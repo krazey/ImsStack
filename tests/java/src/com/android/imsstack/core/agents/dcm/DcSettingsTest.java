@@ -39,6 +39,8 @@ import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
+
 @RunWith(JUnit4.class)
 public class DcSettingsTest {
     private static final int SLOT_0 = 0;
@@ -75,61 +77,44 @@ public class DcSettingsTest {
     }
 
     @Test
-    public void testIsVopsRequired() throws Exception {
+    public void testIsVopsIgnored() throws Exception {
         when(mMockCarrierConfig.getBoolean(
-                eq(CarrierConfig.Assets.KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL), anyBoolean()))
+                eq(CarrierConfig.ImsVoice.KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL), anyBoolean()))
                 .thenReturn(false)
                 .thenReturn(true);
 
         // configured to not ignore VoPS
-        assertTrue(mDcSettingsUT.isVopsRequired());
+        assertFalse(mDcSettingsUT.isVopsIgnored());
 
         // configured to ignore VoPS
-        assertFalse(mDcSettingsUT.isVopsRequired());
+        assertTrue(mDcSettingsUT.isVopsIgnored());
     }
 
     @Test
-    public void testIsImsPdnRequestWithoutMmtel() throws Exception {
+    public void testIsImsPdnRequestWithoutMmtelRequired() throws Exception {
         when(mMockCarrierConfig.getBoolean(
-                eq(CarrierConfig.Assets.KEY_REQUEST_IMS_PDN_WITHOUT_MMTEL_BOOL), anyBoolean()))
+                eq(CarrierConfig.Ims.KEY_REQUEST_IMS_PDN_WITHOUT_MMTEL_BOOL), anyBoolean()))
                 .thenReturn(true)
                 .thenReturn(false);
 
-        assertTrue(mDcSettingsUT.isImsPdnRequestWithoutMmtel());
-        assertFalse(mDcSettingsUT.isImsPdnRequestWithoutMmtel());
+        assertTrue(mDcSettingsUT.isImsPdnRequestWithoutMmtelRequired());
+        assertFalse(mDcSettingsUT.isImsPdnRequestWithoutMmtelRequired());
     }
 
     @Test
-    public void testGetImsPdnEnabledInNoVopsSupport() throws Exception {
-        int[] emptyList = {};
-        int[] availableList = {CarrierConfigManager.Ims.NETWORK_TYPE_HOME};
-        when(mMockCarrierConfig.getIntArray(
-                eq(CarrierConfigManager.Ims.KEY_IMS_PDN_ENABLED_IN_NO_VOPS_SUPPORT_INT_ARRAY)))
-                .thenReturn(emptyList)
-                .thenReturn(availableList);
-
-        int[] noNetwork = mDcSettingsUT.getImsPdnEnabledInNoVopsSupport();
-        assertEquals(noNetwork.length, emptyList.length);
-
-        int[] oneNetwork = mDcSettingsUT.getImsPdnEnabledInNoVopsSupport();
-        assertEquals(oneNetwork.length, availableList.length);
-    }
-
-    @Test
-    public void testGetImsSupportedRats() throws Exception {
+    public void testGetImsSupportedAccessNetworks() throws Exception {
         int[] emptyList = {};
         int[] availableList = {AccessNetworkConstants.AccessNetworkType.EUTRAN};
-
         when(mMockCarrierConfig.getIntArray(
                 eq(CarrierConfigManager.Ims.KEY_SUPPORTED_RATS_INT_ARRAY)))
                 .thenReturn(emptyList)
                 .thenReturn(availableList);
 
-        int[] unAvailableRats = mDcSettingsUT.getImsSupportedRats();
-        assertEquals(unAvailableRats.length, emptyList.length);
+        List<Integer> imsSupportedAccessNetworks = mDcSettingsUT.getImsSupportedAccessNetworks();
+        assertTrue(imsSupportedAccessNetworks.isEmpty());
 
-        int[] availableRats = mDcSettingsUT.getImsSupportedRats();
-        assertEquals(availableRats.length, availableList.length);
+        imsSupportedAccessNetworks = mDcSettingsUT.getImsSupportedAccessNetworks();
+        assertEquals(imsSupportedAccessNetworks.size(), availableList.length);
     }
 
     @Test
@@ -143,27 +128,38 @@ public class DcSettingsTest {
     }
 
     @Test
+    public void testIsEmergencyCallbackModeSupported() throws Exception {
+        when(mMockCarrierConfig.getBoolean(
+                eq(CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_CALLBACK_MODE_SUPPORTED_BOOL),
+                anyBoolean()))
+                .thenReturn(true)
+                .thenReturn(false);
+        assertTrue(mDcSettingsUT.isEmergencyCallbackModeSupported());
+        assertFalse(mDcSettingsUT.isEmergencyCallbackModeSupported());
+    }
+
+    @Test
     public void testGetPreferredIpVersion() throws Exception {
         when(mMockCarrierConfig.getInt(
-                eq(CarrierConfig.Assets.KEY_IMS_PREFERRED_IPTYPE_INT), anyInt()))
-                .thenReturn(CarrierConfig.Assets.IPV4_PREFERRED)
-                .thenReturn(CarrierConfig.Assets.IPV6_PREFERRED);
+                eq(CarrierConfig.Ims.KEY_IMS_PREFERRED_IPTYPE_INT), anyInt()))
+                .thenReturn(CarrierConfig.Ims.IPV4_PREFERRED)
+                .thenReturn(CarrierConfig.Ims.IPV6_PREFERRED);
 
-        assertEquals(mDcSettingsUT.getPreferredIpVersion(), CarrierConfig.Assets.IPV4_PREFERRED);
-        assertEquals(mDcSettingsUT.getPreferredIpVersion(), CarrierConfig.Assets.IPV6_PREFERRED);
+        assertEquals(mDcSettingsUT.getPreferredIpVersion(), CarrierConfig.Ims.IPV4_PREFERRED);
+        assertEquals(mDcSettingsUT.getPreferredIpVersion(), CarrierConfig.Ims.IPV6_PREFERRED);
     }
 
     @Test
     public void testGetEmergencyPreferredIpVersion() throws Exception {
         when(mMockCarrierConfig.getInt(
-                eq(CarrierConfig.Assets.KEY_EMC_PREFERRED_IPTYPE_INT), anyInt()))
-                .thenReturn(CarrierConfig.Assets.IPV4_PREFERRED)
-                .thenReturn(CarrierConfig.Assets.IPV6_PREFERRED);
+                eq(CarrierConfig.ImsEmergency.KEY_EPDN_PREFERRED_IPTYPE_INT), anyInt()))
+                .thenReturn(CarrierConfig.Ims.IPV4_PREFERRED)
+                .thenReturn(CarrierConfig.Ims.IPV6_PREFERRED);
 
         assertEquals(mDcSettingsUT.getEmergencyPreferredIpVersion(),
-                CarrierConfig.Assets.IPV4_PREFERRED);
+                CarrierConfig.Ims.IPV4_PREFERRED);
         assertEquals(mDcSettingsUT.getEmergencyPreferredIpVersion(),
-                CarrierConfig.Assets.IPV6_PREFERRED);
+                CarrierConfig.Ims.IPV6_PREFERRED);
     }
 
     @Test
@@ -172,7 +168,7 @@ public class DcSettingsTest {
         int[] emptyList = {}, availableList = {permanentFailureCause};
 
         when(mMockCarrierConfig.getIntArray(
-                eq(CarrierConfig.Assets.KEY_PERMANENT_PDN_FAILURE_INT_ARRAY)))
+                eq(CarrierConfig.Ims.KEY_PERMANENT_PDN_FAILURE_INT_ARRAY)))
                 .thenReturn(emptyList)
                 .thenReturn(availableList);
 
@@ -184,13 +180,24 @@ public class DcSettingsTest {
     }
 
     @Test
-    public void testIsCdmalessFeatureTagRequired() throws Exception {
-        when(mMockCarrierConfig.getBoolean(
-                eq(CarrierConfig.Assets.KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL), anyBoolean()))
-                .thenReturn(false)
-                .thenReturn(true);
-        assertFalse(mDcSettingsUT.isCdmalessFeatureTagRequired());
-        assertTrue(mDcSettingsUT.isCdmalessFeatureTagRequired());
+    public void testIsCrossStackRedialCause() throws Exception {
+        int crossStackRedialCause = 5;
+        int[] emptyList = {}, availableList = {crossStackRedialCause};
+
+        when(mMockCarrierConfig.getIntArray(
+                eq(CarrierConfig.ImsEmergency
+                        .KEY_EPDN_REJECT_CAUSES_FOR_CROSS_STACK_REDIAL_INT_ARRAY)))
+                .thenReturn(emptyList)
+                .thenReturn(availableList);
+
+        assertFalse(
+                mDcSettingsUT.isCrossStackRedialCause(EApnType.EMERGENCY, crossStackRedialCause));
+        assertTrue(
+                mDcSettingsUT.isCrossStackRedialCause(EApnType.EMERGENCY, crossStackRedialCause));
+
+        assertFalse(
+                mDcSettingsUT.isCrossStackRedialCause(EApnType.INTERNET, crossStackRedialCause));
+        assertFalse(mDcSettingsUT.isCrossStackRedialCause(EApnType.IMS, crossStackRedialCause));
     }
 
     @Test
@@ -201,18 +208,16 @@ public class DcSettingsTest {
         mDcSettingsUT.init(mMockContext);
 
         assertTrue(mDcSettingsUT.isRoamingAllowed());
-        assertFalse(mDcSettingsUT.isVopsRequired());
-        assertFalse(mDcSettingsUT.isImsPdnRequestWithoutMmtel());
-        int[] noVopsRequired = mDcSettingsUT.getImsPdnEnabledInNoVopsSupport();
-        assertEquals(noVopsRequired.length, 0);
-        int[] availableRats = mDcSettingsUT.getImsSupportedRats();
-        assertEquals(availableRats.length, 0);
+        assertTrue(mDcSettingsUT.isVopsIgnored());
+        assertTrue(mDcSettingsUT.getImsSupportedAccessNetworks().isEmpty());
         assertFalse(mDcSettingsUT.isCrossSimEnabledByPlatform());
-        assertEquals(mDcSettingsUT.getPreferredIpVersion(), CarrierConfig.Assets.IPV6_PREFERRED);
+        assertFalse(mDcSettingsUT.isEmergencyCallbackModeSupported());
+        assertEquals(mDcSettingsUT.getPreferredIpVersion(), CarrierConfig.Ims.IPV6_PREFERRED);
         assertEquals(mDcSettingsUT.getEmergencyPreferredIpVersion(),
-                CarrierConfig.Assets.IPV6_PREFERRED);
+                CarrierConfig.Ims.IPV6_PREFERRED);
         assertFalse(mDcSettingsUT.isPermanentFailure(EApnType.IMS, permanentFailureCause));
-        assertFalse(mDcSettingsUT.isCdmalessFeatureTagRequired());
+        assertFalse(mDcSettingsUT.isCrossStackRedialCause(EApnType.EMERGENCY,
+                permanentFailureCause));
     }
 
     private class FakeDcSettings extends DcSettings {

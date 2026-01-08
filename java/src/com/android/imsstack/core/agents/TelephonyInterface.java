@@ -17,7 +17,13 @@ package com.android.imsstack.core.agents;
 
 import android.telephony.Annotation.CallState;
 import android.telephony.Annotation.NetworkType;
+import android.telephony.TelephonyManager;
 import android.telephony.TelephonyManager.SimState;
+import android.telephony.emergency.EmergencyNumber;
+
+import androidx.annotation.NonNull;
+
+import java.util.List;
 
 /**
  * An interface for accessing the Telephony or SIM states through {@link TelephonyManager} or
@@ -148,4 +154,23 @@ public interface TelephonyInterface extends IAgent {
      * @return {@code true} if the number is an emergency number, {@code false} otherwise.
      */
     boolean isEmergencyNumber(String number);
+
+    /**
+     * Get the emergency number list based on current locale, sim, default, modem and network.
+     *
+     * @return The list of {@link EmergencyNumber}
+     */
+    @NonNull List<EmergencyNumber> getEmergencyNumberList();
+
+    /** Returns a string represented by the given call state. */
+    static String callStateToString(@CallState int state) {
+        switch (state) {
+            case TelephonyManager.CALL_STATE_RINGING:
+                return "RINGING";
+            case TelephonyManager.CALL_STATE_OFFHOOK:
+                return "OFFHOOK";
+            default:
+                return "IDLE";
+        }
+    }
 }

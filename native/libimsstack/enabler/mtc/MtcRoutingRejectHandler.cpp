@@ -23,13 +23,13 @@
 #include "MtcRoutingRejectHandler.h"
 #include "ServiceTrace.h"
 #include "SipMethod.h"
+#include "SipStatusCode.h"
+#include "configuration/MtcConfigurationProxy.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 LOCAL const IMS_CHAR REASON_PHRASE_VZW_ON_EHRPD[] = "On eHRPD";
-LOCAL const IMS_CHAR REASON_PHRASE_VZW_VOWIFI_OFF[] = "VoWiFi OFF";
 LOCAL const IMS_CHAR REASON_PHRASE_VZW_VOLTE_OFF[] = "VoLTE setting OFF";
-LOCAL const IMS_CHAR REASON_PHRASE_VZW_VOPS_OFF[] = "VOPS OFF";
 
 PUBLIC MtcRoutingRejectHandler::MtcRoutingRejectHandler(
         IN IMtcContext& objContext, IN INetworkWatcher& objNetworkWatcher) :
@@ -72,13 +72,10 @@ PRIVATE
 SipStatusCode MtcRoutingRejectHandler::GetRoutingRejectCodeForInvite(
         IN const SipStatusCode& objDefaultStatusCode) const
 {
-    // Covers VZ_REQ_RCSVOLTE_37606 and VZ_REQ_VOWIFI_6230932.
-
     /*
-    TODO: if (IMS_OMADM_VLT off)
-    {
+    TODO: b/381989518 - need IMS platform support
+    if subscriber is not provisioned:
         return SipStatusCode(SipStatusCode::SC_488, "Subscriber not provisioned for VoLTE");
-    }
     */
 
     NETRADIO_ENTYPE eRat = m_objNetworkWatcher.GetNetRadioTechType();
@@ -92,26 +89,19 @@ SipStatusCode MtcRoutingRejectHandler::GetRoutingRejectCodeForInvite(
             if (m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_WFC_SETTING_CHANGED) !=
                     IMS_WFC_ON)
             {
-                return SipStatusCode(SipStatusCode::SC_486, REASON_PHRASE_VZW_VOWIFI_OFF);
+                return SipStatusCode(SipStatusCode::SC_486,
+                        m_objContext.GetConfigurationProxy()
+                                .GetString(ConfigVoice::
+                                                KEY_CALL_REJECT_REASON_PHRASE_VOWIFI_OFF_STRING)
+                                .GetStr());
             }
             break;
 
         case NW_REPORT_RADIO_LTE:
-            /*
-            TODO: if (SSAC)
-            {
-                return SipStatusCode(SipStatusCode::SC_488, "SSAC ON");
-            }
-            */
             if (m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_VOLTE_SETTING) ==
                     IMS_VOLTE_SETTING_OFF)
             {
                 return SipStatusCode(SipStatusCode::SC_488, REASON_PHRASE_VZW_VOLTE_OFF);
-            }
-            if (m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE) !=
-                    IMS_VOICE_OVER_PS_SUPPORTED)
-            {
-                return SipStatusCode(SipStatusCode::SC_488, REASON_PHRASE_VZW_VOPS_OFF);
             }
             break;
 

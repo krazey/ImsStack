@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "BaseThread.h"
+#include "IThread.h"
 #include "ImsMessageDef.h"
 #include "ServiceMemory.h"
 #include "ServiceThread.h"
@@ -107,7 +108,7 @@ PROTECTED VIRTUAL IMS_BOOL BaseThread::Runnable_Run(IN ImsMessage& objMsg)
 }
 
 PROTECTED
-IMS_BOOL BaseThread::IsThreadMessage(IN ImsMessage& objMsg) const
+IMS_BOOL BaseThread::IsThreadMessage(IN const ImsMessage& objMsg) const
 {
     const IMS_CHAR* pszTargetName = objMsg.GetTargetName();
 

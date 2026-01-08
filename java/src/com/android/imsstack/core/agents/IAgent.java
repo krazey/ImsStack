@@ -17,6 +17,10 @@ package com.android.imsstack.core.agents;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+
+import com.android.imsstack.util.IndentingPrintWriter;
+
 /** This provides a base interface to implement the various agent components. */
 public interface IAgent {
     /**
@@ -30,4 +34,12 @@ public interface IAgent {
      * Cleans up the Agent object.
      */
     void cleanup();
+
+    /**
+     * Dumps this instance into a readable format for dumpsys usage.
+     *
+     * @param pw A {@link IndentingPrintWriter} object used to write the formatted logs.
+     */
+    default void dump(@NonNull IndentingPrintWriter pw) {
+    }
 }

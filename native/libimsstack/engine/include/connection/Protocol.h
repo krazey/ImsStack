@@ -23,7 +23,7 @@ class IConnection;
 class Protocol
 {
 public:
-    inline Protocol() {}
+    Protocol() = default;
     virtual ~Protocol() = 0;
 
     Protocol(IN const Protocol&) = delete;

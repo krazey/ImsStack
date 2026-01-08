@@ -27,7 +27,7 @@ public class IUMtcService {
     public static final int CLOSE_SESSION                   = (EVENT_U2I + 3);
     public static final int REGISTER_SERVICE                = (EVENT_U2I + 4);
     public static final int SRVCC_STATE_CHANGED             = (EVENT_U2I + 5);
-    public static final int SET_TERMINAL_BASED_CALL_WAITING = (EVENT_U2I + 6);
+    public static final int PERMANENT_SUPP_CHANGED          = (EVENT_U2I + 6);
     public static final int OPEN_EMERGENCY_SERVICE          = (EVENT_U2I + 7);
     public static final int STOP_EMERGENCY_SERVICE          = (EVENT_U2I + 8);
     public static final int TEST_COMMAND                    = (EVENT_U2I + 9);
@@ -56,26 +56,24 @@ public class IUMtcService {
     public static final int SERVICESTATUS_REASON_USERSELECT     = 4;
     public static final int SERVICESTATUS_REASON_FORBIDDEN      = 5;
 
-    // Emergency Service Mode
+    // Emergency Service State
     public static final int ES_IDLE        = 0;
     public static final int ES_OPENING     = 1;
     public static final int ES_OPENED      = 2;
     public static final int ES_UNAVAILABLE = 3;
-    public static final int ES_IN_CALL     = 4;
 
     // Emergency Service Reason
     public static final int ES_IDLE_REASON_UNKNOWN  = -1;
     public static final int ES_IDLE_REASON_NONE     = 0;
     public static final int ES_IDLE_REASON_WITH_ECM = 1;
 
+    // Emergency Service Unavailable Reason
+    /**
+     * This refers to the case where it was not used for the reason of
+     * EmergencyServiceUnavailableReason
+     */
     public static final int ES_UNAVAILABLE_REASON_UNKNOWN = -1;
     public static final int ES_UNAVAILABLE_REASON_NONE    = 0;
-    public static final int ES_UNAVAILABLE_REASON_NO_CSFB = 1;
-    public static final int ES_UNAVAILABLE_REASON_SSAC    = 2;
-
-    // Emergency Routing Category
-    public static final int EMERGENCY_CALL_ROUTING_UNKNOWN = 0;
-    public static final int EMERGENCY_CALL_ROUTING_EMERGENCY = 1;
-    public static final int EMERGENCY_CALL_ROUTING_NORMAL = 2;
-
+    public static final int ES_UNAVAILABLE_REASON_DATA_PERMANENTLY_FAILED = 1;
+    public static final int ES_UNAVAILABLE_REASON_NETWORK_ATTACH_REJECTED = 2;
 }

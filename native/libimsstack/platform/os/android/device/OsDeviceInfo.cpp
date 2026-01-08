@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ISystem.h"
+#include "ISystemProperty.h"
 #include "PlatformContext.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
 #include "device/OsDeviceInfo.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 PUBLIC
 OsDeviceInfo::OsDeviceInfo() {}

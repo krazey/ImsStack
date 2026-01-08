@@ -40,7 +40,7 @@ class RegSubscription :
 public:
     RegSubscription(IN const RegKey& objRegKey, IN RegStateTracker* pRegStateTracker,
             IN IMS_UINT32 nExpiresValue = 0, IN const SipTimerValues* pTimerValues = IMS_NULL);
-    virtual ~RegSubscription();
+    ~RegSubscription() override;
 
     RegSubscription(IN const RegSubscription&) = delete;
     RegSubscription& operator=(IN const RegSubscription&) = delete;
@@ -106,18 +106,20 @@ private:
         return (m_nFeatureSet & nFeature) != 0;
     }
     void SetOngoingConnection(IN ISipClientConnection* piScc);
-    void SetPreviousRequest(IN ISipMessage* piSipMsg);
-    void SetPreviousResponse(IN ISipMessage* piSipMsg);
+    void SetPreviousRequest(IN const ISipMessage* piSipMsg);
+    void SetPreviousResponse(IN const ISipMessage* piSipMsg);
     IMS_BOOL SendResponse(IN ISipServerConnection* piSsc, IN IMS_SINT32 nStatusCode);
     IMS_BOOL SetContactHeader(IN_OUT ISipMessage*& piSipMsg, OUT IMS_BOOL& bIsContactGruu);
     IMS_BOOL SetHeaders(IN_OUT ISipMessage*& piSipMsg);
     void SetState(IN IMS_SINT32 nState);
     IMS_BOOL SubscribeOnImplicitRefresh();
     // IMS_REQUEST_URI_VALIDATION_IN_MID_DIALOG
-    IMS_BOOL ValidateRequestUri(IN const SipAddress& objRequestUri, IN ISipDialog* piDialog) const;
+    IMS_BOOL ValidateRequestUri(
+            IN const SipAddress& objRequestUri, IN const ISipDialog* piDialog) const;
 
     static ISipClientConnection* CreateConnection(IN RegSubscription* pRegSub);
-    static IMS_UINT16 GetReasonParameter(IN ISipMessage* piSipMsg);
+    static IMS_UINT16 GetReasonParameter(IN const ISipMessage* piSipMsg);
+    static IMS_UINT16 GetReasonFromSubStateReason(IN IMS_UINT16 nReason);
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
 private:

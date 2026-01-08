@@ -19,6 +19,7 @@
 
 #include "AString.h"
 #include "ImsTypeDef.h"
+#include "MtcDef.h"
 #include "call/message/IMtcMessageHandler.h"
 
 class IMessage;
@@ -31,7 +32,7 @@ class ParticipantInfo final : public IMtcMessageHandler
 {
 public:
     explicit ParticipantInfo(IN IMtcCallContext& objContext);
-    ~ParticipantInfo();
+    ~ParticipantInfo() override;
     ParticipantInfo(IN const ParticipantInfo&) = delete;
     ParticipantInfo& operator=(IN const ParticipantInfo&) = delete;
 
@@ -49,10 +50,7 @@ public:
 
 private:
     static const AString URI_SET_BY_IMS_ENGINE;
-    static const AString ANONYMOUS_ADDRESS;
-    static const AString ANONYMOUS_DISPLAY_NAME;
 
-    AString GetLocalUriForEmergencyCall() const;
     AString GetRemoteNumberFromMessage(IN const IMessage& objMessage) const;
 
     IMtcCallContext& m_objContext;

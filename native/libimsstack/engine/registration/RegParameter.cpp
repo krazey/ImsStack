@@ -17,11 +17,13 @@
 #include "ServiceTrace.h"
 
 #include "private/ConfigurationManager.h"
+#include "private/ImsSubscriberInfo.h"
 #include "private/SubscriberConfig.h"
 
 #include "ISipClientConnection.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
+#include "ISipMessageBodyPart.h"
 #include "RegParameter.h"
 #include "Sip.h"
 #include "SipConfigProxy.h"
@@ -42,7 +44,7 @@ public:
     {
     }
 
-    inline virtual ~ExtraHeader()
+    inline ~ExtraHeader() override
     {
         if (m_piHeader != IMS_NULL)
         {
@@ -351,7 +353,7 @@ IMS_RESULT RegParameter::FormHeaders(
         piSipMsg->AddHeader(ISipHeader::SUPPORTED, Sip::STR_GRUU);
     }
 
-    if (SipConfigProxy::IsMultipleRegConfigured(GetSlotId(), pStateTracker->GetSipProfile()))
+    if (SipConfigProxy::IsMultipleRegConfigured(GetSlotId()))
     {
         piSipMsg->AddHeader(ISipHeader::SUPPORTED, "outbound");
     }
@@ -427,7 +429,7 @@ IMS_RESULT RegParameter::FormHeaders(
     {
         for (IMS_UINT32 i = 0; i < m_objBodyParts.GetSize(); ++i)
         {
-            ISipMessageBodyPart* piBodyPart = m_objBodyParts.GetAt(i);
+            const ISipMessageBodyPart* piBodyPart = m_objBodyParts.GetAt(i);
 
             if (piBodyPart != IMS_NULL)
             {
@@ -500,7 +502,7 @@ IMS_RESULT RegParameter::FormRouteHeaders(
 }
 
 PUBLIC
-IMS_RESULT RegParameter::FormSecurityHeaders(IN_OUT ISipClientConnection*& piScc)
+IMS_RESULT RegParameter::FormSecurityHeaders(IN const ISipClientConnection* piScc)
 {
     if (piScc == IMS_NULL)
     {
@@ -861,7 +863,7 @@ IMS_BOOL RegParameter::UpdateSecurityHeaders(IN const ISipMessage* piSipMsg)
 }
 
 PUBLIC
-void RegParameter::UpdateSipProfile(IN SipProfile* pProfile)
+void RegParameter::UpdateSipProfile(IN const SipProfile* pProfile)
 {
     if (pProfile == IMS_NULL)
     {
@@ -1090,7 +1092,7 @@ void RegParameter::ChoosePreferredSecurityClient()
     {
         const SipSecurityHeader& objClientHeader = m_objSecurityClients.GetAt(i);
 
-        if (objClientHeader.GetMechanism() != m_pPreferredSecurityServer->GetMechanism())
+        if (!objClientHeader.IsSecurityMechanismMatched(*m_pPreferredSecurityServer))
         {
             continue;
         }
@@ -1160,7 +1162,7 @@ void RegParameter::ChoosePreferredSecurityServer()
         {
             const SipSecurityHeader& objClientHeader = m_objSecurityClients.GetAt(j);
 
-            if (objClientHeader.GetMechanism() == objServerHeader.GetMechanism())
+            if (objClientHeader.IsSecurityMechanismMatched(objServerHeader))
             {
                 bSupportedHeaderFound = IMS_TRUE;
                 break;
@@ -1208,7 +1210,7 @@ PRIVATE GLOBAL const ImsSubscriberInfo* RegParameter::GetImsSubscriberInfo(IN IM
         IN const SipAddress& objAor, IN const AString& strSubsId /*= AString::ConstNull()*/)
 {
     const SubscriberConfig* pSubscriberConfig = IMS_NULL;
-    ConfigurationManager* pConfigMngr = ConfigurationManager::GetInstance();
+    const ConfigurationManager* pConfigMngr = ConfigurationManager::GetInstance();
 
     if (strSubsId.GetLength() > 0)
     {

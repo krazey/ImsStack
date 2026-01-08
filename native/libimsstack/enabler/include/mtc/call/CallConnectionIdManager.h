@@ -28,7 +28,7 @@ class CallConnectionIdManager : public IMtcCallStateListener
 {
 public:
     explicit CallConnectionIdManager(IN IMtcContext& objContext);
-    virtual ~CallConnectionIdManager();
+    virtual ~CallConnectionIdManager() override;
     CallConnectionIdManager(IN const CallConnectionIdManager&) = delete;
     CallConnectionIdManager& operator=(IN const CallConnectionIdManager&) = delete;
 
@@ -45,7 +45,6 @@ public:
     virtual CallKey GetCallKey(IN IMS_UINT32 nConnectionId) const;
 
 private:
-    // TODO: GetNewConnectionId?
     IMS_UINT32 GetNewIndex();
     IMS_SINT32 GetListIndexByCallKey(IN CallKey nCallKey);
     IMS_SINT32 GetListIndexByConnectionId(IN IMS_UINT32 nConnectionId);
@@ -60,10 +59,10 @@ private:
     struct CallKeyConnection
     {
     public:
-        inline explicit CallKeyConnection(IN CallKey nKey_, IN IMS_UINT32 nConnectionId_)
+        inline explicit CallKeyConnection(IN CallKey nKey_, IN IMS_UINT32 nConnectionId_) :
+                nKey(nKey_),
+                nConnectionId(nConnectionId_)
         {
-            nKey = nKey_;
-            nConnectionId = nConnectionId_;
         }
         inline ~CallKeyConnection() {}
         CallKeyConnection(IN const CallKeyConnection&) = delete;

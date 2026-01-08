@@ -16,8 +16,9 @@
 #ifndef INTERFACE_DIGEST_AKA_H_
 #define INTERFACE_DIGEST_AKA_H_
 
-#include "ByteArray.h"
+#include "ImsTypeDef.h"
 
+class ByteArray;
 class IDigestAkaListener;
 
 class IDigestAka

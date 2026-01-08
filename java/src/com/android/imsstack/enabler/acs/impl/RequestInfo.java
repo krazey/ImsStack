@@ -19,12 +19,13 @@ package com.android.imsstack.enabler.acs.impl;
 import android.annotation.NonNull;
 import android.os.Build;
 import android.telephony.SubscriptionManager;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.enabler.acs.AcServiceClientInfo;
-import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.ImsUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.UnsupportedEncodingException;
@@ -119,7 +120,7 @@ public class RequestInfo {
      * @param otp OTP value received from server
      */
     public void setOtp(String otp) {
-        if (Build.IS_USERDEBUG) {
+        if (!ImsUtils.IS_USER) {
             ImsLog.i("[" + mBuilder.mSlotId + "] Otp " + otp);
         }
         mOtp = otp;
@@ -130,7 +131,7 @@ public class RequestInfo {
      * @param token token value in previous response from server
      */
     public void setToken(String token) {
-        if (Build.IS_USERDEBUG) {
+        if (!ImsUtils.IS_USER) {
             ImsLog.i("[" + mBuilder.mSlotId + "] token " + token);
         }
         mToken = token;
@@ -141,7 +142,7 @@ public class RequestInfo {
      * @param defaultSmsApp Default SMS App
      */
     public void setDefaultSmsApp(String defaultSmsApp) {
-        if (Build.IS_USERDEBUG) {
+        if (!ImsUtils.IS_USER) {
             ImsLog.i("[" + mBuilder.mSlotId + "] DefaultSmsApp " + defaultSmsApp);
         }
         mDefaultSmsApp = defaultSmsApp;
@@ -152,7 +153,7 @@ public class RequestInfo {
      * @param defaultVvmApp Default VVM App
      */
     public void setDefaultVvmApp(String defaultVvmApp) {
-        if (Build.IS_USERDEBUG) {
+        if (!ImsUtils.IS_USER) {
             ImsLog.i("[" + mBuilder.mSlotId + "] DefaultVvmApp " + defaultVvmApp);
         }
         mDefaultVvmApp = defaultVvmApp;
@@ -337,12 +338,12 @@ public class RequestInfo {
          */
         RequestInfoBuilder(int slotId, int subId,
                 @NonNull AcServiceClientInfo acServiceClientInfo) {
-            this(slotId, subId, acServiceClientInfo, AppContext.getTelephonyManager(subId));
+            this(slotId, subId, acServiceClientInfo, AppContext.getTelephonyManagerProxy(subId));
         }
 
         @VisibleForTesting
         public RequestInfoBuilder(int slotId, int subId, AcServiceClientInfo acServiceClientInfo,
-                TelephonyManager tm) {
+                TelephonyManagerProxy tmp) {
             mSlotId = slotId;
             mSubId = subId;
 
@@ -358,22 +359,19 @@ public class RequestInfo {
 
             String mcc = "";
             String mnc = "";
-            String imsi = "";
-            String imei = "";
-            if (tm != null) {
-                String mccMnc = tm.getSimOperator();
-                if (!TextUtils.isEmpty(mccMnc)) {
-                    try {
-                        mcc = mccMnc.substring(0, 3);
-                        mnc = mccMnc.substring(3);
+            String mccMnc = tmp.getSimOperator();
+            if (!TextUtils.isEmpty(mccMnc)) {
+                try {
+                    mcc = mccMnc.substring(0, 3);
+                    mnc = mccMnc.substring(3);
 
-                    } catch (NumberFormatException e) {
-                        ImsLog.e(e.getMessage());
-                    }
+                } catch (NumberFormatException e) {
+                    ImsLog.e(e.getMessage());
                 }
-                imsi = tm.getSubscriberId();
-                imei = tm.getImei(mSlotId);
             }
+            String imsi = tmp.getSubscriberId();
+            String imei = tmp.getImei(mSlotId);
+
             setMccMnc(mcc, mnc);
             setImsi(imsi);
             setImei(imei);
@@ -547,7 +545,7 @@ public class RequestInfo {
             buffer.append(", SmsPort:" + mSmsPort);
             buffer.append(", RcsEnabledByUser:" + mRcsEnabledByUser);
 
-            if (Build.IS_USERDEBUG) {
+            if (!ImsUtils.IS_USER) {
                 buffer.append(", Imsi:" + mImsi);
                 buffer.append(", Imei:" + mImei);
                 buffer.append(", Mcc:" + mMcc);

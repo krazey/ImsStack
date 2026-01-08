@@ -22,7 +22,7 @@ class EngineConfig : public ConfigBase
 {
 public:
     explicit EngineConfig(IN IMS_SINT32 nSlotId);
-    virtual ~EngineConfig();
+    ~EngineConfig() override;
 
     EngineConfig(IN const EngineConfig&) = delete;
     EngineConfig& operator=(IN const EngineConfig&) = delete;

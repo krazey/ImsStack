@@ -16,18 +16,37 @@
 -->
 <carrier_config>
     <!-- Ims General -->
-    <boolean name="support_country_param_in_pani_header_bool" value="true"/>
+    <boolean name="ims.allow_sip_instance_param_in_contact_for_non_register_request_bool" value="true"/>
+    <boolean name="ims.support_country_param_in_pani_header_bool" value="true"/>
 
     <!-- Aos -->
-    <boolean name="use_wfc_country_code_availability_check_bool" value="true"/>
+    <boolean name="ims.hold_reg_with_ipcan_changed_during_ims_call_bool" value="true"/>
+    <int-array name="ims.supported_roaming_rats_int_array" num="3">
+        <item value="3"/> <!-- CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN -->
+        <item value="5"/> <!-- CarrierConfig::Ims::ACCESS_NETWORK_TYPE_IWLAN -->
+        <item value="6"/> <!-- CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN -->
+    </int-array>
+    <int-array name="ims.update_registration_with_rat_change_int_array" num="2">
+        <item value="3"/>
+        <item value="6"/>
+    </int-array>
+    <boolean name="imsemergency.reg_timer_for_ecall_timeout_as_failure_bool" value="false"/>
+    <int name="imsemergency.reg_timer_for_ecall_millis_int" value="4000"/>
+    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
+    <boolean name="imswfc.notify_ike_auth_failure_for_wfc_activation_bool" value="true"/>
+    <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="true"/>
 
     <!-- MTC -->
-    <int name="imsvoice.call_type_after_audio_and_video_call_merged_int" value="2"/>
+    <boolean name="ims.support_sip_session_id_header_bool" value="true"/>
     <boolean name="imsvoice.enable_send_reinvite_on_rat_change_bool" value="true"/>
+    <int name="imswfc.country_code_int" value="1"/>
+    <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
+        <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->
+    </int-array>
 
-    <!-- Ut/Xcap AOSP -->
-    <int name="gba_mode_int" value="1"/>
-    <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="true"/>
-    <int name="imsss.ut_as_server_port_int" value="80"/>
-    <int name="imsss.ut_transport_type_int" value="1"/>
+    <!-- Media -->
+    <boolean name="imsvoice.audio_bw_nego_option_bool" value="false"/>
+
+    <!-- Ut/Xcap -->
+    <boolean name="imsss.ut_display_error_phrase_with_409_error_bool" value="true"/>
 </carrier_config>

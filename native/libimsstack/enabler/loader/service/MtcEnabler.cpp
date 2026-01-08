@@ -19,7 +19,7 @@
 #include "MtcFactory.h"
 #include "service/MtcEnabler.h"
 
-__IMS_TRACE_TAG_USER_DECL__("Mtc");
+__IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 MtcEnabler::MtcEnabler(IN IMS_SINT32 nSlotId) :

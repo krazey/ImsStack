@@ -16,11 +16,17 @@
 
 package com.android.imsstack.core.agents;
 
+import static com.android.imsstack.base.TestAppContext.SLOT0;
+import static com.android.imsstack.base.TestAppContext.SLOT1;
+import static com.android.imsstack.base.TestAppContext.SUB_ID_1;
+import static com.android.imsstack.base.TestAppContext.SUB_ID_2;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -38,16 +44,20 @@ import android.telephony.PreciseDataConnectionState;
 import android.telephony.PreciseDisconnectCause;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
-import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
-import android.test.suitebuilder.annotation.SmallTest;
 
-import com.android.imsstack.ContextFixture;
+import androidx.test.filters.SmallTest;
+
+import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.SystemServiceProxy.SubscriptionManagerProxy;
+import com.android.imsstack.base.TelephonyManagerProxy;
+import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.agents.internal.PhoneStateNotifier;
-import com.android.imsstack.util.AppContext;
+import com.android.imsstack.system.ISystem;
+import com.android.imsstack.system.ImsEventDef;
+import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -56,7 +66,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
@@ -65,73 +74,51 @@ import java.util.concurrent.Executor;
 
 @RunWith(JUnit4.class)
 public class PhoneStateAgentTest {
-    private static final int SLOT0 = 0;
-    private static final int SLOT1 = 1;
-    private static final int[] SUB_ID = { 1 };
-    private static final int[] SUB_ID1 = { 2 };
-
+    @Mock private Context mContext;
     @Mock private ServiceState mServiceState;
     @Mock private SimInterface mSimInterface;
     @Mock private ImsPhoneStateListener mPsListener;
     @Mock private PhoneStateNotifier mPsNotifier;
+    @Mock private ISystem mSystem;
+    @Mock private SystemInterface mSystemInterface;
 
-    private ContextFixture mContextFixture;
-    private SubscriptionManager mSubscriptionManager;
-    private TelephonyManager mTelephonyManager;
+    private TestAppContext mTestAppContext;
+    private TelephonyManagerProxy mTelephonyManagerProxy;
     private NetworkRegistrationInfo mNetworkRegistrationInfo;
     private TelephonyCallback.ServiceStateListener mServiceStateListener;
     private PhoneStateAgent mPsAgent;
-    private MSimUtils.SubscriptionManagerProxy mSubscriptionManagerProxy =
-            new MSimUtils.SubscriptionManagerProxy() {
-                @Override
-                public int getDefaultDataSubscriptionId() {
-                    return SUB_ID[0];
-                }
-
-                @Override
-                public int getSlotIndex(int subId) {
-                    if (subId == SUB_ID[0]) {
-                        return SLOT0;
-                    } else if (subId == SUB_ID1[0]) {
-                        return SLOT1;
-                    }
-                    return MSimUtils.INVALID_SLOT_ID;
-                }
-            };
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mContextFixture = new ContextFixture();
-        Context context = mContextFixture.getTestDouble();
-        mSubscriptionManager = context.getSystemService(SubscriptionManager.class);
-        when(mSubscriptionManager.getSubscriptionIds(eq(SLOT0))).thenReturn(SUB_ID);
-        mTelephonyManager = context.getSystemService(TelephonyManager.class);
-        when(mTelephonyManager.createForSubscriptionId(eq(SUB_ID[0])))
-                .thenReturn(mTelephonyManager);
+        mTestAppContext = new TestAppContext(mContext);
+        mTestAppContext.setUp();
 
-        AppContext.init(context);
+        SystemInterface.setSystemInterface(mSystemInterface);
+        when(mSystemInterface.getSystem(eq(SLOT0))).thenReturn(mSystem);
+        mTelephonyManagerProxy = mTestAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
         ImsLog.setDebugOn(true);
-        MSimUtils.setSubscriptionManagerProxy(mSubscriptionManagerProxy);
-        AgentFactory.getInstance().setAgent(SimInterface.class, mSimInterface, SLOT0);
+        AgentFactory.getInstance()
+                .setAgent(SimInterface.class, mSimInterface, SLOT0);
         mPsAgent = new PhoneStateAgent(SLOT0);
-        mPsAgent.init(context);
+        mPsAgent.init(mContext);
     }
 
     @After
     public void tearDown() throws Exception {
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT0);
-        MSimUtils.setSubscriptionManagerProxy(null);
         ImsLog.setDebugOn(false);
+        mTelephonyManagerProxy = null;
         mPsNotifier = null;
         mPsListener = null;
         mSimInterface = null;
-        mTelephonyManager = null;
-        mContextFixture = null;
         mPsAgent.cleanup();
         mPsAgent = null;
-        AppContext.deinit();
+        mSystem = null;
+        mSystemInterface = null;
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
     }
 
     @Test
@@ -140,10 +127,10 @@ public class PhoneStateAgentTest {
         int eventCount = getEventCount(mPsAgent.getPhoneStateEvents().getEvents());
         mPsAgent.cleanup();
 
-        verify(mTelephonyManager, times(eventCount))
+        verify(mTelephonyManagerProxy, times(eventCount))
                 .registerTelephonyCallback(any(Executor.class), any(TelephonyCallback.class));
         verify(mSimInterface).addListener(any(Sim.Listener.class));
-        verify(mTelephonyManager, times(eventCount))
+        verify(mTelephonyManagerProxy, times(eventCount))
                 .unregisterTelephonyCallback(any(TelephonyCallback.class));
         verify(mSimInterface).removeListener(any(Sim.Listener.class));
     }
@@ -169,12 +156,12 @@ public class PhoneStateAgentTest {
         mPsAgent.addNotifier(mPsNotifier);
         int newEventCount = getEventCount(mPsAgent.getPhoneStateEvents().getEvents());
 
-        verify(mTelephonyManager, times(originalEventCount + newEventCount))
+        verify(mTelephonyManagerProxy, times(originalEventCount + newEventCount))
                 .registerTelephonyCallback(any(Executor.class), any(TelephonyCallback.class));
 
         mPsAgent.removeNotifier(mPsNotifier);
 
-        verify(mTelephonyManager, times(originalEventCount + newEventCount))
+        verify(mTelephonyManagerProxy, times(originalEventCount + newEventCount))
                 .unregisterTelephonyCallback(any(TelephonyCallback.class));
 
         // Already registered events for service state and call state.
@@ -185,21 +172,22 @@ public class PhoneStateAgentTest {
         verify(mPsNotifier).notifyCallState(anyInt());
         verify(mPsNotifier, never()).notifyBarringInfo(any(BarringInfo.class));
 
-        TelephonyManager tm = Mockito.mock(TelephonyManager.class);
-        when(mTelephonyManager.createForSubscriptionId(eq(SUB_ID[0]))).thenReturn(tm);
-        PhoneStateNotifier psNotifier1 = Mockito.mock(PhoneStateNotifier.class);
+        TelephonyManagerProxy tmp = mock(TelephonyManagerProxy.class);
+        when(mTelephonyManagerProxy.createForSubscriptionId(eq(SUB_ID_1)))
+                .thenReturn(tmp);
+        PhoneStateNotifier psNotifier1 = mock(PhoneStateNotifier.class);
         int newEvents = originalEvents | ImsPhoneStateListener.LISTEN_CELL_INFO;
         when(psNotifier1.getEvents()).thenReturn(newEvents);
         mPsAgent.addNotifier(psNotifier1);
 
         ArgumentCaptor<TelephonyCallback> captor = ArgumentCaptor.forClass(TelephonyCallback.class);
-        verify(tm, times(getEventCount(newEvents)))
+        verify(tmp, times(getEventCount(newEvents)))
                 .registerTelephonyCallback(any(Executor.class), captor.capture());
         for (TelephonyCallback callback : captor.getAllValues()) {
             invokeTelephonyCallback(callback);
         }
 
-        PhoneStateNotifier psNotifier2 = Mockito.mock(PhoneStateNotifier.class);
+        PhoneStateNotifier psNotifier2 = mock(PhoneStateNotifier.class);
         when(psNotifier2.getEvents()).thenReturn(newEvents);
         mPsAgent.addNotifier(psNotifier2);
 
@@ -224,9 +212,9 @@ public class PhoneStateAgentTest {
                 ImsPhoneStateListener.LISTEN_CELL_INFO);
         int newEventCount = getEventCount(mPsAgent.getPhoneStateEvents().getEvents());
 
-        verify(mTelephonyManager, times(originalEventCount + newEventCount))
+        verify(mTelephonyManagerProxy, times(originalEventCount + newEventCount))
                 .registerTelephonyCallback(any(Executor.class), any(TelephonyCallback.class));
-        verify(mTelephonyManager, times(originalEventCount))
+        verify(mTelephonyManagerProxy, times(originalEventCount))
                 .unregisterTelephonyCallback(any(TelephonyCallback.class));
     }
 
@@ -234,8 +222,9 @@ public class PhoneStateAgentTest {
     @SmallTest
     public void testOnSimStateChanged() {
         int eventCount = getEventCount(mPsAgent.getPhoneStateEvents().getEvents());
-        TelephonyManager tm = Mockito.mock(TelephonyManager.class);
-        when(mTelephonyManager.createForSubscriptionId(eq(SUB_ID[0]))).thenReturn(tm);
+        TelephonyManagerProxy tmp = mock(TelephonyManagerProxy.class);
+        when(mTelephonyManagerProxy.createForSubscriptionId(eq(SUB_ID_1)))
+                .thenReturn(tmp);
         ArgumentCaptor<Sim.Listener> captor = ArgumentCaptor.forClass(Sim.Listener.class);
         verify(mSimInterface).addListener(captor.capture());
 
@@ -244,34 +233,36 @@ public class PhoneStateAgentTest {
         // Ignored because SimInterface is null.
         simListener.onSimStateChanged();
 
-        AgentFactory.getInstance().setAgent(SimInterface.class, mSimInterface, SLOT0);
+        AgentFactory.getInstance()
+                .setAgent(SimInterface.class, mSimInterface, SLOT0);
         when(mSimInterface.isSimLoadCompleted()).thenReturn(false);
         // Ignored because SIM state is not fully loaded.
         simListener.onSimStateChanged();
 
         // Same slot & same subscription
         when(mSimInterface.isSimLoadCompleted()).thenReturn(true);
-        when(mSimInterface.getSubId()).thenReturn(SUB_ID[0]);
+        when(mSimInterface.getSubId()).thenReturn(SUB_ID_1);
         simListener.onSimStateChanged();
 
-        TelephonyManager tm1 = Mockito.mock(TelephonyManager.class);
-        when(mTelephonyManager.createForSubscriptionId(eq(SUB_ID1[0]))).thenReturn(tm1);
-        when(mSimInterface.getSubId()).thenReturn(SUB_ID1[0]);
+        TelephonyManagerProxy tmp1 = mock(TelephonyManagerProxy.class);
+        when(mTelephonyManagerProxy.createForSubscriptionId(eq(SUB_ID_2)))
+                .thenReturn(tmp1);
+        when(mSimInterface.getSubId()).thenReturn(SUB_ID_2);
         // Same slot & different subscription
         simListener.onSimStateChanged();
 
-        verify(tm1, times(eventCount))
+        verify(tmp1, times(eventCount))
                 .registerTelephonyCallback(any(Executor.class), any(TelephonyCallback.class));
-        verify(tm, times(eventCount))
+        verify(tmp, times(eventCount))
                 .unregisterTelephonyCallback(any(TelephonyCallback.class));
     }
 
     @Test
     @SmallTest
     public void testTelephonyCallbackCalled() {
-        TelephonyManager tm = Mockito.mock(TelephonyManager.class);
-        when(mTelephonyManager.createForSubscriptionId(eq(SUB_ID[0]))).thenReturn(tm);
-        when(tm.getDataNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_IWLAN);
+        TelephonyManagerProxy tmp = mock(TelephonyManagerProxy.class);
+        when(mTelephonyManagerProxy.createForSubscriptionId(eq(SUB_ID_1)))
+                .thenReturn(tmp);
 
         int allEvents = ImsPhoneStateListener.LISTEN_SERVICE_STATE
                 | ImsPhoneStateListener.LISTEN_CALL_STATE
@@ -285,7 +276,7 @@ public class PhoneStateAgentTest {
         mPsAgent.addNotifier(mPsNotifier);
 
         ArgumentCaptor<TelephonyCallback> captor = ArgumentCaptor.forClass(TelephonyCallback.class);
-        verify(tm, times(getEventCount(allEvents)))
+        verify(tmp, times(getEventCount(allEvents)))
                 .registerTelephonyCallback(any(Executor.class), captor.capture());
 
         for (TelephonyCallback callback : captor.getAllValues()) {
@@ -301,32 +292,34 @@ public class PhoneStateAgentTest {
         verify(mPsNotifier).notifyPreciseDataConnectionState(any(PreciseDataConnectionState.class));
         verify(mPsNotifier).notifyBarringInfo(any(BarringInfo.class));
         assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mPsAgent.getCellularDataNetworkType());
+        assertEquals(NetworkRegistrationInfo.REGISTRATION_STATE_HOME,
+                mPsAgent.getCsNetworkRegistrationState());
 
         // Network is not registered.
         mNetworkRegistrationInfo = new NetworkRegistrationInfo.Builder().build();
         when(mServiceState.getNetworkRegistrationInfo(
-                eq(NetworkRegistrationInfo.DOMAIN_PS),
-                eq(AccessNetworkConstants.TRANSPORT_TYPE_WWAN)))
+                anyInt(), eq(AccessNetworkConstants.TRANSPORT_TYPE_WWAN)))
                 .thenReturn(mNetworkRegistrationInfo);
         when(mServiceState.getRoaming()).thenReturn(true);
         mServiceStateListener.onServiceStateChanged(mServiceState);
         assertEquals(TelephonyManager.NETWORK_TYPE_UNKNOWN, mPsAgent.getCellularDataNetworkType());
+        assertEquals(NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING,
+                mPsAgent.getCsNetworkRegistrationState());
 
         // NetworkRegistrationInfo is null.
         when(mServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(null);
         mServiceStateListener.onServiceStateChanged(mServiceState);
         assertEquals(TelephonyManager.NETWORK_TYPE_UNKNOWN, mPsAgent.getCellularDataNetworkType());
+        assertEquals(NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING,
+                mPsAgent.getCsNetworkRegistrationState());
     }
 
     @Test
     @SmallTest
     public void testTelephonyCallbackServiceStateChanged() {
-        when(mTelephonyManager.getDataNetworkType())
-                .thenReturn(TelephonyManager.NETWORK_TYPE_IWLAN);
-
         int events = mPsAgent.getPhoneStateEvents().getEvents();
         ArgumentCaptor<TelephonyCallback> captor = ArgumentCaptor.forClass(TelephonyCallback.class);
-        verify(mTelephonyManager, times(getEventCount(events)))
+        verify(mTelephonyManagerProxy, times(getEventCount(events)))
                 .registerTelephonyCallback(any(Executor.class), captor.capture());
 
         for (TelephonyCallback callback : captor.getAllValues()) {
@@ -334,9 +327,11 @@ public class PhoneStateAgentTest {
         }
 
         assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mPsAgent.getCellularDataNetworkType());
+        assertEquals(NetworkRegistrationInfo.REGISTRATION_STATE_HOME,
+                mPsAgent.getCsNetworkRegistrationState());
 
         // Network is not registered.
-        ServiceState serviceState = Mockito.mock(ServiceState.class);
+        ServiceState serviceState = mock(ServiceState.class);
         mNetworkRegistrationInfo = new NetworkRegistrationInfo.Builder().build();
         when(serviceState.getNetworkRegistrationInfo(
                 anyInt(), eq(AccessNetworkConstants.TRANSPORT_TYPE_WWAN)))
@@ -344,11 +339,211 @@ public class PhoneStateAgentTest {
         when(mServiceState.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
         mServiceStateListener.onServiceStateChanged(serviceState);
         assertEquals(TelephonyManager.NETWORK_TYPE_UNKNOWN, mPsAgent.getCellularDataNetworkType());
+        assertEquals(NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING,
+                mPsAgent.getCsNetworkRegistrationState());
 
         // NetworkRegistrationInfo is null.
         when(serviceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(null);
         mServiceStateListener.onServiceStateChanged(serviceState);
         assertEquals(TelephonyManager.NETWORK_TYPE_UNKNOWN, mPsAgent.getCellularDataNetworkType());
+        assertEquals(NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING,
+                mPsAgent.getCsNetworkRegistrationState());
+    }
+
+    @Test
+    @SmallTest
+    public void testCsCallStateChanged() {
+        int events = mPsAgent.getPhoneStateEvents().getEvents();
+        ArgumentCaptor<TelephonyCallback> captor = ArgumentCaptor.forClass(TelephonyCallback.class);
+        verify(mTelephonyManagerProxy, times(getEventCount(events)))
+                .registerTelephonyCallback(any(Executor.class), captor.capture());
+
+        TelephonyCallback.CallStateListener csListener = null;
+        for (TelephonyCallback callback : captor.getAllValues()) {
+            if (callback instanceof TelephonyCallback.CallStateListener) {
+                csListener = (TelephonyCallback.CallStateListener) callback;
+                break;
+            }
+        }
+
+        assertNotNull(csListener);
+
+        csListener.onCallStateChanged(TelephonyManager.CALL_STATE_OFFHOOK);
+
+        assertEquals(TelephonyManager.CALL_STATE_OFFHOOK, mPsAgent.getCsCallState());
+        verify(mSystem).notifyEvent(eq(ImsEventDef.IMS_EVENT_CSCALL_STATE),
+                eq(TelephonyManager.CALL_STATE_OFFHOOK), eq(0));
+
+        csListener.onCallStateChanged(TelephonyManager.CALL_STATE_IDLE);
+
+        assertEquals(TelephonyManager.CALL_STATE_IDLE, mPsAgent.getCsCallState());
+        verify(mSystem).notifyEvent(eq(ImsEventDef.IMS_EVENT_CSCALL_STATE),
+                eq(TelephonyManager.CALL_STATE_IDLE), eq(0));
+    }
+
+    @Test
+    @SmallTest
+    public void testCsCallStateChangedWhenImsInCall() {
+        int events = mPsAgent.getPhoneStateEvents().getEvents();
+        ArgumentCaptor<TelephonyCallback> captor = ArgumentCaptor.forClass(TelephonyCallback.class);
+        verify(mTelephonyManagerProxy, times(getEventCount(events)))
+                .registerTelephonyCallback(any(Executor.class), captor.capture());
+
+        TelephonyCallback.CallStateListener csListener = null;
+        for (TelephonyCallback callback : captor.getAllValues()) {
+            if (callback instanceof TelephonyCallback.CallStateListener) {
+                csListener = (TelephonyCallback.CallStateListener) callback;
+                break;
+            }
+        }
+
+        assertNotNull(csListener);
+
+        mPsAgent.setImsCallState(TelephonyManager.CALL_STATE_OFFHOOK);
+        csListener.onCallStateChanged(TelephonyManager.CALL_STATE_OFFHOOK);
+
+        assertEquals(TelephonyManager.CALL_STATE_OFFHOOK, mPsAgent.getImsCallState());
+        assertEquals(TelephonyManager.CALL_STATE_IDLE, mPsAgent.getCsCallState());
+
+        csListener.onCallStateChanged(TelephonyManager.CALL_STATE_IDLE);
+
+        assertEquals(TelephonyManager.CALL_STATE_IDLE, mPsAgent.getImsCallState());
+        assertEquals(TelephonyManager.CALL_STATE_IDLE, mPsAgent.getCsCallState());
+        verify(mSystem, never())
+                .notifyEvent(eq(ImsEventDef.IMS_EVENT_CSCALL_STATE), anyInt(), anyInt());
+    }
+
+    @Test
+    @SmallTest
+    public void testCallStateChangedWhenCallStateIsIdleWhileImsCallStateIsOffhook() {
+        int events = mPsAgent.getPhoneStateEvents().getEvents();
+        ArgumentCaptor<TelephonyCallback> captor = ArgumentCaptor.forClass(TelephonyCallback.class);
+        verify(mTelephonyManagerProxy, times(getEventCount(events)))
+                .registerTelephonyCallback(any(Executor.class), captor.capture());
+
+        TelephonyCallback.CallStateListener csListener = null;
+        for (TelephonyCallback callback : captor.getAllValues()) {
+            if (callback instanceof TelephonyCallback.CallStateListener) {
+                csListener = (TelephonyCallback.CallStateListener) callback;
+                break;
+            }
+        }
+
+        assertNotNull(csListener);
+
+        // Set IMS call state to OFFHOOK. And then Telephony call state is changed to IDLE. This may
+        // happen when ImsStack registers the CallStateListener when the call starts.
+        mPsAgent.setImsCallState(TelephonyManager.CALL_STATE_OFFHOOK);
+        csListener.onCallStateChanged(TelephonyManager.CALL_STATE_IDLE);
+
+        assertEquals(TelephonyManager.CALL_STATE_IDLE, mPsAgent.getCsCallState());
+        // IMS call state should not be changed and there should be no notification at this time
+        // since the Telephony call state has not changed. IDLE ->IDLE.
+        assertEquals(TelephonyManager.CALL_STATE_OFFHOOK, mPsAgent.getImsCallState());
+        verify(mSystem, never()).notifyEvent(eq(ImsEventDef.IMS_EVENT_CSCALL_STATE),
+                eq(TelephonyManager.CALL_STATE_IDLE), eq(0));
+
+        csListener.onCallStateChanged(TelephonyManager.CALL_STATE_OFFHOOK);
+
+        assertEquals(TelephonyManager.CALL_STATE_IDLE, mPsAgent.getCsCallState());
+        assertEquals(TelephonyManager.CALL_STATE_OFFHOOK, mPsAgent.getImsCallState());
+        verify(mSystem, never()).notifyEvent(eq(ImsEventDef.IMS_EVENT_CSCALL_STATE),
+                eq(TelephonyManager.CALL_STATE_OFFHOOK), eq(0));
+    }
+
+    @Test
+    @SmallTest
+    public void testCsCallStateChangedWhenSim1LoadedAndSim2Absent() {
+        when(mSimInterface.getSimCardState()).thenReturn(Sim.STATE_PRESENT);
+        when(mSimInterface.getSimState()).thenReturn(Sim.STATE_LOADED);
+        SubscriptionManagerProxy smp =
+                mTestAppContext.getSystemServiceProxy(SubscriptionManagerProxy.class);
+        when(smp.getSubscriptionId(eq(SLOT1))).thenReturn(MSimUtils.INVALID_SUB_ID);
+        ISystem systemForSim2 = mock(ISystem.class);
+        when(mSystemInterface.getSystem(eq(SLOT1))).thenReturn(systemForSim2);
+
+        PhoneStateAgent psAgentForSim2 = null;
+
+        try {
+            psAgentForSim2 = new PhoneStateAgent(SLOT1);
+            psAgentForSim2.init(mContext);
+
+            int events = mPsAgent.getPhoneStateEvents().getEvents();
+            int eventCount = getEventCount(events);
+            events = psAgentForSim2.getPhoneStateEvents().getEvents();
+            eventCount += getEventCount(events);
+            ArgumentCaptor<TelephonyCallback> captor =
+                    ArgumentCaptor.forClass(TelephonyCallback.class);
+            verify(mTelephonyManagerProxy, times(eventCount))
+                    .registerTelephonyCallback(any(Executor.class), captor.capture());
+
+            List<TelephonyCallback.CallStateListener> csListeners = new ArrayList<>();
+            for (TelephonyCallback callback : captor.getAllValues()) {
+                if (callback instanceof TelephonyCallback.CallStateListener) {
+                    csListeners.add((TelephonyCallback.CallStateListener) callback);
+                }
+            }
+
+            assertEquals(2, csListeners.size());
+
+            for (TelephonyCallback.CallStateListener listener : csListeners) {
+                listener.onCallStateChanged(TelephonyManager.CALL_STATE_OFFHOOK);
+            }
+
+            assertEquals(TelephonyManager.CALL_STATE_OFFHOOK, mPsAgent.getCsCallState());
+            verify(mSystem).notifyEvent(eq(ImsEventDef.IMS_EVENT_CSCALL_STATE),
+                    eq(TelephonyManager.CALL_STATE_OFFHOOK), eq(0));
+            // Call state change is ignored because this call state change is from SIM1
+            // when SIM1 is in LOADED and SIM2 is absent.
+            assertEquals(TelephonyManager.CALL_STATE_IDLE, psAgentForSim2.getCsCallState());
+
+            for (TelephonyCallback.CallStateListener listener : csListeners) {
+                listener.onCallStateChanged(TelephonyManager.CALL_STATE_IDLE);
+            }
+
+            assertEquals(TelephonyManager.CALL_STATE_IDLE, mPsAgent.getCsCallState());
+            verify(mSystem).notifyEvent(eq(ImsEventDef.IMS_EVENT_CSCALL_STATE),
+                    eq(TelephonyManager.CALL_STATE_IDLE), eq(0));
+            assertEquals(TelephonyManager.CALL_STATE_IDLE, psAgentForSim2.getCsCallState());
+            verify(systemForSim2, never())
+                    .notifyEvent(eq(ImsEventDef.IMS_EVENT_CSCALL_STATE), anyInt(), anyInt());
+        } finally {
+            if (psAgentForSim2 != null) {
+                psAgentForSim2.cleanup();
+                psAgentForSim2 = null;
+            }
+        }
+    }
+
+    @Test
+    @SmallTest
+    public void testCsCallStateChangedWhenImsCallDelayed() {
+        int events = mPsAgent.getPhoneStateEvents().getEvents();
+        ArgumentCaptor<TelephonyCallback> captor = ArgumentCaptor.forClass(TelephonyCallback.class);
+        verify(mTelephonyManagerProxy, times(getEventCount(events)))
+                .registerTelephonyCallback(any(Executor.class), captor.capture());
+
+        TelephonyCallback.CallStateListener csListener = null;
+        for (TelephonyCallback callback : captor.getAllValues()) {
+            if (callback instanceof TelephonyCallback.CallStateListener) {
+                csListener = (TelephonyCallback.CallStateListener) callback;
+                break;
+            }
+        }
+
+        assertNotNull(csListener);
+
+        csListener.onCallStateChanged(TelephonyManager.CALL_STATE_OFFHOOK);
+
+        assertEquals(TelephonyManager.CALL_STATE_IDLE, mPsAgent.getImsCallState());
+        assertEquals(TelephonyManager.CALL_STATE_OFFHOOK, mPsAgent.getCsCallState());
+
+        mPsAgent.setImsCallState(TelephonyManager.CALL_STATE_OFFHOOK);
+
+        assertEquals(TelephonyManager.CALL_STATE_OFFHOOK, mPsAgent.getImsCallState());
+        assertEquals(TelephonyManager.CALL_STATE_IDLE, mPsAgent.getCsCallState());
+        verify(mSystem, times(2))
+                .notifyEvent(eq(ImsEventDef.IMS_EVENT_CSCALL_STATE), anyInt(), anyInt());
     }
 
     private void invokeTelephonyCallback(TelephonyCallback callback) {
@@ -387,7 +582,7 @@ public class PhoneStateAgentTest {
                     (TelephonyCallback.PreciseCallStateListener) callback;
             listener.onPreciseCallStateChanged(callState);
         } else if (callback instanceof TelephonyCallback.SignalStrengthsListener) {
-            SignalStrength ss = Mockito.mock(SignalStrength.class);
+            SignalStrength ss = mock(SignalStrength.class);
             TelephonyCallback.SignalStrengthsListener listener =
                     (TelephonyCallback.SignalStrengthsListener) callback;
             listener.onSignalStrengthsChanged(ss);

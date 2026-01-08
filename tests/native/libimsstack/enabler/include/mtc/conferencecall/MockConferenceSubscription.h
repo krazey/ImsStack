@@ -17,6 +17,7 @@
 #ifndef MOCK_CONFERENCE_SUBSCRIPTION_H_
 #define MOCK_CONFERENCE_SUBSCRIPTION_H_
 
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "conferencecall/ConferenceSubscription.h"
 #include <gmock/gmock.h>
@@ -38,7 +39,7 @@ public:
             ConferenceSubscription(objContext, nConfCallKey, objList, objListener, objFactory)
     {
     }
-    ~MockConferenceSubscription() {}
+    ~MockConferenceSubscription() override {}
     MOCK_METHOD(void, SubscriptionForkedNotify, (IN ISubscription*, IN ISubscription*), (override));
     MOCK_METHOD(void, SubscriptionNotify,
             (IN ISubscription* piSubscription, IN IMessage* piNotify), (override));

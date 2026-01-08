@@ -21,10 +21,12 @@
 #include "SipClientConnection.h"
 #include "SipClientConnectionImpl.h"
 #include "SipConnectionNotifierImpl.h"
+#include "SipDialog.h"
 #include "SipDialogImpl.h"
+#include "SipError.h"
 #include "SipPrivate.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipClientConnectionImpl::SipClientConnectionImpl(IN SipClientConnection* pScc) :
@@ -63,7 +65,7 @@ IMS_RESULT SipClientConnectionImpl::InitDialogRequest()
 
     if (m_pDialogImpl == IMS_NULL)
     {
-        SipDialog* pDialog = m_pScc->GetDialog();
+        const SipDialog* pDialog = m_pScc->GetDialog();
 
         if (pDialog == IMS_NULL)
         {
@@ -154,7 +156,7 @@ PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::Send()
     if (nResult == IMS_SUCCESS)
     {
         SipDialog* pDialog = (m_pDialogImpl != IMS_NULL) ? m_pDialogImpl->GetDialog() : IMS_NULL;
-        SipDialog* pSccDialog = m_pScc->GetDialog();
+        const SipDialog* pSccDialog = m_pScc->GetDialog();
 
         if ((pSccDialog != IMS_NULL) && (pDialog != IMS_NULL) &&
                 (pDialog->GetState() == SipDialog::STATE_CONFIRMED))
@@ -202,6 +204,11 @@ PRIVATE VIRTUAL IMS_SINT32 SipClientConnectionImpl::GetSlotId() const
     return m_pScc->GetSlotId();
 }
 
+PRIVATE VIRTUAL SipProfile* SipClientConnectionImpl::GetSipProfile() const
+{
+    return m_pScc->GetSipProfile();
+}
+
 PRIVATE VIRTUAL void SipClientConnectionImpl::SetSipProfile(IN SipProfile* pProfile)
 {
     m_pScc->SetSipProfile(pProfile);
@@ -245,7 +252,7 @@ PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::InitRequest(
         IN const AString& strMethod, IN ISipConnectionNotifier* piScn)
 {
     SipConnectionNotifierImpl* pScnImpl = DYNAMIC_CAST(SipConnectionNotifierImpl*, piScn);
-    SipConnectionNotifier* pScn = IMS_NULL;
+    const SipConnectionNotifier* pScn = IMS_NULL;
 
     if (pScnImpl != IMS_NULL)
     {
@@ -257,7 +264,7 @@ PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::InitRequest(
         return IMS_FAILURE;
     }
 
-    SipDialog* pDialog = m_pScc->GetDialog();
+    const SipDialog* pDialog = m_pScc->GetDialog();
 
     if (pDialog != IMS_NULL)
     {
@@ -300,11 +307,6 @@ PRIVATE VIRTUAL ISipGenericChallenge* SipClientConnectionImpl::GetAuthentication
     return m_pScc->GetAuthenticationChallenge(nIndex);
 }
 
-PRIVATE VIRTUAL ISipAckPackage* SipClientConnectionImpl::GrabAck()
-{
-    return m_pScc->GrabAck();
-}
-
 PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::InitResubmissionRequest()
 {
     return m_pScc->InitResubmissionRequest();
@@ -344,6 +346,11 @@ PRIVATE VIRTUAL void SipClientConnectionImpl::SetTransportTuple(IN const IpAddre
         IN IMS_SINT32 nTransportExt /*= Sip::TRANSPORT_EXT_ANY*/)
 {
     m_pScc->SetTransportTuple(objIp, nPortS, nPortC, nPortFc, nTransportExt);
+}
+
+PRIVATE VIRTUAL void SipClientConnectionImpl::RetransmitAck()
+{
+    m_pScc->RetransmitAck();
 }
 
 PRIVATE VIRTUAL void SipClientConnectionImpl::OnError_NotifyError(
@@ -407,7 +414,7 @@ PRIVATE VIRTUAL void SipClientConnectionImpl::OnClientConnection_NotifyForkedRes
         return;
     }
 
-    SipDialog* pDialog = pForkedScc->GetDialog();
+    const SipDialog* pDialog = pForkedScc->GetDialog();
 
     if (pDialog != IMS_NULL)
     {

@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "SipTxnContext.h"
 #include "SipTimerContext.h"
+#include "SipTxnContext.h"
 
 SipTxnContext::SipTxnContext() :
-        pSipTimerContext(new SipTimerContext()),
-        pTxnContextData(SIP_NULL)
+        m_pSipTimerContext(new SipTimerContext()),
+        m_pTxnContextData(SIP_NULL)
 {
 }
 
 SipTxnContext::~SipTxnContext()
 {
-    if (pSipTimerContext != SIP_NULL)
+    if (m_pSipTimerContext != SIP_NULL)
     {
-        delete pSipTimerContext;
-        pSipTimerContext = SIP_NULL;
+        delete m_pSipTimerContext;
+        m_pSipTimerContext = SIP_NULL;
     }
 }

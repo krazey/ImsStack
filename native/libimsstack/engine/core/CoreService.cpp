@@ -464,7 +464,6 @@ PRIVATE VIRTUAL void CoreService::Exception_NotifyError(IN IMS_SINT32 nErrorCode
         return;
     }
 
-    // TODO:: define a new reason type
     m_objReasonInfo.SetReasonType(IReasonInfo::REASON_TYPE_NONE);
 
     m_piCoreServiceListener->OnCoreService_ServiceClosed(this, &m_objReasonInfo);
@@ -486,7 +485,7 @@ PRIVATE VIRTUAL IMS_BOOL CoreService::ServerConnection_NotifyRequest(IN ISipServ
         return IMS_FALSE;
     }
 
-    ISipMessage* piSipMsg = piSsc->GetMessage();
+    const ISipMessage* piSipMsg = piSsc->GetMessage();
     AString strRemoteUserId;
 
     // Gets the remote user identity;

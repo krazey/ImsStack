@@ -17,6 +17,7 @@
 #ifndef MOCK_I_ECT_MANAGER_H_
 #define MOCK_I_ECT_MANAGER_H_
 
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "ect/IEctManager.h"
 #include <gmock/gmock.h>
@@ -24,8 +25,6 @@
 class MockIEctManager : public IEctManager
 {
 public:
-    virtual ~MockIEctManager() {}
-
     MOCK_METHOD(IMS_RESULT, Transfer, (IN CallKey, IN const AString&), (override));
     MOCK_METHOD(IEctManager::State, GetState, (), (override));
 };

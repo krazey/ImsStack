@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-#include "core/MockICoreService.h"
-#include "core/MockIMessage.h"
-#include "core/MockIReference.h"
-#include "core/MockISession.h"
+#include "MockICoreService.h"
+#include "MockIMessage.h"
+#include "MockIReference.h"
+#include "MockISession.h"
+#include "MockISipServerConnection.h"
+#include "MockITimer.h"
+#include "PlatformContext.h"
+#include "TestTimerService.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/ReferenceInterfaceHolder.h"
-#include "sipcore/MockISipServerConnection.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;
@@ -36,15 +39,24 @@ public:
     MockIInterfaceHolderListener objListener;
     MockIReference objMockIReference;
     MockISession objMockISession;
+    TestTimerService objTimerService;
+    MockITimer objMockITimer;
 
 protected:
     virtual void SetUp() override
     {
+        objTimerService.SetTimer(&objMockITimer);
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_TIMER, &objTimerService);
         ON_CALL(objMockISession, CreateReference(_, _)).WillByDefault(Return(&objMockIReference));
         pHolder = new ReferenceInterfaceHolder(objListener);
     }
 
-    virtual void TearDown() override { delete pHolder; }
+    virtual void TearDown() override
+    {
+        delete pHolder;
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, IMS_NULL);
+    }
 };
 
 TEST_F(ReferenceInterfaceHolderTest, HolderDoesNothingForReferenceListenerExceptTerminated)
@@ -81,6 +93,25 @@ TEST_F(ReferenceInterfaceHolderTest, AddAndReleaseStartsTimer)
 
     pHolder->ReleaseIReference(&objMockIReference, IMS_FALSE);
     EXPECT_TRUE(pHolder->IsTimerExist(&objMockIReference));
+}
+
+TEST_F(ReferenceInterfaceHolderTest, AddAndReleaseWithTimerExpiredStopsTimer)
+{
+    ON_CALL(objMockIReference, GetState).WillByDefault(Return(IReference::STATE_REFERRING));
+
+    EXPECT_EQ(pHolder->GetReferenceCount(), 0);
+
+    pHolder->GetIReference(&objMockISession, "sip:referToUri", "referMethod");
+    EXPECT_FALSE(pHolder->IsTimerExist(&objMockIReference));
+    EXPECT_EQ(pHolder->GetReferenceCount(), 1);
+
+    pHolder->ReleaseIReference(&objMockIReference, IMS_FALSE);
+    EXPECT_TRUE(pHolder->IsTimerExist(&objMockIReference));
+
+    pHolder->Timer_TimerExpired(&objMockITimer);
+
+    EXPECT_FALSE(pHolder->IsTimerExist(&objMockIReference));
+    EXPECT_EQ(pHolder->GetReferenceCount(), 0);
 }
 
 TEST_F(ReferenceInterfaceHolderTest, AddAndReleaseWithTerminatedStopsTimer)

@@ -23,8 +23,8 @@
 class MockIImsRadioConnectionListener : public IImsRadioConnectionListener
 {
 public:
-    inline MockIImsRadioConnectionListener() = default;
-    inline ~MockIImsRadioConnectionListener() = default;
+    MockIImsRadioConnectionListener() = default;
+    ~MockIImsRadioConnectionListener() override = default;
 
     MOCK_METHOD(void, ImsRadio_OnConnectionFailed,
             (IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis),
@@ -35,8 +35,8 @@ public:
 class MockIImsRadioSsacListener : public IImsRadioSsacListener
 {
 public:
-    inline MockIImsRadioSsacListener() = default;
-    inline ~MockIImsRadioSsacListener() = default;
+    MockIImsRadioSsacListener() = default;
+    ~MockIImsRadioSsacListener() override = default;
 
     MOCK_METHOD(void, ImsRadio_OnSsacChanged, (IN const SsacInfo& objSsacInfo), (override));
 };
@@ -44,8 +44,8 @@ public:
 class MockIImsRadioTrafficPriorityListener : public IImsRadioTrafficPriorityListener
 {
 public:
-    inline MockIImsRadioTrafficPriorityListener() = default;
-    inline ~MockIImsRadioTrafficPriorityListener() = default;
+    MockIImsRadioTrafficPriorityListener() = default;
+    ~MockIImsRadioTrafficPriorityListener() override = default;
 
     MOCK_METHOD(void, ImsRadio_OnTrafficPriorityChanged, (), (override));
 };

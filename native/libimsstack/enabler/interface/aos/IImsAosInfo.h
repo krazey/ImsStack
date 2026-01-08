@@ -18,6 +18,15 @@
 
 #include "AString.h"
 
+/// Indicated the pdn info when emergency service is in progress.
+enum class EmergencyServicePdn
+{
+    /// emergency service with emergency pdn
+    EMERGENCY = 1,
+    /// emergency service with ims pdn
+    IMS
+};
+
 /**
  * @brief This class provides an interface to get and notify the information for AoS.
  *
@@ -140,23 +149,18 @@ public:
     virtual AString GetServiceRouteHeaderValue() = 0;
 
     /**
+     * @brief Indicates whether cross sim is connected or not.
+     *
+     * @return IMS_BOOL Return whether cross sim is connected or not
+     */
+    virtual IMS_BOOL IsCrossSimConnected() = 0;
+
+    /**
      * @brief Notify the emergency call state.
      *
      * @param bIsInitialized Indicated whether emergency call is initialized or done.
      */
     virtual void NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized) = 0;
-
-    /**
-     * @brief Notify the Sms Callback Mode state for emergency.
-     *
-     * @param nState Indicated the SCBM state.
-     *               Possible values are,
-     *               IImsAosInfo::SCBM_STARTED
-     *               IImsAosInfo::SCBM_TERMINATED
-     *               IImsAosInfo::SCBM_TERMINATED_BY_ECALL
-     *               IImsAosInfo::SCBM_TERMINATED_BY_ESMS
-     */
-    virtual void NotifyScbmState(IN IMS_UINT32 nState) = 0;
 
     /**
      * @brief Set the publish state for waiting the un-publish procedure when IMS is de-registering.
@@ -169,8 +173,10 @@ public:
      * @brief Notify the emergency sms state.
      *
      * @param bIsInitialized Indicated whether emergency sms is initialized or done.
+     * @param ePdnType Indicated the pdn type used for the emergency sms.
      */
-    virtual void NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized) = 0;
+    virtual void NotifyEmergencySmsState(
+            IN IMS_BOOL bIsInitialized, IN EmergencyServicePdn ePdnType) = 0;
 
     /**
      * @brief Notify the call state to be EPS fallback.
@@ -213,14 +219,6 @@ public:
 
     enum
     {
-        SCBM_STARTED = 1,
-        SCBM_TERMINATED = 2,
-        SCBM_TERMINATED_BY_ECALL = 3,
-        SCBM_TERMINATED_BY_ESMS = 4
-    };
-
-    enum
-    {
         /// The registration is destroyed and blocked until LTE is attached
         EPSFB_CALL_START = 1,
         /// The registration block for EPS_FB is reset. It's invoked when registration is
@@ -228,5 +226,4 @@ public:
         EPSFB_CALL_FAILED = 2
     };
 };
-
 #endif  // INTERFACE_IMS_AOS_INFO_H_

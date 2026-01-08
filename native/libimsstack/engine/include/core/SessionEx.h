@@ -26,7 +26,7 @@ class SessionEx : public Session, public ITimerListener
 {
 public:
     explicit SessionEx(IN Service* pService);
-    virtual ~SessionEx();
+    ~SessionEx() override;
 
     SessionEx(IN const SessionEx&) = delete;
     SessionEx& operator=(IN const SessionEx&) = delete;
@@ -41,6 +41,7 @@ public:
             IN const AString& strReason = AString::ConstNull(), IN IMS_BOOL bSdp = IMS_TRUE,
             IN IMS_SINT32 nFlags = 0);
     IMS_RESULT UpdateEarlyMedia();
+    void AbortEarlyUpdateTransaction();
     inline void SetExListener(IN IOnSessionExListener* piListener) { m_piListener = piListener; }
 
 protected:
@@ -59,7 +60,8 @@ protected:
 
     // Session class
     Session* CreateSession() override;
-    IMS_RESULT HandleProvisionalResponse(IN ISipClientConnection* piScc) override;
+    IMS_RESULT HandleProvisionalResponse(
+            IN ISipClientConnection* piScc, IN IMS_SINT32 nServiceMethod) override;
     IMS_RESULT HandleRequestToUpdate(IN ISipServerConnection* piSsc) override;
     IMS_RESULT HandleResponseToUpdate(IN ISipClientConnection* piScc) override;
     IMS_BOOL HasPendingPrack() const override;
@@ -71,7 +73,7 @@ protected:
 private:
     AString AdjustSessionExpiresHeader(
             IN const AString& strRequestSe, IN const AString& strResponseSe);
-    IMS_BOOL CheckNCreateRprHelper(IN ISipMessage* piSipMsg);
+    IMS_BOOL CheckNCreateRprHelper(IN const ISipMessage* piSipMsg);
     void DestroyRprHelper();
 
     void HandleRequestToPrack(IN ISipServerConnection* piSsc);

@@ -15,6 +15,9 @@
  */
 
 #include "CallReasonInfo.h"
+#include "ImsList.h"
+#include "MtcDef.h"
+#include "call/IMtcCall.h"
 #include "call/NullCall.h"
 #include <gtest/gtest.h>
 
@@ -23,7 +26,7 @@ TEST(NullCallTest, NullCallDoesNothing)
     NullCall objCall;
 
     CallType eCallType = CallType::UNKNOWN;
-    ImsMap<SuppType, SuppService*> objSuppServices;
+    ImsList<SuppService*> objSuppServices;
     ImsList<ConfUser*> objUsers;
     ISession* piSession = nullptr;
     MediaInfo objMediaInfo;

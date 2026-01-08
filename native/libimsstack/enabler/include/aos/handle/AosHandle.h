@@ -26,10 +26,13 @@
 #include "interface/IAosHandle.h"
 #include "interface/IAosNConfigurationListener.h"
 #include "interface/IAosNetTrackerListener.h"
+#include "interface/IAosNetTrackerTimerListener.h"
 #include "interface/IAosRegistrationControlListener.h"
 #include "interface/IAosServiceSettingListener.h"
 
 #include "handle/AosFeatureTag.h"
+
+#define TRACE_HDL_I(NAME, VAL) TRACE_AOS_I(m_piAppContext, AosDomain::HDL, (NAME), (VAL))
 
 class IAosAppContext;
 
@@ -41,6 +44,7 @@ class AosHandle :
         public IEventListener,
         public IImsAos,
         public ImsStateMachine,
+        public AosNetTrackerTimerListener,
         public AosRegistrationControlListener,
         public AosServiceSettingListener
 {
@@ -61,25 +65,23 @@ class AosHandle :
 public:
     AosHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId,
             IN const AString& strServiceId, IN const IMS_UINT32 nServiceType);
-    virtual ~AosHandle();
+    ~AosHandle() override;
 
     // IAosHandle
-    AString& GetAppId() override;
-    AString& GetServiceId() override;
-    IMS_UINT32 GetServiceType() override;
+    const AString& GetAppId() const override;
+    const AString& GetServiceId() const override;
+    IMS_UINT32 GetServiceType() const override;
 
     IImsAosMonitor* GetMonitor() override;
 
-    IMS_SINT32 GetRequestType() override;
+    IMS_SINT32 GetRequestType() const override;
     void SetRequestType(IN IMS_SINT32 nReqType) override;
 
-    IMS_BOOL IsRegBinded() override;
+    IMS_BOOL IsRegBinded() const override;
     void SetRegBinded(IN IMS_BOOL bBind) override;
 
-    IMS_BOOL IsNetworkRegBinded() override;
-    void SetNetworkRegBinded(IN IMS_BOOL bNetworkBind) override;
-
-    IMS_BOOL IsRegFeatureTagRequired() override;
+    IMS_BOOL IsRegFeatureTagRequired() const override;
+    IMS_BOOL IsRegToNextPcscfRequested() const override;
 
     AosFeatureTagList& GetFeatureTagList() override;
     AosFeatureTagList& GetBindedFeatureTagList() override;
@@ -96,22 +98,28 @@ public:
     // IImsAos
     IMS_BOOL Control(IN IMS_UINT32 nType) override;
     IImsAosInfo* GetAosInfo() override;
-    IMS_UINT32 GetFeatures() override;
-    IMS_UINT32 GetSuspendedReason() override;
-    IMS_BOOL IsFeatureConnected(IN IMS_UINT32 nFeature) override;
-    IMS_BOOL IsImsConnected() override;
-    IMS_BOOL IsImsSuspended() override;
+    IMS_UINT32 GetFeatures() const override;
+    IMS_UINT32 GetSuspendedReason() const override;
+    IMS_BOOL IsFeatureConnected(IN IMS_UINT32 nFeature) const override;
+    IMS_BOOL IsImsConnected() const override;
+    IMS_BOOL IsImsSuspended() const override;
     void SetListener(IN IImsAosListener* piListener) override;
     void SetMonitor(IN IImsAosMonitor* piMonitor) override;
     IMS_BOOL SetReady(IN IMS_BOOL bReady, IN IMS_UINT32 nService) override;
     void UpdateFeature(IN IMS_UINT32 nFeatures) override;
     void UpdateFeature(IN ImsList<ImsAosFeatureTag*>& objFeatureTag) override;
+    void RegisterWithNextPcscf(IN IMS_UINT32 nUnavailableTimeForCurrentPcscf) override;
+    void ReinitiateRegistration(IN IMS_UINT32 nAfterSec) override;
 
     // IAosCallTrackerListener
     void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState) override;
+    inline void CallTracker_ECallSessionReleased(IN IMS_BOOL /* bEstablished */) override {};
 
     // IAosNetTrackerListener
     void NetTracker_StatusChanged() override;
+
+    // IAosNetTrackerTimerListener
+    void NetTracker_TimerInGuardChanged(IN NetTrackerTimerState eState) override;
 
     // IAosNConfigurationListener
     void NConfiguration_NotifyConfigChanged() override;
@@ -159,15 +167,19 @@ public:
         BLOCK_VIWIFI_CAPABILITY = 0x8,
         BLOCK_CALL_COMPOSER_CAPABILITY = 0x10,
         BLOCK_SMS_CAPABILITY = 0x20,
+        BLOCK_TEXT_CAPABILITY = 0x40,
 
         // Network
-        BLOCK_VOPS = 0x40,
-        BLOCK_SSAC = 0x80,
-        BLOCK_NETWORK = 0x100,
-        BLOCK_3G = 0x200,
+        BLOCK_VOPS = 0x80,
+        BLOCK_SSAC = 0x100,
+        BLOCK_NETWORK = 0x200,
+        BLOCK_3G = 0x400,
 
-        // DM
-        BLOCK_SMS_OVER_IP_NETWORK_INDICATION = 0x400
+        // Limited features
+        BLOCK_LIMITED_MMTEL = 0x800,
+        BLOCK_LIMITED_VIDEO = 0x1000,
+        BLOCK_LIMITED_TEXT = 0x2000,
+        BLOCK_LIMITED_SMS = 0x4000
     };
 
 protected:
@@ -179,8 +191,9 @@ protected:
     void ClearSuspendedReason();
 
     IMS_UINT32 GetAppState();
-    IMS_UINT32 GetImsAosReason(IN IMS_UINT32 nAosReason);
-    IMS_UINT32 GetImsAosReasonForSuspend(IN IMS_UINT32 nAosReason);
+    IMS_UINT32 GetImsAosReason(IN IMS_UINT32 nAosReason) const;
+    IMS_UINT32 GetImsAosReasonForConnecting(IN IMS_UINT32 nAosReason) const;
+    IMS_UINT32 GetImsAosReasonForSuspend(IN IMS_UINT32 nAosReason) const;
 
     IMS_BOOL IsEpdgEnabled() const;
     IMS_BOOL IsEqualNetworkType(IN IMS_UINT32 nType, IN AosNetworkType eType) const;
@@ -188,15 +201,16 @@ protected:
     IMS_BOOL IsCapabilityExistedForNetworkType(
             IN IMS_UINT32 nNetworkType, IN AosCapability eCapability) const;
     IMS_BOOL IsNetworkTypeMatchedToRat(IMS_UINT32 nNetworkType, IMS_UINT32 nRat) const;
-    IMS_BOOL IsWifiConnected();
-    IMS_BOOL IsDataConnected();
-    IMS_BOOL IsEmergencyService();
+    IMS_BOOL IsWifiConnected() const;
+    IMS_BOOL IsDataConnected() const;
+    IMS_BOOL IsEmergencyService() const;
     IMS_BOOL IsRoaming() const;
+    IMS_BOOL IsFeatureUnavailableInLimitedReg(IN IMS_UINT32 nFeature) const;
 
     IMS_UINT32 GetNetworkType() const;
     IMS_UINT32 GetMobileNetworkType() const;
     IMS_UINT32 GetMobileChangingNetworkType() const;
-    IMS_UINT32 GetAosFeature(IN IMS_UINT32 nBlock);
+    IMS_UINT32 GetAosFeature(IN IMS_UINT32 nBlock) const;
 
     void AddBlock(IN IMS_UINT32 nBlock, IN_OUT IMS_UINT32& nBlocks);
     void RemoveBlock(IN IMS_UINT32 nBlock, IN_OUT IMS_UINT32& nBlocks);
@@ -206,7 +220,7 @@ protected:
     void ProcessBlock(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded, IN IMS_BOOL bPreProcess = IMS_TRUE);
     IMS_BOOL ProcessCheckBlock(IN IMS_BOOL bRunStateMachine = IMS_TRUE);
     void ProcessUnavailableFeature(IN IMS_UINT32 nFeature, IN IMS_BOOL bAdd);
-    void ProcessUnavailableFeatureChanged();
+    void ProcessFeatureChangedWithoutReg();
 
     void BackupAllBlocks();
     void BackupBlocks(
@@ -216,16 +230,22 @@ protected:
     IMS_BOOL HoldBlockForInvalidNetwork(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded);
     void ReevaluateBlocks();
     IMS_BOOL UpdateIpcan();
+    void UpdateRegToNextPcscfRequested();
+
+    void NotifyEmergencyInitiated();
+    void NotifyEmergencyInitiationDone();
 
     IMS_BOOL IsHandleBlocked(IN IMS_UINT32 nType) const;
     IMS_BOOL IsHandleBlocked(IN const IMS_UINT32& nBlocks, IN IMS_UINT32 nType) const;
 
     virtual IMS_BOOL IsHandleBlocked() const;
+    virtual IMS_BOOL IsFeatureBlocked(IN IMS_UINT32 nFeature) const;
     virtual void ProcessBlockChanged();
 
     virtual IMS_BOOL IsBlockForMobile(IN IMS_UINT32 nBlock) const;
     virtual IMS_BOOL IsBlockForWifi(IN IMS_UINT32 nBlock) const;
 
+    virtual void ReevaluateCapabilities();
     virtual void ReevaluateUnavailableFeature();
 
     virtual void ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked);
@@ -233,7 +253,6 @@ protected:
             IN const ImsMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities);
     virtual void ProcessDataConnectionChanged();
     virtual void ProcessNetworkChanged();
-    virtual void ProcessVopsStateChanged(IN IMS_UINT32 nState, IN IMS_BOOL bUpdateState = IMS_TRUE);
     virtual void ProcessPsRoamingStateChanged(IN IMS_UINT32 nState);
     virtual void ProcessNetworkEvent(
             IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_UINT32 nExtraInfo);
@@ -269,6 +288,7 @@ protected:
     static const IMS_CHAR* StateToString(IN IMS_UINT32 nState);
     static const IMS_CHAR* MsgToString(IN IMS_UINT32 nMsg);
     static const IMS_CHAR* RadioTypeToString(IN IMS_UINT32 nType);
+    static AString BlocksToString(IN IMS_UINT32 nBlocks);
     const IMS_CHAR* ServiceTypeToString();
 
     enum
@@ -297,8 +317,6 @@ protected:
     IMS_UINT32 m_nReqType;
     // m_bBind indicates whether the service is added in registration or not
     IMS_BOOL m_bBind;
-    // m_bNetworkBind indicates whether the service is kept or removed in registration or not
-    IMS_BOOL m_bNetworkBind;
     // m_bRegFeatureTagRequired indicates whether the feature tag is required or not
     IMS_BOOL m_bRegFeatureTagRequired;
 
@@ -319,10 +337,7 @@ protected:
     IMS_UINT32 m_nBlocks;
     IMS_UINT32 m_nHoldingBlocksForMobile;
     IMS_UINT32 m_nHoldingBlocksForWifi;
-    IMS_UINT32 m_nHoldingVopsState;
-    IMS_UINT32 m_nVopsState;
     IMS_UINT32 m_nRoamingState;
-    IMS_BOOL m_bVopsIgnoredForVolteEnabled;
     IMS_BOOL m_bCsVoiceAvailable;
 
     ImsMap<IMS_UINT32, IMS_UINT32> m_objCapabilities;
@@ -335,12 +350,12 @@ protected:
     IMS_BOOL m_bNetSrvIn;
     IMS_UINT32 m_nNetworkType;
 
+    IMS_BOOL m_bEmergencyInitiated;
+    IMS_BOOL m_bRegToNextPcscfRequested;
+
     IMS_UINT32 m_nAppState;
 
     AString m_strTag;
     AString m_strTagWithServiceType;
-
-private:
-    friend class AosHandleTest;
 };
 #endif  // AOS_HANDLE_H_

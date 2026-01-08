@@ -34,6 +34,7 @@ public:
     MOCK_METHOD(void, ServiceSetting_VideoChanged, (IN IMS_BOOL bIsOn), (override));
     MOCK_METHOD(void, ServiceSetting_VolteChanged, (IN IMS_BOOL bIsOn), (override));
     MOCK_METHOD(void, ServiceSetting_WfcChanged, (IN IMS_BOOL bIsOn), (override));
+    MOCK_METHOD(void, ServiceSetting_WifiChanged, (IN IMS_BOOL bIsOn), (override));
 };
 
 #endif  // MOCK_I_AOS_SERVICE_SETTING_LISTENER_H_

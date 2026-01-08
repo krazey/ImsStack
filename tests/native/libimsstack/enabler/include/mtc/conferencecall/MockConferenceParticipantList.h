@@ -18,7 +18,7 @@
 #define MOCK_CONFERENCE_PARTICIPANT_LIST_H_
 
 #include "ImsList.h"
-#include "MtcDef.h"
+#include "ImsTypeDef.h"
 #include "conferencecall/ConferenceParticipantList.h"
 #include <gmock/gmock.h>
 
@@ -29,7 +29,7 @@ class IMtcCallManager;
 class MockConferenceParticipantList : public ConferenceParticipantList
 {
 public:
-    ~MockConferenceParticipantList() {}
+    ~MockConferenceParticipantList() override {}
     MOCK_METHOD(void, SetLocalUri, (IN const AString& strLocalUri), ());
     MOCK_METHOD(const AString&, GetLocalUri, (), (const));
     MOCK_METHOD(void, SetXmlVersion, (IN IMS_SINT32 nVersion), ());
@@ -56,7 +56,7 @@ public:
             (IN IMtcCallManager& objCallManager,
                     IN CallConnectionIdManager& objConnectionIdManager),
             ());
-    MOCK_METHOD(void, Login, (), ());
+    MOCK_METHOD(void, LogLn, (), ());
     MOCK_METHOD(IMS_UINT32, GetSize, (), (const, override));
     MOCK_METHOD(ConferenceParticipant*, GetAt, (IN IMS_UINT32 nAt), (override));
     MOCK_METHOD(ConfUser*, GetConfUser, (IN IMS_UINT32 nIndex), (const, override));

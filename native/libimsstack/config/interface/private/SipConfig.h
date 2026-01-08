@@ -17,10 +17,8 @@
 #define SIP_CONFIG_H_
 
 #include "AStringArray.h"
-#include "ImsMap.h"
 
 #include "CarrierConfig.h"
-#include "Credential.h"
 #include "ISipConfig.h"
 #include "private/ConfigBase.h"
 #include "private/SipConfigV.h"
@@ -58,7 +56,7 @@ public:
 
 public:
     explicit SipConfig(IN IMS_SINT32 nSlotId);
-    virtual ~SipConfig();
+    ~SipConfig() override;
 
     SipConfig(IN const SipConfig&) = delete;
     SipConfig& operator=(IN const SipConfig&) = delete;
@@ -114,7 +112,12 @@ public:
     inline IMS_BOOL IsKeepAliveConfigured() const { return HasFeature(SIP_FEATURE_CAPS_KEEP); }
     inline IMS_BOOL IsMultipleRegConfigured() const
     {
-        return HasFeature(SIP_FEATURE_CAPS_MULTIPLE_REG);
+        return m_nSupportMultipleReg == CarrierConfig::Ims::MULTIPLE_REGISTRATION_FULL;
+    }
+    inline IMS_BOOL IsRegIdParameterConfigured() const
+    {
+        return m_nSupportMultipleReg == CarrierConfig::Ims::MULTIPLE_REGISTRATION_REG_ID_ONLY ||
+                m_nSupportMultipleReg == CarrierConfig::Ims::MULTIPLE_REGISTRATION_FULL;
     }
     inline IMS_BOOL IsNoAcceptContactHeaderInBYE() const
     {
@@ -173,19 +176,20 @@ public:
         return HasFeature(
                 SIP_FEATURE_CAPS_SIP_INSTANCE_PARAM_REQUIRED_IN_CONTACT_FOR_NON_REGISTER_REQUEST);
     }
+    inline IMS_BOOL IsUdpTransportParameterIgnoredForOutgoingRequest() const
+    {
+        return HasFeature(SIP_FEATURE_CAPS_IGNORE_UDP_TRANSPORT_PARAMETER_FOR_OUTGOING_REQUEST);
+    }
     inline IMS_BOOL IsSessionIdHeaderSupported() const
     {
         return HasFeature(SIP_FEATURE_CAPS_SUPPORT_SESSION_ID_HEADER);
-    }
-    inline IMS_BOOL IsMacAddressHiddenInPaniHeader() const
-    {
-        return HasFeature(SIP_FEATURE_CAPS_HIDE_MAC_ADDRESS_IN_PANI_HEADER);
     }
     inline IMS_BOOL IsLocalTimezoneParameterSupportedInPaniHeader() const
     {
         return HasFeature(SIP_FEATURE_CAPS_LOCAL_TIMEZONE_PARAM_IN_PANI_HEADER);
     }
-
+    inline IMS_SINT32 GetHideMacInPaniHeaderPolicy() const { return m_nHideMacInPaniHeader; }
+    inline IMS_SINT32 GetRegContactUserInfoPart() const { return m_nRegContactUserInfoPart; }
     inline IMS_SINT32 GetRegExpiration() const
     {
         return !IsRegExpirationConfigured() ? INVALID_EXPIRATION : m_nRegExpiration;
@@ -222,7 +226,7 @@ private:
     IMS_BOOL GetTimerValueForUpdate(IN const IMS_CHAR* pszKey, IN IMS_SINT32 nDefaultValue,
             IN const AString& strUpdateTimerValue, OUT IMS_SINT32& nTimerValue);
     void UpdateTcpTimerValues();
-    static IMS_SINT32 ReadSipFeatureCaps(IN ICarrierConfig* piCc);
+    static IMS_SINT32 ReadSipFeatureCaps(IN const ICarrierConfig* piCc);
 
 public:
     enum
@@ -283,6 +287,9 @@ private:
     IMS_SINT32 m_nTcpCriterionLength;
     TcpTimerValues m_objTcpTimerValues;
 
+    IMS_SINT32 m_nHideMacInPaniHeader;
+    IMS_SINT32 m_nSupportMultipleReg;
+
     // Registration parameters
     enum
     {
@@ -291,6 +298,7 @@ private:
         EXPIRES_REG_SUB = 0x02
     };
 
+    IMS_SINT32 m_nRegContactUserInfoPart;
     IMS_SINT32 m_nRegExpiresMask;
     IMS_SINT32 m_nRegExpiration;
     AStringArray m_objAllowMethods;

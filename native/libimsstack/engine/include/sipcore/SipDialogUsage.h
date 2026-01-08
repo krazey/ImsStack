@@ -16,7 +16,10 @@
 #ifndef SIP_DIALOG_USAGE_H_
 #define SIP_DIALOG_USAGE_H_
 
-#include "SipDialogBase.h"
+#include "AString.h"
+
+class SipDialogBase;
+class SipMessageInfo;
 
 /**
  * @brief This class defines a dialog usage for SIP.

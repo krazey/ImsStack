@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
 #include "ICoreService.h"
 #include "IImsAosInfo.h"
 #include "IMessage.h"
@@ -34,8 +35,6 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 const AString ParticipantInfo::URI_SET_BY_IMS_ENGINE = AString::ConstNull();
-const AString ParticipantInfo::ANONYMOUS_ADDRESS = "sip:anonymous@anonymous.invalid";
-const AString ParticipantInfo::ANONYMOUS_DISPLAY_NAME = "Anonymous";
 
 PUBLIC
 ParticipantInfo::ParticipantInfo(IN IMtcCallContext& objContext) :
@@ -64,10 +63,6 @@ AString ParticipantInfo::GetLocalNumber() const
 PUBLIC
 AString ParticipantInfo::GetLocalUri() const
 {
-    if (m_objContext.GetService().IsEmergency())
-    {
-        return GetLocalUriForEmergencyCall();
-    }
     return URI_SET_BY_IMS_ENGINE;
 }
 
@@ -136,8 +131,24 @@ PUBLIC
 void ParticipantInfo::UpdateFromRemoteNumber(IN const AString& strRemoteNumber)
 {
     m_strRemoteNumber = strRemoteNumber;
-    m_strRemoteUri =
-            m_objContext.GetDialingPlan().GetToUri(strRemoteNumber, m_objContext.GetCallInfo());
+
+    const SuppService* pSuppService =
+            m_objContext.GetSupplementaryService().Get(SuppType::TARGET_URI);
+    if (m_objContext.GetService().IsEmergency() && pSuppService != IMS_NULL)
+    {
+        return;
+    }
+
+    if (m_objContext.GetService().IsEmergency())
+    {
+        m_strRemoteUri = m_objContext.GetDialingPlan().GetToUriForEmergencyTestNumber(
+                strRemoteNumber, m_objContext);
+    }
+    else
+    {
+        m_strRemoteUri = m_objContext.GetDialingPlan().GetToUri(strRemoteNumber, m_objContext);
+    }
+
     IMS_TRACE_D("UpdateFromRemoteNumber : URI[%s]", m_strRemoteUri.GetStr(), 0, 0);
 }
 
@@ -151,6 +162,8 @@ PUBLIC void ParticipantInfo::HandleRequest(IN RequestType eType, IN const IMessa
     m_strRemoteUri = m_objContext.GetMessageUtils().GetRemoteUri(
             &m_objContext.GetSession()->GetISession(), PeerType::MT);
     m_strRemoteNumber = GetRemoteNumberFromMessage(objRequest);
+    MtcSupplementaryService::ConvertGlobalNumberToLocalNumber(
+            m_objContext.GetConfigurationProxy(), m_strRemoteNumber);
 
     IMS_TRACE_D("HandleRequest : Remote URI[%s] Number[%s]", m_strRemoteUri.GetStr(),
             m_strRemoteNumber.GetStr(), 0);
@@ -165,7 +178,8 @@ PRIVATE AString ParticipantInfo::GetRemoteNumberFromMessage(IN const IMessage& o
 {
     AString strNumber;
 
-    if (!m_objContext.GetConfigurationProxy().Is(Feature::OIP_SOURCE_FROM_HEADER))
+    if (!m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigVoice::KEY_OIP_SOURCE_FROM_HEADER_BOOL))
     {
         // Examine PAID first
         strNumber = m_objContext.GetMessageUtils().GetUserPart(
@@ -178,23 +192,4 @@ PRIVATE AString ParticipantInfo::GetRemoteNumberFromMessage(IN const IMessage& o
     }
 
     return strNumber;
-}
-
-PRIVATE
-AString ParticipantInfo::GetLocalUriForEmergencyCall() const
-{
-    IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
-    IMS_UINT32 nAosRegistrationMode =
-            pAosConnector ? pAosConnector->GetRegistrationMode() : IImsAosInfo::REG_MODE_UNKNOWN;
-
-    if (nAosRegistrationMode == IImsAosInfo::REG_MODE_NOUICC ||
-            nAosRegistrationMode == IImsAosInfo::REG_MODE_ADMIN)
-    {
-        SipAddress objSipAddress;
-        objSipAddress.Create(ANONYMOUS_ADDRESS);
-        objSipAddress.SetDisplayName(ANONYMOUS_DISPLAY_NAME);
-        return objSipAddress.ToString();
-    }
-
-    return URI_SET_BY_IMS_ENGINE;
 }

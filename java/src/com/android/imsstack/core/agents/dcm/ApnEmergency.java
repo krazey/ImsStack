@@ -18,6 +18,7 @@ package com.android.imsstack.core.agents.dcm;
 
 import android.content.Context;
 import android.os.Message;
+import android.telephony.DataFailCause;
 import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.agents.MsgProcInterface;
@@ -30,14 +31,19 @@ import com.android.imsstack.util.ImsLog;
 /**
  * this is data connection class for emergency
  */
-public class ApnEmergency extends Apn {
-    protected IDcUtils mDcUtils;
+public final class ApnEmergency extends Apn {
+    private IDcUtils mDcUtils;
 
     // Public methods --------------------------------------------
     public ApnEmergency(Context context, int slotId) {
-        super(context, slotId);
+        super(context, slotId, EApnType.EMERGENCY);
 
-        initializeApn();
+        mDcUtils = DcFactory.getDcAgent(IDcUtils.class, slotId);
+
+        registerHandler(EVENT_NETWORK_AVAILABLE, new HandleNetworkAvailable());
+        registerHandler(EVENT_NETWORK_LOST, new HandleNetworkLost());
+        registerHandler(EVENT_IP_CHANGED, new HandleIpChanged());
+        registerHandler(EVENT_DATA_CONNECTION_FAILED, new HandleDataConnectionFailed());
     }
 
     // Interface implementation methods --------------------------
@@ -51,6 +57,10 @@ public class ApnEmergency extends Apn {
         if (mAPNState == EApnReqState.APN_REQUEST_DONE) {
             ImsLog.w(mSlotId, "request is already done");
             return true;
+        }
+
+        if (mDcNetWatcher != null) {
+            mDcNetWatcher.clearNetworkRegistrationRejectCause();
         }
 
         setApnReqState(EApnReqState.APN_REQUEST_DONE);
@@ -91,18 +101,7 @@ public class ApnEmergency extends Apn {
         return super.getApn();
     }
 
-    // Private/Protected methods ---------------------------------
-    protected void initializeApn() {
-        mType = EApnType.EMERGENCY;
-        mDcUtils = DcFactory.getDcAgent(IDcUtils.class, getSlotId());
-
-        registerHandler(EVENT_NETWORK_AVAILABLE, new HandleNetworkAvailable());
-        registerHandler(EVENT_NETWORK_LOST, new HandleNetworkLost());
-        registerHandler(EVENT_IP_CHANGED, new HandleIpChanged());
-        registerHandler(EVENT_DATA_CONNECTION_FAILED, new HandleDataConnectionFailed());
-    }
-
-    private class HandleNetworkAvailable implements MsgProcInterface {
+    private final class HandleNetworkAvailable implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
 
@@ -129,7 +128,7 @@ public class ApnEmergency extends Apn {
         }
     }
 
-    private class HandleNetworkLost implements MsgProcInterface {
+    private final class HandleNetworkLost implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             int curDataState = TelephonyManager.DATA_DISCONNECTED;
@@ -143,12 +142,16 @@ public class ApnEmergency extends Apn {
                 ImsLog.i(mSlotId, "data state :: " + mDataState + " >> " + curDataState);
 
                 setDataState(curDataState);
+                if (mDcSettings != null && !mDcSettings.isEmergencyCallbackModeSupported()) {
+                    ImsLog.d(mSlotId, "network release due to not support ECBM");
+                    disconnect();
+                }
                 sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_DISCONNECTED);
             }
         }
     }
 
-    private class HandleIpChanged implements MsgProcInterface {
+    private final class HandleIpChanged implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             ImsLog.i(mSlotId, "ip is changed");
@@ -166,7 +169,7 @@ public class ApnEmergency extends Apn {
         }
     }
 
-    private class HandleDataConnectionFailed implements MsgProcInterface {
+    private final class HandleDataConnectionFailed implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             if (msg == null || msg.obj == null) {
@@ -178,12 +181,26 @@ public class ApnEmergency extends Apn {
                 return;
             }
 
-            int causeCode = (int) msg.obj;
             if (mDcSettings != null) {
-                if (mDcSettings.isPermanentFailure(mType, causeCode)) {
-                    sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_DISCONNECTED);
+                int causeCode = (int) msg.obj;
+                if (mDcSettings.isCrossStackRedialCause(mType, causeCode)) {
+                    sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_CONNECT_FAILED);
+                    return;
+                }
+
+                if (causeCode == DataFailCause.ERROR_UNSPECIFIED && mDcNetWatcher != null) {
+                    // If E-PDN connection is failed by EMM rejection, it needs to check the reject
+                    // cause in the network registration info.
+                    int nwRejectCause = mDcNetWatcher.getNetworkRegistrationRejectCause();
+                    if (mDcSettings.isCrossStackRedialCause(mType, nwRejectCause)) {
+                        ImsLog.d(mSlotId, "nwRejectCause : " + nwRejectCause);
+                        sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_CONNECT_FAILED);
+                        return;
+                    }
                 }
             }
+
+            sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_DISCONNECTED);
         }
     }
 }

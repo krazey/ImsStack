@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,21 +26,9 @@ class MediaNegoUtil
 public:
     MediaNegoUtil();
     ~MediaNegoUtil();
-
-    /**
-     * @brief Get the nego id and media type from remote address and port
-     *
-     * @param pMediaNegoMap MediaNego object container
-     * @param strIpAddr remote address
-     * @param nPort remote port
-     * @param nNegoId identifier of SDP Negotiation Profile(dialog)
-     * @param eMediaType media type
-     * @return IMS_BOOL IMS_TRUE when there is a valid object existed with respects of remote
-     * address and port
-     */
-    static IMS_BOOL GetMediaNegoInfo(IN ImsMap<IMS_UINTP, MediaNego*>* pMediaNegoMap,
-            IN const AString& strIpAddr, IN IMS_SINT32 nPort, OUT IMS_UINTP& nNegoId,
-            OUT MEDIA_CONTENT_TYPE& eMediaType);
+    static void ReleaseRtpPort(IN IMS_SINT32 slotId, IN IMS_UINT32 port);
+    static IMS_UINT32 AcquireRtpPort(IN IMS_SINT32 slotId, IN IMS_UINT32 port);
+    static IMS_SINT32 ConvertMediaTypeToSdpMediaType(IN const MEDIA_CONTENT_TYPE eType);
 };
 
 #endif

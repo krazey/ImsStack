@@ -18,7 +18,7 @@
 
 #include "ServiceFilterCriteria.h"
 
-__IMS_TRACE_TAG_IMS__;
+__IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
 ServiceFilterCriteria::ServiceFilterCriteria() :
@@ -48,12 +48,7 @@ PUBLIC VIRTUAL IMS_UINT32 ServiceFilterCriteria::AddTriggerPoint(
         return 0;
     }
 
-    if (!m_objTriggerPoints.Add(m_nNextTriggerPointId, pTriggerPoint))
-    {
-        IMS_TRACE_E(0, "Adding a TriggerPoint failed", 0, 0, 0);
-        return 0;
-    }
-
+    m_objTriggerPoints.Add(m_nNextTriggerPointId, pTriggerPoint);
     ++m_nNextTriggerPointId;
 
     return (m_nNextTriggerPointId - 1);
@@ -120,7 +115,7 @@ IMS_UINT32 ServiceFilterCriteria::Evaluate(IN const ISipMessage* piSipMsg) const
 {
     for (IMS_UINT32 i = 0; i < m_objTriggerPoints.GetSize(); ++i)
     {
-        TriggerPoint* pTriggerPoint = m_objTriggerPoints.GetValueAt(i);
+        const TriggerPoint* pTriggerPoint = m_objTriggerPoints.GetValueAt(i);
 
         if (pTriggerPoint == IMS_NULL)
         {

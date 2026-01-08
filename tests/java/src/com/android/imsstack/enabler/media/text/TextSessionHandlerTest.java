@@ -17,9 +17,11 @@
 package com.android.imsstack.enabler.media;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -176,12 +178,73 @@ public class TextSessionHandlerTest extends MediaSessionHandlerTest {
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
 
-        mTextSessionHandler.setMediaState(MediaState.MEDIA_STATE_CLOSED);
+        verify(mMockImsMediaManager, times(1)).closeSession(eq(mMockTextSession));
+        assertEquals(MediaState.MEDIA_STATE_CLOSED, mTextSessionHandler.getMediaState());
+
+        // Receive onSessionClosed callback
+        mTextSessionCallback.onSessionClosed();
+        processAllMessages();
+
+        // Verify timeout is cancelled and session is closed
+        assertEquals(false, mTextSessionHandler.getTextMessageHandler().hasMessages(
+                MediaConstants.RESPONSE_SESSION_CLOSED_TIMEOUT));
+        verify(mMockQosAgent,
+                times(1)).destroyQosConnection(eq(mMockRtpSocket), eq(mMockRtpSocket));
+        assertEquals(mTextSessionHandler.getMediaState(), MediaState.MEDIA_STATE_IDLE);
+        testParcel.recycle();
+    }
+
+    @Test
+    public void testCloseSessionWithTimeout() {
+        Parcel testParcel = Parcel.obtain();
+        testParcel.writeInt(MediaConstants.REQUEST_CLOSE_SESSION);
+        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_RTT);
         testParcel.setDataPosition(0);
+        mTextSessionHandler.setTextQosAgent(mMockQosAgent);
+        mTextSessionHandler.setRtpSocket(mRtpSocketPair);
+        mTextSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
+
         verify(mMockImsMediaManager, times(1)).closeSession(eq(mMockTextSession));
+        assertEquals(MediaState.MEDIA_STATE_CLOSED, mTextSessionHandler.getMediaState());
+
+        // Do not receive onSessionClosed, and timeout scheduled for 5000ms is fired
+        moveTimeForward(MediaConstants.RESPONSE_WAIT_TIMEOUT);
+        processAllMessages();
+        verify(mMockQosAgent,
+                times(1)).destroyQosConnection(eq(mMockRtpSocket), eq(mMockRtpSocket));
+        assertEquals(mTextSessionHandler.getMediaState(), MediaState.MEDIA_STATE_IDLE);
         testParcel.recycle();
+    }
+
+    @Test
+    public void testRequestIgnoredWhenClosing() throws Exception {
+        Parcel testParcel = Parcel.obtain();
+        testParcel.setDataPosition(0);
+        mTextSessionHandler.setRtpSocket(mRtpSocketPair);
+        mTextSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
+        // Close session
+        mTextSessionHandler.onImsMediaTextMessage(
+                MediaConstants.REQUEST_CLOSE_SESSION, testParcel);
+        processAllMessages();
+
+        verify(mMockImsMediaManager, times(1)).closeSession(eq(mMockTextSession));
+        assertEquals(MediaState.MEDIA_STATE_CLOSED, mTextSessionHandler.getMediaState());
+
+        // Try to modify session, should be discarded
+        TextConfig textConfig = MediaTestUtils.createTextConfig();
+        Parcel testParcel2 = Parcel.obtain();
+        textConfig.writeToParcel(testParcel2, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+        testParcel2.setDataPosition(0);
+        mTextSessionHandler.onImsMediaTextMessage(
+                MediaConstants.REQUEST_MODIFY_SESSION, testParcel2);
+        processAllMessages();
+
+        // Verify modifySession was not called
+        verify(mMockTextSession, never()).modifySession(any());
+        testParcel.recycle();
+        testParcel2.recycle();
     }
 
     @Test
@@ -189,19 +252,14 @@ public class TextSessionHandlerTest extends MediaSessionHandlerTest {
         // Modify Session Request
         TextConfig textConfig = MediaTestUtils.createTextConfig();
         Parcel testParcel = Parcel.obtain();
-        testParcel.writeInt(MediaConstants.REQUEST_MODIFY_SESSION);
-        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_RTT);
         textConfig.writeToParcel(testParcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         testParcel.setDataPosition(0);
         mTextSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
-        mMediaListener.onMediaMessage(testParcel);
-        processAllMessages();
-
-        testParcel.setDataPosition(0);
-        mTextSessionHandler.setMediaState(MediaState.MEDIA_STATE_CLOSED);
-        mMediaListener.onMediaMessage(testParcel);
+        mTextSessionHandler.onImsMediaTextMessage(
+                MediaConstants.REQUEST_MODIFY_SESSION, testParcel);
         processAllMessages();
         verify(mMockTextSession, times(1)).modifySession(eq(textConfig));
+        assertEquals(MediaState.MEDIA_STATE_LIVE, mTextSessionHandler.getMediaState());
 
         // Modify Session Response - SUCCESS
         mTextSessionCallback.onModifySessionResponse(textConfig, RESULT_SUCCESS);
@@ -252,7 +310,7 @@ public class TextSessionHandlerTest extends MediaSessionHandlerTest {
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
         verify(mMockQosAgent).updateQosConnection(eq(mMockRtpSocket), eq(mMockRtpSocket),
-                eq(REMOTE_RTP_ADDRESS), eq(REMOTE_RTP_PORT));
+                eq(REMOTE_RTP_ADDRESS), eq(REMOTE_RTP_PORT), eq(false));
         testParcel.recycle();
     }
 

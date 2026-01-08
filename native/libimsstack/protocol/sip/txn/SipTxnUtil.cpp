@@ -15,10 +15,9 @@
  */
 
 #include "SipDebug.h"
+#include "SipUtil.h"
 #include "txn/SipTxnKey.h"
 #include "txn/SipTxnUtil.h"
-
-extern SIP_VOID Sip_Cbk_DisplayTxnKey(IN SIP_VOID* pvTxnKey);
 
 static SipVector<SipTxnKey*> s_txnKeyList;
 
@@ -100,19 +99,10 @@ SIP_BOOL SipTxnUtil::IsTxnKeyMatched(SipTxnKey* pUserTxnkey, SipTxnKey* pStoredT
 
     return SIP_TRUE;
 }
-/*
- * Description        : This function Adds Tnx Key to the list
- */
-SIP_BOOL SipTxnUtil::AddTxnKey(SipTxnKey* pTxnKey)
-{
-    if (s_txnKeyList.Add(pTxnKey) < 0)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SipTxnUtil::AddTxnKey:Adding in list failed",
-                SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
 
-    return SIP_TRUE;
+SIP_VOID SipTxnUtil::AddTxnKey(SipTxnKey* pTxnKey)
+{
+    s_txnKeyList.Add(pTxnKey);
 }
 
 SIP_BOOL SipTxnUtil::DeleteTxnKey(SipTxnKey* pUserTxnkey, SIP_BOOL bCheckToTag)
@@ -156,7 +146,13 @@ SIP_BOOL SipTxnUtil::DeleteTxnKey(SipTxnKey* pUserTxnkey, SIP_BOOL bCheckToTag)
 
         if (IsTxnKeyMatched(pUserTxnkey, pStoredTxnKey) == SIP_TRUE)
         {
-            Sip_Cbk_DisplayTxnKey(static_cast<SIP_VOID*>(pStoredTxnKey));
+            ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
+
+            if (pCallback != SIP_NULL)
+            {
+                pCallback->DisplayTxnKey(pStoredTxnKey);
+            }
+
             pStoredTxnKey->SipDelete();
             s_txnKeyList.RemoveAt(nIndex - SIP_ONE);
             // Check again if further elements matches for the same txn key.

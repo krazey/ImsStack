@@ -31,7 +31,7 @@ __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
 Publication::Publication(IN Service* pService, IN const AString& strEvent,
-        IN IMS_BOOL bImplicitRoutingRequired /*= IMS_FALSE*/) :
+        IN IMS_BOOL bImplicitRoutingRequired /*= IMS_TRUE*/) :
         ServiceMethod(pService),
         m_nState(STATE_INACTIVE),
         m_strEvent(strEvent),
@@ -492,7 +492,7 @@ PRIVATE VIRTUAL IMS_BOOL Publication::InitInstance()
 
 PRIVATE VIRTUAL void Publication::NotifySipResponse(IN ISipClientConnection* piScc)
 {
-    ISipMessage* piSipMsg = piScc->GetMessage();
+    const ISipMessage* piSipMsg = piScc->GetMessage();
     const SipMethod& objMethod = piSipMsg->GetMethod();
 
     IMS_TRACE_I("The response is received in the %s", StateToString(GetState()), 0, 0);
@@ -818,7 +818,7 @@ ISipClientConnection* Publication::CreateConnectionWithDialog(
 }
 
 PRIVATE
-void Publication::ReceiveResponse(IN ISipClientConnection* piScc)
+void Publication::ReceiveResponse(IN const ISipClientConnection* piScc)
 {
     switch (m_pPubState->GetOperation())
     {

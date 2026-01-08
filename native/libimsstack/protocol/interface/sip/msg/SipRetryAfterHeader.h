@@ -28,34 +28,25 @@ private:
     SIP_CHAR* m_pszComment;
 
 public:
-    /*constructor*/
     SipRetryAfterHeader();
-
     SipRetryAfterHeader(const SipRetryAfterHeader& objHeader);
 
-    /*destructor*/
-    ~SipRetryAfterHeader();
-
-    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
-
-    /*virtual methods*/
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
-    /*Function for encoding of headers*/
-    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
+    SIP_BOOL Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
-    /*Function for decoding of headers*/
-    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
-    /*Sets */
     inline SIP_VOID SetDeltaSec(SIP_UINT32 nDeltaSec) { m_nDeltaSec = nDeltaSec; }
-    /*Gets */
     inline SIP_UINT32 GetDeltaSec() const { return m_nDeltaSec; }
 
-    /*Sets */
-    SIP_BOOL SetComment(const SIP_CHAR* pszComment);
-    /*Gets */
+    SIP_VOID SetComment(const SIP_CHAR* pszComment);
     inline const SIP_CHAR* GetComment() const { return m_pszComment; }
 
     inline SIP_BOOL IsValidHeader() const override { return SIP_TRUE; }
+
+    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
+
+private:
+    ~SipRetryAfterHeader() override;
 };
 #endif  //__SIP_RETRY_AFTER_HEADER_H__

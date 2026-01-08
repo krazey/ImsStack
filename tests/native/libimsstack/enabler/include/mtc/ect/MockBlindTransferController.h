@@ -17,12 +17,14 @@
 #ifndef MOCK_BLIND_CONTROLLER_H_
 #define MOCK_BLIND_CONTROLLER_H_
 
-#include "AString.h"
-#include "IMtcContext.h"
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "ect/BlindTransferController.h"
-#include "ect/EctFactory.h"
 #include <gmock/gmock.h>
+
+class AString;
+class EctFactory;
+class IMtcContext;
 
 class MockBlindTransferController : public BlindTransferController
 {
@@ -32,7 +34,7 @@ public:
             BlindTransferController(objContext, nCallKey, objListener, objFactory)
     {
     }
-    ~MockBlindTransferController() {}
+    ~MockBlindTransferController() override {}
 
     MOCK_METHOD(void, Transfer, (IN const AString&), (override));
 };

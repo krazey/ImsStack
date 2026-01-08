@@ -25,16 +25,24 @@ class JniAosServiceThreadTest : public ::testing::Test
 {
 public:
     JniAosServiceThread* m_pJniAosServiceThread;
+    ImsList<AString> m_objFeatureTags;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         m_pJniAosServiceThread = new JniAosServiceThread();
         ASSERT_TRUE(m_pJniAosServiceThread != nullptr);
+
+        m_objFeatureTags = ImsList<AString>();
+        m_objFeatureTags.Append(AString("featureTag1"));
+        m_objFeatureTags.Append(AString("featureTag2"));
+        m_objFeatureTags.Append(AString("featureTag3"));
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
+        m_objFeatureTags.Clear();
+
         if (m_pJniAosServiceThread)
         {
             delete m_pJniAosServiceThread;
@@ -42,71 +50,132 @@ protected:
     }
 };
 
-TEST_F(JniAosServiceThreadTest, NotifyRegistered)
+TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenNotifyRegistered)
 {
-    ImsList<AString> objFeatureTags = ImsList<AString>();
-    objFeatureTags.Append(AString("featureTag1"));
-    objFeatureTags.Append(AString("featureTag2"));
-    objFeatureTags.Append(AString("featureTag3"));
-    EXPECT_THAT(m_pJniAosServiceThread->NotifyRegistered(0, 0, objFeatureTags),
-            AnyOf(IMS_TRUE, IMS_FALSE));
+    // GIVEN
+    // WHEN
+    IMS_BOOL bResult = m_pJniAosServiceThread->NotifyRegistered(0, 0, 0, m_objFeatureTags);
+
+    // THEN
+    EXPECT_THAT(bResult, AnyOf(IMS_TRUE, IMS_FALSE));
 }
 
-TEST_F(JniAosServiceThreadTest, NotifyRegistering)
+TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenNotifyRegistering)
 {
-    ImsList<AString> objFeatureTags = ImsList<AString>();
-    objFeatureTags.Append(AString("featureTag1"));
-    objFeatureTags.Append(AString("featureTag2"));
-    objFeatureTags.Append(AString("featureTag3"));
-    EXPECT_THAT(m_pJniAosServiceThread->NotifyRegistering(0, 0, objFeatureTags),
-            AnyOf(IMS_TRUE, IMS_FALSE));
+    // GIVEN
+    // WHEN
+    IMS_BOOL bResult = m_pJniAosServiceThread->NotifyRegistering(0, 0, 0, m_objFeatureTags);
+
+    // THEN
+    EXPECT_THAT(bResult, AnyOf(IMS_TRUE, IMS_FALSE));
 }
 
-TEST_F(JniAosServiceThreadTest, NotifyDeregistered)
+TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenNotifyDeregistered)
 {
-    EXPECT_THAT(m_pJniAosServiceThread->NotifyDeregistered(0, 0), AnyOf(IMS_TRUE, IMS_FALSE));
+    // GIVEN
+    // WHEN
+    IMS_BOOL bResult = m_pJniAosServiceThread->NotifyDeregistered(0, 0, 0, 0);
+
+    // THEN
+    EXPECT_THAT(bResult, AnyOf(IMS_TRUE, IMS_FALSE));
 }
 
-TEST_F(JniAosServiceThreadTest, NotifyTechnologyChangeFailed)
+TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenNotifyDeregistering)
 {
-    EXPECT_THAT(
-            m_pJniAosServiceThread->NotifyTechnologyChangeFailed(0, 0), AnyOf(IMS_TRUE, IMS_FALSE));
+    // GIVEN
+    // WHEN
+    IMS_BOOL bResult = m_pJniAosServiceThread->NotifyDeregistering(0);
+
+    // THEN
+    EXPECT_THAT(bResult, AnyOf(IMS_TRUE, IMS_FALSE));
 }
 
-TEST_F(JniAosServiceThreadTest, NotifyAssociatedUriChanged)
+TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenNotifyTechnologyChangeFailed)
 {
+    // GIVEN
+    // WHEN
+    IMS_BOOL bResult = m_pJniAosServiceThread->NotifyTechnologyChangeFailed(0, 0, 0);
+
+    // THEN
+    EXPECT_THAT(bResult, AnyOf(IMS_TRUE, IMS_FALSE));
+}
+
+TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenNotifyAssociatedUriChanged)
+{
+    // GIVEN
     ImsList<AString> objUris = ImsList<AString>();
     objUris.Append(AString("uri1"));
     objUris.Append(AString("uri2"));
     objUris.Append(AString("uri3"));
-    EXPECT_THAT(m_pJniAosServiceThread->NotifyAssociatedUriChanged(objUris),
-            AnyOf(IMS_TRUE, IMS_FALSE));
+
+    // WHEN
+    IMS_BOOL bResult = m_pJniAosServiceThread->NotifyAssociatedUriChanged(objUris);
+
+    // THEN
+    EXPECT_THAT(bResult, AnyOf(IMS_TRUE, IMS_FALSE));
 }
 
-TEST_F(JniAosServiceThreadTest, NotifyCapabilitiesUpdateFailed)
+TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenNotifyCapabilitiesUpdateFailed)
 {
-    EXPECT_THAT(m_pJniAosServiceThread->NotifyCapabilitiesUpdateFailed(0, 0, 0),
-            AnyOf(IMS_TRUE, IMS_FALSE));
+    // GIVEN
+    // WHEN
+    IMS_BOOL bResult = m_pJniAosServiceThread->NotifyCapabilitiesUpdateFailed(0, 0, 0);
+
+    // THEN
+    EXPECT_THAT(bResult, AnyOf(IMS_TRUE, IMS_FALSE));
 }
 
-TEST_F(JniAosServiceThreadTest, NotifyAosIsimState)
+TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenNotifyAosIsimState)
 {
-    EXPECT_THAT(m_pJniAosServiceThread->NotifyAosIsimState(0), AnyOf(IMS_TRUE, IMS_FALSE));
+    // GIVEN
+    // WHEN
+    IMS_BOOL bResult = m_pJniAosServiceThread->NotifyAosIsimState(0);
+
+    // THEN
+    EXPECT_THAT(bResult, AnyOf(IMS_TRUE, IMS_FALSE));
 }
 
-TEST_F(JniAosServiceThreadTest, NotifyRegEventState)
+TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenNotifyRegEventState)
 {
+    // GIVEN
     ImsList<AString> objImpus;
-    EXPECT_THAT(
-            m_pJniAosServiceThread->NotifyRegEventState(200, objImpus), AnyOf(IMS_TRUE, IMS_FALSE));
+
+    // WHEN
+    IMS_BOOL bResult = m_pJniAosServiceThread->NotifyRegEventState(200, objImpus);
+
+    // THEN
+    EXPECT_THAT(bResult, AnyOf(IMS_TRUE, IMS_FALSE));
 }
 
-TEST_F(JniAosServiceThreadTest, RequestPhoneNumberRetry)
+TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenNotifyImsFeatureChanged)
 {
-    EXPECT_THAT(m_pJniAosServiceThread->RequestPhoneNumberRetry(0), AnyOf(IMS_TRUE, IMS_FALSE));
+    // GIVEN
+    // WHEN
+    IMS_BOOL bResult = m_pJniAosServiceThread->NotifyImsFeatureChanged(0, 0, 0);
+
+    // THEN
+    EXPECT_THAT(bResult, AnyOf(IMS_TRUE, IMS_FALSE));
 }
 
-TEST_F(JniAosServiceThreadTest, RequestWifiService)
+TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenNotifyTrace)
 {
-    EXPECT_THAT(m_pJniAosServiceThread->RequestWifiService(IMS_TRUE), AnyOf(IMS_TRUE, IMS_FALSE));
+    // GIVEN
+    IMS_SINT32 nRegType = 1;
+    AString strTestLog("IMS stack trace message: Registration attempt failed.");
+
+    // WHEN
+    IMS_BOOL bResult = m_pJniAosServiceThread->NotifyTrace(nRegType, strTestLog);
+
+    // THEN
+    EXPECT_THAT(bResult, AnyOf(IMS_TRUE, IMS_FALSE));
+}
+
+TEST_F(JniAosServiceThreadTest, SucceedsSendData2JavaWhenRequestWifiService)
+{
+    // GIVEN
+    // WHEN
+    IMS_BOOL bResult = m_pJniAosServiceThread->RequestWifiService(IMS_TRUE);
+
+    // THEN
+    EXPECT_THAT(bResult, AnyOf(IMS_TRUE, IMS_FALSE));
 }

@@ -17,15 +17,16 @@
 #ifndef ALERTING_STATE_H_
 #define ALERTING_STATE_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "call/state/MtcCallState.h"
+#include <memory>
 
 class AString;
 class IMessage;
 class IMtcCalContext;
 class SuppService;
+class UdpKeepAliveSender;
+enum class CallType;
 enum class QosLossPolicy;
 struct MediaInfo;
 
@@ -36,7 +37,7 @@ class AlertingState : public MtcCallState
 {
 public:
     explicit AlertingState(IN IMtcCallContext& objContext);
-    virtual ~AlertingState();
+    virtual ~AlertingState() override;
     AlertingState(IN const AlertingState&) = delete;
     AlertingState& operator=(IN const AlertingState&) = delete;
 
@@ -51,6 +52,7 @@ public:
     CallStateName UssiStarted(IN ISession* piSession) override;
     CallStateName SessionStarted(IN ISession* piSession) override;
     CallStateName SessionTerminated(IN ISession* piSession) override;
+    CallStateName SessionCanceledOnAccepted(IN ISession* piSession) override;
     CallStateName SessionEarlyMediaUpdated(IN ISession* piSession) override;
     CallStateName SessionEarlyMediaUpdateFailed(IN ISession* piSession) override;
     CallStateName SessionEarlyMediaUpdateReceived(IN ISession* piSession) override;
@@ -61,6 +63,9 @@ public:
     CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) override;
     CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
     CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) override;
+
+private:
+    std::unique_ptr<UdpKeepAliveSender> m_pUdpKeepAliveSender;
 };
 
 #endif

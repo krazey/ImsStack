@@ -33,6 +33,11 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 public class SscHttpsConnection extends SscHttpConnection {
+    // Android 15 restricts the usage of TLS versions 1.0 and 1.1. These versions had
+    // previously been deprecated in Android, but are now disallowed for apps targeting
+    // Android 15.
+    public static final String[] PROTOCOLS = { "TLSv1.2", "TLSv1.3" };
+
     @VisibleForTesting
     final SscSslSocketFactory mSscSocketFactory;
 
@@ -150,9 +155,7 @@ public class SscHttpsConnection extends SscHttpConnection {
         }
 
         private Socket configureSocket(SSLSocket sslSocket) throws IOException {
-            final String[] protocols = { "TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3" };
-            sslSocket.setEnabledProtocols(protocols);
-
+            sslSocket.setEnabledProtocols(PROTOCOLS);
             return sslSocket;
         }
     }

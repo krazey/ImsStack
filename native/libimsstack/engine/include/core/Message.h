@@ -26,7 +26,7 @@ class Message : public IMessage
 {
 public:
     Message(IN AppConfig* pAppConfig, IN IMS_SINT32 nState);
-    virtual ~Message();
+    ~Message() override;
 
     Message(IN const Message&) = delete;
     Message& operator=(IN const Message&) = delete;
@@ -35,10 +35,10 @@ public:
     inline ISipMessage* GetMessage() const override { return m_piSipMsg; }
 
     ISipMessageBodyPart* CreateBodyPartEx();
-    void UpdateSentMessage(IN ISipMessage* piSipMsg);
+    void UpdateSentMessage(IN const ISipMessage* piSipMsg);
     static Message* CreateMessage(IN Message* pMessage);
     static Message* CreateUnsentMessage(IN AppConfig* pAppConfig, IN IMS_BOOL bRequest);
-    static Message* CreateReceivedMessage(IN AppConfig* pAppConfig, IN ISipMessage* piSipMsg);
+    static Message* CreateReceivedMessage(IN AppConfig* pAppConfig, IN const ISipMessage* piSipMsg);
     static const IMS_CHAR* GetMessageType(IN IMS_SINT32 nServiceMethod);
 
 private:

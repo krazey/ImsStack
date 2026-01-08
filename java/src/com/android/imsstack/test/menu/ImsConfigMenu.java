@@ -18,23 +18,22 @@ package com.android.imsstack.test.menu;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
-import android.preference.PreferenceActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.android.imsstack.R;
+import com.android.imsstack.base.DeviceConfig;
+import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.core.carrier.CarrierInfo;
 import com.android.imsstack.core.carrier.ImsCarrierResolver;
 import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
 
 import java.util.ArrayList;
 
-@SuppressWarnings("deprecation")
-public class ImsConfigMenu extends PreferenceActivity {
+public class ImsConfigMenu extends AppCompatActivity {
     protected static final String CARRIER_CONFIG_MENU = "carrier_config_menu";
     protected static final String TEST_CONFIG_MENU = "test_config_menu";
 
@@ -46,11 +45,6 @@ public class ImsConfigMenu extends PreferenceActivity {
         ImsLog.d("");
         super.onCreate(savedInstanceState);
         showSimList();
-    }
-
-    @Override
-    protected boolean isValidFragment(String fragmentName) {
-        return fragmentName != null;
     }
 
     private void initConfigMenu() {
@@ -91,12 +85,13 @@ public class ImsConfigMenu extends PreferenceActivity {
             new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    String[] tokens = new String[] { "SIM1", "SIM2", "SIM3" };
+                    String[] tokens = new String[] { "", "", "SIM1", "SIM2", "SIM3" };
                     String selectedSim = mSimList.get(position);
 
-                    for (int i = 0; i < tokens.length; ++i) {
+                    // First item will be skipped.
+                    for (int i = 2; i < tokens.length; ++i) {
                         if (selectedSim.contains(tokens[i])) {
-                            setSlotId(i);
+                            setSlotId(i - 2);
                             break;
                         }
                     }
@@ -107,8 +102,11 @@ public class ImsConfigMenu extends PreferenceActivity {
 
     private void showSimList() {
         mSimList = new ArrayList<>();
+        // Add empty lines (notification/title bar) for UI limitation.
+        mSimList.add("");
+        mSimList.add("");
 
-        int activeSimCount = MSimUtils.getActiveSimCount();
+        int activeSimCount = DeviceConfig.getActiveSimCount();
 
         for (int i = 0; i < activeSimCount; i++) {
             SimCarrierId cid = CarrierInfo.getInstance().getCarrierId(i);
@@ -130,7 +128,6 @@ public class ImsConfigMenu extends PreferenceActivity {
 
         ArrayAdapter<String> simListAdaptor =
                 new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, mSimList);
-
         ListView listView = getListView();
 
         if (listView != null) {

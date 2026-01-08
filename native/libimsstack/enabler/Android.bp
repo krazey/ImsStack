@@ -25,7 +25,6 @@ cc_library_headers {
         "interface/media",
         "interface/mtc",
         "interface/mts",
-        "interface/sipcontroller",
         "interface/uce",
     ],
 }
@@ -47,15 +46,8 @@ cc_library_headers {
     ],
 }
 
-cc_library_headers {
-    name: "libimsstack_enabler_sipcontroller_headers",
-    export_include_dirs: [
-        "include/sipcontroller",
-    ],
-}
-
 cc_library_static {
-    name:"libimsstack-enabler",
+    name: "libimsstack-enabler",
     defaults: [
         "imsstack_native_defaults",
     ],
@@ -63,7 +55,7 @@ cc_library_static {
         "**/*.cpp",
     ],
     header_libs: [
-        "libimsmedia_config_headers",
+        "libpixelimsmedia_config_headers",
         "libimsstack_config_headers",
         "libimsstack_enabler_headers",
         "libimsstack_enabler_loader_headers",
@@ -76,7 +68,6 @@ cc_library_static {
         "libimsstack_jni_media_headers",
         "libimsstack_jni_aos_headers",
         "libimsstack_jni_uce_headers",
-        "libimsstack_jni_sipcontroller_headers",
     ],
     include_dirs: [
         "system/libbase/include",
@@ -90,7 +81,6 @@ cc_library_static {
         "include/media",
         "include/mtc",
         "include/mts",
-        "include/sipcontroller",
         "include/uce",
     ],
     // For unit-test
@@ -103,7 +93,6 @@ cc_library_static {
         "include/media",
         "include/mtc",
         "include/mts",
-        "include/sipcontroller",
         "include/uce",
     ],
 }

@@ -18,6 +18,7 @@
 #define OS_IMS_RADIO_H_
 
 #include "IImsTraffic.h"
+#include "ISystemListener.h"
 #include "ImsList.h"
 #include "ImsMap.h"
 #include "ImsRadio.h"
@@ -51,7 +52,7 @@ class OsImsRadio : public ImsRadio, public IImsTrafficListener, public ISystemLi
 {
 public:
     explicit OsImsRadio(IN IMS_SINT32 nSlotId);
-    virtual ~OsImsRadio();
+    ~OsImsRadio() override;
 
     OsImsRadio(IN const OsImsRadio&) = delete;
     OsImsRadio& operator=(IN const OsImsRadio&) = delete;
@@ -88,6 +89,7 @@ private:
     void NotifyConnectionSetupPrepared(IN IMS_UINT32 nId);
     void NotifySsacInfoChanged(IN IMS_SINT32 nFactorForVoice, IN IMS_SINT32 nTimeSecForVoice,
             IN IMS_SINT32 nFactorForVideo, IN IMS_SINT32 nTimeSecForVideo);
+    void NotifySimultaneousCallingSupportChanged(IN IMS_BOOL bSupported);
     static const IMS_CHAR* EventToString(IN IMS_UINT32 nEvent);
 
 private:

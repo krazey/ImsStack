@@ -57,9 +57,6 @@ PUBLIC VIRTUAL void CallConnectionIdManager::OnCallStateChanged(IN CallKey nCall
     {
         if (eState == State::TERMINATING)
         {
-            // TODO: check if conference call is failed or terminated.
-            // Or, set IsSynchronousCallRequired() false so ConferenceController::Recover()
-            // is called first.
             ClearConnectionIdsInConference(nControllerIndexOfHost);
             return;
         }
@@ -82,8 +79,7 @@ PUBLIC VIRTUAL void CallConnectionIdManager::OnCallStateChanged(IN CallKey nCall
 
         RemoveKeyConnectionId(GetListIndexByCallKey(nCallKey));
     }
-    else if (eState == State::OUTGOING || eState == State::INCOMING ||
-            eState == State::ALERTING)  // TODO: all?
+    else if (eState == State::OUTGOING || eState == State::INCOMING || eState == State::ALERTING)
     {
         AddKeyConnectionId(nCallKey);
     }
@@ -96,7 +92,7 @@ PUBLIC VIRTUAL void CallConnectionIdManager::OnTotalCallStateChanged(IN State eS
         return;
     }
 
-    IMS_SINT32 nSize = (IMS_SINT32)(m_objCallKeyConnections.GetSize());
+    IMS_SINT32 nSize = static_cast<IMS_SINT32>(m_objCallKeyConnections.GetSize());
     IMS_TRACE_D("OnTotalCallStateChanged IDLE - size[%d]", nSize, 0, 0);
     for (IMS_SINT32 i = nSize - 1; i >= 0; i--)
     {
@@ -315,7 +311,7 @@ PRIVATE
 void CallConnectionIdManager::ClearConnectionIdsInConference(IN IMS_UINT32 nControllerIndex)
 {
     // no null check
-    IConferenceController* piController = m_objControllers.GetAt(nControllerIndex);
+    const IConferenceController* piController = m_objControllers.GetAt(nControllerIndex);
     IMS_SINT32 nSize = m_objCallKeyConnections.GetSize();
     IMS_TRACE_D("ClearConnectionIdsInConference total size=[%d]", nSize, 0, 0);
 

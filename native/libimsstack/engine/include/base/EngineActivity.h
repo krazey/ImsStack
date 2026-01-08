@@ -26,7 +26,7 @@ public:
             ImsActivity(strName)
     {
     }
-    inline virtual ~EngineActivity() {}
+    ~EngineActivity() override = default;
 
     EngineActivity(IN const EngineActivity&) = delete;
     EngineActivity& operator=(IN const EngineActivity&) = delete;

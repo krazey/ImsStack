@@ -33,7 +33,7 @@ public:
     static const IMS_SINT32 CLOSE_SESSION = (EVENT_U2I + 3);
     static const IMS_SINT32 REGISTER_SERVICE = (EVENT_U2I + 4);
     static const IMS_SINT32 SRVCC_STATE_CHANGED = (EVENT_U2I + 5);
-    static const IMS_SINT32 SET_TERMINAL_BASED_CALL_WAITING = (EVENT_U2I + 6);
+    static const IMS_SINT32 PERMANENT_SUPP_CHANGED = (EVENT_U2I + 6);
     static const IMS_SINT32 OPEN_EMERGENCY_SERVICE = (EVENT_U2I + 7);
     static const IMS_SINT32 STOP_EMERGENCY_SERVICE = (EVENT_U2I + 8);
     static const IMS_SINT32 TEST_COMMAND = (EVENT_U2I + 9);
@@ -69,14 +69,18 @@ public:
         OPENING = 1,
         OPENED = 2,
         UNAVAILABLE = 3,
-        IN_CALL = 4,  // TODO: remove
     };
 
-    enum class EmergencyCallRoutingPdn
+    enum class EmergencyServiceUnavailableReason
     {
-        UNKNOWN,
-        EMERGENCY,
-        NORMAL
+        /**
+         * This refers to the case where it was not used for the reason of
+         * EmergencyServiceUnavailableReason
+         */
+        UNKNOWN = -1,
+        NONE = 0,
+        DATA_PERMANENTLY_FAILED = 1,
+        NETWORK_ATTACH_REJECTED = 2,
     };
 
     enum
@@ -94,14 +98,6 @@ public:
         ES_IDLE_REASON_UNKNOWN = -1,
         ES_IDLE_REASON_NONE = 0,
         ES_IDLE_REASON_WITH_ECM = 1,
-    };
-
-    enum
-    {
-        ES_UNAVAILABLE_REASON_UNKNOWN = -1,
-        ES_UNAVAILABLE_REASON_NONE = 0,
-        ES_UNAVAILABLE_REASON_NO_CSFB = 1,
-        ES_UNAVAILABLE_REASON_SSAC = 2
     };
 };
 

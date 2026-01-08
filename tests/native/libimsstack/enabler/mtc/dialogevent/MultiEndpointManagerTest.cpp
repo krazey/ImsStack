@@ -15,20 +15,22 @@
  */
 
 #include "AString.h"
+#include "INetworkWatcher.h"
 #include "ImsAosParameter.h"
 #include "ImsList.h"
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
+#include "MockICoreService.h"
 #include "MockIJniMtcServiceThread.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
+#include "MtcDef.h"
 #include "PlatformContext.h"
+#include "SipAddress.h"
 #include "TestConfigService.h"
 #include "TestPhoneInfoService.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/MockICoreService.h"
 #include "dialogevent/DialogInfo.h"
 #include "dialogevent/IDialogInfoManager.h"
 #include "dialogevent/IDialogSubscription.h"
@@ -38,7 +40,6 @@
 #include "dialogevent/MultiEndpointFactory.h"
 #include "dialogevent/MultiEndpointManager.h"
 #include "helper/MockIMtcAosConnector.h"
-#include "sipcore/SipAddress.h"
 #include <gtest/gtest.h>
 #include <memory>
 #include <utility>
@@ -68,8 +69,7 @@ public:
             objAosConnector(),
             objConfigService(),
             objPhoneInfoService(),
-            pConfigurationManager(new MockIMtcConfigurationManager()),
-            objConfigurationProxy(pConfigurationManager),
+            objConfigurationProxy(),
             objCoreService(),
             objJniMtcServiceThread(),
             piDialogInfoManager(std::make_unique<MockIDialogInfoManager>()),
@@ -85,8 +85,7 @@ protected:
     MockIMtcAosConnector objAosConnector;
     TestConfigService objConfigService;
     TestPhoneInfoService objPhoneInfoService;
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy objConfigurationProxy;
+    MockMtcConfigurationProxy objConfigurationProxy;
     MockICoreService objCoreService;
     MockIJniMtcServiceThread objJniMtcServiceThread;
 
@@ -126,7 +125,8 @@ protected:
     // piDialogSubscription.
     void CreateManager(IN IMS_BOOL bConfigOn = IMS_TRUE)
     {
-        ON_CALL(*pConfigurationManager, IsMultiendpointSupported).WillByDefault(Return(bConfigOn));
+        ON_CALL(objConfigurationProxy, GetBoolean(ConfigVoice::KEY_MULTIENDPOINT_SUPPORTED_BOOL))
+                .WillByDefault(Return(bConfigOn));
 
         ON_CALL(*pMultiEndpointFactory, CreateDialogInfoManager)
                 .WillByDefault(Invoke(
@@ -210,20 +210,24 @@ TEST_F(MultiEndpointManagerTest, ConstructorStartsAndStopsIfSubscriptionFailed)
 TEST_F(MultiEndpointManagerTest, OnAosStateChangedStopsIfDisconnected)
 {
     IMS_UINT32 nAnyReason = 0;
+    IMS_SINT32 nAnyDataFailureReason = 0;
     MtcAosState eAnyState = MtcAosState::DISCONNECTED;
     ON_CALL(objAosConnector, GetFeatures).WillByDefault(Return(ImsAosFeature::MMTEL));
     EXPECT_CALL(*(piDialogSubscription.get()), Unsubscribe);
     CreateManager(IMS_TRUE);
     ON_CALL(objAosConnector, GetFeatures).WillByDefault(Return(ImsAosFeature::VIDEO));
-    pMultiEndpointManager->OnAosStateChanged(objService, eAnyState, nAnyReason);
+    pMultiEndpointManager->OnAosStateChanged(
+            objService, eAnyState, nAnyReason, nAnyDataFailureReason);
 }
 
 TEST_F(MultiEndpointManagerTest, IsRequiredReturnsConfigurationValue)
 {
-    ON_CALL(*pConfigurationManager, IsMultiendpointSupported).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objConfigurationProxy, GetBoolean(ConfigVoice::KEY_MULTIENDPOINT_SUPPORTED_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
     EXPECT_TRUE(MultiEndpointManager::IsRequired(objConfigurationProxy));
 
-    ON_CALL(*pConfigurationManager, IsMultiendpointSupported).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objConfigurationProxy, GetBoolean(ConfigVoice::KEY_MULTIENDPOINT_SUPPORTED_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
     EXPECT_FALSE(MultiEndpointManager::IsRequired(objConfigurationProxy));
 }
 
@@ -301,6 +305,7 @@ TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsHeldDialogIfMatched)
     const AString strSomeId("someId");
     const IMS_UINT32 nSomeId = strSomeId.GetHashCode();
     const AString strLocalUri("localUri");
+    const AString strRemoteUri("remoteUri");
 
     MockDialog objDialogMatched;
     ImsMap<AString, AString> objParamMap;
@@ -309,6 +314,7 @@ TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsHeldDialogIfMatched)
 
     objDialogMatched.SetDialogInfo(strSomeId, "anyCallid");
     objDialogMatched.SetLocalUri(strLocalUri, objTarget);
+    objDialogMatched.SetRemoteUri(strRemoteUri);
 
     ImsList<Dialog*> objDialogs;
     objDialogs.Append(&objDialogMatched);
@@ -331,6 +337,7 @@ TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsUnHeldDialogIfMatched)
     const AString strSomeId("someId");
     const IMS_UINT32 nSomeId = strSomeId.GetHashCode();
     const AString strLocalUri("localUri");
+    const AString strRemoteUri("remoteUri");
 
     MockDialog objDialogMatched;
     ImsMap<AString, AString> objParamMap;
@@ -339,6 +346,7 @@ TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsUnHeldDialogIfMatched)
 
     objDialogMatched.SetDialogInfo(strSomeId, "anyCallid");
     objDialogMatched.SetLocalUri(strLocalUri, objTarget);
+    objDialogMatched.SetRemoteUri(strRemoteUri);
 
     ImsList<Dialog*> objDialogs;
     objDialogs.Append(&objDialogMatched);
@@ -481,16 +489,24 @@ TEST_F(MultiEndpointManagerTest, OnAosStateChangedChecksCondition)
     EXPECT_CALL(objAosConnector, GetFeatures).WillOnce(Return(ImsAosFeature::VIDEO));
 
     IMS_UINT32 nAnyReason = 0;
-    pMultiEndpointManager->OnAosStateChanged(objService, MtcAosState::CONNECTED, nAnyReason);
+    IMS_SINT32 nAnyDataFailureReason = 0;
+    pMultiEndpointManager->OnAosStateChanged(
+            objService, MtcAosState::CONNECTED, nAnyReason, nAnyDataFailureReason);
 }
 
-TEST_F(MultiEndpointManagerTest, OnIpcanChangedChecksCondition)
+TEST_F(MultiEndpointManagerTest, OnEventNotifyDoesNothing)
+{
+    CreateManager(IMS_FALSE);
+    pMultiEndpointManager->OnEventNotify(0, 0);
+}
+
+TEST_F(MultiEndpointManagerTest, OnRatChangedChecksCondition)
 {
     CreateManager(IMS_TRUE);
     EXPECT_CALL(objAosConnector, GetFeatures).WillOnce(Return(ImsAosFeature::VIDEO));
 
-    IMS_UINT32 nAnyIpcan = 0;
-    pMultiEndpointManager->OnIpcanChanged(objService, nAnyIpcan);
+    pMultiEndpointManager->OnRatChanged(objService.GetServiceType(),
+            INetworkWatcher::RADIOTECH_TYPE_IWLAN, INetworkWatcher::RADIOTECH_TYPE_IWLAN);
 }
 
 TEST_F(MultiEndpointManagerTest, NotifyConfigChangedChecksCondition)
@@ -515,7 +531,7 @@ TEST_F(MultiEndpointManagerTest, OnSubscriptionStartedDoesNothing)
 
     ON_CALL(objAosConnector, GetFeatures).WillByDefault(Return(ImsAosFeature::MMTEL));
     ON_CALL(*(piDialogSubscription.get()), Subscribe).WillByDefault(Return(IMS_SUCCESS));
-    pMultiEndpointManager->OnAosStateChanged(objService, MtcAosState::CONNECTED, 0);
+    pMultiEndpointManager->OnAosStateChanged(objService, MtcAosState::CONNECTED, 0, 0);
 
     EXPECT_TRUE(pMultiEndpointManager->IsRunning());
     pMultiEndpointManager->OnSubscriptionStarted();

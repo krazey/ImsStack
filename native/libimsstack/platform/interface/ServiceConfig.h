@@ -17,10 +17,10 @@
 #define SERVICE_IMS_CONFIG_H_
 
 #include "ICarrierConfig.h"
-#include "ImsMessage.h"
 #include "PlatformService.h"
 
 class ConfigServicePrivate;
+class ImsMessage;
 
 class ConfigService : public PlatformService
 {
@@ -30,7 +30,7 @@ public:
     ConfigService& operator=(IN const ConfigService&) = delete;
 
 protected:
-    virtual ~ConfigService();
+    ~ConfigService() override;
 
 public:
     virtual ICarrierConfig* GetCarrierConfig(IN IMS_SINT32 nSlotId);

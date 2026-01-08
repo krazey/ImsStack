@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "msg/SipPVisitedNetworkIdHeader.h"
 #include "SipDebug.h"
-#include "platform/SipString.h"
 #include "msg/SipMsgUtil.h"
+#include "msg/SipPVisitedNetworkIdHeader.h"
+#include "platform/SipString.h"
 
 SipPVisitedNetworkIdHeader::SipPVisitedNetworkIdHeader() :
         SipHeaderBase(SipHeaderBase::P_VISITED_NETWORK_ID)
@@ -31,7 +31,7 @@ SipPVisitedNetworkIdHeader::SipPVisitedNetworkIdHeader(
 
 SipPVisitedNetworkIdHeader::~SipPVisitedNetworkIdHeader() {}
 
-SIP_BOOL SipPVisitedNetworkIdHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipPVisitedNetworkIdHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     /*Case of nothing is present*/
     if (nDecLen == SIP_ZERO)
@@ -42,15 +42,16 @@ SIP_BOOL SipPVisitedNetworkIdHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nD
 
     /*First Check the presence of Header Prm i.e. ";"
       And decode if present*/
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    SIP_CHAR* pTempPre = SIP_NULL;
-    SIP_CHAR* pTempNext = SIP_NULL;
-    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pTempPre = SIP_NULL;
+    const SIP_CHAR* pTempNext = SIP_NULL;
+    if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, SIP_SEMI) ==
+            SIP_TRUE)
     {
         if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODDECODER, "DecodeHdr: Hdr Prm Decoding Failed", SIP_ZERO, SIP_ZERO);
+                    ESIPTRACE_MODDECODER, "Header parameter decoding failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         /*Update the End point for Previous Decoding*/
@@ -70,11 +71,10 @@ SIP_BOOL SipPVisitedNetworkIdHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nD
         pEndPt = pEndPt - SIP_ONE;
     }
     //-----------------------------------------------------------------------------
-    SIP_CHAR* pszValue = SipCreateString(pStartPt, pEndPt);
+    SIP_CHAR* pszValue = SipAbnfUtil::CreateString(pStartPt, pEndPt);
     if (SetValue(pszValue) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "DecodeHdr:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         if (pszValue != SIP_NULL)
         {
             delete[] pszValue;

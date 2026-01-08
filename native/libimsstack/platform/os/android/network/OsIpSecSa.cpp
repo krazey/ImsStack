@@ -13,15 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ISystemProperty.h"
 #include "ImsIpSecType.h"
 #include "ImsStrLib.h"
+#include "IpSecSaParameter.h"
 #include "ServiceMemory.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
 #include "network/OsIpSecSa.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 class OsIpSecSaPrivate
 {

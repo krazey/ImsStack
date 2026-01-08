@@ -34,7 +34,7 @@ class SessionImpl : public ISession, public IOnSessionListener, public IOnSessio
 {
 public:
     explicit SessionImpl(IN SessionEx* pSession);
-    virtual ~SessionImpl();
+    ~SessionImpl() override;
 
     SessionImpl(IN const SessionImpl&) = delete;
     SessionImpl& operator=(IN const SessionImpl&) = delete;
@@ -125,6 +125,10 @@ private:
     inline IMS_BOOL IsSdpNegotiationAllowedForNonRpr() const override
     {
         return m_pSession->IsSdpNegotiationAllowedForNonRpr();
+    }
+    inline IMS_BOOL IsSdpOaInPreviewMode() const override
+    {
+        return m_pSession->IsSdpOaInPreviewMode();
     }
     inline IMS_RESULT RejectEx(IN IMS_SINT32 nStatusCode,
             IN const AString& strReasonPhrase = AString::ConstNull()) override
@@ -217,6 +221,14 @@ private:
     {
         return m_pSession->GetRemoteMediaCapabilities();
     }
+    inline IMS_BOOL IsSessionCanceledOnAccepted() const override
+    {
+        return m_pSession->IsSessionCanceledOnAccepted();
+    }
+    inline void AbortEarlyUpdateTransaction() override
+    {
+        return m_pSession->AbortEarlyUpdateTransaction();
+    }
 
     // IOnSessionListener interface
     void OnSession_Alerting(IN Session* pSession) override;
@@ -227,6 +239,7 @@ private:
     void OnSession_Updated(IN Session* pSession) override;
     void OnSession_UpdateFailed(IN Session* pSession) override;
     void OnSession_UpdateReceived(IN Session* pSession) override;
+    void OnSession_CanceledOnAccepted(IN Session* pSession) override;
     void OnSession_CancelDelivered(IN Session* pSession) override;
     void OnSession_CancelDeliveryFailed(IN Session* pSession) override;
     IMS_BOOL OnSession_ForkedResponseReceived(

@@ -17,10 +17,10 @@
 #include "ServiceMemory.h"
 #include "ServiceSystemTime.h"
 #include "ServiceTimer.h"
+#include "ServiceTrace.h"
 
 #include "private/ConfigurationManager.h"
 
-#include "Connector.h"
 #include "ISipSocketListener.h"
 #include "ISipStreamSocketListener.h"
 #include "SipDebug.h"
@@ -29,7 +29,7 @@
 #include "SipRtConfigUtils.h"
 #include "SipStreamSocket.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipStreamSocket::SipStreamSocket(IN IMS_SINT32 nSlotId) :
@@ -120,7 +120,7 @@ PUBLIC VIRTUAL SipStreamSocket::~SipStreamSocket()
     StopKeepAliveTimer();
 }
 
-PUBLIC VIRTUAL void SipStreamSocket::ApplyIpSec(IN ISocket* /*piAcceptedSocket = IMS_NULL*/)
+PUBLIC VIRTUAL void SipStreamSocket::ApplyIpSec(IN SipSocket* /*pAcceptedSocket = IMS_NULL*/)
 {
     IpAddress objIpAddr;
     IMS_UINT32 nPort = 0;

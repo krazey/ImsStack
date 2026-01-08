@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
 #include "ICoreService.h"
 #include "IMessage.h"
 #include "IMtcService.h"
@@ -33,15 +34,14 @@
 #include "conferencecall/ConferenceConfigurationHelper.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceReference.h"
-#include "conferencecall/ConferenceUtils.h"
 #include "conferencecall/IConferenceReference.h"
 #include "conferencecall/IConferenceReferenceListener.h"
-#include "conferencecall/UriFormatter.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/ReferenceInterfaceHolder.h"
 #include "utility/IMessageUtils.h"
+#include "utility/UriFormatter.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -97,7 +97,7 @@ PUBLIC VIRTUAL void ConferenceReference::ReferenceDelivered(IN IReference* piRef
         return m_objListener.OnReferenceStarted(this);
     }
 
-    IMessage* piReferMessage = piReference->GetPreviousResponse(IMessage::REFERENCE_REFER);
+    const IMessage* piReferMessage = piReference->GetPreviousResponse(IMessage::REFERENCE_REFER);
 
     if (piReferMessage == IMS_NULL)
     {
@@ -112,7 +112,6 @@ PUBLIC VIRTUAL void ConferenceReference::ReferenceDelivered(IN IReference* piRef
     }
     else
     {
-        // TODO: is this reachable?
         IMS_TRACE_I("ReferenceDelivered : but response is failure", 0, 0, 0);
         return m_objListener.OnReferenceStartFailed(this);
     }
@@ -165,10 +164,9 @@ PUBLIC VIRTUAL IMS_RESULT ConferenceReference::SendInvite(
 {
     IMS_TRACE_I("SendInvite", 0, 0, 0);
 
-    IMtcCall* piConfCall = GetConferenceCall();
+    const IMtcCall* piConfCall = GetConferenceCall();
     if (piConfCall == IMS_NULL)
     {
-        // TODO: check for KR conference call cases.
         return IMS_FAILURE;
     }
 
@@ -232,7 +230,7 @@ PUBLIC VIRTUAL IMS_UINT32 ConferenceReference::GetResponseCode() const
         return SipStatusCode::SC_INVALID;
     }
 
-    IMessage* piReferMessage = m_piReference->GetPreviousResponse(IMessage::REFERENCE_REFER);
+    const IMessage* piReferMessage = m_piReference->GetPreviousResponse(IMessage::REFERENCE_REFER);
     if (piReferMessage == IMS_NULL)
     {
         return SipStatusCode::SC_INVALID;
@@ -306,7 +304,7 @@ IMS_RESULT ConferenceReference::SendInviteForMultipleUser(OUT AString& strReferT
     piReferMessage->AddHeader(SipHeaderName::CONTENT_DISPOSITION, strContentDisposition);
 
     m_objContext.GetMessageUtils().SetResourceList(
-            piReferMessage, m_objContext, strReferToUri, m_objConfUsers, IMS_FALSE, IMS_FALSE);
+            piReferMessage, m_objConfUsers, IMS_FALSE, IMS_FALSE);
 
     // 4. Set Referred-By header
     SetReferredByHeader();
@@ -334,7 +332,8 @@ void ConferenceReference::GetReferToUri(OUT AString& strUri, IN IMtcCall* pi1To1
     // Send Refer with Target number - multiple refer with resource list
     else if (m_objConfUsers.GetSize() > 0)
     {
-        strUri = m_objContext.GetConfigurationProxy().GetStr(Feature::CONFERENCE_FACTORY_URI, 0);
+        strUri = m_objContext.GetConfigurationProxy().GetString(
+                ConfigVoice::KEY_CONFERENCE_FACTORY_URI_STRING);
     }
 }
 
@@ -354,7 +353,7 @@ void ConferenceReference::SetReplaces(IN IMtcCall* pi1To1Call)
 PRIVATE
 void ConferenceReference::SetReferredByHeader()
 {
-    IMtcService* piMtcService = m_objContext.GetServiceByType(ServiceType::NORMAL);
+    const IMtcService* piMtcService = m_objContext.GetServiceByType(ServiceType::NORMAL);
     if (piMtcService == IMS_NULL)
     {
         return;

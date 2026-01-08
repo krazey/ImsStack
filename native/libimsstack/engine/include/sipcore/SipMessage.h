@@ -16,10 +16,14 @@
 #ifndef SIP_MESSAGE_H_
 #define SIP_MESSAGE_H_
 
-#include "ISipMessage.h"
-#include "SipMessageBodyPart.h"
-#include "SipStatusCode.h"
 #include "msg/SipMessage.h"
+
+#include "ISipMessage.h"
+#include "SipMethod.h"
+#include "SipStatusCode.h"
+#include "SipUnknownHeaders.h"
+
+class SipMessageBodyPart;
 
 namespace sipcore
 {
@@ -30,7 +34,7 @@ public:
     explicit SipMessage(IN IMS_SINT32 nType = ISipMessage::TYPE_REQUEST);
     explicit SipMessage(IN ::SipMessage* pSipMsg);
     explicit SipMessage(IN ::SipMessage* pSipMsg, IN IMS_BOOL bMessageClone);
-    virtual ~SipMessage();
+    ~SipMessage() override;
 
     SipMessage(IN const SipMessage&) = delete;
 

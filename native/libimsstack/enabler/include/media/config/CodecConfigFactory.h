@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,14 +17,9 @@
 #ifndef CODEC_CONFIG_FACTORY_H_
 #define CODEC_CONFIG_FACTORY_H_
 
-#include "config/CodecAmrConfig.h"
-#include "config/CodecPcmConfig.h"
-#include "config/CodecTelephoneEventConfig.h"
-#include "config/CodecEvsConfig.h"
-#include "config/CodecAvcConfig.h"
-#include "config/CodecHevcConfig.h"
-#include "config/CodecT140Config.h"
+#include "ImsTypeDef.h"
 
+class ICarrierConfig;
 class CodecConfig;
 
 class CodecConfigFactory
@@ -39,33 +34,30 @@ public:
      * @param piCc configuration
      * @param nCodec codec type
      * @param nPayloadTypeNum payload type number
-     * @param nCodecIdx codec index within each codec type
      * @return CodecConfig* Return the codec config
      */
-    static CodecConfig* CreateAudioPayloadConfig(ICarrierConfig* piCc, IMS_SINT32 nCodec,
-            IMS_SINT32 nPayloadTypeNum, IMS_SINT32 nCodecIdx);
+    static CodecConfig* CreateAudioPayloadConfig(
+            ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum);
     /**
      * @brief Create a video payload config
      *
      * @param piCc configuration
      * @param nCodec codec type
      * @param nPayloadTypeNum payload type number
-     * @param nCodecIdx codec index within each codec type
      * @return CodecConfig* Return the codec config
      */
-    static CodecConfig* CreateVideoPayloadConfig(ICarrierConfig* piCc, IMS_SINT32 nCodec,
-            IMS_SINT32 nPayloadTypeNum, IMS_SINT32 nCodecIdx);
+    static CodecConfig* CreateVideoPayloadConfig(
+            ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum);
     /**
      * @brief Create a text payload config
      *
      * @param piCc configuration
      * @param nCodec codec type
      * @param nPayloadTypeNum payload type number
-     * @param nCodecIdx codec index within each codec type
      * @return CodecConfig* Return the codec config
      */
-    static CodecConfig* CreateTextPayloadConfig(ICarrierConfig* piCc, IMS_SINT32 nCodec,
-            IMS_SINT32 nPayloadTypeNum, IMS_SINT32 nCodecIdx);
+    static CodecConfig* CreateTextPayloadConfig(
+            ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum);
 };
 
 #endif

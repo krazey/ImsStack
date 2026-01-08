@@ -15,18 +15,25 @@
  */
 #include "ServiceMemory.h"
 #include "ServiceTimer.h"
+#include "ServiceTrace.h"
 
-#include "Connector.h"
+#include "SipStackManager.h"
+#include "transport/SipTransportInfo.h"
+#include "txn/SipTxn.h"
+
 #include "ISipHeader.h"
 #include "SipAddress.h"
 #include "SipConfigProxy.h"
+#include "SipDState.h"
 #include "SipDebug.h"
 #include "SipDialogEx.h"
+#include "SipError.h"
 #include "SipFactoryProxy.h"
 #include "SipFeatures.h"
 #include "SipHeaderUtils.h"
 #include "SipManager.h"
 #include "SipMessage.h"
+#include "SipMessageInfo.h"
 #include "SipMessageTracker.h"
 #include "SipPrivate.h"
 #include "SipServerTransactionState.h"
@@ -34,10 +41,9 @@
 #include "SipStack.h"
 #include "SipStackState.h"
 #include "SipTimerValuesHelper.h"
-#include "SipTxnContextData.h"
 #include "SipUtils.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipServerTransactionState::SipServerTransactionState(IN IMS_SINT32 nSlotId,
@@ -180,8 +186,6 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
         objTranspParam.SetTanspIpType(SipTransportInfo::NETWORK_IPV6);
     }
 
-    /* Prepare User data */
-    /* BSP_TODO: make sure stack store the pTxnContextData otherwise there is memory leak */
     SipMethod objMethod = SipStack::GetMethod(pSipMsg);
 
     SipTxnContext* pTxnContext = SipStack::CreateTxnContext();
@@ -197,12 +201,8 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
         pTxnContextData->SetTxnState(this);
     }
 
-    pTxnContext->pTxnContextData = static_cast<SIP_VOID*>(pTxnContextData);
+    pTxnContext->m_pTxnContextData = static_cast<SIP_VOID*>(pTxnContextData);
     ISipUserData objUserData(static_cast<SIP_VOID*>(pTxnContext));
-
-    /* BSP_TODO::
-    To send internal 100 Trying on received of new INVITE, user data is required otherwise
-    Send2Nw APIs will Fail */
     IMS_SINT32 eTxnStatus = SipTxn::STATUS_INVALID;
     ::SipTxnKey* pTxnKey = IMS_NULL;
     IMS_UINT16 nError = 0;
@@ -300,23 +300,27 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
 
     if (m_pTxnKey != IMS_NULL)
     {
-        if (m_pTxnKey->GetTxnType() == SipTxn::INV_SER_TXN)
+        if (m_pTxnKey->GetTxnType() == SipTxn::INVITE_SERVER)
         {
             m_nClass = CLASS_INVITE;
         }
-        else if (m_pTxnKey->GetTxnType() == SipTxn::NON_INV_SER_TXN)
+        else if (m_pTxnKey->GetTxnType() == SipTxn::NON_INVITE_SERVER)
         {
             m_nClass = CLASS_REGULAR;
         }
     }
 
+    SipMessageInfo objMsgInfo(GetSlotId(), objMethod, pSipMsg, SipMessageInfo::DIRECTION_INCOMING);
+    LogSipMessageInfo(objMsgInfo);
+
     SipFactoryProxy* pFactoryProxy = SipFactoryProxy::GetInstance();
     /* NOTE::
     If the message is an ACK request for non-2xx response to INVITE request,
     then stack drop the message by returning ignore request */
-    if ((m_pTxnKey != IMS_NULL) && (m_pTxnKey->GetTxnType() == SipTxn::INV_SER_TXN))
+    if ((m_pTxnKey != IMS_NULL) && (m_pTxnKey->GetTxnType() == SipTxn::INVITE_SERVER))
     {
-        if (objMethod.Equals(SipMethod::ACK) && (m_pTxnKey->GetRespCode() >= SipStatusCode::SC_300))
+        if (objMethod.Equals(SipMethod::ACK) &&
+                (m_pTxnKey->GetResponseCode() >= SipStatusCode::SC_300))
         {
             IMS_TRACE_I("__UAS__ :: ___ ACK (%s) TO UNSUCCESSFUL FINAL RESPONSE ___",
                     SipDebug::GetCharA1(m_pTxnKey->GetCallId(), 8, '@'), 0, 0);
@@ -325,7 +329,7 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
             if (pFactoryProxy->IsMessageTrackerEnabled(GetSlotId()))
             {
                 SipMessageTracker* pMessageTracker = pFactoryProxy->GetMessageTracker(GetSlotId());
-                pMessageTracker->NotifyMessageReceived(objMethod, m_pTxnKey->GetRespCode(),
+                pMessageTracker->NotifyMessageReceived(objMethod, m_pTxnKey->GetResponseCode(),
                         AString(static_cast<const IMS_CHAR*>(m_pTxnKey->GetCallId())));
             }
             return SipPrivate::MESSAGE_DISCARDED;
@@ -338,13 +342,12 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
         SipMessageTracker* pMessageTracker = pFactoryProxy->GetMessageTracker(GetSlotId());
         if (m_pTxnKey != IMS_NULL)
         {
-            pMessageTracker->NotifyMessageReceived(SipStack::GetMethod(m_pSipMsg), 0,
-                    AString(static_cast<const IMS_CHAR*>(m_pTxnKey->GetCallId())));
+            pMessageTracker->NotifyMessageReceived(
+                    objMethod, 0, AString(static_cast<const IMS_CHAR*>(m_pTxnKey->GetCallId())));
         }
         else
         {
-            pMessageTracker->NotifyMessageReceived(
-                    SipStack::GetMethod(m_pSipMsg), 0, AString::ConstNull());
+            pMessageTracker->NotifyMessageReceived(objMethod, 0, AString::ConstNull());
         }
     }
     return SipPrivate::MESSAGE_VALID;
@@ -623,7 +626,7 @@ IMS_SINT32 SipServerTransactionState::HandleRequest(OUT RcPtr<SipDialogEx>& pOri
         }
         else
         {
-            SipDialogState* pDialogState = m_pDialogEx->GetDialogState();
+            const SipDialogState* pDialogState = m_pDialogEx->GetDialogState();
             AString strToTag =
                     (pDialogState != IMS_NULL) ? pDialogState->GetLocalTag() : AString::ConstNull();
 
@@ -1090,7 +1093,7 @@ IMS_BOOL SipServerTransactionState::InitResponse(
     // HEADER_REQ_SESSION-ID
     else if (SipFeatures::IsHeaderSessionIdRequired(GetSlotId()))
     {
-        SipDialogState* pDState = m_pDialogEx->GetDialogState();
+        const SipDialogState* pDState = m_pDialogEx->GetDialogState();
         AString strSessionId = pDState->GetSessionId();
 
         if (strSessionId.GetLength() == 0 && objMethod.Equals(SipMethod::INVITE))
@@ -1175,7 +1178,7 @@ PRIVATE GLOBAL IMS_RESULT SipServerTransactionState::SendResponse100Trying(
     // Update the transport information to route the response to the proper network entity
     if (pStState->m_pTransport != IMS_NULL)
     {
-        pStState->m_pTransport->UpdateDestinationInfo(pSipMsg100Trying);
+        pStState->m_pTransport->UpdateDestinationInfo(pSipMsg100Trying, pStState->GetSipProfile());
     }
 
     // Send SIP message to the network

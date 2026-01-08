@@ -16,12 +16,10 @@
 package com.android.imsstack.imsservice.mmtel;
 
 import android.os.Handler;
-import android.os.Message;
 import android.telephony.ims.feature.MmTelFeature;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.Sim;
-import com.android.imsstack.core.agents.SimInterface;
+import com.android.imsstack.core.agents.AgentUtils;
 import com.android.imsstack.core.agents.WifiInterface;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.enabler.IBaseContext;
@@ -29,7 +27,6 @@ import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListene
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtServiceStateListener;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
 
 public class ImsFeatureManager {
     private final Object mLock = new Object();
@@ -54,13 +51,19 @@ public class ImsFeatureManager {
         public void onRegistrationFeatureChanged() {
             updateAndNotifyFeatureCapabilitiesIfChanged();
         }
+
+        @Override
+        public void onAvailableFeatureChanged(int enabledFeatures, int disabledFeatures) {
+            updateAvailableFeatures(enabledFeatures, disabledFeatures);
+        }
     };
+
     public ImsFeatureManager(IBaseContext context,
             IMmTelFeatureCapabilityListener featureCapabilityListener) {
         mContext = context;
         mFeatureCapabilityListener = featureCapabilityListener;
         mNetworkTracker = new NetworkTracker();
-     }
+    }
 
     public void dispose() {
         if (mUt != null) {
@@ -150,6 +153,20 @@ public class ImsFeatureManager {
         updateAndNotifyFeatureCapabilitiesIfChanged();
     }
 
+    /**
+     * Update available features early before registered IMS feature tag is updated.
+     *
+     * @param enabledFeatures Features that will be updated to enable.
+     * @param disabledFeatures Features that will be updated to disable.
+     */
+    public void updateAvailableFeatures(int enabledFeatures, int disabledFeatures) {
+        enableFeature(enabledFeatures);
+        disableFeature(disabledFeatures);
+        log("updateAvailableFeatures: " + mMmTelCapabilities);
+
+        mFeatureCapabilityListener.onFeatureCapabilityChanged(mMmTelCapabilities);
+    }
+
     private void disableFeature(int feature) {
         synchronized (mLock) {
             mMmTelCapabilities.removeCapabilities(feature);
@@ -189,7 +206,7 @@ public class ImsFeatureManager {
     private void updateFeatureCapabilityForUt() {
         disableFeature(MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_UT);
 
-        if (isAllSimAbsent()) {
+        if (AgentUtils.isAllSimAbsent()) {
             log("Ut :: No SIM inserted");
             return;
         }
@@ -208,22 +225,6 @@ public class ImsFeatureManager {
         return AgentFactory.getInstance().getAgent(WifiInterface.class);
     }
 
-    private static boolean isAllSimAbsent() {
-        boolean allSimAbsent = true;
-        int activeSimCount = MSimUtils.getActiveSimCount();
-
-        for (int i = 0; i < activeSimCount; ++i) {
-            SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, i);
-            int simState = (sim != null) ? sim.getSimState() : Sim.STATE_ABSENT;
-            if (simState != Sim.STATE_ABSENT) {
-                allSimAbsent = false;
-                break;
-            }
-        }
-
-        return allSimAbsent;
-    }
-
     private static void log(String s) {
         ImsLog.d("[GII-IMPL] " + s);
     }
@@ -232,9 +233,8 @@ public class ImsFeatureManager {
         ImsLog.i("[GII-IMPL] " + s);
     }
 
-    private class NetworkTracker extends Handler implements WifiInterface.Listener {
-        private static final int EVENT_RAT_CHANGED = 1;
-
+    private class NetworkTracker extends Handler
+            implements WifiInterface.Listener, IDcNetWatcher.Listener {
         public NetworkTracker() {
             super(mContext.getDefaultLooper());
             init();
@@ -244,7 +244,7 @@ public class ImsFeatureManager {
             IDcNetWatcher idnw = mContext.getDcNetWatcher();
 
             if (idnw != null) {
-                idnw.unregisterForRatChanged(this);
+                idnw.removeListener(this);
             }
 
             WifiInterface wifi = getWifiInterface();
@@ -258,7 +258,7 @@ public class ImsFeatureManager {
             IDcNetWatcher idnw = mContext.getDcNetWatcher();
 
             if (idnw != null) {
-                idnw.registerForRatChanged(this, EVENT_RAT_CHANGED, null);
+                idnw.addListener(this);
             }
 
             WifiInterface wifi = getWifiInterface();
@@ -269,27 +269,19 @@ public class ImsFeatureManager {
         }
 
         @Override
+        public void onDataNetworkTypeChanged() {
+            post(() -> {
+                logi("Network Type changed");
+                updateAndNotifyFeatureCapabilitiesIfChanged();
+            });
+        }
+
+        @Override
         public void onWifiConnectionStateChanged() {
             post(() -> {
                 logi("WiFi state changed");
                 updateAndNotifyFeatureCapabilitiesIfChanged();
             });
         }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case EVENT_RAT_CHANGED: {
-                    logi("RAT changed");
-
-                    updateAndNotifyFeatureCapabilitiesIfChanged();
-                    break;
-                }
-                default:
-                    // no-op
-                    break;
-            }
-        }
     }
-
 }

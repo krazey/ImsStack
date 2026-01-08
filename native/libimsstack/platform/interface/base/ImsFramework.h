@@ -25,7 +25,7 @@ class ImsFramework : public ImsAppThread
 {
 public:
     ImsFramework();
-    virtual ~ImsFramework();
+    ~ImsFramework() override;
 
     ImsFramework(IN const ImsFramework&) = delete;
     ImsFramework& operator=(IN const ImsFramework&) = delete;
@@ -35,9 +35,6 @@ public:
     void RemoveListener(IN const IFrameworkThreadListener* piListener);
 
 protected:
-    IMS_BOOL Initialize() override;
-    void Uninitialize() override;
-
     IMS_BOOL OnStart(IN ImsMessage& objMsg) override;
     IMS_BOOL OnTerminate(IN ImsMessage& objMsg) override;
     IMS_BOOL OnMessage(IN ImsMessage& objMsg) override;

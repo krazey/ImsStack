@@ -13,22 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "platform/SipString.h"
-
+#include "ISipLoggerUtil.h"
 #include "SipDebug.h"
 #include "SipUtil.h"
+#include "platform/SipString.h"
 
 // NOLINTNEXTLINE(cert-dcl50-cpp)
-void SIP_DEBUG_LOG(SIP_UINT32 nCategory, const SIP_CHAR* pszFilename, SIP_INT32 nLine,
+SIP_VOID SIP_DEBUG_LOG(SIP_UINT32 nCategory, const SIP_CHAR* pszFilename, SIP_INT32 nLine,
         const SIP_CHAR* pszFormat, ...)
 {
-    SipUtil* pUtil = SipUtil_GetInstance();
-
-    if (pUtil == SIP_NULL)
-    {
-        return;
-    }
-
     SIP_CHAR szTemp[DEBUG_MSG_MAX_SIZE + 1] = {SIP_ZERO};
 
     va_list args;
@@ -36,18 +29,13 @@ void SIP_DEBUG_LOG(SIP_UINT32 nCategory, const SIP_CHAR* pszFilename, SIP_INT32 
     vsnprintf(szTemp, DEBUG_MSG_MAX_SIZE, pszFormat, args);
     va_end(args);
 
-    SIP_CHAR* pszTempFilename = SipPf_Strdup(pszFilename);
-
-    const SIP_CHAR* pTemp =
-            (pszTempFilename != SIP_NULL) ? SipPf_StripFileName(pszTempFilename) : "xxx";
-
     SIP_CHAR szFrmtString[DEBUG_MSG_MAX_SIZE + 1] = {SIP_ZERO};
-    SipPf_Snprintf(szFrmtString, DEBUG_MSG_MAX_SIZE, "[%s:%d] %s", pTemp, nLine, szTemp);
+    SipPf_Snprintf(szFrmtString, DEBUG_MSG_MAX_SIZE, "%s", szTemp);
 
-    pUtil->GetLogger()->DumpLog(nCategory, SIP_NULL, nLine, szFrmtString);
+    SipUtil::GetInstance()->GetLogger()->DumpLog(nCategory, pszFilename, nLine, szFrmtString);
+}
 
-    if (pszTempFilename != SIP_NULL)
-    {
-        delete[] pszTempFilename;
-    }
+SIP_VOID SIP_ASSERT_LOG(const SIP_CHAR* pszCondition, const SIP_CHAR* pszModule, SIP_UINT16 nLine)
+{
+    SipUtil::GetInstance()->GetLogger()->DumpAssertLog(pszCondition, pszModule, nLine);
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,9 @@
 #ifndef _MOCK_INTERFACE_MEDIA_SESSION_CLIENT_LISTENER_H_
 #define _MOCK_INTERFACE_MEDIA_SESSION_CLIENT_LISTENER_H_
 
-#include <IMediaSessionClientListener.h>
+#include <gmock/gmock.h>
+
+#include "IMediaSessionClientListener.h"
 
 class MockIMediaSessionClientListener : public IMediaSessionClientListener
 {

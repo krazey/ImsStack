@@ -25,7 +25,7 @@ class ImsStateMachine : public ImsStateObject
 
 public:
     explicit ImsStateMachine(IN IMS_UINT32 nState = IMS_INVALID_STATE);
-    inline virtual ~ImsStateMachine() {}
+    ~ImsStateMachine() override = default;
 
     ImsStateMachine(IN const ImsStateMachine&) = delete;
     ImsStateMachine& operator=(IN const ImsStateMachine&) = delete;
@@ -34,8 +34,8 @@ public:
 
 protected:
     IMS_BOOL SetState(IN IMS_UINT32 nState);
-    inline IMS_UINT32 GetState() { return m_nState; }
-    inline IMS_UINT32 GetOldState() { return m_nOldState; }
+    inline IMS_UINT32 GetState() const { return m_nState; }
+    inline IMS_UINT32 GetOldState() const { return m_nOldState; }
 
 private:
     IMS_UINT32 m_nState;

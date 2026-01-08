@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 
+#include "ImsNew.h"
 #include "MockIFile.h"
 #include "PlatformContext.h"
 #include "TestFileService.h"
@@ -225,7 +226,7 @@ TEST_F(ConfigFileBufferTest, Create)
 TEST_F(ConfigFileBufferTest, ConfigDataError)
 {
     AString strConfigData("[test.service]\n[audio config]\n");
-    IConfigBuffer* piBuffer = ConfigFileBuffer::CreateFileBuffer(strConfigData);
+    const IConfigBuffer* piBuffer = ConfigFileBuffer::CreateFileBuffer(strConfigData);
 
     ASSERT_EQ(piBuffer, nullptr);
 }

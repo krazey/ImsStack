@@ -14,14 +14,42 @@
  * limitations under the License.
  */
 
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "IMessage.h"
+#include "ISipConfig.h"
+#include "ISipConfigV.h"
+#include "ISipHeader.h"
 #include "ServiceSystemTime.h"
 #include "ServiceTrace.h"
+#include "SipMethod.h"
 #include "SipStatusCode.h"
+#include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
+#include "call/termination/DefaultStatusCodeAndReasonCodeSets.h"
 #include "call/termination/UpdateErrorHandler.h"
+#include "configuration/MtcConfigurationProxy.h"
+#include "configuration/MtcConfigurationResolver.h"
+#include "helper/IMtcAosConnector.h"
+#include "helper/IPassiveTimerHolder.h"
+#include "utility/IMessageUtils.h"
+#include <unordered_map>
 
 __IMS_TRACE_TAG_COM_MTC__;
+
+// clang-format off
+const std::unordered_map<IMS_SINT32, UpdateErrorHandler::ActionFunc>
+        UpdateErrorHandler::objActionFuncMap = {
+    {ConfigVoice::UPDATE_ERROR_ACTION_TERMINATE,
+            &UpdateErrorHandler::HandleTerminate},
+    {ConfigVoice::UPDATE_ERROR_ACTION_RETRY,
+            &UpdateErrorHandler::HandleRetry},
+    {ConfigVoice::UPDATE_ERROR_ACTION_GLARE_CONDITION,
+            &UpdateErrorHandler::HandleGlareCondition},
+    {ConfigVoice::UPDATE_ERROR_ACTION_BLOCK_CALL_BY_TIMER,
+            &UpdateErrorHandler::HandleBlockCallByTimer}
+};
+// clang-format on
 
 PUBLIC
 UpdateErrorHandler::UpdateErrorHandler(IN IMtcCallContext& objContext) :
@@ -41,11 +69,29 @@ CallReasonInfo UpdateErrorHandler::Handle(IN const IMessage* piMessage) const
         return CallReasonInfo(CODE_SIP_SERVER_ERROR);
     }
 
-    return GetCallReasonInfoForResponse(*piMessage);
+    IMS_TRACE_D("Handle : status code[%d]", piMessage->GetStatusCode(), 0, 0);
+
+    ImsVector<IMS_SINT32> objActions = MtcConfigurationResolver::LookupActionForStatusCode(
+            m_objContext.GetConfigurationProxy(),
+            ConfigVoice::KEY_UPDATE_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY,
+            piMessage->GetStatusCode());
+    for (IMS_UINT32 i = 0; i < objActions.GetSize(); ++i)
+    {
+        auto it = objActionFuncMap.find(objActions.GetAt(i));
+        if (it != objActionFuncMap.end())
+        {
+            CallReasonInfo objResult = (this->*(it->second))(*piMessage);
+            if (objResult.nCode != CODE_NONE)
+            {
+                return objResult;
+            }
+        }
+    }
+
+    return CallReasonInfo(CODE_UNSPECIFIED);
 }
 
-PUBLIC
-IMS_UINT32 UpdateErrorHandler::GetGlareTimeMillisecond(IN PeerType ePeerType)
+PUBLIC GLOBAL IMS_UINT32 UpdateErrorHandler::GetGlareTimeMillisecond(IN PeerType ePeerType)
 {
     IMS_UINT32 nUpperT = 0;
     IMS_UINT32 nBaseT = 0;
@@ -66,92 +112,100 @@ IMS_UINT32 UpdateErrorHandler::GetGlareTimeMillisecond(IN PeerType ePeerType)
 }
 
 PRIVATE
-CallReasonInfo UpdateErrorHandler::GetCallReasonInfoForResponse(IN const IMessage& objMessage) const
+CallReasonInfo UpdateErrorHandler::HandleTerminate(IN const IMessage& objMessage) const
 {
-    IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
-    IMS_ASSERT(nStatusCode >= SipStatusCode::SC_300);
-
-    if (SipStatusCode::SC_300 <= nStatusCode && nStatusCode < SipStatusCode::SC_400)
-    {
-        return GetCallReasonInfoFor3xxResponse(objMessage);
-    }
-    else if (SipStatusCode::SC_400 <= nStatusCode && nStatusCode < SipStatusCode::SC_500)
-    {
-        return GetCallReasonInfoFor4xxResponse(objMessage);
-    }
-    else if (SipStatusCode::SC_500 <= nStatusCode && nStatusCode < SipStatusCode::SC_600)
-    {
-        return GetCallReasonInfoFor5xxResponse(objMessage);
-    }
-    else if (SipStatusCode::SC_600 <= nStatusCode && nStatusCode < SipStatusCode::SC_MAX)
-    {
-        return GetCallReasonInfoFor6xxResponse(objMessage);
-    }
-    return CallReasonInfo(CODE_SIP_SERVER_ERROR);
+    return GetDefaultCallReasonInfo(objMessage);
 }
 
 PRIVATE
-CallReasonInfo UpdateErrorHandler::GetCallReasonInfoFor3xxResponse(IN const IMessage& objMessage)
+CallReasonInfo UpdateErrorHandler::HandleRetry(IN const IMessage& objMessage) const
 {
-    IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
-
-    return CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode);
+    IMS_SINT32 nRetryAfterInSeconds = m_objContext.GetMessageUtils().GetHeaderValueInt(
+            &objMessage, ISipHeader::RETRY_AFTER_ANY);
+    if (nRetryAfterInSeconds > 0)
+    {
+        return CallReasonInfo(CODE_INTERNAL_RETRY_UPDATE, nRetryAfterInSeconds);
+    }
+    return CallReasonInfo(CODE_NONE);
 }
 
 PRIVATE
-CallReasonInfo UpdateErrorHandler::GetCallReasonInfoFor4xxResponse(
-        IN const IMessage& objMessage) const
+CallReasonInfo UpdateErrorHandler::HandleGlareCondition(IN const IMessage& /* objMessage */) const
 {
-    IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
-
-    switch (nStatusCode)
-    {
-        case SipStatusCode::SC_404:
-        case SipStatusCode::SC_405:
-        case SipStatusCode::SC_410:
-        case SipStatusCode::SC_416:
-        case SipStatusCode::SC_480:
-        case SipStatusCode::SC_481:
-        case SipStatusCode::SC_482:
-        case SipStatusCode::SC_483:
-        case SipStatusCode::SC_484:
-        case SipStatusCode::SC_485:
-        case SipStatusCode::SC_489:
-            return CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nStatusCode);
-
-        case SipStatusCode::SC_491:
-            return CallReasonInfo(CODE_SIP_REQUEST_PENDING,
-                    GetGlareTimeMillisecond(m_objContext.GetCallInfo().ePeerType));
-    }
-
-    return CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode);
+    return CallReasonInfo(CODE_INTERNAL_RETRY_UPDATE,
+            GetGlareTimeMillisecond(m_objContext.GetCallInfo().ePeerType));
 }
 
 PRIVATE
-CallReasonInfo UpdateErrorHandler::GetCallReasonInfoFor5xxResponse(IN const IMessage& objMessage)
+CallReasonInfo UpdateErrorHandler::HandleBlockCallByTimer(IN const IMessage& objMessage) const
 {
-    IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
-
-    switch (nStatusCode)
+    IMS_SINT32 nRetryAfter = m_objContext.GetMessageUtils().GetHeaderValueInt(
+            &objMessage, ISipHeader::RETRY_AFTER_ANY);
+    if (IsRegisterWithNextPcscfRequiredFor503(nRetryAfter, objMessage.GetMethod()))
     {
-        case SipStatusCode::SC_501:
-        case SipStatusCode::SC_502:
-            return CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nStatusCode);
+        RegisterFor503(nRetryAfter);
+        return CallReasonInfo(CODE_SIP_SERVICE_UNAVAILABLE, objMessage.GetStatusCode());
     }
 
-    return CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode);
+    IMS_SINT32 nRetryAfterInMillis = nRetryAfter * 1000;
+    m_objContext.GetPassiveTimerHolder().AddTimer(
+            IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, nRetryAfterInMillis);
+
+    return CallReasonInfo(CODE_SIP_SERVER_ERROR, objMessage.GetStatusCode());
 }
 
 PRIVATE
-CallReasonInfo UpdateErrorHandler::GetCallReasonInfoFor6xxResponse(IN const IMessage& objMessage)
+void UpdateErrorHandler::RegisterFor503(IN IMS_SINT32 nRetryAfter) const
 {
-    IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
-
-    switch (nStatusCode)
+    const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    if (pAosConnector)
     {
-        case SipStatusCode::SC_604:
-            return CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nStatusCode);
+        pAosConnector->RegisterWithNextPcscf(nRetryAfter > 0 ? nRetryAfter : 0);
     }
+}
 
-    return CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode);
+PRIVATE
+IMS_BOOL UpdateErrorHandler::IsRegisterWithNextPcscfRequiredFor503(
+        IN IMS_SINT32 nRetryAfter, IN const SipMethod& objMethod) const
+{
+    return nRetryAfter <= 0 ||
+            nRetryAfter * 1000 > Engine::GetConfiguration()
+                                         ->GetSipConfig(m_objContext.GetSlotId())
+                                         ->GetSipConfigV()
+                                         ->GetTimerValue(objMethod.Equals(SipMethod::INVITE)
+                                                         ? ISipConfigV::TIMER_B
+                                                         : ISipConfigV::TIMER_F);
+}
+
+PRIVATE
+CallReasonInfo UpdateErrorHandler::GetDefaultCallReasonInfo(IN const IMessage& objMessage) const
+{
+    const IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
+    IMS_SINT32 nReasonCode = MtcConfigurationResolver::LookupReasonCodeByStatusCodeForNormal(
+            m_objContext.GetConfigurationProxy(), nStatusCode);
+    if (nReasonCode == CODE_NONE)
+    {
+        auto it = s_defaultStatusCodeAndReasonCodeMap.find(nStatusCode);
+        if (it != s_defaultStatusCodeAndReasonCodeMap.end())
+        {
+            nReasonCode = it->second;
+        }
+        else
+        {
+            nReasonCode = CODE_SIP_SERVER_ERROR;
+        }
+    }
+    IMS_TRACE_I("GetDefaultCallReasonInfo [%d]", nReasonCode, 0, 0);
+    return CallReasonInfo(nReasonCode, GetDefaultExtraCode(objMessage));
+}
+
+PRIVATE
+IMS_SINT32 UpdateErrorHandler::GetDefaultExtraCode(IN const IMessage& objMessage) const
+{
+    IMS_SINT32 nExtraCode = m_objContext.GetMessageUtils().GetCauseFromReasonHeader(&objMessage);
+    if (nExtraCode == -1)
+    {
+        nExtraCode = objMessage.GetStatusCode();
+    }
+    return nExtraCode;
 }

@@ -127,9 +127,9 @@ public class ImsStateStoreTest {
 
     @Test
     public void mmTelState_Provisioned_allTest() {
-        assertNotNull(ImsStateStore.getMmTelState(mPhoneId).isVoLteProvisioned());
-        assertNotNull(ImsStateStore.getMmTelState(mPhoneId).isVtProvisioned());
-        assertNotNull(ImsStateStore.getMmTelState(mPhoneId).isWfcProvisioned());
+        assertFalse(ImsStateStore.getMmTelState(mPhoneId).isVoLteProvisioned());
+        assertFalse(ImsStateStore.getMmTelState(mPhoneId).isVtProvisioned());
+        assertFalse(ImsStateStore.getMmTelState(mPhoneId).isWfcProvisioned());
 
         ImsStateStore.getMmTelState(mPhoneId).setVoLteProvisioned(STATE_ACTIVE);
         assertEquals(true, ImsStateStore.getMmTelState(mPhoneId).isVoLteProvisioned());

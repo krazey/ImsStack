@@ -16,6 +16,7 @@
 
 package com.android.imsstack.enabler.ssc;
 
+import static android.telephony.TelephonyManager.GBA_FAILURE_REASON_UNKNOWN;
 import static android.telephony.TelephonyManager.NETWORK_TYPE_IWLAN;
 
 import android.os.Handler;
@@ -42,12 +43,14 @@ import org.w3c.dom.Document;
 public class SscTransaction {
     public static final int EVENT_SEND_HTTP_REQUEST = 1001;
 
+
     private final int mSlotId;
     private final SscXmlGov mXmlGov;
     private final ImsRadioInterface mImsRadio;
 
     private int mEventNumber = 0;
     private int mTransactionId = 0;
+    private long mTransactionExpiryTime = 0;
     private boolean mXcapTrafficNotified = false;
     private boolean mXcapTrafficStarted = false;
 
@@ -88,7 +91,7 @@ public class SscTransaction {
         mSscServiceImplHandler = handler;
     }
 
-    public void close() {
+    public synchronized void close() {
         ImsLog.d(mSlotId, "");
         if (mTransactionHandler != null) {
             mTransactionHandler.removeCallbacksAndMessages(null);
@@ -113,6 +116,8 @@ public class SscTransaction {
         mTransaction = new GetTransaction(data);
         mEventNumber = data.getEventNumber();
         mTransactionId = data.getTransactionId();
+        setTransactionExpiryTime();
+
         mSscTransactionThread.start();
     }
 
@@ -123,6 +128,8 @@ public class SscTransaction {
         mTransaction = new PutTransaction(data);
         mEventNumber = data.getEventNumber();
         mTransactionId = data.getTransactionId();
+        setTransactionExpiryTime();
+
         mSscTransactionThread.start();
     }
 
@@ -168,8 +175,13 @@ public class SscTransaction {
                 netConnectionGov.refreshConnectionTimer(mSlotId);
             } else {
                 ImsLog.i(mSlotId, "PDN is not connected. Trying to Connect");
-                if (!netConnectionGov.connect(mSlotId)) {
-                    ImsLog.i(mSlotId, "PDN connection fail");
+
+                long timeLeftMs = getTransactionTimeLeftMs();
+                if (timeLeftMs == 0) {
+                    ImsLog.d(mSlotId, "Transaction Timer Expired");
+                    sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
+                } else if (!netConnectionGov.connect(mSlotId, timeLeftMs)) {
+                    ImsLog.e(mSlotId, "PDN connection fail");
                     sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
                 }
                 return;
@@ -201,16 +213,18 @@ public class SscTransaction {
                 return;
             }
 
-            String requestUri = getRequestUri(xui);
-            if (TextUtils.isEmpty(requestUri)) {
-                ImsLog.e(mSlotId, "Invalid requestUri");
+            String body = getXmlBody();
+            if (body == null) {
+                ImsLog.e(mSlotId, "Invalid body");
                 sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
                 return;
             }
 
-            String body = getXmlBody();
-            if (body == null) {
-                ImsLog.e(mSlotId, "Invalid body");
+            // Request URI shall be created after XML body creation since URI is generated based on
+            // the XML body.
+            String requestUri = getRequestUri(xui);
+            if (TextUtils.isEmpty(requestUri)) {
+                ImsLog.e(mSlotId, "Invalid requestUri");
                 sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
                 return;
             }
@@ -221,8 +235,14 @@ public class SscTransaction {
             }
 
             ISscHttpConnectionGov httpConnection = getSscHttpConnectionGov();
+            int timeLeftMs = getTransactionTimeLeftMs();
+            if (timeLeftMs == 0) {
+                ImsLog.d(mSlotId, "Transaction Timer Expired");
+                sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
+                return;
+            }
             int responseCode = httpConnection.sendRequest(mSlotId, getRequestType(), requestUri,
-                    xui, body);
+                    xui, body, timeLeftMs);
             ImsLog.i(mSlotId, "response Code : " + responseCode);
 
             if (responseCode == SscConstant.HTTP_UNAUTHORIZED) {
@@ -233,8 +253,15 @@ public class SscTransaction {
                         return;
                     }
 
+                    timeLeftMs = getTransactionTimeLeftMs();
+                    if (timeLeftMs == 0) {
+                        ImsLog.d(mSlotId, "Transaction Timer Expired");
+                        sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
+                        return;
+                    }
+
                     responseCode = httpConnection.sendRequest(mSlotId, getRequestType(), requestUri,
-                            xui, body);
+                            xui, body, timeLeftMs);
                 }
             }
 
@@ -254,6 +281,9 @@ public class SscTransaction {
             if (responseCode == SscConstant.HTTP_UNAUTHORIZED // 401 again
                     || responseCode == SscConstant.HTTP_FORBIDDEN) {
                 getSscAuthAgent().setIsCredentialInfoUpdated(false);
+            } else if (responseCode == SscConstant.HTTP_PRECONDITION_FAILURE) {
+                // Clear the previous ETag.
+                getSscAuthAgent().setETag("");
             }
 
             processResponse(httpConnection, responseCode);
@@ -383,6 +413,11 @@ public class SscTransaction {
     }
 
     @VisibleForTesting
+    protected long getTransactionExpiryTime() {
+        return mTransactionExpiryTime;
+    }
+
+    @VisibleForTesting
     protected Handler getTransactionHandler() {
         return mTransactionHandler;
     }
@@ -432,7 +467,8 @@ public class SscTransaction {
         return AgentFactory.getInstance().getAgent(GbaInterface.class, mSlotId);
     }
 
-    private boolean getGbaKey(boolean forceBootStrapping) {
+    @VisibleForTesting
+    protected boolean getGbaKey(boolean forceBootStrapping) {
         GbaInterface gbaAgent = getGbaAgent();
         if (gbaAgent == null) {
             return false;
@@ -443,21 +479,50 @@ public class SscTransaction {
             return false;
         }
 
+        int timeLeftSec = getTransactionTimeLeftMs() / 1000;
+        if (timeLeftSec == 0) {
+            ImsLog.d(mSlotId, "Transaction Timer Expired");
+            authAgent.setIsCredentialInfoUpdated(false);
+            return false;
+        }
+
         int appType = getSscUtils().getTelephonySimType(mSlotId);
-        int gbaMode = SscConfig.getGbaMode(mSlotId);
         boolean isTls = SscConfig.isTls(mSlotId);
-        String nafFqdn = authAgent.getNafFqdnFromRealm();
+        String nafFqdn = authAgent.getNafFqdn();
         String securityProtocol = authAgent.getCipherSuite();
 
-        GbaCredentials gbaCredentials = gbaAgent.getGbaKey(appType, gbaMode, isTls, nafFqdn,
-                securityProtocol, forceBootStrapping);
-        if (gbaCredentials == null || gbaCredentials.getResult() == GbaInterface.RESULT_FAILURE) {
+        GbaCredentials gbaCredentials;
+        int gbaMode = authAgent.getLastSuccessfulGbaMode();
+        if (gbaMode != SscConfig.GBA_NONE) {
+            gbaCredentials = gbaAgent.getGbaKey(appType, authAgent.getLastSuccessfulGbaMode(),
+                    isTls, nafFqdn, securityProtocol, forceBootStrapping, timeLeftSec);
+        } else {
+            gbaMode = authAgent.getGbaMode(appType);
+            gbaCredentials = gbaAgent.getGbaKey(appType, gbaMode, isTls, nafFqdn, securityProtocol,
+                    forceBootStrapping, timeLeftSec);
+
+            if (gbaCredentials.getResult() == GbaInterface.RESULT_FAILURE) {
+                if (gbaMode == SscConfig.GBA_U
+                        && gbaCredentials.getReason() == GBA_FAILURE_REASON_UNKNOWN) {
+                    timeLeftSec = getTransactionTimeLeftMs() / 1000;
+                    if (timeLeftSec > 0) {
+                        // Retry GBA authentication with GBA ME if it failed with GBA U.
+                        gbaMode = SscConfig.GBA_ME;
+                        gbaCredentials = gbaAgent.getGbaKey(appType, gbaMode, isTls,
+                                nafFqdn, securityProtocol, forceBootStrapping, timeLeftSec);
+                    }
+                }
+            }
+        }
+
+        if (gbaCredentials.getResult() == GbaInterface.RESULT_FAILURE) {
             ImsLog.e(mSlotId, "Getting gba key failure");
             authAgent.setIsCredentialInfoUpdated(false);
             return false;
         }
 
         authAgent.setGbaKeys(gbaCredentials.getTransactionId(), gbaCredentials.getKey());
+        authAgent.setLastSuccessfulGbaMode(gbaMode);
         return true;
     }
 
@@ -472,6 +537,29 @@ public class SscTransaction {
                     ImsRadioInterface.DIRECTION_MO, mConnectionListener);
             mXcapTrafficNotified = true;
         }
+    }
+
+    @VisibleForTesting
+    protected long getCurrentTime() {
+        return getSscUtils().getCurrentUtcTimeEpochMs();
+    }
+
+    private void setTransactionExpiryTime() {
+        int utTransactionTimer = SscConfig.getUtTransactionTimer(mSlotId);
+        if (utTransactionTimer > 0) {
+            mTransactionExpiryTime = getCurrentTime() + (utTransactionTimer * 1000L);
+            ImsLog.d(mSlotId, "utTransactionTimer = " + utTransactionTimer);
+        }
+    }
+
+    private int getTransactionTimeLeftMs() {
+        int minTimeoutMs = 1000; // 1 sec.
+        if (mTransactionExpiryTime > 0) {
+            int timeLeft = (int) (mTransactionExpiryTime - getCurrentTime());
+            return (timeLeft > minTimeoutMs) ? timeLeft : 0;
+        }
+
+        return 30 * 1000; // Default timeout 30 sec.
     }
 
     private final class SscTransactionThread extends Thread {

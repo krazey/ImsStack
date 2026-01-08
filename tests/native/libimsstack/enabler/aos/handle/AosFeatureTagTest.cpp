@@ -25,8 +25,8 @@ public:
     AosFeatureTagList m_objAosFeatureTagList;
 
 protected:
-    virtual void SetUp() override {}
-    virtual void TearDown() override {}
+    void SetUp() override {}
+    void TearDown() override {}
 
     void AppendFeatureTag(IN AosFeatureTag* objFeatureTag)
     {

@@ -29,7 +29,7 @@ class AString;
 class IMtcExtension : public IMtcMessageFormatter, public IMtcMessageHandler
 {
 public:
-    virtual ~IMtcExtension() {}
+    virtual ~IMtcExtension() override {}
 
     /**
      * Make a clone of this instance.

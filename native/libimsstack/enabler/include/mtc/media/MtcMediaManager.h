@@ -17,122 +17,168 @@
 #ifndef MTC_MEDIA_MANAGER_H_
 #define MTC_MEDIA_MANAGER_H_
 
-#include "IMediaSession.h"
-#include "IMessage.h"
+#include "ImsMap.h"
 #include "ImsTypeDef.h"
-#include "MediaDef.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
-#include "call/IMtcCallContext.h"
 #include "helper/ISrvccStateListener.h"
-#include "media/IMediaReportEventListener.h"
 #include "media/IMediaSessionClientListener.h"
 #include "media/IMtcMediaManager.h"
-#include "media/MtcMediaProfileManager.h"
 
-class IMediaManager;
+class IMediaSession;
+class IMediaReportEventListener;
+class IMessage;
+class IMtcCallContext;
+class MediaManager;
+class MtcMediaProfileManager;
+struct SdpNegotiationResult;
+
+class SessionMedia
+{
+public:
+    inline SessionMedia() :
+            objMediaInfo(),
+            objOldMediaInfo()
+    {
+    }
+    inline explicit SessionMedia(IN const MediaInfo& objInfo) :
+            objMediaInfo(objInfo),
+            objOldMediaInfo()
+    {
+    }
+    inline virtual ~SessionMedia() {}
+    SessionMedia(IN const SessionMedia&) = delete;
+    SessionMedia& operator=(IN const SessionMedia&) = delete;
+
+public:
+    inline virtual const MediaInfo& GetMediaInfo() const { return objMediaInfo; }
+    inline virtual const MediaInfo& GetOldMediaInfo() const { return objOldMediaInfo; }
+    inline virtual void SetMediaInfo(IN const MediaInfo& objInfo)
+    {
+        objOldMediaInfo = objMediaInfo;
+        objMediaInfo = objInfo;
+    }
+    inline virtual void RestoreMediaInfo() { objMediaInfo = objOldMediaInfo; }
+
+private:
+    MediaInfo objMediaInfo;
+    MediaInfo objOldMediaInfo;
+};
 
 class MtcMediaManager : public IMtcMediaManager, public IMediaSessionClientListener
 {
 public:
-    explicit MtcMediaManager(IN IMtcCallContext& objContext, IN IMediaManager& objMediaManager);
-    virtual ~MtcMediaManager();
+    explicit MtcMediaManager(IN IMtcCallContext& objContext, IN MediaManager& objMediaManager);
+    virtual ~MtcMediaManager() override;
     MtcMediaManager(IN const MtcMediaManager&) = delete;
     MtcMediaManager& operator=(IN const MtcMediaManager&) = delete;
 
 public: /* IMediaSessionClientListener */
-    virtual void MediaSession_Notify(IN IMS_UINT32 eReportType,
+    void MediaSession_Notify(IN IMS_UINT32 eReportType,
             IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_INVALID,
             IN MEDIA_TRANSPORT_PROTOCOL eMediaProtocolType = MEDIA_PROTOCOL_ANY) override;
 
-    virtual void MediaSession_NotifyFailures(IN IMS_UINT32 eReportType, IN IMS_SINT32 eError,
+    void MediaSession_NotifyFailures(IN IMS_UINT32 eReportType, IN IMS_SINT32 eError,
             IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_INVALID) override;
 
-    virtual void MediaSession_NotifyQos(IN IMS_UINTP nNegoId, IN IMS_BOOL bSuccess,
+    void MediaSession_NotifyQos(IN IMS_UINTP nNegoId, IN IMS_BOOL bSuccess,
             IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_INVALID) override;
 
 public:
-    virtual void SetMediaReportEventListener(IN IMediaReportEventListener* pListener) override;
-    virtual void SetQosListener(IN IMediaQosEventListener* pListener) override;
+    void SetMediaReportEventListener(IN IMediaReportEventListener* pListener) override;
+    void SetQosListener(IN IMediaQosEventListener* pListener) override;
 
     /* Media Info */
-    virtual void SetMediaInfo(IN const MediaInfo& objInfo) override;
-    virtual void UpdateMediaDirection(IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir) override;
+    void SetMediaInfo(IN const ISession& objISession, IN const MediaInfo& objInfo) override;
+    void UpdateMediaDirection(
+            IN const ISession& objISession, IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir) override;
     // using enum values defined in MtcDef.h
-    virtual const MediaInfo& GetMediaInfo() const override;
-    virtual void RestoreMediaInfo() override;
+    const MediaInfo& GetMediaInfo(IN const ISession& objISession) const override;
+    void RestoreMediaInfo(IN const ISession& objISession) override;
 
     /* MediaSession */
-    virtual void CreateMediaSession() override;
-    virtual void DestroyMediaSession() override;
+    void CreateMediaSession() override;
+    void DestroyMediaSession() override;
 
     /* Media Profile */
-    virtual void CreateMediaProfile(
+    void CreateMediaProfile(
             IN ISession* piSession, IN IMS_BOOL bForked, IN IMS_BOOL bOrigin) override;
-    virtual void DestroyMediaProfile(IN ISession* piSession) override;
+    void DestroyMediaForSession(IN ISession* piSession) override;
     void DestroyAllMediaProfiles();  // called when terminate media
 
     /* Local Tone - public or private */
     void SetLocalTone(IN IMS_BOOL bLocalTone);  // private?
-    virtual IMS_BOOL IsLocalTone() override;
+    IMS_BOOL IsLocalTone() override;
 
     /* Handling SDP */
-    virtual IMS_RESULT FormSdp(IN ISession* piSession, IN CallType eCallType,
+    IMS_RESULT FormSdp(IN ISession* piSession, IN CallType eCallType,
             IN IMS_BOOL bAnswerForOfferlessReInvite = IMS_FALSE) override;
-    virtual NegotiationResult NegotiateSdp(IN ISession* piSession) override;
-    virtual void RestoreSdp(IN ISession* piSession) override;
+    SdpNegotiationResult NegotiateSdp(IN ISession* piSession) override;
+    void RestoreSdp(IN ISession* piSession) override;
     void FinalizeSdp(IN ISession* piSession) override;
 
     /* P-Early-Media */
-    virtual void UpdatePemType(IN ISession* piSession, IN IMessage* piMessage) override;
+    void UpdatePemType(IN ISession* piSession, IN IMessage* piMessage) override;
 
     /* Media Operations */
-    virtual void Run(IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bEarly) override;
+    void Run(IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bEarly) override;
 
-    virtual void SetRtpPort(
-            IN ISession* piSession, IN IMS_UINT32 eMediaType, IN IMS_UINT32 nPort) override;
+    void SetRtpPort(IN ISession* piSession, IN IMS_UINT32 eMediaType, IN IMS_UINT32 nPort) override;
     IMS_SINT32 GetRemoteRtpPort(IN ISession* piSession, IN IMS_UINT32 eMediaType) override;
-    virtual void SetConferenceCall(IN IMS_BOOL bConference) override;
-    virtual void SetConfirmedSession(IN ISession* piSession) override;
+    void SetConferenceCall() override;
+    void SetConfirmedSession(IN ISession* piSession) override;
 
-    virtual NegotiationState GetNegotiationState(IN ISession* piSession) override;
-    virtual IMS_SINT32 GetNegotiatedDirection(
-            IN ISession* piSession, IN IMS_UINT32 eMediaType) override;
-    virtual IMS_SINT32 GetNegotiatedQuality(
-            IN ISession* piSession, IN IMS_UINT32 eMediaType) override;
-    virtual CallType GetNegotiatedCallType(IN ISession* piSession) override;
+    NegotiationState GetNegotiationState(IN ISession* piSession) override;
+    IMS_SINT32 GetNegotiatedDirection(
+            IN const ISession* piSession, IN IMS_UINT32 eMediaType) override;
+    IMS_SINT32 GetNegotiatedQuality(
+            IN const ISession* piSession, IN IMS_UINT32 eMediaType) override;
+    CallType GetNegotiatedCallType(IN ISession* piSession) override;
 
-    virtual PemType GetPemType(IN ISession* piSession) override;  // remove..?
+    PemType GetPemType(IN ISession* piSession) override;  // remove..?
 
-    virtual IMS_BOOL IsAudioInactive() override;
-    virtual void AdjustDirectionForAutoOffer(IN CallType eCallType);
-    virtual void AdjustDirectionForAutoAnswer();
+    IMS_BOOL IsAudioInactive() override;
+    void AdjustDirectionForAutoOffer(
+            IN const ISession& objISession, IN CallType eCallType) override;
+    void AdjustDirectionForAutoAnswer(IN const ISession& objISession) override;
+    void AdjustDirectionForLocalResourceConfirmation(
+            IN const ISession& objISession, IN CallType eCallType) override;
     void SetSrvccState(IN SrvccState eState) override;
-    IMS_BOOL IsOnHold() override;
+    IMS_BOOL IsOnHold(IN const ISession& objISession) override;
     IMS_UINT32 GetSupportedMediaTypesFromSdp(IN ISession* piSession) override;
+    IMS_BOOL IsPreviewMode(IN ISession* piSession) const override;
+    IMS_BOOL IsForkedSession(IN const ISession* piSession) const override;
 
 private:
-    void UpdateLocalTone(IN ISession* piSession, IN IMessage* piMessage);
+    void UpdateLocalTone(
+            IN ISession* piSession, IN const IMessage* piMessage, IN NegotiationState eNegoState);
     void UpdateLocalTone(IN ISession* piSession, IN IMS_BOOL bAudioBlocked);
     void SetNetworkToneRtpTimer(IN IMS_UINTP nNegoId, IN IMS_UINT32 nDuration);
 
-    IMS_BOOL IsNecessaryToRunMedia(IN ISession* piSession, IN IMessage* piMessage);
-    IMS_UINTP GetMediaNegoId(IN ISession* piSession);
-    IMS_UINT32 GetWaitingNetworkToneDuration(IN ISession* piSession, IN IMessage* piMessage);
+    IMS_BOOL IsNecessaryToRunMedia(IN ISession* piSession, IN const IMessage* piMessage);
+    IMS_UINTP GetMediaNegoId(IN const ISession* piSession) const;
+    IMS_UINT32 GetWaitingNetworkToneDuration(IN ISession* piSession, IN const IMessage* piMessage);
 
     static void HandleReceivingMediaDataStarted(IN IMS_UINT32 eMediaType);
     void HandleReceivingNetworkTone(IN IMS_BOOL bNetworkToneReceived);
-    void RequestToRegisterQosCallback(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eContents);
     IMS_BOOL IsDynamicRbtRequired(IN ISession* piSession);
+    void SetDirectionToActiveFromInactive(
+            IN const ISession& objISession, IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir);
+
+    SessionMedia* GetSessionMedia(IN const ISession& objISession) const;
+    void DestroyAllSessionMedia();
+    void DestroySessionMedia(IN const ISession& objISession);
+
+    void SetMediaPemType(IN IMS_UINTP nNegoId, IN PemType ePemType);
+    AudioCodecAttributes GetNegotiatedAudioCodecAttributes(IN const ISession& objISession) const;
 
 protected:
-    IMediaManager& m_objMediaManager;
+    MediaManager& m_objMediaManager;
     IMediaReportEventListener* m_pMediaReportListener;
     IMediaQosEventListener* m_pQosListener;
     MtcMediaProfileManager* m_pProfileManager;
     IMtcCallContext& m_objContext;
-    MediaInfo* m_pMediaInfo;
-    MediaInfo* m_pOldMediaInfo;
+    ImsMap<const ISession*, SessionMedia*> m_objSessionMedias;
     IMS_BOOL m_bLocalTone;
     IMS_BOOL m_bAudioInactive;
     IMediaSession* m_piMediaSession;

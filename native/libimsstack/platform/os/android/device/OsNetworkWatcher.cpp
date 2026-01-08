@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ISystem.h"
 #include "PlatformContext.h"
 #include "ServiceNetworkPolicy.h"
 #include "ServiceTrace.h"
@@ -20,7 +21,7 @@
 #include "network/OsNetworkConstants.h"
 #include "system-intf/SystemConstants.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 PUBLIC
 OsNetworkWatcher::OsNetworkWatcher(IN IMS_SINT32 nSlotId) :
@@ -471,6 +472,11 @@ PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetNetworkType()
     return PlatformContext::GetInstance()->GetSystem()->GetNetworkType(GetSlotId());
 }
 
+PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetCellularServiceState()
+{
+    return PlatformContext::GetInstance()->GetSystem()->GetCellularServiceState(GetSlotId());
+}
+
 PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetRoamingState()
 {
     return PlatformContext::GetInstance()->GetSystem()->GetRoamingState(GetSlotId());
@@ -486,6 +492,13 @@ PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetDataRoamingType()
     return PlatformContext::GetInstance()->GetSystem()->GetDataRoamingType(GetSlotId());
 }
 
+PUBLIC VIRTUAL AString OsNetworkWatcher::GetNetworkOperator() const
+{
+    AString strOperator(AString::ConstEmpty());
+    PlatformContext::GetInstance()->GetSystem()->GetNetworkOperator(strOperator, GetSlotId());
+    return strOperator;
+}
+
 PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsImsEmergencyCallSupported()
 {
     return PlatformContext::GetInstance()->GetSystem()->IsImsEmergencyCallSupported(GetSlotId());
@@ -496,9 +509,37 @@ PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsImsVoiceCallSupported()
     return PlatformContext::GetInstance()->GetSystem()->IsImsVoiceCallSupported(GetSlotId());
 }
 
-PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsLteEmergencyOnly()
+PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsImsServiceContinuitySupported(
+        IN IMS_SINT32 ePreviousNetwork, IN IMS_SINT32 eCurrentNetwork) const
 {
-    return PlatformContext::GetInstance()->GetSystem()->IsLteEmergencyOnly(GetSlotId());
+    if (ePreviousNetwork == RADIOTECH_TYPE_NR)
+    {
+        switch (eCurrentNetwork)
+        {
+            // 2G networks
+            case RADIOTECH_TYPE_GPRS:
+            case RADIOTECH_TYPE_EDGE:
+            case RADIOTECH_TYPE_IDEN:
+            case RADIOTECH_TYPE_GSM:
+            // 3G networks
+            case RADIOTECH_TYPE_UMTS:
+            case RADIOTECH_TYPE_HSDPA:
+            case RADIOTECH_TYPE_HSUPA:
+            case RADIOTECH_TYPE_HSPA:
+            case RADIOTECH_TYPE_HSPAP:
+            case RADIOTECH_TYPE_TD_SCDMA:
+                return IMS_FALSE;
+            default:
+                break;
+        }
+    }
+
+    return IMS_TRUE;
+}
+
+PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsEmergencyOnly()
+{
+    return PlatformContext::GetInstance()->GetSystem()->IsEmergencyOnly(GetSlotId());
 }
 
 PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsEmergencyAttachSupported()
@@ -530,9 +571,15 @@ IMS_SINT32 OsNetworkWatcher::GetVoiceServiceStateType() const
     return PlatformContext::GetInstance()->GetSystem()->GetVoiceServiceState(GetSlotId());
 }
 
-PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetMocnPlmnInfo()
+PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetNetworkRegistrationRejectCause()
 {
-    return PlatformContext::GetInstance()->GetSystem()->GetMocnPlmnInfo(GetSlotId());
+    return PlatformContext::GetInstance()->GetSystem()->GetNetworkRegistrationRejectCause(
+            GetSlotId());
+}
+
+PUBLIC VIRTUAL AString OsNetworkWatcher::GetAccessNetworkPlmn() const
+{
+    return PlatformContext::GetInstance()->GetSystem()->GetAccessNetworkPlmn(GetSlotId());
 }
 
 PRIVATE GLOBAL const IMS_CHAR* OsNetworkWatcher::RadioTechToString(IN IMS_UINT32 nType)

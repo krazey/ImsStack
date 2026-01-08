@@ -119,18 +119,18 @@ public:
     //
     // Add an element in the right place (or replaces it if there is one)
     //
-    inline IMS_BOOL Add(IN const KEY& key, IN const VALUE& value);
-    inline IMS_BOOL SetValue(IN const KEY& key, IN const VALUE& value);
+    inline void Add(IN const KEY& key, IN const VALUE& value);
+    inline void SetValue(IN const KEY& key, IN const VALUE& value);
     inline IMS_BOOL SetValueAt(IN IMS_UINT32 nIndex, IN const VALUE& value);
 
     //
     // Remove an element
     //
-    inline IMS_BOOL Remove(IN const KEY& key);
+    inline void Remove(IN const KEY& key);
 
     // Remove several elements
-    inline IMS_BOOL RemoveAt(IN IMS_UINT32 nIndex) { return RemoveElementsAt(nIndex); }
-    inline IMS_BOOL RemoveElementsAt(IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount = 1);
+    inline void RemoveAt(IN IMS_UINT32 nIndex) { RemoveElementsAt(nIndex); }
+    inline void RemoveElementsAt(IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount = 1);
 
 private:
     ImsSortedVector<MapPair<KEY, VALUE>> m_objVector;
@@ -216,14 +216,14 @@ inline VALUE& ImsMap<KEY, VALUE>::GetValueAt(IN IMS_UINT32 nIndex)
 
 PUBLIC
 template <typename KEY, typename VALUE>
-inline IMS_BOOL ImsMap<KEY, VALUE>::Add(IN const KEY& key, IN const VALUE& value)
+inline void ImsMap<KEY, VALUE>::Add(IN const KEY& key, IN const VALUE& value)
 {
-    return m_objVector.Add(MapPair<KEY, VALUE>(key, value));
+    m_objVector.Add(MapPair<KEY, VALUE>(key, value));
 }
 
 PUBLIC
 template <typename KEY, typename VALUE>
-inline IMS_BOOL ImsMap<KEY, VALUE>::SetValue(IN const KEY& key, IN const VALUE& value)
+inline void ImsMap<KEY, VALUE>::SetValue(IN const KEY& key, IN const VALUE& value)
 {
     MapPair<KEY, VALUE> pair(key, value);
     IMS_SLONG nIndex = m_objVector.GetIndexOf(pair);
@@ -231,10 +231,10 @@ inline IMS_BOOL ImsMap<KEY, VALUE>::SetValue(IN const KEY& key, IN const VALUE& 
     if (nIndex >= 0)
     {
         m_objVector.GetAt(nIndex).SetValue(value);
-        return IMS_TRUE;
+        return;
     }
 
-    return m_objVector.Add(pair);
+    m_objVector.Add(pair);
 }
 
 PUBLIC
@@ -252,17 +252,16 @@ inline IMS_BOOL ImsMap<KEY, VALUE>::SetValueAt(IN IMS_UINT32 nIndex, IN const VA
 
 PUBLIC
 template <typename KEY, typename VALUE>
-inline IMS_BOOL ImsMap<KEY, VALUE>::Remove(IN const KEY& key)
+inline void ImsMap<KEY, VALUE>::Remove(IN const KEY& key)
 {
-    return m_objVector.Remove(MapPair<KEY, VALUE>(key));
+    m_objVector.Remove(MapPair<KEY, VALUE>(key));
 }
 
 PUBLIC
 template <typename KEY, typename VALUE>
-inline IMS_BOOL ImsMap<KEY, VALUE>::RemoveElementsAt(
-        IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount /*= 1*/)
+inline void ImsMap<KEY, VALUE>::RemoveElementsAt(IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount /*= 1*/)
 {
-    return m_objVector.RemoveElementsAt(nIndex, nCount);
+    m_objVector.RemoveElementsAt(nIndex, nCount);
 }
 
 #endif

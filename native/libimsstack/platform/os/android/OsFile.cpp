@@ -21,11 +21,13 @@
 #include <private/android_filesystem_config.h>
 #include <sys/stat.h>
 
+#include "ISystem.h"
+#include "ImsNew.h"
 #include "OsFile.h"
 #include "PlatformContext.h"
 #include "ServiceTrace.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 class OsFilePrivate
 {
@@ -174,7 +176,7 @@ PUBLIC VIRTUAL IMS_UINT32 OsFile::GetSize() const
 
         nSize = ftell(m_pFileP->m_pFile);
 
-        fsetpos(m_pFileP->m_pFile, (const fpos_t*)&nCurPos);
+        fsetpos(m_pFileP->m_pFile, static_cast<const fpos_t*>(&nCurPos));
     }
 
     return nSize;

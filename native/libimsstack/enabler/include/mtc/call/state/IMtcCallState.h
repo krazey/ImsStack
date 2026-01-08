@@ -17,11 +17,10 @@
 #ifndef INTERFACE_MTC_CALL_STATE_H_
 #define INTERFACE_MTC_CALL_STATE_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "call/block/IMtcBlockChecker.h"
-#include "helper/IMtcAosStateListener.h"
+#include "helper/ISrvccStateListener.h"
 
 class AString;
 class IMessage;
@@ -32,10 +31,13 @@ class ISipClientConnection;
 class ISipConnection;
 class ISipServerConnection;
 class MtcSession;
+enum class MtcAosState;
 enum class QosLossPolicy;
 struct CallReasonInfo;
 struct ConfUser;
 struct MediaInfo;
+template <class T>
+class ImsList;
 
 using CallStateName = IMtcCall::State;
 
@@ -73,8 +75,7 @@ public:
      * @return
      */
     virtual CallStateName Start(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Starts
@@ -87,7 +88,7 @@ public:
      * @return
      */
     virtual CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+            IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices,
             IN const ImsList<ConfUser*>& lstUsers) = 0;
 
     /**
@@ -362,6 +363,14 @@ public:
     virtual CallStateName SessionUpdateReceived(IN ISession* piSession) = 0;
 
     /**
+     * @brief Handles {@link ISessionListener#SessionCanceledOnAccepted} event.
+     *
+     * @param piSession Subject {@link ISession}.
+     * @return Next state to transition.
+     */
+    virtual CallStateName SessionCanceledOnAccepted(IN ISession* piSession) = 0;
+
+    /**
      * @brief Sessions
      *
      * @param piSession
@@ -627,9 +636,11 @@ public:
      *
      * @param eState
      * @param eAosReason
+     * @param nDataFailureReason
      * @return
      */
-    virtual CallStateName OnAosStateChanged(IN MtcAosState eState, IN IMS_UINT32 eAosReason) = 0;
+    virtual CallStateName OnAosStateChanged(
+            IN MtcAosState eState, IN IMS_UINT32 eAosReason, IN IMS_SINT32 nDataFailureReason) = 0;
 
     /**
      * @brief Notifies
@@ -638,6 +649,31 @@ public:
      * @return
      */
     virtual CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) = 0;
+
+    /**
+     * @brief Reports OnRatChanged information received from the IMtcNetworkWatcherListener.
+     *
+     * @param eOldRatType The type of the old RAT.
+     * @param eRatType The type of the new RAT. It can't be same as an old RAT.
+     * @return The CallStateName after handling this event.
+     */
+    virtual CallStateName OnRatChanged(IN IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType) = 0;
+
+    /**
+     * Reports the OnConnectionFailed information received from the IMtcRadioCheckerListener.
+     * <p>
+     * This method forwards the connection failure details, including the reason and
+     * suggested wait time before retrying, originally provided by the network through
+     * the {@link IMtcRadioCheckerListener} and {@link IImsRadioConnectionListener}.
+     *
+     * @param nFailureReason The reason for the connection failure.
+     *                       See {@link IImsRadio#ConnectionFailureReason} for possible values.
+     * @param nWaitTimeMillis The retry wait time suggested by the network, in milliseconds.
+     *
+     * @return The CallStateName after handling this event.
+     */
+    virtual CallStateName OnConnectionFailed(
+            IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) = 0;
 };
 
 #endif

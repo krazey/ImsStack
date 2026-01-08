@@ -20,8 +20,12 @@
 #include "SipMethod.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
+#include "call/IMtcSession.h"
+#include "call/extension/MtcExtension.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/extension/PreconditionExtension.h"
+#include "media/IMtcMediaManager.h"
+#include "precondition/IMtcPreconditionManager.h"
 #include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -29,7 +33,8 @@ __IMS_TRACE_TAG_COM_MTC__;
 PUBLIC
 PreconditionExtension::PreconditionExtension(IN IMtcCallContext& objContext) :
         MtcExtension(objContext, MtcExtensionSet::OPTION_TAG_PRECONDITION,
-                {RequestType::START, RequestType::EARLY_UPDATE, RequestType::PRACK},
+                {RequestType::START, RequestType::EARLY_UPDATE, RequestType::PRACK,
+                        RequestType::UPDATE},
                 {ResponseType::PROVISIONAL_RESPONSE})
 {
 }
@@ -55,6 +60,16 @@ PUBLIC VIRTUAL void PreconditionExtension::FormatRequest(
         return;
     }
 
+    // Based on the 3GPP 24.229, a "precondition" option-tag is only considered when a request has
+    // SDP. So, SDP is not ready to be sent(not STATE_OFFER_SENT), does nothing.
+    // Also, technically, a PRACK can be sent with SDP answer when receiving a 183 with SDP offer
+    // and an ACK can be sent with SDP answer. However, We are not considering that cases because
+    // an INVITE that is sent from the AP IMS always has SDP offer.
+    if (!IsRequestIncludingOffer())
+    {
+        return;
+    }
+
     IMS_SINT32 eHeaderType = ISipHeader::SUPPORTED;
     switch (eType)
     {
@@ -70,8 +85,11 @@ PUBLIC VIRTUAL void PreconditionExtension::FormatRequest(
             eHeaderType = ISipHeader::REQUIRE;
             break;
 
-        case RequestType::PRACK:  // TODO: Check SDP and set Supported header.
+        case RequestType::PRACK:
         case RequestType::ACK:
+            eHeaderType = ISipHeader::REQUIRE;
+            break;
+
         case RequestType::CANCEL_UPDATE:
         case RequestType::TERMINATE:
             return;
@@ -99,7 +117,7 @@ PUBLIC VIRTUAL void PreconditionExtension::FormatResponse(
 PUBLIC VIRTUAL void PreconditionExtension::HandleRequest(
         IN RequestType eType, IN const IMessage& objRequest)
 {
-    if (eType != RequestType::START && !m_objContext.GetMessageUtils().HasSdp(&objRequest))
+    if (eType != RequestType::START && !HasSdpWithPrecondition(objRequest))
     {
         IMS_TRACE_D("HandleRequest : Don't check precondition feature without SDP.", 0, 0, 0);
         return;
@@ -111,11 +129,24 @@ PUBLIC VIRTUAL void PreconditionExtension::HandleRequest(
 PUBLIC VIRTUAL void PreconditionExtension::HandleResponse(
         IN ResponseType eType, IN const IMessage& objResponse)
 {
-    if (!m_objContext.GetMessageUtils().HasSdp(&objResponse))
+    if (!HasSdpWithPrecondition(objResponse))
     {
         IMS_TRACE_D("HandleResponse : Don't check precondition feature without SDP.", 0, 0, 0);
         return;
     }
 
     MtcExtension::HandleResponse(eType, objResponse);
+}
+
+PRIVATE IMS_BOOL PreconditionExtension::IsRequestIncludingOffer() const
+{
+    return m_objContext.GetMediaManager().GetNegotiationState(
+                   &m_objContext.GetSession()->GetISession()) == NegotiationState::STATE_OFFER_SENT;
+}
+
+PRIVATE IMS_BOOL PreconditionExtension::HasSdpWithPrecondition(IN const IMessage& objMessage) const
+{
+    return m_objContext.GetMessageUtils().HasSdp(&objMessage) &&
+            m_objContext.GetPreconditionManager().IsPreconditionIncludedInSdp(
+                    &m_objContext.GetSession()->GetISession());
 }

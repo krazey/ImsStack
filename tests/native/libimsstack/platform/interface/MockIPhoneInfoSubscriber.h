@@ -24,8 +24,29 @@
 class MockISubscriberInfo : public ISubscriberInfo
 {
 public:
-    inline MockISubscriberInfo() {}
-    inline virtual ~MockISubscriberInfo() {}
+    inline MockISubscriberInfo()
+    {
+        ON_CALL(*this, GetSimMcc)
+                .WillByDefault(
+                        [this](OUT AString& strMcc)
+                        {
+                            return GetSimMccInternal(&strMcc);
+                        });
+        ON_CALL(*this, GetSimMnc)
+                .WillByDefault(
+                        [this](OUT AString& strMnc)
+                        {
+                            return GetSimMncInternal(&strMnc);
+                        });
+        ON_CALL(*this, GetSubscriberId)
+                .WillByDefault(
+                        [this](OUT AString& strImsi)
+                        {
+                            return GetSubscriberIdInternal(&strImsi);
+                        });
+    }
+
+    ~MockISubscriberInfo() override = default;
 
     MOCK_METHOD(IMS_BOOL, GetPhoneNumber, (OUT AString & strPhoneNumber), (const, override));
     MOCK_METHOD(IMS_BOOL, GetSimMcc, (OUT AString & strMcc), (const, override));
@@ -39,6 +60,11 @@ public:
     MOCK_METHOD(IMS_BOOL, SetPreference,
             (IN const AString& strFileName, IN const AString& strKey, IN const AString& strValue),
             (override));
+
+    // Add mock method that can set OUT parameter
+    MOCK_METHOD(IMS_BOOL, GetSimMccInternal, (OUT AString * strMcc));
+    MOCK_METHOD(IMS_BOOL, GetSimMncInternal, (OUT AString * strMnc));
+    MOCK_METHOD(IMS_BOOL, GetSubscriberIdInternal, (OUT AString * strImsi));
 };
 
 #endif

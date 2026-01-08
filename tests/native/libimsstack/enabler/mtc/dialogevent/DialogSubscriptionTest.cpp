@@ -15,26 +15,26 @@
  */
 
 #include "AString.h"
+#include "ByteArray.h"
+#include "IMessage.h"
+#include "IMessageBodyPart.h"
+#include "ISipHeader.h"
+#include "ISubscription.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
+#include "MockICoreService.h"
+#include "MockIMessage.h"
+#include "MockIMessageBodyPart.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
-#include "core/IMessage.h"
-#include "core/IMessageBodyPart.h"
-#include "core/ISubscription.h"
-#include "core/MockICoreService.h"
-#include "core/MockIMessage.h"
-#include "core/MockIMessageBodyPart.h"
-#include "core/MockISubscription.h"
+#include "MockISipMessage.h"
+#include "MockISubscription.h"
+#include "SipStatusCode.h"
 #include "dialogevent/DialogSubscription.h"
 #include "dialogevent/MockIDialogSubscription.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockSubscriptionInterfaceHolder.h"
-#include "sipcore/ISipHeader.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/SipStatusCode.h"
-#include "util/ByteArray.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
 
@@ -106,7 +106,6 @@ TEST_F(DialogSubscriptionTest, SubscribeInvokesSubscribeEvenIfIMessageIsNull)
             .WillByDefault(Return(&objISubscription));
     EXPECT_CALL(objISubscription, SetListener(&objSubscription));
     EXPECT_CALL(objISubscription, Subscribe);
-    MockIMessage objMessage;
     ON_CALL(objISubscription, GetNextRequest).WillByDefault(Return(nullptr));
     objSubscription.Subscribe();
 }
@@ -134,6 +133,15 @@ TEST_F(DialogSubscriptionTest, SubscribeInvokesSubscribe)
     ON_CALL(objISubscription, GetNextRequest).WillByDefault(Return(&objMessage));
     ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
     objSubscription.Subscribe();
+}
+
+TEST_F(DialogSubscriptionTest, SubscribeFailsIfAlreadySubscribed)
+{
+    ON_CALL(objSubscriptionHolder, GetISubscription(_, _, _, _))
+            .WillByDefault(Return(&objISubscription));
+    objSubscription.Subscribe();
+
+    EXPECT_EQ(objSubscription.Subscribe(), IMS_FAILURE);
 }
 
 TEST_F(DialogSubscriptionTest, UnsubscribeInvokesUnsubscribeIfSubscribed)

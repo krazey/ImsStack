@@ -16,7 +16,7 @@
 #ifndef INTERFACE_XML_TRANSACTION_LISTENER_H_
 #define INTERFACE_XML_TRANSACTION_LISTENER_H_
 
-#include "IXmlTransaction.h"
+class IXmlTransaction;
 
 class IXmlTransactionListener
 {

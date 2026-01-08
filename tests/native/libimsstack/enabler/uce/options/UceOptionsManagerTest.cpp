@@ -35,7 +35,7 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnNull;
 
-__IMS_TRACE_TAG_USER_DECL__("UCE");
+__IMS_TRACE_TAG_UCE__;
 
 class TestUceOptionsManager : public UceOptionsManager
 {
@@ -44,7 +44,7 @@ public:
             UceOptionsManager(AString("UceOptionsManager"), piCoreService, 0)
     {
     }
-    virtual ~TestUceOptionsManager() {}
+    virtual ~TestUceOptionsManager() override {}
 
     void setAosConnected(IMS_BOOL connected) { m_bAoSConnected = connected; }
     IMS_BOOL getAosConnected() { return m_bAoSConnected; }

@@ -17,10 +17,10 @@
 #ifndef MTC_APP_H_
 #define MTC_APP_H_
 
-#include "Configuration.h"
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "IMtcApp.h"
 #include "IMtcContext.h"
-#include "IMtcService.h"
 #include "ImsApp.h"
 #include "ImsList.h"
 #include "MtcImsEventReceiver.h"
@@ -33,6 +33,8 @@
 #include "dialingplan/MtcDialingPlan.h"
 #include "dialogevent/MultiEndpointManager.h"
 #include "helper/CallStateProxy.h"
+#include "helper/MtcLocationRefresher.h"
+#include "helper/OperationAsyncRunnerManager.h"
 #include "helper/PassiveTimerHolder.h"
 #include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
 #include "utility/MessageUtils.h"
@@ -52,17 +54,21 @@ class IMtcDialingPlan;
 class IMtcEmergencyServiceManager;
 class IMtcImsEventReceiver;
 class IMtcRadioChecker;
+class IMtcService;
 class IMtcSipInterfaceFactory;
 class IMultiEndpointManager;
 class IPassiveTimerHolder;
 class LastComeFirstServedHelper;
+class MtcTimerWrapper;
 class OperationAsyncRunner;
+class RttAutoUpgrader;
+enum class ServiceType;
 
 class MtcApp : public ImsApp, public IMtcApp, public IMtcContext
 {
 public:
     explicit MtcApp(IN IMS_SINT32 nSlotId);
-    virtual ~MtcApp();
+    virtual ~MtcApp() override;
     MtcApp(IN const MtcApp&) = delete;
     MtcApp& operator=(IN const MtcApp&) = delete;
 
@@ -74,7 +80,7 @@ public:
     inline IMS_SINT32 GetSlotId() const override { return m_nSlotId; }
     inline const ISubscriberConfig* GetSubscriberConfig() const override
     {
-        return Configuration::GetInstance()->GetSubscriberConfig(GetSlotId());
+        return Engine::GetConfiguration()->GetSubscriberConfig(GetSlotId());
     }
     IMtcService* GetServiceByType(IN ServiceType eServiceType) override;
     inline IMtcDialingPlan& GetDialingPlan() override { return m_objDialingPlan; }
@@ -95,7 +101,12 @@ public:
     inline IConferenceManager& GetConferenceManager() override { return m_objConferenceManager; }
     IEctManager& GetEctManager() override;
     IMtcEmergencyServiceManager& GetEmergencyServiceManager() override;
-    OperationAsyncRunner* GetAsyncRunner(IN std::function<void()> objOperation) override;
+    void RunAsyncOperation(IN void* pOwner, IN std::function<void()> objOperation) override;
+    inline void ReleaseAsyncOperation(IN void* pOwner) override
+    {
+        m_objOperationAsyncRunnerManager.Release(pOwner);
+    }
+    std::unique_ptr<MtcTimerWrapper> CreateTimer() override;
     inline IMessageUtils& GetMessageUtils() override { return m_objMessageUtils; }
     inline IPassiveTimerHolder& GetPassiveTimerHolder() override { return m_objPassiveTimerHolder; }
     inline IMultiEndpointManager* GetMultiEndpointManager() override
@@ -107,10 +118,12 @@ public:
     {
         return m_objCallConnectionIdManager;
     }
+    inline MtcLocationRefresher& GetLocationRefresher() override { return m_objLocationRefresher; }
     inline IMS_BOOL IsWifiTestMode() override { return m_bWifiTestMode; }
+    void CreateRttAutoUpgrader() override;
+    void DestroyRttAutoUpgrader() override;
 
 protected:
-    virtual void InitConfiguration();
     virtual void CreateServices();
     virtual void InitCallManager();
     virtual void DestroyServices();
@@ -118,6 +131,7 @@ protected:
 protected:
     IMS_SINT32 m_nSlotId;
     MtcConfigurationProxy m_objConfigurationProxy;
+    OperationAsyncRunnerManager m_objOperationAsyncRunnerManager;
     ImsList<IMtcService*> m_lstServices;
     MtcDialingPlan m_objDialingPlan;
     MtcCallManager m_objCallManager;
@@ -134,6 +148,8 @@ protected:
     MtcRadioChecker m_objMtcRadioChecker;
     std::unique_ptr<LastComeFirstServedHelper> m_pLastComeFirstServedHelper;
     CallConnectionIdManager m_objCallConnectionIdManager;
+    MtcLocationRefresher m_objLocationRefresher;
+    std::unique_ptr<RttAutoUpgrader> m_pRttAutoUpgrader;
 
     IMS_BOOL m_bWifiTestMode;
 };

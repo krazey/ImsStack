@@ -27,8 +27,8 @@ class ISession;
 class MockIMediaQosEventListener : public IMediaQosEventListener
 {
 public:
-    ~MockIMediaQosEventListener() {}
-    MOCK_METHOD(void, OnQosStatusChanged, (IN ISession*, IN QosStatus, IN IMS_UINT32), (override));
+    MOCK_METHOD(void, OnQosStatusChanged, (IN ISession*, IN QosStatus, IN IMS_UINT32, IN IMS_BOOL),
+            (override));
 };
 
 #endif

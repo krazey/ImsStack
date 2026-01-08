@@ -18,12 +18,11 @@
 #define MTC_DIALING_PLAN_H_
 
 #include "AString.h"
-#include "ImsIdentity.h"
+#include "ImsTypeDef.h"
 #include "dialingplan/IMtcDialingPlan.h"
 #include "dialingplan/NormalDialingPlan.h"
-#include <memory>
 
-class IMtcContext;
+class IMtcCallContext;
 class ISubscriberInfo;
 class ImsIdentityProxy;
 struct CallInfo;
@@ -35,50 +34,23 @@ using Scheme = NormalDialingPlan::Scheme;
 class MtcDialingPlan : public IMtcDialingPlan
 {
 public:
-    explicit MtcDialingPlan(IN IMtcContext& objContext, IN ISubscriberInfo& objSubscriberInfo);
-    virtual ~MtcDialingPlan();
+    MtcDialingPlan();
+    virtual ~MtcDialingPlan() override;
     MtcDialingPlan(IN const MtcDialingPlan&) = delete;
     MtcDialingPlan& operator=(IN const MtcDialingPlan&) = delete;
 
-public:
-    AString GetToUri(IN const AString& strNumber, IN const CallInfo& objCallInfo,
+    AString GetToUri(IN const AString& strNumber, IN IMtcCallContext& objContext,
             IN Scheme eScheme = Scheme::UNKNOWN) override;
 
-    void OnCountrySpecificServiceUrnReceived(
-            IN const AString& strNumber, IN const AString& strServiceUrn) override;
+    AString GetToUriForEmergencyTestNumber(
+            IN const AString& strNumber, IN IMtcCallContext& objContext) override;
 
 private:
     static IMS_BOOL IsUriForm(IN const AString& strNumber);
-    AString GetConferenceFactoryUri() const;
-    AString GetMcc() const;
-    AString GetMnc(IN IMS_UINT32 nLength) const;
+    AString GetConferenceFactoryUri(IN IMtcCallContext& objContext) const;
 
 protected:
     ImsIdentityProxy* m_pIdentityProxy;
-
-private:
-    struct TemporaryServiceUrn final
-    {
-    public:
-        TemporaryServiceUrn(IN const AString& strNumber_, IN const AString& strUrn_) :
-                strNumber(strNumber_),
-                strUrn(strUrn_)
-        {
-        }
-        TemporaryServiceUrn(IN const TemporaryServiceUrn&) = delete;
-        TemporaryServiceUrn& operator=(IN const TemporaryServiceUrn&) = delete;
-
-        inline const AString& GetNumber() const { return strNumber; }
-        inline const AString& GetUrn() const { return strUrn; }
-
-        AString strNumber;
-        AString strUrn;
-    };
-
-    IMtcContext& m_objContext;
-    // TODO: no requirement found... try to find the standard again and update the logic.
-    std::unique_ptr<TemporaryServiceUrn> m_pTemporaryServiceUrn;
-    ISubscriberInfo& m_objSubscriberInfo;
 };
 
 #endif

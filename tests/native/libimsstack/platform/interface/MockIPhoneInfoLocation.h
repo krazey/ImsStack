@@ -19,14 +19,13 @@
 
 #include <gmock/gmock.h>
 
-#include "AString.h"
 #include "IPhoneInfoLocation.h"
 
 class MockILocationProperties : public ILocationProperties
 {
 public:
-    inline MockILocationProperties() {}
-    inline virtual ~MockILocationProperties() {}
+    MockILocationProperties() = default;
+    ~MockILocationProperties() override = default;
 
     MOCK_METHOD(const AString&, GetLatitude, (), (const, override));
     MOCK_METHOD(const AString&, GetLongitude, (), (const, override));
@@ -43,17 +42,28 @@ public:
     MOCK_METHOD(const AString&, GetVerticalAccuracy, (), (const, override));
 };
 
+class MockILocationUpdateListener : public ILocationUpdateListener
+{
+public:
+    MockILocationUpdateListener() = default;
+    ~MockILocationUpdateListener() override = default;
+
+    MOCK_METHOD(void, LocationUpdate_OnCompleted, (), (override));
+};
+
 class MockILocationInfo : public ILocationInfo
 {
 public:
-    inline MockILocationInfo() {}
-    inline virtual ~MockILocationInfo() {}
+    MockILocationInfo() = default;
+    ~MockILocationInfo() override = default;
 
     MOCK_METHOD(
             IMS_BOOL, StartListeningForLocation, (IN IMS_UINT32 nUpdateIntervalInSec), (override));
     MOCK_METHOD(void, StopListeningForLocation, (), (override));
     MOCK_METHOD(ILocationProperties*, GetLocationProperties, (IN IMS_SINT32 nType), (override));
-    MOCK_METHOD(IMS_BOOL, StartInstantLocationUpdate, (), (override));
+    MOCK_METHOD(void, RequestLocationUpdate,
+            (IN IMS_SINT32 nWaitTimeMs, IN ILocationUpdateListener* piListener), (override));
+    MOCK_METHOD(void, CancelLocationUpdate, (IN ILocationUpdateListener * piListener), (override));
     MOCK_METHOD(void, SetDefaultLocationProperties, (IN IMS_BOOL bFromUICC), (override));
     MOCK_METHOD(const AString&, GetLastKnownCountry, (), (const, override));
 };

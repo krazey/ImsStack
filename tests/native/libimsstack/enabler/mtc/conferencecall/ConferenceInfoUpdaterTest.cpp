@@ -20,8 +20,9 @@
 #include "conferencecall/ConferenceParticipantList.h"
 #include "conferencecall/MockConferenceFactory.h"
 #include "conferencecall/MockConferenceInfo.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "utility/MessageUtils.h"
 #include <gtest/gtest.h>
 
 using ::testing::Return;
@@ -53,6 +54,16 @@ namespace android
 class ConferenceInfoUpdaterTest : public ::testing::Test
 {
 public:
+    inline ConferenceInfoUpdaterTest() :
+            pInfo(IMS_NULL),
+            pDescription(IMS_NULL),
+            pFactory(IMS_NULL),
+            pConfigurationProxy(IMS_NULL),
+            pUpdater(IMS_NULL),
+            objMessageUtils(objContext)
+    {
+    }
+
     MockConferenceInfo* pInfo;
     MockConferenceDescription* pDescription;
     ImsList<AString> objUris;
@@ -60,11 +71,11 @@ public:
 
     MockIMtcContext objContext;
     MockConferenceFactory* pFactory;
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
 
     ConferenceParticipantList objParticipantList;
     ConferenceInfoUpdater* pUpdater;
+    MessageUtils objMessageUtils;
 
 protected:
     virtual void SetUp() override
@@ -72,18 +83,19 @@ protected:
         pInfo = IMS_NULL;
         pDescription = IMS_NULL;
 
-        pConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
-        ON_CALL(*pConfigurationManager, IsCheckConferenceEventPackageVersion)
+        ON_CALL(*pConfigurationProxy,
+                GetBoolean(ConfigVoice::KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL))
                 .WillByDefault(Return(IMS_TRUE));
-        ON_CALL(*pConfigurationManager, IsEnableConferenceSubscribeByParticipant)
+        ON_CALL(*pConfigurationProxy,
+                GetBoolean(ConfigVoice::KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL))
                 .WillByDefault(Return(IMS_FALSE));
 
         objParticipantList.SetLocalUri(LOCAL_URI);
 
         pFactory = new MockConferenceFactory(objContext);
-        pUpdater = new ConferenceInfoUpdater(*pFactory, *pConfigurationProxy);
+        pUpdater = new ConferenceInfoUpdater(*pFactory, *pConfigurationProxy, objMessageUtils);
     }
 
     virtual void TearDown() override
@@ -181,7 +193,8 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateFailsByInvalidVersionInPartialState)
 
 TEST_F(ConferenceInfoUpdaterTest, UpdateSucceedsEvenInvalidVersionIfConfigurationOff)
 {
-    ON_CALL(*pConfigurationManager, IsCheckConferenceEventPackageVersion)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
     SetUpDefaultUsers();
@@ -194,7 +207,8 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateSucceedsEvenInvalidVersionIfConfiguratio
 
 TEST_F(ConferenceInfoUpdaterTest, UpdateSucceedsIfValidVersionWithPartialState)
 {
-    ON_CALL(*pConfigurationManager, IsCheckConferenceEventPackageVersion)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
     SetUpDefaultUsers();
@@ -207,7 +221,8 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateSucceedsIfValidVersionWithPartialState)
 
 TEST_F(ConferenceInfoUpdaterTest, UpdateSucceedsIfValidVersionWithFullState)
 {
-    ON_CALL(*pConfigurationManager, IsCheckConferenceEventPackageVersion)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
     SetUpDefaultUsers();
@@ -223,6 +238,16 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateFailsByInitialNotifyWithoutUsers)
     SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 1);
 
     EXPECT_EQ(ConferenceInfoUpdater::RESULT_NOTHING_UPDATED,
+            pUpdater->Update(&objParticipantList, ANY_EVENT_PACKAGE_BODY));
+}
+
+TEST_F(ConferenceInfoUpdaterTest,
+        UpdateDoesNotFailByInitialNotifyWithoutUsersIfPreviousVersionIsValid)
+{
+    SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 11);
+    objParticipantList.SetXmlVersion(10);
+
+    EXPECT_EQ(ConferenceInfoUpdater::RESULT_UPDATED,
             pUpdater->Update(&objParticipantList, ANY_EVENT_PACKAGE_BODY));
 }
 
@@ -247,11 +272,11 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateByUserEntityWithLegid)
 
     AString strAnyEntityWithLegid1 = USER_ENTITY1 + ";legid=1";
     AddUserToInfo(strAnyEntityWithLegid1, eStatusAfter1);
-    ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
+    const ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
 
     AString strAnyEntityWithLegid2 = USER_ENTITY2 + ";legid=2";
     AddUserToInfo(strAnyEntityWithLegid2, eStatusAfter2);
-    ConfUser* pUser2 = AddParticipant(USER_ENTITY2, USER_ENTITY2, eStatusBefore2);
+    const ConfUser* pUser2 = AddParticipant(USER_ENTITY2, USER_ENTITY2, eStatusBefore2);
 
     SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 1);
 
@@ -268,14 +293,13 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateByUserEntityMatching)
     IMS_UINT32 eStatusAfter1 = STATUS_CONNECTED;
     IMS_UINT32 eStatusAfter2 = STATUS_ON_HOLD;
 
-    AString strAnyEntity1WithPhone = USER_ENTITY1 + ";user=phone";
-    AddUserToInfo(USER_ENTITY1, eStatusAfter1);
-    ConfUser* pUser1 =
-            AddParticipant(strAnyEntity1WithPhone, strAnyEntity1WithPhone, eStatusBefore1);
+    AString strAnyEntity1 = USER_ENTITY1;
+    AddUserToInfo(strAnyEntity1, eStatusAfter1);
+    const ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
 
     AString strAnyEntity2 = USER_ENTITY2;
     AddUserToInfo(strAnyEntity2, eStatusAfter2);
-    ConfUser* pUser2 = AddParticipant(USER_ENTITY2, USER_ENTITY2, eStatusBefore2);
+    const ConfUser* pUser2 = AddParticipant(USER_ENTITY2, USER_ENTITY2, eStatusBefore2);
 
     SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 1);
 
@@ -283,6 +307,30 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateByUserEntityMatching)
             pUpdater->Update(&objParticipantList, ANY_EVENT_PACKAGE_BODY));
     EXPECT_EQ(pUser1->eStatus, eStatusAfter1);
     EXPECT_EQ(pUser2->eStatus, eStatusAfter2);
+}
+
+TEST_F(ConferenceInfoUpdaterTest, UpdateByUserEntityMatchingByDifferentUserPhoneParameter)
+{
+    IMS_UINT32 eStatusBefore1 = STATUS_IDLE;
+    IMS_UINT32 eStatusBefore2 = STATUS_IDLE;
+    IMS_UINT32 eStatusAfter1 = STATUS_CONNECTED;
+    IMS_UINT32 eStatusAfter2 = STATUS_ON_HOLD;
+
+    AString strAnyEntity1WithPhone = USER_ENTITY1 + ";user=phone";
+    AddUserToInfo(strAnyEntity1WithPhone, eStatusAfter1);
+    const ConfUser* pUser1 = AddParticipant(USER_ENTITY1, strAnyEntity1WithPhone, eStatusBefore1);
+
+    AString strAnyEntity2WithoutPhone = USER_ENTITY2;
+    AddUserToInfo(strAnyEntity2WithoutPhone, eStatusAfter2);
+    const ConfUser* pUser2 = AddParticipant(
+            USER_ENTITY2 + ";user=phone", USER_ENTITY2 + ";user=phone", eStatusBefore2);
+
+    SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 1);
+
+    EXPECT_EQ(ConferenceInfoUpdater::RESULT_UPDATED,
+            pUpdater->Update(&objParticipantList, ANY_EVENT_PACKAGE_BODY));
+    EXPECT_EQ(pUser1->eStatus, eStatusBefore1);
+    EXPECT_EQ(pUser2->eStatus, eStatusBefore2);
 }
 
 TEST_F(ConferenceInfoUpdaterTest, UpdateByUserEntityMatchingWithAnonymousUri)
@@ -312,10 +360,10 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateByOrderMatching)
     AddUserToInfo(LOCAL_URI, STATUS_CONNECTED);
 
     AddUserToInfo(ANONYMOUS1_URI, eStatusAfter1);
-    ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
+    ConfUser* pUser1 = AddParticipant("", USER_ENTITY1, eStatusBefore1);
 
     AddUserToInfo(ANONYMOUS2_URI, eStatusAfter2);
-    ConfUser* pUser2 = AddParticipant(USER_ENTITY2, USER_ENTITY2, eStatusBefore2);
+    ConfUser* pUser2 = AddParticipant("", USER_ENTITY2, eStatusBefore2);
 
     SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 1);
 
@@ -327,9 +375,35 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateByOrderMatching)
     EXPECT_STREQ(pUser2->strUserEntity.GetStr(), ANONYMOUS2_URI.GetStr());
 }
 
+TEST_F(ConferenceInfoUpdaterTest, UpdateByOrderMatchingDoesNotUpdateIfAlreadyHaveUserEntity)
+{
+    IMS_UINT32 eStatusBefore1 = STATUS_IDLE;
+    IMS_UINT32 eStatusBefore2 = STATUS_IDLE;
+    IMS_UINT32 eStatusAfter1 = STATUS_CONNECTED;
+    IMS_UINT32 eStatusAfter2 = STATUS_ON_HOLD;
+
+    AddUserToInfo(LOCAL_URI, STATUS_CONNECTED);
+
+    AddUserToInfo(ANONYMOUS1_URI, eStatusAfter1);
+    ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
+
+    AddUserToInfo(ANONYMOUS2_URI, eStatusAfter2);
+    ConfUser* pUser2 = AddParticipant(USER_ENTITY2, USER_ENTITY2, eStatusBefore2);
+
+    SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 1);
+
+    EXPECT_EQ(ConferenceInfoUpdater::RESULT_UPDATED,
+            pUpdater->Update(&objParticipantList, ANY_EVENT_PACKAGE_BODY));
+    EXPECT_EQ(pUser1->eStatus, eStatusBefore1);
+    EXPECT_STREQ(pUser1->strUserEntity.GetStr(), USER_ENTITY1.GetStr());
+    EXPECT_EQ(pUser2->eStatus, eStatusBefore2);
+    EXPECT_STREQ(pUser2->strUserEntity.GetStr(), USER_ENTITY2.GetStr());
+}
+
 TEST_F(ConferenceInfoUpdaterTest, UpdateByOrderMatchingOnParticipant)
 {
-    ON_CALL(*pConfigurationManager, IsEnableConferenceSubscribeByParticipant)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL))
             .WillByDefault(Return(IMS_TRUE));
 
     IMS_UINT32 eStatusAfter1 = STATUS_CONNECTED;
@@ -360,10 +434,10 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateByReferToMatching)
     IMS_UINT32 eStatusAfter2 = STATUS_ON_HOLD;
 
     AddUserToInfo(USER_ENTITY1, eStatusAfter1);
-    ConfUser* pUser1 = AddParticipant(ANONYMOUS1_URI, USER_ENTITY1, eStatusBefore1);
+    ConfUser* pUser1 = AddParticipant("", USER_ENTITY1, eStatusBefore1);
 
     AddUserToInfo(USER_ENTITY2, eStatusAfter2);
-    ConfUser* pUser2 = AddParticipant(ANONYMOUS2_URI, USER_ENTITY2, eStatusBefore2);
+    ConfUser* pUser2 = AddParticipant("", USER_ENTITY2, eStatusBefore2);
 
     SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 1);
 
@@ -373,6 +447,29 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateByReferToMatching)
     EXPECT_STREQ(pUser1->strUserEntity.GetStr(), USER_ENTITY1.GetStr());
     EXPECT_EQ(pUser2->eStatus, eStatusAfter2);
     EXPECT_STREQ(pUser2->strUserEntity.GetStr(), USER_ENTITY2.GetStr());
+}
+
+TEST_F(ConferenceInfoUpdaterTest, UpdateByReferToMatchingDoesNotUpdateIfAlreadyHaveUserEntity)
+{
+    IMS_UINT32 eStatusBefore1 = STATUS_IDLE;
+    IMS_UINT32 eStatusBefore2 = STATUS_IDLE;
+    IMS_UINT32 eStatusAfter1 = STATUS_CONNECTED;
+    IMS_UINT32 eStatusAfter2 = STATUS_ON_HOLD;
+
+    AddUserToInfo(USER_ENTITY1, eStatusAfter1);
+    ConfUser* pUser1 = AddParticipant(ANONYMOUS1_URI, USER_ENTITY1, eStatusBefore1);
+
+    AddUserToInfo(USER_ENTITY2, eStatusAfter2);
+    ConfUser* pUser2 = AddParticipant(ANONYMOUS2_URI, USER_ENTITY2, eStatusBefore2);
+
+    SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 1);
+
+    EXPECT_EQ(ConferenceInfoUpdater::RESULT_UPDATED,
+            pUpdater->Update(&objParticipantList, ANY_EVENT_PACKAGE_BODY));
+    EXPECT_EQ(pUser1->eStatus, eStatusBefore1);
+    EXPECT_STREQ(pUser1->strUserEntity.GetStr(), ANONYMOUS1_URI.GetStr());
+    EXPECT_EQ(pUser2->eStatus, eStatusBefore2);
+    EXPECT_STREQ(pUser2->strUserEntity.GetStr(), ANONYMOUS2_URI.GetStr());
 }
 
 TEST_F(ConferenceInfoUpdaterTest, UpdatebyUserEntityWithPrefix)
@@ -400,12 +497,12 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateDoesNotSetDisconnectedBeforeConnected)
     IMS_UINT32 eStatusAfter2 = STATUS_DISCONNECTED;
 
     // no User entity in the first NOTIFY case
-    ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
+    const ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
 
     // disconnected status before connected case
     AString strAnyEntityWithLegid2 = USER_ENTITY2;
     AddUserToInfo(strAnyEntityWithLegid2, eStatusAfter2);
-    ConfUser* pUser2 = AddParticipant(USER_ENTITY2, USER_ENTITY2, eStatusBefore2);
+    const ConfUser* pUser2 = AddParticipant(USER_ENTITY2, USER_ENTITY2, eStatusBefore2);
 
     SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 1);
 
@@ -423,13 +520,13 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateSetsDisconnectedAfterConnected)
     IMS_UINT32 eStatusAfter2 = STATUS_DISCONNECTED;
 
     // no User entity in the first NOTIFY case
-    ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
+    const ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
     objParticipantList.GetAt(0)->SetInfoUpdated(IMS_TRUE);
 
     // disconnected status before connected case
     AString strAnyEntityWithLegid2 = USER_ENTITY2;
     AddUserToInfo(strAnyEntityWithLegid2, eStatusAfter2);
-    ConfUser* pUser2 = AddParticipant(USER_ENTITY2, USER_ENTITY2, eStatusBefore2);
+    const ConfUser* pUser2 = AddParticipant(USER_ENTITY2, USER_ENTITY2, eStatusBefore2);
     objParticipantList.GetAt(1)->SetInfoUpdated(IMS_TRUE);
 
     SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 1);
@@ -447,13 +544,13 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateDoesNotSetDisconnectedIfPartial)
     IMS_UINT32 eStatusAfter2 = STATUS_CONNECTED;
 
     // no User entity in the first NOTIFY case
-    ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
+    const ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
     objParticipantList.GetAt(0)->SetInfoUpdated(IMS_TRUE);
 
     // disconnected status before connected case
     AString strAnyEntityWithLegid2 = USER_ENTITY2;
     AddUserToInfo(strAnyEntityWithLegid2, eStatusAfter2);
-    ConfUser* pUser2 = AddParticipant(USER_ENTITY2, USER_ENTITY2, eStatusBefore2);
+    const ConfUser* pUser2 = AddParticipant(USER_ENTITY2, USER_ENTITY2, eStatusBefore2);
     objParticipantList.GetAt(1)->SetInfoUpdated(IMS_TRUE);
 
     SetUpConferenceInfo(ConferenceInfo::STATE_PARTIAL, 1);
@@ -471,7 +568,7 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateDisconnectingStatusAsDisconnected)
     IMS_UINT32 eStatusAfterModified1 = STATUS_DISCONNECTED;
 
     AddUserToInfo(USER_ENTITY1, eStatusAfter1);
-    ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
+    const ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
     objParticipantList.GetAt(0)->SetInfoUpdated(IMS_TRUE);
 
     SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 1);

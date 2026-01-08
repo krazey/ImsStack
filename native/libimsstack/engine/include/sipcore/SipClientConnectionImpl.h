@@ -30,7 +30,7 @@ class SipClientConnectionImpl :
 {
 public:
     explicit SipClientConnectionImpl(IN SipClientConnection* pScc);
-    virtual ~SipClientConnectionImpl();
+    ~SipClientConnectionImpl() override;
 
     SipClientConnectionImpl() = delete;
     SipClientConnectionImpl(IN const SipClientConnectionImpl&) = delete;
@@ -64,6 +64,7 @@ private:
     IMS_SINT32 GetHeaderCount(IN const AString& strName) const override;
     ISipMessage* GetMessage() const override;
     IMS_SINT32 GetSlotId() const override;
+    SipProfile* GetSipProfile() const override;
     void SetSipProfile(IN SipProfile* pProfile) override;
     void SetTransactionTimerValues(IN const SipTimerValues& objTimerValues) override;
 
@@ -80,7 +81,6 @@ private:
     }
     IMS_RESULT SetRequestUri(IN const AString& strUri) override;
     ISipGenericChallenge* GetAuthenticationChallenge(IN IMS_SINT32 nIndex = 0) const override;
-    ISipAckPackage* GrabAck() override;
     IMS_RESULT InitResubmissionRequest() override;
     void RemoveAllChallenges() override;
     void RemoveAllCredentials() override;
@@ -90,6 +90,7 @@ private:
     void SetTransportTuple(IN const IpAddress& objIp, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
             IN IMS_SINT32 nPortFc = Sip::PORT_UNSPECIFIED,
             IN IMS_SINT32 nTransportExt = Sip::TRANSPORT_EXT_ANY) override;
+    void RetransmitAck() override;
 
     // IOnSipErrorListener interface
     void OnError_NotifyError(

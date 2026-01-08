@@ -72,7 +72,6 @@
 #define IMS_MSG_AOS                  (IMS_MSG_APP_INTERNAL + 3000)
 #define IMS_MSG_SMS                  (IMS_MSG_APP_INTERNAL + 4000)
 #define IMS_MSG_UCE                  (IMS_MSG_APP_INTERNAL + 5000)
-#define IMS_MSG_SIP_DELEGATE         (IMS_MSG_APP_INTERNAL + 6000)
 
 //// USER_BASE
 #define IMS_MSG_USER                 (IMS_MSG_USER_BASE + 0)

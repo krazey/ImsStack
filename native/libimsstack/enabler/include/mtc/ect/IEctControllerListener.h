@@ -17,15 +17,18 @@
 #ifndef INTERFACE_ECT_CONTROLLER_LISTENER_H_
 #define INTERFACE_ECT_CONTROLLER_LISTENER_H_
 
+/**
+ * @brief Listener interface for events from an EctController.
+ *
+ * This interface is used by classes that need to be notified about the completion
+ * of an Explicit Call Transfer (ECT) operation.
+ */
 class IEctControllerListener
 {
 public:
     virtual ~IEctControllerListener() = default;
 
-    /**
-     * @brief Notifies
-     *
-     */
+    /** Notifies the listener that the ECT operation has been completed. */
     virtual void OnEctCompleted() = 0;
 };
 

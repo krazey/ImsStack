@@ -15,11 +15,13 @@
  */
 
 #include "AString.h"
+#include "CarrierConfig.h"
 #include "ICarrierConfig.h"
 #include "ICoreService.h"
 #include "IJniMtcServiceThread.h"
 #include "IMtcContext.h"
 #include "IMtcService.h"
+#include "INetworkWatcher.h"
 #include "ImsAosParameter.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
@@ -27,6 +29,7 @@
 #include "MtcDef.h"
 #include "ServiceConfig.h"
 #include "ServiceTrace.h"
+#include "SipAddress.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "dialogevent/DialogInfo.h"
@@ -40,7 +43,6 @@
 #include "helper/IMtcAosConnector.h"
 #include "helper/IMtcAosStateListener.h"
 #include "registration/SipUrnHelper.h"
-#include "sipcore/SipAddress.h"
 #include <memory>
 #include <utility>
 
@@ -59,6 +61,7 @@ MultiEndpointManager::MultiEndpointManager(
     if (piNormalService)
     {
         piNormalService->AddAosStateListener(this);
+        piNormalService->AddNetworkWatcherListener(this);
     }
 
     ICarrierConfig* piCc =
@@ -79,6 +82,7 @@ MultiEndpointManager::~MultiEndpointManager()
     if (piNormalService)
     {
         piNormalService->RemoveAosStateListener(this);
+        piNormalService->RemoveNetworkWatcherListener(this);
     }
 
     ICarrierConfig* piCc =
@@ -92,7 +96,7 @@ MultiEndpointManager::~MultiEndpointManager()
 PUBLIC GLOBAL IMS_BOOL MultiEndpointManager::IsRequired(
         IN const MtcConfigurationProxy& objConfigProxy)
 {
-    return objConfigProxy.Is(Feature::MULTIENDPOINT_SUPPORTED);
+    return objConfigProxy.GetBoolean(ConfigVoice::KEY_MULTIENDPOINT_SUPPORTED_BOOL);
 }
 
 VIRTUAL PUBLIC IMultiEndpointManager::PullingDialogInfo MultiEndpointManager::GetDialogInfo(
@@ -124,14 +128,10 @@ VIRTUAL PUBLIC IMultiEndpointManager::PullingDialogInfo MultiEndpointManager::Ge
     return objInfo;
 }
 
-VIRTUAL PUBLIC void MultiEndpointManager::OnAosStateChanged(
-        IN IMtcService& /*objMtcService*/, IN MtcAosState /*eState*/, IN IMS_UINT32 /*eAosReason*/)
-{
-    HandleConditionChanged();
-}
-
-VIRTUAL PUBLIC void MultiEndpointManager::OnIpcanChanged(
-        IN IMtcService& /*objMtcService*/, IN IMS_UINT32 /*eIpcan*/)
+VIRTUAL PUBLIC void MultiEndpointManager::OnAosStateChanged(IN
+        [[maybe_unused]] IMtcService& objMtcService,
+        IN [[maybe_unused]] MtcAosState eState, IN [[maybe_unused]] IMS_UINT32 eAosReason,
+        IN [[maybe_unused]] IMS_SINT32 nDataFailureReason)
 {
     HandleConditionChanged();
 }
@@ -159,7 +159,10 @@ VIRTUAL PUBLIC void MultiEndpointManager::OnSubscriptionStartFailed()
     // If the response code is 403, MEP must be stopped and re-started after an initial
     // registration. Here, not checking the response code because subscription retry is done
     // in DialogSubscription and if a subscription is failed, there is no way to keep MEP on.
-    // TODO: timer for Retry-After and call HandleConditionChanged() when the timer expires.
+
+    // Currently Retry-After timer handling and it's expiration handling(HandleConditionChanged) is
+    // not implemented.
+
     Stop();
 }
 
@@ -176,6 +179,16 @@ VIRTUAL PUBLIC void MultiEndpointManager::OnSubscriptionNotified(IN const AStrin
     if (m_piDialogInfoManager->Update(strBody) == IMS_SUCCESS)
     {
         NotifyExternalCalls();
+    }
+}
+
+VIRTUAL PUBLIC void MultiEndpointManager::OnRatChanged(IN [[maybe_unused]] ServiceType eServiceType,
+        IN IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType)
+{
+    if (eOldRatType == INetworkWatcher::RADIOTECH_TYPE_IWLAN ||
+            eRatType == INetworkWatcher::RADIOTECH_TYPE_IWLAN)
+    {
+        HandleConditionChanged();
     }
 }
 
@@ -206,15 +219,17 @@ PRIVATE
 IMS_BOOL MultiEndpointManager::IsReady() const
 {
     IMS_TRACE_D("IsReady", 0, 0, 0);
-    // TODO: check config and service activation status.
     if (IsRequired(m_objContext.GetConfigurationProxy()) == IMS_FALSE)
     {
         return IMS_FALSE;
     }
 
-    // TODO: need to check AoS behavior.
-    return (m_objContext.GetAosConnector(ServiceType::NORMAL)->GetFeatures() &
-                   ImsAosFeature::MMTEL) == ImsAosFeature::MMTEL;
+    if (m_objContext.GetAosConnector(ServiceType::NORMAL))
+    {
+        return (m_objContext.GetAosConnector(ServiceType::NORMAL)->GetFeatures() &
+                ImsAosFeature::MMTEL);
+    }
+    return IMS_FALSE;
 }
 
 PRIVATE
@@ -283,7 +298,6 @@ ImsList<const JniExternalCall*> MultiEndpointManager::GetJniExternalCalls() cons
         if (IsOwnDialog(objDialog))
         {
             IMS_TRACE_D("GetJniExternalCalls ignores my own dialog", 0, 0, 0);
-            // TODO: this could be also done in Telephony Side.
             continue;
         }
 
@@ -398,8 +412,7 @@ IMS_BOOL MultiEndpointManager::IsOwnDialog(const Dialog& objDialog) const
         {
             // Removing "gr=" (3 characters)
             strToken = strToken.GetSubStr(3, strToken.GetLength() - 3);
-            return SipUrnHelper::GetUrn(
-                    m_objContext.GetSlotId(), SipUrnHelper::GSMA_IMEI, IMS_FALSE)
+            return SipUrnHelper::GetUrn(m_objContext.GetSlotId(), SipUrnHelper::GSMA_IMEI)
                     .Equals(strToken);
         }
     }

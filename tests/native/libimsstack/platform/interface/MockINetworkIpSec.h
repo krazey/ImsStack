@@ -18,16 +18,13 @@
 
 #include <gmock/gmock.h>
 
-#include "IIpSecPolicy.h"
 #include "INetworkIpSec.h"
-#include "ISocket.h"
-#include "SocketAddress.h"
 
 class MockINetworkIpSec : public INetworkIpSec
 {
 public:
-    inline MockINetworkIpSec() {}
-    inline virtual ~MockINetworkIpSec() {}
+    MockINetworkIpSec() = default;
+    ~MockINetworkIpSec() override = default;
 
     MOCK_METHOD(IIpSecPolicy*, CreatePolicy, (), (override));
     MOCK_METHOD(void, DestroyPolicy, (IN IIpSecPolicy * piPolicy), (override));
@@ -40,7 +37,8 @@ public:
             (IN ISocket * piSocket, IN const SocketAddress& objLocal,
                     IN const SocketAddress* pRemote),
             (override));
-    MOCK_METHOD(IMS_BOOL, ApplyIpSecTransform, (IN ISocket * piSocket, IN ISocket* piServerSocket),
+    MOCK_METHOD(IMS_BOOL, ApplyIpSecTransform,
+            (IN ISocket * piSocket, IN ISocket* piServerSocket, IN const SocketAddress& objRemote),
             (override));
     MOCK_METHOD(void, RemoveIpSecTransforms, (IN IMS_SINT32 nSocketId), (override));
 };

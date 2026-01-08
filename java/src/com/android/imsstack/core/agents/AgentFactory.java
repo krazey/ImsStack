@@ -18,10 +18,14 @@ package com.android.imsstack.core.agents;
 import android.content.Context;
 import android.util.SparseArray;
 
+import androidx.annotation.NonNull;
+
+import com.android.imsstack.base.DeviceConfig;
+import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.imsstack.util.Log;
-import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -39,7 +43,7 @@ public final class AgentFactory {
     private static AgentFactory sInstance = null;
 
     private AgentFactory() {
-        int supportedSimCount = MSimUtils.getSupportedSimCount();
+        int supportedSimCount = DeviceConfig.getSupportedSimCount();
         mSystemCallAgents = new SparseArray<>(supportedSimCount);
         mAgentsForSlot = new SparseArray<>(supportedSimCount);
 
@@ -141,7 +145,7 @@ public final class AgentFactory {
             return;
         }
 
-        Log.i(Log.TAG, "createAgents");
+        Log.i(this, "createAgents");
 
         if (mDefaultSystemCallAgent == null) {
             mDefaultSystemCallAgent = new DefaultSystemCallAgent();
@@ -159,7 +163,7 @@ public final class AgentFactory {
      * Destroys the default agents.
      */
     public void destroyAgents() {
-        Log.i(Log.TAG, "destroyAgents");
+        Log.i(this, "destroyAgents");
 
         Collection<IAgent> agentList = reverseCollection(mAgents.values());
         for (IAgent agent : agentList) {
@@ -180,7 +184,7 @@ public final class AgentFactory {
      * @param context A {@link Context} object.
      */
     public void initAgents(Context context) {
-        Log.i(Log.TAG, "initAgents");
+        Log.i(this, "initAgents");
 
         if (mDefaultSystemCallAgent == null) {
             mDefaultSystemCallAgent = new DefaultSystemCallAgent();
@@ -209,7 +213,7 @@ public final class AgentFactory {
             return;
         }
 
-        Log.i(Log.TAG, "createAgentsForSlot" + slotId);
+        Log.i(this, "createAgentsForSlot" + slotId);
 
         mSystemCallAgents.put(slotId, new SystemCallAgent(slotId));
 
@@ -232,7 +236,7 @@ public final class AgentFactory {
      * @param slotId A slot id.
      */
     public void destroyAgentsForSlot(int slotId) {
-        Log.i(Log.TAG, "destroyAgentsForSlot" + slotId);
+        Log.i(this, "destroyAgentsForSlot" + slotId);
 
         Map<Class<?>, IAgent> agents = mAgentsForSlot.get(slotId);
 
@@ -261,7 +265,7 @@ public final class AgentFactory {
      * @param slotId A slot id.
      */
     public void initAgentsForSlot(Context context, int slotId) {
-        Log.i(Log.TAG, "initAgentsForSlot" + slotId);
+        Log.i(this, "initAgentsForSlot" + slotId);
 
         SystemCallAgent sca = mSystemCallAgents.get(slotId);
 
@@ -276,6 +280,56 @@ public final class AgentFactory {
                 if (agent != null) {
                     agent.init(context);
                 }
+            }
+        }
+    }
+
+    /**
+     * Dumps this instance into a readable format for dumpsys usage.
+     *
+     * @param printWriter A {@link PrintWriter} object used to write the formatted logs
+     */
+    public void dump(@NonNull PrintWriter printWriter) {
+        IndentingPrintWriter pw = new IndentingPrintWriter(printWriter, "  ");
+
+        pw.println("Common:");
+        pw.increaseIndent();
+
+        for (IAgent agent : mAgents.values()) {
+            if (agent != null) {
+                agent.dump(pw);
+            }
+        }
+
+        pw.decreaseIndent();
+
+        for (int i = 0; i < mAgentsForSlot.size(); ++i) {
+            int slotId = mAgentsForSlot.keyAt(i);
+            pw.printf("Slot%d:\n", slotId);
+            pw.increaseIndent();
+
+            Map<Class<?>, IAgent> agents = mAgentsForSlot.get(slotId);
+            for (IAgent agent : agents.values()) {
+                // ConfigInterface is handled specially outside of this loop.
+                if (agent == null || agent instanceof ConfigInterface) {
+                    continue;
+                }
+                agent.dump(pw);
+            }
+
+            pw.decreaseIndent();
+        }
+        pw.println();
+
+        pw.flush();
+        pw.println("### Carrier Configs");
+
+        for (int i = 0; i < mAgentsForSlot.size(); ++i) {
+            int slotId = mAgentsForSlot.keyAt(i);
+            ConfigInterface ci = getAgent(ConfigInterface.class, slotId);
+            if (ci != null) {
+                ci.dump(pw);
+                pw.flush();
             }
         }
     }

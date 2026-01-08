@@ -16,7 +16,9 @@
 #ifndef NATIVE_COMMANDS_HANDLER_H_
 #define NATIVE_COMMANDS_HANDLER_H_
 
-#include "IEnablerLoader.h"
+#include "ImsTypeDef.h"
+
+class IEnablerLoader;
 
 class NativeCommandsHandler
 {

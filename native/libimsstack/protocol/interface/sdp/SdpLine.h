@@ -16,7 +16,9 @@
 #ifndef SDP_LINE_H_
 #define SDP_LINE_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
+
+class AString;
 
 class SdpLine
 {

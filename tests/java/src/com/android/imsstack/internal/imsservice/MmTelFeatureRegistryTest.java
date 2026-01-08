@@ -28,22 +28,24 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.provider.Settings;
 import android.telecom.TelecomManager;
 import android.telephony.SubscriptionManager;
-import android.telephony.ims.ImsManager;
 import android.telephony.ims.ImsMmTelManager;
-import android.telephony.ims.ProvisioningManager;
-import android.test.mock.MockContentResolver;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.telephony.ims.ImsService;
 import android.testing.TestableLooper;
 
+import androidx.test.filters.SmallTest;
+
 import com.android.imsstack.ContextFixture;
-import com.android.imsstack.util.AppContext;
-import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.ContentProviderProxy.SettingsProxy;
+import com.android.imsstack.base.SystemServiceProxy.ImsManagerProxy;
+import com.android.imsstack.base.SystemServiceProxy.ImsMmTelManagerProxy;
+import com.android.imsstack.base.SystemServiceProxy.SubscriptionManagerProxy;
+import com.android.imsstack.base.TestAppContext;
 
 import org.junit.After;
 import org.junit.Before;
@@ -55,39 +57,31 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class MmTelFeatureRegistryTest {
-    private static final int SLOT0 = 0;
-    private static final int[] SUB_ID = { 1 };
+    @Mock private SettingsProxy mSettingsProxy;
+    @Mock private MmTelFeatureRegistry.Listener mListener;
 
-    @Mock ImsMmTelManager mMmTelManager;
-    @Mock ProvisioningManager mProvisioningManager;
-    @Mock MmTelFeatureRegistry.Listener mListener;
-    private Context mContext;
     private ContextFixture mContextFixture;
-    private FakeSettingsProvider mSettingsProvider;
-    private ImsManager mImsManager;
-    private SubscriptionManager mSubscriptionManager;
+    private TestAppContext mTestAppContext;
     private TestableLooper mTestableLooper;
+    private ImsManagerProxy mImsManagerProxy;
+    private ImsMmTelManagerProxy mImsMmTelManagerProxy;
     private MmTelFeatureRegistry mMmTelFeatureRegistry;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        FakeSettingsProvider.clearSettingsProvider();
 
         mContextFixture = new ContextFixture();
-        mContext = mContextFixture.getTestDouble();
-        AppContext.init(mContext);
-        mSubscriptionManager = mContext.getSystemService(SubscriptionManager.class);
-        when(mSubscriptionManager.getSubscriptionIds(eq(SLOT0))).thenReturn(SUB_ID);
-        mImsManager = mContext.getSystemService(ImsManager.class);
-        when(mImsManager.getImsMmTelManager(anyInt())).thenReturn(mMmTelManager);
-        when(mImsManager.getProvisioningManager(anyInt())).thenReturn(mProvisioningManager);
-        mSettingsProvider = new FakeSettingsProvider();
-        ((MockContentResolver) mContext.getContentResolver()).addProvider(
-                Settings.AUTHORITY, mSettingsProvider);
+        mTestAppContext = new TestAppContext(mContextFixture.getTestDouble());
+        mTestAppContext.setUp();
+
+        when(mTestAppContext.getContentProviderProxy().getSecureSettings())
+                .thenReturn(mSettingsProxy);
+        mImsManagerProxy = mTestAppContext.getSystemServiceProxy(ImsManagerProxy.class);
+        mImsMmTelManagerProxy = mImsManagerProxy.getImsMmTelManagerProxy(TestAppContext.SUB_ID_1);
         mTestableLooper = new TestableLooper(AppContext.getInstance().getMainLooper());
 
-        mMmTelFeatureRegistry = new MmTelFeatureRegistry(SLOT0);
+        mMmTelFeatureRegistry = new MmTelFeatureRegistry(TestAppContext.SLOT0);
     }
 
     @After
@@ -96,13 +90,20 @@ public class MmTelFeatureRegistryTest {
             mTestableLooper.destroy();
             mTestableLooper = null;
         }
-        mProvisioningManager = null;
-        mMmTelManager = null;
+        mImsMmTelManagerProxy = null;
+        mImsManagerProxy = null;
         mMmTelFeatureRegistry = null;
-        AppContext.deinit();
-        mContext = null;
         mContextFixture = null;
-        FakeSettingsProvider.clearSettingsProvider();
+        mSettingsProxy = null;
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
+    }
+
+    @Test
+    @SmallTest
+    public void testGetTerminalBasedServiceCapabilities() {
+        assertTrue((ImsService.CAPABILITY_TERMINAL_BASED_CALL_WAITING
+                & mMmTelFeatureRegistry.getTerminalBasedServiceCapabilities()) > 0);
     }
 
     @Test
@@ -161,18 +162,18 @@ public class MmTelFeatureRegistryTest {
         verify(mListener, never()).onSrvccStateChanged(anyInt());
 
         mMmTelFeatureRegistry.addListener(mListener);
-        mMmTelFeatureRegistry.setTerminalBasedCallWaitingStatus(true);
-        mMmTelFeatureRegistry.setSrvccState(MmTelFeatureRegistry.SRVCC_STATE_STARTED);
         mMmTelFeatureRegistry.setTerminalBasedCallWaitingStatus(false);
+        mMmTelFeatureRegistry.setSrvccState(MmTelFeatureRegistry.SRVCC_STATE_STARTED);
+        mMmTelFeatureRegistry.setTerminalBasedCallWaitingStatus(true);
         mMmTelFeatureRegistry.setSrvccState(MmTelFeatureRegistry.SRVCC_STATE_COMPLETED);
 
         verify(mListener, times(2)).onTerminalBasedCallWaitingStatusChanged();
         verify(mListener, times(2)).onSrvccStateChanged(anyInt());
 
         mMmTelFeatureRegistry.removeListener(mListener);
-        mMmTelFeatureRegistry.setTerminalBasedCallWaitingStatus(true);
-        mMmTelFeatureRegistry.setSrvccState(MmTelFeatureRegistry.SRVCC_STATE_STARTED);
         mMmTelFeatureRegistry.setTerminalBasedCallWaitingStatus(false);
+        mMmTelFeatureRegistry.setSrvccState(MmTelFeatureRegistry.SRVCC_STATE_STARTED);
+        mMmTelFeatureRegistry.setTerminalBasedCallWaitingStatus(true);
         mMmTelFeatureRegistry.setSrvccState(MmTelFeatureRegistry.SRVCC_STATE_COMPLETED);
 
         verifyNoMoreInteractions(mListener);
@@ -213,16 +214,16 @@ public class MmTelFeatureRegistryTest {
         verify(mListener, never()).onRttModeChanged();
 
         mMmTelFeatureRegistry.addListener(mListener);
-        when(mMmTelManager.isAdvancedCallingSettingEnabled()).thenReturn(true);
-        when(mMmTelManager.isVtSettingEnabled()).thenReturn(true);
-        when(mMmTelManager.isVoWiFiSettingEnabled()).thenReturn(true);
-        when(mMmTelManager.getVoWiFiModeSetting()).thenReturn(
-                ImsMmTelManager.WIFI_MODE_CELLULAR_PREFERRED);
-        when(mMmTelManager.isVoWiFiRoamingSettingEnabled()).thenReturn(true);
-        when(mMmTelManager.getVoWiFiRoamingModeSetting()).thenReturn(
-                ImsMmTelManager.WIFI_MODE_CELLULAR_PREFERRED);
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                MmTelFeatureRegistry.RTT_MODE_SETTING, 1);
+        when(mImsMmTelManagerProxy.isAdvancedCallingSettingEnabled()).thenReturn(true);
+        when(mImsMmTelManagerProxy.isVtSettingEnabled()).thenReturn(true);
+        when(mImsMmTelManagerProxy.isVoWiFiSettingEnabled()).thenReturn(true);
+        when(mImsMmTelManagerProxy.getVoWiFiModeSetting())
+                .thenReturn(ImsMmTelManager.WIFI_MODE_CELLULAR_PREFERRED);
+        when(mImsMmTelManagerProxy.isVoWiFiRoamingSettingEnabled()).thenReturn(true);
+        when(mImsMmTelManagerProxy.getVoWiFiRoamingModeSetting())
+                .thenReturn(ImsMmTelManager.WIFI_MODE_CELLULAR_PREFERRED);
+        when(mSettingsProxy.getInt(eq(MmTelFeatureRegistry.RTT_MODE_SETTING), anyInt()))
+                .thenReturn(1);
         mMmTelFeatureRegistry.reloadAllUserSettings();
         processAllMessages();
 
@@ -232,16 +233,16 @@ public class MmTelFeatureRegistryTest {
         verify(mListener).onRttModeChanged();
 
         mMmTelFeatureRegistry.removeListener(mListener);
-        when(mMmTelManager.isAdvancedCallingSettingEnabled()).thenReturn(false);
-        when(mMmTelManager.isVtSettingEnabled()).thenReturn(false);
-        when(mMmTelManager.isVoWiFiSettingEnabled()).thenReturn(false);
-        when(mMmTelManager.getVoWiFiModeSetting()).thenReturn(
-                ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED);
-        when(mMmTelManager.isVoWiFiRoamingSettingEnabled()).thenReturn(false);
-        when(mMmTelManager.getVoWiFiRoamingModeSetting()).thenReturn(
-                ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED);
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                MmTelFeatureRegistry.RTT_MODE_SETTING, 2);
+        when(mImsMmTelManagerProxy.isAdvancedCallingSettingEnabled()).thenReturn(false);
+        when(mImsMmTelManagerProxy.isVtSettingEnabled()).thenReturn(false);
+        when(mImsMmTelManagerProxy.isVoWiFiSettingEnabled()).thenReturn(false);
+        when(mImsMmTelManagerProxy.getVoWiFiModeSetting())
+                .thenReturn(ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED);
+        when(mImsMmTelManagerProxy.isVoWiFiRoamingSettingEnabled()).thenReturn(false);
+        when(mImsMmTelManagerProxy.getVoWiFiRoamingModeSetting())
+                .thenReturn(ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED);
+        when(mSettingsProxy.getInt(eq(MmTelFeatureRegistry.RTT_MODE_SETTING), anyInt()))
+                .thenReturn(2);
         mMmTelFeatureRegistry.reloadAllUserSettings();
         processAllMessages();
 
@@ -251,18 +252,18 @@ public class MmTelFeatureRegistryTest {
     @Test
     @SmallTest
     public void testInitUserSettings() {
-        when(mMmTelManager.isAdvancedCallingSettingEnabled()).thenReturn(true, false);
-        when(mMmTelManager.isVtSettingEnabled()).thenReturn(true, false);
-        when(mMmTelManager.isVoWiFiSettingEnabled()).thenReturn(true, false);
-        when(mMmTelManager.getVoWiFiModeSetting()).thenReturn(
+        when(mImsMmTelManagerProxy.isAdvancedCallingSettingEnabled()).thenReturn(true, false);
+        when(mImsMmTelManagerProxy.isVtSettingEnabled()).thenReturn(true, false);
+        when(mImsMmTelManagerProxy.isVoWiFiSettingEnabled()).thenReturn(true, false);
+        when(mImsMmTelManagerProxy.getVoWiFiModeSetting()).thenReturn(
                 ImsMmTelManager.WIFI_MODE_CELLULAR_PREFERRED,
                 ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED);
-        when(mMmTelManager.isVoWiFiRoamingSettingEnabled()).thenReturn(true, false);
-        when(mMmTelManager.getVoWiFiRoamingModeSetting()).thenReturn(
+        when(mImsMmTelManagerProxy.isVoWiFiRoamingSettingEnabled()).thenReturn(true, false);
+        when(mImsMmTelManagerProxy.getVoWiFiRoamingModeSetting()).thenReturn(
                 ImsMmTelManager.WIFI_MODE_CELLULAR_PREFERRED,
                 ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED);
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                MmTelFeatureRegistry.RTT_MODE_SETTING, 1);
+        when(mSettingsProxy.getInt(eq(MmTelFeatureRegistry.RTT_MODE_SETTING), anyInt()))
+                .thenReturn(1);
         mMmTelFeatureRegistry.initUserSettings();
 
         assertTrue(mMmTelFeatureRegistry.isAdvancedCallingSettingEnabled());
@@ -275,8 +276,8 @@ public class MmTelFeatureRegistryTest {
                 mMmTelFeatureRegistry.getVoWiFiRoamingModeSetting());
         assertEquals(1, mMmTelFeatureRegistry.getRttMode());
 
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                MmTelFeatureRegistry.RTT_MODE_SETTING, 0);
+        when(mSettingsProxy.getInt(eq(MmTelFeatureRegistry.RTT_MODE_SETTING), anyInt()))
+                .thenReturn(0);
         mMmTelFeatureRegistry.initUserSettings();
 
         assertFalse(mMmTelFeatureRegistry.isAdvancedCallingSettingEnabled());
@@ -296,21 +297,15 @@ public class MmTelFeatureRegistryTest {
         MmTelFeatureRegistry.UserSettings settings = mMmTelFeatureRegistry.getUserSettings();
 
         assertNotNull(settings);
-        verify(mImsManager).getImsMmTelManager(eq(SUB_ID[0]));
+        verify(mImsManagerProxy, times(2)).getImsMmTelManagerProxy(eq(TestAppContext.SUB_ID_1));
 
-        final int[] testSubId = { 2 };
-        when(mSubscriptionManager.getSubscriptionIds(SLOT0)).thenReturn(testSubId);
+        SubscriptionManagerProxy smp =
+                mTestAppContext.getSystemServiceProxy(SubscriptionManagerProxy.class);
+        when(smp.getSubscriptionId(TestAppContext.SLOT0)).thenReturn(TestAppContext.SUB_ID_2);
         settings = mMmTelFeatureRegistry.getUserSettings();
 
         assertNotNull(settings);
-        verify(mImsManager).getImsMmTelManager(eq(testSubId[0]));
-
-        final int[] testInvalidSubId = { SubscriptionManager.INVALID_SUBSCRIPTION_ID };
-        when(mSubscriptionManager.getSubscriptionIds(SLOT0)).thenReturn(testInvalidSubId);
-        settings = mMmTelFeatureRegistry.getUserSettings();
-
-        assertNotNull(settings);
-        verifyNoMoreInteractions(mImsManager);
+        verify(mImsManagerProxy).getImsMmTelManagerProxy(eq(TestAppContext.SUB_ID_2));
     }
 
     @Test
@@ -333,25 +328,26 @@ public class MmTelFeatureRegistryTest {
                 mMmTelFeatureRegistry.getVoWiFiRoamingModeSetting());
         assertEquals(0, mMmTelFeatureRegistry.getRttMode());
 
-        when(mMmTelManager.isAdvancedCallingSettingEnabled()).thenReturn(true);
-        when(mMmTelManager.isVtSettingEnabled()).thenReturn(true);
-        when(mMmTelManager.isVoWiFiSettingEnabled()).thenReturn(true);
-        when(mMmTelManager.getVoWiFiModeSetting())
+        final int subId = TestAppContext.SUB_ID_1;
+        when(mImsMmTelManagerProxy.isAdvancedCallingSettingEnabled()).thenReturn(true);
+        when(mImsMmTelManagerProxy.isVtSettingEnabled()).thenReturn(true);
+        when(mImsMmTelManagerProxy.isVoWiFiSettingEnabled()).thenReturn(true);
+        when(mImsMmTelManagerProxy.getVoWiFiModeSetting())
                 .thenReturn(ImsMmTelManager.WIFI_MODE_CELLULAR_PREFERRED);
-        when(mMmTelManager.isVoWiFiRoamingSettingEnabled()).thenReturn(true);
-        when(mMmTelManager.getVoWiFiRoamingModeSetting())
+        when(mImsMmTelManagerProxy.isVoWiFiRoamingSettingEnabled()).thenReturn(true);
+        when(mImsMmTelManagerProxy.getVoWiFiRoamingModeSetting())
                 .thenReturn(ImsMmTelManager.WIFI_MODE_CELLULAR_PREFERRED);
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                MmTelFeatureRegistry.RTT_MODE_SETTING, 1);
+        when(mSettingsProxy.getInt(eq(MmTelFeatureRegistry.RTT_MODE_SETTING), anyInt()))
+                .thenReturn(1);
         observer.onChange(false,
-                getUriFor(SubscriptionManager.ADVANCED_CALLING_ENABLED_CONTENT_URI, SUB_ID[0]));
-        observer.onChange(false, getUriFor(SubscriptionManager.VT_ENABLED_CONTENT_URI, SUB_ID[0]));
-        observer.onChange(false, getUriFor(SubscriptionManager.WFC_ENABLED_CONTENT_URI, SUB_ID[0]));
-        observer.onChange(false, getUriFor(SubscriptionManager.WFC_MODE_CONTENT_URI, SUB_ID[0]));
+                getUriFor(SubscriptionManager.ADVANCED_CALLING_ENABLED_CONTENT_URI, subId));
+        observer.onChange(false, getUriFor(SubscriptionManager.VT_ENABLED_CONTENT_URI, subId));
+        observer.onChange(false, getUriFor(SubscriptionManager.WFC_ENABLED_CONTENT_URI, subId));
+        observer.onChange(false, getUriFor(SubscriptionManager.WFC_MODE_CONTENT_URI, subId));
         observer.onChange(false,
-                getUriFor(SubscriptionManager.WFC_ROAMING_ENABLED_CONTENT_URI, SUB_ID[0]));
+                getUriFor(SubscriptionManager.WFC_ROAMING_ENABLED_CONTENT_URI, subId));
         observer.onChange(false,
-                getUriFor(SubscriptionManager.WFC_ROAMING_MODE_CONTENT_URI, SUB_ID[0]));
+                getUriFor(SubscriptionManager.WFC_ROAMING_MODE_CONTENT_URI, subId));
         observer.onChange(false, Settings.Secure.getUriFor(mMmTelFeatureRegistry.RTT_MODE_SETTING));
         // Unknown URI.
         observer.onChange(false, Uri.parse("content://unknown"));
@@ -372,22 +368,22 @@ public class MmTelFeatureRegistryTest {
     public void testCheckUserSettingsWhenExceptionOrNull() {
         doAnswer((invocation) -> {
             throw new RuntimeException("isAdvancedCallingSettingEnabled failed.");
-        }).when(mMmTelManager).isAdvancedCallingSettingEnabled();
+        }).when(mImsMmTelManagerProxy).isAdvancedCallingSettingEnabled();
         doAnswer((invocation) -> {
             throw new RuntimeException("isVtSettingEnabled failed.");
-        }).when(mMmTelManager).isVtSettingEnabled();
+        }).when(mImsMmTelManagerProxy).isVtSettingEnabled();
         doAnswer((invocation) -> {
             throw new RuntimeException("isVoWiFiSettingEnabled failed.");
-        }).when(mMmTelManager).isVoWiFiSettingEnabled();
+        }).when(mImsMmTelManagerProxy).isVoWiFiSettingEnabled();
         doAnswer((invocation) -> {
             throw new RuntimeException("getVoWiFiModeSetting failed.");
-        }).when(mMmTelManager).getVoWiFiModeSetting();
+        }).when(mImsMmTelManagerProxy).getVoWiFiModeSetting();
         doAnswer((invocation) -> {
             throw new RuntimeException("isVoWiFiRoamingSettingEnabled failed.");
-        }).when(mMmTelManager).isVoWiFiRoamingSettingEnabled();
+        }).when(mImsMmTelManagerProxy).isVoWiFiRoamingSettingEnabled();
         doAnswer((invocation) -> {
             throw new RuntimeException("getVoWiFiRoamingModeSetting failed.");
-        }).when(mMmTelManager).getVoWiFiRoamingModeSetting();
+        }).when(mImsMmTelManagerProxy).getVoWiFiRoamingModeSetting();
         MmTelFeatureRegistry.UserSettings settings = mMmTelFeatureRegistry.getUserSettings();
 
         assertNotNull(settings);
@@ -399,7 +395,7 @@ public class MmTelFeatureRegistryTest {
         assertEquals(ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED,
                 settings.getVoWiFiRoamingModeSetting());
 
-        when(mImsManager.getImsMmTelManager(anyInt())).thenReturn(null);
+        when(mImsManagerProxy.getImsMmTelManagerProxy(anyInt())).thenReturn(null);
 
         assertFalse(settings.isAdvancedCallingSettingEnabled());
         assertFalse(settings.isVtSettingEnabled());

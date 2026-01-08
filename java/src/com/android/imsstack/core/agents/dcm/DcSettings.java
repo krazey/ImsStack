@@ -19,6 +19,8 @@ package com.android.imsstack.core.agents.dcm;
 import android.content.Context;
 import android.telephony.CarrierConfigManager;
 
+import androidx.annotation.NonNull;
+
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
@@ -27,6 +29,10 @@ import com.android.imsstack.core.agents.dcmif.IDcSettings;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * This class provide interface to get carrier configurations
@@ -59,55 +65,38 @@ public class DcSettings implements IDcSettings {
     }
 
     @Override
-    public boolean isVopsRequired() {
+    public boolean isVopsIgnored() {
         CarrierConfig config = getCarrierConfig(mSlotId);
 
-        return (config == null) ? false : !config.getBoolean(
-                CarrierConfig.Assets.KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL, false);
+        return config == null || config.getBoolean(
+                CarrierConfig.ImsVoice.KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL, true);
     }
 
     @Override
-    public boolean isImsPdnRequestWithoutMmtel() {
+    public boolean isImsPdnRequestWithoutMmtelRequired() {
         CarrierConfig config = getCarrierConfig(mSlotId);
 
-        return (config == null) ? false : config.getBoolean(
-                CarrierConfig.Assets.KEY_REQUEST_IMS_PDN_WITHOUT_MMTEL_BOOL, false);
+        return config != null && config.getBoolean(
+                CarrierConfig.Ims.KEY_REQUEST_IMS_PDN_WITHOUT_MMTEL_BOOL, false);
     }
 
     @Override
-    public int[] getImsPdnEnabledInNoVopsSupport() {
+    public @NonNull List<Integer> getImsSupportedAccessNetworks() {
         CarrierConfig config = getCarrierConfig(mSlotId);
-
-        if (config != null) {
-            int[] noVopsRequired = config.getIntArray(
-                    CarrierConfigManager.Ims.KEY_IMS_PDN_ENABLED_IN_NO_VOPS_SUPPORT_INT_ARRAY);
-            if (noVopsRequired != null) {
-                return noVopsRequired;
-            } else {
-                ImsLog.w(mSlotId, "noVopsRequired is null");
-            }
-        } else {
+        if (config == null) {
             ImsLog.w(mSlotId, "config is null");
+            return Collections.emptyList();
         }
-        return new int[]{};
-    }
 
-    @Override
-    public int[] getImsSupportedRats() {
-        CarrierConfig config = getCarrierConfig(mSlotId);
+        int[] supportedRats = config.getIntArray(
+                CarrierConfigManager.Ims.KEY_SUPPORTED_RATS_INT_ARRAY);
 
-        if (config != null) {
-            int[] supportedRats = config.getIntArray(
-                    CarrierConfigManager.Ims.KEY_SUPPORTED_RATS_INT_ARRAY);
-            if (supportedRats != null) {
-                return supportedRats;
-            } else {
-                ImsLog.w(mSlotId, "supportedRats is null");
-            }
-        } else {
-            ImsLog.w(mSlotId, "config is null");
+        if (supportedRats == null) {
+            ImsLog.w(mSlotId, "supportedRats is null");
+            return Collections.emptyList();
         }
-        return new int[]{};
+
+        return IntStream.of(supportedRats).boxed().toList();
     }
 
     @Override
@@ -122,15 +111,27 @@ public class DcSettings implements IDcSettings {
     }
 
     @Override
+    public boolean isEmergencyCallbackModeSupported() {
+        CarrierConfig config = getCarrierConfig(mSlotId);
+
+        if (config != null) {
+            return config.getBoolean(
+                    CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_CALLBACK_MODE_SUPPORTED_BOOL,
+                    false);
+        }
+        return false;
+    }
+
+    @Override
     public int getPreferredIpVersion() {
         CarrierConfig config = getCarrierConfig(mSlotId);
 
         if (config != null) {
-            return config.getInt(CarrierConfig.Assets.KEY_IMS_PREFERRED_IPTYPE_INT,
-                    CarrierConfig.Assets.IPV6_PREFERRED);
+            return config.getInt(CarrierConfig.Ims.KEY_IMS_PREFERRED_IPTYPE_INT,
+                    CarrierConfig.Ims.IPV6_PREFERRED);
         }
 
-        return CarrierConfig.Assets.IPV6_PREFERRED;
+        return CarrierConfig.Ims.IPV6_PREFERRED;
     }
 
     @Override
@@ -138,10 +139,10 @@ public class DcSettings implements IDcSettings {
         CarrierConfig config = getCarrierConfig(mSlotId);
 
         if (config != null) {
-            return config.getInt(CarrierConfig.Assets.KEY_EMC_PREFERRED_IPTYPE_INT,
-                    CarrierConfig.Assets.IPV6_PREFERRED);
+            return config.getInt(CarrierConfig.ImsEmergency.KEY_EPDN_PREFERRED_IPTYPE_INT,
+                    CarrierConfig.Ims.IPV6_PREFERRED);
         }
-        return CarrierConfig.Assets.IPV6_PREFERRED;
+        return CarrierConfig.Ims.IPV6_PREFERRED;
     }
 
     @Override
@@ -153,7 +154,7 @@ public class DcSettings implements IDcSettings {
 
             if (apnType == EApnType.IMS) {
                 permanentFailure = config.getIntArray(
-                        CarrierConfig.Assets.KEY_PERMANENT_PDN_FAILURE_INT_ARRAY);
+                        CarrierConfig.Ims.KEY_PERMANENT_PDN_FAILURE_INT_ARRAY);
             } else {
                 return false;
             }
@@ -171,13 +172,29 @@ public class DcSettings implements IDcSettings {
     }
 
     @Override
-    public boolean isCdmalessFeatureTagRequired() {
-        CarrierConfig config = getCarrierConfig(mSlotId);
-
-        if (config != null) {
-            return config.getBoolean(CarrierConfig.Assets.KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL,
-                    false);
+    public boolean isCrossStackRedialCause(EApnType apnType, int causeCode) {
+        if (apnType != EApnType.EMERGENCY) {
+            return false;
         }
+
+        CarrierConfig config = getCarrierConfig(mSlotId);
+        if (config == null) {
+            return false;
+        }
+
+        int[] crossStackRedialCauses = config.getIntArray(
+                CarrierConfig.ImsEmergency.KEY_EPDN_REJECT_CAUSES_FOR_CROSS_STACK_REDIAL_INT_ARRAY);
+        if (crossStackRedialCauses == null) {
+            return false;
+        }
+
+        for (int i = 0; i < crossStackRedialCauses.length; i++) {
+            if (crossStackRedialCauses[i] == causeCode) {
+                ImsLog.w(mSlotId, "crossStackRedialCause " + causeCode);
+                return true;
+            }
+        }
+
         return false;
     }
 

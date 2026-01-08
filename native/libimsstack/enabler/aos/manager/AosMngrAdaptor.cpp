@@ -20,7 +20,7 @@
 #include "manager/AosMngr.h"
 #include "handle/AosHandle.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 PUBLIC
 AosMngrAdaptor::AosMngrAdaptor(IN const AString& strAppName, IN IMS_SINT32 nSlotId) :

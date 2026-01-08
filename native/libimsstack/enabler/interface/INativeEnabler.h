@@ -16,8 +16,6 @@
 #ifndef INTERFACE_NATIVE_ENABLER_H_
 #define INTERFACE_NATIVE_ENABLER_H_
 
-#include "ImsTypeDef.h"
-
 class INativeEnabler
 {
 public:

@@ -32,6 +32,37 @@
 #define SIP_TRACE_E(a, b, c)           SIP_DEBUG_LOG(CAT_E, __FILE__, __LINE__, a, b, c)
 // Added New DEBUG og capturing macro function
 #define SIP_TRACE_D(a, b, c)           SIP_DEBUG_LOG(CAT_D, __FILE__, __LINE__, a, b, c)
+
+#if defined(__arm)
+
+#if defined(__clang__)
+#define __IMS_FILE__ __FILE__
+#else
+#define __IMS_FILE__ __MODULE__
+#endif
+#define __IMS_LINE__ __LINE__
+#define __IMS_FUNC__ __func__
+
+#elif defined(__LINUX__)
+
+#define __IMS_FILE__ __FILE__
+#define __IMS_LINE__ __LINE__
+#define __IMS_FUNC__ __func__
+
+#else
+
+#define __IMS_FILE__ "N/A"
+#define __IMS_LINE__ 0
+#define __IMS_FUNC__ "N/A"
+
+#endif
+
+#define SIP_ASSERT(CONDITION)                                       \
+    do                                                              \
+    {                                                               \
+        if (!(CONDITION))                                           \
+            SIP_ASSERT_LOG(#CONDITION, __IMS_FUNC__, __IMS_LINE__); \
+    } while (0)
 #else
 #define SIP_DEBUG_WARNING(a, b, c, d)
 #define SIP_DEBUG_EXTRLBUG(a, b, c, d)
@@ -39,6 +70,7 @@
 #define SIP_TRACE_I(a, b, c)
 #define SIP_TRACE_E(a, b, c)
 #define SIP_TRACE_D(a, b, c)
+#define SIP_ASSERT(CONDITION)
 #endif
 
 typedef enum _SipEn_TraceModules
@@ -72,7 +104,8 @@ typedef enum _SipEn_DebugTypes
     ESIPDEBUG_INVALID = SIP_INVALID
 } SipEn_DebugTypes;
 
-void SIP_DEBUG_LOG(SIP_UINT32 nCategory, const SIP_CHAR* pszFilename, SIP_INT32 nLine,
+SIP_VOID SIP_DEBUG_LOG(SIP_UINT32 nCategory, const SIP_CHAR* pszFilename, SIP_INT32 nLine,
         const SIP_CHAR* pszFormat, ...);
+SIP_VOID SIP_ASSERT_LOG(const SIP_CHAR* pszCondition, const SIP_CHAR* pszModule, SIP_UINT16 nLine);
 
 #endif  //__SIP_DEBUG_H__

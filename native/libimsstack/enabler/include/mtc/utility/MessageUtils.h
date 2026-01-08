@@ -18,11 +18,9 @@
 #define MESSAGE_UTILS_H_
 
 #include "AString.h"
-#include "IMtcService.h"
-#include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "utility/IMessageUtils.h"
-#include "utility/MessageUtil.h"
+#include <optional>
 #include <tuple>
 
 class AStringBuffer;
@@ -33,7 +31,6 @@ class Ims3gpp;
 class ISession;
 class ISipHeader;
 class ISipMessage;
-class IMtcCall;
 class SipAddress;
 class SipParameter;
 struct ConfUser;
@@ -41,8 +38,8 @@ struct ConfUser;
 class MessageUtils : public IMessageUtils
 {
 public:
-    MessageUtils();
-    virtual ~MessageUtils();
+    explicit MessageUtils(IN IMtcContext& objContext);
+    virtual ~MessageUtils() override;
     MessageUtils(IN const MessageUtils&) = delete;
     MessageUtils& operator=(IN const MessageUtils&) = delete;
 
@@ -66,15 +63,12 @@ public:
     AString GetParameterValue(IN const IMessage* piMessage, IN const AString& strParameterName,
             IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
-    ImsList<AString> GetUserParts(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
-            IN const AString& strHeaderName = AString::ConstNull()) override;
     AString GetUserPart(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
+    AString GetUserPart(IN const AString& strUri) override;
     ImsList<AString> GetUserIds(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
     AString GetUserId(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
-            IN const AString& strHeaderName = AString::ConstNull()) override;
-    ImsList<AString> GetDisplayNames(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
     AString GetDisplayName(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
@@ -85,10 +79,13 @@ public:
     AString GetParameterValueFromUri(IN IMessage* piMessage, IN const AString& strParameterName,
             IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
-    ImsList<AString> GetUris(IN IMessage* piMessage, IN IMS_BOOL bWithParameters,
+    AString GetParameterValueFromUri(
+            IN const SipAddress& objAddress, IN const AString& strParameterName) override;
+    ImsList<AString> GetUris(IN const IMessage* piMessage, IN IMS_BOOL bWithParameters,
             IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
-    AString GetUri(IN IMessage* piMessage, IN IMS_BOOL bWithParameters, IN IMS_SINT32 eHeaderType,
+    AString GetUri(IN const IMessage* piMessage, IN IMS_BOOL bWithParameters,
+            IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
     IMS_SINT32 GetSosTypeFromServiceUrn(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
@@ -96,6 +93,8 @@ public:
             IN const AString& strProtocol = AString::ConstNull()) override;
     ReasonHeaderValue GetCauseAndTextFromReasonHeader(IN const IMessage* piMessage,
             IN const AString& strProtocol = AString::ConstNull()) override;
+    ReasonHeaderValue GetPrioritizedReasonHeader(IN const IMessage* piMessage,
+            IN const std::initializer_list<AString>& lstPrioritizedProtocols) override;
     Ims3gpp& GetIms3gppFromBody(IN const IMessage* piMessage, OUT Ims3gpp& objIms3gpp) override;
     Ims3gppData GetIms3gppData(IN const IMessage* piMessage) override;
     IMS_SINT32 GetStatusCodeInNotify(IN IMessage* piMessage) override;
@@ -103,10 +102,10 @@ public:
     IMS_BOOL IsFocusConf(IN const IMessage* piMessage) override;
     IMS_BOOL IsInitialRegistrationRequired(IN const IMessage* piMessage) override;
     IMS_BOOL IsInitialEmergencyRegistrationRequired(IN const IMessage* piMessage) override;
-    IMS_BOOL ContainsValue(IN IMessage* piMessage, IN const AString& strValue,
+    IMS_BOOL ContainsValue(IN const IMessage* piMessage, IN const AString& strValue,
             IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
-    IMS_BOOL HasValue(IN const IMessage* piMessage, IN const AString& strValue,
+    IMS_BOOL ContainsValueIgnoreCase(IN const IMessage* piMessage, IN const AString& strValue,
             IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
     IMS_BOOL IsHeaderPresent(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
@@ -114,6 +113,7 @@ public:
     IMS_BOOL ContainsTag(IN const AString& strHeader, IN const AString& strTag) override;
     IMS_BOOL ContainsAddressInPaid(
             IN const IMessage* piMessage, IN const AString& strAddress) override;
+    AString GetPai(IN const IMessage& objMessage) override;
     IMS_RESULT SetHeader(IN IMessage* piMessage, IN const AString& strValue,
             IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
@@ -121,15 +121,16 @@ public:
             IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
     AString GenerateContentId(IN const AString& strHost) override;
-    IMS_RESULT SetResourceList(IN_OUT IMessage* piMessage, IN IMtcContext& objContext,
-            IN const AString& strContentId, IN const ImsList<ConfUser*>& lstConfUser,
+    IMS_RESULT SetResourceList(IN_OUT IMessage* piMessage, IN const ImsList<ConfUser*>& lstConfUser,
             IN IMS_BOOL bWithDialogId, IN IMS_BOOL bMultiPart) override;
-    IMS_BOOL IsVideoFeatureIncluded(IN const IMessage* piMessage) override;
-    IMS_BOOL IsTextFeatureIncluded(IN const IMessage* piMessage) override;
-    CallType GetCallType(
-            IN const IMessage* piMessage, IN ISession* piSession, IN IMS_BOOL bPeerView) override;
-    CallType GetCallTypeFromSdp(IN ISession* piSession, IN IMS_BOOL bNegoSdp, IN IMS_BOOL bPeerView,
-            IN IMS_BOOL bCheckPort = IMS_TRUE) override;  // TODO: change name of bPeerView
+    std::optional<IMS_BOOL> IsMmtelFeatureIncluded(IN const IMessage* piMessage) override;
+    std::optional<IMS_BOOL> IsVideoFeatureIncluded(IN const IMessage* piMessage) override;
+    std::optional<IMS_BOOL> IsTextFeatureIncluded(IN const IMessage* piMessage) override;
+    CallType GetCallType(IN const IMessage* piMessage, IN ISession* piSession,
+            IN IMS_BOOL bCheckRemote) override;
+    CallType GetCallTypeFromSdp(IN ISession* piSession, IN IMS_BOOL bActiveMediaOnly,
+            IN IMS_BOOL bCheckRemote, IN IMS_BOOL bIgnorePort0 = IMS_TRUE) override;
+    IMS_SINT32 GetRemotePortFromSdp(IN ISession* piSession, IN IMS_SINT32 eMediaType) override;
     IMS_BOOL IsResponseExist(IN ISession* piSession, IN IMS_SINT32 nStatusCode) override;
     IMS_UINT32 GetNumberOfPreviousResponses(
             IN const ISession* piSession, IN IMS_SINT32 eServiceMethod) const override;
@@ -144,13 +145,14 @@ private:
     IMS_RESULT GetUrnValue(IN const IMessage* piMessage, IN const AString& strId,
             IN IMS_SINT32 eHeaderType, OUT AString& strValue,
             IN const AString& strHeaderName = AString::ConstNull());
-    IMS_RESULT SetResourceListWithHeaders(IN_OUT IMessage* piMessage,
-            IN const AString& strContentId, IN IMS_BOOL bMultiPart, IN const AString& strXml);
+    IMS_RESULT SetResourceListWithHeaders(
+            IN_OUT IMessage* piMessage, IN IMS_BOOL bMultiPart, IN const AString& strXml);
     AString CreateResourceListXml(
             IN const ImsList<std::tuple<AString, AString, AString>>& objEntries);
-    AString CreateEntryUri(
-            IN IMtcContext& objContext, IN const ConfUser& objUser, IN IMS_BOOL bWithDialogId);
+    AString CreateEntryUri(IN const ConfUser& objUser, IN IMS_BOOL bWithDialogId);
     AString CreateFromToPartWithTagValue(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType);
+
+    IMtcContext& m_objContext;
 };
 
 #endif

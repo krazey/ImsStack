@@ -24,4 +24,6 @@
 <!-- video-call: popup statements -->
 <string name="turning_off_camera_not_supported">Turning off a camera is not supported.</string>
 
+<string name="search_hint">Search options</string>
+
 </resources>

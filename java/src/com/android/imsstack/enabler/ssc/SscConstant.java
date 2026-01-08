@@ -50,6 +50,8 @@ public class SscConstant {
     public static final int EVENT_SSC_INSERT_CB = EVENT_SSC_BASE + 21;
     public static final int EVENT_SSC_INSERT_CF = EVENT_SSC_BASE + 22;
 
+    public static final int EVENT_SSC_QUERY_OIR_TB_NETWORK_DEFAULT = EVENT_SSC_BASE + 23;
+
     // NoReplyTimer value range according to 3GPP 24.604 4.9.2
     public static final int CFNR_TIMER_MIN = 5;
     public static final int CFNR_TIMER_MAX = 180;

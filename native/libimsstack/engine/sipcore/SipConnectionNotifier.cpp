@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
+#include "ServiceTrace.h"
 #include "SystemConfig.h"
 
 #include "private/SipConfig.h"
@@ -25,6 +26,7 @@
 #include "SipDebug.h"
 #include "SipDialog.h"
 #include "SipDialogImpl.h"
+#include "SipError.h"
 #include "SipFactoryProxy.h"
 #include "SipManager.h"
 #include "SipParameter.h"
@@ -37,7 +39,7 @@
 #include "SipStreamSocket.h"
 #include "SipTransportHelper.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 // 3 fix it
 PRIVATE GLOBAL IMS_SINT32* SipConnectionNotifier::s_pGlobalSystemPort = IMS_NULL;
@@ -826,7 +828,7 @@ void SipConnectionNotifier::ControlUdpClientReference(IN IMS_SINT32 nControl)
 
 PRIVATE
 IMS_BOOL SipConnectionNotifier::CreateClientInitiatedConnection(
-        IN IMS_SINT32 nPort, IN SipSocketAddress* pFarEnd)
+        IN IMS_SINT32 nPort, IN const SipSocketAddress* pFarEnd)
 {
     SipTransportHelper* pTransportHelper = GetTransportHelper();
     SipSocketAddress objNearEnd;

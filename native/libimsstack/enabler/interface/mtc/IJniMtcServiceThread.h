@@ -18,20 +18,21 @@
 
 #include "IJniEnablerThread.h"
 #include "IMtcService.h"
-#include "ImsList.h"
-#include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "IuMtcService.h"
-#include "JniCallInfo.h"
-#include "MtcDef.h"
 
+class SuppService;
+enum class OipType;
+struct CallReasonInfo;
+struct JniCallInfo;
 struct JniExternalCall;
+struct MediaInfo;
+template <class T>
+class ImsList;
 
 class IJniMtcServiceThread : public IJniEnablerThread
 {
 public:
-    virtual ~IJniMtcServiceThread() {}
-
     /**
      * @brief Notifies
      *
@@ -48,29 +49,34 @@ public:
      * @param eServiceType
      */
     virtual void OnEmergencyServiceChanged(IN IuMtcService::EmergencyServiceState eState,
-            IN IMS_SINT32 eReason, IN ServiceType eServiceType) = 0;
+            IN IuMtcService::EmergencyServiceUnavailableReason eReason,
+            IN ServiceType eServiceType) = 0;
 
     /**
-     * @brief Notifies
+     * @brief Notifies that an incoming call has been received. This is the 'pre-incoming' stage
+     *        before the device starts alerting the user.
      *
-     * @param nCallKey
+     * @param nCallKey A unique key for the call.
+     * @param strLogTag A log tag for the call.
      */
-    virtual void OnPreIncomingCallReceived(IN IMS_ULONG nCallKey) = 0;
+    virtual void OnPreIncomingCallReceived(IN IMS_ULONG nCallKey, IN const AString& strLogTag) = 0;
 
     /**
      * @brief Notifies there is an rejected incoming call for call logs.
      *
-     * @param objCallInfo
-     * @param objMediaInfo
-     * @param objSuppServices
-     * @param eOipType
-     * @param strRemoteNumber
+     * @param nCallKey A unique key for the call.
+     * @param objCallInfo The call information.
+     * @param objMediaInfo The media information related to the call.
+     * @param objSuppServices The supplementary services information related to the call.
+     * @param eOipType The OIP type to determine whether to show a caller identification or not.
+     * @param strRemoteNumber The number of a caller.
+     * @param objReason The reason for the rejection.
+     * @param strLogTag A log tag for the call.
      */
-    virtual void OnRejectedIncomingCall(IN const JniCallInfo& objCallInfo,
-            IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices, IN OipType eOipType,
-            IN const AString& strRemoteNumber, IN const CallReasonInfo& objReason) = 0;
-
+    virtual void OnRejectedIncomingCall(IN IMS_ULONG nCallKey, IN const JniCallInfo& objCallInfo,
+            IN const MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices,
+            IN OipType eOipType, IN const AString& strRemoteNumber,
+            IN const CallReasonInfo& objReason, IN const AString& strLogTag) = 0;
     /**
      * @brief Notifies Java that {@code JniExternalCall} state is changed.
      *

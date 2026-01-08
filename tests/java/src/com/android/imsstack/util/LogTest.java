@@ -19,7 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import android.test.suitebuilder.annotation.SmallTest;
+import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,11 +27,20 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class LogTest {
-    private static final String TAG = LogTest.class.getSimpleName();
     private static final String LOG_MESSAGE = "LogMessage";
     private static final String TEST = "Test";
     private static final String DELIMITER = ".";
     private static final String TEST_LOG_MESSAGE = TEST + DELIMITER + LOG_MESSAGE;
+
+    @Test
+    @SmallTest
+    public void testInit() {
+        int logOptions = ImsUtils.hexStringToInt(Log.DEFAULT_LOG_OPTIONS);
+        Log.init(logOptions, true);
+
+        assertTrue(Log.isImsDebugEnabled());
+        assertEquals(logOptions, Log.getLogOptions());
+    }
 
     @Test
     @SmallTest
@@ -47,12 +56,12 @@ public class LogTest {
         }
 
         // Checks the logs in the logcat.
-        Log.d(TAG, LOG_MESSAGE + ": d");
-        Log.e(TAG, LOG_MESSAGE + ": e");
-        Log.e(TAG, LOG_MESSAGE + ": e w/ exception", throwable);
-        Log.i(TAG, LOG_MESSAGE + ": i");
-        Log.v(TAG, LOG_MESSAGE + ": v");
-        Log.w(TAG, LOG_MESSAGE + ": w");
+        Log.d(this, LOG_MESSAGE + ": d");
+        Log.e(this, LOG_MESSAGE + ": e");
+        Log.e(this, LOG_MESSAGE + ": e w/ exception", throwable);
+        Log.i(this, LOG_MESSAGE + ": i");
+        Log.v(this, LOG_MESSAGE + ": v");
+        Log.w(this, LOG_MESSAGE + ": w");
     }
 
     @Test
@@ -61,11 +70,11 @@ public class LogTest {
         // When the debug is not enabled.
         Log.setDebuggable();
         Log.setImsDebug(false);
-        Log.dc(TAG, LOG_MESSAGE);
+        Log.dc(this, LOG_MESSAGE);
 
         // When sImsDebug is true.
         Log.setImsDebug(true);
-        Log.dc(TAG, LOG_MESSAGE + ": dc");
+        Log.dc(this, LOG_MESSAGE + ": dc");
     }
 
     @Test
@@ -74,11 +83,11 @@ public class LogTest {
         // When the debug is not enabled.
         Log.setDebuggable();
         Log.setImsDebug(false);
-        Log.vc(TAG, LOG_MESSAGE);
+        Log.vc(this, LOG_MESSAGE);
 
         // When sImsDebug is true.
         Log.setImsDebug(true);
-        Log.vc(TAG, LOG_MESSAGE + ": vc");
+        Log.vc(this, LOG_MESSAGE + ": vc");
     }
 
     @Test

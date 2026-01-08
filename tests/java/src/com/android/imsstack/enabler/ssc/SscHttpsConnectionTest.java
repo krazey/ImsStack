@@ -17,11 +17,10 @@
 package com.android.imsstack.enabler.ssc;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.test.suitebuilder.annotation.SmallTest;
+import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.core.agents.dcmif.EApnType;
 
@@ -130,7 +129,7 @@ public class SscHttpsConnectionTest {
         Socket socket = mSscHttpsConnection.mSscSocketFactory.createSocket(host, port);
 
         verify(mMockSslSocketFactory).createSocket(host, port);
-        verify(mMockSslSocket).setEnabledProtocols(any());
+        verify(mMockSslSocket).setEnabledProtocols(SscHttpsConnection.PROTOCOLS);
         assertEquals(mMockSslSocket, socket);
     }
 
@@ -144,7 +143,7 @@ public class SscHttpsConnectionTest {
         Socket socket = mSscHttpsConnection.mSscSocketFactory.createSocket(mMockHostAddr, port);
 
         verify(mMockSslSocketFactory).createSocket(mMockHostAddr, port);
-        verify(mMockSslSocket).setEnabledProtocols(any());
+        verify(mMockSslSocket).setEnabledProtocols(SscHttpsConnection.PROTOCOLS);
         assertEquals(mMockSslSocket, socket);
     }
 
@@ -162,7 +161,7 @@ public class SscHttpsConnectionTest {
                 .createSocket(host, port, mMockClientAddr, clientPort);
 
         verify(mMockSslSocketFactory).createSocket(host, port, mMockClientAddr, clientPort);
-        verify(mMockSslSocket).setEnabledProtocols(any());
+        verify(mMockSslSocket).setEnabledProtocols(SscHttpsConnection.PROTOCOLS);
         assertEquals(mMockSslSocket, socket);
     }
 
@@ -181,7 +180,7 @@ public class SscHttpsConnectionTest {
 
         verify(mMockSslSocketFactory)
                 .createSocket(mMockHostAddr, port, mMockClientAddr, clientPort);
-        verify(mMockSslSocket).setEnabledProtocols(any());
+        verify(mMockSslSocket).setEnabledProtocols(SscHttpsConnection.PROTOCOLS);
         assertEquals(mMockSslSocket, socket);
     }
 
@@ -200,7 +199,7 @@ public class SscHttpsConnectionTest {
                 .createSocket(oldSocket, host, port, true);
 
         verify(mMockSslSocketFactory).createSocket(oldSocket, host, port, true);
-        verify(mMockSslSocket).setEnabledProtocols(any());
+        verify(mMockSslSocket).setEnabledProtocols(SscHttpsConnection.PROTOCOLS);
         assertEquals(mMockSslSocket, socket);
     }
 }

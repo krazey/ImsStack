@@ -17,6 +17,9 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "INativeThreadMethods.h"
+#include "IRunnable.h"
+#include "ISystemProperty.h"
 #include "ImsMessageDef.h"
 #include "OsThread.h"
 #include "ServiceConfig.h"
@@ -32,10 +35,9 @@
 #define WAIT_TIMEOUT_FOR_IPC 1      // ms
 #define WAIT_TIMEOUT_FOR_RUN 10000  // us
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
-LOCAL
-void osThread_Run(IN OsThread* pThread)
+static void osThread_Run(IN OsThread* pThread)
 {
     if (pThread == IMS_NULL)
     {
@@ -58,8 +60,7 @@ void osThread_Run(IN OsThread* pThread)
     pthread_exit(NULL);
 }
 
-LOCAL
-IMS_PVOID osThread_ThreadProc(void* param)
+static IMS_PVOID osThread_ThreadProc(void* param)
 {
     osThread_Run(reinterpret_cast<OsThread*>(param));
     return IMS_NULL;
@@ -72,6 +73,7 @@ OsThread::OsThread() :
         m_nThreadId(0),
         m_bIsRunning(IMS_FALSE),
         m_bSignalFlag(IMS_FALSE),
+        m_nProcessingMsgIndex(-1),
         m_piListener(IMS_NULL)
 {
     if (pthread_cond_init(&m_stCond, NULL) == 0)
@@ -182,11 +184,12 @@ PUBLIC VIRTUAL IMS_SINT32 OsThread::RemoveMessages(IN ImsMessage::IMessageCallba
     IMS_SINT32 nRemovedMsgCount = 0;
 
     m_objMsgQueueMutex.Lock();
-    nRemovedMsgCount += RemoveMessages(m_objMsgQueue, piCallback, pImsMsgs);
+    nRemovedMsgCount += RemoveMessages(m_objMsgQueue, 0, piCallback, pImsMsgs);
     m_objMsgQueueMutex.Unlock();
 
     m_objProcessingMsgsMutex.Lock();
-    nRemovedMsgCount += RemoveMessages(m_objProcessingMsgs, piCallback, pImsMsgs);
+    nRemovedMsgCount +=
+            RemoveMessages(m_objProcessingMsgs, m_nProcessingMsgIndex + 1, piCallback, pImsMsgs);
     m_objProcessingMsgsMutex.Unlock();
 
     return nRemovedMsgCount;
@@ -230,6 +233,7 @@ PUBLIC VIRTUAL IMS_ULONG OsThread::Run()
 
             for (IMS_UINT32 i = 0; i < m_objProcessingMsgs.GetSize(); i++)
             {
+                m_nProcessingMsgIndex = i;
                 ImsMessage& objMsg = m_objProcessingMsgs.GetAt(i);
                 IMS_UINT32 nName = objMsg.GetName();
 
@@ -253,6 +257,7 @@ PUBLIC VIRTUAL IMS_ULONG OsThread::Run()
                 }
             }
 
+            m_nProcessingMsgIndex = -1;
             m_objProcessingMsgs.Clear();
             m_objProcessingMsgsMutex.Unlock();
         }
@@ -465,11 +470,12 @@ PROTECTED GLOBAL IMS_BOOL OsThread::IsSystemMessage(IN IMS_SINT32 nMsg)
 
 PRIVATE
 IMS_SINT32 OsThread::RemoveMessages(IN_OUT ImsVector<ImsMessage>& objMsgQueue,
-        IN ImsMessage::IMessageCallback* piCallback, OUT ImsList<ImsMessage>* pImsMsgs)
+        IN IMS_SINT32 nStartingIndex, IN const ImsMessage::IMessageCallback* piCallback,
+        OUT ImsList<ImsMessage>* pImsMsgs)
 {
     IMS_SINT32 nRemovedMsgCount = 0;
 
-    for (IMS_UINT32 i = 0; i < objMsgQueue.GetSize();)
+    for (IMS_UINT32 i = nStartingIndex; i < objMsgQueue.GetSize();)
     {
         const ImsMessage& objMsg = objMsgQueue.GetAt(i);
 

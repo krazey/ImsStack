@@ -33,12 +33,10 @@ class JniMediaSession : public BaseService
 public:
     JniMediaSession(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId,
             IN IMS_SINTP nCallKey, IN IMS_SINTP nNativeObject);
-    virtual ~JniMediaSession();
+    ~JniMediaSession() override;
 
     virtual int SendData(const Parcel& objParcel) override;
     void Initialize(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINTP nNativeObject);
-    void SetMtcCallId(IN IMS_SINTP nCallKey);
-    void NotifyNativeEnablerSet() override;
     IJniEnablerThread* GetJniThread() const override;
     static IMS_BOOL IsMediaMessage(IN IMS_SINT32 nMsg);
 
@@ -51,13 +49,15 @@ private:
     IJniMediaManager* GetMediaManager();
     MEDIA_CONTENT_TYPE ConvertToMediaType(IN SessionType eSessiontype);
     void OnResponses(IN IMS_SINT32 nMsg, IN IMS_BOOL bNeedConfig, IN const Parcel& objParcel);
-    void OnNofityMediaInactitivy(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
-    void OnNofityPacketLosses(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
-    void OnNofityCallQualityChange(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
-    void OnNofityHeaderExtension(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
+    void OnNotifyMediaInactivity(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
+    void OnNotifyPacketLosses(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
+    void OnNotifyCallQualityChange(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
+    void OnNotifyHeaderExtension(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
     void OnNotifyQosInfo(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
     void OnNotifyMediaDetach(IN IMS_SINT32 nMsg);
     void OnSendDtmf(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
+    void OnNotifyAnbrReceived(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
+    void OnNotifyRtpReceptionStats(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
     void OnVideoMessage(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
     void ConvertString(IN const String16& strSource, OUT AString& strDest);
 

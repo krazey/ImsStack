@@ -15,7 +15,6 @@
  */
 package com.android.imsstack.core.agents;
 
-import android.content.Context;
 import android.net.IpSecAlgorithm;
 import android.net.IpSecManager;
 import android.net.IpSecManager.ResourceUnavailableException;
@@ -24,6 +23,8 @@ import android.net.IpSecManager.SpiUnavailableException;
 import android.net.IpSecTransform;
 import android.util.SparseArray;
 
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.SystemServiceProxy.IpSecManagerProxy;
 import com.android.imsstack.system.IpSecSaParameter;
 import com.android.imsstack.system.IpSecSaPolicy;
 import com.android.imsstack.util.ImsLog;
@@ -50,41 +51,49 @@ public class IpSecConnector {
         mTransforms = new SparseArray<>(MAX_TRANSFORM);
     }
 
-    public boolean applySa(Context context, int spi, int intFd, FileDescriptor socketFd) {
-        ImsLog.d("[IpSec] applySa - spi=" + spi + ", intFd=" + intFd);
+    /**
+     * Applies the security association with the given SPI and socket.
+     *
+     * @param spi The security parameter index.
+     * @param intFd The socket file descriptor as integer.
+     * @param socketFd The socket file descriptor.
+     * @return {@code true} if it's successfully applied, {@code false} otherwise.
+     */
+    public boolean applySa(int spi, int intFd, FileDescriptor socketFd) {
+        logd(this, "applySa - spi=" + spi + ", intFd=" + intFd);
 
         Transform transform = mTransforms.get(spi);
 
         if (transform == null) {
-            ImsLog.e("[IpSec] Transform is not found");
+            loge(this, "Transform is not found");
             return false;
         }
 
         IpSecSaPolicy policy = mParam.getPolicy(spi);
 
         if (policy == null) {
-            ImsLog.e("[IpSec] Policy is not found");
+            loge(this, "Policy is not found");
             return false;
         }
 
-        final IpSecManager ipm = context.getSystemService(IpSecManager.class);
+        final IpSecManagerProxy ismp = getIpSecManagerProxy();
 
         if (policy.getMode() == IpSecSaPolicy.MODE_TRANSPORT) {
             int direction = (policy.getDirection() == IpSecSaPolicy.DIRECTION_IN)
                     ? IpSecManager.DIRECTION_IN : IpSecManager.DIRECTION_OUT;
 
             try {
-                ipm.applyTransportModeTransform(
+                ismp.applyTransportModeTransform(
                         socketFd,
                         direction,
                         transform.getIpSecTransform());
             } catch (IllegalArgumentException
                     | IllegalStateException
                     | UnsupportedOperationException e) {
-                ImsLog.e("[IpSec] applyTransportMode: " + e.toString());
+                loge(this, "applyTransportMode - " + e.toString());
                 return false;
             } catch (Throwable t) {
-                ImsLog.e("[IpSec] applyTransportMode: " + t.toString());
+                loge(this, "applyTransportMode - " + t.toString());
                 return false;
             }
         } else if (policy.getMode() == IpSecSaPolicy.MODE_TUNNEL) {
@@ -96,42 +105,49 @@ public class IpSecConnector {
         return true;
     }
 
-    public void removeSa(Context context, int spi, int intFd, FileDescriptor socketFd) {
-        ImsLog.d("[IpSec] removeSa - spi=" + spi + ", intFd=" + intFd);
+    /**
+     * Removes the security association with the given SPI and socket.
+     *
+     * @param spi The security parameter index.
+     * @param intFd The socket file descriptor as integer.
+     * @param socketFd The socket file descriptor.
+     */
+    public void removeSa(int spi, int intFd, FileDescriptor socketFd) {
+        logd(this, "removeSa - spi=" + spi + ", intFd=" + intFd);
 
         Transform transform = mTransforms.get(spi);
 
         if (transform == null) {
-            ImsLog.e("[IpSec] Transform is not found");
+            loge(this, "Transform is not found");
             return;
         }
 
         if (!transform.removeSocket(intFd)) {
             // It's already removed.
-            ImsLog.i("[IpSec] SA is already removed - spi=" + spi + ", intFd=" + intFd);
+            logi(this, "SA is already removed - spi=" + spi + ", intFd=" + intFd);
             return;
         }
 
         IpSecSaPolicy policy = mParam.getPolicy(spi);
 
         if (policy == null) {
-            ImsLog.e("[IpSec] Policy is not found");
+            loge(this, "Policy is not found");
             return;
         }
 
         if (SUPPORT_REMOVE_IPSEC_TRANSFORM_PER_SOCKET) {
-            final IpSecManager ipm = context.getSystemService(IpSecManager.class);
+            final IpSecManagerProxy ismp = getIpSecManagerProxy();
 
             if (policy.getMode() == IpSecSaPolicy.MODE_TRANSPORT) {
                 try {
-                    ipm.removeTransportModeTransforms(socketFd);
+                    ismp.removeTransportModeTransforms(socketFd);
                 } catch (IllegalArgumentException
                         | IllegalStateException
                         | UnsupportedOperationException e) {
-                    ImsLog.e("[IpSec] removeTransportMode: " + e.toString());
+                    loge(this, "removeTransportMode - " + e.toString());
                     return;
                 } catch (Throwable t) {
-                    ImsLog.e("[IpSec] removeTransportMode: " + t.toString());
+                    loge(this, "removeTransportMode - " + t.toString());
                     return;
                 }
             } else if (policy.getMode() == IpSecSaPolicy.MODE_TUNNEL) {
@@ -140,20 +156,22 @@ public class IpSecConnector {
         }
     }
 
-    public void close(Context context) {
+    /**
+     * Closes all the resources for the {@link IpSecConnector}.
+     */
+    public void close() {
         for (int i = 0; i < mTransforms.size(); ++i) {
             Transform transform = mTransforms.valueAt(i);
             SparseArray<FileDescriptor> sockets = transform.getSockets();
 
             if (sockets.size() > 0) {
-                ImsLog.i("[IpSec] Sockets exist on close.");
+                logi(this, "Sockets exist on close.");
 
                 for (int j = 0; j < sockets.size(); ++j) {
                     int intFd = sockets.keyAt(j);
                     FileDescriptor socketFd = sockets.valueAt(j);
 
-                    removeSa(context, transform.getSecurityParameterIndex().getSpi(),
-                            intFd, socketFd);
+                    removeSa(transform.getSecurityParameterIndex().getSpi(), intFd, socketFd);
                 }
             }
 
@@ -166,11 +184,19 @@ public class IpSecConnector {
         mIntegrityAlgorithm = null;
     }
 
+    /**
+     * Returns the {@link IpSecSaParameter} of this connector.
+     */
     public IpSecSaParameter getSaParameter() {
         return mParam;
     }
 
-    public boolean init(Context context) {
+    /**
+     * Initializes this connector.
+     *
+     * @return {@code true} if it's successfully initialized, {@code false} otherwise.
+     */
+    public boolean init() {
         if (mParam.getEncryptionAlgorithm() == IpSecSaParameter.ENCRYPTION_ALGORITHM_NULL) {
             // Do not create IpSecAlgorithm.
             mEncryptionAlgorithm = null;
@@ -178,7 +204,7 @@ public class IpSecConnector {
             mEncryptionAlgorithm = createEncryptionAlgorithm(mParam);
 
             if (mEncryptionAlgorithm == null) {
-                ImsLog.e("[IpSec] EncryptionAlgorithm is null");
+                loge(this, "EncryptionAlgorithm is null");
                 return false;
             }
         }
@@ -186,7 +212,7 @@ public class IpSecConnector {
         mIntegrityAlgorithm = createIntegrityAlgorithm(mParam);
 
         if (mIntegrityAlgorithm == null) {
-            ImsLog.e("[IpSec] IntegrityAlgorithm is null");
+            loge(this, "IntegrityAlgorithm is null");
             return false;
         }
 
@@ -198,15 +224,15 @@ public class IpSecConnector {
 
             if (mTransforms.get(spi) != null) {
                 // Ignores the duplicate SA policy (TCP/UDP)
-                ImsLog.d("[IpSec] Duplicate SA policy for a different transport - ignored.");
+                logd(this, "Duplicate SA policy for a different transport - ignored.");
                 continue;
             }
 
             Transform transform = new Transform();
 
-            if (!transform.create(context, saPolicy, mIntegrityAlgorithm, mEncryptionAlgorithm))
+            if (!transform.create(saPolicy, mIntegrityAlgorithm, mEncryptionAlgorithm))
             {
-                close(context);
+                close();
                 return false;
             }
 
@@ -216,6 +242,11 @@ public class IpSecConnector {
         return true;
     }
 
+    /**
+     * Checks whether all the sockets for this connector are detached.
+     *
+     * @return {@code true} if all the sockets are detached, {@code false} otherwise.
+     */
     public boolean isAllSocketsDetached() {
         for (int i = 0; i < mTransforms.size(); ++i) {
             Transform transform = mTransforms.valueAt(i);
@@ -233,8 +264,13 @@ public class IpSecConnector {
         return mRemoved;
     }
 
+    /** Marks this connector as removed. */
     public void markAsRemoved() {
         mRemoved = true;
+    }
+
+    private static IpSecManagerProxy getIpSecManagerProxy() {
+        return AppContext.getInstance().getSystemServiceProxy(IpSecManagerProxy.class);
     }
 
     private static IpSecAlgorithm createEncryptionAlgorithm(IpSecSaParameter param) {
@@ -276,7 +312,22 @@ public class IpSecConnector {
         return new IpSecAlgorithm(algorithmName, key, truncatedBits);
     }
 
-    public static class Transform {
+    private static void logd(Object o, String s) {
+        ImsLog.d(o, "IpSec: " + s);
+    }
+
+    private static void loge(Object o, String s) {
+        ImsLog.e(o, "IpSec: " + s);
+    }
+
+    private static void logi(Object o, String s) {
+        ImsLog.i(o, "IpSec: " + s);
+    }
+
+    /**
+     * A wrapper class to manage the {@link IpSecTransform} and its related sockets.
+     */
+    private static class Transform {
         private static final int MAX_SOCKET = 2;
         private SecurityParameterIndex mSpi;
         private IpSecTransform mTransform;
@@ -295,7 +346,7 @@ public class IpSecConnector {
         }
 
         public void close() {
-            ImsLog.d("[IpSec] Sockets: " + mSockets.size());
+            logd(this, "Sockets=" + mSockets.size());
 
             try {
                 if (mTransform != null) {
@@ -308,23 +359,23 @@ public class IpSecConnector {
                     mSpi = null;
                 }
             } catch (Throwable t) {
-                ImsLog.e("[IpSec] close - " + t.toString());
+                loge(this, "close - " + t.toString());
             }
         }
 
-        public boolean create(Context context, IpSecSaPolicy policy,
+        public boolean create(IpSecSaPolicy policy,
                 IpSecAlgorithm integrity, IpSecAlgorithm encryption) {
-            final IpSecManager ipm = context.getSystemService(IpSecManager.class);
+            final IpSecManagerProxy ismp = getIpSecManagerProxy();
 
             if (mSpi == null) {
                 try {
                     InetAddress remoteIp = InetAddress.getByName(policy.getRemoteIp());
-                    mSpi = ipm.allocateSecurityParameterIndex(remoteIp, policy.getSpi());
+                    mSpi = ismp.allocateSecurityParameterIndex(remoteIp, policy.getSpi());
                 } catch (SpiUnavailableException | ResourceUnavailableException e) {
-                    ImsLog.e("[IpSec] Allocating SPI failed - " + e.toString());
+                    loge(this, "Allocating SPI failed - " + e.toString());
                     return false;
                 } catch (Throwable t) {
-                    ImsLog.e("[IpSec] Error: " + t.toString());
+                    loge(this, "Error - " + t.toString());
                     return false;
                 }
             }
@@ -332,7 +383,8 @@ public class IpSecConnector {
             if (mTransform == null) {
                 try {
                     InetAddress localIp = InetAddress.getByName(policy.getLocalIp());
-                    IpSecTransform.Builder builder = new IpSecTransform.Builder(context);
+                    IpSecTransform.Builder builder =
+                            new IpSecTransform.Builder(AppContext.getInstance());
                     builder.setAuthentication(integrity);
 
                     if (encryption != null) {
@@ -342,12 +394,12 @@ public class IpSecConnector {
                     if (policy.getMode() == IpSecSaPolicy.MODE_TRANSPORT) {
                         mTransform = builder.buildTransportModeTransform(localIp, mSpi);
                     } else if (policy.getMode() == IpSecSaPolicy.MODE_TUNNEL) {
-                        ImsLog.d("[IpSec] Invalid argument - unsupported mode (tunnel)");
+                        logd(this, "Invalid argument - unsupported mode (tunnel)");
                         close();
                         return false;
                     }
                 } catch (Throwable t) {
-                    ImsLog.e("[IpSec] Error: " + t.toString());
+                    loge(this, "Error - " + t.toString());
                     close();
                     return false;
                 }

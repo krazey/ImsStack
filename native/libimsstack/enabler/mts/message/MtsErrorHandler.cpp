@@ -15,26 +15,39 @@
  */
 
 #include "CarrierConfig.h"
+#include "Engine.h"
 #include "ICarrierConfig.h"
+#include "IConfiguration.h"
+#include "IMessage.h"
+#include "IMtsContext.h"
+#include "IMtsNetworkTracker.h"
 #include "IMtsService.h"
-#include "ImsAosParameter.h"
-#include "IuMtsService.h"
+#include "INetworkWatcher.h"
+#include "ISipConfigV.h"
+#include "IPageMessage.h"
+#include "ImsEventDef.h"
+#include "IuMtsApp.h"
 #include "MtsDef.h"
+#include "MtsStringDef.h"
+#include "ServiceConfig.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
-#include "core/IMessage.h"
+#include "message/IMtsMessage.h"
 #include "message/MtsErrorHandler.h"
-#include "utility/MtsDynamicLoader.h"
+#include "utility/IMtsDynamicLoader.h"
+#include "utility/MtsSipFormUtils.h"
 
 __IMS_TRACE_TAG_COM_MTS__;
 
 PUBLIC
-MtsErrorHandler::MtsErrorHandler(IN ICarrierConfig* piCarrierConfig) :
-        m_piCarrierConfig(piCarrierConfig),
+MtsErrorHandler::MtsErrorHandler(IN IMtsContext& objContext) :
+        m_objContext(objContext),
         m_nCumulativeDuration(0),
         m_nCurrentRetryCount(0),
-        m_nRetryAfterValue(0)
+        m_nRetryAfterValue(0),
+        m_nSlotId(m_objContext.GetSlotId()),
+        m_piCarrierConfig(ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId))
 {
     IMS_TRACE_I("+MtsErrorHandler", 0, 0, 0);
 }
@@ -46,40 +59,112 @@ MtsErrorHandler::~MtsErrorHandler()
 }
 
 PUBLIC
-IMS_SINT32 MtsErrorHandler::Handle(IN IMtsService* piMtsService,
-        IN MtsDynamicLoader* pMtsDynamicLoader, IN const IMessage* piMessage)
+IMS_SINT32 MtsErrorHandler::Handle(
+        IN const IMtsService& objMtsService, IN IMtsMessage* piMtsMessage)
 {
-    IMS_SINT32 nResult = MO_ERROR_RETRY;
-    IMS_SINT32 nStatusCode =
-            (piMessage != IMS_NULL) ? piMessage->GetStatusCode() : SipStatusCode::SC_INVALID;
+    IMS_SINT32 nResult = MO_INVALID;
     ImsVector<IMS_SINT32> objGenericErrorCodes = m_piCarrierConfig->GetIntArray(
-            CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY);
-    for (IMS_UINT32 i = 0; i < objGenericErrorCodes.GetSize(); i++)
+            CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY);
+    ImsVector<IMS_SINT32> objFallbackErrorCodes = m_piCarrierConfig->GetIntArray(
+            CarrierConfig::ImsSms::KEY_SMS_FALLBACK_ERROR_CODES_INT_ARRAY);
+    ImsVector<IMS_SINT32> objSmmaGenericErrorCodes = m_piCarrierConfig->GetIntArray(
+            CarrierConfig::ImsSms::KEY_SMS_SMMA_GENERIC_ERROR_CODES_INT_ARRAY);
+
+    // VZW Requirements - VZ_REQ_5GNRSA SMS_4105999311952943 and VZ_REQ_LTESMS_29553
+    if (NeedToCheckRadioStatusForRetry(piMtsMessage->GetRetryCount()))
     {
-        if (objGenericErrorCodes.GetAt(i) == nStatusCode)
+        IMS_SINT32 nNetworkType = m_objContext.GetNetworkTracker().GetNetworkType();
+        IMS_TRACE_I(
+                "Handle : Check current network status[%s]", PS_RadioTechType(nNetworkType), 0, 0);
+
+        if (nNetworkType == INetworkWatcher::RADIOTECH_TYPE_NR)
         {
-            nResult = MO_ERROR_GENERIC;
-            break;
+            IMS_BOOL bDataRoaming = m_objContext.GetNetworkTracker().IsInRoamingState();
+
+            return bDataRoaming ? MO_ERROR_FALLBACK : MO_ERROR_GENERIC;
+        }
+        else if (nNetworkType == INetworkWatcher::RADIOTECH_TYPE_LTE ||
+                nNetworkType == INetworkWatcher::RADIOTECH_TYPE_LTE_CA)
+        {
+            IMS_UINT32 nLteAttachState = m_objContext.GetNetworkTracker().GetLteAttachState();
+
+            return (nLteAttachState == IMS_LTE_INFO_COMBINED_ATTACHED) ? MO_ERROR_FALLBACK
+                                                                       : MO_ERROR_GENERIC;
         }
     }
 
-    IMS_SINT32 nPolicy = GetRegistrationRecoveryPolicy(piMessage);
-    if (nPolicy != MTS_REG_RECOVERY_POLICY_NONE)
+    const IMessage* piMessage =
+            piMtsMessage->GetPageMessage()->GetPreviousResponse(IMessage::PAGEMESSAGE_SEND);
+    // ORG Requirements - IMS_SMSIP_40, IMS_SMSIP_43, IMS_SMSIP_540, IMS_SMSIP_543
+    nResult = EvaluateNetworkStatusForErrorCode(objMtsService, piMessage);
+    if (nResult != MO_INVALID)
     {
-        piMtsService->RequestRegistrationRecovery(nPolicy);
+        return nResult;
     }
 
-    if (nResult != MO_ERROR_GENERIC)
+    if (piMessage != IMS_NULL)
     {
-        CalculateRetryAfterCondition(
-                pMtsDynamicLoader->GetMtsSipFormUtils()->GetRetryAfterValue(piMessage));
-        if (IsRetryPossible())
+        // A status code should only be present in either 'imssms.sms_generic_error_codes_int_array'
+        // or 'imssms.sms_fallback_error_codes_int_array', but not both.
+        IMS_SINT32 nMti = piMtsMessage->GetMti();
+        if (nMti == SMS_3GPP_MTI_RP_SMMA)
+        {
+            if (objSmmaGenericErrorCodes.Contains(piMessage->GetStatusCode()))
+            {
+                nResult = MO_ERROR_GENERIC;
+            }
+            else
+            {
+                nResult = MO_ERROR_RETRY;
+            }
+        }
+        else if (objGenericErrorCodes.Contains(piMessage->GetStatusCode()))
+        {
+            nResult = MO_ERROR_GENERIC;
+        }
+        else if (objFallbackErrorCodes.Contains(piMessage->GetStatusCode()))
+        {
+            nResult = MO_ERROR_FALLBACK;
+        }
+        else
+        {
+            nResult = MO_ERROR_RETRY;
+        }
+    }
+    else if (objGenericErrorCodes.Contains(SipStatusCode::SC_INVALID))
+    {
+        nResult = MO_ERROR_GENERIC;
+    }
+    else
+    {
+        nResult = m_piCarrierConfig->GetInt(
+                CarrierConfig::ImsSms::KEY_SMS_RETRY_POLICY_FOR_EXPIRY_TIMER_F_INT, MO_ERROR_RETRY);
+    }
+
+    IMS_SINT32 nPolicy = GetRegistrationRecoveryPolicy(piMessage);
+    if (nPolicy != MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE)
+    {
+        objMtsService.RequestRegistrationRecovery(nPolicy);
+    }
+
+    if (nResult != MO_ERROR_GENERIC && nResult != MO_ERROR_FALLBACK)
+    {
+        SetRetryAfterStatus(
+                m_objContext.GetDynamicLoader().GetMtsSipFormUtils()->GetRetryAfterValue(
+                        piMessage));
+        if (IsRegisterWithNextPcscfRequired(piMessage) &&
+                nPolicy == MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE)
+        {
+            objMtsService.RequestRegisterWithNextPcscf(m_nRetryAfterValue);
+            nResult = MO_ERROR_GENERIC;
+        }
+        else if (IsRetryPossible())
         {
             nResult = MO_ERROR_BY_RETRY_AFTER;
         }
         else
         {
-            if (m_piCarrierConfig->GetBoolean(CarrierConfig::Assets::
+            if (m_piCarrierConfig->GetBoolean(CarrierConfig::ImsSms::
                                 KEY_SMS_REPORT_GENERIC_ERROR_WHEN_RETRY_AFTER_NOT_POSSIBLE_BOOL))
             {
                 nResult = MO_ERROR_GENERIC;
@@ -111,14 +196,14 @@ IMS_SINT32 MtsErrorHandler::GetRegistrationRecoveryPolicy(IN const IMessage* piM
         return Get5xxResponsePolicy(piMessage);
     }
 
-    return MTS_REG_RECOVERY_POLICY_NONE;
+    return MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE;
 }
 
 PRIVATE
 IMS_SINT32 MtsErrorHandler::GetExpiryTimerFPolicy() const
 {
     IMS_SINT32 nPolicy = m_piCarrierConfig->GetInt(
-            CarrierConfig::Assets::KEY_SMS_POLICY_FOR_EXPIRY_TIMER_F_INT);
+            CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_EXPIRY_TIMER_F_INT);
 
     return nPolicy;
 }
@@ -126,7 +211,7 @@ IMS_SINT32 MtsErrorHandler::GetExpiryTimerFPolicy() const
 PRIVATE
 IMS_SINT32 MtsErrorHandler::Get4xxResponsePolicy(IN const IMessage* piMessage) const
 {
-    IMS_SINT32 nPolicy = MTS_REG_RECOVERY_POLICY_NONE;
+    IMS_SINT32 nPolicy = MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE;
     IMS_SINT32 nStatusCode = piMessage->GetStatusCode();
 
     switch (nStatusCode)
@@ -151,8 +236,8 @@ IMS_SINT32 MtsErrorHandler::Get4xxResponsePolicy(IN const IMessage* piMessage) c
 PRIVATE
 IMS_SINT32 MtsErrorHandler::Get403ResponsePolicy() const
 {
-    IMS_SINT32 nPolicy =
-            m_piCarrierConfig->GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_403_RESPONSE_INT);
+    IMS_SINT32 nPolicy = m_piCarrierConfig->GetInt(
+            CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_403_RESPONSE_INT);
 
     return nPolicy;
 }
@@ -160,8 +245,8 @@ IMS_SINT32 MtsErrorHandler::Get403ResponsePolicy() const
 PRIVATE
 IMS_SINT32 MtsErrorHandler::Get404ResponsePolicy() const
 {
-    IMS_SINT32 nPolicy =
-            m_piCarrierConfig->GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_404_RESPONSE_INT);
+    IMS_SINT32 nPolicy = m_piCarrierConfig->GetInt(
+            CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_404_RESPONSE_INT);
 
     return nPolicy;
 }
@@ -169,8 +254,8 @@ IMS_SINT32 MtsErrorHandler::Get404ResponsePolicy() const
 PRIVATE
 IMS_SINT32 MtsErrorHandler::Get406ResponsePolicy() const
 {
-    IMS_SINT32 nPolicy =
-            m_piCarrierConfig->GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_406_RESPONSE_INT);
+    IMS_SINT32 nPolicy = m_piCarrierConfig->GetInt(
+            CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_406_RESPONSE_INT);
 
     return nPolicy;
 }
@@ -178,8 +263,8 @@ IMS_SINT32 MtsErrorHandler::Get406ResponsePolicy() const
 PRIVATE
 IMS_SINT32 MtsErrorHandler::Get408ResponsePolicy() const
 {
-    IMS_SINT32 nPolicy =
-            m_piCarrierConfig->GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_408_RESPONSE_INT);
+    IMS_SINT32 nPolicy = m_piCarrierConfig->GetInt(
+            CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_408_RESPONSE_INT);
 
     return nPolicy;
 }
@@ -187,7 +272,7 @@ IMS_SINT32 MtsErrorHandler::Get408ResponsePolicy() const
 PRIVATE
 IMS_SINT32 MtsErrorHandler::Get5xxResponsePolicy(IN const IMessage* piMessage) const
 {
-    IMS_SINT32 nPolicy = MTS_REG_RECOVERY_POLICY_NONE;
+    IMS_SINT32 nPolicy = MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE;
     IMS_SINT32 nStatusCode = piMessage->GetStatusCode();
 
     switch (nStatusCode)
@@ -209,8 +294,8 @@ IMS_SINT32 MtsErrorHandler::Get5xxResponsePolicy(IN const IMessage* piMessage) c
 PRIVATE
 IMS_SINT32 MtsErrorHandler::Get500ResponsePolicy() const
 {
-    IMS_SINT32 nPolicy =
-            m_piCarrierConfig->GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_500_RESPONSE_INT);
+    IMS_SINT32 nPolicy = m_piCarrierConfig->GetInt(
+            CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_500_RESPONSE_INT);
 
     return nPolicy;
 }
@@ -218,10 +303,10 @@ IMS_SINT32 MtsErrorHandler::Get500ResponsePolicy() const
 PRIVATE
 IMS_SINT32 MtsErrorHandler::Get503ResponsePolicy(IN const IMessage* piMessage) const
 {
-    IMS_SINT32 nPolicy =
-            m_piCarrierConfig->GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_503_RESPONSE_INT);
+    IMS_SINT32 nPolicy = m_piCarrierConfig->GetInt(
+            CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_503_RESPONSE_INT);
 
-    if (nPolicy == ImsAosControl::REGISTER_REINITIATE)
+    if (nPolicy == MtsRegRecoveryPolicy::REGISTER_REINITIATE)
     {
         const AString& strPhrase = piMessage->GetReasonPhrase();
         if (strPhrase.GetLength() > 0)
@@ -230,12 +315,11 @@ IMS_SINT32 MtsErrorHandler::Get503ResponsePolicy(IN const IMessage* piMessage) c
 
             if (strPhrase.MakeUpper().Contains("OUTAGE"))
             {
-                // TODO(Mts): Check IMS is connected or not, then report MO_ERROR_GENERIC
                 return nPolicy;
             }
         }
         // In case of no reason header and no "OUTAGE"
-        nPolicy = MTS_REG_RECOVERY_POLICY_NONE;
+        nPolicy = MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE;
     }
 
     return nPolicy;
@@ -244,20 +328,27 @@ IMS_SINT32 MtsErrorHandler::Get503ResponsePolicy(IN const IMessage* piMessage) c
 PRIVATE
 IMS_SINT32 MtsErrorHandler::Get504ResponsePolicy() const
 {
-    IMS_SINT32 nPolicy =
-            m_piCarrierConfig->GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_504_RESPONSE_INT);
+    IMS_SINT32 nPolicy = m_piCarrierConfig->GetInt(
+            CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_504_RESPONSE_INT);
 
     return nPolicy;
 }
 
 PRIVATE
-void MtsErrorHandler::CalculateRetryAfterCondition(IN const IMS_SINT32 nRetryAfterValue)
+void MtsErrorHandler::SetRetryAfterStatus(IN const IMS_SINT32 nRetryAfterValue)
 {
+    if (nRetryAfterValue <= 0)
+    {
+        // The error response does not have Retry-After header
+        ResetRetryAfterStatus();
+        return;
+    }
+
     m_nRetryAfterValue = nRetryAfterValue;
     m_nCurrentRetryCount++;
     m_nCumulativeDuration += m_nRetryAfterValue;
 
-    IMS_TRACE_I("CalculateRetryAfterCondition : RetryAfterValue[%d], CurrentRetryCount[%d], "
+    IMS_TRACE_I("SetRetryAfterStatus : RetryAfterValue[%d], CurrentRetryCount[%d], "
                 "CumulativeDuration[%d]",
             m_nRetryAfterValue, m_nCurrentRetryCount, m_nCumulativeDuration);
 }
@@ -272,20 +363,74 @@ IMS_BOOL MtsErrorHandler::IsRetryPossible() const
     }
 
     IMS_SINT32 nMaxRetryCount =
-            m_piCarrierConfig->GetInt(CarrierConfig::Assets::KEY_SMS_RETRY_AFTER_MAX_COUNT_INT);
+            m_piCarrierConfig->GetInt(CarrierConfig::ImsSms::KEY_SMS_RETRY_AFTER_MAX_COUNT_INT);
     if ((nMaxRetryCount > 0) && (m_nCurrentRetryCount >= nMaxRetryCount))
     {
-        // sms_retry_after_max_count_int has reached
+        // imssms.sms_retry_after_max_count_int has reached
+        IMS_TRACE_I("IsRetryPossible : Reached the max retry counter", 0, 0, 0);
         return IMS_FALSE;
     }
 
     IMS_SINT32 nMaxRetryDuration =
-            m_piCarrierConfig->GetInt(CarrierConfig::Assets::KEY_SMS_RETRY_AFTER_MAX_TIME_SEC_INT);
+            m_piCarrierConfig->GetInt(CarrierConfig::ImsSms::KEY_SMS_RETRY_AFTER_MAX_TIME_SEC_INT);
     if (m_nCumulativeDuration >= nMaxRetryDuration)
     {
-        // sms_retry_after_max_time_sec_int has reached
+        // imssms.sms_retry_after_max_time_sec_int has reached
+        IMS_TRACE_I("IsRetryPossible : Reached the max retry duration", 0, 0, 0);
         return IMS_FALSE;
     }
 
     return IMS_TRUE;
+}
+
+PRIVATE
+IMS_BOOL MtsErrorHandler::IsRegisterWithNextPcscfRequired(IN const IMessage* piMessage) const
+{
+    IMS_SINT32 nStatusCode =
+            (piMessage != IMS_NULL) ? piMessage->GetStatusCode() : SipStatusCode::SC_INVALID;
+
+    if (nStatusCode != SipStatusCode::SC_503 || m_nRetryAfterValue <= 0)
+    {
+        return IMS_FALSE;
+    }
+
+    return m_nRetryAfterValue * 1000 >
+            Engine::GetConfiguration()->GetSipConfig(m_nSlotId)->GetSipConfigV()->GetTimerValue(
+                    ISipConfigV::TIMER_F);
+}
+
+PRIVATE
+IMS_BOOL MtsErrorHandler::NeedToCheckRadioStatusForRetry(IN IMS_UINT32 nRetryCount) const
+{
+    return m_piCarrierConfig->GetBoolean(
+                   CarrierConfig::ImsSms::KEY_SMS_EVALUATE_RADIO_STATUS_FOR_3RD_ATTEMPT_BOOL,
+                   IMS_FALSE) &&
+            (nRetryCount >= 1);
+}
+
+PRIVATE
+IMS_SINT32 MtsErrorHandler::EvaluateNetworkStatusForErrorCode(
+        IN const IMtsService& objMtsService, IN const IMessage* piMessage) const
+{
+    ImsVector<IMS_SINT32> objEvaluateNetworkErrorCodes = m_piCarrierConfig->GetIntArray(
+            CarrierConfig::ImsSms::KEY_SMS_EVALUATE_RADIO_STATUS_FOR_ERROR_CODES_INT_ARRAY);
+
+    if (piMessage == IMS_NULL || !objEvaluateNetworkErrorCodes.Contains(piMessage->GetStatusCode()))
+    {
+        return MO_INVALID;
+    }
+
+    if (!objMtsService.IsWlan())
+    {
+        return MO_ERROR_FALLBACK;
+    }
+
+    IMS_BOOL bDataRoaming = m_objContext.GetNetworkTracker().IsInRoamingState();
+    IMS_SINT32 nCellularState = m_objContext.GetNetworkTracker().GetCellularServiceState();
+    if (bDataRoaming || (nCellularState != INetworkWatcher::STATE_IN_SERVICE))
+    {
+        return MO_ERROR_GENERIC;
+    }
+
+    return MO_ERROR_FALLBACK;
 }

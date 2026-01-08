@@ -26,7 +26,7 @@ class TestCoreService : public CoreService
 {
 public:
     TestCoreService();
-    virtual ~TestCoreService();
+    ~TestCoreService() override;
 
     inline ISipClientConnection* CreateConnection(IN const SipAddress* /*pFrom*/,
             IN const SipAddress* /*pTo*/, IN const SipMethod& /*objMethod*/,
@@ -62,7 +62,7 @@ public:
     inline void SetScc(IN ISipClientConnection* piScc) { m_piScc = piScc; }
     inline void SetSccForMidDialog(IN ISipClientConnection* piScc) { m_piSccForMidDialog = piScc; }
     inline void SetSccForCancel(IN ISipClientConnection* piScc) { m_piSccForCancel = piScc; }
-    inline void SetImsConnected(IN IMS_BOOL bImsConnected)
+    inline void MarkAsImsConnected(IN IMS_BOOL bImsConnected)
     {
         CoreService::SetImsConnected(bImsConnected);
     }

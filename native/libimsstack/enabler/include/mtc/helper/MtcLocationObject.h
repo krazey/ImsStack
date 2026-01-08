@@ -17,6 +17,7 @@
 #ifndef MTC_LOCATION_OBJECT_H_
 #define MTC_LOCATION_OBJECT_H_
 
+#include "AString.h"
 #include "ByteArray.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
@@ -44,12 +45,12 @@ public:
      */
     static MtcLocationProperties* GetLocationFromMessage(IN const IMessage& objMessage);
 
-    void SetLocationToMessage(IN_OUT IMessage& objMessage, IN const ByteArray& objContent,
-            IN IMS_BOOL bGeolocationRouting);
+    void SetLocationToMessage(IN_OUT IMessage& objMessage, IN IMS_BOOL bGeolocationRouting,
+            IN const ByteArray& objContent);
     inline void SetLocationToMessage(
             IN_OUT IMessage& objMessage, IN IMS_BOOL bGeolocationRouting = IMS_FALSE)
     {
-        SetLocationToMessage(objMessage, CreateLocationBody(), bGeolocationRouting);
+        SetLocationToMessage(objMessage, bGeolocationRouting, CreateLocationBody());
     }
 
     ByteArray CreateLocationBody() const;
@@ -57,7 +58,7 @@ public:
             IN const AString& strLatitude, IN const AString& strLongitude) const;
 
 private:
-    AString CreateCid(IN const ISubscriberConfig& objSubscriberConfig) const;
+    AString CreateCid() const;
     AString CreatePersonId() const;
 
     IMS_SINT32 GetInformationLevel() const;
@@ -67,6 +68,14 @@ private:
     static AString GetContentIdHeader(IN const AString& strCid);
     static AString GetContentDispositionHeader();
     static AString GetEntityUri(IN const ISubscriberConfig& objSubscriberConfig);
+
+    static IMS_BOOL IsNoUicc(IN const IMtcCallContext& objContext);
+    static IMS_BOOL IsGeolocationBlockedByConfig(IN IMtcCallContext& objContext);
+    static IMS_BOOL IsGeolocationBlockedByPlmn(IN IMtcCallContext& objContext);
+    static IMS_BOOL IsGeolocationBlockedBySuppService(IN IMtcCallContext& objContext);
+
+    static IMS_SINT32 GetGeolocationPidfAllowedType(
+            IN EmergencyType eEmergencyType, IN IMS_BOOL bWifi);
 
     IMtcCallContext& m_objContext;
 };

@@ -22,6 +22,8 @@ import android.os.Message;
 import android.os.Parcel;
 import android.telephony.emergency.EmergencyNumber.EmergencyCallRouting;
 
+import androidx.annotation.NonNull;
+
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.externalcalls.ExternalCalls;
@@ -31,6 +33,7 @@ import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.jni.JniObjectId;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.Closeable;
@@ -75,13 +78,14 @@ public class MtcApp implements Closeable {
         }
     }
 
-    private static final int MSG_IMS_SERVICE_STARTED = 1;
-    private static final int MSG_SEND_NOTIFICATION = 2;
+    protected static final int MSG_IMS_SERVICE_STARTED = 1;
+    protected static final int MSG_SEND_NOTIFICATION = 2;
 
     private final IBaseContext mContext;
     private final IMtcCallManager mCM;
     private final MtcAppHandler mHandler;
     private final MtcEmergencyServiceManager mEmergencyServiceManager;
+    private final MtcTerminalBasedSupplementaryServiceNotifier mTbSsNotifier;
     private long mNativeObject = 0;
     private JNIImsListenerProxy mNativeListener = new JNIImsListenerProxy();
     private ServiceStateListener mServiceStateListener = null;
@@ -90,6 +94,7 @@ public class MtcApp implements Closeable {
     protected MmtelFeatureListener mMmtelFeatureListener = null;
     private NativeStateInterface.Listener mNativeStateListener;
     private long mPreIncomingNativeCallId = 0;
+    private long mIncomingCallKey = 0;
 
     public MtcApp(IBaseContext context) {
         mContext = context;
@@ -98,6 +103,8 @@ public class MtcApp implements Closeable {
         mHandler = new MtcAppHandler(mContext.getCallLooper());
         mEmergencyServiceManager =
                 new MtcEmergencyServiceManager(mContext, mCM.getCallStateTracker());
+        mTbSsNotifier = new MtcTerminalBasedSupplementaryServiceNotifier(
+                mContext.getSlotId(), mContext.getCallLooper());
         mMtcJniProxy = MtcJniProxy.getInstance();
 
         init();
@@ -105,12 +112,14 @@ public class MtcApp implements Closeable {
 
     @VisibleForTesting
     public MtcApp(IBaseContext context, IMtcCallManager mtcCallManager, Looper looper,
-            MtcEmergencyServiceManager mtcEmergencyServiceManager, MtcJniProxy mtcJniProxy) {
+            MtcEmergencyServiceManager mtcEmergencyServiceManager,
+            MtcTerminalBasedSupplementaryServiceNotifier tbSsNotifier, MtcJniProxy mtcJniProxy) {
         mContext = context;
 
         mCM = mtcCallManager;
         mHandler = new MtcAppHandler(looper);
         mEmergencyServiceManager = mtcEmergencyServiceManager;
+        mTbSsNotifier = tbSsNotifier;
         mMtcJniProxy = mtcJniProxy;
     }
 
@@ -122,6 +131,7 @@ public class MtcApp implements Closeable {
         mCM.init();
         mContext.addImsServiceListener(mHandler);
         mEmergencyServiceManager.init();
+        mTbSsNotifier.init();
 
         MmTelFeatureRegistry mmtelFr = ImsServiceRegistry.getInstance(mContext.getSlotId())
                 .getMmTelFeatureRegistry();
@@ -142,6 +152,7 @@ public class MtcApp implements Closeable {
         mEmergencyServiceManager.clear();
         mContext.removeImsServiceListener(mHandler);
         mCM.clear();
+        mTbSsNotifier.deinit();
 
         initializeState();
 
@@ -161,10 +172,17 @@ public class MtcApp implements Closeable {
             }
             mNativeStateListener = null;
         }
+
+        mPreIncomingNativeCallId = 0;
+        mIncomingCallKey = 0;
     }
 
     public IMtcCallManager getCallManager() {
         return mCM;
+    }
+
+    public MtcEmergencyServiceManager getMtcEmergencyServiceManager() {
+        return mEmergencyServiceManager;
     }
 
     /**
@@ -183,10 +201,22 @@ public class MtcApp implements Closeable {
      * Creates {@link MtcCall} according to received information and attaches it
      * to {@link MtcCallManager}.
      *
-     * @param callAttributes The information used when creates {@link MtcCall}.
+     * @param callAttributes The information used when creating {@link MtcCall}.
      * @return The created {@link MtcCall}.
      */
     public MtcCall createMtcCallAndAttach(int callAttributes) {
+        return createMtcCallAndAttach(callAttributes, "");
+    }
+
+    /**
+     * Creates {@link MtcCall} according to received information and attaches it
+     * to {@link MtcCallManager}.
+     *
+     * @param callAttributes The information used when creating {@link MtcCall}.
+     * @param logTag The log tag for the call.
+     * @return The created {@link MtcCall}.
+     */
+    private MtcCall createMtcCallAndAttach(int callAttributes, String logTag) {
         if (getJNIService() == 0) {
             bindJNIService();
 
@@ -196,7 +226,7 @@ public class MtcApp implements Closeable {
             }
         }
 
-        MtcCall call = createMtcCall(callAttributes);
+        MtcCall call = createMtcCall(callAttributes, logTag);
 
         if (call.isMO()) {
             mCM.attachCall(call);
@@ -218,12 +248,13 @@ public class MtcApp implements Closeable {
     /**
      * Creates {@link MtcCall} according to received information.
      *
-     * @param callAttributes The information used when creates {@link MtcCall}.
+     * @param callAttributes The information used when creating {@link MtcCall}.
+     * @param logTag The log tag for the call.
      * @return The created {@link MtcCall}.
      */
-    public MtcCall createMtcCall(int callAttributes) {
-        return new MtcCall(mContext, mCM.getCallTracker(), callAttributes,
-                mCM.getVacantCallIndex(), "");
+    public MtcCall createMtcCall(int callAttributes, String logTag) {
+        return new MtcCall(mContext, mCM.getCallTracker(), callAttributes, mCM.getNextCallIndex(),
+                logTag);
     }
 
     /**
@@ -245,6 +276,16 @@ public class MtcApp implements Closeable {
         }
 
         return call;
+    }
+
+    /**
+     * Clears information related to a incoming call.
+     */
+    public void onIncomingCallTaken(MtcCall mtcCall) {
+        if (mPreIncomingNativeCallId == mtcCall.getNativeCallId()) {
+            mPreIncomingNativeCallId = 0;
+            mIncomingCallKey = 0;
+        }
     }
 
     public void setCallListener(MtcApp.CallListener listener) {
@@ -279,11 +320,6 @@ public class MtcApp implements Closeable {
     @VisibleForTesting
     protected class MmtelFeatureListener implements MmTelFeatureRegistry.Listener {
         @Override
-        public void onTerminalBasedCallWaitingStatusChanged() {
-            setTerminalBasedCallWaiting();
-        }
-
-        @Override
         public void onSrvccStateChanged(int srvccState) {
             logi("onSrvccStateChanged :: SRVCC State = " + srvccState);
             Parcel parcel = Parcel.obtain();
@@ -293,28 +329,6 @@ public class MtcApp implements Closeable {
 
             sendNotification(parcel);
         }
-    }
-
-    /**
-     * Sends received terminal-based call waiting value to the Native.
-     */
-    public void setTerminalBasedCallWaiting() {
-        boolean enabled = false;
-
-        MmTelFeatureRegistry mmtelFr = ImsServiceRegistry.getInstance(mContext.getSlotId())
-                .getMmTelFeatureRegistry();
-
-        if (mmtelFr != null) {
-            enabled = mmtelFr.isTerminalBasedCallWaitingEnabled();
-        }
-        logi("setTerminalBasedCallWaiting :: enabled=" + enabled);
-
-        Parcel parcel = Parcel.obtain();
-
-        parcel.writeInt(IUMtcService.SET_TERMINAL_BASED_CALL_WAITING);
-        parcel.writeInt(enabled ? 1 : 0);
-
-        sendNotification(parcel);
     }
 
     public boolean isServiceValid() {
@@ -328,7 +342,6 @@ public class MtcApp implements Closeable {
         MtcStateUtils.initializeState(mContext.getContext(), mContext.getSlotId());
     }
 
-    @VisibleForTesting
     public MtcAppHandler getHandler() {
         return mHandler;
     }
@@ -345,6 +358,18 @@ public class MtcApp implements Closeable {
 
     public long getJNIService() {
         return mNativeObject;
+    }
+
+    /**
+     * Checks if an outgoing call is barred based on the call type and the recipient's number.
+     *
+     * @param callType The type of the outgoing call.
+     * @param callee The phone number of the recipient of the outgoing call to check
+     *               if it is an international number.
+     * @return {@code true} if the outgoing call is barred, {@code false} otherwise.
+     */
+    public boolean isOutgoingCallBarringActivated(int callType, String callee) {
+        return mTbSsNotifier.isOutgoingCallBarringActivated(callType, callee);
     }
 
     private void bindJNIService() {
@@ -388,7 +413,8 @@ public class MtcApp implements Closeable {
             }
 
             mEmergencyServiceManager.setNativeObject(mNativeObject);
-            setTerminalBasedCallWaiting();
+            mTbSsNotifier.setHandler(mHandler);
+            mTbSsNotifier.notifyInfo();
         }
     }
 
@@ -399,6 +425,7 @@ public class MtcApp implements Closeable {
             mNativeObject = 0;
 
             mEmergencyServiceManager.setNativeObject(mNativeObject);
+            mTbSsNotifier.setHandler(null);
         }
     }
 
@@ -467,27 +494,40 @@ public class MtcApp implements Closeable {
         private void onMessageForCallApp(int msg, Parcel parcel) {
             if (msg == IUMtcService.PRE_INCOMING_CALL) {
                 long nativeCallKey = parcel.readLong();
-                parcel.readString();
 
-                MtcCall call = createMtcCallAndAttach(0);
+                if (mIncomingCallKey != 0 && mIncomingCallKey != nativeCallKey) {
+                    loge("Only one incoming call can be processed at a time");
+                    return;
+                }
 
-                if (mCallListener != null && call != null) {
+                mIncomingCallKey = nativeCallKey;
+
+                MtcCall call = createMtcCallAndAttach(0, parcel.readString());
+                call.attach(nativeCallKey);
+
+                if (mCallListener != null) {
                     mPreIncomingNativeCallId = call.getNativeCallId();
                     mCallListener.onPreIncomingCallReceived(MtcApp.this, mPreIncomingNativeCallId);
-                    call.attach(nativeCallKey);
                 } else {
                     rejectAndCloseCall(call);
                 }
             } else if (msg == IUMtcService.AUTO_REJECTED_CALL) {
-                MtcCall call = getPendingCall(mPreIncomingNativeCallId);
-                if (call == null) {
-                    call = createMtcCallAndAttach(0);
+                long nativeCallKey = parcel.readLong();
+
+                MtcCall call;
+                if (mIncomingCallKey == nativeCallKey) {
+                    // PRE_INCOMING_CALL and AUTO_REJECTED_CALL for a same incoming call.
+                    parcel.readString();
+                    call = getPendingCall(mPreIncomingNativeCallId);
+                } else {
+                    // only AUTO_REJECTED_CALL for a differencet incoming call.
+                    call = createMtcCallAndAttach(0, parcel.readString());
+                    call.attach(nativeCallKey);
+
                     if (mCallListener != null) {
                         mCallListener.onPreIncomingCallReceived(
                                 MtcApp.this, call.getNativeCallId());
                     }
-                } else {
-                    mPreIncomingNativeCallId = 0;
                 }
 
                 call.invokeIncomingCallReceivedForAutoRejecting(
@@ -529,12 +569,11 @@ public class MtcApp implements Closeable {
                 }
             }
             else if (msg == IUMtcService.JNI_READY) {
-                setTerminalBasedCallWaiting();
             }
         }
     }
 
-    private class MtcAppHandler extends Handler implements ImsStackRegistry.ImsServiceListener {
+    protected class MtcAppHandler extends Handler implements ImsStackRegistry.ImsServiceListener {
         public MtcAppHandler(Looper looper) {
             super(looper);
         }
@@ -577,5 +616,15 @@ public class MtcApp implements Closeable {
         public void onImsServiceStopped(int slotId) {
             logi("onImsServiceStopped: slotId=" + slotId);
         }
+    }
+
+    /**
+     * Dump this instance into a readable format for dumpsys usage.
+     */
+    public void dump(@NonNull IndentingPrintWriter pw) {
+        pw.println("Mtc:");
+        pw.increaseIndent();
+        pw.println("jniService=" + getJNIService());
+        pw.decreaseIndent();
     }
 }

@@ -16,36 +16,40 @@
 #ifndef __SIP_UTIL_H__
 #define __SIP_UTIL_H__
 
-#include "ISipLoggerUtil.h"
-#include "ISipNetworkUtil.h"
-#include "ISipTimerUtil.h"
-#include "ISipTxnListener.h"
+#include "ISipTransactionCallback.h"
+
+class ISipLoggerUtil;
+class ISipNetworkUtil;
 
 class SipUtil
 {
 public:
     SipUtil();
     virtual ~SipUtil();
+    SipUtil(IN const SipUtil&) = delete;
+    SipUtil& operator=(IN const SipUtil&) = delete;
 
-    SIP_VOID RegisterNetwork(ISipNetworkUtil* pNwUtil);
-    SIP_VOID RegisterTxnListener(ISipTxnListener* pTxnListener);
-    ISipTimerUtil* GetTimer();
-    ISipLoggerUtil* GetLogger();
-    ISipNetworkUtil* GetNetwork();
-    ISipTxnListener* GetTxnListener();
+    SIP_VOID SetNetwork(ISipNetworkUtil* pNetworkUtil);
+    inline SIP_VOID SetTransactionCallback(ISipTransactionCallback* pCallback)
+    {
+        m_pCallback = pCallback;
+    }
+
+    inline ISipLoggerUtil* GetLogger() const { return m_pLoggerUtil; }
+
+    inline ISipNetworkUtil* GetNetwork() const { return m_pNetworkUtil; }
+
+    inline ISipTransactionCallback* GetTransactionCallback() const { return m_pCallback; }
+
+    static SipUtil* GetInstance();
+    static SIP_VOID DestroyInstance();
 
 private:
-    ISipTimerUtil* m_pTimerUtil;
     ISipLoggerUtil* m_pLoggerUtil;
     ISipNetworkUtil* m_pNetworkUtil;
-    ISipTxnListener* m_pTxnListener;
+    ISipTransactionCallback* m_pCallback;
 
-    SipUtil& operator=(IN const SipUtil& objRHS);
-    SipUtil(IN const SipUtil& objRHS);
+    static SipUtil* s_pUtil;
 };
-
-void SipUtil_Construct();
-void SipUtil_Destruct();
-SipUtil* SipUtil_GetInstance();
 
 #endif  //__SIP_UTIL_H__

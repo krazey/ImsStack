@@ -33,6 +33,7 @@
 #include "interface/IAosRegistrationControlListener.h"
 #include "interface/IAosRegistrationListener.h"
 #include "interface/IAosServicePhoneListener.h"
+#include "provider/AosTracer.h"
 #include "provider/AosStaticProfile.h"
 
 class IAosAppContext;
@@ -72,7 +73,7 @@ class AosApplication :
 
 public:
     AosApplication(IN IAosAppContext* piAppContext, IN AString& strAppId);
-    virtual ~AosApplication();
+    ~AosApplication() override;
 
     // IAosApplication
     void Reconfig() override;
@@ -85,6 +86,7 @@ public:
 
     IMS_BOOL IsActivated() override;
     IMS_BOOL IsOn() override;
+    IMS_BOOL IsCrossSimConnected() override;
 
     void SetActivation(IN IMS_BOOL bActivation) override;
     void NotifyEpsFallbackCallState(IN IMS_UINT32 nState) override;
@@ -93,6 +95,8 @@ public:
 protected:
     void ClearOffReason();
     void ClearPending();
+    void ClearWifiRegBlock();
+    void ClearDataFailureReason();
 
     AosNetworkType GetNetworkTypeForImsRegState() const;
 
@@ -100,9 +104,16 @@ protected:
     void SetImsCall(IN IMS_BOOL bActive);
     void SetPublishState(IN IMS_BOOL bActive);
     void SetRegRecoveryHeld(IN IMS_BOOL bHeld);
+    void SetDataFailureReason(IN IMS_SINT32 nReason);
 
     void ResetBlock(IN BLOCK_REASON nReason);
     void NotifyDeregistered(IN AosReasonCode eReason);
+    void NotifyDeregistering();
+    void AddRatBlock();
+    void ClearRatBlocks();
+    void PerformRatBlockActions(IN IMS_BOOL bStart);
+    AosStatusInfo GetStatusInfo(IN IMS_UINT32 nRegResult, IN IMS_UINT32 nRegReason,
+            IN IMS_UINT32 nConnType, IN IMS_UINT32 nConnReason) const;
 
     IMS_BOOL IsEmergency() const;
     IMS_BOOL IsStateMessage(IN IMS_UINT32 nMsg) const;
@@ -115,8 +126,15 @@ protected:
     IMS_BOOL IsTimerRunning(IN IMS_UINT32 nType) const;
     IMS_BOOL IsRegTypeNormal() const;
     IMS_BOOL IsRegStateUpdatedByNrLteRatChange() const;
+    IMS_BOOL IsRegisteredNetwork(IN IMS_UINT32 nNetworkType) const;
     IMS_BOOL IsPdnDisconnectRequired() const;
     IMS_BOOL IsPlmnBlockRequired() const;
+    IMS_BOOL IsBlockRat(IN IMS_UINT32 nRat) const;
+    IMS_BOOL IsReasonBlockedForImsEstablishmentTimer() const;
+    IMS_BOOL IsImsEstablishmentTimerStopRequired() const;
+    IMS_BOOL IsPdnDeactivationRequired() const;
+
+    IMS_SINT32 GetImsEstablishmentTime() const;
 
     // Create
     virtual void CreateAosCondition();
@@ -132,21 +150,23 @@ protected:
     virtual void SetCleanState();
 
     virtual IMS_BOOL IsUpdateAvailable();
-    virtual IMS_BOOL IsRegReconfigAvailable();
-    virtual IMS_BOOL IsReconfigHandleChanged();
+    virtual IMS_BOOL IsRegReconfigAvailable() const;
+    virtual IMS_BOOL IsReconfigHandleChanged() const;
     virtual IMS_BOOL IsRequestCmdHeldByCondition(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason = 0);
-    virtual IMS_BOOL IsAllHandleDetached();
-    virtual IMS_BOOL IsConditionTimerSkippedDueToTimer();
-    virtual IMS_BOOL IsRegUpdatedByNrLteRatChange();
+    virtual IMS_BOOL IsAllHandleDetached() const;
+    virtual IMS_BOOL IsConditionTimerSkippedDueToTimer() const;
+    virtual IMS_BOOL IsRegUpdatedByNrLteRatChange() const;
 
     // Clean
     virtual void CleanAll(IN IMS_UINT32 nOffReason = AosReason::NONE);
     virtual void ClearConnection();
+    virtual void ClearConnector();
 
     virtual IMS_UINT32 GetReportState();
+    IMS_SINT32 GetDataFailureReason() const override;
 
     // ImsActivityEx
-    virtual IMS_BOOL OnMessage(IN IMSMSG& objMsg);
+    IMS_BOOL OnMessage(IN IMSMSG& objMsg) override;
 
     // Message
     virtual IMS_BOOL ProcessMessage(IN IMSMSG& objMsg);
@@ -202,6 +222,7 @@ protected:
     virtual void ProcessRegFailed_Start(IN IMS_UINT32 nReason);
     virtual void ProcessRegFailed_Update(IN IMS_UINT32 nReason);
     virtual void ProcessRegFailed_Terminated();
+    virtual void ProcessRegFailed_NoNextPcscfOnScscfRestoration();
 
     virtual void ProcessDisconnectingState(IN IMS_UINT32 nReason = 0);
     virtual void ProcessNetworkEvent(
@@ -210,6 +231,8 @@ protected:
     virtual void ProcessRegControlEvent(IN IMS_UINT32 nType, IN IMS_UINT32 nReason);
     virtual void ProcessRegInternalFailed(IN IMS_UINT32 nReason = 0);
     virtual void ProcessRegAuthenticationFailed();
+    virtual void ProcessRegForbiddenInWifi();
+    virtual void ProcessRegUsimAuthenticationFailed();
     virtual void ProcessRegTerminated();
     virtual void ProcessPingCommand();
     virtual void ProcessRegTerminating();
@@ -224,7 +247,7 @@ protected:
     virtual void ProcessRegStopTimerExpired();
     virtual void ProcessPdnBlockedTimerExpired();
     virtual void ProcessImsEstablishmentTimerExpired();
-
+    virtual void ProcessRatBlockTimerExpired();
     virtual void ProcessPdnBlock();
     virtual void ProcessPdnBlockWithTime();
 
@@ -250,6 +273,10 @@ protected:
     virtual void UpdateRegisteredRat(IN IMS_UINT32 nRegisteredRat);
     virtual void UpdateMonitorNotify(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
 
+    // IAosApplication
+    void Init() override;
+    void CleanUp() override;
+
     // IAosConditionListener
     void Condition_Changed(IN IMS_UINT32 nReason = 0) override;
     void Condition_RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason = 0) override;
@@ -264,6 +291,7 @@ protected:
 
     // IAosCallTrackerListener
     void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState) override;
+    inline void CallTracker_ECallSessionReleased(IN IMS_BOOL /* bEstablished */) override {};
 
     // IAosNetTrackerListener
     void NetTracker_StatusChanged() override;
@@ -281,9 +309,21 @@ protected:
     // AosRegistrationControlListener
     void RegistrationControl_ControlRegistration(IN AosRegRequestType eType,
             IN AosPcscfOrder eOrder, IN AosControlCause eCause) override;
+    void RegistrationControl_UpdateDataFailureReason(IN IMS_SINT32 nReason) override;
 
     // AosServicePhoneListener
     void ServicePhone_LocationInfoChanged(IN LocationInfo eState) override;
+    void ServicePhone_CrossSimStatusChanged(IN IMS_BOOL bConnected) override;
+    void ServicePhone_PlmnChanged(IN const AString& strPlmn) override;
+
+public:
+    static const IMS_UINT32 RECONFIG_GUARD_TIME_MILLIS = 1000;
+    static const IMS_UINT32 REG_STOP_WAITING_TIME_MILLIS = 1000;
+    static const IMS_UINT32 APP_START_WAITING_TIME_MILLIS = 4000;
+    static const IMS_UINT32 DELAY_STOPPING_PDN_TO_KEEP_SESSION_TIME_SECONDS = 2;
+    static const IMS_UINT32 UNEXPECTED_ERROR_APP_START_WAITING_TIME_MILLIS = 10000;
+    static const IMS_UINT32 PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS = 5;
+    static const IMS_UINT32 RAT_BLOCK_TIME_MILLIS = 720000;  // 12 MIN
 
 protected:
     enum
@@ -348,14 +388,15 @@ protected:
     enum
     {
         TIMER_RECONFIG_GUARD = 0,
-        TIMER_MSG_CONITION,
+        TIMER_MSG_CONDITION,
         TIMER_REG_STOP,
         TIMER_REG_BLOCKED,
         TIMER_APP_ACTIVATED,
         TIMER_APP_CONNECTED,
         TIMER_APP_TERMINATED,
         TIMER_PDN_BLOCKED,
-        TIMER_IMS_ESTABLISHMENT
+        TIMER_IMS_ESTABLISHMENT,
+        TIMER_RAT_BLOCK
     };
 
     enum
@@ -385,10 +426,6 @@ protected:
     };
 
 protected:
-    void Init() override;
-    void CleanUp() override;
-
-protected:
     IAosAppContext* m_piContext;
     IAosRegistration* m_piRegistration;
     IAosCallTracker* m_piCallTracker;
@@ -406,11 +443,13 @@ protected:
     ITimer* m_piAppTerminatedTimer;
     ITimer* m_piPdnBlockedTimer;
     ITimer* m_piImsEstablishmentTimer;
+    ITimer* m_piRatBlockTimer;
 
     AString m_strAppId;
     IMS_UINT32 m_nAppType;
     IMS_UINT32 m_nOffReason;
     IMS_UINT32 m_nRat;
+    IMS_UINT32 m_nBlockedRats;
     AosRegistrationType m_eRegType;
     IMS_UINT32 m_nReportState;
     IMS_UINT32 m_nRegPending;
@@ -420,6 +459,7 @@ protected:
     IMS_UINT32 m_nLteExtraInfo;
     IMS_UINT32 m_nVoiceServiceState;
     IMS_SINT32 m_nSlotId;
+    IMS_SINT32 m_nDataFailureReason;
 
     IMS_BOOL m_bConnected;
     IMS_BOOL m_bRegRecoveryHeld;
@@ -428,14 +468,9 @@ protected:
     IMS_BOOL m_bIsActivated;
     IMS_BOOL m_bEpdgEnabled;
     IMS_BOOL m_bDataRoaming;
+    IMS_BOOL m_bPdnDeactivationRequired;
+    IMS_BOOL m_bClearIpsecBlockOnPdnDisconnect;
 
     AString m_strTag;
-
-    static const IMS_UINT32 RECONFIG_GUARD_TIME_MILLIS = 1000;
-    static const IMS_UINT32 REG_STOP_WAITING_TIME_MILLIS = 1000;
-    static const IMS_UINT32 APP_START_WAITING_TIME_MILLIS = 4000;
-    static const IMS_UINT32 DELAY_STOPPING_PDN_TO_KEEP_SESSION_TIME_SECONDS = 2;
-    static const IMS_UINT32 UNEXPECTED_ERROR_APP_START_WAITING_TIME_MILLIS = 10000;
-    static const IMS_UINT32 PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS = 5;
 };
 #endif  // AOS_APPLICATION_H_

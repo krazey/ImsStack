@@ -17,11 +17,10 @@
 #define __SIP_TRANSPORT_INFO_H__
 
 #include "SipDatatypes.h"
-#include "msg/SipMsgUtil.h"
-#include "ISipUserData.h"
-#include "transport/SipTransportParameter.h"
-#include "transport/SipTransportBuffer.h"
 #include "msg/SipMessage.h"
+#include "msg/SipMsgUtil.h"
+#include "transport/SipTransportBuffer.h"
+#include "transport/SipTransportParameter.h"
 
 class SipTransportInfo
 {
@@ -67,9 +66,6 @@ public:
     };
 
 private:
-    /************************************************************
-      Private    Member Variables
-     **************************************************************/
     /* Number of Times message has been retransmitted */
     SIP_CHAR m_cNumTimeReqSent;
 
@@ -87,28 +83,21 @@ private:
 
     /* SipMessage Corresponding to actual sent buffer. used in callbacks to network */
     SipMessage* m_pSentSipMsg;
-
-    /***********************************************************
-      Private Member Functions
-     ************************************************************/
     SipTransportInfo& operator=(IN const SipTransportInfo& objRHS);
     SipTransportInfo(IN const SipTransportInfo& objRHS);
 
 public:
-    /************************************************************
-      Member Functions
-     **************************************************************/
     SipTransportInfo();
-    SipTransportInfo(SipTransportParameter* pTranspParam, SipTransportBuffer* pTransSipBuffer);
+    SipTransportInfo(
+            const SipTransportParameter* pTranspParam, SipTransportBuffer* pTransSipBuffer);
     virtual ~SipTransportInfo();
-    /* Set APIs */
 
-    /* Get APIs*/
-
-    /* Returns the Transport parameter to which the Req/Resp was sent initially */
     SipTransportParameter* GetMsgSentTranspParam();
 
-    SIP_BOOL SetMsgSentTranspParam(SipTransportParameter* pTranspParam);
+    inline SIP_VOID SetMsgSentTranspParam(SipTransportParameter* pTranspParam)
+    {
+        m_pActualDestParam = pTranspParam;
+    }
 
     /* Returns the Transmitting SIP Buffer */
     SipTransportBuffer* GetTranspSipBuffer();

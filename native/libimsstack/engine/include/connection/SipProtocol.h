@@ -17,21 +17,19 @@
 #define SIP_PROTOCOL_H_
 
 #include "Protocol.h"
-#include "Sip.h"
 
 class SipProtocol : public Protocol
 {
-private:
-    SipProtocol();
-
 public:
-    virtual ~SipProtocol();
+    inline SipProtocol() :
+            Protocol()
+    {
+    }
+
+    ~SipProtocol() override = default;
 
     SipProtocol(IN const SipProtocol&) = delete;
     SipProtocol& operator=(IN const SipProtocol&) = delete;
-
-public:
-    static SipProtocol* GetInstance();
 
 private:
     // Protocol class

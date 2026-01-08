@@ -25,7 +25,7 @@ class AosRegStateManager : public IAosRegStateManager
 {
 public:
     AosRegStateManager();
-    virtual ~AosRegStateManager();
+    ~AosRegStateManager() override;
 
     /// IAosRegStateManager Interface
     void SetListener(IN IAosRegStateManagerListener* piRegListener) override;

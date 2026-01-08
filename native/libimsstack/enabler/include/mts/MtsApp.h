@@ -18,36 +18,68 @@
 #define MTS_APP_H_
 
 #include "IMtsApp.h"
+#include "IMtsContext.h"
+#include "IMtsJni.h"
 #include "ImsApp.h"
+#include "MtsDef.h"
+#include "MtsNetworkTracker.h"
+#include "MtsService.h"
+#include "message/MtsMessageController.h"
+#include "utility/MtsDynamicLoader.h"
 
+class IJniMtsAppThread;
+class IMtsDynamicLoader;
+class IMtsMessageController;
+class IMtsNetworkTracker;
 class IMtsService;
-class MtsDynamicLoader;
-class MtsMessageController;
 
-class MtsApp final : public IMtsApp, public ImsApp
+class MtsApp final : public IMtsApp, public ImsApp, public IMtsContext, public IMtsJni
 {
 public:
     explicit MtsApp(IN IMS_SINT32 nSlotId);
-    ~MtsApp();
+    ~MtsApp() override;
+    MtsApp(IN const MtsApp&) = delete;
+    MtsApp& operator=(IN const MtsApp&) = delete;
 
     // IMtsApp
     virtual void Start() override;
     virtual void Stop() override;
 
-    inline IMtsService* GetMtsService() { return m_piMtsService; }
-    inline MtsDynamicLoader* GetMtsDynamicLoader() { return m_pMtsDynamicLoader; }
-    inline MtsMessageController* GetMtsMessageController() { return m_pMtsMessageController; }
+    // IMtsContext
+    inline IMS_SINT32 GetSlotId() const override { return m_nSlotId; }
+    const IMtsService& GetService(IN MtsServiceType eServiceType) const override;
+    inline IMtsMessageController& GetMessageController() override
+    {
+        return m_objMtsMessageController;
+    }
+    inline const IMtsNetworkTracker& GetNetworkTracker() const override
+    {
+        return m_objMtsNetworkTracker;
+    }
+    inline const IMtsDynamicLoader& GetDynamicLoader() const override
+    {
+        return m_objMtsDynamicLoader;
+    }
+    IJniMtsAppThread* GetJniAppThread() const override;
+
+    // IMtsJni
+    inline void NotifyJniEnablerSet() override {}
+    void SendMoSmsByServiceType(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
+            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergencyNumber,
+            IN IMS_UINT32 nRetryCount) override;
+    void NotifyMoSmsTimedOut() override;
+    void NotifyMtSmsTimedOut(IN IMS_SINT32 nMessageRef) override;
 
 private:
-    void CreateMtsMessageController();
-    void CreateMtsService();
-    void CreateMtsUtils();
+    void AttachJni();
+    IMS_BOOL ShouldUseEmergencyPdnForSms() const;
 
-private:
     IMS_SINT32 m_nSlotId;
-    IMtsService* m_piMtsService;
-    MtsDynamicLoader* m_pMtsDynamicLoader;
-    MtsMessageController* m_pMtsMessageController;
+    MtsService m_objNormalService;
+    MtsService m_objEmergencyService;
+    MtsMessageController m_objMtsMessageController;
+    MtsNetworkTracker m_objMtsNetworkTracker;
+    MtsDynamicLoader m_objMtsDynamicLoader;
 };
 
 #endif

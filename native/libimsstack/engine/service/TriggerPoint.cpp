@@ -19,11 +19,12 @@
 
 #include "ISipHeader.h"
 #include "ISipMessage.h"
+#include "ISipMessageBodyPart.h"
 #include "SipParameter.h"
 #include "SipParsingHelper.h"
 #include "TriggerPoint.h"
 
-__IMS_TRACE_TAG_IMS__;
+__IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
 TriggerPoint::TriggerPoint(
@@ -576,7 +577,7 @@ PRIVATE GLOBAL IMS_SINT32 TriggerPoint::CompareSdpInfo(IN const ImsList<AString>
         return SPT_MATCH_OK;
     }
 
-    ISipMessageBodyPart* pBodyPart = piSipMsg->GetSdpBodyPart();
+    const ISipMessageBodyPart* pBodyPart = piSipMsg->GetSdpBodyPart();
 
     if (pBodyPart == IMS_NULL)
     {

@@ -20,9 +20,14 @@ import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 import android.telephony.ims.stub.ImsSmsImplBase;
 
+import androidx.annotation.NonNull;
+
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.SystemServiceProxy.SmsManagerProxy;
 import com.android.imsstack.imsservice.mmtel.sms.SmsTransferLayer;
 import com.android.imsstack.imsservice.mmtel.sms.SmsUtils;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.internal.annotations.VisibleForTesting;
 
 /**
@@ -77,12 +82,14 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
      * clears the objects created by this class.
      */
     public void clear() {
-        mReady = false;
-        if (mSmsTL != null) {
-            log("clear");
-            mSmsTL.setListener(null);
-            mSmsTL.clear();
-            mSmsTL = null;
+        synchronized (mLock) {
+            mReady = false;
+            if (mSmsTL != null) {
+                log("clear");
+                mSmsTL.setListener(null);
+                mSmsTL.clear();
+                mSmsTL = null;
+            }
         }
     }
 
@@ -96,8 +103,9 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
         }
         try {
             if (mScAddress == null) {
-                mScAddress = SmsManager.getSmsManagerForContextAndSubscriptionId(null,
-                                mCallContext.getSubId()).getSmscAddress();
+                SmsManagerProxy smp =
+                        AppContext.getInstance().getSystemServiceProxy(SmsManagerProxy.class);
+                mScAddress = smp.getSmscAddress();
             }
             log("SMMA smsc = " + mScAddress);
             result = mSmsTL.sendMemoryAvailabilityNotification(token, mScAddress);
@@ -113,10 +121,23 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
         log("sendSms: token = " + token + " format = " + format + " smsc = " + smsc
                                 + " isRetry = " + isRetry);
         int smsFormat = SmsUtils.FORMAT_INT_INVALID;
-        int result;
-        if (!mReady) {
-            throw new RuntimeException("Sms Not Ready!");
+
+        SmsTransferLayer smsTL;
+        synchronized (mLock) {
+            if (!mReady || mSmsTL == null) {
+                loge("sendSms failed: mReady=" + mReady + ", mSmsTL is null: " + (mSmsTL == null));
+                // Gracefully report error to Framework so it can retry
+                onSendSmsResultError(
+                        token,
+                        messageRef,
+                        SEND_STATUS_ERROR_RETRY,
+                        SmsManager.RESULT_ERROR_GENERIC_FAILURE,
+                        RESULT_NO_NETWORK_ERROR);
+                return;
+            }
+            smsTL = mSmsTL;
         }
+
         try {
             if (format.equals(SmsMessage.FORMAT_3GPP)) {
                 smsFormat = SmsUtils.FORMAT_INT_3GPP;
@@ -155,7 +176,7 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
                         RESULT_NO_NETWORK_ERROR);
                 return;
             }
-            result = mSmsTL.sendMoTPdu(token, smsFormat, messageRef, smsc, pdu);
+            int result = smsTL.sendMoTPdu(token, smsFormat, messageRef, smsc, pdu, isRetry);
             if (result == SmsUtils.SMS_RESULT_INVALID_SMSC_ADDRESS) {
                 loge("Can not send sms - Invalid smsc");
                 onSendSmsResultError(
@@ -235,6 +256,16 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
         }
     }
 
+    /**
+     * Dump this instance into a readable format for dumpsys usage.
+     */
+    public void dump(@NonNull IndentingPrintWriter pw) {
+        pw.println("Sms:");
+        pw.increaseIndent();
+
+        pw.decreaseIndent();
+    }
+
     private static void log(String s) {
         ImsLog.d(TAG + s);
     }
@@ -282,6 +313,17 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
             } catch (RuntimeException e) {
                 loge("notifySmsReceived Failed : " + e.getMessage());
                 return SmsUtils.RESULT_FAILURE;
+            }
+        }
+
+        @Override
+        public void notifyMemoryAvailableResult(int token, int result, int cause) {
+            log("notifyMemoryAvailableResult: token = " + token + " result = " + result
+                    + " cause = " + cause);
+            try {
+                onMemoryAvailableResult(token, result, cause);
+            } catch (RuntimeException e) {
+                loge("notifyMemoryAvailableResult error: " + e.getMessage());
             }
         }
     }

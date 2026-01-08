@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
+
 #include "AStringBuffer.h"
 #include "msg/SipRetryAfterHeader.h"
 
@@ -50,8 +51,7 @@ TEST_F(SipRetryAfterHeaderTest, Encode)
             SipRetryAfterHeader::GetNewObj(SipHeaderBase::RETRY_AFTER_SEC, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE,
-            pHeader->DecodeHdr(const_cast<char*>("360(sip server overloaded);duration=7200"), 40));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("360(sip server overloaded);duration=7200", 40));
 
     objBuffer = AString::ConstNull();
 
@@ -71,8 +71,7 @@ TEST_F(SipRetryAfterHeaderTest, Encode)
             SipRetryAfterHeader::GetNewObj(SipHeaderBase::RETRY_AFTER_SEC, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE,
-            pHeader->DecodeHdr(const_cast<char*>("360 (sip server overloaded);duration=7200"), 41));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("360 (sip server overloaded);duration=7200", 41));
 
     objBuffer = AString::ConstNull();
 
@@ -92,9 +91,7 @@ TEST_F(SipRetryAfterHeaderTest, Encode)
             SipRetryAfterHeader::GetNewObj(SipHeaderBase::RETRY_AFTER_SEC, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE,
-            pHeader->DecodeHdr(
-                    const_cast<char*>("360 ( sip server overloaded ) ;duration=7200"), 44));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("360 ( sip server overloaded ) ;duration=7200", 44));
 
     objBuffer = AString::ConstNull();
 
@@ -111,17 +108,17 @@ TEST_F(SipRetryAfterHeaderTest, Encode)
     pHeader->SipDelete();
 }
 
-TEST_F(SipRetryAfterHeaderTest, EncodeHdrAndDecodeHdr)
+TEST_F(SipRetryAfterHeaderTest, EncodeAndDecode)
 {
     SipRetryAfterHeader* pHeader = reinterpret_cast<SipRetryAfterHeader*>(
             SipRetryAfterHeader::GetNewObj(SipHeaderBase::RETRY_AFTER_SEC, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Empty buffer, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(""), 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("", 0));
 
     /* only delta seconds to retry present, success */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("20"), 2));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("20", 2));
     EXPECT_EQ(20, pHeader->GetDeltaSec());
 
     SipRetryAfterHeader* pCopyHeader = reinterpret_cast<SipRetryAfterHeader*>(
@@ -130,13 +127,13 @@ TEST_F(SipRetryAfterHeaderTest, EncodeHdrAndDecodeHdr)
 
     pHeader->SipDelete();
 
-    const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {
+    const SIP_INT32 BUFFER_SIZE = 4096;
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
     EXPECT_STREQ("20", &(aBuffer[0]));
 
     pCopyHeader->SipDelete();
@@ -146,7 +143,7 @@ TEST_F(SipRetryAfterHeaderTest, EncodeHdrAndDecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* delta seconds to retry and comment present, success */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("30(sip server overloaded)"), 25));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("30(sip server overloaded)", 25));
 
     pCopyHeader = reinterpret_cast<SipRetryAfterHeader*>(
             SipRetryAfterHeader::GetNewObj(SipHeaderBase::RETRY_AFTER_SEC, pHeader));
@@ -157,8 +154,8 @@ TEST_F(SipRetryAfterHeaderTest, EncodeHdrAndDecodeHdr)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
-    EXPECT_STREQ(const_cast<char*>("30(sip server overloaded)"), &(aBuffer[0]));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
+    EXPECT_STREQ("30(sip server overloaded)", &(aBuffer[0]));
 
     pCopyHeader->SipDelete();
 
@@ -167,8 +164,7 @@ TEST_F(SipRetryAfterHeaderTest, EncodeHdrAndDecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* delta seconds to retry,comment and extra parameter present, success */
-    EXPECT_EQ(SIP_TRUE,
-            pHeader->DecodeHdr(const_cast<char*>("15(sip server overloaded);duration=4800"), 39));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("15(sip server overloaded);duration=4800", 39));
     EXPECT_STREQ("sip server overloaded", pHeader->GetComment());
 
     pCopyHeader = reinterpret_cast<SipRetryAfterHeader*>(
@@ -180,7 +176,7 @@ TEST_F(SipRetryAfterHeaderTest, EncodeHdrAndDecodeHdr)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
     EXPECT_STREQ("15(sip server overloaded);duration=4800", &(aBuffer[0]));
 
     pCopyHeader->SipDelete();
@@ -190,8 +186,7 @@ TEST_F(SipRetryAfterHeaderTest, EncodeHdrAndDecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* delta seconds and space to retry,comment and extra parameter present, success */
-    EXPECT_EQ(SIP_TRUE,
-            pHeader->DecodeHdr(const_cast<char*>("15 (sip server overloaded);duration=4800"), 40));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("15 (sip server overloaded);duration=4800", 40));
     EXPECT_STREQ("sip server overloaded", pHeader->GetComment());
 
     pCopyHeader = reinterpret_cast<SipRetryAfterHeader*>(
@@ -203,7 +198,7 @@ TEST_F(SipRetryAfterHeaderTest, EncodeHdrAndDecodeHdr)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
     EXPECT_STREQ("15(sip server overloaded);duration=4800", &(aBuffer[0]));
 
     pCopyHeader->SipDelete();
@@ -213,9 +208,7 @@ TEST_F(SipRetryAfterHeaderTest, EncodeHdrAndDecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* delta seconds and space to retry,comment with space and extra parameter present, success */
-    EXPECT_EQ(SIP_TRUE,
-            pHeader->DecodeHdr(
-                    const_cast<char*>("15 ( sip server overloaded ) ;duration=4800"), 43));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("15 ( sip server overloaded ) ;duration=4800", 43));
     EXPECT_STREQ(" sip server overloaded ", pHeader->GetComment());
 
     pCopyHeader = reinterpret_cast<SipRetryAfterHeader*>(
@@ -227,7 +220,7 @@ TEST_F(SipRetryAfterHeaderTest, EncodeHdrAndDecodeHdr)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
     EXPECT_STREQ("15( sip server overloaded );duration=4800", &(aBuffer[0]));
 
     pCopyHeader->SipDelete();
@@ -237,7 +230,7 @@ TEST_F(SipRetryAfterHeaderTest, EncodeHdrAndDecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* delta seconds to retry,empty comment and extra parameter present, success */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("15();duration=1800"), 18));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("15();duration=1800", 18));
     EXPECT_STREQ("", pHeader->GetComment());
     EXPECT_EQ(SIP_TRUE, pHeader->IsValidHeader());
 
@@ -250,7 +243,7 @@ TEST_F(SipRetryAfterHeaderTest, EncodeHdrAndDecodeHdr)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
     EXPECT_STREQ("15();duration=1800", &(aBuffer[0]));
 
     pCopyHeader->SipDelete();
@@ -260,7 +253,7 @@ TEST_F(SipRetryAfterHeaderTest, EncodeHdrAndDecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* delta seconds to retry and comment present with no closing parenthesis, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("30(sip server overloaded"), 24));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("30(sip server overloaded", 24));
 
     pHeader->SipDelete();
 
@@ -269,7 +262,7 @@ TEST_F(SipRetryAfterHeaderTest, EncodeHdrAndDecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* delta seconds to retry and comment present with no opening parenthesis, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("30 sip server overloaded)"), 25));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("30 sip server overloaded)", 25));
 
     pHeader->SipDelete();
 
@@ -278,8 +271,7 @@ TEST_F(SipRetryAfterHeaderTest, EncodeHdrAndDecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* extra invalid string after comment, fail */
-    EXPECT_EQ(SIP_FALSE,
-            pHeader->DecodeHdr(const_cast<char*>("30(sip server overloaded)InvalidString"), 38));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("30(sip server overloaded)InvalidString", 38));
 
     pHeader->SipDelete();
 }

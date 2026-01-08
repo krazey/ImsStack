@@ -22,7 +22,7 @@ class OsEventSender : public IEventSender
 {
 public:
     OsEventSender();
-    virtual ~OsEventSender();
+    ~OsEventSender() override;
 
 public:
     void SendEvent(IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam,

@@ -60,7 +60,7 @@ public:
 public:
     inline void RegisterObserver(IN IWifiWatcherListener* piListener)
     {
-        IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
+        const IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
 
         for (IMS_UINT32 i = 0; i < m_objObserverLists.GetSize(); i++)
         {
@@ -83,7 +83,7 @@ public:
 
     inline void RemoveObserver(IN const IWifiWatcherListener* piListener)
     {
-        IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
+        const IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
 
         for (IMS_UINT32 i = 0; i < m_objObserverLists.GetSize(); i++)
         {
@@ -98,7 +98,8 @@ public:
             {
                 for (IMS_UINT32 j = 0; j < pObserverList->m_objListeners.GetSize(); j++)
                 {
-                    IWifiWatcherListener* piTmpListener = pObserverList->m_objListeners.GetAt(j);
+                    const IWifiWatcherListener* piTmpListener =
+                            pObserverList->m_objListeners.GetAt(j);
 
                     if (piListener == piTmpListener)
                     {
@@ -130,7 +131,7 @@ public:
 public:
     inline void ProcessNotify(IN ImsMessage& /*objMsg*/)
     {
-        IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
+        const IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
 
         for (IMS_UINT32 i = 0; i < m_objObserverLists.GetSize(); ++i)
         {

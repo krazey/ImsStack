@@ -17,159 +17,11 @@
 #include "ImsAosParameter.h"
 #include "ImsEventDef.h"
 #include "IRegistration.h"
+#include "AosReason.h"
 #include "provider/AosLog.h"
+#include "provider/AosStaticProfile.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
-
-class ApplicationLog
-{
-public:
-    // State
-    enum
-    {
-        STATE_NOTREADY = 0,
-        STATE_READY,
-        STATE_CONNECTING,
-        STATE_CONNECTED,
-        STATE_UPDATING,
-        STATE_DISCONNECTING
-    };
-
-    // Message
-    enum
-    {
-        // State-Machine MSG
-        MSG_CONDITION = AOSMSG_SERVICE_INTERNAL,
-        MSG_CONNECTION,
-        MSG_REGISTRATION,
-
-        // NO State-Machine MSG
-        MSG_INIT = AOSMSG_SERVICE_INTERNAL + 10,
-        MSG_REG_START,
-        MSG_REG_UPDATE,
-        MSG_REG_STOP,
-        MSG_REG_RECONFIG,
-        MSG_REG_RECOVER,
-        MSG_IPCAN_CHANGED,
-        MSG_PUB_TERMINATED,
-        MSG_DESTROY,
-        MSG_IMS_EST_TIMER_CONTROL,
-        MSG_REG_EXCHANGE,
-        MSG_AC_CONFIGURED,
-        MSG_PCSCF_RECOVER,
-        MSG_SCSCF_RESTORATION,
-        MSG_OTHERS
-    };
-
-    // Pending
-    enum
-    {
-        PENDING_NONE = 0x0,
-
-        // REG PENDING
-        PENDING_REG_RECOVERY_HELD = 0x1,
-
-        // REG STOP PENDING
-        PENDING_REG_STOP_HELD = 0x2,
-
-        // APP PENDING
-        PENDING_APP_DESTROY_HELD = 0x4,
-
-        // REG RECONFIG PENDING
-        PENDING_REG_RECONFIG_HELD = 0x8,
-
-        // After CSFB
-        PENDING_REG_AFTER_CSFB_COMPLETE = 0x10,
-
-        // IPCAN PENDING
-        PENDING_IPCAN_HELD = 0x20,
-
-        // REG UPDATE PENDING
-        PENDING_REG_UPDATE_HELD = 0x40
-    };
-
-    // Timer
-    enum
-    {
-        TIMER_RECONFIG_GUARD = 0,
-        TIMER_MSG_CONITION,
-        TIMER_REG_STOP,
-        TIMER_REG_BLOCKED,
-        TIMER_APP_ACTIVATED,
-        TIMER_APP_CONNECTED,
-        TIMER_APP_TERMINATED,
-        TIMER_PDN_BLOCKED,
-        TIMER_IMS_ESTABLISHMENT
-    };
-};
-
-class RegistrationLog
-{
-public:
-    enum
-    {
-        STATE_OFFLINE = 0,
-        STATE_REGISTERING,
-        STATE_REGSTOP,
-        STATE_REGISTERED,
-        STATE_REFRESHING,
-        STATE_REFRESHSTOP,
-        STATE_DEREGISTERING
-    };
-
-    enum
-    {
-        MSG_REG_START = AOSMSG_SERVICE_INTERNAL,
-
-        MSG_REG_REINITIATE,
-        MSG_REG_UPDATE,
-        MSG_REG_RECONFIG,
-
-        MSG_REG_REQUIRED_WITH_WAIT_TIME,
-        MSG_REG_REQUIRED_WITH_NEXT_PCSCF,
-        MSG_REG_REINITIATE_WITH_REG_STATE,
-        MSG_REG_TERMINATED_BY_NOTIFY,
-
-        MSG_SUB_REINITIATE,
-        MSG_SUB_TERMINATED,
-
-        MSG_REG_EVENT_REGISTERED
-    };
-
-    enum
-    {
-        MODE_NORMAL = 0,
-        MODE_LIMITED,
-        MODE_FAKE
-    };
-
-    enum
-    {
-        PENDING_NONE = 0x0,
-        PENDING_START = 0x1,
-        PENDING_TRANSACTION = 0x2,
-        PENDING_UPDATE = 0x4,
-        PENDING_RECONFIG = 0x8,
-        PENDING_UPDATE_HELD_BY_CALL = 0x10,
-        PENDING_PLMN_BLOCK_HELD_BY_CALL = 0x20,
-
-        PENDING_SUBSCRIPTION = 0x40,
-        PENDING_TERMINATED = 0x80,
-
-        PENDING_TRAFFIC = 0x100
-    };
-
-    enum
-    {
-        TIMER_OFFLINE_RECOVER = 100,
-        TIMER_STOP_RETRY,
-        TIMER_REFRESH,
-        TIMER_EXPIRED,
-        TIMER_MODE,
-        TIMER_TRANSACTION,
-        TIMER_INTERNAL_ERROR
-    };
-};
+__IMS_TRACE_TAG_AOS__;
 
 PUBLIC
 AosLog::AosLog()
@@ -291,14 +143,8 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::AppRequestToString(IN IMS_UINT32 nType)
         case ImsAosControl::REGISTER_STOP:
             return "REGISTER_STOP";
 
-        case ImsAosControl::REGISTER_STOP_BY_ROAMING:
-            return "REGISTER_STOP_BY_ROAMING";
-
         case ImsAosControl::REGISTER_REINITIATE:
             return "REGISTER_REINITIATE";
-
-        case ImsAosControl::REGISTER_REINITIATE_BY_CSFB:
-            return "REGISTER_REINITIATE_BY_CSFB";
 
         case ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF:
             return "E_REGISTER_FAKE_WITH_NEXT_PCSCF";
@@ -366,8 +212,8 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::AppTimerToString(IN IMS_UINT32 nType)
         case ApplicationLog::TIMER_RECONFIG_GUARD:
             return "TIMER_RECONFIG_GUARD";
 
-        case ApplicationLog::TIMER_MSG_CONITION:
-            return "TIMER_MSG_CONITION";
+        case ApplicationLog::TIMER_MSG_CONDITION:
+            return "TIMER_MSG_CONDITION";
 
         case ApplicationLog::TIMER_REG_STOP:
             return "TIMER_REG_STOP";
@@ -389,6 +235,27 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::AppTimerToString(IN IMS_UINT32 nType)
 
         case ApplicationLog::TIMER_IMS_ESTABLISHMENT:
             return "TIMER_IMS_ESTABLISHMENT";
+
+        case ApplicationLog::TIMER_RAT_BLOCK:
+            return "TIMER_RAT_BLOCK";
+
+        default:
+            return "__INVALID__";
+    }
+}
+
+PUBLIC GLOBAL const IMS_CHAR* AosLog::AppConnectionStateToString(IN IMS_UINT32 nState)
+{
+    switch (nState)
+    {
+        case ApplicationLog::CONNECTION_ACTIVATED:
+            return "ACTIVATED";
+
+        case ApplicationLog::CONNECTION_DEACTIVATED:
+            return "DEACTIVATED";
+
+        case ApplicationLog::CONNECTION_UPDATED:
+            return "UPDATED";
 
         default:
             return "__INVALID__";
@@ -416,6 +283,9 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegMessageToString(IN IMS_UINT32 nType)
 
         case RegistrationLog::MSG_REG_REQUIRED_WITH_NEXT_PCSCF:
             return "MSG_REG_REQUIRED_WITH_NEXT_PCSCF";
+
+        case RegistrationLog::MSG_REG_REQUIRED_WITH_SCSCF_RESTORATION:
+            return "MSG_REG_REQUIRED_WITH_SCSCF_RESTORATION";
 
         case RegistrationLog::MSG_REG_REINITIATE_WITH_REG_STATE:
             return "MSG_REG_REINITIATE_WITH_REG_STATE";
@@ -488,6 +358,9 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegPendingToString(IN IMS_UINT32 nType)
 
         case RegistrationLog::PENDING_TRAFFIC:
             return "PENDING_TRAFFIC";
+
+        case RegistrationLog::PENDING_STOP:
+            return "PENDING_STOP";
 
         default:
             return "__INVALID__";
@@ -576,8 +449,8 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegTimerToString(IN IMS_UINT32 nType)
         case RegistrationLog::TIMER_REFRESH:
             return "TIMER_REFRESH";
 
-        case RegistrationLog::TIMER_EXPIRED:
-            return "TIMER_EXPIRED";
+        case RegistrationLog::TIMER_DEREG_TRAFFIC:
+            return "TIMER_DEREG_TRAFFIC";
 
         case RegistrationLog::TIMER_MODE:
             return "TIMER_MODE";
@@ -588,8 +461,193 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegTimerToString(IN IMS_UINT32 nType)
         case RegistrationLog::TIMER_INTERNAL_ERROR:
             return "TIMER_INTERNAL_ERROR";
 
+        case RegistrationLog::TIMER_WAIT_EMERGENCY_NETWORK:
+            return "TIMER_WAIT_EMERGENCY_NETWORK";
+
         default:
             return "__INVALID__";
+    }
+}
+
+PUBLIC GLOBAL const IMS_CHAR* AosLog::RegResultToString(IN IMS_UINT32 nType)
+{
+    switch (nType)
+    {
+        case RegistrationLog::RESULT_NONE:
+            return "NONE";
+
+        case RegistrationLog::RESULT_SUCCESS:
+            return "SUCCESS";
+
+        case RegistrationLog::RESULT_TRYING:
+            return "TRYING";
+
+        case RegistrationLog::RESULT_FAILURE:
+            return "FAILURE";
+
+        default:
+            return "__INVALID__";
+    }
+}
+
+PUBLIC GLOBAL const IMS_CHAR* AosLog::RegReasonForResultToString(IN IMS_UINT32 nType)
+{
+    switch (nType)
+    {
+        case RegistrationLog::REASON_NONE:
+            return "NONE";
+
+            // --- RESULT_TRYING ---
+        case RegistrationLog::REASON_TRYING_START:
+            return "TRYING_START";
+        case RegistrationLog::REASON_TRYING_UPDATE:
+            return "TRYING_UPDATE";
+        case RegistrationLog::REASON_TRYING_STOP:
+            return "TRYING_STOP";
+
+            // --- RESULT_FAILURE ---
+        case RegistrationLog::REASON_FAILURE_GENERAL:
+            return "FAILURE_GENERAL";
+        case RegistrationLog::REASON_FAILURE_SPECIAL:
+            return "FAILURE_SPECIAL";
+        case RegistrationLog::REASON_FAILURE_FORBIDDEN:
+            return "FAILURE_FORBIDDEN";
+        case RegistrationLog::REASON_FAILURE_FORBIDDEN_IN_WIFI:
+            return "FAILURE_FORBIDDEN_IN_WIFI";
+        case RegistrationLog::REASON_FAILURE_AUTHENTICATION:
+            return "FAILURE_AUTHENTICATION";
+        case RegistrationLog::REASON_FAILURE_USIM_AUTHENTICATION:
+            return "FAILURE_USIM_AUTHENTICATION";
+        case RegistrationLog::REASON_FAILURE_TERMINATED:
+            return "FAILURE_TERMINATED";
+        case RegistrationLog::REASON_FAILURE_INTERNAL:
+            return "FAILURE_INTERNAL";
+        case RegistrationLog::REASON_FAILURE_BANNDED:
+            return "FAILURE_BANNDED";
+        case RegistrationLog::REASON_FAILURE_INVALID_REGINFO:
+            return "FAILURE_INVALID_REGINFO";
+        case RegistrationLog::REASON_FAILURE_PDN_RECONNECT:
+            return "FAILURE_PDN_RECONNECT";
+        case RegistrationLog::REASON_FAILURE_PDN_RECONNECT_WITH_AWT:
+            return "FAILURE_PDN_RECONNECT_WITH_AWT";
+        case RegistrationLog::REASON_FAILURE_NEXT_PCSCF_REQUIRED:
+            return "FAILURE_NEXT_PCSCF_REQUIRED";
+        case RegistrationLog::REASON_FAILURE_NO_PCSCF_AVAILABLE:
+            return "FAILURE_NO_PCSCF_AVAILABLE";
+        case RegistrationLog::REASON_FAILURE_REG_TERMINATING:
+            return "FAILURE_REG_TERMINATING";
+        case RegistrationLog::REASON_FAILURE_PCO_LIMITED_SERVICE:
+            return "FAILURE_PCO_LIMITED_SERVICE";
+        case RegistrationLog::REASON_FAILURE_PLMN_BLOCK_WITH_TIMEOUT:
+            return "FAILURE_PLMN_BLOCK_WITH_TIMEOUT";
+
+        default:
+            return "__INVALID__";
+    }
+}
+
+PUBLIC GLOBAL const IMS_CHAR* AosLog::ConnectorReasonToString(IN IMS_UINT32 nReason)
+{
+    switch (nReason)
+    {
+        case ConnectorLog::REASON_NONE:
+            return "REASON_NONE";
+
+            // Connection_Deactivated reasons
+        case ConnectorLog::REASON_DISCONNECTED:
+            return "REASON_DISCONNECTED";
+        case ConnectorLog::REASON_FAILED:
+            return "REASON_FAILED";
+        case ConnectorLog::REASON_PCSCF_DISCOVERY_FAILED:
+            return "REASON_PCSCF_DISCOVERY_FAILED";
+        case ConnectorLog::REASON_PERMANENTLY_FAILED:
+            return "REASON_PERMANENTLY_FAILED";
+        case ConnectorLog::REASON_LIMITED_SERVICE_PCO:
+            return "REASON_LIMITED_SERVICE_PCO";
+
+            // Connection_Updated reasons
+        case ConnectorLog::REASON_IP_CHANGED:
+            return "REASON_IP_CHANGED";
+        case ConnectorLog::REASON_PCSCF_CHANGED:
+            return "REASON_PCSCF_CHANGED";
+        case ConnectorLog::REASON_IPCAN_CAT_CHANGED:
+            return "REASON_IPCAN_CAT_CHANGED";
+
+        case ConnectorLog::REASON_OTHERS:
+            return "REASON_OTHERS";
+
+        default:
+            return "__INVALID__";
+    }
+}
+
+PUBLIC GLOBAL const IMS_CHAR* AosLog::AosReasonToString(IN IMS_UINT32 nReason)
+{
+    switch (nReason)
+    {
+        case AosReason::NONE:
+            return "NONE";
+        case AosReason::POWER_OFF:
+            return "POWER_OFF";
+        case AosReason::AIRPLANE_MODE:
+            return "AIRPLANE_MODE";
+        case AosReason::SERVICE_POLICY:
+            return "SERVICE_POLICY";
+        case AosReason::IMS_DISABLED:
+            return "IMS_DISABLED";
+        case AosReason::TTYMODEON:
+            return "TTY_MODE_ON";
+        case AosReason::WIFI_OFF:
+            return "WIFI_OFF";
+        case AosReason::VOPS_NOT_SUPPORTED:
+            return "VOPS_NOT_SUPPORTED";
+        case AosReason::SSAC_BARRED:
+            return "SSAC_BARRED";
+        case AosReason::NOT_SPECIFIED:
+            return "NOT_SPECIFIED";
+        case AosReason::IP_CHANGED:
+            return "IP_CHANGED";
+        case AosReason::DATA_DISCONNECTED:
+            return "DATA_DISCONNECTED";
+        case AosReason::DATA_CONNECTION_MAINTAIN:
+            return "DATA_CONNECTION_MAINTAIN";
+        case AosReason::DATA_PERMANENTLY_FAILED:
+            return "DATA_PERMANENTLY_FAILED";
+        case AosReason::NETWORK_ATTACH_REJECTED:
+            return "NETWORK_ATTACH_REJECTED";
+        case AosReason::REG_FAILURE:
+            return "REG_FAILURE";
+        case AosReason::REG_TERMINATED:
+            return "REG_TERMINATED";
+        case AosReason::INITIAL_REG_REQUESTED:
+            return "INITIAL_REG_REQUESTED";
+        case AosReason::REG_TERMINATING:
+            return "REG_TERMINATING";
+        case AosReason::REG_ALL_PCSCF_FAILED:
+            return "REG_ALL_PCSCF_FAILED";
+        default:
+            return "UNKNOWN";
+    }
+}
+
+PUBLIC GLOBAL const IMS_CHAR* AosLog::AosRegistrationTypeToString(IN AosRegistrationType eType)
+{
+    switch (static_cast<IMS_UINT32>(eType))
+    {
+        case static_cast<IMS_UINT32>(AosRegistrationType::NORMAL):
+            return "NORMAL";
+
+        case static_cast<IMS_UINT32>(AosRegistrationType::EMERGENCY):
+            return "EMERGENCY";
+
+        case static_cast<IMS_UINT32>(AosRegistrationType::FAKE):
+            return "FAKE";
+
+        case static_cast<IMS_UINT32>(AosRegistrationType::RCS):
+            return "RCS";
+
+        default:
+            return "UNKNOWN";
     }
 }
 
@@ -605,9 +663,6 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::EventToString(IN IMS_SINT32 nEvent)
 
         case IMS_EVENT_CSCALL_STATE:
             return "IMS_EVENT_CSCALL_STATE";
-
-        case IMS_EVENT_LTE_STATE:
-            return "IMS_EVENT_LTE_STATE";
 
         case IMS_EVENT_LTE_INFO:
             return "IMS_EVENT_LTE_INFO";

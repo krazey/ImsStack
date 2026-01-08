@@ -29,12 +29,11 @@ using Scheme = NormalDialingPlan::Scheme;
 class MockIMtcDialingPlan : public IMtcDialingPlan
 {
 public:
-    ~MockIMtcDialingPlan() {}
     MOCK_METHOD(AString, GetToUri,
-            (IN const AString& strNumber, IN const CallInfo& objCallInfo, IN Scheme eScheme),
+            (IN const AString& strNumber, IN IMtcCallContext& objContext, IN Scheme eScheme),
             (override));
-    MOCK_METHOD(void, OnCountrySpecificServiceUrnReceived,
-            (IN const AString& strNumber, IN const AString& strServiceUrn), (override));
+    MOCK_METHOD(AString, GetToUriForEmergencyTestNumber,
+            (IN const AString& strNumber, IN IMtcCallContext& objContext), (override));
 };
 
 #endif

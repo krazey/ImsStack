@@ -18,12 +18,14 @@
 #define PASSIVE_TIMER_HOLDER_H_
 
 #include "ITimer.h"
+#include "ImsList.h"
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "helper/IMtcAosStateListener.h"
 #include "helper/IPassiveTimerHolder.h"
 
 class IMtcService;
+class IPassiveTimerListener;
 
 class PassiveTimerHolder final :
         public IPassiveTimerHolder,
@@ -32,28 +34,94 @@ class PassiveTimerHolder final :
 {
 public:
     PassiveTimerHolder();
-    virtual ~PassiveTimerHolder();
+    virtual ~PassiveTimerHolder() override;
     PassiveTimerHolder(IN const PassiveTimerHolder&) = delete;
     PassiveTimerHolder& operator=(IN const PassiveTimerHolder&) = delete;
 
-    void AddTimer(IN IPassiveTimerHolder::Type eType, IN IMS_UINT32 nTimeInMillis,
-            IN IMS_BOOL bAllowReset = IMS_FALSE) override;
+    void AddTimer(IN IPassiveTimerHolder::Type eType, IN IMS_SINT32 nTimeInMillis,
+            IN IMS_BOOL bAllowReset = IMS_FALSE,
+            IN IMS_BOOL bKeepOnAosDisconnect = IMS_FALSE) override;
+    void RemoveTimer(IN IPassiveTimerHolder::Type eType) override;
     IMS_BOOL IsActive(IN IPassiveTimerHolder::Type eType) const override;
+    void AddListener(IN IPassiveTimerHolder::Type eType,
+            IN IPassiveTimerListener* pPassiveTimerListener) override;
+    void RemoveListener(IN IPassiveTimerHolder::Type eType,
+            IN IPassiveTimerListener* pPassiveTimerListener) override;
 
     void OnAosStateChanged(IN IMtcService& objMtcService, IN MtcAosState eState,
-            IN IMS_UINT32 eAosReason) override;
-    inline void OnIpcanChanged(IN IMtcService&, IN IMS_UINT32) override {}
+            IN IMS_UINT32 eAosReason, IN IMS_SINT32 nDataFailureReason) override;
+    inline void OnEventNotify(
+            IN [[maybe_unused]] IMS_UINT32 nType, IN [[maybe_unused]] IMS_UINT32 nState) override
+    {
+    }
 
     void Timer_TimerExpired(IN ITimer* piTimer) override;
 
     void SetNormalService(IN IMtcService* pService);
 
 private:
-    IMS_SLONG GetIndexOfTimer(IN const ITimer* piTimer);
-    void ReleaseTimer(IN ITimer* piTimer);
+    struct TimerInfo
+    {
+    public:
+        inline explicit TimerInfo(IN ITimer* piTimer, IN IMS_BOOL bKeep) :
+                piTimer(piTimer),
+                objListeners(ImsList<IPassiveTimerListener*>()),
+                bIsTerminating(IMS_FALSE),
+                bKeepOnAosDisconnect(bKeep)
+        {
+        }
 
-    IMtcService* m_pService;
-    ImsMap<IPassiveTimerHolder::Type, ITimer*> m_objTimers;
+        inline virtual ~TimerInfo() { objListeners.Clear(); }
+
+    private:
+        TimerInfo(IN const TimerInfo&) = delete;
+        TimerInfo& operator=(IN const TimerInfo&) = delete;
+
+    public:
+        void AddListener(IN IPassiveTimerListener* pPassiveTimerListener)
+        {
+            for (IMS_UINT32 i = 0; i < objListeners.GetSize(); i++)
+            {
+                if (objListeners.GetAt(i) == pPassiveTimerListener)
+                {
+                    return;
+                }
+            }
+
+            objListeners.Append(pPassiveTimerListener);
+        }
+
+        void RemoveListener(IN const IPassiveTimerListener* pPassiveTimerListener)
+        {
+            if (bIsTerminating)
+            {
+                return;
+            }
+
+            for (IMS_UINT32 i = 0; i < objListeners.GetSize(); i++)
+            {
+                if (objListeners.GetAt(i) == pPassiveTimerListener)
+                {
+                    objListeners.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+
+        void SetTerminating() { bIsTerminating = IMS_TRUE; }
+
+        ITimer* piTimer;
+        ImsList<IPassiveTimerListener*> objListeners;
+        IMS_BOOL bIsTerminating;
+        IMS_BOOL bKeepOnAosDisconnect;
+    };
+
+    IMS_SLONG GetIndexOfTimerInfo(IN const ITimer* piTimer) const;
+    void ReleaseTimerInfo(IN IPassiveTimerHolder::Type eType);
+    void ReleaseAllTimerInfo(IN IMS_BOOL bCheckKeepOnAosDisconnected);
+
+    IMtcService* m_piService;
+    ImsMap<IPassiveTimerHolder::Type, TimerInfo*> m_objTimerInfoByType;
 };
 
 #endif

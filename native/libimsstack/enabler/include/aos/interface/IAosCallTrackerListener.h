@@ -26,6 +26,7 @@ public:
     virtual ~IAosCallTrackerListener(){};
 
     virtual void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState) = 0;
+    virtual void CallTracker_ECallSessionReleased(IN IMS_BOOL bEstablished) = 0;
 };
 
 #endif  // INTERFACE_AOS_CALL_TRACKER_LISTENER_H_

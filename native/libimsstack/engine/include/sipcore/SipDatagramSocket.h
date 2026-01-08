@@ -24,7 +24,7 @@ class SipDatagramSocket : public SipSocket
 {
 public:
     explicit SipDatagramSocket(IN IMS_SINT32 nSlotId);
-    virtual ~SipDatagramSocket();
+    ~SipDatagramSocket() override;
 
 public:
     IMS_BOOL Create(IN const IpAddress& objIp, IN IMS_UINT32 nPort = 0,
@@ -40,8 +40,6 @@ protected:
     // ISocketListener interface
     void Socket_OnDataReceived(IN ISocket* piSocket) override;
     void Socket_OnSendEnabled(IN ISocket* piSocket) override;
-    void Socket_OnClosed(
-            IN ISocket* piSocket, IN IMS_SINT32 nReason = ISocket::CLOSE_REASON_UNKNOWN) override;
 
 private:
     ISipDatagramSocketListener* m_piListener;

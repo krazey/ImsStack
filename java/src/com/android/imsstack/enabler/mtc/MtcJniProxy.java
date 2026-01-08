@@ -21,6 +21,7 @@ import android.os.Parcel;
 import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.jni.JniImsProxy;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * provides APIs for getting, releasing an interface between Java and Native for call.
@@ -28,17 +29,30 @@ import com.android.imsstack.util.ImsLog;
  */
 public class MtcJniProxy {
     private static MtcJniProxy sMtcJniProxy = null;
+    private static MtcJniProxy sTestInstance = null;    // for UnitTest for mtcMediaSession
 
     /**
      * Creates singleton object of {@code MtcJniProxy}.
      */
     public static MtcJniProxy getInstance() {
+        if (sTestInstance != null) {
+            return sTestInstance;
+        }
         synchronized (MtcJniProxy.class) {
             if (sMtcJniProxy == null) {
                 sMtcJniProxy = new MtcJniProxy();
             }
         }
         return sMtcJniProxy;
+    }
+
+    /**
+     * Sets a test instance for the MtcJniProxy singleton.
+     * Should only be used for testing.
+     */
+    @VisibleForTesting
+    public static void setInstanceForTesting(MtcJniProxy testInstance) {
+        sTestInstance = testInstance;
     }
 
     /**

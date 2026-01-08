@@ -19,34 +19,51 @@
 
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
-#include "call/IMtcCallContext.h"
+
+class IMtcCallContext;
 
 class UpdatingInfo final
 {
 public:
     explicit UpdatingInfo(IN IMtcCallContext& objContext);
-    virtual ~UpdatingInfo();
+    ~UpdatingInfo();
     UpdatingInfo(IN const UpdatingInfo&) = delete;
     UpdatingInfo& operator=(IN const UpdatingInfo&) = delete;
 
 public:
     inline CallType GetTargetCallType() const { return m_eTargetCallType; }
     inline UpdateType GetRequestingType() const { return m_eRequestingType; }
-    inline MediaInfo& GetNegotiatedInfo() { return m_objNegotiatedInfo; }
+    inline MediaInfo& GetOriginalInfo() { return m_objOriginalInfo; }
     inline MediaInfo& GetModifyingInfo() { return m_objModifyingInfo; }
     inline MediaInfo& GetAlertingInfo() { return m_objAlertingInfo; }
     inline MediaInfo& GetModifiedInfo() { return m_objModifiedInfo; }
-    inline IMS_BOOL IsModifier() { return m_bModifier; }
-    inline IMS_BOOL IsAlerted() { return m_bAlerted; }
+    inline IMS_BOOL IsModifier() const { return m_bModifier; }
+    inline IMS_BOOL IsAlerted() const { return m_bAlerted; }
     inline void SetTargetCallType(IN CallType eCallType) { m_eTargetCallType = eCallType; }
     inline void SetRequestingType(IN UpdateType eType) { m_eRequestingType = eType; }
     inline void SetModifier() { m_bModifier = IMS_TRUE; }
     inline void SetAlerted() { m_bAlerted = IMS_TRUE; }
-    inline void SetPendingUpdate(IN IMS_BOOL bHasPendingUpdate)
-    {
-        // TODO: check if setting to false is required.
-        m_bHasPendingUpdate = bHasPendingUpdate;
-    }
+    inline void SetPendingUpdate() { m_bHasPendingUpdate = IMS_TRUE; }
+
+    /**
+     * @brief Updates its requesting UpdateType based on the current states.
+     *
+     * Following states must be updated before using this method.
+     * - Original info
+     * - Alerting info
+     * - MediaManager#NegotiateSdp
+     */
+    void UpdateRequestingTypeForIncomingUpdate();
+
+    /**
+     * @brief Updates its requesting UpdateType based on the current states.
+     *
+     * Following states must be updated before using this method.
+     * - Original info
+     * - Modifying info
+     * - Target call type
+     */
+    void UpdateRequestingTypeForOfferlessReInvite();
 
     IMS_BOOL IsHeld() const;
     IMS_BOOL IsHeldBy() const;
@@ -64,8 +81,12 @@ public:
      */
     IMS_BOOL IsModified() const;
     IMS_BOOL IsDowngraded() const;
+    MediaInfo GetModifiedMediaInfoWithOriginalAudioDir() const;
     inline IMS_BOOL HasPendingUpdate() const { return m_bHasPendingUpdate; }
-    void AdjustDirectionIfNeededForHoldOrResume(IN MediaInfo& objMediaInfo) const;
+    static IMS_BOOL IsValidHoldDirection(
+            IN IMS_SINT32 eCurrentAudioDir, IN IMS_SINT32 eTargetAudioDir);
+    static IMS_BOOL IsValidResumeDirection(
+            IN IMS_SINT32 eCurrentAudioDir, IN IMS_SINT32 eTargetAudioDir);
 
 private:
     // This returns the original CallType before this update is successfully completed.
@@ -73,9 +94,10 @@ private:
 
 private:
     IMtcCallContext& m_objContext;
+    const CallType m_eOriginalCallType;
     CallType m_eTargetCallType;
     UpdateType m_eRequestingType;
-    MediaInfo m_objNegotiatedInfo;  // Info before starting update.
+    MediaInfo m_objOriginalInfo;    // Info before starting update.
     MediaInfo m_objModifyingInfo;   // Info after sending update.
     MediaInfo m_objAlertingInfo;    // Info after receiving update.
     MediaInfo m_objModifiedInfo;    // Info after update completed.

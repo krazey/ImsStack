@@ -24,27 +24,24 @@
 #include "IIpSecPolicy.h"
 #include "ImsIpSecType.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AosIpsec");
+__IMS_TRACE_TAG_AOS__;
 
 #define AOSTAG m_strTag.GetStr()
 
-IMS_UINT32 gRandUePort = AosIpsec::UE_PORT_LOWER;
-IMS_UINT32 gRandPcscfPort = AosIpsec::PCSCF_PORT_LOWER;
-
 PUBLIC
 AosIpsec::AosIpsec(IN IAosIpsecListener* piListener, IN IMS_SINT32 nSlotId) :
-        m_piListener(piListener),
         m_piNetIpsec(IMS_NULL),
         m_piPolicy(IMS_NULL),
-        m_pUeInfo(new UeIpsecInfo()),
         m_pPcscfInfo(new PcscfIpsecInfo()),
+        m_bSaEstablished(IMS_FALSE),
+        m_bIgnorePolicyExpired(IMS_FALSE),
+        m_piListener(piListener),
+        m_pUeInfo(new UeIpsecInfo()),
         m_nSecuProto(IpSecType::SECURITY_PROTOCOL_ESP),
         m_nAuthAlgo(IpSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96),
         m_nEncrAlgo(IpSecType::ENCRYPTION_ALGORITHM_NO),
         m_nMode(IpSecType::MODE_TRANSPORT),
         m_bAddPolicy(IMS_FALSE),
-        m_bSaEstablished(IMS_FALSE),
-        m_bIgnorePolicyExpired(IMS_FALSE),
         m_nSlotId(nSlotId)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosIpsec = %" PFLS_u "/%" PFLS_x, sizeof(AosIpsec), this, 0);
@@ -117,26 +114,6 @@ void AosIpsec::IpSecPolicy_OnSecurityAssociationExpired(IN IIpSecPolicy* piPolic
     }
 
     delete this;
-}
-
-PUBLIC
-IMS_UINT32 AosIpsec::CreateUePort()
-{
-    IMS_UINT32 nPort = 0;
-    // 1. Crate UE Port
-    if (gRandUePort < UE_PORT_UPPER)
-    {
-        nPort = ++gRandUePort;
-    }
-    else
-    {
-        gRandUePort = UE_PORT_LOWER;
-        nPort = gRandUePort;
-    }
-
-    A_IMS_TRACE_I(AOSTAG, "Create UE Port (%d)", nPort, 0, 0);
-
-    return nPort;
 }
 
 PUBLIC
@@ -240,16 +217,9 @@ void AosIpsec::SetSecurityAlgorithm(
     A_IMS_TRACE_I(AOSTAG, "SetSecurityAlgorithm :: Securtiy (%d) , Auth (%d) , Encr (%d)",
             nSecuAlog, nAuthAlgo, nEncrAlgo);
 
-    this->m_nSecuProto = (nSecuAlog == IpSecType::SECURITY_PROTOCOL_AH)
-            ? IpSecType::SECURITY_PROTOCOL_AH
-            : IpSecType::SECURITY_PROTOCOL_ESP;
-    this->m_nAuthAlgo = nAuthAlgo;
-    this->m_nEncrAlgo = nEncrAlgo;
-
-    if (nEncrAlgo == SipSecurityHeader::EALG_UNSPECIFIED)
-    {
-        this->m_nEncrAlgo = IpSecType::ENCRYPTION_ALGORITHM_NO;
-    }
+    m_nSecuProto = GetProtocolForIpsec(nSecuAlog);
+    m_nAuthAlgo = GetAuthAlgoForIpsec(nAuthAlgo);
+    m_nEncrAlgo = GetEncrAlgoForIpsec(nEncrAlgo);
 }
 
 PUBLIC
@@ -281,10 +251,11 @@ void AosIpsec::MakeSecurityClientH(
         IN SipSecurityHeader& objSecuH, IN IMS_BOOL bSpi3gpp /* = IMS_TRUE */)
 {
     // 1. Set Algorithm
-    objSecuH.SetAlgorithm(m_nAuthAlgo);
-    objSecuH.SetEncryptionAlgorithm(m_nEncrAlgo);
-    objSecuH.SetMode(m_nMode);
-    objSecuH.SetProtocol(m_nSecuProto);
+    objSecuH.SetAlgorithm(GetAuthAlgoForSecurityHeader(static_cast<IMS_SINT32>(m_nAuthAlgo)));
+    objSecuH.SetEncryptionAlgorithm(
+            GetEncrAlgoForSecurityHeader(static_cast<IMS_SINT32>(m_nEncrAlgo)));
+    objSecuH.SetMode(GetModeForSecurityHeader(m_nMode));
+    objSecuH.SetProtocol(GetProtocolForSecurityHeader(m_nSecuProto));
 
     // 2. Set Ports
     objSecuH.SetPort(m_pUeInfo->nPortC, m_pUeInfo->nPortS);
@@ -319,6 +290,82 @@ IIpSecPolicy* AosIpsec::GetPolicy()
         A_IMS_TRACE_D(AOSTAG, "m_piNetIpsec is null", 0, 0, 0);
         return IMS_NULL;
     }
+}
+
+PUBLIC
+IMS_UINT32 AosIpsec::GetIntegrityAlgorithm()
+{
+    A_IMS_TRACE_I(AOSTAG, "GetIntegrityAlgorithm :: (%d)", m_nAuthAlgo, 0, 0);
+
+    return m_nAuthAlgo;
+}
+
+PUBLIC
+IMS_UINT32 AosIpsec::GetAuthAlgoForIpsec(IN IMS_UINT32 nAlgo) const
+{
+    return (nAlgo == SipSecurityHeader::ALG_HMAC_MD5_96)
+            ? IpSecType::INTEGRITY_ALGORITHM_HMAC_MD5_96
+            : IpSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96;
+}
+
+PUBLIC
+IMS_UINT32 AosIpsec::GetEncrAlgoForIpsec(IN IMS_UINT32 nAlgo) const
+{
+    switch (nAlgo)
+    {
+        case SipSecurityHeader::EALG_AES_CBC:
+            return IpSecType::ENCRYPTION_ALGORITHM_AES_CBC;
+        case SipSecurityHeader::EALG_DES_EDE3_CBC:
+            return IpSecType::ENCRYPTION_ALGORITHM_DES_EDE3_CBC;
+        case SipSecurityHeader::EALG_NULL:         // FALL-THROUGH
+        case SipSecurityHeader::EALG_UNSPECIFIED:  // FALL-THROUGH
+        default:
+            return IpSecType::ENCRYPTION_ALGORITHM_NO;
+    }
+}
+
+PUBLIC
+IMS_SINT32 AosIpsec::GetAuthAlgoForSecurityHeader(IN IMS_SINT32 nAlgo) const
+{
+    return (nAlgo == IpSecType::INTEGRITY_ALGORITHM_HMAC_MD5_96)
+            ? SipSecurityHeader::ALG_HMAC_MD5_96
+            : SipSecurityHeader::ALG_HMAC_SHA_1_96;
+}
+
+PUBLIC
+IMS_SINT32 AosIpsec::GetEncrAlgoForSecurityHeader(IN IMS_SINT32 nAlgo) const
+{
+    switch (nAlgo)
+    {
+        case IpSecType::ENCRYPTION_ALGORITHM_AES_CBC:
+            return SipSecurityHeader::EALG_AES_CBC;
+        case IpSecType::ENCRYPTION_ALGORITHM_DES_EDE3_CBC:
+            return SipSecurityHeader::EALG_DES_EDE3_CBC;
+        case IpSecType::ENCRYPTION_ALGORITHM_NO:  // FALL-THROUGH
+        default:
+            return SipSecurityHeader::EALG_NULL;
+    }
+}
+
+PUBLIC
+IMS_SINT32 AosIpsec::GetModeForSecurityHeader(IN IMS_UINT32 nMode) const
+{
+    return (nMode == IpSecType::MODE_TUNNEL) ? SipSecurityHeader::MODE_TUNNEL
+                                             : SipSecurityHeader::MODE_TRANSPORT;
+}
+
+PUBLIC
+IMS_UINT32 AosIpsec::GetProtocolForIpsec(IN IMS_UINT32 nProtocol) const
+{
+    return (nProtocol == SipSecurityHeader::PROTOCOL_AH) ? IpSecType::SECURITY_PROTOCOL_AH
+                                                         : IpSecType::SECURITY_PROTOCOL_ESP;
+}
+
+PUBLIC
+IMS_SINT32 AosIpsec::GetProtocolForSecurityHeader(IN IMS_UINT32 nProtocol) const
+{
+    return (nProtocol == IpSecType::SECURITY_PROTOCOL_AH) ? SipSecurityHeader::PROTOCOL_AH
+                                                          : SipSecurityHeader::PROTOCOL_ESP;
 }
 
 PUBLIC
@@ -553,12 +600,4 @@ void AosIpsec::CreateSa(IN IMS_UINT32 nType)
             m_nAuthAlgo, m_nEncrAlgo, m_pUeInfo->objIk, m_pUeInfo->objCk);
 
     piSa->DoneSa();
-}
-
-PRIVATE
-IMS_UINT32 AosIpsec::GetIntegrityAlgorithm()
-{
-    A_IMS_TRACE_I(AOSTAG, "GetIntegrityAlgorithm :: (%d)", m_nAuthAlgo, 0, 0);
-
-    return m_nAuthAlgo;
 }

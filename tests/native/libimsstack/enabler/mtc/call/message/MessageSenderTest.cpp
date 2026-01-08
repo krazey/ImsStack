@@ -15,17 +15,17 @@
  */
 
 #include "CallReasonInfo.h"
+#include "MockICoreService.h"
+#include "MockIMessage.h"
 #include "MockIMtcService.h"
+#include "MockISession.h"
+#include "MockISipMessage.h"
 #include "SipStatusCode.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/message/MessageSender.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/MockICoreService.h"
-#include "core/MockIMessage.h"
-#include "core/MockISession.h"
 #include "helper/MtcSupplementaryService.h"
-#include "sipcore/MockISipMessage.h"
 #include "utility/MessageUtils.h"
 #include <gtest/gtest.h>
 
@@ -40,6 +40,14 @@ namespace android
 class MessageSenderTest : public ::testing::Test
 {
 public:
+    inline MessageSenderTest() :
+            pSender(IMS_NULL),
+            pConfigurationProxy(IMS_NULL),
+            pSupplementaryService(IMS_NULL),
+            objMessageUtils(objContext)
+    {
+    }
+
     MessageSender* pSender;
 
     CallInfo objCallInfo;
@@ -49,14 +57,14 @@ public:
     MockIMtcService objService;
     MockICoreService objCoreService;
     MockISession objSession;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     MtcSupplementaryService* pSupplementaryService;
     MessageUtils objMessageUtils;
 
 protected:
     virtual void SetUp() override
     {
-        pConfigurationProxy = new MtcConfigurationProxy(new MockIMtcConfigurationManager());
+        pConfigurationProxy = new MockMtcConfigurationProxy();
         pSupplementaryService = new MtcSupplementaryService(objContext, *pConfigurationProxy);
 
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
@@ -94,7 +102,7 @@ TEST_F(MessageSenderTest, CreateSenderWithNormalFormatter)
 TEST_F(MessageSenderTest, CreateSenderWithEmergencyFormatter)
 {
     CallInfo objEmergencyCallInfo;
-    objEmergencyCallInfo.bEmergency = IMS_TRUE;
+    objEmergencyCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
 
     ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objEmergencyCallInfo));
 

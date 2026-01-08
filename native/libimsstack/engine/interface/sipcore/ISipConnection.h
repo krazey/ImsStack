@@ -17,15 +17,17 @@
 #define INTERFACE_SIP_CONNECTION_H_
 
 #include "AString.h"
+
 #include "IConnection.h"
-#include "SipTimerValues.h"
 
 class ByteArray;
+
 class ISipDialog;
 class ISipErrorListener;
 class ISipMessage;
 class SipMethod;
 class SipProfile;
+class SipTimerValues;
 
 /**
  * @brief This class provides a base interface for SIP transactions.
@@ -38,7 +40,7 @@ class SipProfile;
 class ISipConnection : public IConnection
 {
 protected:
-    virtual ~ISipConnection() = default;
+    ~ISipConnection() override = default;
 
 public:
     /**
@@ -257,6 +259,13 @@ public:
      * @return Slot id of this SIP connection.
      */
     virtual IMS_SINT32 GetSlotId() const = 0;
+
+    /**
+     * @brief Gets the SIP profile of this SIP connection.
+     *
+     * @return SIP profile of this SIP connection.
+     */
+    virtual SipProfile* GetSipProfile() const = 0;
 
     /**
      * @brief Sets the SIP profile for specific configuration of this SIP connection.

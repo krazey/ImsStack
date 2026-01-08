@@ -132,6 +132,6 @@ GLOBAL void CallComposerUtil::SetLocation(IN const AString& strLatitude,
     }
 
     MtcLocationObject objLocation(objContext);
-    objLocation.SetLocationToMessage(objMessage,
-            objLocation.CreateCallComposerLocationBody(strLatitude, strLongitude), IMS_FALSE);
+    objLocation.SetLocationToMessage(objMessage, IMS_FALSE,
+            objLocation.CreateCallComposerLocationBody(strLatitude, strLongitude));
 }

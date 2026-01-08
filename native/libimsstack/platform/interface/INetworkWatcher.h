@@ -107,6 +107,38 @@ public:
         RADIOTECH_TYPE_MAX,
     };
 
+    // Same as OsNetworkConstants.h
+    // TODO: Need to consolidate the constant values.
+    enum
+    {
+        STATE_INVALID = -1,
+        STATE_IN_SERVICE = 0,
+        STATE_OUT_OF_SERVICE = 1,
+        STATE_EMERGENCY_ONLY = 2,
+        STATE_POWER_OFF = 3,
+        STATE_MAX,
+    };
+
+    enum
+    {
+        /**
+         * Not roaming, registered in home network.
+         */
+        ROAMING_TYPE_NOT_ROAMING = 0,
+        /**
+         * registered in a roaming network, but can not tell if it's domestic or international.
+         */
+        ROAMING_TYPE_UNKNOWN = 1,
+        /**
+         * registered in a domestic roaming network
+         */
+        ROAMING_TYPE_DOMESTIC = 2,
+        /**
+         * registered in an international roaming network
+         */
+        ROAMING_TYPE_INTERNATIONAL = 3,
+    };
+
 public:
     virtual IMS_UINT32 GetNetworkStatus(IN const AString& strProfile) = 0;
     virtual NETRADIO_ENTYPE GetNetRadioTechType(
@@ -119,8 +151,22 @@ public:
     virtual NETSERVICE_ENTYPE GetNetVoiceServiceType() = 0;
     virtual NETDOMAIN_ENTYPE GetNetDomainType() = 0;
 
-    // 20120227 jungwpn82.kang@ - for direct access network type
+    // Returns the data network type directly from TelephonyManager.
     virtual IMS_SINT32 GetNetworkType() = 0;
+
+    /**
+     * @brief Returns the cellular data network type.
+     *
+     * The #GetNetServiceType() reads the service state of the current device's data network
+     * (including IWLAN), while this method reads the service state of the current device's
+     * cellular data network.
+     *
+     * @see #STATE_IN_SERVICE
+     * @see #STATE_OUT_OF_SERVICE
+     * @see #STATE_EMERGENCY_ONLY
+     * @see #STATE_POWER_OFF
+     */
+    virtual IMS_SINT32 GetCellularServiceState() = 0;
 
     virtual IMS_SINT32 GetRoamingState() = 0;
 
@@ -128,20 +174,39 @@ public:
 
     virtual IMS_SINT32 GetDataRoamingType() = 0;
 
+    virtual AString GetNetworkOperator() const = 0;
+
     virtual IMS_BOOL IsImsEmergencyCallSupported() = 0;
 
     virtual IMS_BOOL IsImsVoiceCallSupported() = 0;
 
-    virtual IMS_BOOL IsLteEmergencyOnly() = 0;
+    /**
+     * @brief Checks if IMS service continuity is supported during a network change.
+     *
+     * This function is used to determine if an IMS service can be maintained when the device moves
+     * from one network type to another.
+     *
+     * It returns IMS_TRUE for RADIOTECH_TYPE_INVALID or RADIOTECH_TYPE_UNKNOWN, as it's expected
+     * that those cases can be handled without this continuity check.
+     *
+     * @param ePreviousNetwork The previous network type the device was connected to.
+     * @param eCurrentNetwork The current network type the device has handed over to.
+     * @return IMS_TRUE if the handover is supported for the IMS services. Otherwise IMS_FALSE.
+     */
+    virtual IMS_BOOL IsImsServiceContinuitySupported(
+            IN IMS_SINT32 ePreviousNetwork, IN IMS_SINT32 eCurrentNetwork) const = 0;
+
+    virtual IMS_BOOL IsEmergencyOnly() = 0;
 
     virtual IMS_BOOL IsEmergencyAttachSupported() = 0;
 
-    virtual IMS_SINT32 GetMocnPlmnInfo() = 0;
+    virtual IMS_SINT32 GetNetworkRegistrationRejectCause() = 0;
+    virtual AString GetAccessNetworkPlmn() const = 0;
 
 public:
     inline void RegisterObserver(IN INetworkWatcherListener* piListener)
     {
-        IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
+        const IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
 
         for (IMS_UINT32 i = 0; i < m_objObserverLists.GetSize(); i++)
         {
@@ -164,7 +229,7 @@ public:
 
     inline void RemoveObserver(IN const INetworkWatcherListener* piListener)
     {
-        IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
+        const IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
 
         for (IMS_UINT32 i = 0; i < m_objObserverLists.GetSize(); i++)
         {
@@ -179,7 +244,8 @@ public:
             {
                 for (IMS_UINT32 j = 0; j < pObserverList->m_objListeners.GetSize(); j++)
                 {
-                    INetworkWatcherListener* piTmpListener = pObserverList->m_objListeners.GetAt(j);
+                    const INetworkWatcherListener* piTmpListener =
+                            pObserverList->m_objListeners.GetAt(j);
 
                     if (piListener == piTmpListener)
                     {
@@ -210,7 +276,7 @@ public:
 public:
     inline void ProcessNotify(IN ImsMessage& /*objMsg*/)
     {
-        IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
+        const IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
 
         for (IMS_UINT32 i = 0; i < m_objObserverLists.GetSize(); ++i)
         {

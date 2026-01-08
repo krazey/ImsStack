@@ -19,6 +19,7 @@
 #include "IJniMtcServiceThread.h"
 #include "IMtcService.h"
 #include "ImsAosParameter.h"
+#include "ImsAosReason.h"
 #include "ImsTypeDef.h"
 #include "IuMtcService.h"
 #include "ServiceTrace.h"
@@ -33,7 +34,6 @@ MtcAosEventHandler::MtcAosEventHandler(
         IN IMtcService& objService, IN MtcConfigurationProxy& objConfiguration) :
         m_objService(objService),
         m_objConfiguration(objConfiguration),
-        m_nIpcan(IIpcan::CATEGORY_MOBILE),
         m_objListeners(ImsList<IMtcAosStateListener*>())
 {
     IMS_TRACE_I("+MtcAosEventHandler", 0, 0, 0);
@@ -73,10 +73,9 @@ void MtcAosEventHandler::RemoveListener(IN IMtcAosStateListener* piListener)
 }
 
 PUBLIC
-void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan)
+void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures)
 {
-    IMS_TRACE_I("OnConnected emergency[%s] nIpcan[%d]", _TRACE_B_(m_objService.IsEmergency()),
-            nIpcan, 0);
+    IMS_TRACE_I("OnConnected emergency[%s]", _TRACE_B_(m_objService.IsEmergency()), 0, 0);
 
     if (!m_objService.IsEmergency())
     {
@@ -85,15 +84,9 @@ void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpc
         {
             pThread->OnServiceChanged(ConvertAosFeatureToServiceState(nFeatures), 0);
         }
-        // TODO: this must be called when registration is refreshed?
         m_objConfiguration.OnRegistrationRefreshed();
     }
 
-    if (m_nIpcan != nIpcan)
-    {
-        NotifyIpcanChanged(nIpcan);
-    }
-    m_nIpcan = nIpcan;
     NotifyStateChanged(MtcAosState::CONNECTED, ImsAosReason::NONE);
 }
 
@@ -107,7 +100,7 @@ void MtcAosEventHandler::OnDisconnecting(IN IMS_UINT32 nReason)
 }
 
 PUBLIC
-void MtcAosEventHandler::OnDisconnected(IN IMS_UINT32 nReason)
+void MtcAosEventHandler::OnDisconnected(IN IMS_UINT32 nReason, IN IMS_SINT32 nDataFailureReason)
 {
     IMS_TRACE_I("OnDisconnected emergency[%s] nReason[%d]", _TRACE_B_(m_objService.IsEmergency()),
             nReason, 0);
@@ -121,7 +114,7 @@ void MtcAosEventHandler::OnDisconnected(IN IMS_UINT32 nReason)
         }
     }
 
-    NotifyStateChanged(MtcAosState::DISCONNECTED, nReason);
+    NotifyStateChanged(MtcAosState::DISCONNECTED, nReason, nDataFailureReason);
 }
 
 PUBLIC
@@ -151,23 +144,20 @@ void MtcAosEventHandler::OnEventNotify(IN IMS_UINT32 nType, IN IMS_UINT32 nState
 {
     IMS_TRACE_I("OnEventNotify emergency[%s] nType[%d] nState[%d]",
             _TRACE_B_(m_objService.IsEmergency()), nType, nState);
-}
-
-PRIVATE
-void MtcAosEventHandler::NotifyStateChanged(IN MtcAosState eState, IN IMS_UINT32 eAosReason) const
-{
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); i++)
     {
-        m_objListeners.GetAt(i)->OnAosStateChanged(m_objService, eState, eAosReason);
+        m_objListeners.GetAt(i)->OnEventNotify(nType, nState);
     }
 }
 
 PRIVATE
-void MtcAosEventHandler::NotifyIpcanChanged(IN IMS_UINT32 eIpcan) const
+void MtcAosEventHandler::NotifyStateChanged(
+        IN MtcAosState eState, IN IMS_UINT32 eAosReason, IN IMS_SINT32 nDataFailureReason) const
 {
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); i++)
     {
-        m_objListeners.GetAt(i)->OnIpcanChanged(m_objService, eIpcan);
+        m_objListeners.GetAt(i)->OnAosStateChanged(
+                m_objService, eState, eAosReason, nDataFailureReason);
     }
 }
 

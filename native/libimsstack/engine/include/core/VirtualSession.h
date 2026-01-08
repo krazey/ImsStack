@@ -32,7 +32,7 @@ class VirtualSession : public RcObject, public ISessionState
 public:
     explicit VirtualSession(IN Service* pService, IN const SipAddress* pUserAor);
     VirtualSession(IN const VirtualSession& other);
-    virtual ~VirtualSession();
+    ~VirtualSession() override;
 
 public:
     VirtualSession& operator=(IN const VirtualSession&) = delete;

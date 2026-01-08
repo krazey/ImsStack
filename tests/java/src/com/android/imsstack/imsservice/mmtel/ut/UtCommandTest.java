@@ -16,6 +16,8 @@
 
 package com.android.imsstack.imsservice.mmtel.ut;
 
+import static com.android.imsstack.base.TestAppContext.SLOT0;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,10 +27,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsReasonInfo;
 
-import com.android.imsstack.ContextFixture;
 import com.android.imsstack.core.agents.Usat;
 import com.android.imsstack.core.agents.UsatInterface;
 import com.android.imsstack.enabler.IBaseContext;
@@ -37,12 +37,9 @@ import com.android.imsstack.enabler.ssc.SscServiceClassUtil;
 import com.android.imsstack.imsservice.mmtel.ImsUtImpl;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtListener;
-import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -53,10 +50,6 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class UtCommandTest {
-    private final int mSlotId = 0;
-    private static final int ACTIVE_MODEM_COUNT = 1;
-
-    private static ContextFixture sContext;
     private ImsUtImpl mImsUtImpl;
 
     @Mock private IBaseContext mMockBaseContext;
@@ -69,29 +62,18 @@ public class UtCommandTest {
     @Captor ArgumentCaptor<String> mStringCaptor;
     @Captor ArgumentCaptor<Usat.Listener> mUsatListenerCaptor;
 
-    @BeforeClass
-    public static void setupOnce() {
-        // This is to get one when MSimUtils.getSupportedModemCount() is called in UtFactory
-        sContext = new ContextFixture();
-        AppContext.init(sContext.getTestDouble());
-
-        TelephonyManager tm = sContext.getTestDouble().getSystemService(TelephonyManager.class);
-        when(tm.getActiveModemCount()).thenReturn(ACTIVE_MODEM_COUNT);
-        when(tm.getSupportedModemCount()).thenReturn(ACTIVE_MODEM_COUNT);
-    }
-
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        when(mMockBaseContext.getSlotId()).thenReturn(mSlotId);
+        when(mMockBaseContext.getSlotId()).thenReturn(SLOT0);
         when(mMockBaseContext.getUsatInterface()).thenReturn(mMockUsatInterface);
         when(mMockUsatInterface.isServiceAvailable(Usat.SERVICE_CALL_CONTROL)).thenReturn(true);
         when(mMockUsatInterface.createCallControlCommand(anyInt(), anyString(), anyInt(), anyInt(),
                 any())).thenReturn(null);
         when(mMockUsatCmdRes.getResult()).thenReturn(Usat.RESULT_ALLOWED);
 
-        UtFactory.getInstance().setUtInterfaceForSlot(mSlotId, mMockUtInterface);
+        UtFactory.getInstance().setUtInterfaceForSlot(SLOT0, mMockUtInterface);
 
         mImsUtImpl = new ImsUtImpl(mMockBaseContext);
         mImsUtImpl.init();
@@ -100,13 +82,7 @@ public class UtCommandTest {
     @After
     public void tearDown() {
         mImsUtImpl.clear();
-        UtFactory.getInstance().setUtInterfaceForSlot(mSlotId, null);
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
-        AppContext.deinit();
-        sContext = null;
+        UtFactory.getInstance().setUtInterfaceForSlot(SLOT0, null);
     }
 
     @Test

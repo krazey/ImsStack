@@ -25,7 +25,7 @@ class MediaConfig : public ConfigBase, public IMediaConfig
 {
 public:
     explicit MediaConfig(IN IMS_SINT32 nSlotId);
-    virtual ~MediaConfig();
+    ~MediaConfig() override;
 
     MediaConfig(IN const MediaConfig&) = delete;
     MediaConfig& operator=(IN const MediaConfig&) = delete;
@@ -48,11 +48,6 @@ protected:
     inline IMS_BOOL WriteTo() override { return IMS_FALSE; }
 
     IMS_BOOL ReadMediaProfile(IN const AString& strMProfName, IN const AString& strConfName);
-    inline IMS_BOOL WriteMediaProfile(
-            IN const AString& /*strMProfName*/, IN const AString& /*strConfName*/)
-    {
-        return IMS_FALSE;
-    }
 
 private:
     static const IMS_CHAR SECTION_PROFILES[];

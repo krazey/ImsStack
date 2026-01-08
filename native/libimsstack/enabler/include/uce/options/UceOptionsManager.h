@@ -29,7 +29,7 @@ class UceOptionsManager : public ImsActivityEx
 public:
     explicit UceOptionsManager(
             IN const AString& strName, IN ICoreService* piCoreService, IN IMS_SINT32 simSlotId);
-    virtual ~UceOptionsManager();
+    virtual ~UceOptionsManager() override;
 
     IMS_BOOL SendOptionsRequest(
             IN IMS_UINT32 nKey, IN const AString& strRemoteURI, IN IMS_UINT32 ownCapabilities);
@@ -43,7 +43,7 @@ public:
     IMS_BOOL ClosedService();  // core service closed
 
 protected:
-    virtual IMS_BOOL OnMessage(IN IMSMSG& objMsg);
+    virtual IMS_BOOL OnMessage(IN IMSMSG& objMsg) override;
 
 private:
     IMS_UINT32 getReceivedKey();

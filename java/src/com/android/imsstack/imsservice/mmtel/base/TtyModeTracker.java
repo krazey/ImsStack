@@ -17,7 +17,7 @@ package com.android.imsstack.imsservice.mmtel.base;
 
 import android.telecom.TelecomManager;
 
-import com.android.imsstack.util.AppContext;
+import com.android.imsstack.base.AppContext;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.Set;

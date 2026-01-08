@@ -17,6 +17,7 @@
 #include "TextParser.h"
 
 #include "conf/ConfigSection.h"
+#include "conf/ConfigSectionData.h"
 
 PUBLIC
 ConfigSection::ConfigSection() :
@@ -40,17 +41,6 @@ ConfigSection::~ConfigSection()
         }
 
         m_objSectionData.Clear();
-    }
-}
-
-PUBLIC
-void ConfigSection::GetKeys(OUT AStringArray& objKeys) const
-{
-    for (IMS_UINT32 i = 0; i < m_objSectionData.GetSize(); ++i)
-    {
-        const ConfigSectionData* pSectionData = m_objSectionData.GetAt(i);
-
-        objKeys.AddElement(pSectionData->GetKey());
     }
 }
 

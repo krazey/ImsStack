@@ -37,7 +37,7 @@ class ISubscription;
 class ICoreService : public IService
 {
 protected:
-    virtual ~ICoreService() = default;
+    ~ICoreService() override = default;
 
 public:
     /**

@@ -16,8 +16,8 @@
 #ifndef INTERFACE_AOS_EMERGENCY_LISTENER_H_
 #define INTERFACE_AOS_EMERGENCY_LISTENER_H_
 
-enum class EmcCallbackModeType;
-enum class EmcCallbackMode;
+enum class EmergencyCallbackModeType;
+enum class EmergencyCallbackMode;
 
 /**
  * @brief This class provides a listener interface for Aos
@@ -35,14 +35,14 @@ public:
      * @param eState The emergency callback mode state.
      * @param nDuration The timer duration of emergency callback mode for call or sms.
      */
-    virtual void CallbackModeChanged(
-            IN EmcCallbackModeType eType, IN EmcCallbackMode eState, IN IMS_ULONG nDuration) = 0;
+    virtual void CallbackModeChanged(IN EmergencyCallbackModeType eType,
+            IN EmergencyCallbackMode eState, IN IMS_ULONG nDuration) = 0;
 };
 
 /**
  * Emergency Callback mode type for Aos
  */
-enum class EmcCallbackModeType
+enum class EmergencyCallbackModeType
 {
     CALL = 1,
     SMS = 2
@@ -51,11 +51,11 @@ enum class EmcCallbackModeType
 /**
  * Emergency Callback mode for Aos
  */
-enum class EmcCallbackMode
+enum class EmergencyCallbackMode
 {
     STOP = 0,
     START = 1,
-    STOP_BY_EMC = 2
+    STOP_BY_EMERGENCY = 2
 };
 
 #endif  // INTERFACE_AOS_EMERGENCY_LISTENER_H_

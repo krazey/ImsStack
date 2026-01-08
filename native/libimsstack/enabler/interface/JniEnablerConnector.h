@@ -18,10 +18,9 @@
 
 #include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "INativeEnabler.h"
-#include "ServiceMutex.h"
 
 class IJniEnabler;
+class IMutex;
 class INativeEnabler;
 class JniConnection;
 enum class EnablerType
@@ -29,10 +28,9 @@ enum class EnablerType
     AOS_SERVICE,
     MTC_SERVICE,
     MTC_CALL,
-    MTS_SERVICE,
+    MTS,
     MEDIA_SESSION,
-    UCE,
-    SIP_DELEGATE
+    UCE
 };
 
 class JniEnablerConnector final
@@ -41,7 +39,7 @@ private:
     explicit JniEnablerConnector();
 
 public:
-    virtual ~JniEnablerConnector();
+    ~JniEnablerConnector();
     JniEnablerConnector(IN const JniEnablerConnector&) = delete;
     JniEnablerConnector& operator=(IN const JniEnablerConnector&) = delete;
 

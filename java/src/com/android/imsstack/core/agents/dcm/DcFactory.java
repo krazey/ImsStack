@@ -19,14 +19,18 @@ package com.android.imsstack.core.agents.dcm;
 import android.content.Context;
 import android.util.SparseArray;
 
+import androidx.annotation.NonNull;
+
 import com.android.imsstack.core.agents.dcmif.IDc;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.agents.dcmif.IDcSettings;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
+import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.imsstack.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -104,7 +108,7 @@ public final class DcFactory {
             return;
         }
 
-        Log.i(Log.TAG, "createDcAgents: slot" + slotId);
+        Log.i(DcFactory.class, "createDcAgents: slot" + slotId);
 
         agents.put(IDcUtils.class, new DcUtils(slotId));
         agents.put(IDcSettings.class, new DcSettings(slotId));
@@ -119,7 +123,7 @@ public final class DcFactory {
      * @param slotId A slot id.
      */
     public static void initDcAgents(Context context, int slotId) {
-        Log.i(Log.TAG, "initDcAgents: slot" + slotId);
+        Log.i(DcFactory.class, "initDcAgents: slot" + slotId);
 
         Map<Class<?>, IDc> agents = sDcAgents.get(slotId);
 
@@ -138,7 +142,7 @@ public final class DcFactory {
      * @param slotId A slot id.
      */
     public static void cleanUpDcAgents(int slotId) {
-        Log.i(Log.TAG, "cleanUpDcAgents: slot" + slotId);
+        Log.i(DcFactory.class, "cleanUpDcAgents: slot" + slotId);
 
         Map<Class<?>, IDc> agents = sDcAgents.get(slotId);
 
@@ -150,6 +154,32 @@ public final class DcFactory {
                 }
             }
         }
+    }
+
+    /**
+     * Dumps this instance into a readable format for dumpsys usage.
+     *
+     * @param printWriter A {@link PrintWriter} object used to write the formatted logs
+     */
+    public static void dump(@NonNull PrintWriter printWriter) {
+        IndentingPrintWriter pw = new IndentingPrintWriter(printWriter, "  ");
+
+        for (int i = 0; i < sDcAgents.size(); ++i) {
+            int slotId = sDcAgents.keyAt(i);
+            pw.printf("Slot%d:\n", slotId);
+            pw.increaseIndent();
+
+            Map<Class<?>, IDc> agents = sDcAgents.get(slotId);
+            for (IDc dc : agents.values()) {
+                if (dc != null) {
+                    dc.dump(pw);
+                }
+            }
+
+            pw.decreaseIndent();
+        }
+
+        pw.println();
     }
 
     private static Collection<IDc> reverseCollection(Collection<IDc> c) {

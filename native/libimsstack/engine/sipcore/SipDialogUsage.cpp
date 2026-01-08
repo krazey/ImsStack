@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
+#include "ServiceTrace.h"
 
 #include "ISipHeader.h"
+#include "SipDState.h"
 #include "SipDialogUsage.h"
 #include "SipFeatures.h"
+#include "SipMessageInfo.h"
 #include "SipPrivate.h"
 #include "SipStack.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC VIRTUAL SipDialogUsage::~SipDialogUsage()
 {
@@ -109,7 +112,7 @@ IMS_SINT32 SipDialogUsage::GetActionForResponse(IN const SipMessageInfo& objMsgI
     if (!SipStack::IsRequestMessage(pSipMsg))
     {
         IMS_SINT32 nStatusCode = SipStack::GetStatusCode(pSipMsg);
-        SipDialogState* pDialogState = m_pDialogBase->GetDialogState();
+        const SipDialogState* pDialogState = m_pDialogBase->GetDialogState();
 
         switch (nStatusCode)
         {
@@ -204,7 +207,7 @@ IMS_SINT32 SipDialogUsage::GetActionForResponse(IN const SipMessageInfo& objMsgI
             case SipStatusCode::SC_485:  // FALL-THROUGH
             case SipStatusCode::SC_502:  // FALL-THROUGH
             case SipStatusCode::SC_604:
-                // FIXME: Should 502 be excluded if the dialog usage is for subscription? (RFC 6665)
+                // Should 502 be excluded if the dialog usage is for subscription? (RFC 6665)
                 if (SipFeatures::IsMultipleDialogUsagesRequiredForNonSharedDialog(
                             objMsgInfo.GetSlotId()) ||
                         ((pDialogState != IMS_NULL) && pDialogState->HasMultipleDialogUsages()))

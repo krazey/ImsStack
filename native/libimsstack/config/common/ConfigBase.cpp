@@ -107,11 +107,7 @@ IMS_BOOL ConfigBase::AddListener(IN IMS_SINT32 nCpi, IN IConfigUpdateListener* p
         ImsList<IConfigUpdateListener*> objListeners;
 
         objListeners.Append(piListener);
-
-        if (!m_objConfigUpdateListeners.Add(nCpi, objListeners))
-        {
-            return IMS_FALSE;
-        }
+        m_objConfigUpdateListeners.Add(nCpi, objListeners);
 
         IMS_TRACE_D("ConfigUpdateListener :: add - %d / %p", m_objConfigUpdateListeners.GetSize(),
                 piListener, 0);

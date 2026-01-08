@@ -21,34 +21,12 @@
 #include "SipClientConnectionImpl.h"
 #include "SipConnectionNotifier.h"
 #include "SipConnectionNotifierImpl.h"
+#include "SipError.h"
 #include "SipManager.h"
 #include "SipPrivate.h"
 #include "SipProtocol.h"
 
-__IMS_TRACE_TAG_SIP__;
-
-PRIVATE
-SipProtocol::SipProtocol() :
-        Protocol()
-{
-}
-
-PUBLIC VIRTUAL SipProtocol::~SipProtocol() {}
-
-/**
- * Returns a singleton object of SIP protocol.
- */
-PUBLIC GLOBAL SipProtocol* SipProtocol::GetInstance()
-{
-    static SipProtocol* s_pSipProtocol = IMS_NULL;
-
-    if (s_pSipProtocol == IMS_NULL)
-    {
-        s_pSipProtocol = new SipProtocol();
-    }
-
-    return s_pSipProtocol;
-}
+__IMS_TRACE_TAG_SIP_CORE__;
 
 /**
  * Creates and opens a SIP Connection.

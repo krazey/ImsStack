@@ -27,7 +27,7 @@ class IJniEnablerThread;
 class MockIJniEnabler : public IJniEnabler
 {
 public:
-    inline virtual ~MockIJniEnabler() {}
+    ~MockIJniEnabler() override = default;
 
     MOCK_METHOD(void, NotifyNativeEnablerSet, (), (override));
     MOCK_METHOD(IJniEnablerThread*, GetJniThread, (), (const, override));

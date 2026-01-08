@@ -17,11 +17,12 @@
 #ifndef MOCK_ECT_REFERENCE_H_
 #define MOCK_ECT_REFERENCE_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "ect/EctReference.h"
 #include <gmock/gmock.h>
 
+class AString;
 class IEctReferenceListener;
 
 class MockEctReference : public EctReference
@@ -32,7 +33,7 @@ public:
             EctReference(objContext, nTransfereeKey, objListener)
     {
     }
-    virtual ~MockEctReference() {}
+    virtual ~MockEctReference() override {}
 
     MOCK_METHOD(IMS_RESULT, SendInvite, (IN CallKey), (override));
     MOCK_METHOD(IMS_RESULT, SendInvite, (IN const AString&), (override));

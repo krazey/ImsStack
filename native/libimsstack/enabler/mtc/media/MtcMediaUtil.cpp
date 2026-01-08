@@ -15,7 +15,9 @@
  */
 
 #include "MtcDef.h"
+#include "SdpMedia.h"
 #include "media/MtcMediaUtil.h"
+#include <vector>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -120,6 +122,42 @@ PUBLIC GLOBAL IMS_UINT32 MtcMediaUtil::GetMediaTypesFromMediaContents(
     return eMediaTypes;
 }
 
+PUBLIC GLOBAL std::vector<IMS_UINT32> MtcMediaUtil::GetMediaTypeListFromCallType(
+        IN CallType eCallType)
+{
+    switch (eCallType)
+    {
+        case CallType::VOIP:
+            return {MEDIATYPE_AUDIO};
+        case CallType::VT:
+            return {MEDIATYPE_AUDIO, MEDIATYPE_VIDEO};
+        case CallType::RTT:
+            return {MEDIATYPE_AUDIO, MEDIATYPE_TEXT};
+        case CallType::VIDEO_RTT:
+            return {MEDIATYPE_AUDIO, MEDIATYPE_VIDEO, MEDIATYPE_TEXT};
+        default:  // CallType::UNKNOWN
+            return {};
+    }
+}
+
+PUBLIC GLOBAL std::vector<IMS_UINT32> MtcMediaUtil::GetUnusedMediaTypeListFromCallType(
+        IN CallType eCallType)
+{
+    switch (eCallType)
+    {
+        case CallType::UNKNOWN:
+            return {MEDIATYPE_AUDIO, MEDIATYPE_VIDEO, MEDIATYPE_TEXT};
+        case CallType::VOIP:
+            return {MEDIATYPE_VIDEO, MEDIATYPE_TEXT};
+        case CallType::VT:
+            return {MEDIATYPE_TEXT};
+        case CallType::RTT:
+            return {MEDIATYPE_VIDEO};
+        default:  // CallType::VIDEO_RTT
+            return {};
+    }
+}
+
 PUBLIC GLOBAL MEDIA_CONTENT_TYPE MtcMediaUtil::GetMediaContentsFromMediaTypes(
         IN IMS_UINT32 eMediaTypes)
 {
@@ -184,6 +222,21 @@ PUBLIC GLOBAL MEDIA_CONTENT_TYPE MtcMediaUtil::GetMediaContentsFromCallType(IN C
     return eMediaContentTypes;
 }
 
+PUBLIC GLOBAL IMS_SINT32 MtcMediaUtil::GetSdpMediaType(IN IMS_UINT32 eMediaType)
+{
+    switch (eMediaType)
+    {
+        case MEDIATYPE_AUDIO:
+            return SdpMedia::TYPE_AUDIO;
+        case MEDIATYPE_VIDEO:
+            return SdpMedia::TYPE_VIDEO;
+        case MEDIATYPE_TEXT:
+            return SdpMedia::TYPE_TEXT;
+        default:
+            return SdpMedia::TYPE_INVALID;
+    }
+}
+
 PUBLIC GLOBAL MEDIA_SERVICE_TYPE MtcMediaUtil::GetMediaServiceType(IN ServiceType eServiceType)
 {
     if (eServiceType == ServiceType::EMERGENCY)
@@ -194,7 +247,8 @@ PUBLIC GLOBAL MEDIA_SERVICE_TYPE MtcMediaUtil::GetMediaServiceType(IN ServiceTyp
     return MEDIA_SERVICE_DEFAULT;
 }
 
-PUBLIC GLOBAL MEDIA_NETWORK_TYPE MtcMediaUtil::GetMediaNetworkType(IN IMtcService* piMtcService,
+PUBLIC GLOBAL MEDIA_NETWORK_TYPE MtcMediaUtil::GetMediaNetworkType(
+        IN const IMtcService* piMtcService,
         IN IMS_SINT32 eRadioType /* = INetworkWatcher::RADIOTECH_TYPE_INVALID */)
 {
     if (piMtcService->IsWlanIpCanType())
@@ -293,4 +347,50 @@ PUBLIC GLOBAL IMS_UINT32 MtcMediaUtil::StringToMediaTypes(IN const AString& strM
     }
 
     return eMediaTypes;
+}
+
+PUBLIC GLOBAL void MtcMediaUtil::RefineMediaInfoByCallType(
+        IN CallType eCallType, IN_OUT MediaInfo& objMediaInfo)
+{
+    for (IMS_UINT32 eMediaType : GetUnusedMediaTypeListFromCallType(eCallType))
+    {
+        if (eMediaType == MEDIATYPE_AUDIO)
+        {
+            objMediaInfo.eAudioDirection = DIRECTION_INVALID;
+            objMediaInfo.eAudioQuality = AUDIO_QUALITY_NONE;
+        }
+
+        if (eMediaType == MEDIATYPE_VIDEO)
+        {
+            objMediaInfo.eVideoDirection = DIRECTION_INVALID;
+            objMediaInfo.eVideoQuality = VIDEO_QUALITY_NONE;
+        }
+
+        if (eMediaType == MEDIATYPE_TEXT)
+        {
+            objMediaInfo.eTextDirection = DIRECTION_INVALID;
+            objMediaInfo.eGttMode = GTT_MODE_INVALID;
+        }
+    }
+}
+
+PUBLIC GLOBAL PemType MtcMediaUtil::GetPemType(IN const AString& strPemHeader)
+{
+    if (strPemHeader.Contains("sendrecv"))
+    {
+        return PemType::SENDRECV;
+    }
+    else if (strPemHeader.Contains("sendonly"))
+    {
+        return PemType::SENDONLY;
+    }
+    else if (strPemHeader.Contains("recvonly"))
+    {
+        return PemType::RECVONLY;
+    }
+    else if (strPemHeader.Contains("inactive"))
+    {
+        return PemType::INACTIVE;
+    }
+    return PemType::NONE;
 }

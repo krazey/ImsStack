@@ -16,13 +16,14 @@
 #ifndef SERVICE_NETWORK_H_
 #define SERVICE_NETWORK_H_
 
-#include "ImsMessage.h"
-#include "INetworkConnection.h"
 #include "ISocket.h"
 #include "PlatformService.h"
 
+class AString;
 class IIpcan;
+class INetworkConnection;
 class INetworkIpSec;
+class ImsMessage;
 class NetworkServicePrivate;
 class SslCertificate;
 
@@ -34,7 +35,7 @@ public:
     NetworkService& operator=(IN const NetworkService&) = delete;
 
 protected:
-    virtual ~NetworkService();
+    ~NetworkService() override;
 
 public:
     virtual INetworkConnection* CreateConnection(
@@ -90,7 +91,7 @@ public:
     virtual IIpcan* GetIpcan();
     virtual INetworkIpSec* GetIpSec(IN IMS_SINT32 nSlotId);
 
-    void DispatchServiceMessage(IN ImsMessage& objMsg);
+    void DispatchServiceMessage(IN const ImsMessage& objMsg);
 
     static NetworkService* GetNetworkService();
 

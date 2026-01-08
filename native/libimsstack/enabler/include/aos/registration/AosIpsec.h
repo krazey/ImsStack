@@ -83,7 +83,7 @@ class AosIpsec : public IIpSecPolicyListener
 {
 public:
     AosIpsec(IN IAosIpsecListener* piListener, IN IMS_SINT32 nSlotId);
-    virtual ~AosIpsec();
+    ~AosIpsec() override;
 
 private:
     AosIpsec(IN const AosIpsec& objRhs);
@@ -122,7 +122,6 @@ public:
     void IpSecPolicy_OnSecurityAssociationExpired(IN IIpSecPolicy* piPolicy) override;
 
     /// Create UE Transport Port and SPI Identity
-    IMS_UINT32 CreateUePort();
     IMS_UINT32 CreateUeSpi();
 
     /// Create SPs for TCP or UDP
@@ -167,8 +166,17 @@ public:
     /// Get Policy Interface
     IIpSecPolicy* GetPolicy();
 
-    /// Get Integrity Algorithm
+    /// Get Integrity & Encryption Algorithm
     IMS_UINT32 GetIntegrityAlgorithm();
+    IMS_UINT32 GetAuthAlgoForIpsec(IN IMS_UINT32 nAlgo) const;
+    IMS_UINT32 GetEncrAlgoForIpsec(IN IMS_UINT32 nAlgo) const;
+    IMS_SINT32 GetAuthAlgoForSecurityHeader(IN IMS_SINT32 nAlgo) const;
+    IMS_SINT32 GetEncrAlgoForSecurityHeader(IN IMS_SINT32 nAlgo) const;
+
+    // Get Security Mode & Protocol Algorithm
+    IMS_SINT32 GetModeForSecurityHeader(IN IMS_UINT32 nMode) const;
+    IMS_UINT32 GetProtocolForIpsec(IN IMS_UINT32 nProtocol) const;
+    IMS_SINT32 GetProtocolForSecurityHeader(IN IMS_UINT32 nProtocol) const;
 
     /// Get UE Port & Spi
     const IpAddress& GetUeIpa() const;
@@ -192,9 +200,10 @@ private:
 
 public:
     // ePDG requires a certain range of UE ports. So here we made a change from 58001 to 38001.
+    // Plain TCP can be transmitted from a port 40000 to 50000. Avoid this range for Ipsec.
     static const IMS_UINT32 UE_PORT_LOWER = 38001;
     static const IMS_UINT32 UE_PORT_UPPER = 39000;
-    // UE Server Port 9001 ~ 10000
+    // UE Server Port 39000 ~ 39999
     static const IMS_UINT32 PCSCF_PORT_LOWER = 10001;
     static const IMS_UINT32 PCSCF_PORT_UPPER = 11000;
     // Pcscf Server Port 11001 ~ 12000
@@ -207,25 +216,26 @@ public:
     /// Increase the SPI for sending REGISTER doing authentication
     static const IMS_UINT32 SPI_VALUE_TO_BE_INCREASED = 2;
 
-private:
-    IAosIpsecListener* m_piListener;
+protected:
     INetworkIpSec* m_piNetIpsec;
     IIpSecPolicy* m_piPolicy;
-    UeIpsecInfo* m_pUeInfo;
     PcscfIpsecInfo* m_pPcscfInfo;
+    IMS_BOOL m_bSaEstablished;
+    IMS_BOOL m_bIgnorePolicyExpired;
+
+private:
+    IAosIpsecListener* m_piListener;
+    UeIpsecInfo* m_pUeInfo;
     IMS_UINT32 m_nSecuProto;
     IMS_UINT32 m_nAuthAlgo;
     IMS_UINT32 m_nEncrAlgo;
     IMS_UINT32 m_nMode;
     IMS_BOOL m_bAddPolicy;
-    IMS_BOOL m_bSaEstablished;
-    IMS_BOOL m_bIgnorePolicyExpired;
     IMS_SINT32 m_nSlotId;
     AString m_strTag;
 
 private:
     friend class AosIpsecTest;
-    friend class AosIpsecHelperTest;
 };
 
 /**

@@ -18,9 +18,9 @@
 #define REFERENCE_INTERFACE_HOLDER_H_
 
 #include "IReferenceListener.h"
+#include "ITimer.h"
 #include "ImsList.h"
 #include "ImsMap.h"
-#include "ServiceTimer.h"
 
 class ISession;
 class ICoreService;
@@ -31,7 +31,7 @@ class ReferenceInterfaceHolder : public IReferenceListener, public ITimerListene
 {
 public:
     explicit ReferenceInterfaceHolder(IN IInterfaceHolderListener& objListener);
-    virtual ~ReferenceInterfaceHolder();
+    virtual ~ReferenceInterfaceHolder() override;
     ReferenceInterfaceHolder(IN const ReferenceInterfaceHolder&) = delete;
     ReferenceInterfaceHolder& operator=(IN const ReferenceInterfaceHolder&) = delete;
 
@@ -58,7 +58,7 @@ public:
     inline virtual IMS_UINT32 GetReferenceCount() const { return m_objIReferences.GetSize(); }
 
 private:
-    static IMS_BOOL IsReadyToDestroy(IN IReference* piReference);
+    static IMS_BOOL IsReadyToDestroy(IN const IReference* piReference);
 
     void ClearIReferences();
 

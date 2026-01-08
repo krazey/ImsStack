@@ -25,74 +25,74 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.SparseArray;
 
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
-import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
-import com.android.imsstack.util.SimUtils;
+import com.android.imsstack.util.ImsUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 /**
  * This class provides the implementation of USAT functions to interwork with the UICC.
  */
 public class UsatAgent extends Handler implements UsatInterface {
-    /** Common parameters */
-    /** Device identities */
+    // Common parameters
+    // Device identities
     private static final int TAG_DEVICE_IDENTITIES = 0x02;
     private static final int DEVICE_IDENTITY_UICC = 0x81;
     private static final int DEVICE_IDENTITY_TERMINAL = 0x82; // ME
     private static final int DEVICE_IDENTITY_NETWORK = 0x83;
-    /** IMS URI: 0x31 or 0xB1 */
+    // IMS URI: 0x31 or 0xB1
     // private static final int TAG_IMS_URI = 0x31;
-    /** URI truncated: 0x73 or 0xF3 */
+    // URI truncated: 0x73 or 0xF3
     // private static final int TAG_URI_TRUNCATED = 0x73;
 
-    /** Call control by USIM */
+    // Call control by USIM
     private static final int TAG_CALL_CONTROL = 0xD4;
-    /** Address: 0x06 or 0x86 */
+    // Address: 0x06 or 0x86
     private static final int TAG_ADDRESS = 0x06;
     private static final int TAG_ADDRESS_1 = 0x86;
-    /** SS string: 0x09 or 0x89 */
+    // SS string: 0x09 or 0x89
     private static final int TAG_SS_STRING = 0x09;
     private static final int TAG_SS_STRING_1 = 0x89;
-    /** USSD string: 0x0A or 0x8A */
+    // USSD string: 0x0A or 0x8A
     private static final int TAG_USSD_STRING = 0x0A;
     private static final int TAG_USSD_STRING_1 = 0x8A;
-    /** Location information: 0x13 or 0x93 */
+    // Location information: 0x13 or 0x93
     private static final int TAG_LOCATION_INFORMATION = 0x13;
-    /**
-     * Media type: 0x7E or 0xFE
-     * Voice: 0x01, Video: 0x02
-     */
+    // Media type: 0x7E or 0xFE
+    // Voice: 0x01, Video: 0x02
     private static final int TAG_MEDIA_TYPE = 0x7E;
 
-    /** MO SMS control by USIM */
+    // MO SMS control by USIM
     private static final int TAG_MO_SMS_CONTROL = 0xD5;
 
-    /** Data download via SMS-PP */
+    // Data download via SMS-PP
     private static final int TAG_SMS_PP_DOWNLOAD = 0xD1;
-    /** SMS TPDU: 0x0B or 0x8B */
+    // SMS TPDU: 0x0B or 0x8B
     private static final int TAG_SMS_TPDU = 0x0B;
 
-    /** Event download: 0xD6 */
+    // Event download: 0xD6
     private static final int TAG_EVENT_DOWNLOAD = 0xD6;
-    /** Event list: 0x19 or 0x99 */
+    // Event list: 0x19 or 0x99
     private static final int TAG_EVENT_LIST = 0x19;
-    /** Ims registration event: 0x17 */
+    // Ims registration event: 0x17
     private static final int EVENT_IMS_REGISTRATION = 0x17;
-    /** IMPU list: 0x80 or 0x77 */
+    // IMPU list: 0x80 or 0x77
     private static final int TAG_IMPU_LIST = 0x77;
-    /** IMS status code: 0x80 or 0x78 */
+    // IMS status code: 0x80 or 0x78
     private static final int TAG_IMS_STATUS_CODE = 0x78;
-    /** URI TLV: 0x80 */
+    // URI TLV: 0x80
     private static final int TAG_URI_TLV = 0x80;
 
     static final class DataObject {
@@ -107,7 +107,7 @@ public class UsatAgent extends Handler implements UsatInterface {
                     + (value.length == 0
                             ? "(null)"
                             : (ImsLog.DBG
-                                    ? SimUtils.bytesToHexString(value)
+                                    ? ImsUtils.bytesToHexString(value)
                                     : value.length))
                     + " ]";
         }
@@ -137,20 +137,22 @@ public class UsatAgent extends Handler implements UsatInterface {
                     + (data == null
                             ? "(null)"
                             : (ImsLog.DBG
-                                    ? SimUtils.bytesToHexString(data)
+                                    ? ImsUtils.bytesToHexString(data)
                                     : data.length))
                     + " ]";
         }
     }
 
-    /** The maximum internal command identifier. */
+    // The maximum internal command identifier.
     private static final int MAX_CID = Integer.MAX_VALUE;
 
     private static final int EVENT_SEND_COMMAND = 1;
+    private static final int EVENT_UPDATE_SETUP_EVENT_LIST = 2;
 
     private final Object mLock = new Object();
     private final SimInterface mSim;
     private final SparseArray<Usat.Command> mCommands;
+    private List<Integer> mSetupEventList = Collections.emptyList();
     private int mGlobalCommandId = 1;
 
     UsatAgent(SimInterface sim) {
@@ -160,14 +162,26 @@ public class UsatAgent extends Handler implements UsatInterface {
     }
 
     @Override
+    public void updateSetupEventList(@NonNull int[] setupEventList) {
+        Message.obtain(this, EVENT_UPDATE_SETUP_EVENT_LIST, setupEventList).sendToTarget();
+    }
+
+    @Override
+    public boolean isInSetupEventList(int event) {
+        return mSetupEventList.contains(event);
+    }
+
+    @Override
     public boolean isServiceAvailable(@Usat.ServiceType int serviceType) {
         byte[] ust = mSim.getUsimServiceTable();
+        return ust.length != 0 && isServiceAvailable(ust, serviceType);
+    }
 
-        if (ust != null) {
-            return isServiceAvailable(ust, serviceType);
-        }
-
-        return false;
+    @Override
+    public boolean isUiccImsAccessEnabled() {
+        byte[] ist = mSim.getIsimServiceTable();
+        return isServiceAvailable(ist, Usat.ISIM_SERVICE_SUPPORT_OF_UICC_ACCESS_TO_IMS)
+                || isServiceAvailable(Usat.SERVICE_SUPPORT_OF_UICC_ACCESS_TO_IMS);
     }
 
     @Override
@@ -206,7 +220,7 @@ public class UsatAgent extends Handler implements UsatInterface {
             return;
         }
 
-        ImsLog.d(getSlotId(), "USAT: cancelCommand - " + command);
+        logd(this, "cancelCommand - " + command);
 
         synchronized (mLock) {
             if (mCommands.contains(command.getCid())) {
@@ -221,7 +235,7 @@ public class UsatAgent extends Handler implements UsatInterface {
             return;
         }
 
-        ImsLog.i(getSlotId(), "USAT: sendCommand - " + command);
+        logi(this, "sendCommand - " + command);
 
         synchronized (mLock) {
             mCommands.put(command.getCid(), command);
@@ -232,12 +246,17 @@ public class UsatAgent extends Handler implements UsatInterface {
 
     @Override
     public void handleMessage(@NonNull Message msg) {
-        ImsLog.i(getSlotId(), "USAT: handleMessage - msg=" + msg.what);
+        logi(this, "handleMessage - msg=" + msg.what);
 
         switch (msg.what) {
             case EVENT_SEND_COMMAND: {
                 Usat.Command cmd = (Usat.Command) msg.obj;
                 handleUsatCommand(cmd);
+                break;
+            }
+            case EVENT_UPDATE_SETUP_EVENT_LIST : {
+                int[] setupEventList = (int[]) msg.obj;
+                mSetupEventList = IntStream.of(setupEventList).boxed().toList();
                 break;
             }
             default:
@@ -265,7 +284,7 @@ public class UsatAgent extends Handler implements UsatInterface {
                 handleRegEventDownloadCommand((Usat.RegEventDownloadCommand) cmd);
                 break;
             default:
-                ImsLog.d(getSlotId(), "USAT: unknown command - " + cmd);
+                logd(this, "unknown command - " + cmd);
                 break;
         }
     }
@@ -295,7 +314,8 @@ public class UsatAgent extends Handler implements UsatInterface {
         removeCommand(response.getCommand());
 
         if (isCommandAborted(response.getCommand())) {
-            ImsLog.i(getSlotId(), "USAT: command is already aborted - " + response.getCommand());
+            logi(this, "command is already aborted - "
+                    + response.getCommand());
             return;
         }
 
@@ -312,7 +332,7 @@ public class UsatAgent extends Handler implements UsatInterface {
      * @param cmd The call control command.
      */
     private void handleCallControlCommand(final Usat.CallControlCommand cmd) {
-        ImsLog.d(getSlotId(), "USAT: handleCallControlCommand");
+        logd(this, "handleCallControlCommand");
 
         String encodedCommand = encodeCommandForCallControl(cmd);
         String response = "";
@@ -324,12 +344,12 @@ public class UsatAgent extends Handler implements UsatInterface {
         UsatResult result = createUsatResult(response);
 
         if (ImsLog.DBG) {
-            ImsLog.d(getSlotId(), "USAT: call-control - encodedCommand=" + encodedCommand
+            logd(this, "call-control - encodedCommand=" + encodedCommand
                     + ", response=" + response + ", result=" + result);
         }
 
         if (!result.isOk()) {
-            ImsLog.w(getSlotId(), "USAT: call-control failed - " + result);
+            logw(this, "call-control failed - " + result);
         }
 
         Usat.CallControlCommandResponse cmdResponse =
@@ -338,7 +358,7 @@ public class UsatAgent extends Handler implements UsatInterface {
         if (cmdResponse != null) {
             notifyCommandResponse(cmdResponse);
         } else {
-            ImsLog.i(getSlotId(), "USAT: call-control command aborted");
+            logi(this, "call-control command aborted");
         }
     }
 
@@ -364,17 +384,17 @@ public class UsatAgent extends Handler implements UsatInterface {
 
         if (ccType == Usat.CALL_CONTROL_TYPE_MO_CALL) {
             if (!writeAddress(buffer, cmd.getDialedString())) {
-                ImsLog.w(getSlotId(), "USAT: writing address failed");
+                logw(this, "writing address failed");
                 return null;
             }
         } else if (ccType == Usat.CALL_CONTROL_TYPE_SS) {
             if (!writeSsString(buffer, cmd.getDialedString())) {
-                ImsLog.w(getSlotId(), "USAT: writing SS string failed");
+                logw(this, "writing SS string failed");
                 return null;
             }
         } else if (ccType == Usat.CALL_CONTROL_TYPE_USSD) {
             if (!writeUssdString(buffer, cmd.getDialedString())) {
-                ImsLog.w(getSlotId(), "USAT: writing USSD string failed");
+                logw(this, "writing USSD string failed");
                 return null;
             }
         }
@@ -392,7 +412,7 @@ public class UsatAgent extends Handler implements UsatInterface {
                 buffer.write(locationInfo.length);
                 buffer.writeBytes(locationInfo);
             } else {
-                ImsLog.d(getSlotId(), "USAT: no location information.");
+                logd(this, "no location information.");
                 buffer.write(0);
             }
         }
@@ -414,7 +434,7 @@ public class UsatAgent extends Handler implements UsatInterface {
         // Adjust the length field of BER-TLV data object.
         data = refineBerTlvDataObject(data);
 
-        return SimUtils.bytesToHexString(data);
+        return ImsUtils.bytesToHexString(data);
     }
 
     /**
@@ -451,7 +471,7 @@ public class UsatAgent extends Handler implements UsatInterface {
                 // Malformed data format. Do not allow the call.
                 cmdResult = Usat.RESULT_NOT_ALLOWED;
             } else {
-                ImsLog.i(getSlotId(), "USAT: response data objects=" + dataObjects.size());
+                logi(this, "response data objects=" + dataObjects.size());
 
                 if (dataObjects.isEmpty()) {
                     cmdResult = Usat.RESULT_NOT_ALLOWED;
@@ -481,12 +501,8 @@ public class UsatAgent extends Handler implements UsatInterface {
                 } else if (tag == TAG_USSD_STRING || tag == TAG_USSD_STRING_1) {
                     ccType = Usat.CALL_CONTROL_TYPE_USSD;
 
-                    try {
-                        if (value.length != 0) {
-                            dialedString = new String(value, "UTF-8");
-                        }
-                    } catch (UnsupportedEncodingException e) {
-                        ImsLog.e(getSlotId(), "USAT: " + e);
+                    if (value.length != 0) {
+                        dialedString = new String(value, StandardCharsets.UTF_8);
                     }
                 } else if (tag == TAG_MEDIA_TYPE || tag == (TAG_MEDIA_TYPE | 0x80)) {
                     if (value.length != 0) {
@@ -512,7 +528,7 @@ public class UsatAgent extends Handler implements UsatInterface {
      * @param cmd The MO SMS command.
      */
     private void handleMoSmsControlCommand(final Usat.MoSmsControlCommand cmd) {
-        ImsLog.d(getSlotId(), "USAT: handleMoSmsControlCommand");
+        logd(this, "handleMoSmsControlCommand");
 
         String encodedCommand = encodeCommandForMoSmsControl(cmd);
         String response = "";
@@ -524,12 +540,12 @@ public class UsatAgent extends Handler implements UsatInterface {
         UsatResult result = createUsatResult(response);
 
         if (ImsLog.DBG) {
-            ImsLog.d(getSlotId(), "USAT: mo-sms-control - encodedCommand=" + encodedCommand
+            logd(this, "mo-sms-control - encodedCommand=" + encodedCommand
                     + ", response=" + response + ", result=" + result);
         }
 
         if (!result.isOk()) {
-            ImsLog.w(getSlotId(), "USAT: mo-sms-control failed - " + result);
+            logw(this, "mo-sms-control failed - " + result);
         }
 
         Usat.MoSmsControlCommandResponse cmdResponse =
@@ -538,7 +554,7 @@ public class UsatAgent extends Handler implements UsatInterface {
         if (cmdResponse != null) {
             notifyCommandResponse(cmdResponse);
         } else {
-            ImsLog.i(getSlotId(), "USAT: mo-sms-control command aborted");
+            logi(this, "mo-sms-control command aborted");
         }
     }
 
@@ -561,13 +577,13 @@ public class UsatAgent extends Handler implements UsatInterface {
 
         // RP_Destination_Address of the Service Center
         if (!writeAddress(buffer, cmd.getRpDestinationAddress())) {
-            ImsLog.w(getSlotId(), "USAT: writing RP_Destination_Address failed");
+            logw(this, "writing RP_Destination_Address failed");
             return null;
         }
 
         // TP_Destination_Address
         if (!writeAddress(buffer, cmd.getTpDestinationAddress())) {
-            ImsLog.w(getSlotId(), "USAT: writing TP_Destination_Address failed");
+            logw(this, "writing TP_Destination_Address failed");
             return null;
         }
 
@@ -582,7 +598,7 @@ public class UsatAgent extends Handler implements UsatInterface {
             buffer.write(locationInfo.length);
             buffer.writeBytes(locationInfo);
         } else {
-            ImsLog.d(getSlotId(), "USAT: no location information.");
+            logd(this, "no location information.");
             buffer.write(0);
         }
 
@@ -591,7 +607,7 @@ public class UsatAgent extends Handler implements UsatInterface {
         // Adjust the length field of BER-TLV data object.
         data = refineBerTlvDataObject(data);
 
-        return SimUtils.bytesToHexString(data);
+        return ImsUtils.bytesToHexString(data);
     }
 
     /**
@@ -630,7 +646,7 @@ public class UsatAgent extends Handler implements UsatInterface {
                         null);
             }
 
-            ImsLog.i(getSlotId(), "USAT: response data objects size = " + dataObjects.size());
+            logi(this, "response data objects size = " + dataObjects.size());
 
             for (int i = 0; i < dataObjects.size(); i++) {
                 if (i == 2) break;
@@ -661,7 +677,7 @@ public class UsatAgent extends Handler implements UsatInterface {
      * @param cmd The SMS-PP download command.
      */
     private void handleSmsPpDownloadCommand(final Usat.SmsPpDownloadCommand cmd) {
-        ImsLog.d(getSlotId(), "USAT: handleSmsPpDownloadCommand");
+        logd(this, "handleSmsPpDownloadCommand");
 
         String encodedCommand = encodeCommandForSmsPpDownload(cmd);
         String response = "";
@@ -673,12 +689,12 @@ public class UsatAgent extends Handler implements UsatInterface {
         UsatResult result = createUsatResult(response);
 
         if (ImsLog.DBG) {
-            ImsLog.d(getSlotId(), "USAT: sms-pp-download - encodedCommand=" + encodedCommand
+            logd(this, "sms-pp-download - encodedCommand=" + encodedCommand
                     + ", response=" + response + ", result=" + result);
         }
 
         if (!result.isOk()) {
-            ImsLog.w(getSlotId(), "USAT: sms-pp-download failed - " + result);
+            logw(this, "sms-pp-download failed - " + result);
         }
 
         Usat.SmsPpDownloadCommandResponse cmdResponse =
@@ -687,7 +703,7 @@ public class UsatAgent extends Handler implements UsatInterface {
         if (cmdResponse != null) {
             notifyCommandResponse(cmdResponse);
         } else {
-            ImsLog.i(getSlotId(), "USAT: sms-pp-download command aborted");
+            logi(this, "sms-pp-download command aborted");
         }
     }
 
@@ -709,7 +725,7 @@ public class UsatAgent extends Handler implements UsatInterface {
 
         // writeAddress (RP_Originating Address of Service Centre)
         if (!writeAddress(buffer, cmd.getRpOriginatingAddress())) {
-            ImsLog.w(getSlotId(), "USAT: writing RP_Originating_Address failed");
+            logw(this, "writing RP_Originating_Address failed");
             return null;
         }
 
@@ -724,7 +740,7 @@ public class UsatAgent extends Handler implements UsatInterface {
         // Adjust the length field of BER-TLV data object.
         data = refineBerTlvDataObject(data);
 
-        return SimUtils.bytesToHexString(data);
+        return ImsUtils.bytesToHexString(data);
     }
 
     /**
@@ -743,10 +759,10 @@ public class UsatAgent extends Handler implements UsatInterface {
         int cmdResult;
         if (result.isValidForClass2Sms()) {
             cmdResult = Usat.RESULT_DATA_DOWNLOAD_OK;
-            ImsLog.i(getSlotId(), "USAT: sms-pp download ok");
+            logi(this, "sms-pp download ok");
         } else {
             cmdResult = Usat.RESULT_DATA_DOWNLOAD_ERROR;
-            ImsLog.i(getSlotId(), "USAT: sms-pp download error");
+            logi(this, "sms-pp download error");
         }
 
         return new Usat.SmsPpDownloadCommandResponse(cmd, cmdResult, result.data);
@@ -788,7 +804,7 @@ public class UsatAgent extends Handler implements UsatInterface {
 
         plmn += ani[1];
 
-        StringBuilder sb = new StringBuilder(SimUtils.stringToBcdString(plmn));
+        StringBuilder sb = new StringBuilder(ImsUtils.stringToBcdString(plmn));
 
         int tacOrLacLen = 4; // E-UTRAN / UTRAN / GERAN
         int cellIdLen = 7; // E-UTRAN / UTRAN
@@ -823,7 +839,7 @@ public class UsatAgent extends Handler implements UsatInterface {
             sb.append("F");
         }
 
-        return SimUtils.hexStringToBytes(sb.toString());
+        return ImsUtils.hexStringToBytes(sb.toString());
     }
 
     /**
@@ -832,7 +848,7 @@ public class UsatAgent extends Handler implements UsatInterface {
      * @param cmd The registration event download command.
      */
     private void handleRegEventDownloadCommand(final Usat.RegEventDownloadCommand cmd) {
-        ImsLog.d(getSlotId(), "USAT: handleRegEventDownloadCommand");
+        logd(this, "handleRegEventDownloadCommand");
 
         String encodedCommand = encodeCommandForRegEventDownload(cmd);
         String response = "";
@@ -844,12 +860,12 @@ public class UsatAgent extends Handler implements UsatInterface {
         UsatResult result = createUsatResult(response);
 
         if (ImsLog.DBG) {
-            ImsLog.d(getSlotId(), "USAT: reg-event-download - encodedCommand=" + encodedCommand
-                    + ", response=" + response + ", result=" + result);
+            logd(this, "reg-event-download - encodedCommand="
+                    + encodedCommand + ", response=" + response + ", result=" + result);
         }
 
         if (!result.isOk()) {
-            ImsLog.w(getSlotId(), "USAT: reg-event-download failed - " + result);
+            logw(this, "reg-event-download failed - " + result);
         }
 
         Usat.CommandResponse cmdResponse = new Usat.CommandResponse(cmd,
@@ -858,7 +874,7 @@ public class UsatAgent extends Handler implements UsatInterface {
         if (cmdResponse != null) {
             notifyCommandResponse(cmdResponse);
         } else {
-            ImsLog.i(getSlotId(), "USAT: reg-event-download command aborted");
+            logi(this, "reg-event-download command aborted");
         }
     }
 
@@ -872,18 +888,14 @@ public class UsatAgent extends Handler implements UsatInterface {
 
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
-        /**
-         * Event download tag (Table 7.17 of TS101.220 : 0xD6)
-         */
+        // Event download tag (Table 7.17 of TS101.220 : 0xD6)
         buffer.write(TAG_EVENT_DOWNLOAD);
 
-        /**
-         * Length (A+B+C) or (A+B+D)
-         *     A: Event list
-         *     B: Device identities
-         *     C: IMPU list
-         *     D: IMS status code
-         */
+        // Length (A+B+C) or (A+B+D)
+        //     A: Event list
+        //     B: Device identities
+        //     C: IMPU list
+        //     D: IMS status code
         buffer.write(0x00); // place holder
 
         writeEventList(buffer, EVENT_IMS_REGISTRATION);
@@ -895,7 +907,7 @@ public class UsatAgent extends Handler implements UsatInterface {
             try {
                 writeImpuList(buffer, cmd.getImpus());
             } catch (IOException e) {
-                ImsLog.e(getSlotId(), "USAT: " + e);
+                loge(this, e.toString());
                 return null;
             }
         } else {
@@ -907,7 +919,27 @@ public class UsatAgent extends Handler implements UsatInterface {
         // Adjust the length field of BER-TLV data object.
         data = refineBerTlvDataObject(data);
 
-        return SimUtils.bytesToHexString(data);
+        return ImsUtils.bytesToHexString(data);
+    }
+
+    private void logd(Object o, String s) {
+        ImsLog.d(o, getSlotId(), "USAT: " + s);
+    }
+
+    private void loge(Object o, String s) {
+        ImsLog.e(o, getSlotId(), "USAT: " + s);
+    }
+
+    private void logi(Object o, String s) {
+        ImsLog.i(o, getSlotId(), "USAT: " + s);
+    }
+
+    private void logw(Object o, String s) {
+        ImsLog.w(o, getSlotId(), "USAT: " + s);
+    }
+
+    private static void loge(String s) {
+        ImsLog.e(null, "USAT: " + s);
     }
 
     /**
@@ -998,8 +1030,8 @@ public class UsatAgent extends Handler implements UsatInterface {
      */
     private @NonNull String sendEnvelopeWithStatus(String content) {
         int subId = MSimUtils.getSubId(getSlotId());
-        TelephonyManager tm = AppContext.getTelephonyManager(subId);
-        return (tm != null) ? tm.sendEnvelopeWithStatus(content) : "";
+        TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(subId);
+        return tmp.sendEnvelopeWithStatus(content);
     }
 
     /**
@@ -1164,13 +1196,7 @@ public class UsatAgent extends Handler implements UsatInterface {
      * @return true if the operation is successfully done, false otherwise.
      */
     private static boolean writeUssdString(ByteArrayOutputStream buffer, String ussdString) {
-        byte[] ussdBytes = null;
-
-        try {
-            ussdBytes = ussdString.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return false;
-        }
+        byte[] ussdBytes = ussdString.getBytes(StandardCharsets.UTF_8);
 
         if (ussdBytes == null) {
             return false;
@@ -1239,7 +1265,7 @@ public class UsatAgent extends Handler implements UsatInterface {
             return result;
         }
 
-        byte[] res = SimUtils.hexStringToBytes(response);
+        byte[] res = ImsUtils.hexStringToBytes(response);
 
         if (res == null || res.length < 2) {
             // Invalid response data.
@@ -1263,7 +1289,7 @@ public class UsatAgent extends Handler implements UsatInterface {
      * @return 1 if a byte is less and equal that 0x7F, 2 if a byte is 0x81, 0 otherwise.
      */
     private static int sizeOfLengthField(byte firstByteOfLength) {
-        if (firstByteOfLength <= 0x7F) {
+        if ((int) firstByteOfLength <= 0x7F) {
             return 1;
         } else if (firstByteOfLength == (byte) 0x81) {
             return 2;
@@ -1299,17 +1325,18 @@ public class UsatAgent extends Handler implements UsatInterface {
             if (totalLen > 2) {
                 paramLen = buf[offset] & 0xFF;
             } else {
-                ImsLog.e("BER-TLV: Invalid 2 bytes length; tag=0x" + Integer.toHexString(tag));
+                loge("BER-TLV: Invalid 2 bytes length; tag=0x"
+                        + Integer.toHexString(tag));
                 return false;
             }
         } else {
-            ImsLog.e("BER-TLV: Invalid length; tag=0x" + Integer.toHexString(tag));
+            loge("BER-TLV: Invalid length; tag=0x" + Integer.toHexString(tag));
             return false;
         }
 
         // Check with the buffer length except for the tag and size of length field
         if (paramLen != (totalLen - (1 + sizeOfLen))) {
-            ImsLog.e("BER-TLV: Length mismatched; tag=0x" + Integer.toHexString(tag)
+            loge("BER-TLV: Length mismatched; tag=0x" + Integer.toHexString(tag)
                     + ", paramLen=" + paramLen
                     + ", totalLen=" + totalLen
                     + ", sizeOfLen=" + sizeOfLen);
@@ -1340,7 +1367,7 @@ public class UsatAgent extends Handler implements UsatInterface {
                 }
 
                 if (valueLen < 0) {
-                    ImsLog.e("COMPREHENSION-TLV: Invalid length; tag=0x"
+                    loge("COMPREHENSION-TLV: Invalid length; tag=0x"
                             + Integer.toHexString(object.tag));
                     return false;
                 }
@@ -1357,7 +1384,7 @@ public class UsatAgent extends Handler implements UsatInterface {
 
                     dataObjects.add(object);
                 } else {
-                    ImsLog.e("COMPREHENSION-TLV: Invalid value; tag=0x"
+                    loge("COMPREHENSION-TLV: Invalid value; tag=0x"
                             + Integer.toHexString(object.tag));
                     return false;
                 }

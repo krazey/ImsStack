@@ -15,9 +15,9 @@
  */
 package com.android.imsstack.test;
 
+import com.android.imsstack.base.DeviceConfig;
+import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsPrivateProperties;
-import com.android.imsstack.util.MSimUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +47,7 @@ public final class ImsTestMode {
     private static ImsTestMode sImsTestMode = new ImsTestMode();
 
     private static Map<Integer, IImsTestMode> sTestModes =
-            new HashMap<Integer, IImsTestMode>(MSimUtils.getSupportedSimCount());
+            new HashMap<Integer, IImsTestMode>(DeviceConfig.getSupportedSimCount());
 
 
     public static ImsTestMode getInstance() {

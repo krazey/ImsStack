@@ -24,7 +24,9 @@ import static org.mockito.Mockito.when;
 import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
 
-import com.android.imsstack.core.agents.ConfigAgent;
+import androidx.test.filters.SmallTest;
+
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.ImsRadioInterface;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.SubsInfoInterface;
@@ -48,7 +50,7 @@ public class SscUtilsTest {
     private FakeSscUtils mSscUtils;
 
     @Mock private CarrierConfig mMockCarrierConfig;
-    @Mock private ConfigAgent mMockConfigAgent;
+    @Mock private ConfigInterface mMockConfigInterface;
     @Mock private SimInterface mMockSimInterface;
     @Mock private SubsInfoInterface mMockSubsInfoInterface;
     @Mock private TelephonyInterface mMockTelephonyInterface;
@@ -57,8 +59,8 @@ public class SscUtilsTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        SscConfig.setConfigInterface(SLOT_0, mMockConfigInterface);
 
         mSscUtils = new FakeSscUtils();
     }
@@ -69,6 +71,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getTelephonySimType_subsInfoIsNull() {
         mMockSubsInfoInterface = null;
 
@@ -78,6 +81,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getTelephonySimType_isim() {
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
 
@@ -88,6 +92,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getTelephonySimType_usim() {
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(false);
 
@@ -98,6 +103,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getImpi_simInterfaceIsNull() {
         mMockSimInterface = null;
 
@@ -107,6 +113,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getImpi_impiIsNull() {
         when(mMockSimInterface.getIsimImpi()).thenReturn(null);
 
@@ -116,6 +123,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getImpi_normalBehavior() {
         when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
 
@@ -126,6 +134,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getImpu_simInterfaceIsNull() {
         mMockSimInterface = null;
 
@@ -135,6 +144,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getImpu_impuIsEmpty() {
         when(mMockSimInterface.getIsimImpu()).thenReturn(new ArrayList<String>());
 
@@ -144,6 +154,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getImpu_normalBehavior() {
         ArrayList<String> impuList = new ArrayList<>();
         impuList.add("impu@operator.com");
@@ -155,6 +166,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getDomain_subsInfoInterfaceIsNull() {
         mMockSubsInfoInterface = null;
 
@@ -164,6 +176,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getDomain_fromIsimWhenImpiIsNull() {
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn(null);
@@ -176,6 +189,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getDomain_fromUsimWhenTelephonySubscriberIsNull() {
         mMockTelephonyInterface = null;
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(false);
@@ -186,6 +200,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getDomain_fromUsimWhenMncIsNull() {
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(false);
         when(mMockTelephonyInterface.getSimMnc()).thenReturn(null);
@@ -197,6 +212,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getDomain_fromUsimWhenMccIsNull() {
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(false);
         when(mMockTelephonyInterface.getSimMnc()).thenReturn("001");
@@ -208,6 +224,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getDomain_fromUsimWhenNumberFormatException() {
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(false);
         when(mMockTelephonyInterface.getSimMnc()).thenReturn("abc");
@@ -219,6 +236,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getDomain_fromIsim() {
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
@@ -229,6 +247,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getDomain_fromIsimForXcapRootUri() {
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
@@ -239,6 +258,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getDomain_fromIsimForXcapRootUriWhenImpiContainsSpecificString() {
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn("impi@3gppnetwork.org");
@@ -249,6 +269,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getDomain_fromUsim() {
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(false);
         when(mMockTelephonyInterface.getSimMnc()).thenReturn("01");
@@ -260,6 +281,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getDomain_fromUsimForXcapRootUri() {
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(false);
         when(mMockTelephonyInterface.getSimMnc()).thenReturn("02");
@@ -271,6 +293,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getSscUserAgent_emptyUserAgent() {
         when(mMockCarrierConfig.getString(CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING))
             .thenReturn(null);
@@ -281,6 +304,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getSscUserAgent_includingImsUserAgent() {
         when(mMockCarrierConfig.getString(CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING))
                 .thenReturn("IMS client");
@@ -291,6 +315,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getNumberFromUri_targetUriIsNull() {
         String number = mSscUtils.getNumberFromUri(SLOT_0, null);
 
@@ -298,6 +323,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getNumberFromUri_fromNumber() {
         String number = mSscUtils.getNumberFromUri(SLOT_0, "+1234567890");
 
@@ -305,6 +331,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getNumberFromUri_fromTelUri() {
         String number = mSscUtils.getNumberFromUri(SLOT_0, "tel:+1234567890");
 
@@ -312,6 +339,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getNumberFromUri_fromTelUriIncludingPhoneContext() {
         String number = mSscUtils.getNumberFromUri(SLOT_0,
                 "tel:1234567890;phone-context:operator.com");
@@ -320,6 +348,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getNumberFromUri_fromSipUri() {
         String number = mSscUtils.getNumberFromUri(SLOT_0, "sip:+1234567890@operator.com");
 
@@ -327,6 +356,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getNumberFromUri_fromSipsUri() {
         String number = mSscUtils.getNumberFromUri(SLOT_0,
                 "sips:+1234567890;postd=pp22@operator.com;user=phone");
@@ -335,6 +365,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getNumberFromUri_fromSipUriWithoutDomain() {
         // this is a wrong URI, just used for testing
         String number = mSscUtils.getNumberFromUri(SLOT_0, "sip:+1234567890");
@@ -343,6 +374,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getNumberFromUri_fromSipUriIncludingPhoneContext() {
         String number = mSscUtils.getNumberFromUri(SLOT_0,
                 "sip:1234567890;phone-context:operator.com");
@@ -351,9 +383,10 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getNumberFromUri_replaceZeroWithCountrycode() {
         when(mMockCarrierConfig.getString(
-                CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_ZERO_REPLACE_TO_COUNTRY_CODE_STRING))
+                CarrierConfig.ImsSs.KEY_UT_TARGET_ADDRESS_ZERO_REPLACE_TO_COUNTRY_CODE_STRING))
                 .thenReturn("+81");
 
         String number = mSscUtils.getNumberFromUri(SLOT_0,
@@ -363,9 +396,10 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getNumberFromUri_replaceCountryCodeWithZero() {
         when(mMockCarrierConfig.getString(
-                CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_COUNTRY_CODE_REPLACE_TO_ZERO_STRING))
+                CarrierConfig.ImsSs.KEY_UT_TARGET_ADDRESS_COUNTRY_CODE_REPLACE_TO_ZERO_STRING))
                 .thenReturn("+81");
 
         String number = mSscUtils.getNumberFromUri(SLOT_0, "tel:+81234567890");
@@ -374,6 +408,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getUriFromNumer_numberIsNull() {
         String uri = mSscUtils.getUriFromNumber(SLOT_0, null);
 
@@ -381,6 +416,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getUriFromNumer_domainIsNull() {
         mMockSubsInfoInterface = null; // This is to make domain null
 
@@ -390,7 +426,26 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
+    public void getUriFromNumer_invalidCfTargetUriType() {
+        final int invalidUriType = -1;
+        when(mMockCarrierConfig
+                .getInt(CarrierConfig.ImsSs.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT))
+                .thenReturn(invalidUriType);
+        when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
+        when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
+
+        String uri = mSscUtils.getUriFromNumber(SLOT_0, "1234567890");
+
+        assertEquals("1234567890", uri);
+    }
+
+    @Test
+    @SmallTest
     public void getUriFromNumer_telWithLocalNumber() {
+        when(mMockCarrierConfig
+                .getInt(CarrierConfig.ImsSs.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT))
+                .thenReturn(SscConfig.URI_TYPE_TEL);
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
 
@@ -400,7 +455,25 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
+    public void getUriFromNumer_sipWithLocalNumber() {
+        when(mMockCarrierConfig
+                .getInt(CarrierConfig.ImsSs.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT))
+                .thenReturn(SscConfig.URI_TYPE_SIP);
+        when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
+        when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
+
+        String uri = mSscUtils.getUriFromNumber(SLOT_0, "1234567890");
+
+        assertEquals("sip:1234567890;phone-context=operator.com@operator.com;user=phone", uri);
+    }
+
+    @Test
+    @SmallTest
     public void getUriFromNumer_telWithInternationalNumber() {
+        when(mMockCarrierConfig
+                .getInt(CarrierConfig.ImsSs.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT))
+                .thenReturn(SscConfig.URI_TYPE_TEL);
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
 
@@ -410,9 +483,24 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
+    public void getUriFromNumer_sipWithInternationalNumber() {
+        when(mMockCarrierConfig
+                .getInt(CarrierConfig.ImsSs.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT))
+                .thenReturn(SscConfig.URI_TYPE_SIP);
+        when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
+        when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
+
+        String uri = mSscUtils.getUriFromNumber(SLOT_0, "+1234567890");
+
+        assertEquals("sip:+1234567890@operator.com;user=phone", uri);
+    }
+
+    @Test
+    @SmallTest
     public void getUriFromNumer_telWithContextFromConfig() {
         when(mMockCarrierConfig.getString(
-                CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_PHONE_CONTEXT_STRING))
+                CarrierConfig.ImsSs.KEY_UT_TARGET_ADDRESS_PHONE_CONTEXT_STRING))
                 .thenReturn("contextFromConfig.com");
 
         String uri = mSscUtils.getUriFromNumber(SLOT_0, "1234567890");
@@ -421,11 +509,12 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getUriFromNumer_replaceZeroWithCountrycode() {
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
         when(mMockCarrierConfig.getString(
-                CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_ZERO_REPLACE_TO_COUNTRY_CODE_STRING))
+                CarrierConfig.ImsSs.KEY_UT_TARGET_ADDRESS_ZERO_REPLACE_TO_COUNTRY_CODE_STRING))
                 .thenReturn("+81");
 
         String uri = mSscUtils.getUriFromNumber(SLOT_0, "01234567890");
@@ -434,11 +523,12 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getUriFromNumer_replaceCountryCodeWithZero() {
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
         when(mMockCarrierConfig.getString(
-                CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_COUNTRY_CODE_REPLACE_TO_ZERO_STRING))
+                CarrierConfig.ImsSs.KEY_UT_TARGET_ADDRESS_COUNTRY_CODE_REPLACE_TO_ZERO_STRING))
                 .thenReturn("+81");
 
         String uri = mSscUtils.getUriFromNumber(SLOT_0, "+81234567890");
@@ -447,6 +537,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void convertToImsRadioNetworkType() {
         assertEquals(ImsRadioInterface.ACCESS_NETWORK_TYPE_IWLAN,
                 SscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_IWLAN));
@@ -475,6 +566,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void convertToAccessNetworkType() {
         assertEquals(SscConstant.NETWORK_TYPE_IWLAN,
                 SscUtils.convertToAccessNetworkType(TelephonyManager.NETWORK_TYPE_IWLAN));
@@ -510,6 +602,7 @@ public class SscUtilsTest {
     }
 
     @Test
+    @SmallTest
     public void getSupplementaryServiceTypeForCarrierConfig() {
         assertEquals(SscConfig.SERVICE_TYPE_OIP,
                 SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.OIP,
@@ -583,6 +676,48 @@ public class SscUtilsTest {
         assertEquals(SscConfig.SERVICE_TYPE_INVALID,
                 SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.NONE,
                         SscConstant.CONDITION_INVALID));
+    }
+
+    @Test
+    @SmallTest
+    public void testGetConditionFromSsType() {
+        // Test Call Forwarding service types.
+        assertEquals(SscConstant.CONDITION_CFU,
+                SscUtils.getConditionFromSsType(SscConfig.SERVICE_TYPE_CFU));
+        assertEquals(SscConstant.CONDITION_CFB,
+                SscUtils.getConditionFromSsType(SscConfig.SERVICE_TYPE_CFB));
+        assertEquals(SscConstant.CONDITION_CFNR,
+                SscUtils.getConditionFromSsType(SscConfig.SERVICE_TYPE_CFNRY));
+        assertEquals(SscConstant.CONDITION_CFNRC,
+                SscUtils.getConditionFromSsType(SscConfig.SERVICE_TYPE_CFNRC));
+        assertEquals(SscConstant.CONDITION_CFNL,
+                SscUtils.getConditionFromSsType(SscConfig.SERVICE_TYPE_CFNL));
+
+        // Test Call Barring service types.
+        assertEquals(SscConstant.CONDITION_BAOC,
+                SscUtils.getConditionFromSsType(SscConfig.SERVICE_TYPE_BAOC));
+        assertEquals(SscConstant.CONDITION_BOIC,
+                SscUtils.getConditionFromSsType(SscConfig.SERVICE_TYPE_BOIC));
+        assertEquals(SscConstant.CONDITION_BOIC_EXHC,
+                SscUtils.getConditionFromSsType(SscConfig.SERVICE_TYPE_BOIC_EXHC));
+        assertEquals(SscConstant.CONDITION_BAIC,
+                SscUtils.getConditionFromSsType(SscConfig.SERVICE_TYPE_BAIC));
+        assertEquals(SscConstant.CONDITION_BIC_WR,
+                SscUtils.getConditionFromSsType(SscConfig.SERVICE_TYPE_BIC_ROAM));
+        assertEquals(SscConstant.CONDITION_ACR,
+                SscUtils.getConditionFromSsType(SscConfig.SERVICE_TYPE_ACR));
+
+        // Test other service types (should return CONDITION_INVALID).
+        assertEquals(SscConstant.CONDITION_INVALID,
+                SscUtils.getConditionFromSsType(SscConfig.SERVICE_TYPE_CW));
+        assertEquals(SscConstant.CONDITION_INVALID,
+                SscUtils.getConditionFromSsType(SscConfig.SERVICE_TYPE_OIP));
+        assertEquals(SscConstant.CONDITION_INVALID,
+                SscUtils.getConditionFromSsType(SscConfig.SERVICE_TYPE_OIR));
+        assertEquals(SscConstant.CONDITION_INVALID,
+                SscUtils.getConditionFromSsType(SscConfig.SERVICE_TYPE_TIP));
+        assertEquals(SscConstant.CONDITION_INVALID,
+                SscUtils.getConditionFromSsType(SscConfig.SERVICE_TYPE_TIR));
     }
 
     private class FakeSscUtils extends SscUtils {

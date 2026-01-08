@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
+#include "ServiceTrace.h"
 
 #include "ISipHeader.h"
+#include "SipDState.h"
 #include "SipDialogSubscribeUsage.h"
+#include "SipMessageInfo.h"
+#include "SipMethod.h"
 #include "SipPrivate.h"
 #include "SipStack.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 // clang-format off
 PRIVATE GLOBAL const IMS_SINT32
@@ -229,7 +233,7 @@ PUBLIC VIRTUAL AString SipDialogSubscribeUsage::ToString() const
 PUBLIC VIRTUAL IMS_SINT32 SipDialogSubscribeUsage::UpdateUsageDetails(
         IN const SipMessageInfo& objMsgInfo)
 {
-    ::SipMessage* pSipMsg = objMsgInfo.GetMessage();
+    const ::SipMessage* pSipMsg = objMsgInfo.GetMessage();
     const SipMethod& objMethod = objMsgInfo.GetMethod();
 
     // Update Subscription-State header

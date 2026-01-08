@@ -30,7 +30,7 @@ public:
             ImsVector<T>(other)
     {
     }
-    inline virtual ~ImsStack() {}
+    ~ImsStack() override = default;
 
 public:
     inline ImsStack<T>& operator=(IN const ImsStack<T>& other)

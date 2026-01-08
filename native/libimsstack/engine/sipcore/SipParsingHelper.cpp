@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "SipError.h"
 #include "SipHeader.h"
 #include "SipHeaderName.h"
 #include "SipMessage.h"
+#include "SipMessageBodyPart.h"
 #include "SipParameter.h"
 #include "SipParsingHelper.h"
 #include "SipPrivate.h"

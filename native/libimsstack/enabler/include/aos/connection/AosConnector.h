@@ -37,7 +37,8 @@ class AosConnector :
 {
 public:
     explicit AosConnector(IN IAosAppContext* piAppContext);
-    virtual ~AosConnector();
+    inline explicit AosConnector(){};
+    ~AosConnector() override;
 
     virtual IMS_BOOL Start();
     virtual void Stop();
@@ -45,8 +46,9 @@ public:
 
     virtual void SetListener(IN IAosConnectorListener* piListener);
     virtual IMS_BOOL IsReady() const;
-    virtual void SetPdnDeactivationRequired(IN IMS_BOOL bIsRequired);
-    virtual IMS_BOOL IsPdnDeactivationRequired();
+    virtual void ResetReadyRecovery();
+    virtual IMS_BOOL IsCrossSimConnected() const;
+    virtual IMS_BOOL ProcessPendingPcscfChange();
 
     // GetState
     enum
@@ -97,6 +99,10 @@ public:
         LISTENER_TYPE_UPDATED
     };
 
+    static const IMS_SINT32 PCO_INVALID_VALUE = -1;
+    static const IMS_UINT32 IPV6_ADDRESS_WAIT_TIME_SEC = 4;
+    static const IMS_UINT32 WAITING_PCO_VALUE_TIMEOUT_MILLIS = 2000;
+
 protected:
     void ClearPending();
 
@@ -110,16 +116,16 @@ protected:
     IMS_BOOL IsPcscfChangeAvailable() const;
     IMS_BOOL IsPcscfConfigured() const;
     IMS_BOOL IsPcoWaitingRequired() const;
-    IMS_BOOL IsCarrierSignalPcoEnabled() const;
     IMS_BOOL IsPending() const;
     IMS_BOOL IsTerminating() const;
     IMS_BOOL IsTimerRunning(IN IMS_UINT32 nType) const;
     IMS_BOOL IsDataConnectedWithoutPending() const;
+    IMS_BOOL IsIpv6PcscfUnavailable() const;
 
     void CheckReadyRecoveryAndSetTimer();
     IMS_BOOL CheckIpChangedForEmergency();
     IMS_BOOL CheckIpaAndProcessReadyRecovery();
-    IMS_UINT32 GetActualRecoveryWaitingTime();
+    void HandleInvalidPcscfAddress();
     IMS_BOOL SelectIpVersion();
 
     void Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nReason = REASON_NONE);
@@ -150,6 +156,7 @@ protected:
 
     // AosServicePhoneListener
     void ServicePhone_PcoValueChanged(IN IMS_SINT32 nValue) override;
+    void ServicePhone_CrossSimStatusChanged(IN IMS_BOOL bCrossSimConnected) override;
 
     // ITimerListener
     void Timer_TimerExpired(IN ITimer* piTimer) override;
@@ -176,23 +183,14 @@ protected:
 
     IMS_BOOL m_bPcscfConfigured;
     IMS_BOOL m_bDataConnected;
+    IMS_BOOL m_bCrossSimConnected;
     IMS_BOOL m_bEmergencyType;
     IMS_BOOL m_bIsTerminating;
     IMS_BOOL m_bIsPcscfChangeIgnored;
-    IMS_BOOL m_bIsPdnDeactivationRequired;
 
     AString strTag;
 
-    static const IMS_SINT32 PCO_INVALID_VALUE = -1;
-    static const IMS_UINT32 READY_RECOVERY_DEFAULT_COUNT = 3;
-    static const IMS_UINT32 READY_RECOVERY_DEFAULT_TIME = 20;         // 20 Sec.
-    static const IMS_UINT32 READY_RECOVERY_BASE_TIME = 20;            // 20 Sec.
-    static const IMS_UINT32 READY_RECOVERY_MAX_TIME = 1800;           // 1800 Sec.
-    static const IMS_UINT32 IPV6_ADDRESS_WAIT_TIME_SEC = 4;           // 4 Sec.
-    static const IMS_UINT32 WAITING_PCO_VALUE_TIMEOUT_MILLIS = 2000;  // 2 Sec.
-
 protected:
     friend class AosApplication;
-    friend class AosConnectorTest;
 };
 #endif  // AOS_CONNECTOR_H_

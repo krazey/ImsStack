@@ -21,37 +21,32 @@ import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
-import android.preference.PreferenceActivity;
-import android.telephony.SubscriptionManager;
-import android.telephony.ims.ImsException;
-import android.telephony.ims.ImsManager;
-import android.telephony.ims.ImsMmTelManager;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Toast;
 
 import com.android.imsstack.R;
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.ImsPrivateProperties;
+import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.SystemServiceProxy.ImsManagerProxy;
+import com.android.imsstack.base.SystemServiceProxy.ImsMmTelManagerProxy;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.test.DebugScreen;
-import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsPrivateProperties;
-import com.android.imsstack.util.LogUtils;
-import com.android.imsstack.util.MSimUtils;
-import com.android.imsstack.util.SystemUtils;
+import com.android.imsstack.util.ImsUtils;
+import com.android.imsstack.util.Log;
 
-@SuppressWarnings("deprecation")
-public class TestConfigMenu extends PreferenceActivity {
+public class TestConfigMenu extends AppCompatActivity {
     // Main tree
     protected static final String KEY_TEST_IMS_DISABLED = "test_ims_disabled";
     protected static final String KEY_TEST_DEBUG_ENABLED = "test_debug_enabled";
     protected static final String KEY_TEST_TESTMODE_ENABLED = "test_testmode_enabled";
     protected static final String KEY_TEST_WIFI_TEST_ENABLED = "test_wifi_test_enabled";
+    protected static final String KEY_TEST_SIMULATED_IMS_HAL = "test_simulated_ims_hal";
     protected static final String KEY_TEST_CROSS_SIM_ENABLED = "test_cross_sim_enabled";
-    protected static final String KEY_TEST_CARRIER_SIGNAL_PCO_ENABLED =
-            "test_carrier_signal_pco_enabled";
     protected static final String KEY_TEST_PCSCF_ADDRESS = "test_pcscf_address";
     protected static final String KEY_TEST_IMS_DEREGISTER = "test_ims_deregister";
     protected static final String KEY_TEST_LOG_OPTIONS = "test_log_options";
@@ -75,8 +70,8 @@ public class TestConfigMenu extends PreferenceActivity {
     private CheckBoxPreference mDebugEnabled;
     private CheckBoxPreference mTestModeEnabled;
     private CheckBoxPreference mWifiTestEnabled;
+    private CheckBoxPreference mSimulatedImsHal;
     private CheckBoxPreference mCrossSimEnabled;
-    private CheckBoxPreference mCarrierSignalPcoEnabled;
     private EditTextPreference mHomeDomainName;
     private EditTextPreference mImpi;
     private EditTextPreference mImpu;
@@ -110,11 +105,6 @@ public class TestConfigMenu extends PreferenceActivity {
         addPreferencesFromResource(R.xml.test_config_menu);
 
         initPreferences();
-    }
-
-    @Override
-    protected boolean isValidFragment(String fragmentName) {
-        return fragmentName != null;
     }
 
     private void initPreferences() {
@@ -154,33 +144,28 @@ public class TestConfigMenu extends PreferenceActivity {
             mWifiTestEnabled.setOnPreferenceChangeListener(new CheckBoxItemChangeListener());
         }
 
+        mSimulatedImsHal =
+                (CheckBoxPreference) findPreference(KEY_TEST_SIMULATED_IMS_HAL);
+
+        if (mSimulatedImsHal != null) {
+            boolean simulatedImsHalEnabled = ImsPrivateProperties.Persistent.getBoolean(
+                    ImsPrivateProperties.Persistent.KEY_TEST_SIMULATED_IMS_HAL, false, mSlotId);
+
+            mSimulatedImsHal.setChecked(simulatedImsHalEnabled);
+            mSimulatedImsHal.setOnPreferenceChangeListener(new CheckBoxItemChangeListener());
+        }
+
         mCrossSimEnabled = (CheckBoxPreference) findPreference(KEY_TEST_CROSS_SIM_ENABLED);
 
         if (mCrossSimEnabled != null) {
             boolean crossSimEnabled = false;
-            ImsMmTelManager imsMmTelMgr = getImsMmTelManager();
-            if (imsMmTelMgr != null) {
-                try {
-                    crossSimEnabled = imsMmTelMgr.isCrossSimCallingEnabled();
-                } catch (ImsException exception) {
-                    // do noting
-                }
+            ImsMmTelManagerProxy imtmp = getImsMmTelManagerProxy();
+            if (imtmp != null) {
+                crossSimEnabled = imtmp.isCrossSimCallingEnabled();
             }
 
             mCrossSimEnabled.setChecked(crossSimEnabled);
             mCrossSimEnabled.setOnPreferenceChangeListener(new CheckBoxItemChangeListener());
-        }
-
-        mCarrierSignalPcoEnabled =
-                (CheckBoxPreference) findPreference(KEY_TEST_CARRIER_SIGNAL_PCO_ENABLED);
-
-        if (mCarrierSignalPcoEnabled != null) {
-            boolean carrierSignalPcoEnabled = (ImsPrivateProperties.Persistent.getInt(
-                    ImsPrivateProperties.Persistent.KEY_CARRIER_SIGNAL_PCO_TEST,
-                    0, mSlotId) == 1);
-            mCarrierSignalPcoEnabled.setChecked(carrierSignalPcoEnabled);
-            mCarrierSignalPcoEnabled.setOnPreferenceChangeListener(
-                    new CheckBoxItemChangeListener());
         }
 
         mHomeDomainName = (EditTextPreference) findPreference(KEY_SUBSCRIBER_HOME_DOMAIN_NAME);
@@ -268,7 +253,7 @@ public class TestConfigMenu extends PreferenceActivity {
         if (mLogOptions != null) {
             String logOptions = ImsPrivateProperties.Persistent.get(
                     ImsPrivateProperties.Persistent.KEY_TEST_LOG_OPTIONS,
-                    LogUtils.DEFAULT_LOG_OPTIONS, mSlotId);
+                    Log.DEFAULT_LOG_OPTIONS, mSlotId);
             mLogOptions.setText(logOptions);
             mLogOptions.setSummary(logOptions);
             mLogOptions.setOnPreferenceChangeListener(new EditTextItemChangeListener());
@@ -296,15 +281,10 @@ public class TestConfigMenu extends PreferenceActivity {
         }
     }
 
-    private ImsMmTelManager getImsMmTelManager() {
+    private ImsMmTelManagerProxy getImsMmTelManagerProxy() {
         int subId = MSimUtils.getSubId(mSlotId);
-
-        if (!SubscriptionManager.isUsableSubscriptionId(subId)) {
-            return null;
-        }
-
-        ImsManager imsMgr = AppContext.getInstance().getSystemService(ImsManager.class);
-        return (imsMgr == null) ? null : imsMgr.getImsMmTelManager(subId);
+        ImsManagerProxy imp = AppContext.getInstance().getSystemServiceProxy(ImsManagerProxy.class);
+        return imp.getImsMmTelManagerProxy(subId);
     }
 
     private String getImsDeregisterSummary(String value) {
@@ -335,19 +315,14 @@ public class TestConfigMenu extends PreferenceActivity {
                     key = ImsPrivateProperties.Persistent.KEY_WIFI_TEST;
                     isValueTypeInt = true;
                     break;
-                case KEY_TEST_CROSS_SIM_ENABLED:
-                    ImsMmTelManager imsMmTelMgr = getImsMmTelManager();
-                    if (imsMmTelMgr != null) {
-                        try {
-                            imsMmTelMgr.setCrossSimCallingEnabled(value);
-                        } catch (ImsException exception) {
-                            // do noting
-                        }
-                    }
+                case KEY_TEST_SIMULATED_IMS_HAL:
+                    key = ImsPrivateProperties.Persistent.KEY_TEST_SIMULATED_IMS_HAL;
                     break;
-                case KEY_TEST_CARRIER_SIGNAL_PCO_ENABLED:
-                    key = ImsPrivateProperties.Persistent.KEY_CARRIER_SIGNAL_PCO_TEST;
-                    isValueTypeInt = true;
+                case KEY_TEST_CROSS_SIM_ENABLED:
+                    ImsMmTelManagerProxy imtmp = getImsMmTelManagerProxy();
+                    if (imtmp != null) {
+                        imtmp.setCrossSimCallingEnabled(value);
+                    }
                     break;
                 case KEY_USER_AGENT_USE_PREDEFINED_UA_STRING:
                     key = ImsPrivateProperties.Persistent.KEY_USE_PREDEFINED_UA_STRING;
@@ -401,7 +376,7 @@ public class TestConfigMenu extends PreferenceActivity {
                         value = "0x" + value;
                     }
 
-                    int logOptions = SystemUtils.hexStringToInt(value);
+                    int logOptions = ImsUtils.hexStringToInt(value);
 
                     if (logOptions >= 0 && value.length() <= 10) {
                         key = ImsPrivateProperties.Persistent.KEY_TEST_LOG_OPTIONS;

@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
+#include "ImsList.h"
+#include "MtcDef.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
+#include "call/MtcCallStringUtils.h"
+#include "call/UpdatingInfo.h"
 #include "call/block/ProcessingCallBlockRule.h"
+#include "emergency/IMtcEmergencyServiceManager.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -32,19 +37,21 @@ PUBLIC VIRTUAL ProcessingCallBlockRule::~ProcessingCallBlockRule() {}
 PUBLIC VIRTUAL ProcessingCallBlockRule::Result ProcessingCallBlockRule::Check(
         IN IMtcBlockRuleCheckListener& /* objListener */)
 {
+    if (m_objContext.GetCallInfo().eEmergencyType != EmergencyType::NONE)
+    {
+        return Result(Result::Status::UNBLOCKED);
+    }
+
     ImsList<IMtcCall*> lstCalls = m_objContext.GetOtherCalls();
 
     PeerType ePeerType = m_objContext.GetCallInfo().ePeerType;
-    if (IsEmergencyCallExists(lstCalls))
+    if (m_objContext.GetEmergencyServiceManager().GetState() ==
+                    IEmergencyServiceController::State::OPENING ||
+            IsEmergencyCallExists(lstCalls))
     {
-        if (ePeerType == PeerType::MO)
-        {
-            return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE));
-        }
-        else
-        {
-            return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_REJECT_ONGOING_E911_CALL));
-        }
+        return Result(Result::Status::BLOCKED,
+                ePeerType == PeerType::MO ? CallReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE)
+                                          : CallReasonInfo(CODE_REJECT_ONGOING_E911_CALL));
     }
 
     if (IsCallSetupProcessing(lstCalls))
@@ -52,7 +59,7 @@ PUBLIC VIRTUAL ProcessingCallBlockRule::Result ProcessingCallBlockRule::Check(
         return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_REJECT_ONGOING_CALL_SETUP));
     }
 
-    if (IsCallUpdating(lstCalls) && ePeerType == PeerType::MT)
+    if (IsCallConverting(lstCalls) && ePeerType == PeerType::MT)
     {
         return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_REJECT_ONGOING_CALL_UPGRADE));
     }
@@ -69,7 +76,8 @@ IMS_BOOL ProcessingCallBlockRule::IsCallSetupProcessing(IN const ImsList<IMtcCal
         if (eState == IMtcCall::State::IDLE || eState == IMtcCall::State::OUTGOING ||
                 eState == IMtcCall::State::INCOMING || eState == IMtcCall::State::ALERTING)
         {
-            IMS_TRACE_I("IsCallSetupProcessing : Call in [%d] state exists", eState, 0, 0);
+            IMS_TRACE_I("IsCallSetupProcessing : Call in [%s] state exists",
+                    MtcCallStringUtils::ConvertCallState(eState), 0, 0);
             return IMS_TRUE;
         }
     }
@@ -77,15 +85,21 @@ IMS_BOOL ProcessingCallBlockRule::IsCallSetupProcessing(IN const ImsList<IMtcCal
 }
 
 PRIVATE
-IMS_BOOL ProcessingCallBlockRule::IsCallUpdating(IN const ImsList<IMtcCall*>& lstCalls)
+IMS_BOOL ProcessingCallBlockRule::IsCallConverting(IN const ImsList<IMtcCall*>& lstCalls)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
     {
         IMtcCall::State eState = lstCalls.GetAt(nIndex)->GetState();
         if (eState == IMtcCall::State::UPDATING)
         {
-            IMS_TRACE_I("IsCallUpdating : Updating call exists", eState, 0, 0);
-            return IMS_TRUE;
+            const UpdateType eType =
+                    lstCalls.GetAt(nIndex)->GetCallContext().GetUpdatingInfo().GetRequestingType();
+            IMS_TRACE_I("IsCallConverting : Converting call exists eType[%s]",
+                    MtcCallStringUtils::ConvertUpdateType(eType), 0, 0);
+            if (eType == UpdateType::SESSION)
+            {
+                return IMS_TRUE;
+            }
         }
     }
     return IMS_FALSE;
@@ -96,7 +110,7 @@ IMS_BOOL ProcessingCallBlockRule::IsEmergencyCallExists(IN const ImsList<IMtcCal
 {
     for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
     {
-        if (lstCalls.GetAt(nIndex)->GetCallContext().GetCallInfo().bEmergency)
+        if (lstCalls.GetAt(nIndex)->GetCallContext().GetCallInfo().IsEmergency())
         {
             IMS_TRACE_I("IsEmergencyCallExists : Emergency call exists", 0, 0, 0);
             return IMS_TRUE;

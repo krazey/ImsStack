@@ -25,67 +25,42 @@
 using ::testing::_;
 using ::testing::Return;
 
-enum
-{
-    MSG_READY = AOSMSG_SERVICE_INTERNAL,
-    MSG_REQUEST,
-    MSG_DONE,
-    MSG_DESTROY,
-    MSG_TERMINATED
-};
-
-// Dns Query Event
-enum
-{
-    DNS_QUERY_NONE = 0x0000,
-    DNS_QUERY_EXEC = 0x0001,
-    DNS_QUERY_TERMINATE = 0x8000
-};
+#define DECLARE_USING(Base)    \
+    using Base::ResetEvent;    \
+    using Base::SetEvent;      \
+    using Base::HasEvent;      \
+    using Base::Start;         \
+    using Base::Terminate;     \
+    using Base::SetThread;     \
+    using Base::SetConnection; \
+    using Base::SetSignaled;   \
+    using Base::RunImp;        \
+    using Base::OnMessage;
 
 class TestAosDnsQuery : public AosDnsQuery
 {
 public:
-    TestAosDnsQuery(IN IMS_BOOL bIsTest) :
+    DECLARE_USING(AosDnsQuery)
+
+    inline explicit TestAosDnsQuery(IN IMS_BOOL bIsTest) :
             AosDnsQuery(bIsTest)
     {
     }
-
-    FRIEND_TEST(AosDnsQueryTest, Request_success);
-    FRIEND_TEST(AosDnsQueryTest, Destroy_success);
-    FRIEND_TEST(AosDnsQueryTest, DnsQueryPrivate_Done);
-    FRIEND_TEST(AosDnsQueryTest, DnsQueryPrivate_Terminated);
-    FRIEND_TEST(AosDnsQueryTest, OnMessage_ListenerIsNull);
-    FRIEND_TEST(AosDnsQueryTest, OnMessage_MsgReady);
-    FRIEND_TEST(AosDnsQueryTest, OnMessage_MsgRequest);
-    FRIEND_TEST(AosDnsQueryTest, OnMessage_MsgRequestDuplicated);
-    FRIEND_TEST(AosDnsQueryTest, OnMessage_MsgDone);
-    FRIEND_TEST(AosDnsQueryTest, OnMessage_MsgDestroy);
-    FRIEND_TEST(AosDnsQueryTest, OnMessage_MsgTerminated);
-    FRIEND_TEST(AosDnsQueryTest, OnMessage_MsgInvalid);
-    FRIEND_TEST(AosDnsQueryTest, AosDnsQueryPrivate_SetEvent);
-    FRIEND_TEST(AosDnsQueryTest, AosDnsQueryPrivate_ResetEvent);
-    FRIEND_TEST(AosDnsQueryTest, AosDnsQueryPrivate_Start_ThreadIsNull);
-    FRIEND_TEST(AosDnsQueryTest, AosDnsQueryPrivate_Terminate_ThreadIsNull);
-    FRIEND_TEST(AosDnsQueryTest, AosDnsQueryPrivate_RunImp_QueryFailed);
-    FRIEND_TEST(AosDnsQueryTest, AosDnsQueryPrivate_RunImp_QuerySuccess);
-    FRIEND_TEST(AosDnsQueryTest, AosDnsQueryPrivate_RunImp_QuerySuccess_Signaled);
-    FRIEND_TEST(AosDnsQueryTest, AosDnsQueryPrivate_RunImp_QueryTerminate);
 };
 
 class AosDnsQueryTest : public ::testing::Test
 {
 public:
     TestAosDnsQuery* m_pAosDnsQuery;
-    MockINetworkConnection m_objMockINetworkConnection;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         m_pAosDnsQuery = new TestAosDnsQuery(IMS_TRUE);
         ASSERT_TRUE(m_pAosDnsQuery != nullptr);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosDnsQuery)
         {
@@ -94,219 +69,377 @@ protected:
     }
 };
 
-TEST_F(AosDnsQueryTest, Request_success)
+TEST_F(AosDnsQueryTest, RequestReturnTrue)
 {
+    // GIVEN
     AString strDomainName = AString("testDomainName");
-    EXPECT_TRUE(m_pAosDnsQuery->Request(strDomainName, IMS_NULL));
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosDnsQuery->Request(strDomainName, IMS_NULL);
+
+    // THEN
+    EXPECT_TRUE(bResult);
 }
 
-TEST_F(AosDnsQueryTest, Destroy_success)
+TEST_F(AosDnsQueryTest, DestroyReturnTrue)
 {
-    EXPECT_TRUE(m_pAosDnsQuery->Destroy());
+    // GIVEN
+    // WHEN
+    IMS_BOOL bResult = m_pAosDnsQuery->Destroy();
+
+    // THEN
+    EXPECT_TRUE(bResult);
 }
 
-TEST_F(AosDnsQueryTest, DnsQueryPrivate_Ready)
+TEST_F(AosDnsQueryTest, DnsQueryPrivateReadyReturnTrue)
 {
-    EXPECT_TRUE(m_pAosDnsQuery->DnsQueryPrivate_Ready());
+    // GIVEN
+    // WHEN
+    IMS_BOOL bResult = m_pAosDnsQuery->DnsQueryPrivate_Ready();
+
+    // THEN
+    EXPECT_TRUE(bResult);
 }
 
-TEST_F(AosDnsQueryTest, DnsQueryPrivate_Done)
+TEST_F(AosDnsQueryTest, DnsQueryPrivateDoneWithParamTrueReturnTrue)
 {
+    // GIVEN
     ImsList<IpAddress> Ips;
-    EXPECT_TRUE(m_pAosDnsQuery->DnsQueryPrivate_Done(IMS_TRUE, Ips));
-    EXPECT_TRUE(m_pAosDnsQuery->DnsQueryPrivate_Done(IMS_FALSE, Ips));
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosDnsQuery->DnsQueryPrivate_Done(IMS_TRUE, Ips);
+
+    // THEN
+    EXPECT_TRUE(bResult);
 }
 
-TEST_F(AosDnsQueryTest, DnsQueryPrivate_Terminated)
+TEST_F(AosDnsQueryTest, DnsQueryPrivateDoneWithParamFalseReturnTrue)
 {
-    EXPECT_TRUE(m_pAosDnsQuery->DnsQueryPrivate_Terminated());
+    // GIVEN
+    ImsList<IpAddress> Ips;
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosDnsQuery->DnsQueryPrivate_Done(IMS_FALSE, Ips);
+
+    // THEN
+    EXPECT_TRUE(bResult);
 }
 
-TEST_F(AosDnsQueryTest, OnMessage_ListenerIsNull)
+TEST_F(AosDnsQueryTest, DnsQueryPrivateTerminatedReturnTrue)
 {
+    // GIVEN
+    // WHEN
+    IMS_BOOL bResult = m_pAosDnsQuery->DnsQueryPrivate_Terminated();
+
+    // THEN
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosDnsQueryTest, OnMessageWithoutListenerReturnFalse)
+{
+    // GIVEN
     m_pAosDnsQuery->SetListener(IMS_NULL);
 
-    IMSMSG objMsg(MSG_READY, 0, 0);
-    EXPECT_FALSE(m_pAosDnsQuery->OnMessage(objMsg));
+    IMSMSG objMsg(TestAosDnsQuery::MSG_READY, 0, 0);
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosDnsQuery->OnMessage(objMsg);
+
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosDnsQueryTest, OnMessage_MsgReady)
+TEST_F(AosDnsQueryTest, OnMessageWithMsgReadyReturnTrue)
 {
+    // GIVEN
     MockIAosDnsQueryListener objMockIAosDnsQueryListener;
     EXPECT_CALL(objMockIAosDnsQueryListener, DnsQuery_Ready()).Times(1);
     EXPECT_CALL(objMockIAosDnsQueryListener, DnsQuery_Done(_, _)).Times(0);
 
-    m_pAosDnsQuery->SetListener(static_cast<IAosDnsQueryListener*>(&objMockIAosDnsQueryListener));
+    m_pAosDnsQuery->SetListener(&objMockIAosDnsQueryListener);
 
-    IMSMSG objMsg(MSG_READY, 0, 0);
-    EXPECT_TRUE(m_pAosDnsQuery->OnMessage(objMsg));
+    IMSMSG objMsg(TestAosDnsQuery::MSG_READY, 0, 0);
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosDnsQuery->OnMessage(objMsg);
+
+    // THEN
+    EXPECT_TRUE(bResult);
 }
 
-TEST_F(AosDnsQueryTest, OnMessage_MsgRequest)
+TEST_F(AosDnsQueryTest, OnMessageWithMsgRequestReturnTrue)
 {
+    // GIVEN
     MockIAosDnsQueryListener objMockIAosDnsQueryListener;
     EXPECT_CALL(objMockIAosDnsQueryListener, DnsQuery_Ready()).Times(0);
     EXPECT_CALL(objMockIAosDnsQueryListener, DnsQuery_Done(_, _)).Times(0);
 
-    m_pAosDnsQuery->SetListener(static_cast<IAosDnsQueryListener*>(&objMockIAosDnsQueryListener));
+    m_pAosDnsQuery->SetListener(&objMockIAosDnsQueryListener);
 
-    IMSMSG objMsg(MSG_REQUEST, 0, 0);
-    EXPECT_TRUE(m_pAosDnsQuery->OnMessage(objMsg));
+    IMSMSG objMsg(TestAosDnsQuery::MSG_REQUEST, 0, 0);
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosDnsQuery->OnMessage(objMsg);
+
+    // THEN
+    EXPECT_TRUE(bResult);
 }
 
-TEST_F(AosDnsQueryTest, OnMessage_MsgRequestDuplicated)
+TEST_F(AosDnsQueryTest, OnMessageWithDuplicatedMsgRequestReturnTrue)
 {
+    // GIVEN
     MockIAosDnsQueryListener objMockIAosDnsQueryListener;
     EXPECT_CALL(objMockIAosDnsQueryListener, DnsQuery_Ready()).Times(0);
     EXPECT_CALL(objMockIAosDnsQueryListener, DnsQuery_Done(_, _)).Times(0);
 
-    m_pAosDnsQuery->SetListener(static_cast<IAosDnsQueryListener*>(&objMockIAosDnsQueryListener));
+    m_pAosDnsQuery->SetListener(&objMockIAosDnsQueryListener);
 
     // DoDnsQuery() returns IMS_FALSE
-    EXPECT_TRUE(m_pAosDnsQuery->SetEvent(DNS_QUERY_EXEC));
-    EXPECT_TRUE(m_pAosDnsQuery->HasEvent(DNS_QUERY_EXEC));
+    EXPECT_TRUE(m_pAosDnsQuery->SetEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
+    EXPECT_TRUE(m_pAosDnsQuery->HasEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
 
-    IMSMSG objMsg(MSG_REQUEST, 0, 0);
-    EXPECT_TRUE(m_pAosDnsQuery->OnMessage(objMsg));
+    IMSMSG objMsg(TestAosDnsQuery::MSG_REQUEST, 0, 0);
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosDnsQuery->OnMessage(objMsg);
+
+    // THEN
+    EXPECT_TRUE(bResult);
 }
 
-TEST_F(AosDnsQueryTest, OnMessage_MsgDone)
+TEST_F(AosDnsQueryTest, OnMessageWithMsgDoneAndParamZeroReturnTrue)
 {
+    // GIVEN
     MockIAosDnsQueryListener objMockIAosDnsQueryListener;
     EXPECT_CALL(objMockIAosDnsQueryListener, DnsQuery_Ready()).Times(0);
-    EXPECT_CALL(objMockIAosDnsQueryListener, DnsQuery_Done(_, _)).Times(2);
+    EXPECT_CALL(objMockIAosDnsQueryListener, DnsQuery_Done(_, _)).Times(1);
 
-    m_pAosDnsQuery->SetListener(static_cast<IAosDnsQueryListener*>(&objMockIAosDnsQueryListener));
+    m_pAosDnsQuery->SetListener(&objMockIAosDnsQueryListener);
 
-    IMSMSG objMsg1(MSG_DONE, 0, 0);
-    EXPECT_TRUE(m_pAosDnsQuery->OnMessage(objMsg1));
+    IMSMSG objMsg(TestAosDnsQuery::MSG_DONE, 0, 0);
 
-    IMSMSG objMsg2(MSG_DONE, 1, 0);
-    EXPECT_TRUE(m_pAosDnsQuery->OnMessage(objMsg2));
+    // WHen
+    IMS_BOOL bResult = m_pAosDnsQuery->OnMessage(objMsg);
+
+    // THEN
+    EXPECT_TRUE(bResult);
 }
 
-TEST_F(AosDnsQueryTest, OnMessage_MsgDestroy)
+TEST_F(AosDnsQueryTest, OnMessageWithMsgDoneAndParamNotZeroReturnTrue)
 {
+    // GIVEN
+    MockIAosDnsQueryListener objMockIAosDnsQueryListener;
+    EXPECT_CALL(objMockIAosDnsQueryListener, DnsQuery_Ready()).Times(0);
+    EXPECT_CALL(objMockIAosDnsQueryListener, DnsQuery_Done(_, _)).Times(1);
+
+    m_pAosDnsQuery->SetListener(&objMockIAosDnsQueryListener);
+
+    IMSMSG objMsg(TestAosDnsQuery::MSG_DONE, 1, 0);
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosDnsQuery->OnMessage(objMsg);
+
+    // THEN
+    EXPECT_TRUE(bResult);
+}
+
+TEST_F(AosDnsQueryTest, OnMessageWithMsgDestroyReturnTrue)
+{
+    // GIVEN
     MockIAosDnsQueryListener objMockIAosDnsQueryListener;
     EXPECT_CALL(objMockIAosDnsQueryListener, DnsQuery_Ready()).Times(0);
     EXPECT_CALL(objMockIAosDnsQueryListener, DnsQuery_Done(_, _)).Times(0);
 
-    m_pAosDnsQuery->SetListener(static_cast<IAosDnsQueryListener*>(&objMockIAosDnsQueryListener));
+    m_pAosDnsQuery->SetListener(&objMockIAosDnsQueryListener);
 
-    IMSMSG objMsg(MSG_DESTROY, 0, 0);
-    EXPECT_TRUE(m_pAosDnsQuery->OnMessage(objMsg));
+    IMSMSG objMsg(TestAosDnsQuery::MSG_DESTROY, 0, 0);
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosDnsQuery->OnMessage(objMsg);
+
+    // THEN
+    EXPECT_TRUE(bResult);
 }
 
-TEST_F(AosDnsQueryTest, OnMessage_MsgTerminated)
+TEST_F(AosDnsQueryTest, OnMessageWithMsgTerminatedReturnTrue)
 {
+    // GIVEN
     MockIAosDnsQueryListener objMockIAosDnsQueryListener;
     EXPECT_CALL(objMockIAosDnsQueryListener, DnsQuery_Ready()).Times(0);
     EXPECT_CALL(objMockIAosDnsQueryListener, DnsQuery_Done(_, _)).Times(0);
 
-    m_pAosDnsQuery->SetListener(static_cast<IAosDnsQueryListener*>(&objMockIAosDnsQueryListener));
+    m_pAosDnsQuery->SetListener(&objMockIAosDnsQueryListener);
 
-    IMSMSG objMsg(MSG_TERMINATED, 0, 0);
-    EXPECT_TRUE(m_pAosDnsQuery->OnMessage(objMsg));
+    IMSMSG objMsg(TestAosDnsQuery::MSG_TERMINATED, 0, 0);
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosDnsQuery->OnMessage(objMsg);
+
+    // THEN
+    EXPECT_TRUE(bResult);
 }
 
-TEST_F(AosDnsQueryTest, OnMessage_MsgInvalid)
+TEST_F(AosDnsQueryTest, OnMessageWithInvalidMsgReturnFalse)
 {
+    // GIVEN
     MockIAosDnsQueryListener objMockIAosDnsQueryListener;
     EXPECT_CALL(objMockIAosDnsQueryListener, DnsQuery_Ready()).Times(0);
     EXPECT_CALL(objMockIAosDnsQueryListener, DnsQuery_Done(_, _)).Times(0);
 
-    m_pAosDnsQuery->SetListener(static_cast<IAosDnsQueryListener*>(&objMockIAosDnsQueryListener));
+    m_pAosDnsQuery->SetListener(&objMockIAosDnsQueryListener);
 
-    IMSMSG objMsg(MSG_TERMINATED + 999, 0, 0);
-    EXPECT_FALSE(m_pAosDnsQuery->OnMessage(objMsg));
+    IMSMSG objMsg(TestAosDnsQuery::MSG_TERMINATED + 999, 0, 0);
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosDnsQuery->OnMessage(objMsg);
+
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosDnsQueryTest, AosDnsQueryPrivate_SetEvent)
+TEST_F(AosDnsQueryTest, SucceedSetEventToDnsQueryPrivate)
 {
-    EXPECT_TRUE(m_pAosDnsQuery->SetEvent(DNS_QUERY_NONE));
-    EXPECT_FALSE(m_pAosDnsQuery->HasEvent(DNS_QUERY_EXEC));
+    // GIVEN
+    EXPECT_TRUE(m_pAosDnsQuery->SetEvent(TestAosDnsQuery::DNS_QUERY_NONE));
+    EXPECT_FALSE(m_pAosDnsQuery->HasEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
 
-    EXPECT_TRUE(m_pAosDnsQuery->SetEvent(DNS_QUERY_EXEC));
-    EXPECT_TRUE(m_pAosDnsQuery->HasEvent(DNS_QUERY_EXEC));
+    // WHEN
+    EXPECT_TRUE(m_pAosDnsQuery->SetEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
 
-    // Duplicated event
-    EXPECT_FALSE(m_pAosDnsQuery->SetEvent(DNS_QUERY_EXEC));
-    EXPECT_TRUE(m_pAosDnsQuery->HasEvent(DNS_QUERY_EXEC));
+    // THEN
+    EXPECT_TRUE(m_pAosDnsQuery->HasEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
 }
 
-TEST_F(AosDnsQueryTest, AosDnsQueryPrivate_ResetEvent)
+TEST_F(AosDnsQueryTest, FailSetEventToDnsQueryPrivateWhenDuplicate)
 {
-    EXPECT_TRUE(m_pAosDnsQuery->SetEvent(DNS_QUERY_EXEC));
-    EXPECT_TRUE(m_pAosDnsQuery->HasEvent(DNS_QUERY_EXEC));
+    // GIVEN
+    EXPECT_TRUE(m_pAosDnsQuery->SetEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
+    EXPECT_TRUE(m_pAosDnsQuery->HasEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
 
-    EXPECT_TRUE(m_pAosDnsQuery->ResetEvent(DNS_QUERY_EXEC));
-    EXPECT_FALSE(m_pAosDnsQuery->HasEvent(DNS_QUERY_EXEC));
+    // WHEN
+    IMS_BOOL bResult = m_pAosDnsQuery->SetEvent(TestAosDnsQuery::DNS_QUERY_EXEC);
 
-    // Duplicated event
-    EXPECT_FALSE(m_pAosDnsQuery->ResetEvent(DNS_QUERY_EXEC));
-    EXPECT_FALSE(m_pAosDnsQuery->HasEvent(DNS_QUERY_EXEC));
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosDnsQueryTest, AosDnsQueryPrivate_Start_ThreadIsNull)
+TEST_F(AosDnsQueryTest, SucceedResetEventToDnsQueryPrivate)
 {
+    // GIVEN
+    EXPECT_TRUE(m_pAosDnsQuery->SetEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
+    EXPECT_TRUE(m_pAosDnsQuery->HasEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
+
+    // WHEN
+    EXPECT_TRUE(m_pAosDnsQuery->ResetEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
+
+    // THEN
+    EXPECT_FALSE(m_pAosDnsQuery->HasEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
+}
+
+TEST_F(AosDnsQueryTest, FailResetEventToDnsQueryPrivateWhenDuplicate)
+{
+    // GIVEN
+    EXPECT_TRUE(m_pAosDnsQuery->SetEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
+    EXPECT_TRUE(m_pAosDnsQuery->HasEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
+
+    EXPECT_TRUE(m_pAosDnsQuery->ResetEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
+    EXPECT_FALSE(m_pAosDnsQuery->HasEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosDnsQuery->ResetEvent(TestAosDnsQuery::DNS_QUERY_EXEC);
+
+    // THEN
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AosDnsQueryTest, StartDnsQueryPrivateReturnFalseWhenNullThread)
+{
+    // GIVEN
     m_pAosDnsQuery->SetThread(IMS_NULL);
-    EXPECT_FALSE(m_pAosDnsQuery->Start());
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosDnsQuery->Start();
+
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosDnsQueryTest, AosDnsQueryPrivate_Terminate_ThreadIsNull)
+TEST_F(AosDnsQueryTest, TerminateDnsQueryPrivateReturnFalseWhenNullThread)
 {
+    // GIVEN
     m_pAosDnsQuery->SetThread(IMS_NULL);
-    EXPECT_FALSE(m_pAosDnsQuery->Terminate());
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosDnsQuery->Terminate();
+
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosDnsQueryTest, AosDnsQueryPrivate_RunImp_QueryFailed)
+TEST_F(AosDnsQueryTest, RunDnsQueryPrivateThenResetEventWhenQueryFail)
 {
-    EXPECT_CALL(m_objMockINetworkConnection, GetHostByName(_, _, _)).Times(1).WillOnce(Return(-1));
+    // GIVEN
+    MockINetworkConnection objMockINetworkConnection;
+    EXPECT_CALL(objMockINetworkConnection, GetHostByName(_, _, _)).Times(1).WillOnce(Return(-1));
 
-    m_pAosDnsQuery->SetConnection(&m_objMockINetworkConnection);
+    m_pAosDnsQuery->SetConnection(&objMockINetworkConnection);
 
-    EXPECT_TRUE(m_pAosDnsQuery->SetEvent(DNS_QUERY_EXEC));
-    EXPECT_TRUE(m_pAosDnsQuery->HasEvent(DNS_QUERY_EXEC));
+    EXPECT_TRUE(m_pAosDnsQuery->SetEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
+    EXPECT_TRUE(m_pAosDnsQuery->HasEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
 
+    // WHEN
     m_pAosDnsQuery->RunImp();
 
-    EXPECT_FALSE(m_pAosDnsQuery->HasEvent(DNS_QUERY_EXEC));
+    // THEN
+    EXPECT_FALSE(m_pAosDnsQuery->HasEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
 }
 
-TEST_F(AosDnsQueryTest, AosDnsQueryPrivate_RunImp_QuerySuccess)
+TEST_F(AosDnsQueryTest, RunDnsQueryPrivateThenResetEventWhenQuerySuccess)
 {
-    EXPECT_CALL(m_objMockINetworkConnection, GetHostByName(_, _, _)).Times(1).WillOnce(Return(1));
+    // GIVEN
+    MockINetworkConnection objMockINetworkConnection;
+    EXPECT_CALL(objMockINetworkConnection, GetHostByName(_, _, _)).Times(1).WillOnce(Return(1));
 
-    m_pAosDnsQuery->SetConnection(&m_objMockINetworkConnection);
+    m_pAosDnsQuery->SetConnection(&objMockINetworkConnection);
 
-    EXPECT_TRUE(m_pAosDnsQuery->SetEvent(DNS_QUERY_EXEC));
-    EXPECT_TRUE(m_pAosDnsQuery->HasEvent(DNS_QUERY_EXEC));
+    EXPECT_TRUE(m_pAosDnsQuery->SetEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
+    EXPECT_TRUE(m_pAosDnsQuery->HasEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
 
+    // WHEN
     m_pAosDnsQuery->RunImp();
 
-    EXPECT_FALSE(m_pAosDnsQuery->HasEvent(DNS_QUERY_EXEC));
+    // THEN
+    EXPECT_FALSE(m_pAosDnsQuery->HasEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
 }
 
-TEST_F(AosDnsQueryTest, AosDnsQueryPrivate_RunImp_QuerySuccess_Signaled)
+TEST_F(AosDnsQueryTest, RunDnsQueryPrivateThenResetEventWhenQuerySuccessWithSignal)
 {
-    EXPECT_CALL(m_objMockINetworkConnection, GetHostByName(_, _, _)).Times(1).WillOnce(Return(1));
+    // GIVEN
+    MockINetworkConnection objMockINetworkConnection;
+    EXPECT_CALL(objMockINetworkConnection, GetHostByName(_, _, _)).Times(1).WillOnce(Return(1));
 
-    m_pAosDnsQuery->SetConnection(&m_objMockINetworkConnection);
+    m_pAosDnsQuery->SetConnection(&objMockINetworkConnection);
     m_pAosDnsQuery->SetSignaled(IMS_TRUE);
 
-    EXPECT_TRUE(m_pAosDnsQuery->SetEvent(DNS_QUERY_EXEC));
-    EXPECT_TRUE(m_pAosDnsQuery->HasEvent(DNS_QUERY_EXEC));
+    EXPECT_TRUE(m_pAosDnsQuery->SetEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
+    EXPECT_TRUE(m_pAosDnsQuery->HasEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
 
+    // WHEN
     m_pAosDnsQuery->RunImp();
 
-    EXPECT_FALSE(m_pAosDnsQuery->HasEvent(DNS_QUERY_EXEC));
+    // THEN
+    EXPECT_FALSE(m_pAosDnsQuery->HasEvent(TestAosDnsQuery::DNS_QUERY_EXEC));
 }
 
-TEST_F(AosDnsQueryTest, AosDnsQueryPrivate_RunImp_QueryTerminate)
+TEST_F(AosDnsQueryTest, RunDnsQueryPrivateThenResetTerminateEvent)
 {
-    EXPECT_TRUE(m_pAosDnsQuery->SetEvent(DNS_QUERY_TERMINATE));
-    EXPECT_TRUE(m_pAosDnsQuery->HasEvent(DNS_QUERY_TERMINATE));
+    // GIVEN
+    EXPECT_TRUE(m_pAosDnsQuery->SetEvent(TestAosDnsQuery::DNS_QUERY_TERMINATE));
+    EXPECT_TRUE(m_pAosDnsQuery->HasEvent(TestAosDnsQuery::DNS_QUERY_TERMINATE));
+
+    // WHEN
     m_pAosDnsQuery->RunImp();
 
-    EXPECT_FALSE(m_pAosDnsQuery->HasEvent(DNS_QUERY_TERMINATE));
+    // THEN
+    EXPECT_FALSE(m_pAosDnsQuery->HasEvent(TestAosDnsQuery::DNS_QUERY_TERMINATE));
 }

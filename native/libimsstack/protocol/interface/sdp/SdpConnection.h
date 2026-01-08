@@ -16,6 +16,8 @@
 #ifndef SDP_CONNECTION_H_
 #define SDP_CONNECTION_H_
 
+#include "AString.h"
+
 #include "SdpLine.h"
 
 class SdpConnection : public SdpLine
@@ -23,7 +25,7 @@ class SdpConnection : public SdpLine
 public:
     SdpConnection();
     SdpConnection(IN const SdpConnection& other);
-    virtual ~SdpConnection();
+    ~SdpConnection() override;
 
 public:
     SdpConnection& operator=(IN const SdpConnection& other);

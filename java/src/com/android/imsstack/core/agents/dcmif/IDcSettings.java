@@ -16,58 +16,64 @@
 
 package com.android.imsstack.core.agents.dcmif;
 
+import androidx.annotation.NonNull;
+
+import java.util.List;
+
 /**
  * This provides interface to check carrier configurations.
  */
 public interface IDcSettings extends IDc {
 
     /**
-     * Returns whether VoLTE service is allowed in roaming state
+     * Returns whether VoLTE service is allowed in roaming state.
      */
     boolean isRoamingAllowed();
 
     /**
-     * Returns whether VoPS value should be notified when the VoPS is not supported
+     * Returns whether to ignore the VoPS supported indication passed from network
+     * and always consider it supported.
      */
-    boolean isVopsRequired();
+    boolean isVopsIgnored();
 
     /**
-     * Returns whether IMS PDN request without MMTEL capability is required
+     * Returns whether IMS PDN request without MMTEL capability is required.
      */
-    boolean isImsPdnRequestWithoutMmtel();
+    boolean isImsPdnRequestWithoutMmtelRequired();
 
     /**
-     * Returns scenarios that IMS PDN needs to be enabled even if VOPS is not support
+     * Returns list of access network on which IMS is supported.
      */
-    int[] getImsPdnEnabledInNoVopsSupport();
+    @NonNull
+    List<Integer> getImsSupportedAccessNetworks();
 
     /**
-     * Returns list of RAT technologies on which IMS is supported
-     */
-    int[] getImsSupportedRats();
-
-    /**
-     * Returns a platform configuration for Cross SIM
+     * Returns a platform configuration for Cross SIM.
      */
     boolean isCrossSimEnabledByPlatform();
 
     /**
-     * Returns preferred IP version for connection
+     * Returns whether emergency callback mode is supported.
+     */
+    boolean isEmergencyCallbackModeSupported();
+
+    /**
+     * Returns preferred IP version for connection.
      */
     int getPreferredIpVersion();
 
     /**
-     * Returns preferred IP version for emergency connection
+     * Returns preferred IP version for emergency connection.
      */
     int getEmergencyPreferredIpVersion();
 
     /**
-     * Returns whether the casueCode should be handled as permanent failure
+     * Returns whether the casueCode should be handled as permanent failure.
      */
     boolean isPermanentFailure(EApnType apnType, int causeCode);
 
     /**
-     * Returns whether cdmaless feature tag is required
+     * Returns whether the causeCode requires a cross stack redial.
      */
-    boolean isCdmalessFeatureTagRequired();
+    boolean isCrossStackRedialCause(EApnType apnType, int causeCode);
 }

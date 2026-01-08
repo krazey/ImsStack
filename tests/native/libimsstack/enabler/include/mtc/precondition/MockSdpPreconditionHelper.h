@@ -29,17 +29,18 @@ class MockSdpPreconditionHelper : public SdpPreconditionHelper
 {
 public:
     MockSdpPreconditionHelper() {}
-    ~MockSdpPreconditionHelper() {}
+    ~MockSdpPreconditionHelper() override {}
     MOCK_METHOD(void, FormPreconditionSdp,
             (IN ISession * piSession, IN QosStatusTable* pStatusTable, IN IMS_BOOL bUseConf),
             (override));
     MOCK_METHOD(void, RemovePreconditionSdp, (IN ISession * piSession), (override));
     MOCK_METHOD(void, FormFailurePreconditionSdp, (IN ISession * piSession), (override));
     MOCK_METHOD(IMS_UINT32, GetMediaType, (IN const SdpMedia* pSdpMedia, IN IMS_SINT32 nMediaState),
-            (override));
-    MOCK_METHOD(IMS_BOOL, IsPreconditionIncludedInSdp, (IN ISession * piSession), (override));
+            (const, override));
+    MOCK_METHOD(IMS_BOOL, IsPreconditionIncludedInSdp,
+            (IN ISession * piSession, IN IMS_UINT32 eMediaType), (const, override));
     MOCK_METHOD(IMS_BOOL, IsLocalResourceReservedInSdp,
-            (IN ISession * piSession, IN IMS_SINT32 nServiceMethod), (override));
+            (IN ISession * piSession, IN IMS_SINT32 nServiceMethod), (override, const));
 };
 
 #endif

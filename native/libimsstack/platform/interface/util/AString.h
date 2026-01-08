@@ -17,8 +17,8 @@
 #define ANSI_STRING_H_
 
 #include <stdarg.h>
+
 #include "ImsList.h"
-#include "ImsTypeDef.h"
 #include "RcObject.h"
 
 class WCharPtr;
@@ -312,7 +312,7 @@ class WCharPtr : public RcObject
 public:
     explicit WCharPtr(IN const AString& str);
     WCharPtr(IN const WCharPtr& other);
-    virtual ~WCharPtr();
+    ~WCharPtr() override;
 
 public:
     WCharPtr& operator=(IN const WCharPtr& other);

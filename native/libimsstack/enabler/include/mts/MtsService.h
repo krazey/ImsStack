@@ -20,16 +20,18 @@
 #include "ICoreServiceListener.h"
 #include "IImsAosListener.h"
 #include "IMtsService.h"
-#include "ImsService.h"
 #include "IMtsTrafficListener.h"
+#include "ImsService.h"
+#include "MtsDef.h"
+#include <memory>
 
+class ICoreService;
 class IImsAos;
 class IImsRadio;
-class IJniMtsServiceThread;
+class IMtsContext;
 class IMtsTraffic;
-class INetworkWatcher;
 
-class MtsService final :
+class MtsService :
         public ICoreServiceListener,
         public IImsAosListener,
         public IMtsService,
@@ -37,11 +39,14 @@ class MtsService final :
         public ImsService
 {
 public:
-    explicit MtsService(IN IMS_SINT32 nSlotId);
-    ~MtsService();
+    explicit MtsService(IN IMtsContext& objContext, IN MtsServiceType eServiceType);
+    virtual ~MtsService() override;
     MtsService(IN const MtsService&) = delete;
     MtsService& operator=(IN const MtsService&) = delete;
 
+    void Init();
+
+    // ICoreServiceListener
     void CoreService_PageMessageReceived(
             IN ICoreService* piService, IN IPageMessage* piMessage) override;
     void CoreService_ReferenceReceived(
@@ -55,63 +60,58 @@ public:
     void CoreService_CapabilityQueryReceived(
             IN ICoreService* piService, IN ICapabilities* piCapabilities) override;
 
+    // IImsAosListener
     void ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan) override;
     void ImsAos_Connecting() override;
     void ImsAos_Disconnecting(IN IMS_UINT32 nReason) override;
-    void ImsAos_Disconnected(IN IMS_UINT32 nReason) override;
+    void ImsAos_Disconnected(IN IMS_UINT32 nReason, IN IMS_SINT32 nDataFailureReason) override;
     void ImsAos_Suspended(IN IMS_UINT32 nReason) override;
     void ImsAos_Resumed() override;
 
-    ICoreService* GetICoreService(IN IMS_BOOL bEmergency) const override;
-    inline IMtsServiceState* GetIMtsServiceState() override { return m_piMtsServiceState; }
-    void ReportMoStatus(
-            IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId) override;
-    void ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent) override;
-    void RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType) override;
-    void SetListener(IN IMtsServiceListener* piMtsServiceListener) override;
-    inline void NotifyJniEnablerSet() override {}
+    // IMtsService
+    inline ICoreService* GetICoreService() const override { return m_piCoreService; }
+    inline IImsAos* GetIImsAos() const override { return m_piImsAos; }
+    inline IMtsServiceState* GetIMtsServiceState() const override { return m_piMtsServiceState; }
+    void RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType) const override;
+    void RequestRegisterWithNextPcscf(IN const IMS_UINT32 nRetryAfterValue) const override;
     void SendMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
-            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) override;
+            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergencyNumber,
+            IN IMS_UINT32 nRetryCount) override;
+    IMS_BOOL IsWlan() const override;
+    void NotifyEmergencySmsStateToAos(IN IMS_BOOL bInitialized) const override;
 
+    // IMtsTrafficListener
     void Traffic_OnConnectionFailed(IN IMS_UINT32 nType, IN IMS_UINT32 nDirection,
             IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode,
             IN IMS_UINT32 nWaitTimeMillis) override;
     void Traffic_OnConnectionSetupPrepared(IN IMS_UINT32 nType, IN IMS_UINT32 nDirection) override;
     void Traffic_GuardTimerExpired(IN IMS_UINT32 nType, IN IMS_UINT32 nDirection) override;
 
-    // Test-Purpose
-    void InitMtsServiceState();
-    inline void SetIImsAos(IN IImsAos* piImsAos) { m_piImsAos = piImsAos; }
-    inline void SetIImsEmergencyAos(IN IImsAos* piImsEmergencyAos)
-    {
-        m_piImsEmergencyAos = piImsEmergencyAos;
-    }
-
 private:
-    void AttachJni();
     void AttachAos();
     void AttachCoreService();
-    IMS_UINT32 ConvertToAccessNetworkType(
-            IN IMS_UINT32 nTrafficType, IN IMS_SINT32 nReportedNetwork);
-    IMtsTraffic* GetTraffic(IN IMS_UINT32 nTrafficType, IN IMS_UINT32 nDirection);
-    IJniMtsServiceThread* GetJniThread();
-    void StartRadioTraffic(IN IMtsTraffic* piMtsTraffic);
-
-    void Init();
     void DeInit();
+    void InitMtsServiceState();
 
-    IImsAos* m_piImsAos;
-    IImsAos* m_piImsEmergencyAos;
-    INetworkWatcher* m_piNetWatcherInfo;
+    IMS_UINT32 GetCurrentAccessNetworkType() const;
+    IMtsTraffic* GetTraffic(IN IMS_UINT32 nTrafficType, IN IMS_UINT32 nDirection);
+    IMS_UINT32 GetTrafficTypeOfService() const;
+    IMS_BOOL IsEmergencySmsReadyToSend() const;
+    IMS_BOOL ShouldUseEmergencyPdnForSms() const;
+    MtsTrafficStartResult StartMtTraffic();
+    MtsTrafficStartResult StartMoTrafficIfNeeded();
+
+    IMtsContext& m_objContext;
+    MtsServiceType m_eServiceType;
     AString m_strAppId;
-    IMS_UINT32 m_nSlotId;
-    ICoreService* m_piCoreService;
-    ICoreService* m_piEmergencyCoreService;
-    IMtsServiceListener* m_piMtsServiceListener;
-    IMtsServiceState* m_piMtsServiceState;
     IImsRadio* m_piImsRadio;
     ImsList<IMtsTraffic*> m_objMtsTraffics;
-    SmsSendRequestInfo* m_pSmsInfo;
+    std::unique_ptr<SmsSendRequestInfo> m_pSmsInfo;
+
+protected:
+    ICoreService* m_piCoreService;
+    IImsAos* m_piImsAos;
+    IMtsServiceState* m_piMtsServiceState;
 };
 
 #endif

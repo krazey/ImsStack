@@ -40,7 +40,7 @@ public:
     {
     }
 
-    virtual ~Pcscf() { StopTimer(); }
+    ~Pcscf() override { StopTimer(); }
 
     inline const AString& GetAddress() { return m_strAddress; }
     inline IMS_SINT32 GetPort() { return m_nPort; }
@@ -48,13 +48,6 @@ public:
 
     inline void IncreaseTriedCount() { m_nTriedCount++; }
     inline IMS_BOOL IsAvailable() { return m_bIsAvailable; }
-
-    inline IMS_BOOL IsEqual(IN const AString& strCurr)
-    {
-        IpAddress objIpaCurr(strCurr);
-        IpAddress objIpa(m_strAddress);
-        return objIpaCurr.Equals(objIpa);
-    }
 
     inline IMS_BOOL IsTried() { return m_bIsTried; }
 
@@ -159,7 +152,7 @@ class AosPcscf : public IAosPcscf, public ITimerListener
 {
 public:
     explicit AosPcscf(IN IAosAppContext* piAppContext);
-    virtual ~AosPcscf();
+    ~AosPcscf() override;
 
     void Init() override;
     void CleanUp() override;
@@ -209,6 +202,11 @@ public:
 
     void SetListener(IN IAosPcscfListener* piListener) override;
 
+    enum
+    {
+        TIMER_DNS_QUERY_RETRY = 0
+    };
+
 protected:
     void AddPcscf(IN const AString& strHost, IN IMS_SINT32 nPort);
 
@@ -228,6 +226,7 @@ protected:
 
     virtual IMS_BOOL GetFromPco(IN IMS_SINT32 nIpVersion);
     virtual IMS_BOOL GetFromConf(IN IMS_SINT32 nIpVersion);
+    virtual IMS_BOOL GetFromIsim(IN IMS_SINT32 nIpVersion);
     virtual IMS_BOOL ProcessDnsQuery(
             IN const AString& strHost, IN IMS_SINT32 nPort, IN IMS_SINT32 nIpVersion);
 
@@ -253,11 +252,6 @@ protected:
 
     static const IMS_CHAR* TimerToString(IN IMS_UINT32 nType);
 
-    enum
-    {
-        TIMER_DNS_QUERY_RETRY = 0
-    };
-
 private:
     static const IMS_SINT32 DNS_QEUERY_RETRY_WAITING_TIME_MILLS = 4000;
     IMS_SINT32 GetPcscfPort();
@@ -276,9 +270,9 @@ protected:
     IMS_UINT32 m_nChangedType;
 
     IMS_BOOL m_bIsConfigured;
+    IMS_BOOL m_bIsDnsQueryRetry;
+    IMS_BOOL m_bOtherIpTypeRequired;
     IMS_UINT32 m_nCurrentPcscfIndex;
-    IMS_UINT32 m_bIsDnsQueryRetry;
-    IMS_UINT32 m_bOtherIpTypeRequired;
     IMS_UINT32 m_nDiscoveryMethodIndex;
 
     AStringArray m_objCurrAddresses;

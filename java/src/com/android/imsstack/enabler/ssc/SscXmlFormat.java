@@ -292,6 +292,12 @@ public final class SscXmlFormat {
             return;
         }
 
+        if (TextUtils.isEmpty(namespace)
+                && !TextUtils.isEmpty((xsf.getTags().get(tagName)))) {
+            // Do not clear namespace if it's set in other element.
+            return;
+        }
+
         if (NS_SS_PREFIX.equals(namespace + ":")) {
             xsf.mNsSsPrefix = NS_SS_PREFIX;
         }

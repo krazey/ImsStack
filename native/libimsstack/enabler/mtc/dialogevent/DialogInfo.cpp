@@ -58,10 +58,10 @@ LOCAL const IMS_CHAR EXTRA_ELEMENT_MEDIADIRECTION[] = "mediaDirection";
 LOCAL const IMS_CHAR EXTRA_ELEMENT_PORT0[] = "port0";
 
 PUBLIC
-DialogInfo::DialogInfo(IN_OUT ImsList<Dialog*>& objDialogs) :
-        m_objDialogs(objDialogs),
+DialogInfo::DialogInfo() :
+        m_objDialogs(ImsList<Dialog*>()),
         m_nVersion(0),
-        m_nState(STATE_FULL),
+        m_nState(STATE_INVALID),
         m_strEntity(AString::ConstNull())
 {
     IMS_TRACE_I("+DialogInfo", 0, 0, 0);
@@ -171,7 +171,7 @@ PUBLIC GLOBAL AString& DialogInfo::GetSubElementValue(
 PUBLIC GLOBAL AString& DialogInfo::GetElementValue(
         IN const IElement* piElement, OUT AString& strElementValue)
 {
-    INode* piNode = piElement->GetFirstChild();
+    const INode* piNode = piElement->GetFirstChild();
 
     while (piNode != IMS_NULL)
     {
@@ -189,7 +189,7 @@ PUBLIC GLOBAL AString& DialogInfo::GetElementValue(
 PUBLIC GLOBAL IMS_BOOL DialogInfo::IsElementExist(
         IN const IElement* piElement, IN const IMS_CHAR* pszElement)
 {
-    INode* piNode = piElement->GetFirstChild();
+    const INode* piNode = piElement->GetFirstChild();
 
     while (piNode != IMS_NULL)
     {
@@ -217,10 +217,9 @@ PUBLIC GLOBAL IMS_BOOL DialogInfo::IsAttrExist(
 PRIVATE
 IMS_UINT32 DialogInfo::ConvertState(IN const AString& strState)
 {
-    // TODO: this information must be used.
     // Only VZW guarantees that the first one is FULL and all the subsequent NOTIFYs are partial.
-    // If the state is FULL and a dialog doesn't exist in it, it must be set as
-    // a Terminated-state dialog and deleted.
+    // If the state is FULL and a dialog doesn't exist in it, it must be set as a Terminated-state
+    // dialog and deleted.
     if (strState.Equals("partial"))
     {
         return STATE_PARTIAL;
@@ -251,7 +250,7 @@ IMS_SLONG DialogInfo::GetIndexOfKeyHasSameId(IN const AString& strDialogId)
 }
 
 PUBLIC
-IMS_RESULT Dialog::Update(IN IElement* piElementDialog)
+IMS_RESULT Dialog::Update(IN const IElement* piElementDialog)
 {
     IMS_TRACE_I("+Update", 0, 0, 0);
 
@@ -444,7 +443,7 @@ void Dialog::Participant::Update(IN const IElement* piElementParticipant)
     while (piNode != IMS_NULL)
     {
         const AString& strName = piNode->GetLocalName();
-        IElement* piElement = DYNAMIC_CAST(IElement*, piNode);
+        const IElement* piElement = DYNAMIC_CAST(IElement*, piNode);
 
         if (strName.EqualsIgnoreCase(ELEMENT_IDENTITY))
         {
@@ -473,7 +472,7 @@ void Dialog::Target::Update(IN const IElement* piElementTarget)
 
         if (strName.EqualsIgnoreCase(ELEMENT_PARAM))
         {
-            IElement* piElement = DYNAMIC_CAST(IElement*, piNode);
+            const IElement* piElement = DYNAMIC_CAST(IElement*, piNode);
             AString strPname = piElement->GetAttribute(ATTR_PARAM_PNAME);
             AString strval = piElement->GetAttribute(ATTR_PARAM_PVAL);
             m_objParamMap.Add(strPname, strval);

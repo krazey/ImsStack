@@ -31,7 +31,7 @@ public:
     explicit UceOptions(IN const AString& strManagerName, IN ICoreService* piCoreService,
             IN ICapabilities* piCapabilities, IN IMS_UINT32 nKey, IN IMS_BOOL isSendingRequest,
             IN IMS_SINT32 nSimSlot = 0);
-    virtual ~UceOptions();
+    virtual ~UceOptions() override;
 
 public:
     IMS_BOOL SendOptionsRequest(IN AString strRemoteURI, IN IMS_UINT32 ownCapabilities);

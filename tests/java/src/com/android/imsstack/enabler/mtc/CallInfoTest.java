@@ -16,6 +16,8 @@
 
 package com.android.imsstack.enabler.mtc;
 
+import static android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -34,7 +36,7 @@ public class CallInfoTest  {
 
         assertEquals(IUMtcCall.SERVICETYPE_NORMAL, callInfo.serviceType);
         assertEquals(IUMtcCall.CALLTYPE_VOIP, callInfo.callType);
-        assertFalse(callInfo.emergency);
+        assertEquals(IUMtcCall.EMERGENCYTYPE_NONE, callInfo.emergencyType);
         assertFalse(callInfo.offline);
         assertFalse(callInfo.ussi);
         assertFalse(callInfo.isConf);
@@ -42,6 +44,8 @@ public class CallInfoTest  {
         assertFalse(callInfo.confSub);
         assertFalse(callInfo.rttCapable);
         assertFalse(callInfo.videoCapable);
+        assertFalse(callInfo.crossSim);
+        assertEquals(NETWORK_TYPE_UNKNOWN, callInfo.ratType);
     }
 
     @Test
@@ -51,7 +55,7 @@ public class CallInfoTest  {
 
         assertEquals(IUMtcCall.SERVICETYPE_EMERGENCY, callInfo.serviceType);
         assertEquals(IUMtcCall.CALLTYPE_VIDEO_RTT, callInfo.callType);
-        assertFalse(callInfo.emergency);
+        assertEquals(IUMtcCall.EMERGENCYTYPE_NONE, callInfo.emergencyType);
         assertFalse(callInfo.offline);
         assertFalse(callInfo.ussi);
         assertFalse(callInfo.isConf);
@@ -59,6 +63,8 @@ public class CallInfoTest  {
         assertFalse(callInfo.confSub);
         assertFalse(callInfo.rttCapable);
         assertFalse(callInfo.videoCapable);
+        assertFalse(callInfo.crossSim);
+        assertEquals(NETWORK_TYPE_UNKNOWN, callInfo.ratType);
     }
 
     @Test
@@ -68,7 +74,7 @@ public class CallInfoTest  {
 
         assertEquals(IUMtcCall.SERVICETYPE_NONE, callInfo.serviceType);
         assertEquals(IUMtcCall.CALLTYPE_VT, callInfo.callType);
-        assertFalse(callInfo.emergency);
+        assertEquals(IUMtcCall.EMERGENCYTYPE_NONE, callInfo.emergencyType);
         assertFalse(callInfo.offline);
         assertFalse(callInfo.ussi);
         assertTrue(callInfo.isConf);
@@ -76,6 +82,8 @@ public class CallInfoTest  {
         assertFalse(callInfo.confSub);
         assertFalse(callInfo.rttCapable);
         assertFalse(callInfo.videoCapable);
+        assertFalse(callInfo.crossSim);
+        assertEquals(NETWORK_TYPE_UNKNOWN, callInfo.ratType);
     }
 
     @Test
@@ -83,7 +91,7 @@ public class CallInfoTest  {
         CallInfo callInfo = new CallInfo();
         callInfo.serviceType = IUMtcCall.SERVICETYPE_EMERGENCY;
         callInfo.callType = IUMtcCall.CALLTYPE_VIDEO_RTT;
-        callInfo.emergency = true;
+        callInfo.emergencyType = IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING;
         callInfo.offline = true;
         callInfo.ussi = true;
         callInfo.isConf = true;
@@ -91,12 +99,14 @@ public class CallInfoTest  {
         callInfo.confSub = true;
         callInfo.rttCapable = true;
         callInfo.videoCapable = true;
+        callInfo.crossSim = true;
+        callInfo.ratType = 1;
 
         CallInfo callInfo2 = new CallInfo(callInfo);
 
         assertEquals(IUMtcCall.SERVICETYPE_EMERGENCY, callInfo2.serviceType);
         assertEquals(IUMtcCall.CALLTYPE_VIDEO_RTT, callInfo2.callType);
-        assertTrue(callInfo2.emergency);
+        assertEquals(IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING, callInfo2.emergencyType);
         assertTrue(callInfo2.offline);
         assertTrue(callInfo2.ussi);
         assertTrue(callInfo2.isConf);
@@ -104,6 +114,8 @@ public class CallInfoTest  {
         assertTrue(callInfo2.confSub);
         assertTrue(callInfo2.rttCapable);
         assertTrue(callInfo2.videoCapable);
+        assertTrue(callInfo.crossSim);
+        assertEquals(1, callInfo.ratType);
     }
 
     @Test
@@ -111,7 +123,7 @@ public class CallInfoTest  {
         CallInfo callInfo = new CallInfo();
         callInfo.serviceType = IUMtcCall.SERVICETYPE_EMERGENCY;
         callInfo.callType = IUMtcCall.CALLTYPE_VIDEO_RTT;
-        callInfo.emergency = true;
+        callInfo.emergencyType = IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING;
         callInfo.offline = true;
         callInfo.ussi = true;
         callInfo.isConf = true;
@@ -119,13 +131,15 @@ public class CallInfoTest  {
         callInfo.confSub = true;
         callInfo.rttCapable = true;
         callInfo.videoCapable = true;
+        callInfo.crossSim = true;
+        callInfo.ratType = 1;
 
         CallInfo callInfo2 = new CallInfo();
         callInfo2.update(callInfo);
 
         assertEquals(IUMtcCall.SERVICETYPE_EMERGENCY, callInfo2.serviceType);
         assertEquals(IUMtcCall.CALLTYPE_VIDEO_RTT, callInfo2.callType);
-        assertTrue(callInfo2.emergency);
+        assertEquals(IUMtcCall.EMERGENCYTYPE_EMERGENCY_ROUTING, callInfo2.emergencyType);
         assertTrue(callInfo2.offline);
         assertTrue(callInfo2.ussi);
         assertTrue(callInfo2.isConf);
@@ -133,6 +147,8 @@ public class CallInfoTest  {
         assertTrue(callInfo2.confSub);
         assertTrue(callInfo2.rttCapable);
         assertTrue(callInfo2.videoCapable);
+        assertTrue(callInfo2.crossSim);
+        assertEquals(1, callInfo2.ratType);
     }
 
     @Test
@@ -148,7 +164,7 @@ public class CallInfoTest  {
 
         assertEquals(callInfo.serviceType, callInfo2.serviceType);
         assertEquals(callInfo.callType, callInfo2.callType);
-        assertEquals(callInfo.emergency, callInfo2.emergency);
+        assertEquals(callInfo.emergencyType, callInfo2.emergencyType);
         assertEquals(callInfo.offline, callInfo2.offline);
         assertEquals(callInfo.ussi, callInfo2.ussi);
         assertEquals(callInfo.isConf, callInfo2.isConf);
@@ -156,5 +172,7 @@ public class CallInfoTest  {
         assertEquals(callInfo.confSub, callInfo2.confSub);
         assertEquals(callInfo.rttCapable, callInfo2.rttCapable);
         assertEquals(callInfo.videoCapable, callInfo2.videoCapable);
+        assertEquals(callInfo.crossSim, callInfo2.crossSim);
+        assertEquals(callInfo.ratType, callInfo2.ratType);
     }
 }

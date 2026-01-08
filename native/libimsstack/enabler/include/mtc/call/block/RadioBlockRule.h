@@ -27,7 +27,7 @@ class RadioBlockRule final : public IMtcBlockRule, public IMtcRadioCheckerListen
 {
 public:
     explicit RadioBlockRule(IN IMtcCallContext& objContext, IN CallType eCallType);
-    virtual ~RadioBlockRule();
+    virtual ~RadioBlockRule() override;
     RadioBlockRule(IN const RadioBlockRule&) = delete;
     RadioBlockRule& operator=(IN const RadioBlockRule&) = delete;
 

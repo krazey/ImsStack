@@ -18,8 +18,8 @@
     package="com.android.imsstack"
     coreApp="true"
     android:process="com.android.imsstack"
-    android:versionCode="1001"
-    android:versionName="1.0.01">
+    android:versionCode="10000"
+    android:versionName="1.00.00">
 
     <!-- ims permission -->
     <permission android:name="com.android.imsstack.permission.IMS"
@@ -37,19 +37,22 @@
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS"/>
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL"/>
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.LOCAL_MAC_ADDRESS"/>
     <uses-permission android:name="android.permission.LOCATION_BYPASS"/>
     <uses-permission android:name="android.permission.MANAGE_USERS"/>
     <uses-permission android:name="android.permission.MODIFY_PHONE_STATE"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.READ_ACTIVE_EMERGENCY_SESSION"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <uses-permission android:name="android.permission.READ_PRECISE_PHONE_STATE"/>
     <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.RECEIVE_STK_COMMANDS"/>
     <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
     <uses-permission android:name="android.permission.USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
-    <uses-permission android:name="com.android.telephony.permission.USE_IMSMEDIA" />
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS"/>
+    <uses-permission android:name="com.android.telephony.permission.USE_PIXELIMSMEDIA"/>
     <uses-permission android:name="com.android.telephony.permission.USE_IMS_CALL_EXT_FEATURE"/>
 
     <!--  Application -->
@@ -69,7 +72,8 @@
             android:name=".test.menu.ImsConfigMenu"
             android:resizeableActivity="true"
             android:process="com.android.imsstack"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat">
             <intent-filter>
                 <action android:name="com.android.imsstack.action.IMS_PROVISIONING" />
                 <action android:name="com.android.imsstack.action.IMS_CONFIG_MENU" />
@@ -81,7 +85,8 @@
             android:name=".test.menu.CarrierConfigMenu"
             android:resizeableActivity="true"
             android:process="com.android.imsstack"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat">
             <intent-filter>
                 <action android:name="com.android.imsstack.action.CARRIER_CONFIG_MENU" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -92,7 +97,8 @@
             android:name=".test.menu.TestConfigMenu"
             android:resizeableActivity="true"
             android:process="com.android.imsstack"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat">
             <intent-filter>
                 <action android:name="com.android.imsstack.action.TEST_CONFIG_MENU" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -104,7 +110,8 @@
             android:label="Debug Screen"
             android:resizeableActivity="true"
             android:process="com.android.imsstack"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat">
             <intent-filter>
                 <action android:name="com.android.imsstack.action.DEBUG_SCREEN" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -134,6 +141,13 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.telephony.action.CARRIER_SIGNAL_PCO_VALUE"/>
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".core.StkSetupEventReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.telephony.action.STK_SETUP_EVENT_LIST"/>
             </intent-filter>
         </receiver>
     </application>

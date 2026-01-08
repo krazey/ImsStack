@@ -17,11 +17,13 @@
 #ifndef MOCK_CONSULTATIVE_CONTROLLER_H_
 #define MOCK_CONSULTATIVE_CONTROLLER_H_
 
-#include "IMtcContext.h"
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "ect/ConsultativeTransferController.h"
-#include "ect/EctFactory.h"
 #include <gmock/gmock.h>
+
+class IMtcContext;
+class EctFactory;
 
 class MockConsultativeTransferController : public ConsultativeTransferController
 {
@@ -31,7 +33,7 @@ public:
             ConsultativeTransferController(objContext, nCallKey, objListener, objFactor)
     {
     }
-    ~MockConsultativeTransferController() {}
+    ~MockConsultativeTransferController() override {}
 
     MOCK_METHOD(void, Transfer, (), (override));
 };

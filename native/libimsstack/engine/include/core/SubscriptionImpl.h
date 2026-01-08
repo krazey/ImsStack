@@ -24,7 +24,7 @@ class SubscriptionImpl : public ISubscription, public IOnSubscriptionListener
 {
 public:
     explicit SubscriptionImpl(IN Subscription* pSubscription);
-    virtual ~SubscriptionImpl();
+    ~SubscriptionImpl() override;
 
     SubscriptionImpl(IN const SubscriptionImpl&) = delete;
     SubscriptionImpl& operator=(IN const SubscriptionImpl&) = delete;

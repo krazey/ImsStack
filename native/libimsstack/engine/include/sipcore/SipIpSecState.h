@@ -16,12 +16,16 @@
 #ifndef SIP_IPSEC_STATE_H_
 #define SIP_IPSEC_STATE_H_
 
-#include "EngineActivity.h"
-#include "ISipIpSecState.h"
-#include "SipTransportAddress.h"
-#include "SipTxnKey.h"
+#include "IpAddress.h"
+
 #include "msg/SipMessage.h"
 #include "txn/SipTxnKey.h"
+
+#include "EngineActivity.h"
+#include "ISipIpSecState.h"
+#include "SipTxnKey.h"
+
+class SipTransportAddress;
 
 class SipIpSecState : public EngineActivity, public ISipIpSecState
 {
@@ -90,7 +94,7 @@ private:
 
 public:
     SipIpSecState();
-    virtual ~SipIpSecState();
+    ~SipIpSecState() override;
 
     SipIpSecState(IN const SipIpSecState&) = delete;
     SipIpSecState& operator=(IN const SipIpSecState&) = delete;
@@ -105,7 +109,7 @@ public:
     void NotifyMessageSent(IN const SipTransportAddress& objNearEnd,
             IN const SipTransportAddress& objFarEnd, IN ::SipMessage* pSipMsg);
     void NotifyMessageSentFailed(IN ::SipMessage* pSipMsg);
-    void NotifyTransactionAborted(IN ::SipTxnKey* pSipTxnKey);
+    void NotifyTransactionAborted(IN const ::SipTxnKey* pSipTxnKey);
 
 private:
     // EngineActivity class
@@ -127,7 +131,7 @@ private:
             IN const SipTransportAddress& objFarEnd, IN sipcore::SipTxnKey* pTxnKey);
     void NotifyMessageSentInternal(IN const SipTransportAddress& objNearEnd,
             IN const SipTransportAddress& objFarEnd, IN sipcore::SipTxnKey* pTxnKey);
-    void NotifyTransactionAbortedInternal(IN sipcore::SipTxnKey* pTxnKey);
+    void NotifyTransactionAbortedInternal(IN const sipcore::SipTxnKey* pTxnKey);
 
 private:
     // Event for message processing

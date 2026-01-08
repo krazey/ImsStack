@@ -29,16 +29,16 @@ class SipSocket : public ImsSlot, public ISocketListener
 {
 public:
     explicit SipSocket(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nType = SipSocketAddress::SOCKET_UDP);
-    virtual ~SipSocket();
+    ~SipSocket() override;
 
     SipSocket(IN const SipSocket&) = delete;
     SipSocket& operator=(IN const SipSocket&) = delete;
 
 public:
     inline virtual SipSocket* Accept() { return IMS_NULL; }
-    inline virtual void ApplyIpSec(IN ISocket* piAcceptedSocket = IMS_NULL)
+    inline virtual void ApplyIpSec(IN SipSocket* pAcceptedSocket = IMS_NULL)
     {
-        ApplyIpSecInternal(m_objSockAddr.GetSocketAddress(), IMS_NULL, piAcceptedSocket);
+        ApplyIpSecInternal(m_objSockAddr.GetSocketAddress(), IMS_NULL, pAcceptedSocket);
     }
     inline virtual IMS_BOOL Connect() { return IMS_TRUE; }
     virtual IMS_BOOL Create(
@@ -71,9 +71,17 @@ public:
     /** Same as ISocket::SetOption(...) */
     void SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue);
 
+    inline IMS_SINT32 GetSocketId() const
+    {
+        return (m_piSocket != IMS_NULL) ? m_piSocket->GetSocketId() : -1;
+    }
     inline IMS_SINT32 GetState() const { return m_nState; }
     inline IMS_SINT32 GetType() const { return m_objSockAddr.GetType(); }
     inline IMS_BOOL IsSocketForcinlyClosed() const { return m_bForcinglyClosed; }
+    IMS_BOOL IsClosedOrBeingClosed() const
+    {
+        return m_piSocket != IMS_NULL ? m_piSocket->IsClosedOrBeingClosed() : IMS_TRUE;
+    }
 
 protected:
     // ISocketListener interface
@@ -85,12 +93,12 @@ protected:
             IN ISocket* piSocket, IN IMS_SINT32 nReason = ISocket::CLOSE_REASON_UNKNOWN) override;
 
     void ApplyIpSecInternal(IN const SocketAddress& objLocal,
-            IN const SocketAddress* pRemote = IMS_NULL, IN ISocket* piAcceptedSocket = IMS_NULL);
+            IN const SocketAddress* pRemote = IMS_NULL, IN SipSocket* pAcceptedSocket = IMS_NULL);
     void CloseSocket();
     void NotifyPongReceived();
     inline void SetForcinglyClosed(IN IMS_BOOL bClosed) { m_bForcinglyClosed = bClosed; }
     void SetSocketOptionForTcpMaxSeg(
-            IN INetworkConnection* piConnection, IN const IpAddress& objLocalIp);
+            IN const INetworkConnection* piConnection, IN const IpAddress& objLocalIp);
     void SetSocketOptions(IN const IpAddress& objLocalIp, IN IMS_UINT32 nLocalPort);
     void SetState(IN IMS_SINT32 nState);
 

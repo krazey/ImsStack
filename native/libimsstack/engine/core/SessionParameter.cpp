@@ -17,6 +17,7 @@
 #include "ServiceTrace.h"
 
 #include "SdpAttribute.h"
+#include "SdpMediaDescription.h"
 #include "offeranswer/SdpOfferAnswer.h"
 
 #include "SessionParameter.h"
@@ -41,8 +42,7 @@ SessionParameter::SessionParameter(IN const SessionParameter& other) :
 {
     for (IMS_UINT32 i = 0; i < other.m_objMediaParams.GetSize(); ++i)
     {
-        SdpMediaParameter* pMediaParam = other.m_objMediaParams.GetAt(i);
-
+        const SdpMediaParameter* pMediaParam = other.m_objMediaParams.GetAt(i);
         m_objMediaParams.Append(new SdpMediaParameter(*pMediaParam));
     }
 }
@@ -68,8 +68,7 @@ SessionParameter& SessionParameter::operator=(IN const SessionParameter& other)
 
         for (IMS_UINT32 i = 0; i < other.m_objMediaParams.GetSize(); ++i)
         {
-            SdpMediaParameter* pMediaParam = other.m_objMediaParams.GetAt(i);
-
+            const SdpMediaParameter* pMediaParam = other.m_objMediaParams.GetAt(i);
             m_objMediaParams.Append(new SdpMediaParameter(*pMediaParam));
         }
     }
@@ -352,10 +351,8 @@ IMS_SINT32 SessionParameter::GenerateAnswer(IN const SessionParameter* pOffer,
         IN IMS_SINT32 nOptions, IN IMS_BOOL bInitialOffer /*= IMS_FALSE*/)
 {
     // Initialize the local & remote SDP views
-    if (!pProposalView->Create() || !pPeerView->Create())
-    {
-        return SdpOfferAnswer::RESULT_FAILURE;
-    }
+    pProposalView->Create();
+    pPeerView->Create();
 
     // Compare & generate the session level parameters
     IMS_SINT32 nOaResult = CompareSessionParameters(IMS_TRUE, pOffer, pProposalView, pPeerView);
@@ -401,10 +398,8 @@ IMS_SINT32 SessionParameter::ProcessAnswer(IN const SessionParameter* pAnswer,
         IN IMS_SINT32 nOptions)
 {
     // Initialize the local & remote SDP views
-    if (!pProposalView->Create() || !pPeerView->Create())
-    {
-        return SdpOfferAnswer::RESULT_FAILURE;
-    }
+    pProposalView->Create();
+    pPeerView->Create();
 
     // Compare & generate the session level parameters
     IMS_SINT32 nOaResult = CompareSessionParameters(IMS_FALSE, pAnswer, pProposalView, pPeerView);
@@ -521,15 +516,13 @@ void SessionParameter::Clear()
 }
 
 PRIVATE
-IMS_BOOL SessionParameter::Create()
+void SessionParameter::Create()
 {
     SdpSessionParameter objNewSessionParam;
 
     Clear();
 
     m_objSessionParam = objNewSessionParam;
-
-    return IMS_TRUE;
 }
 
 PRIVATE
@@ -875,7 +868,7 @@ void SessionParameter::RemoveMediaFromGroup(IN IMS_SINT32 nMid)
 
 PRIVATE
 void SessionParameter::RemovePreconditionsIfNotSupport(
-        OUT SessionParameter*& pProposalView, OUT SessionParameter*& pPeerView)
+        IN const SessionParameter* pProposalView, IN const SessionParameter* pPeerView)
 {
 #if defined(__IMS_SDP_PRECONDITION__)
     const ImsList<SdpMediaParameter*>& objPeerMediaParams = pPeerView->GetMediaParameters();
@@ -883,15 +876,15 @@ void SessionParameter::RemovePreconditionsIfNotSupport(
 
     for (IMS_UINT32 i = 0; i < objPeerMediaParams.GetSize(); ++i)
     {
-        SdpMediaParameter* pPeerMediaParam = objPeerMediaParams.GetAt(i);
+        const SdpMediaParameter* pPeerMediaParam = objPeerMediaParams.GetAt(i);
 
         if (pPeerMediaParam == IMS_NULL)
         {
             continue;
         }
 
-        SdpPrecondition* pCurrent = pPeerMediaParam->GetPrecondition(SdpAttribute::CURR);
-        SdpPrecondition* pDesired = pPeerMediaParam->GetPrecondition(SdpAttribute::DES);
+        const SdpPrecondition* pCurrent = pPeerMediaParam->GetPrecondition(SdpAttribute::CURR);
+        const SdpPrecondition* pDesired = pPeerMediaParam->GetPrecondition(SdpAttribute::DES);
 
         if ((pCurrent != IMS_NULL) || (pDesired != IMS_NULL))
         {

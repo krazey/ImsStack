@@ -16,9 +16,10 @@
 #include "ServiceTrace.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosBlockListener.h"
+#include "interface/IAosBlockSilentListener.h"
 #include "condition/AosBlock.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 #define APPPROFILE m_strTag.GetStr()
 
@@ -26,6 +27,7 @@ PUBLIC
 AosBlock::AosBlock(IN IAosAppContext* piAppContext) :
         m_piAppContext(piAppContext),
         BLOCK_ENABLED(1),
+        REASON{},
         objServiceBlockReasons(ImsList<IMS_UINT32>())
 {
     m_strTag.Sprintf("%d:%s", m_piAppContext->GetSlotId(), m_piAppContext->GetProfileId().GetStr());
@@ -88,6 +90,51 @@ PUBLIC VIRTUAL void AosBlock::RemoveListener(IN IAosBlockListener* piListener)
     }
 }
 
+PUBLIC VIRTUAL void AosBlock::SetSilentListener(IN IAosBlockSilentListener* piListener)
+{
+    if (piListener == IMS_NULL)
+    {
+        return;
+    }
+
+    for (IMS_UINT32 i = 0; i < m_objSilentListeners.GetSize(); ++i)
+    {
+        IAosBlockSilentListener* pTmpListener = m_objSilentListeners.GetAt(i);
+
+        if (pTmpListener == piListener)
+        {
+            A_IMS_TRACE_D(APPPROFILE, "SetSilentListener :: (%" PFLS_X ") is already set",
+                    piListener, 0, 0);
+            return;
+        }
+    }
+
+    m_objSilentListeners.Append(piListener);
+    A_IMS_TRACE_D(APPPROFILE, "SetSilentListener :: (%" PFLS_X ") is set", piListener, 0, 0);
+}
+
+PUBLIC VIRTUAL void AosBlock::RemoveSilentListener(IN IAosBlockSilentListener* piListener)
+{
+    if (piListener == IMS_NULL)
+    {
+        return;
+    }
+
+    for (IMS_UINT32 i = 0; i < m_objSilentListeners.GetSize(); ++i)
+    {
+        IAosBlockSilentListener* pTmpListener = m_objSilentListeners.GetAt(i);
+
+        if (pTmpListener == piListener)
+        {
+            m_objSilentListeners.RemoveAt(i);
+
+            A_IMS_TRACE_D(APPPROFILE, "RemoveSilentListener :: (%" PFLS_X ") is removed",
+                    piListener, 0, 0);
+            return;
+        }
+    }
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosBlock::SetBlockReason(
         IN BLOCK_REASON eReason, IN IMS_BOOL bNotify /* = IMS_TRUE */)
 {
@@ -112,10 +159,7 @@ PUBLIC VIRTUAL IMS_BOOL AosBlock::SetBlockReason(
         m_objBlock.SetAt(&REASON[eReason], &BLOCK_ENABLED);
     }
 
-    if (bNotify)
-    {
-        Notify(eReason, IMS_TRUE);
-    }
+    Notify(eReason, IMS_TRUE, bNotify);
 
     return IMS_TRUE;
 }
@@ -144,10 +188,7 @@ PUBLIC VIRTUAL IMS_BOOL AosBlock::ResetBlockReason(
         m_objBlock.RemoveKey(&REASON[eReason]);
     }
 
-    if (bNotify)
-    {
-        Notify(eReason, IMS_FALSE);
-    }
+    Notify(eReason, IMS_FALSE, bNotify);
 
     return IMS_TRUE;
 }
@@ -162,12 +203,9 @@ PUBLIC VIRTUAL void AosBlock::ClearAllBlockReasons()
     Notify(BLOCK_MAX, IMS_FALSE);
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosBlock::PrintBlockReasons()
+PUBLIC VIRTUAL void AosBlock::GetBlockReasonsString(OUT AString& strOutLog)
 {
     AString strLogCom;
-    AString strLogCell;
-    AString strLogWifi;
-
     for (IMS_UINT32 i = BLOCK_START; i <= BLOCK_END; i++)
     {
         if (m_objBlock.GetValueAt(&REASON[i]) == &BLOCK_ENABLED)
@@ -178,6 +216,7 @@ PUBLIC VIRTUAL IMS_BOOL AosBlock::PrintBlockReasons()
         }
     }
 
+    AString strLogCell;
     for (IMS_UINT32 i = BLOCK_CELLULAR_START; i <= BLOCK_CELLULAR_END; i++)
     {
         if (m_objBlockCellular.GetValueAt(&REASON[i]) == &BLOCK_ENABLED)
@@ -188,6 +227,7 @@ PUBLIC VIRTUAL IMS_BOOL AosBlock::PrintBlockReasons()
         }
     }
 
+    AString strLogWifi;
     for (IMS_UINT32 i = BLOCK_WIFI_START; i <= BLOCK_WIFI_END; i++)
     {
         if (m_objBlockWifi.GetValueAt(&REASON[i]) == &BLOCK_ENABLED)
@@ -198,12 +238,16 @@ PUBLIC VIRTUAL IMS_BOOL AosBlock::PrintBlockReasons()
         }
     }
 
-    A_IMS_TRACE_I(APPPROFILE, "PrintBlockReasons :: Common - size (%d), reason (%s)",
-            m_objBlock.GetSize(), strLogCom.GetStr(), 0);
-    A_IMS_TRACE_I(APPPROFILE, "PrintBlockReasons :: Cellular - size (%d), reason (%s)",
-            m_objBlockCellular.GetSize(), strLogCell.GetStr(), 0);
-    A_IMS_TRACE_I(APPPROFILE, "PrintBlockReasons :: WiFi - size (%d), reason (%s)",
-            m_objBlockWifi.GetSize(), strLogWifi.GetStr(), 0);
+    strOutLog.Sprintf("Common(%d):%s Cellular(%d):%s WiFi(%d):%s", m_objBlock.GetSize(),
+            strLogCom.GetStr(), m_objBlockCellular.GetSize(), strLogCell.GetStr(),
+            m_objBlockWifi.GetSize(), strLogWifi.GetStr());
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosBlock::PrintBlockReasons()
+{
+    AString strLog;
+    GetBlockReasonsString(strLog);
+    A_IMS_TRACE_I(APPPROFILE, "PrintBlockReasons :: %s", strLog.GetStr(), 0, 0);
 
     return IMS_TRUE;
 }
@@ -329,6 +373,9 @@ PUBLIC GLOBAL const IMS_CHAR* AosBlock::BlockReasonToString(IN IMS_UINT32 nReaso
         case BLOCK_AUTHENTICATION_FAILED:
             return "AUTHENTICATION_FAILED";
 
+        case BLOCK_USIM_AUTHENTICATION_FAILED:
+            return "USIM_AUTHENTICATION_FAILED";
+
         case BLOCK_AOS_INCOMPLETED:
             return "AOS_INCOMPLETED";
 
@@ -368,6 +415,9 @@ PUBLIC GLOBAL const IMS_CHAR* AosBlock::BlockReasonToString(IN IMS_UINT32 nReaso
         case BLOCK_EPS_FALLBACK_STARTED:
             return "EPS_FALLBACK_STARTED";
 
+        case BLOCK_INVALID_CONNECTION:
+            return "INVALID_CONNECTION";
+
         case BLOCK_CELLULAR_AIRPLANE_MODE_ON:
             return "CELLULAR_AIRPLANE_MODE_ON";
 
@@ -377,11 +427,11 @@ PUBLIC GLOBAL const IMS_CHAR* AosBlock::BlockReasonToString(IN IMS_UINT32 nReaso
         case BLOCK_CELLULAR_OUT_OF_SERVICE:
             return "CELLULAR_OUT_OF_SERVICE";
 
+        case BLOCK_CELLULAR_RAT_BLOCK:
+            return "CELLULAR_RAT_BLOCK";
+
         case BLOCK_CELLULAR_ROAMING:
             return "CELLULAR_ROAMING";
-
-        case BLOCK_CELLULAR_VOPS_OFF:
-            return "CELLULAR_VOPS_OFF";
 
         case BLOCK_WIFI_BAD_CONNECTION:
             return "WIFI_BAD_CONNECTION";
@@ -395,6 +445,9 @@ PUBLIC GLOBAL const IMS_CHAR* AosBlock::BlockReasonToString(IN IMS_UINT32 nReaso
         case BLOCK_WIFI_NO_WIFI:
             return "WIFI_NO_WIFI";
 
+        case BLOCK_WIFI_REG_FORBIDDEN:
+            return "WIFI_REG_FORBIDDEN";
+
         case BLOCK_WIFI_TEMPORARILY_BLOCKED:
             return "WIFI_TEMPORARILY_BLOCKED";
 
@@ -403,17 +456,29 @@ PUBLIC GLOBAL const IMS_CHAR* AosBlock::BlockReasonToString(IN IMS_UINT32 nReaso
     }
 }
 
-PRIVATE
-void AosBlock::Notify(IN BLOCK_REASON eReason, IN IMS_BOOL bIsEnable)
+PROTECTED
+void AosBlock::Notify(
+        IN BLOCK_REASON eReason, IN IMS_BOOL bIsEnable, IN IMS_BOOL bNotify /*= IMS_TRUE*/)
 {
-    for (IMS_UINT32 nAt = 0; nAt < m_objListeners.GetSize(); nAt++)
+    if (bNotify)
     {
-        IAosBlockListener* piListener = m_objListeners.GetAt(nAt);
-        piListener->Block_Changed(eReason, (bIsEnable) ? 1 : 0);
+        for (IMS_UINT32 nAt = 0; nAt < m_objListeners.GetSize(); nAt++)
+        {
+            IAosBlockListener* piListener = m_objListeners.GetAt(nAt);
+            piListener->Block_Changed(eReason, (bIsEnable) ? 1 : 0);
+        }
+    }
+    else
+    {
+        for (IMS_UINT32 nAt = 0; nAt < m_objSilentListeners.GetSize(); nAt++)
+        {
+            IAosBlockSilentListener* piListener = m_objSilentListeners.GetAt(nAt);
+            piListener->Block_SilentChanged(eReason, (bIsEnable) ? 1 : 0);
+        }
     }
 }
 
-PRIVATE GLOBAL IMS_UINT32 AosBlock::GetBlockType(IN BLOCK_REASON eReason)
+PROTECTED GLOBAL IMS_UINT32 AosBlock::GetBlockType(IN BLOCK_REASON eReason)
 {
     if (eReason >= BLOCK_CELLULAR_START && eReason <= BLOCK_CELLULAR_END)
     {
@@ -429,7 +494,7 @@ PRIVATE GLOBAL IMS_UINT32 AosBlock::GetBlockType(IN BLOCK_REASON eReason)
     }
 }
 
-PRIVATE GLOBAL const IMS_CHAR* AosBlock::ServiceTypeToString(IN SERVICE_TYPE eType)
+PROTECTED GLOBAL const IMS_CHAR* AosBlock::ServiceTypeToString(IN SERVICE_TYPE eType)
 {
     switch (eType)
     {

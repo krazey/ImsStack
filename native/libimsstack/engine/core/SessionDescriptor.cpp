@@ -16,6 +16,8 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
+#include "SdpBandwidth.h"
+#include "SdpInformation.h"
 #include "offeranswer/SdpSessionParameter.h"
 
 #include "ISessionState.h"
@@ -132,7 +134,7 @@ PRIVATE VIRTUAL ImsList<AString> SessionDescriptor::GetAttributes() const
         return ImsList<AString>();
     }
 
-    SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
+    const SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -161,7 +163,7 @@ PRIVATE VIRTUAL AString SessionDescriptor::GetProtocolVersion() const
         return AString::ConstNull();
     }
 
-    SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
+    const SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -179,7 +181,7 @@ PRIVATE VIRTUAL const AString& SessionDescriptor::GetSessionId() const
         return AString::ConstNull();
     }
 
-    SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
+    const SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -197,7 +199,7 @@ PRIVATE VIRTUAL AString SessionDescriptor::GetSessionInfo() const
         return AString::ConstNull();
     }
 
-    SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
+    const SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -561,7 +563,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddBandwidth(IN IMS_SINT32 nType,
 PRIVATE VIRTUAL const AString& SessionDescriptor::GetAttribute(
         IN IMS_SINT32 nType, IN const AString& strType /*= AString::ConstNull()*/) const
 {
-    SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
+    const SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -608,7 +610,7 @@ PRIVATE VIRTUAL const AString& SessionDescriptor::GetAttribute(
 PRIVATE VIRTUAL IMS_SINT32 SessionDescriptor::GetAttributeInt(
         IN IMS_SINT32 nType, IN const AString& strType /*= AString::ConstNull()*/) const
 {
-    SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
+    const SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -681,7 +683,7 @@ PRIVATE VIRTUAL IMS_SINT32 SessionDescriptor::GetAttributeInt(
 PRIVATE VIRTUAL IMS_SINT32 SessionDescriptor::GetBandwidth(
         IN IMS_SINT32 nType, IN const AString& strType /*= AString::ConstNull()*/) const
 {
-    SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
+    const SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -715,7 +717,7 @@ PRIVATE VIRTUAL IMS_SINT32 SessionDescriptor::GetBandwidth(
 
 PRIVATE VIRTUAL IMS_SINT32 SessionDescriptor::GetDirection() const
 {
-    SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
+    const SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -736,7 +738,7 @@ PRIVATE VIRTUAL const AString& SessionDescriptor::GetSessionVersion() const
         return AString::ConstNull();
     }
 
-    SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
+    const SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {
@@ -754,7 +756,7 @@ PRIVATE VIRTUAL const AString& SessionDescriptor::GetUsername() const
         return AString::ConstNull();
     }
 
-    SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
+    const SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
 
     if (pSessionParam == IMS_NULL)
     {

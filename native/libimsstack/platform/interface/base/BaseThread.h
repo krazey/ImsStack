@@ -16,13 +16,16 @@
 #ifndef BASE_THREAD_H_
 #define BASE_THREAD_H_
 
-#include "IThread.h"
+#include "AString.h"
+#include "IRunnable.h"
+
+class IThread;
 
 class BaseThread : public IRunnable
 {
 public:
     BaseThread();
-    virtual ~BaseThread();
+    ~BaseThread() override;
 
     BaseThread(IN const BaseThread&) = delete;
     BaseThread& operator=(IN const BaseThread&) = delete;
@@ -45,7 +48,7 @@ protected:
     inline virtual IMS_BOOL OnTerminate(IN ImsMessage& /*objMsg*/) { return IMS_TRUE; }
     inline virtual IMS_BOOL OnMessage(IN ImsMessage& /*objMsg*/) { return IMS_FALSE; }
 
-    IMS_BOOL IsThreadMessage(IN ImsMessage& objMsg) const;
+    IMS_BOOL IsThreadMessage(IN const ImsMessage& objMsg) const;
 
 private:
     AString m_strName;

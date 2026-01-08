@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
+#include "config/MediaSessionConfig.h"
+
+#include "ICarrierConfig.h"
 #include "ServiceTrace.h"
 #include "ServiceConfig.h"
-#include "config/MediaSessionConfig.h"
-#include "config/MediaSessionConfigFactory.h"
-#include "ICarrierConfig.h"
 #include "config/AudioConfiguration.h"
+#include "config/MediaSessionConfigFactory.h"
 #include "config/VideoConfiguration.h"
 #include "config/TextConfiguration.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.CONF");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC
 MediaSessionConfig::MediaSessionConfig(IN IMS_SINT32 nSlotId, IN MEDIA_SERVICE_TYPE serviceType) :
@@ -36,12 +37,12 @@ MediaSessionConfig::MediaSessionConfig(IN IMS_SINT32 nSlotId, IN MEDIA_SERVICE_T
         m_bSupportMultiConfigInEarlySession(DEFAULT_SUPPORT_MULTICONFIG),
         m_bSdpReofferFullCapability(IMS_TRUE)
 {
-    IMS_TRACE_D("+MediaSessionConfig() - nSlotId(%d), serviceType(%d)", nSlotId, serviceType, 0);
+    IMS_TRACE_I("+MediaSessionConfig() - SlotId[%d], ServiceType[%d]", nSlotId, serviceType, 0);
 }
 
 PUBLIC VIRTUAL MediaSessionConfig::~MediaSessionConfig()
 {
-    IMS_TRACE_D("~MediaSessionConfig()", 0, 0, 0);
+    IMS_TRACE_I("~MediaSessionConfig()", 0, 0, 0);
 
     Clear();
     MediaSessionConfigFactory::GetInstance()->DestroySessionConfig(this);
@@ -50,8 +51,6 @@ PUBLIC VIRTUAL MediaSessionConfig::~MediaSessionConfig()
 PUBLIC
 IMS_BOOL MediaSessionConfig::Create(IN IMS_SINT32 nSlotId)
 {
-    IMS_TRACE_D("Create", 0, 0, 0);
-
     ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(nSlotId);
 
     if (piCc == IMS_NULL)
@@ -61,13 +60,13 @@ IMS_BOOL MediaSessionConfig::Create(IN IMS_SINT32 nSlotId)
     piCc->AddListener(this);
 
     m_bIsSessLevelBW =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_MEDIA_SESSION_LEVEL_BANDWIDTH_BOOL);
+            piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_MEDIA_SESSION_LEVEL_BANDWIDTH_BOOL);
     m_bAnbrSupported =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_MEDIA_ANBR_CAPABILITY_IN_MODEM_BOOL);
-    m_bSupportMultiConfigInEarlySession =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL);
+            piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_MEDIA_ANBR_CAPABILITY_IN_MODEM_BOOL);
+    m_bSupportMultiConfigInEarlySession = piCc->GetBoolean(
+            CarrierConfig::ImsVoice::KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL);
     m_bSdpReofferFullCapability =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL);
+            piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL);
 
     if (m_pAudioConfig == IMS_NULL)
     {
@@ -90,16 +89,15 @@ IMS_BOOL MediaSessionConfig::Create(IN IMS_SINT32 nSlotId)
 PUBLIC
 void MediaSessionConfig::SetServiceType(IN MEDIA_SERVICE_TYPE serviceType)
 {
-    IMS_TRACE_D("SetServiceType(%d)", serviceType, 0, 0);
     m_nServiceType = serviceType;
 }
 
 PUBLIC
 void MediaSessionConfig::ToDebugString() const
 {
-    IMS_TRACE_D("m_nServiceType(%d), m_bIsSessLevelBW(%d), m_bAnbrSupported(%d)", m_nServiceType,
+    IMS_TRACE_D("ServiceType[%d], IsSessLevelBandwidth[%d], AnbrSupported[%d]", m_nServiceType,
             m_bIsSessLevelBW, m_bAnbrSupported);
-    IMS_TRACE_D("m_bSupportMultiConfigInEarlySession(%d), m_bSdpReofferFullCapability(%d)",
+    IMS_TRACE_D("SupportMultiConfigInEarlySession[%d], SdpReofferFullCapability[%d]",
             m_bSupportMultiConfigInEarlySession, m_bSdpReofferFullCapability, 0);
 }
 
@@ -154,8 +152,6 @@ IMS_BOOL MediaSessionConfig::IsSdpReofferFullCapability() const
 PRIVATE
 void MediaSessionConfig::Clear()
 {
-    IMS_TRACE_D("Clear()", 0, 0, 0);
-
     if (m_pAudioConfig != IMS_NULL)
     {
         delete m_pAudioConfig;
@@ -178,7 +174,6 @@ void MediaSessionConfig::Clear()
 PRIVATE
 void MediaSessionConfig::ResetMediaConfigurations(IN IMS_SINT32 nSlotId)
 {
-    IMS_TRACE_D("ResetMediaConfigurations()", 0, 0, 0);
     Clear();
     Create(nSlotId);
 }
@@ -195,8 +190,6 @@ PRIVATE VIRTUAL void MediaSessionConfig::CarrierConfig_NotifyConfigChanged(IN IM
 PROTECTED
 IMS_BOOL MediaSessionConfig::CreateAudioConfiguration(IN ICarrierConfig* piCc)
 {
-    IMS_TRACE_D("CreateAudioConfiguration()", 0, 0, 0);
-
     AudioConfiguration* pConfig = new AudioConfiguration(MEDIA_TYPE_AUDIO);
 
     if (pConfig == IMS_NULL)
@@ -206,7 +199,7 @@ IMS_BOOL MediaSessionConfig::CreateAudioConfiguration(IN ICarrierConfig* piCc)
 
     if (!pConfig->Create(piCc))
     {
-        IMS_TRACE_E(0, "Creating an audio configuration failed", 0, 0, 0);
+        IMS_TRACE_E(0, "CreateAudioConfiguration - failed", 0, 0, 0);
 
         delete pConfig;
         return IMS_FALSE;
@@ -220,8 +213,6 @@ IMS_BOOL MediaSessionConfig::CreateAudioConfiguration(IN ICarrierConfig* piCc)
 PROTECTED
 IMS_BOOL MediaSessionConfig::CreateVideoConfiguration(IN ICarrierConfig* piCc)
 {
-    IMS_TRACE_D("CreateVideoConfiguration()", 0, 0, 0);
-
     VideoConfiguration* pConfig = new VideoConfiguration(MEDIA_TYPE_AUDIOVIDEO);
 
     if (pConfig == IMS_NULL)
@@ -231,7 +222,7 @@ IMS_BOOL MediaSessionConfig::CreateVideoConfiguration(IN ICarrierConfig* piCc)
 
     if (!pConfig->Create(piCc))
     {
-        IMS_TRACE_E(0, "Creating an video configuration failed", 0, 0, 0);
+        IMS_TRACE_E(0, "CreateVideoConfiguration - failed", 0, 0, 0);
 
         delete pConfig;
         return IMS_FALSE;
@@ -245,8 +236,6 @@ IMS_BOOL MediaSessionConfig::CreateVideoConfiguration(IN ICarrierConfig* piCc)
 PROTECTED
 IMS_BOOL MediaSessionConfig::CreateTextConfiguration(IN ICarrierConfig* piCc)
 {
-    IMS_TRACE_D("CreateTextConfiguration()", 0, 0, 0);
-
     TextConfiguration* pConfig = new TextConfiguration(MEDIA_TYPE_TEXT);
 
     if (pConfig == IMS_NULL)
@@ -256,7 +245,7 @@ IMS_BOOL MediaSessionConfig::CreateTextConfiguration(IN ICarrierConfig* piCc)
 
     if (!pConfig->Create(piCc))
     {
-        IMS_TRACE_E(0, "Creating an text configuration failed", 0, 0, 0);
+        IMS_TRACE_E(0, "CreateTextConfiguration - failed", 0, 0, 0);
 
         delete pConfig;
         return IMS_FALSE;

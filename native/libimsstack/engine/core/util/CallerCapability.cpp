@@ -327,7 +327,7 @@ IMS_BOOL CallerCapability::HasFeature(IN const Feature* pFeature) const
         return IMS_FALSE;
     }
 
-    FeatureSet* pFeatureSet = Lookup(pFeature->GetTag());
+    const FeatureSet* pFeatureSet = Lookup(pFeature->GetTag());
 
     if (pFeatureSet == IMS_NULL)
     {
@@ -530,7 +530,6 @@ IMS_SINT32 CallerCapability::AddFeature(IN const AString& strTag)
     }
     else
     {
-        // TODO:: if failed, what to do ???
         if (Attach(strTag, AString::ConstNull()))
         {
             return FEATURE_CHANGED;
@@ -554,7 +553,6 @@ IMS_SINT32 CallerCapability::AddFeature(IN const AString& strTag, IN const AStri
     }
     else
     {
-        // TODO:: if failed, what to do ???
         if (Attach(strTag, strValue))
         {
             return FEATURE_CHANGED;

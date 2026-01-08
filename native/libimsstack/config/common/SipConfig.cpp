@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "IImsPrivateProperty.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
 
+#include "ICarrierConfig.h"
 #include "private/SipConfig.h"
 
 __IMS_TRACE_TAG_CONF__;
@@ -73,6 +75,9 @@ SipConfig::SipConfig(IN IMS_SINT32 nSlotId) :
         m_nTimerValue100Trying(200),
         m_nTcpCriterionLength(TCP_CRITERION_LEN),
         m_objTcpTimerValues(SipConfig::TcpTimerValues()),
+        m_nHideMacInPaniHeader(HIDE_MAC_IN_PANI),
+        m_nSupportMultipleReg(CarrierConfig::Ims::MULTIPLE_REGISTRATION_NONE),
+        m_nRegContactUserInfoPart(CarrierConfig::Ims::REGISTRATION_CONTACT_USER_INFO_PART_UUID),
         m_nRegExpiresMask(EXPIRES_NONE),
         m_nRegExpiration(DEFAULT_EXPIRATION),
         m_bRegSubscription(IMS_TRUE),
@@ -164,17 +169,16 @@ IMS_SINT32 SipConfig::GetTimerValueT2() const
 
 PROTECTED VIRTUAL IMS_BOOL SipConfig::ReadFrom()
 {
-    ICarrierConfig* piCc = GetCarrierConfig();
+    const ICarrierConfig* piCc = GetCarrierConfig();
 
     m_bCompactFormConfigured =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_SIP_COMPACT_FORM_ENABLED_BOOL);
 
     m_nSipFeatureCaps = ReadSipFeatureCaps(piCc);
 
-    m_nDeviceId = DEVICE_ID_GSMA_IMEI;
+    m_nDeviceId = piCc->GetInt(CarrierConfig::Ims::KEY_SIP_DEVICE_ID_TYPE_INT, DEVICE_ID_GSMA_IMEI);
 
-    m_nTimerValue100Trying =
-            piCc->GetInt(CarrierConfig::Assets::KEY_SIP_TIMER_100_TRYING_MILLIS_INT);
+    m_nTimerValue100Trying = piCc->GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_100_TRYING_MILLIS_INT);
 
     IImsPrivateProperty* piProperty = UtilService::GetUtilService()->GetPrivateProperty();
 
@@ -184,6 +188,14 @@ PROTECTED VIRTUAL IMS_BOOL SipConfig::ReadFrom()
     m_nTcpCriterionLength = piCc->GetInt(CarrierConfig::Ims::KEY_IPV6_SIP_MTU_SIZE_CELLULAR_INT);
 
     m_nTransportType = piCc->GetInt(CarrierConfig::Ims::KEY_SIP_PREFERRED_TRANSPORT_INT);
+
+    m_nHideMacInPaniHeader = piCc->GetInt(
+            CarrierConfig::Ims::KEY_HIDE_MAC_ADDRESS_IN_PANI_HEADER_INT, HIDE_MAC_IN_PANI);
+    m_nSupportMultipleReg = piCc->GetInt(CarrierConfig::Ims::KEY_SUPPORT_MULTIPLE_REGISTRATION_INT,
+            CarrierConfig::Ims::MULTIPLE_REGISTRATION_NONE);
+    m_nRegContactUserInfoPart =
+            piCc->GetInt(CarrierConfig::Ims::KEY_REGISTRATION_CONTACT_USER_INFO_PART_INT,
+                    CarrierConfig::Ims::REGISTRATION_CONTACT_USER_INFO_PART_UUID);
 
     m_nRegExpiration = piCc->GetInt(CarrierConfig::Ims::KEY_REGISTRATION_EXPIRY_TIMER_SEC_INT);
     m_nRegExpiresMask = EXPIRES_NONE;
@@ -287,7 +299,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfig::Update(
             }
             else
             {
-                ICarrierConfig* piCc = GetCarrierConfig();
+                const ICarrierConfig* piCc = GetCarrierConfig();
                 m_nTcpCriterionLength =
                         piCc->GetInt(CarrierConfig::Ims::KEY_IPV6_SIP_MTU_SIZE_CELLULAR_INT);
             }
@@ -314,7 +326,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfig::Update(
             }
             else
             {
-                ICarrierConfig* piCc = GetCarrierConfig();
+                const ICarrierConfig* piCc = GetCarrierConfig();
                 m_bRegSubscription = piCc->GetBoolean(
                         CarrierConfig::Ims::KEY_REGISTRATION_EVENT_PACKAGE_SUPPORTED_BOOL);
             }
@@ -389,7 +401,7 @@ IMS_BOOL SipConfig::GetTimerValueForUpdate(IN const IMS_CHAR* pszKey, IN IMS_SIN
     }
     else
     {
-        ICarrierConfig* piCc = GetCarrierConfig();
+        const ICarrierConfig* piCc = GetCarrierConfig();
         nTimerValue = piCc->GetInt(pszKey, nDefaultValue);
     }
 
@@ -422,17 +434,20 @@ void SipConfig::UpdateTcpTimerValues()
             m_objTcpTimerValues.m_nTvConnectionWaiting, m_objTcpTimerValues.m_nTvWouldblockWaiting);
 }
 
-PRIVATE GLOBAL IMS_SINT32 SipConfig::ReadSipFeatureCaps(IN ICarrierConfig* piCc)
+PRIVATE GLOBAL IMS_SINT32 SipConfig::ReadSipFeatureCaps(IN const ICarrierConfig* piCc)
 {
     IMS_SINT32 nSipFeatureCaps = SIP_FEATURE_CAPS_RPORT;
 
     nSipFeatureCaps |= SIP_FEATURE_CAPS_TRUST_DOMAIN;
     nSipFeatureCaps |= SIP_FEATURE_CAPS_PPI_HEADER_IN_REG_SUB;
-    nSipFeatureCaps |= SIP_FEATURE_CAPS_EXPIRES_HEADER_IN_REG;
     nSipFeatureCaps |= SIP_FEATURE_CAPS_SIP_INSTANCE_FOR_CALLER_PREFERENCE;
-    nSipFeatureCaps |= SIP_FEATURE_CAPS_CELLULAR_NETWORK_INFO_HEADER;
     nSipFeatureCaps |= SIP_FEATURE_CAPS_USER_AGENT;
     nSipFeatureCaps |= SIP_FEATURE_CAPS_CONTACT_IN_ALL_1XX;
+
+    if (piCc->GetBoolean(CarrierConfig::Ims::KEY_ALLOW_CELLULAR_NETWORK_INFO_HEADER_BOOL))
+    {
+        nSipFeatureCaps |= SIP_FEATURE_CAPS_CELLULAR_NETWORK_INFO_HEADER;
+    }
 
     if (piCc->GetBoolean(CarrierConfig::Ims::KEY_GRUU_ENABLED_BOOL))
     {
@@ -450,36 +465,37 @@ PRIVATE GLOBAL IMS_SINT32 SipConfig::ReadSipFeatureCaps(IN ICarrierConfig* piCc)
         nSipFeatureCaps |= SIP_FEATURE_CAPS_UDP_FALLBACK;
     }
 
-    if (piCc->GetBoolean(CarrierConfig::Assets::KEY_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR_BOOL))
+    if (piCc->GetBoolean(CarrierConfig::Ims::KEY_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR_BOOL))
     {
         nSipFeatureCaps |= SIP_FEATURE_CAPS_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR;
     }
 
     if (piCc->GetBoolean(
-                CarrierConfig::Assets::KEY_REQUEST_URI_VALIDATION_REQUIRED_IN_MID_DIALOG_BOOL))
+                CarrierConfig::Ims::KEY_REQUEST_URI_VALIDATION_REQUIRED_IN_MID_DIALOG_BOOL))
     {
         nSipFeatureCaps |= SIP_FEATURE_CAPS_REQUEST_URI_VALIDATION_REQUIRED_IN_MID_DIALOG;
     }
 
-    if (piCc->GetBoolean(CarrierConfig::Assets::
+    if (piCc->GetBoolean(CarrierConfig::Ims::
                         KEY_SESSION_TIMER_UPDATE_REQUIRED_IN_SESSION_UPDATE_BY_REINVITE_BOOL))
     {
         nSipFeatureCaps |= SIP_FEATURE_CAPS_SESSION_TIMER_UPDATE_REQUIRED_BY_REINVITE;
     }
 
-    if (piCc->GetBoolean(CarrierConfig::Assets::
-                        KEY_ALLOW_SIP_INSTANCE_PARAMETER_IN_CONTACT_FOR_NON_REGISTER_REQUEST_BOOL))
+    if (piCc->GetBoolean(CarrierConfig::Ims::
+                        KEY_ALLOW_SIP_INSTANCE_PARAM_IN_CONTACT_FOR_NON_REGISTER_REQUEST_BOOL))
     {
         nSipFeatureCaps |=
                 SIP_FEATURE_CAPS_SIP_INSTANCE_PARAM_REQUIRED_IN_CONTACT_FOR_NON_REGISTER_REQUEST;
     }
 
-    if (piCc->GetBoolean(CarrierConfig::Assets::KEY_HIDE_MAC_ADDRESS_IN_PANI_HEADER_BOOL))
+    if (piCc->GetBoolean(
+                CarrierConfig::Ims::KEY_IGNORE_UDP_TRANSPORT_PARAMETER_FOR_OUTGOING_REQUEST_BOOL))
     {
-        nSipFeatureCaps |= SIP_FEATURE_CAPS_HIDE_MAC_ADDRESS_IN_PANI_HEADER;
+        nSipFeatureCaps |= SIP_FEATURE_CAPS_IGNORE_UDP_TRANSPORT_PARAMETER_FOR_OUTGOING_REQUEST;
     }
 
-    if (piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_COUNTRY_PARAM_IN_PANI_HEADER_BOOL))
+    if (piCc->GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_COUNTRY_PARAM_IN_PANI_HEADER_BOOL))
     {
         nSipFeatureCaps |= SIP_FEATURE_CAPS_COUNTRY_PARAM_IN_PANI_HEADER;
     }
@@ -495,14 +511,18 @@ PRIVATE GLOBAL IMS_SINT32 SipConfig::ReadSipFeatureCaps(IN ICarrierConfig* piCc)
         nSipFeatureCaps |= SIP_FEATURE_CAPS_PANI_HEADER_IN_INITIAL_REG;
     }
 
+    if (piCc->GetBoolean(CarrierConfig::Ims::KEY_REQUIRE_SIP_EXPIRES_HEADER_IN_REGISTER_BOOL))
+    {
+        nSipFeatureCaps |= SIP_FEATURE_CAPS_EXPIRES_HEADER_IN_REG;
+    }
+
     if (piCc->GetBoolean(
-                CarrierConfig::Ims::KEY_ALLOW_ALGORITHM_PARAMETER_IN_SIP_AUTHORIZATION_HEADER_BOOL))
+                CarrierConfig::Ims::KEY_ALLOW_ALGORITHM_PARAM_IN_SIP_AUTHORIZATION_HEADER_BOOL))
     {
         nSipFeatureCaps |= SIP_FEATURE_CAPS_AUTHENTICATION_ALGORITHM_PARAMETER;
     }
 
-    if (!piCc->GetBoolean(
-                CarrierConfig::Ims::KEY_USE_SIP_USER_AGENT_HEADER_ONLY_FOR_UA_STRING_BOOL))
+    if (!piCc->GetBoolean(CarrierConfig::Ims::KEY_USE_SIP_USER_AGENT_HEADER_IN_UA_STRING_BOOL))
     {
         nSipFeatureCaps |= SIP_FEATURE_CAPS_UA_SET_BY_CONTEXT;
     }

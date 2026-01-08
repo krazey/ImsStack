@@ -30,7 +30,7 @@ public:
     RegBinding();
 
 protected:
-    virtual ~RegBinding();
+    ~RegBinding() override;
 
     RegBinding(IN const RegBinding&) = delete;
     RegBinding& operator=(IN const RegBinding&) = delete;
@@ -80,6 +80,7 @@ protected:
 
     IMS_BOOL IsBehindNat() const override;
     IMS_BOOL IsWithinTrustDomain() const override;
+    IMS_BOOL IsEmergencyRegistration() const override;
     void NotifyCallerCapabilityChanged() override;
     void SetListener(IN IRegBindingListener* piListener) override;
 

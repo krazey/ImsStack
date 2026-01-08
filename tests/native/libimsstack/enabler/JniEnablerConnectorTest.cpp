@@ -50,7 +50,7 @@ protected:
 
 TEST_F(JniEnablerConnectorTest, GetInstanceReturnsSameInstance)
 {
-    JniEnablerConnector* pOtherConnector = &JniEnablerConnector::GetInstance();
+    const JniEnablerConnector* pOtherConnector = &JniEnablerConnector::GetInstance();
 
     EXPECT_EQ(pConnector, pOtherConnector);
 }

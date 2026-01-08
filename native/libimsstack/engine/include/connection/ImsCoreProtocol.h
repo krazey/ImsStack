@@ -24,17 +24,16 @@ class CoreServiceConfig;
 
 class ImsCoreProtocol : public ServiceProtocol
 {
-private:
-    ImsCoreProtocol();
+public:
+    inline ImsCoreProtocol() :
+            ServiceProtocol()
+    {
+    }
+    ~ImsCoreProtocol() override = default;
 
 public:
-    inline virtual ~ImsCoreProtocol() {}
-
     ImsCoreProtocol(IN const ImsCoreProtocol&) = delete;
     ImsCoreProtocol& operator=(IN const ImsCoreProtocol&) = delete;
-
-public:
-    static ImsCoreProtocol* GetInstance();
 
 private:
     // ServiceProtocol class

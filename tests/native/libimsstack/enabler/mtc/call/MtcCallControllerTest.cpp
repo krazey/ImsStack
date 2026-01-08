@@ -14,26 +14,41 @@
  * limitations under the License.
  */
 
+#include "Engine.h"
+#include "IConfiguration.h"
 #include "ImsList.h"
-#include "ImsMap.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
+#include "MockISession.h"
+#include "PlatformContext.h"
+#include "TestConfigService.h"
 #include "call/ISilentRedialHelper.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
+#include "call/MockIMtcSession.h"
 #include "call/MtcCallController.h"
+#include "call/termination/ByeTransactionHandler.h"
 #include "conferencecall/MockIConferenceController.h"
 #include "conferencecall/MockIConferenceManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "ect/MockIEctManager.h"
 #include "helper/MockICallStateProxy.h"
+#include "helper/MockIPassiveTimerHolder.h"
+#include "helper/OperationAsyncRunner.h"
+#include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
+#include "helper/sipinterfaceholder/MockSessionInterfaceHolder.h"
+#include "media/MockIMtcMediaManager.h"
 #include <functional>
 #include <gtest/gtest.h>
 #include <initializer_list>
+#include <memory>
 
 using ::testing::_;
 using ::testing::AnyNumber;
 using ::testing::Eq;
+using ::testing::Invoke;
+using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -46,30 +61,48 @@ public:
     MockIMtcCallManager objCallManager;
     MockIEctManager objEctManager;
     MockICallStateProxy objCallStateProxy;
+    MockMtcConfigurationProxy objConfigurationProxy;
+    MockIMtcMediaManager objMediaManager;
+    MockIPassiveTimerHolder objPassiveTimer;
+    MockIMtcSession objMtcSession;
+    MockISession objISession;
+    MockIMtcSipInterfaceFactory objSipInterfaceFactory;
+    MockSessionInterfaceHolder* pSessionInterfaceHolder;
+    TestConfigService objConfigService;
+    MediaInfo objMediaInfo;
 
 protected:
     virtual void SetUp() override
     {
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_CONFIG, &objConfigService);
+        Engine::GetConfiguration()->RefreshConfigs(IMS_SLOT_0);
+        pSessionInterfaceHolder = new MockSessionInterfaceHolder();
+
+        ON_CALL(objContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
         ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
         ON_CALL(objContext, GetConferenceManager).WillByDefault(ReturnRef(objConferenceManager));
         ON_CALL(objContext, GetEctManager).WillByDefault(ReturnRef(objEctManager));
         ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
+        ON_CALL(objContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
+        ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
+        ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objISession));
+        ON_CALL(objContext, GetSipInterfaceFactory)
+                .WillByDefault(ReturnRef(objSipInterfaceFactory));
+        ON_CALL(objSipInterfaceFactory, GetISessionHolder)
+                .WillByDefault(ReturnRef(*pSessionInterfaceHolder));
+        ON_CALL(objMediaManager, GetMediaInfo(Ref(objISession)))
+                .WillByDefault(ReturnRef(objMediaInfo));
 
         pCallController = new MtcCallController(objContext);
     }
 
-    virtual void TearDown() override { delete pCallController; }
-
-    ImsList<IMtcCall*> CreateCallList(std::initializer_list<IMtcCall*> lstCalls)
+    virtual void TearDown() override
     {
-        ImsList<IMtcCall*> lstOut;
-
-        for (IMtcCall* pCall : lstCalls)
-        {
-            lstOut.Append(pCall);
-        }
-
-        return lstOut;
+        delete pSessionInterfaceHolder;
+        delete pCallController;
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
     }
 
     MockIMtcCall* CreateMockIMtcCall(CallKey nKey)
@@ -93,11 +126,11 @@ TEST_F(MtcCallControllerTest, OpenCreatesCall)
     CallKey nCallKey = 1;
     MockIMtcCall* pCall = CreateMockIMtcCall(nCallKey);
 
-    EXPECT_CALL(objCallManager, CreateCall(eServiceType, Eq(std::ref(objCallInfo))))
+    EXPECT_CALL(objCallManager, CreateCall(eServiceType, Eq(std::ref(objCallInfo)), _))
             .Times(1)
             .WillRepeatedly(Return(pCall));
 
-    pCallController->Open(eServiceType, objCallInfo);
+    pCallController->Open(eServiceType, objCallInfo, AString::ConstNull());
 
     delete pCall;
 }
@@ -107,11 +140,11 @@ TEST_F(MtcCallControllerTest, OpenReturnsCreatedCallKey)
     CallKey nCallKey = 1;
     MockIMtcCall* pCall = CreateMockIMtcCall(nCallKey);
 
-    ON_CALL(objCallManager, CreateCall(_, _)).WillByDefault(Return(pCall));
+    ON_CALL(objCallManager, CreateCall(_, _, _)).WillByDefault(Return(pCall));
 
     ServiceType eServiceType = ServiceType::NORMAL;
     CallInfo objCallInfo;
-    EXPECT_EQ(nCallKey, pCallController->Open(eServiceType, objCallInfo));
+    EXPECT_EQ(nCallKey, pCallController->Open(eServiceType, objCallInfo, AString::ConstNull()));
 
     delete pCall;
 }
@@ -129,6 +162,20 @@ TEST_F(MtcCallControllerTest, AttachAttachesTargetCall)
     delete pCall;
 }
 
+TEST_F(MtcCallControllerTest, DetachInvokesRemoveCallUsingAsyncRunner)
+{
+    CallKey nCallKey = 1;
+    EXPECT_CALL(objContext, RunAsyncOperation(_, _))
+            .WillOnce(Invoke(
+                    []([[maybe_unused]] void* pOwner, std::function<void()> objOperation)
+                    {
+                        objOperation();
+                    }));
+    EXPECT_CALL(objCallManager, RemoveCall(nCallKey)).Times(1);
+
+    pCallController->Detach(nCallKey);
+}
+
 TEST_F(MtcCallControllerTest, HandleIncomingCreatesCall)
 {
     ServiceType eServiceType = ServiceType::NORMAL;
@@ -137,12 +184,12 @@ TEST_F(MtcCallControllerTest, HandleIncomingCreatesCall)
     ON_CALL(objService, GetServiceType).WillByDefault(Return(eServiceType));
 
     MockIMtcCall objCall;
-    EXPECT_CALL(objCallManager, CreateCall(_, _)).Times(1).WillRepeatedly(Return(&objCall));
+    EXPECT_CALL(objCallManager, CreateCall(_, _, _)).Times(1).WillRepeatedly(Return(&objCall));
 
     pCallController->HandleIncoming(&objService, IMS_NULL);
 }
 
-TEST_F(MtcCallControllerTest, HandleIncomingCallsTargetCall)
+TEST_F(MtcCallControllerTest, HandleIncomingInvokesTargetCall)
 {
     MockIMtcService objService;
     ISession* pSession = reinterpret_cast<ISession*>(0x1);
@@ -150,20 +197,19 @@ TEST_F(MtcCallControllerTest, HandleIncomingCallsTargetCall)
     MockIMtcCall objCall;
     EXPECT_CALL(objCall, HandleIncoming(pSession)).Times(1);
 
-    ON_CALL(objCallManager, CreateCall(_, _)).WillByDefault(Return(&objCall));
+    ON_CALL(objCallManager, CreateCall(_, _, _)).WillByDefault(Return(&objCall));
 
     pCallController->HandleIncoming(&objService, pSession);
 }
 
-TEST_F(MtcCallControllerTest, StartCallsTargetCall)
+TEST_F(MtcCallControllerTest, StartInvokesTargetCall)
 {
     CallKey nCallKey = 1;
     CallType eCallType = CallType::VOIP;
     AString strTarget = "target";
     MediaInfo objMediaInfo;
-    ImsMap<SuppType, SuppService*> objSuppServices;
+    ImsList<SuppService*> objSuppServices;
 
-    // TODO: Make a matcher for ImsMap<SuppType, SuppService*>
     MockIMtcCall objCall;
     EXPECT_CALL(objCall, Start(eCallType, strTarget, objMediaInfo, _)).Times(1);
 
@@ -172,7 +218,7 @@ TEST_F(MtcCallControllerTest, StartCallsTargetCall)
     pCallController->Start(nCallKey, eCallType, strTarget, objMediaInfo, objSuppServices);
 }
 
-TEST_F(MtcCallControllerTest, HandleUserAlertCallsTargetCall)
+TEST_F(MtcCallControllerTest, HandleUserAlertInvokesTargetCall)
 {
     CallKey nCallKey = 1;
 
@@ -184,7 +230,7 @@ TEST_F(MtcCallControllerTest, HandleUserAlertCallsTargetCall)
     pCallController->HandleUserAlert(nCallKey);
 }
 
-TEST_F(MtcCallControllerTest, AcceptCallsTargetCall)
+TEST_F(MtcCallControllerTest, AcceptInvokesTargetCall)
 {
     CallKey nCallKey = 1;
     CallType eCallType = CallType::VOIP;
@@ -198,7 +244,7 @@ TEST_F(MtcCallControllerTest, AcceptCallsTargetCall)
     pCallController->Accept(nCallKey, eCallType, objMediaInfo);
 }
 
-TEST_F(MtcCallControllerTest, RejectCallsTargetCall)
+TEST_F(MtcCallControllerTest, RejectInvokesTargetCall)
 {
     CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
     CallKey nCallKey = 1;
@@ -211,7 +257,7 @@ TEST_F(MtcCallControllerTest, RejectCallsTargetCall)
     pCallController->Reject(nCallKey, objReason);
 }
 
-TEST_F(MtcCallControllerTest, HoldCallsTargetCall)
+TEST_F(MtcCallControllerTest, HoldInvokesTargetCall)
 {
     CallKey nCallKey = 1;
     MediaInfo objMediaInfo;
@@ -224,7 +270,7 @@ TEST_F(MtcCallControllerTest, HoldCallsTargetCall)
     pCallController->Hold(nCallKey, objMediaInfo);
 }
 
-TEST_F(MtcCallControllerTest, ResumeCallsTargetCall)
+TEST_F(MtcCallControllerTest, ResumeInvokesTargetCall)
 {
     CallKey nCallKey = 1;
     MediaInfo objMediaInfo;
@@ -237,7 +283,7 @@ TEST_F(MtcCallControllerTest, ResumeCallsTargetCall)
     pCallController->Resume(nCallKey, objMediaInfo);
 }
 
-TEST_F(MtcCallControllerTest, AcceptResumeCallsTargetCall)
+TEST_F(MtcCallControllerTest, AcceptResumeInvokesTargetCall)
 {
     CallKey nCallKey = 1;
     CallType eCallType = CallType::VOIP;
@@ -251,7 +297,7 @@ TEST_F(MtcCallControllerTest, AcceptResumeCallsTargetCall)
     pCallController->AcceptResume(nCallKey, eCallType, objMediaInfo);
 }
 
-TEST_F(MtcCallControllerTest, RejectResumeCallsTargetCall)
+TEST_F(MtcCallControllerTest, RejectResumeInvokesTargetCall)
 {
     CallKey nCallKey = 1;
     CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
@@ -264,17 +310,26 @@ TEST_F(MtcCallControllerTest, RejectResumeCallsTargetCall)
     pCallController->RejectResume(nCallKey, objReason);
 }
 
-TEST_F(MtcCallControllerTest, TerminateCallsAsyncRunner)
+TEST_F(MtcCallControllerTest, TerminateInvokesTerminateUsingAsyncRunner)
 {
     CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
     CallKey nCallKey = 1;
+    MockIMtcCall objCall;
+    ON_CALL(objCallManager, GetCallByCallKey(nCallKey)).WillByDefault(Return(&objCall));
 
-    EXPECT_CALL(objContext, GetAsyncRunner).Times(1);
+    EXPECT_CALL(objContext, RunAsyncOperation(_, _))
+            .WillOnce(Invoke(
+                    []([[maybe_unused]] void* pOwner, std::function<void()> objOperation)
+                    {
+                        objOperation();
+                    }));
+
+    EXPECT_CALL(objCall, Terminate(objReason)).Times(1);
 
     pCallController->Terminate(nCallKey, objReason);
 }
 
-TEST_F(MtcCallControllerTest, UpdateCallsTargetCall)
+TEST_F(MtcCallControllerTest, UpdateInvokesTargetCall)
 {
     CallKey nCallKey = 1;
     CallType eCallType = CallType::VOIP;
@@ -288,7 +343,7 @@ TEST_F(MtcCallControllerTest, UpdateCallsTargetCall)
     pCallController->Update(nCallKey, eCallType, objMediaInfo);
 }
 
-TEST_F(MtcCallControllerTest, CancelUpdateCallsTargetCall)
+TEST_F(MtcCallControllerTest, CancelUpdateInvokesTargetCall)
 {
     CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
     CallKey nCallKey = 1;
@@ -301,7 +356,7 @@ TEST_F(MtcCallControllerTest, CancelUpdateCallsTargetCall)
     pCallController->CancelUpdate(nCallKey, objReason);
 }
 
-TEST_F(MtcCallControllerTest, AcceptUpdateCallsTargetCall)
+TEST_F(MtcCallControllerTest, AcceptUpdateInvokesTargetCall)
 {
     CallKey nCallKey = 1;
     CallType eCallType = CallType::VOIP;
@@ -315,7 +370,7 @@ TEST_F(MtcCallControllerTest, AcceptUpdateCallsTargetCall)
     pCallController->AcceptUpdate(nCallKey, eCallType, objMediaInfo);
 }
 
-TEST_F(MtcCallControllerTest, RejectUpdateCallsTargetCall)
+TEST_F(MtcCallControllerTest, RejectUpdateInvokesTargetCall)
 {
     CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
     CallKey nCallKey = 1;
@@ -328,7 +383,7 @@ TEST_F(MtcCallControllerTest, RejectUpdateCallsTargetCall)
     pCallController->RejectUpdate(nCallKey, objReason);
 }
 
-TEST_F(MtcCallControllerTest, SendUssdCallsTargetCall)
+TEST_F(MtcCallControllerTest, SendUssdInvokesTargetCall)
 {
     AString strUssd = "ussd";
     CallKey nCallKey = 1;
@@ -346,7 +401,6 @@ TEST_F(MtcCallControllerTest, MergeToConferenceCallsProcessesMerge)
     CallKey nCallKey = 1;
     ImsList<ConfUser*> objUsers;
 
-    // TODO: Make a matcher for ImsList<ConfUser*>
     MockIConferenceController objConferenceController;
     EXPECT_CALL(objConferenceController, ProcessCommand(IConferenceController::MERGE, _)).Times(1);
 
@@ -377,7 +431,6 @@ TEST_F(MtcCallControllerTest, AddToConferenceCallsProcessesAdd)
     CallKey nCallKey = 1;
     ImsList<ConfUser*> objUsers;
 
-    // TODO: Make a matcher for ImsList<ConfUser*>
     MockIConferenceController objConferenceController;
     EXPECT_CALL(objConferenceController, ProcessCommand(IConferenceController::ADD, _)).Times(1);
 
@@ -404,7 +457,6 @@ TEST_F(MtcCallControllerTest, RemoveFromConferenceCallsProcessesRemove)
     CallKey nCallKey = 1;
     ImsList<ConfUser*> objUsers;
 
-    // TODO: Make a matcher for ImsList<ConfUser*>
     MockIConferenceController objConferenceController;
     EXPECT_CALL(objConferenceController, ProcessCommand(IConferenceController::REMOVE, _)).Times(1);
 
@@ -436,18 +488,78 @@ TEST_F(MtcCallControllerTest, TransferCallsEctManager)
     pCallController->Transfer(nCallKey, strTarget);
 }
 
+TEST_F(MtcCallControllerTest, HandleByeTransactionAddsListenerToSessionHolder)
+{
+    CallKey nCallKey = 1;
+    std::function<void(ISession&)> objOperation = [](ISession&)
+    {
+    };
+
+    EXPECT_CALL(*pSessionInterfaceHolder, AddListener(_)).Times(1);
+
+    pCallController->HandleByeTransaction(nCallKey, objOperation);
+
+    EXPECT_CALL(*pSessionInterfaceHolder, RemoveListener(_)).Times(0);
+}
+
+TEST_F(MtcCallControllerTest, OnByeTransactionCompletedRemovesListenerAndDeletesHandler)
+{
+    CallKey nCallKey = 1;
+    EXPECT_CALL(*pSessionInterfaceHolder, RemoveListener(_));
+
+    std::function<void(ISession&)> objOperation = [](ISession&)
+    {
+    };
+
+    pCallController->HandleByeTransaction(nCallKey, objOperation);
+
+    // Pass a dummy handler to trigger ClearByeTransactionHandlers.
+    // The handler itself is not managed by the controller, so it must be deleted manually.
+    std::unique_ptr<ByeTransactionHandler> pHandler =
+            std::make_unique<ByeTransactionHandler>(nCallKey, *pCallController,
+                    [](ISession&)
+                    {
+                    });
+    pCallController->OnByeTransactionCompleted(pHandler.get());
+}
+
+TEST_F(MtcCallControllerTest, OnByeTransactionCompletedRemovesListenerAndDeletesAllHandlers)
+{
+    CallKey nCallKey = 1;
+    std::function<void(ISession&)> objOperation = [](ISession&)
+    {
+    };
+
+    EXPECT_CALL(*pSessionInterfaceHolder, AddListener(_)).Times(2);
+
+    pCallController->HandleByeTransaction(nCallKey, objOperation);
+    pCallController->HandleByeTransaction(nCallKey, objOperation);
+
+    EXPECT_CALL(*pSessionInterfaceHolder, RemoveListener(_)).Times(2);
+
+    std::unique_ptr<ByeTransactionHandler> pHandler =
+            std::make_unique<ByeTransactionHandler>(nCallKey, *pCallController,
+                    [](ISession&)
+                    {
+                    });
+    pCallController->OnByeTransactionCompleted(pHandler.get());
+}
+
 TEST_F(MtcCallControllerTest, GetRedialHelperCreatesSilentRedialHelper)
 {
     const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE);
-    ISilentRedialHelper& objRedialHelper = pCallController->GetRedialHelper(objContext, objReason);
+    const ISilentRedialHelper& objRedialHelper =
+            pCallController->GetRedialHelper(objContext, objReason);
     EXPECT_NE(&objRedialHelper, nullptr);
 }
 
 TEST_F(MtcCallControllerTest, GetRedialHelperWithSameReasonDoesNotCreatesSilentRedialHelper)
 {
     const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE);
-    ISilentRedialHelper& objRedialHelper1 = pCallController->GetRedialHelper(objContext, objReason);
-    ISilentRedialHelper& objRedialHelper2 = pCallController->GetRedialHelper(objContext, objReason);
+    const ISilentRedialHelper& objRedialHelper1 =
+            pCallController->GetRedialHelper(objContext, objReason);
+    const ISilentRedialHelper& objRedialHelper2 =
+            pCallController->GetRedialHelper(objContext, objReason);
     EXPECT_EQ(&objRedialHelper1, &objRedialHelper2);
 }
 
@@ -455,10 +567,10 @@ TEST_F(MtcCallControllerTest, GetRedialHelperWithDifferentTypeCreatesSilentRedia
 {
     const CallReasonInfo objReason1(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE);
     const CallReasonInfo objReason2(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER);
-    ISilentRedialHelper& objRedialHelper1 =
+    const ISilentRedialHelper& objRedialHelper1 =
             pCallController->GetRedialHelper(objContext, objReason1);
     IMS_UINT32 nType1 = objRedialHelper1.GetType();
-    ISilentRedialHelper& objRedialHelper2 =
+    const ISilentRedialHelper& objRedialHelper2 =
             pCallController->GetRedialHelper(objContext, objReason2);
     EXPECT_NE(nType1, objRedialHelper2.GetType());
 }
@@ -466,10 +578,25 @@ TEST_F(MtcCallControllerTest, GetRedialHelperWithDifferentTypeCreatesSilentRedia
 TEST_F(MtcCallControllerTest, ReleaseRedialHelperDeletesSilentRedialHelper)
 {
     const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE);
-    ISilentRedialHelper& objRedialHelper1 = pCallController->GetRedialHelper(objContext, objReason);
+    const ISilentRedialHelper& objRedialHelper1 =
+            pCallController->GetRedialHelper(objContext, objReason);
     IMS_UINT32 nType1 = objRedialHelper1.GetType();
     pCallController->ReleaseRedialHelper();
-    ISilentRedialHelper& objRedialHelper2 = pCallController->GetRedialHelper(objContext, objReason);
+    const ISilentRedialHelper& objRedialHelper2 =
+            pCallController->GetRedialHelper(objContext, objReason);
     // nothing to check : cannot check address
     EXPECT_EQ(nType1, objRedialHelper2.GetType());
+}
+
+TEST_F(MtcCallControllerTest, GetActiveRedialHelper)
+{
+    pCallController->ReleaseRedialHelper();
+    const ISilentRedialHelper* pNullRedialHelper = pCallController->GetActiveRedialHelper();
+    EXPECT_EQ(pNullRedialHelper, nullptr);
+
+    const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE);
+    const ISilentRedialHelper& objRedialHelper =
+            pCallController->GetRedialHelper(objContext, objReason);
+    const ISilentRedialHelper* pActiveRedialHelper = pCallController->GetActiveRedialHelper();
+    EXPECT_EQ(&objRedialHelper, pActiveRedialHelper);
 }

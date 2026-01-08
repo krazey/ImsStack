@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,61 +19,70 @@
 
 #include "config/MediaConfiguration.h"
 
+/**
+ * @class TextConfiguration
+ * @brief Manages Real-Time Text (RTT) specific media configurations.
+ * @details This class holds all configuration parameters related to RTT streams,
+ * such as payload types for T.140 and RED, DSCP values, and other codec settings.
+ */
 class TextConfiguration : public MediaConfiguration
 {
 public:
     /**
-     * @brief Construct a new text configuration
+     * @brief Constructs a new TextConfiguration object.
      *
-     * @param eSessionType mediasession type (as: text)
+     * @param eSessionType The type of media session, typically MEDIA_TYPE_TEXT.
      */
     explicit TextConfiguration(MEDIA_CONTENT_TYPE eSessionType = MEDIA_TYPE_TEXT);
+
     /**
-     * @brief Destroy the text configuration
-     *
+     * @brief Destroys the TextConfiguration object.
      */
-    virtual ~TextConfiguration();
+    ~TextConfiguration() override;
+
     /**
-     * @brief Create codec using the configuration
+     * @brief Initializes the text configuration by reading carrier-specific settings.
      *
-     * @param piCc configuration
-     * @return IMS_BOOL Return true if the create function is executed without error
-     * Return false if the create function is failed
+     * @param piCc A pointer to the carrier configuration interface.
+     * @return IMS_TRUE on success, IMS_FALSE on failure.
      */
-    IMS_BOOL Create(IN ICarrierConfig* piCc) override;
+    virtual IMS_BOOL Create(IN ICarrierConfig* piCc) override;
+
     /**
-     * @brief Update codec using the configuration
+     * @brief Updates the text configuration with new carrier-specific settings.
      *
-     * @param piCc configuration
-     * @return IMS_BOOL Return true if the create function is executed without error
-     * Return false if the create function is failed
+     * @param piCc A pointer to the carrier configuration interface.
+     * @return IMS_TRUE on success, IMS_FALSE on failure.
      */
-    IMS_BOOL Update(IN ICarrierConfig* piCc) override;
+    virtual IMS_BOOL Update(IN ICarrierConfig* piCc) override;
+
     /**
-     * @brief Get the T140 payload type number
+     * @brief Gets the payload type number for the T.140 text codec.
      *
-     * @return IMS_SINT32 Return T140 payload type number
+     * @return The T.140 payload type number.
      */
-    IMS_SINT32 GetT140PayloadType() const;
+    virtual IMS_SINT32 GetT140PayloadType() const;
+
     /**
-     * @brief Get the redundant payload type value
+     * @brief Gets the payload type number for the redundant (RED) text codec.
      *
-     * @return IMS_SINT32 Return redendancy payload type number
+     * @return The RED payload type number.
      */
-    IMS_SINT32 GetRedPayloadType() const;
+    virtual IMS_SINT32 GetRedPayloadType() const;
+
     /**
-     * @brief Get the Text dscp value
+     * @brief Gets the Differentiated Services Code Point (DSCP) value for text RTP packets.
      *
-     * @return IMS_SINT32 Return text dscp value
+     * @return The DSCP value.
      */
-    IMS_SINT32 GetTextDscp() const;
+    virtual IMS_SINT32 GetTextDscp() const;
+
     /**
-     * @brief Return whether textxodec emptyredundant is enabled
+     * @brief Checks if sending empty redundant packets for the text codec is enabled.
      *
-     * @return IMS_BOOL Return true if textxodec emptyredundant is enabled
-     * Return false if  textxodec emptyredundant is disabled
+     * @return IMS_TRUE if enabled, otherwise IMS_FALSE.
      */
-    IMS_BOOL IsTextCodecEmptyRedundantEnabled() const;
+    virtual IMS_BOOL IsTextCodecEmptyRedundantEnabled() const;
 
     static const IMS_SINT32 NEED_TO_CHECK_I = 0;
     static const IMS_SINT32 DEFAULT_PAYLOAD_T140 = NEED_TO_CHECK_I;

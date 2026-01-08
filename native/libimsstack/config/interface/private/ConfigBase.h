@@ -20,18 +20,19 @@
 #include "ImsMap.h"
 #include "ImsSlot.h"
 
-#include "ICarrierConfig.h"
+#include "ICarrierConfigListener.h"
 #include "IConfigurable.h"
 
 class IImsPrivateProperty;
 
+class ICarrierConfig;
 class IConfigBuffer;
 
 class ConfigBase : public ImsSlot, public ICarrierConfigListener
 {
 public:
     explicit ConfigBase(IN IMS_SINT32 nSlotId);
-    virtual ~ConfigBase() = 0;
+    ~ConfigBase() override = 0;
 
     ConfigBase(IN const ConfigBase&) = delete;
     ConfigBase& operator=(IN const ConfigBase&) = delete;

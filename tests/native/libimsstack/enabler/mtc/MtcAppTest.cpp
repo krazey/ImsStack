@@ -14,25 +14,35 @@
  * limitations under the License.
  */
 
+#include "Engine.h"
+#include "IConfiguration.h"
+#include "IImsPrivateProperty.h"
 #include "IMtcCallController.h"
 #include "IMtcImsEventReceiver.h"
 #include "IMtcService.h"
+#include "MockICarrierConfig.h"
 #include "MtcApp.h"
+#include "PlatformContext.h"
 #include "ServiceUtil.h"
+#include "TestConfigService.h"
 #include "call/IMtcCallManager.h"
+#include "call/RttAutoUpgrader.h"
 #include "call/radio/IMtcRadioChecker.h"
 #include "conferencecall/IConferenceManager.h"
-#include "configuration/MtcConfigurationManager.h"
 #include "dialingplan/IMtcDialingPlan.h"
 #include "ect/IEctManager.h"
 #include "emergency/IMtcEmergencyServiceManager.h"
 #include "helper/ICallStateProxy.h"
 #include "helper/ILastComeFirstServedHelper.h"
+#include "helper/MtcLocationRefresher.h"
 #include "helper/OperationAsyncRunner.h"
 #include "utility/IMessageUtils.h"
 #include <gtest/gtest.h>
 
 LOCAL IMS_SINT32 SLOT_ID = 0;
+
+using ::testing::_;
+using ::testing::Return;
 
 namespace android
 {
@@ -44,20 +54,39 @@ public:
             MtcApp(SLOT_ID)
     {
     }
-    virtual ~TestMtcApp() {}
+    virtual ~TestMtcApp() override {}
 
     IMS_SINT32 GetServiceCount() const { return m_lstServices.GetSize(); }
+    RttAutoUpgrader* GetRttAutoUpgrader() const { return m_pRttAutoUpgrader.get(); }
 };
 
 class MtcAppTest : public ::testing::Test
 {
-public:
+protected:
     MtcApp* pMtcApp;
 
-protected:
-    virtual void SetUp() override { pMtcApp = new MtcApp(SLOT_ID); }
+    PlatformService* m_pOldConfigService;
+    TestConfigService* m_pConfigService;
+    MockICarrierConfig m_objMockICarrierConfig;
 
-    virtual void TearDown() override { delete pMtcApp; }
+    virtual void SetUp() override
+    {
+        m_pConfigService = new TestConfigService();
+        m_pConfigService->SetCarrierConfig(&m_objMockICarrierConfig);
+        m_pOldConfigService = PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_CONFIG, m_pConfigService);
+        Engine::GetConfiguration()->RefreshConfigs(IMS_SLOT_0);
+        pMtcApp = new MtcApp(SLOT_ID);
+    }
+
+    virtual void TearDown() override
+    {
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_CONFIG, m_pOldConfigService);
+        delete m_pConfigService;
+
+        delete pMtcApp;
+    }
 };
 
 TEST_F(MtcAppTest, Constructor)
@@ -74,13 +103,13 @@ TEST_F(MtcAppTest, GetSlotId)
 
 TEST_F(MtcAppTest, GetSubscriberConfig)
 {
-    EXPECT_EQ(pMtcApp->GetSubscriberConfig(), nullptr);
+    EXPECT_NE(pMtcApp->GetSubscriberConfig(), nullptr);
     pMtcApp->Stop();
 }
 
 TEST_F(MtcAppTest, CreateNormalServiceAfterStart)
 {
-    IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::NORMAL);
+    const IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::NORMAL);
     ASSERT_EQ(piService, nullptr);
 
     pMtcApp->Start();
@@ -91,7 +120,7 @@ TEST_F(MtcAppTest, CreateNormalServiceAfterStart)
 
 TEST_F(MtcAppTest, CreateEmergencyServiceAfterStart)
 {
-    IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::EMERGENCY);
+    const IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::EMERGENCY);
     ASSERT_EQ(piService, nullptr);
 
     pMtcApp->Start();
@@ -103,8 +132,27 @@ TEST_F(MtcAppTest, CreateEmergencyServiceAfterStart)
 TEST_F(MtcAppTest, ReturnNullForGetServiceForUnknownType)
 {
     pMtcApp->Start();
-    IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::UNKNOWN);
+    const IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::UNKNOWN);
     ASSERT_EQ(piService, nullptr);
+    pMtcApp->Stop();
+}
+
+TEST_F(MtcAppTest, StartDoesNotCreateMultiEndPointManagerIfNotSupported)
+{
+    ON_CALL(m_objMockICarrierConfig, GetBoolean(ConfigVoice::KEY_MULTIENDPOINT_SUPPORTED_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
+    pMtcApp->Start();
+    EXPECT_EQ(pMtcApp->GetMultiEndpointManager(), nullptr);
+    pMtcApp->Stop();
+}
+
+TEST_F(MtcAppTest, StartCreatesMultiEndpointManagerIfSupported)
+{
+    ON_CALL(m_objMockICarrierConfig, GetBoolean(ConfigVoice::KEY_MULTIENDPOINT_SUPPORTED_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
+
+    pMtcApp->Start();
+    ASSERT_NE(pMtcApp->GetMultiEndpointManager(), nullptr);
     pMtcApp->Stop();
 }
 
@@ -118,7 +166,7 @@ TEST_F(MtcAppTest, GetNormalServiceAfterStop)
     TestMtcApp* pMtcApp = new TestMtcApp();
     pMtcApp->Start();
     pMtcApp->Stop();
-    IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::NORMAL);
+    const IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::NORMAL);
     ASSERT_EQ(piService, nullptr);
 }
 
@@ -127,7 +175,7 @@ TEST_F(MtcAppTest, GetEmergencyServiceAfterStop)
     TestMtcApp* pMtcApp = new TestMtcApp();
     pMtcApp->Start();
     pMtcApp->Stop();
-    IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::EMERGENCY);
+    const IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::EMERGENCY);
     ASSERT_EQ(piService, nullptr);
 }
 
@@ -144,85 +192,93 @@ TEST_F(MtcAppTest, StartTwiceWithoutStopNoDuplicatedServiceCreation)
 
 TEST_F(MtcAppTest, CreateEctManagerOnlyOnceWhenFirstGetterIsCalled)
 {
-    IEctManager* pFirstManager = &pMtcApp->GetEctManager();
-    IEctManager* pSecondManager = &pMtcApp->GetEctManager();
+    const IEctManager* pFirstManager = &pMtcApp->GetEctManager();
+    const IEctManager* pSecondManager = &pMtcApp->GetEctManager();
     EXPECT_EQ(pFirstManager, pSecondManager);
 }
 
 TEST_F(MtcAppTest, CreateEmergencyManagerOnlyOnceWhenFirstGetterIsCalled)
 {
     pMtcApp->Start();  // to have MtcService
-    IMtcEmergencyServiceManager* pFirstManager = &pMtcApp->GetEmergencyServiceManager();
-    IMtcEmergencyServiceManager* pSecondManager = &pMtcApp->GetEmergencyServiceManager();
+    const IMtcEmergencyServiceManager* pFirstManager = &pMtcApp->GetEmergencyServiceManager();
+    const IMtcEmergencyServiceManager* pSecondManager = &pMtcApp->GetEmergencyServiceManager();
     EXPECT_EQ(pFirstManager, pSecondManager);
 }
 
 TEST_F(MtcAppTest, GetDialingPlanAfterConstructor)
 {
-    IMtcDialingPlan* piDialingPlan = &pMtcApp->GetDialingPlan();
+    const IMtcDialingPlan* piDialingPlan = &pMtcApp->GetDialingPlan();
     ASSERT_NE(piDialingPlan, nullptr);
 }
 
 TEST_F(MtcAppTest, GetCallControllerAfterConstructor)
 {
-    IMtcCallController* piCallController = &pMtcApp->GetCallController();
+    const IMtcCallController* piCallController = &pMtcApp->GetCallController();
     ASSERT_NE(piCallController, nullptr);
 }
 
 TEST_F(MtcAppTest, GetRadioCheckerAfterConstructor)
 {
-    IMtcRadioChecker* piTrafficChecker = &pMtcApp->GetRadioChecker();
+    const IMtcRadioChecker* piTrafficChecker = &pMtcApp->GetRadioChecker();
     ASSERT_NE(piTrafficChecker, nullptr);
 }
 
 TEST_F(MtcAppTest, GetCallManagerAfterConstructor)
 {
-    IMtcCallManager* piCallManager = &pMtcApp->GetCallManager();
+    const IMtcCallManager* piCallManager = &pMtcApp->GetCallManager();
     ASSERT_NE(piCallManager, nullptr);
 }
 
 TEST_F(MtcAppTest, GetConfigurationProxyAfterConstructor)
 {
-    MtcConfigurationProxy* piConfigProxy = &pMtcApp->GetConfigurationProxy();
+    const MtcConfigurationProxy* piConfigProxy = &pMtcApp->GetConfigurationProxy();
     ASSERT_NE(piConfigProxy, nullptr);
 }
 
 TEST_F(MtcAppTest, GetCallStateProxyAfterConstructor)
 {
-    ICallStateProxy* piCallStateProxy = &pMtcApp->GetCallStateProxy();
+    const ICallStateProxy* piCallStateProxy = &pMtcApp->GetCallStateProxy();
     ASSERT_NE(piCallStateProxy, nullptr);
 }
 
 TEST_F(MtcAppTest, GetEventReceiverAfterConstructor)
 {
-    IMtcImsEventReceiver* piEventReceiver = &pMtcApp->GetImsEventReceiver();
+    const IMtcImsEventReceiver* piEventReceiver = &pMtcApp->GetImsEventReceiver();
     ASSERT_NE(piEventReceiver, nullptr);
 }
 
 TEST_F(MtcAppTest, GetSipInterfaceFactoryAfterConstructor)
 {
-    IMtcSipInterfaceFactory* piSipInterfaceFactory = &pMtcApp->GetSipInterfaceFactory();
+    const IMtcSipInterfaceFactory* piSipInterfaceFactory = &pMtcApp->GetSipInterfaceFactory();
     ASSERT_NE(piSipInterfaceFactory, nullptr);
+}
+
+TEST_F(MtcAppTest, GetLocationRefresherAfterConstructor)
+{
+    const MtcLocationRefresher* pLocationRefresher = &pMtcApp->GetLocationRefresher();
+    ASSERT_NE(pLocationRefresher, nullptr);
 }
 
 TEST_F(MtcAppTest, GetConferenceManagerAfterConstructor)
 {
-    IConferenceManager* piConferenceManager = &pMtcApp->GetConferenceManager();
+    const IConferenceManager* piConferenceManager = &pMtcApp->GetConferenceManager();
     ASSERT_NE(piConferenceManager, nullptr);
 }
 
-TEST_F(MtcAppTest, GetAsyncRunnerAfterConstructor)
+TEST_F(MtcAppTest, RunAsyncOperationAfterConstructor)
 {
     // null case
-    ASSERT_EQ(nullptr, pMtcApp->GetAsyncRunner(nullptr));
+    pMtcApp->RunAsyncOperation(IMS_NULL, nullptr);
+    pMtcApp->RunAsyncOperation(IMS_NULL,
+            []()
+            {
+            });
 
     // non-null case
-    OperationAsyncRunner* pRunner = pMtcApp->GetAsyncRunner(
-            [&]()
+    pMtcApp->RunAsyncOperation(this,
+            []()
             {
-                // do nothing
             });
-    ASSERT_NE(pRunner, nullptr);
 
     // Here, BaseThread is null so OperationAsyncRunner is deleted immediately
     // so pRunner is Dangling pointer.
@@ -231,14 +287,14 @@ TEST_F(MtcAppTest, GetAsyncRunnerAfterConstructor)
 
 TEST_F(MtcAppTest, GetMessageUtilsAfterConstructor)
 {
-    IMessageUtils* piMessageUtils = &pMtcApp->GetMessageUtils();
+    const IMessageUtils* piMessageUtils = &pMtcApp->GetMessageUtils();
     ASSERT_NE(piMessageUtils, nullptr);
 }
 
 TEST_F(MtcAppTest, CreateLastComeFirstServedHelperOnlyOnceWhenFirstGetterIsCalled)
 {
-    ILastComeFirstServedHelper* pFirstHelper = &pMtcApp->GetLastComeFirstServedHelper();
-    ILastComeFirstServedHelper* pSecondHelper = &pMtcApp->GetLastComeFirstServedHelper();
+    const ILastComeFirstServedHelper* pFirstHelper = &pMtcApp->GetLastComeFirstServedHelper();
+    const ILastComeFirstServedHelper* pSecondHelper = &pMtcApp->GetLastComeFirstServedHelper();
     EXPECT_EQ(pFirstHelper, pSecondHelper);
 }
 
@@ -247,6 +303,36 @@ TEST_F(MtcAppTest, IsWifiTestModeReturnsSameValueOfUtilService)
     IMS_BOOL bWifiTestMode = UtilService::GetUtilService()->GetPrivateProperty()->GetPersistentInt(
                                      ImsPrivateProperties::Persistent::KEY_WIFI_TEST, 0) == 1;
     EXPECT_EQ(bWifiTestMode, pMtcApp->IsWifiTestMode());
+}
+
+TEST_F(MtcAppTest, GetAosConnectorReturnsNullIfNotStarted)
+{
+    EXPECT_EQ(pMtcApp->GetAosConnector(ServiceType::NORMAL), nullptr);
+}
+
+TEST_F(MtcAppTest, GetAosConnectorReturnsNullIfStarted)
+{
+    // It's always null in the test since the AoS module(IImsAos) is not ready.
+    pMtcApp->Start();
+    EXPECT_EQ(pMtcApp->GetAosConnector(ServiceType::NORMAL), nullptr);
+    EXPECT_EQ(pMtcApp->GetAosConnector(ServiceType::EMERGENCY), nullptr);
+    pMtcApp->Stop();
+}
+
+TEST_F(MtcAppTest, CreateAndDestroyRttAutoUpgrader)
+{
+    TestMtcApp objMtcApp;
+    EXPECT_EQ(objMtcApp.GetRttAutoUpgrader(), nullptr);
+
+    objMtcApp.CreateRttAutoUpgrader();
+    const RttAutoUpgrader* pRttAutoUpgrader = objMtcApp.GetRttAutoUpgrader();
+    ASSERT_NE(pRttAutoUpgrader, nullptr);
+
+    objMtcApp.CreateRttAutoUpgrader();
+    EXPECT_EQ(objMtcApp.GetRttAutoUpgrader(), pRttAutoUpgrader);
+
+    objMtcApp.DestroyRttAutoUpgrader();
+    EXPECT_EQ(objMtcApp.GetRttAutoUpgrader(), nullptr);
 }
 
 }  // namespace android

@@ -16,6 +16,8 @@
 
 package com.android.imsstack.enabler.mtc;
 
+import static android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -23,24 +25,26 @@ import com.android.imsstack.util.ImsLog;
 
 public class CallInfo implements Parcelable
 {
-    public int            serviceType;
-    public int            callType;
+    public int serviceType;
+    public int callType;
+    public int emergencyType;
 
-    public boolean        emergency;
-    public boolean        offline;
-    public boolean        ussi;
-    public boolean        isConf;
-    public boolean        enabledConf;
-    public boolean        confSub;
-    public boolean        rttCapable;
-    public boolean        videoCapable;
+    public boolean offline;
+    public boolean ussi;
+    public boolean isConf;
+    public boolean enabledConf;
+    public boolean confSub;
+    public boolean rttCapable;
+    public boolean videoCapable;
+    public boolean crossSim;
+    public int ratType;
 
     //------------------------------------------------------------------------------------------//
 
     public CallInfo() {
         serviceType = IUMtcCall.SERVICETYPE_NORMAL;
         callType = IUMtcCall.CALLTYPE_VOIP;
-        emergency = false;
+        emergencyType = IUMtcCall.EMERGENCYTYPE_NONE;
         offline = false;
         ussi = false;
         isConf = false;
@@ -48,14 +52,16 @@ public class CallInfo implements Parcelable
         confSub = false;
         rttCapable = false;
         videoCapable = false;
+        crossSim = false;
+        ratType = NETWORK_TYPE_UNKNOWN;
 
-        logIn("init");
+        logLn("init");
     }
 
     public CallInfo(CallInfo callInfo) {
         serviceType = callInfo.serviceType;
         callType = callInfo.callType;
-        emergency = callInfo.emergency;
+        emergencyType = callInfo.emergencyType;
         offline = callInfo.offline;
         ussi = callInfo.ussi;
         isConf = callInfo.isConf;
@@ -63,8 +69,10 @@ public class CallInfo implements Parcelable
         confSub = callInfo.confSub;
         rttCapable = callInfo.rttCapable;
         videoCapable = callInfo.videoCapable;
+        crossSim = callInfo.crossSim;
+        ratType = callInfo.ratType;
 
-        logIn("init");
+        logLn("init");
     }
 
     public CallInfo(Parcel source) {
@@ -74,7 +82,7 @@ public class CallInfo implements Parcelable
     public CallInfo(int _serviceType, int _callType) {
         serviceType = _serviceType;
         callType = _callType;
-        emergency = false;
+        emergencyType = IUMtcCall.EMERGENCYTYPE_NONE;
         offline = false;
         ussi = false;
         isConf = false;
@@ -82,14 +90,16 @@ public class CallInfo implements Parcelable
         confSub = false;
         rttCapable = false;
         videoCapable = false;
+        crossSim = false;
+        ratType = NETWORK_TYPE_UNKNOWN;
 
-        logIn("init");
+        logLn("init");
     }
 
     public CallInfo(int _serviceType, int _callType, boolean _isConf) {
         serviceType = _serviceType;
         callType = _callType;
-        emergency = false;
+        emergencyType = IUMtcCall.EMERGENCYTYPE_NONE;
         offline = false;
         ussi = false;
         isConf = _isConf;
@@ -97,14 +107,16 @@ public class CallInfo implements Parcelable
         confSub = false;
         rttCapable = false;
         videoCapable = false;
+        crossSim = false;
+        ratType = NETWORK_TYPE_UNKNOWN;
 
-        logIn("init");
+        logLn("init");
     }
 
     public void update(CallInfo callInfo) {
         serviceType = callInfo.serviceType;
         callType = callInfo.callType;
-        emergency = callInfo.emergency;
+        emergencyType = callInfo.emergencyType;
         offline = callInfo.offline;
         ussi = callInfo.ussi;
         isConf = callInfo.isConf;
@@ -112,46 +124,60 @@ public class CallInfo implements Parcelable
         confSub = callInfo.confSub;
         rttCapable = callInfo.rttCapable;
         videoCapable = callInfo.videoCapable;
+        crossSim = callInfo.crossSim;
+        ratType = callInfo.ratType;
 
-        logIn("update");
+        logLn("update");
     }
 
-    public void logIn(String tag) {
+    public void logLn(String tag) {
         ImsLog.i(tag + " - serviceType : " + serviceType
                 + " callType : " + callType
+                + " emergencyType : " + emergencyType
                 + " isConf : " + isConf
                 + " enabledConf : " + enabledConf
                 + " confSub : " + confSub
                 + " rttCapable : " + rttCapable
-                + " emergency : " + emergency
                 + " offline : " + offline
                 + " ussi : " + ussi
-                + " videoCapable : " + videoCapable);
+                + " videoCapable : " + videoCapable
+                + " crossSim : " + crossSim
+                + " ratType : " + ratType);
     }
 
+    /**
+     * Reads the state of this CallInfo instance from a Parcel.
+     * The values are read in the same order they were written in
+     * {@link #writeToParcel(Parcel, int)}.
+     *
+     * @param source The Parcel to read the object's data from.
+     */
     public void readFromParcel(Parcel source) {
         serviceType = source.readInt();
         callType = source.readInt();
+        emergencyType = source.readInt();
 
-        emergency = (source.readInt() == 1) ? true : false;
-        offline = (source.readInt() == 1) ? true : false;
-        ussi = (source.readInt() == 1) ? true : false;
-        isConf = (source.readInt() == 1) ? true : false;
-        enabledConf = (source.readInt() == 1) ? true : false;
-        confSub = (source.readInt() == 1) ? true : false;
-        rttCapable = (source.readInt() == 1) ? true : false;
-        videoCapable = (source.readInt() == 1) ? true : false;
+        offline = source.readInt() == 1;
+        ussi = source.readInt() == 1;
+        isConf = source.readInt() == 1;
+        enabledConf = source.readInt() == 1;
+        confSub = source.readInt() == 1;
+        rttCapable = source.readInt() == 1;
+        videoCapable = source.readInt() == 1;
+        crossSim = source.readInt() == 1;
+        ratType = source.readInt();
 
-        logIn("read");
+        logLn("read");
     }
 
     public void writeToParcel(Parcel dest, int flags) {
+        // This is not actually used.
         ImsLog.i("");
 
         dest.writeInt(serviceType);
         dest.writeInt(callType);
+        dest.writeInt(emergencyType);
 
-        dest.writeInt(emergency ? 1 : 0);
         dest.writeInt(offline ? 1 : 0);
         dest.writeInt(ussi ? 1 : 0);
         dest.writeInt(isConf ? 1 : 0);
@@ -159,6 +185,8 @@ public class CallInfo implements Parcelable
         dest.writeInt(confSub ? 1 : 0);
         dest.writeInt(rttCapable ? 1 : 0);
         dest.writeInt(videoCapable ? 1 : 0);
+        dest.writeInt(crossSim ? 1 : 0);
+        dest.writeInt(ratType);
     }
 
     public int describeContents() {

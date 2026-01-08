@@ -16,10 +16,11 @@
 #ifndef INTERFACE_SIP_ROUTING_REJECT_LISTENER_H_
 #define INTERFACE_SIP_ROUTING_REJECT_LISTENER_H_
 
-#include "SipStatusCode.h"
+#include "ImsTypeDef.h"
 
 class ISipMessage;
 class ISipServerConnection;
+class SipStatusCode;
 
 /**
  * @brief This class provides a listener interface for receiving notifications about

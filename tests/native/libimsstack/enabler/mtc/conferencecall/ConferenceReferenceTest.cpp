@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
+#include "ISipHeader.h"
 #include "ImsList.h"
+#include "MockICoreService.h"
+#include "MockIMessage.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
+#include "MockIReference.h"
+#include "MockISession.h"
+#include "MockISipMessage.h"
+#include "SipHeaderName.h"
+#include "SipStatusCode.h"
 #include "call/IMtcSession.h"
 #include "call/MockCallConnectionIdManager.h"
 #include "call/MockIMtcCall.h"
@@ -26,19 +34,14 @@
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceReference.h"
 #include "conferencecall/MockIConferenceReferenceListener.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/MockIMessage.h"
-#include "core/MockIReference.h"
-#include "core/MockISession.h"
 #include "helper/MockICallStateProxy.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockReferenceInterfaceHolder.h"
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/SipStatusCode.h"
 #include "utility/MockIMessageUtils.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -60,8 +63,7 @@ public:
     ConferenceReference* pConferenceReference;
     MockIMtcContext objMockContext;
     MockIConferenceReferenceListener objMockListener;
-    MtcConfigurationProxy* pConfigurationProxy;
-    MockIMtcConfigurationManager* pMockConfigurationManager;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     MockICallStateProxy objMockCallStateProxy;
     MockIMtcSipInterfaceFactory objMockInterfaceFactory;
     MockReferenceInterfaceHolder* pMockReferenceInterfaceHolder;
@@ -84,19 +86,21 @@ public:
     MockISession objMockJoiningSession;
     MockIMtcSession objMockJoiningMtcSession;
     MockIReference objMockReference;
+    MockICoreService objMockICoreService;
 
 protected:
     virtual void SetUp() override
     {
-        pMockConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pMockConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objMockContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(objMockContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
         ON_CALL(objMockContext, GetCallStateProxy).WillByDefault(ReturnRef(objMockCallStateProxy));
         ON_CALL(objMockContext, GetCallManager).WillByDefault(ReturnRef(objMockCallManager));
-        // ON_CALL(objMockContext, GetServiceByType).WillByDefault(ReturnRef(objMockCallManager));
+        ON_CALL(objMockContext, GetServiceByType(ServiceType::NORMAL))
+                .WillByDefault(Return(&objMockService));
+        ON_CALL(objMockService, GetICoreService).WillByDefault(Return(&objMockICoreService));
 
         ON_CALL(objMockContext, GetSipInterfaceFactory)
                 .WillByDefault(ReturnRef(objMockInterfaceFactory));
@@ -123,8 +127,7 @@ protected:
 
     void CreateReference()
     {
-        // TODO: when multiple ConfUser logic is added, this should be updated
-        objUser.strUserEntity = "sip:testUser@ims.google.com";
+        objUser.strUserEntity = "sip:testUser1@ims.google.com";
         objUser.nConnectionId = JOINING_CALL_ID;
 
         pConferenceReference = new ConferenceReference(
@@ -201,8 +204,22 @@ TEST_F(ConferenceReferenceTest, Constructor)
 
 TEST_F(ConferenceReferenceTest, OnReferenceDeliveredAndSubsSupported)
 {
-    ON_CALL(*pMockConfigurationManager, IsSupportConferenceReferSubscribe)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_SUPPORT_CONFERENCE_REFER_SUBSCRIBE_BOOL))
             .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objMockListener, OnReferenceStarted(_)).Times(1);
+
+    pConferenceReference->ReferenceDelivered(&objMockReference);
+}
+
+TEST_F(ConferenceReferenceTest, OnReferenceDeliveredInvokesOnReferenceStartedWithNoRefer)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_SUPPORT_CONFERENCE_REFER_SUBSCRIBE_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMockReference, GetPreviousResponse(IMessage::REFERENCE_REFER))
+            .WillByDefault(Return(static_cast<IMessage*>(IMS_NULL)));
 
     EXPECT_CALL(objMockListener, OnReferenceStarted(_)).Times(1);
 
@@ -211,7 +228,8 @@ TEST_F(ConferenceReferenceTest, OnReferenceDeliveredAndSubsSupported)
 
 TEST_F(ConferenceReferenceTest, OnReferenceDeliveredAndNoSubsSupported)
 {
-    ON_CALL(*pMockConfigurationManager, IsSupportConferenceReferSubscribe)
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_SUPPORT_CONFERENCE_REFER_SUBSCRIBE_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
     MockIMessage objMockMessage;
@@ -220,6 +238,22 @@ TEST_F(ConferenceReferenceTest, OnReferenceDeliveredAndNoSubsSupported)
     ON_CALL(objMockMessage, GetStatusCode).WillByDefault(Return(200));
 
     EXPECT_CALL(objMockListener, OnReferenceStarted(_)).Times(1);
+
+    pConferenceReference->ReferenceDelivered(&objMockReference);
+}
+
+TEST_F(ConferenceReferenceTest, OnReferenceDeliveredInvokesOnReferenceStartFailed)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_SUPPORT_CONFERENCE_REFER_SUBSCRIBE_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    MockIMessage objMockMessage;
+    ON_CALL(objMockReference, GetPreviousResponse(IMessage::REFERENCE_REFER))
+            .WillByDefault(Return(&objMockMessage));
+    ON_CALL(objMockMessage, GetStatusCode).WillByDefault(Return(100));
+
+    EXPECT_CALL(objMockListener, OnReferenceStartFailed(_)).Times(1);
 
     pConferenceReference->ReferenceDelivered(&objMockReference);
 }
@@ -263,9 +297,28 @@ TEST_F(ConferenceReferenceTest, OnReferenceTerminated)
     pConferenceReference->ReferenceTerminated(&objMockReference);
 }
 
-TEST_F(ConferenceReferenceTest, SendInviteWithSingleUser)
+TEST_F(ConferenceReferenceTest, SendInviteFailedWithNoConfCall)
 {
-    ON_CALL(*pMockConfigurationManager, IsConferenceReferToUriSourcePaid)
+    ON_CALL(objMockConferenceCall, GetKey).WillByDefault(Return(IMtcCall::CALL_KEY_INVALID));
+
+    AString strReferToUri = "sip:testuri@ims.google.com";
+    EXPECT_EQ(IMS_FAILURE,
+            pConferenceReference->SendInvite(strReferToUri, *pMockConnectionIdManager));
+}
+
+TEST_F(ConferenceReferenceTest, SendInviteFailedWithTerminatingState)
+{
+    ON_CALL(objMockConferenceCall, GetState).WillByDefault(Return(IMtcCall::State::TERMINATING));
+
+    AString strReferToUri = "sip:testuri@ims.google.com";
+    EXPECT_EQ(IMS_FAILURE,
+            pConferenceReference->SendInvite(strReferToUri, *pMockConnectionIdManager));
+}
+
+TEST_F(ConferenceReferenceTest, SendInviteInvokesSendInviteForSingleUser)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_CONFERENCE_REFER_TO_URI_SOURCE_PAID_BOOL))
             .WillByDefault(Return(IMS_TRUE));
 
     ON_CALL(*pMockReferenceInterfaceHolder, GetIReference(_, _, _))
@@ -273,12 +326,112 @@ TEST_F(ConferenceReferenceTest, SendInviteWithSingleUser)
 
     ON_CALL(objMessageUtils, GetSessionId(&objMockJoiningSession)).WillByDefault(Return("12345"));
 
-    // TODO: let UriFormatter returns test uri
     AString strReferToUri = "sip:testuri@ims.google.com";
     ON_CALL(objMessageUtils, GetRemoteUri(_, _)).WillByDefault(Return(strReferToUri));
+
     IMS_RESULT nResult = pConferenceReference->SendInvite(strReferToUri, *pMockConnectionIdManager);
     EXPECT_EQ(nResult, IMS_SUCCESS);
     EXPECT_EQ(pConferenceReference->GetType(), REFERENCE_TYPE_INVITE);
+}
+
+TEST_F(ConferenceReferenceTest, SendInviteInvokesSendInviteForMultipleUser)
+{
+    ConfUser objUser2;
+    objUser2.strUserEntity = "sip:testUser2@ims.google.com";
+    ImsList<ConfUser*> objConfUsers;
+    objConfUsers.Append(&objUser);
+    objConfUsers.Append(&objUser2);
+    ConferenceReference* pConferenceReferenceWithMultipleUser = new ConferenceReference(
+            objMockContext, CONFERENCE_CALL_KEY, objConfUsers, objMockListener);
+
+    EXPECT_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_SUPPORT_CONFERENCE_REFER_SUBSCRIBE_BOOL))
+            .Times(1);
+    EXPECT_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_CONFERENCE_REFER_TO_URI_SOURCE_PAID_BOOL))
+            .Times(0);
+
+    ON_CALL(*pConfigurationProxy, GetString(ConfigVoice::KEY_CONFERENCE_FACTORY_URI_STRING))
+            .WillByDefault(Return(AString("sip:conference-factory1@mrfc1.home1.net")));
+    ON_CALL(*pMockReferenceInterfaceHolder, GetIReference(_, _, _))
+            .WillByDefault(Return(&objMockReference));
+
+    MockIMessage objIMessage;
+    EXPECT_CALL(objMockReference, GetNextRequest).Times(1).WillOnce(Return(&objIMessage));
+    EXPECT_CALL(objIMessage,
+            AddHeader(AString(SipHeaderName::CONTENT_DISPOSITION), AString("recipient-list")))
+            .Times(1);
+
+    AString strReferToUri = "sip:testuri@ims.google.com";
+    IMS_RESULT nResult = pConferenceReferenceWithMultipleUser->SendInvite(
+            strReferToUri, *pMockConnectionIdManager);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
+    EXPECT_EQ(pConferenceReferenceWithMultipleUser->GetType(), REFERENCE_TYPE_INVITE);
+
+    delete pConferenceReferenceWithMultipleUser;
+}
+
+TEST_F(ConferenceReferenceTest, SendInviteFailedWithNoUsers)
+{
+    ImsList<ConfUser*> objConfUsers;
+    ConferenceReference* pConferenceReferenceWithNoUsers = new ConferenceReference(
+            objMockContext, CONFERENCE_CALL_KEY, objConfUsers, objMockListener);
+
+    AString strReferToUri = "sip:testuri@ims.google.com";
+    EXPECT_EQ(IMS_FAILURE,
+            pConferenceReferenceWithNoUsers->SendInvite(strReferToUri, *pMockConnectionIdManager));
+    EXPECT_EQ(pConferenceReferenceWithNoUsers->GetType(), REFERENCE_TYPE_INVITE);
+    delete pConferenceReferenceWithNoUsers;
+}
+
+TEST_F(ConferenceReferenceTest, SendByFailedWithNoRefer)
+{
+    ON_CALL(*pMockReferenceInterfaceHolder, GetIReference(_, _, _))
+            .WillByDefault(Return(static_cast<IReference*>(IMS_NULL)));
+
+    EXPECT_EQ(IMS_FAILURE, pConferenceReference->SendBye());
+    EXPECT_EQ(pConferenceReference->GetType(), REFERENCE_TYPE_BYE);
+}
+
+TEST_F(ConferenceReferenceTest, SendBySendsRefer)
+{
+    ON_CALL(*pMockReferenceInterfaceHolder, GetIReference(_, _, AString("BYE")))
+            .WillByDefault(Return(&objMockReference));
+    EXPECT_CALL(objMockReference, Refer(IMS_TRUE)).Times(1);
+    ON_CALL(objMockICoreService, GetLocalUserId).WillByDefault(Return(AString("LocalUserId")));
+    MockIMessage objMockMessage;
+    ON_CALL(objMockReference, GetNextRequest).WillByDefault(Return(&objMockMessage));
+    MockISipMessage objMockISipMessage;
+    ON_CALL(objMockMessage, GetMessage).WillByDefault(Return(&objMockISipMessage));
+
+    EXPECT_CALL(objMockISipMessage,
+            AddHeader(ISipHeader::REFERRED_BY, AString("LocalUserId"), AString::ConstNull()))
+            .Times(1);
+    EXPECT_EQ(IMS_SUCCESS, pConferenceReference->SendBye());
+    EXPECT_EQ(pConferenceReference->GetType(), REFERENCE_TYPE_BYE);
+}
+
+TEST_F(ConferenceReferenceTest, GetResponseCodeReturnsInvalid)
+{
+    EXPECT_EQ(SipStatusCode::SC_INVALID, pConferenceReference->GetResponseCode());
+}
+
+TEST_F(ConferenceReferenceTest, SetForceToTerminateInterfaceChangesReleaseIReferenceParam)
+{
+    // Set true
+    {
+        pConferenceReference->SetForceToTerminateInterface(IMS_TRUE);
+        EXPECT_CALL(*pMockReferenceInterfaceHolder, ReleaseIReference(_, IMS_TRUE));
+        delete pConferenceReference;
+    }
+
+    // Set false
+    {
+        pConferenceReference = new ConferenceReference(
+                objMockContext, CONFERENCE_CALL_KEY, &objUser, objMockListener);
+        pConferenceReference->SetForceToTerminateInterface(IMS_FALSE);
+        EXPECT_CALL(*pMockReferenceInterfaceHolder, ReleaseIReference(_, IMS_FALSE));
+    }
 }
 
 }  // namespace android

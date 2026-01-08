@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "DeviceConfig.h"
+#include "ImsNew.h"
 
 PRIVATE GLOBAL __DeviceConfig DeviceConfig::s_objConfig;
 

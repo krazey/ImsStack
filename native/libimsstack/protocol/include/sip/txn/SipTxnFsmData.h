@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef _SIP_TXN_FSM_DATA_H_
-#define _SIP_TXN_FSM_DATA_H_
+#ifndef __SIP_TXN_FSM_DATA_H__
+#define __SIP_TXN_FSM_DATA_H__
 
-#include "txn/SipTxn.h"
-
-#include "msg/SipMessage.h"
-#include "transport/SipTransportInfo.h"
+class SipMessage;
+class SipTransportInfo;
 
 class SipTxnFsmData
 {
@@ -43,7 +41,7 @@ public:
     SipMessage* m_pSendSipMsg;
 
     /* Recv Txn handling: layer status on received side */
-    SIP_INT32 eTxnStatus;
+    SIP_INT32 m_eTxnStatus;
 
     /* Recv Txn handling: User while re-tranamission of message on receive of re-transmitted message
      */
@@ -54,8 +52,8 @@ public:
     SipTransportInfo* m_pTranspInfo;
 
     /* Used for both Send and Recv Txn */
-    SIP_BOOL bTxnTerminated;
-    SIP_BOOL bTxnCreated;
+    SIP_BOOL m_bTxnTerminated;
+    SIP_BOOL m_bTxnCreated;
 };
 
-#endif  //_SIP_TXN_FSM_DATA_H_
+#endif  //__SIP_TXN_FSM_DATA_H__

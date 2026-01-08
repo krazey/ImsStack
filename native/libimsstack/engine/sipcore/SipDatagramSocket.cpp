@@ -15,6 +15,7 @@
  */
 #include "ByteArray.h"
 #include "ServiceMemory.h"
+#include "ServiceTrace.h"
 
 #include "ISipDatagramSocketListener.h"
 #include "SipDatagramSocket.h"
@@ -23,7 +24,7 @@
 #include "SipPrivate.h"
 #include "SipRtConfigUtils.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipDatagramSocket::SipDatagramSocket(IN IMS_SINT32 nSlotId) :
@@ -121,10 +122,4 @@ PROTECTED VIRTUAL void SipDatagramSocket::Socket_OnSendEnabled(IN ISocket* piSoc
 {
     SetState(STATE_CONNECTED);
     SipSocket::Socket_OnSendEnabled(piSocket);
-}
-
-PROTECTED VIRTUAL void SipDatagramSocket::Socket_OnClosed(
-        IN ISocket* piSocket, IN IMS_SINT32 nReason /*= ISocket::CLOSE_REASON_UNKNOWN*/)
-{
-    SipSocket::Socket_OnClosed(piSocket, nReason);
 }

@@ -16,8 +16,9 @@
 #ifndef INTERFACE_NODE_H_
 #define INTERFACE_NODE_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
 
+class AString;
 class IDocument;
 class INamedNodeMap;
 class INodeList;

@@ -26,7 +26,7 @@ class ObjectAsyncDestroyer final : public ImsActivity
 {
 public:
     inline explicit ObjectAsyncDestroyer() {}
-    inline virtual ~ObjectAsyncDestroyer() {}
+    inline virtual ~ObjectAsyncDestroyer() override {}
     ObjectAsyncDestroyer(IN const ObjectAsyncDestroyer&) = delete;
     ObjectAsyncDestroyer& operator=(IN const ObjectAsyncDestroyer&) = delete;
 

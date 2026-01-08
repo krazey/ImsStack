@@ -24,7 +24,7 @@ class ConfigEnabler : public Enabler
 {
 public:
     explicit ConfigEnabler(IN IMS_SINT32 nSlotId);
-    virtual ~ConfigEnabler();
+    ~ConfigEnabler() override;
 
     ConfigEnabler(IN const ConfigEnabler&) = delete;
     ConfigEnabler& operator=(IN const ConfigEnabler&) = delete;
@@ -35,6 +35,9 @@ private:
     void Stop() override;
 
 private:
+    static constexpr IMS_SINT32 SIP_TCP_CLIENT_PORT_START = 40000;
+    static constexpr IMS_SINT32 SIP_TCP_CLIENT_PORT_END = 50000;
+
     ConfigApp* m_pConfigApp;
 
     IMS_BOOL m_bUseResetWhenClosingSipTcpConnection;

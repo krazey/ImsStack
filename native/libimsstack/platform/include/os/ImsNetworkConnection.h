@@ -29,7 +29,7 @@ public:
             ImsSlot(nSlotId)
     {
     }
-    inline virtual ~ImsNetworkConnection() {}
+    ~ImsNetworkConnection() override = default;
 
 public:
     inline INetworkPing* CreatePing() override { return new ImsNetworkPing(); }

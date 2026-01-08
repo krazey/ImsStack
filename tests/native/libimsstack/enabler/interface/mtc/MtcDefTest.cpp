@@ -18,8 +18,6 @@
 #include <gtest/gtest.h>
 #include "MtcDef.h"
 
-// TODO: Unit tests of only the uncovered lines are added. The other cases will be added.
-
 LOCAL IMS_SINT32 ANY_A_DIR = 1;
 LOCAL IMS_SINT32 ANY_V_DIR = 2;
 LOCAL IMS_SINT32 ANY_T_DIR = 3;
@@ -44,7 +42,7 @@ TEST(MtcDefTest, MediaInfoConstructorWithParams)
     EXPECT_EQ(objMediaInfo.eGttMode, ANY_GTT_MODE);
 }
 
-TEST(MtcDefTest, MediaInfoAssignOperator)
+TEST(MtcDefTest, MediaInfoAssignmentOperator)
 {
     MediaInfo objMediaInfo;
     MediaInfo objRightHandSide(ANY_A_DIR, ANY_V_DIR, 3, 1, 2, 1);
@@ -85,26 +83,26 @@ TEST(MtcDefTest, SuppServiceCopyConstructor)
     objSuppServiceToCopy.nValue = ANY_SUPP_INT;
     objSuppServiceToCopy.bValue = ANY_SUPP_BOOL;
 
-    SuppService objSuppService(objSuppServiceToCopy);
+    SuppService objSuppServices(objSuppServiceToCopy);
 
-    EXPECT_STREQ(objSuppService.strValue.GetStr(), objSuppServiceToCopy.strValue.GetStr());
-    EXPECT_EQ(objSuppService.nValue, objSuppServiceToCopy.nValue);
-    EXPECT_EQ(objSuppService.bValue, objSuppServiceToCopy.bValue);
+    EXPECT_STREQ(objSuppServices.strValue.GetStr(), objSuppServiceToCopy.strValue.GetStr());
+    EXPECT_EQ(objSuppServices.nValue, objSuppServiceToCopy.nValue);
+    EXPECT_EQ(objSuppServices.bValue, objSuppServiceToCopy.bValue);
 }
 
-TEST(MtcDefTest, SuppServiceAssignOperator)
+TEST(MtcDefTest, SuppServiceAssignmentOperator)
 {
-    SuppService objSuppService;
+    SuppService objSuppServices;
     SuppService objRightHandSide;
     objRightHandSide.strValue = ANY_SUPP_STR;
     objRightHandSide.nValue = ANY_SUPP_INT;
     objRightHandSide.bValue = ANY_SUPP_BOOL;
 
-    objSuppService = objRightHandSide;
+    objSuppServices = objRightHandSide;
 
-    EXPECT_STREQ(objSuppService.strValue.GetStr(), objRightHandSide.strValue.GetStr());
-    EXPECT_EQ(objSuppService.nValue, objRightHandSide.nValue);
-    EXPECT_EQ(objSuppService.bValue, objRightHandSide.bValue);
+    EXPECT_STREQ(objSuppServices.strValue.GetStr(), objRightHandSide.strValue.GetStr());
+    EXPECT_EQ(objSuppServices.nValue, objRightHandSide.nValue);
+    EXPECT_EQ(objSuppServices.bValue, objRightHandSide.bValue);
 }
 
 TEST(MtcDefTest, SuppServiceEqualToOperator)

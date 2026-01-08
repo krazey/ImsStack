@@ -16,13 +16,16 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#include "ServiceTrace.h"
+#include "INativeThreadMethods.h"
+#include "INetworkConnection.h"
+#include "IThreadImpListener.h"
 #include "OsMutex.h"
 #include "OsPthread.h"
-#include "INetworkConnection.h"
+#include "ServiceThread.h"
+#include "ServiceTrace.h"
 #include "provider/AosDnsQuery.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 extern void JniDetachNativeThread();
 
@@ -32,7 +35,7 @@ class AosDnsQueryPrivate : public IThreadImpListener
 {
 public:
     explicit AosDnsQueryPrivate(IN AosDnsQuery* pDnsQueryer);
-    virtual ~AosDnsQueryPrivate();
+    ~AosDnsQueryPrivate() override;
 
 private:
     AosDnsQueryPrivate(IN const AosDnsQueryPrivate& objRhs);
@@ -56,15 +59,6 @@ private:
     void SetDomainName(IN const AString& strDomainName);
 
 private:
-    // Dns Query Event
-    enum
-    {
-        DNS_QUERY_NONE = 0x0000,
-        DNS_QUERY_EXEC = 0x0001,
-
-        DNS_QUERY_TERMINATE = 0x8000
-    };
-
     pthread_cond_t m_stSignal;
     OsMutex m_objMutex4Signal;
     IMS_UINT32 m_nEvent;
@@ -78,7 +72,7 @@ private:
 
 PUBLIC
 AosDnsQueryPrivate::AosDnsQueryPrivate(IN AosDnsQuery* pDnsQueryer) :
-        m_nEvent(DNS_QUERY_NONE),
+        m_nEvent(AosDnsQuery::DNS_QUERY_NONE),
         m_pThread(new OsPthread()),
         m_piConnection(IMS_NULL),
         m_pQueryer(pDnsQueryer),
@@ -153,7 +147,7 @@ IMS_BOOL AosDnsQueryPrivate::Terminate()
         return IMS_FALSE;
     }
 
-    if (!SetEvent(DNS_QUERY_TERMINATE))
+    if (!SetEvent(AosDnsQuery::DNS_QUERY_TERMINATE))
     {
         return IMS_TRUE;
     }
@@ -171,7 +165,7 @@ IMS_BOOL AosDnsQueryPrivate::DoDnsQuery(
 {
     IMS_TRACE_D("DoDnsQuery :: domain = %s", strDomainName.GetStr(), 0, 0);
 
-    if (!SetEvent(DNS_QUERY_EXEC))
+    if (!SetEvent(AosDnsQuery::DNS_QUERY_EXEC))
     {
         return IMS_FALSE;
     }
@@ -193,7 +187,6 @@ PUBLIC
 VIRTUAL void AosDnsQueryPrivate::RunImp()
 {
     IMS_BOOL bLoop = IMS_TRUE;
-    IMS_SINT32 nWaitResult = 0;
 
     if (m_pQueryer != IMS_NULL)
     {
@@ -204,17 +197,10 @@ VIRTUAL void AosDnsQueryPrivate::RunImp()
     {
         m_objMutex4Signal.Lock();
 
-        if (m_bSignaled)
+        if (!m_bSignaled && m_pQueryer->IsTestMode() == IMS_FALSE)
         {
-            IMS_TRACE_D("AosDnsQueryPrivate :: signal is already triggered", 0, 0, 0);
-            nWaitResult = 1;
-        }
-        else
-        {
-            nWaitResult = (m_pQueryer->IsTestMode())
-                    ? 1
-                    : pthread_cond_wait(&m_stSignal,
-                              reinterpret_cast<pthread_mutex_t*>(m_objMutex4Signal.GetMutexObj()));
+            pthread_cond_wait(&m_stSignal,
+                    reinterpret_cast<pthread_mutex_t*>(m_objMutex4Signal.GetMutexObj()));
         }
 
         m_bSignaled = IMS_FALSE;
@@ -225,10 +211,9 @@ VIRTUAL void AosDnsQueryPrivate::RunImp()
         IMS_UINT32 nEventCache = m_nEvent;
         m_objMutex4Event.Unlock();
 
-        IMS_TRACE_D("AosDnsQueryPrivate :: wait_result (%d) , event (%d) before processing",
-                nWaitResult, m_nEvent, 0);
+        IMS_TRACE_D("AosDnsQueryPrivate :: event (%d) before processing", m_nEvent, 0, 0);
 
-        if ((nEventCache & DNS_QUERY_EXEC) != 0)
+        if ((nEventCache & AosDnsQuery::DNS_QUERY_EXEC) != 0)
         {
             ImsList<IpAddress> objIps;
 
@@ -247,13 +232,13 @@ VIRTUAL void AosDnsQueryPrivate::RunImp()
                 }
             }
 
-            ResetEvent(DNS_QUERY_EXEC);
+            ResetEvent(AosDnsQuery::DNS_QUERY_EXEC);
         }
 
-        if ((nEventCache & DNS_QUERY_TERMINATE) != 0)
+        if ((nEventCache & AosDnsQuery::DNS_QUERY_TERMINATE) != 0)
         {
             bLoop = IMS_FALSE;
-            ResetEvent(DNS_QUERY_TERMINATE);
+            ResetEvent(AosDnsQuery::DNS_QUERY_TERMINATE);
         }
 
         if (m_pQueryer->IsTestMode())
@@ -266,7 +251,12 @@ VIRTUAL void AosDnsQueryPrivate::RunImp()
 
     IMS_TRACE_D("AosDnsQueryPrivate :: terminated", 0, 0, 0);
 
-    JniDetachNativeThread();
+    INativeThreadMethods* piNativeThreadMethods = ThreadService::GetNativeThreadMethods();
+
+    if (piNativeThreadMethods != IMS_NULL)
+    {
+        piNativeThreadMethods->DetachNativeThread();
+    }
 
     if (m_pQueryer != IMS_NULL)
     {

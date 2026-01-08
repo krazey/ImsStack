@@ -17,7 +17,6 @@
 package com.android.imsstack.core.agents;
 
 import android.annotation.NonNull;
-import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.QosCallback;
@@ -30,12 +29,13 @@ import android.telephony.data.NrQosSessionAttributes;
 import android.util.Pair;
 import android.util.SparseArray;
 
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.SystemServiceProxy.ConnectivityManagerProxy;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
-import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.IoUtils;
+import com.android.imsstack.util.ImsUtils;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -88,7 +88,7 @@ public class QosAgent {
 
         @Override
         public void onError(final QosCallbackException exception) {
-            ImsLog.d(mSlotId, "onError: " + exception.toString());
+            ImsLog.d(this, mSlotId, "onError: " + exception.toString());
         }
 
         @Override
@@ -97,7 +97,7 @@ public class QosAgent {
 
             int qosIdentifier = 0;
 
-            ImsLog.d(mSlotId, "[onQosSessionAvailable] QosSession: "
+            ImsLog.d(this, mSlotId, "onQosSessionAvailable - QosSession: "
                     + session + ", QosSessionAttributes: " + sessionAttributes);
 
             if (session.getSessionType() == TYPE_EPS_BEARER) {
@@ -106,7 +106,7 @@ public class QosAgent {
 
                 qosIdentifier = attributes.getQosIdentifier();
 
-                ImsLog.d(mSlotId, "[EpsBearerQosSessionAttributes] qci: " + qosIdentifier
+                ImsLog.d(this, mSlotId, "EpsBearerQosSessionAttributes - qci: " + qosIdentifier
                         + ", MAXUplink: " + attributes.getMaxUplinkBitRateKbps()
                         + ", MAXDownlink: " + attributes.getMaxDownlinkBitRateKbps()
                         + ", gbrUplink: " + attributes.getGuaranteedUplinkBitRateKbps()
@@ -115,7 +115,7 @@ public class QosAgent {
                 NrQosSessionAttributes attributes = (NrQosSessionAttributes) sessionAttributes;
 
                 qosIdentifier = attributes.getQosIdentifier();
-                ImsLog.d(mSlotId, "[NrQosSessionAttributes] qci: " + qosIdentifier
+                ImsLog.d(this, mSlotId, "NrQosSessionAttributes - qci: " + qosIdentifier
                         + ", MAXUplink: " + attributes.getMaxUplinkBitRateKbps()
                         + ", MAXDownlink: " + attributes.getMaxDownlinkBitRateKbps()
                         + ", gbrUplink: " + attributes.getGuaranteedUplinkBitRateKbps()
@@ -123,7 +123,7 @@ public class QosAgent {
             }
 
             if (qosIdentifier == 0) {
-                ImsLog.d(mSlotId, "Invalid QCI value");
+                ImsLog.d(this, mSlotId, "Invalid QCI value");
             } else {
                 InetSocketAddress remoteAddress =
                         (InetSocketAddress) mSocket.getRemoteSocketAddress();
@@ -134,7 +134,7 @@ public class QosAgent {
 
         @Override
         public void onQosSessionLost(final QosSession session) {
-            ImsLog.d(mSlotId, "[onQosSessionLost] QosSession: " + session);
+            ImsLog.d(this, mSlotId, "onQosSessionLost - QosSession: " + session);
 
             InetSocketAddress remoteAddress = (InetSocketAddress) mSocket.getRemoteSocketAddress();
 
@@ -170,7 +170,7 @@ public class QosAgent {
             String localAddress, int localPort) {
         InetAddress localAddr = createInetAddress(localAddress);
         Network network = getNetworkForIpAddress(localAddr);
-        ImsLog.d(mSlotId, "createQosConnection without remoteaddress");
+        ImsLog.d(this, mSlotId, "createQosConnection without remote address");
 
         if (network == null) {
             return null;
@@ -192,18 +192,17 @@ public class QosAgent {
     */
     public Pair<DatagramSocket, DatagramSocket> createQosConnection(
             String localAddress, int localPort, String remoteAddress, int remotePort) {
-
         InetAddress localAddr = createInetAddress(localAddress);
-        InetAddress remoteAddr = createInetAddress(remoteAddress);
         Network network = getNetworkForIpAddress(localAddr);
-        ImsLog.d(mSlotId, "createQosConnection with remoteaddress");
 
         if (network == null) {
-            ImsLog.e(mSlotId, "Network not found");
-
+            ImsLog.e(this, mSlotId, "Network not found");
             return null;
         }
 
+        ImsLog.d(this, mSlotId, "createQosConnection with remote address");
+
+        InetAddress remoteAddr = createInetAddress(remoteAddress);
         DatagramSocket rtpSocket = createDatagramSocket(network, localAddr, localPort);
         DatagramSocket rtcpSocket = createDatagramSocket(network, localAddr, (localPort + 1));
 
@@ -224,38 +223,57 @@ public class QosAgent {
     }
 
     /**
-    * Update rtpsocket/rtcpsocket with remote address and port
-    * Register QosCallback
-    */
+     * Establish a remote network connection, specifying both the remote address and port.
+     * Subsequently, register a new Quality of Service (QoS) callback function.
+     * Implement a mechanism to detect and terminate any existing QoS connections associated
+     * with the same socket if the provided remote address differs from
+     * the currently connected address.
+     *
+     * @param rtpSocket rtp datagram socket
+     * @param rtcpSocket rtcp datagram socket
+     * @param remoteAddress Remote address
+     * @param remotePort Remote port
+     * @param isRemoteChanged true if remote address/port is changed
+     */
     public boolean updateQosConnection(
             DatagramSocket rtpSocket, DatagramSocket rtcpSocket,
-            String remoteAddress, int remotePort) {
+            String remoteAddress, int remotePort, boolean isRemoteChanged) {
 
-        ImsLog.d(mSlotId, "updateQosConnection - rtpSocket: " + rtpSocket
-                + " remotePort: " + remotePort);
+        if (rtpSocket == null || rtcpSocket == null || remoteAddress.isEmpty() || remotePort <= 0) {
+            ImsLog.e(this, mSlotId,
+                    "updateQosConnection - Sockets are null or invalid remote address");
+            return false;
+        }
+
+        if (isRemoteChanged) {
+            removeQosConnection(rtpSocket, rtcpSocket, false);
+        }
 
         InetAddress remoteAddr = createInetAddress(remoteAddress);
 
         if (remoteAddr == null) {
-            ImsLog.e(mSlotId, "remoteAddr not found");
+            ImsLog.e(this, mSlotId, "updateQosConnection - Remote address not found; rtpSocket: "
+                    + rtpSocket + " remotePort: " + remotePort);
             return false;
         }
 
         Network network = getNetworkForIpAddress(rtpSocket.getLocalAddress());
 
         if (network == null) {
-            ImsLog.e(mSlotId, "Network not found");
+            ImsLog.e(this, mSlotId, "updateQosConnection - Network not found; rtpSocket: "
+                    + rtpSocket + " remotePort: " + remotePort);
             return false;
         }
 
-        if (!remoteAddress.isEmpty() && (remotePort > 0)) {
-            rtpSocket.connect(remoteAddr, remotePort);
-            rtcpSocket.connect(remoteAddr, (remotePort + 1));
+        ImsLog.d(this, mSlotId, "updateQosConnection - rtpSocket: "
+                + rtpSocket + " remotePort: " + remotePort);
 
-            QosSocket qosSocket = new QosSocket(rtpSocket);
-            mSockets.put(remotePort, qosSocket);
-            registerQosCallback(network, rtpSocket, qosSocket);
-        }
+        rtpSocket.connect(remoteAddr, remotePort);
+        rtcpSocket.connect(remoteAddr, (remotePort + 1));
+
+        QosSocket qosSocket = new QosSocket(rtpSocket);
+        mSockets.put(remotePort, qosSocket);
+        registerQosCallback(network, rtpSocket, qosSocket);
 
         return true;
     }
@@ -265,9 +283,18 @@ public class QosAgent {
     */
     public void destroyQosConnection(DatagramSocket rtpSocket, DatagramSocket rtcpSocket) {
         if (rtcpSocket != null) {
-            IoUtils.closeQuietly(rtcpSocket);
+            ImsUtils.closeQuietly(rtcpSocket);
         }
 
+        if (rtpSocket != null) {
+            removeQosConnection(rtpSocket, rtcpSocket, true);
+            ImsUtils.closeQuietly(rtpSocket);
+        }
+    }
+
+    /** Unregister QosConnection and remove QosSocket */
+    private void removeQosConnection(
+            DatagramSocket rtpSocket, DatagramSocket rtcpSocket, boolean close) {
         if (rtpSocket != null) {
             int remotePort = rtpSocket.getPort();
             QosSocket socket = mSockets.get(remotePort);
@@ -275,13 +302,19 @@ public class QosAgent {
             if (socket != null) {
                 unregisterQosCallback(socket);
                 mSockets.remove(remotePort);
-                ImsLog.d(mSlotId, "QosSocket closed");
-                socket.close();
+                if (close) {
+                    ImsLog.d(this, mSlotId, "removeQosConnection - QosSocket closed");
+                    socket.close();
+                } else {
+                    ImsLog.d(this, mSlotId, "removeQosConnection - disconnect; rtpSocket: "
+                            + rtpSocket + " remotePort: " + remotePort);
+                    rtpSocket.disconnect();
+                    rtcpSocket.disconnect();
+                }
             } else {
-                ImsLog.d(mSlotId, "socket is not connected");
+                ImsLog.d(this, mSlotId, "removeQosConnection - QosSocket for remotePort: "
+                        + remotePort + "is not found");
             }
-
-            IoUtils.closeQuietly(rtpSocket);
         }
     }
 
@@ -289,7 +322,7 @@ public class QosAgent {
 
         DatagramSocket socket = null;
 
-        ImsLog.d(mSlotId, "createDatagramSocket - ipAddr=" + ipAddr + ", port=" + port);
+        ImsLog.d(this, mSlotId, "createDatagramSocket - ipAddr=" + ipAddr + ", port=" + port);
 
         try {
             socket = new DatagramSocket(null);
@@ -300,7 +333,7 @@ public class QosAgent {
                 network.bindSocket(socket);
             }
         } catch (IOException e) {
-            ImsLog.e(mSlotId, "createDatagramSocket: " + e.toString());
+            ImsLog.e(this, mSlotId, "createDatagramSocket: " + e.toString());
 
             if (socket != null) {
                 socket.close();
@@ -312,22 +345,16 @@ public class QosAgent {
     }
 
     private Network getNetworkForIpAddress(InetAddress addr) {
-        ConnectivityManager cm =
-                AppContext.getInstance().getSystemService(ConnectivityManager.class);
-
-        if (cm == null) {
-            return null;
-        }
-
+        ConnectivityManagerProxy cmp = getConnectivityManagerProxy();
         List<Network> networks = getAllNetworks(mSlotId);
 
         if (networks.isEmpty()) {
-            ImsLog.w(mSlotId, "No networks");
+            ImsLog.w(this, mSlotId, "No networks");
             return null;
         }
 
         for (Network network : networks) {
-            LinkProperties lp = cm.getLinkProperties(network);
+            LinkProperties lp = cmp.getLinkProperties(network);
 
             if (lp == null) {
                 continue;
@@ -344,33 +371,24 @@ public class QosAgent {
     }
 
     private void registerQosCallback(Network network, DatagramSocket socket, QosCallback callback) {
-
-        ConnectivityManager cm =
-                AppContext.getInstance().getSystemService(ConnectivityManager.class);
-
-        ImsLog.d(mSlotId, "registerQosCallback" + callback);
+        ConnectivityManagerProxy cmp = getConnectivityManagerProxy();
+        ImsLog.d(this, mSlotId, "registerQosCallback: " + callback);
         try {
-            if (cm != null) {
-                QosSocketInfo socketInfo = new QosSocketInfo(network, socket);
-                cm.registerQosCallback(
-                        socketInfo, AppContext.getInstance().getMainExecutor(), callback);
-            }
+            QosSocketInfo socketInfo = new QosSocketInfo(network, socket);
+            cmp.registerQosCallback(
+                    socketInfo, AppContext.getInstance().getMainExecutor(), callback);
         } catch (Throwable t) {
-            ImsLog.e(mSlotId, "registerQosCallback: " + t.toString());
+            ImsLog.e(this, mSlotId, "registerQosCallback: " + t.toString());
         }
     }
 
     private void unregisterQosCallback(QosCallback callback) {
-
-        ConnectivityManager cm =
-                AppContext.getInstance().getSystemService(ConnectivityManager.class);
-        ImsLog.d(mSlotId, "unregisterQosCallback" + callback);
+        ConnectivityManagerProxy cmp = getConnectivityManagerProxy();
+        ImsLog.d(this, mSlotId, "unregisterQosCallback: " + callback);
         try {
-            if (cm != null) {
-                cm.unregisterQosCallback(callback);
-            }
+            cmp.unregisterQosCallback(callback);
         } catch (Throwable t) {
-            ImsLog.e(mSlotId, "unregisterQosCallback: " + t.toString());
+            ImsLog.e(this, mSlotId, "unregisterQosCallback: " + t.toString());
         }
     }
 
@@ -378,7 +396,7 @@ public class QosAgent {
         try {
             return InetAddress.getByName(address);
         } catch (IOException e) {
-            ImsLog.e("getByName: " + e);
+            ImsLog.e(null, "getByName: " + e);
         }
 
         return null;
@@ -406,5 +424,9 @@ public class QosAgent {
         }
 
         return allNetworks;
+    }
+
+    private static ConnectivityManagerProxy getConnectivityManagerProxy() {
+        return AppContext.getInstance().getSystemServiceProxy(ConnectivityManagerProxy.class);
     }
 }

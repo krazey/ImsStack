@@ -14,11 +14,18 @@
  * limitations under the License.
  */
 
-#include "Configuration.h"
+#include "CarrierConfig.h"
+#include "Engine.h"
+#include "IConfiguration.h"
+#include "IJniEnabler.h"
+#include "IJniMtsAppThread.h"
+#include "IMtsServiceState.h"
 #include "ImsServiceConfig.h"
+#include "JniEnablerConnector.h"
 #include "MtsApp.h"
 #include "MtsService.h"
-#include "IMtsServiceState.h"
+#include "MtsNetworkTracker.h"
+#include "ServiceConfig.h"
 #include "ServiceTrace.h"
 #include "message/MtsMessageController.h"
 #include "utility/MtsDynamicLoader.h"
@@ -31,13 +38,15 @@ PUBLIC
 MtsApp::MtsApp(IN IMS_SINT32 nSlotId) :
         ImsApp(MTS_APP_NAME),
         m_nSlotId(nSlotId),
-        m_piMtsService(IMS_NULL),
-        m_pMtsDynamicLoader(IMS_NULL),
-        m_pMtsMessageController(IMS_NULL)
+        m_objNormalService(MtsService(*this, MtsServiceType::NORMAL)),
+        m_objEmergencyService(MtsService(*this, MtsServiceType::EMERGENCY)),
+        m_objMtsMessageController(MtsMessageController(*this)),
+        m_objMtsNetworkTracker(MtsNetworkTracker(*this)),
+        m_objMtsDynamicLoader(MtsDynamicLoader(*this))
 {
     IMS_TRACE_I("+MtsApp [slot_%d]", m_nSlotId, 0, 0);
 
-    Configuration::GetInstance()->SetAppConfig(
+    Engine::GetConfiguration()->SetAppConfig(
             ImsServiceConfig::GetAppName(ImsAppId::MTS), m_nSlotId);
 }
 
@@ -45,70 +54,90 @@ PUBLIC MtsApp::~MtsApp()
 {
     IMS_TRACE_I("~MtsApp [slot_%d]", m_nSlotId, 0, 0);
 
-    if (m_pMtsDynamicLoader != IMS_NULL)
-    {
-        delete m_pMtsDynamicLoader;
-        m_pMtsDynamicLoader = IMS_NULL;
-    }
-
-    if (m_piMtsService != IMS_NULL)
-    {
-        delete m_piMtsService;
-        m_piMtsService = IMS_NULL;
-    }
-
-    if (m_pMtsMessageController != IMS_NULL)
-    {
-        delete m_pMtsMessageController;
-        m_pMtsMessageController = IMS_NULL;
-    }
+    JniEnablerConnector::GetInstance().SetNativeEnabler(m_nSlotId, EnablerType::MTS, IMS_NULL);
 }
 
 PUBLIC VIRTUAL void MtsApp::Start()
 {
     IMS_TRACE_I("SMS Start [slot_%d]", m_nSlotId, 0, 0);
 
-    // 1. MtsUtils
-    /*===================*/
-    CreateMtsUtils();
+    m_objNormalService.Init();
+    m_objEmergencyService.Init();
 
-    // 2. MtsService
-    /*===================*/
-    CreateMtsService();
-
-    // 3. MtsMessageController
-    /*===================*/
-    CreateMtsMessageController();
+    AttachJni();
 }
 
 PUBLIC VIRTUAL void MtsApp::Stop()
 {
     IMS_TRACE_I("SMS Stop [slot_%d]", m_nSlotId, 0, 0);
 
-    if (m_piMtsService != IMS_NULL)
+    m_objNormalService.GetIMtsServiceState()->SetImsRegConnected(IMS_FALSE);
+    m_objEmergencyService.GetIMtsServiceState()->SetImsRegConnected(IMS_FALSE);
+}
+
+PUBLIC VIRTUAL const IMtsService& MtsApp::GetService(IN MtsServiceType eServiceType) const
+{
+    if (eServiceType == MtsServiceType::NORMAL)
     {
-        m_piMtsService->GetIMtsServiceState()->SetImsRegConnected(IMS_FALSE);
+        return m_objNormalService;
+    }
+    else
+    {
+        return m_objEmergencyService;
     }
 }
 
-PRIVATE void MtsApp::CreateMtsService()
+PUBLIC VIRTUAL IJniMtsAppThread* MtsApp::GetJniAppThread() const
 {
-    IMS_TRACE_I("CreateMtsService [slot_%d]", m_nSlotId, 0, 0);
+    const IJniEnabler* piJniEnabler =
+            JniEnablerConnector::GetInstance().GetJniEnabler(m_nSlotId, EnablerType::MTS);
+    if (piJniEnabler == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "JniMtsAppThread is null", 0, 0, 0);
+        return IMS_NULL;
+    }
 
-    m_piMtsService = new MtsService(m_nSlotId);
+    return reinterpret_cast<IJniMtsAppThread*>(piJniEnabler->GetJniThread());
 }
 
-PRIVATE void MtsApp::CreateMtsMessageController()
+PUBLIC VIRTUAL void MtsApp::SendMoSmsByServiceType(IN SmsFormatType eSmsFormat,
+        IN ByteArray* pContent, IN const AString& strAddress, IN IMS_SINT32 nSeqId,
+        IN IMS_BOOL bEmergencyNumber, IN IMS_UINT32 nRetryCount)
 {
-    IMS_TRACE_I("CreateMtsMessageController [slot_%d]", m_nSlotId, 0, 0);
-
-    m_pMtsMessageController =
-            new MtsMessageController(m_nSlotId, m_piMtsService, m_pMtsDynamicLoader);
+    if (bEmergencyNumber && ShouldUseEmergencyPdnForSms())
+    {
+        m_objEmergencyService.SendMoSms(
+                eSmsFormat, pContent, strAddress, nSeqId, bEmergencyNumber, nRetryCount);
+    }
+    else
+    {
+        m_objNormalService.SendMoSms(
+                eSmsFormat, pContent, strAddress, nSeqId, bEmergencyNumber, nRetryCount);
+    }
 }
 
-PRIVATE void MtsApp::CreateMtsUtils()
+PUBLIC
+void MtsApp::NotifyMoSmsTimedOut()
 {
-    IMS_TRACE_I("CreateMtsUtils [slot_%d]", m_nSlotId, 0, 0);
+    m_objMtsMessageController.TriggerEmergencySmsStateNotification(
+            IMS_FALSE, m_objMtsMessageController.GetLastEmergencyMessageReference());
+}
 
-    m_pMtsDynamicLoader = new MtsDynamicLoader(m_nSlotId);
+PUBLIC
+void MtsApp::NotifyMtSmsTimedOut(IN IMS_SINT32 nMessageRef)
+{
+    m_objMtsMessageController.ClearStaleMtSmsAndProcessNext(nMessageRef);
+}
+
+PRIVATE void MtsApp::AttachJni()
+{
+    JniEnablerConnector::GetInstance().SetNativeEnabler(m_nSlotId, EnablerType::MTS, this);
+}
+
+PRIVATE
+IMS_BOOL MtsApp::ShouldUseEmergencyPdnForSms() const
+{
+    return ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId)->GetBoolean(
+            CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL)
+            && !m_objMtsNetworkTracker.IsInRoamingState();
 }

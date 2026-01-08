@@ -25,15 +25,12 @@ class PageMessage : public ServiceMethod
 {
 public:
     explicit PageMessage(IN Service* pService);
-    inline virtual ~PageMessage() {}
+    ~PageMessage() override = default;
 
     PageMessage(IN const PageMessage&) = delete;
     PageMessage& operator=(IN const PageMessage&) = delete;
 
 public:
-    // Method class
-    inline void Destroy() override { ServiceMethod::Destroy(); }
-
     // IPageMessage interface
     const ByteArray& GetContent() const;
     AString GetContentType() const;

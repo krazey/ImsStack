@@ -23,8 +23,8 @@
 class MockIFrameworkThreadListener : public IFrameworkThreadListener
 {
 public:
-    inline MockIFrameworkThreadListener() = default;
-    inline ~MockIFrameworkThreadListener() = default;
+    MockIFrameworkThreadListener() = default;
+    ~MockIFrameworkThreadListener() override = default;
 
     MOCK_METHOD(void, FrameworkThread_OnStarted, (), (override));
     MOCK_METHOD(void, FrameworkThread_OnTerminated, (), (override));

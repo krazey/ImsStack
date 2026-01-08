@@ -14,30 +14,40 @@
  * limitations under the License.
  */
 
+#include "AString.h"
 #include "IMtcService.h"
 #include "ImsList.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
 #include "call/IMtcCall.h"
+#include "call/MockIMtcSession.h"
 #include "call/MtcCall.h"
 #include "call/MtcCallManager.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "call/radio/IMtcRadioChecker.h"
+#include "call/radio/MockIMtcRadioChecker.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MockICallStateProxy.h"
+#include "helper/MockMtcTimerWrapper.h"
 #include <gtest/gtest.h>
+#include <memory>
 
 using ::testing::_;
+using ::testing::Invoke;
 using ::testing::Return;
 using ::testing::ReturnRef;
+
+const AString TEST_CALL_LOG_TAG = "TestCall";
 
 class MtcCallManagerTest : public ::testing::Test
 {
 public:
     MockIMtcContext objContext;
     MockICallStateProxy objCallStateProxy;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     MtcCallManager* pCallManager;
     MockIMtcService objService;
+    MockIMtcRadioChecker objRadioChecker;
 
 protected:
     virtual void SetUp() override
@@ -46,10 +56,21 @@ protected:
         ON_CALL(objContext, GetServiceByType(_)).WillByDefault(Return(&objService));
         ON_CALL(objService, GetStatus).WillByDefault(Return(ServiceStatus::SERVICE_ACTIVE));
 
-        pConfigurationProxy = new MtcConfigurationProxy(new MockIMtcConfigurationManager());
+        pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
 
+        ON_CALL(objContext, CreateTimer)
+                .WillByDefault(Invoke(
+                        []()
+                        {
+                            return std::make_unique<MockMtcTimerWrapper>();
+                        }));
+        ON_CALL(objContext, GetRadioChecker).WillByDefault(ReturnRef(objRadioChecker));
+        ON_CALL(objRadioChecker, Check(_, _, _, _, _, _))
+                .WillByDefault(Return(IMtcRadioChecker::CheckResult::Unblocked()));
+
         pCallManager = new MtcCallManager(objContext);
+        ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(*pCallManager));
     }
 
     virtual void TearDown() override
@@ -60,38 +81,30 @@ protected:
 
     void ClearAllCalls()
     {
-        const CallType eType = CallType::UNKNOWN;
-        const IMS_BOOL bEmergency = IMS_FALSE;
-        const IMS_SINT32 nReason = 0;
-
         ImsList<IMtcCall*> lstCalls = pCallManager->GetCalls();
         for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
         {
-            IMtcCall* pCall = lstCalls.GetAt(nIndex);
-            pCallManager->OnCallStateChanged(
-                    pCall->GetKey(), IMtcCall::State::TERMINATING, eType, bEmergency, nReason);
+            pCallManager->RemoveCall(lstCalls.GetAt(nIndex)->GetKey());
         }
     }
 };
 
-TEST_F(MtcCallManagerTest, InitRegistersThisToCallStateProxy)
+TEST_F(MtcCallManagerTest, DeInitClearsAllCalls)
 {
-    EXPECT_CALL(objCallStateProxy, AddListener(pCallManager)).Times(1);
-
-    pCallManager->Init();
-}
-
-TEST_F(MtcCallManagerTest, DeInitUnregistersThisFromCallStateProxy)
-{
-    EXPECT_CALL(objCallStateProxy, RemoveListener(pCallManager)).Times(1);
+    CallInfo objCallInfo;
+    pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo, TEST_CALL_LOG_TAG);
+    pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo, TEST_CALL_LOG_TAG);
+    ASSERT_EQ(2, pCallManager->GetCalls().GetSize());
 
     pCallManager->DeInit();
+    ASSERT_EQ(0, pCallManager->GetCalls().GetSize());
 }
 
 TEST_F(MtcCallManagerTest, CreateCallReturnsNewCall)
 {
     CallInfo objCallInfo;
-    IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
+    const IMtcCall* pCall =
+            pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo, TEST_CALL_LOG_TAG);
 
     EXPECT_NE(nullptr, pCall);
 }
@@ -99,7 +112,8 @@ TEST_F(MtcCallManagerTest, CreateCallReturnsNewCall)
 TEST_F(MtcCallManagerTest, CreateCallAddsNewCallToList)
 {
     CallInfo objCallInfo;
-    IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
+    const IMtcCall* pCall =
+            pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo, TEST_CALL_LOG_TAG);
 
     EXPECT_EQ(pCall, pCallManager->GetCalls().GetAt(0));
 }
@@ -109,7 +123,8 @@ TEST_F(MtcCallManagerTest, CreateCallReturnsNullCallIfServiceIsNull)
     ON_CALL(objContext, GetServiceByType(_)).WillByDefault(Return(nullptr));
 
     CallInfo objCallInfo;
-    IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
+    const IMtcCall* pCall =
+            pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo, TEST_CALL_LOG_TAG);
 
     EXPECT_EQ(DYNAMIC_CAST(IMtcCall*, MtcCallManager::s_pNullCall), pCall);
 }
@@ -119,7 +134,8 @@ TEST_F(MtcCallManagerTest, CreateCallReturnsNullCallIfServiceIsSuspended)
     ON_CALL(objService, GetStatus).WillByDefault(Return(ServiceStatus::SERVICE_SUSPENDED));
 
     CallInfo objCallInfo;
-    IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
+    const IMtcCall* pCall =
+            pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo, TEST_CALL_LOG_TAG);
 
     EXPECT_EQ(DYNAMIC_CAST(IMtcCall*, MtcCallManager::s_pNullCall), pCall);
 }
@@ -129,7 +145,8 @@ TEST_F(MtcCallManagerTest, CreateCallReturnsNullCallIfServiceIsIdle)
     ON_CALL(objService, GetStatus).WillByDefault(Return(ServiceStatus::SERVICE_IDLE));
 
     CallInfo objCallInfo;
-    IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
+    const IMtcCall* pCall =
+            pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo, TEST_CALL_LOG_TAG);
 
     EXPECT_EQ(DYNAMIC_CAST(IMtcCall*, MtcCallManager::s_pNullCall), pCall);
 }
@@ -139,7 +156,7 @@ TEST_F(MtcCallManagerTest, CreateCallNotAddsNullCallIfServiceIsNull)
     ON_CALL(objContext, GetServiceByType(_)).WillByDefault(Return(nullptr));
 
     CallInfo objCallInfo;
-    pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
+    pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo, TEST_CALL_LOG_TAG);
 
     EXPECT_EQ(0, pCallManager->GetCalls().GetSize());
 }
@@ -147,7 +164,8 @@ TEST_F(MtcCallManagerTest, CreateCallNotAddsNullCallIfServiceIsNull)
 TEST_F(MtcCallManagerTest, GetCallByCallKeyReturnsMatchingCall)
 {
     CallInfo objCallInfo;
-    IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
+    const IMtcCall* pCall =
+            pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo, TEST_CALL_LOG_TAG);
 
     EXPECT_EQ(pCall, pCallManager->GetCallByCallKey(pCall->GetKey()));
 }
@@ -155,7 +173,8 @@ TEST_F(MtcCallManagerTest, GetCallByCallKeyReturnsMatchingCall)
 TEST_F(MtcCallManagerTest, GetCallByCallKeyReturnsNullCallIfNoMatchingCall)
 {
     CallInfo objCallInfo;
-    IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
+    const IMtcCall* pCall =
+            pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo, TEST_CALL_LOG_TAG);
 
     const CallKey nNotExistingCallKey = pCall->GetKey() + 1;
 
@@ -173,8 +192,10 @@ TEST_F(MtcCallManagerTest, GetCallsReturnsEmptyCallListInitially)
 TEST_F(MtcCallManagerTest, GetCallsExcludingReturnsCallListOfMatchingCall)
 {
     CallInfo objCallInfo;
-    IMtcCall* pCall1 = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
-    IMtcCall* pCall2 = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
+    const IMtcCall* pCall1 =
+            pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo, TEST_CALL_LOG_TAG);
+    const IMtcCall* pCall2 =
+            pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo, TEST_CALL_LOG_TAG);
 
     ImsList<IMtcCall*> lstResult = pCallManager->GetCallsExcluding(pCall1->GetKey());
     EXPECT_EQ(1, lstResult.GetSize());
@@ -185,11 +206,12 @@ TEST_F(MtcCallManagerTest, GetCallsByTypeReturnsCallListOfMatchingCall)
 {
     CallInfo objCallInfo1;
     objCallInfo1.eInitialCallType = CallType::VOIP;
-    IMtcCall* pVoipCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo1);
+    const IMtcCall* pVoipCall =
+            pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo1, TEST_CALL_LOG_TAG);
 
     CallInfo objCallInfo2;
     objCallInfo2.eInitialCallType = CallType::VT;
-    pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo2);
+    pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo2, TEST_CALL_LOG_TAG);
 
     ImsList<IMtcCall*> lstResult = pCallManager->GetCallsByType(CallType::VOIP);
     EXPECT_EQ(1, lstResult.GetSize());
@@ -211,8 +233,10 @@ TEST_F(MtcCallManagerTest, GetCallsByServiceTypeReturnsCallListOfMatchingCall)
     ON_CALL(objEmergencyService, GetStatus).WillByDefault(Return(ServiceStatus::SERVICE_ACTIVE));
 
     CallInfo objCallInfo;
-    IMtcCall* pNormalCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
-    IMtcCall* pEmergencyCall = pCallManager->CreateCall(ServiceType::EMERGENCY, objCallInfo);
+    const IMtcCall* pNormalCall =
+            pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo, TEST_CALL_LOG_TAG);
+    const IMtcCall* pEmergencyCall =
+            pCallManager->CreateCall(ServiceType::EMERGENCY, objCallInfo, TEST_CALL_LOG_TAG);
 
     ImsList<IMtcCall*> lstNormalResult = pCallManager->GetCallsByServiceType(ServiceType::NORMAL);
     EXPECT_EQ(1, lstNormalResult.GetSize());
@@ -231,11 +255,12 @@ TEST_F(MtcCallManagerTest, GetCallsInConferenceReturnsCallListOfMatchingCall)
 {
     CallInfo objCallInfo1;
     objCallInfo1.bConference = IMS_TRUE;
-    IMtcCall* pConferenceCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo1);
+    const IMtcCall* pConferenceCall =
+            pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo1, TEST_CALL_LOG_TAG);
 
     CallInfo objCallInfo2;
     objCallInfo2.bConference = IMS_FALSE;
-    pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo2);
+    pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo2, TEST_CALL_LOG_TAG);
 
     ImsList<IMtcCall*> lstResult = pCallManager->GetCallsInConference();
     EXPECT_EQ(1, lstResult.GetSize());
@@ -245,7 +270,8 @@ TEST_F(MtcCallManagerTest, GetCallsInConferenceReturnsCallListOfMatchingCall)
 TEST_F(MtcCallManagerTest, GetCallsByStateReturnsCallListOfMatchingCall)
 {
     CallInfo objCallInfo;
-    IMtcCall* pIdleCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
+    const IMtcCall* pIdleCall =
+            pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo, TEST_CALL_LOG_TAG);
 
     ImsList<IMtcCall*> lstIdleCalls = pCallManager->GetCallsByState(IMtcCall::State::IDLE);
     EXPECT_EQ(1, lstIdleCalls.GetSize());
@@ -256,91 +282,22 @@ TEST_F(MtcCallManagerTest, GetCallsByStateReturnsCallListOfMatchingCall)
     EXPECT_EQ(0, lstTerminatingCalls.GetSize());
 }
 
-TEST_F(MtcCallManagerTest, OnCallStateChangedDoNothingIfNotTerminating)
+TEST_F(MtcCallManagerTest, RemoveCallRemovesCall)
 {
     CallInfo objCallInfo;
-    IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
+    const IMtcCall* pCall =
+            pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo, TEST_CALL_LOG_TAG);
 
-    const CallType eType = CallType::VOIP;
-    const IMS_BOOL bEmergency = IMS_FALSE;
-    const IMS_SINT32 nReason = 0;
-
-    pCallManager->OnCallStateChanged(
-            pCall->GetKey(), IMtcCall::State::IDLE, eType, bEmergency, nReason);
-    EXPECT_EQ(1, pCallManager->GetCalls().GetSize());
-
-    pCallManager->OnCallStateChanged(
-            pCall->GetKey(), IMtcCall::State::OUTGOING, eType, bEmergency, nReason);
-    EXPECT_EQ(1, pCallManager->GetCalls().GetSize());
-
-    pCallManager->OnCallStateChanged(
-            pCall->GetKey(), IMtcCall::State::INCOMING, eType, bEmergency, nReason);
-    EXPECT_EQ(1, pCallManager->GetCalls().GetSize());
-
-    pCallManager->OnCallStateChanged(
-            pCall->GetKey(), IMtcCall::State::ALERTING, eType, bEmergency, nReason);
-    EXPECT_EQ(1, pCallManager->GetCalls().GetSize());
-
-    pCallManager->OnCallStateChanged(
-            pCall->GetKey(), IMtcCall::State::ESTABLISHED, eType, bEmergency, nReason);
-    EXPECT_EQ(1, pCallManager->GetCalls().GetSize());
-
-    pCallManager->OnCallStateChanged(
-            pCall->GetKey(), IMtcCall::State::UPDATING, eType, bEmergency, nReason);
-    EXPECT_EQ(1, pCallManager->GetCalls().GetSize());
-}
-
-TEST_F(MtcCallManagerTest, OnCallStateChangedRemoveCallIfTerminating)
-{
-    CallInfo objCallInfo;
-    IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
-
-    const CallType eType = CallType::VOIP;
-    const IMS_BOOL bEmergency = IMS_FALSE;
-    const IMS_SINT32 nReason = 0;
-
-    pCallManager->OnCallStateChanged(
-            pCall->GetKey(), IMtcCall::State::TERMINATING, eType, bEmergency, nReason);
+    pCallManager->RemoveCall(pCall->GetKey());
     EXPECT_EQ(0, pCallManager->GetCalls().GetSize());
 }
 
-TEST_F(MtcCallManagerTest, OnCallStateChangedDoesNothingIfTerminatingInvalidCallKey)
+TEST_F(MtcCallManagerTest, RemoveCallDoesNothingIfInvalidCallKey)
 {
     CallInfo objCallInfo;
-    IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
+    const IMtcCall* pCall =
+            pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo, TEST_CALL_LOG_TAG);
 
-    const CallType eType = CallType::VOIP;
-    const IMS_BOOL bEmergency = IMS_FALSE;
-    const IMS_SINT32 nReason = 0;
-
-    pCallManager->OnCallStateChanged(
-            pCall->GetKey() + 1, IMtcCall::State::TERMINATING, eType, bEmergency, nReason);
-    EXPECT_EQ(1, pCallManager->GetCalls().GetSize());
-}
-
-TEST_F(MtcCallManagerTest, OnTotalCallStateChangedDoNothing)
-{
-    CallInfo objCallInfo;
-    pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
-
-    pCallManager->OnTotalCallStateChanged(IMtcCall::State::IDLE);
-    EXPECT_EQ(1, pCallManager->GetCalls().GetSize());
-
-    pCallManager->OnTotalCallStateChanged(IMtcCall::State::OUTGOING);
-    EXPECT_EQ(1, pCallManager->GetCalls().GetSize());
-
-    pCallManager->OnTotalCallStateChanged(IMtcCall::State::INCOMING);
-    EXPECT_EQ(1, pCallManager->GetCalls().GetSize());
-
-    pCallManager->OnTotalCallStateChanged(IMtcCall::State::ALERTING);
-    EXPECT_EQ(1, pCallManager->GetCalls().GetSize());
-
-    pCallManager->OnTotalCallStateChanged(IMtcCall::State::ESTABLISHED);
-    EXPECT_EQ(1, pCallManager->GetCalls().GetSize());
-
-    pCallManager->OnTotalCallStateChanged(IMtcCall::State::UPDATING);
-    EXPECT_EQ(1, pCallManager->GetCalls().GetSize());
-
-    pCallManager->OnTotalCallStateChanged(IMtcCall::State::TERMINATING);
+    pCallManager->RemoveCall(pCall->GetKey() + 1);
     EXPECT_EQ(1, pCallManager->GetCalls().GetSize());
 }

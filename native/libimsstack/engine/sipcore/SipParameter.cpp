@@ -16,6 +16,8 @@
 #include "ServiceMemory.h"
 
 #include "Feature.h"
+
+#include "SipError.h"
 #include "SipParameter.h"
 #include "SipPrivate.h"
 #include "SipUtils.h"

@@ -24,7 +24,7 @@ class MockISipConfigV : public ISipConfigV
 {
 public:
     inline MockISipConfigV() {}
-    inline virtual ~MockISipConfigV() {}
+    ~MockISipConfigV() override = default;
 
     MOCK_METHOD(IConfigurable*, GetConfigurable, (), (const, override));
     MOCK_METHOD(IMS_UINT32, GetFeatureTagOptions, (), (const, override));

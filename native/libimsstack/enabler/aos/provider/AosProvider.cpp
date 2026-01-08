@@ -32,7 +32,7 @@
 
 #include "provider/AosProvider.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 PUBLIC
 AosProvider::AosProvider() :
@@ -44,7 +44,7 @@ AosProvider::AosProvider() :
 
     m_piLock = MutexService::GetMutexService()->CreateMutex();
 
-    for (int i = 0; i < SystemConfig::GetSupportedSimCount(); i++)
+    for (IMS_SINT32 i = 0; i < SystemConfig::GetSupportedSimCount(); i++)
     {
         m_objParam.Add(i, new ProviderParam());
     }
@@ -131,6 +131,12 @@ PUBLIC
 IAosSubscriberManager* AosProvider::GetSubscriberManager(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 {
     return m_objParam.GetValue(nSlotId)->m_piSubscriberManager;
+}
+
+PUBLIC
+IAosTracer* AosProvider::GetTracer(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
+{
+    return m_objParam.GetValue(nSlotId)->m_piTracer;
 }
 
 PUBLIC
@@ -233,6 +239,18 @@ void AosProvider::SetSubscriberManager(
     if (pParam != IMS_NULL)
     {
         pParam->m_piSubscriberManager = piSubscriberManager;
+    }
+}
+
+PUBLIC
+void AosProvider::SetTracer(IN IAosTracer* piTracer, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
+{
+    LockGuard objLock(m_piLock);
+
+    ProviderParam* pParam = m_objParam.GetValue(nSlotId);
+    if (pParam != IMS_NULL)
+    {
+        pParam->m_piTracer = piTracer;
     }
 }
 

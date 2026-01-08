@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "MtsDef.h"
 #include "utility/MtsSipFormUtils.h"
+#include <gtest/gtest.h>
 
 namespace android
 {

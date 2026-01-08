@@ -17,7 +17,8 @@
 #define INTERFACE_SIP_CONNECTION_NOTIFIER_H_
 
 #include "IConnection.h"
-#include "IpAddress.h"
+
+class IpAddress;
 
 class ISipConnectionNotifierErrorListener;
 class ISipDialog;
@@ -36,7 +37,7 @@ class SipProfile;
 class ISipConnectionNotifier : public IConnection
 {
 protected:
-    virtual ~ISipConnectionNotifier() = default;
+    ~ISipConnectionNotifier() override = default;
 
 public:
     /**

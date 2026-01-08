@@ -63,7 +63,8 @@ public:
         {
             ACTION_UNKNOWN = 0,
             ACTION_EMERGENCY_REGISTRATION = 1,
-            ACTION_INITIAL_REGISTRATION = 2
+            ACTION_INITIAL_REGISTRATION = 2,
+            ACTION_ANONYMOUS_EMERGENCYCALL = 3
         };
 
     private:
@@ -116,8 +117,8 @@ public:
     IMS_BOOL Parse(IN const AString& str3gppIms);
 
 private:
-    void CreateAlternativeService(IN INode* piNode);
-    void CreateServiceInfo(IN INode* piNode);
+    void CreateAlternativeService(IN const INode* piNode);
+    void CreateServiceInfo(IN const INode* piNode);
 
 public:
     /// "alternative-service" or "service-info"

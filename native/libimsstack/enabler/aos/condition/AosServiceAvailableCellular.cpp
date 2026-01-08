@@ -24,14 +24,13 @@
 #include "condition/AosCondition.h"
 #include "condition/AosServiceAvailableCellular.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 #define AOSTAG m_strTag.GetStr()
 
 PUBLIC
 AosServiceAvailableCellular::AosServiceAvailableCellular() :
         AosServiceAvailable("AosServiceAvailableCellular"),
-        m_bVopsState(IMS_FALSE),
         m_bNetworkServiceIn(IMS_FALSE)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosServiceAvailableCellular = %" PFLS_u "/%" PFLS_x,
@@ -44,7 +43,7 @@ PUBLIC VIRTUAL AosServiceAvailableCellular::~AosServiceAvailableCellular()
             sizeof(AosServiceAvailableCellular), this, 0);
 }
 
-PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleNetworkStateChanged()
+PROTECTED VIRTUAL void AosServiceAvailableCellular::HandleNetworkStateChanged()
 {
     IAosNetTracker* piNetTracker = m_piAppContext->GetNetTracker();
     if (piNetTracker != IMS_NULL)
@@ -70,7 +69,7 @@ PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleNetworkStateChanged()
     }
 }
 
-PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleRoamingChanged(IN IMS_UINT32 nState)
+PROTECTED VIRTUAL void AosServiceAvailableCellular::HandleRoamingChanged(IN IMS_UINT32 nState)
 {
     AosServiceAvailable::HandleRoamingChanged(nState);
 
@@ -97,7 +96,7 @@ PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleRoamingChanged(IN IMS_UI
     }
 }
 
-PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleAirplaneModeChanged(IN IMS_UINT32 nState)
+PROTECTED VIRTUAL void AosServiceAvailableCellular::HandleAirplaneModeChanged(IN IMS_UINT32 nState)
 {
     AosServiceAvailable::HandleAirplaneModeChanged(nState);
 
@@ -117,29 +116,7 @@ PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleAirplaneModeChanged(IN I
     }
 }
 
-PRIVATE
-void AosServiceAvailableCellular::HandleVopsChanged(IN IMS_UINT32 nState)
-{
-    m_bVopsState = (nState == IMS_VOICE_OVER_PS_SUPPORTED) ? IMS_TRUE : IMS_FALSE;
-
-    if (m_bVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
-    {
-        RequestCommand(AosCondition::REQUEST_PDN_DISCONNECT, AosReason::NOT_SPECIFIED);
-        if (m_piBlock != IMS_NULL)
-        {
-            m_piBlock->SetBlockReason(BLOCK_CELLULAR_VOPS_OFF);
-        }
-    }
-    else
-    {
-        if (m_piBlock != IMS_NULL)
-        {
-            m_piBlock->ResetBlockReason(BLOCK_CELLULAR_VOPS_OFF);
-        }
-    }
-}
-
-PRIVATE VIRTUAL IMS_BOOL AosServiceAvailableCellular::CheckServiceAvailable()
+PROTECTED VIRTUAL IMS_BOOL AosServiceAvailableCellular::CheckServiceAvailable()
 {
     if (GET_N_CONFIG(m_nSlotId) == IMS_NULL)
     {

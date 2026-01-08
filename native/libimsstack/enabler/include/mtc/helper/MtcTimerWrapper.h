@@ -27,7 +27,7 @@ class MtcTimerWrapper : public ITimerListener
 {
 public:
     MtcTimerWrapper();
-    virtual ~MtcTimerWrapper();
+    virtual ~MtcTimerWrapper() override;
     MtcTimerWrapper(IN const MtcTimerWrapper&) = delete;
     MtcTimerWrapper& operator=(IN const MtcTimerWrapper&) = delete;
 
@@ -65,7 +65,6 @@ public:
 private:
     void Clear();
 
-    // TODO: ImsMap<type, timer> would be better.
     ImsList<MtcTimer*> m_lstTimers;
     IMtcTimerListener* m_piListener;
 };

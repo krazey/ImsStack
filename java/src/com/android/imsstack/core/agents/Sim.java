@@ -21,7 +21,7 @@ import android.content.Intent;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 
-import com.android.imsstack.util.MSimUtils;
+import com.android.imsstack.base.MSimUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -119,11 +119,13 @@ public interface Sim {
     int ISIM_FILE_ID_IMPI = 0x6F02;
     int ISIM_FILE_ID_DOMAIN = 0x6F03;
     int ISIM_FILE_ID_IMPU = 0x6F04;
+    int ISIM_FILE_ID_PCSCF = 0x6F09;
 
     @IntDef(value = {
         ISIM_FILE_ID_IMPI,
         ISIM_FILE_ID_DOMAIN,
-        ISIM_FILE_ID_IMPU
+        ISIM_FILE_ID_IMPU,
+        ISIM_FILE_ID_PCSCF
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface IsimFileId {}
@@ -266,6 +268,43 @@ public interface Sim {
                 return "PRESENT";
             default:
                 return "INVALID";
+        }
+    }
+
+    /** Returns a string representation by the given ISIM file id. */
+    static String isimFileIdToString(@Sim.IsimFileId int fileId) {
+        switch (fileId) {
+            case Sim.ISIM_FILE_ID_IMPI:
+                return "IMPI";
+            case Sim.ISIM_FILE_ID_DOMAIN:
+                return "DOMAIN";
+            case Sim.ISIM_FILE_ID_IMPU:
+                return "IMPU";
+            case Sim.ISIM_FILE_ID_PCSCF:
+                return "PCSCF";
+            default:
+                return "UNKNOWN";
+        }
+    }
+
+    /** Returns a string representation by the given ISIM state. */
+    static String isimStateToString(@Sim.IsimState int state) {
+        switch (state) {
+            case Sim.ISIM_STATE_NOT_PRESENT:
+                return "NOT_PRESENT";
+            case Sim.ISIM_STATE_NOT_READY:
+                return "NOT_READY";
+            case Sim.ISIM_STATE_LOADED:
+                return "LOADED";
+            case Sim.ISIM_STATE_REFRESH_STARTED:
+                return "REFRESH_STARTED";
+            case Sim.ISIM_STATE_REFRESH_COMPLETED:
+                return "REFRESH_COMPLETED";
+            case Sim.ISIM_STATE_REMOVED:
+                return "SIM_REMOVED";
+            case Sim.ISIM_STATE_UNKNOWN: // FALL-THROUGH
+            default:
+                return "UNKNOWN";
         }
     }
 }

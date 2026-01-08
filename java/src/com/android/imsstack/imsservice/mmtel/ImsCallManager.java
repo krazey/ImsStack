@@ -17,13 +17,15 @@
 package com.android.imsstack.imsservice.mmtel;
 
 import android.os.PowerManager;
-import android.telephony.emergency.EmergencyNumber;
-import android.telephony.emergency.EmergencyNumber.EmergencyCallRouting;
+import android.telephony.ServiceState;
+import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsCallSession;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.SrvccCall;
 
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.PhoneStateInterface;
 import com.android.imsstack.core.config.ServiceCaps;
 import com.android.imsstack.enabler.mtc.CallTracker;
 import com.android.imsstack.enabler.mtc.ConferenceInfoHelper;
@@ -137,25 +139,29 @@ public class ImsCallManager {
         }
     }
 
+    /**
+     * Creates an {@link ImsCallSessionImpl} from a given ImsCallProfile.
+     *
+     * @param profile The {@link ImsCallProfile} to make the {@link ImsCallSessionImpl}.
+     * @return {@link ImsCallSessionImpl}
+     */
+    @SuppressWarnings("deprecation") // EXTRA_CALL_RAT_TYPE
     public ImsCallSessionImpl createSession(ImsCallProfile profile) {
-        boolean emergency = false;
         boolean offline = false;
         boolean ussi = false;
-        @EmergencyCallRouting int emergencyRouting =
-                EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN;
-
         int sessionAttributes = MtcCall.FLAG_MO;
 
         if (profile.getServiceType() == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
             sessionAttributes |= MtcCall.FLAG_EMERGENCY;
-            emergency = true;
-            emergencyRouting = ImsCallUtils.getEmergencyRoutingFromCallProfile(profile);
 
             // ECBM
             checkAndExitEcbm();
-            //To-Do:- Need to find the way Emergency call Over VoWiFi
-            //sessionAttributes |=  MtcCall.FLAG_WIFI_EMERGENCY;
-            //wifi = true;
+
+            if (String.valueOf(ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN).equals(
+                    ImsCallUtils.getCallExtraFromOemExtras(
+                            profile, ImsCallProfile.EXTRA_CALL_RAT_TYPE, ""))) {
+                sessionAttributes |=  MtcCall.FLAG_WIFI_EMERGENCY;
+            }
         } else if (profile.getServiceType() == ImsCallProfile.SERVICE_TYPE_NORMAL) {
             if (profile.getCallExtraInt(ImsCallProfile.EXTRA_DIALSTRING, -1)
                     == ImsCallProfile.DIALSTRING_USSD) {
@@ -184,16 +190,17 @@ public class ImsCallManager {
                 mCallContext, mCT, call, callId, profile, true);
 
         onCallCreate(callSession);
+        // MO call created.
+        updateImsCallState(TelephonyManager.CALL_STATE_OFFHOOK);
 
         // CALL_CONNECTION_ID
         int ccId = ImsCallConnectionIds.getNewId(mCallContext.getSlotId());
         callSession.setCallConnectionId(ccId);
         ImsCallConnectionIds.add(mCallContext.getSlotId(), ccId);
 
-        if (call.isEmergencyCall()) {
-            mMtcApp.openEmergencyService(call, emergencyRouting);
-        } else {
-            call.open(IUMtcCall.SERVICETYPE_NORMAL, emergency, offline, ussi);
+        if (!call.isEmergencyCall()) {
+            call.open(IUMtcCall.SERVICETYPE_NORMAL, IUMtcCall.EMERGENCYTYPE_NONE, offline, ussi,
+                    false);
         }
 
         return callSession;
@@ -210,6 +217,8 @@ public class ImsCallManager {
 
             if (newSession != null) {
                 onCallCreate(newSession);
+                // MT call is taken.
+                updateImsCallState(TelephonyManager.CALL_STATE_OFFHOOK);
 
                 // CALL_CONNECTION_ID
                 int ccId = ImsCallConnectionIds.getNewId(mCallContext.getSlotId());
@@ -224,6 +233,7 @@ public class ImsCallManager {
 
         if (newSession != null) {
             removePendingSession(newSession);
+            mMtcApp.onIncomingCallTaken(newSession.getMtcCall());
             return true;
         }
 
@@ -412,6 +422,14 @@ public class ImsCallManager {
         return ServiceCaps.isWfcEnabledByPlatform(mCallContext.getSlotId());
     }
 
+    private void updateImsCallState(int state) {
+        PhoneStateInterface phoneState = AgentFactory.getInstance().getAgent(
+                PhoneStateInterface.class, mCallContext.getSlotId());
+        if (phoneState != null) {
+            phoneState.setImsCallState(state);
+        }
+    }
+
     private void checkAndExitEcbm() {
         // It requires to exit an ECBM if emergency call is initiated
         IECallStateTracker ecst = mCallContext.getECallStateTracker();
@@ -423,7 +441,6 @@ public class ImsCallManager {
 
     private void addPendingSession(ImsCallSessionImpl session) {
         synchronized (mPendingSessions) {
-            removePendingSessions();
             mPendingSessions.put(session.getCallId(), session);
 
             log("pendingSessions=" + mPendingSessions.size() +
@@ -521,6 +538,7 @@ public class ImsCallManager {
             // If all the sessions are destroyed,
             // then remove all the ConferenceInfo if present.
             if (mSessions.isEmpty()) {
+                updateImsCallState(TelephonyManager.CALL_STATE_IDLE);
                 ConferenceInfoHelper.destroyAllConferenceInfos();
 
                 ImsGarbageCalls gc = ImsGarbageCalls.getInstance();

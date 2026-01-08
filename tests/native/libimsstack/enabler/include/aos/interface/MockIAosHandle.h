@@ -30,17 +30,16 @@ class AosFeatureTagList;
 class MockIAosHandle : public IAosHandle
 {
 public:
-    MOCK_METHOD(AString&, GetAppId, (), (override));
-    MOCK_METHOD(AString&, GetServiceId, (), (override));
-    MOCK_METHOD(IMS_UINT32, GetServiceType, (), (override));
+    MOCK_METHOD(const AString&, GetAppId, (), (const, override));
+    MOCK_METHOD(const AString&, GetServiceId, (), (const, override));
+    MOCK_METHOD(IMS_UINT32, GetServiceType, (), (const, override));
     MOCK_METHOD(IImsAosMonitor*, GetMonitor, (), (override));
-    MOCK_METHOD(IMS_SINT32, GetRequestType, (), (override));
+    MOCK_METHOD(IMS_SINT32, GetRequestType, (), (const, override));
     MOCK_METHOD(void, SetRequestType, (IN IMS_SINT32 nReqType), (override));
-    MOCK_METHOD(IMS_BOOL, IsRegBinded, (), (override));
+    MOCK_METHOD(IMS_BOOL, IsRegBinded, (), (const, override));
     MOCK_METHOD(void, SetRegBinded, (IN IMS_BOOL bBind), (override));
-    MOCK_METHOD(IMS_BOOL, IsNetworkRegBinded, (), (override));
-    MOCK_METHOD(void, SetNetworkRegBinded, (IN IMS_BOOL bNetworkBind), (override));
-    MOCK_METHOD(IMS_BOOL, IsRegFeatureTagRequired, (), (override));
+    MOCK_METHOD(IMS_BOOL, IsRegFeatureTagRequired, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsRegToNextPcscfRequested, (), (const, override));
     MOCK_METHOD(AosFeatureTagList&, GetFeatureTagList, (), (override));
     MOCK_METHOD(AosFeatureTagList&, GetBindedFeatureTagList, (), (override));
     MOCK_METHOD(void, ProcessFeatureTagChange, (), (override));

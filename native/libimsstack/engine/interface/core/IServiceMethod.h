@@ -34,7 +34,7 @@ class IMessage;
 class IServiceMethod : public IMethod
 {
 protected:
-    virtual ~IServiceMethod() = default;
+    ~IServiceMethod() override = default;
 
 public:
     /**

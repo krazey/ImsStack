@@ -15,14 +15,9 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Carrier configurations -->
-    <!-- Aos -->
-    <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
-
-    <!-- Mtc Assets -->
-    <int name="geolocation_policy_for_location_based_call_int" value="13"/>
-
-    <!-- Ut/Xcap Assets -->
-    <int name="ut_xcap_apn_inactivity_timer_sec_int" value="240"/>
-
+    <!-- Please always keep this config on the first line. -->
+    <!-- Specifies a list of parent carrier ids from which to inherit configuration values. -->
+    <int-array name="ims.parent_carrier_ids_int_array" num="1">
+        <item value="2"/>
+    </int-array>
 </carrier_config>

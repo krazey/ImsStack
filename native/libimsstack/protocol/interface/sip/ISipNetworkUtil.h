@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __ISIPNETWORKUTIL_H__
-#define __ISIPNETWORKUTIL_H__
+#ifndef __INTERFACE_SIP_NETWORK_UTIL_H__
+#define __INTERFACE_SIP_NETWORK_UTIL_H__
 
 #include "SipDatatypes.h"
 
@@ -32,4 +32,4 @@ public:
             SipTransportParameter* pTransportParam, ISipUserData* pUserData) = 0;
 };
 
-#endif  // __ISIPNETWORKUTIL_H__
+#endif  //__INTERFACE_SIP_NETWORK_UTIL_H__

@@ -25,7 +25,7 @@ public:
     AosMngrAdaptor* m_AosMngrAdaptor;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         const AString strName("AosManagerAdapter");
         m_AosMngrAdaptor = new AosMngrAdaptor(strName, IMS_SLOT_0);
@@ -33,7 +33,7 @@ protected:
         ASSERT_TRUE(m_AosMngrAdaptor != nullptr);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_AosMngrAdaptor)
         {

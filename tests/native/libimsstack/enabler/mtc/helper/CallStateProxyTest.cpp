@@ -217,9 +217,28 @@ TEST_F(CallStateProxyTest, UpdateTotalCallStateChecksPeerTypeIfIdleState)
     EXPECT_CALL(objListener, OnTotalCallStateChanged(IMtcCallStateListener::State::OUTGOING));
     pProxy->UpdateCallState(ANY_KEY, ANY_STATE, ANY_TYPE, ANY_ECC_BOOL, ANY_REASON);
 
+    // cppcheck-suppress redundantAssignment
     objCallInfo.ePeerType = PeerType::MT;
     EXPECT_CALL(objListener, OnTotalCallStateChanged(IMtcCallStateListener::State::INCOMING));
     pProxy->UpdateCallState(ANY_KEY, ANY_STATE, ANY_TYPE, ANY_ECC_BOOL, ANY_REASON);
+}
+
+TEST_F(CallStateProxyTest, NotifyCallSessionReleasedNotifiesBothSyncAndAsyncListeners)
+{
+    ON_CALL(objListener, IsSynchronousCallRequired).WillByDefault(Return(IMS_TRUE));
+    pProxy->AddListener(&objListener);
+
+    MockIMtcCallStateListener objListenerAsync;
+    ON_CALL(objListenerAsync, IsSynchronousCallRequired).WillByDefault(Return(IMS_FALSE));
+    pProxy->AddListener(&objListenerAsync);
+
+    IMS_BOOL bEmergency = IMS_TRUE;
+    IMS_BOOL bEstablished = IMS_TRUE;
+
+    EXPECT_CALL(objListener, OnCallSessionReleased(ANY_KEY, bEmergency, bEstablished));
+    EXPECT_CALL(objListenerAsync, OnCallSessionReleased(ANY_KEY, bEmergency, bEstablished));
+
+    pProxy->NotifyCallSessionReleased(ANY_KEY, bEmergency, bEstablished);
 }
 
 }  // namespace android

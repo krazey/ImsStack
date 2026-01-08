@@ -18,11 +18,11 @@
 #define CONFERENCE_PARTICIPANT_LIST_H_
 
 #include "ImsList.h"
-#include "MtcDef.h"
+#include "ImsTypeDef.h"
 #include "conferencecall/ConferenceDef.h"
-#include "conferencecall/IConferenceReference.h"
 
 class CallConnectionIdManager;
+class IConferenceReference;
 class IMtcCallManager;
 
 class ConferenceParticipantList
@@ -46,7 +46,6 @@ public:
         ConferenceParticipant& operator=(IN const ConferenceParticipant&) = delete;
 
     public:
-        // TODO: determine copy or just reference.
         inline void SetConfUser(IN const ConfUser* pConfUser)
         {
             m_pConfUser = new ConfUser(*pConfUser);
@@ -88,7 +87,7 @@ public:
         }
         inline IMS_BOOL IsDisconnectedExplicitly() { return m_bDisconnectedExplicitly; }
 
-        void Login();
+        void LogLn() const;
 
     private:
         ConfUser* m_pConfUser;
@@ -145,7 +144,7 @@ public:
     virtual IMS_SINT32 FindParticipant(IN IMS_UINT32 nConnectionId);
     void ReOrder(IN IMtcCallManager& objCallManager,
             IN const CallConnectionIdManager& objConnectionIdManager);
-    void Login();
+    void LogLn() const;
 
     virtual inline IMS_UINT32 GetSize() const { return m_objParticipants.GetSize(); }
 
@@ -162,8 +161,6 @@ private:
     IMS_SINT32 FindParticipant(IN const ConfUser* pConfUser) const;
 
 private:
-    // TODO: open ConferenceParticipant to all classes?
-    // Or, just open to ConferenceInfoUpdater?
     friend class ConferenceInfoUpdater;
 
     // the order of this list is same as the order of sending REFER.

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 #include "IIpcan.h"
+#include "IOsFactory.h"
+#include "ImsMessage.h"
 #include "ImsMessageDef.h"
 #include "ImsNetworkConnectionState.h"
 #include "ImsSocketState.h"
@@ -209,7 +211,7 @@ INetworkConnection* NetworkService::FindConnection(IN const IpAddress& objIpAddr
 PUBLIC
 ISocket* NetworkService::CreateSocket(IN INetworkConnection* piConnection)
 {
-    ImsNetworkConnection* pConnection = DYNAMIC_CAST(ImsNetworkConnection*, piConnection);
+    const ImsNetworkConnection* pConnection = DYNAMIC_CAST(ImsNetworkConnection*, piConnection);
 
     if (pConnection == IMS_NULL)
     {
@@ -234,7 +236,7 @@ ISocket* NetworkService::CreateSocket(IN INetworkConnection* piConnection)
 PUBLIC
 ISocket* NetworkService::CreateSocket(IN const IMS_CHAR* pszProfileName, IN IMS_SINT32 nSlotId)
 {
-    ImsNetworkConnection* pConnection =
+    const ImsNetworkConnection* pConnection =
             ImsNetworkConnectionState::GetInstance()->LookupHandle(pszProfileName, nSlotId);
 
     if (pConnection == IMS_NULL)
@@ -261,7 +263,7 @@ PUBLIC
 ISocket* NetworkService::CreateSslSocket(
         IN INetworkConnection* piConnection, IN SslCertificate* pCertificate)
 {
-    ImsNetworkConnection* pConnection = DYNAMIC_CAST(ImsNetworkConnection*, piConnection);
+    const ImsNetworkConnection* pConnection = DYNAMIC_CAST(ImsNetworkConnection*, piConnection);
 
     if (pConnection == IMS_NULL)
     {
@@ -287,7 +289,7 @@ PUBLIC
 ISocket* NetworkService::CreateSslSocket(
         IN const IMS_CHAR* pszProfileName, IN SslCertificate* pCertificate, IN IMS_SINT32 nSlotId)
 {
-    ImsNetworkConnection* pConnection =
+    const ImsNetworkConnection* pConnection =
             ImsNetworkConnectionState::GetInstance()->LookupHandle(pszProfileName, nSlotId);
 
     if (pConnection == IMS_NULL)
@@ -342,7 +344,7 @@ INetworkIpSec* NetworkService::GetIpSec(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-void NetworkService::DispatchServiceMessage(IN ImsMessage& objMsg)
+void NetworkService::DispatchServiceMessage(IN const ImsMessage& objMsg)
 {
     switch (objMsg.GetName())
     {
@@ -389,6 +391,6 @@ PUBLIC GLOBAL IMS_SINT32 NetworkService::GetSlotId(IN const IpAddress& objIpAddr
 
 PUBLIC GLOBAL IMS_SINT32 NetworkService::GetSlotId(IN INetworkConnection* piConnection)
 {
-    ImsNetworkConnection* pConnection = DYNAMIC_CAST(ImsNetworkConnection*, piConnection);
+    const ImsNetworkConnection* pConnection = DYNAMIC_CAST(ImsNetworkConnection*, piConnection);
     return (pConnection != IMS_NULL) ? pConnection->GetSlotId() : IMS_SLOT_ANY;
 }

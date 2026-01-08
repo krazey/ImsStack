@@ -35,7 +35,14 @@ public class SscNetConnectionGov implements ISscNetConnectionGov {
 
     @Override
     public void init(int slotId, EApnType apnType) {
-        SscNetConnection sscNetConnection = new SscNetConnection(slotId);
+        SscNetConnection sscNetConnection = null;
+
+        // this is used for testing purpose for now.
+        if (apnType == EApnType.WIFI) {
+            sscNetConnection = new SscNetConnectionWifi(slotId);
+        } else {
+            sscNetConnection = new SscNetConnection(slotId);
+        }
         sscNetConnection.init(apnType);
         setSscNetConnection(slotId, sscNetConnection);
     }
@@ -56,13 +63,13 @@ public class SscNetConnectionGov implements ISscNetConnectionGov {
     }
 
     @Override
-    public boolean connect(int slotId) {
+    public boolean connect(int slotId, long timeoutMs) {
         ISscNetConnection netConnection = mSscNetConnection.get(slotId);
         if (netConnection == null) {
             return false;
         }
 
-        return netConnection.connect();
+        return netConnection.connect(timeoutMs);
     }
 
     @Override
@@ -97,6 +104,11 @@ public class SscNetConnectionGov implements ISscNetConnectionGov {
         if (netConnection != null) {
             netConnection.refreshConnectionTimer();
         }
+    }
+
+    @VisibleForTesting
+    protected ISscNetConnection getSscNetConnection(int slotId) {
+        return mSscNetConnection.get(slotId);
     }
 
     @VisibleForTesting

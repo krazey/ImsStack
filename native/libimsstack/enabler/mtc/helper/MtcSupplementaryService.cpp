@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
 #include "IMessage.h"
 #include "ISipHeader.h"
 #include "IuMtcService.h"
@@ -39,14 +40,17 @@ __IMS_TRACE_TAG_COM_MTC__;
 LOCAL const IMS_CHAR STR_VERSTAT[] = "verstat";
 LOCAL const IMS_CHAR STR_VERSTAT_TN_VALIDATION_PASSED[] = "TN-Validation-Passed";
 LOCAL const IMS_CHAR STR_VERSTAT_TN_VALIDATION_FAILED[] = "TN-Validation-Failed";
+LOCAL const IMS_CHAR STR_VERSTAT_POTENTIAL_SPAM[] = "Potential Spam";
+LOCAL const IMS_CHAR STR_COIN_LINE_OR_PAYPHONE[] = "Coin line/payphone";
+LOCAL const IMS_CHAR STR_INTERACTION_WITH_OTHER_SERVICE[] = "Interaction with other service";
+LOCAL const IMS_CHAR STR_UNAVAILABLE[] = "Unavailable";
 
 PUBLIC
-MtcSupplementaryService::MtcSupplementaryService(IN IMtcCallContext& objContext,
-        IN MtcConfigurationProxy& objConfigurationProxy,
-        IN const ImsMap<SuppType, SuppService*>& objSuppServices) :
+MtcSupplementaryService::MtcSupplementaryService(
+        IN IMtcCallContext& objContext, IN MtcConfigurationProxy& objConfigurationProxy) :
         m_objContext(objContext),
-        m_objSuppService(objSuppServices),
-        m_objConfigurationProxy(objConfigurationProxy)
+        m_objConfigurationProxy(objConfigurationProxy),
+        m_objSuppServices(ImsList<SuppService*>())
 {
     IMS_TRACE_I("+MtcSupplementaryService", 0, 0, 0);
 }
@@ -55,262 +59,187 @@ PUBLIC
 MtcSupplementaryService::~MtcSupplementaryService()
 {
     IMS_TRACE_I("~MtcSupplementaryService", 0, 0, 0);
-    DeleteServices();
+    SuppServiceUtils::DeleteServices(m_objSuppServices);
 }
 
 PUBLIC
-void MtcSupplementaryService::UpdateOutgoingServices(
-        IN const ImsMap<SuppType, SuppService*>& objSuppServices)
+void MtcSupplementaryService::UpdateServices(IN const ImsList<SuppService*>& objSuppServices)
 {
     IMS_UINT32 nInServiceSize = objSuppServices.GetSize();
-    IMS_TRACE_I("MtcSupplementaryService : ServiceNum[%d] InServiceNum[%d]",
-            m_objSuppService.GetSize(), nInServiceSize, 0);
+    IMS_TRACE_I("UpdateServices : ServiceNum[%d] InServiceNum[%d]", m_objSuppServices.GetSize(),
+            nInServiceSize, 0);
 
     for (IMS_UINT32 i = 0; i < nInServiceSize; i++)
     {
-        const SuppType eType = objSuppServices.GetKeyAt(i);
-        IMS_SLONG nIndex = m_objSuppService.GetIndexOfKey(eType);
-
-        if (nIndex >= 0)
+        if (SuppServiceUtils::Get(m_objSuppServices, objSuppServices.GetAt(i)->nType) != IMS_NULL)
         {
-            delete m_objSuppService.GetValueAt(nIndex);
+            Delete(static_cast<SuppType>(objSuppServices.GetAt(i)->nType));
         }
 
-        m_objSuppService.Add(eType, objSuppServices.GetValueAt(i));
+        IMS_TRACE_I("UpdateServices : Append[%d]", objSuppServices.GetAt(i)->nType, 0, 0);
+        m_objSuppServices.Append(objSuppServices.GetAt(i));
     }
+}
+
+PUBLIC
+void MtcSupplementaryService::UpdateServices(IN IMessage* piMessage)
+{
+    IMS_TRACE_I("UpdateServices : update services using a received SIP message", 0, 0, 0);
+
+    UpdateCallerId(piMessage);
+    UpdateCnap(piMessage);
+    UpdateCdiv(piMessage);
+    UpdateCw(piMessage);
+    UpdateCallingNumberVerification(piMessage);
+    UpdateCallComposerElements(piMessage);
+    UpdateSessionId(piMessage);
 }
 
 PUBLIC
 void MtcSupplementaryService::UpdateTip(IN IMessage* piMessage)
 {
-    AString strPrivacy = m_objContext.GetMessageUtils().GetHeader(piMessage, ISipHeader::PRIVACY);
+    const AString strPrivacy =
+            m_objContext.GetMessageUtils().GetHeader(piMessage, ISipHeader::PRIVACY);
     IMS_BOOL bHasPAssertedIdentity = m_objContext.GetMessageUtils().IsHeaderPresent(
             piMessage, ISipHeader::P_ASSERTED_IDENTITY);
 
-    IMS_SINT32 tipType;
-    AString tipStr;
+    IMS_SINT32 eTipType;
+    AString strTipNumberAndName;
     if (!bHasPAssertedIdentity && strPrivacy.EqualsIgnoreCase("id"))
     {
-        tipType = TIP_TYPE_RESTRICTED;
+        eTipType = TIP_TYPE_RESTRICTED;
     }
     else if (!bHasPAssertedIdentity && !(strPrivacy.EqualsIgnoreCase("id")))
     {
-        tipType = TIP_TYPE_NONE;
+        eTipType = TIP_TYPE_NONE;
     }
     else
     {
-        tipType = TIP_TYPE_IDENTITY;
+        eTipType = TIP_TYPE_IDENTITY;
         AString strNumber = m_objContext.GetMessageUtils().GetUserPart(
                 piMessage, ISipHeader::P_ASSERTED_IDENTITY);
         AString strName = m_objContext.GetMessageUtils().GetDisplayName(
                 piMessage, ISipHeader::P_ASSERTED_IDENTITY);
-        tipStr.Append(strNumber);
-        tipStr.Append(',');
-        tipStr.Append(strName);
+        strTipNumberAndName.Append(strNumber);
+        strTipNumberAndName.Append(',');
+        strTipNumberAndName.Append(strName);
     }
-    Add(SuppType::TIP, tipType);
-    Add(SuppType::TIP, tipStr);
+    Add(SuppType::TIP, eTipType);
+    Add(SuppType::TIP, strTipNumberAndName);
 }
 
 PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateIncomingServices(IN IMessage* piMessage)
+void MtcSupplementaryService::UpdateSessionId(IN const IMessage* piMessage)
 {
-    IMS_BOOL bUpdate = IMS_FALSE;
-
-    bUpdate |= UpdateCallerId(piMessage);
-    bUpdate |= UpdateCnap(piMessage);
-    bUpdate |= UpdateCnapEx(piMessage);
-    bUpdate |= UpdateMmc(piMessage);
-    bUpdate |= UpdateGtt(piMessage);
-    bUpdate |= UpdateCdivCause(piMessage);
-    bUpdate |= UpdateCdivHistory(piMessage);
-    bUpdate |= UpdateCw(piMessage);
-    bUpdate |= UpdateVm(piMessage);
-    bUpdate |= UpdateAnswerHold(piMessage);
-    bUpdate |= UpdateMcid(piMessage);
-    bUpdate |= UpdateDualNumber(piMessage);
-    bUpdate |= UpdateCallingNumVerification(piMessage);
-    bUpdate |= UpdateCallComposerElements(piMessage);
-    bUpdate |= UpdateSessionId(piMessage);
-
-    IMS_TRACE_I("UpdateService : [%s]", _TRACE_B_(bUpdate), 0, 0);
-    return bUpdate;
-}
-
-PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateCallerId(IN IMessage* piMessage)
-{
-    AString strPrivacy = m_objContext.GetMessageUtils().GetHeader(piMessage, ISipHeader::PRIVACY);
-    if (strPrivacy.EqualsIgnoreCase("id"))
+    AString strSessionId =
+            m_objContext.GetMessageUtils().GetHeaderValue(piMessage, ISipHeader::SESSION_ID);
+    if (strSessionId.GetLength() > 0)
     {
-        // 3GPP 24.607 requires to check absence of PAID as well in this case.
-        Add(SuppType::CALLER_ID, static_cast<IMS_SINT32>(OipType::RESTRICTED));
-        IMS_TRACE_I("UpdateCallerId Privacy header value is id", 0, 0, 0);
-        return IMS_TRUE;
+        Add(SuppType::SESSION_ID, strSessionId);
     }
+}
 
-    IMS_BOOL bPolicyFallBack =
-            m_objConfigurationProxy.Is(Feature::ENABLE_OIP_HEADER_POLICY_FALLBACK);
-    IMS_BOOL bOipSourceFromHeader = m_objConfigurationProxy.Is(Feature::OIP_SOURCE_FROM_HEADER);
+PUBLIC
+void MtcSupplementaryService::UpdateCallerId(IN IMessage* piMessage)
+{
+    IMS_BOOL bOipSourceFromHeader =
+            m_objConfigurationProxy.GetBoolean(ConfigVoice::KEY_OIP_SOURCE_FROM_HEADER_BOOL);
+    IMS_BOOL bPolicyFallBack = m_objConfigurationProxy.GetBoolean(
+            ConfigVoice::KEY_ENABLE_OIP_HEADER_POLICY_FALLBACK_BOOL);
     OipType eOipType = GetOipTypeByHeader(piMessage, bOipSourceFromHeader, bPolicyFallBack);
-    if (eOipType == OipType::INVALID)
+    if (eOipType == OipType::INVALID || eOipType == OipType::IDENTITY)
     {
-        eOipType = OipType::NONE;
+        AString strPrivacy =
+                m_objContext.GetMessageUtils().GetHeader(piMessage, ISipHeader::PRIVACY);
+        if (strPrivacy.EqualsIgnoreCase("id"))
+        {
+            eOipType = OipType::RESTRICTED;
+            IMS_TRACE_I("UpdateCallerId Privacy header value is id", 0, 0, 0);
+        }
+        else if (eOipType == OipType::INVALID)
+        {
+            eOipType = OipType::NONE;
+        }
     }
 
     IMS_TRACE_I("UpdateCallerId FromHeader[%s] OIP-Type[%d]", _TRACE_B_(bOipSourceFromHeader),
             eOipType, 0);
     Add(SuppType::CALLER_ID, static_cast<IMS_SINT32>(eOipType));
-    return IMS_TRUE;
 }
 
 PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateCnap(IN IMessage* piMessage)
+void MtcSupplementaryService::UpdateCnap(IN IMessage* piMessage)
 {
-    AString strCnap;
-    IMS_BOOL bPolicyFallBack =
-            m_objConfigurationProxy.Is(Feature::ENABLE_OIP_HEADER_POLICY_FALLBACK);
-    IMS_BOOL bOipSourceFromHeader = m_objConfigurationProxy.Is(Feature::OIP_SOURCE_FROM_HEADER);
-
-    GetCnapByHeader(piMessage, bOipSourceFromHeader, strCnap, bPolicyFallBack);
-
+    IMS_BOOL bOipSourceFromHeader =
+            m_objConfigurationProxy.GetBoolean(ConfigVoice::KEY_OIP_SOURCE_FROM_HEADER_BOOL);
+    IMS_BOOL bPolicyFallBack = m_objConfigurationProxy.GetBoolean(
+            ConfigVoice::KEY_ENABLE_OIP_HEADER_POLICY_FALLBACK_BOOL);
+    AString strCnap = GetCnapByHeader(piMessage, bOipSourceFromHeader, bPolicyFallBack);
     if (strCnap.GetLength() <= 0)
     {
-        return IMS_FALSE;
+        return;
     }
 
     Add(SuppType::CNAP, strCnap);
-
-    return IMS_TRUE;
 }
 
 PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateCnapEx(IN IMessage* /*piMessage*/)
-{
-    return IMS_FALSE;
-}
-
-PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateMmc(IN IMessage* /*piMessage*/)
-{
-    IMS_BOOL bUseMMC = m_objConfigurationProxy.Is(Feature::USE_MMC_SUPPLEMENTARY_SERVICE);
-
-    if (bUseMMC)
-    {
-    }
-
-    return IMS_FALSE;
-}
-
-PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateGtt(IN IMessage* /*piMessage*/)
-{
-    return IMS_FALSE;
-}
-
-PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateCdivCause(IN IMessage* piMessage)
+void MtcSupplementaryService::UpdateCdiv(IN const IMessage* piMessage)
 {
     ISipHeader* piHeader = GetHistoryInfoHeader(piMessage);
 
     if (piHeader == IMS_NULL)
     {
-        return IMS_FALSE;
+        return;
     }
 
-    IMS_SINT32 nCause;
-
-    if (GetCdivCause(piHeader->GetSipAddress(), nCause))
+    IMS_SINT32 nCause = GetCdivCause(piHeader->GetSipAddress());
+    if (nCause >= 0)
     {
         Add(SuppType::CDIV_CAUSE, ConvertCdivCause(nCause));
     }
 
-    piHeader->Destroy();
-
-    return IMS_TRUE;
-}
-
-PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateCdivHistory(IN IMessage* piMessage)
-{
-    ISipHeader* piHeader = GetHistoryInfoHeader(piMessage);
-
-    if (piHeader == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    AString strTarget;
-
-    if (GetCdivTarget(piHeader->GetSipAddress(), strTarget))
+    AString strTarget = GetCdivTarget(piHeader->GetSipAddress());
+    if (strTarget.GetLength() > 0)
     {
         Add(SuppType::CDIV_HISTORY, strTarget);
     }
 
     piHeader->Destroy();
-
-    return IMS_TRUE;
 }
 
 PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateCw(IN IMessage* piMessage)
+void MtcSupplementaryService::UpdateCw(IN const IMessage* piMessage)
 {
-    if (m_objContext.GetMessageUtils().IsHeaderPresent(piMessage, ISipHeader::ALERT_INFO) ==
-            IMS_FALSE)
+    if (m_objContext.GetMessageUtils()
+                    .GetHeaderValue(piMessage, ISipHeader::ALERT_INFO)
+                    .Equals(MessageUtil::STR_ALERT_URN_CALL_WAITING))
     {
-        return IMS_FALSE;
+        IMS_TRACE_I("UpdateCw", 0, 0, 0);
+        Add(SuppType::CW, IMS_TRUE);
+    }
+}
+
+PUBLIC
+void MtcSupplementaryService::UpdateCallingNumberVerification(IN IMessage* piMessage)
+{
+    AString strVerstatParameter = GetCnvParameterValue(piMessage);
+    if (strVerstatParameter.GetLength() <= 0)
+    {
+        return;
     }
 
-    Add(SuppType::CW, IMS_TRUE);
+    AString strDisplayName = m_objContext.GetMessageUtils().GetDisplayName(
+            piMessage, ISipHeader::P_ASSERTED_IDENTITY);
 
-    return IMS_TRUE;
+    IMS_SINT32 nResult = GetCallingNumberVerificationResult(strVerstatParameter, strDisplayName);
+    IMS_TRACE_D("UpdateCallingNumberVerification : result[%d]", nResult, 0, 0);
+
+    Add(SuppType::CALLING_NUM_VERIFICATION, nResult);
 }
 
 PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateVm(IN IMessage* /*piMessage*/)
-{
-    return IMS_FALSE;
-}
-
-PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateAnswerHold(IN IMessage* /*piMessage*/)
-{
-    return IMS_FALSE;
-}
-
-PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateMcid(IN IMessage* /*piMessage*/)
-{
-    IMS_BOOL bUseMCID = m_objConfigurationProxy.Is(Feature::USE_MCID_SUPPLEMENTARY_SERVICE);
-
-    if (bUseMCID)
-    {
-    }
-
-    return IMS_FALSE;
-}
-
-PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateDualNumber(IN IMessage* /*piMessage*/)
-{
-    return IMS_FALSE;
-}
-
-PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateCallingNumVerification(IN IMessage* piMessage)
-{
-    AString strValue = GetCnvParameterValue(piMessage);
-    if (strValue.GetLength() <= 0)
-    {
-        return IMS_FALSE;
-    }
-
-    Add(SuppType::CALLING_NUM_VERIFICATION, GetCallingNumVerificationResult(strValue));
-    return IMS_TRUE;
-}
-
-PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateCallComposerElements(IN IMessage* piMessage)
+void MtcSupplementaryService::UpdateCallComposerElements(IN const IMessage* piMessage)
 {
     IMS_SINT32 nPriority = CallComposerUtil::GetPriority(*piMessage);
     if (nPriority >= 0)
@@ -341,127 +270,26 @@ IMS_BOOL MtcSupplementaryService::UpdateCallComposerElements(IN IMessage* piMess
     {
         Add(SuppType::CALL_COMPOSER_IS_BUSINESS, IMS_TRUE);
     }
-
-    return IMS_TRUE;
 }
 
-PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateSessionId(IN IMessage* piMessage)
+PUBLIC GLOBAL void MtcSupplementaryService::ConvertGlobalNumberToLocalNumber(
+        IN const MtcConfigurationProxy& objConfigurationProxy, IN_OUT AString& strNumber)
 {
-    AString strSessionId =
-            m_objContext.GetMessageUtils().GetHeaderValue(piMessage, ISipHeader::SESSION_ID);
-    if (strSessionId.GetLength() > 0)
+    AString strSet =
+            objConfigurationProxy.GetString(ConfigVoice::KEY_LOCAL_NUMBER_PRESENTATION_SET_STRING);
+    if (strSet.GetLength() == 0 || strNumber.GetLength() == 0)
     {
-        Add(SuppType::SESSION_ID, strSessionId);
-        return IMS_TRUE;
-    }
-    return IMS_FALSE;
-}
-
-PUBLIC
-void MtcSupplementaryService::Delete(IN SuppType eType)
-{
-    IMS_SLONG nIndex = m_objSuppService.GetIndexOfKey(eType);
-
-    if (nIndex >= 0)
-    {
-        SuppService* pSuppService = m_objSuppService.GetValueAt(nIndex);
-        delete pSuppService;
-        m_objSuppService.RemoveAt(nIndex);
-        IMS_TRACE_I("Delete : size[%d] Type[%d]", m_objSuppService.GetSize(), eType, 0);
         return;
     }
 
-    IMS_TRACE_I("Delete : NoT Matched Size[%d]", m_objSuppService.GetSize(), 0, 0);
-}
-
-PUBLIC
-void MtcSupplementaryService::DeleteServices()
-{
-    IMS_UINT32 nSize = m_objSuppService.GetSize();
-
-    IMS_TRACE_I("DeleteAll : Size[%d]", nSize, 0, 0);
-
-    for (IMS_UINT32 index = 0; index < nSize; index++)
-    {
-        SuppService* pService = m_objSuppService.GetValueAt(index);
-        delete pService;
-    }
-
-    m_objSuppService.Clear();
-}
-
-PUBLIC
-const SuppService* MtcSupplementaryService::Get(IN SuppType eType)
-{
-    IMS_SLONG nIndex = m_objSuppService.GetIndexOfKey(eType);
-
-    if (nIndex >= 0)
-    {
-        SuppService* pSuppService = m_objSuppService.GetValueAt(nIndex);
-        return pSuppService;
-    }
-
-    IMS_TRACE_I("Get : NoT Matched, Size[%d]", m_objSuppService.GetSize(), 0, 0);
-    return IMS_NULL;
-}
-
-PUBLIC
-const ImsMap<SuppType, SuppService*>& MtcSupplementaryService::GetServices() const
-{
-    return m_objSuppService;
-}
-
-PUBLIC
-void MtcSupplementaryService::Add(IN SuppType eSuppType, IN const AString& strValue)
-{
-    if (IsExist(eSuppType) == IMS_TRUE)
-    {
-        SuppService* pExistService = m_objSuppService.GetValue(eSuppType);
-        pExistService->strValue = strValue;
-    }
-    else
-    {
-        SuppService* pUpdateService = new SuppService();
-        pUpdateService->strValue = strValue;
-        m_objSuppService.Add(eSuppType, pUpdateService);
-    }
-}
-
-PUBLIC
-void MtcSupplementaryService::Add(IN SuppType eSuppType, IN IMS_SINT32 nValue)
-{
-    if (IsExist(eSuppType) == IMS_TRUE)
-    {
-        SuppService* pExistService = m_objSuppService.GetValue(eSuppType);
-        pExistService->nValue = nValue;
-    }
-    else
-    {
-        SuppService* pUpdateService = new SuppService();
-        pUpdateService->nValue = nValue;
-        m_objSuppService.Add(eSuppType, pUpdateService);
-    }
-}
-
-PUBLIC
-void MtcSupplementaryService::Add(IN SuppType eSuppType, IN IMS_BOOL bValue)
-{
-    if (IsExist(eSuppType) == IMS_TRUE)
-    {
-        SuppService* pExistService = m_objSuppService.GetValue(eSuppType);
-        pExistService->bValue = bValue;
-    }
-    else
-    {
-        SuppService* pUpdateService = new SuppService();
-        pUpdateService->bValue = bValue;
-        m_objSuppService.Add(eSuppType, pUpdateService);
-    }
+    AString strInternationalNumberPrefix;
+    AString strLocalNumberPrefix;
+    strSet.SplitF(TextParser::CHAR_COLON, strInternationalNumberPrefix, strLocalNumberPrefix);
+    strNumber.Replace(strInternationalNumberPrefix, strLocalNumberPrefix);
 }
 
 PRIVATE
-ISipHeader* MtcSupplementaryService::GetHistoryInfoHeader(IN IMessage* piMessage)
+ISipHeader* MtcSupplementaryService::GetHistoryInfoHeader(IN const IMessage* piMessage) const
 {
     ImsList<AString> lstHistoryInfos =
             m_objContext.GetMessageUtils().GetHeaders(piMessage, ISipHeader::HISTORY_INFO);
@@ -480,117 +308,6 @@ ISipHeader* MtcSupplementaryService::GetHistoryInfoHeader(IN IMessage* piMessage
 }
 
 PRIVATE
-IMS_BOOL MtcSupplementaryService::GetCdivCause(
-        IN const SipAddress* pAddress, OUT IMS_SINT32& nCause)
-{
-    if (pAddress != IMS_NULL)
-    {
-        const SipParameter* pSIPParameter = pAddress->GetParameter("cause");
-
-        if (pSIPParameter != IMS_NULL)
-        {
-            const AString strCause = pSIPParameter->GetValue();
-
-            if (strCause.GetLength() > 0)
-            {
-                IMS_TRACE_D("GetCDIVCause : Cause=%s", strCause.GetStr(), 0, 0);
-
-                nCause = strCause.ToInt32();
-                return IMS_TRUE;
-            }
-        }
-    }
-
-    return IMS_FALSE;
-}
-
-PRIVATE
-IMS_BOOL MtcSupplementaryService::GetCdivTarget(
-        IN const SipAddress* pAddress, OUT AString& strTarget)
-{
-    if (pAddress == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "GetCDIVTarget : pAddress is NULL", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    if (pAddress->IsSchemeSip() || pAddress->IsSchemeSips())
-    {
-        strTarget = pAddress->GetUser();
-    }
-    else if (pAddress->IsSchemeTel())
-    {
-        strTarget = pAddress->GetHost();
-    }
-    else
-    {
-        IMS_TRACE_I("GetCDIVTarget : Getting the target failed", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    IMS_TRACE_D("GetCDIVTarget : Target=%s", strTarget.GetStr(), 0, 0);
-    return IMS_TRUE;
-}
-
-PRIVATE
-IMS_SINT32 MtcSupplementaryService::ConvertCdivCause(IN IMS_SINT32 nCause)
-{
-    IMS_SINT32 nCDIVCause;
-
-    switch (nCause)
-    {
-        case 302:
-            nCDIVCause = static_cast<IMS_SINT32>(CdivCause::UNCONDITION);
-            break;
-        case 404:
-            nCDIVCause = static_cast<IMS_SINT32>(CdivCause::NOT_LOGGED_IN);
-            break;
-        case 408:
-            nCDIVCause = static_cast<IMS_SINT32>(CdivCause::NO_REPLY);
-            break;
-        case 480:
-            nCDIVCause = static_cast<IMS_SINT32>(CdivCause::DEFLECTION);
-            break;
-        case 486:
-            nCDIVCause = static_cast<IMS_SINT32>(CdivCause::BUSY);
-            break;
-        case 487:
-            nCDIVCause = static_cast<IMS_SINT32>(CdivCause::DEFLECTION_ALERTING);
-            break;
-        case 503:
-            nCDIVCause = static_cast<IMS_SINT32>(CdivCause::NOT_REACHABLE);
-            break;
-
-        default:
-            nCDIVCause = static_cast<IMS_SINT32>(CdivCause::NONE);
-            break;
-    }
-
-    return nCDIVCause;
-}
-
-PRIVATE
-IMS_SINT32 MtcSupplementaryService::GetCallingNumVerificationResult(IN const AString& strValue)
-{
-    IMS_SINT32 nVerstatResult = CALLING_NUM_VERSTAT_NONE;
-
-    if (strValue.GetLength() > 0)
-    {
-        if (strValue.EqualsIgnoreCase(STR_VERSTAT_TN_VALIDATION_PASSED))
-        {
-            nVerstatResult = CALLING_NUM_VERSTAT_VERIFIED;
-        }
-        else if (strValue.EqualsIgnoreCase(STR_VERSTAT_TN_VALIDATION_FAILED))
-        {
-            nVerstatResult = CALLING_NUM_VERSTAT_NOT_VERIFIED;
-        }
-    }
-
-    IMS_TRACE_D("GetCallingNumVerificationResult : result is [%d]", nVerstatResult, 0, 0);
-    return nVerstatResult;
-}
-
-PRIVATE
 AString MtcSupplementaryService::GetCnvParameterValue(IN IMessage* piMessage) const
 {
     AString strValue = m_objContext.GetMessageUtils().GetParameterValueFromUri(
@@ -606,7 +323,7 @@ AString MtcSupplementaryService::GetCnvParameterValue(IN IMessage* piMessage) co
 
 PRIVATE
 OipType MtcSupplementaryService::GetOipTypeByHeader(
-        IN IMessage* piMessage, IN IMS_BOOL bFromHeader, IN IMS_BOOL bDoFallBack)
+        IN IMessage* piMessage, IN IMS_BOOL bFromHeader, IN IMS_BOOL bDoFallBack) const
 {
     OipType eOipType = OipType::INVALID;
     IMS_SINT32 nDeterminationPolicyHeader =
@@ -617,24 +334,25 @@ OipType MtcSupplementaryService::GetOipTypeByHeader(
     {
         // only PAID can be multiple.
         SipAddress objAddr(objHeaders.GetAt(i));
-        if (objAddr.GetDisplayName().EqualsIgnoreCase(MessageUtil::STR_ANONYMOUS) ||
+        const AString& strDisplayName = objAddr.GetDisplayName();
+        if (strDisplayName.EqualsIgnoreCase(STR_COIN_LINE_OR_PAYPHONE))
+        {
+            eOipType = OipType::PAYPHONE;
+            break;
+        }
+
+        if (strDisplayName.EqualsIgnoreCase(STR_INTERACTION_WITH_OTHER_SERVICE) ||
+                strDisplayName.EqualsIgnoreCase(STR_UNAVAILABLE))
+        {
+            eOipType = static_cast<OipType>(
+                    m_objConfigurationProxy.GetInt(ConfigVoice::KEY_OIP_TYPE_FOR_UNAVAILABLE_INT));
+            break;
+        }
+
+        if (strDisplayName.EqualsIgnoreCase(MessageUtil::STR_ANONYMOUS) ||
                 objAddr.GetUser().EqualsIgnoreCase(MessageUtil::STR_ANONYMOUS))
         {
             eOipType = OipType::RESTRICTED;
-            break;
-        }
-        else if (objAddr.GetDisplayName().EqualsIgnoreCase(MessageUtil::STR_UNAVAILABLE) ||
-                objAddr.GetUser().EqualsIgnoreCase(MessageUtil::STR_UNAVAILABLE))
-        {
-            // TODO: CarrierConfig.h : 0 - NONE, 1 - RESTRICTED
-            if (m_objConfigurationProxy.GetInt(Feature::OIP_TYPE_FOR_UNAVAILABLE) == 0)
-            {
-                eOipType = OipType::NONE;
-            }
-            else
-            {
-                eOipType = OipType::RESTRICTED;
-            }
             break;
         }
 
@@ -646,32 +364,108 @@ OipType MtcSupplementaryService::GetOipTypeByHeader(
         return GetOipTypeByHeader(piMessage, !bFromHeader, IMS_FALSE);
     }
 
+    IMS_TRACE_D("GetOipTypeByHeader OIP-Type[%d]", eOipType, 0, 0);
     return eOipType;
 }
 
 PRIVATE
-void MtcSupplementaryService::GetCnapByHeader(IN IMessage* piMessage, IN IMS_BOOL bFromHeader,
-        OUT AString& strCnap, IN IMS_BOOL bDoFallBack)
+AString MtcSupplementaryService::GetCnapByHeader(
+        IN IMessage* piMessage, IN IMS_BOOL bFromHeader, IN IMS_BOOL bDoFallBack) const
 {
     IMS_SINT32 nDeterminationPolicyHeader =
             bFromHeader ? ISipHeader::FROM : ISipHeader::P_ASSERTED_IDENTITY;
-    strCnap = m_objContext.GetMessageUtils().GetDisplayName(piMessage, nDeterminationPolicyHeader);
+    AString strCnap =
+            m_objContext.GetMessageUtils().GetDisplayName(piMessage, nDeterminationPolicyHeader);
 
     if (strCnap.GetLength() <= 0 && bDoFallBack)
     {
-        return GetCnapByHeader(piMessage, !bFromHeader, strCnap, IMS_FALSE);
+        return GetCnapByHeader(piMessage, !bFromHeader, IMS_FALSE);
+    }
+    return strCnap;
+}
+
+PRIVATE GLOBAL IMS_SINT32 MtcSupplementaryService::GetCdivCause(IN const SipAddress* pAddress)
+{
+    if (pAddress == IMS_NULL)
+    {
+        return -1;
+    }
+
+    const SipParameter* pSIPParameter = pAddress->GetParameter("cause");
+    if (pSIPParameter != IMS_NULL)
+    {
+        const AString strCause = pSIPParameter->GetValue();
+
+        if (strCause.GetLength() > 0)
+        {
+            IMS_TRACE_D("GetCDIVCause : Cause=%s", strCause.GetStr(), 0, 0);
+
+            return strCause.ToInt32();
+        }
+    }
+
+    return -1;
+}
+
+PRIVATE GLOBAL AString MtcSupplementaryService::GetCdivTarget(IN const SipAddress* pAddress)
+{
+    if (pAddress == IMS_NULL)
+    {
+        return AString::ConstNull();
+    }
+
+    if (pAddress->IsSchemeSip() || pAddress->IsSchemeSips())
+    {
+        return pAddress->GetUser();
+    }
+    else if (pAddress->IsSchemeTel())
+    {
+        return pAddress->GetHost();
+    }
+
+    IMS_TRACE_I("GetCdivTarget : Getting the target failed", 0, 0, 0);
+    return AString::ConstNull();
+}
+
+PRIVATE GLOBAL IMS_SINT32 MtcSupplementaryService::ConvertCdivCause(IN IMS_SINT32 nCause)
+{
+    switch (nCause)
+    {
+        case 302:
+            return static_cast<IMS_SINT32>(CdivCause::UNCONDITION);
+        case 404:
+            return static_cast<IMS_SINT32>(CdivCause::NOT_LOGGED_IN);
+        case 408:
+            return static_cast<IMS_SINT32>(CdivCause::NO_REPLY);
+        case 480:
+            return static_cast<IMS_SINT32>(CdivCause::DEFLECTION);
+        case 486:
+            return static_cast<IMS_SINT32>(CdivCause::BUSY);
+        case 487:
+            return static_cast<IMS_SINT32>(CdivCause::DEFLECTION_ALERTING);
+        case 503:
+            return static_cast<IMS_SINT32>(CdivCause::NOT_REACHABLE);
+        default:
+            return static_cast<IMS_SINT32>(CdivCause::NONE);
     }
 }
 
-PRIVATE
-IMS_BOOL MtcSupplementaryService::IsExist(IN SuppType suppType)
+PRIVATE GLOBAL IMS_SINT32 MtcSupplementaryService::GetCallingNumberVerificationResult(
+        IN const AString& strVerstatParameter, IN const AString& strDisplayName)
 {
-    IMS_SLONG nIndex = m_objSuppService.GetIndexOfKey(suppType);
-
-    if (nIndex >= 0)
+    if (strVerstatParameter.EqualsIgnoreCase(STR_VERSTAT_TN_VALIDATION_PASSED))
     {
-        return IMS_TRUE;
+        if (strDisplayName.EqualsIgnoreCase(STR_VERSTAT_POTENTIAL_SPAM))
+        {
+            return CALLING_NUM_VERSTAT_NOT_VERIFIED;
+        }
+        return CALLING_NUM_VERSTAT_VERIFIED;
     }
 
-    return IMS_FALSE;
+    if (strVerstatParameter.EqualsIgnoreCase(STR_VERSTAT_TN_VALIDATION_FAILED))
+    {
+        return CALLING_NUM_VERSTAT_NOT_VERIFIED;
+    }
+
+    return CALLING_NUM_VERSTAT_NONE;
 }

@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ISystem.h"
+#include "IThread.h"
 #include "ImsMessageDef.h"
 #include "OsParcel.h"
 #include "PlatformContext.h"
@@ -22,7 +24,7 @@
 #include "device/OsImsRadio.h"
 #include "system-intf/SystemConstants.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 class OsImsRadioParam
 {
@@ -39,6 +41,7 @@ public:
         EVENT_CONNECTION_FAILED = 1,
         EVENT_CONNECTION_SETUP_PREPARED = 2,
         EVENT_SSAC_STATE_CHANGED = 3,
+        EVENT_SIMULTANEOUS_CALLING_SUPPORT_CHANGED = 4,
     };
 
     IMS_UINT32 m_nEvent;
@@ -55,7 +58,7 @@ public:
             m_nWaitTimeMillis(0)
     {
     }
-    inline virtual ~ConnectionFailedParam() {}
+    ~ConnectionFailedParam() override = default;
 
     IMS_UINT32 m_nId;
     IMS_UINT32 m_nFailureReason;
@@ -71,7 +74,7 @@ public:
             m_nId(0)
     {
     }
-    inline virtual ~ConnectionSetupPreparedParam() {}
+    ~ConnectionSetupPreparedParam() override = default;
 
     IMS_UINT32 m_nId;
 };
@@ -87,7 +90,7 @@ public:
             m_nBarringTimeSecForVideo(0)
     {
     }
-    inline virtual ~SsacInfoParam() {}
+    ~SsacInfoParam() override = default;
 
     IMS_SINT32 m_nBarringFactorForVoice;
     IMS_SINT32 m_nBarringTimeSecForVoice;
@@ -95,8 +98,21 @@ public:
     IMS_SINT32 m_nBarringTimeSecForVideo;
 };
 
-LOCAL
-void osImsRadio_SendMessage(IN IThread* piThread, IN IMS_SINT32 nSlotId, IN OsImsRadioParam* pParam)
+class SccsInfoParam : public OsImsRadioParam
+{
+public:
+    inline SccsInfoParam() :
+            OsImsRadioParam(EVENT_SIMULTANEOUS_CALLING_SUPPORT_CHANGED),
+            m_bIsSupported(IMS_FALSE)
+    {
+    }
+    ~SccsInfoParam() override = default;
+
+    IMS_BOOL m_bIsSupported;
+};
+
+static void osImsRadio_SendMessage(
+        IN IThread* piThread, IN IMS_SINT32 nSlotId, IN OsImsRadioParam* pParam)
 {
     if (piThread == IMS_NULL)
     {
@@ -185,13 +201,13 @@ PUBLIC VIRTUAL void OsImsRadio::StartImsTraffic(IN IMS_UINT32 nTrafficType,
 
     for (IMS_UINT32 i = 0; i < m_objConnectionListeners.GetSize(); i++)
     {
-        ConnectionListener* pConnectionListener = m_objConnectionListeners.GetAt(i);
+        const ConnectionListener* pConnectionListener = m_objConnectionListeners.GetAt(i);
         if (pConnectionListener == IMS_NULL)
         {
             continue;
         }
 
-        IImsRadioConnectionListener* piCurrListener = pConnectionListener->GetListener();
+        const IImsRadioConnectionListener* piCurrListener = pConnectionListener->GetListener();
         if (piCurrListener == piListener)
         {
             nIndex = i;
@@ -219,7 +235,7 @@ PUBLIC VIRTUAL void OsImsRadio::StartImsTraffic(IN IMS_UINT32 nTrafficType,
     }
     else
     {
-        ConnectionListener* pConnectionListener = m_objConnectionListeners.GetAt(nIndex);
+        const ConnectionListener* pConnectionListener = m_objConnectionListeners.GetAt(nIndex);
         if (pConnectionListener == IMS_NULL)
         {
             return;
@@ -256,7 +272,7 @@ PUBLIC VIRTUAL void OsImsRadio::StopImsTraffic(IN IImsRadioConnectionListener* p
             continue;
         }
 
-        IImsRadioConnectionListener* piCurrListener = pConnectionListener->GetListener();
+        const IImsRadioConnectionListener* piCurrListener = pConnectionListener->GetListener();
         if (piCurrListener == piListener)
         {
             IMS_UINT32 nId = pConnectionListener->GetId();
@@ -309,7 +325,7 @@ PUBLIC VIRTUAL void OsImsRadio::AddListenerForSsac(IN IImsRadioSsacListener* piL
 
     for (IMS_UINT32 i = 0; i < m_objSsacListeners.GetSize(); ++i)
     {
-        IImsRadioSsacListener* pTmpListener = m_objSsacListeners.GetAt(i);
+        const IImsRadioSsacListener* pTmpListener = m_objSsacListeners.GetAt(i);
 
         if (pTmpListener == piListener)
         {
@@ -329,7 +345,7 @@ PUBLIC VIRTUAL void OsImsRadio::RemoveListenerForSsac(IN IImsRadioSsacListener* 
 
     for (IMS_UINT32 i = 0; i < m_objSsacListeners.GetSize(); ++i)
     {
-        IImsRadioSsacListener* pTmpListener = m_objSsacListeners.GetAt(i);
+        const IImsRadioSsacListener* pTmpListener = m_objSsacListeners.GetAt(i);
 
         if (pTmpListener == piListener)
         {
@@ -349,7 +365,8 @@ PUBLIC VIRTUAL void OsImsRadio::AddListenerForTrafficPriority(
 
     for (IMS_UINT32 i = 0; i < m_objTrafficPriorityListeners.GetSize(); ++i)
     {
-        IImsRadioTrafficPriorityListener* pTmpListener = m_objTrafficPriorityListeners.GetAt(i);
+        const IImsRadioTrafficPriorityListener* pTmpListener =
+                m_objTrafficPriorityListeners.GetAt(i);
 
         if (pTmpListener == piListener)
         {
@@ -370,7 +387,8 @@ PUBLIC VIRTUAL void OsImsRadio::RemoveListenerForTrafficPriority(
 
     for (IMS_UINT32 i = 0; i < m_objTrafficPriorityListeners.GetSize(); ++i)
     {
-        IImsRadioTrafficPriorityListener* pTmpListener = m_objTrafficPriorityListeners.GetAt(i);
+        const IImsRadioTrafficPriorityListener* pTmpListener =
+                m_objTrafficPriorityListeners.GetAt(i);
 
         if (pTmpListener == piListener)
         {
@@ -393,14 +411,14 @@ PROTECTED VIRTUAL void OsImsRadio::DispatchServiceMessage(IN IMS_UINTP /* nWpara
 
         if (pImsRadioParam->m_nEvent == OsImsRadioParam::EVENT_CONNECTION_SETUP_PREPARED)
         {
-            ConnectionSetupPreparedParam* pParam =
+            const ConnectionSetupPreparedParam* pParam =
                     reinterpret_cast<ConnectionSetupPreparedParam*>(pImsRadioParam);
 
             NotifyConnectionSetupPrepared(pParam->m_nId);
         }
         else if (pImsRadioParam->m_nEvent == OsImsRadioParam::EVENT_CONNECTION_FAILED)
         {
-            ConnectionFailedParam* pParam =
+            const ConnectionFailedParam* pParam =
                     reinterpret_cast<ConnectionFailedParam*>(pImsRadioParam);
 
             NotifyConnectionFailed(pParam->m_nId, pParam->m_nFailureReason, pParam->m_nCauseCode,
@@ -408,11 +426,18 @@ PROTECTED VIRTUAL void OsImsRadio::DispatchServiceMessage(IN IMS_UINTP /* nWpara
         }
         else if (pImsRadioParam->m_nEvent == OsImsRadioParam::EVENT_SSAC_STATE_CHANGED)
         {
-            SsacInfoParam* pParam = reinterpret_cast<SsacInfoParam*>(pImsRadioParam);
+            const SsacInfoParam* pParam = reinterpret_cast<SsacInfoParam*>(pImsRadioParam);
 
             NotifySsacInfoChanged(pParam->m_nBarringFactorForVoice,
                     pParam->m_nBarringTimeSecForVoice, pParam->m_nBarringFactorForVideo,
                     pParam->m_nBarringTimeSecForVideo);
+        }
+        else if (pImsRadioParam->m_nEvent ==
+                OsImsRadioParam::EVENT_SIMULTANEOUS_CALLING_SUPPORT_CHANGED)
+        {
+            const SccsInfoParam* pParam = reinterpret_cast<SccsInfoParam*>(pImsRadioParam);
+
+            NotifySimultaneousCallingSupportChanged(pParam->m_bIsSupported);
         }
 
         delete pImsRadioParam;
@@ -481,6 +506,14 @@ PROTECTED VIRTUAL void OsImsRadio::System_NotifyEvent(
             osImsRadio_SendMessage(m_piOwnerThread, GetSlotId(), pParam);
             break;
         }
+        case OsImsRadioParam::EVENT_SIMULTANEOUS_CALLING_SUPPORT_CHANGED:
+        {
+            SccsInfoParam* pParam = new SccsInfoParam();
+            pParam->m_bIsSupported = (pParcel->readInt32() > 0) ? IMS_TRUE : IMS_FALSE;
+
+            osImsRadio_SendMessage(m_piOwnerThread, GetSlotId(), pParam);
+            break;
+        }
         default:
         {
             // no-op
@@ -493,7 +526,7 @@ PRIVATE IImsRadioConnectionListener* OsImsRadio::GetConnectionListener(IN IMS_UI
 {
     for (IMS_UINT32 i = 0; i < m_objConnectionListeners.GetSize(); i++)
     {
-        ConnectionListener* pConnectionListener = m_objConnectionListeners.GetAt(i);
+        const ConnectionListener* pConnectionListener = m_objConnectionListeners.GetAt(i);
         if (pConnectionListener == IMS_NULL)
         {
             continue;
@@ -567,6 +600,16 @@ PRIVATE void OsImsRadio::NotifySsacInfoChanged(IN IMS_SINT32 nFactorForVoice,
     }
 }
 
+PRIVATE void OsImsRadio::NotifySimultaneousCallingSupportChanged(IN IMS_BOOL bSupported)
+{
+    IImsTraffic* piImsTraffic = ImsRadioService::GetImsRadioService()->GetImsTraffic();
+
+    if (piImsTraffic != IMS_NULL)
+    {
+        piImsTraffic->SetSimultaneousCallingSupported(GetSlotId(), bSupported);
+    }
+}
+
 PRIVATE GLOBAL const IMS_CHAR* OsImsRadio::EventToString(IN IMS_UINT32 nEvent)
 {
     switch (nEvent)
@@ -579,6 +622,9 @@ PRIVATE GLOBAL const IMS_CHAR* OsImsRadio::EventToString(IN IMS_UINT32 nEvent)
 
         case OsImsRadioParam::EVENT_SSAC_STATE_CHANGED:
             return "EVENT_SSAC_STATE_CHANGED";
+
+        case OsImsRadioParam::EVENT_SIMULTANEOUS_CALLING_SUPPORT_CHANGED:
+            return "EVENT_SIMULTANEOUS_CALLING_SUPPORT_CHANGED";
 
         default:
             return "__INVALID__";

@@ -45,7 +45,7 @@ public class MessageExecutor extends Handler implements Executor {
         if (msg.obj instanceof Runnable) {
             executeInternal((Runnable) msg.obj);
         } else {
-            Log.d(Log.TAG, "[MessageExecutor] handleMessage: Not runnable object - " + msg);
+            Log.d(this, "handleMessage: Not runnable object - " + msg);
         }
     }
 
@@ -53,7 +53,7 @@ public class MessageExecutor extends Handler implements Executor {
         try {
             r.run();
         } catch (Throwable t) {
-            Log.e(Log.TAG, "[MessageExecutor] executeInternal: " + r);
+            Log.e(this, "executeInternal: " + r);
             t.printStackTrace();
         }
     }
@@ -62,7 +62,7 @@ public class MessageExecutor extends Handler implements Executor {
         HandlerThread thread = new HandlerThread(name);
         thread.start();
         Looper looper = thread.getLooper();
-        Log.d(Log.TAG, "[MessageExecutor] createLooper: name=" + name
+        Log.d(MessageExecutor.class, "createLooper: name=" + name
                 + ", tid=" + thread.getThreadId());
         return looper;
     }

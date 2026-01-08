@@ -23,8 +23,8 @@
 class MockIDigestAkaListener : public IDigestAkaListener
 {
 public:
-    inline MockIDigestAkaListener() = default;
-    inline ~MockIDigestAkaListener() = default;
+    MockIDigestAkaListener() = default;
+    ~MockIDigestAkaListener() override = default;
 
     MOCK_METHOD(void, DigestAka_OnResponse,
             (IN const ByteArray& objRes, IN const ByteArray& objIk, IN const ByteArray& objCk),

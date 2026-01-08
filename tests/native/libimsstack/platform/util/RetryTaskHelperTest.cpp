@@ -16,12 +16,13 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "RetryCmd.h"
-#include "RetryTaskHelper.h"
-
-#include "MockITimer.h"
 #include "MockIRetryTaskHelperListener.h"
+#include "MockITimer.h"
 #include "PlatformContext.h"
+#include "RetryCmd.h"
+#include "RetryCondition.h"
+#include "RetryTaskHelper.h"
+#include "RetryTimer.h"
 #include "TestTimerService.h"
 
 using ::testing::_;
@@ -451,7 +452,7 @@ TEST_F(RetryTaskHelperTest, RetryTimer_OnInterimExpired)
                     [&](Unused, ITimerListener* pListener)
                     {
                         pTimerListener = pListener;
-                        return IMS_NULL;
+                        return 0;
                     }));
 
     EXPECT_EQ(IMS_TRUE, objRetryTaskHelper.Start(RetryTaskHelper::START_TIMER));
@@ -509,7 +510,7 @@ TEST_F(RetryTaskHelperTest, RetryTimer_OnFinalExpired)
                     [&](Unused, ITimerListener* pListener)
                     {
                         pTimerListener = pListener;
-                        return IMS_NULL;
+                        return 0;
                     }));
 
     EXPECT_EQ(IMS_TRUE, objRetryTaskHelper.Start(RetryTaskHelper::START_TIMER));

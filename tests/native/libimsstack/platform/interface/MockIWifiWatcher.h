@@ -18,18 +18,13 @@
 
 #include <gmock/gmock.h>
 
-#include "ImsList.h"
-#include "ImsMessageDef.h"
-#include "ServiceMessage.h"
-#include "ServiceThread.h"
-
 #include "IWifiWatcher.h"
 
 class MockIWifiWatcher : public IWifiWatcher
 {
 public:
-    inline MockIWifiWatcher() {}
-    inline virtual ~MockIWifiWatcher() {}
+    MockIWifiWatcher() = default;
+    ~MockIWifiWatcher() override = default;
 
     MOCK_METHOD(IMS_SINT32, GetState, (), (override));
 };
@@ -37,8 +32,8 @@ public:
 class MockIWifiWatcherListener : public IWifiWatcherListener
 {
 public:
-    inline MockIWifiWatcherListener() {}
-    inline virtual ~MockIWifiWatcherListener() {}
+    MockIWifiWatcherListener() = default;
+    ~MockIWifiWatcherListener() override = default;
 
     MOCK_METHOD(
             void, WifiWatcher_NotifyStateChanged, (IN IWifiWatcher * piWifiWatcher), (override));

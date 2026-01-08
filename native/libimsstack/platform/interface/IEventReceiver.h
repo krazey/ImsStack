@@ -16,7 +16,9 @@
 #ifndef INTERFACE_EVENT_RECEIVER_H_
 #define INTERFACE_EVENT_RECEIVER_H_
 
-#include "IEventReceiverListener.h"
+#include "ImsTypeDef.h"
+
+class IEventReceiverListener;
 
 class IEventReceiver
 {

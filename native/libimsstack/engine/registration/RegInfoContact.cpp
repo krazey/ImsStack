@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "AStringBuffer.h"
+#include "ISystemProperty.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
@@ -92,7 +93,7 @@ IMS_BOOL RegInfoContact::Equals(IN INode* piNode) const
         return IMS_FALSE;
     }
 
-    INode* piNodeId = piNodeMap->GetNamedItem(RegInfoConst::ATTR_ID);
+    const INode* piNodeId = piNodeMap->GetNamedItem(RegInfoConst::ATTR_ID);
 
     if (piNodeId == IMS_NULL)
     {
@@ -150,11 +151,10 @@ IMS_BOOL RegInfoContact::Update(IN INode* piNode)
 
             if (strNodeName.EqualsIgnoreCase(RegInfoConst::ELEMENT_URI))
             {
-                if (!SetUri(piChildNode))
-                {
-                    piNode->DestroyNamedNodeMap(piNodeMap);
-                    return IMS_FALSE;
-                }
+                // The reason we don't perform error handling here is to allow the current parsing
+                // process to continue even if the "uri" element of "contact" element is malformed
+                // and leave related exception handling to the enabler.
+                SetUri(piChildNode);
             }
             else if (strNodeName.EqualsIgnoreCase(RegInfoConst::ELEMENT_DISPLAY_NAME))
             {
@@ -211,7 +211,7 @@ IMS_BOOL RegInfoContact::Update(IN INode* piNode)
             }
             else
             {
-                IMS_TRACE_D("Unknown element (%s)", strNodeName.GetStr(), 0, 0);
+                IMS_TRACE_D("Skip or unknown element (%s)", strNodeName.GetStr(), 0, 0);
             }
 
             piChildNode = piChildNode->GetNextSibling();
@@ -310,9 +310,9 @@ void RegInfoContact::DisplayRegInfo(IN const AString& strTag /*= AString::ConstN
 }
 
 PRIVATE
-void RegInfoContact::SetCallId(IN INamedNodeMap* piNodeMap)
+void RegInfoContact::SetCallId(IN const INamedNodeMap* piNodeMap)
 {
-    INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_CALLID);
+    const INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_CALLID);
 
     if (piNode == IMS_NULL)
     {
@@ -324,9 +324,9 @@ void RegInfoContact::SetCallId(IN INamedNodeMap* piNodeMap)
 }
 
 PRIVATE
-void RegInfoContact::SetCSeq(IN INamedNodeMap* piNodeMap)
+void RegInfoContact::SetCSeq(IN const INamedNodeMap* piNodeMap)
 {
-    INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_CSEQ);
+    const INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_CSEQ);
 
     if (piNode == IMS_NULL)
     {
@@ -347,9 +347,9 @@ void RegInfoContact::SetCSeq(IN INamedNodeMap* piNodeMap)
 }
 
 PRIVATE
-void RegInfoContact::SetDurationRegistered(IN INamedNodeMap* piNodeMap)
+void RegInfoContact::SetDurationRegistered(IN const INamedNodeMap* piNodeMap)
 {
-    INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_DURATION_REGISTERED);
+    const INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_DURATION_REGISTERED);
 
     if (piNode == IMS_NULL)
     {
@@ -370,9 +370,9 @@ void RegInfoContact::SetDurationRegistered(IN INamedNodeMap* piNodeMap)
 }
 
 PRIVATE
-IMS_BOOL RegInfoContact::SetEvent(IN INamedNodeMap* piNodeMap)
+IMS_BOOL RegInfoContact::SetEvent(IN const INamedNodeMap* piNodeMap)
 {
-    INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_EVENT);
+    const INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_EVENT);
 
     if (piNode == IMS_NULL)
     {
@@ -423,10 +423,10 @@ IMS_BOOL RegInfoContact::SetEvent(IN INamedNodeMap* piNodeMap)
 }
 
 PRIVATE
-void RegInfoContact::SetExpiresValue(IN INamedNodeMap* piNodeMap)
+void RegInfoContact::SetExpiresValue(IN const INamedNodeMap* piNodeMap)
 {
     // If 'event' is "shortened", then it MUST be present
-    INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_EXPIRES);
+    const INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_EXPIRES);
 
     if (piNode == IMS_NULL)
     {
@@ -447,9 +447,9 @@ void RegInfoContact::SetExpiresValue(IN INamedNodeMap* piNodeMap)
 }
 
 PRIVATE
-IMS_BOOL RegInfoContact::SetId(IN INamedNodeMap* piNodeMap)
+IMS_BOOL RegInfoContact::SetId(IN const INamedNodeMap* piNodeMap)
 {
-    INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_ID);
+    const INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_ID);
 
     if (piNode == IMS_NULL)
     {
@@ -463,9 +463,9 @@ IMS_BOOL RegInfoContact::SetId(IN INamedNodeMap* piNodeMap)
 }
 
 PRIVATE
-void RegInfoContact::SetQValue(IN INamedNodeMap* piNodeMap)
+void RegInfoContact::SetQValue(IN const INamedNodeMap* piNodeMap)
 {
-    INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_Q);
+    const INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_Q);
 
     if (piNode == IMS_NULL)
     {
@@ -477,10 +477,10 @@ void RegInfoContact::SetQValue(IN INamedNodeMap* piNodeMap)
 }
 
 PRIVATE
-void RegInfoContact::SetRetryAfterValue(IN INamedNodeMap* piNodeMap)
+void RegInfoContact::SetRetryAfterValue(IN const INamedNodeMap* piNodeMap)
 {
     // If 'event' is "probation", then it MUST be present.
-    INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_RETRY_AFTER);
+    const INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_RETRY_AFTER);
 
     if (piNode == IMS_NULL)
     {
@@ -501,9 +501,9 @@ void RegInfoContact::SetRetryAfterValue(IN INamedNodeMap* piNodeMap)
 }
 
 PRIVATE
-IMS_BOOL RegInfoContact::SetState(IN INamedNodeMap* piNodeMap)
+IMS_BOOL RegInfoContact::SetState(IN const INamedNodeMap* piNodeMap)
 {
-    INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_STATE);
+    const INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_STATE);
 
     if (piNode == IMS_NULL)
     {
@@ -526,14 +526,14 @@ IMS_BOOL RegInfoContact::SetState(IN INamedNodeMap* piNodeMap)
 }
 
 PRIVATE
-void RegInfoContact::SetDisplayName(IN INode* piNode)
+void RegInfoContact::SetDisplayName(IN const INode* piNode)
 {
     if (piNode == IMS_NULL)
     {
         return;
     }
 
-    INode* piContent = piNode->GetFirstChild();
+    const INode* piContent = piNode->GetFirstChild();
 
     m_strDisplayName = piContent->GetNodeValue();
 }
@@ -548,7 +548,7 @@ void RegInfoContact::SetPublicGruu(IN INode* piNode)
         return;
     }
 
-    INode* piAttrNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_URI);
+    const INode* piAttrNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_URI);
 
     if (piAttrNode == IMS_NULL)
     {
@@ -572,7 +572,7 @@ void RegInfoContact::SetTemporaryGruu(IN INode* piNode)
         return;
     }
 
-    INode* piAttrNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_URI);
+    const INode* piAttrNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_URI);
 
     if (piAttrNode == IMS_NULL)
     {
@@ -620,7 +620,7 @@ void RegInfoContact::SetUnknownParameter(IN INode* piNode)
         return;
     }
 
-    INode* piNameNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_NAME);
+    const INode* piNameNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_NAME);
 
     if (piNameNode == IMS_NULL)
     {
@@ -641,7 +641,7 @@ void RegInfoContact::SetUnknownParameter(IN INode* piNode)
     piNode->DestroyNamedNodeMap(piNodeMap);
 
     AString strValue = AString::ConstEmpty();
-    INode* piContent = piNode->GetFirstChild();
+    const INode* piContent = piNode->GetFirstChild();
 
     if (piContent != IMS_NULL)
     {
@@ -676,7 +676,7 @@ void RegInfoContact::SetUnknownParameter(IN INode* piNode)
 }
 
 PRIVATE
-IMS_BOOL RegInfoContact::SetUri(IN INode* piNode)
+IMS_BOOL RegInfoContact::SetUri(IN const INode* piNode)
 {
     if (piNode == IMS_NULL)
     {
@@ -684,7 +684,7 @@ IMS_BOOL RegInfoContact::SetUri(IN INode* piNode)
         return IMS_FALSE;
     }
 
-    INode* piContent = piNode->GetFirstChild();
+    const INode* piContent = piNode->GetFirstChild();
 
     if (piContent == IMS_NULL)
     {

@@ -28,7 +28,7 @@ class MediaDescriptionReader : public IMediaDescriptor
 public:
     MediaDescriptionReader(
             IN const SdpMediaDescription& objSmd, IN const AString& strSessionLevelRemoteAddress);
-    virtual ~MediaDescriptionReader() = default;
+    ~MediaDescriptionReader() override = default;
 
     MediaDescriptionReader(IN const MediaDescriptionReader&) = delete;
     MediaDescriptionReader& operator=(IN const MediaDescriptionReader&) = delete;

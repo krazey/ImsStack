@@ -72,13 +72,6 @@ void MtcTimerWrapper::Start(IN IMS_UINT32 eType, IN IMS_SINT32 nDuration)
         return;
     }
 
-    if (nDuration == 0)
-    {
-        // The ServiceTimer immediately, but asynchronously calls Timer_TimerExpired()
-        // This can be used as a Message Driven Asynchronous call instead of PostMessage();
-        // TODO: Does a user want synchronous call?
-    }
-
     MtcTimer* pTimer = new MtcTimer(eType);
     pTimer->piTimer->SetTimer(nDuration, this);
     m_lstTimers.Append(pTimer);

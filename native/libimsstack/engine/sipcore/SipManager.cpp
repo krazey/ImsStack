@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
+#include "ServiceTrace.h"
 
-#include "SipAckPackage.h"
 #include "SipClientConnectionImpl.h"
 #include "SipConfigProxy.h"
+#include "SipConnectionNotifier.h"
 #include "SipConnectionNotifierImpl.h"
 #include "SipDebug.h"
 #include "SipFactoryProxy.h"
@@ -30,7 +31,7 @@
 #include "SipUtils.h"
 #include "StaticSip.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PRIVATE
 SipManager::SipManager() :
@@ -66,7 +67,7 @@ IMS_BOOL SipManager::AttachDialogState(IN SipDialogState* pDState)
 }
 
 PUBLIC
-void SipManager::DetachDialogState(IN SipDialogState* pDState)
+void SipManager::DetachDialogState(IN const SipDialogState* pDState)
 {
     if (m_nState != STATE_ACTIVE)
     {
@@ -76,7 +77,7 @@ void SipManager::DetachDialogState(IN SipDialogState* pDState)
 
     for (IMS_UINT32 i = 0; i < m_objDialogStates.GetSize(); ++i)
     {
-        SipDialogState* pTempDState = m_objDialogStates.GetAt(i);
+        const SipDialogState* pTempDState = m_objDialogStates.GetAt(i);
 
         if (pTempDState != IMS_NULL)
         {
@@ -166,7 +167,7 @@ void SipManager::DetachConnectionNotifier(IN const SipConnectionNotifier* pScn)
 
     for (IMS_UINT32 i = 0; i < m_objScns.GetSize(); ++i)
     {
-        SipConnectionNotifier* pTempScn = m_objScns.GetAt(i);
+        const SipConnectionNotifier* pTempScn = m_objScns.GetAt(i);
 
         if (pTempScn != IMS_NULL)
         {
@@ -235,9 +236,6 @@ IMS_BOOL SipManager::StartUp()
 
     // Initialize the SIP stack & transaction layer
     SipStackState::GetInstance()->StartUp();
-
-    // For ACK retransmission for 2xx response to INVITE
-    SipAckPackage::Init();
 
     SipDebug::InitLogging();
 

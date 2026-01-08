@@ -13,10 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "AString.h"
+
 #include "Document.h"
 #include "ElementImpl.h"
 #include "IAttr.h"
 #include "IText.h"
+#include "NodeList.h"
+#include "XmlApiTree.h"
+#include "XmlApiXPath.h"
 
 PUBLIC
 Document::Document(xmlDocPtr pstDoc, xmlXPathContextPtr pstXpathContext) :

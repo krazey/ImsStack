@@ -22,7 +22,7 @@ class OsSystemTime : public ISystemTime
 {
 public:
     OsSystemTime();
-    virtual ~OsSystemTime();
+    ~OsSystemTime() override;
 
 public:
     ImsDate GetDate() const override;

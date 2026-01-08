@@ -24,7 +24,7 @@ class PublicationImpl : public IPublication, public IOnPublicationListener
 {
 public:
     explicit PublicationImpl(IN Publication* pPublication);
-    virtual ~PublicationImpl();
+    ~PublicationImpl() override;
 
     PublicationImpl(IN const PublicationImpl&) = delete;
     PublicationImpl& operator=(IN const PublicationImpl&) = delete;

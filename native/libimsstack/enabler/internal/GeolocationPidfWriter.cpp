@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include "AString.h"
 #include "GeolocationPidfWriter.h"
 #include "IXmlStreamWriter.h"
-#include "ImsTypeDef.h"
+#include "ServiceMemory.h"
 #include "TextParser.h"
+#include "XmlFactory.h"
 #include <initializer_list>
 #include <vector>
 
@@ -41,6 +41,11 @@ PUBLIC VIRTUAL void Element::Write(IN_OUT IXmlStreamWriter& objWriter) const
     }
 }
 
+PUBLIC VIRTUAL void Element::Append(IN Element* pElement)
+{
+    m_lstChildren.push_back(pElement);
+}
+
 PUBLIC VIRTUAL void PidfLoXml::Write(IN_OUT IXmlStreamWriter& objWriter) const
 {
     objWriter.WriteStartDocument("UTF-8", "1.0");
@@ -49,6 +54,29 @@ PUBLIC VIRTUAL void PidfLoXml::Write(IN_OUT IXmlStreamWriter& objWriter) const
     Element::Write(objWriter);
 
     objWriter.WriteEndDocument();
+}
+
+PUBLIC ByteArray PidfLoXml::Write() const
+{
+    ByteArray objContent;
+
+    XmlFactory* pXmlFactory = XmlFactory::GetInstance();
+    IXmlStreamWriter* pWriter = pXmlFactory->CreateStreamWriter();
+
+    Write(*pWriter);
+
+    IMS_CHAR* pszXml = pWriter->Flush();
+    if (pszXml != IMS_NULL)
+    {
+        objContent.Attach(reinterpret_cast<IMS_BYTE*>(pszXml), pWriter->GetContentLength());
+        objContent.Detach();
+        IMS_MEM_Free(pszXml);
+    }
+
+    pWriter->Close();
+    pXmlFactory->DestroyStreamWriter(pWriter);
+
+    return objContent;
 }
 
 PUBLIC VIRTUAL void Presence::Write(IN_OUT IXmlStreamWriter& objWriter) const
@@ -79,6 +107,10 @@ PUBLIC VIRTUAL void Presence::Write(IN_OUT IXmlStreamWriter& objWriter) const
     if (m_nNamespaces & Namespace::CON)
     {
         objWriter.WriteNamespace("con", "urn:ietf:params:xml:ns:geopriv:conf");
+    }
+    if (m_nNamespaces & Namespace::GBP)
+    {
+        objWriter.WriteNamespace("gbp", "urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy");
     }
 
     objWriter.WriteAttribute("entity", m_strEntityUri);
@@ -161,8 +193,24 @@ void LocationInfo::Write(IN_OUT IXmlStreamWriter& objWriter) const
 
 void UsageRules::Write(IN_OUT IXmlStreamWriter& objWriter) const
 {
-    objWriter.WriteEmptyElement("gp:usage-rules");
+    objWriter.WriteStartElement("gp:usage-rules");
     objWriter.WriteCharacters(TextParser::STR_LF);
+
+    Element::Write(objWriter);
+
+    objWriter.WriteEndElement();
+    objWriter.WriteCharacters(TextParser::STR_LF);
+}
+
+void RetransmissionAllowed::Write(IN_OUT IXmlStreamWriter& objWriter) const
+{
+    if (m_strRetransmissionAllowed.GetLength() > 0)
+    {
+        objWriter.WriteStartElement("gbp:retransmission-allowed");
+        objWriter.WriteCharacters(m_strRetransmissionAllowed);
+        objWriter.WriteEndElement();
+        objWriter.WriteCharacters(TextParser::STR_LF);
+    }
 }
 
 void Method::Write(IN_OUT IXmlStreamWriter& objWriter) const

@@ -24,7 +24,7 @@ class MockIConfigurable : public IConfigurable
 {
 public:
     inline MockIConfigurable() {}
-    inline virtual ~MockIConfigurable() {}
+    ~MockIConfigurable() override = default;
 
     MOCK_METHOD(IMS_BOOL, AddListener, (IN IMS_SINT32 nCpi, IN IConfigUpdateListener* piListener),
             (override));

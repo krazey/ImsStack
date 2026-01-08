@@ -26,7 +26,7 @@ public:
             ImsActivity(strName)
     {
     }
-    inline virtual ~ImsActivityEx() {}
+    ~ImsActivityEx() override = default;
 
     ImsActivityEx(IN const ImsActivityEx&) = delete;
     ImsActivityEx& operator=(IN const ImsActivityEx&) = delete;
@@ -34,8 +34,6 @@ public:
 protected:
     inline IImsActivityController* GetController() override { return IMS_NULL; }
     inline virtual IMS_BOOL OnMessage(IN ImsMessage& /*objMsg*/) { return IMS_FALSE; }
-
-private:
     // ImsActivity
     inline IMS_BOOL DispatchMessage(IN ImsMessage& objMsg) override { return OnMessage(objMsg); }
 };

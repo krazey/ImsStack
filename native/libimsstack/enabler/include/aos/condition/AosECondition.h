@@ -22,33 +22,35 @@ class AosECondition : public AosCondition
 {
 public:
     explicit AosECondition(IN IAosAppContext* piAppContext);
-    virtual ~AosECondition();
+    ~AosECondition() override;
 
     IMS_BOOL IsReady() final;
 
-private:
+protected:
+    inline void AddConfigListener() final {};
+    inline void RemoveConfigListener() final {};
+
     inline void AddServiceAvailable() final{};
     inline void RemoveServiceAvailable() final{};
 
     inline void AddEventListener() final{};
     inline void RemoveEventListener() final{};
 
-    IMS_BOOL AddAosServiceListener() final;
-    IMS_BOOL RemoveAosServiceListener() final;
+    void AddAosServiceListener() override;
+    void RemoveAosServiceListener() override;
 
     // IAosBlockListener
-    void Block_Changed(IN IMS_UINT32 nType, IN IMS_UINT32 nParam) final;
+    void Block_Changed(IN IMS_UINT32 nType, IN IMS_UINT32 nParam) override;
 
     // AosServicePhoneListener
-    void ServicePhone_AosStart() final;
+    void ServicePhone_AosStart() override;
     inline void ServicePhone_LocationInfoChanged(IN LocationInfo /*eState*/) final{};
     inline void ServicePhone_PhoneNumberStateChanged(
             IN IMS_BOOL /*bIsRefresh*/, IN PhoneNumberState /*eState*/) final{};
-    inline void ServicePhone_PlmnChanged() final{};
+    inline void ServicePhone_PlmnChanged(IN const AString& /*strPlmn*/) final {};
     inline void ServicePhone_PowerOff() final{};
-
-private:
-    friend class AosEConditionTest;
+    inline void ServicePhone_AllowedNetworkTypesChanged(
+            IN IMS_ULONG /*nNetworkTypesBitMask*/) final {};
 };
 
 #endif  // AOS_E_CONDITION_H_

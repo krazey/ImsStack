@@ -17,27 +17,28 @@
 #ifndef CONFERENCE_EVENT_NOTIFIER_H_
 #define CONFERENCE_EVENT_NOTIFIER_H_
 
-#include "ImsList.h"
-#include "MtcDef.h"
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 
-class IMtcCallContext;
+class IJniMtcCallThread;
+class IMtcCallManager;
 class CallConnectionIdManager;
 class ConferenceParticipantList;
+template <class T>
+class ImsList;
 
 class ConferenceEventNotifier
 {
 public:
-    // TODO: update this to use JniMtcCallThread. IMtcCallContext should provide
-    // TODO: objContext.GetUiNotifier().GetCallThread()
-    explicit ConferenceEventNotifier(IN IMtcCallContext& objConfCallContext,
-            IN CallConnectionIdManager& objConnectionIdManager);
+    explicit ConferenceEventNotifier(IN IMtcCallManager& objCallManager,
+            IN CallKey nConferenceCallKey, IN CallConnectionIdManager& objConnectionIdManager);
     virtual ~ConferenceEventNotifier();
     ConferenceEventNotifier(IN const ConferenceEventNotifier&) = delete;
     ConferenceEventNotifier& operator=(IN const ConferenceEventNotifier&) = delete;
 
 public:
-    virtual void NotifyMerged(IN ConferenceParticipantList& objParticipantList);
+    virtual void NotifyMerged(
+            IN ConferenceParticipantList& objParticipantList, IN IMS_BOOL bSubscribed);
     virtual void NotifyMergeFailed(IN const CallReasonInfo& objReason);
 
     virtual void NotifyGroupCallStarted();
@@ -46,13 +47,11 @@ public:
     virtual void NotifyExpanded();
     virtual void NotifyExpandFailed(IN const CallReasonInfo& objReason);
 
-    virtual void NotifyDropped(
-            IN const CallReasonInfo& objReason, IN ConferenceParticipantList& objParticipantList);
+    virtual void NotifyDropped(IN ConferenceParticipantList& objParticipantList);
     virtual void NotifyDropFailed(
             IN const CallReasonInfo& objReason, IN ConferenceParticipantList& objParticipantList);
 
-    virtual void NotifyJoined(
-            IN const CallReasonInfo& objReason, IN ConferenceParticipantList& objParticipantList);
+    virtual void NotifyJoined(IN ConferenceParticipantList& objParticipantList);
     virtual void NotifyJoinFailed(
             IN const CallReasonInfo& objReason, IN ConferenceParticipantList& objParticipantList);
 
@@ -64,9 +63,12 @@ public:
 private:
     void CheckDisconnectedConfUsersInfo(
             IN ConferenceParticipantList& objParticipantList, IN_OUT ImsList<ConfUser*>& objUsers);
+    IMtcCallContext* GetConferenceCallContext() const;
+    IJniMtcCallThread* GetCallThread() const;
 
 private:
-    IMtcCallContext& m_objConfCallContext;
+    IMtcCallManager& m_objCallManager;
+    CallKey m_nConferenceCallKey;
     CallConnectionIdManager& m_objConnectionIdManager;
 };
 

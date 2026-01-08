@@ -59,6 +59,12 @@ public:
      *        with the IMS traffic type
      */
     virtual void ImsRadio_OnConnectionSetupPrepared() = 0;
+
+    /// Cause Code
+    enum
+    {
+        CAUSE_CODE_SR_LLF_TIMER_START = 1000
+    };
 };
 
 class IImsRadioSsacListener

@@ -20,37 +20,13 @@
 #include "private/ConfigurationManager.h"
 
 #include "CoreServiceImpl.h"
+#include "IServiceManager.h"
+#include "ImsCoreContext.h"
 #include "ImsCoreProtocol.h"
-#include "ServiceManager.h"
 #include "SipDebug.h"
 #include "SipError.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
-
-PRIVATE
-ImsCoreProtocol::ImsCoreProtocol() :
-        ServiceProtocol()
-{
-}
-
-/**
- * @brief Returns a singleton object of IMS Core Protocol.
- *
- * It throws the error as follows:
- *   ILLEGAL_ARGUMENT,
- *   CONNECTION_NOT_FOUND
- */
-PUBLIC GLOBAL ImsCoreProtocol* ImsCoreProtocol::GetInstance()
-{
-    static ImsCoreProtocol* s_pImsCoreProtocol = IMS_NULL;
-
-    if (s_pImsCoreProtocol == IMS_NULL)
-    {
-        s_pImsCoreProtocol = new ImsCoreProtocol();
-    }
-
-    return s_pImsCoreProtocol;
-}
 
 /**
  * @brief Creates a IMS Service.
@@ -62,7 +38,7 @@ PUBLIC GLOBAL ImsCoreProtocol* ImsCoreProtocol::GetInstance()
 PRIVATE VIRTUAL IService* ImsCoreProtocol::CreateService(
         IN const AString& strAppId, IN const AString& strServiceId, IN const AString& strUserId)
 {
-    IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
+    const IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
     IMS_SINT32 nSlotId = (piThread == IMS_NULL) ? IMS_SLOT_0 : piThread->GetSlotId();
 
     IMS_TRACE_D("CoreService - appId=%s, serviceId=%s, slotId=%d", strAppId.GetStr(),
@@ -73,7 +49,7 @@ PRIVATE VIRTUAL IService* ImsCoreProtocol::CreateService(
         IMS_TRACE_D("CoreService - userId=%s", SipDebug::GetUri1(strUserId).GetStr(), 0, 0);
     }
 
-    ConfigurationManager* pConfigMngr = ConfigurationManager::GetInstance();
+    const ConfigurationManager* pConfigMngr = ConfigurationManager::GetInstance();
 
     if (!pConfigMngr->IsAppConfigured(strAppId, nSlotId))
     {
@@ -106,8 +82,8 @@ PRIVATE VIRTUAL IService* ImsCoreProtocol::CreateService(
     }
 
     // Check if the service is already created
-    ServiceManager* pServiceMngr = ServiceManager::GetInstance();
-    Service* pService = pServiceMngr->GetService(nSlotId, strAppId, strServiceId);
+    IServiceManager* piServiceMngr = ImsCoreContext::GetInstance()->GetServiceManager();
+    const Service* pService = piServiceMngr->GetService(nSlotId, strAppId, strServiceId);
 
     if (pService != IMS_NULL)
     {
@@ -161,7 +137,7 @@ PRIVATE VIRTUAL IService* ImsCoreProtocol::CreateService(
         return IMS_NULL;
     }
 
-    if (!pServiceMngr->AttachService(pCoreService))
+    if (!piServiceMngr->AttachService(pCoreService))
     {
         piCoreService->Close();
 
@@ -169,7 +145,7 @@ PRIVATE VIRTUAL IService* ImsCoreProtocol::CreateService(
         return IMS_NULL;
     }
 
-    pCoreService->SetServiceManagerListener(pServiceMngr);
+    pCoreService->SetServiceCloseListener(piServiceMngr);
 
     return piCoreService;
 }

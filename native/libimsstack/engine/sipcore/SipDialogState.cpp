@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
+#include "ServiceTrace.h"
 
+#include "ISipHeader.h"
+#include "SipDState.h"
 #include "SipDebug.h"
 #include "SipDialogSharedState.h"
 #include "SipDialogState.h"
+#include "SipError.h"
 #include "SipFeatures.h"
+#include "SipHeader.h"
 #include "SipMessage.h"
+#include "SipMessageInfo.h"
 #include "SipPrivate.h"
 #include "SipStack.h"
 
 #define __IMS_SIP_DIALOG_COMPONENT_BY_REFERENCE__
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipDialogState::PendingRemoteTarget::PendingRemoteTarget() :
@@ -637,7 +643,7 @@ IMS_BOOL SipDialogState::InitDialogDetails(IN ::SipMessage* pSipMsg)
 }
 
 PUBLIC
-IMS_BOOL SipDialogState::InitDialogDetails(IN IMS_SINT32 nTrigger, IN SipDialogState* pDState)
+IMS_BOOL SipDialogState::InitDialogDetails(IN IMS_SINT32 nTrigger, IN const SipDialogState* pDState)
 {
     if (nTrigger == DIALOG_CANCELLED)
     {
@@ -860,10 +866,7 @@ IMS_SINT32 SipDialogState::UpdateDialogDetails(IN const SipMessageInfo& objMsgIn
             if (GetState() == SipDState::STATE_INIT)
             {
                 // Update To-Tag when sending the response to the incoming SIP request
-                if (!UpdateComponents(objMsgInfo))
-                {
-                    return SipPrivate::MESSAGE_FAILED;
-                }
+                UpdateComponents(objMsgInfo);
 
                 // HEADER_REQ_SESSION-ID
                 if (SipFeatures::IsHeaderSessionIdRequired(objMsgInfo.GetSlotId()))
@@ -1300,17 +1303,14 @@ IMS_BOOL SipDialogState::CreateRouteSet(IN const SipMessageInfo& objMsgInfo)
         }
 
         // 3 Contact or From or Request-URI need to be extracted ???
-        if (!UpdateContact(objMsgInfo))
-        {
-            return IMS_FALSE;
-        }
+        UpdateContact(objMsgInfo);
     }
 
     return IMS_TRUE;
 }
 
 PRIVATE
-IMS_BOOL SipDialogState::UpdateComponents(IN const SipMessageInfo& objMsgInfo)
+void SipDialogState::UpdateComponents(IN const SipMessageInfo& objMsgInfo)
 {
     ::SipMessage* pSipMsg = objMsgInfo.GetMessage();
     AString strTmpVal;
@@ -1412,12 +1412,10 @@ IMS_BOOL SipDialogState::UpdateComponents(IN const SipMessageInfo& objMsgInfo)
     }
 
     SipStack::FreeHeaderEx(pSipHdr);
-
-    return IMS_TRUE;
 }
 
 PRIVATE
-IMS_BOOL SipDialogState::UpdateContact(IN const SipMessageInfo& objMsgInfo)
+void SipDialogState::UpdateContact(IN const SipMessageInfo& objMsgInfo)
 {
     ::SipMessage* pSipMsg = objMsgInfo.GetMessage();
 
@@ -1433,7 +1431,7 @@ IMS_BOOL SipDialogState::UpdateContact(IN const SipMessageInfo& objMsgInfo)
                 RemovePendingRemoteTarget(objMsgInfo);
             }
         }
-        return IMS_TRUE;
+        return;
     }
 
     IMS_SINT32 nHCount = SipStack::GetHeaderCount(pSipMsg, ISipHeader::CONTACT_NORMAL);
@@ -1491,8 +1489,6 @@ IMS_BOOL SipDialogState::UpdateContact(IN const SipMessageInfo& objMsgInfo)
             }
         }
     }
-
-    return IMS_TRUE;
 }
 
 PRIVATE
@@ -1594,10 +1590,7 @@ IMS_BOOL SipDialogState::UpdateRouteSet(IN const SipMessageInfo& objMsgInfo)
         {
             // This is an established route set.
             // Only last entry which indicates the contact address can be changed.
-            if (!UpdateContact(objMsgInfo))
-            {
-                return IMS_FALSE;
-            }
+            UpdateContact(objMsgInfo);
         }
     }
 
@@ -1631,7 +1624,6 @@ void SipDialogState::UpdateState(
 {
     IMS_SINT32 nNextState = SipDState::STATE_MAX;
 
-    // 3 TODO
     (void)nTrigger;
 
     switch (nAction)
@@ -1700,7 +1692,7 @@ void SipDialogState::AddPendingRemoteTarget(IN const SipMessageInfo& objMsgInfo)
     // Checks if the pending remote target is already present or not
     for (IMS_UINT32 i = 0; i < m_objPendingRemoteTargets.GetSize(); ++i)
     {
-        PendingRemoteTarget* pRemoteTarget = m_objPendingRemoteTargets.GetAt(i);
+        const PendingRemoteTarget* pRemoteTarget = m_objPendingRemoteTargets.GetAt(i);
 
         if (pRemoteTarget == IMS_NULL)
         {

@@ -16,9 +16,20 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
+java_defaults {
+    name: "imsstack_mockito_target_extended_defaults",
+    static_libs: [
+        "mockito-target-extended-minus-junit4"
+    ],
+    jni_libs: [
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
+    ],
+}
+
 java_import {
-  name: "ImsCallExtLib-prebuilt",
-  jars: ["prebuilt/ImsCallExtLib.jar"],
+    name: "ImsCallExtLib-prebuilt",
+    jars: ["prebuilt/ImsCallExtLib.jar"],
 }
 
 java_library {

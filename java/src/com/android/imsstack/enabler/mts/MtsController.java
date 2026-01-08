@@ -37,7 +37,6 @@ public class MtsController {
     public static final int REQUEST_REPORT_MO_STATUS = 1;
     // 2 : Request Report Mt SMS
     public static final int REQUEST_REPORT_MT_SMS = 2;
-    public static final int NOTIFICATION_MTS_SEND_MO_SMS = 101;
 
     /* GII-SMSImpl Message */
     public static final int MO_INVALID = 0;
@@ -97,6 +96,7 @@ public class MtsController {
     private Listener mListener = null;
     private MtsJni mMtsJni;
     private boolean mUseDialedNumber = false;
+    private int mRetryCount = 0;
 
     public MtsController(IBaseContext context) {
         ImsLog.d(context.getSlotId(), "");
@@ -118,7 +118,7 @@ public class MtsController {
             }
 
             mUseDialedNumber = cc.getBoolean(
-                    CarrierConfig.Assets.KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL);
+                    CarrierConfig.ImsSms.KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL);
         } else {
             ImsLog.w(mSlotId, "config is null");
             return;
@@ -138,7 +138,9 @@ public class MtsController {
     public void cleanup() {
         ImsLog.d(mSlotId, "");
 
-        mMtsJni.release(mSlotId);
+        if (mMtsJni != null) {
+            mMtsJni.release(mSlotId);
+        }
 
         if (mHandler != null) {
             mHandler.removeCallbacksAndMessages(null);
@@ -170,28 +172,58 @@ public class MtsController {
         return mHandler;
     }
 
+    /** Deprecated */
     public boolean sendMessage(
             int smsFormat, byte[] smsData, String psiSmsc, String dialedNumber, int seqId) {
+        // Call the new overloaded method with isRetry = false by default
+        return sendMessage(smsFormat, smsData, psiSmsc, dialedNumber, seqId, false);
+    }
+
+    /**
+     * Constructs a Parcel containing the necessary MO SMS information from the given parameters.
+     * Initiates the sending process by dispatching the Parcel to the native via JNI.
+     *
+     * @param smsFormat The smsFormat Format of the SMS PDU.
+     * @param smsData The raw PDU (Protocol Data Unit) data of the SMS message to be sent.
+     * @param psiSmsc The Public Service Identity (PSI) of the IP-SM-GW (SMSC).
+     * @param dialedNumber The destination phone number originally dialed by the user.
+     * @param seqId A sequence identifier provided by the caller.
+     * @param isRetry Indicates if this attempt is a retry of a previously failed one.
+     */
+    public boolean sendMessage(int smsFormat, byte[] smsData, String psiSmsc,
+            String dialedNumber, int seqId, boolean isRetry) {
+        if (smsData == null) {
+            ImsLog.e(mSlotId, "smsData is null");
+            processNotifySendMoSmsError(smsFormat, seqId, MO_ERROR_GENERIC);
+            return false;
+        }
         ImsLog.d(mSlotId, "smsFormat : " + smsFormat + ", smsDataLength = " + smsData.length
                 + ", psiSmsc = " + psiSmsc + ", dialedNumber = " + dialedNumber
-                + ", seqId = " + seqId);
+                + ", seqId = " + seqId + ", isRetry = " + isRetry);
+
+        if (isRetry) {
+            mRetryCount++;
+        } else {
+            mRetryCount = 0;
+        }
+
         String encodedPdu = Base64.encodeToString(smsData, Base64.DEFAULT);
         if (encodedPdu == null || psiSmsc == null) {
-            processNotifySendMoSmsError(smsFormat, seqId);
+            processNotifySendMoSmsError(smsFormat, seqId, MO_ERROR_RETRY);
             return false;
         }
 
         Parcel parcel = Parcel.obtain();
         if (parcel == null) {
             ImsLog.e(mSlotId, "parcel is null");
-            processNotifySendMoSmsError(smsFormat, seqId);
+            processNotifySendMoSmsError(smsFormat, seqId, MO_ERROR_RETRY);
             return false;
         }
 
         String targetAddress = psiSmsc;
         if (mUseDialedNumber) {
             if (dialedNumber == null) {
-                processNotifySendMoSmsError(smsFormat, seqId);
+                processNotifySendMoSmsError(smsFormat, seqId, MO_ERROR_RETRY);
                 return false;
             } else {
                 targetAddress = dialedNumber;
@@ -208,11 +240,41 @@ public class MtsController {
         parcel.writeInt(seqId);
         parcel.writeBoolean((telephony != null)
                 ? telephony.isEmergencyNumber(dialedNumber) : false);
+        parcel.writeInt(mRetryCount);
         mMtsJni.sendMessage(parcel, mSlotId);
         return true;
     }
 
-    private void processNotifySendMoSmsError(int smsFormat, int seqId) {
+    /**
+     * Notifies the native that the MO SMS has timed out.
+     */
+    public void notifyMoSmsTimedOut() {
+        ImsLog.d(mSlotId, "notifyMoSmsTimedOut");
+
+        Parcel parcel = Parcel.obtain();
+        if (parcel == null) {
+            ImsLog.e(mSlotId, "parcel is null");
+            return;
+        }
+
+        parcel.writeInt(MtsJni.NOTI_MTSENABLER_MO_SMS_TIMED_OUT);
+        mMtsJni.sendMessage(parcel, mSlotId);
+    }
+
+    public void notifyMtSmsTimedOut(int messageRef) {
+        ImsLog.d(mSlotId, "notifyMtSmsTimedOut, messageRef: " + messageRef);
+        Parcel parcel = Parcel.obtain();
+        if (parcel == null) {
+            ImsLog.e(mSlotId, "parcel is null");
+            return;
+        }
+
+        parcel.writeInt(MtsJni.NOTI_MTSENABLER_MT_SMS_TIMED_OUT);
+        parcel.writeInt(messageRef);
+        mMtsJni.sendMessage(parcel, mSlotId);
+    }
+
+    private void processNotifySendMoSmsError(int smsFormat, int seqId, int reason) {
         ImsLog.d(mSlotId, "");
 
         if (mHandler == null) {
@@ -221,7 +283,7 @@ public class MtsController {
         }
 
         Bundle bundle = new Bundle();
-        bundle.putInt(REPORTMOSTATUS_REASON, MO_ERROR_RETRY);
+        bundle.putInt(REPORTMOSTATUS_REASON, reason);
         bundle.putInt(REPORTMOSTATUS_SMSFORMAT, smsFormat);
         bundle.putInt(REPORTMOSTATUS_SEQID, seqId);
 

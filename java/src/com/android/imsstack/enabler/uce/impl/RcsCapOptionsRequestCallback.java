@@ -21,15 +21,16 @@ import android.telephony.ims.stub.CapabilityExchangeEventListener.OptionsRequest
 import android.util.Log;
 
 import com.android.imsstack.enabler.uce.interf.RemoteOptionsCallback;
-import com.android.imsstack.util.MessageExecutor;
+
+import java.util.concurrent.Executor;
 
 public class RcsCapOptionsRequestCallback implements OptionsRequestCallback {
 
+    private static final String LOG_TAG = RcsCapOptionsRequestCallback.class.getSimpleName();
     private RemoteOptionsCallback mRemoteOptionsCallback = null;
-    private static final String LOG_TAG = "RcsCapOptionsRequestCallback";
-    private MessageExecutor mMessageExecutor;
+    private final Executor mMessageExecutor;
 
-    public RcsCapOptionsRequestCallback(MessageExecutor executor) {
+    public RcsCapOptionsRequestCallback(Executor executor) {
         mMessageExecutor = executor;
     }
 
@@ -38,7 +39,7 @@ public class RcsCapOptionsRequestCallback implements OptionsRequestCallback {
      * the network back to the framework.
      * @param remoteOptionsCallback The callback of option request
      */
-    public void setCallBack(RemoteOptionsCallback remoteOptionsCallback) {
+    public void setCallback(RemoteOptionsCallback remoteOptionsCallback) {
         mRemoteOptionsCallback = remoteOptionsCallback;
     }
 

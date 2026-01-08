@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
+
+#include "SipConfiguration.h"
 #include "msg/SipEventHeader.h"
 
 namespace android
@@ -28,43 +30,44 @@ protected:
     virtual void TearDown() override {}
 };
 
-TEST_F(SipEventHeaderTest, EncodeHdrAndDecodeHdr)
+TEST_F(SipEventHeaderTest, EncodeAndDecode)
 {
-    SipHeaderBase* pHeader = SipEventHeader::GetNewObj(SipHeaderBase::EVENT, nullptr);
+    SipHeaderBase* pHeader = SipEventHeader::GetNewObj(SipHeaderBase::ALLOW_EVENTS, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
-    const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {
+    const SIP_INT32 BUFFER_SIZE = 4096;
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
 
     AStringBuffer objBuffer(256);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE,
+            pHeader->Encode(&pBuff, SIP_TRUE, SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(""), 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("", 0));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("event-package"), 13));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("event-package", 13));
 
-    SipHeaderBase* pCopyHeader = SipEventHeader::GetNewObj(SipHeaderBase::EVENT, pHeader);
+    SipHeaderBase* pCopyHeader = SipEventHeader::GetNewObj(SipHeaderBase::ALLOW_EVENTS, pHeader);
     ASSERT_TRUE(pCopyHeader != nullptr);
 
     pHeader->SipDelete();
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("event-package", &(aBuffer[0]));
     EXPECT_STREQ("event-package", objBuffer.GetCharString());
 
     pCopyHeader->SipDelete();
 
-    pHeader = SipEventHeader::GetNewObj(SipHeaderBase::EVENT, nullptr);
+    pHeader = SipEventHeader::GetNewObj(SipHeaderBase::ALLOW_EVENTS, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("event-package.event-template"), 28));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("event-package.event-template", 28));
 
-    pCopyHeader = SipEventHeader::GetNewObj(SipHeaderBase::EVENT, pHeader);
+    pCopyHeader = SipEventHeader::GetNewObj(SipHeaderBase::ALLOW_EVENTS, pHeader);
     ASSERT_TRUE(pCopyHeader != nullptr);
 
     pHeader->SipDelete();
@@ -73,21 +76,62 @@ TEST_F(SipEventHeaderTest, EncodeHdrAndDecodeHdr)
     memset(pBuff, 0, BUFFER_SIZE);
     objBuffer = AString::ConstNull();
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(objBuffer, SIP_FALSE));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("event-package.event-template", &(aBuffer[0]));
     EXPECT_STREQ("event-package.event-template", objBuffer.GetCharString());
 
     pCopyHeader->SipDelete();
 
+    pHeader = SipEventHeader::GetNewObj(SipHeaderBase::ALLOW_EVENTS, nullptr);
+    ASSERT_TRUE(pHeader != nullptr);
+
+    // Consecutive DOTS, fail.
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("event-package.event-template1..event-template2", 46));
+
+    pHeader->SipDelete();
+
+    pHeader = SipEventHeader::GetNewObj(SipHeaderBase::ALLOW_EVENTS, nullptr);
+    ASSERT_TRUE(pHeader != nullptr);
+
+    // Ending with DOT, fail.
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("event-package.event-template1.event-template2.", 46));
+
+    pHeader->SipDelete();
+
+    SipEventHeader* pEventsHeader = reinterpret_cast<SipEventHeader*>(
+            SipEventHeader::GetNewObj(SipHeaderBase::ALLOW_EVENTS, nullptr));
+    ASSERT_TRUE(pEventsHeader != nullptr);
+
+    EXPECT_EQ(SIP_TRUE, pEventsHeader->Decode("event-package.event-template1.event-template2", 45));
+
+    EXPECT_EQ(2, pEventsHeader->GetTemplateCount());
+
+    EXPECT_EQ(SIP_TRUE, pEventsHeader->IsTemplatePresent("event-template1"));
+    EXPECT_EQ(SIP_FALSE, pEventsHeader->IsTemplatePresent("event-template3"));
+
+    EXPECT_EQ(0, pEventsHeader->GetTemplateIndex("event-template1"));
+    EXPECT_EQ(-1, pEventsHeader->GetTemplateIndex("event-template4"));
+
+    EXPECT_STREQ("event-template2", pEventsHeader->GetTemplate(1));
+
+    pEventsHeader->RemoveTemplate("event-template2");
+    pEventsHeader->AddTemplate("event-template5");
+
+    pBuff = &(aBuffer[0]);
+    memset(pBuff, 0, BUFFER_SIZE);
+
+    EXPECT_EQ(SIP_TRUE, pEventsHeader->Encode(&pBuff));
+    EXPECT_STREQ("event-package.event-template1.event-template5", &(aBuffer[0]));
+
+    pEventsHeader->SipDelete();
+
+    // Event header
     pHeader = SipEventHeader::GetNewObj(SipHeaderBase::EVENT, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
     EXPECT_EQ(SIP_TRUE,
-            pHeader->DecodeHdr(
-                    const_cast<char*>(
-                            "event-package.event-template;event-param-name=event-param-value"),
-                    63));
+            pHeader->Decode("event-package.event-template;event-param-name=event-param-value", 63));
 
     pCopyHeader = SipEventHeader::GetNewObj(SipHeaderBase::EVENT, pHeader);
     ASSERT_TRUE(pCopyHeader != nullptr);
@@ -98,7 +142,7 @@ TEST_F(SipEventHeaderTest, EncodeHdrAndDecodeHdr)
     memset(pBuff, 0, BUFFER_SIZE);
     objBuffer = AString::ConstNull();
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("event-package.event-template;event-param-name=event-param-value", &(aBuffer[0]));
     EXPECT_STREQ("event-package.event-template;event-param-name=event-param-value",

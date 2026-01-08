@@ -13,17 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ImsIdentity.h"
 #include "ServiceTrace.h"
 #include "ISubscriberConfig.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosBlock.h"
+#include "interface/IAosNConfiguration.h"
 #include "interface/IAosRegistration.h"
 #include "interface/IAosSubscriberListener.h"
 #include "interface/IAosSubscriberManager.h"
 #include "provider/AosProvider.h"
 #include "condition/AosSubscriber.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 #define APPPROFILE m_strTag.GetStr()
 
@@ -33,7 +35,8 @@ AosSubscriber::AosSubscriber(IN IAosAppContext* piAppContext) :
         m_piSubscriberManager(IMS_NULL),
         m_nSlotId(m_piAppContext->GetSlotId()),
         m_piListener(IMS_NULL),
-        m_eRegType(AosRegistrationType::NORMAL)
+        m_eRegType(AosRegistrationType::NORMAL),
+        m_strTempPuidForGiba(AString::ConstNull())
 {
     m_strTag.Sprintf("%d:%s", m_nSlotId, m_piAppContext->GetProfileId().GetStr());
     m_piSubscriberManager = AosProvider::GetInstance()->GetSubscriberManager(m_nSlotId);
@@ -55,6 +58,16 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscriber::IsReady() const
             : IMS_FALSE;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosSubscriber::IsIsim() const
+{
+    return (m_piSubscriberManager != IMS_NULL) ? m_piSubscriberManager->IsIsim() : IMS_FALSE;
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosSubscriber::IsUsim() const
+{
+    return (m_piSubscriberManager != IMS_NULL) ? m_piSubscriberManager->IsUsim() : IMS_FALSE;
+}
+
 PUBLIC VIRTUAL void AosSubscriber::SetListener(IN IAosSubscriberListener* piListener)
 {
     A_IMS_TRACE_D(APPPROFILE, "SetListener :: (%" PFLS_x ") is set", piListener, 0, 0);
@@ -72,9 +85,26 @@ PUBLIC VIRTUAL void AosSubscriber::SetListener(IN IAosSubscriberListener* piList
 
 PUBLIC VIRTUAL const AStringArray& AosSubscriber::GetConfiguredImpus() const
 {
-    return (m_piSubscriberManager != IMS_NULL)
-            ? m_piSubscriberManager->GetConfiguredImpus(m_eRegType == AosRegistrationType::FAKE)
-            : AStringArray::ConstNull();
+    if (m_piSubscriberManager == IMS_NULL)
+    {
+        return AStringArray::ConstNull();
+    }
+
+    if (m_eRegType == AosRegistrationType::FAKE)
+    {
+        A_IMS_TRACE_D(APPPROFILE, "GetConfiguredImpus: Configured IMPU for fake", 0, 0, 0);
+        return m_piSubscriberManager->GetConfiguredImpusForFake();
+    }
+
+    if (m_eRegType == AosRegistrationType::EMERGENCY &&
+            GET_N_CONFIG(m_nSlotId)->IsERegUsingFirstImpuInIsim())
+    {
+        A_IMS_TRACE_D(APPPROFILE, "GetConfiguredImpus: Ordered IMPUs", 0, 0, 0);
+        return m_piSubscriberManager->GetOrderedImpus();
+    }
+
+    A_IMS_TRACE_D(APPPROFILE, "GetConfiguredImpus: Configured IMPU", 0, 0, 0);
+    return m_piSubscriberManager->GetConfiguredImpus();
 }
 
 PUBLIC VIRTUAL const AStringArray& AosSubscriber::GetFakeImpus() const
@@ -90,7 +120,27 @@ PUBLIC VIRTUAL const ISubscriberConfig* AosSubscriber::GetSubscriberConfig(
                                                : IMS_NULL;
 }
 
-PRIVATE
+PROTECTED VIRTUAL void AosSubscriber::CreateTemporaryPublicUserIdForGiba()
+{
+    m_strTempPuidForGiba = AString(ImsIdentity::CreateTemporaryPublicUserId(m_nSlotId));
+}
+
+PROTECTED VIRTUAL void AosSubscriber::ClearTemporaryPublicUserIdForGiba()
+{
+    m_strTempPuidForGiba = AString::ConstNull();
+}
+
+PROTECTED VIRTUAL IMS_BOOL AosSubscriber::HasValidTemporaryPublicUserIdForGiba() const
+{
+    return m_strTempPuidForGiba.GetLength() != 0;
+}
+
+PROTECTED VIRTUAL const AString& AosSubscriber::GetTemporaryPublicUserIdForGiba() const
+{
+    return m_strTempPuidForGiba;
+}
+
+PROTECTED
 IMS_BOOL AosSubscriber::Init()
 {
     m_eRegType = m_piAppContext->GetRegistration()->GetRegType();
@@ -121,7 +171,7 @@ IMS_BOOL AosSubscriber::Init()
     return IMS_TRUE;
 }
 
-PRIVATE
+PROTECTED
 IMS_BOOL AosSubscriber::CleanUp()
 {
     A_IMS_TRACE_D(APPPROFILE, "CleanUp", 0, 0, 0);
@@ -143,7 +193,7 @@ IMS_BOOL AosSubscriber::CleanUp()
     return IMS_TRUE;
 }
 
-PRIVATE
+PROTECTED
 void AosSubscriber::Notify(IN IMS_UINT32 nState)
 {
     A_IMS_TRACE_D(APPPROFILE, "Notify (%d)", nState, 0, 0);
@@ -153,7 +203,7 @@ void AosSubscriber::Notify(IN IMS_UINT32 nState)
     }
 }
 
-PRIVATE
+PROTECTED
 void AosSubscriber::AosSubscriberManager_NotifyState(IN IMS_UINT32 nState)
 {
     Notify(nState);

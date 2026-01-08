@@ -22,7 +22,7 @@ class SipClientTransport : public SipTransport
 {
 public:
     explicit SipClientTransport(IN IMS_SINT32 nSlotId);
-    virtual ~SipClientTransport();
+    ~SipClientTransport() override;
 
     SipClientTransport(IN const SipClientTransport&) = delete;
     SipClientTransport& operator=(IN const SipClientTransport&) = delete;
@@ -31,8 +31,8 @@ public:
     IMS_BOOL FormViaHeader(
             IN_OUT ::SipMessage*& pSipMsg, IN const SipProfile* pProfile = IMS_NULL) override;
     IMS_BOOL ReserveResource(IN const SipProfile* pProfile = IMS_NULL) override;
-    IMS_BOOL UpdateDestinationInfo(IN ::SipMessage* pSipMsg, IN IMS_BOOL bRoutingLr = IMS_TRUE,
-            IN SipAddrSpec* pImplicitRoute = IMS_NULL) override;
+    IMS_BOOL UpdateDestinationInfo(IN ::SipMessage* pSipMsg, IN const SipProfile* pProfile,
+            IN IMS_BOOL bRoutingLr = IMS_TRUE, IN SipAddrSpec* pImplicitRoute = IMS_NULL) override;
     IMS_SINT32 ValidateViaHeader(IN ::SipMessage* pSipMsg) override;
 
     inline void SetExtensionTokenForViaBranch(IN const AString& strToken)

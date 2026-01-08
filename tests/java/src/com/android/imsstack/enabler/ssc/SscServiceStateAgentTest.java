@@ -26,7 +26,7 @@ import static org.mockito.Mockito.verify;
 import android.os.Looper;
 
 import com.android.imsstack.ContextFixture;
-import com.android.imsstack.util.AppContext;
+import com.android.imsstack.base.AppContext;
 
 import org.junit.After;
 import org.junit.Before;

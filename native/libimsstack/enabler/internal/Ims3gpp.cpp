@@ -24,7 +24,7 @@
 
 #include "Ims3gpp.h"
 
-__IMS_TRACE_TAG_USER_DECL__("Ims3gpp");
+__IMS_TRACE_TAG_BASE__;
 
 PUBLIC GLOBAL const IMS_CHAR Ims3gpp::ELEMENT_ACTION[] = "action";
 PUBLIC GLOBAL const IMS_CHAR Ims3gpp::ELEMENT_ALTERNATIVE_SERVICE[] = "alternative-service";
@@ -96,7 +96,7 @@ IMS_BOOL Ims3gpp::Parse(IN const AString& str3gppIms)
     IMS_TRACE_D("'ims-3gpp' version is %s", strVersion.GetStr(), 0, 0);
 
     // "service-info" / "alternative-service" element
-    INode* piNode = piElement->GetFirstChild();
+    const INode* piNode = piElement->GetFirstChild();
 
     if (piNode != IMS_NULL)
     {
@@ -125,7 +125,7 @@ IMS_BOOL Ims3gpp::Parse(IN const AString& str3gppIms)
 }
 
 PRIVATE
-void Ims3gpp::CreateAlternativeService(IN INode* piNode)
+void Ims3gpp::CreateAlternativeService(IN const INode* piNode)
 {
     // Value of type
     const IMS_CHAR VALUE_EMERGENCY[] = "emergency";
@@ -133,13 +133,14 @@ void Ims3gpp::CreateAlternativeService(IN INode* piNode)
     // Value of action
     const IMS_CHAR VALUE_EMERGENCY_REGISTRATION[] = "emergency-registration";
     const IMS_CHAR VALUE_INITIAL_REGISTRATION[] = "initial-registration";
+    const IMS_CHAR VALUE_ANONYMOUS_EMERGENCYCALL[] = "anonymous-emergencycall";
 
     if (piNode == IMS_NULL)
     {
         return;
     }
 
-    INode* piElement = piNode->GetFirstChild();
+    const INode* piElement = piNode->GetFirstChild();
 
     while (piElement != IMS_NULL)
     {
@@ -147,7 +148,7 @@ void Ims3gpp::CreateAlternativeService(IN INode* piNode)
 
         if (strName.EqualsIgnoreCase(ELEMENT_TYPE))
         {
-            INode* piNode_Value = piElement->GetFirstChild();
+            const INode* piNode_Value = piElement->GetFirstChild();
 
             if (piNode_Value != IMS_NULL)
             {
@@ -165,7 +166,7 @@ void Ims3gpp::CreateAlternativeService(IN INode* piNode)
         }
         else if (strName.EqualsIgnoreCase(ELEMENT_ACTION))
         {
-            INode* piNode_Value = piElement->GetFirstChild();
+            const INode* piNode_Value = piElement->GetFirstChild();
 
             if (piNode_Value != IMS_NULL)
             {
@@ -181,11 +182,16 @@ void Ims3gpp::CreateAlternativeService(IN INode* piNode)
                     m_objAlternativeService.m_nAction =
                             AlternativeService::ACTION_INITIAL_REGISTRATION;
                 }
+                else if (m_objAlternativeService.m_strAction.Equals(VALUE_ANONYMOUS_EMERGENCYCALL))
+                {
+                    m_objAlternativeService.m_nAction =
+                            AlternativeService::ACTION_ANONYMOUS_EMERGENCYCALL;
+                }
             }
         }
         else if (strName.EqualsIgnoreCase(ELEMENT_REASON))
         {
-            INode* piNode_Value = piElement->GetFirstChild();
+            const INode* piNode_Value = piElement->GetFirstChild();
 
             if (piNode_Value != IMS_NULL)
             {
@@ -205,14 +211,14 @@ void Ims3gpp::CreateAlternativeService(IN INode* piNode)
 }
 
 PRIVATE
-void Ims3gpp::CreateServiceInfo(IN INode* piNode)
+void Ims3gpp::CreateServiceInfo(IN const INode* piNode)
 {
     if (piNode == IMS_NULL)
     {
         return;
     }
 
-    INode* piNode_Value = piNode->GetFirstChild();
+    const INode* piNode_Value = piNode->GetFirstChild();
 
     if (piNode_Value != IMS_NULL)
     {

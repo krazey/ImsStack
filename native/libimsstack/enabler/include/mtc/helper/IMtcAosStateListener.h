@@ -21,6 +21,9 @@
 
 class IMtcService;
 
+/**
+ * @brief Represents the registration state of the Always On Service (AoS) for IMS.
+ */
 enum class MtcAosState
 {
     CONNECTED,
@@ -29,28 +32,33 @@ enum class MtcAosState
     DISCONNECTED,
 };
 
+/**
+ * @brief Interface for a listener that receives notifications about Always On Service (AoS)
+ *        registration state changes and events.
+ */
 class IMtcAosStateListener
 {
 public:
     virtual ~IMtcAosStateListener() {}
 
     /**
-     * @brief Notifies
+     * @brief Notifies of a change in the Always On Service (AoS) registration state.
      *
-     * @param objMtcService
-     * @param eState
-     * @param eAosReason
+     * @param objMtcService The IMtcService instance associated with this state change.
+     * @param eState The new MtcAosState registration state.
+     * @param eAosReason A service-specific reason for the state change.
+     * @param nDataFailureReason The reason for data connection failure.
      */
-    virtual void OnAosStateChanged(
-            IN IMtcService& objMtcService, IN MtcAosState eState, IN IMS_UINT32 eAosReason) = 0;
+    virtual void OnAosStateChanged(IN IMtcService& objMtcService, IN MtcAosState eState,
+            IN IMS_UINT32 eAosReason, IN IMS_SINT32 nDataFailureReason) = 0;
 
     /**
-     * @brief Notifies
+     * @brief Notifies of events related to the Always On Service registration.
      *
-     * @param objMtcService
-     * @param eIpcan
+     * @param nType The type of the registration event that occurred.
+     * @param nState The new state or value associated with the event.
      */
-    virtual void OnIpcanChanged(IN IMtcService& objMtcService, IN IMS_UINT32 eIpcan) = 0;
+    virtual void OnEventNotify(IN IMS_UINT32 nType, IN IMS_UINT32 nState) = 0;
 };
 
 #endif

@@ -18,15 +18,16 @@
 
 #include "SipForkedTransactionManager.h"
 #include "SipTransactionState.h"
-#include "SipTransportAddress.h"
 
 class ISipClientTransactionStateListener;
+class SipMethod;
+class SipTransportAddress;
 
 class SipClientTransactionState : public SipTransactionState
 {
 public:
     explicit SipClientTransactionState(IN IMS_SINT32 nSlotId);
-    virtual ~SipClientTransactionState();
+    ~SipClientTransactionState() override;
 
     SipClientTransactionState& operator=(IN const SipClientTransactionState&) = delete;
 
@@ -35,6 +36,7 @@ public:
     IMS_SINT32 CheckMessageValidity() override;
     IMS_BOOL FormMessage() override;
     IMS_BOOL InitTxnDetails(IN const SipTransactionState* pTState) override;
+    void NotifyTimerExpired() override;
     IMS_BOOL Send(IN SipTimerValues* pTimerValues = IMS_NULL) override;
     IMS_BOOL UpdateTransportDetails() override;
 
@@ -57,6 +59,8 @@ public:
     }
     IMS_BOOL UpdateRouteDetails(IN const SipMethod& objMethod);
     IMS_SINT32 HandleResponse(IN ::SipMessage* pSipMsg);
+    void ClearAllForkedTransactions();
+    IMS_BOOL IsAckSent() const;
     static IMS_SINT32 MatchTransaction(IN ::SipMessage* pSipMsg,
             IN const SipTransportAddress& objFarEnd,
             OUT RcPtr<SipClientTransactionState>& pCtState);
@@ -70,7 +74,7 @@ private:
     IMS_BOOL InitAck(IN_OUT ::SipMessage*& pAckSipMsg, IN ::SipMessage* pRespSipMsg);
     IMS_BOOL SetDialogRelatedHeaders(IN const SipMethod& objMethod);
     IMS_BOOL SetMandatoryHeaders(IN const SipMethod& objMethod);
-    void SetPaniHeader(IN const SipMethod& objMethod, IN_OUT ::SipMessage*& pSipMsg);
+    void SetPaniHeader(IN_OUT ::SipMessage*& pSipMsg);
     IMS_BOOL UpdateTxnDetails(IN const SipMethod& objMethod);
 
 private:

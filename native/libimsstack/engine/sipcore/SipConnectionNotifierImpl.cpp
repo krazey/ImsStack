@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
+#include "ServiceTrace.h"
 
 #include "ISipConnectionNotifierErrorListener.h"
 #include "ISipServerConnectionListener.h"
@@ -21,7 +22,7 @@
 #include "SipConnectionNotifierImpl.h"
 #include "SipPrivate.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipConnectionNotifierImpl::SipConnectionNotifierImpl(IN SipConnectionNotifier* pScn) :
@@ -165,7 +166,7 @@ PRIVATE VIRTUAL void SipConnectionNotifierImpl::RemoveErrorListener(
 
     for (IMS_UINT32 i = 0; i < m_objErrorListeners.GetSize(); ++i)
     {
-        ISipConnectionNotifierErrorListener* piErrorListener = m_objErrorListeners.GetAt(i);
+        const ISipConnectionNotifierErrorListener* piErrorListener = m_objErrorListeners.GetAt(i);
 
         if (piErrorListener == piListener)
         {

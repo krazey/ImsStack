@@ -19,32 +19,31 @@
 
 #include <gmock/gmock.h>
 
-#include "ImsTypeDef.h"
 #include <audio/AudioNego.h>
 
 class MockAudioNego : public AudioNego
 {
 public:
     explicit MockAudioNego(IMS_SINT32 nSlotId) :
-            AudioNego(nSlotId){};
+            AudioNego(nSlotId) {};
     MOCK_METHOD(void, CreateProfiles,
-            (IN MediaEnvironment * pEnvironment, IN AudioConfiguration* pConfig), (override));
-    MOCK_METHOD(IMS_BOOL, FormSDP,
+            (IN std::shared_ptr<MediaEnvironment> pEnvironment, IN MediaConfiguration* pConfig),
+            (override));
+    MOCK_METHOD(IMS_BOOL, FormSdp,
             (IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
                     OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDir,
-                    IN IMS_BOOL bEnforceReofferMode),
+                    IN IMS_BOOL bDisable, IN IMS_BOOL bEnforceReofferMode),
             (override));
     MOCK_METHOD(IMS_BOOL, IsMediaCodecFromSdpSupported,
             (IN ISessionDescriptor * pSessionDescriptor, IN IMediaDescriptor* pDescriptor),
             (override));
-    MOCK_METHOD(void, NegotiateSDP,
+    MOCK_METHOD(void, NegotiateSdp,
             (IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
-                    IN IMediaDescriptor* pDescriptor, OUT IMS_SINT32& nDirection),
+                    IN IMediaDescriptor* pDescriptor, OUT MEDIA_DIRECTION& eDirection),
             (override));
-    MOCK_METHOD(void, FinalizeSDP,
-            (IN ISessionDescriptor * pSessionDescriptor, NEGO_STATE eNegoState), (override));
-    MOCK_METHOD(IMS_BOOL, SetPort, (IN IMS_UINT32 nPort), (override));
+    MOCK_METHOD(void, CleanupIncompleteOaModels, (), (override));
     MOCK_METHOD(const IpAddress&, GetLocalAddress, (), (override));
+    MOCK_METHOD(IMS_BOOL, SetLocalPort, (IMS_UINT32 nPort), (override));
     MOCK_METHOD(IMS_UINT32, GetLocalPort, (), (override));
     MOCK_METHOD(const IpAddress&, GetNegotiatedRemoteAddress, (), (override));
     MOCK_METHOD(IMS_SINT32, GetRemotePort, (), (override));
@@ -56,7 +55,7 @@ public:
     MOCK_METHOD(AUDIO_CODEC_BITRATE, GetNegotiatedAudioCodecRate, (), (override));
     MOCK_METHOD(IMS_BOOL, HasNegotiatedDtmf, (), (override));
     MOCK_METHOD(IMS_SINT32, GetNegotiatedRtpPort, (), (override));
-    MOCK_METHOD(IMS_SINT32, GetMediaBandwidth, (), (override));
+    MOCK_METHOD(IMS_SINT32, GetNegotiatedBandwidth, (), (override));
 };
 
 #endif

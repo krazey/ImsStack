@@ -15,19 +15,36 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Carrier configurations -->
-
     <!-- Ims General -->
     <boolean name="ims.allow_sip_p_access_network_info_header_in_initial_register_bool" value="true"/>
+    <int name="ims.sip_timer_100_trying_millis_int" value="0"/>
 
     <!-- Aos -->
-    <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
-    <boolean name="use_wfc_country_code_availability_check_bool" value="true"/>
-
-    <!-- Ut/Xcap AOSP -->
-    <!-- Previous solution was using 80 and TCP, but need to check actual operation with requirement
-    Mandatory TLS : Usage of encrypted communication, e.g. using TLS 1.2 or higher, is mandatory for
-    all vendor applications that are sending data to a remote party. -->
-    <int name="imsss.ut_as_server_port_int" value="443"/>
-    <int name="imsss.ut_transport_type_int" value="3"/>
+    <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
+    <int name="ims.reg_retry_default_policy_int" value="1"/>
+    <int-array name="imsemergency.epdn_reject_causes_for_cross_stack_redial_int_array" num="1">
+        <item value="5"/>
+    </int-array>
+    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
+    <string-array name="imsvoice.reject_code_and_action_set_string_array" num="17">
+        <item value="300:5"/>
+        <item value="301:5"/>
+        <item value="302:5"/>
+        <item value="305:5"/>
+        <item value="380:6,0"/>
+        <item value="403:7"/>
+        <item value="404:3,9"/>
+        <item value="413:3"/>
+        <item value="480:3"/>
+        <item value="486:3"/>
+        <item value="488:2,17"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT, START_ERROR_ACTION_SILENT_REINVITE_WITH_AUDIO -->
+        <item value="500:11,0"/>
+        <item value="503:11,0"/>
+        <item value="504:4"/>
+        <item value="600:3"/>
+        <item value="603:3"/>
+        <item value="606:2"/>
+    </string-array>
+    <int name="imsvoice.mo_call_request_timeout_for_eps_fallback_trigger_millis_int" value="4000"/>
+    <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="true"/>
 </carrier_config>

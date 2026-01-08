@@ -25,29 +25,18 @@ private:
     SIP_CHAR* m_pszHdrValue;
 
 public:
-    /*constructor*/
     SipUnknownHeader();
-
-    /*destructor*/
-    ~SipUnknownHeader();
-
     SipUnknownHeader(const SipUnknownHeader& objHeader);
 
-    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
-    /*virtual methods*/
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
-    /*Function for encoding of headers*/
-    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
+    SIP_BOOL Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
-    /*Function for decoding of headers*/
-    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
-    /*set methods*/
-    SIP_BOOL SetHeaderName(const SIP_CHAR* pszHdrName);
+    SIP_VOID SetHeaderName(const SIP_CHAR* pszHdrName);
 
-    SIP_BOOL SetHeaderValue(const SIP_CHAR* pszHdrValue);
+    SIP_VOID SetHeaderValue(const SIP_CHAR* pszHdrValue);
 
-    /*Get methods*/
     inline const SIP_CHAR* GetHeaderName() const { return m_pszHdrName; }
     inline const SIP_CHAR* GetHeaderValue() const { return m_pszHdrValue; }
 
@@ -55,5 +44,10 @@ public:
     {
         return (m_pszHdrName == SIP_NULL) ? SIP_FALSE : SIP_TRUE;
     }
+
+    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
+
+private:
+    ~SipUnknownHeader() override;
 };
 #endif  //__SIP_UNKNOWN_HEADER_H__

@@ -16,8 +16,6 @@
 #ifndef SDP_PRECONDITION_H_
 #define SDP_PRECONDITION_H_
 
-#include "AString.h"
-
 class SdpPrecondition
 {
 public:
@@ -43,7 +41,7 @@ public:
                 m_nStrength(other.m_nStrength)
         {
         }
-        inline ~DetailInfo() {}
+        ~DetailInfo() = default;
 
     public:
         DetailInfo& operator=(IN const DetailInfo& other)

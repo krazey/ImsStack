@@ -28,7 +28,7 @@
 class ISipServerConnection : public ISipConnection
 {
 protected:
-    virtual ~ISipServerConnection() = default;
+    ~ISipServerConnection() override = default;
 
 public:
     /**

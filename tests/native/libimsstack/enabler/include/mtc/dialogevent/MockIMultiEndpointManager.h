@@ -18,7 +18,6 @@
 #define MOCK_I_MULTI_ENDPOINT_MANAGER_H_
 
 #include "ImsTypeDef.h"
-#include "dialogevent/DialogInfo.h"
 #include "dialogevent/IMultiEndpointManager.h"
 #include <gmock/gmock.h>
 
@@ -27,7 +26,7 @@ class AString;
 class MockIMultiEndpointManager : public IMultiEndpointManager
 {
 public:
-    virtual ~MockIMultiEndpointManager() {}
+    virtual ~MockIMultiEndpointManager() override {}
 
     MOCK_METHOD(IMultiEndpointManager::PullingDialogInfo, GetDialogInfo, (IN IMS_UINT32),
             (const, override));

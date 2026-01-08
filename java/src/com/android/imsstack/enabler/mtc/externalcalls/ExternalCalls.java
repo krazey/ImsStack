@@ -56,7 +56,7 @@ public class ExternalCalls implements Parcelable {
     /**
      * Leaves logs of an every member of list of ImsExternalCallState with tag.
      */
-    public void logIn(String tag) {
+    public void logLn(String tag) {
         ImsLog.i(tag + " - mImsExternalCallStates : size[" + mImsExternalCallStates.size() + "]");
 
         for (int index = 0; index < mImsExternalCallStates.size(); index++) {
@@ -68,7 +68,7 @@ public class ExternalCalls implements Parcelable {
     /**
      * Leaves logs of the received ImsExternalCallState.
      */
-    public void logInImsExternalCallState(ImsExternalCallState imsExternalCallState) {
+    public void logLnImsExternalCallState(ImsExternalCallState imsExternalCallState) {
         ImsLog.i(imsExternalCallState.toString());
     }
 
@@ -99,7 +99,7 @@ public class ExternalCalls implements Parcelable {
      */
     public ImsExternalCallState cloneImsExternalCallState(
             ImsExternalCallState imsExternalCallState) {
-        logInImsExternalCallState(imsExternalCallState);
+        logLnImsExternalCallState(imsExternalCallState);
 
         ImsExternalCallState newImsExternalCallState =
                 new ImsExternalCallState(imsExternalCallState.getCallId(),
@@ -107,7 +107,7 @@ public class ExternalCalls implements Parcelable {
                 imsExternalCallState.isCallPullable(), imsExternalCallState.getCallState(),
                 imsExternalCallState.getCallType(), imsExternalCallState.isCallHeld());
 
-        logIn("cloneImsExternalCallState");
+        logLn("cloneImsExternalCallState");
         return newImsExternalCallState;
     }
 
@@ -128,7 +128,7 @@ public class ExternalCalls implements Parcelable {
 
             mImsExternalCallStates.add(newImsExternalCallState);
         }
-        logIn("readFromParcel");
+        logLn("readFromParcel");
     }
 
     @Override
@@ -146,7 +146,7 @@ public class ExternalCalls implements Parcelable {
             dest.writeInt(imsExternalCallState.isCallHeld() ? 1 : 0);
         }
 
-        logIn("writeToParcel");
+        logLn("writeToParcel");
     }
 
     @Override

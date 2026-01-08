@@ -28,11 +28,10 @@
 
 __IMS_TRACE_TAG_CONF__;
 
-LOCAL
-const IMS_CHAR SUBSCRIBER_CONFIG_NAMES[] = "subscriber,subscriber_fake";
+static const IMS_CHAR SUBSCRIBER_CONFIG_NAMES[] = "subscriber,subscriber_fake";
 
 template <class T>
-LOCAL void configurationManager_DestroyConfig(IN T*& pBase)
+static void configurationManager_DestroyConfig(IN T*& pBase)
 {
     if (pBase != IMS_NULL)
     {
@@ -414,7 +413,7 @@ IMS_BOOL ConfigurationHolder::CreateSubscriberConfigIfNotPresent(IN IMS_SINT32 n
 
     for (IMS_UINT32 i = 0; i < m_objSubscriberConfigs.GetSize(); ++i)
     {
-        SubscriberConfig* pSubsConfig = m_objSubscriberConfigs.GetAt(i);
+        const SubscriberConfig* pSubsConfig = m_objSubscriberConfigs.GetAt(i);
 
         if (pSubsConfig != IMS_NULL)
         {
@@ -648,20 +647,20 @@ PUBLIC
 const AppConfig* ConfigurationManager::GetAppConfig(
         IN const AString& strAppId, IN IMS_SINT32 nSlotId) const
 {
-    ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
+    const ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
     return pHolder->GetAppConfig(strAppId);
 }
 
 PUBLIC
 AStringArray ConfigurationManager::GetAppIds(IN IMS_SINT32 nSlotId) const
 {
-    ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
+    const ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
     const ImsList<AppConfig*>& objAppConfigs = pHolder->GetAppConfigs();
     AStringArray objAppIds;
 
     for (IMS_UINT32 i = 0; i < objAppConfigs.GetSize(); ++i)
     {
-        AppConfig* pAppConfig = objAppConfigs.GetAt(i);
+        const AppConfig* pAppConfig = objAppConfigs.GetAt(i);
 
         if (pAppConfig != IMS_NULL)
         {
@@ -726,7 +725,7 @@ PUBLIC
 const SubscriberConfig* ConfigurationManager::GetSubscriberConfig(
         IN const AString& strId, IN IMS_SINT32 nSlotId) const
 {
-    ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
+    const ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
     return pHolder->GetSubscriberConfig(strId);
 }
 
@@ -734,7 +733,7 @@ PUBLIC
 const ImsList<SubscriberConfig*>& ConfigurationManager::GetSubscriberConfigs(
         IN IMS_SINT32 nSlotId) const
 {
-    ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
+    const ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
     return pHolder->GetSubscriberConfigs();
 }
 
@@ -746,7 +745,7 @@ const ImsList<SubscriberConfig*>& ConfigurationManager::GetSubscriberConfigs(
 PUBLIC
 const EngineConfig* ConfigurationManager::GetEngineConfig(IN IMS_SINT32 nSlotId) const
 {
-    ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
+    const ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
     return pHolder->GetEngineConfig();
 }
 
@@ -757,7 +756,7 @@ const EngineConfig* ConfigurationManager::GetEngineConfig(IN IMS_SINT32 nSlotId)
 PUBLIC
 const SipConfig* ConfigurationManager::GetSipConfig(IN IMS_SINT32 nSlotId) const
 {
-    ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
+    const ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
     return pHolder->GetSipConfig();
 }
 
@@ -768,7 +767,7 @@ const SipConfig* ConfigurationManager::GetSipConfig(IN IMS_SINT32 nSlotId) const
 PUBLIC
 const MediaConfig* ConfigurationManager::GetMediaConfig(IN IMS_SINT32 nSlotId) const
 {
-    ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
+    const ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
     return pHolder->GetMediaConfig();
 }
 

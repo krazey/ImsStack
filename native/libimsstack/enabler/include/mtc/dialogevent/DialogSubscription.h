@@ -17,31 +17,58 @@
 #ifndef DIALOG_SUBSCRIPTION_H_
 #define DIALOG_SUBSCRIPTION_H_
 
+#include "AString.h"
+#include "ISubscriptionListener.h"
 #include "ImsTypeDef.h"
-#include "core/ISubscriptionListener.h"
 #include "dialogevent/IDialogSubscription.h"
 
-class AString;
 class IMessage;
 class IMtcContext;
 class ISubscription;
 
+/**
+ * @brief Manages a SIP subscription for the 'dialog' event package.
+ *
+ * This class handles the lifecycle of a SIP SUBSCRIBE request for dialog events,
+ * including sending the initial subscription, handling notifications, and managing
+ * subscription termination. It also implements retry logic for specific failure
+ * scenarios, such as when the requested subscription interval is too brief.
+ */
 class DialogSubscription final : public IDialogSubscription, public ISubscriptionListener
 {
 public:
+    /**
+     * @brief Constructs a new DialogSubscription object.
+     *
+     * @param objContext The MTC context.
+     * @param objListener A listener for subscription events.
+     * @param strTargetUri The target URI for the subscription.
+     */
     explicit DialogSubscription(IN IMtcContext& objContext,
             IN IDialogSubscriptionListener& objListener, IN const AString& strTargetUri);
-    virtual ~DialogSubscription();
+    virtual ~DialogSubscription() override;
     DialogSubscription(IN const DialogSubscription&) = delete;
     DialogSubscription& operator=(IN const DialogSubscription&) = delete;
 
+    /** See {@link IDialogSubscription::Subscribe}. */
     IMS_RESULT Subscribe() override;
+
+    /** See {@link IDialogSubscription::Unsubscribe}. */
     void Unsubscribe() override;
 
-    inline void SubscriptionForkedNotify(IN ISubscription*, IN ISubscription*) {}
+    /** This is not used. */
+    inline void SubscriptionForkedNotify(IN ISubscription*, IN ISubscription*) override {}
+
+    /** Handles incoming NOTIFY requests for the subscription. */
     void SubscriptionNotify(IN ISubscription* piSubscription, IN IMessage* piNotify) override;
+
+    /** Called when the subscription has been successfully established. */
     void SubscriptionStarted(IN ISubscription* piSubscription) override;
+
+    /** Called when the subscription fails to start. */
     void SubscriptionStartFailed(IN ISubscription* piSubscription) override;
+
+    /** Called when the subscription is terminated. */
     void SubscriptionTerminated(IN ISubscription* piSubscription) override;
 
 private:

@@ -14,22 +14,29 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "IImsRadio.h"
+#include "MockIMtsContext.h"
+#include "MockIMtsMessageController.h"
 #include "MockIMtsTrafficListener.h"
 #include "MockITimer.h"
 #include "MtsTraffic.h"
 #include "PlatformContext.h"
 #include "TestTimerService.h"
+#include <gtest/gtest.h>
+
+using ::testing::Return;
+using ::testing::ReturnRef;
 
 namespace android
 {
+
+const IMS_SINT32 SLOT_ID = 0;
 
 class MtsTrafficTest : public ::testing::Test
 {
 public:
     inline MtsTrafficTest() :
-            pMtsTraffic(IMS_NULL),
+            objMtsTraffics(ImsList<MtsTraffic*>()),
             pTimerService(new TestTimerService()),
             objTimer(pTimerService->GetMockTimer())
     {
@@ -41,56 +48,147 @@ public:
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, IMS_NULL);
     }
 
-    MtsTraffic* pMtsTraffic;
+    ImsList<MtsTraffic*> objMtsTraffics;
     TestTimerService* pTimerService;
 
+    MockIMtsContext objContext;
+    MockIMtsMessageController objMessageController;
     MockIMtsTrafficListener objMockMtsTrafficListener;
     MockITimer& objTimer;
 
 protected:
     virtual void SetUp() override
     {
-        pMtsTraffic = new MtsTraffic(
-                IImsRadio::DIRECTION_MO, IImsRadio::TRAFFIC_TYPE_SMS, objMockMtsTrafficListener);
+        ON_CALL(objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
+        ON_CALL(objContext, GetMessageController).WillByDefault(ReturnRef(objMessageController));
+
+        objMtsTraffics.Append(new MtsTraffic(objContext, IImsRadio::DIRECTION_MO,
+                IImsRadio::TRAFFIC_TYPE_SMS, objMockMtsTrafficListener));
+        objMtsTraffics.Append(new MtsTraffic(objContext, IImsRadio::DIRECTION_MT,
+                IImsRadio::TRAFFIC_TYPE_SMS, objMockMtsTrafficListener));
+        objMtsTraffics.Append(new MtsTraffic(objContext, IImsRadio::DIRECTION_MO,
+                IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS, objMockMtsTrafficListener));
+        objMtsTraffics.Append(new MtsTraffic(objContext, IImsRadio::DIRECTION_MT,
+                IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS, objMockMtsTrafficListener));
     }
 
-    virtual void TearDown() override { delete pMtsTraffic; }
+    virtual void TearDown() override
+    {
+        for (IMS_UINT32 i = 0; i < objMtsTraffics.GetSize(); i++)
+        {
+            const MtsTraffic* pTmpMtsTraffic = objMtsTraffics.GetAt(i);
+
+            if (pTmpMtsTraffic)
+            {
+                delete pTmpMtsTraffic;
+            }
+        }
+
+        objMtsTraffics.Clear();
+    }
+
+    MtsTraffic* GetTraffic(IN IMS_UINT32 nTrafficType, IN IMS_UINT32 nDirection)
+    {
+        for (IMS_UINT32 i = 0; i < objMtsTraffics.GetSize(); i++)
+        {
+            const MtsTraffic* pTmpMtsTraffic = objMtsTraffics.GetAt(i);
+
+            if ((pTmpMtsTraffic->GetDirection() == nDirection) &&
+                    (pTmpMtsTraffic->GetTrafficType() == nTrafficType))
+            {
+                return objMtsTraffics.GetAt(i);
+            }
+        }
+
+        return IMS_NULL;
+    }
 };
 
 TEST_F(MtsTrafficTest, Constructor)
 {
-    ASSERT_NE(pMtsTraffic, nullptr);
+    for (IMS_UINT32 i = 0; i < objMtsTraffics.GetSize(); i++)
+    {
+        const MtsTraffic* pTmpMtsTraffic = objMtsTraffics.GetAt(i);
+
+        ASSERT_NE(pTmpMtsTraffic, nullptr);
+    }
 }
 
-TEST_F(MtsTrafficTest, ImsRadio_OnConnectionFailed)
+TEST_F(MtsTrafficTest, ImsRadio_OnConnectionFailedWithInternalErrorReason)
 {
+    MtsTraffic* pMtsTraffic = GetTraffic(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO);
+
     EXPECT_CALL(objMockMtsTrafficListener,
-            Traffic_OnConnectionFailed(
-                    IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO, 0, 0, 0))
+            Traffic_OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO,
+                    IImsRadio::REASON_INTERNAL_ERROR, 0, 0))
             .Times(1);
-    pMtsTraffic->ImsRadio_OnConnectionFailed(0, 0, 0);
+    pMtsTraffic->ImsRadio_OnConnectionFailed(IImsRadio::REASON_INTERNAL_ERROR, 0, 0);
+}
+
+TEST_F(MtsTrafficTest, ImsRadio_OnConnectionFailedWithIgnoredReason)
+{
+    MtsTraffic* pMtsTraffic = GetTraffic(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO);
+
+    EXPECT_CALL(objMockMtsTrafficListener,
+            Traffic_OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO,
+                    IImsRadio::REASON_RF_BUSY, 0, 0))
+            .Times(0);
+    pMtsTraffic->ImsRadio_OnConnectionFailed(IImsRadio::REASON_RF_BUSY, 0, 0);
 }
 
 TEST_F(MtsTrafficTest, ImsRadio_OnConnectionSetupPrepared)
 {
+    MtsTraffic* pMtsTraffic = GetTraffic(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO);
+
     EXPECT_CALL(objMockMtsTrafficListener,
-            Traffic_OnConnectionSetupPrepared(
-                    IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO))
+            Traffic_OnConnectionSetupPrepared(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO))
             .Times(1);
     pMtsTraffic->ImsRadio_OnConnectionSetupPrepared();
 }
 
 TEST_F(MtsTrafficTest, Timer_TimerExpired)
 {
+    MtsTraffic* pMtsTraffic = GetTraffic(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MT);
+
     EXPECT_CALL(objMockMtsTrafficListener,
-            Traffic_GuardTimerExpired(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO))
+            Traffic_GuardTimerExpired(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MT))
             .Times(1);
     pMtsTraffic->StartRadioGuardTimer();
     pMtsTraffic->Timer_TimerExpired(&objTimer);
 }
 
+TEST_F(MtsTrafficTest, Timer_TimerExpiredAndNoMoPending)
+{
+    MtsTraffic* pMtsTraffic = GetTraffic(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO);
+
+    EXPECT_CALL(objMockMtsTrafficListener,
+            Traffic_GuardTimerExpired(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO))
+            .Times(1);
+    EXPECT_CALL(objMessageController, HasPendingMoSms()).Times(1).WillOnce(Return(IMS_FALSE));
+
+    pMtsTraffic->StartRadioGuardTimer();
+    pMtsTraffic->Timer_TimerExpired(&objTimer);
+}
+
+TEST_F(MtsTrafficTest, Timer_TimerExpiredWhenExtendedGuardTimerExpired)
+{
+    MtsTraffic* pMtsTraffic = GetTraffic(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO);
+
+    EXPECT_CALL(objMockMtsTrafficListener,
+            Traffic_GuardTimerExpired(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO))
+            .Times(1);
+    EXPECT_CALL(objMessageController, HasPendingMoSms()).Times(1).WillOnce(Return(IMS_TRUE));
+
+    pMtsTraffic->StartRadioGuardTimer();
+    pMtsTraffic->Timer_TimerExpired(&objTimer);
+    pMtsTraffic->StartRadioGuardTimer(MTS_RADIO_EXTENDED_GUARD_TIMER_MS);
+    pMtsTraffic->Timer_TimerExpired(&objTimer);
+}
+
 TEST_F(MtsTrafficTest, Timer_TimerExpiredWithNullTimer)
 {
+    MtsTraffic* pMtsTraffic = GetTraffic(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO);
+
     EXPECT_CALL(objMockMtsTrafficListener,
             Traffic_GuardTimerExpired(IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO))
             .Times(0);

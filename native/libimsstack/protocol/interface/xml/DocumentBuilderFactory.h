@@ -16,6 +16,8 @@
 #ifndef DOCUMENT_BUILDER_FACTORY_H_
 #define DOCUMENT_BUILDER_FACTORY_H_
 
+#include "ImsTypeDef.h"
+
 class DocumentBuilder;
 
 /**
@@ -25,10 +27,10 @@ class DocumentBuilder;
 class DocumentBuilderFactory
 {
 protected:
-    inline DocumentBuilderFactory() {}
+    DocumentBuilderFactory() = default;
 
 public:
-    inline virtual ~DocumentBuilderFactory() {}
+    virtual ~DocumentBuilderFactory() = default;
 
     DocumentBuilderFactory(IN const DocumentBuilderFactory&) = delete;
     DocumentBuilderFactory& operator=(IN const DocumentBuilderFactory&) = delete;

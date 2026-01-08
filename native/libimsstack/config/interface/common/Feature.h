@@ -16,10 +16,10 @@
 #ifndef FEATURE_H_
 #define FEATURE_H_
 
-#include "AStringArray.h"
+#include "AString.h"
 #include "RcObject.h"
 
-#include "ServiceIdentifier.h"
+class ServiceIdentifier;
 
 class Feature : public RcObject
 {
@@ -27,7 +27,7 @@ public:
     explicit Feature(IN const AString& strFeature);
     Feature(IN const AString& strTag, IN const AString& strValue);
     Feature(IN const Feature& other);
-    virtual ~Feature();
+    ~Feature() override;
 
 public:
     Feature& operator=(IN const Feature& other);

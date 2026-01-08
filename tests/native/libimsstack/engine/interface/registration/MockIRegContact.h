@@ -52,8 +52,7 @@ public:
     MOCK_METHOD(void, SetListener, (IN IRegContactListener * piListener), (override));
     MOCK_METHOD(void, SetPolicyForCallerCapability, (IN IMS_BOOL bCapsByApp), (override));
     MOCK_METHOD(void, SetPort, (IN IMS_SINT32 nPort), (override));
-    MOCK_METHOD(
-            void, SetUserInfo, (IN IMS_SINT32 nPolicy, IN const AString& strUserInfo), (override));
+    MOCK_METHOD(void, SetUserInfo, (IN IMS_SINT32 nUserInfoPart), (override));
     MOCK_METHOD(IMS_BOOL, AddExtraCapability,
             (IN const AString& strName, IN const AString& strValue), (override));
     MOCK_METHOD(void, RemoveExtraCapability,

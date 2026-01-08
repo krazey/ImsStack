@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "SipDialogBase.h"
+#include "SipMethod.h"
 
 PUBLIC GLOBAL IMS_BOOL SipDialogBase::IsDialogCreatable(IN const SipMethod& objMethod)
 {

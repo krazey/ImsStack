@@ -21,50 +21,36 @@
 #include <string.h>
 #include <cutils/log.h>
 
-#include "ServiceMemory.h"
-#include "ServiceMutex.h"
+#include "ITraceOption.h"
 #include "ImsConstDef.h"
-#include "ImsStrLib.h"
 #include "ImsTraceNode.h"
 #include "OsTrace.h"
+#include "ServiceMemory.h"
+#include "ServiceMutex.h"
 
 class OsTraceNode : public ImsTraceNode
 {
 public:
-    OsTraceNode(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag);
-    virtual ~OsTraceNode();
+    explicit OsTraceNode(IN const IMS_CHAR* pszTag) :
+            ImsTraceNode(pszTag)
+    {
+    }
+    ~OsTraceNode() override = default;
 
 public:
-    IMS_BOOL IsWritable() const;
+    inline IMS_BOOL IsWritable() const { return (GetLength() <= MAX_TRACE_SIZE); }
 
 protected:
-    inline virtual IMS_SINT32 Vsnprintf(OUT IMS_CHAR* pszBuffer, IN IMS_UINT32 nBuffSize,
-            IN const IMS_CHAR* pszFormat, IN va_list args)
+    inline IMS_SINT32 Vsnprintf(OUT IMS_CHAR* pszBuffer, IN IMS_UINT32 nBuffSize,
+            IN const IMS_CHAR* pszFormat, IN va_list args) override
     {
         return vsnprintf(pszBuffer, nBuffSize, pszFormat, args);
     }
 
 public:
-    // 250 in android
-    enum
-    {
-        MAX_TRACE_SIZE = 1024
-    };
+    // Android log system truncates log messages larger than 1k.
+    static constexpr IMS_SINT32 MAX_TRACE_SIZE = 1024;
 };
-
-PUBLIC
-OsTraceNode::OsTraceNode(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag) :
-        ImsTraceNode(nCategory, pszTag)
-{
-}
-
-PUBLIC VIRTUAL OsTraceNode::~OsTraceNode() {}
-
-PUBLIC
-IMS_BOOL OsTraceNode::IsWritable() const
-{
-    return (GetLength() <= MAX_TRACE_SIZE);
-}
 
 PUBLIC
 OsTrace::OsTrace() :
@@ -85,7 +71,8 @@ PUBLIC VIRTUAL OsTrace::~OsTrace()
 }
 
 PUBLIC VIRTUAL void OsTrace::OutV(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag,
-        IN IMS_UINT32 nModule, IN const IMS_CHAR* pszFormat, IN va_list args)
+        IN IMS_UINT32 nModule, IN const IMS_CHAR* pszFile, IN IMS_UINT32 nLine,
+        IN const IMS_CHAR* pszFormat, IN va_list args)
 {
     (void)nModule;
 
@@ -104,19 +91,27 @@ PUBLIC VIRTUAL void OsTrace::OutV(IN IMS_SINT32 nCategory, IN const IMS_CHAR* ps
 
     if (nTraceNodeCount > 200)
     {
-        (void)ALOG(LOG_ERROR, IMS_LOG_TAG, "IMS.TRACE.I>> TOO MANY NODE\n");
+        (void)ALOG(LOG_ERROR, IMS_LOG_TAG, "[IPL] TOO MANY NODE\n");
         return;
     }
 
-    OsTraceNode* pNode = new OsTraceNode(nCategory, pszTag);
+    OsTraceNode* pNode = new OsTraceNode(pszTag);
 
     if (pNode == IMS_NULL)
     {
-        (void)ALOG(LOG_ERROR, IMS_LOG_TAG, "IMS.TRACE.I>> ALLOCATING NODE FAILED\n");
+        (void)ALOG(LOG_ERROR, IMS_LOG_TAG, "[IPL] ALLOCATING NODE FAILED\n");
         return;
     }
 
-    pNode->Format(pszFormat, args);
+    AString strComponentName = ImsTraceNode::GetComponentName(pszFile);
+    AString strSuffix;
+
+    if (strComponentName.GetLength() > 0)
+    {
+        strSuffix.Sprintf(" [@%s:%d", strComponentName.GetStr(), nLine);
+    }
+
+    pNode->Format(pszFormat, args, strSuffix);
 
     // When the node is processing...
     if (IsLogging())
@@ -169,97 +164,52 @@ PUBLIC VIRTUAL void OsTrace::OutV(IN IMS_SINT32 nCategory, IN const IMS_CHAR* ps
     SetLogging(IMS_FALSE);
 }
 
-PRIVATE VIRTUAL const IMS_CHAR* OsTrace::GetFileName(IN const IMS_CHAR* pszFileName)
-{
-    if (pszFileName == IMS_NULL)
-    {
-        return "__NULL__";
-    }
-
-    IMS_CHAR* pszFn = IMS_StrRChr(pszFileName, '/');
-
-    return (pszFn != IMS_NULL) ? (pszFn + 1) : pszFileName;
-}
-
-PRIVATE VIRTUAL const IMS_CHAR* OsTrace::GetFileName(
-        IN_OUT IMS_CHAR* pszOutFileName, IN const IMS_CHAR* pszFileName)
-{
-    if (pszFileName == IMS_NULL)
-    {
-        return "__NULL__";
-    }
-
-    AString strFileName(pszFileName);
-
-    IMS_CHAR* pszName = strrchr(strFileName.GetStr(), '/');
-
-    if (pszName == IMS_NULL)
-    {
-        sprintf(pszOutFileName, "%s", strFileName.GetStr());
-    }
-    else
-    {
-        sprintf(pszOutFileName, "%s", pszName + 1);
-    }
-
-    return pszOutFileName;
-}
-
 PRIVATE VIRTUAL const IMS_CHAR* OsTrace::GetDirName() const
 {
     return IMS_SOLUTION_STORAGE_ROOT_DIR "/";
 }
 
-PRIVATE VIRTUAL void OsTrace::OutputString(
-        IN IMS_SINT32 nCategory, IN IMS_CHAR* pszTrace, IN IMS_UINT32 nLength)
+PRIVATE VIRTUAL void OsTrace::OutputString(IN IMS_SINT32 nCategory, IN IMS_CHAR* pszTrace,
+        IN IMS_UINT32 nLength, IN const IMS_CHAR* pszLogTag /*= IMS_NULL*/)
 {
     IMS_UINT32 nOption = GetOption();
 
-    ImsTrace::OutputString(nCategory, pszTrace, nLength);
+    ImsTrace::OutputString(nCategory, pszTrace, nLength, pszLogTag);
 
     // If serial logging is set ...
     if ((nOption & ITraceOption::OPT_MEDIUM_SERIAL) != 0)
     {
         IMS_UINT32 nCurrentPos = 0;
-        IMS_CHAR cRestoringChar = '\0';
-        IMS_CHAR* pszOutString;
         const IMS_UINT32 MAX_LOG_BUFF = OsTraceNode::MAX_TRACE_SIZE - 1;
+        const IMS_CHAR* pszImsLogTag = (pszLogTag == IMS_NULL) ? IMS_LOG_TAG : pszLogTag;
 
         while (nLength > 0)
         {
-            if (nLength >= OsTraceNode::MAX_TRACE_SIZE)
-            {
-                cRestoringChar = pszTrace[nCurrentPos + MAX_LOG_BUFF];
-                pszTrace[nCurrentPos + MAX_LOG_BUFF] = '\0';
+            IMS_UINT32 nLengthToPrint =
+                    (nLength >= OsTraceNode::MAX_TRACE_SIZE) ? MAX_LOG_BUFF : nLength;
 
-                pszOutString = &(pszTrace[nCurrentPos]);
+            IMS_CHAR cCharToRestore = pszTrace[nCurrentPos + nLengthToPrint];
+            pszTrace[nCurrentPos + nLengthToPrint] = '\0';
 
-                nCurrentPos += MAX_LOG_BUFF;
-                nLength -= MAX_LOG_BUFF;
-            }
-            else
-            {
-                pszOutString = &(pszTrace[nCurrentPos]);
-                nLength = 0;
-            }
+            IMS_CHAR* pszOutString = &(pszTrace[nCurrentPos]);
+
+            nCurrentPos += nLengthToPrint;
+            nLength -= nLengthToPrint;
 
             if (nCategory == ITrace::CAT_I)
             {
-                (void)ALOG(LOG_INFO, IMS_LOG_TAG, "%s", pszOutString);
+                (void)ALOG(LOG_INFO, pszImsLogTag, "%s", pszOutString);
             }
             else if (nCategory == ITrace::CAT_E)
             {
-                (void)ALOG(LOG_ERROR, IMS_LOG_TAG, "%s", pszOutString);
+                (void)ALOG(LOG_ERROR, pszImsLogTag, "%s", pszOutString);
             }
             else
             {
-                (void)ALOG(LOG_DEBUG, IMS_LOG_TAG, "%s", pszOutString);
+                (void)ALOG(LOG_DEBUG, pszImsLogTag, "%s", pszOutString);
             }
 
-            if (nLength != 0)
-            {
-                pszTrace[nCurrentPos] = cRestoringChar;
-            }
+            pszTrace[nCurrentPos] = cCharToRestore;
         }
     }
 }

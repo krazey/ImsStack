@@ -18,11 +18,12 @@
 #define INTERFACE_MTC_PRECONDITION_MANAGER_H_
 
 #include "ImsTypeDef.h"
-#include "precondition/QosDef.h"
+#include "MediaDef.h"
 
-class ISession;
+class IMediaSession;
 class IMessage;
 class IMtcPreconditionListener;
+class ISession;
 
 class IMtcPreconditionManager
 {
@@ -52,6 +53,16 @@ public:
     virtual void SetListener(IN IMtcPreconditionListener* pListener) = 0;
 
     /**
+     * @brief Initializes the RAT information.
+     *
+     * This initializes the values of {@link MtcPreconditionManager#m_ePreviousRatType} and
+     * {@link MtcPreconditionManager#m_eCurrentRatType} which store RAT information.
+     * It is called when the {@code MtcPreconditionManager} is created and when the resources of an
+     * existing call are released for internal silent call redial.
+     */
+    virtual void InitializeMobileRatInformation() = 0;
+
+    /**
      * @brief Checks
      *
      * @return
@@ -73,7 +84,7 @@ public:
      *
      * @return IMS_BOOL
      */
-    virtual IMS_BOOL IsCheckingResourcesRequiredToAlertUser() const = 0;
+    virtual IMS_BOOL IsCheckingResourcesRequiredToAlertUser(IN ISession* piSession) const = 0;
 
     /**
      * @brief Checks
@@ -100,6 +111,15 @@ public:
     virtual IMS_BOOL IsAvailableToSendLocalResourceConfirmation(IN ISession* piSession) const = 0;
 
     /**
+     * @brief Checks if QoS precondition attributes are included in the SDP media information that
+     *        was last negotiated for the given @ISession at the current time.
+     *
+     * @param piSession ISession instance to examine.
+     * @return IMS_TRUE if QoS precondition attributes are included, IMS_FALSE otherwise.
+     */
+    virtual IMS_BOOL IsPreconditionIncludedInSdp(IN ISession* piSession) const = 0;
+
+    /**
      * @brief To form the precondition attributes of SDP.
      * @param piSession ISession instance to get the QosStatusTable and the SDP body of the
      *                  specific session.
@@ -108,18 +128,18 @@ public:
     virtual void FormPreconditionSdp(IN ISession* piSession, IN IMS_BOOL bFailure) = 0;
 
     /**
-     * @brief Handles
-     *
-     */
-    virtual void HandleQosOnIpcanChanged() = 0;
-
-    /**
      * @brief Updates
      *
      * @param piSession
-     * @param piMessage
      */
-    virtual void OnSdpReceived(IN ISession* piSession, IN IMessage* piMessage) = 0;
+    virtual void OnSdpReceived(IN ISession* piSession) = 0;
+
+    /**
+     * @brief
+     *
+     * @param piSession
+     */
+    virtual void OnSdpSent(IN ISession* piSession, IN IMS_BOOL bInitialInvite = IMS_FALSE) = 0;
 
     /**
      * @brief Updates
@@ -142,6 +162,19 @@ public:
      * @param piSession
      */
     virtual void OnCallModified(IN ISession* piSession) = 0;
+
+    /**
+     * @brief Handles the RAT(Radio Access Technology) changed event.
+     *
+     * The received RAT type for determining conditions such as handover between WiFi and mobile
+     * network, or fallback from NR to EPS.
+     *
+     * @param eRatType The changed RAT type
+     */
+    virtual void OnRatChanged(IN IMS_SINT32 eRatType) = 0;
+
+    virtual void UpdateQosIfAvailable(IN ISession* piSession, IN IMS_UINTP nNegoId,
+            IN MEDIA_CONTENT_TYPE eNegotiatedMediaType, IN IMediaSession* piMediaSession) = 0;
 };
 
 #endif

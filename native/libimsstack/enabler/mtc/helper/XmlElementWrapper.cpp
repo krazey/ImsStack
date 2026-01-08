@@ -49,7 +49,7 @@ const AString& XmlElementWrapper::GetValue() const
         return AString::ConstNull();
     }
 
-    INode* pValueNode = m_pElement->GetFirstChild();
+    const INode* pValueNode = m_pElement->GetFirstChild();
     if (pValueNode == IMS_NULL)
     {
         return AString::ConstNull();
@@ -66,7 +66,7 @@ XmlElementWrapper XmlElementWrapper::GetFirstChild(IN const AString& strTagName)
         return *this;
     }
 
-    INodeList* pChilds = m_pElement->GetElementsByTagName(strTagName);
+    const INodeList* pChilds = m_pElement->GetElementsByTagName(strTagName);
     if (pChilds == IMS_NULL)
     {
         return XmlElementWrapper(IMS_NULL);

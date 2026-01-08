@@ -21,17 +21,20 @@ import android.content.Intent;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 
+import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
-/** This class is for receiving carrier signal pco value intent. */
+/**
+ * Receives and processes carrier signal PCO value intents.
+ */
 public class CarrierSignalReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        String action = intent.getAction();
-        int nSlotId = getSlotId(intent.getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
+        final String action = intent.getAction();
+        final int nSlotId = getSlotId(intent.getIntExtra(
+                SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
                 SubscriptionManager.INVALID_SUBSCRIPTION_ID));
 
         ImsLog.i("[" + nSlotId + "]" + ImsLog.lastSubString(action, "."));
@@ -47,7 +50,7 @@ public class CarrierSignalReceiver extends BroadcastReceiver {
     }
 
     @VisibleForTesting
-    protected int getSlotId(int subId) {
+    int getSlotId(int subId) {
         return MSimUtils.getSlotId(subId);
     }
 }

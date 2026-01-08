@@ -15,17 +15,19 @@
  */
 package com.android.imsstack.jni;
 
+import static com.android.imsstack.base.TestAppContext.SLOT0;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.telephony.TelephonyManager;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.content.Context;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.ContextFixture;
-import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
 import org.junit.Before;
@@ -37,38 +39,29 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class NativeCommandsTest {
-    private static final int SLOT0 = 0;
-
     @Mock private JniIms mJniIms;
 
-    private ContextFixture mContextFixture;
+    private Context mContext;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mContextFixture = new ContextFixture();
-        AppContext.init(mContextFixture.getTestDouble());
-        TelephonyManager tm = mContextFixture.getTestDouble()
-                .getSystemService(TelephonyManager.class);
-        when(mContextFixture.getTestDouble().getResources().getBoolean(anyInt())).thenReturn(true);
-        when(tm.getActiveModemCount()).thenReturn(1);
-        when(tm.getSupportedModemCount()).thenReturn(1);
-
+        mContext = new ContextFixture().getTestDouble();
+        when(mContext.getResources().getBoolean(anyInt())).thenReturn(true);
         JniImsProxy.setJniIms(mJniIms);
     }
 
     @After
     public void tearDown() throws Exception {
         JniImsProxy.setJniIms(null);
-        AppContext.deinit();
-        mContextFixture = null;
+        mContext = null;
     }
 
     @Test
     @SmallTest
     public void setDeviceConfig() {
-        NativeCommands.setDeviceConfig(AppContext.getInstance());
+        NativeCommands.setDeviceConfig(mContext);
         verify(mJniIms).sendCommand(eq(NativeCommands.CMD_SET_DEVICE_CONFIG), anyInt(), any());
     }
 

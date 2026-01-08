@@ -28,7 +28,7 @@ class SsacBlockRule final : public IMtcBlockRule
 {
 public:
     explicit SsacBlockRule(IN IMtcCallContext& objContext, IN CallType eCallType);
-    virtual ~SsacBlockRule();
+    virtual ~SsacBlockRule() override;
     SsacBlockRule(IN const SsacBlockRule&) = delete;
     SsacBlockRule& operator=(IN const SsacBlockRule&) = delete;
 
@@ -39,8 +39,7 @@ private:
     CallType m_eCallType;
     IImsRadio* m_pImsRadio;
 
-    IMS_BOOL IsSsacTimerRunning(IN CallType eCallType) const;
-    IMS_BOOL StartSsacTimer(IN CallType eCallType);
+    IMS_BOOL IsNeedToBar(IN CallType eCallType) const;
 };
 
 #endif

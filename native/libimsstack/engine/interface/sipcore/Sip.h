@@ -16,8 +16,7 @@
 #ifndef SIP_H_
 #define SIP_H_
 
-#include "SipError.h"
-#include "TextParser.h"
+#include "AString.h"
 
 /**
  * @brief This class defines a constant values for SIP handling.
@@ -158,6 +157,7 @@ public:
     static const IMS_CHAR STR_RECEIVED[];
     static const IMS_CHAR STR_REG_ID[];
     static const IMS_CHAR STR_SIP_INSTANCE[];
+    static const IMS_CHAR STR_SOS[];
     static const IMS_CHAR STR_TYPE[];
     // Non-standard parameters
     // MULTI_REG_TRANSPORT

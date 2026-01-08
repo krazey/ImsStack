@@ -27,7 +27,7 @@ class SessionParameter : public ISessionParameter
 public:
     SessionParameter();
     SessionParameter(IN const SessionParameter& other);
-    virtual ~SessionParameter();
+    ~SessionParameter() override;
 
 public:
     SessionParameter& operator=(IN const SessionParameter& other);
@@ -84,7 +84,7 @@ public:
 
 private:
     void Clear();
-    IMS_BOOL Create();
+    void Create();
     IMS_SINT32 CreateMid();
     IMS_SINT32 CompareMediaGroups(IN const SessionParameter* pPeerParam,
             OUT SessionParameter*& pProposalView, IN IMS_SINT32 nOptions);
@@ -95,7 +95,7 @@ private:
             OUT SessionParameter*& pProposalView, OUT SessionParameter*& pPeerView);
     void RemoveMediaFromGroup(IN IMS_SINT32 nMid);
     void RemovePreconditionsIfNotSupport(
-            OUT SessionParameter*& pProposalView, OUT SessionParameter*& pPeerView);
+            IN const SessionParameter* pProposalView, IN const SessionParameter* pPeerView);
 
 private:
     AString m_strRemoteVersion;

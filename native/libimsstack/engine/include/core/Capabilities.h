@@ -26,15 +26,12 @@ class Capabilities : public ServiceMethod
 {
 public:
     explicit Capabilities(IN Service* pService);
-    virtual ~Capabilities();
+    ~Capabilities() override;
 
     Capabilities(IN const Capabilities&) = delete;
     Capabilities& operator=(IN const Capabilities&) = delete;
 
 public:
-    // Method class
-    inline void Destroy() override { ServiceMethod::Destroy(); }
-
     // ICapabilities interface
     ImsList<AString> GetRemoteUserIdentities() const;
     inline IMS_SINT32 GetState() const { return m_nState; }
@@ -60,11 +57,11 @@ protected:
             IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
 
 private:
-    IMS_BOOL CreateContactHeader(OUT AString& strContactHeader, OUT IMS_BOOL& bIsContactGruu,
+    void CreateContactHeader(OUT AString& strContactHeader, OUT IMS_BOOL& bIsContactGruu,
             IN IMS_BOOL bIncludeAllFeatures = IMS_TRUE) const;
     IMS_BOOL CreateSdp(OUT AString& strSdp, IN IMS_BOOL bCheckMediaCapability = IMS_TRUE,
             IN IMS_BOOL bRequest = IMS_FALSE) const;
-    void HandleCapabilities(IN ISipClientConnection* piScc);
+    void HandleCapabilities(IN const ISipClientConnection* piScc);
     inline IMS_BOOL HasFlag(IN IMS_SINT32 nFlags, IN IMS_SINT32 nFlag) const
     {
         return (nFlags & nFlag) == nFlag;

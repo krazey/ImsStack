@@ -27,11 +27,17 @@ class MockIAosSubscriber : public IAosSubscriber
 {
 public:
     MOCK_METHOD(IMS_BOOL, IsReady, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsIsim, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsUsim, (), (const, override));
     MOCK_METHOD(void, SetListener, (IN IAosSubscriberListener * piListener), (override));
     MOCK_METHOD(const AStringArray&, GetConfiguredImpus, (), (const, override));
     MOCK_METHOD(const AStringArray&, GetFakeImpus, (), (const, override));
     MOCK_METHOD(
             const ISubscriberConfig*, GetSubscriberConfig, (IMS_SINT32 nType), (const, override));
+    MOCK_METHOD(void, CreateTemporaryPublicUserIdForGiba, (), (override));
+    MOCK_METHOD(void, ClearTemporaryPublicUserIdForGiba, (), (override));
+    MOCK_METHOD(IMS_BOOL, HasValidTemporaryPublicUserIdForGiba, (), (const override));
+    MOCK_METHOD(const AString&, GetTemporaryPublicUserIdForGiba, (), (const override));
     MOCK_METHOD(IMS_BOOL, Init, (), (override));
     MOCK_METHOD(IMS_BOOL, CleanUp, (), (override));
 };

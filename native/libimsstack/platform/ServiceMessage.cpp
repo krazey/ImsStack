@@ -18,7 +18,7 @@
 #include "ServiceMessage.h"
 #include "ServiceThread.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_BASE__;
 
 PRIVATE GLOBAL AString MessageService::GetThreadName(IN const AString& strTargetName)
 {
@@ -65,7 +65,7 @@ PUBLIC GLOBAL IMS_BOOL MessageService::PostMessageThread(
         return IMS_FALSE;
     }
 
-    ThreadService* pThreadService = ThreadService::GetThreadService();
+    const ThreadService* pThreadService = ThreadService::GetThreadService();
     IMS_BOOL bResult = IMS_FALSE;
 
     pThreadService->LockThreadPool();

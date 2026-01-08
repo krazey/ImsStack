@@ -18,12 +18,12 @@
 
 #define SIP_BADMESSAGE_PARSING
 
-#include "msg/SipHeaders.h"
-#include "msg/SipMsgBody.h"
-#include "msg/SipRequestLine.h"
 #ifdef SIP_BADMESSAGE_PARSING
 #include "msg/SipBadHeader.h"
 #endif
+#include "msg/SipHeaders.h"
+#include "msg/SipMsgBody.h"
+#include "msg/SipRequestLine.h"
 
 /**
   This class represents one SIP message. The stack user can create a suitable message by setting
@@ -116,17 +116,17 @@ private:
 
 public:
     SipMessage();
-    ~SipMessage();
     explicit SipMessage(SIP_INT32 eSipMsgType);
     SipMessage(const SipMessage& objSipMsg);
-    SIP_BOOL EncodeMsg(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
+    SIP_BOOL Encode(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
             SIP_UINT32* pSipMsgLength, /* in-out parameter*/ SIP_UINT32 nMsgOptions);
 
-    SIP_BOOL DecodeFragmentMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen);
+    SIP_BOOL DecodeFragmentMsg(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen);
 
-    SIP_BOOL DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen);
+    SIP_BOOL Decode(const SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen);
 
-    SIP_BOOL DecMultiPartBody(SIP_CHAR* pBuffStart, SIP_CHAR* pBuffEnd, SIP_UINT32 nMsgBuffLen);
+    SIP_BOOL DecodeMultiPartBody(
+            const SIP_CHAR* pBuffStart, const SIP_CHAR* pBuffEnd, SIP_UINT32 nMsgBuffLen);
 
     inline SipMsgBodyList* GetMsgBodyList()
     {
@@ -137,12 +137,12 @@ public:
         return m_pMsgBodyList;
     }
 
-    SIP_BOOL SetRequestline(SipRequestLine* pReqLine);
+    SIP_VOID SetRequestline(SipRequestLine* pReqLine);
     SIP_BOOL SetHeader(SipHeaderBase* pHdr);
     SIP_BOOL AppendHeader(SipHeaderBase* pHdr);
     SIP_BOOL InsertHeader(SipHeaderBase* pHdr, SIP_UINT32 nIndex);
     SIP_BOOL SetMessageBody(SipMsgBody* pMsgBody);
-    SIP_BOOL SetMessageType(SIP_INT32 eMsgType);
+    inline SIP_VOID SetMessageType(SIP_INT32 eMsgType) { m_eSipMsgType = eMsgType; }
     inline SipHeaders* GetMsgHdrs() { return (m_objHdrs); }
     inline SIP_INT32 GetMsgType() const { return m_eSipMsgType; }
     inline SipRequestLine* GetReqLine()
@@ -177,7 +177,7 @@ public:
     SIP_BOOL AppendMessageBody(SipMsgBody* pMsgBody);
     SipMsgBody* GetMsgBody(SIP_UINT32 nPos);
     SIP_BOOL RemoveHdr(SIP_INT32 eHdrType);
-    SIP_BOOL SetStatusLine(SipStatusLine* pStatusLine);
+    SIP_VOID SetStatusLine(SipStatusLine* pStatusLine);
     SIP_BOOL IsReqLineExists();
     SIP_BOOL IsStatusLineExists();
     SIP_BOOL HasMIMEMessageBody();
@@ -201,5 +201,10 @@ public:
             SipMessage* pSipMsg, SIP_INT32* peMsgType, SIP_INT32* peMethodType);
 
     static SIP_UINT32 GetRSeqNum(SipMessage* pSipMsg, SIP_INT32 eHdrType);
+
+private:
+    ~SipMessage() override;
+
+    static constexpr SIP_UINT32 MAX_METHOD_LEN = 32;
 };
 #endif  //__SIP_MESSAGE_H__

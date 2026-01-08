@@ -25,13 +25,14 @@ import android.telephony.imsmedia.ImsMediaManager;
 import android.telephony.imsmedia.ImsMediaSession;
 import android.telephony.imsmedia.RtpConfig;
 
-import com.android.imsstack.util.AppContext;
+import com.android.imsstack.base.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.net.DatagramSocket;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This instantiates ImsMediaManager and interacts with ImsMedia framework
@@ -39,8 +40,7 @@ import java.util.concurrent.Executors;
 public class MediaManagerHelper {
 
     private final Context mContext;
-    private static boolean sIsImsMediaManagerReady;
-    private static boolean sIsImsMediaServiceDisconnected;
+    private static AtomicBoolean sIsImsMediaConnected = new AtomicBoolean(false);
     private static ImsMediaManager sImsMediaManager;
     private static Executor sExecutor;
     private static IMediaConnectionObserver sMediaObserver;
@@ -71,19 +71,20 @@ public class MediaManagerHelper {
         }
     }
 
-    private void createImsMediaManagerInstance(){
+    private void createImsMediaManagerInstance() {
+
+        if (sMediaHandlerThread == null || !sMediaHandlerThread.isAlive()) {
+            ImsLog.d("New media handler thread created");
+            sMediaHandlerThread = new HandlerThread(MediaManagerHelper.class.getSimpleName());
+            sMediaHandlerThread.start();
+        }
 
         if (sImsMediaManager == null) {
-            ImsLog.v("ImsMediaManager instance created");
-            sMediaHandlerThread = new HandlerThread(MediaManagerHelper.class.getSimpleName());
+            ImsLog.d("ImsMediaManager instance created");
             sExecutor = Executors.newSingleThreadExecutor();
+            setImsMediaConnected(false);
             sImsMediaManager = new ImsMediaManager(mContext, sExecutor,
-                                    new ImsMediaManagerCallback());
-            sIsImsMediaManagerReady = false;
-            sIsImsMediaServiceDisconnected = false;
-            if (sMediaHandlerThread.getState() == Thread.State.NEW) {
-                sMediaHandlerThread.start();
-            }
+                    new ImsMediaManagerCallback());
         }
     }
 
@@ -105,13 +106,17 @@ public class MediaManagerHelper {
     /**
      * Returns whether ImsMedia is connected or not
      */
-    public boolean isImsMediaConnected() {
-        return sIsImsMediaManagerReady;
+    public static boolean isImsMediaConnected() {
+        return sIsImsMediaConnected.get();
     }
 
+    /**
+     * Sets whether ImsMedia is connected or not
+     */
     @VisibleForTesting
-    void setImsMediaConnected(boolean isConnected) {
-        sIsImsMediaManagerReady = isConnected;
+    static void setImsMediaConnected(boolean isConnected) {
+        sIsImsMediaConnected.set(isConnected);
+        ImsLog.i("ImsMediaManager is connected[" + isImsMediaConnected() + "]");
     }
 
     /**
@@ -120,51 +125,52 @@ public class MediaManagerHelper {
     @VisibleForTesting
     void close() {
         if (sImsMediaManager != null) {
+            ImsLog.i("ImsMediaManager - close");
             sImsMediaManager.release();
             sImsMediaManager = null;
             sExecutor = null;
             sMediaObserver = null;
-            sIsImsMediaManagerReady = false;
-            sIsImsMediaServiceDisconnected = false;
+            setImsMediaConnected(false);
         }
 
         if (sMediaHandlerThread != null) {
+            ImsLog.i("ImsMediaManager - Quit media handler thread safely");
             sMediaHandlerThread.quitSafely();
             sMediaHandlerThread = null;
         }
     }
 
     /**
-     * Opens a RTP session based on the local sockets with the associated initial
-     * remote configuration if there is a valid {@link RtpConfig} passed. It starts
-     * the media flow if the media direction in the {@link RtpConfig} is set to any
-     * value other than {@link RtpConfig#NO_MEDIA_FLOW}. If the open session is
-     * successful then a new {@link ImsMediaSession} object will be returned using
-     * the {@link SessionCallback#onOpenSessionSuccess(ImsMediaSession)} API. If the
-     * open session is failed then an error code {@link SessionOperationResult} will
-     * be returned using {@link SessionCallback#onOpenSessionFailure(int)} API.
+     * Opens a RTP session based on the local sockets with the associated initial remote
+     * configuration if there is a valid {@link RtpConfig} passed. It starts the media flow if the
+     * media direction in the {@link RtpConfig} is set to any value other than {@link
+     * RtpConfig#NO_MEDIA_FLOW}. If the open session is successful then a new {@link
+     * ImsMediaSession} object will be returned using the {@link
+     * SessionCallback#onOpenSessionSuccess(ImsMediaSession)} API. If the open session is failed
+     * then an error code {@link SessionOperationResult} will be returned using {@link
+     * SessionCallback#onOpenSessionFailure(int)} API.
      *
      * @param rtpSocket local UDP socket to send and receive incoming RTP packets
      * @param rtcpSocket local UDP socket to send and receive incoming RTCP packets
-     * @param rtpConfig provides remote endpoint info and codec details.
-     *        This could be null initially and the application may update
-     *        this later using {@link ImsMediaSession#modifySession()} API.
+     * @param rtpConfig provides remote endpoint info and codec details. This could be null
+     *     initially and the application may update this later using {@link
+     *     ImsMediaSession#modifySession()} API.
      * @param callback callbacks to receive session specific notifications.
      */
-    public void openSession(@NonNull final DatagramSocket rtpSocket,
+    public void openSession(
+            @NonNull final DatagramSocket rtpSocket,
             @NonNull final DatagramSocket rtcpSocket,
             @NonNull final @ImsMediaSession.SessionType int sessionType,
             @Nullable final RtpConfig rtpConfig,
             @NonNull final ImsMediaManager.SessionCallback callback) {
-        getImsMediaManagerInstance().openSession(rtpSocket,
-                    rtcpSocket, sessionType, rtpConfig,
-                    getExecutor(), callback);
+        getImsMediaManagerInstance()
+                .openSession(
+                        rtpSocket, rtcpSocket, sessionType, rtpConfig, getExecutor(), callback);
     }
 
     /**
-     * Closes the RTP session including cleanup of all the resources
-     * associated with the session. This will also close the session object
-     * and associated callback.
+     * Closes the RTP session including cleanup of all the resources associated with the session.
+     * This will also close the session object and associated callback.
      *
      * @param session RTP session to be closed.
      */
@@ -185,13 +191,11 @@ public class MediaManagerHelper {
      * Handle ImsMedia onConnected callback
      */
     private void handleConnected() {
-        if (sIsImsMediaServiceDisconnected) {
-            close();
-            return;
-        }
-        sIsImsMediaManagerReady = true;
-        if (sMediaObserver != null) {
-            sMediaObserver.onMediaConnected();
+        if (!isImsMediaConnected()) {
+            setImsMediaConnected(true);
+            if (sMediaObserver != null) {
+                sMediaObserver.onMediaConnected();
+            }
         }
     }
 
@@ -199,16 +203,17 @@ public class MediaManagerHelper {
      * Handle ImsMedia onDisconnected callback
      */
     private void handleDisconnected() {
-        sIsImsMediaManagerReady = false;
-        sIsImsMediaServiceDisconnected = true;
-        if (sMediaObserver != null) {
-            sMediaObserver.onMediaDisconnected();
+        if (isImsMediaConnected()) {
+            if (sMediaObserver != null) {
+                sMediaObserver.onMediaDisconnected();
+            }
+            close();
         }
     }
 
     /**
-     * Implements Interface to receive callbacks when the ImsMediaManager is connected
-     * or disconnected.
+     * Implements Interface to receive callbacks when the ImsMediaManager is connected or
+     * disconnected.
      */
     private class ImsMediaManagerCallback implements ImsMediaManager.OnConnectedCallback {
 

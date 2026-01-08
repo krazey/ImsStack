@@ -21,7 +21,7 @@
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "JniCallInfo.h"
-#include "sipcore/SipMethod.h"
+#include "SipMethod.h"
 
 class CurrentLocationDiscoveryController;
 class EpsFallbackTrigger;
@@ -46,7 +46,7 @@ class UssiController;
 class IMtcCallContext : public IMtcContext
 {
 public:
-    virtual ~IMtcCallContext(){};
+    virtual ~IMtcCallContext() override {};
 
     /**
      * @brief Gets
@@ -56,6 +56,13 @@ public:
     virtual IMS_UINTP GetCallKey() const = 0;
 
     /**
+     * @brief Checks if the call has been established.
+     *
+     * @return true if the call has been in the ESTABLISHED state, false otherwise.
+     */
+    virtual IMS_BOOL IsEstablished() const = 0;
+
+    /**
      * @brief Checks
      *
      * @return
@@ -63,11 +70,37 @@ public:
     virtual IMS_BOOL IsHeldByMe() const = 0;
 
     /**
+     * @brief Checks if the call is in an unconfirmed remote hold state.
+     *
+     * When the UE requests a hold, some networks respond with "inactive" media
+     * direction. In this scenario, the UE cannot determine if the remote party is also on
+     * hold. This flag indicates that ambiguous state.
+     *
+     * @return {@code IMS_TRUE} if the call is in an unconfirmed remote hold state,
+     *         {@code IMS_FALSE} otherwise.
+     */
+    virtual IMS_BOOL IsOnUnconfirmedRemoteHold() const = 0;
+
+    /**
      * @brief Checks
      *
      * @return
      */
     virtual IMS_BOOL IsUssi() const = 0;
+
+    /**
+     * @brief Checks if CSFB is available based on the UE's network status, carrier
+     *        configuration and call status.
+     *
+     * This method evaluates the UE's network conditions, including NR, EPS Attach Type, Roaming,
+     * and WiFi status, against the CSFB block conditions specified in the carrier configuration
+     * {@link ConfigVoice#KEY_CSFB_BLOCK_CONDITION_INT_ARRAY}.
+     *
+     * If there's an established call already, it returns false in order to maintain the call.
+     *
+     * @return True if CSFB is available based on conditions. False otherwise.
+     */
+    virtual IMS_BOOL IsCsfbAvailable() = 0;
 
     /**
      * @brief Gets
@@ -110,7 +143,7 @@ public:
      *
      * @return
      */
-    virtual IMtcService& GetService() = 0;
+    virtual IMtcService& GetService() const = 0;
 
     /**
      * @brief Gets
@@ -138,7 +171,7 @@ public:
      *
      * @return
      */
-    virtual MtcTimerWrapper& GetTimer() = 0;
+    virtual MtcTimerWrapper& GetTimer() const = 0;
 
     /**
      * @brief Gets
@@ -160,13 +193,6 @@ public:
      * @return
      */
     virtual EpsFallbackTrigger& GetEpsFallbackTrigger() = 0;
-
-    /**
-     * @brief Gets
-     *
-     * @return
-     */
-    virtual UdpKeepAliveSender& GetUdpKeepAliveSender() = 0;
 
     /**
      * @brief Gets
@@ -202,12 +228,22 @@ public:
      * @return
      */
     virtual ImsList<IMtcCall*> GetOtherCalls() = 0;
+
     /**
      * @brief Sets
      *
      * @param bHeldByMe
      */
     virtual void SetHeldByMe(IN IMS_BOOL bHeldByMe) = 0;
+
+    /**
+     * @brief Sets the unconfirmed remote hold status for the call.
+     *
+     * @param bUnconfirmedRemoteHold {@code IMS_TRUE} to indicate the call is in an unconfirmed
+     *        remote hold state, {@code IMS_FALSE} otherwise.
+     * @see IsOnUnconfirmedRemoteHold
+     */
+    virtual void SetUnconfirmedRemoteHold(IN IMS_BOOL bUnconfirmedRemoteHold) = 0;
 
     /**
      * @brief Creates
@@ -248,18 +284,24 @@ public:
     virtual ISipClientConnection* CreateClientConnection(IN SipMethod eMethod) = 0;
 
     /**
-     * @brief Removes
+     * Creates UdpKeepAliveSender with the current configuration and context.
      *
-     * @param piSession
+     * @return A new instance of UdpKeepAliveSender.
      */
-    virtual void RemoveSession(IN const ISession* piSession) = 0;
+    virtual UdpKeepAliveSender* CreateUdpKeepAliveSender() = 0;
 
     /**
-     * @brief Removes
+     * @brief Removes the given MtcSession.
      *
-     * @param piActiveSession
+     * @param objSession MtcSession to remove.
      */
-    virtual void RemoveInactiveSessions(IN const ISession* piActiveSession) = 0;
+    virtual void RemoveSession(IN IMtcSession& objSession) = 0;
+
+    /**
+     * @brief Removes all the MtcSessions
+     *
+     */
+    virtual void RemoveAllSessions() = 0;
 
     /**
      * @brief Deletes

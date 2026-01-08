@@ -16,7 +16,9 @@
 #ifndef CONFIG_APP_FACTORY_H_
 #define CONFIG_APP_FACTORY_H_
 
-#include "base/ConfigApp.h"
+#include "ImsTypeDef.h"
+
+class ConfigApp;
 
 class ConfigAppFactory
 {

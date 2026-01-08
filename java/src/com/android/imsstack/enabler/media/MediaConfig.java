@@ -83,6 +83,12 @@ public class MediaConfig {
      * @param rtpConfig object to Rtp Configurations
      */
     public void updateRtpConfig(RtpConfig rtpConfig) {
+        if (mRtpConfig != null && mRtpConfig.getAccessNetwork() != rtpConfig.getAccessNetwork()) {
+            mNotifyCurrentStatus = true;
+        } else {
+            mNotifyCurrentStatus = false;
+        }
+        ImsLog.d("updateRtpConfig - mNotifyCurrentStatus: " + mNotifyCurrentStatus);
         mRtpConfig = rtpConfig;
     }
 
@@ -98,52 +104,51 @@ public class MediaConfig {
     /**
      * Get MediaQualityThreshold for media quality status notifications
      *
-     * @return MediaQualityThreshold object to set the threshold for
-     *         media quality status notifications
+     * @return MediaQualityThreshold object to set the threshold for media quality status
+     *     notifications
      */
     public MediaQualityThreshold getMediaQualityThreshold() {
         return new MediaQualityThreshold.Builder()
-            .setRtpInactivityTimerMillis(mRtpInactivityCombinedTimer)
-            .setRtcpInactivityTimerMillis(mRtcpInactivityTimer)
-            .setRtpHysteresisTimeInMillis(RTP_HYSTERESISTIME)
-            .setRtpPacketLossDurationMillis(RTP_PACKETLOSS_DURATION)
-            .setRtpPacketLossRate(mRtpPacketLossRate)
-            .setRtpJitterMillis(mRtpJitter)
-            .setNotifyCurrentStatus(mNotifyCurrentStatus)
-            .build();
+                .setRtpInactivityTimerMillis(mRtpInactivityCombinedTimer)
+                .setRtcpInactivityTimerMillis(mRtcpInactivityTimer)
+                .setRtpHysteresisTimeInMillis(RTP_HYSTERESISTIME)
+                .setRtpPacketLossDurationMillis(RTP_PACKETLOSS_DURATION)
+                .setRtpPacketLossRate(mRtpPacketLossRate)
+                .setRtpJitterMillis(mRtpJitter)
+                .setNotifyCurrentStatus(mNotifyCurrentStatus)
+                .build();
     }
 
     /**
      * Updates Media Quality Thresholds received from Media native
      *
-     * @param  mediaThreshold object to set the threshold for
-     *         media quality status notifications
+     * @param mediaThreshold object to set the threshold for media quality status notifications
+     * @param needFwkTimer boolean to check if the telephony framework needs timer for the RTP
+     *     inactivity for the QNS
      */
-    public boolean updateMediaQualityThreshold(MediaQualityThreshold mediaThreshold) {
-        if (mRtcpInactivityTimer == mediaThreshold.getRtcpInactivityTimerMillis()
-                && Arrays.equals(mRtpInactivityImsTimer,
-                    mediaThreshold.getRtpInactivityTimerMillis())) {
-            return false;
-        }
+    public void updateMediaQualityThreshold(
+            MediaQualityThreshold mediaThreshold, boolean needFwkTimer) {
+        // set even if threshold values are not changed,
+        // because FwkTimer may or maynot have been set
+
         // update Rtcp Inactivity Timer
         mRtcpInactivityTimer = mediaThreshold.getRtcpInactivityTimerMillis();
         // update Rtp Inactivity Timer
         mRtpInactivityImsTimer = mediaThreshold.getRtpInactivityTimerMillis();
-        if (mRtpInactivityFwkTimer.length == 0) {
-            mRtpInactivityCombinedTimer = Arrays.copyOf(mRtpInactivityImsTimer,
-                    mRtpInactivityImsTimer.length);
-        } else {
+
+        if (needFwkTimer && mRtpInactivityFwkTimer.length != 0) {
             mRtpInactivityCombinedTimer = IntStream.concat(Arrays.stream(mRtpInactivityImsTimer),
-                    Arrays.stream(mRtpInactivityFwkTimer)).toArray();
+                Arrays.stream(mRtpInactivityFwkTimer)).toArray();
+        } else {
+            mRtpInactivityCombinedTimer =
+                    Arrays.copyOf(mRtpInactivityImsTimer, mRtpInactivityImsTimer.length);
         }
-        return true;
     }
 
     /**
      * Updates Media Quality Thresholds received from frameworks
      *
-     * @param mediaThreshold object to set the threshold for
-     *         media quality status notifications
+     * @param mediaThreshold object to set the threshold for media quality status notifications
      */
     public void updateMediaQualityThreshold(MediaThreshold mediaThreshold) {
         if (mediaThreshold != null) {
@@ -159,8 +164,8 @@ public class MediaConfig {
                 mRtpInactivityFwkTimer =
                         Arrays.stream(thresholds).mapToInt(i -> toIntExact(i)).toArray();
                 if (mRtpInactivityImsTimer.length == 0) {
-                    mRtpInactivityCombinedTimer = Arrays.copyOf(mRtpInactivityFwkTimer,
-                            mRtpInactivityFwkTimer.length);
+                    mRtpInactivityCombinedTimer =
+                            Arrays.copyOf(mRtpInactivityFwkTimer, mRtpInactivityFwkTimer.length);
                 } else {
                     mRtpInactivityCombinedTimer = IntStream.concat(
                             Arrays.stream(mRtpInactivityImsTimer),
@@ -173,8 +178,8 @@ public class MediaConfig {
             ImsLog.d("clear MediaThreshold");
             resetMediaThreshold();
             if (mRtpInactivityImsTimer.length != 0) {
-                mRtpInactivityCombinedTimer = Arrays.copyOf(mRtpInactivityImsTimer,
-                    mRtpInactivityImsTimer.length);
+                mRtpInactivityCombinedTimer =
+                        Arrays.copyOf(mRtpInactivityImsTimer, mRtpInactivityImsTimer.length);
             } else {
                 mRtpInactivityCombinedTimer = new int[0];
             }

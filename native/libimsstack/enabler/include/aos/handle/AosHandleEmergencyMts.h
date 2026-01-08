@@ -24,13 +24,10 @@ class AosHandleEmergencyMts : public AosHandle
 public:
     AosHandleEmergencyMts(IN IAosAppContext* piAppContext, IN const AString& strAppId,
             IN const AString& strServiceId, IN const IMS_SINT32 nServiceType);
-    virtual ~AosHandleEmergencyMts();
+    ~AosHandleEmergencyMts() override;
 
 protected:
     void InitializeServiceBlock() override;
     void InitializeServiceFeature() override;
-
-private:
-    friend class AosHandleEmergencyMtsTest;
 };
 #endif  // AOS_HANDLE_EMERGENCY_MTS_H_

@@ -17,7 +17,6 @@
 #ifndef CONFERENCE_FACTORY_H_
 #define CONFERENCE_FACTORY_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 
@@ -31,8 +30,9 @@ class ConferenceSubscription;
 class IConferenceReference;
 class IConferenceReferenceListener;
 class IConferenceSubscriptionListener;
-class IMtcCallContext;
 class IMtcContext;
+template <class T>
+class ImsList;
 
 class ConferenceFactory
 {
@@ -50,8 +50,8 @@ public:
             IN ImsList<ConfUser*>& objConfUsers, IN IConferenceReferenceListener& objListener);
     virtual ConferenceParticipantList* CreateParticipantList();
     virtual ConferenceOperationQueue* CreateOperationQueue();
-    virtual ConferenceEventNotifier* CreateEventNotifier(IN IMtcCallContext& objConfCallContext,
-            IN CallConnectionIdManager& objConnectionIdManager);
+    virtual ConferenceEventNotifier* CreateEventNotifier(
+            IN CallKey nConfCallKey, IN CallConnectionIdManager& objConnectionIdManager);
     virtual ConferenceInfoUpdater* CreateInfoUpdater();
     virtual ConferenceInfo* CreateInfo();
 

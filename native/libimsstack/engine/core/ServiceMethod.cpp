@@ -22,6 +22,7 @@
 #include "ISipServerConnection.h"
 #include "ServiceMethod.h"
 #include "SipConfigProxy.h"
+#include "SipError.h"
 #include "SipParameter.h"
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
@@ -183,7 +184,7 @@ Message* ServiceMethod::GetPreviousRequest(IN IMS_SINT32 nServiceMethod) const
         return IMS_NULL;
     }
 
-    PreviousMessage* pPreviousMessage = m_objPreviousMessages.GetValueAt(nIndex);
+    const PreviousMessage* pPreviousMessage = m_objPreviousMessages.GetValueAt(nIndex);
 
     Ims::SetLastError(ImsError::NO_ERROR);
 
@@ -225,7 +226,7 @@ ImsList<Message*> ServiceMethod::GetPreviousResponses(IN IMS_SINT32 nServiceMeth
         return ImsList<Message*>();
     }
 
-    PreviousMessage* pPreviousMessage = m_objPreviousMessages.GetValueAt(nIndex);
+    const PreviousMessage* pPreviousMessage = m_objPreviousMessages.GetValueAt(nIndex);
 
     Ims::SetLastError(ImsError::NO_ERROR);
 
@@ -313,15 +314,7 @@ void ServiceMethod::CopyPreviousMessage(
     }
 
     RemovePreviousMessage(nDstServiceMethod);
-
-    if (!m_objPreviousMessages.Add(nDstServiceMethod, pNewPreviousMessage))
-    {
-        delete pNewPreviousMessage;
-
-        IMS_TRACE_E(0, "Adding the previous message (%s) failed",
-                Message::GetMessageType(nDstServiceMethod), 0, 0);
-        return;
-    }
+    m_objPreviousMessages.Add(nDstServiceMethod, pNewPreviousMessage);
 }
 
 PROTECTED
@@ -500,7 +493,7 @@ IMS_BOOL ServiceMethod::IsPrivacyRequested(IN IMS_BOOL bRequest /*= IMS_TRUE*/) 
 {
     if (SipConfigProxy::IsGruuConfigured(GetSlotId(), m_pService->GetSipProfile()))
     {
-        ISipMessage* piSipMsg = IMS_NULL;
+        const ISipMessage* piSipMsg = IMS_NULL;
 
         // Outgoing request message
         if (bRequest)
@@ -751,7 +744,7 @@ IMS_BOOL ServiceMethod::UpdateRequestOnSent(IN IMS_SINT32 nServiceMethod, IN ISi
 
 PROTECTED
 IMS_BOOL ServiceMethod::UpdateResponseOnReceived(
-        IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSc)
+        IN IMS_SINT32 nServiceMethod, IN const ISipConnection* piSc)
 {
     Message* pMessage =
             Message::CreateReceivedMessage(m_pService->GetAppConfig(), piSc->GetMessage());
@@ -779,7 +772,8 @@ IMS_BOOL ServiceMethod::UpdateResponseOnReceived(
 }
 
 PROTECTED
-IMS_BOOL ServiceMethod::UpdateResponseOnSent(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSc)
+IMS_BOOL ServiceMethod::UpdateResponseOnSent(
+        IN IMS_SINT32 nServiceMethod, IN const ISipConnection* piSc)
 {
     // Make sure that Message MUST be created before SEND operation.
     if (GetNextResponse() == IMS_NULL)
@@ -845,16 +839,7 @@ IMS_BOOL ServiceMethod::SetPreviousRequest(
         return IMS_FALSE;
     }
 
-    if (!m_objPreviousMessages.Add(nServiceMethod, pPreviousMessage))
-    {
-        pPreviousMessage->m_pRequest = IMS_NULL;
-        delete pPreviousMessage;
-
-        IMS_TRACE_E(0, "Adding the previous message (%s) failed",
-                Message::GetMessageType(nServiceMethod), 0, 0);
-        return IMS_FALSE;
-    }
-
+    m_objPreviousMessages.Add(nServiceMethod, pPreviousMessage);
     // Store the SIP connection for the response message
     pPreviousMessage->m_piSc = piSc;
 
@@ -872,7 +857,7 @@ ISipConnection* ServiceMethod::GetConnection(IN IMS_SINT32 nServiceMethod) const
         return IMS_NULL;
     }
 
-    PreviousMessage* pPreviousMessage = m_objPreviousMessages.GetValueAt(nIndex);
+    const PreviousMessage* pPreviousMessage = m_objPreviousMessages.GetValueAt(nIndex);
 
     if (pPreviousMessage->m_piSc == IMS_NULL)
     {

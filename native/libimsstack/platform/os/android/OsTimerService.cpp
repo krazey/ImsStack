@@ -13,31 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ISystem.h"
 #include "ImsMessageDef.h"
+#include "OsTimer.h"
 #include "OsTimerService.h"
 #include "PlatformContext.h"
 #include "ServiceMessage.h"
 #include "ServiceTrace.h"
 #include "system-intf/SystemConstants.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
-LOCAL
-void osTimerService_AddListener(IN ISystemListener* piListener)
+static void osTimerService_AddListener(IN ISystemListener* piListener)
 {
     ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
     piSystem->AddListener(SystemConstants::CATEGORY_TIMER, piListener, IMS_SLOT_0);
 }
 
-LOCAL
-void osTimerService_RemoveListener(IN ISystemListener* piListener)
+static void osTimerService_RemoveListener(IN ISystemListener* piListener)
 {
     ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
     piSystem->RemoveListener(SystemConstants::CATEGORY_TIMER, piListener, IMS_SLOT_0);
 }
 
-LOCAL
-IMS_BOOL osTimerService_KillTimer(IN IMS_UINTP nTimerId)
+static IMS_BOOL osTimerService_KillTimer(IN IMS_UINTP nTimerId)
 {
     ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
     IMS_SINT32 nResult = piSystem->KillTimer(nTimerId);
@@ -45,8 +44,7 @@ IMS_BOOL osTimerService_KillTimer(IN IMS_UINTP nTimerId)
     return (nResult == 0) ? IMS_FALSE : IMS_TRUE;
 }
 
-LOCAL
-IMS_BOOL osTimerService_SetTimer(IN IMS_UINTP nTimerId, IN IMS_UINT32 nDuration)
+static IMS_BOOL osTimerService_SetTimer(IN IMS_UINTP nTimerId, IN IMS_SINT64 nDuration)
 {
     ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
     IMS_SINT32 nResult = piSystem->SetTimer(nDuration, nTimerId);
@@ -104,7 +102,7 @@ PUBLIC VIRTUAL OsTimerService::~OsTimerService()
 }
 
 PUBLIC
-void OsTimerService::KillTimer(IN OsTimer* pTimer)
+void OsTimerService::KillTimer(IN const OsTimer* pTimer)
 {
     if (pTimer == IMS_NULL)
     {
@@ -150,7 +148,7 @@ void OsTimerService::KillTimer(IN OsTimer* pTimer)
 }
 
 PUBLIC
-IMS_BOOL OsTimerService::SetTimer(IN IMS_UINT32 nDuration, IN OsTimer* pTimer)
+IMS_BOOL OsTimerService::SetTimer(IN IMS_SINT64 nDuration, IN OsTimer* pTimer)
 {
     if (pTimer == IMS_NULL)
     {

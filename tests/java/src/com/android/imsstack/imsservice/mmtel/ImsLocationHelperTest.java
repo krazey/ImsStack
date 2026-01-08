@@ -34,10 +34,10 @@ import android.os.Message;
 import android.util.Log;
 
 import com.android.imsstack.ContextFixture;
+import com.android.imsstack.base.AppContext;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.TimerInterface;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
-import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.GeocoderProxy;
 
 import org.junit.After;

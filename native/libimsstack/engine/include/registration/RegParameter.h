@@ -34,7 +34,7 @@ class RegParameter final : public ImsSlot, public IRegParameter
 {
 public:
     explicit RegParameter(IN IMS_SINT32 nSlotId);
-    virtual ~RegParameter();
+    ~RegParameter() override;
 
     RegParameter(IN const RegParameter&) = delete;
     RegParameter& operator=(IN const RegParameter&) = delete;
@@ -55,7 +55,7 @@ public:
             IN_OUT ISipClientConnection*& piScc, IN const RcPtr<RegStateTracker>& pStateTracker);
     IMS_RESULT FormRouteHeaders(
             IN_OUT ISipClientConnection*& piScc, IN const RcPtr<RegStateTracker>& pStateTracker);
-    IMS_RESULT FormSecurityHeaders(IN_OUT ISipClientConnection*& piScc);
+    IMS_RESULT FormSecurityHeaders(IN const ISipClientConnection* piScc);
     inline Credential& GetCredential() { return m_objCredential; }
     inline IMS_SINT32 GetFlowControlOption() const { return m_nFlowControlOption; }
     inline IMS_SINT32 GetPortFlowControl() const { return m_nPortFlowControl; }
@@ -92,7 +92,7 @@ public:
     IMS_BOOL UpdateProfile(
             IN const SipAddress& objAor, IN const AString& strSubsId = AString::ConstNull());
     IMS_BOOL UpdateSecurityHeaders(IN const ISipMessage* piSipMsg);
-    void UpdateSipProfile(IN SipProfile* pProfile);
+    void UpdateSipProfile(IN const SipProfile* pProfile);
 
 private:
     // IRegParameter interface

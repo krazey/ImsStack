@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,622 +17,741 @@
 #ifndef AUDIO_PROFILE_H_
 #define AUDIO_PROFILE_H_
 
-#include "ImsTypeDef.h"
-#include "IpAddress.h"
-#include "ImsMap.h"
+#include <memory>
 
-class AudioProfile
+#include "config/CodecAudioConfig.h"
+#include "MediaBaseProfile.h"
+
+/**
+ * AudioProfile is used to keep the SDP negotiation information for audio like
+ * SDP offer, answer and the negotiated media information.
+ */
+class AudioProfile : public MediaBaseProfile
 {
 public:
-    class RtpMap
+    /**
+     * AudioFmtp attributes are used within the SDP to carry audio parameters that provide
+     * extra configurations for the specific audio codecs described in the rtpmap.
+     */
+    class AudioFmtp
     {
     public:
-        IMS_UINT32 nPayloadNum;
-        AString strPayloadType;
-        IMS_UINT32 nSamplingRate;
-        IMS_SINT32 nChannel;  // default is 1, if this value is -1 hide channel value at SDP
-    public:
-        RtpMap() :
-                nPayloadNum(0),
-                strPayloadType(AString::ConstNull()),
-                nSamplingRate(0),
-                nChannel(1)
+        AudioFmtp() :
+                m_nModeSetList(0),
+                m_nDefaultRtpModeSet(0),
+                m_nModeChangeCapability(CodecAudioConfig::DEFAULT_MODECHANGE_CAPABILITY),
+                m_nModeChangePeriod(CodecAudioConfig::DEFAULT_MODECHANGE_PERIOD),
+                m_nModeChangeNeighbor(CodecAudioConfig::DEFAULT_MODECHANGE_NEIGHBOR),
+                m_nMaxRed(CodecAudioConfig::DEFAULT_MAXRED),
+                m_bDtx(CodecAudioConfig::DEFAULT_DTX),
+                m_bVisibleModeSet(IMS_FALSE),
+                m_bVisibleModeChangeCapability(IMS_FALSE),
+                m_bVisibleModeChangePeriod(IMS_FALSE),
+                m_bVisibleModeChangeNeighbor(IMS_FALSE),
+                m_bVisibleMaxRed(IMS_FALSE),
+                m_bVisibleDtx(IMS_FALSE)
         {
         }
 
-        RtpMap(IN const RtpMap& obj) :
-                nPayloadNum(obj.nPayloadNum),
-                strPayloadType(obj.strPayloadType),
-                nSamplingRate(obj.nSamplingRate),
-                nChannel(obj.nChannel)
+        AudioFmtp(IN const AudioFmtp& objFmtp) :
+                m_nModeSetList(objFmtp.m_nModeSetList),
+                m_nDefaultRtpModeSet(objFmtp.m_nDefaultRtpModeSet),
+                m_nModeChangeCapability(objFmtp.m_nModeChangeCapability),
+                m_nModeChangePeriod(objFmtp.m_nModeChangePeriod),
+                m_nModeChangeNeighbor(objFmtp.m_nModeChangeNeighbor),
+                m_nMaxRed(objFmtp.m_nMaxRed),
+                m_bDtx(objFmtp.m_bDtx),
+                m_bVisibleModeSet(objFmtp.m_bVisibleModeSet),
+                m_bVisibleModeChangeCapability(objFmtp.m_bVisibleModeChangeCapability),
+                m_bVisibleModeChangePeriod(objFmtp.m_bVisibleModeChangePeriod),
+                m_bVisibleModeChangeNeighbor(objFmtp.m_bVisibleModeChangeNeighbor),
+                m_bVisibleMaxRed(objFmtp.m_bVisibleMaxRed),
+                m_bVisibleDtx(objFmtp.m_bVisibleDtx)
         {
         }
 
-        RtpMap& operator=(IN const RtpMap& obj)
+        virtual ~AudioFmtp() {}
+
+        AudioFmtp& operator=(IN const AudioFmtp& obj)
         {
             if (this != &obj)
             {
-                nPayloadNum = obj.nPayloadNum;
-                strPayloadType = obj.strPayloadType;
-                nSamplingRate = obj.nSamplingRate;
-                nChannel = obj.nChannel;
+                m_nModeSetList = obj.m_nModeSetList;
+                m_nDefaultRtpModeSet = obj.m_nDefaultRtpModeSet;
+                m_nModeChangeCapability = obj.m_nModeChangeCapability;
+                m_nModeChangePeriod = obj.m_nModeChangePeriod;
+                m_nModeChangeNeighbor = obj.m_nModeChangeNeighbor;
+                m_nMaxRed = obj.m_nMaxRed;
+                m_bDtx = obj.m_bDtx;
+                m_bVisibleModeSet = obj.m_bVisibleModeSet;
+                m_bVisibleModeChangeCapability = obj.m_bVisibleModeChangeCapability;
+                m_bVisibleModeChangePeriod = obj.m_bVisibleModeChangePeriod;
+                m_bVisibleModeChangeNeighbor = obj.m_bVisibleModeChangeNeighbor;
+                m_bVisibleMaxRed = obj.m_bVisibleMaxRed;
+                m_bVisibleDtx = obj.m_bVisibleDtx;
             }
-            return (*this);
+            return *this;
         }
+
+        bool operator==(IN const AudioFmtp& obj) const
+        {
+            return (m_nModeSetList == obj.m_nModeSetList &&
+                    m_nDefaultRtpModeSet == obj.m_nDefaultRtpModeSet &&
+                    m_nModeChangeCapability == obj.m_nModeChangeCapability &&
+                    m_nModeChangePeriod == obj.m_nModeChangePeriod &&
+                    m_nModeChangeNeighbor == obj.m_nModeChangeNeighbor &&
+                    m_nMaxRed == obj.m_nMaxRed && m_bDtx == obj.m_bDtx &&
+                    m_bVisibleModeSet == obj.m_bVisibleModeSet &&
+                    m_bVisibleModeChangeCapability == obj.m_bVisibleModeChangeCapability &&
+                    m_bVisibleModeChangePeriod == obj.m_bVisibleModeChangePeriod &&
+                    m_bVisibleModeChangeNeighbor == obj.m_bVisibleModeChangeNeighbor &&
+                    m_bVisibleMaxRed == obj.m_bVisibleMaxRed && m_bVisibleDtx == obj.m_bVisibleDtx);
+        }
+
+        bool operator!=(IN const AudioFmtp& obj) const { return !(*this == obj); }
+
+        inline void SetModeSetList(IN const IMS_UINT32 nModeSetList)
+        {
+            m_nModeSetList = nModeSetList;
+        }
+        inline IMS_UINT32 GetModeSetList() { return m_nModeSetList; }
+        inline void SetDefaultRtpModeSet(IN const IMS_UINT32 nDefaultRtpModeSet)
+        {
+            m_nDefaultRtpModeSet = nDefaultRtpModeSet;
+        }
+        inline IMS_UINT32 GetDefaultRtpModeSet() { return m_nDefaultRtpModeSet; }
+
+        inline void SetModeChangeCapability(IN const IMS_SINT32 nModeChangeCapability)
+        {
+            m_nModeChangeCapability = nModeChangeCapability;
+        }
+        inline IMS_SINT32 GetModeChangeCapability() { return m_nModeChangeCapability; }
+        inline void SetModeChangePeriod(IN const IMS_SINT32 nModeChangePeriod)
+        {
+            m_nModeChangePeriod = nModeChangePeriod;
+        }
+        inline IMS_SINT32 GetModeChangePeriod() { return m_nModeChangePeriod; }
+        inline void SetModeChangeNeighbor(IN const IMS_SINT32 nModeChangeNeighbor)
+        {
+            m_nModeChangeNeighbor = nModeChangeNeighbor;
+        }
+        inline IMS_SINT32 GetModeChangeNeighbor() { return m_nModeChangeNeighbor; }
+
+        inline void SetMaxRed(IN const IMS_SINT32 nMaxRed) { m_nMaxRed = nMaxRed; }
+        inline IMS_SINT32 GetMaxRed() { return m_nMaxRed; }
+        inline void SetDtx(IN const IMS_BOOL bDtx) { m_bDtx = bDtx; }
+        inline IMS_BOOL IsDtxEnabled() { return m_bDtx; }
+        inline void SetVisibleModeSet(IN const IMS_BOOL bVisibleModeSet)
+        {
+            m_bVisibleModeSet = bVisibleModeSet;
+        }
+        inline IMS_BOOL IsModeSetVisible() { return m_bVisibleModeSet; }
+
+        inline void SetVisibleModeChangeCapability(IN const IMS_BOOL bVisibleModeChangeCapability)
+        {
+            m_bVisibleModeChangeCapability = bVisibleModeChangeCapability;
+        }
+        inline IMS_BOOL IsModeChangeCapabilityVisible() { return m_bVisibleModeChangeCapability; }
+        inline void SetVisibleModeChangePeriod(IN const IMS_BOOL bVisibleModeChangePeriod)
+        {
+            m_bVisibleModeChangePeriod = bVisibleModeChangePeriod;
+        }
+        inline IMS_BOOL IsModeChangePeriodVisible() { return m_bVisibleModeChangePeriod; }
+        inline void SetVisibleModeChangeNeighbor(IN const IMS_BOOL bVisibleModeChangeNeighbor)
+        {
+            m_bVisibleModeChangeNeighbor = bVisibleModeChangeNeighbor;
+        }
+        inline IMS_BOOL IsModeChangeNeighborVisible() { return m_bVisibleModeChangeNeighbor; }
+
+        inline void SetVisibleMaxRed(IN const IMS_BOOL bVisibleMaxRed)
+        {
+            m_bVisibleMaxRed = bVisibleMaxRed;
+        }
+        inline IMS_BOOL IsMaxRedVisible() { return m_bVisibleMaxRed; }
+        inline void SetVisibleDtx(IN const IMS_BOOL bVisibleDtx) { m_bVisibleDtx = bVisibleDtx; }
+        inline IMS_BOOL IsDtxVisible() { return m_bVisibleDtx; }
+
+    private:
+        IMS_UINT32 m_nModeSetList;
+        IMS_UINT32 m_nDefaultRtpModeSet;
+        IMS_SINT32 m_nModeChangeCapability;
+        IMS_SINT32 m_nModeChangePeriod;
+        IMS_SINT32 m_nModeChangeNeighbor;
+        IMS_SINT32 m_nMaxRed;
+        IMS_BOOL m_bDtx;
+        IMS_BOOL m_bVisibleModeSet;
+        IMS_BOOL m_bVisibleModeChangeCapability;
+        IMS_BOOL m_bVisibleModeChangePeriod;
+        IMS_BOOL m_bVisibleModeChangeNeighbor;
+        IMS_BOOL m_bVisibleMaxRed;
+        IMS_BOOL m_bVisibleDtx;
     };
 
-public:
-    class AmrFmtp
+    /**
+     * AmrFmtp attributes are used within the SDP to carry AMR parameters that provide
+     * extra configurations for the specific audio codecs described in the rtpmap.
+     */
+    class AmrFmtp : public AudioFmtp
     {
     public:
-        IMS_UINT32 nModeSetList;
-        IMS_UINT32 nDefaultRtpModeSet;
-        IMS_BOOL bSCREnable;
-
         enum
         {
-            DEFAULT_OCTCTALIGN = 0,
-            DEFAULT_MODECHANGE_CAPABILITY = 1,
-            DEFAULT_MODECHANGE_PERIOD = 1,
-            DEFAULT_MODECHANGE_NEIGHBOR = 0,
-            DEFAULT_MAXRED = -1,
-            DEFAULT_PTIME = -1,
-            DEFAULT_MAXPTIME = -1,
+            DEFAULT_OCTETALIGN = 0,
         };
 
-        // If each field has non-default value or bShow_xxx is TRUE it will be included at SDP.
-        IMS_SINT32 nOctetAlign;
-        IMS_SINT32 nModeChangeCapability;
-        IMS_SINT32 nModeChangePeriod;
-        IMS_SINT32 nModeChangeNeighbor;
-
-        IMS_SINT32 nMaxRed;
-        IMS_SINT32 nPtime;
-        IMS_SINT32 nMaxPtime;
-
-        IMS_BOOL bShow_OctetAlign;
-        IMS_BOOL bShowModeChangeCapability;
-        IMS_BOOL bShowModeChangePeriod;
-        IMS_BOOL bShowModeChangeNeighbor;
-        IMS_BOOL bShow_RobustSorting;
-
-        IMS_BOOL bShowMaxRed;
-        IMS_BOOL bShowPtime;
-        IMS_BOOL bShowMaxPtime;
-        IMS_BOOL bShowModeSet;
-
-    public:
         AmrFmtp() :
-                nModeSetList(0),
-                nDefaultRtpModeSet(0),
-                bSCREnable(IMS_FALSE),
-                nOctetAlign(DEFAULT_OCTCTALIGN),
-                nModeChangeCapability(DEFAULT_MODECHANGE_CAPABILITY),
-                nModeChangePeriod(DEFAULT_MODECHANGE_PERIOD),
-                nModeChangeNeighbor(DEFAULT_MODECHANGE_NEIGHBOR),
-                nMaxRed(DEFAULT_MAXRED),
-                nPtime(DEFAULT_PTIME),
-                nMaxPtime(DEFAULT_MAXPTIME),
-                bShow_OctetAlign(IMS_FALSE),
-                bShowModeChangeCapability(IMS_FALSE),
-                bShowModeChangePeriod(IMS_FALSE),
-                bShowModeChangeNeighbor(IMS_FALSE),
-                bShow_RobustSorting(IMS_FALSE),
-                bShowMaxRed(IMS_FALSE),
-                bShowPtime(IMS_FALSE),
-                bShowMaxPtime(IMS_FALSE),
-                bShowModeSet(IMS_FALSE)
+                AudioFmtp(),
+                m_nOctetAlign(DEFAULT_OCTETALIGN),
+                m_bVisibleOctetAlign(IMS_FALSE)
         {
         }
 
         AmrFmtp(IN const AmrFmtp& objFmtp) :
-                nModeSetList(objFmtp.nModeSetList),
-                nDefaultRtpModeSet(objFmtp.nDefaultRtpModeSet),
-                bSCREnable(objFmtp.bSCREnable),
-                nOctetAlign(objFmtp.nOctetAlign),
-                nModeChangeCapability(objFmtp.nModeChangeCapability),
-                nModeChangePeriod(objFmtp.nModeChangePeriod),
-                nModeChangeNeighbor(objFmtp.nModeChangeNeighbor),
-                nMaxRed(objFmtp.nMaxRed),
-                nPtime(objFmtp.nPtime),
-                nMaxPtime(objFmtp.nMaxPtime),
-                bShow_OctetAlign(objFmtp.bShow_OctetAlign),
-                bShowModeChangeCapability(objFmtp.bShowModeChangeCapability),
-                bShowModeChangePeriod(objFmtp.bShowModeChangePeriod),
-                bShowModeChangeNeighbor(objFmtp.bShowModeChangeNeighbor),
-                bShow_RobustSorting(objFmtp.bShow_RobustSorting),
-                bShowMaxRed(objFmtp.bShowMaxRed),
-                bShowPtime(objFmtp.bShowPtime),
-                bShowMaxPtime(objFmtp.bShowMaxPtime),
-                bShowModeSet(objFmtp.bShowModeSet)
+                AudioFmtp(objFmtp),
+                m_nOctetAlign(objFmtp.m_nOctetAlign),
+                m_bVisibleOctetAlign(objFmtp.m_bVisibleOctetAlign)
         {
         }
 
-        AmrFmtp(IN const IMS_UINT32 modeSet, IN const IMS_SINT32 octetAlign,
-                IN const IMS_SINT32 modeChangeCapability) :
-                nModeSetList(modeSet),
-                nDefaultRtpModeSet(modeSet),
-                bSCREnable(IMS_TRUE),
-                nOctetAlign(octetAlign),
-                nModeChangeCapability(modeChangeCapability),
-                nModeChangePeriod(DEFAULT_MODECHANGE_PERIOD),
-                nModeChangeNeighbor(DEFAULT_MODECHANGE_NEIGHBOR),
-                nMaxRed(DEFAULT_MAXRED),
-                nPtime(DEFAULT_PTIME),
-                nMaxPtime(DEFAULT_MAXPTIME),
-                bShow_OctetAlign(octetAlign > 0),
-                bShowModeChangeCapability(modeChangeCapability > 0),
-                bShowModeChangePeriod(IMS_FALSE),
-                bShowModeChangeNeighbor(IMS_FALSE),
-                bShow_RobustSorting(IMS_FALSE),
-                bShowMaxRed(IMS_FALSE),
-                bShowPtime(IMS_FALSE),
-                bShowMaxPtime(IMS_FALSE),
-                bShowModeSet(IMS_FALSE){};
+        virtual ~AmrFmtp() override {}
+
+        AmrFmtp& operator=(IN const AmrFmtp& obj)
+        {
+            if (this != &obj)
+            {
+                AudioFmtp::operator=(obj);
+                m_nOctetAlign = obj.m_nOctetAlign;
+                m_bVisibleOctetAlign = obj.m_bVisibleOctetAlign;
+            }
+            return *this;
+        }
+
+        bool operator==(IN const AmrFmtp& obj) const
+        {
+            return (AudioFmtp::operator==(obj) && m_nOctetAlign == obj.m_nOctetAlign &&
+                    m_bVisibleOctetAlign == obj.m_bVisibleOctetAlign);
+        }
+
+        bool operator!=(IN const AmrFmtp& obj) const { return !(*this == obj); }
+
+        inline void SetOctetAlign(IN const IMS_SINT32 nOctetAlign) { m_nOctetAlign = nOctetAlign; }
+        inline IMS_SINT32 GetOctetAlign() { return m_nOctetAlign; }
+
+        inline void SetVisibleOctetAlign(IN const IMS_BOOL bVisibleOctetAlign)
+        {
+            m_bVisibleOctetAlign = bVisibleOctetAlign;
+        }
+        inline IMS_BOOL IsOctetAlignVisible() { return m_bVisibleOctetAlign; }
+
+    private:
+        IMS_SINT32 m_nOctetAlign;
+        IMS_BOOL m_bVisibleOctetAlign;
     };
 
 public:
-    class EvsFmtp
+    /**
+     * EvsFmtp attributes are used within the SDP to carry EVS parameters that provide
+     * extra configurations for the specific audio codecs described in the rtpmap.
+     */
+    class EvsFmtp : public AudioFmtp
     {
     public:
         enum
         {
-            // COMMON PARAMETER
-            DEFAULT_PTIME = -1,
-            DEFAULT_MAXPTIME = -1,
-            DEFAULT_DTX = 1,
-            DEFAULT_DTXRECV = 1,
             DEFAULT_HFMODE = 0,
             DEFAULT_EVSMODESWITCH = 0,
-            DEFAULT_MAXRED = -1,
             DEFAULT_BANDWIDTHLIST = 0,
             DEFAULT_BITRATELIST = 0,
-            // PRIMARY PARAMETER
-            // DEFAULT_BITRATE = -1,
             DEFAULT_BANDWIDTH = -1,
             DEFAULT_CMR = 0,
             DEFAULT_CHANNEL_AWMODE = 0,
-            // AMR-WB IO PARAMETER
-            DEFAULT_MODESETLIST = 0,
-            DEFAULT_RTPMODESET = 0,
-            DEFAULT_MODECHANGE_CAPABILITY = 1,
-            DEFAULT_MODECHANGE_PERIOD = 1,
-            DEFAULT_MODECHANGE_NEIGHBOR = 0
         };
-
-        IMS_SINT32 nPtime;
-        IMS_SINT32 nMaxPtime;
-        /** 1(default) is turn on DTX */
-        IMS_UINT32 nDtx;
-        /** 1(default) is dependent on DTX */
-        IMS_UINT32 nDtx_Recv;
-        /** 0(default) is compact and hf format used, other is only hf format used */
-        IMS_UINT32 nHfOnly;
-        /** 0(default) is "primary mode start" */
-        IMS_UINT32 nEvsModeSwitch;
-        IMS_SINT32 nMaxRed;
-        /** EVS primary mode bitrate range (kbps) */
-        IMS_UINT32 nBrList;
-        /** EVS primary mode bitrate range (kbps), only send direction (used at sendrecv/sendonly
-         direction) */
-        IMS_SINT32 nBrSend;
-        /** EVS primary mode bitrate range (kbps), only recv direction (used at sendrecv/recvonly
-        direction) */
-        IMS_SINT32 nBrRecv;
-        /** bw has a value from the set : nb, wb, swb, fb, nb-wb, nb-swb, and nb-fb. nb, wb, swb,
-         * fb*/
-        IMS_UINT32 nBwList;
-        IMS_SINT32 nBwSend;
-        IMS_SINT32 nBwRecv;
-        IMS_SINT32 nCmr;
-        /** -1 is channel aware mode disable, 0(default) is not used at the start of the session,
-         * but it'll be changed using CMR or RTCP app. */
-        IMS_SINT32 nChAwRecv;
-        /** -1 is channel aware mode disable, 0(default) is not used at the start of the session,
-         * but it'll be changed using CMR or RTCP app. */
-        IMS_SINT32 nReceivedChAwRecv;
-        // AMR-WB IO parameter
-        IMS_UINT32 nModeSetList;
-        IMS_UINT32 nDefaultRtpModeSet;
-        IMS_SINT32 nModeChangeCapability;
-        IMS_SINT32 nModeChangePeriod;
-        IMS_SINT32 nModeChangeNeighbor;
-        // showable check variable
-        IMS_BOOL bShowPtime;
-        IMS_BOOL bShowMaxPtime;
-        IMS_BOOL bShowDtx;
-        IMS_BOOL bShowHfOnly;
-        IMS_BOOL bShowEvsModeSwitch;
-        IMS_BOOL bShowMaxRed;
-        IMS_BOOL bShowCmr;
-        IMS_BOOL bShowChannelAwMode;
-        IMS_BOOL bShowModeChangeCapability;
-        IMS_BOOL bShowModeChangePeriod;
-        IMS_BOOL bShowModeChangeNeighbor;
-        IMS_BOOL bShowBrList;
-        IMS_BOOL bShowBwList;
-        IMS_BOOL bSendCmr;          // send cmr option
-        IMS_BOOL bShowModeSetList;  // send ModeSetList option
 
     public:
         EvsFmtp() :
-                nPtime(DEFAULT_PTIME),
-                nMaxPtime(DEFAULT_MAXPTIME),
-                nDtx(DEFAULT_DTX),
-                nDtx_Recv(DEFAULT_DTXRECV),
-                nHfOnly(DEFAULT_HFMODE),
-                nEvsModeSwitch(DEFAULT_EVSMODESWITCH),
-                nMaxRed(DEFAULT_MAXRED),
-                nBrList(0),
-                nBrSend(0),
-                nBrRecv(0),
-                nBwList(0),
-                nBwSend(0),
-                nBwRecv(0),
-                nCmr(DEFAULT_CMR),
-                nChAwRecv(DEFAULT_CHANNEL_AWMODE),
-                nReceivedChAwRecv(DEFAULT_CHANNEL_AWMODE),
-                nModeSetList(DEFAULT_MODESETLIST),
-                nDefaultRtpModeSet(DEFAULT_MODESETLIST),
-                nModeChangeCapability(DEFAULT_MODECHANGE_CAPABILITY),
-                nModeChangePeriod(DEFAULT_MODECHANGE_PERIOD),
-                nModeChangeNeighbor(DEFAULT_MODECHANGE_NEIGHBOR),
-                bShowPtime(IMS_FALSE),
-                bShowMaxPtime(IMS_FALSE),
-                bShowDtx(IMS_FALSE),
-                bShowHfOnly(IMS_FALSE),
-                bShowEvsModeSwitch(IMS_FALSE),
-                bShowMaxRed(IMS_FALSE),
-                bShowCmr(IMS_FALSE),
-                bShowChannelAwMode(IMS_FALSE),
-                bShowModeChangeCapability(IMS_FALSE),
-                bShowModeChangePeriod(IMS_FALSE),
-                bShowModeChangeNeighbor(IMS_FALSE),
-                bShowBrList(IMS_TRUE),
-                bShowBwList(IMS_TRUE),
-                bSendCmr(IMS_FALSE),
-                bShowModeSetList(IMS_FALSE)
+                AudioFmtp(),
+                m_nHfOnly(DEFAULT_HFMODE),
+                m_nEvsModeSwitch(DEFAULT_EVSMODESWITCH),
+                m_nBrList(0),
+                m_nBrSend(0),
+                m_nBrRecv(0),
+                m_nBwList(0),
+                m_nBwSend(0),
+                m_nBwRecv(0),
+                m_nCmr(DEFAULT_CMR),
+                m_nChAwRecv(DEFAULT_CHANNEL_AWMODE),
+                m_nReceivedChAwRecv(DEFAULT_CHANNEL_AWMODE),
+                m_bVisibleHfOnly(IMS_FALSE),
+                m_bVisibleEvsModeSwitch(IMS_FALSE),
+                m_bVisibleCmr(IMS_FALSE),
+                m_bVisibleChannelAwMode(IMS_FALSE),
+                m_bVisibleBrList(IMS_TRUE),
+                m_bVisibleBwList(IMS_TRUE),
+                m_bSendCmr(IMS_FALSE)
         {
         }
 
         EvsFmtp(IN const EvsFmtp& objFmtp) :
-                nPtime(objFmtp.nPtime),
-                nMaxPtime(objFmtp.nMaxPtime),
-                nDtx(objFmtp.nDtx),
-                nDtx_Recv(objFmtp.nDtx_Recv),
-                nHfOnly(objFmtp.nHfOnly),
-                nEvsModeSwitch(objFmtp.nEvsModeSwitch),
-                nMaxRed(objFmtp.nMaxRed),
-                nBrList(objFmtp.nBrList),
-                nBrSend(objFmtp.nBrSend),
-                nBrRecv(objFmtp.nBrRecv),
-                nBwList(objFmtp.nBwList),
-                nBwSend(objFmtp.nBwSend),
-                nBwRecv(objFmtp.nBwRecv),
-                nCmr(objFmtp.nCmr),
-                nChAwRecv(objFmtp.nChAwRecv),
-                nReceivedChAwRecv(objFmtp.nReceivedChAwRecv),
-                nModeSetList(objFmtp.nModeSetList),
-                nDefaultRtpModeSet(objFmtp.nDefaultRtpModeSet),
-                nModeChangeCapability(objFmtp.nModeChangeCapability),
-                nModeChangePeriod(objFmtp.nModeChangePeriod),
-                nModeChangeNeighbor(objFmtp.nModeChangeNeighbor),
-                bShowPtime(objFmtp.bShowPtime),
-                bShowMaxPtime(objFmtp.bShowMaxPtime),
-                bShowDtx(objFmtp.bShowDtx),
-                bShowHfOnly(objFmtp.bShowHfOnly),
-                bShowEvsModeSwitch(objFmtp.bShowEvsModeSwitch),
-                bShowMaxRed(objFmtp.bShowMaxRed),
-                bShowCmr(objFmtp.bShowCmr),
-                bShowChannelAwMode(objFmtp.bShowChannelAwMode),
-                bShowModeChangeCapability(objFmtp.bShowModeChangeCapability),
-                bShowModeChangePeriod(objFmtp.bShowModeChangePeriod),
-                bShowModeChangeNeighbor(objFmtp.bShowModeChangeNeighbor),
-                bShowBrList(objFmtp.bShowBrList),
-                bShowBwList(objFmtp.bShowBwList),
-                bSendCmr(objFmtp.bSendCmr),
-                bShowModeSetList(objFmtp.bShowModeSetList)
+                AudioFmtp(objFmtp),
+                m_nHfOnly(objFmtp.m_nHfOnly),
+                m_nEvsModeSwitch(objFmtp.m_nEvsModeSwitch),
+                m_nBrList(objFmtp.m_nBrList),
+                m_nBrSend(objFmtp.m_nBrSend),
+                m_nBrRecv(objFmtp.m_nBrRecv),
+                m_nBwList(objFmtp.m_nBwList),
+                m_nBwSend(objFmtp.m_nBwSend),
+                m_nBwRecv(objFmtp.m_nBwRecv),
+                m_nCmr(objFmtp.m_nCmr),
+                m_nChAwRecv(objFmtp.m_nChAwRecv),
+                m_nReceivedChAwRecv(objFmtp.m_nReceivedChAwRecv),
+                m_bVisibleHfOnly(objFmtp.m_bVisibleHfOnly),
+                m_bVisibleEvsModeSwitch(objFmtp.m_bVisibleEvsModeSwitch),
+                m_bVisibleCmr(objFmtp.m_bVisibleCmr),
+                m_bVisibleChannelAwMode(objFmtp.m_bVisibleChannelAwMode),
+                m_bVisibleBrList(objFmtp.m_bVisibleBrList),
+                m_bVisibleBwList(objFmtp.m_bVisibleBwList),
+                m_bSendCmr(objFmtp.m_bSendCmr)
         {
         }
+
+        virtual ~EvsFmtp() override {}
+
+        EvsFmtp& operator=(IN const EvsFmtp& obj)
+        {
+            if (this != &obj)
+            {
+                AudioFmtp::operator=(obj);
+                m_nHfOnly = obj.m_nHfOnly;
+                m_nEvsModeSwitch = obj.m_nEvsModeSwitch;
+                m_nBrList = obj.m_nBrList;
+                m_nBrSend = obj.m_nBrSend;
+                m_nBrRecv = obj.m_nBrRecv;
+                m_nBwList = obj.m_nBwList;
+                m_nBwSend = obj.m_nBwSend;
+                m_nBwRecv = obj.m_nBwRecv;
+                m_nCmr = obj.m_nCmr;
+                m_nChAwRecv = obj.m_nChAwRecv;
+                m_nReceivedChAwRecv = obj.m_nReceivedChAwRecv;
+                m_bSendCmr = obj.m_bSendCmr;
+            }
+            return *this;
+        }
+
+        bool operator==(IN const EvsFmtp& obj) const
+        {
+            return (AudioFmtp::operator==(obj) && m_nHfOnly == obj.m_nHfOnly &&
+                    m_nEvsModeSwitch == obj.m_nEvsModeSwitch && m_nBrList == obj.m_nBrList &&
+                    m_nBrSend == obj.m_nBrSend && m_nBrRecv == obj.m_nBrRecv &&
+                    m_nBwList == obj.m_nBwList && m_nBwSend == obj.m_nBwSend &&
+                    m_nBwRecv == obj.m_nBwRecv && m_nCmr == obj.m_nCmr &&
+                    m_nChAwRecv == obj.m_nChAwRecv &&
+                    m_nReceivedChAwRecv == obj.m_nReceivedChAwRecv &&
+                    m_bVisibleHfOnly == obj.m_bVisibleHfOnly &&
+                    m_bVisibleEvsModeSwitch == obj.m_bVisibleEvsModeSwitch &&
+                    m_bVisibleCmr == obj.m_bVisibleCmr &&
+                    m_bVisibleChannelAwMode == obj.m_bVisibleChannelAwMode &&
+                    m_bVisibleBrList == obj.m_bVisibleBrList &&
+                    m_bVisibleBwList == obj.m_bVisibleBwList && m_bSendCmr == obj.m_bSendCmr);
+        }
+
+        bool operator!=(IN const EvsFmtp& obj) const { return !(*this == obj); }
+
+        inline void SetHfOnly(IN const IMS_UINT32 nHfOnly) { m_nHfOnly = nHfOnly; }
+        inline IMS_UINT32 GetHfOnly() { return m_nHfOnly; }
+        inline void SetEvsModeSwitch(IN const IMS_UINT32 nEvsModeSwitch)
+        {
+            m_nEvsModeSwitch = nEvsModeSwitch;
+        }
+        inline IMS_UINT32 GetEvsModeSwitch() { return m_nEvsModeSwitch; }
+        inline void SetBrList(IN const IMS_UINT32 nBrList) { m_nBrList = nBrList; }
+        inline IMS_UINT32 GetBrList() { return m_nBrList; }
+        inline void SetBrSend(IN const IMS_SINT32 nBrSend) { m_nBrSend = nBrSend; }
+        inline IMS_SINT32 GetBrSend() { return m_nBrSend; }
+        inline void SetBrRecv(IN const IMS_SINT32 nBrRecv) { m_nBrRecv = nBrRecv; }
+        inline IMS_SINT32 GetBrRecv() { return m_nBrRecv; }
+        inline void SetBwList(IN const IMS_UINT32 nBwList) { m_nBwList = nBwList; }
+        inline IMS_UINT32 GetBwList() { return m_nBwList; }
+        inline void SetBwSend(IN const IMS_SINT32 nBwSend) { m_nBwSend = nBwSend; }
+        inline IMS_SINT32 GetBwSend() { return m_nBwSend; }
+        inline void SetBwRecv(IN const IMS_SINT32 nBwRecv) { m_nBwRecv = nBwRecv; }
+        inline IMS_SINT32 GetBwRecv() { return m_nBwRecv; }
+        inline void SetCmr(IN const IMS_SINT32 nCmr) { m_nCmr = nCmr; }
+        inline IMS_SINT32 GetCmr() { return m_nCmr; }
+        inline void SetChAwRecv(IN const IMS_SINT32 nChAwRecv) { m_nChAwRecv = nChAwRecv; }
+        inline IMS_SINT32 GetChAwRecv() { return m_nChAwRecv; }
+        inline void SetReceivedChAwRecv(IN const IMS_SINT32 nReceivedChAwRecv)
+        {
+            m_nReceivedChAwRecv = nReceivedChAwRecv;
+        }
+        inline IMS_SINT32 GetReceivedChAwRecv() { return m_nReceivedChAwRecv; }
+        inline void SetShowHfOnly(IN const IMS_BOOL bVisibleHfOnly)
+        {
+            m_bVisibleHfOnly = bVisibleHfOnly;
+        }
+        inline IMS_BOOL IsHfOnlyVisible() { return m_bVisibleHfOnly; }
+        inline void SetShowEvsModeSwitch(IN const IMS_BOOL bVisibleEvsModeSwitch)
+        {
+            m_bVisibleEvsModeSwitch = bVisibleEvsModeSwitch;
+        }
+        inline IMS_BOOL IsEvsModeSwitchVisible() { return m_bVisibleEvsModeSwitch; }
+        inline void SetShowCmr(IN const IMS_BOOL bVisibleCmr) { m_bVisibleCmr = bVisibleCmr; }
+        inline IMS_BOOL IsCmrVisible() { return m_bVisibleCmr; }
+        inline void SetShowChannelAwMode(IN const IMS_BOOL bVisibleChannelAwMode)
+        {
+            m_bVisibleChannelAwMode = bVisibleChannelAwMode;
+        }
+        inline IMS_BOOL IsChannelAwModeVisible() { return m_bVisibleChannelAwMode; }
+        inline void SetShowBrList(IN const IMS_BOOL bVisibleBrList)
+        {
+            m_bVisibleBrList = bVisibleBrList;
+        }
+        inline IMS_BOOL IsBrListVisible() { return m_bVisibleBrList; }
+        inline void SetShowBwList(IN const IMS_BOOL bVisibleBwList)
+        {
+            m_bVisibleBwList = bVisibleBwList;
+        }
+        inline IMS_BOOL IsBwListVisible() { return m_bVisibleBwList; }
+        inline void SetSendCmr(IN const IMS_BOOL bSendCmr) { m_bSendCmr = bSendCmr; }
+        inline IMS_BOOL IsSendCmrEnabled() { return m_bSendCmr; }
+
+    private:
+        IMS_UINT32 m_nHfOnly;
+        IMS_UINT32 m_nEvsModeSwitch;
+        IMS_UINT32 m_nBrList;
+        IMS_SINT32 m_nBrSend;
+        IMS_SINT32 m_nBrRecv;
+        IMS_UINT32 m_nBwList;
+        IMS_SINT32 m_nBwSend;
+        IMS_SINT32 m_nBwRecv;
+        IMS_SINT32 m_nCmr;
+        IMS_SINT32 m_nChAwRecv;
+        IMS_SINT32 m_nReceivedChAwRecv;
+        IMS_BOOL m_bVisibleHfOnly;
+        IMS_BOOL m_bVisibleEvsModeSwitch;
+        IMS_BOOL m_bVisibleCmr;
+        IMS_BOOL m_bVisibleChannelAwMode;
+        IMS_BOOL m_bVisibleBrList;
+        IMS_BOOL m_bVisibleBwList;
+        IMS_BOOL m_bSendCmr;
     };
 
 public:
-    class TelephoneEventFmtp
+    /**
+     * TelephoneEventFmtp attributes are used within the SDP to carry TelephoneEvent parameters that
+     * provide extra configurations for the specific TelephoneEvent codecs described in the rtpmap.
+     */
+    class TelephoneEventFmtp : public AudioFmtp
     {
     public:
-        AString strEvents;
-
-    public:
         TelephoneEventFmtp() :
-                strEvents("0-15"){};
+                AudioFmtp(),
+                m_strEvents("0-15")
+        {
+        }
 
         explicit TelephoneEventFmtp(IN const AString& events) :
-                strEvents(events){};
+                AudioFmtp(),
+                m_strEvents(events)
+        {
+        }
 
         TelephoneEventFmtp(IN const TelephoneEventFmtp& objFmtp) :
-                strEvents(objFmtp.strEvents){};
+                AudioFmtp(),
+                m_strEvents(objFmtp.m_strEvents)
+        {
+        }
+
+        virtual ~TelephoneEventFmtp() override {}
 
         TelephoneEventFmtp& operator=(IN const TelephoneEventFmtp& obj)
         {
             if (this != &obj)
             {
-                strEvents = obj.strEvents;
+                m_strEvents = obj.m_strEvents;
             }
 
             return (*this);
         }
 
-        bool operator==(IN const TelephoneEventFmtp& obj) { return (strEvents == obj.strEvents); }
+        bool operator==(IN const TelephoneEventFmtp& obj) const
+        {
+            return (m_strEvents == obj.m_strEvents);
+        }
+
+        bool operator!=(IN const TelephoneEventFmtp& obj) const { return !(*this == obj); }
+
+        inline void SetEvents(IN const AString strEvents) { m_strEvents = strEvents; }
+        inline AString& GetEvents() { return m_strEvents; }
+
+    private:
+        AString m_strEvents;
     };
 
 public:
-    class Payload
+    /**
+     * Payload for audio is the actual audio data transported by RTP in a packet.
+     */
+    class Payload : public BasePayload
     {
-    public:
-        RtpMap objRtpMap;
-        void* pFmtp;
-
     public:
         Payload() :
-                pFmtp(IMS_NULL){};
+                BasePayload(1)
+        {
+        }
         Payload(IN const Payload& obj) :
-                objRtpMap(obj.objRtpMap),
-                pFmtp(IMS_NULL)
+                BasePayload(obj)
         {
-            if (objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB") ||
-                    objRtpMap.strPayloadType.EqualsIgnoreCase("AMR"))
+            CreateAudioFmtp(obj);
+        }
+
+        Payload& operator=(IN const Payload& obj)
+        {
+            if (this != &obj)
             {
-                pFmtp = new AudioProfile::AmrFmtp(
-                        *reinterpret_cast<AudioProfile::AmrFmtp*>(obj.pFmtp));
+                BasePayload::operator=(obj);
+                CreateAudioFmtp(obj);
             }
-            else if (objRtpMap.strPayloadType.EqualsIgnoreCase("EVS"))
+
+            return (*this);
+        }
+
+        virtual ~Payload() override {}
+
+        std::shared_ptr<BasePayload> clone() const override
+        {
+            return std::make_shared<Payload>(*this);
+        }
+
+        bool operator==(IN const Payload& obj) const
+        {
+            if (!BasePayload::operator==(obj))
             {
-                pFmtp = new AudioProfile::EvsFmtp(
-                        *reinterpret_cast<AudioProfile::EvsFmtp*>(obj.pFmtp));
+                return false;
             }
-            else if (objRtpMap.strPayloadType.EqualsIgnoreCase("telephone-event"))
+
+            if (m_pFmtp == IMS_NULL || obj.m_pFmtp == IMS_NULL)
             {
-                pFmtp = new AudioProfile::TelephoneEventFmtp(
-                        *reinterpret_cast<AudioProfile::TelephoneEventFmtp*>(obj.pFmtp));
+                return m_pFmtp == obj.m_pFmtp;
+            }
+
+            if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR-WB") ||
+                    m_objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR"))
+            {
+                return *std::static_pointer_cast<const AmrFmtp>(m_pFmtp) ==
+                        *std::static_pointer_cast<const AmrFmtp>(obj.m_pFmtp);
+            }
+            else if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("EVS"))
+            {
+                return *std::static_pointer_cast<const EvsFmtp>(m_pFmtp) ==
+                        *std::static_pointer_cast<const EvsFmtp>(obj.m_pFmtp);
+            }
+            else if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("telephone-event"))
+            {
+                return *std::static_pointer_cast<const TelephoneEventFmtp>(m_pFmtp) ==
+                        *std::static_pointer_cast<const TelephoneEventFmtp>(obj.m_pFmtp);
+            }
+
+            return *m_pFmtp == *obj.m_pFmtp;
+        }
+
+        bool operator!=(IN const Payload& obj) const { return !(*this == obj); }
+
+        inline void CreateAudioFmtp(IN const Payload& obj)
+        {
+            if (obj.m_pFmtp != IMS_NULL)
+            {
+                if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR-WB") ||
+                        m_objRtpMap.GetPayloadType().EqualsIgnoreCase("AMR"))
+                {
+                    m_pFmtp = std::make_shared<AudioProfile::AmrFmtp>(
+                            *std::static_pointer_cast<AudioProfile::AmrFmtp>(obj.m_pFmtp));
+                }
+                else if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("EVS"))
+                {
+                    m_pFmtp = std::make_shared<AudioProfile::EvsFmtp>(
+                            *std::static_pointer_cast<AudioProfile::EvsFmtp>(obj.m_pFmtp));
+                }
+                else if (m_objRtpMap.GetPayloadType().EqualsIgnoreCase("telephone-event"))
+                {
+                    m_pFmtp = std::make_shared<AudioProfile::TelephoneEventFmtp>(
+                            *std::static_pointer_cast<AudioProfile::TelephoneEventFmtp>(
+                                    obj.m_pFmtp));
+                }
             }
         }
 
-        ~Payload()
-        {
-            if (this->pFmtp == IMS_NULL)
-            {
-                return;
-            }
+        inline void SetFmtp(IN std::shared_ptr<AudioFmtp> pFmtp) { m_pFmtp = pFmtp; }
+        inline std::shared_ptr<AudioFmtp> GetFmtp() { return m_pFmtp; }
 
-            if (objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB") ||
-                    objRtpMap.strPayloadType.EqualsIgnoreCase("AMR"))
-            {
-                delete reinterpret_cast<AudioProfile::AmrFmtp*>(this->pFmtp);
-            }
-            else if (objRtpMap.strPayloadType.EqualsIgnoreCase("EVS"))
-            {
-                delete reinterpret_cast<AudioProfile::EvsFmtp*>(this->pFmtp);
-            }
-            else if (objRtpMap.strPayloadType.EqualsIgnoreCase("telephone-event"))
-            {
-                delete reinterpret_cast<AudioProfile::TelephoneEventFmtp*>(this->pFmtp);
-            }
-        }
-
-    public:
-        void SetRtpMap(IN const IMS_UINT32 nPayloadNum, IN const AString& strPayloadType,
-                IN const IMS_UINT32 nSamplingRate, IN const IMS_SINT32 nChannel)
-        {
-            objRtpMap.nPayloadNum = nPayloadNum;
-            objRtpMap.strPayloadType = strPayloadType;
-            objRtpMap.nSamplingRate = nSamplingRate;
-            objRtpMap.nChannel = nChannel;
-        }
-
-        void SetRtpMap(IN const RtpMap& objMap)
-        {
-            objRtpMap.nPayloadNum = objMap.nPayloadNum;
-            objRtpMap.strPayloadType = objMap.strPayloadType;
-            objRtpMap.nSamplingRate = objMap.nSamplingRate;
-            objRtpMap.nChannel = objMap.nChannel;
-        };
-    };
-
-    class CapaNego
-    {
-    public:
-        ImsMap<IMS_SINT32, AString> mapTransportCapa;
-        ImsMap<IMS_SINT32, AString> mapAttributeCapa;
-        ImsList<AString> lstPotentialConfig;
-
-        AString strNegotiatedAcfg;
-        IMS_BOOL bIsAttCapaInPcfg;
-
-    public:
-        CapaNego() :
-                strNegotiatedAcfg(""),
-                bIsAttCapaInPcfg(IMS_FALSE){};
-
-        CapaNego(const CapaNego& obj) :
-                mapTransportCapa(obj.mapTransportCapa),
-                mapAttributeCapa(obj.mapAttributeCapa),
-                lstPotentialConfig(obj.lstPotentialConfig),
-                strNegotiatedAcfg(obj.strNegotiatedAcfg),
-                bIsAttCapaInPcfg(obj.bIsAttCapaInPcfg)
-        {
-        }
+    private:
+        std::shared_ptr<AudioFmtp> m_pFmtp;
     };
 
 public:
-    class RTCPXRAttributes
+    class RtcpXrAttributes
     {
     public:
-        IMS_BOOL bSupportStatisticMetrics;
-        IMS_BOOL bSupportVoipMetrics;
-        IMS_BOOL bSupportPacketLossRle;
-        IMS_BOOL bSupportPacketDuplicatedRle;
+        RtcpXrAttributes() :
+                m_bSupportStatisticMetrics(IMS_FALSE),
+                m_bSupportVoipMetrics(IMS_FALSE),
+                m_bSupportPacketLossRle(IMS_FALSE),
+                m_bSupportPacketDuplicatedRle(IMS_FALSE)
+        {
+        }
 
-    public:
-        RTCPXRAttributes() :
-                bSupportStatisticMetrics(IMS_FALSE),
-                bSupportVoipMetrics(IMS_FALSE),
-                bSupportPacketLossRle(IMS_FALSE),
-                bSupportPacketDuplicatedRle(IMS_FALSE){};
-
-        RTCPXRAttributes& operator=(const RTCPXRAttributes& p)
+        RtcpXrAttributes& operator=(const RtcpXrAttributes& p)
         {
             if (this != &p)
             {
-                bSupportStatisticMetrics = p.bSupportStatisticMetrics;
-                bSupportVoipMetrics = p.bSupportVoipMetrics;
-                bSupportPacketLossRle = p.bSupportPacketLossRle;
-                bSupportPacketDuplicatedRle = p.bSupportPacketDuplicatedRle;
+                m_bSupportStatisticMetrics = p.m_bSupportStatisticMetrics;
+                m_bSupportVoipMetrics = p.m_bSupportVoipMetrics;
+                m_bSupportPacketLossRle = p.m_bSupportPacketLossRle;
+                m_bSupportPacketDuplicatedRle = p.m_bSupportPacketDuplicatedRle;
             }
             return (*this);
         }
 
-        bool operator==(IN const RTCPXRAttributes& obj) const
+        bool operator==(IN const RtcpXrAttributes& obj) const
         {
-            return (bSupportStatisticMetrics == obj.bSupportStatisticMetrics &&
-                    bSupportVoipMetrics == obj.bSupportVoipMetrics &&
-                    bSupportPacketLossRle == obj.bSupportPacketLossRle &&
-                    bSupportPacketDuplicatedRle == obj.bSupportPacketDuplicatedRle);
+            return (m_bSupportStatisticMetrics == obj.m_bSupportStatisticMetrics &&
+                    m_bSupportVoipMetrics == obj.m_bSupportVoipMetrics &&
+                    m_bSupportPacketLossRle == obj.m_bSupportPacketLossRle &&
+                    m_bSupportPacketDuplicatedRle == obj.m_bSupportPacketDuplicatedRle);
         }
+
+        bool operator!=(IN const RtcpXrAttributes& obj) const { return !(*this == obj); }
+
+        inline void SetSupportStatisticMetrics(IN const IMS_BOOL bSupportStatisticMetrics)
+        {
+            m_bSupportStatisticMetrics = bSupportStatisticMetrics;
+        }
+        inline IMS_BOOL IsStatisticMetricsSupported() { return m_bSupportStatisticMetrics; }
+        inline void SetSupportVoipMetrics(IN const IMS_BOOL bSupportVoipMetrics)
+        {
+            m_bSupportVoipMetrics = bSupportVoipMetrics;
+        }
+        inline IMS_BOOL IsVoipMetricsSupported() { return m_bSupportVoipMetrics; }
+        inline void SetSupportPacketLossRle(IN const IMS_BOOL bSupportPacketLossRle)
+        {
+            m_bSupportPacketLossRle = bSupportPacketLossRle;
+        }
+        inline IMS_BOOL IsPacketLossRleSupported() { return m_bSupportPacketLossRle; }
+        inline void SetSupportPacketDuplicatedRle(IN const IMS_BOOL bSupportPacketDuplicatedRle)
+        {
+            m_bSupportPacketDuplicatedRle = bSupportPacketDuplicatedRle;
+        }
+        inline IMS_BOOL IsPacketDuplicatedRleSupported() { return m_bSupportPacketDuplicatedRle; }
+
+    private:
+        IMS_BOOL m_bSupportStatisticMetrics;
+        IMS_BOOL m_bSupportVoipMetrics;
+        IMS_BOOL m_bSupportPacketLossRle;
+        IMS_BOOL m_bSupportPacketDuplicatedRle;
     };
 
 public:
     enum
     {
         // COMMON PARAMETER
-        DEFAULT_PTIME = 20,
-        DEFAULT_MAXPTIME = 240,
+        DEFAULT_PTIME = -1,
+        DEFAULT_MAXPTIME = -1,
     };
 
-    IpAddress objIpAddr;
-    IMS_UINT32 nDataPort;
-    IMS_UINT32 nControlPort;
-    AString strTransportType;
-    IMS_UINT32 nRtcpInterval;
-    IMS_SINT32 nBandwidthAs;
-    IMS_SINT32 nBandwidthRs;
-    IMS_SINT32 nBandwidthRr;
-    ImsList<Payload*> lstPayload;
-    MEDIA_DIRECTION eDirection;
-    IMS_SINT32 nPtime;
-    IMS_SINT32 nMaxPtime;
-    ImsVector<AString> objCandidateAttr;
-    IMS_SINT32 nNegotiatedPayloadIndex;
-    IMS_BOOL bIsOfferCase;
-    CapaNego objCapaNego;
-    IMS_BOOL bSupportRtcpXr;
-    RTCPXRAttributes objRtcpXrAttr;
-    IMS_BOOL bRtcpDisableBeforeSetup;
-
-public:
     AudioProfile() :
-            objIpAddr(IpAddress::IPv6NONE),
-            nDataPort(0),
-            nControlPort(0),
-            strTransportType("RTP/AVP"),
-            nRtcpInterval(0),
-            nBandwidthAs(0),
-            nBandwidthRs(0),
-            nBandwidthRr(0),
-            lstPayload(ImsList<Payload*>()),
-            eDirection(MEDIA_DIRECTION_SEND_RECEIVE),
-            nPtime(0),
-            nMaxPtime(0),
-            objCandidateAttr(ImsVector<AString>()),
-            nNegotiatedPayloadIndex(-1),
-            bIsOfferCase(IMS_FALSE),
-            objCapaNego(CapaNego()),
-            bSupportRtcpXr(IMS_FALSE),
-            objRtcpXrAttr(RTCPXRAttributes()),
-            bRtcpDisableBeforeSetup(IMS_FALSE){};
-
-    ~AudioProfile()
+            MediaBaseProfile(
+                    IpAddress::IPv6NONE, 0, 0, "RTP/AVP", 0, 0, 0, 0, MEDIA_DIRECTION_SEND_RECEIVE),
+            m_nPtime(0),
+            m_nMaxPtime(0),
+            m_objCandidateAttr(ImsVector<AString>()),
+            m_bSupportRtcpXr(IMS_FALSE),
+            m_objRtcpXrAttr(RtcpXrAttributes()),
+            m_bAnbr(IMS_FALSE)
     {
-        while (lstPayload.GetSize() > 0)
-        {
-            AudioProfile::Payload* pPayload = lstPayload.GetAt(0);
+    }
 
-            if (pPayload != IMS_NULL)
-            {
-                delete pPayload;
-            }
+    virtual ~AudioProfile() override {}
 
-            lstPayload.RemoveAt(0);
-        }
-    };
+    AudioProfile(IN const AudioProfile& obj) :
+            MediaBaseProfile(obj),
+            m_nPtime(obj.m_nPtime),
+            m_nMaxPtime(obj.m_nMaxPtime),
+            m_objCandidateAttr(obj.m_objCandidateAttr),
+            m_bSupportRtcpXr(obj.m_bSupportRtcpXr),
+            m_objRtcpXrAttr(obj.m_objRtcpXrAttr),
+            m_bAnbr(obj.m_bAnbr)
+    {
+    }
 
     AudioProfile& operator=(IN const AudioProfile& obj)
     {
         if (this != &obj)
         {
-            copy(&obj);
+            MediaBaseProfile::operator=(obj);
+            m_nPtime = obj.m_nPtime;
+            m_nMaxPtime = obj.m_nMaxPtime;
+            m_objCandidateAttr = obj.m_objCandidateAttr;
+            m_bSupportRtcpXr = obj.m_bSupportRtcpXr;
+            m_objRtcpXrAttr = obj.m_objRtcpXrAttr;
+            m_bAnbr = obj.m_bAnbr;
         }
         return (*this);
     }
 
     bool operator==(IN const AudioProfile& obj) const
     {
-        return (objIpAddr == obj.objIpAddr && nDataPort == obj.nDataPort &&
-                nControlPort == obj.nControlPort && strTransportType == obj.strTransportType &&
-                nRtcpInterval == obj.nRtcpInterval && nBandwidthAs == obj.nBandwidthAs &&
-                nBandwidthRs == obj.nBandwidthRs && nBandwidthRr == obj.nBandwidthRr &&
-                bSupportRtcpXr == obj.bSupportRtcpXr && objRtcpXrAttr == obj.objRtcpXrAttr &&
-                bRtcpDisableBeforeSetup == obj.bRtcpDisableBeforeSetup);
+        return (MediaBaseProfile::operator==(obj) && m_nPtime == obj.m_nPtime &&
+                m_nMaxPtime == obj.m_nMaxPtime && m_objCandidateAttr == obj.m_objCandidateAttr &&
+                m_bSupportRtcpXr == obj.m_bSupportRtcpXr &&
+                m_objRtcpXrAttr == obj.m_objRtcpXrAttr && m_bAnbr == obj.m_bAnbr);
     }
 
-    AudioProfile(IN const AudioProfile& obj) { copy(&obj); }
+    bool operator!=(IN const AudioProfile& obj) const { return !(*this == obj); }
+
+    Payload* GetPayloadAt(IN IMS_UINT32 nIndex) override
+    {
+        BasePayload* pPayload = MediaBaseProfile::GetPayloadAt(nIndex);
+        return (pPayload != IMS_NULL) ? static_cast<Payload*>(pPayload) : IMS_NULL;
+    }
+
+    inline void AddPayload(Payload* pPayload)
+    {
+        MediaBaseProfile::AddPayload(std::shared_ptr<Payload>(pPayload));
+    }
+
+    inline void AddPayload(std::shared_ptr<Payload> pPayload)
+    {
+        MediaBaseProfile::AddPayload(pPayload);
+    }
+
+    inline void SetPtime(IN const IMS_SINT32 nPtime) { m_nPtime = nPtime; }
+    inline IMS_SINT32 GetPtime() { return m_nPtime; }
+    inline void SetMaxPtime(IN const IMS_SINT32 nMaxPtime) { m_nMaxPtime = nMaxPtime; }
+    inline IMS_SINT32 GetMaxPtime() { return m_nMaxPtime; }
+    inline void SetCandidateAttr(IN const ImsVector<AString> objCandidateAttr)
+    {
+        m_objCandidateAttr = objCandidateAttr;
+    }
+    inline ImsVector<AString>& GetCandidateAttr() { return m_objCandidateAttr; }
+    inline void SetSupportRtcpXr(IN const IMS_BOOL bSupportRtcpXr)
+    {
+        m_bSupportRtcpXr = bSupportRtcpXr;
+    }
+    inline IMS_BOOL IsRtcpXrSupported() { return m_bSupportRtcpXr; }
+    inline void SetRtcpXrAttr(IN const RtcpXrAttributes objRtcpXrAttr)
+    {
+        m_objRtcpXrAttr = objRtcpXrAttr;
+    }
+    inline RtcpXrAttributes& GetRtcpXrAttr() { return m_objRtcpXrAttr; }
+    inline void SetAnbr(IN const IMS_BOOL bAnbr) { m_bAnbr = bAnbr; }
+    inline IMS_BOOL IsAnbrSupported() { return m_bAnbr; }
 
 private:
-    void copy(IN const AudioProfile* pProfile)
-    {
-        if (pProfile == IMS_NULL)
-        {
-            return;
-        }
-
-        objIpAddr = pProfile->objIpAddr;
-        nDataPort = pProfile->nDataPort;
-        nControlPort = pProfile->nControlPort;
-        strTransportType = pProfile->strTransportType;
-        nRtcpInterval = pProfile->nRtcpInterval;
-        nBandwidthAs = pProfile->nBandwidthAs;
-        nBandwidthRs = pProfile->nBandwidthRs;
-        nBandwidthRr = pProfile->nBandwidthRr;
-        bSupportRtcpXr = pProfile->bSupportRtcpXr;
-        objRtcpXrAttr = pProfile->objRtcpXrAttr;
-        bRtcpDisableBeforeSetup = pProfile->bRtcpDisableBeforeSetup;
-
-        while (lstPayload.GetSize() > 0)
-        {
-            AudioProfile::Payload* pPayload = lstPayload.GetAt(0);
-
-            if (pPayload != IMS_NULL)
-            {
-                delete pPayload;
-            }
-
-            lstPayload.RemoveAt(0);
-        }
-
-        for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
-        {
-            AudioProfile::Payload* pNewPayload =
-                    new AudioProfile::Payload(*pProfile->lstPayload.GetAt(i));
-            lstPayload.Append(pNewPayload);
-        }
-
-        eDirection = pProfile->eDirection;
-        nPtime = pProfile->nPtime;
-        nMaxPtime = pProfile->nMaxPtime;
-        objCandidateAttr = pProfile->objCandidateAttr;
-        bIsOfferCase = pProfile->bIsOfferCase;
-        objCapaNego = pProfile->objCapaNego;
-        nNegotiatedPayloadIndex = -1;
-    }
+    IMS_SINT32 m_nPtime;
+    IMS_SINT32 m_nMaxPtime;
+    ImsVector<AString> m_objCandidateAttr;
+    IMS_BOOL m_bSupportRtcpXr;
+    RtcpXrAttributes m_objRtcpXrAttr;
+    IMS_BOOL m_bAnbr;
 };
 
 #endif

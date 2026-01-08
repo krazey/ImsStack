@@ -24,9 +24,6 @@ class AosHandleUce : public AosHandle
 public:
     AosHandleUce(IN IAosAppContext* piAppContext, IN const AString& strAppId,
             IN const AString& strServiceId, IN const IMS_SINT32 nServiceType);
-    virtual ~AosHandleUce();
-
-private:
-    friend class AosHandleUceTest;
+    ~AosHandleUce() override;
 };
 #endif  // AOS_HANDLE_UCE_H_

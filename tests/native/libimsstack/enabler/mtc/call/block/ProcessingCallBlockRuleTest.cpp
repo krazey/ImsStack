@@ -15,10 +15,14 @@
  */
 
 #include "ImsList.h"
+#include "MtcDef.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
+#include "call/UpdatingInfo.h"
 #include "call/block/MockIMtcBlockRule.h"
 #include "call/block/ProcessingCallBlockRule.h"
+#include "call/state/UpdatingState.h"
+#include "emergency/MockIMtcEmergencyServiceManager.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -31,9 +35,12 @@ class ProcessingCallBlockRuleTest : public ::testing::Test
 public:
     MockIMtcCallContext objContext;
     MockIMtcCallContext objEmergencyCallContext;
+    MockIMtcEmergencyServiceManager objEmergencyServiceManager;
     CallInfo objCallInfo;
     CallInfo objEmergencyCallInfo;
+    UpdatingInfo* pUpdatingInfo;
 
+    // cppcheck-suppress unusedStructMember
     MockIMtcBlockRuleCheckListener objListener;
     ImsList<IMtcCall*> lstOtherCalls;
     ProcessingCallBlockRule* pBlockRule;
@@ -42,12 +49,16 @@ protected:
     virtual void SetUp() override
     {
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+        ON_CALL(objContext, GetEmergencyServiceManager)
+                .WillByDefault(ReturnRef(objEmergencyServiceManager));
 
-        objEmergencyCallInfo.bEmergency = IMS_TRUE;
+        objEmergencyCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
         ON_CALL(objEmergencyCallContext, GetCallInfo)
                 .WillByDefault(ReturnRef(objEmergencyCallInfo));
 
         pBlockRule = new ProcessingCallBlockRule(objContext);
+        pUpdatingInfo = new UpdatingInfo(objContext);
+        ON_CALL(objContext, GetUpdatingInfo).WillByDefault(ReturnRef(*pUpdatingInfo));
     }
 
     virtual void TearDown() override
@@ -59,6 +70,7 @@ protected:
             delete lstOtherCalls.GetAt(nIndex);
         }
         lstOtherCalls.Clear();
+        delete pUpdatingInfo;
     }
 
     MockIMtcCall* CreateMockIMtcCall(IMtcCall::State eState)
@@ -80,6 +92,22 @@ protected:
         return pCall;
     }
 };
+
+TEST_F(ProcessingCallBlockRuleTest, CheckReturnsUnblockedIfEmergencyRoutingCall)
+{
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    Result objResult = pBlockRule->Check(objListener);
+
+    EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
+}
+
+TEST_F(ProcessingCallBlockRuleTest, CheckReturnsUnblockedIfNormalRoutingCall)
+{
+    objCallInfo.eEmergencyType = EmergencyType::NORMAL_ROUTING;
+    Result objResult = pBlockRule->Check(objListener);
+
+    EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
+}
 
 TEST_F(ProcessingCallBlockRuleTest, CheckReturnsBlockedIfIdleCallExists)
 {
@@ -125,7 +153,7 @@ TEST_F(ProcessingCallBlockRuleTest, CheckReturnsBlockedIfOutgoingCallExists)
     EXPECT_EQ(CallReasonInfo(CODE_REJECT_ONGOING_CALL_SETUP), objResult.objReason);
 }
 
-TEST_F(ProcessingCallBlockRuleTest, CheckReturnsUnblockedForMoIfUpdatingCallExists)
+TEST_F(ProcessingCallBlockRuleTest, CheckReturnsUnblockedForMoIfConvertingCallExists)
 {
     objCallInfo.ePeerType = PeerType::MO;
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::UPDATING));
@@ -139,13 +167,49 @@ TEST_F(ProcessingCallBlockRuleTest, CheckReturnsUnblockedForMoIfUpdatingCallExis
 TEST_F(ProcessingCallBlockRuleTest, CheckReturnsBlockedForMtIfUpdatingCallExists)
 {
     objCallInfo.ePeerType = PeerType::MT;
+    objContext.GetUpdatingInfo().SetRequestingType(UpdateType::SESSION);
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::UPDATING));
     ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
     Result objResult = pBlockRule->Check(objListener);
 
     EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
-    EXPECT_EQ(CallReasonInfo(CODE_REJECT_ONGOING_CALL_UPGRADE), objResult.objReason);
+}
+
+TEST_F(ProcessingCallBlockRuleTest, CheckReturnsUnblockedForMtIfHoldUpdatingCallExists)
+{
+    objCallInfo.ePeerType = PeerType::MT;
+    objContext.GetUpdatingInfo().SetRequestingType(UpdateType::HOLD);
+    lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::UPDATING));
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
+
+    Result objResult = pBlockRule->Check(objListener);
+
+    EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
+}
+
+TEST_F(ProcessingCallBlockRuleTest, CheckReturnsBlockedForMoIfEmergencyServiceIsOpening)
+{
+    objCallInfo.ePeerType = PeerType::MO;
+    ON_CALL(objEmergencyServiceManager, GetState)
+            .WillByDefault(Return(IEmergencyServiceController::State::OPENING));
+
+    Result objResult = pBlockRule->Check(objListener);
+
+    EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
+    EXPECT_EQ(CallReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE), objResult.objReason);
+}
+
+TEST_F(ProcessingCallBlockRuleTest, CheckReturnsBlockedForMtIfEmergencyServiceIsOpening)
+{
+    objCallInfo.ePeerType = PeerType::MT;
+    ON_CALL(objEmergencyServiceManager, GetState)
+            .WillByDefault(Return(IEmergencyServiceController::State::OPENING));
+
+    Result objResult = pBlockRule->Check(objListener);
+
+    EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
+    EXPECT_EQ(CallReasonInfo(CODE_REJECT_ONGOING_E911_CALL), objResult.objReason);
 }
 
 TEST_F(ProcessingCallBlockRuleTest, CheckReturnsBlockedForMoIfEmergencyCallExists)

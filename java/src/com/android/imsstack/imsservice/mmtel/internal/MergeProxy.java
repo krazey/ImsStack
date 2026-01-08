@@ -433,6 +433,42 @@ public class MergeProxy extends ConferenceProxy {
         });
     }
 
+    private void notifyTriggerAnbrQueryReceived(MtcCall call, int mediaType, int direction,
+            int bitsPerSecond) {
+        postAndRun(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    for (ListenerWrapper lw : mListeners) {
+                        if (lw.mListener != null) {
+                            lw.mListener.onTriggerAnbrQueryReceived(call, mediaType, direction,
+                                    bitsPerSecond);
+                        }
+                    }
+                } catch (Throwable t) {
+                    loge("notifyTriggerAnbrQueryReceived", t);
+                }
+            }
+        });
+    }
+
+    private void notifyIncomingDtmfReceived(MtcCall call, int numDtmfDigit) {
+        postAndRun(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    for (ListenerWrapper lw : mListeners) {
+                        if (lw.mListener != null) {
+                            lw.mListener.onNotifyIncomingDtmfReceived(call, numDtmfDigit);
+                        }
+                    }
+                } catch (Throwable t) {
+                    loge("notifyIncomingDtmfReceived", t);
+                }
+            }
+        });
+    }
+
     private void notifyAudioSessionClosed(MtcCall call) {
         postAndRun(new Runnable() {
             @Override
@@ -791,6 +827,27 @@ public class MergeProxy extends ConferenceProxy {
                 call = mForegroundCall;
             }
             notifyCallQualityChanged(call, callQuality);
+        }
+
+        @Override
+        public void onTriggerAnbrQueryReceived(MtcCall call, int mediaType, int direction,
+                int bitsPerSecond) {
+            logi("onTriggerAnbrQueryReceived");
+
+            if (call.equals(getConferenceCall())) {
+                call = mForegroundCall;
+            }
+            notifyTriggerAnbrQueryReceived(call, mediaType, direction, bitsPerSecond);
+        }
+
+        @Override
+        public void onNotifyIncomingDtmfReceived(MtcCall call, int numDtmfDigit) {
+            logi("onNotifyIncomingDtmfReceived");
+
+            if (call.equals(getConferenceCall())) {
+                call = mForegroundCall;
+            }
+            notifyIncomingDtmfReceived(call, numDtmfDigit);
         }
 
         @Override

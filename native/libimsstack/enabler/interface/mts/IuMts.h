@@ -18,8 +18,9 @@
 #define IUMTS_H_
 
 #include "ImsMessageDef.h"
+#include "ImsTypeDef.h"
 
-LOCAL const IMS_CHAR* STR_MTS_SVC_THREAD_NAME[]= {"JniMtsServiceThread_0", "JniMtsServiceThread_1"};
+LOCAL const IMS_CHAR* STR_MTS_APP_THREAD_NAME[] = {"JniMtsAppThread_0", "JniMtsAppThread_1"};
 
 #define MTS_MAX_PDU_DATA_LEN 512
 

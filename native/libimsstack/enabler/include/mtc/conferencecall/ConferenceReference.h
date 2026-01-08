@@ -17,17 +17,17 @@
 #ifndef CONFERENCE_REFERENCE_H_
 #define CONFERENCE_REFERENCE_H_
 
-#include "ImsList.h"
 #include "AString.h"
 #include "IReferenceListener.h"
-#include "MtcDef.h"
+#include "ImsList.h"
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "conferencecall/IConferenceReference.h"
 
 class CallConnectionIdManager;
-class IReference;
-class IMtcContext;
 class IConferenceReferenceListener;
+class IMtcContext;
+class IReference;
 
 class ConferenceReference final : public IReferenceListener, public IConferenceReference
 {
@@ -36,7 +36,7 @@ public:
             IN ConfUser* pConfUser, IN IConferenceReferenceListener& objListener);
     explicit ConferenceReference(IN IMtcContext& objContext, IN CallKey nConfCallKey,
             IN ImsList<ConfUser*>& objConfUsers, IN IConferenceReferenceListener& objListener);
-    virtual ~ConferenceReference();
+    virtual ~ConferenceReference() override;
     ConferenceReference(IN const ConferenceReference&) = delete;
     ConferenceReference& operator=(IN const ConferenceReference&) = delete;
 

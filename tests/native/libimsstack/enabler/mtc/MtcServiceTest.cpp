@@ -15,48 +15,60 @@
  */
 
 #include "CarrierConfig.h"
-#include "Configuration.h"
+#include "IConfiguration.h"
 #include "IIpcan.h"
 #include "IMtcService.h"
+#include "INetworkWatcher.h"
+#include "IPageMessage.h"
 #include "ImsAosParameter.h"
-#include "ImsServiceConfig.h"
-#include "ImsServiceConfigTypeDef.h"
+#include "ImsAosReason.h"
+#include "ImsEventDef.h"
+#include "ImsList.h"
 #include "ImsVector.h"
 #include "JniEnablerConnector.h"
+#include "MockICapabilities.h"
 #include "MockICarrierConfig.h"
+#include "MockICoreService.h"
 #include "MockIFeatureCaps.h"
 #include "MockIJniEnabler.h"
 #include "MockIJniMtcServiceThread.h"
+#include "MockIMessage.h"
 #include "MockIMtcCallController.h"
 #include "MockIMtcContext.h"
+#include "MockIMtcImsEventReceiver.h"
+#include "MockIMtcService.h"
+#include "MockIPageMessage.h"
+#include "MockIReference.h"
+#include "MockISession.h"
+#include "MtcDef.h"
 #include "MtcService.h"
 #include "PlatformContext.h"
-#include "TestConfigService.h"
+#include "SipStatusCode.h"
+#include "TestConnector.h"
 #include "TestPhoneInfoService.h"
 #include "call/MockIMtcCallManager.h"
 #include "call/MtcCallController.h"
 #include "call/radio/MockIMtcRadioChecker.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/IPageMessage.h"
-#include "core/MockICapabilities.h"
-#include "core/MockICoreService.h"
-#include "core/MockIMessage.h"
-#include "core/MockIReference.h"
-#include "core/MockISession.h"
 #include "emergency/MockIMtcEmergencyServiceManager.h"
 #include "helper/ISrvccStateListener.h"
 #include "helper/MockIMtcAosConnector.h"
 #include "helper/MockIMtcAosStateListener.h"
+#include "helper/MockIMtcNetworkWatcherListener.h"
+#include "helper/MockIPassiveTimerHolder.h"
 #include "helper/MockISrvccStateListener.h"
 #include "helper/MockMtcAosEventHandler.h"
+#include "helper/MockMtcNetworkWatcher.h"
 #include "helper/MockSrvccStateManager.h"
 #include "service/IReasonInfo.h"
 #include <gtest/gtest.h>
+#include <vector>
 
 LOCAL IMS_SINT32 SLOT_ID = 0;
 
 using ::testing::_;
+using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -94,6 +106,12 @@ public:
         delete m_pAosConnector;
         m_pAosConnector = pAosConnector;
     }
+
+    inline void ReplaceNetworkWatcher(IN MtcNetworkWatcher* pNetworkWatcher)
+    {
+        delete m_pNetworkWatcher;
+        m_pNetworkWatcher = pNetworkWatcher;
+    }
 };
 
 LOCAL IMS_UINTP FAKE_ADDRESS = 1;
@@ -102,8 +120,7 @@ class MtcServiceTest : public ::testing::Test
 {
 public:
     MockIMtcContext objMockContext;
-    MockIMtcConfigurationManager* pMockConfigurationManager;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     MockIMtcEmergencyServiceManager* pMockEmergencyManager;
     MockIMtcCallManager objMockCallManager;
     MockIMtcCallController objMockCallController;
@@ -116,8 +133,11 @@ public:
     MockIJniEnabler objMockJniEnabler;
     MockIJniMtcServiceThread objMockServiceThread;
     JniEnablerConnector* pConnector;
-    TestConfigService objConfigService;
     TestPhoneInfoService objPhoneInfoService;
+    MockIMtcImsEventReceiver objEventReceiver;
+    TestConnector objConnector;
+    MockMtcNetworkWatcher* pNetworkWatcher;
+    MockIPassiveTimerHolder objPassiveTimerHolder;
 
     MtcService* pNormalMtcService;
     MtcService* pEmergencyMtcService;
@@ -125,14 +145,12 @@ public:
 protected:
     virtual void SetUp() override
     {
-        pMockConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pMockConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objMockContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
 
         ON_CALL(objMockContext, GetSlotId).WillByDefault(Return(SLOT_ID));
 
-        ON_CALL(objMockContext, GetServiceByType(_)).WillByDefault(Return(nullptr));
         pMockEmergencyManager = new MockIMtcEmergencyServiceManager();
         ON_CALL(objMockContext, GetEmergencyServiceManager)
                 .WillByDefault(ReturnRef(*pMockEmergencyManager));
@@ -145,30 +163,33 @@ protected:
         pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_SERVICE, &objMockJniEnabler);
         ON_CALL(objMockJniEnabler, GetJniThread).WillByDefault(Return(&objMockServiceThread));
 
-        ON_CALL(*pMockConfigurationManager,
-                IsUseCarrierSpecificRejectPhraseForIncomingCallDuringNoRegistration)
+        ON_CALL(*pConfigurationProxy,
+                GetBoolean(ConfigVoice::
+                                KEY_USE_CARRIER_SPECIFIC_REJECT_PHRASE_FOR_INCOMING_CALL_DURING_NO_REGISTRATION_BOOL))
                 .WillByDefault(Return(IMS_TRUE));
+        ON_CALL(objMockContext, GetImsEventReceiver).WillByDefault(ReturnRef(objEventReceiver));
+        ON_CALL(objMockContext, GetPassiveTimerHolder)
+                .WillByDefault(ReturnRef(objPassiveTimerHolder));
 
-        PlatformContext::GetInstance()->SetService(
-                PlatformContext::SERVICE_CONFIG, &objConfigService);
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_PHONE_INFO, &objPhoneInfoService);
 
-        // to make Connector::Open() return valid IConnector even though MtcApp is not created
-        // during the test.
-        Configuration::GetInstance()->SetAppConfig(
-                ImsServiceConfig::GetAppName(ImsAppId::MTC), SLOT_ID);
-
         pNormalMtcService = CreateNormalService();
         pEmergencyMtcService = CreateEmergencyService();
+
+        ON_CALL(objMockContext, GetServiceByType(ServiceType::NORMAL))
+                .WillByDefault(Return(pNormalMtcService));
+        ON_CALL(objMockContext, GetServiceByType(ServiceType::EMERGENCY))
+                .WillByDefault(Return(pEmergencyMtcService));
     }
 
     virtual void TearDown() override
     {
-        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
 
         delete pMockEmergencyManager;
+        ON_CALL(objMockContext, GetServiceByType(ServiceType::NORMAL))
+                .WillByDefault(Return(IMS_NULL));
         delete pNormalMtcService;
         delete pEmergencyMtcService;
         delete pConnector;
@@ -189,6 +210,9 @@ protected:
 
         pMockAosConnector = new MockIMtcAosConnector();
         pService->ReplaceAosConnector(pMockAosConnector);
+
+        pNetworkWatcher = new MockMtcNetworkWatcher(*pService, objMockContext.GetSlotId());
+        pService->ReplaceNetworkWatcher(pNetworkWatcher);
         return pService;
     }
 
@@ -228,11 +252,13 @@ TEST_F(MtcServiceTest, AddSrvccStateListenerThenBeingNotified)
     MockISrvccStateListener* pSrvccListener = new MockISrvccStateListener();
     pNormalMtcService->AddSrvccStateListener(pSrvccListener);
 
-    EXPECT_CALL(*pSrvccListener, OnSrvccStateUpdated(SrvccState::STARTED)).Times(1);
-    EXPECT_CALL(*pSrvccListener, OnSrvccStateUpdated(SrvccState::SUCCEEDED)).Times(1);
-
-    pNormalMtcService->UpdateSrvccState(SrvccState::STARTED);
-    pNormalMtcService->UpdateSrvccState(SrvccState::SUCCEEDED);
+    std::vector<SrvccState> objSrvccState{SrvccState::IDLE, SrvccState::STARTED,
+            SrvccState::SUCCEEDED, SrvccState::FAILED, SrvccState::CANCELED};
+    for (SrvccState eSrvccState : objSrvccState)
+    {
+        EXPECT_CALL(*pSrvccListener, OnSrvccStateUpdated(eSrvccState));
+        pNormalMtcService->UpdateSrvccState(eSrvccState);
+    }
 }
 
 TEST_F(MtcServiceTest, RemoveSrvccStateListenerThenNotBeingNotified)
@@ -241,14 +267,79 @@ TEST_F(MtcServiceTest, RemoveSrvccStateListenerThenNotBeingNotified)
     pNormalMtcService->AddSrvccStateListener(pSrvccListener);
     pNormalMtcService->RemoveSrvccStateListener(pSrvccListener);
 
-    EXPECT_CALL(*pSrvccListener, OnSrvccStateUpdated(SrvccState::STARTED)).Times(0);
+    std::vector<SrvccState> objSrvccState{SrvccState::IDLE, SrvccState::STARTED,
+            SrvccState::SUCCEEDED, SrvccState::FAILED, SrvccState::CANCELED};
+    for (SrvccState eSrvccState : objSrvccState)
+    {
+        EXPECT_CALL(*pSrvccListener, OnSrvccStateUpdated(eSrvccState)).Times(0);
+        pNormalMtcService->UpdateSrvccState(eSrvccState);
+    }
+}
 
-    pNormalMtcService->UpdateSrvccState(SrvccState::STARTED);
+TEST_F(MtcServiceTest, UpdateSrvccStateInvokesSameApiForEmergencyType)
+{
+    MockIMtcService objEmergencyService;
+    ON_CALL(objMockContext, GetServiceByType(ServiceType::EMERGENCY))
+            .WillByDefault(Return(&objEmergencyService));
+
+    std::vector<SrvccState> objSrvccState{SrvccState::IDLE, SrvccState::STARTED,
+            SrvccState::SUCCEEDED, SrvccState::FAILED, SrvccState::CANCELED};
+    for (SrvccState eSrvccState : objSrvccState)
+    {
+        EXPECT_CALL(objEmergencyService, UpdateSrvccState(eSrvccState));
+        pNormalMtcService->UpdateSrvccState(eSrvccState);
+    }
+}
+
+TEST_F(MtcServiceTest, AddNetworkWatcherListenerInvokesMtcNetworkWatcher)
+{
+    MockIMtcNetworkWatcherListener objNetworkWatcherListener;
+    EXPECT_CALL(*pNetworkWatcher, AddListener(Ref(objNetworkWatcherListener))).Times(1);
+
+    pNormalMtcService->AddNetworkWatcherListener(&objNetworkWatcherListener);
+}
+
+TEST_F(MtcServiceTest, RemoveNetworkWatcherListenerInvokesMtcNetworkWatcher)
+{
+    MockIMtcNetworkWatcherListener objNetworkWatcherListener;
+    EXPECT_CALL(*pNetworkWatcher, RemoveListener(Ref(objNetworkWatcherListener))).Times(1);
+
+    pNormalMtcService->RemoveNetworkWatcherListener(&objNetworkWatcherListener);
 }
 
 TEST_F(MtcServiceTest, IsActiveReturnsFalseBeforeAosConnected)
 {
     EXPECT_EQ(pNormalMtcService->IsActive(), IMS_FALSE);
+}
+
+TEST_F(MtcServiceTest, GetRatTypeReturnsCorrectValue)
+{
+    EXPECT_CALL(*pNetworkWatcher, GetRatType()).Times(2).WillOnce(Return(0)).WillOnce(Return(1));
+
+    EXPECT_EQ(0, pNormalMtcService->GetRatType());
+    EXPECT_EQ(1, pNormalMtcService->GetRatType());
+}
+
+TEST_F(MtcServiceTest, GetMobileRatTypeReturnsCorrectValue)
+{
+    EXPECT_CALL(*pNetworkWatcher, GetMobileRatType())
+            .Times(2)
+            .WillOnce(Return(1))
+            .WillOnce(Return(0));
+
+    EXPECT_EQ(1, pNormalMtcService->GetMobileRatType());
+    EXPECT_EQ(0, pNormalMtcService->GetMobileRatType());
+}
+
+TEST_F(MtcServiceTest, GetLastConnectedRatTypeReturnsCorrectValue)
+{
+    EXPECT_CALL(*pNetworkWatcher, GetLastConnectedRatType())
+            .Times(2)
+            .WillOnce(Return(0))
+            .WillOnce(Return(1));
+
+    EXPECT_EQ(0, pNormalMtcService->GetLastConnectedRatType());
+    EXPECT_EQ(1, pNormalMtcService->GetLastConnectedRatType());
 }
 
 TEST_F(MtcServiceTest, IsActiveReturnsFalseAfterAosConnecting)
@@ -260,10 +351,9 @@ TEST_F(MtcServiceTest, IsActiveReturnsFalseAfterAosConnecting)
 TEST_F(MtcServiceTest, IsActiveReturnsTrueAfterAosConnected)
 {
     IMS_UINT32 nFeature = ImsAosFeature::MMTEL;
-    IMS_UINT32 nIpcan = IIpcan::CATEGORY_MOBILE;
-    EXPECT_CALL(*pMockAosEventHandler, OnConnected(nFeature, nIpcan)).Times(1);
+    EXPECT_CALL(*pMockAosEventHandler, OnConnected(nFeature)).Times(1);
 
-    pNormalMtcService->ImsAos_Connected(nFeature, nIpcan);
+    pNormalMtcService->ImsAos_Connected(nFeature, IIpcan::CATEGORY_MOBILE);
     EXPECT_EQ(pNormalMtcService->IsActive(), IMS_TRUE);
 }
 
@@ -281,10 +371,11 @@ TEST_F(MtcServiceTest, IsActiveReturnsFalseAfterAosDisconnected)
 {
     ON_CALL(objMockJniEnabler, GetJniThread).WillByDefault(Return(nullptr));
     IMS_UINT32 nReason = ImsAosReason::NONE;
-    EXPECT_CALL(*pMockAosEventHandler, OnDisconnected(nReason)).Times(1);
+    IMS_SINT32 nDataFailureReason = 0;
+    EXPECT_CALL(*pMockAosEventHandler, OnDisconnected(nReason, nDataFailureReason)).Times(1);
 
     pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
-    pNormalMtcService->ImsAos_Disconnected(nReason);
+    pNormalMtcService->ImsAos_Disconnected(nReason, nDataFailureReason);
     EXPECT_EQ(pNormalMtcService->IsActive(), IMS_FALSE);
 }
 
@@ -318,15 +409,6 @@ TEST_F(MtcServiceTest, IsEmergencyReturnsTrue)
     EXPECT_EQ(pEmergencyMtcService->IsEmergency(), IMS_TRUE);
 }
 
-TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsTrue)
-{
-    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_WLAN));
-    EXPECT_EQ(pNormalMtcService->IsWlanIpCanType(), IMS_TRUE);
-
-    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_MOBILE));
-    EXPECT_EQ(pNormalMtcService->IsWlanIpCanType(), IMS_FALSE);
-}
-
 TEST_F(MtcServiceTest, IsNrChecksWifiFirst)
 {
     ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_WLAN));
@@ -336,7 +418,7 @@ TEST_F(MtcServiceTest, IsNrChecksWifiFirst)
     EXPECT_FALSE(pNormalMtcService->IsNr());
 }
 
-TEST_F(MtcServiceTest, IsNrChecksRadioInfo)
+TEST_F(MtcServiceTest, IsNrChecksRatType)
 {
     ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_MOBILE));
 
@@ -347,6 +429,113 @@ TEST_F(MtcServiceTest, IsNrChecksRadioInfo)
     ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
             .WillByDefault(Return(NW_REPORT_RADIO_NR));
     EXPECT_TRUE(pNormalMtcService->IsNr());
+}
+
+TEST_F(MtcServiceTest, IsEpsOnlyAttachChecksRatType)
+{
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_NR));
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+            .WillByDefault(Return(IMS_LTE_INFO_EPS_ONLY_ATTACHED));
+    EXPECT_FALSE(pNormalMtcService->IsEpsOnlyAttach());
+
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+            .WillByDefault(Return(IMS_LTE_INFO_EPS_ONLY_ATTACHED));
+    EXPECT_TRUE(pNormalMtcService->IsEpsOnlyAttach());
+}
+
+TEST_F(MtcServiceTest, IsEpsOnlyAttachChecksLteInfo)
+{
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+            .WillByDefault(Return(IMS_LTE_INFO_COMBINED_ATTACHED));
+    EXPECT_FALSE(pNormalMtcService->IsEpsOnlyAttach());
+
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+            .WillByDefault(Return(IMS_LTE_INFO_UNKNOWN));
+    EXPECT_FALSE(pNormalMtcService->IsEpsOnlyAttach());
+
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+            .WillByDefault(Return(IMS_LTE_INFO_EPS_ONLY_ATTACHED));
+    EXPECT_TRUE(pNormalMtcService->IsEpsOnlyAttach());
+}
+
+TEST_F(MtcServiceTest, IsEpsCombinedAttachChecksRatType)
+{
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_NR));
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+            .WillByDefault(Return(IMS_LTE_INFO_COMBINED_ATTACHED));
+    EXPECT_FALSE(pNormalMtcService->IsEpsCombinedAttach());
+
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+            .WillByDefault(Return(IMS_LTE_INFO_COMBINED_ATTACHED));
+    EXPECT_TRUE(pNormalMtcService->IsEpsCombinedAttach());
+}
+
+TEST_F(MtcServiceTest, IsEpsCombinedAttachChecksLteInfo)
+{
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+            .WillByDefault(Return(IMS_LTE_INFO_EPS_ONLY_ATTACHED));
+    EXPECT_FALSE(pNormalMtcService->IsEpsCombinedAttach());
+
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+            .WillByDefault(Return(IMS_LTE_INFO_UNKNOWN));
+    EXPECT_FALSE(pNormalMtcService->IsEpsCombinedAttach());
+
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+            .WillByDefault(Return(IMS_LTE_INFO_COMBINED_ATTACHED));
+    EXPECT_TRUE(pNormalMtcService->IsEpsCombinedAttach());
+}
+
+TEST_F(MtcServiceTest, IsRoamingReturnsTrue)
+{
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_ROAMING_STATE))
+            .WillByDefault(Return(IMS_ROAMING_STATE_ON));
+    EXPECT_EQ(pNormalMtcService->IsRoaming(), IMS_TRUE);
+}
+
+TEST_F(MtcServiceTest, IsRoamingReturnsFalse)
+{
+    ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_ROAMING_STATE))
+            .WillByDefault(Return(IMS_ROAMING_STATE_OFF));
+    EXPECT_EQ(pNormalMtcService->IsRoaming(), IMS_FALSE);
+}
+
+TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsTrue)
+{
+    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_WLAN));
+    EXPECT_EQ(pNormalMtcService->IsWlanIpCanType(), IMS_TRUE);
+
+    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(IIpcan::CATEGORY_MOBILE));
+    EXPECT_EQ(pNormalMtcService->IsWlanIpCanType(), IMS_FALSE);
+}
+
+TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsFalseIfAosConnectorIsNull)
+{
+    MtcService objRealService(objMockContext, ServiceType::NORMAL);
+    EXPECT_FALSE(objRealService.IsWlanIpCanType());
+}
+
+TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsFalse)
+{
+    pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
+    EXPECT_EQ(pNormalMtcService->IsWlanIpCanType(), IMS_FALSE);
 }
 
 TEST_F(MtcServiceTest, ImsAosConnectedNormalServiceInvokesSetReady)
@@ -365,6 +554,17 @@ TEST_F(MtcServiceTest, ImsAosConnectedEmergencyServiceInvokesSetReady)
     EXPECT_CALL(*pMockEmergencyAosConnector, SetReady(IMS_FALSE, ImsAosService::EMERGENCY_MTC))
             .Times(1);
     pEmergencyMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
+}
+
+TEST_F(MtcServiceTest, ImsAosConnectedUpdatesCrossSimConnected)
+{
+    ON_CALL(*pMockAosConnector, IsCrossSimConnected).WillByDefault(Return(IMS_TRUE));
+    IMS_SINT32 nDataFailureReason = 0;
+
+    pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
+    pNormalMtcService->ImsAos_Disconnected(ImsAosReason::NONE, nDataFailureReason);
+
+    EXPECT_TRUE(pNormalMtcService->IsCrossSimConnected());
 }
 
 TEST_F(MtcServiceTest, ImsAosConnectedWithCallComposerFeatureAddsFeature)
@@ -417,16 +617,43 @@ TEST_F(MtcServiceTest, ImsAosConnectedWithCallComposerFeatureDoesNothingForEmerg
     pEmergencyMtcService->ImsAos_Connected(nFeatures, IIpcan::CATEGORY_ANY);
 }
 
-TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsFalse)
+TEST_F(MtcServiceTest, ImsAosConnectedDoesNothingForCallComposerIfCoreServiceIsNull)
 {
-    pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
-    EXPECT_EQ(pNormalMtcService->IsWlanIpCanType(), IMS_FALSE);
+    reinterpret_cast<TestMtcService*>(pNormalMtcService)->ReplaceCoreService(IMS_NULL);
+
+    // Meaningless codes.
+    MockIFeatureCaps objFeatureCaps;
+    ON_CALL(objMockCoreService, GetFeatureCaps).WillByDefault(Return(&objFeatureCaps));
+
+    EXPECT_CALL(objFeatureCaps,
+            AddFeature(AString("+g.gsma.callcomposer"), AString::ConstEmpty(), SipMethod::INVITE,
+                    ISipMessage::TYPE_ANY))
+            .Times(0);
+
+    const IMS_UINT32 nFeatures = ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY;
+    pNormalMtcService->ImsAos_Connected(nFeatures, IIpcan::CATEGORY_ANY);
+}
+
+TEST_F(MtcServiceTest, ImsAosConnectedNotifiesNetworkWatcher)
+{
+    EXPECT_CALL(*pNetworkWatcher, OnConnected(IIpcan::CATEGORY_WLAN));
+    pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_WLAN);
+}
+
+TEST_F(MtcServiceTest, ImsAosDisconnectedNotifiesNetworkWatcher)
+{
+    IMS_SINT32 nDataFailureReason = 0;
+
+    EXPECT_CALL(*pNetworkWatcher, OnDisconnected);
+    pNormalMtcService->ImsAos_Disconnected(ImsAosReason::POWER_OFF, nDataFailureReason);
 }
 
 TEST_F(MtcServiceTest, GetOldStatusReturnsOldStatus)
 {
+    IMS_SINT32 nDataFailureReason = 0;
+
     pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
-    pNormalMtcService->ImsAos_Disconnected(ImsAosReason::NONE);
+    pNormalMtcService->ImsAos_Disconnected(ImsAosReason::NONE, nDataFailureReason);
     EXPECT_EQ(pNormalMtcService->GetOldStatus(), ServiceStatus::SERVICE_ACTIVE);
 }
 
@@ -445,8 +672,10 @@ TEST_F(MtcServiceTest, GetStatusReturnsSuspendedAfterAosSuspended)
 
 TEST_F(MtcServiceTest, GetStatusReturnsIdleAfterAosDisconnected)
 {
+    IMS_SINT32 nDataFailureReason = 0;
+
     pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
-    pNormalMtcService->ImsAos_Disconnected(ImsAosReason::NONE);
+    pNormalMtcService->ImsAos_Disconnected(ImsAosReason::NONE, nDataFailureReason);
     EXPECT_EQ(pNormalMtcService->GetStatus(), ServiceStatus::SERVICE_IDLE);
 }
 
@@ -467,6 +696,12 @@ TEST_F(MtcServiceTest, GetJniServiceThreadReturnsThread)
     EXPECT_EQ(pNormalMtcService->GetJniServiceThread(), &objMockServiceThread);
 }
 
+TEST_F(MtcServiceTest, GetJniServiceThreadReturnsNullIfJniEnablerIsNull)
+{
+    pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_SERVICE, IMS_NULL);
+    EXPECT_EQ(pNormalMtcService->GetJniServiceThread(), nullptr);
+}
+
 TEST_F(MtcServiceTest, GetSrvccStateReturnsValueFromSrvccStateManager)
 {
     ON_CALL(*pMockSrvccStateManager, GetState).WillByDefault(Return(SrvccState::STARTED));
@@ -474,38 +709,58 @@ TEST_F(MtcServiceTest, GetSrvccStateReturnsValueFromSrvccStateManager)
     EXPECT_EQ(pNormalMtcService->GetSrvccState(), SrvccState::STARTED);
 }
 
-TEST_F(MtcServiceTest, SetAndCheckTerminalBasedCallWaiting)
-{
-    EXPECT_EQ(TbcwStatus::UNPROVISIONED, pNormalMtcService->GetTbcwStatus());
-
-    ImsVector<IMS_SINT32> objTbcw;
-    objTbcw.Add(0);
-    ImsVector<IMS_SINT32> objNoTbcw;
-
-    EXPECT_CALL(objConfigService.GetMockCarrierConfig(),
-            GetIntArray(CarrierConfig::ImsSs::KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
-            .WillOnce(Return(objNoTbcw))
-            .WillOnce(Return(objTbcw))
-            .WillOnce(Return(objNoTbcw))
-            .WillOnce(Return(objTbcw));
-
-    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_FALSE);
-    EXPECT_EQ(TbcwStatus::UNPROVISIONED, pNormalMtcService->GetTbcwStatus());
-
-    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_FALSE);
-    EXPECT_EQ(TbcwStatus::PROVISIONED_DISABLED, pNormalMtcService->GetTbcwStatus());
-
-    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_TRUE);
-    EXPECT_EQ(TbcwStatus::PROVISIONED_DISABLED, pNormalMtcService->GetTbcwStatus());
-
-    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_TRUE);
-    EXPECT_EQ(TbcwStatus::PROVISIONED_ENABLED, pNormalMtcService->GetTbcwStatus());
-}
-
 TEST_F(MtcServiceTest, OpenEmergencyServiceCallsEmergencyServiceManager)
 {
-    EXPECT_CALL(*pMockEmergencyManager, StartOpen(EmergencyCallRoutingPdn::EMERGENCY)).Times(1);
-    pNormalMtcService->OpenEmergencyService(EmergencyCallRoutingPdn::EMERGENCY);
+    EXPECT_CALL(*pMockEmergencyManager, StartOpen(ServiceType::EMERGENCY)).Times(1);
+    pNormalMtcService->OpenEmergencyService(ServiceType::EMERGENCY);
+}
+
+TEST_F(MtcServiceTest, StopEmergencyServiceInvokesStopOpenService)
+{
+    EXPECT_CALL(*pMockEmergencyManager, StopOpen(IMS_TRUE)).Times(1);
+    pNormalMtcService->StopEmergencyService();
+}
+
+TEST_F(MtcServiceTest, ProcessTestCommandChangesInternalAosState)
+{
+    const IMS_UINT32 nFeature = ImsAosFeature::MMTEL;
+    EXPECT_CALL(*pMockAosEventHandler, OnConnected(nFeature)).Times(1);
+    pNormalMtcService->ProcessTestCommand(
+            0 /* TestCommand::AOS_CONNECTED */, nFeature, IIpcan::CATEGORY_MOBILE);
+
+    const IMS_UINT32 nReason = ImsAosReason::NONE;
+    const IMS_SINT32 nDataFailureReason = 1;
+    EXPECT_CALL(*pMockAosEventHandler, OnDisconnected(nReason, nDataFailureReason)).Times(1);
+    pNormalMtcService->ProcessTestCommand(
+            1 /* TestCommand::AOS_DISCONNECTED */, nReason, nDataFailureReason);
+}
+
+TEST_F(MtcServiceTest, ProcessTestCommandChangesRatType)
+{
+    const IMS_SINT32 eRatTypeNr = INetworkWatcher::RADIOTECH_TYPE_NR;
+    const IMS_SINT32 eRatTypeLte = INetworkWatcher::RADIOTECH_TYPE_LTE;
+    EXPECT_CALL(*pNetworkWatcher, UpdateMobileRat(eRatTypeNr)).Times(1);
+    pNormalMtcService->ProcessTestCommand(2 /* TestCommand::RAT_CHANGED */, eRatTypeNr, 0);
+
+    EXPECT_CALL(*pNetworkWatcher, UpdateMobileRat(eRatTypeLte)).Times(1);
+    pNormalMtcService->ProcessTestCommand(2 /* TestCommand::RAT_CHANGED */, eRatTypeLte, 0);
+
+    // To cover the default case.
+    pNormalMtcService->ProcessTestCommand(3 /* Not defined */, 0, 0);
+}
+
+TEST_F(MtcServiceTest, UpdatePermanentSuppServicesAndIsPermanentSuppServiceEnabledReturnsTrue)
+{
+    // `pTestSupp` will be deleted through `MtcPermanentSupplementaryService`'s destructor.
+    SuppService* pTestSupp = new SuppService();
+    pTestSupp->nType = static_cast<IMS_SINT32>(PermanentSuppType::TB_CB_INCOMING_ANONYMOUS_VIDEO);
+    pTestSupp->bValue = IMS_TRUE;
+    ImsList<SuppService*> objSuppServices;
+    objSuppServices.Append(pTestSupp);
+    pNormalMtcService->UpdatePermanentSuppServices(objSuppServices);
+
+    EXPECT_TRUE(pNormalMtcService->IsPermanentSuppServiceEnabled(
+            PermanentSuppType::TB_CB_INCOMING_ANONYMOUS_VIDEO));
 }
 
 TEST_F(MtcServiceTest, NotifyJniEnablerSetDoesNothing)
@@ -514,18 +769,22 @@ TEST_F(MtcServiceTest, NotifyJniEnablerSetDoesNothing)
     EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
 }
 
-TEST_F(MtcServiceTest, CoreServicePageMessageReceivedDoesNothing)
+TEST_F(MtcServiceTest, CoreServicePageMessageReceivedAndRejectWith488)
 {
-    IPageMessage* piMessage = reinterpret_cast<IPageMessage*>(FAKE_ADDRESS);
-    pNormalMtcService->CoreService_PageMessageReceived(&objMockCoreService, piMessage);
-    EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
+    MockIPageMessage objMockIPageMessage;
+    EXPECT_CALL(objMockIPageMessage, Reject(SipStatusCode::SC_488, _)).Times(1);
+    EXPECT_CALL(objMockIPageMessage, Destroy).Times(1);
+
+    pNormalMtcService->CoreService_PageMessageReceived(&objMockCoreService, &objMockIPageMessage);
 }
 
-TEST_F(MtcServiceTest, CoreServiceReferenceReceivedDoesNothing)
+TEST_F(MtcServiceTest, CoreServiceReferenceReceivedAndRejectWith488)
 {
     MockIReference objMockReference;
+    EXPECT_CALL(objMockReference, RejectEx(SipStatusCode::SC_488)).Times(1);
+    EXPECT_CALL(objMockReference, Destroy).Times(1);
+
     pNormalMtcService->CoreService_ReferenceReceived(&objMockCoreService, &objMockReference);
-    EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
 }
 
 TEST_F(MtcServiceTest, CoreServiceServiceClosedDoesNothing)
@@ -554,11 +813,11 @@ TEST_F(MtcServiceTest, CoreServiceSessionInvitationReceivedInvokesHandleIncoming
 
 TEST_F(MtcServiceTest, CoreServiceCapabilityQueryReceivedInvokesHandleIncomingCapabilityQuery)
 {
-    MockICapabilities objICapa;
+    MockICapabilities objICapabilities;
     MockICoreService objICoreService;
 
-    // TODO: cannot check
-    pNormalMtcService->CoreService_CapabilityQueryReceived(&objICoreService, &objICapa);
+    // No means to check if HandleIncomingCapabilityQuery is invoked or not
+    pNormalMtcService->CoreService_CapabilityQueryReceived(&objICoreService, &objICapabilities);
 }
 
 TEST_F(MtcServiceTest, ImsAosMonitorConnectedInvokesEventHandler)
@@ -571,14 +830,72 @@ TEST_F(MtcServiceTest, ImsAosMonitorConnectedInvokesEventHandler)
     EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
 }
 
-TEST_F(MtcServiceTest, ImsAosMonitorNotifyInvokesEventHandler)
+TEST_F(MtcServiceTest, ImsAosMonitorNotifyWithRegPendingTypeInvokesNetworkWatcherIfChanged)
 {
-    IMS_UINT32 nType = IImsAosMonitor::TYPE_IPCAN;
-    IMS_UINT32 nState = IIpcan::CATEGORY_WLAN;
+    IMS_UINT32 nType = IImsAosMonitor::TYPE_REG_RECOVERY_PENDING;
+    IMS_UINT32 nState = 0;  // meaningless.
+
+    IMS_UINT32 eIpcanType = IIpcan::CATEGORY_WLAN;
+    ON_CALL(*pNetworkWatcher, GetRatType)
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_LTE));
+    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(eIpcanType));
     EXPECT_CALL(*pMockAosEventHandler, OnEventNotify(nType, nState)).Times(1);
+    EXPECT_CALL(*pNetworkWatcher, OnConnected(eIpcanType)).Times(1);
 
     pNormalMtcService->ImsAosMonitor_Notify(nType, nState);
     EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
+}
+
+TEST_F(MtcServiceTest, ImsAosMonitorNotifyWithRegPendingTypeDoesNotInvokeNetworkWatcherIfNotChanged)
+{
+    IMS_UINT32 nType = IImsAosMonitor::TYPE_REG_RECOVERY_PENDING;
+    IMS_UINT32 nState = 0;  // meaningless.
+
+    IMS_UINT32 eIpcanType = IIpcan::CATEGORY_WLAN;
+    ON_CALL(*pNetworkWatcher, GetRatType)
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_IWLAN));
+    ON_CALL(*pMockAosConnector, GetIpcanType).WillByDefault(Return(eIpcanType));
+    EXPECT_CALL(*pMockAosEventHandler, OnEventNotify(nType, nState)).Times(1);
+    EXPECT_CALL(*pNetworkWatcher, OnConnected(_)).Times(0);
+
+    pNormalMtcService->ImsAosMonitor_Notify(nType, nState);
+    EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
+}
+
+TEST_F(MtcServiceTest, ImsAosMonitorNotifyWithIpcanTypeInvokesEventHandlerOnly)
+{
+    IMS_UINT32 nType = IImsAosMonitor::TYPE_IPCAN;
+    IMS_UINT32 nState = IIpcan::CATEGORY_WLAN;
+
+    EXPECT_CALL(*pMockAosEventHandler, OnEventNotify(nType, nState)).Times(1);
+    EXPECT_CALL(*pNetworkWatcher, OnConnected(_)).Times(0);
+
+    pNormalMtcService->ImsAosMonitor_Notify(nType, nState);
+    EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
+}
+
+TEST_F(MtcServiceTest, ImsAosMonitorNotifyWithHandoverTypeInvokesEventHandlerOnly)
+{
+    IMS_UINT32 nType = IImsAosMonitor::TYPE_HANDOVER;
+    IMS_UINT32 nState = IImsAosMonitor::HANDOVER_WIFI_TO_CELLULAR_START;
+
+    EXPECT_CALL(*pMockAosEventHandler, OnEventNotify(nType, nState)).Times(1);
+    EXPECT_CALL(*pNetworkWatcher, OnConnected(_)).Times(0);
+
+    pNormalMtcService->ImsAosMonitor_Notify(nType, nState);
+    EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
+}
+
+TEST_F(MtcServiceTest, ImsAosMonitorNotifyWithCrossSimStatusTypeSetsStatus)
+{
+    IMS_UINT32 nType = IImsAosMonitor::TYPE_CROSS_SIM_STATUS;
+    IMS_UINT32 nState = IImsAosMonitor::CROSS_SIM_CONNECTED;
+
+    EXPECT_CALL(*pMockAosEventHandler, OnEventNotify(nType, nState)).Times(1);
+    EXPECT_CALL(*pNetworkWatcher, OnConnected(_)).Times(0);
+
+    pNormalMtcService->ImsAosMonitor_Notify(nType, nState);
+    EXPECT_TRUE(pNormalMtcService->IsCrossSimConnected());
 }
 
 }  // namespace android

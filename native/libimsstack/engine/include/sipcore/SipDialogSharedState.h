@@ -18,9 +18,8 @@
 
 #include "ImsList.h"
 
-#include "SipMessageInfo.h"
-
 class SipDialogEx;
+class SipMessageInfo;
 
 /**
  * @brief This class defines a shared dialog state.

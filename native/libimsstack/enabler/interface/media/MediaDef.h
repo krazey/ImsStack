@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +20,10 @@
 #include <IpAddress.h>
 #include <list>
 #include <algorithm>
+
+inline constexpr IMS_UINTP UNDEFINED_NEGO_ID = 0;
+inline constexpr IMS_SINT32 MEDIA_DEFAULT_RS = 1250;
+inline constexpr IMS_SINT32 MEDIA_DEFAULT_RR = 3750;
 
 /** Service Type */
 typedef enum
@@ -83,17 +87,32 @@ typedef enum
 /** Media Transport Type Definition for checking RTP-RTCP Timeout */
 typedef enum
 {
-    // No Check
+    /** No Check */
     MEDIA_PROTOCOL_NONE = 0,
-    // RTP or RTCP any
+    /** RTP or RTCP any */
     MEDIA_PROTOCOL_ANY = 1,
-    // RTP only
+    /** RTP only */
     MEDIA_PROTOCOL_RTP = 2,
-    // RTCP only
+    /** RTCP only */
     MEDIA_PROTOCOL_RTCP = 3,
-    // Maintain Previous Setting
+    /** Maintain Previous Setting */
     MEDIA_PROTOCOL_NO_CHANGE = 4,
 } MEDIA_TRANSPORT_PROTOCOL;
+
+/** Media Inactivity Call End Reason for checking RTP-RTCP Timeout */
+typedef enum
+{
+    /**  RTCP inactivity occurred when call is on HOLD. */
+    RTCP_INACTIVITY_ON_HOLD = 0,
+    /**  RTCP inactivity occurred when call is connected. */
+    RTCP_INACTIVITY_ON_CONNECTED = 1,
+    /**  RTP inactivity occurred when call is connected. */
+    RTP_INACTIVITY_ON_CONNECTED = 2,
+    /**  E911 RTCP inactivity occurred when call is connected. */
+    E911_RTCP_INACTIVITY_ON_CONNECTED = 3,
+    /**  E911 RTP inactivity occurred when call is connected. */
+    E911_RTP_INACTIVITY_ON_CONNECTED = 4,
+} MEDIA_INACTIVITY_CALL_END_REASON;
 
 typedef enum
 {
@@ -133,6 +152,10 @@ typedef enum _REPORT_TYPE
     REPORT_RECEIVED_DTMF_EVENT,
     // Notify that the ImsMedia process disconnected
     REPORT_MEDIA_DETACH,
+    // Notify that the ImsMedia triggers ANBR_Query
+    REPORT_TRIGGER_ANBR_QUERY,
+    // Notify the ANBR negotiation result
+    REPORT_ANBR_NEGOTIATION_RESULT,
     REPORT_NOTUSED
 } REPORT_TYPE;
 
@@ -148,6 +171,64 @@ enum MEDIA_SRVCC_STATUS
     MEDIA_SRVCC_FAILED,
     /** SRVCC transition has been canceled */
     MEDIA_SRVCC_CANCELED
+};
+
+typedef enum
+{
+    NONE = 0,
+    SENDRECV = 1,
+    SENDONLY = 2,
+    RECVONLY = 3,
+    INACTIVE = 4,
+} MEDIA_PEM_TYPE;
+
+enum MediaNegoResult
+{
+    /** No error */
+    MEDIA_NEGO_NO_ERROR = 0,
+    /** error when the descriptor is invalid*/
+    MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR,
+    /** error when there is no negotiated codec */
+    MEDIA_NEGO_ERROR_NO_CODEC_MATCHED,
+    /** error when the ip version is not matched between offer and answer */
+    MEDIA_NEGO_ERROR_IP_MISMATCH,
+};
+
+/**
+ * @brief Represents the result of an SDP negotiation process.
+ *
+ * This struct encapsulates the outcome of an SDP negotiation, including the overall result,
+ * the types of media that were successfully negotiated, and the final direction for each
+ * media type.
+ *
+ * @note When the result is not MEDIA_NEGO_NO_ERROR, the direction and negotiated type
+ *       can be ignored as the negotiation has failed.
+ */
+struct SdpNegotiationResult
+{
+    /** The overall result of the negotiation. */
+    MediaNegoResult eResult = MEDIA_NEGO_NO_ERROR;
+    /** A bitmask of the successfully negotiated media types. */
+    MEDIA_CONTENT_TYPE eNegotiatedType = MEDIA_TYPE_INVALID;
+    /** The negotiated direction for the audio stream. */
+    MEDIA_DIRECTION eAudioDirection = MEDIA_DIRECTION_INVALID;
+    /** The negotiated direction for the video stream. */
+    MEDIA_DIRECTION eVideoDirection = MEDIA_DIRECTION_INVALID;
+    /** The negotiated direction for the text stream. */
+    MEDIA_DIRECTION eTextDirection = MEDIA_DIRECTION_INVALID;
+
+    explicit SdpNegotiationResult(MediaNegoResult result = MEDIA_NEGO_NO_ERROR,
+            MEDIA_CONTENT_TYPE negotiatedType = MEDIA_TYPE_INVALID,
+            MEDIA_DIRECTION audioDirection = MEDIA_DIRECTION_INVALID,
+            MEDIA_DIRECTION videoDirection = MEDIA_DIRECTION_INVALID,
+            MEDIA_DIRECTION textDirection = MEDIA_DIRECTION_INVALID) :
+            eResult(result),
+            eNegotiatedType(negotiatedType),
+            eAudioDirection(audioDirection),
+            eVideoDirection(videoDirection),
+            eTextDirection(textDirection)
+    {
+    }
 };
 
 struct QosRequestParam
@@ -197,14 +278,12 @@ public:
 #define MEDIA_PORT_INVALID                       (-1)
 #define MEDIA_IS_CONTAINED_THIS_TYPE(eDst, eSrc) (((eDst) & (eSrc)) != 0)
 #define MEDIA_TYPE_WITHOUT_TEXT(eSrc)            ((eSrc) & (~MEDIA_TYPE_TEXT))
-
 #define MEDIA_DIRECTION_INVOLVED_RECV(eDir) \
     (((eDir) == MEDIA_DIRECTION_SEND_RECEIVE) || ((eDir) == MEDIA_DIRECTION_RECEIVE))
 #define MEDIA_DIRECTION_INVOLVED_SEND(eDir) \
     (((eDir) == MEDIA_DIRECTION_SEND_RECEIVE) || ((eDir) == MEDIA_DIRECTION_SEND))
 #define IS_VALID_MEDIA_DIRECTION(eDir) \
     (((eDir) >= MEDIA_DIRECTION_INACTIVE) && ((eDir) <= MEDIA_DIRECTION_SEND_RECEIVE))
-
 #define MEDIA_DIRECTION_IS_AUDIO_RUNNABLE(eDir)                                         \
     (((eDir) == MEDIA_DIRECTION_RECEIVE) || ((eDir) == MEDIA_DIRECTION_SEND_RECEIVE) || \
             ((eDir) == MEDIA_DIRECTION_SEND))
@@ -212,11 +291,10 @@ public:
     ((MEDIA_DIRECTION_RECEIVE <= (eDir)) && ((eDir) <= MEDIA_DIRECTION_SEND_RECEIVE))
 #define MEDIA_DIRECTION_IS_TEXT_RUNNABLE(eDir) \
     (((eDir) == MEDIA_DIRECTION_RECEIVE) || ((eDir) == MEDIA_DIRECTION_SEND_RECEIVE))
-
 #define MEDIA_DIRECTION_IS_AUDIO_HOLD(eDir) ((eDir) != MEDIA_DIRECTION_SEND_RECEIVE)
 #define MEDIA_DIRECTION_IS_VIDEO_HOLD(eDir) \
     ((eDir) == MEDIA_DIRECTION_INACTIVE || (eDir) == MEDIA_DIRECTION_INVALID)
 #define MEDIA_DIRECTION_IS_TEXT_HOLD(eDir) \
     (((eDir) == MEDIA_DIRECTION_SEND) || ((eDir) == MEDIA_DIRECTION_INACTIVE))
-
+#define IS_DYNAMIC_PAYLOAD_TYPE(pt) (((pt) >= 96) && ((pt) <= 127))
 #endif

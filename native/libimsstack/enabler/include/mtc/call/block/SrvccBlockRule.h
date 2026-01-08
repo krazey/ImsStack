@@ -25,7 +25,7 @@ class SrvccBlockRule final : public IMtcBlockRule
 {
 public:
     explicit SrvccBlockRule(IN SrvccState eState);
-    virtual ~SrvccBlockRule();
+    virtual ~SrvccBlockRule() override;
     SrvccBlockRule(IN const SrvccBlockRule&) = delete;
     SrvccBlockRule& operator=(IN const SrvccBlockRule&) = delete;
 

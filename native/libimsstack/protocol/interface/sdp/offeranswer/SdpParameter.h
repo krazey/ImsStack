@@ -16,7 +16,13 @@
 #ifndef SDP_PARAMETER_H_
 #define SDP_PARAMETER_H_
 
-#include "SdpDescription.h"
+#include "Sdp.h"
+#include "SdpAttribute.h"
+#include "SdpBandwidth.h"
+
+class SdpDescription;
+class SdpEncryptionKey;
+class SdpInformation;
 
 class SdpParameter
 {
@@ -34,6 +40,11 @@ public:
      *        in the current SDP order.
      */
     inline virtual const AString& GetConnectionAddress() const { return AString::ConstNull(); }
+
+    /**
+     * @brief Returns the SDP message from the current SDP parameter.
+     */
+    virtual AString ToSdp() const;
 
     /**
      * @brief Adds the attribute line to the SDP parameter.
@@ -210,11 +221,6 @@ public:
      *                   #Sdp#SETUP_HOLDCONN
      */
     void SetAttributeSetup(IN IMS_SINT32 nAttrSetup);
-
-    /**
-     * @brief Returns the SDP message from the current SDP parameter.
-     */
-    AString ToSdp() const;
 
     /**
      * @brief Updates the direction of the current SDP parameter.

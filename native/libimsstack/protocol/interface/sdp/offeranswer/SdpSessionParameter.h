@@ -16,15 +16,23 @@
 #ifndef SDP_SESSION_PARAMETER_H_
 #define SDP_SESSION_PARAMETER_H_
 
-#include "SdpSessionDescription.h"
+#include "SdpOrigin.h"
+#include "SdpSessionName.h"
+#include "SdpTimeDescription.h"
+#include "SdpVersion.h"
 #include "offeranswer/SdpParameter.h"
+
+class SdpConnection;
+class SdpSessionDescription;
+class SdpTimezone;
+class SdpUri;
 
 class SdpSessionParameter : public SdpParameter
 {
 public:
     SdpSessionParameter();
     SdpSessionParameter(IN const SdpSessionParameter& other);
-    virtual ~SdpSessionParameter();
+    ~SdpSessionParameter() override;
 
 public:
     SdpSessionParameter& operator=(IN const SdpSessionParameter& other);
@@ -35,6 +43,11 @@ public:
      * @brief Returns the connection address from the session-level description.
      */
     const AString& GetConnectionAddress() const override;
+
+    /**
+     * @brief Returns the SDP message from the session-level parameter.
+     */
+    AString ToSdp() const override;
 
     /**
      * @brief Negotiates the session-level parameters through the SDP offer/answer exchange.
@@ -81,11 +94,6 @@ public:
      * @brief Sets the connection line to the media-level parameter.
      */
     IMS_BOOL SetConnectionAddress(IN const AString& strAddress);
-
-    /**
-     * @brief Returns the SDP message from the session-level parameter.
-     */
-    AString ToSdp() const;
 
     /**
      * @brief Updates the properties from the specified session-level parameter.

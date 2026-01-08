@@ -24,7 +24,7 @@ public:
     explicit SdpFramesize(IN IMS_SINT32 nPayloadTypeNumber);
     explicit SdpFramesize(IN const AString& strOtherFormat);
     SdpFramesize(IN const SdpFramesize& other);
-    virtual ~SdpFramesize();
+    ~SdpFramesize() override;
 
 public:
     SdpFramesize& operator=(IN const SdpFramesize& other);

@@ -36,7 +36,7 @@ class CallerCapability;
 class Capabilities;
 class IRegBinding;
 class IRegInfo;
-class IServiceManagerListener;
+class IServiceCloseListener;
 class ISipClientConnection;
 class ISipDialog;
 class ISipMessage;
@@ -56,7 +56,7 @@ class Service : public Connection, public IConfigUpdateListener, public IRegBind
 public:
     Service(IN const AString& strScheme, IN const AString& strAppId, IN const AString& strServiceId,
             IN const SipAddress* pImpu = IMS_NULL);
-    virtual ~Service();
+    ~Service() override;
 
     Service(IN const Service&) = delete;
     Service& operator=(IN const Service&) = delete;
@@ -135,6 +135,7 @@ public:
 
     IMS_BOOL IsBehindNat() const;
     IMS_BOOL IsEventPackageSupported(IN const AString& strEvent) const;
+    IMS_BOOL IsForEmergency() const;
     inline IMS_BOOL IsImsConnected() const { return m_bImsConnected; }
     IMS_BOOL IsWithinTrustDomain() const;
 
@@ -158,19 +159,19 @@ public:
     }
     IMS_BOOL SendResponse(IN ISipServerConnection* piSsc, IN IMS_SINT32 nStatusCode,
             IN const AString& strPhrase = AString::ConstNull());
-    inline void SetServiceManagerListener(IN IServiceManagerListener* piListener)
+    inline void SetServiceCloseListener(IN IServiceCloseListener* piListener)
     {
-        m_piServiceManagerListener = piListener;
+        m_piServiceCloseListener = piListener;
     }
     inline void SetSipProfile(IN SipProfile* pProfile) { m_pSipProfile = pProfile; }
     void RegisterMethod(IN Method* pMethod);
-    void DeregisterMethod(IN Method* pMethod);
+    void DeregisterMethod(IN const Method* pMethod);
 
     IMS_BOOL ValidateMethod(IN const SipMethod& objMethod) const;
     IMS_BOOL ValidateRequestUri(IN const SipAddress& objRequestUri,
-            IN ISipDialog* piDialog = IMS_NULL, IN IMS_BOOL bIsMidDialogRequest = IMS_FALSE);
+            IN const ISipDialog* piDialog = IMS_NULL, IN IMS_BOOL bIsMidDialogRequest = IMS_FALSE);
     IMS_BOOL ValidateRequestUriForIpAndPort(IN const SipAddress& objRequestUri,
-            IN ISipDialog* piDialog = IMS_NULL, IN IMS_BOOL bIsMidDialogRequest = IMS_FALSE);
+            IN const ISipDialog* piDialog = IMS_NULL, IN IMS_BOOL bIsMidDialogRequest = IMS_FALSE);
 
     static IMS_BOOL ValidateFromAndTo(
             IN const AString& strFrom, IN const AString& strTo, IN IMS_BOOL bToLenient);
@@ -208,7 +209,7 @@ protected:
             IN IMS_BOOL bRequest, OUT AString& strContact, OUT IMS_BOOL& bIsContactGruu) const;
     inline IRegBinding* GetRegBinding() const { return m_piRegBinding; }
     inline IMS_BOOL IsUserIdProvisioned() const { return m_bProvisionedUserId; }
-    void SetGruuOptionTagInMidDialog(IN ISipDialog* piDialog, IN_OUT ISipMessage*& piSipMsg);
+    void SetGruuOptionTagInMidDialog(IN const ISipDialog* piDialog, IN_OUT ISipMessage*& piSipMsg);
 
 private:
     void CreateDefaultPublicUserId();
@@ -220,6 +221,16 @@ private:
     inline IMS_BOOL IsRegBindingOnActive() const
     {
         return (IsImsConnected() && (m_piRegBinding != IMS_NULL));
+    }
+    // RFC 3325: INVITE/BYE/OPTIONS/SUBSCRIBE/NOTIFY/REFER
+    // RFC 5876: all requests except for ACK/CANCEL
+    // 3GPP Profile: INVITE/BYE/MESSAGE/PUBLISH/REFER/SUBSCRIBE/OPTIONS
+    inline IMS_BOOL IsPpiHeaderRequired(IN const SipMethod& objMethod) const
+    {
+        return objMethod.Equals(SipMethod::INVITE) || objMethod.Equals(SipMethod::BYE) ||
+                objMethod.Equals(SipMethod::MESSAGE) || objMethod.Equals(SipMethod::PUBLISH) ||
+                objMethod.Equals(SipMethod::REFER) || objMethod.Equals(SipMethod::SUBSCRIBE) ||
+                objMethod.Equals(SipMethod::OPTIONS);
     }
     IMS_BOOL SetPPreferredIdentityHeader(
             IN IMS_SINT32 nPreferredId, IN_OUT ISipMessage*& piSipMsg) const;
@@ -259,7 +270,8 @@ private:
                 m_objSecurityVerifys(AStringArray::ConstNull()),
                 m_pPubGruu(IMS_NULL),
                 m_pTempGruu(IMS_NULL),
-                m_objAssociatedUris(AStringArray::ConstNull())
+                m_objAssociatedUris(AStringArray::ConstNull()),
+                m_bEmergencyRegistration(IMS_FALSE)
         {
         }
         inline ~CachedRegBinding()
@@ -304,6 +316,8 @@ private:
         inline const SipAddress* GetTemporaryGruu() const { return m_pTempGruu; }
 
         inline const AStringArray& GetAssociatedUris() const { return m_objAssociatedUris; }
+        inline SipProfile* GetSipProfile() const { return m_pSipProfile.Get(); }
+        inline IMS_BOOL IsEmergencyRegistration() const { return m_bEmergencyRegistration; }
 
         inline void SetPortUc(IN IMS_SINT32 nPortUc) { m_nPortUc = nPortUc; }
         inline void SetPortUs(IN IMS_SINT32 nPortUs) { m_nPortUs = nPortUs; }
@@ -376,6 +390,11 @@ private:
         {
             m_objAssociatedUris = objAssociatedUris;
         }
+        inline void SetSipProfile(IN SipProfile* pSipProfile) { m_pSipProfile = pSipProfile; }
+        inline void SetEmergencyRegistration(IN IMS_BOOL bEmergencyRegistration)
+        {
+            m_bEmergencyRegistration = bEmergencyRegistration;
+        }
 
     public:
         // port-uc / port-us
@@ -400,6 +419,9 @@ private:
 
         // Authorized URIs
         AStringArray m_objAssociatedUris;
+        RcPtr<SipProfile> m_pSipProfile;
+        // Flag specifying whether the registration is for emergency or not.
+        IMS_BOOL m_bEmergencyRegistration;
     };
 
     // In case of JSR 281, it MUST be a "imscore"
@@ -410,8 +432,8 @@ private:
     AString m_strServiceId;
     // IMS registry; Storage for application & service specific configurations
     AppConfig* m_pAppConfig;
-    // Reference of ServiceManager listener
-    IServiceManagerListener* m_piServiceManagerListener;
+    // Listener for monitoring the service close.
+    IServiceCloseListener* m_piServiceCloseListener;
 
     // Registration state
     IMS_BOOL m_bImsConnected;

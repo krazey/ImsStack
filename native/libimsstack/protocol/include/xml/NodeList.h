@@ -23,7 +23,7 @@ class NodeList : public INodeList
 {
 public:
     NodeList();
-    virtual ~NodeList();
+    ~NodeList() override;
 
     NodeList(IN const NodeList&) = delete;
     NodeList& operator=(IN const NodeList&) = delete;

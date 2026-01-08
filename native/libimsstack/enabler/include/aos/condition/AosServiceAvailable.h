@@ -37,12 +37,15 @@ public:
     void CleanUp();
     void SetListener(IN IAosServiceAvailableListener* piListener);
     void RemoveListener(IN IAosServiceAvailableListener* piListener);
-    void RefreshServiceAvailablility();
+    void RefreshServiceAvailability();
     IMS_BOOL IsAvailable();
-    IMS_UINT32 HandleEvent(IN IMS_UINT32 eEvent, IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx);
+    void HandleEvent(IN IMS_UINT32 eEvent, IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx);
 
     inline virtual IMS_BOOL StartToCheckNetworkConnection() { return IMS_FALSE; };
     virtual IMS_BOOL StopToCheckNetworkConnection(IN IMS_BOOL bNeedToCheckAvailable = IMS_TRUE);
+
+    void SetBlock(IN IAosBlock* piBlock);
+    IMS_BOOL IsRoaming();
 
 protected:
     inline virtual void RegisterListener(){};
@@ -53,12 +56,11 @@ protected:
     virtual void HandleBlockChanged(IN IMS_UINT32 nState, IN IMS_UINT32 nStateEx);
     virtual void HandleRoamingChanged(IN IMS_UINT32 nState);
     virtual void HandleAirplaneModeChanged(IN IMS_UINT32 nState);
-    virtual void HandleVopsChanged(IN IMS_UINT32 nState);
-    virtual void HandleWiFiConnectionChanged();
+    virtual void HandleWifiConnectionChanged();
     virtual void HandleLocationInfoChanged();
     virtual IMS_BOOL CheckServiceAvailable();
 
-    void Notify();
+    void Notify(IN IMS_BOOL bNotify = IMS_TRUE);
     void RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason);
 
     IMS_BOOL IsSameAsBeforeUnavailableReason();
@@ -70,12 +72,12 @@ public:
     {
         EVENT_AIRPLANE = 0,
         EVENT_ROAMING,
-        EVENT_VOPS,
         EVENT_LOCATION,
         EVENT_CALL,
         EVENT_NETWORK,
         EVENT_WIFI_STATE,
         EVENT_BLOCK,
+        EVENT_BLOCK_SILENT,
         EVENT_MAX
     };
 
@@ -91,16 +93,10 @@ protected:
 
     IMS_BOOL m_bAirplaneMode;
     IMS_BOOL m_bRoamingState;
-
-private:
     IMS_BOOL m_bAvailableLastNotified;
 
     ImsList<IMS_UINT32> m_objBlockReasonsLastNotified;
     ImsList<IAosServiceAvailableListener*> m_objListeners;
-
-private:
-    friend class AosServiceAvailableTest;
-    friend class AosConditionTest;
 };
 
 #endif  // AOS_SERVICE_AVAILABLE_H_

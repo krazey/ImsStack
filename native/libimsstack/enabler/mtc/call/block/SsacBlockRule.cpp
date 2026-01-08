@@ -16,6 +16,7 @@
 
 #include "CallReasonInfo.h"
 #include "IImsRadio.h"
+#include "IMtcService.h"
 #include "ImsTypeDef.h"
 #include "ServiceImsRadio.h"
 #include "ServiceSystemTime.h"
@@ -23,7 +24,7 @@
 #include "call/IMtcCallContext.h"
 #include "call/block/IMtcBlockRule.h"
 #include "call/block/SsacBlockRule.h"
-#include "helper/IPassiveTimerHolder.h"
+#include "helper/ISsacTimerHandler.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -54,14 +55,22 @@ PUBLIC VIRTUAL SsacBlockRule::Result SsacBlockRule::Check(
     }
 
     if (m_objContext.GetCallInfo().ePeerType == PeerType::MT ||
-            m_objContext.GetCallInfo().bEmergency || m_objContext.GetService().IsWlanIpCanType())
+            m_objContext.GetCallInfo().IsEmergency() || m_objContext.GetService().IsWlanIpCanType())
     {
         return Result(IMtcBlockRule::Result::Status::UNBLOCKED);
     }
 
-    if (IsSsacTimerRunning(m_eCallType) || StartSsacTimer(m_eCallType))
+    if (m_objContext.GetService().GetSsacTimerHandler().IsSsacTimerRunning(m_eCallType))
+    {
+        IMS_TRACE_D("Check blocked - SSAC timer is running", 0, 0, 0);
+        return Result(
+                IMtcBlockRule::Result::Status::BLOCKED, CallReasonInfo(CODE_ACCESS_CLASS_BLOCKED));
+    }
+
+    if (IsNeedToBar(m_eCallType))
     {
         IMS_TRACE_D("Check blocked - SSAC barred", 0, 0, 0);
+        m_objContext.GetService().GetSsacTimerHandler().StartBarringTimer(m_eCallType);
         return Result(
                 IMtcBlockRule::Result::Status::BLOCKED, CallReasonInfo(CODE_ACCESS_CLASS_BLOCKED));
     }
@@ -69,24 +78,7 @@ PUBLIC VIRTUAL SsacBlockRule::Result SsacBlockRule::Check(
     return Result(IMtcBlockRule::Result::Status::UNBLOCKED);
 }
 
-PRIVATE IMS_BOOL SsacBlockRule::IsSsacTimerRunning(IN CallType eCallType) const
-{
-    if (m_objContext.GetPassiveTimerHolder().IsActive(
-                IPassiveTimerHolder::Type::SSAC_VOICE_BARRING))
-    {
-        return IMS_TRUE;
-    }
-
-    if (eCallType == CallType::VT || eCallType == CallType::VIDEO_RTT)
-    {
-        return m_objContext.GetPassiveTimerHolder().IsActive(
-                IPassiveTimerHolder::Type::SSAC_VIDEO_BARRING);
-    }
-
-    return IMS_FALSE;
-}
-
-PRIVATE IMS_BOOL SsacBlockRule::StartSsacTimer(IN CallType eCallType)
+PRIVATE IMS_BOOL SsacBlockRule::IsNeedToBar(IN CallType eCallType) const
 {
     if (eCallType == CallType::UNKNOWN)
     {
@@ -95,26 +87,19 @@ PRIVATE IMS_BOOL SsacBlockRule::StartSsacTimer(IN CallType eCallType)
 
     const SsacInfo& objSsacInfo = m_pImsRadio->GetSsacInfo();
     IMS_SINT32 nBarringFactor;
-    IMS_SINT32 nBarringTimeSec;
-    IPassiveTimerHolder::Type nSsacType;
 
     if (eCallType == CallType::VOIP || eCallType == CallType::RTT)
     {
         nBarringFactor = objSsacInfo.nBarringFactorForVoice;
-        nBarringTimeSec = objSsacInfo.nBarringTimeSecForVoice;
-        nSsacType = IPassiveTimerHolder::Type::SSAC_VOICE_BARRING;
     }
     else
     {
         nBarringFactor = objSsacInfo.nBarringFactorForVideo;
-        nBarringTimeSec = objSsacInfo.nBarringTimeSecForVideo;
-        nSsacType = IPassiveTimerHolder::Type::SSAC_VIDEO_BARRING;
     }
 
-    IMS_TRACE_D("StartSsacTimer BarringFactor[%d] BarringTimeSec[%d]", nBarringFactor,
-            nBarringTimeSec, 0);
+    IMS_TRACE_D("IsNeedToBar BarringFactor[%d]", nBarringFactor, 0, 0);
 
-    if (nBarringFactor >= 100 || (nBarringFactor != 0 && nBarringTimeSec <= 0))
+    if (nBarringFactor >= 100)
     {
         return IMS_FALSE;
     }
@@ -124,11 +109,6 @@ PRIVATE IMS_BOOL SsacBlockRule::StartSsacTimer(IN CallType eCallType)
     {
         return IMS_FALSE;
     }
-
-    nRandom = IMS_SYS_GetRandom(10);
-    IMS_DOUBLE nCalculatedBarringTime = (0.7 + 0.6 * (nRandom / 10.0)) * nBarringTimeSec;
-
-    m_objContext.GetPassiveTimerHolder().AddTimer(nSsacType, nCalculatedBarringTime * 1000);
 
     return IMS_TRUE;
 }

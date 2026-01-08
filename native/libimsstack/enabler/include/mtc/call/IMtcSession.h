@@ -18,6 +18,7 @@
 #define INTERFACE_MTC_SESSION_H_
 
 #include "ImsTypeDef.h"
+#include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "call/message/IMtcMessageHandler.h"
 
@@ -30,8 +31,6 @@ struct CallReasonInfo;
 class IMtcSession : public IMtcMessageHandler
 {
 public:
-    virtual ~IMtcSession() {}
-
     /**
      * @brief Starts
      *
@@ -45,14 +44,14 @@ public:
      * @param bUserAlert
      * @return
      */
-    virtual IMS_RESULT SendProvisionalResponse(IN IMS_BOOL bUserAlert) = 0;
+    virtual IMS_RESULT SendProvisionalResponse(IN IMS_BOOL bUserAlert, IN IMS_BOOL bReliable) = 0;
 
     /**
      * @brief Sends
      *
      * @return
      */
-    virtual IMS_RESULT SendPrack(IN IMS_BOOL bAllowReOffer) = 0;
+    virtual IMS_RESULT SendPrack(IN IMS_BOOL bSdpOfferRequired) = 0;
 
     /**
      * @brief Responds
@@ -135,11 +134,29 @@ public:
     virtual IMS_RESULT Terminate(IMS_BOOL bUseBye, IN const CallReasonInfo& objReason) = 0;
 
     /**
+     * @brief Marks the session as terminated or start-failed.
+     *
+     * This method is called to update the session's state when it is no longer active,
+     * specifically in the following cases:
+     * - ISessionListener#SessionTerminated() is invoked.
+     * - ISessionListener#SessionStartFailed() is invoked.
+     */
+    virtual void SetSessionTerminatedOrStartFailed() = 0;
+
+    /**
      * @brief Sets the current CallType with the input param.
      *
      * @param eCallType The CallType to set.
      */
     virtual void SetCallType(IN CallType eCallType) = 0;
+
+    /**
+     * @brief Sets the call type after adjusting it based on the session's capabilities.
+     *
+     * @param eCallType The CallType to set. It's downgraded if the session doesn't support the
+     *                  required features.
+     */
+    virtual void SetCapableCallType(IN CallType eCallType) = 0;
 
     /**
      * @brief Gets the current CallType.
@@ -185,6 +202,13 @@ public:
      * @return
      */
     virtual IMS_BOOL IsRttCapable() const = 0;
+
+    /**
+     * @brief Checks if there's a pending PRACK transaction.
+     *
+     * @return True when it hasn't sent a PRACK for 183 or received a PRACK_RESPONSE for the PRACK.
+     */
+    virtual IMS_BOOL IsPrackPending() const = 0;
 
     /**
      * @brief Gets the UpdateType of Early UPDATE previously sent and not succeeded yet.

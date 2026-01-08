@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ISystem.h"
+#include "IThread.h"
 #include "ImsAccessNetworkInfoType.h"
 #include "ImsMessageDef.h"
 #include "ImsNetworkConnectionState.h"
 #include "ImsSocketState.h"
-#include "IThread.h"
 #include "OsUtil.h"
 #include "PlatformContext.h"
 #include "ServiceEvent.h"
@@ -29,7 +30,7 @@
 #include "network/OsNetworkConstants.h"
 #include "system-intf/SystemConstants.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 // NR / LTE
 #define UTRAN_ANI_ITEM_SIZE        4
@@ -451,7 +452,7 @@ PRIVATE VIRTUAL void OsNetworkConnection::AddReferenceListener(
 
     for (IMS_UINT32 i = 0; i < m_objReferenceListeners.GetSize(); ++i)
     {
-        INetworkConnectionListener* piTmpListener = m_objReferenceListeners.GetAt(i);
+        const INetworkConnectionListener* piTmpListener = m_objReferenceListeners.GetAt(i);
 
         if (piTmpListener == piListener)
         {
@@ -472,7 +473,7 @@ PRIVATE VIRTUAL void OsNetworkConnection::RemoveReferenceListener(
 
     for (IMS_UINT32 i = 0; i < m_objReferenceListeners.GetSize(); ++i)
     {
-        INetworkConnectionListener* piTmpListener = m_objReferenceListeners.GetAt(i);
+        const INetworkConnectionListener* piTmpListener = m_objReferenceListeners.GetAt(i);
 
         if (piTmpListener == piListener)
         {
@@ -925,6 +926,14 @@ PRIVATE
 void OsNetworkConnection::GetAccessNetworkInfoForWiFi(OUT AccessNetworkInfo& objAccessNetInfo)
 {
     AString strMacAddress = PlatformContext::GetInstance()->GetSystem()->GetWifiBssId();
+    // Fall back to a default MAC address because, in most cases, a valid one is not set
+    // due to privacy concerns.
+    // - specific case: Cross SIM dialing (no Wi-Fi, other SIM's data connection)
+    if (strMacAddress.GetLength() == 0)
+    {
+        IMS_TRACE_D("Fall back to a default MAC address", 0, 0, 0);
+        strMacAddress = WLAN_NULL_MAC;
+    }
     ImsList<AString> objTokens = strMacAddress.Split(':');
 
     if (objTokens.GetSize() == ANI_WLAN_MAX_MAC)
@@ -994,8 +1003,6 @@ void OsNetworkConnection::NotifyDataConnected(IN IMS_SINT32 nErrorCode)
 PRIVATE
 void OsNetworkConnection::NotifyDataDisconnected(IN IMS_SINT32 nErrorCode)
 {
-    IMS_UINT32 nOldState = m_nState;
-
     if (m_nState == STATE_TERMINATING)
     {
         SetState(STATE_TERMINATED);
@@ -1013,19 +1020,11 @@ void OsNetworkConnection::NotifyDataDisconnected(IN IMS_SINT32 nErrorCode)
     }
 
     CallReferenceListeners(NET_DISCONNECTED, nErrorCode);
-
-    if ((nOldState == STATE_ACTIVATING) || (nOldState == STATE_ACTIVE))
-    {
-        // 4 FIXME : is it required in here?
-        Release();
-    }
 }
 
 PRIVATE
 void OsNetworkConnection::NotifyDataConnectionFailed(IN IMS_SINT32 nErrorCode)
 {
-    IMS_UINT32 nOldState = m_nState;
-
     if (m_nState == STATE_TERMINATING)
     {
         SetState(STATE_TERMINATED);
@@ -1043,12 +1042,6 @@ void OsNetworkConnection::NotifyDataConnectionFailed(IN IMS_SINT32 nErrorCode)
     }
 
     CallReferenceListeners(NET_CONNECT_FAILED, nErrorCode);
-
-    if ((nOldState == STATE_ACTIVATING) || (nOldState == STATE_ACTIVE))
-    {
-        // 4 FIXME : is it required in here?
-        Release();
-    }
 }
 
 PRIVATE
@@ -1110,6 +1103,8 @@ void OsNetworkConnection::NotifyPcscfChanged()
         return;
     }
 
+    CacheLocalAddress();
+
     if (m_piConnectionListener != IMS_NULL)
     {
         m_piConnectionListener->NetworkConnection_OnPcscfChanged(this);
@@ -1132,56 +1127,34 @@ IMS_BOOL OsNetworkConnection::HandleEmergencyPdnOnIpChanged(IN IMS_SINT32 nError
     }
 
     // IPv4 address
-    IpAddress objIpv4;
     AString strIpAddr = PlatformContext::GetInstance()->GetSystem()->GetLocalAddress(
             GetApnType(), IpAddress::IPV4, GetSlotId());
-
-    if (!objIpv4.Parse(strIpAddr))
+    if (!m_objLocalAddressIpv4.Parse(strIpAddr))
     {
-        objIpv4 = IpAddress::NONE;
+        m_objLocalAddressIpv4 = IpAddress::NONE;
     }
 
     // IPv6 address
-    IpAddress objIpv6;
     strIpAddr = PlatformContext::GetInstance()->GetSystem()->GetLocalAddress(
             GetApnType(), IpAddress::IPV6, GetSlotId());
-
-    if (!objIpv6.Parse(strIpAddr))
+    if (!m_objLocalAddressIpv6.Parse(strIpAddr))
     {
-        objIpv6 = IpAddress::IPv6NONE;
+        m_objLocalAddressIpv6 = IpAddress::IPv6NONE;
     }
 
-    IMS_BOOL bIpUpdated = IMS_FALSE;
-
-    if (!m_objLocalAddressIpv4.Equals(objIpv4))
+    // Default IP address based on configuration
+    strIpAddr = PlatformContext::GetInstance()->GetSystem()->GetLocalAddress(
+            GetApnType(), -1, GetSlotId());
+    if (!m_objLocalAddress.Parse(strIpAddr))
     {
-        bIpUpdated = IMS_TRUE;
-        m_objLocalAddressIpv4 = objIpv4;
+        m_objLocalAddress = IpAddress::NONE;
     }
 
-    if (!m_objLocalAddressIpv6.Equals(objIpv6))
-    {
-        bIpUpdated = IMS_TRUE;
-        m_objLocalAddressIpv6 = objIpv6;
-    }
+    AdjustPreferredLocalAddress();
 
-    if (bIpUpdated)
-    {
-        // Default IP address based on configuration
-        strIpAddr = PlatformContext::GetInstance()->GetSystem()->GetLocalAddress(
-                GetApnType(), -1, GetSlotId());
-
-        if (!m_objLocalAddress.Parse(strIpAddr))
-        {
-            m_objLocalAddress = IpAddress::NONE;
-        }
-
-        AdjustPreferredLocalAddress();
-
-        IMS_TRACE_D("EmergencyPdnOnIpChanged :: preferred=%s, ipv4=%s, ipv6=%s",
-                m_objLocalAddress.ToString().GetStr(), m_objLocalAddressIpv4.ToString().GetStr(),
-                m_objLocalAddressIpv6.ToString().GetStr());
-    }
+    IMS_TRACE_D("EmergencyPdnOnIpChanged :: preferred=%s, ipv4=%s, ipv6=%s",
+            m_objLocalAddress.ToString().GetStr(), m_objLocalAddressIpv4.ToString().GetStr(),
+            m_objLocalAddressIpv6.ToString().GetStr());
 
     if (m_piConnectionListener != IMS_NULL)
     {
@@ -1226,32 +1199,15 @@ void OsNetworkConnection::PostEvent(IN IMS_UINT32 nEvent)
 PRIVATE
 IMS_BOOL OsNetworkConnection::Release(IN IMS_BOOL bDisableApn /*= IMS_FALSE*/)
 {
-    if (GetApnType() == NetworkPolicy::APN_EMERGENCY)
+    if (bDisableApn)
     {
+        IMS_TRACE_D("APN (%s) will be explicitly disabled by the application",
+                GetProfileName().GetStr(), 0, 0);
+
         if (PlatformContext::GetInstance()->GetSystem()->ReleaseNetwork(
                     GetApnType(), GetSlotId()) == 0)
         {
             IMS_TRACE_E(0, "Disable data connectivity(%s) failed", GetProfileName().GetStr(), 0, 0);
-            return IMS_FALSE;
-        }
-    }
-    else
-    {
-        if (bDisableApn)
-        {
-            IMS_TRACE_D("APN (%s) will be explicitly disabled by the application",
-                    GetProfileName().GetStr(), 0, 0);
-
-            if (PlatformContext::GetInstance()->GetSystem()->ReleaseNetwork(
-                        GetApnType(), GetSlotId()) == 0)
-            {
-                IMS_TRACE_E(
-                        0, "Disable data connectivity(%s) failed", GetProfileName().GetStr(), 0, 0);
-                return IMS_FALSE;
-            }
-        }
-        else
-        {
             return IMS_FALSE;
         }
     }

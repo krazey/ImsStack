@@ -131,6 +131,10 @@ PRIVATE VIRTUAL void JniAosService::HandleMessage(IN IMS_SINT32 nMsg, IN const P
             ControlRegistration(objParcel);
             break;
 
+        case IIAosService::J2N_UPDATE_DATA_FAILURE_REASON:
+            UpdateDataFailureReason(objParcel);
+            break;
+
         case IIAosService::J2N_NOTIFY_AIRPLANE_SETTING:
             NotifyAirplaneSetting(objParcel);
             break;
@@ -167,6 +171,10 @@ PRIVATE VIRTUAL void JniAosService::HandleMessage(IN IMS_SINT32 nMsg, IN const P
             NotifyWfcSetting(objParcel);
             break;
 
+        case IIAosService::J2N_NOTIFY_WIFI_SETTING:
+            NotifyWifiSetting(objParcel);
+            break;
+
         case IIAosService::J2N_NOTIFY_AOS_START:
             NotifyAosStart(objParcel);
             break;
@@ -199,6 +207,10 @@ PRIVATE VIRTUAL void JniAosService::HandleMessage(IN IMS_SINT32 nMsg, IN const P
             NotifyPlmnChanged(objParcel);
             break;
 
+        case IIAosService::J2N_NOTIFY_VOPS_STATE_CHANGED:
+            NotifyVopsStateChanged(objParcel);
+            break;
+
         case IIAosService::J2N_NOTIFY_POWER_OFF:
             NotifyPowerOff(objParcel);
             break;
@@ -211,8 +223,28 @@ PRIVATE VIRTUAL void JniAosService::HandleMessage(IN IMS_SINT32 nMsg, IN const P
             NotifyCarrierSignalPcoValueChanged(objParcel);
             break;
 
-        case IIAosService::J2N_NOTIFY_EMC_CALLBACK_MODE_CHANGED:
-            NotifyEmcCallbackModeChanged(objParcel);
+        case IIAosService::J2N_NOTIFY_CROSS_SIM_STATUS:
+            NotifyCrossSimStatus(objParcel);
+            break;
+
+        case IIAosService::J2N_NOTIFY_EMERGENCY_CALLBACK_MODE_CHANGED:
+            NotifyEmergencyCallbackModeChanged(objParcel);
+            break;
+
+        case IIAosService::J2N_NOTIFY_NAS_ALGORITHM_CHANGED:
+            NotifyNasSecurityAlgorithmChanged(objParcel);
+            break;
+
+        case IIAosService::J2N_NOTIFY_ALLOWED_NETWORK_TYPES_CHANGED:
+            NotifyAllowedNetworkTypesChanged(objParcel);
+            break;
+
+        case IIAosService::J2N_NOTIFY_EMERGENCY_REGISTRATION_STATE_CHANGED:
+            NotifyEmergencyRegistrationStateChanged(objParcel);
+            break;
+
+        case IIAosService::J2N_NOTIFY_SIM_STATE_CHANGED:
+            NotifySimStateChanged(objParcel);
             break;
 
         default:
@@ -275,7 +307,7 @@ void JniAosService::NotifyCapabilitiesChanged(IN const Parcel& objParcel)
     ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
 
     IMS_SINT32 nSize = objParcel.readInt32();
-    for (int i = 0; i < nSize; ++i)
+    for (IMS_SINT32 i = 0; i < nSize; ++i)
     {
         objCapabilities.Add(objParcel.readInt32(), objParcel.readInt32());
     }
@@ -295,6 +327,16 @@ void JniAosService::ControlRegistration(IN const android::Parcel& objParcel)
     {
         piAosService->ControlRegistration(
                 objParcel.readInt32(), objParcel.readInt32(), objParcel.readInt32());
+    }
+}
+
+PRIVATE
+void JniAosService::UpdateDataFailureReason(IN const android::Parcel& objParcel)
+{
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
+    {
+        piAosService->UpdateDataFailureReason(objParcel.readInt32());
     }
 }
 
@@ -389,6 +431,16 @@ void JniAosService::NotifyWfcSetting(IN const android::Parcel& objParcel)
 }
 
 PRIVATE
+void JniAosService::NotifyWifiSetting(IN const android::Parcel& objParcel)
+{
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
+    {
+        piAosService->NotifyWifiSetting(objParcel.readInt32());
+    }
+}
+
+PRIVATE
 void JniAosService::NotifyAosStart(IN const android::Parcel& /*objParcel*/)
 {
     IAosService* piAosService = GetNativeService();
@@ -459,12 +511,27 @@ void JniAosService::NotifyPhoneNumberState(IN const android::Parcel& objParcel)
 }
 
 PRIVATE
-void JniAosService::NotifyPlmnChanged(IN const android::Parcel& /*objParcel*/)
+void JniAosService::NotifyPlmnChanged(IN const android::Parcel& objParcel)
 {
     IAosService* piAosService = GetNativeService();
     if (piAosService)
     {
-        piAosService->NotifyPlmnChanged();
+        AString strPlmn;
+        ConvertString(objParcel.readString16(), strPlmn);
+        piAosService->NotifyPlmnChanged(strPlmn);
+    }
+}
+
+PRIVATE
+void JniAosService::NotifyVopsStateChanged(IN const android::Parcel& objParcel)
+{
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
+    {
+        IMS_UINT32 nState = objParcel.readInt32();
+        AString strPlmn;
+        ConvertString(objParcel.readString16(), strPlmn);
+        piAosService->NotifyVopsStateChanged(nState, strPlmn);
     }
 }
 
@@ -499,13 +566,63 @@ void JniAosService::NotifyCarrierSignalPcoValueChanged(IN const android::Parcel&
 }
 
 PRIVATE
-void JniAosService::NotifyEmcCallbackModeChanged(IN const android::Parcel& objParcel)
+void JniAosService::NotifyCrossSimStatus(IN const android::Parcel& objParcel)
 {
     IAosService* piAosService = GetNativeService();
     if (piAosService)
     {
-        piAosService->NotifyEmcCallbackModeChanged(
+        piAosService->NotifyCrossSimStatus(objParcel.readInt32());
+    }
+}
+
+PRIVATE
+void JniAosService::NotifyEmergencyCallbackModeChanged(IN const android::Parcel& objParcel)
+{
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
+    {
+        piAosService->NotifyEmergencyCallbackModeChanged(
                 objParcel.readInt32(), objParcel.readInt32(), objParcel.readInt64());
+    }
+}
+
+PRIVATE
+void JniAosService::NotifyNasSecurityAlgorithmChanged(IN const android::Parcel& objParcel)
+{
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
+    {
+        piAosService->NotifyNasSecurityAlgorithmChanged(objParcel.readInt32());
+    }
+}
+
+PRIVATE
+void JniAosService::NotifyAllowedNetworkTypesChanged(IN const android::Parcel& objParcel)
+{
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
+    {
+        piAosService->NotifyAllowedNetworkTypesChanged(objParcel.readUint64());
+    }
+}
+
+PRIVATE
+void JniAosService::NotifyEmergencyRegistrationStateChanged(IN const android::Parcel& objParcel)
+{
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
+    {
+        piAosService->NotifyEmergencyRegistrationStateChanged(objParcel.readInt32());
+    }
+}
+
+PRIVATE
+void JniAosService::NotifySimStateChanged(IN const android::Parcel& objParcel)
+{
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
+    {
+        piAosService->NotifySimStateChanged(objParcel.readInt32());
     }
 }
 

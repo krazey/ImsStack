@@ -26,13 +26,17 @@ public:
     virtual ~IAosSubscriberManager(){};
 
     virtual IMS_BOOL IsReady(IN IMS_BOOL bIsFake = IMS_FALSE) const = 0;
+    virtual IMS_BOOL IsIsim() const = 0;
+    virtual IMS_BOOL IsUsim() const = 0;
 
     virtual void AddListener(IN IAosSubscriberManagerListener* piListener) = 0;
     virtual void RemoveListener(IN IAosSubscriberManagerListener* piListener) = 0;
     virtual void AddListenerForMonitor(IN IAosSubscriberManagerListener* piListener) = 0;
     virtual void RemoveListenerForMonitor(IN IAosSubscriberManagerListener* piListener) = 0;
 
-    virtual const AStringArray& GetConfiguredImpus(IN IMS_BOOL bIsFake = IMS_FALSE) const = 0;
+    virtual const AStringArray& GetConfiguredImpus() const = 0;
+    virtual const AStringArray& GetOrderedImpus() const = 0;
+    virtual const AStringArray& GetConfiguredImpusForFake() const = 0;
     virtual const AStringArray& GetFakeImpus() const = 0;
 
     virtual const ISubscriberConfig* GetSubscriberConfig(

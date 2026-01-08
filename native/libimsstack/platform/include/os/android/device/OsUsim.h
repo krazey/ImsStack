@@ -16,18 +16,19 @@
 #ifndef OS_USIM_H_
 #define OS_USIM_H_
 
+#include "ByteArray.h"
 #include "IDigestAka.h"
 #include "ISystemListener.h"
 #include "ImsUsim.h"
 
-class IThread;
 class IDigestAkaListener;
+class IThread;
 
 class OsUsimDigestAka : public IDigestAka
 {
 public:
     explicit OsUsimDigestAka(IN ImsUsim* pUsim);
-    virtual ~OsUsimDigestAka();
+    ~OsUsimDigestAka() override;
 
     OsUsimDigestAka(IN const OsUsimDigestAka&) = delete;
     OsUsimDigestAka& operator=(IN const OsUsimDigestAka&) = delete;
@@ -51,7 +52,7 @@ class OsUsim : public ImsUsim, public ISystemListener
 {
 public:
     explicit OsUsim(IN IMS_SINT32 nSlotId);
-    virtual ~OsUsim();
+    ~OsUsim() override;
 
     OsUsim(IN const OsUsim&) = delete;
     OsUsim& operator=(IN const OsUsim&) = delete;
@@ -76,8 +77,8 @@ public:
 
 public:
     // Result of REQUEST_USIM_AUTH(String nonce, int owner)
-    // SimAgent#NOTIFICATION_USIM_AUTH (106)
-    static const int NOTIFICATION_USIM_AUTH = 106;
+    // SimAgent#NOTIFICATION_USIM_AUTH (201)
+    static const int NOTIFICATION_USIM_AUTH = 201;
 
 private:
     ImsList<OsUsimDigestAka*> m_objDigestAkas;

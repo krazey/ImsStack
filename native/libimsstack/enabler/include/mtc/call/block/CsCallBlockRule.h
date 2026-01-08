@@ -26,7 +26,7 @@ class CsCallBlockRule final : public IMtcBlockRule
 {
 public:
     explicit CsCallBlockRule(IN IMtcCallContext& objContext);
-    virtual ~CsCallBlockRule();
+    virtual ~CsCallBlockRule() override;
     CsCallBlockRule(IN const CsCallBlockRule&) = delete;
     CsCallBlockRule& operator=(IN const CsCallBlockRule&) = delete;
 

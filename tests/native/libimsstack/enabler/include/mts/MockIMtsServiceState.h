@@ -25,8 +25,6 @@ class IImsAos;
 class MockIMtsServiceState : public IMtsServiceState
 {
 public:
-    virtual ~MockIMtsServiceState() {}
-
     // MtsService
     MOCK_METHOD(void, Init, (IN IImsAos* piImsAos), (override));
     MOCK_METHOD(IMS_SINT32, GetState, (), (const, override));

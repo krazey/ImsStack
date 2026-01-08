@@ -34,6 +34,7 @@ public class CallReasonInfo implements Parcelable {
     public static final int CODE_LOCAL_LOW_BATTERY = 112;
     public static final int CODE_LOCAL_NETWORK_NO_SERVICE = 121;
     public static final int CODE_LOCAL_NETWORK_NO_LTE_COVERAGE = 122;
+    public static final int CODE_LOCAL_NETWORK_IP_CHANGED = 124;
     public static final int CODE_LOCAL_SERVICE_UNAVAILABLE = 131;
     public static final int CODE_LOCAL_NOT_REGISTERED = 132;
     public static final int CODE_LOCAL_CALL_EXCEEDED = 141;
@@ -69,6 +70,8 @@ public class CallReasonInfo implements Parcelable {
     public static final int CODE_SIP_SERVER_ERROR = 354;
     public static final int CODE_SIP_USER_REJECTED = 361;
     public static final int CODE_SIP_GLOBAL_ERROR = 362;
+    public static final int CODE_EMERGENCY_TEMP_FAILURE = 363;
+    public static final int CODE_EMERGENCY_PERM_FAILURE = 364;
     public static final int CODE_SIP_METHOD_NOT_ALLOWED = 366;
     public static final int CODE_SIP_PROXY_AUTHENTICATION_REQUIRED = 367;
     public static final int CODE_SIP_REQUEST_ENTITY_TOO_LARGE = 368;
@@ -106,9 +109,11 @@ public class CallReasonInfo implements Parcelable {
     public static final int CODE_MAXIMUM_NUMBER_OF_CALLS_REACHED = 1403;
     public static final int CODE_REMOTE_CALL_DECLINE = 1404;
     public static final int CODE_WIFI_LOST = 1407;
+    public static final int CODE_RADIO_OFF = 1500;
     public static final int CODE_RADIO_INTERNAL_ERROR = 1502;
     public static final int CODE_NETWORK_RESP_TIMEOUT = 1503;
     public static final int CODE_ACCESS_CLASS_BLOCKED = 1512;
+    public static final int CODE_NETWORK_DETACH = 1513;
     public static final int CODE_SIP_ALTERNATE_EMERGENCY_CALL = 1514;
     public static final int CODE_REJECT_UNKNOWN = 1600;
     public static final int CODE_REJECT_ONGOING_CALL_WAITING_DISABLED = 1601;
@@ -119,6 +124,7 @@ public class CallReasonInfo implements Parcelable {
     public static final int CODE_REJECT_ONGOING_CALL_SETUP = 1607;
     public static final int CODE_REJECT_MAX_CALL_LIMIT_REACHED = 1608;
     public static final int CODE_REJECT_UNSUPPORTED_SIP_HEADERS = 1609;
+    public static final int CODE_REJECT_UNSUPPORTED_SDP_HEADERS = 1610;
     public static final int CODE_REJECT_ONGOING_CALL_TRANSFER = 1611;
     public static final int CODE_REJECT_INTERNAL_ERROR = 1612;
     public static final int CODE_REJECT_QOS_FAILURE = 1613;
@@ -126,31 +132,41 @@ public class CallReasonInfo implements Parcelable {
     public static final int CODE_REJECT_ONGOING_CALL_UPGRADE = 1616;
     public static final int CODE_REJECT_ONGOING_CONFERENCE_CALL = 1618;
     public static final int CODE_REJECT_ONGOING_CS_CALL = 1621;
+    public static final int CODE_EMERGENCY_CALL_OVER_WFC_NOT_AVAILABLE = 1622;
+    public static final int CODE_OEM_CAUSE_3 = 61443;
 
     // CODE_LOCAL_CALL_CS_RETRY_REQUIRED
-    public static final int EXTRA_CODE_CALL_RETRY_NORMAL = 0;
-    public static final int EXTRA_CODE_CALL_RETRY_SILENT_REDIAL = 1;
-    public static final int EXTRA_CODE_CALL_RETRY_EMERGENCY = 2;
+    public static final int EXTRA_CODE_CALL_RETRY_NORMAL = 1;
+    public static final int EXTRA_CODE_CALL_RETRY_SILENT_REDIAL = 2;
+    public static final int EXTRA_CODE_CALL_RETRY_EMERGENCY = 4;
 
     // CODE_USER_TERMINATED
     public static final int EXTRA_USER_TERMINATED_ECT = 0;
 
-    // FAIL_REASON_SESSION_RETRY1X_E_1X|VOLTE :: CODE
+    // CODE_SIP_ALTERNATE_EMERGENCY_CALL
+    // android.telephony.emergency.EmergencyNumber.EmergencyServiceCategories
     public static final int EXTRA_CODE_EMERGENCYSERVICE_INVALID = -1;
     public static final int EXTRA_CODE_EMERGENCYSERVICE_GENERIC = 0;
-    public static final int EXTRA_CODE_EMERGENCYSERVICE_AMBULANCE = 1;
-    public static final int EXTRA_CODE_EMERGENCYSERVICE_ANIMAL_CONTROL = 2;
+    public static final int EXTRA_CODE_EMERGENCYSERVICE_POLICE = 1;
+    public static final int EXTRA_CODE_EMERGENCYSERVICE_AMBULANCE = 2;
     public static final int EXTRA_CODE_EMERGENCYSERVICE_FIRE = 3;
-    public static final int EXTRA_CODE_EMERGENCYSERVICE_GAS = 4;
-    public static final int EXTRA_CODE_EMERGENCYSERVICE_MARINE = 5;
-    public static final int EXTRA_CODE_EMERGENCYSERVICE_MOUNTAIN = 6;
-    public static final int EXTRA_CODE_EMERGENCYSERVICE_PHYSICIAN = 7;
-    public static final int EXTRA_CODE_EMERGENCYSERVICE_POISON = 8;
-    public static final int EXTRA_CODE_EMERGENCYSERVICE_POLICE = 9;
+    public static final int EXTRA_CODE_EMERGENCYSERVICE_MARINE = 4;
+    public static final int EXTRA_CODE_EMERGENCYSERVICE_MOUNTAIN = 5;
+    public static final int EXTRA_CODE_EMERGENCYSERVICE_MIEC = 6;
+    public static final int EXTRA_CODE_EMERGENCYSERVICE_AIEC = 7;
+    public static final int EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC = 8;
+    public static final int EXTRA_CODE_EMERGENCYSERVICE_UNSPECIFIED = 9;
 
     public static final int EXTRA_CODE_NOT_ACCEPTABLE_SIP_406 = 1;
     public static final int EXTRA_CODE_NOT_ACCEPTABLE_SIP_488 = 2;
     public static final int EXTRA_CODE_NOT_ACCEPTABLE_SIP_606 = 3;
+
+    // CODE_LOCAL_INTERNAL_ERROR
+    // used internally only between native MTC and java MTC
+    public static final int EXTRA_CODE_INTERNAL_ERROR_INVALID_CALL_KEY = 0;
+
+    // used internally only between native MTC and java MTC
+    public static final String EXTRA_MESSAGE_AOS_DISCONNECTED = "AOS_DISCONNECTED";
 
     public int mCode;
     public int mExtraCode;
@@ -165,7 +181,7 @@ public class CallReasonInfo implements Parcelable {
         mExtraCode = -1;
         mExtraMessage = "";
 
-        logIn();
+        logLn();
     }
 
     public CallReasonInfo(CallReasonInfo callReasonInfo) {
@@ -175,7 +191,7 @@ public class CallReasonInfo implements Parcelable {
         mExtraCode = callReasonInfo.mExtraCode;
         mExtraMessage = callReasonInfo.mExtraMessage;
 
-        logIn();
+        logLn();
     }
 
     public CallReasonInfo(Parcel source) {
@@ -190,13 +206,13 @@ public class CallReasonInfo implements Parcelable {
         mExtraCode = extraCode;
         mExtraMessage = extraMessage;
 
-        logIn();
+        logLn();
     }
 
     /**
      * Helper for leaving the logs.
     */
-    public void logIn() {
+    public void logLn() {
         ImsLog.i("mCode : " + mCode
                 + " mExtraCode : " + mExtraCode
                 + " mExtraMessage : " + mExtraMessage
@@ -213,7 +229,7 @@ public class CallReasonInfo implements Parcelable {
         mExtraCode = source.readInt();
         mExtraMessage = source.readString();
 
-        logIn();
+        logLn();
     }
 
     @Override

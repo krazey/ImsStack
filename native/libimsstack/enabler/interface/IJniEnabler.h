@@ -16,7 +16,6 @@
 #ifndef INTERFACE_JNI_ENABLER_H_
 #define INTERFACE_JNI_ENABLER_H_
 
-#include "ImsTypeDef.h"
 #include "ImsMessage.h"
 
 class IJniEnablerThread;
@@ -24,7 +23,7 @@ class IJniEnablerThread;
 class IJniEnabler : public ImsMessage::IMessageCallback
 {
 public:
-    virtual ~IJniEnabler() {}
+    ~IJniEnabler() override = default;
 
     virtual void NotifyNativeEnablerSet() = 0;
     virtual IJniEnablerThread* GetJniThread() const = 0;

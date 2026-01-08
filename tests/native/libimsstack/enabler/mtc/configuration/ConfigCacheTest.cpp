@@ -14,64 +14,31 @@
  * limitations under the License.
  */
 
+#include "ImsTypeDef.h"
 #include "configuration/ConfigCache.h"
 #include "configuration/ConfigDef.h"
 #include <gtest/gtest.h>
+#include <variant>
 
-namespace android
+TEST(ConfigCacheTest, GetCacheReturnsNull)
 {
+    ConfigCache objCache;
 
-class ConfigCacheTest : public ::testing::Test
-{
-public:
-    ConfigCache objConfigCache;
-
-protected:
-    virtual void SetUp() override {}
-
-    virtual void TearDown() override {}
-};
-
-TEST_F(ConfigCacheTest, PutAndGetBoolCacheAndReset)
-{
-    Feature eAnyFeature = Feature::SUPPORT_GEOLOCATION_PIDF_IN_SIP_INVITE;
-    IMS_BOOL bAnyBooleanValue = IMS_TRUE;
-    objConfigCache.PutCache(eAnyFeature, bAnyBooleanValue);
-    EXPECT_EQ(bAnyBooleanValue, objConfigCache.GetBooleanCache(eAnyFeature));
-
-    EXPECT_FALSE(objConfigCache.IsEmpty());
-    EXPECT_TRUE(objConfigCache.HasBooleanCache(eAnyFeature));
-    objConfigCache.ResetCache(eAnyFeature);
-    EXPECT_TRUE(objConfigCache.IsEmpty());
-    EXPECT_FALSE(objConfigCache.HasBooleanCache(eAnyFeature));
+    const IMS_CHAR* pszAnyKey = "any_key_int";
+    auto result = objCache.GetCache(pszAnyKey);
+    EXPECT_FALSE(result.has_value());
 }
 
-TEST_F(ConfigCacheTest, PutAndGetIntegerCacheAndReset)
+TEST(ConfigCacheTest, PutAndGetCacheReturnsCachingValue)
 {
-    Feature eAnyFeature = Feature::REQUEST_URI_TYPE;
-    IMS_SINT32 nAnyIntegerValue = 12345;
-    objConfigCache.PutCache(eAnyFeature, nAnyIntegerValue);
-    EXPECT_EQ(nAnyIntegerValue, objConfigCache.GetIntegerCache(eAnyFeature));
+    ConfigCache objCache;
 
-    EXPECT_FALSE(objConfigCache.IsEmpty());
-    EXPECT_TRUE(objConfigCache.HasIntegerCache(eAnyFeature));
-    objConfigCache.ResetCache(eAnyFeature);
-    EXPECT_TRUE(objConfigCache.IsEmpty());
-    EXPECT_FALSE(objConfigCache.HasIntegerCache(eAnyFeature));
+    const IMS_CHAR* pszAnyKey = "any_key_int";
+    IMS_SINT32 nValue = 1000;
+    objCache.PutCache(pszAnyKey, nValue);
+
+    auto result = objCache.GetCache(pszAnyKey);
+    EXPECT_TRUE(result.has_value());
+
+    EXPECT_EQ(std::get<IMS_SINT32>(result.value()), nValue);
 }
-
-TEST_F(ConfigCacheTest, PutAndGetStringCacheAndReset)
-{
-    Feature eAnyFeature = Feature::CONFERENCE_FACTORY_URI;
-    const AString& strAnyStringValue = "12345";
-    objConfigCache.PutCache(eAnyFeature, strAnyStringValue);
-    EXPECT_STREQ(strAnyStringValue.GetStr(), objConfigCache.GetStringCache(eAnyFeature).GetStr());
-
-    EXPECT_FALSE(objConfigCache.IsEmpty());
-    EXPECT_TRUE(objConfigCache.HasStringCache(eAnyFeature));
-    objConfigCache.ResetCache(eAnyFeature);
-    EXPECT_TRUE(objConfigCache.IsEmpty());
-    EXPECT_FALSE(objConfigCache.HasStringCache(eAnyFeature));
-}
-
-}  // namespace android

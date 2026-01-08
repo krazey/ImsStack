@@ -18,10 +18,6 @@
 
 #include <gmock/gmock.h>
 
-#include "ImsVector.h"
-#include "CarrierConfig.h"
-#include "IAsyncConfig.h"
-#include "IImsSubscriberInfo.h"
 #include "ISubscriberConfig.h"
 
 class MockISubscriberConfig : public ISubscriberConfig
@@ -42,9 +38,21 @@ public:
     MOCK_METHOD(IMS_BOOL, IsTestMode, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetSubscriptionAttributes, (), (const, override));
     MOCK_METHOD(IConfigurable*, GetConfigurable, (), (const, override));
-    MOCK_METHOD(
-            void, RemoveListener, (IN ISubscriberConfigListener * piListener), (const, override));
-    MOCK_METHOD(void, SetListener, (IN ISubscriberConfigListener * piListener), (const, override));
+    MOCK_METHOD(void, RemoveListener, (IN ISubscriberConfigListener * piListener), (override));
+    MOCK_METHOD(void, SetListener,
+            (IN ISubscriberConfigListener * piListener,
+                    IN IMS_SINT32 nEvents /*= LISTEN_EVENT_DEFAULT*/),
+            (override));
+    MOCK_METHOD(void, EnableIsim, (), (override));
+    MOCK_METHOD(void, UpdateSubscriberInfo,
+            (IN const AString& strHomeDomainName, IN const AString& strPrivateUserId,
+                    IN const AString& strPublicUserId, IN IMS_BOOL bIsimEnabled /*= IMS_FALSE*/),
+            (override));
+    MOCK_METHOD(void, UpdateSubscriberInfo,
+            (IN const AString& strHomeDomainName, IN const AString& strPrivateUserId,
+                    IN const AStringArray& objPublicUserIds,
+                    IN IMS_BOOL bIsimEnabled /*= IMS_FALSE*/),
+            (override));
     MOCK_METHOD(const Credential&, GetCredential, (), (const, override));
     MOCK_METHOD(const AString&, GetHomeDomainName, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetIndexOfPrimaryPublicUserId, (), (const, override));
@@ -52,6 +60,7 @@ public:
     MOCK_METHOD(const AString&, GetPrivateUserId, (), (const, override));
     MOCK_METHOD(const AString&, GetPublicUserId, (IN IMS_SINT32 nImpuType), (const, override));
     MOCK_METHOD(const AStringArray&, GetPublicUserIds, (), (const, override));
+    MOCK_METHOD(const AStringArray&, GetPcscfAddressesFromIsim, (), (const, override));
 
     MOCK_METHOD(void, HandleMessage,
             (IN IMS_SINT32 nMSG, IN IMS_SINTP nParam1, IN IMS_SINTP nParam2), (override));

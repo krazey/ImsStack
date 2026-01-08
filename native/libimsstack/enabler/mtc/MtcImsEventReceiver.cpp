@@ -123,11 +123,9 @@ PUBLIC VIRTUAL void MtcImsEventReceiver::Event_NotifyEvent(
 PRIVATE
 void MtcImsEventReceiver::RegisterSupportedEvents()
 {
-    RegisterEvent(IMS_EVENT_AC_BARRING_STATE);
     RegisterEvent(IMS_EVENT_CSCALL_STATE);
     RegisterEvent(IMS_EVENT_IMS_VOICE_OVER_PS_STATE);
     RegisterEvent(IMS_EVENT_LTE_INFO);
-    RegisterEvent(IMS_EVENT_LTE_STATE);
     RegisterEvent(IMS_EVENT_POWER_LOW_BATTERY);
     RegisterEvent(IMS_EVENT_REG_CONTROL);
     RegisterEvent(IMS_EVENT_ROAMING_STATE);

@@ -50,6 +50,7 @@ public:
     ConferenceOperationQueue* pOperationQueue;
     TestTimerService* pTimerService;
     MockITimer& objTimer;
+    // cppcheck-suppress unusedStructMember
     MockIConferenceOperationQueueListener objListener;
 
 protected:
@@ -60,7 +61,7 @@ protected:
 
 TEST_F(ConferenceOperationQueueTest, GetNextOperationWithoutPutReturnsNull)
 {
-    ConferenceOperationQueue::ConferenceOperation* pNextOperation =
+    const ConferenceOperationQueue::ConferenceOperation* pNextOperation =
             pOperationQueue->GetNextOperation();
     EXPECT_EQ(nullptr, pNextOperation);
 }
@@ -84,7 +85,7 @@ TEST_F(ConferenceOperationQueueTest, CreateAndPutWithDelayThenGetNextReturnsNull
 
     EXPECT_CALL(objTimer, SetTimer(nAnyDelay, pOperationQueue));
 
-    ConferenceOperationQueue::ConferenceOperation* pNextOperation =
+    const ConferenceOperationQueue::ConferenceOperation* pNextOperation =
             pOperationQueue->GetNextOperation();
     EXPECT_EQ(nullptr, pNextOperation);
 }
@@ -157,7 +158,7 @@ TEST_F(ConferenceOperationQueueTest, CreateAndPutWithUsersProvidesSameUser)
     objUsers.Append(&objUser);
     pOperationQueue->CreateNPutWithUsers(nAnyType, objUsers);
 
-    ConferenceOperationQueue::ConferenceOperation* pNextOperation =
+    const ConferenceOperationQueue::ConferenceOperation* pNextOperation =
             pOperationQueue->GetNextOperation();
 
     EXPECT_EQ(pNextOperation->GetUsers().GetAt(0), &objUser);
@@ -172,7 +173,7 @@ TEST_F(ConferenceOperationQueueTest, CreateAndPutWithUserProvidesSameUser)
     ConfUser objUser;
     pOperationQueue->CreateNPutWithUser(nAnyType, &objUser);
 
-    ConferenceOperationQueue::ConferenceOperation* pNextOperation =
+    const ConferenceOperationQueue::ConferenceOperation* pNextOperation =
             pOperationQueue->GetNextOperation();
 
     EXPECT_EQ(pNextOperation->GetUsers().GetAt(0), &objUser);
@@ -184,7 +185,7 @@ TEST_F(ConferenceOperationQueueTest, CreateAndPutWithStartParamProvidesSameParam
     CallInfo objCallInfo;
     MediaInfo objMediaInfo;
     ImsList<ConfUser*> objUsers;
-    ImsMap<SuppType, SuppService*> objSuppServices;
+    ImsList<SuppService*> objSuppServices;
     CallStartOperationParams* pParam =
             new CallStartOperationParams(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objCallInfo,
                     objMediaInfo, objUsers, objSuppServices);
@@ -239,7 +240,7 @@ TEST_F(ConferenceOperationQueueTest, CreateAndCompleteCurrentOperationRemovesOpe
     {
         IMS_UINT32 nAnyType = eType;
         pOperationQueue->CreateNPut(nAnyType, IMS_FALSE);
-        ConferenceOperationQueue::ConferenceOperation* pNextOperation =
+        const ConferenceOperationQueue::ConferenceOperation* pNextOperation =
                 pOperationQueue->GetNextOperation();
         EXPECT_NE(nullptr, pNextOperation);
         pOperationQueue->CompleteCurrentOperation(nAnyType);

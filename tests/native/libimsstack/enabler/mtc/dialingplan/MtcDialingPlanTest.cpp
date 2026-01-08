@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-#include "MockIMtcContext.h"
+#include "MockIMtcService.h"
+#include "MockINetworkConnection.h"
 #include "MockIPhoneInfoSubscriber.h"
+#include "MockISubscriberConfig.h"
+#include "PlatformContext.h"
+#include "ServiceNetworkPolicy.h"
+#include "TestNetworkService.h"
+#include "TestPhoneInfoService.h"
 #include "call/IMtcCall.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "call/MockIMtcCallContext.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "dialingplan/ImsIdentityProxy.h"
 #include "dialingplan/MockImsIdentityProxy.h"
 #include "dialingplan/MtcDialingPlan.h"
+#include "helper/MockIMtcAosConnector.h"
 #include <gtest/gtest.h>
 
 namespace android
@@ -35,12 +43,11 @@ using ::testing::ReturnRef;
 class TestMtcDialingPlan : public MtcDialingPlan
 {
 public:
-    inline explicit TestMtcDialingPlan(
-            IN IMtcContext& objContext, IN ISubscriberInfo& objSubscriberInfo) :
-            MtcDialingPlan(objContext, objSubscriberInfo)
+    inline TestMtcDialingPlan() :
+            MtcDialingPlan()
     {
     }
-    inline ~TestMtcDialingPlan() {}
+    inline ~TestMtcDialingPlan() override {}
 
     inline void ReplaceImsIdentityProxy(IN ImsIdentityProxy* pProxy)
     {
@@ -53,22 +60,38 @@ class MtcDialingPlanTest : public ::testing::Test
 {
 public:
     TestMtcDialingPlan* pDialingPlan;
-    MockIMtcContext objContext;
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockIMtcCallContext objContext;
+    MockIMtcService objService;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     MockISubscriberInfo objSubscriberInfo;
     MockImsIdentityProxy* pIdentityProxy;
+    MockIMtcAosConnector objAosConnector;
+    MockINetworkConnection objNetworkConnection;
+    MockISubscriberConfig objSubscriberConfig;
+    TestPhoneInfoService objPhoneInfoService;
+    TestNetworkService objNetworkService;
     CallInfo objCallInfo;
 
 protected:
     virtual void SetUp() override
     {
-        pConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(objContext, GetSlotId).WillByDefault(Return(0));
+        ON_CALL(objContext, GetServiceByType).WillByDefault(Return(&objService));
 
-        pDialingPlan = new TestMtcDialingPlan(objContext, objSubscriberInfo);
+        ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
+        ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+        ON_CALL(objAosConnector, GetConnectionType).WillByDefault(Return(NetworkPolicy::APN_IMS));
+        ON_CALL(objContext, GetSubscriberConfig).WillByDefault(Return(&objSubscriberConfig));
+
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_PHONE_INFO, &objPhoneInfoService);
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_NETWORK, &objNetworkService);
+        objNetworkService.SetConnection(&objNetworkConnection);
+
+        pDialingPlan = new TestMtcDialingPlan();
         pIdentityProxy = new MockImsIdentityProxy();
         pDialingPlan->ReplaceImsIdentityProxy(pIdentityProxy);
     }
@@ -77,42 +100,41 @@ protected:
     {
         delete pDialingPlan;
         delete pConfigurationProxy;
+
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_NETWORK, IMS_NULL);
     }
 };
-
-TEST_F(MtcDialingPlanTest, GetToUriNormal)
-{
-    // TODO
-}
 
 TEST_F(MtcDialingPlanTest, GetToUriReturnsConferenceUriFromConfig)
 {
     objCallInfo.bConference = IMS_TRUE;
 
     AString strUri = "sip:some_conference_uri";
-    ON_CALL(*pConfigurationManager, GetConferenceFactoryUri).WillByDefault(Return(strUri));
+    ON_CALL(*pConfigurationProxy, GetString(ConfigVoice::KEY_CONFERENCE_FACTORY_URI_STRING))
+            .WillByDefault(Return(strUri));
 
-    EXPECT_EQ(strUri, pDialingPlan->GetToUri("", objCallInfo));
+    EXPECT_EQ(strUri, pDialingPlan->GetToUri("", objContext));
 }
 
 TEST_F(MtcDialingPlanTest, GetToUriReturnsDefaultConferenceUriIfMncIs2Digit)
 {
     objCallInfo.bConference = IMS_TRUE;
 
-    ON_CALL(*pConfigurationManager, GetConferenceFactoryUri)
+    ON_CALL(*pConfigurationProxy, GetString(ConfigVoice::KEY_CONFERENCE_FACTORY_URI_STRING))
             .WillByDefault(Return(AString::ConstEmpty()));
 
     const AString strMcc3("123");
     const AString strMnc2("56");
     const AString strMnc3("056");
-    ON_CALL(objSubscriberInfo, GetSimMcc)
+    ON_CALL(objPhoneInfoService.GetMockSubscriberInfo(), GetSimMcc(_))
             .WillByDefault(Invoke(
                     [strMcc3](AString& strMcc)
                     {
                         strMcc = strMcc3;
                         return IMS_TRUE;
                     }));
-    ON_CALL(objSubscriberInfo, GetSimMnc)
+    ON_CALL(objPhoneInfoService.GetMockSubscriberInfo(), GetSimMnc(_))
             .WillByDefault(Invoke(
                     [strMnc2](AString& strMnc)
                     {
@@ -120,29 +142,29 @@ TEST_F(MtcDialingPlanTest, GetToUriReturnsDefaultConferenceUriIfMncIs2Digit)
                         return IMS_TRUE;
                     }));
 
-    AString strUri("sip:mmtel@conf-factory.ims.mnc[MNC].mcc[MCC].3gppnetwork.org");
-    strUri = strUri.Replace("[MCC]", strMcc3).Replace("[MNC]", strMnc3);
+    AString strUri("sip:mmtel@conf-factory.ims.mnc#MNC#.mcc#MCC#.3gppnetwork.org");
+    strUri = strUri.Replace("#MCC#", strMcc3).Replace("#MNC#", strMnc3);
 
-    EXPECT_EQ(strUri, pDialingPlan->GetToUri("", objCallInfo));
+    EXPECT_EQ(strUri, pDialingPlan->GetToUri("", objContext));
 }
 
 TEST_F(MtcDialingPlanTest, GetToUriReturnsDefaultConferenceUriIfMncIs3Digit)
 {
     objCallInfo.bConference = IMS_TRUE;
-    ON_CALL(*pConfigurationManager, GetConferenceFactoryUri)
+    ON_CALL(*pConfigurationProxy, GetString(ConfigVoice::KEY_CONFERENCE_FACTORY_URI_STRING))
             .WillByDefault(Return(AString::ConstEmpty()));
 
     const AString strMcc3("123");
     const AString strMnc2("56");
     const AString strMnc3("056");
-    ON_CALL(objSubscriberInfo, GetSimMcc)
+    ON_CALL(objPhoneInfoService.GetMockSubscriberInfo(), GetSimMcc(_))
             .WillByDefault(Invoke(
                     [strMcc3](AString& strMcc)
                     {
                         strMcc = strMcc3;
                         return IMS_TRUE;
                     }));
-    ON_CALL(objSubscriberInfo, GetSimMnc)
+    ON_CALL(objPhoneInfoService.GetMockSubscriberInfo(), GetSimMnc(_))
             .WillByDefault(Invoke(
                     [strMnc3](AString& strMnc)
                     {
@@ -150,23 +172,24 @@ TEST_F(MtcDialingPlanTest, GetToUriReturnsDefaultConferenceUriIfMncIs3Digit)
                         return IMS_TRUE;
                     }));
 
-    AString strUri("sip:mmtel@conf-factory.ims.mnc[MNC].mcc[MCC].3gppnetwork.org");
-    strUri = strUri.Replace("[MCC]", strMcc3).Replace("[MNC]", strMnc3);
+    AString strUri("sip:mmtel@conf-factory.ims.mnc#MNC#.mcc#MCC#.3gppnetwork.org");
+    strUri = strUri.Replace("#MCC#", strMcc3).Replace("#MNC#", strMnc3);
 
-    EXPECT_EQ(strUri, pDialingPlan->GetToUri("", objCallInfo));
+    EXPECT_EQ(strUri, pDialingPlan->GetToUri("", objContext));
 }
 
 TEST_F(MtcDialingPlanTest, GetToUriReturnsConferenceFactoryUriWithConvertingHomaDomainName)
 {
     objCallInfo.bConference = IMS_TRUE;
-    AString strUri("sip:anyUserPart@[DOMAIN]");
-    ON_CALL(*pConfigurationManager, GetConferenceFactoryUri).WillByDefault(Return(strUri));
+    AString strUri("sip:anyUserPart@#HOME_DOMAIN#");
+    ON_CALL(*pConfigurationProxy, GetString(ConfigVoice::KEY_CONFERENCE_FACTORY_URI_STRING))
+            .WillByDefault(Return(strUri));
     AString strDomainName("any_domain_name");
-    EXPECT_CALL(*pIdentityProxy, GetHomeDomainName(_)).WillOnce(Return(strDomainName));
+    ON_CALL(objSubscriberConfig, GetHomeDomainName).WillByDefault(ReturnRef(strDomainName));
 
-    strUri = strUri.Replace("[DOMAIN]", strDomainName);
+    strUri = strUri.Replace("#HOME_DOMAIN#", strDomainName);
 
-    EXPECT_STREQ(strUri.GetStr(), pDialingPlan->GetToUri("", objCallInfo).GetStr());
+    EXPECT_STREQ(strUri.GetStr(), pDialingPlan->GetToUri("", objContext).GetStr());
 }
 
 TEST_F(MtcDialingPlanTest, GetToUriReturnsDefaultUriInSipUriScheme)
@@ -175,37 +198,17 @@ TEST_F(MtcDialingPlanTest, GetToUriReturnsDefaultUriInSipUriScheme)
     AString strUriWithoutScheme("conf@ims.google.com");
     AString strUriWithScheme("sip:conf@ims.google.com");
 
-    ON_CALL(*pConfigurationManager, GetConferenceFactoryUri)
+    ON_CALL(*pConfigurationProxy, GetString(ConfigVoice::KEY_CONFERENCE_FACTORY_URI_STRING))
             .WillByDefault(Return(strUriWithoutScheme));
 
-    EXPECT_EQ(strUriWithScheme, pDialingPlan->GetToUri("", objCallInfo));
+    EXPECT_EQ(strUriWithScheme, pDialingPlan->GetToUri("", objContext));
 }
 
 TEST_F(MtcDialingPlanTest, GetToUriReturnsInputValueIfItIsUriForm)
 {
     AString strUriWithScheme("sip:1234@ims.google.com");
 
-    EXPECT_EQ(strUriWithScheme, pDialingPlan->GetToUri(strUriWithScheme, objCallInfo));
-}
-
-TEST_F(MtcDialingPlanTest, GetToUriReturnsStoredServiceUrn)
-{
-    AString strNumber("123");
-    AString strServiceUrn("sos.country-specific.test");
-
-    pDialingPlan->OnCountrySpecificServiceUrnReceived(strNumber, strServiceUrn);
-    EXPECT_EQ(strServiceUrn, pDialingPlan->GetToUri(strNumber, objCallInfo));
-}
-
-TEST_F(MtcDialingPlanTest, GetToUriUsingDifferentNumberResetsTemporaryUrn)
-{
-    AString strNumber("123");
-    AString strServiceUrn("sos.country-specific.test");
-    AString strDifferentNumber("123");
-
-    pDialingPlan->OnCountrySpecificServiceUrnReceived(strNumber, strServiceUrn);
-    pDialingPlan->GetToUri(strDifferentNumber, objCallInfo);
-    EXPECT_NE(strServiceUrn, pDialingPlan->GetToUri(strNumber, objCallInfo));
+    EXPECT_EQ(strUriWithScheme, pDialingPlan->GetToUri(strUriWithScheme, objContext));
 }
 
 TEST_F(MtcDialingPlanTest, GetToUriReturnsDialStringFormatIfUssi)
@@ -215,7 +218,7 @@ TEST_F(MtcDialingPlanTest, GetToUriReturnsDialStringFormatIfUssi)
     AString strExpectedUri("sip:123;phone-context=ims.google.com@ims.google.com;user=dialstring");
     ON_CALL(*pIdentityProxy, CreateSipUserIdWithDialString(strNumber, _, _))
             .WillByDefault(Return(strExpectedUri));
-    EXPECT_STREQ(strExpectedUri.GetStr(), pDialingPlan->GetToUri(strNumber, objCallInfo).GetStr());
+    EXPECT_STREQ(strExpectedUri.GetStr(), pDialingPlan->GetToUri(strNumber, objContext).GetStr());
 }
 
 TEST_F(MtcDialingPlanTest, GetToUriReturnsDialNumberWithPhone)
@@ -225,7 +228,22 @@ TEST_F(MtcDialingPlanTest, GetToUriReturnsDialNumberWithPhone)
     ON_CALL(*pIdentityProxy, CreateSipUserId(strNumber, _, IMS_TRUE, _))
             .WillByDefault(Return(strExpectedUri));
     EXPECT_STREQ(strExpectedUri.GetStr(),
-            pDialingPlan->GetToUri(strNumber, objCallInfo, Scheme::SIP).GetStr());
+            pDialingPlan->GetToUri(strNumber, objContext, Scheme::SIP).GetStr());
+}
+
+TEST_F(MtcDialingPlanTest, GetToUriForEmergencyTestNumber)
+{
+    AString strNumber = "123";
+    AString strExpectedUri("sip:" + strNumber + "@any_domain_name");
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigEmergency::
+                            KEY_EMERGENCY_EXCLUDE_URI_PARAMETERS_FOR_EMERGENCY_TEST_NUMBER_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pIdentityProxy, CreateSipUserId(strNumber, _, IMS_FALSE, _))
+            .WillByDefault(Return(strExpectedUri));
+    EXPECT_STREQ(strExpectedUri.GetStr(),
+            pDialingPlan->GetToUriForEmergencyTestNumber(strNumber, objContext).GetStr());
 }
 
 }  // namespace android

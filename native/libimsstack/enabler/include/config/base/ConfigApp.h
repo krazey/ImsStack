@@ -24,7 +24,7 @@ class ConfigApp : public ImsApp, public IEventListener
 {
 public:
     explicit ConfigApp(IN const AString& strAppName);
-    virtual ~ConfigApp();
+    ~ConfigApp() override;
 
 public:
     void Start();

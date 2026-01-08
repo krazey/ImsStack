@@ -38,8 +38,8 @@ import android.telephony.ims.stub.ImsSmsImplBase;
 
 import com.android.imsstack.imsservice.mmtel.sms.SmsTransferLayer;
 import com.android.imsstack.imsservice.mmtel.sms.SmsUtils;
+import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.MessageExecutor;
-import com.android.internal.util.HexDump;
 
 import org.junit.After;
 import org.junit.Before;
@@ -64,7 +64,7 @@ public class ImsSmsImplTest extends ImsSmsImplBase {
     private int mToken = 1;
     private int mMessageRef = 10;
     private int mResult = ImsSmsImplBase.SEND_STATUS_OK;
-    private byte[] mPdu = HexDump.hexStringToByteArray("21110A81785634121000000666B2996C2603");
+    private byte[] mPdu = ImsUtils.hexStringToBytes("21110A81785634121000000666B2996C2603");
     private int mFormat = SmsUtils.FORMAT_INT_3GPP;
     private String mSmsc = "+919876543210";
 
@@ -95,19 +95,28 @@ public class ImsSmsImplTest extends ImsSmsImplBase {
     }
 
     @Test
-    public void test_sendSms_Exception() throws RemoteException {
+    public void test_SendSms_NotReady() throws RemoteException {
+        // Set mReady to false and mSmsTL to null
         mImsSmsImpl.clear();
-        Throwable exception = assertThrows(RuntimeException.class, () -> {
-            mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
-        }
-        );
-        assertEquals("Sms Not Ready!", exception.getMessage());
+        mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
+        verify(mListener).onSendSmsResult(mToken, mMessageRef, SEND_STATUS_ERROR_RETRY,
+                SmsManager.RESULT_ERROR_GENERIC_FAILURE, RESULT_NO_NETWORK_ERROR);
+    }
+
+    @Test
+    public void test_sendSms_NullPdu() throws RemoteException {
+        // Set mReady to true and mSmsTL to null.
+        mImsSmsImpl.clear();
+        mImsSmsImpl.onReady();
+        mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, null);
+        verify(mListener).onSendSmsResult(mToken, mMessageRef, SEND_STATUS_ERROR_RETRY,
+                SmsManager.RESULT_ERROR_GENERIC_FAILURE, RESULT_NO_NETWORK_ERROR);
     }
 
     @Test
     public void test_sendSms_Success() throws RemoteException {
         mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
-        verify(mMockSmsTransferLayer).sendMoTPdu(mToken, mFormat, mMessageRef, "1111", mPdu);
+        verify(mMockSmsTransferLayer).sendMoTPdu(mToken, mFormat, mMessageRef, "1111", mPdu, true);
     }
 
     @Test
@@ -125,19 +134,19 @@ public class ImsSmsImplTest extends ImsSmsImplBase {
                 SmsManager.RESULT_INVALID_SMS_FORMAT, RESULT_NO_NETWORK_ERROR);
 
         when(mMockSmsTransferLayer.sendMoTPdu(mToken, mFormat, mMessageRef,
-                "1111", mPdu)).thenReturn(SmsUtils.SMS_RESULT_INVALID_SMSC_ADDRESS);
+                "1111", mPdu, true)).thenReturn(SmsUtils.SMS_RESULT_INVALID_SMSC_ADDRESS);
         mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
         verify(mListener, times(2)).onSendSmsResult(mToken, mMessageRef, SEND_STATUS_ERROR,
                 SmsManager.RESULT_INVALID_SMSC_ADDRESS, RESULT_NO_NETWORK_ERROR);
 
         when(mMockSmsTransferLayer.sendMoTPdu(mToken, mFormat, mMessageRef,
-                "1111", mPdu)).thenReturn(SmsUtils.SMSRL_RESULT_PDU_ENCODING_FAILED);
+                "1111", mPdu, true)).thenReturn(SmsUtils.SMSRL_RESULT_PDU_ENCODING_FAILED);
         mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
         verify(mListener).onSendSmsResult(mToken, mMessageRef, SEND_STATUS_ERROR,
                 SmsManager.RESULT_ENCODING_ERROR, RESULT_NO_NETWORK_ERROR);
 
         when(mMockSmsTransferLayer.sendMoTPdu(mToken, mFormat, mMessageRef,
-                "1111", mPdu)).thenReturn(SmsUtils.SMSRL_RESULT_MTS_CONTROLLER_FAILED);
+                "1111", mPdu, true)).thenReturn(SmsUtils.SMSRL_RESULT_MTS_CONTROLLER_FAILED);
         mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
         verify(mListener).onSendSmsResult(mToken, mMessageRef, SEND_STATUS_ERROR,
                 SmsManager.RESULT_ERROR_GENERIC_FAILURE, RESULT_NO_NETWORK_ERROR);
@@ -213,7 +222,7 @@ public class ImsSmsImplTest extends ImsSmsImplBase {
 
     @Test
     public void test_acknowledgeSmsWithPdu() {
-        byte[] smsAckPdu = HexDump.hexStringToByteArray("000700F6050001020304");
+        byte[] smsAckPdu = ImsUtils.hexStringToBytes("000700F6050001020304");
         mImsSmsImpl.acknowledgeSms(mToken, mMessageRef, mResult, smsAckPdu);
         verify(mMockSmsTransferLayer).sendReportTPdu(mToken, mMessageRef,
                 mResult, smsAckPdu);
@@ -262,6 +271,24 @@ public class ImsSmsImplTest extends ImsSmsImplBase {
     }
 
     @Test
+    public void test_notifyMemoryAvailableResult() throws RemoteException {
+        SmsTransferLayer.Listener listener = setupListener();
+        mResult = ImsSmsImplBase.SEND_STATUS_ERROR_RETRY;
+        listener.notifyMemoryAvailableResult(mToken, mResult, 0);
+        verify(mListener).onMemoryAvailableResult(mToken, mResult, 0);
+    }
+
+    @Test
+    public void test_notifyMemoryAvailableResult_RuntimeException() throws RemoteException {
+        SmsTransferLayer.Listener listener = setupListener();
+        mResult = ImsSmsImplBase.SEND_STATUS_ERROR_RETRY;
+        doThrow(mMockRuntimeException).when(mListener)
+            .onMemoryAvailableResult(mToken, mResult, 0);
+        listener.notifyMemoryAvailableResult(mToken, mResult, 0);
+        verify(mMockRuntimeException).getMessage();
+    }
+
+    @Test
     public void test_acknowledgeSmsReport_RuntimeException() {
         doThrow(mMockRuntimeException).when(mMockSmsTransferLayer).sendReportTPdu(mToken,
                 mMessageRef, mResult, null);
@@ -288,7 +315,7 @@ public class ImsSmsImplTest extends ImsSmsImplBase {
     @Test
     public void test_sendSms_RuntimeException() {
         doThrow(mMockRuntimeException).when(mMockSmsTransferLayer).sendMoTPdu(mToken, mFormat,
-                mMessageRef, "1111", mPdu);
+                mMessageRef, "1111", mPdu, true);
         mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
         verify(mMockRuntimeException).getMessage();
     }

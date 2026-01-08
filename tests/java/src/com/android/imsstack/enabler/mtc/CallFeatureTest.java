@@ -20,6 +20,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
+import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 
 import com.android.imsstack.core.agents.AgentFactory;
@@ -56,25 +57,42 @@ public class CallFeatureTest {
     public void testCallFeature() {
         int[] intArray = {0, 1};
         int[] emptyArray = new int[0];
+        PersistableBundle audioCodecCapaPayloadBundle = Mockito.mock(PersistableBundle.class);
 
-        when(mMockCarrierConfig.getIntArray(
+        when(mMockCarrierConfig.getBundle(
+                CarrierConfigManager.ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE))
+                .thenReturn(audioCodecCapaPayloadBundle);
+        when(audioCodecCapaPayloadBundle.getIntArray(
                 CarrierConfigManager.ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY))
                 .thenReturn(intArray)
                 .thenReturn(emptyArray);
         assertTrue(CallFeature.isAudioEvsSupported(SLOT_ID));
         assertFalse(CallFeature.isAudioEvsSupported(SLOT_ID));
 
+        when(mMockCarrierConfig.getBundle(
+                CarrierConfigManager.ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE))
+                .thenReturn(null);
+        assertFalse(CallFeature.isAudioEvsSupported(SLOT_ID));
+
+        when(mMockCarrierConfig.getBundle(
+                CarrierConfigManager.ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE))
+                .thenReturn(audioCodecCapaPayloadBundle);
+        when(audioCodecCapaPayloadBundle.getIntArray(
+                CarrierConfigManager.ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY))
+                .thenReturn(null);
+        assertFalse(CallFeature.isAudioEvsSupported(SLOT_ID));
+
         assertFalse(CallFeature.isVideoHevcSupported(SLOT_ID));
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_AUDIO_HOLD_WITH_DIRECTION_INACTIVE_BOOL))
+                CarrierConfig.ImsVoice.KEY_AUDIO_HOLD_WITH_DIRECTION_INACTIVE_BOOL))
                 .thenReturn(true)
                 .thenReturn(false);
         assertTrue(CallFeature.isCallHoldUsingInactive(SLOT_ID));
         assertFalse(CallFeature.isCallHoldUsingInactive(SLOT_ID));
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_INCOMING_RESUME_EVENT_SUPPORT_BOOL))
+                CarrierConfig.ImsVoice.KEY_INCOMING_RESUME_EVENT_SUPPORT_BOOL))
                 .thenReturn(true)
                 .thenReturn(false);
         assertTrue(CallFeature.isIncomingResumeEventSupported(SLOT_ID));
@@ -95,59 +113,66 @@ public class CallFeatureTest {
         assertFalse(CallFeature.isTtySupported(SLOT_ID));
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfigManager.KEY_RTT_SUPPORTED_BOOL, false))
-                .thenReturn(true)
-                .thenReturn(false);
-        assertTrue(CallFeature.isRttSupported(SLOT_ID));
-        assertFalse(CallFeature.isRttSupported(SLOT_ID));
-
-        when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_VIDEO_HOLD_WITH_DIRECTION_INACTIVE_BOOL))
+                CarrierConfig.ImsVt.KEY_VIDEO_HOLD_WITH_DIRECTION_INACTIVE_BOOL))
                 .thenReturn(true)
                 .thenReturn(false);
         assertTrue(CallFeature.isVideoDirectionInactiveOnVideoCallHold(SLOT_ID));
         assertFalse(CallFeature.isVideoDirectionInactiveOnVideoCallHold(SLOT_ID));
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_TEXT_HOLD_WITH_DIRECTION_INACTIVE_BOOL))
+                CarrierConfig.ImsRtt.KEY_TEXT_HOLD_WITH_DIRECTION_INACTIVE_BOOL))
                 .thenReturn(true)
                 .thenReturn(false);
         assertTrue(CallFeature.isTextDirectionInactiveOnRttCallHold(SLOT_ID));
         assertFalse(CallFeature.isTextDirectionInactiveOnRttCallHold(SLOT_ID));
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_DYNAMIC_VIDEO_QUALITY_SUPPORTED_BOOL))
+                CarrierConfig.ImsVt.KEY_DYNAMIC_VIDEO_QUALITY_SUPPORTED_BOOL))
                 .thenReturn(true)
                 .thenReturn(false);
         assertTrue(CallFeature.isDynamicVideoQualitySupported(SLOT_ID));
         assertFalse(CallFeature.isDynamicVideoQualitySupported(SLOT_ID));
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_ONE_WAY_VIDEO_BY_LOCAL_END_SUPPORTED_BOOL))
+                CarrierConfig.ImsVt.KEY_ONE_WAY_VIDEO_CALL_BY_LOCAL_END_SUPPORTED_BOOL))
                 .thenReturn(true)
                 .thenReturn(false);
         assertTrue(CallFeature.isOneWayVideoCallByLocalEndSupported(SLOT_ID));
         assertFalse(CallFeature.isOneWayVideoCallByLocalEndSupported(SLOT_ID));
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_ONE_WAY_VIDEO_BY_REMOTE_END_SUPPORTED_BOOL))
+                CarrierConfig.ImsVt.KEY_ONE_WAY_VIDEO_CALL_BY_REMOTE_END_SUPPORTED_BOOL))
                 .thenReturn(true)
                 .thenReturn(false);
         assertTrue(CallFeature.isOneWayVideoCallByRemoteEndSupported(SLOT_ID));
         assertFalse(CallFeature.isOneWayVideoCallByRemoteEndSupported(SLOT_ID));
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_NOTIFY_CONF_STATE_WHEN_ANONYMOUS_USER_BOOL))
+                CarrierConfig.ImsVoice.KEY_NOTIFY_CONF_STATE_WHEN_ANONYMOUS_USER_BOOL))
                 .thenReturn(true)
                 .thenReturn(false);
         assertTrue(CallFeature.isNotifyConfStateWhenAnonymousUser(SLOT_ID));
         assertFalse(CallFeature.isNotifyConfStateWhenAnonymousUser(SLOT_ID));
 
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_CALL_MERGEABLE_ON_CONFERENCE_ON_HOLD_BOOL))
+                CarrierConfig.ImsVoice.KEY_CALL_MERGEABLE_ON_CONFERENCE_ON_HOLD_BOOL))
                 .thenReturn(true)
                 .thenReturn(false);
         assertTrue(CallFeature.isCallMergeableOnConferenceOnHold(SLOT_ID));
         assertFalse(CallFeature.isCallMergeableOnConferenceOnHold(SLOT_ID));
+
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfigManager.ImsWfc.KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_BOOL))
+                .thenReturn(true)
+                .thenReturn(false);
+        assertTrue(CallFeature.isWiFiEmcOverEmergencyPdn(SLOT_ID));
+        assertFalse(CallFeature.isWiFiEmcOverEmergencyPdn(SLOT_ID));
+
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.ImsVt.KEY_REQUIRE_SIP_SIGNALING_ON_MULTITASKING_BOOL))
+                .thenReturn(true)
+                .thenReturn(false);
+        assertTrue(CallFeature.isSipSignalingRequiredOnMultitasking(SLOT_ID));
+        assertFalse(CallFeature.isSipSignalingRequiredOnMultitasking(SLOT_ID));
     }
 }

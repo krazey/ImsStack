@@ -23,11 +23,13 @@
 
 using ::testing::_;
 using ::testing::AnyNumber;
+using ::testing::Invoke;
 using ::testing::Return;
+using ::testing::ReturnRoundRobin;
+using ::testing::Unused;
 
 namespace android
 {
-static const IMS_SINT32 TEST_CARRIER_CONFIG_INT = 1000;
 
 class SipConfigTest : public ::testing::Test
 {
@@ -38,9 +40,6 @@ protected:
     virtual void SetUp() override
     {
         m_pConfigService = new TestConfigService();
-
-        m_pConfigService->SetCarrierConfig(&m_objMockICarrierConfig);
-
         m_pOldConfigService = PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_CONFIG, m_pConfigService);
 
@@ -48,12 +47,14 @@ protected:
         ON_CALL(m_pConfigService->GetMockCarrierConfig(), RemoveListener(_))
                 .WillByDefault(Return());
 
-        EXPECT_CALL(m_objMockICarrierConfig, GetBoolean(_, _))
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(IMS_TRUE));
-        EXPECT_CALL(m_objMockICarrierConfig, GetInt(_, _))
-                .Times(AnyNumber())
-                .WillRepeatedly(Return(TEST_CARRIER_CONFIG_INT));
+        ON_CALL(m_pConfigService->GetMockCarrierConfig(), GetBoolean(_, _))
+                .WillByDefault(Return(IMS_TRUE));
+        ON_CALL(m_pConfigService->GetMockCarrierConfig(), GetInt(_, _))
+                .WillByDefault(Invoke(
+                        [](Unused, IMS_SINT32 nDefaultValue)
+                        {
+                            return nDefaultValue;
+                        }));
     }
 
     virtual void TearDown() override
@@ -71,7 +72,6 @@ protected:
 protected:
     PlatformService* m_pOldConfigService;
     TestConfigService* m_pConfigService;
-    MockICarrierConfig m_objMockICarrierConfig;
     AStringArray m_objAllowMethods;
 };
 
@@ -155,8 +155,8 @@ TEST_F(SipConfigTest, GetUaVersion)
 
     AString strValue("UaVersion");
 
-    EXPECT_CALL(
-            m_objMockICarrierConfig, GetString(CarrierConfig::Ims::KEY_IMS_USER_AGENT_STRING, _))
+    EXPECT_CALL(m_pConfigService->GetMockCarrierConfig(),
+            GetString(CarrierConfig::Ims::KEY_IMS_USER_AGENT_STRING, _))
             .Times(1)
             .WillOnce(Return(strValue));
 
@@ -174,12 +174,22 @@ TEST_F(SipConfigTest, GetTimerValue)
     // default T2 value
     EXPECT_EQ(objSipConfig.GetTimerValueT2(), SipConfigV::DEFAULT_TIMER_T2);
 
+    IMS_SINT32 nT1 = 3000;
+    IMS_SINT32 nT2 = 6000;
+
+    ON_CALL(m_pConfigService->GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_T1_MILLIS_INT, _))
+            .WillByDefault(Return(nT1));
+    ON_CALL(m_pConfigService->GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_T2_MILLIS_INT, _))
+            .WillByDefault(Return(nT2));
+
     objSipConfig.Init();
 
     // T1 value
-    EXPECT_EQ(objSipConfig.GetTimerValueT1(), TEST_CARRIER_CONFIG_INT);
+    EXPECT_EQ(objSipConfig.GetTimerValueT1(), nT1);
     // T2 value
-    EXPECT_EQ(objSipConfig.GetTimerValueT2(), TEST_CARRIER_CONFIG_INT);
+    EXPECT_EQ(objSipConfig.GetTimerValueT2(), nT2);
 }
 
 TEST_F(SipConfigTest, Update)
@@ -244,6 +254,7 @@ TEST_F(SipConfigTest, Update)
     EXPECT_TRUE(objSipConfig.IsIpSecConfigured());
     EXPECT_FALSE(objSipConfig.IsKeepAliveConfigured());
     EXPECT_FALSE(objSipConfig.IsMultipleRegConfigured());
+    EXPECT_FALSE(objSipConfig.IsRegIdParameterConfigured());
     EXPECT_FALSE(objSipConfig.IsNoAcceptContactHeaderInBYE());
     EXPECT_TRUE(objSipConfig.IsPermissionSipConfigured());
     EXPECT_FALSE(objSipConfig.IsPermissionSipsConfigured());
@@ -259,9 +270,12 @@ TEST_F(SipConfigTest, Update)
     EXPECT_TRUE(objSipConfig.IsRequestUriValidationRequiredInMidDialog());
     EXPECT_TRUE(objSipConfig.IsSessionTimerUpdateRequiredByReInvite());
     EXPECT_TRUE(objSipConfig.IsSipInstanceParamRequiredInContactForNonRegisterRequest());
+    EXPECT_TRUE(objSipConfig.IsUdpTransportParameterIgnoredForOutgoingRequest());
     EXPECT_TRUE(objSipConfig.IsSessionIdHeaderSupported());
-    EXPECT_TRUE(objSipConfig.IsMacAddressHiddenInPaniHeader());
+    EXPECT_EQ(objSipConfig.GetHideMacInPaniHeaderPolicy(), ISipConfig::HIDE_MAC_IN_PANI);
     EXPECT_FALSE(objSipConfig.IsLocalTimezoneParameterSupportedInPaniHeader());
+    EXPECT_EQ(objSipConfig.GetRegContactUserInfoPart(),
+            CarrierConfig::Ims::REGISTRATION_CONTACT_USER_INFO_PART_UUID);
     EXPECT_EQ(objSipConfig.GetRegExpiration(), -1);
     EXPECT_FALSE(objSipConfig.IsRegExpirationConfigured());
     EXPECT_TRUE(objSipConfig.IsRegSubscriptionConfigured());
@@ -271,6 +285,11 @@ TEST_F(SipConfigTest, Update)
 
 TEST_F(SipConfigTest, CarrierConfig_NotifyConfigChanged)
 {
+    ON_CALL(m_pConfigService->GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Ims::KEY_SUPPORT_MULTIPLE_REGISTRATION_INT, _))
+            .WillByDefault(ReturnRoundRobin({CarrierConfig::Ims::MULTIPLE_REGISTRATION_REG_ID_ONLY,
+                    CarrierConfig::Ims::MULTIPLE_REGISTRATION_FULL}));
+
     SipConfig objSipConfig(IMS_SLOT_0);
     ICarrierConfigListener* piCarrierConfigListener = &objSipConfig;
 
@@ -279,9 +298,15 @@ TEST_F(SipConfigTest, CarrierConfig_NotifyConfigChanged)
     const AStringArray& objAllowMethods = objSipConfig.GetRegAllowMethods();
     EXPECT_EQ(m_objAllowMethods.GetElements(), objAllowMethods.GetElements());
 
+    EXPECT_FALSE(objSipConfig.IsMultipleRegConfigured());
+    EXPECT_TRUE(objSipConfig.IsRegIdParameterConfigured());
+
     piCarrierConfigListener->CarrierConfig_NotifyConfigChanged(IMS_SLOT_0);
     const AStringArray& objAllowMethodsForRefresh = objSipConfig.GetRegAllowMethods();
     EXPECT_EQ(m_objAllowMethods.GetElements(), objAllowMethodsForRefresh.GetElements());
+
+    EXPECT_TRUE(objSipConfig.IsMultipleRegConfigured());
+    EXPECT_TRUE(objSipConfig.IsRegIdParameterConfigured());
 }
 
 }  // namespace android

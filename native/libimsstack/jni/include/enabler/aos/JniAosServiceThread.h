@@ -23,18 +23,21 @@ class JniAosServiceThread final : public BaseServiceThread, public IJniAosServic
 {
 public:
     JniAosServiceThread();
-    virtual ~JniAosServiceThread();
+    ~JniAosServiceThread() override;
 
-    IMS_BOOL NotifyRegistered(IN IMS_SINT32 nNetworkType, IN IMS_UINT32 nFeatureTagBits,
-            IN const ImsList<AString>& objFeatureTags) override;
+    IMS_BOOL NotifyRegistered(IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType,
+            IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags) override;
 
-    IMS_BOOL NotifyRegistering(IN IMS_SINT32 nNetworkType, IN IMS_UINT32 nFeatureTagBits,
-            IN const ImsList<AString>& objFeatureTags) override;
+    IMS_BOOL NotifyRegistering(IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType,
+            IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags) override;
 
-    IMS_BOOL NotifyDeregistered(IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nReason) override;
+    IMS_BOOL NotifyDeregistered(IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType,
+            IN IMS_SINT32 nReason, IN IMS_SINT32 nDataFailureReason) override;
+
+    IMS_BOOL NotifyDeregistering(IN IMS_SINT32 nRegType) override;
 
     IMS_BOOL NotifyTechnologyChangeFailed(
-            IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nCauseCode) override;
+            IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nReason) override;
 
     IMS_BOOL NotifyAssociatedUriChanged(IN const ImsList<AString>& objUris) override;
 
@@ -46,12 +49,12 @@ public:
     IMS_BOOL NotifyRegEventState(
             IN IMS_UINT32 nStatusCode, IN const ImsList<AString>& objImpus) override;
 
-    IMS_BOOL RequestPhoneNumberRetry(IN IMS_UINT32 nCommand) override;
+    IMS_BOOL NotifyImsFeatureChanged(IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType,
+            IN IMS_UINT32 nFeatureTagBits) override;
+
+    IMS_BOOL NotifyTrace(IN IMS_SINT32 nRegType, IN const AString& strLog) override;
 
     IMS_BOOL RequestWifiService(IN IMS_BOOL bIsOn) override;
-
-private:
-    friend class JniAosServiceThreadTest;
 };
 
 #endif  // JNI_AOS_SERVICE_THREAD_H_

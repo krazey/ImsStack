@@ -15,24 +15,33 @@
  */
 package com.android.imsstack.core.agents;
 
+import static android.provider.Settings.Global.DEVICE_NAME;
+
+import static com.android.imsstack.base.TestAppContext.SLOT0;
+import static com.android.imsstack.base.TestAppContext.SLOT1;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
-import android.provider.Settings;
-import android.test.mock.MockContentResolver;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.telephony.TelephonyManager;
 
+import androidx.test.filters.SmallTest;
+
+import com.android.imsstack.base.ContentProviderProxy.SettingsProxy;
+import com.android.imsstack.base.TelephonyManagerProxy;
+import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.system.SystemInterface;
-import com.android.imsstack.util.AppContext;
-import com.android.internal.util.test.FakeSettingsProvider;
 
 import org.junit.After;
 import org.junit.Before;
@@ -42,15 +51,15 @@ import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.UUID;
+
 @RunWith(JUnit4.class)
 public class DefaultSystemCallAgentTest {
     private static final String TEST_FILE = "test_prefs";
     private static final String TEST_KEY = "test-key";
     private static final String TEST_VALUE = "test-value";
-    private static final int SLOT0 = 0;
     private static final int TEST_PRIORITY_TYPE = 1;
 
-    @Mock private Context mContext;
     @Mock private SystemInterface mSystemInterface;
     @Mock private PreferenceInterface mPreferenceInterface;
     @Mock private WakeLockInterface mWakeLockInterface;
@@ -59,13 +68,19 @@ public class DefaultSystemCallAgentTest {
     @Mock private TimerAgent mTimerAgent;
     @Mock private ImsTrafficInterface mImsTrafficInterface;
 
+    private TestAppContext mTestAppContext;
+    private TelephonyManagerProxy mTelephonyManagerProxy;
     private DefaultSystemCallAgent mDefaultSystemCallAgent;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        AppContext.init(mContext);
+        mTestAppContext = new TestAppContext();
+        mTestAppContext.setUp();
+
+        mTelephonyManagerProxy = mTestAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
+
         SystemInterface.setSystemInterface(mSystemInterface);
         AgentFactory.getInstance().setAgent(PreferenceInterface.class, mPreferenceInterface);
         AgentFactory.getInstance().setAgent(WakeLockInterface.class, mWakeLockInterface);
@@ -92,12 +107,13 @@ public class DefaultSystemCallAgentTest {
         AgentFactory.getInstance().setAgent(PreferenceInterface.class, null);
         SystemInterface.setSystemInterface(null);
 
+        mTelephonyManagerProxy = null;
         mImsTrafficInterface = null;
         mTimerAgent = null;
         mWifiInterface = null;
         mSystemInterface = null;
-        mContext = null;
-        AppContext.deinit();
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
     }
 
     @Test
@@ -183,11 +199,10 @@ public class DefaultSystemCallAgentTest {
     @SmallTest
     public void testGetDeviceName() {
         String testDeviceName = "Device-A";
-        MockContentResolver contentResolver = new MockContentResolver();
-        FakeSettingsProvider settingsProvider = new FakeSettingsProvider();
-        contentResolver.addProvider(Settings.AUTHORITY, settingsProvider);
-        Settings.Global.putString(contentResolver, Settings.Global.DEVICE_NAME, testDeviceName);
-        when(mContext.getContentResolver()).thenReturn(contentResolver);
+        SettingsProxy settingsProxy = mock(SettingsProxy.class);
+        when(mTestAppContext.getContentProviderProxy().getGlobalSettings())
+                .thenReturn(settingsProxy);
+        when(settingsProxy.getString(eq(DEVICE_NAME), anyString())).thenReturn(testDeviceName);
 
         assertEquals(testDeviceName, mDefaultSystemCallAgent.getDeviceName());
     }
@@ -196,6 +211,54 @@ public class DefaultSystemCallAgentTest {
     @SmallTest
     public void testGetExternalStoragePath() {
         assertNotNull(mDefaultSystemCallAgent.getExternalStoragePath());
+    }
+
+    @Test
+    @SmallTest
+    public void testGetUuid() {
+        String name = "test";
+
+        // Version 1
+        when(mWifiInterface.getMacAddress()).thenReturn("11:22:33:44:55:66");
+        String uuid = mDefaultSystemCallAgent.getUuid(1, name);
+
+        verify(mWifiInterface).getMacAddress();
+        assertNotNull(uuid);
+        UUID newUuid = UUID.fromString(uuid);
+        assertEquals(1, newUuid.version());
+        assertEquals(2, newUuid.variant());
+
+        // Version 1 - no MAC address
+        when(mWifiInterface.getMacAddress()).thenReturn(null);
+        uuid = mDefaultSystemCallAgent.getUuid(1, name);
+
+        verify(mWifiInterface, times(2)).getMacAddress();
+        assertNotNull(uuid);
+        newUuid = UUID.fromString(uuid);
+        assertEquals(1, newUuid.version());
+        assertEquals(2, newUuid.variant());
+
+        // Version 3
+        uuid = mDefaultSystemCallAgent.getUuid(3, name);
+        assertNotNull(uuid);
+        newUuid = UUID.fromString(uuid);
+        assertEquals(3, newUuid.version());
+        assertEquals(2, newUuid.variant());
+
+        assertThrows(NullPointerException.class, () -> {
+            mDefaultSystemCallAgent.getUuid(3, null);
+        });
+
+        // Version 4
+        uuid = mDefaultSystemCallAgent.getUuid(4, name);
+        assertNotNull(uuid);
+        newUuid = UUID.fromString(uuid);
+        assertEquals(4, newUuid.version());
+        assertEquals(2, newUuid.variant());
+
+        // Unsupported version
+        uuid = mDefaultSystemCallAgent.getUuid(5, name);
+        assertNull(uuid);
     }
 
     @Test
@@ -238,5 +301,27 @@ public class DefaultSystemCallAgentTest {
         AgentFactory.getInstance().setAgent(ImsTrafficInterface.class, null);
         mDefaultSystemCallAgent.setTrafficPriority(TEST_PRIORITY_TYPE, SLOT0);
         verifyNoMoreInteractions(mImsTrafficInterface);
+    }
+
+    @Test
+    @SmallTest
+    public void testIsCrossSimRedialingAvailable() {
+        when(mTelephonyManagerProxy.getActiveModemCount()).thenReturn(1);
+        assertFalse(mDefaultSystemCallAgent.isCrossSimRedialingAvailable(SLOT0));
+
+        when(mTelephonyManagerProxy.getActiveModemCount()).thenReturn(2);
+        when(mTelephonyManagerProxy.getSimState(eq(SLOT1))).thenReturn(
+                TelephonyManager.SIM_STATE_NOT_READY);
+        assertFalse(mDefaultSystemCallAgent.isCrossSimRedialingAvailable(SLOT0));
+
+        when(mTelephonyManagerProxy.getActiveModemCount()).thenReturn(2);
+        when(mTelephonyManagerProxy.getSimState(eq(SLOT1))).thenReturn(
+                TelephonyManager.SIM_STATE_READY);
+        assertTrue(mDefaultSystemCallAgent.isCrossSimRedialingAvailable(SLOT0));
+
+        when(mTelephonyManagerProxy.getActiveModemCount()).thenReturn(2);
+        when(mTelephonyManagerProxy.getSimState(eq(SLOT1))).thenReturn(
+                TelephonyManager.SIM_STATE_PRESENT);
+        assertTrue(mDefaultSystemCallAgent.isCrossSimRedialingAvailable(SLOT0));
     }
 }

@@ -19,10 +19,11 @@ package com.android.imsstack.core.agents;
 import static android.telephony.TelephonyManager.CALL_STATE_IDLE;
 import static android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN;
 
-import android.annotation.NonNull;
 import android.telephony.Annotation.CallState;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.ServiceState;
+
+import androidx.annotation.NonNull;
 
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.EDataState;
@@ -35,11 +36,14 @@ import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.IpSecSaParameter;
 import com.android.imsstack.system.SystemCallInterface;
 import com.android.imsstack.system.SystemInterface;
+import com.android.imsstack.util.Log;
 
 import java.io.FileDescriptor;
+import java.util.Collections;
+import java.util.List;
 
 /** A class for providing the implementation of system call. */
-public class SystemCallAgent implements SystemCallInterface {
+public final class SystemCallAgent implements SystemCallInterface {
     private final int mSlotId;
 
     public SystemCallAgent(int slotId) {
@@ -155,42 +159,36 @@ public class SystemCallAgent implements SystemCallInterface {
     }
 
     /**
-     * Reads the file attributes of the specified ISIM record.
+     * Returns the list of the specified ISIM record.
      *
      * @param fileId The file id to be read.
-     * @return One of {@link #RESULT_FAIL} or {@link #RESULT_OK}.
+     * @return The list of ISIM record.
      */
     @Override
-    public int readIsimFileAttributes(int fileId) {
+    public @NonNull List<String> getIsimRecord(int fileId) {
         SimAgent sim = (SimAgent) AgentFactory.getInstance().getAgent(
                 SimInterface.class, mSlotId);
+        List<String> record = null;
 
         if (sim != null) {
-            sim.readIsimFileAttributes(fileId);
-            return RESULT_OK;
+            if (fileId == Sim.ISIM_FILE_ID_IMPI) {
+                String impi = sim.getIsimImpi();
+                record = impi != null ? List.of(impi) : null;
+            } else if (fileId == Sim.ISIM_FILE_ID_DOMAIN) {
+                String domain = sim.getIsimDomain();
+                record = domain != null ? List.of(domain) : null;
+            } else if (fileId == Sim.ISIM_FILE_ID_IMPU) {
+                record = Collections.unmodifiableList(sim.getIsimImpu());
+            } else if (fileId == Sim.ISIM_FILE_ID_PCSCF) {
+                record = Collections.unmodifiableList(sim.getIsimPcscf());
+            }
+
+            Log.d(this, "ISIM" + mSlotId + " record: fileId=" + Integer.toHexString(fileId)
+                    + ", name=" + Sim.isimFileIdToString(fileId)
+                    + ", record=" + record);
         }
 
-        return RESULT_FAIL;
-    }
-
-    /**
-     * Reads the value of the specified ISIM record.
-     *
-     * @param fileId The file id to be read.
-     * @param index The index of the record for the given file.
-     * @return One of {@link #RESULT_FAIL} or {@link #RESULT_OK}.
-     */
-    @Override
-    public int readIsimRecord(int fileId, int index) {
-        SimAgent sim = (SimAgent) AgentFactory.getInstance().getAgent(
-                SimInterface.class, mSlotId);
-
-        if (sim != null) {
-            sim.readIsimRecord(fileId, index);
-            return RESULT_OK;
-        }
-
-        return RESULT_FAIL;
+        return record != null ? record : Collections.emptyList();
     }
 
     /**
@@ -352,6 +350,17 @@ public class SystemCallAgent implements SystemCallInterface {
         TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
                 TelephonyInterface.class, mSlotId);
         return (telephony != null) ? telephony.getSimCountryIso() : "";
+    }
+
+    /**
+     * Returns the MCC+MNC (Mobile Country Code + Mobile Network Code) of the current registered
+     * operator. 5 or 6 decimal digits.
+     */
+    @Override
+    public String getNetworkOperator() {
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, mSlotId);
+        return (telephony != null) ? telephony.getNetworkOperator() : "";
     }
 
     /**
@@ -638,6 +647,23 @@ public class SystemCallAgent implements SystemCallInterface {
     }
 
     /**
+     * Returns the service state of the current cellular data network.
+     *
+     * @return A service state.
+     *         {@link ServiceState#STATE_IN_SERVICE},
+     *         {@link ServiceState#STATE_OUT_OF_SERVICE},
+     *         {@link ServiceState#STATE_EMERGENCY_ONLY},
+     *         {@link ServiceState#STATE_POWER_OFF}
+     */
+    @Override
+    public int getCellularDataServiceState() {
+        IDcNetWatcher netWatcher = getDcNetWatcher();
+        return (netWatcher != null)
+                ? netWatcher.getCellularDataServiceState()
+                : ServiceState.STATE_OUT_OF_SERVICE;
+    }
+
+    /**
      * Returns the service state of the current data network.
      *
      * @return A service state.
@@ -672,17 +698,6 @@ public class SystemCallAgent implements SystemCallInterface {
     }
 
     /**
-     * Returns the PLMN information of MOCN.
-     *
-     * @return A PLMN info. of MOCN.
-     */
-    @Override
-    public int getMocnPlmnInfo() {
-        IDcNetWatcher netWatcher = getDcNetWatcher();
-        return (netWatcher != null) ? netWatcher.getMocnPlmnInfo() : 0;
-    }
-
-    /**
      * Checks whether the current network is attached as roaming.
      *
      * @return {@code true} if the network is in roaming, {@code false} otherwise.
@@ -699,9 +714,9 @@ public class SystemCallAgent implements SystemCallInterface {
      * @return {@code true} if the emergency is only available, {@code false} otherwise.
      */
     @Override
-    public boolean isLteEmergencyOnly() {
+    public boolean isEmergencyOnly() {
         IDcNetWatcher netWatcher = getDcNetWatcher();
-        return (netWatcher != null) ? netWatcher.isLteEmergencyOnly() : false;
+        return (netWatcher != null) ? netWatcher.isEmergencyOnly() : false;
     }
 
     /**
@@ -821,7 +836,7 @@ public class SystemCallAgent implements SystemCallInterface {
     @Override
     public boolean isImsVoiceCallSupported() {
         IDcNetWatcher netWatcher = getDcNetWatcher();
-        return (netWatcher != null) ? netWatcher.isVops() : false;
+        return (netWatcher != null) ? netWatcher.isVopsSupported() : false;
     }
 
     /**
@@ -889,15 +904,56 @@ public class SystemCallAgent implements SystemCallInterface {
     }
 
     /**
-     * Starts an instant location update (one-time update).
+     * Requests a location update (one-time update).
+     *
+     * @param waitTimeMs A wait time to fix the location in milli-seconds.
+     * @return The request identifier for event handling for location update completion and
+     *         cancellation.
+     *         0(zero) indicates that the location update request cannot be performed,
+     *         otherwise an integer value greater than 0 is returned.
      */
     @Override
-    public void startInstantLocationUpdate() {
+    public int requestLocationUpdate(int waitTimeMs) {
+        LocationInterface location = AgentFactory.getInstance().getAgent(
+                LocationInterface.class, mSlotId);
+        return (location != null) ? location.requestLocationUpdate(waitTimeMs) : 0;
+    }
+
+    /**
+     * Cancels a previously requested location update.
+     *
+     * @param requestId A request identifier returned from {@link #requestLocationUpdate(int)}.
+     */
+    @Override
+    public void cancelLocationUpdate(int requestId) {
         LocationInterface location = AgentFactory.getInstance().getAgent(
                 LocationInterface.class, mSlotId);
         if (location != null) {
-            location.startInstantLocationUpdate();
+            location.cancelLocationUpdate(requestId);
         }
+    }
+
+    /**
+     * Returns the reject cause for the network registration.
+     *
+     * @return A reject cause.
+     */
+    @Override
+    public int getNetworkRegistrationRejectCause() {
+        IDcNetWatcher netWatcher = getDcNetWatcher();
+        return (netWatcher != null) ? netWatcher.getNetworkRegistrationRejectCause()
+                : IDcNetWatcher.REGISTRATION_REJECT_CAUSE_NONE;
+    }
+
+    /**
+     * Returns the MCC+MNC (Mobile Country Code + Mobile Network Code) of the current attached
+     * operator. 5 or 6 decimal digits.
+     */
+    @Override
+    @NonNull
+    public String getAccessNetworkPlmn() {
+        IDcUtils utils = DcFactory.getDcAgent(IDcUtils.class, mSlotId);
+        return (utils != null) ? utils.getAccessNetworkPlmn() : "";
     }
 
     private IDcApn getDcApn() {

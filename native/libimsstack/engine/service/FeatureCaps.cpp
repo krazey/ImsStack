@@ -23,7 +23,7 @@
 #include "SipMethod.h"
 #include "util/CallerCapability.h"
 
-__IMS_TRACE_TAG_IMS__;
+__IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
 FeatureCaps::FeatureCaps() :
@@ -325,7 +325,7 @@ IMS_BOOL FeatureCaps::FormContactFeatures(
         pCc->AddFeatures(m_pFeaturesForAllMessage);
     }
 
-    CallerCapability* pFeatures = IMS_NULL;
+    const CallerCapability* pFeatures = IMS_NULL;
 
     // REQUEST-CAPS
     if (bRequest)
@@ -354,7 +354,7 @@ IMS_BOOL FeatureCaps::FormContactFeatures(
 }
 
 PUBLIC
-void FeatureCaps::UpdateRegCaps(IN CallerCapability* pRegCaps)
+void FeatureCaps::UpdateRegCaps(IN const CallerCapability* pRegCaps)
 {
     m_pRegCaps->Clear();
     m_pRegCaps->AddFeatures(pRegCaps);
@@ -412,13 +412,7 @@ CallerCapability* FeatureCaps::GetFeaturesForRequest(
         if (bCreate)
         {
             CallerCapability* pCc = new CallerCapability(0);
-
-            if (!m_pFeaturesForRequest->Add(nSipMethod, pCc))
-            {
-                delete pCc;
-                return IMS_NULL;
-            }
-
+            m_pFeaturesForRequest->Add(nSipMethod, pCc);
             return pCc;
         }
         else
@@ -456,13 +450,7 @@ CallerCapability* FeatureCaps::GetFeaturesForResponse(
         if (bCreate)
         {
             CallerCapability* pCc = new CallerCapability(0);
-
-            if (!m_pFeaturesForResponse->Add(nSipMethod, pCc))
-            {
-                delete pCc;
-                return IMS_NULL;
-            }
-
+            m_pFeaturesForResponse->Add(nSipMethod, pCc);
             return pCc;
         }
         else
@@ -491,7 +479,7 @@ IMS_BOOL FeatureCaps::HasAdditionalFeatures(IN IMS_SINT32 nSipMethod, IN IMS_BOO
         return IMS_TRUE;
     }
 
-    CallerCapability* pFeatures = IMS_NULL;
+    const CallerCapability* pFeatures = IMS_NULL;
 
     // REQUEST-CAPS
     if (bRequest)

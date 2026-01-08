@@ -27,7 +27,7 @@ class SdpReader : public ISdpReader
 {
 public:
     explicit SdpReader(IN const ByteArray& objSdp);
-    virtual ~SdpReader();
+    ~SdpReader() override;
 
     SdpReader(IN const SdpReader&) = delete;
     SdpReader& operator=(IN const SdpReader&) = delete;

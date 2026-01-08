@@ -16,136 +16,111 @@
 #include <gtest/gtest.h>
 
 #include "SipUtil.h"
+#include "SipVector.h"
+#include "include/MockISipTransactionCallback.h"
+#include "include/MockSipTransaction.h"
+#include "platform/SipString.h"
+#include "transport/SipTransportInfo.h"
+#include "txn/SipTimeoutData.h"
 #include "txn/SipTxn.h"
 #include "txn/SipTxnFsm.h"
 #include "txn/SipTxnFsmData.h"
-#include "transport/SipTransportInfo.h"
-#include "SipStackCallback.h"
-#include "txn/SipTimeoutData.h"
-#include "SipVector.h"
-#include "include/MockSipTransaction.h"
 
-SipVector<MockSipTransaction*> objTxnList;
-static int* pnTimerId = SIP_NULL;
-
-SIP_BOOL MockTxn_FetchTransaction(
-        SIP_VOID* pvTxnKey, SIP_INT32 nOption, SIP_VOID** /*ppvOutTxnKey*/, SIP_VOID** ppvTxn)
-{
-    if (pvTxnKey == SIP_NULL)
-    {
-        return SIP_FALSE;
-    }
-    SipTxnKey* pTxnKey = static_cast<SipTxnKey*>(pvTxnKey);
-    if (nOption == TXN_OPT_CREATE)
-    {
-        if ((ppvTxn != SIP_NULL) && (*ppvTxn != SIP_NULL))
-        {
-            MockSipTransaction* pMockTxn =
-                    new MockSipTransaction(pTxnKey, reinterpret_cast<SipTxn*>(*ppvTxn));
-            objTxnList.Add(pMockTxn);
-        }
-        return SIP_TRUE;
-    }
-
-    SIP_UINT32 nSize = objTxnList.GetSize();
-
-    for (SIP_UINT32 i = 0; i < nSize; i++)
-    {
-        MockSipTransaction* pMockTxn = objTxnList.GetAt(i);
-        SipTxn* pTxn = pMockTxn->GetTxn();
-
-        if (pTxn != SIP_NULL)
-        {
-            if (pTxnKey->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
-            {
-                *ppvTxn = pTxn;
-                return SIP_TRUE;
-            }
-        }
-    }
-    return SIP_FALSE;
-}
-
-SIP_BOOL MockTxn_StartTimer(SIP_UINT32, SipTimerCallback, SIP_VOID*, SIP_VOID** ppvHandle)
-{
-    if (pnTimerId == SIP_NULL)
-    {
-        pnTimerId = new int[16];
-    }
-    *ppvHandle = pnTimerId;
-    return SIP_TRUE;
-}
-
-SIP_BOOL MockTxn_ReleaseTransaction(
-        SIP_VOID* pvTxnKey, SIP_INT32, SIP_VOID** ppvOutTxnKey, SIP_VOID** ppvTxn)
-{
-    SIP_UINT32 nSize = objTxnList.GetSize();
-
-    for (SIP_UINT32 i = 0; i < nSize; i++)
-    {
-        MockSipTransaction* pMockTxn = objTxnList.GetAt(i);
-        SipTxn* pTxn = pMockTxn->GetTxn();
-
-        if (pTxn != SIP_NULL)
-        {
-            if ((static_cast<SipTxnKey*>(pvTxnKey))->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
-            {
-                if (ppvOutTxnKey != IMS_NULL)
-                {
-                    (*ppvOutTxnKey) = pMockTxn->GetKey();
-                }
-                if (ppvTxn != IMS_NULL)
-                {
-                    (*ppvTxn) = pTxn;
-                }
-                delete pMockTxn;
-                objTxnList.RemoveAt(i);
-                return SIP_TRUE;
-            }
-        }
-    }
-
-    return SIP_FALSE;
-}
+using ::testing::_;
+using ::testing::Invoke;
+using ::testing::Return;
+using ::testing::Unused;
 
 namespace android
 {
+
+SipVector<MockSipTransaction*> objTxnList;
 
 class SipTxnTest : public ::testing::Test
 {
 public:
     SipMessage* pSipMsg = SIP_NULL;
+    MockISipTransactionCallback* pMockISipTransactionCallback;
+    static constexpr SIP_INT32 TIMER_ID = 1;
 
 protected:
     virtual void SetUp() override
     {
-        SipUtil_Construct();
+        pMockISipTransactionCallback = new MockISipTransactionCallback();
+        SipUtil::GetInstance()->SetTransactionCallback(pMockISipTransactionCallback);
+
+        ON_CALL(*pMockISipTransactionCallback, StartTimer(_, _, _))
+                .WillByDefault(Return(static_cast<void*>(const_cast<SIP_INT32*>(&TIMER_ID))));
+
+        ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+                .WillByDefault(Invoke(
+                        [](IN SipTxnKey* pTxnKey, IN SIP_INT32 nOption, OUT SipTxn*& pOutTxn)
+                        {
+                            if (nOption == SipTxn::OPT_CREATE)
+                            {
+                                MockSipTransaction* pMockTxn =
+                                        new MockSipTransaction(pTxnKey, pOutTxn);
+                                objTxnList.Add(pMockTxn);
+                                return SIP_TRUE;
+                            }
+                            else
+                            {
+                                SIP_UINT32 nSize = objTxnList.GetSize();
+
+                                for (SIP_UINT32 i = 0; i < nSize; i++)
+                                {
+                                    MockSipTransaction* pMockTxn = objTxnList.GetAt(i);
+                                    SipTxn* pTxn = pMockTxn->GetTxn();
+
+                                    if (pTxn != SIP_NULL)
+                                    {
+                                        if (pTxnKey->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
+                                        {
+                                            pOutTxn = pTxn;
+                                            return SIP_TRUE;
+                                        }
+                                    }
+                                }
+                                return SIP_FALSE;
+                            }
+                        }));
+
+        ON_CALL(*pMockISipTransactionCallback, ReleaseTransaction(_, _, _, _))
+                .WillByDefault(Invoke(
+                        [](SipTxnKey* pTxnKey, SIP_INT32, SipTxnKey*& pOutTxnKey, SipTxn*& pOutTxn)
+                        {
+                            for (SIP_UINT32 i = 0; i < objTxnList.GetSize(); i++)
+                            {
+                                MockSipTransaction* pMockTxn = objTxnList.GetAt(i);
+                                SipTxn* pTxn = pMockTxn->GetTxn();
+
+                                if (pTxn != SIP_NULL)
+                                {
+                                    if (pTxnKey->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
+                                    {
+                                        pOutTxnKey = pMockTxn->GetKey();
+                                        pOutTxn = pTxn;
+
+                                        delete pMockTxn;
+                                        objTxnList.RemoveAt(i);
+                                        return SIP_TRUE;
+                                    }
+                                }
+                            }
+                            return SIP_TRUE;
+                        }));
 
         pSipMsg = new SipMessage();
         pSipMsg->SetMessageType(SipMessage::REQ_TYPE);
 
-        char* pMsg = const_cast<char*>("REGISTER sip:user@host SIP/2.0\r\n\
+        const SIP_CHAR* pMsg = "REGISTER sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 REGISTER\r\n\
-\r\n");
-        EXPECT_EQ(SIP_TRUE, pSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
-
-        static const SipStackCallbacks stTestCallbacks = {
-                &MockTxn_FetchTransaction,
-                &MockTxn_ReleaseTransaction,
-                &MockTxn_StartTimer,
-                SIP_NULL,
-                SIP_NULL,
-                SIP_NULL,
-                SIP_NULL,
-                SIP_NULL,
-                SIP_NULL,
-        };
-
-        SipStackCallback_SetCallbacks(stTestCallbacks);
+\r\n";
+        EXPECT_EQ(SIP_TRUE, pSipMsg->Decode(pMsg, SipPf_Strlen(pMsg)));
     }
 
     virtual void TearDown() override
@@ -154,34 +129,33 @@ CSeq: 1 REGISTER\r\n\
         {
             pSipMsg->SipDelete();
         }
-        SipUtil_Destruct();
-
-        if (pnTimerId != SIP_NULL)
+        if (pMockISipTransactionCallback != SIP_NULL)
         {
-            delete pnTimerId;
-            pnTimerId = SIP_NULL;
+            delete pMockISipTransactionCallback;
+            pMockISipTransactionCallback = SIP_NULL;
         }
+        SipUtil::DestroyInstance();
     }
 };
 
-TEST_F(SipTxnTest, InvokeFsm_NonInvCliTxn)
+TEST_F(SipTxnTest, InvokeFsm_NonInviteClient)
 {
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
-    SipTransportParameter* pSipTranspParam = new SipTransportParameter(
-            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+    SipTransportParameter* pSipTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
 
     SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
-    SipTimerContext* pSipTxnTimerContext = new SipTimerContext();
+    const SipTimerContext* pSipTxnTimerContext = new SipTimerContext();
 
     /* Calling NonInvCli Fsm in idle state with send NonInvReq event
        timer E will be started and txn will move to trying state */
     SipTxn* pTxn =
-            new SipTxn(SipTxn::NON_INV_CLI_TXN, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
+            new SipTxn(SipTxn::NON_INVITE_CLIENT, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
     SipTransportInfo* pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
-    SipTransportParameter* pSipSendTranspParam = new SipTransportParameter(
-            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+    SipTransportParameter* pSipSendTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
 
     pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
     pTxn->UpdateTranspInfo(pTranspInfo);
@@ -200,7 +174,7 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvCliTxn)
     /* Calling NonInvCli Fsm in trying state with 2xx_6xx recv event
        timer K will be started and txn will move to completed state */
     EXPECT_EQ(SIP_TRUE,
-            pTxn->InvokeFsm(SipTxn::NON_INV_CLI_RECV_2XX_6XX_RESP_EVT, pTxnFsmData, &nError));
+            pTxn->InvokeFsm(SipTxn::NON_INV_CLI_RECV_FINAL_RESP_EVT, pTxnFsmData, &nError));
     EXPECT_EQ(SipTxn::NON_INV_CLI_COMPLETED_ST, pTxn->GetTxnState());
 
     /* Invoking timeout callback for Timer K */
@@ -220,11 +194,11 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvCliTxn)
     delete pTxnFsmData;
     pTxn->SipDelete();
 
-    pSipTranspParam = new SipTransportParameter(
-            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_TCP);
+    pSipTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_TCP);
 
     pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
-    pTxn = new SipTxn(SipTxn::NON_INV_CLI_TXN, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
+    pTxn = new SipTxn(SipTxn::NON_INVITE_CLIENT, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
 
     EXPECT_EQ(SIP_TRUE,
             pTxn->InvokeFsm(SipTxn::NON_INV_CLI_SEND_NON_INV_REQ_EVT, pTxnFsmData, &nError));
@@ -241,28 +215,29 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvCliTxn)
     pTxn->SipDelete();
     delete pSipUserData;
     delete pTxnFsmData;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
 }
 
-TEST_F(SipTxnTest, InvokeFsm_InvCliTxn)
+TEST_F(SipTxnTest, InvokeFsm_InviteClient)
 {
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
-    SipTransportParameter* pSipTranspParam = new SipTransportParameter(
-            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+    SipTransportParameter* pSipTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
 
     SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
     SipTimerContext* pSipTxnTimerContext = new SipTimerContext();
-    SipTxn* pTxn = new SipTxn(SipTxn::INV_CLI_TXN, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
+    SipTxn* pTxn =
+            new SipTxn(SipTxn::INVITE_CLIENT, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
 
     /* Calling Inv cli fsm with send invite event in UDP timer A will start */
     EXPECT_EQ(SIP_TRUE, pTxn->InvokeFsm(SipTxn::INV_CLI_SEND_INV_REQ_EVT, pTxnFsmData, &nError));
     EXPECT_EQ(SipTxn::INV_CLI_CALLING_ST, pTxn->GetTxnState());
 
     SipTransportInfo* pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
-    SipTransportParameter* pSipSendTranspParam = new SipTransportParameter(
-            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+    SipTransportParameter* pSipSendTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
     pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
     pTxn->UpdateTranspInfo(pTranspInfo);
 
@@ -282,7 +257,7 @@ TEST_F(SipTxnTest, InvokeFsm_InvCliTxn)
 
     /* Calling Inv cli fsm with 3xx_6xx event timer D will start */
     EXPECT_EQ(
-            SIP_TRUE, pTxn->InvokeFsm(SipTxn::INV_CLI_RECV_3XX_6XX_RESP_EVT, pTxnFsmData, &nError));
+            SIP_TRUE, pTxn->InvokeFsm(SipTxn::INV_CLI_RECV_FAILURE_RESP_EVT, pTxnFsmData, &nError));
     EXPECT_EQ(SipTxn::INV_CLI_COMPLETED_ST, pTxn->GetTxnState());
 
     /* Invoking timeout callback for Timer D */
@@ -296,11 +271,11 @@ TEST_F(SipTxnTest, InvokeFsm_InvCliTxn)
     delete pTxnFsmData;
     pTxn->SipDelete();
 
-    pSipTranspParam = new SipTransportParameter(
-            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_TCP);
+    pSipTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_TCP);
 
     pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
-    pTxn = new SipTxn(SipTxn::INV_CLI_TXN, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
+    pTxn = new SipTxn(SipTxn::INVITE_CLIENT, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
 
     /* Calling Inv cli fsm with send invite event in UDP timer B will start */
     EXPECT_EQ(SIP_TRUE, pTxn->InvokeFsm(SipTxn::INV_CLI_SEND_INV_REQ_EVT, pTxnFsmData, &nError));
@@ -318,22 +293,23 @@ TEST_F(SipTxnTest, InvokeFsm_InvCliTxn)
     pTxn->SipDelete();
     delete pSipUserData;
     delete pTxnFsmData;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     delete pSipTxnTimerContext;
 }
 
-TEST_F(SipTxnTest, InvokeFsm_InvSerTxn)
+TEST_F(SipTxnTest, InvokeFsm_InviteServer)
 {
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
-    SipTransportParameter* pSipTranspParam = new SipTransportParameter(
-            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+    SipTransportParameter* pSipTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
 
     SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
     SipTimerContext* pSipTxnTimerContext = new SipTimerContext();
 
-    SipTxn* pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
+    SipTxn* pTxn =
+            new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
     /* Calling Inv ser fsm with recv invite event state will be moved to proceeding state*/
     EXPECT_EQ(SIP_TRUE, pTxn->InvokeFsm(SipTxn::INV_SER_RECV_INV_REQ_EVT, pTxnFsmData, &nError));
     EXPECT_EQ(SipTxn::INV_SER_PROCEEDING_ST, pTxn->GetTxnState());
@@ -352,31 +328,33 @@ TEST_F(SipTxnTest, InvokeFsm_InvSerTxn)
     EXPECT_EQ(SipTxn::INV_SER_PROCEEDING_ST, pTxn->GetTxnState());
 
     SipTransportInfo* pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
-    SipTransportParameter* pSipSendTranspParam = new SipTransportParameter(
-            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+    SipTransportParameter* pSipSendTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
     pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
     pTxn->UpdateTranspInfo(pTranspInfo);
 
-    /* Calling Inv ser fsm send 2xx resp event and timer H will be started
+    /* Calling Inv ser fsm send 2xx resp event and timer L will be started
         state will be moved to completed state */
-    EXPECT_EQ(SIP_TRUE,
-            pTxn->InvokeFsm(SipTxn::INV_SER_SEND_2XX_SUCCESS_RESP_EVT, pTxnFsmData, &nError));
-    EXPECT_EQ(SipTxn::INV_SER_COMPLETED_ST, pTxn->GetTxnState());
+    EXPECT_EQ(SIP_TRUE, pTxn->InvokeFsm(SipTxn::INV_SER_SEND_2XX_RESP_EVT, pTxnFsmData, &nError));
+    EXPECT_EQ(SipTxn::INV_SER_ACCEPTED_ST, pTxn->GetTxnState());
     pTxn->SetMaxDuration(140000);
 
-    /* Invoking timeout callback for Timer H */
+    EXPECT_EQ(SIP_TRUE, pTxn->InvokeFsm(SipTxn::INV_SER_RECV_ACK_REQ_EVT, pTxnFsmData, &nError));
+    EXPECT_EQ(SipTxn::INV_SER_ACCEPTED_ST, pTxn->GetTxnState());
+
+    /* Invoking timeout callback for Timer L */
     pTimeoutData = new SipTimeoutData();
     pTimeoutData->SetTxnKey(new SipTxnKey(pTxn->GetTxnKey(), &nError));
-    pTimeoutData->SetTimerType(SipTxn::TIMER_H);
+    pTimeoutData->SetTimerType(SipTxn::TIMER_L);
     CbkTxnTimeout(pTimeoutData, pTxn->GetTimerId());
-    EXPECT_EQ(SipTxn::INV_SER_COMPLETED_ST, pTxn->GetTxnState());
+    EXPECT_EQ(SipTxn::INV_SER_TERMINATED_ST, pTxn->GetTxnState());
 
     /* Calling timeout with not matching TxnKey */
     pTimeoutData = new SipTimeoutData();
     pTimeoutData->SetTxnKey(new SipTxnKey());
-    pTimeoutData->SetTimerType(SipTxn::TIMER_H);
+    pTimeoutData->SetTimerType(SipTxn::TIMER_L);
     CbkTxnTimeout(pTimeoutData, pTxn->GetTimerId());
-    EXPECT_EQ(SipTxn::INV_SER_COMPLETED_ST, pTxn->GetTxnState());
+    EXPECT_EQ(SipTxn::INV_SER_TERMINATED_ST, pTxn->GetTxnState());
 
     /* start invalid timer in Inv Ser txn and  invoking timeout with invalid timer type*/
     EXPECT_EQ(SIP_TRUE, pTxn->StartTxnTimer(SipTxn::TIMER_TYPE_INVALID, 1000, &nError));
@@ -384,6 +362,36 @@ TEST_F(SipTxnTest, InvokeFsm_InvSerTxn)
     pTimeoutData->SetTxnKey(new SipTxnKey(pTxn->GetTxnKey(), &nError));
     pTimeoutData->SetTimerType(SipTxn::TIMER_TYPE_INVALID);
     CbkTxnTimeout(pTimeoutData, pTxn->GetTimerId());
+
+    delete pSipTranspParam;
+    pTxn->SipDelete();
+    delete pSipUserData;
+    delete pTxnFsmData;
+    pTxnKey->SipDelete();
+    delete pSipTxnTimerContext;
+
+    pSipUserData = new ISipUserData(SIP_NULL);
+    pSipTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
+
+    pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
+    pTxnKey = new SipTxnKey(pSipMsg, &nError);
+    pSipTxnTimerContext = new SipTimerContext();
+
+    pTxn = new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
+    /* Calling Inv ser fsm with recv invite event state will be moved to proceeding state*/
+    EXPECT_EQ(SIP_TRUE, pTxn->InvokeFsm(SipTxn::INV_SER_RECV_INV_REQ_EVT, pTxnFsmData, &nError));
+    EXPECT_EQ(SipTxn::INV_SER_PROCEEDING_ST, pTxn->GetTxnState());
+
+    EXPECT_EQ(
+            SIP_TRUE, pTxn->InvokeFsm(SipTxn::INV_SER_SEND_FAILURE_RESP_EVT, pTxnFsmData, &nError));
+    EXPECT_EQ(SipTxn::INV_SER_COMPLETED_ST, pTxn->GetTxnState());
+
+    pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
+    pSipSendTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
+    pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
+    pTxn->UpdateTranspInfo(pTranspInfo);
 
     /* Calling Inv ser fsm with recv ACK in completed state
        event in UDP timer I will start */
@@ -401,23 +409,23 @@ TEST_F(SipTxnTest, InvokeFsm_InvSerTxn)
     pTxn->SipDelete();
     delete pSipUserData;
     delete pTxnFsmData;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     delete pSipTxnTimerContext;
 }
 
-TEST_F(SipTxnTest, InvokeFsm_NonInvSerTxn)
+TEST_F(SipTxnTest, InvokeFsm_NonInviteServer)
 {
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
-    SipTransportParameter* pSipTranspParam = new SipTransportParameter(
-            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+    SipTransportParameter* pSipTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
 
     SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
     SipTimerContext* pSipTxnTimerContext = new SipTimerContext();
 
     SipTxn* pTxn =
-            new SipTxn(SipTxn::NON_INV_SER_TXN, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
+            new SipTxn(SipTxn::NON_INVITE_SERVER, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
     /* Calling Non Inv ser fsm with recv non invite event state will be moved to trying state*/
     EXPECT_EQ(SIP_TRUE,
             pTxn->InvokeFsm(SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT, pTxnFsmData, &nError));
@@ -433,7 +441,7 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvSerTxn)
     /* Calling Non Inv ser fsm with recv 2xx resp event in trying state
        in UDP timer J will start */
     EXPECT_EQ(SIP_TRUE,
-            pTxn->InvokeFsm(SipTxn::NON_INV_SER_SEND_2XX_6XX_RESP_EVT, pTxnFsmData, &nError));
+            pTxn->InvokeFsm(SipTxn::NON_INV_SER_SEND_FINAL_RESP_EVT, pTxnFsmData, &nError));
     EXPECT_EQ(SipTxn::NON_INV_SER_COMPLETED_ST, pTxn->GetTxnState());
 
     /* Invoking timeout callback for Timer J */
@@ -449,7 +457,7 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvSerTxn)
     CbkTxnTimeout(pTimeoutData, pTxn->GetTimerId());
 
     /* Invoking Timeout with invalid timerID */
-    int nTimerId = 0;
+    SIP_INT32 nTimerId = 0;
     pTimeoutData = new SipTimeoutData();
     pTimeoutData->SetTxnKey(new SipTxnKey(pTxn->GetTxnKey(), &nError));
     CbkTxnTimeout(pTimeoutData, &nTimerId);
@@ -458,7 +466,7 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvSerTxn)
     pTxn->SipDelete();
     delete pSipUserData;
     delete pTxnFsmData;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     delete pSipTxnTimerContext;
 }
 
@@ -485,7 +493,7 @@ TEST_F(SipTxnTest, PrepareACK)
     SipMessage* pInSipMsg = new SipMessage();
     pInSipMsg->SetMessageType(SipMessage::REQ_TYPE);
 
-    char* pMsg = const_cast<char*>("REGISTER sip:user@host SIP/2.0\r\n\
+    const SIP_CHAR* pMsg = "REGISTER sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
@@ -494,40 +502,38 @@ CSeq: 1 REGISTER\r\n\
 Route: <pcscf>\r\n\
 P-Access-Network-Info: 3GPP-UTRAN;utran-cell-id-3gpp=B20E\r\n\
 User-Agent: pixel\r\n\
-\r\n");
+\r\n";
 
-    EXPECT_EQ(SIP_TRUE, pInSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
-    SipTxn* pTxn = new SipTxn(SipTxn::NON_INV_SER_TXN, SIP_NULL, pInSipMsg, SIP_NULL, &nError);
+    EXPECT_EQ(SIP_TRUE, pInSipMsg->Decode(pMsg, SipPf_Strlen(pMsg)));
+    SipTxn* pTxn = new SipTxn(SipTxn::NON_INVITE_SERVER, SIP_NULL, pInSipMsg, SIP_NULL, &nError);
 
-    pMsg = const_cast<char*>("SIP/2.0 406 Not Acceptable\r\n\
+    pMsg = "SIP/2.0 406 Not Acceptable\r\n\
 Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 INVITE\r\n\
-\r\n");
+\r\n";
 
-    EXPECT_EQ(SIP_TRUE, pRespSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pRespSipMsg->Decode(pMsg, SipPf_Strlen(pMsg)));
     EXPECT_EQ(SIP_TRUE, pTxn->PrepareACK(pRespSipMsg, SIP_TRUE, &pOutMsg));
 
-    delete pInSipMsg;
+    pInSipMsg->SipDelete();
     pTxn->SipDelete();
-    delete pRespSipMsg;
+    pRespSipMsg->SipDelete();
 }
 
 TEST_F(SipTxnTest, SetUserData)
 {
     SipTxn* pTxn = new SipTxn();
 
-    EXPECT_EQ(SIP_FALSE, pTxn->SetUserData(SIP_NULL));
-
-    EXPECT_EQ(SIP_TRUE, pTxn->SetUserData(new ISipUserData()));
+    pTxn->SetUserData(new ISipUserData());
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
     EXPECT_EQ(SipConfiguration::MSG_OPT_ENCODE_NONE, pSipUserData->GetMsgOptions());
     pSipUserData->SetMsgOptions(SipConfiguration::MSG_OPT_ENCODE_MULTI_LINE);
     EXPECT_EQ(SipConfiguration::MSG_OPT_ENCODE_MULTI_LINE, pSipUserData->GetMsgOptions());
     EXPECT_EQ(SIP_FALSE, pSipUserData->GetDeleteFlag());
-    EXPECT_EQ(SIP_TRUE, pTxn->SetUserData(pSipUserData));
+    pTxn->SetUserData(pSipUserData);
 
     pTxn->SipDelete();
 }
@@ -536,27 +542,27 @@ TEST_F(SipTxnTest, IsTxnTerminated)
 {
     SIP_UINT16 nError = 0;
 
-    SipTxn* pTxn = new SipTxn(SipTxn::NON_INV_CLI_TXN, SIP_NULL, pSipMsg, SIP_NULL, &nError);
+    SipTxn* pTxn = new SipTxn(SipTxn::NON_INVITE_CLIENT, SIP_NULL, pSipMsg, SIP_NULL, &nError);
     pTxn->SetTxnState(SipTxn::NON_INV_CLI_TERMINATED_ST);
     EXPECT_EQ(SIP_TRUE, pTxn->IsTxnTerminated());
 
     pTxn->SipDelete();
-    pTxn = new SipTxn(SipTxn::INV_CLI_TXN, SIP_NULL, pSipMsg, SIP_NULL, &nError);
+    pTxn = new SipTxn(SipTxn::INVITE_CLIENT, SIP_NULL, pSipMsg, SIP_NULL, &nError);
     pTxn->SetTxnState(SipTxn::INV_CLI_TERMINATED_ST);
     EXPECT_EQ(SIP_TRUE, pTxn->IsTxnTerminated());
 
     pTxn->SipDelete();
-    pTxn = new SipTxn(SipTxn::INV_SER_TXN, SIP_NULL, pSipMsg, SIP_NULL, &nError);
+    pTxn = new SipTxn(SipTxn::INVITE_SERVER, SIP_NULL, pSipMsg, SIP_NULL, &nError);
     pTxn->SetTxnState(SipTxn::INV_SER_TERMINATED_ST);
     EXPECT_EQ(SIP_TRUE, pTxn->IsTxnTerminated());
 
     pTxn->SipDelete();
-    pTxn = new SipTxn(SipTxn::NON_INV_SER_TXN, SIP_NULL, pSipMsg, SIP_NULL, &nError);
+    pTxn = new SipTxn(SipTxn::NON_INVITE_SERVER, SIP_NULL, pSipMsg, SIP_NULL, &nError);
     pTxn->SetTxnState(SipTxn::NON_INV_SER_TERMINATED_ST);
     EXPECT_EQ(SIP_TRUE, pTxn->IsTxnTerminated());
 
     pTxn->SipDelete();
-    pTxn = new SipTxn(SipTxn::INVALID_TXN, SIP_NULL, pSipMsg, SIP_NULL, &nError);
+    pTxn = new SipTxn(SipTxn::INVALID, SIP_NULL, pSipMsg, SIP_NULL, &nError);
     EXPECT_EQ(SIP_FALSE, pTxn->IsTxnTerminated());
 
     pTxn->SipDelete();
@@ -568,9 +574,9 @@ TEST_F(SipTxnTest, InvalidTxn)
     SipMessage* pInSipMsg = new SipMessage();
     pInSipMsg->SetMessageType(SipMessage::TYPE_INVALID);
     SipTxnKey* pTxnKey = new SipTxnKey(pInSipMsg, &nError);
-    EXPECT_EQ(SipTxn::INVALID_TXN, pTxnKey->GetTxnType());
+    EXPECT_EQ(SipTxn::INVALID, pTxnKey->GetTxnType());
 
-    SipTxn* pTxn = new SipTxn(SipTxn::INVALID_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
+    SipTxn* pTxn = new SipTxn(SipTxn::INVALID, pTxnKey, pSipMsg, SIP_NULL, &nError);
 
     EXPECT_EQ(SIP_FALSE, pTxn->InvokeFsm(SipTxn::NON_INV_CLI_INVALID_EVT, SIP_NULL, &nError));
 
@@ -586,16 +592,16 @@ TEST_F(SipTxnTest, InvalidTxn)
 
     SipTxn_RemoveFromTxnPool(SIP_NULL);
     pTxn->SipDelete();
-    delete pTxnKey;
-    delete pInSipMsg;
+    pTxnKey->SipDelete();
+    pInSipMsg->SipDelete();
 }
 
 TEST_F(SipTxnTest, AbortTxn)
 {
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
-    SipTransportParameter* pSipTranspParam = new SipTransportParameter(
-            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+    SipTransportParameter* pSipTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
 
     SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
@@ -604,10 +610,10 @@ TEST_F(SipTxnTest, AbortTxn)
     /* Calling NonInvCli Fsm in idle state with send NonInvReq event
        timer E will be started and txn will move to trying state */
     SipTxn* pTxn =
-            new SipTxn(SipTxn::NON_INV_CLI_TXN, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
+            new SipTxn(SipTxn::NON_INVITE_CLIENT, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
     SipTransportInfo* pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
-    SipTransportParameter* pSipSendTranspParam = new SipTransportParameter(
-            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
+    SipTransportParameter* pSipSendTranspParam =
+            new SipTransportParameter("192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
 
     pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
     pTxn->UpdateTranspInfo(pTranspInfo);
@@ -619,18 +625,14 @@ TEST_F(SipTxnTest, AbortTxn)
 
     /* Aborting txn without SipUtil */
     EXPECT_EQ(SIP_TRUE,
-            pTxn->InvokeFsm(SipTxn::NON_INV_CLI_RECV_2XX_6XX_RESP_EVT, pTxnFsmData, &nError));
-    SipUtil_Destruct();
-    EXPECT_EQ(SIP_FALSE, pTxn->StartTxnTimer(SipTxn::TIMER_TYPE_INVALID, 1000, &nError));
-    EXPECT_EQ(SIP_FALSE, pTxn->StopTxnTimer());
-    EXPECT_EQ(SIP_FALSE, pTxn->AbortTxn());
+            pTxn->InvokeFsm(SipTxn::NON_INV_CLI_RECV_FINAL_RESP_EVT, pTxnFsmData, &nError));
 
     delete pSipTranspParam;
     pTxn->RemoveFromTxnPool();
     pTxn->SipDelete();
     delete pSipUserData;
     delete pTxnFsmData;
-    delete pTxnKey;
+    pTxnKey->SipDelete();
     delete pSipTxnTimerContext;
 }
 }  // namespace android

@@ -16,11 +16,13 @@
 #ifndef AOS_SUBSCRIBER_MANAGERH_
 #define AOS_SUBSCRIBER_MANAGERH_
 
+#include "IPhoneInfoSubscriber.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTimer.h"
 #include "ISubscriberConfigListener.h"
 #include "IConfigUpdateListener.h"
 #include "ImsIdentity.h"
+#include "IAosService.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosNConfigurationListener.h"
 #include "interface/IAosServicePhoneListener.h"
@@ -38,10 +40,12 @@ class AosSubscriberManager :
 {
 public:
     explicit AosSubscriberManager(IN IMS_SINT32 nSlotId);
-    virtual ~AosSubscriberManager();
+    ~AosSubscriberManager() override;
 
 public:
     IMS_BOOL IsReady(IN IMS_BOOL bIsFake = IMS_FALSE) const override;
+    IMS_BOOL IsIsim() const override;
+    IMS_BOOL IsUsim() const override;
 
     // IAosSubscriberManager
     void AddListener(IN IAosSubscriberManagerListener* piListener) override;
@@ -49,7 +53,9 @@ public:
     void AddListenerForMonitor(IN IAosSubscriberManagerListener* piListener) override;
     void RemoveListenerForMonitor(IN IAosSubscriberManagerListener* piListener) override;
 
-    const AStringArray& GetConfiguredImpus(IN IMS_BOOL bIsFake = IMS_FALSE) const override;
+    const AStringArray& GetConfiguredImpus() const override;
+    const AStringArray& GetOrderedImpus() const override;
+    const AStringArray& GetConfiguredImpusForFake() const override;
     const AStringArray& GetFakeImpus() const override;
 
     const ISubscriberConfig* GetSubscriberConfig(
@@ -67,7 +73,6 @@ protected:
     enum
     {
         TIMER_ICC_LOADED_WAITING = 100,
-        TIMER_ISIM_RECOVERY,
         TIMER_PHONE_RESTART_RECOVERY
     };
 
@@ -82,41 +87,42 @@ protected:
 
     void ClearAll();
 
-    IMS_BOOL IsIsim() const;
-    IMS_BOOL IsUsim() const;
     IMS_BOOL IsProvisioned(IN IMS_BOOL bIsFake = IMS_FALSE) const;
     IMS_BOOL IsRefreshStarted() const;
-    IMS_BOOL IsIsimRecoveryAllowed() const;
     IMS_BOOL IsTimerRunning(IN IMS_UINT32 nType) const;
     IMS_BOOL IsSupportFallback(IN IMS_UINT32 nIdentity) const;
     IMS_UINT32 GetIsimAt() const;
 
-    void ClearIsimRecovery();
-
-    IMS_BOOL ConfigureAsDefault();
-    IMS_BOOL ConfigureAsFake();
+    void ConfigureAsDefault();
+    void ConfigureAsFake();
 
     IMS_BOOL CheckIsimValues();
+    IMS_BOOL IsValidImpu(IN const AStringArray& objImpus);
 
-    const ISubscriberConfig* GetSubscriberConfiguration(
+    ISubscriberConfig* GetSubscriberConfiguration(
             IN IMS_SINT32 nType = IAosSubscriber::NORMAL) const;
-    IMS_BOOL GetImpuFromIsim(OUT AStringArray& objImpus);
-    IMS_BOOL GetTemporaryImpu(OUT AStringArray& objImpus, IN IMS_BOOL bDbWritable);
+    IMS_BOOL UpdateImpuFromIsim(OUT AStringArray& objImpus);
+    IMS_BOOL UpdateSubscriberInfoWithTempImpu(
+            OUT AStringArray& objImpus, IN IMS_BOOL bIsIsim = IMS_FALSE);
 
     void RemoveImpu() const;
     IMS_BOOL UpdateImsi() const;
-    IMS_BOOL UpdateImsIdentity(IN IMS_UINT32 nIdentity);
+    void UpdateImsIdentity(IN IMS_UINT32 nIdentity);
     IMS_UINT32 GetIdentity(IN Index eIndex) const;
 
-    IMS_BOOL ProcessFallback(IN IMS_BOOL bToUsim);
-    IMS_BOOL ProcessFallbackToImsiBasedIsim(IN IMS_SINT32 nCpi);
-    IMS_BOOL ProcessPhoneNumberAvailable(IN IMS_BOOL bIsRefresh, IN PhoneNumberState eState);
+    IMS_BOOL ReconfigureFallback(IN IMS_BOOL bToUsim);
+    IMS_BOOL ProcessPhoneNumberAvailable();
     IMS_BOOL ProcessIsimStateChange(IN IsimState eState);
-    void ProcessIsimRecovery();
+    IMS_BOOL ProcessSimStateChange(IN SimState eState);
+
     void ProcessPhoneRestarted();
     void ProcessIccLoadedWaitingTimerExpired();
-    void ProcessIsimRecoveryTimerExpired();
     void ProcessPhoneRestartRecoveryTimerExpired();
+    void ProcessValidIsimOnCompleted(IN IMS_BOOL bIsRefresh);
+    void ProcessInvalidIsimOnCompleted(IN IMS_BOOL bIsRefresh);
+
+    IMS_BOOL CheckAndTryUsimFallback();
+    IMS_BOOL CheckAndTryIsimImsiFallback();
 
     IMS_BOOL UpdateNConfiguration();
 
@@ -124,8 +130,9 @@ protected:
     void StopTimer(IN IMS_UINT32 nType);
     void ClearTimers();
 
-    void NotifyState(IN IMS_UINT32 nState) const;
-    void NotifyMonitorState(IN IMS_UINT32 nState) const;
+    void NotifyState(IN IMS_UINT32 nState);
+    void NotifyMonitorState(IN IMS_UINT32 nState);
+    void NotifyAosIsimState(IN AosIsimState eState);
 
     IMS_BOOL IsPrimaryImpuValid(IN const AStringArray& objImpus);
     IMS_BOOL IsSipUri(IN const AString& strImpu) const;
@@ -173,11 +180,11 @@ protected:
     void ServicePhone_PhoneNumberStateChanged(
             IN IMS_BOOL bIsRefresh, IN PhoneNumberState eState) override;
     void ServicePhone_IsimStateChanged(IN IsimState eState) override;
+    void ServicePhone_SimStateChanged(IN SimState eState) override;
 
     // Log
     const IMS_CHAR* IdentityPriorityToString();
     static const IMS_CHAR* PrintIdentity(IN IMS_UINT32 nIdentity);
-    static const IMS_CHAR* UpdateEventToString(IN IMS_UINT32 nEvent);
     static const IMS_CHAR* TimerToString(IN IMS_UINT32 nType);
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
@@ -187,23 +194,26 @@ protected:
     ImsList<IAosSubscriberManagerListener*> m_objListeners;
     ImsList<IAosSubscriberManagerListener*> m_objMonitorListeners;
 
-    const ISubscriberConfig* m_piSubscriberConfig;
-    const ISubscriberConfig* m_piSubscriberConfigFake;
+    ISubscriberConfig* m_piSubscriberConfig;
+    ISubscriberConfig* m_piSubscriberConfigFake;
 
     IMS_BOOL m_bIsim;
     IMS_BOOL m_bUsim;
     IMS_BOOL m_bUsimFallback;
     IMS_BOOL m_bIsRefreshStarted;
-    IMS_UINT32 m_nIsimRecoveryCount;
 
     ITimer* m_piTimerToIccLoadedWaiting;
-    ITimer* m_piTimerToIsimRecovery;
     ITimer* m_piTimerToPhoneRestartRecovery;
 
     IMS_BOOL m_bIsProvisioned;
     IMS_BOOL m_bIsProvisionedForFake;
 
+    IMS_UINT32 m_nNotifyState;
+    IMS_UINT32 m_nNotifyStateForFake;
+    AosIsimState m_eNotifyIsimState;
+
     AStringArray m_objPuids;
+    AStringArray m_objOrderedPuids;
     AStringArray m_objPuidsForFake;
 
     AString m_strPriority;
@@ -213,10 +223,9 @@ protected:
     // Carrier Configuration
     IMS_UINT32 m_nIsimIndexForImpu;
     IMS_BOOL m_bSupportLimitedAdminSmsMode;
+    IMS_BOOL m_bPrioritizeImsiBasedUri;
     ImsVector<IMS_SINT32> m_objImsIdentityPriority;
 
-    static const IMS_UINT32 ISIM_RECOVERY_MAX_COUNT = 2;
-    static const IMS_UINT32 ISIM_RECOVERY_DEFAULT_INTERVAL = 2;
     static const IMS_UINT32 PHONE_RESTART_RECOVERY_INTERVAL = 15000;
     static const IMS_UINT32 DEFAULT_ISIM_INDEX_FOR_IMPU = 1;
     static const IMS_SINT32 USIM_MSISDN_LENGTH = 10;

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
+
+#include "Sip.h"
 #include "SipPrivate.h"
 #include "SipSocketAddress.h"
 

@@ -32,9 +32,8 @@ import com.android.imsstack.core.agents.UsatInterface;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.ImsUtils;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.telephony.uicc.IccUtils;
-import com.android.internal.util.HexDump;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Map;
@@ -60,10 +59,10 @@ public class SmsTransferLayer {
     private MessageHandler mSmsHandler = null;
     private HandlerThread mSmsHandlerThread = new HandlerThread("ImsSmsHandlerThread");
     public static final int REQUEST_SEND_NEXT_SMS_TO_RL = 1;
-    //TODO: b/245837957 - To be changed to False or ImsLog.isDebuggable()
-    private static final boolean DBG = true;
+    private static final boolean DBG = ImsLog.isDebuggable();
     private UsatBasedSms mUsatBasedSms = null;
     public Map<Usat.MoSmsControlCommand, TpduParam> mUsatCmdMessageMap = new ConcurrentHashMap<>();
+    private boolean mIsSmmaRetry = false;
 
     /**
      * Start Index of TP-DestinationAddress after MTI(0th Index), TP-MR(1st), TP-DA length(2nd)
@@ -99,13 +98,15 @@ public class SmsTransferLayer {
         String mSmsc;
         String mDestinationAddress;
         int mRpMessageType;
+        boolean mIsRetry;
         TpduParam(int token, byte[] pdu, String scAddress, String destinationAddr,
-                    int rpMessageType) {
+                int rpMessageType, boolean isRetry) {
             mToken = token;
             mTpdu = pdu;
             mSmsc = scAddress;
             mDestinationAddress = destinationAddr;
             mRpMessageType = rpMessageType;
+            mIsRetry = isRetry;
         }
     }
 
@@ -133,6 +134,14 @@ public class SmsTransferLayer {
          * @return the result if handling incoming RP-Data received
          */
         int notifySmsReceived(int token, int format, int messageType, byte[] pdu);
+
+        /**
+         * notifies ImsSmsImpl about the report for SMMA
+         * @param token unique token generated to trigger callbacks for this message.
+         * @param result result of sending the SMS.
+         * @param cause cause for the Failure
+         */
+        void notifyMemoryAvailableResult(int token, int result, int cause);
     }
 
     public SmsTransferLayer(ImsCallContext callContext) {
@@ -179,16 +188,33 @@ public class SmsTransferLayer {
      * @param tpMessageRef the TP-MR passed for the SMS-SUBMIT message
      * @param smsc the Short Message Service Center address
      * @param pdu PDU representing the contents of the message.
+     * @deprecated use {@code sendMoTPdu(int, int, int, String, byte[], boolean)} instead
      *
      * @return result of processing of outgoing SMS's TPDU
      */
+    @Deprecated
     public int sendMoTPdu(int token, int smsFormat, int tpMessageRef, String smsc, byte[] pdu) {
+        return sendMoTPdu(token, smsFormat, tpMessageRef, smsc, pdu, false);
+    }
+
+    /**
+     * Handles SMS-SUBMIT Message at Transfer Layer and notifies Relay Layer to send RP-DATA
+     * @param token sent from framework to track callback for each SMS-SUBMIT message
+     * @param smsFormat format of the message
+     * @param tpMessageRef the TP-MR passed for the SMS-SUBMIT message
+     * @param smsc the Short Message Service Center address
+     * @param pdu PDU representing the contents of the message.
+     * @param isRetry true if it's a retry attempt, otherwise false.
+     *
+     * @return result of processing of outgoing SMS's TPDU
+     */
+    public int sendMoTPdu(int token, int smsFormat, int tpMessageRef, String smsc, byte[] pdu,
+            boolean isRetry) {
         logi("sendMoTPdu");
         if (DBG) {
             log("token = " + token
                                 + "tpMessageRef = " + tpMessageRef
-                                + "smsc = " + ImsLog.hiddenString(smsc)
-                                + "pdu = " + ImsLog.hiddenString(IccUtils.bytesToHexString(pdu)));
+                                + "smsc = " + ImsLog.hiddenString(smsc));
         }
         try {
             /* Framework's TPdu Parser expects the TPdu be prepended with SC-Address.
@@ -205,14 +231,15 @@ public class SmsTransferLayer {
             if (DBG) {
                 log("TpAddress = " + ImsLog.hiddenString(address));
             }
-            TpduParam tpduParameters = new TpduParam(token, pdu, smsc, address, SmsUtils.RP_DATA);
+            TpduParam tpduParameters = new TpduParam(token, pdu, smsc, address, SmsUtils.RP_DATA,
+                    isRetry);
             UsatInterface usat = mCallContext.getUsatInterface();
             mUsatBasedSms = new UsatBasedSms();
             if (usat != null && usat.isServiceAvailable(Usat.SERVICE_MO_SMS_CONTROL)) {
                 logi("usat service available");
                 IDcNetWatcher dcnw = mCallContext.getDcNetWatcher();
                 int networkType =  TelephonyManager.NETWORK_TYPE_UNKNOWN;
-                byte[] smscAddrBytes = HexDump.hexStringToByteArray(smsc);
+                byte[] smscAddrBytes = ImsUtils.hexStringToBytes(smsc);
                 int len = smscAddrBytes[0];
                 String rpAddress = PhoneNumberUtils.calledPartyBCDToString(smscAddrBytes, 1,
                                     len, PhoneNumberUtils.BCD_EXTENDED_TYPE_CALLED_PARTY);
@@ -244,7 +271,8 @@ public class SmsTransferLayer {
         }
         try {
             //In case of RP-SMMA, the destination address is set to smsc address
-            TpduParam tpduParameters = new TpduParam(token, null, smsc, smsc, SmsUtils.RP_SMMA);
+            TpduParam tpduParameters = new TpduParam(token, null, smsc, smsc, SmsUtils.RP_SMMA,
+                    mIsSmmaRetry);
             return enqueueAndSendMessageToRL(tpduParameters);
         } catch (RuntimeException e) {
             loge("sendMemoryAvailabilityNotification :: Failed: " + e.getMessage());
@@ -276,7 +304,7 @@ public class SmsTransferLayer {
             }
             if (DBG) {
                 log("SMS-DELIVER-REPORT = "
-                        + ImsLog.hiddenString(IccUtils.bytesToHexString(deliverReportPdu)));
+                        + ImsLog.hiddenString(ImsUtils.bytesToHexString(deliverReportPdu)));
             }
             return mSmsRL.sendRPMessage(token, messageType, null, null, deliverReportPdu, result);
         } catch (RuntimeException e) {
@@ -377,7 +405,7 @@ public class SmsTransferLayer {
                 if (!TextUtils.isEmpty(rpDestAddr)) {
                     byte[] encodedSmscBytes = PhoneNumberUtils
                                               .networkPortionToCalledPartyBCDWithLength(rpDestAddr);
-                    encodedSmsc = IccUtils.bytesToHexString(encodedSmscBytes);
+                    encodedSmsc = ImsUtils.bytesToHexString(encodedSmscBytes);
                 }
                 if (TextUtils.isEmpty(tpDestAddr)) {
                     // Use the original dialed string if this is not present.
@@ -505,15 +533,13 @@ public class SmsTransferLayer {
                                     + " encoded Smsc = "
                                     + ImsLog.hiddenString(tpduParameters.mSmsc)
                                     + " tpDestinationAddress = "
-                                    + ImsLog.hiddenString(tpduParameters.mDestinationAddress)
-                                    + " tpdu = " + ImsLog.hiddenString(IccUtils
-                                        .bytesToHexString(tpduParameters.mTpdu)));
+                                    + ImsLog.hiddenString(tpduParameters.mDestinationAddress));
                 }
                 mSendSmsQueue.add(tpduParameters.mToken);
                 mTokenMessageMap.put(tpduParameters.mToken, tpduParameters);
                 return mSmsRL.sendRPMessage(tpduParameters.mToken, tpduParameters.mRpMessageType,
                         tpduParameters.mSmsc, tpduParameters.mDestinationAddress,
-                        tpduParameters.mTpdu, 0);
+                        tpduParameters.mTpdu, 0, tpduParameters.mIsRetry);
             } else {
                 if (mTokenMessageMap.containsKey(tpduParameters.mToken)) {
                     loge("enqueueAndSendMessageToRL duplicate token - discarding the request");
@@ -550,13 +576,11 @@ public class SmsTransferLayer {
                                     + tpduParameters.mToken
                                     + " encoded Smsc = " + ImsLog.hiddenString(tpduParameters.mSmsc)
                                     + " tpDestinationAddress = "
-                                    + ImsLog.hiddenString(tpduParameters.mDestinationAddress)
-                                    + " tpdu = " + ImsLog.hiddenString(IccUtils
-                                        .bytesToHexString(tpduParameters.mTpdu)));
+                                    + ImsLog.hiddenString(tpduParameters.mDestinationAddress));
                     }
                     mSmsRL.sendRPMessage(tpduParameters.mToken, tpduParameters.mRpMessageType,
                                          tpduParameters.mSmsc, tpduParameters.mDestinationAddress,
-                                         tpduParameters.mTpdu, 0);
+                                         tpduParameters.mTpdu, 0, tpduParameters.mIsRetry);
                     break;
 
                 default :
@@ -573,72 +597,13 @@ public class SmsTransferLayer {
      */
     protected byte[] generateCdmaPdu(byte[] pdu) {
         logi("generateCdmaPdu:");
-        if (DBG) {
-            log("Incoming pdu = " + ImsLog.hiddenString(IccUtils
-                                        .bytesToHexString(pdu)));
-        }
-        com.android.internal.telephony.cdma.SmsMessage cdmaMsg = null;
         if (pdu == null) {
             loge("pdu is null");
             return new byte[0];
         }
-
-        int pduLength = pdu.length;
-        logi("Original pdu length = " + pduLength);
-        if (pduLength <= 0 || pduLength > MAX_CDMA_PDU_LENGTH) {
-            loge("Invalid pdu length");
-            return new byte[0];
-        }
-
-        byte[] cdmaPdu = new byte[pduLength + 2];
-        //TODO: BugId: b/240369384, Need to check the behaviour at modem side
-        /* The first byte should be interpreted as per 3GPP2 C.S0023 3.4.27
-         * It is a status field, we have hardcoded as
-         * ‘001’ Message received by MS from network,
-         * which means message read
-         */
-        cdmaPdu[0] = 0x01;
-        cdmaPdu[1] = (byte) pduLength;
-        System.arraycopy(pdu, 0, cdmaPdu, 2, pduLength);
-
-        if (DBG) {
-            log("EfRecord Pdu = "
-                    + ImsLog.hiddenString(IccUtils.bytesToHexString(cdmaPdu)));
-        }
-
-        if (cdmaPdu != null && cdmaPdu.length > 0) {
-            cdmaMsg =  com.android.internal.telephony.cdma.SmsMessage
-                                            .createFromEfRecord(0, cdmaPdu);
-
-            if (cdmaMsg != null) {
-                if (DBG) {
-                    log("Originating Address = "
-                            + ImsLog.hiddenString(cdmaMsg.getOriginatingAddress()));
-                    log("Message Body = " + ImsLog.hiddenString(cdmaMsg.getMessageBody()));
-                }
-                /* generates framework compatible CDMA PDU */
-                cdmaMsg.createPdu();
-                log("cdmaMsg.mPdu = "
-                        + ImsLog.hiddenString(IccUtils.bytesToHexString(cdmaMsg.getPdu())));
-            } else {
-                loge("cdmaMsg is null");
-            }
-        }
-
-        return ((cdmaMsg != null) ? cdmaMsg.getPdu() : new byte[0]);
-
-    }
-
-    private static void log(String s) {
-        ImsLog.d(TAG + s);
-    }
-
-    private static void loge(String s) {
-        ImsLog.e(TAG + s);
-    }
-
-    private static void logi(String s) {
-        ImsLog.i(TAG + s);
+        CdmaSmsMessageHelper cdmaMsg = new CdmaSmsMessageHelper();
+        cdmaMsg.parseCdmaPdu(pdu);
+        return cdmaMsg.formatPdu();
     }
 
     class SmsRLListenerProxy implements SmsRelayLayer.Listener {
@@ -648,9 +613,7 @@ public class SmsTransferLayer {
             logi("notifyRLDataIndication");
             if (DBG) {
                 log("token = " + token  + " smsFormat = " + smsFormat
-                                        + " rpMessageType = " + rpMessageType
-                                        + " pdu = "
-                                        + ImsLog.hiddenString(IccUtils.bytesToHexString(pdu)));
+                                        + " rpMessageType = " + rpMessageType);
             }
             int result = SmsUtils.SMSTL_RESULT_FAILURE;
             try {
@@ -693,7 +656,7 @@ public class SmsTransferLayer {
                                              int reason, int causeCode) {
             try {
                 logi("notifyRLReportIndication :: token = " + token + " messageRef = " + messageRef
-                        + " result = " + result + " reason = " + reason + " casue = " + causeCode);
+                        + " result = " + result + " reason = " + reason + " cause = " + causeCode);
                 TpduParam tpduParameters;
                 int nextToken;
                 SmsTransferLayer.Listener listener = mListener;
@@ -702,10 +665,23 @@ public class SmsTransferLayer {
                     return;
                 }
                 synchronized (mLock) {
-                    listener.notifySmsResult(token, messageRef, result, reason, causeCode);
                     if (mTokenMessageMap.containsKey(token)) {
                         mSendSmsQueue.remove(token);
+                        tpduParameters = mTokenMessageMap.get(token);
+                        if (tpduParameters.mRpMessageType == SmsUtils.RP_SMMA) {
+                            listener.notifyMemoryAvailableResult(token, result, causeCode);
+                            // As per section 6.3.3.1.2 in TS 124011, only one retry is allowed.
+                            if (result == ImsSmsImplBase.SEND_STATUS_ERROR_RETRY && !mIsSmmaRetry) {
+                                mIsSmmaRetry = true;
+                            } else {
+                                mIsSmmaRetry = false;
+                            }
+                        } else {
+                            listener.notifySmsResult(token, messageRef, result, reason, causeCode);
+                        }
                         mTokenMessageMap.remove(token);
+                    } else {
+                        listener.notifySmsResult(token, messageRef, result, reason, causeCode);
                     }
                     if (!mSendSmsQueue.isEmpty()) {
                         nextToken = mSendSmsQueue.peek();
@@ -724,5 +700,17 @@ public class SmsTransferLayer {
                 loge("notifyRLReportIndication Failed: " + e.getMessage());
             }
         }
+    }
+
+    private static void log(String s) {
+        ImsLog.d(TAG + s);
+    }
+
+    private static void loge(String s) {
+        ImsLog.e(TAG + s);
+    }
+
+    private static void logi(String s) {
+        ImsLog.i(TAG + s);
     }
 }

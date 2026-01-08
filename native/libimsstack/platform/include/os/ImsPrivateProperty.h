@@ -22,7 +22,7 @@ class ImsPrivateProperty : public IImsPrivateProperty
 {
 private:
     ImsPrivateProperty();
-    ~ImsPrivateProperty();
+    ~ImsPrivateProperty() override;
 
 public:
     static ImsPrivateProperty* GetInstance();

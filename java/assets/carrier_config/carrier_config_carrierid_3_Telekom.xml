@@ -15,20 +15,75 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Carrier configurations -->
-
     <!-- Aos -->
-    <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
+    <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
+    <boolean name="ims.keep_reg_retry_cnt_upon_pdn_reconnect_bool" value="true"/>
+    <boolean name="ims.keep_reg_retry_timer_on_all_enablers_detached_bool" value="true"/>
+    <int-array name="ims.keep_reg_with_mmtel_feature_tag_policy_int_array" num="1">
+        <item value="3"/>
+    </int-array>
+    <int-array name="ims.reg_temp_plmn_block_rats_on_all_pcscfs_fail_int_array" num="1">
+        <item value="6"/>
+    </int-array>
+    <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
+    <pbundle_as_map name="ims.extra_reg_err_bundle">
+        <int-array name="ims.extra_reg_err_code_int_array" num="2">
+            <item value="0"/>
+            <item value="2"/>
+        </int-array>
+    </pbundle_as_map>
+    <int-array name="imsemergency.epdn_reject_causes_for_cross_stack_redial_int_array" num="1">
+        <item value="5"/>
+    </int-array>
+    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
 
-    <!-- Ut/Xcap AOSP -->
-    <int name="gba_mode_int" value="1"/>
-    <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="true"/>
-    <!-- Previous solution was using 80 and TCP, but O2 requirement is TLS -->
-    <int name="imsss.ut_as_server_port_int" value="443"/>
-    <int name="imsss.ut_transport_type_int" value="3"/>
-
+    <int name="imsvoice.session_refresh_sdp_session_version_increment_int" value="2"/>
     <!-- Ut/Xcap Config -->
     <int-array name="imsss.ut_http_permanent_error_code_int_array" num="1">
         <item value="403"/>
+    </int-array>
+
+    <!-- MTC -->
+    <boolean name="imsemergency.emergency_retry_without_checking_380_content_for_non_ue_detectable_emergency_call_bool" value="true"/>
+    <boolean name="imsvoice.enable_registration_recovery_on_prack_timeout_bool" value="true"/>
+    <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
+        <item value="3"/>
+    </int-array>
+    <string-array name="imsvoice.reject_code_and_action_set_string_array" num="17">
+        <item value="300:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="301:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="302:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="305:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="380:6,0"/> <!-- NON_UE_DETECTABLE_EMERGENCY_CALL, CSFB  -->
+        <item value="403:7"/> <!-- HANDLE_FORBIDDEN_BY_POLICY  -->
+        <item value="404:3,9"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, USSI_CSFB -->
+        <item value="413:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="480:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="486:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="488:2,17"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT, START_ERROR_ACTION_SILENT_REINVITE_WITH_AUDIO -->
+        <item value="500:3,12"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, TERMINATE_BY_RESPONSE_SOURCE -->
+        <item value="503:10"/> <!-- BLOCK_CALL_BY_TIMER -->
+        <item value="504:4"/> <!-- REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY -->
+        <item value="600:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="603:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="606:2"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT -->
+    </string-array>
+    <string-array name="imsvoice.early_update_reject_code_and_action_set_string_array" num="3">
+        <item value="0:5"/> <!-- EARLY_UPDATE_ERROR_ACTION_REGISTRATION_RESTORATION -->
+        <item value="491:2"/> <!-- EARLY_UPDATE_ERROR_ACTION_GLARE_CONDITION -->
+        <item value="503:3"/> <!-- EARLY_UPDATE_ERROR_ACTION_BLOCK_CALL_BY_TIMER -->
+    </string-array>
+    <int-array name="imsvoice.csfb_block_condition_int_array" num="5">
+        <item value="0"/> <!-- CSFB_BLOCK_CONDITION_IF_EPS_ONLY_ATTACH -->
+        <item value="1"/> <!-- CSFB_BLOCK_CONDITION_IN_NR -->
+        <item value="2"/> <!-- CSFB_BLOCK_CONDITION_IN_WIFI -->
+        <item value="3"/> <!-- CSFB_BLOCK_CONDITION_IN_ROAMING -->
+        <item value="4"/> <!-- CSFB_BLOCK_CONDITION_IN_HOME -->
+    </int-array>
+    <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="4"/>
+    <boolean name="imsvoice.enable_registration_recovery_when_bye_transaction_timeout_bool" value="true"/>
+    <int-array name="imsvoice.call_initiation_to_18x_timer_millis_int_array" num="2">
+        <item value="10000"/>
+        <item value="10000"/>
     </int-array>
 </carrier_config>

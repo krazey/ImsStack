@@ -29,13 +29,14 @@ public:
             EpsFallbackTrigger(objContext)
     {
     }
-    ~MockEpsFallbackTrigger() {}
+    ~MockEpsFallbackTrigger() override {}
 
     MOCK_METHOD(void, StartWatchdog, (), (override));
     MOCK_METHOD(void, OnEpsFallbackCompleted, (), (override));
-    MOCK_METHOD(void, TriggerEpsFallback, (IN EpsFallbackReason, IN IMS_BOOL), (override));
-    MOCK_METHOD(IMS_BOOL, IsWaitingEpsFallbackForNoResponse, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsWaitingEpsFallbackForNoTrigger, (), (const, override));
+    MOCK_METHOD(void, TriggerEpsFallback, (IN EpsFallbackReason), (override));
+    MOCK_METHOD(EpsFallbackReason, GetTriggerReason, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsWaitingRegistration, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsWaitingEpsFallback, (), (const, override));
 };
 
 #endif

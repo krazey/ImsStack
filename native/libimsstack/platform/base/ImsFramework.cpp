@@ -44,7 +44,7 @@ void ImsFramework::AddListener(IN IFrameworkThreadListener* piListener)
 
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        IFrameworkThreadListener* piThreadListener = m_objListeners.GetAt(i);
+        const IFrameworkThreadListener* piThreadListener = m_objListeners.GetAt(i);
 
         if (piThreadListener == piListener)
         {
@@ -68,7 +68,7 @@ void ImsFramework::RemoveListener(IN const IFrameworkThreadListener* piListener)
 
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        IFrameworkThreadListener* piThreadListener = m_objListeners.GetAt(i);
+        const IFrameworkThreadListener* piThreadListener = m_objListeners.GetAt(i);
 
         if (piThreadListener == piListener)
         {
@@ -77,13 +77,6 @@ void ImsFramework::RemoveListener(IN const IFrameworkThreadListener* piListener)
         }
     }
 }
-
-PROTECTED VIRTUAL IMS_BOOL ImsFramework::Initialize()
-{
-    return IMS_TRUE;
-}
-
-PROTECTED VIRTUAL void ImsFramework::Uninitialize() {}
 
 PROTECTED VIRTUAL IMS_BOOL ImsFramework::OnStart(IN ImsMessage& objMsg)
 {

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "IOsFactory.h"
 #include "ImsTrace.h"
 #include "PlatformContext.h"
 #include "ServiceMemory.h"
@@ -20,7 +21,7 @@
 
 #define __IMS_TRACE_TAG_DEF__(ENUM, NAME, MODULE) {NAME, IMS_TRACE_MODULE_##MODULE},
 
-LOCAL const ImsTraceTag s_objImsTraceTag[IMS_TRACE_TAG_MAX + 1] = {
+static const ImsTraceTag TRACE_TAGS[IMS_TRACE_TAG_MAX + 1] = {
         {__IMS_TRACE_DEFAULT_NAME__, IMS_TRACE_MODULE_DEFAULT},
 
 #include "ITraceTagDef.h"
@@ -72,7 +73,7 @@ TraceService::TraceService() :
 {
     for (IMS_SINT32 i = 0; i < IMS_TRACE_TAG_MAX + 1; ++i)
     {
-        m_objTraceTag[i] = const_cast<ImsTraceTag*>(&s_objImsTraceTag[i]);
+        m_objTraceTag[i] = const_cast<ImsTraceTag*>(&TRACE_TAGS[i]);
     }
 
     s_nLoggableForDebug = ImsTrace::IsLoggable(ITrace::CAT_D);
@@ -85,33 +86,6 @@ TraceService::~TraceService()
     {
         delete m_pPrivate;
     }
-}
-
-PUBLIC
-const IMS_CHAR* TraceService::GetFileName(IN const IMS_CHAR* pszFileName) const
-{
-    ImsTrace* pTrace = m_pPrivate->GetTrace();
-
-    if (pTrace == IMS_NULL)
-    {
-        return "__NULL__";
-    }
-
-    return pTrace->GetFileName(pszFileName);
-}
-
-PUBLIC
-const IMS_CHAR* TraceService::GetFileName(
-        IN_OUT IMS_CHAR* pszOutFileName, IN const IMS_CHAR* pszFileName) const
-{
-    ImsTrace* pTrace = m_pPrivate->GetTrace();
-
-    if (pTrace == IMS_NULL)
-    {
-        return "__NULL__";
-    }
-
-    return pTrace->GetFileName(pszOutFileName, pszFileName);
 }
 
 PUBLIC
@@ -128,7 +102,7 @@ const ImsTraceTag& TraceService::GetTraceTag(IN IMS_SINT32 nTag) const
 PUBLIC
 IMS_UINT32 TraceService::GetOption() const
 {
-    ImsTrace* pTrace = m_pPrivate->GetTrace();
+    const ImsTrace* pTrace = m_pPrivate->GetTrace();
 
     if (pTrace == IMS_NULL)
     {
@@ -193,10 +167,10 @@ PUBLIC GLOBAL TraceService* TraceService::GetTraceService()
 
 GLOBAL
 void TraceService_Assert(
-        IN const IMS_CHAR* pszCondition, IN const IMS_CHAR* pszModule, IN IMS_UINT16 nLine)
+        IN const IMS_CHAR* pszCondition, IN const IMS_CHAR* pszModule, IN IMS_UINT32 nLine)
 {
     TraceService::GetTraceService()->GetTrace()->Out(ITrace::CAT_E, "ASSERT",
-            IMS_TRACE_MODULE_DEFAULT, "(%s) FAILED AT (%s, %d)", pszCondition, pszModule, nLine);
+            IMS_TRACE_MODULE_DEFAULT, pszModule, nLine, "(%s) FAILED", pszCondition);
 }
 
 GLOBAL

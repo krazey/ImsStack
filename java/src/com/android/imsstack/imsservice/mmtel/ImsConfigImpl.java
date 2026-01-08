@@ -22,17 +22,21 @@ import android.telephony.ims.stub.ImsConfigImplBase;
 import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.imsservice.mmtel.config.base.ConfigProxy;
 import com.android.imsstack.imsservice.mmtel.config.base.ConfigurationListener;
+import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.util.ImsLog;
 
 public final class ImsConfigImpl extends ImsConfigImplBase {
     private static final boolean DBG = ImsLog.isDebuggable();
 
     private final ConfigProxy mConfigProxy;
+    private final int mSlotId;
 
     public ImsConfigImpl(IContext context) {
         super();
 
+        mSlotId = context.getSlotId();
         mConfigProxy = new ConfigProxy(context,this);
+        ImsServiceRegistry.getInstance(mSlotId).setImsConfig(this);
 
         init();
     }
@@ -40,6 +44,7 @@ public final class ImsConfigImpl extends ImsConfigImplBase {
     public void dispose() {
         log("dispose");
 
+        ImsServiceRegistry.getInstance(mSlotId).setImsConfig(null);
         clear();
     }
 

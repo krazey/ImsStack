@@ -25,8 +25,8 @@ import android.net.TelephonyNetworkSpecifier;
 import android.os.Handler;
 import android.os.Message;
 
+import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
 
 /**
  * This is NetworkCallback to receive notifications about changes of default network

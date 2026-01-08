@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,18 +14,23 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
-#include "config/ImsCodec.h"
 #include "config/CodecConfigFactory.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.CONF");
+#include "ServiceTrace.h"
+#include "config/ImsCodec.h"
+#include "config/CodecAmrConfig.h"
+#include "config/CodecAvcConfig.h"
+#include "config/CodecEvsConfig.h"
+#include "config/CodecHevcConfig.h"
+#include "config/CodecPcmConfig.h"
+#include "config/CodecTelephoneEventConfig.h"
+#include "config/CodecT140Config.h"
+
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(
-        ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum, IMS_SINT32 nCodecIdx)
+        ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum)
 {
-    IMS_TRACE_D("CreateAudioPayloadConfig nCodec[%d], nPayloadTypeNum[%d] nCodecIdx[%d]", nCodec,
-            nPayloadTypeNum, nCodecIdx);
-
     if (nCodec == ImsCodec::AUDIO_NONE)
     {
         return IMS_NULL;
@@ -38,45 +43,44 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(
         case ImsCodec::AUDIO_AMR:
         case ImsCodec::AUDIO_AMR_WB:
         {
-            CodecAmrConfig* pAMRConfig = new CodecAmrConfig(nCodec, nPayloadTypeNum);
+            auto pAmrConfig = new CodecAmrConfig(nCodec, nPayloadTypeNum);
 
-            if (pAMRConfig == IMS_NULL || !pAMRConfig->Create(piCc, nCodecIdx))
+            if (pAmrConfig == IMS_NULL || !pAmrConfig->Create(piCc))
             {
-                IMS_TRACE_D("pAMRConfig Create failure", 0, 0, 0);
+                IMS_TRACE_E(0, "CreateAudioPayloadConfig - AmrConfig Create failure", 0, 0, 0);
 
-                delete pAMRConfig;
+                delete pAmrConfig;
                 return IMS_NULL;
             }
 
-            pCodecConfig = pAMRConfig;
+            pCodecConfig = pAmrConfig;
         }
         break;
         case ImsCodec::AUDIO_PCMA:
         case ImsCodec::AUDIO_PCMU:
         {
-            CodecPcmConfig* pPCMConfig = new CodecPcmConfig(nCodec, nPayloadTypeNum);
+            auto pPcmConfig = new CodecPcmConfig(nCodec, nPayloadTypeNum);
 
-            if (pPCMConfig == IMS_NULL || !pPCMConfig->Create(piCc, nCodecIdx))
+            if (pPcmConfig == IMS_NULL || !pPcmConfig->Create(piCc))
             {
-                IMS_TRACE_D("pPCMConfig Create failure", 0, 0, 0);
+                IMS_TRACE_E(0, "CreateAudioPayloadConfig - PcmConfig Create failure", 0, 0, 0);
 
-                delete pPCMConfig;
+                delete pPcmConfig;
                 return IMS_NULL;
             }
 
-            pCodecConfig = pPCMConfig;
+            pCodecConfig = pPcmConfig;
         }
         break;
         case ImsCodec::AUDIO_TELEPHONE_EVENT:
         case ImsCodec::AUDIO_TELEPHONE_EVENT_WB:
         {
-            CodecTelephoneEventConfig* pTelephoneEventConfig =
-                    new CodecTelephoneEventConfig(nCodec, nPayloadTypeNum);
+            auto pTelephoneEventConfig = new CodecTelephoneEventConfig(nCodec, nPayloadTypeNum);
 
-            if (pTelephoneEventConfig == IMS_NULL ||
-                    !pTelephoneEventConfig->Create(piCc, nCodecIdx))
+            if (pTelephoneEventConfig == IMS_NULL || !pTelephoneEventConfig->Create(piCc))
             {
-                IMS_TRACE_D("pTelephoneEventConfig Create failure", 0, 0, 0);
+                IMS_TRACE_E(0, "CreateAudioPayloadConfig - TelephoneEventConfig Create failure", 0,
+                        0, 0);
 
                 delete pTelephoneEventConfig;
                 return IMS_NULL;
@@ -87,17 +91,17 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(
         break;
         case ImsCodec::AUDIO_EVS:
         {
-            CodecEvsConfig* pEVSConfig = new CodecEvsConfig(nCodec, nPayloadTypeNum);
+            auto pEvsConfig = new CodecEvsConfig(nCodec, nPayloadTypeNum);
 
-            if (pEVSConfig == IMS_NULL || !pEVSConfig->Create(piCc, nCodecIdx))
+            if (pEvsConfig == IMS_NULL || !pEvsConfig->Create(piCc))
             {
-                IMS_TRACE_D("pEVSConfig Create failure", 0, 0, 0);
+                IMS_TRACE_E(0, "CreateAudioPayloadConfig - EvsConfig Create failure", 0, 0, 0);
 
-                delete pEVSConfig;
+                delete pEvsConfig;
                 return IMS_NULL;
             }
 
-            pCodecConfig = pEVSConfig;
+            pCodecConfig = pEvsConfig;
         }
         break;
     }
@@ -106,7 +110,7 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(
 }
 
 PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateVideoPayloadConfig(
-        ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum, IMS_SINT32 nCodecIdx)
+        ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum)
 {
     if (nCodec == ImsCodec::VIDEO_NONE)
     {
@@ -121,9 +125,9 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateVideoPayloadConfig(
         {
             CodecAvcConfig* pAvcConfig = new CodecAvcConfig(nCodec, nPayloadTypeNum);
 
-            if (pAvcConfig == IMS_NULL || !pAvcConfig->Create(piCc, nCodecIdx))
+            if (pAvcConfig == IMS_NULL || !pAvcConfig->Create(piCc))
             {
-                IMS_TRACE_D("pAvcConfig Create failure", 0, 0, 0);
+                IMS_TRACE_E(0, "CreateVideoPayloadConfig - AvcConfig Create failure", 0, 0, 0);
 
                 delete pAvcConfig;
                 return IMS_NULL;
@@ -137,9 +141,9 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateVideoPayloadConfig(
         {
             CodecHevcConfig* pHevcConfig = new CodecHevcConfig(nCodec, nPayloadTypeNum);
 
-            if (pHevcConfig == IMS_NULL || !pHevcConfig->Create(piCc, nCodecIdx))
+            if (pHevcConfig == IMS_NULL || !pHevcConfig->Create(piCc))
             {
-                IMS_TRACE_D("pHevcConfig Create failure", 0, 0, 0);
+                IMS_TRACE_E(0, "CreateVideoPayloadConfig - HevcConfig Create failure", 0, 0, 0);
 
                 delete pHevcConfig;
                 return IMS_NULL;
@@ -153,7 +157,7 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateVideoPayloadConfig(
 }
 
 PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateTextPayloadConfig(
-        ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum, IMS_SINT32 nCodecIdx)
+        ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum)
 {
     if (nCodec == ImsCodec::TEXT_NONE)
     {
@@ -162,9 +166,6 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateTextPayloadConfig(
 
     CodecConfig* pCodecConfig = IMS_NULL;
 
-    IMS_TRACE_D("pT140Config codec config: codectype: %d, nPayloadTypeNum: %d, nCodecIdx: %d",
-            nCodec, nPayloadTypeNum, nCodecIdx);
-
     switch (nCodec)
     {
         case ImsCodec::TEXT_T140:
@@ -172,9 +173,9 @@ PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateTextPayloadConfig(
         {
             CodecT140Config* pT140Config = new CodecT140Config(nCodec, nPayloadTypeNum);
 
-            if (pT140Config == IMS_NULL || !pT140Config->Create(piCc, nCodecIdx))
+            if (pT140Config == IMS_NULL || !pT140Config->Create(piCc))
             {
-                IMS_TRACE_D("pT140Config Create failure", 0, 0, 0);
+                IMS_TRACE_E(0, "CreateTextPayloadConfig - T140Config Create failure", 0, 0, 0);
 
                 delete pT140Config;
                 return IMS_NULL;

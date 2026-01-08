@@ -31,7 +31,7 @@ public:
             ReferenceInterfaceHolder(objListener)
     {
     }
-    ~MockReferenceInterfaceHolder() {}
+    ~MockReferenceInterfaceHolder() override {}
     MOCK_METHOD(void, ReferenceDelivered, (IN IReference*), (override));
     MOCK_METHOD(void, ReferenceDeliveryFailed, (IN IReference*), (override));
     MOCK_METHOD(void, ReferenceNotify, (IN IReference*, IN IMessage*), (override));

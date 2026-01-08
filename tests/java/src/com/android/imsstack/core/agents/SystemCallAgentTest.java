@@ -18,10 +18,13 @@ package com.android.imsstack.core.agents;
 import static android.telephony.TelephonyManager.CALL_STATE_IDLE;
 import static android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN;
 
+import static com.android.imsstack.base.TestAppContext.SLOT0;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -30,7 +33,8 @@ import static org.mockito.Mockito.when;
 
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.EApnType;
@@ -53,12 +57,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.FileDescriptor;
+import java.util.Collections;
+import java.util.List;
 
 @RunWith(JUnit4.class)
 public class SystemCallAgentTest {
-    private static final int SLOT0 = 0;
-    private static final int ISIM_EF_IMPI = 0x6F02;
-
     @Mock private ISystem mSystem;
     @Mock private SystemInterface mSystemInterface;
     @Mock private ConfigInterface mConfigInterface;
@@ -221,32 +224,59 @@ public class SystemCallAgentTest {
 
     @Test
     @SmallTest
-    public void testReadIsimFileAttributes() {
-        int result = mSystemCallAgent.readIsimFileAttributes(ISIM_EF_IMPI);
+    public void testGetIsimRecord() {
+        when(mSimAgent.getIsimImpi()).thenReturn("impi");
+        List<String> record = mSystemCallAgent.getIsimRecord(Sim.ISIM_FILE_ID_IMPI);
 
-        assertEquals(SystemCallInterface.RESULT_OK, result);
-        verify(mSimAgent).readIsimFileAttributes(eq(ISIM_EF_IMPI));
+        assertEquals(1, record.size());
+        assertEquals("impi", record.get(0));
 
-        AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT0);
-        result = mSystemCallAgent.readIsimFileAttributes(ISIM_EF_IMPI);
+        when(mSimAgent.getIsimDomain()).thenReturn("domain");
+        record = mSystemCallAgent.getIsimRecord(Sim.ISIM_FILE_ID_DOMAIN);
 
-        assertEquals(SystemCallInterface.RESULT_FAIL, result);
-        verifyNoMoreInteractions(mSimAgent);
+        assertEquals(1, record.size());
+        assertEquals("domain", record.get(0));
+
+        when(mSimAgent.getIsimImpu()).thenReturn(List.of("impu"));
+        record = mSystemCallAgent.getIsimRecord(Sim.ISIM_FILE_ID_IMPU);
+
+        assertEquals(1, record.size());
+        assertEquals("impu", record.get(0));
+
+        when(mSimAgent.getIsimPcscf()).thenReturn(List.of("pcscfAddress"));
+        record = mSystemCallAgent.getIsimRecord(Sim.ISIM_FILE_ID_PCSCF);
+
+        assertEquals(1, record.size());
+        assertEquals("pcscfAddress", record.get(0));
     }
 
     @Test
     @SmallTest
-    public void testReadIsimRecord() {
-        int result = mSystemCallAgent.readIsimRecord(ISIM_EF_IMPI, 0);
+    public void testGetIsimRecordWhenContentNullOrEmpty() {
+        when(mSimAgent.getIsimImpi()).thenReturn(null);
+        List<String> record = mSystemCallAgent.getIsimRecord(Sim.ISIM_FILE_ID_IMPI);
 
-        assertEquals(SystemCallInterface.RESULT_OK, result);
-        verify(mSimAgent).readIsimRecord(eq(ISIM_EF_IMPI), eq(0));
+        assertTrue(record.isEmpty());
+
+        when(mSimAgent.getIsimDomain()).thenReturn(null);
+        record = mSystemCallAgent.getIsimRecord(Sim.ISIM_FILE_ID_DOMAIN);
+
+        assertTrue(record.isEmpty());
+
+        when(mSimAgent.getIsimImpu()).thenReturn(Collections.emptyList());
+        record = mSystemCallAgent.getIsimRecord(Sim.ISIM_FILE_ID_IMPU);
+
+        assertTrue(record.isEmpty());
+
+        int unknownFileId = 0x6FFF;
+        record = mSystemCallAgent.getIsimRecord(unknownFileId);
+
+        assertTrue(record.isEmpty());
 
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT0);
-        result = mSystemCallAgent.readIsimRecord(ISIM_EF_IMPI, 0);
+        record = mSystemCallAgent.getIsimRecord(Sim.ISIM_FILE_ID_IMPI);
 
-        assertEquals(SystemCallInterface.RESULT_FAIL, result);
-        verifyNoMoreInteractions(mSimAgent);
+        assertTrue(record.isEmpty());
     }
 
     @Test
@@ -453,6 +483,20 @@ public class SystemCallAgentTest {
 
     @Test
     @SmallTest
+    public void testGetNetworkOperator() {
+        mSystemCallAgent.getNetworkOperator();
+
+        verify(mTelephonyInterface).getNetworkOperator();
+
+        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT0);
+        String operator = mSystemCallAgent.getNetworkOperator();
+
+        assertEquals("", operator);
+        verifyNoMoreInteractions(mTelephonyInterface);
+    }
+
+    @Test
+    @SmallTest
     public void testIsEmergencyNumber() {
         String number = "911";
         mSystemCallAgent.isEmergencyNumber(number);
@@ -626,6 +670,35 @@ public class SystemCallAgentTest {
 
     @Test
     @SmallTest
+    public void testGetNetworkRegistrationRejectCause() {
+        mSystemCallAgent.getNetworkRegistrationRejectCause();
+
+        verify(mDcNetWatcher).getNetworkRegistrationRejectCause();
+
+        replaceDcNetWatcher(null);
+        int result = mSystemCallAgent.getNetworkRegistrationRejectCause();
+
+        assertEquals(IDcNetWatcher.REGISTRATION_REJECT_CAUSE_NONE, result);
+        verifyNoMoreInteractions(mDcNetWatcher);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetAccessNetworkPlmn() {
+        mSystemCallAgent.getAccessNetworkPlmn();
+
+        verify(mDcUtils).getAccessNetworkPlmn();
+
+        replaceDcUtils(null);
+        String result = mSystemCallAgent.getAccessNetworkPlmn();
+
+        assertNotNull(result);
+        assertEquals("", result);
+        verifyNoMoreInteractions(mDcUtils);
+    }
+
+    @Test
+    @SmallTest
     public void testGetHostByName() {
         String host = "test.ims.com";
         mSystemCallAgent.getHostByName(EApnType.IMS.getType(), EIpVersion.IPV6V4.getInt(), host);
@@ -700,6 +773,20 @@ public class SystemCallAgentTest {
 
     @Test
     @SmallTest
+    public void testGetCellularDataServiceState() {
+        mSystemCallAgent.getCellularDataServiceState();
+
+        verify(mDcNetWatcher).getCellularDataServiceState();
+
+        replaceDcNetWatcher(null);
+        int result = mSystemCallAgent.getCellularDataServiceState();
+
+        assertEquals(ServiceState.STATE_OUT_OF_SERVICE, result);
+        verifyNoMoreInteractions(mDcNetWatcher);
+    }
+
+    @Test
+    @SmallTest
     public void testGetDataRoamingType() {
         mSystemCallAgent.getDataRoamingType();
 
@@ -709,20 +796,6 @@ public class SystemCallAgentTest {
         int result = mSystemCallAgent.getDataRoamingType();
 
         assertEquals(ServiceState.ROAMING_TYPE_NOT_ROAMING, result);
-        verifyNoMoreInteractions(mDcNetWatcher);
-    }
-
-    @Test
-    @SmallTest
-    public void testGetMocnPlmnInfo() {
-        mSystemCallAgent.getMocnPlmnInfo();
-
-        verify(mDcNetWatcher).getMocnPlmnInfo();
-
-        replaceDcNetWatcher(null);
-        int result = mSystemCallAgent.getMocnPlmnInfo();
-
-        assertEquals(0, result);
         verifyNoMoreInteractions(mDcNetWatcher);
     }
 
@@ -742,13 +815,13 @@ public class SystemCallAgentTest {
 
     @Test
     @SmallTest
-    public void testIsLteEmergencyOnly() {
-        mSystemCallAgent.isLteEmergencyOnly();
+    public void testIsEmergencyOnly() {
+        mSystemCallAgent.isEmergencyOnly();
 
-        verify(mDcNetWatcher).isLteEmergencyOnly();
+        verify(mDcNetWatcher).isEmergencyOnly();
 
         replaceDcNetWatcher(null);
-        boolean result = mSystemCallAgent.isLteEmergencyOnly();
+        boolean result = mSystemCallAgent.isEmergencyOnly();
 
         assertFalse(result);
         verifyNoMoreInteractions(mDcNetWatcher);
@@ -868,7 +941,7 @@ public class SystemCallAgentTest {
     public void testIsImsVoiceCallSupported() {
         mSystemCallAgent.isImsVoiceCallSupported();
 
-        verify(mDcNetWatcher).isVops();
+        verify(mDcNetWatcher).isVopsSupported();
 
         replaceDcNetWatcher(null);
         boolean result = mSystemCallAgent.isImsVoiceCallSupported();
@@ -937,13 +1010,28 @@ public class SystemCallAgentTest {
 
     @Test
     @SmallTest
-    public void testStartInstantLocationUpdate() {
-        mSystemCallAgent.startInstantLocationUpdate();
+    public void testRequestLocationUpdate() {
+        int waitTimeMs = 2000; // 2s
+        mSystemCallAgent.requestLocationUpdate(waitTimeMs);
 
-        verify(mLocationInterface).startInstantLocationUpdate();
+        verify(mLocationInterface).requestLocationUpdate(eq(waitTimeMs));
 
         AgentFactory.getInstance().setAgent(LocationInterface.class, null, SLOT0);
-        mSystemCallAgent.startInstantLocationUpdate();
+        mSystemCallAgent.requestLocationUpdate(waitTimeMs);
+
+        verifyNoMoreInteractions(mLocationInterface);
+    }
+
+    @Test
+    @SmallTest
+    public void testCancelLocationUpdate() {
+        int requestId = 1;
+        mSystemCallAgent.cancelLocationUpdate(requestId);
+
+        verify(mLocationInterface).cancelLocationUpdate(eq(requestId));
+
+        AgentFactory.getInstance().setAgent(LocationInterface.class, null, SLOT0);
+        mSystemCallAgent.cancelLocationUpdate(requestId);
 
         verifyNoMoreInteractions(mLocationInterface);
     }

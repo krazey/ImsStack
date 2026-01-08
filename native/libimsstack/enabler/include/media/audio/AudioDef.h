@@ -96,7 +96,6 @@ typedef enum
 typedef enum
 {
     AUDIO_CODEC_BANDWIDTH_INVALID = -1,
-
     AUDIO_CODEC_BANDWIDTH_NB = 0,
     AUDIO_CODEC_BANDWIDTH_WB = 1,
     AUDIO_CODEC_BANDWIDTH_SWB = 2,
@@ -114,5 +113,17 @@ typedef enum
     AUDIO_CODEC_QUALITY_EVS_AMR_IO = 4,
     AUDIO_CODEC_QUALITY_G711 = 5,
 } AUDIO_CODEC_QUALITY;
+
+typedef enum
+{
+    /** EVS narrow band only */
+    EVS_BW_NB = 1 << AUDIO_CODEC_BANDWIDTH_NB,
+    /** EVS wide band only */
+    EVS_BW_WB = 1 << AUDIO_CODEC_BANDWIDTH_WB,
+    /** EVS super wide band only */
+    EVS_BW_SWB = 1 << AUDIO_CODEC_BANDWIDTH_SWB,
+    /** EVS full band only */
+    EVS_BW_FB = 1 << AUDIO_CODEC_BANDWIDTH_FB,
+} AUDIO_EVS_BANDWIDTH_BIT;
 
 #endif

@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef _INTERFACE_PARAMETER_COMPONENT_H_
-#define _INTERFACE_PARAMETER_COMPONENT_H_
+#ifndef __INTERFACE_PARAMETER_COMPONENT_H__
+#define __INTERFACE_PARAMETER_COMPONENT_H__
 
 class IParameterComponent
 {
@@ -48,4 +48,4 @@ private:
     SIP_INT32 m_eComponentType;
 };
 
-#endif  // _INTERFACE_PARAMETER_COMPONENT_H_
+#endif  //__INTERFACE_PARAMETER_COMPONENT_H__

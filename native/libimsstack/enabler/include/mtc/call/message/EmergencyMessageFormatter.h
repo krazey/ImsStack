@@ -17,43 +17,41 @@
 #ifndef EMERGENCY_MESSAGE_FORMATTER_H_
 #define EMERGENCY_MESSAGE_FORMATTER_H_
 
-#include "IMtcService.h"
 #include "ImsTypeDef.h"
-#include "call/IMtcCall.h"
 #include "call/message/MessageFormatter.h"
 
 class AString;
 class IMtcCallContext;
 class ISession;
+enum class CallType;
+enum class ServiceType;
+enum class UpdateType;
 
 class EmergencyMessageFormatter : public MessageFormatter
 {
 public:
     EmergencyMessageFormatter(IN IMtcCallContext& objContext, IN ISession& objSession);
-    virtual ~EmergencyMessageFormatter();
+    virtual ~EmergencyMessageFormatter() override;
     EmergencyMessageFormatter(IN const MessageFormatter&) = delete;
     EmergencyMessageFormatter& operator=(IN const MessageFormatter&) = delete;
 
-public:
-    virtual IMS_RESULT FormStartMessage(IN CallType eCallType) override;
+    IMS_RESULT FormStartMessage(IN CallType eCallType) override;
+    IMS_RESULT FormUpdateMessage(IN UpdateType eUpdateType, IN IMS_BOOL bIncludeAlertInfo) override;
 
 protected:
-    virtual void SetAcceptHeader();
+    void SetAcceptHeader() override;
+    void SetCallerIdHeader() override;
+    void SetPPreferredIdentityHeader() override;
 
 private:
-    void SetPPreferredIdentityHeader();
+    void SetPPreferredIdentityHeaderByFormat(IN const AString& strFormat);
     void SetPPreferredIdentityHeaderByUserId();
-    void SetPPreferredIdentityHeaderByDeviceId();
     void SetRecvInfoHeader();
+    void SetPEmergencyInfoHeader();
     void SetSipInstanceFeature();
+    void SetPComServiceTypeHeader();
 
-    IMS_UINT32 GetAoSRegMode(IN ServiceType eServiceType);
-    IMS_RESULT GetLocalIpAddress(OUT AString& strIpAddress);
-    IMS_UINT32 GetLocalPort();
-
-private:
-    IMS_UINT32 m_eNormalAosRegMode;
-    IMS_UINT32 m_eEmergencyAosRegMode;
+    IMS_UINT32 GetAosRegMode(IN ServiceType eServiceType) const;
 };
 
 #endif

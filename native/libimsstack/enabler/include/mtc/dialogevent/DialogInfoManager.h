@@ -17,31 +17,47 @@
 #ifndef DIALOG_INFO_MANAGER_H_
 #define DIALOG_INFO_MANAGER_H_
 
-#include "AString.h"
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "dialogevent/DialogInfo.h"
 #include "dialogevent/IDialogInfoManager.h"
 #include <memory>
 
+class AString;
+template <class T>
+class ImsList;
+
+/**
+ * @brief Manages dialog information received from a dialog event package.
+ *
+ * This class is responsible for parsing an XML dialog event package and storing the
+ * resulting dialog information. It provides access to the list of dialogs and
+ * other metadata from the last processed package.
+ */
 class DialogInfoManager final : public IDialogInfoManager
 {
 public:
     DialogInfoManager();
-    virtual ~DialogInfoManager();
+    virtual ~DialogInfoManager() override;
     DialogInfoManager(IN const DialogInfoManager&) = delete;
     DialogInfoManager& operator=(IN const DialogInfoManager&) = delete;
 
+    /** See {@link IDialogInfoManager#Update}. */
     IMS_RESULT Update(IN const AString& strEventPackage) override;
 
-    inline const ImsList<Dialog*>& GetDialogs() const override { return m_objDialogs; }
+    /** See {@link IDialogInfoManager#GetDialogs}. */
+    const ImsList<Dialog*>& GetDialogs() const override;
+
+    /** See {@link IDialogInfoManager#GetState}. */
     IMS_UINT32 GetState() const override;
+
+    /** See {@link IDialogInfoManager#GetVersion}. */
     IMS_UINT32 GetVersion() const override;
+
+    /** See {@link IDialogInfoManager#GetEntity}. */
     const AString& GetEntity() const override;
 
 private:
     std::unique_ptr<DialogInfo> m_pLastDialogInfo;
-    ImsList<Dialog*> m_objDialogs;
 };
 
 #endif

@@ -17,13 +17,14 @@ package com.android.imsstack.enabler.mtc;
 
 import android.content.Context;
 
+import com.android.imsstack.base.DeviceConfig;
+import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.core.config.ServiceCaps;
 import com.android.imsstack.internal.enabler.ImsStateStore;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
 
 public class MtcStateUtils {
     public static final int INIT_REG_STATE = 0x01;
@@ -109,8 +110,8 @@ public class MtcStateUtils {
         if (phoneId >= MSimUtils.DEFAULT_PHONE_ID) {
             initializeImsStateInternal(phoneId, initFlags);
         } else {
-            if (MSimUtils.isMultiSimEnabled()) {
-                int activeSimCount = MSimUtils.getActiveSimCount();
+            if (DeviceConfig.isMultiSimEnabled()) {
+                int activeSimCount = DeviceConfig.getActiveSimCount();
                 for (int i = 0; i < activeSimCount; ++i) {
                     initializeImsStateInternal(i, initFlags);
                 }
@@ -118,8 +119,6 @@ public class MtcStateUtils {
                 initializeImsStateInternal(MSimUtils.DEFAULT_PHONE_ID, initFlags);
             }
         }
-
-        // FIXME: Is it required to turn off "volte/vt provisioned" state?
     }
 
     public static int getRegisteredServiceType(Context context, int phoneId) {

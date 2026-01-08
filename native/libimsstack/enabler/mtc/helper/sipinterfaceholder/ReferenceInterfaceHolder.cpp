@@ -17,6 +17,7 @@
 #include "IReference.h"
 #include "ISession.h"
 #include "ServiceTrace.h"
+#include "ServiceTimer.h"
 #include "helper/sipinterfaceholder/IInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/ReferenceInterfaceHolder.h"
 
@@ -48,7 +49,6 @@ PUBLIC VIRTUAL void ReferenceInterfaceHolder::ReferenceTerminated(IN IReference*
 {
     IMS_TRACE_D("ReferenceTerminated", 0, 0, 0);
 
-    // TODO: delete piReference / timer???
     ReleaseIReference(piReference, IMS_TRUE);
 }
 
@@ -125,7 +125,7 @@ void ReferenceInterfaceHolder::ReleaseIReference(
 #endif
 
 PRIVATE
-IMS_BOOL ReferenceInterfaceHolder::IsReadyToDestroy(IN IReference* piReference)
+IMS_BOOL ReferenceInterfaceHolder::IsReadyToDestroy(IN const IReference* piReference)
 {
     IMS_TRACE_D("IsReadyToDestroy [%d]", piReference->GetState(), 0, 0);
 

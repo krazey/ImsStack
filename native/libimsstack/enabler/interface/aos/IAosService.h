@@ -19,6 +19,9 @@
 #include "AString.h"
 #include "ImsMap.h"
 #include "INativeEnabler.h"
+#include "AosEnumOperators.h"
+
+#define TO_UINT32(e) (static_cast<IMS_UINT32>(e))
 
 class IAosRegistrationControlListener;
 class IAosServicePhoneListener;
@@ -26,29 +29,27 @@ class IAosServiceSettingListener;
 class IAosEmergencyListener;
 
 enum class AosReasonCode;
+enum class AosRegistrationType;
 enum class AosNetworkType;
-enum class AosCapability;
+enum class AosCapability : IMS_UINT32;
 enum class AosIsimState;
-enum class AosPhoneNumberRetryCommand;
 enum class AosRegRequestType;
 enum class AosPcscfOrder;
 
 class IAosService : public INativeEnabler
 {
 public:
-    virtual ~IAosService(){};
+    virtual void AddListener(IN IAosRegistrationControlListener* piListener) = 0;
+    virtual void RemoveListener(IN IAosRegistrationControlListener* piListener) = 0;
 
-    virtual IMS_BOOL AddListener(IN IAosRegistrationControlListener* piListener) = 0;
-    virtual IMS_BOOL RemoveListener(IN IAosRegistrationControlListener* piListener) = 0;
+    virtual void AddListener(IN IAosServiceSettingListener* piListener) = 0;
+    virtual void RemoveListener(IN IAosServiceSettingListener* piListener) = 0;
 
-    virtual IMS_BOOL AddListener(IN IAosServiceSettingListener* piListener) = 0;
-    virtual IMS_BOOL RemoveListener(IN IAosServiceSettingListener* piListener) = 0;
+    virtual void AddListener(IN IAosServicePhoneListener* piListener) = 0;
+    virtual void RemoveListener(IN IAosServicePhoneListener* piListener) = 0;
 
-    virtual IMS_BOOL AddListener(IN IAosServicePhoneListener* piListener) = 0;
-    virtual IMS_BOOL RemoveListener(IN IAosServicePhoneListener* piListener) = 0;
-
-    virtual IMS_BOOL AddListener(IN IAosEmergencyListener* piListener) = 0;
-    virtual IMS_BOOL RemoveListener(IN IAosEmergencyListener* piListener) = 0;
+    virtual void AddListener(IN IAosEmergencyListener* piListener) = 0;
+    virtual void RemoveListener(IN IAosEmergencyListener* piListener) = 0;
 
     /**
      * AosService(Java) -> IAosRegistrationControlListener(Native)
@@ -62,6 +63,7 @@ public:
             IN const ImsMap<IMS_UINT32, IMS_UINT32>& objCapabilities) = 0;
     virtual void ControlRegistration(
             IN IMS_SINT32 nRequestType, IN IMS_SINT32 nPcscfOrder, IN IMS_SINT32 nCause) = 0;
+    virtual void UpdateDataFailureReason(IN IMS_SINT32 nReason) = 0;
 
     /**
      * AosService(Java) -> IAosServiceSettingListener(Native)
@@ -76,6 +78,7 @@ public:
     virtual void NotifyVideoSetting(IN IMS_UINT32 nIsOn) = 0;
     virtual void NotifyVolteSetting(IN IMS_UINT32 nIsOn) = 0;
     virtual void NotifyWfcSetting(IN IMS_UINT32 nIsOn) = 0;
+    virtual void NotifyWifiSetting(IN IMS_UINT32 nIsOn) = 0;
 
     /**
      * AosService(Java) -> IAosServicePhoneListener(Native)
@@ -84,15 +87,21 @@ public:
     virtual void NotifyAosStart() = 0;
     virtual void NotifyIpcanHandoverFailure(
             IN IMS_SINT32 nTargetNetwork, IN IMS_SINT32 nCauseCode) = 0;
-    virtual void NotifyIsimState(IN IMS_UINT32 nState) = 0;
+    virtual void NotifyIsimState(IN IMS_SINT32 nState) = 0;
     virtual void NotifyLocationInfo(IN IMS_UINT32 nState) = 0;
     virtual void NotifyMobileDataLimit(IN IMS_UINT32 nIsLimited) = 0;
     virtual void NotifyNetworkVideoCapability(IN IMS_UINT32 nIsOn) = 0;
     virtual void NotifyPhoneNumberState(IN IMS_UINT32 nIsRefresh, IN IMS_UINT32 nState) = 0;
-    virtual void NotifyPlmnChanged() = 0;
+    virtual void NotifyPlmnChanged(IN const AString& strPlmn) = 0;
+    virtual void NotifyVopsStateChanged(IN IMS_UINT32 nState, IN const AString& strPlmn) = 0;
     virtual void NotifyPowerOff() = 0;
     virtual void NotifyPreciseCallState(IN IMS_SINT32 nState) = 0;
     virtual void NotifyCarrierSignalPcoValueChanged(IN IMS_SINT32 nValue) = 0;
+    virtual void NotifyCrossSimStatus(IN IMS_SINT32 nIsConnected) = 0;
+    virtual void NotifyNasSecurityAlgorithmChanged(IN IMS_UINT32 nIsNullAlgo) = 0;
+    virtual void NotifyAllowedNetworkTypesChanged(IN IMS_ULONG nNetworkTypesBitMask) = 0;
+    virtual void NotifyEmergencyRegistrationStateChanged(IN IMS_UINT32 nIsEmergencyAttached) = 0;
+    virtual void NotifySimStateChanged(IN IMS_SINT32 nSimState) = 0;
 
     /**
      * Notify an emergency callback mode changed information by AosService (Java)
@@ -102,55 +111,72 @@ public:
      * @param nState The emergency callback mode state.
      * @param nDuration The timer duration(seconds) of emergency callback mode for call or sms.
      */
-    virtual void NotifyEmcCallbackModeChanged(
+    virtual void NotifyEmergencyCallbackModeChanged(
             IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_ULONG nDuration) = 0;
 
     /**
      * Notify the application that the device is connected to the IMS network.
      *
+     * @param nRegType Type of the registration.
      * @param eNetworkType The radio access technology.
      * @param nFeatureTagBits Type of bits an integer.
      * @param objFeatureTags Type of ImsList<AString>&.
-     * @see class ImsAosFeature
+     * @see IAosRegistration::IMS_REG_TYPE_XXX
      * @see class AosNetworkType
+     * @see class ImsAosFeature
      */
-    virtual IMS_BOOL NotifyRegistered(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
-            IN const ImsList<AString>& objFeatureTags) = 0;
+    virtual IMS_BOOL NotifyRegistered(IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType,
+            IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags) = 0;
 
     /**
-     * Notify the application that the device is connected to the IMS network.
+     * Notify the application that the device is trying to connect to the IMS network.
      *
+     * @param nRegType Type of the registration.
      * @param eNetworkType The radio access technology.
      * @param nFeatureTagBits Type of bits an integer.
      * @param objFeatureTags Type of ImsList<AString>&.
-     * @see class ImsAosFeature
+     * @see IAosRegistration::IMS_REG_TYPE_XXX
      * @see class NetworkType
+     * @see class ImsAosFeature
      */
-    virtual IMS_BOOL NotifyRegistering(IN AosNetworkType eNetworkType,
+    virtual IMS_BOOL NotifyRegistering(IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType,
             IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags) = 0;
 
     /**
      * Notify the application that the device is disconnected from the IMS network.
      *
+     * @param nRegType Type of the registration.
      * @param eNetworkType The radio access technology.
      * @param eReason associated with why registration was disconnected.
+     * @param nDataFailureReason The data failure reason for PDN disconnection
+     * @see IAosRegistration::IMS_REG_TYPE_XXX
      * @see class NetworkType
      * @see class AosReasonCode
+     * @see class DataFailCause
      */
-    virtual IMS_BOOL NotifyDeregistered(
-            IN AosNetworkType eNetworkType, IN AosReasonCode eReason) = 0;
+    virtual IMS_BOOL NotifyDeregistered(IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType,
+            IN AosReasonCode eReason, IN IMS_SINT32 nDataFailureReason) = 0;
+
+    /**
+     * Notify the application that the device is disconnecting from the IMS network.
+     *
+     * @param nRegType Type of the registration.
+     */
+    virtual IMS_BOOL NotifyDeregistering(IN IMS_SINT32 nRegType) = 0;
 
     /**
      * Notify the framework that the handover from the current radio technology to the other
      * technology has failed.
      *
+     * @param nRegType Type of the registration.
      * @param eNetworkType The technology that has failed to be changed to.
-     * @param nCauseCode Handover failure cause.
+     * @param eReason Handover failure reason.
+     * @see IAosRegistration::IMS_REG_TYPE_XXX
      * @see class AosNetworkType
-     * @see class android.telephony.DataFailCause
+     * @see class AosReasonCode
      */
     virtual IMS_BOOL NotifyTechnologyChangeFailed(
-            IN AosNetworkType eNetworkType, IN IMS_SINT32 nCauseCode) = 0;
+            IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, IN AosReasonCode eReason) = 0;
 
     /**
      * This device's subscriber associated {@link Uri}s have changed, which are used to filter out
@@ -195,13 +221,33 @@ public:
             IN const ImsList<AString>& objImpus = ImsList<AString>()) = 0;
 
     /**
-     * Request the application to phone number retry.
-     * AosService(Native) -> AosService(Java)
+     * Notify the application that the supported IMS feature is changed.
      *
-     * @param nCommand is type of AosPhoneNumberRetryCommand.
-     * @see enum AosPhoneNumberRetryCommand
+     * @param nRegType Type of the registration.
+     * @param eNetworkType The radio access technology.
+     * @param nFeatureTagBits Type of bits an integer.
+     * @see IAosRegistration::IMS_REG_TYPE_XXX
+     * @see class AosNetworkType
+     * @see class ImsAosFeature
      */
-    virtual IMS_BOOL RequestPhoneNumberRetry(IN AosPhoneNumberRetryCommand eCommand) = 0;
+    virtual IMS_BOOL NotifyImsFeatureChanged(IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType,
+            IN IMS_UINT32 nFeatureTagBits) = 0;
+
+    /**
+     * @brief Notifies the application layer of a structured diagnostic trace,
+     *        covering both system vital status snapshots and specific transactional events.
+     *        This method serves as the unified interface for both TraceStatus and TraceEvent.
+     *        AosService(Native) -> AosService(Java)
+     *
+     * @param eType The type of registration this trace belongs to (e.g., NORMAL, EMERGENCY).
+     *        This parameter is used by the Java layer for log routing and filtering.
+     * @param strLog The formatted diagnostic log string.
+     *        This contains the full payload, which can be either:
+     *        1. A comprehensive vital status snapshot (from AosTracer::TraceStatus).
+     *        2. A specific transactional event message (from AosTracer::TraceEvent).
+     * @return IMS_TRUE if the notification was successfully sent to Java, IMS_FALSE otherwise.
+     */
+    virtual IMS_BOOL NotifyTrace(IN AosRegistrationType eType, IN const AString& strLog) = 0;
 
     /**
      * Request the application to Wifi on or off.
@@ -237,92 +283,248 @@ public:
      */
     virtual IMS_BOOL IsSupportCapabilitiesForNetwork(
             AosNetworkType eNetworkType, AosCapability eCapability) = 0;
+
+    /**
+     * Returns the NAS null security algorithm.
+     *
+     * @return Returns whether the NAL security algorithm is null or not.
+     */
+    virtual IMS_BOOL IsNasSecurityAlgorithmNull() = 0;
 };
 
 /**
- * reasons associated with why registration was disconnected
+ * @brief Enum class defining base values for categorizing {@link AosReasonCode}.
+ * Each base value represents a distinct category of errors or conditions that can lead to
+ * registration failures.
+ *
+ * Note: It is crucial that each BASE_XXX value is separated by a consistent interval,
+ * specifically the {@link BASE_CONVERSION_FACTOR}, to ensure proper categorization
+ * and comparison of {@link AosReasonCode} values.
+ */
+enum class AosReasonCodeBase
+{
+    /// General Errors.
+    BASE = 0,
+
+    /// Errors requiring special action from the modem.
+    BASE_MODEM = 2000,
+
+    /// Errors due to data failures.
+    BASE_DATA = 3000,
+
+    /// Errors due to registration common failures.
+    BASE_COMMON_OTHER = 4000,
+
+    /// Errors due to registration response 3XX.
+    BASE_RESP_3XX = 13000,
+
+    /// Errors due to registration response 4XX.
+    BASE_RESP_4XX = 14000,
+
+    /// Errors due to registration response 5XX.
+    BASE_RESP_5XX = 15000,
+
+    /// Errors due to registration response 6XX.
+    BASE_RESP_6XX = 16000,
+
+    /// Errors due to registration other response.
+    BASE_RESP_OTHER = 17000,
+
+    /// Errors due to WFC registration response 3XX.
+    BASE_RESP_WFC_3XX = 23000,
+
+    /// Errors due to WFC registration response 4XX.
+    BASE_RESP_WFC_4XX = 24000,
+
+    /// Errors due to WFC registration response 5XX.
+    BASE_RESP_WFC_5XX = 25000,
+
+    /// Errors due to WFC registration response 6XX.
+    BASE_RESP_WFC_6XX = 26000,
+
+    /// Errors due to WFC registration other response.
+    BASE_RESP_WFC_OTHER = 27000
+};
+
+/**
+ * @class AosReasonCodeWrapper
+ * @brief A wrapper class for {@link AosReasonCode} enum values, providing utility functions.
+ *
+ * This class wraps {@link AosReasonCode} enum values, offering functionality to check if
+ * a given code belongs to a specific base group and to retrieve the integer
+ * representation of the enum value.
+ */
+class AosReasonCodeWrapper
+{
+public:
+    /**
+     * @brief Constructor for the {@link AosReasonCodeWrapper} class.
+     * @param eCode The {@link AosReasonCode} enum value to be wrapped.
+     */
+    explicit AosReasonCodeWrapper(IN AosReasonCode eCode) :
+            m_eCode(eCode)
+    {
+    }
+
+    /**
+     * @brief Checks if the wrapped {@link AosReasonCode belongs} to a specific base group.
+     * @param eBase The {@link AosReasonCodeBase} group to check against.
+     * @return IMS_BOOL, {@code IMS_TRUE} if in base group, {@code IMS_FALSE} otherwise.
+     *
+     * This function converts both the {@link AosReasonCode} and {@link AosReasonCodeBase} to
+     * integers, divides each by 1000, and compares the quotients to determine if they belong
+     * to the same base group.
+     *
+     * @note {@link BASE_CONVERSION_FACTOR} is the factor used to determine base groups.
+     */
+    // cppcheck-suppress unusedFunction
+    inline IMS_BOOL IsInBase(IN AosReasonCodeBase eBase) const
+    {
+        constexpr unsigned int BASE_CONVERSION_FACTOR = 1000;
+        return TO_UINT32(m_eCode) / BASE_CONVERSION_FACTOR ==
+                TO_UINT32(eBase) / BASE_CONVERSION_FACTOR;
+    }
+
+    /**
+     * @brief Returns the wrapped {@link AosReasonCode} as an integer.
+     * @return IMS_UINT32 representation of the {@@link AosReasonCode}.
+     */
+    inline IMS_UINT32 GetInt() const { return TO_UINT32(m_eCode); }
+
+private:
+    AosReasonCode m_eCode;
+};
+
+/**
+ * @brief Enum class representing the reasons for registration disconnection.
+ *        Each reason belongs to a specific category, indicated by its base value.
  */
 enum class AosReasonCode
 {
+
     /**
-     * The Reason is unspecified.
+     * @brief : BASE(0) - General Errors.
      */
-    UNSPECIFIED = 0,
+
+    /// The reason for disconnection is unknown or unspecified.
+    UNSPECIFIED = TO_UINT32(AosReasonCodeBase::BASE),
+
+    /// A general error occurred during IMS registration.
+    REGISTRATION_ERROR = TO_UINT32(AosReasonCodeBase::BASE) + 1,
+
+    /// Service is unavailable because the radio is powered off.
+    POWER_OFF = TO_UINT32(AosReasonCodeBase::BASE) + 2,
+
+    /// Service is unavailable due to low battery.
+    LOW_BATTERY = TO_UINT32(AosReasonCodeBase::BASE) + 3,
+
+    /// Service is unavailable due to out of service(data service state).
+    NETWORK_NO_SERVICE = TO_UINT32(AosReasonCodeBase::BASE) + 4,
+
+    /// Service is unavailable due to no LTE coverage.
+    NETWORK_NO_LTE_COVERAGE = TO_UINT32(AosReasonCodeBase::BASE) + 5,
+
+    /// Service is unavailable due to roaming.
+    NETWORK_ROAMING = TO_UINT32(AosReasonCodeBase::BASE) + 6,
+
+    /// Service is unavailable because the IP address changed.
+    NETWORK_IP_CHANGED = TO_UINT32(AosReasonCodeBase::BASE) + 7,
+
+    /// Service is unavailable for an unspecified reason.
+    SERVICE_UNAVAILABLE = TO_UINT32(AosReasonCodeBase::BASE) + 8,
+
+    /// Service is unavailable because IMS is not registered.
+    NOT_REGISTERED = TO_UINT32(AosReasonCodeBase::BASE) + 9,
+
+    /// Registration failed due to USIM authentication failure.
+    USIM_AUTHENTICATION_FAILURES = TO_UINT32(AosReasonCodeBase::BASE) + 10,
+
+    /// Registration failed due to internal error.
+    INTERNAL_ERROR = TO_UINT32(AosReasonCodeBase::BASE) + 11,
+
+    /// Registration termination triggered by network.
+    NETWORK_TRIGGERED_DEREGISTER = TO_UINT32(AosReasonCodeBase::BASE) + 12,
+
+    /// Deregistration due to user actions
+    NORMAL_DEREGISTRATION = TO_UINT32(AosReasonCodeBase::BASE) + 13,
+
     /**
-     * Indicates that the IMS registration is failed with fatal error such as 403 or 404
-     * on all P-CSCF addresses. The radio shall block the current PLMN or disable
-     * the RAT
+     * @brief : BASE_MODEM(2000) - Errors requiring special action from the modem.
      */
-    PLMN_BLOCK = 1,
+
+    /// Indicates that the IMS registration is failed with fatal error such as 403 or 404 on all
+    /// P-CSCF addresses. The radio shall block the current PLMN or disable the RAT.
+    PLMN_BLOCK = TO_UINT32(AosReasonCodeBase::BASE_MODEM),
+
+    /// Indicates that the IMS registration on current PLMN failed multiple times. The radio shall
+    /// block the current PLMN or disable the RAT during the time based on carrier requirement.
+    PLMN_BLOCK_WITH_TIMEOUT = TO_UINT32(AosReasonCodeBase::BASE_MODEM) + 1,
+
+    /// The current RAT was blocked because registration failed for all P-CSCFs.
+    RAT_BLOCK = TO_UINT32(AosReasonCodeBase::BASE_MODEM) + 2,
+
+    /// Clears blocks for all RATs.
+    CLEAR_RAT_BLOCKS = TO_UINT32(AosReasonCodeBase::BASE_MODEM) + 3,
+
+    /// Indicates that the IMS registration terminated due to VoPS not supported. The radio shall
+    /// block the current PLMN or disable the RAT during the time based on carrier requirement.
+    PLMN_BLOCK_WITH_TIMEOUT_BY_VOPS_NOT_SUPPORTED = TO_UINT32(AosReasonCodeBase::BASE_MODEM) + 4,
+
+    /// Indicates that the IMS registration terminated due to SSAC barred. The radio shall block the
+    /// current PLMN or disable the RAT during the time based on carrier requirement.
+    PLMN_BLOCK_WITH_TIMEOUT_BY_SSAC_BARRED = TO_UINT32(AosReasonCodeBase::BASE_MODEM) + 5,
+
     /**
-     * Indicates that the IMS registration on current PLMN failed multiple times.
-     * The radio shall block the current PLMN or disable the RAT during the time
-     * based on carrier requirement
+     * @brief : BASE_DATA(3000) - Errors due to DataFailCause
+     * The reasons below are for mapping the ImsReasonInfo ExtraCode by the DataFailCause.
      */
-    PLMN_BLOCK_WITH_TIMEOUT = 2,
+
+    /// Deregistration due to PDN disconnection
+    DATA_DISCONNECTED = TO_UINT32(AosReasonCodeBase::BASE_DATA),
+
     /**
-     * IMS Registration error code
+     * @brief : BASE_RESP_4XX(14000) - Errors due to registration response 4XX.
      */
-    REGISTRATION_ERROR = 3,
+
+    /// Registration failed due to a 403 Forbidden response from the network.
+    REG_RESP_403 = TO_UINT32(AosReasonCodeBase::BASE_RESP_4XX) + 403,
+
     /**
-     * WFC Registration error code if the network returns 403 Forbidden for Register.
-     * The 403 Forbidden case due to non-support for other countries are not included.
+     * @brief : BASE_RESP_OTHER(17000) - Errors due to registration other response.
      */
-    REGISTRATION_ERROR_WFC_REG_403 = 4,
+
+    /// No response received for the registration request, TCP connection failure or timeout.
+    REG_RESP_NETWORK_TIMEOUT = TO_UINT32(AosReasonCodeBase::BASE_RESP_OTHER),
+
     /**
-     * WFC Registration error code if the network returns 500 Internal server error for Register.
+     * @brief : BASE_RESP_WFC_4XX(24000) - Errors due to WFC registration response 4XX.
      */
-    REGISTRATION_ERROR_WFC_REG_500 = 5,
+
+    /// WFC registration failed due to a 403 Forbidden response (excluding unsupported country).
+    WFC_REG_RESP_403 = TO_UINT32(AosReasonCodeBase::BASE_RESP_WFC_4XX) + 403,
+
     /**
-     * WFC Registration error code if the network returns 403 Forbidden with a different country for
-     * register.
+     * @brief : BASE_RESP_WFC_5XX(25000) - Errors due to WFC registration response 5XX.
      */
-    REGISTRATION_ERROR_WFC_NOT_SUPPORTED_COUNTRY = 6,
+
+    /// WFC registration failed due to a 500 Internal Server Error response.
+    WFC_REG_RESP_500 = TO_UINT32(AosReasonCodeBase::BASE_RESP_WFC_5XX) + 500,
+
     /**
-     * WFC Registration error code if the network returns 403 response for Subscribe.
+     * @brief : BASE_RESP_WFC_OTHER(27000) - Errors due to WFC registration other response.
      */
-    REGISTRATION_ERROR_WFC_SUB_403 = 7,
-    /**
-     * WFC Registration error code if the network returns Notify Terminate message.
-     */
-    REGISTRATION_ERROR_WFC_NOTIFY_TERMINATED = 8,
-    /**
-     * WFC Registration error code for all other failures.
-     */
-    REGISTRATION_ERROR_WFC_OTHER_FAILURES = 9,
-    /**
-     * Service unavailable; radio power off
-     */
-    LOCAL_POWER_OFF = 10,
-    /**
-     * Service unavailable; low battery
-     */
-    LOCAL_LOW_BATTERY = 11,
-    /**
-     * Service unavailable; out of service (data service state)
-     */
-    LOCAL_NETWORK_NO_SERVICE = 12,
-    /**
-     * Service unavailable; no LTE coverage
-     * (VoLTE is not supported even though IMS is registered)
-     */
-    LOCAL_NETWORK_NO_LTE_COVERAGE = 13,
-    /**
-     * Service unavailable; located in roaming area
-     */
-    LOCAL_NETWORK_ROAMING = 14,
-    /**
-     * Service unavailable; IP changed
-     */
-    NETWORK_IP_CHANGED = 15,
-    /**
-     * Service unavailable; for an unspecified reason
-     */
-    LOCAL_SERVICE_UNAVAILABLE = 16,
-    /**
-     * Service unavailable; IMS is not registered
-     */
-    LOCAL_NOT_REGISTERED = 17
+
+    /// WFC registration failed due to a 403 Forbidden response with unsupported country.
+    WFC_REG_RESP_403_NOT_SUPPORTED_COUNTRY = TO_UINT32(AosReasonCodeBase::BASE_RESP_WFC_OTHER),
+
+    /// WFC registration failed due to other unspecified reasons.
+    WFC_REG_RESP_OTHER_FAILURES = TO_UINT32(AosReasonCodeBase::BASE_RESP_WFC_OTHER) + 1,
+
+    /// WFC registration failed due to a 403 Forbidden response during subscription.
+    WFC_SUB_RESP_403 = TO_UINT32(AosReasonCodeBase::BASE_RESP_WFC_OTHER) + 2,
+
+    /// WFC registration terminated due to a Notify Terminate message.
+    WFC_SUB_NOTIFY_TERMINATED = TO_UINT32(AosReasonCodeBase::BASE_RESP_WFC_OTHER) + 3
 };
 
 /**
@@ -341,7 +543,7 @@ enum class AosNetworkType
 /**
  * Capability
  */
-enum class AosCapability
+enum class AosCapability : IMS_UINT32
 {
     NONE = 0,
     VOICE = 1 << 0,
@@ -349,9 +551,15 @@ enum class AosCapability
     UT = 1 << 2,
     SMS = 1 << 3,
     CALL_COMPOSER = 1 << 4,
-    OPTIONS_UCE = 1 << 5,
-    PRESENCE_UCE = 1 << 6
+    CALL_COMPOSER_BUSINESS_ONLY = 1 << 5,
+    OPTIONS_UCE = 1 << 6,
+    PRESENCE_UCE = 1 << 7,
+
+    // Internal capabilities
+    TEXT = 1 << 11
 };
+
+DEFINE_ENUM_BITMASK_OPERATORS_EX(AosCapability)
 
 /**
  * ISIM State
@@ -362,16 +570,6 @@ enum class AosIsimState
     VALID = 1,
     REFRESH_STARTED = 2,
     REFRESH_COMPLETE = 3
-};
-
-/**
- * Phone number retry request command
- */
-enum class AosPhoneNumberRetryCommand
-{
-    INITIAL = 0,
-    REFRESH = 1,
-    CLEAR = 2,
 };
 
 #endif  // INTERFACE_AOS_SERVICE_H_

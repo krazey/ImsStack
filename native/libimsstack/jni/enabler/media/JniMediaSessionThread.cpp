@@ -56,7 +56,7 @@ IMS_BOOL JniMediaSessionThread::OnOpenSession(IN ImsMediaMsgOpenConfigParam* pPa
     objParcel.writeString16(android::String16(pParam->m_objLocalAddress.ToString().GetStr()));
     objParcel.writeInt32(pParam->m_nLocalPort);
 
-    if (pParam->m_pConfig != NULL)
+    if (pParam->m_pConfig != IMS_NULL)
     {
         pParam->m_pConfig->writeToParcel(&objParcel);
     }
@@ -79,6 +79,7 @@ IMS_BOOL JniMediaSessionThread::OnModifySession(IN ImsMediaMsgConfigParam* pPara
     Parcel objParcel;
     objParcel.writeInt32(IJniMedia::REQUEST_MODIFY_SESSION);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
+
     pParam->m_pConfig->writeToParcel(&objParcel);
     SendData2Java(objParcel);
     delete pParam;
@@ -187,11 +188,13 @@ IMS_BOOL JniMediaSessionThread::OnSetMediaQualityThreshold(
         return IMS_FALSE;
     }
 
-    IMS_TRACE_D("OnSetMediaQualityThreshold - type[%d]", pParam->m_eMediaType, 0, 0);
+    IMS_TRACE_D("OnSetMediaQualityThreshold - type[%d], Framework timer needed[%d]",
+            pParam->m_eMediaType, pParam->m_bRtpInactivityFwkTimer, 0);
     Parcel objParcel;
     objParcel.writeInt32(IJniMedia::REQUEST_SET_MEDIA_QUALITY);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
     pParam->m_objMediaQualityThreshold.writeToParcel(&objParcel);
+    objParcel.writeBool(pParam->m_bRtpInactivityFwkTimer);
     SendData2Java(objParcel);
     delete pParam;
     return IMS_TRUE;
@@ -212,6 +215,45 @@ IMS_BOOL JniMediaSessionThread::OnRequestQos(IN ImsMediaMsgQosParam* pParam)
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
     objParcel.writeString16(android::String16(pParam->m_objIpAddress.ToString().GetStr()));
     objParcel.writeInt32(pParam->m_nPort);
+    SendData2Java(objParcel);
+    delete pParam;
+    return IMS_TRUE;
+}
+
+PUBLIC
+IMS_BOOL JniMediaSessionThread::OnRequestUpdateAnbrEnabledConfig(
+        IN ImsMediaMsgAnbrNegotiationParam* pParam)
+{
+    if (pParam == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    IMS_TRACE_D("OnRequestUpdateAnbrEnabledConfig", 0, 0, 0);
+    Parcel objParcel;
+    objParcel.writeInt32(IJniMedia::REQUEST_UPDATE_ANBR_ENABLED_CONFIG);
+    objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
+    objParcel.writeBool(pParam->m_bAnbrNegotiationType);
+    SendData2Java(objParcel);
+    delete pParam;
+    return IMS_TRUE;
+}
+
+PUBLIC
+IMS_BOOL JniMediaSessionThread::OnRequestRtpReceptionStats(
+        IN ImsMediaMsgRtpReceptionStatsParam* pParam)
+{
+    if (pParam == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    IMS_TRACE_D("OnRequestRtpReceptionStats type[%d]", pParam->m_eMediaType, 0, 0);
+
+    Parcel objParcel;
+    objParcel.writeInt32(IJniMedia::REQUEST_RTP_RECEPTION_STATS);
+    objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
+    objParcel.writeInt32(pParam->m_nIntervalMs);
     SendData2Java(objParcel);
     delete pParam;
     return IMS_TRUE;

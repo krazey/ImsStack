@@ -16,8 +16,9 @@
 #ifndef SIP_MESSAGE_INFO_H_
 #define SIP_MESSAGE_INFO_H_
 
-#include "SipMethod.h"
 #include "msg/SipMessage.h"
+
+class SipMethod;
 
 /**
  * @brief This class includes an information of the current processing SIP Message.
@@ -34,7 +35,7 @@ public:
     {
     }
 
-    inline ~SipMessageInfo() {}
+    ~SipMessageInfo() = default;
 
     SipMessageInfo(IN const SipMessageInfo&) = delete;
     SipMessageInfo& operator=(IN const SipMessageInfo&) = delete;

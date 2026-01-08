@@ -38,7 +38,7 @@ TEST_F(RegPropertyTest, CopyConstructor)
     // NOLINTNEXTLINE(performance-unnecessary-copy-initialization)
     RegProperty objCopiedRegProperty(objRegProperty);
 
-    ImsProperty* pImsProperty = &objCopiedRegProperty;
+    const ImsProperty* pImsProperty = &objCopiedRegProperty;
 
     EXPECT_TRUE(pImsProperty->Equals(objRegProperty));
 }
@@ -50,7 +50,7 @@ TEST_F(RegPropertyTest, AssignmentOperator)
 
     objAssignedRegProperty = objRegProperty;
 
-    ImsProperty* pImsProperty = &objAssignedRegProperty;
+    const ImsProperty* pImsProperty = &objAssignedRegProperty;
 
     EXPECT_TRUE(pImsProperty->Equals(objRegProperty));
 }

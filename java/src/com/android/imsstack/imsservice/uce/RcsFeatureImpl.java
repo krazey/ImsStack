@@ -16,7 +16,7 @@
 
 package com.android.imsstack.imsservice.uce;
 
-import android.annotation.NonNull;
+import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 import android.telephony.ims.feature.CapabilityChangeRequest;
 import android.telephony.ims.feature.ImsFeature;
@@ -25,17 +25,23 @@ import android.telephony.ims.stub.CapabilityExchangeEventListener;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.telephony.ims.stub.RcsCapabilityExchangeImplBase;
 
+import androidx.annotation.NonNull;
+
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.SystemServiceProxy.CarrierConfigManagerProxy;
 import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.IndentingPrintWriter;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 public class RcsFeatureImpl extends RcsFeature {
     private final IContext mIContext;
-
+    private final Executor mCallbackExecutor = Executors.newSingleThreadExecutor();
     public RcsFeatureImpl(IContext iContext) {
         super(iContext.getExecutor());
         mIContext = iContext;
-        initialize(mIContext.getContext(), mIContext.getSlotId());
         setFeatureState(ImsFeature.STATE_READY);
     }
 
@@ -50,7 +56,8 @@ public class RcsFeatureImpl extends RcsFeature {
     public RcsCapabilityExchangeImplBase createCapabilityExchangeImpl(
             @NonNull CapabilityExchangeEventListener listener) {
         logi("createCapabilityExchangeImpl");
-        return new RcsCapExchangeImpl(listener, mIContext.getSlotId(), mIContext.getContext());
+        return new RcsCapExchangeImpl(listener, mIContext.getSlotId(), mIContext.getContext(),
+                mIContext.getExecutor(), mCallbackExecutor);
     }
 
     @Override
@@ -126,39 +133,41 @@ public class RcsFeatureImpl extends RcsFeature {
         }
     }
 
+    /**
+     * Dump this instance into a readable format for dumpsys usage.
+     */
+    public void dump(IndentingPrintWriter pw) {
+        pw.println("RcsFeature:");
+        pw.increaseIndent();
+        pw.println("featureState=" + getFeatureState());
+        pw.decreaseIndent();
+    }
+
     private int getCapabilities() {
-        CarrierConfigManager cfgManager = (CarrierConfigManager)
-                mContext.getSystemService(mContext.CARRIER_CONFIG_SERVICE);
+        CarrierConfigManagerProxy ccmp =
+                AppContext.getInstance().getSystemServiceProxy(CarrierConfigManagerProxy.class);
+        PersistableBundle b = ccmp.getConfigForSubId(mIContext.getSubId(),
+                CarrierConfigManager.Ims.KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL,
+                CarrierConfigManager.KEY_USE_RCS_SIP_OPTIONS_BOOL);
         int capabilities = RcsImsCapabilities.CAPABILITY_TYPE_NONE;
-        if (cfgManager != null) {
-            boolean isPresenceEnabled = cfgManager.getConfigForSubId(mIContext.getSubId()).
-                    getBoolean(
-                            CarrierConfigManager.Ims.KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL);
-            if (isPresenceEnabled) {
-                logi("getCapabilities presence");
-                capabilities = RcsImsCapabilities.CAPABILITY_TYPE_PRESENCE_UCE;
-                return capabilities;
-            }
-            boolean isCapOptionEnabled = cfgManager.getConfigForSubId(mIContext.getSubId()).
-                    getBoolean(CarrierConfigManager.KEY_USE_RCS_SIP_OPTIONS_BOOL);
-            if (isCapOptionEnabled) {
-                logi("getCapabilities Option");
-                capabilities = RcsImsCapabilities.CAPABILITY_TYPE_OPTIONS_UCE;
-                return capabilities;
-            }
+        boolean isPresenceEnabled =
+                b.getBoolean(CarrierConfigManager.Ims.KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL);
+        if (isPresenceEnabled) {
+            logi("getCapabilities presence");
+            capabilities = RcsImsCapabilities.CAPABILITY_TYPE_PRESENCE_UCE;
+            return capabilities;
+        }
+        boolean isCapOptionEnabled =
+                b.getBoolean(CarrierConfigManager.KEY_USE_RCS_SIP_OPTIONS_BOOL);
+        if (isCapOptionEnabled) {
+            logi("getCapabilities Option");
+            capabilities = RcsImsCapabilities.CAPABILITY_TYPE_OPTIONS_UCE;
+            return capabilities;
         }
         return capabilities;
     }
+
     private static void logi(String s) {
         ImsLog.i("[GII-IMPL] " + s);
-    }
-
-    /** Dump this instance into a readable format for dumpsys usage. */
-    public void dump(IndentingPrintWriter pw) {
-        pw.println("RcsFeatureImpl:");
-        pw.increaseIndent();
-        pw.println("slotId=" + mIContext.getSlotId());
-        pw.println("featureState=" + getFeatureState());
-        pw.decreaseIndent();
     }
 }

@@ -16,7 +16,9 @@
 #ifndef INTERFACE_PHONE_INFO_SUBSCRIBER_H_
 #define INTERFACE_PHONE_INFO_SUBSCRIBER_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
+
+class AString;
 
 class ISubscriberInfo
 {

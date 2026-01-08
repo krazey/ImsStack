@@ -18,9 +18,9 @@
 #define MOCK_I_MTC_MEDIA_MANAGER_H_
 
 #include "ImsTypeDef.h"
+#include "MediaDef.h"
 #include "helper/ISrvccStateListener.h"
 #include "media/IMtcMediaManager.h"
-#include "media/MediaNego.h"
 #include <gmock/gmock.h>
 
 class IMediaQosEventListener;
@@ -34,27 +34,29 @@ struct MediaInfo;
 class MockIMtcMediaManager : public IMtcMediaManager
 {
 public:
-    ~MockIMtcMediaManager() {}
     MOCK_METHOD(void, SetMediaReportEventListener, (IN IMediaReportEventListener* pListener),
             (override));
     MOCK_METHOD(void, SetQosListener, (IN IMediaQosEventListener* pListener), (override));
-    MOCK_METHOD(void, SetMediaInfo, (IN const MediaInfo& objInfo), (override));
+    MOCK_METHOD(void, SetMediaInfo, (IN const ISession& objISession, IN const MediaInfo& objInfo),
+            (override));
+    MOCK_METHOD(void, UpdateMediaDirection,
+            (IN const ISession& objISession, IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir),
+            (override));
     MOCK_METHOD(
-            void, UpdateMediaDirection, (IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir), (override));
-    MOCK_METHOD(const MediaInfo&, GetMediaInfo, (), (const, override));
-    MOCK_METHOD(void, RestoreMediaInfo, (), (override));
+            const MediaInfo&, GetMediaInfo, (IN const ISession& objISession), (const, override));
+    MOCK_METHOD(void, RestoreMediaInfo, (IN const ISession& objISession), (override));
     MOCK_METHOD(void, CreateMediaSession, (), (override));
     MOCK_METHOD(void, DestroyMediaSession, (), (override));
     MOCK_METHOD(void, CreateMediaProfile,
             (IN ISession* piSession, IN IMS_BOOL bForked, IN IMS_BOOL bOriginalProfile),
             (override));
-    MOCK_METHOD(void, DestroyMediaProfile, (IN ISession* piSession), (override));
+    MOCK_METHOD(void, DestroyMediaForSession, (IN ISession * piSession), (override));
     MOCK_METHOD(IMS_BOOL, IsLocalTone, (), (override));
     MOCK_METHOD(IMS_RESULT, FormSdp,
             (IN ISession* piSession, IN CallType eCallType,
                     IN IMS_BOOL bAnswerForOfferlessReInvite),
             (override));
-    MOCK_METHOD(NegotiationResult, NegotiateSdp, (IN ISession* piSession), (override));
+    MOCK_METHOD(SdpNegotiationResult, NegotiateSdp, (IN ISession * piSession), (override));
     MOCK_METHOD(void, RestoreSdp, (IN ISession* piSession), (override));
     MOCK_METHOD(void, FinalizeSdp, (IN ISession * piSession), (override));
     MOCK_METHOD(void, UpdatePemType, (IN ISession* piSession, IN IMessage* piMessage), (override));
@@ -64,21 +66,26 @@ public:
             (IN ISession * piSession, IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nPort), (override));
     MOCK_METHOD(IMS_SINT32, GetRemoteRtpPort, (IN ISession * piSession, IN IMS_UINT32 eMediaTypes),
             (override));
-    MOCK_METHOD(void, SetConferenceCall, (IN IMS_BOOL bConference), (override));
+    MOCK_METHOD(void, SetConferenceCall, (), (override));
     MOCK_METHOD(void, SetConfirmedSession, (IN ISession * piSession), (override));
     MOCK_METHOD(NegotiationState, GetNegotiationState, (IN ISession* piSession), (override));
     MOCK_METHOD(IMS_SINT32, GetNegotiatedDirection,
-            (IN ISession* piSession, IN IMS_UINT32 eMediaType), (override));
+            (IN const ISession* piSession, IN IMS_UINT32 eMediaType), (override));
     MOCK_METHOD(IMS_SINT32, GetNegotiatedQuality,
-            (IN ISession* piSession, IN IMS_UINT32 eMediaType), (override));
+            (IN const ISession* piSession, IN IMS_UINT32 eMediaType), (override));
     MOCK_METHOD(CallType, GetNegotiatedCallType, (IN ISession * piSession), (override));
     MOCK_METHOD(PemType, GetPemType, (IN ISession * piSession), (override));
     MOCK_METHOD(IMS_BOOL, IsAudioInactive, (), (override));
-    MOCK_METHOD(void, AdjustDirectionForAutoOffer, (IN CallType eCallType), (override));
-    MOCK_METHOD(void, AdjustDirectionForAutoAnswer, (), (override));
+    MOCK_METHOD(void, AdjustDirectionForAutoOffer,
+            (IN const ISession& objISession, IN CallType eCallType), (override));
+    MOCK_METHOD(void, AdjustDirectionForAutoAnswer, (IN const ISession& objISession), (override));
+    MOCK_METHOD(void, AdjustDirectionForLocalResourceConfirmation,
+            (IN const ISession& objISession, IN CallType eCallType), (override));
     MOCK_METHOD(void, SetSrvccState, (IN SrvccState eState), (override));
-    MOCK_METHOD(IMS_BOOL, IsOnHold, (), (override));
+    MOCK_METHOD(IMS_BOOL, IsOnHold, (IN const ISession& objISession), (override));
     MOCK_METHOD(IMS_UINT32, GetSupportedMediaTypesFromSdp, (IN ISession * piSession), (override));
+    MOCK_METHOD(IMS_BOOL, IsPreviewMode, (IN ISession * piSession), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsForkedSession, (IN const ISession* piSession), (const, override));
 };
 
 #endif

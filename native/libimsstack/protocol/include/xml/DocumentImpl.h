@@ -16,9 +16,9 @@
 #ifndef DOCUMENT_IMPL_H_
 #define DOCUMENT_IMPL_H_
 
+#include "libxml/xpath.h"
+
 #include "IDocument.h"
-#include "XmlApiTree.h"
-#include "XmlApiXPath.h"
 
 class Document;
 
@@ -26,7 +26,7 @@ class DocumentImpl : public IDocument
 {
 public:
     DocumentImpl(IN xmlDocPtr pstDoc, IN xmlXPathContextPtr pstXpathContext);
-    virtual ~DocumentImpl();
+    ~DocumentImpl() override;
 
     DocumentImpl(IN const DocumentImpl&) = delete;
     DocumentImpl& operator=(IN const DocumentImpl&) = delete;

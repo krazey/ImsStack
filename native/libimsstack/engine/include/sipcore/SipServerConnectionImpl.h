@@ -26,7 +26,7 @@ class SipServerConnectionImpl : public ISipServerConnection, public IOnSipErrorL
 {
 public:
     explicit SipServerConnectionImpl(IN SipServerConnection* pSsc);
-    virtual ~SipServerConnectionImpl();
+    ~SipServerConnectionImpl() override;
 
     SipServerConnectionImpl() = delete;
     SipServerConnectionImpl(IN const SipServerConnectionImpl&) = delete;
@@ -57,6 +57,7 @@ private:
     IMS_SINT32 GetHeaderCount(IN const AString& strName) const override;
     ISipMessage* GetMessage() const override;
     IMS_SINT32 GetSlotId() const override;
+    SipProfile* GetSipProfile() const override;
     void SetSipProfile(IN SipProfile* pProfile) override;
     void SetTransactionTimerValues(IN const SipTimerValues& objTimerValues) override;
 

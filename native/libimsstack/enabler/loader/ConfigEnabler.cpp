@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "CarrierConfig.h"
+#include "ISystemProperty.h"
 #include "ITraceOption.h"
 #include "ServiceConfig.h"
 #include "ServiceMemory.h"
@@ -21,7 +22,8 @@
 
 #include "offeranswer/SdpProfile.h"
 
-#include "Configuration.h"
+#include "Engine.h"
+#include "IConfiguration.h"
 
 #include "ISipRtConfigHelper.h"
 #include "SipFactory.h"
@@ -29,6 +31,7 @@
 #include "ConfigAppFactory.h"
 #include "ConfigEnabler.h"
 #include "GeolocationHelper.h"
+#include "GeolocationPidfCreator.h"
 
 PUBLIC
 ConfigEnabler::ConfigEnabler(IN IMS_SINT32 nSlotId) :
@@ -48,7 +51,7 @@ PUBLIC VIRTUAL ConfigEnabler::~ConfigEnabler()
 
 PRIVATE VIRTUAL void ConfigEnabler::Start()
 {
-    ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(GetSlotId());
+    const ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(GetSlotId());
     ISipRtConfigHelper* piRtConfigHelper = SipFactory::GetRtConfigHelper(GetSlotId());
 
     if (piRtConfigHelper != IMS_NULL)
@@ -59,9 +62,9 @@ PRIVATE VIRTUAL void ConfigEnabler::Start()
 
         piRtConfigHelper->SetConfig(SipRtConfig::CONFIG_I_REUSEADDR, &objSocketOption);
 
-        Configuration* pConfiguration = Configuration::GetInstance();
+        const IConfiguration* piConfiguration = Engine::GetConfiguration();
 
-        if (((pConfiguration->GetTraceOption(GetSlotId()) & ITraceOption::OPT_HIDE_PRIVACY) ==
+        if (((piConfiguration->GetTraceOption(GetSlotId()) & ITraceOption::OPT_HIDE_PRIVACY) ==
                     ITraceOption::OPT_HIDE_PRIVACY) ||
                 IMS_UTIL_SYS_PROP_IS_SERVER_INFO_HIDDEN_IN_LOG())
         {
@@ -74,7 +77,7 @@ PRIVATE VIRTUAL void ConfigEnabler::Start()
         }
 
         if (piCc->GetBoolean(
-                    CarrierConfig::Assets::KEY_USE_RESET_WHEN_CLOSING_SIP_TCP_CONNECTION_BOOL))
+                    CarrierConfig::Ims::KEY_USE_RESET_WHEN_CLOSING_SIP_TCP_CONNECTION_BOOL))
         {
             m_bUseResetWhenClosingSipTcpConnection = IMS_TRUE;
             objSocketOption.nValue = 0;
@@ -85,10 +88,18 @@ PRIVATE VIRTUAL void ConfigEnabler::Start()
         }
 
         // It's based on the Verizon's requirement, but it will be applied for all the carriers.
-        SipRtConfig::TcpPortRange objTcpPortRange;
+        ImsVector<IMS_SINT32> objPortRange =
+                piCc->GetIntArray(CarrierConfig::Ims::KEY_SIP_TCP_CLIENT_PORT_RANGE_INT_ARRAY);
+        if (objPortRange.GetSize() < 2)
+        {
+            objPortRange.Clear();
+            objPortRange.Add(SIP_TCP_CLIENT_PORT_START);
+            objPortRange.Add(SIP_TCP_CLIENT_PORT_END);
+        }
 
-        objTcpPortRange.nPortStart = 40000;
-        objTcpPortRange.nPortEnd = 50000;
+        SipRtConfig::TcpPortRange objTcpPortRange;
+        objTcpPortRange.nPortStart = objPortRange.GetAt(0);
+        objTcpPortRange.nPortEnd = objPortRange.GetAt(1);
         piRtConfigHelper->SetConfig(SipRtConfig::CONFIG_I_TCP_PORT_RANGE, &objTcpPortRange);
     }
 
@@ -106,30 +117,35 @@ PRIVATE VIRTUAL void ConfigEnabler::Start()
     {
         IMS_SINT32 nFeatures = 0;
 
-        if (piCc->GetBoolean(
-                    CarrierConfig::Assets::KEY_USE_TUPLE_ELEMENT_FOR_GEOLOCATION_PIDF_BOOL))
+        if (piCc->GetBoolean(CarrierConfig::Ims::KEY_USE_TUPLE_ELEMENT_IN_GEOLOCATION_PIDF_BOOL))
         {
             nFeatures |= GeolocationPidfCreator::FEATURE_FORMAT_TUPLE;
         }
-
-        if (!piCc->GetBoolean(CarrierConfig::Assets::
-                            KEY_ALLOW_UNKNOWN_COUNTRY_ELEMENT_FOR_GEOLOCATION_PIDF_BOOL))
+        if (!piCc->GetBoolean(
+                    CarrierConfig::Ims::KEY_ALLOW_UNKNOWN_COUNTRY_ELEMENT_IN_GEOLOCATION_PIDF_BOOL))
         {
             nFeatures |= GeolocationPidfCreator::FEATURE_NO_COUNTRY_IF_UNKNOWN;
         }
+        if (piCc->GetBoolean(CarrierConfig::Ims::KEY_ALLOW_NO_POSITION_IN_GEOLOCATION_PIDF_BOOL))
+        {
+            nFeatures |= GeolocationPidfCreator::FEATURE_ALLOW_NO_POSITION;
+        }
 
         pPidfCreator->SetFeatures(nFeatures);
+
+        pPidfCreator->SetRetransmissionAllowed(piCc->GetString(
+                CarrierConfig::Ims::KEY_RETRANSMISSION_ALLOWED_OF_GEOLOCATION_PIDF_STRING));
     }
 
     IMS_SINT32 nSdpFeatures = SdpProfile::FEATURE_NONE;
 
-    if (piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_SDP_PRECONDITION_BOOL))
+    if (piCc->GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_SDP_PRECONDITION_BOOL))
     {
         nSdpFeatures |= SdpProfile::FEATURE_A_PRECONDITION_SUPPORTED;
     }
 
     if (piCc->GetBoolean(
-                CarrierConfig::Assets::KEY_SET_SDP_DIRECTION_ATTRIBUTE_FOR_REMOVED_MEDIA_BOOL))
+                CarrierConfig::Ims::KEY_SET_SDP_DIRECTION_ATTRIBUTE_FOR_REMOVED_MEDIA_BOOL))
     {
         nSdpFeatures |= SdpProfile::FEATURE_A_DIRECTION_REQUIRED_FOR_REMOVED_MEDIA;
     }

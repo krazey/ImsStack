@@ -27,7 +27,7 @@ class VirtualSessionImpl : public ISession
 {
 public:
     explicit VirtualSessionImpl(IN ISession* piOwnerSession, IN VirtualSession* pSession);
-    virtual ~VirtualSessionImpl();
+    ~VirtualSessionImpl() override;
 
     VirtualSessionImpl(IN const VirtualSessionImpl&) = delete;
     VirtualSessionImpl& operator=(IN const VirtualSessionImpl&) = delete;
@@ -81,6 +81,7 @@ private:
     IMS_BOOL IsFinalResponseReceivedForInitialInviteRequest() const override;
     IMS_BOOL IsReliableProvResponseSupported() const override;
     IMS_BOOL IsSdpNegotiationAllowedForNonRpr() const override;
+    IMS_BOOL IsSdpOaInPreviewMode() const override;
     IMS_RESULT RejectEx(IN IMS_SINT32 nStatusCode,
             IN const AString& strReasonPhrase = AString::ConstNull()) override;
     IMS_RESULT RespondToEarlyUpdate(
@@ -121,6 +122,8 @@ private:
     inline IMS_BOOL IsSessionRefreshInProgress() const override { return IMS_FALSE; }
     inline void SetReasonHeaderSetter(IN IReasonHeaderSetter* /*piSetter*/) override {}
     inline ISdpReader* GetRemoteMediaCapabilities() const override { return IMS_NULL; }
+    inline IMS_BOOL IsSessionCanceledOnAccepted() const override { return IMS_FALSE; }
+    inline void AbortEarlyUpdateTransaction() override {}
 
 private:
     ISession* m_piOwnerSession;

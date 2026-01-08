@@ -15,33 +15,21 @@
  */
 #include <gtest/gtest.h>
 
-#include "SipStackCallback.h"
+#include "SipUtil.h"
+#include "platform/SipString.h"
 #include "transport/SipTransportHandler.h"
+#include "txn/SipTxn.h"
+#include "../txn/include/MockISipTransactionCallback.h"
+
+using ::testing::_;
+using ::testing::Invoke;
+using ::testing::Return;
+using ::testing::Unused;
 
 namespace android
 {
 
 SipTxn* pTxn = SIP_NULL;
-
-SIP_BOOL FetchTxn_Fail(SIP_VOID* /*pvTxnKey*/, SIP_INT32 /*nOption*/, SIP_VOID** /*ppvOutTxnKey*/,
-        SIP_VOID** ppvTxn)
-{
-    *ppvTxn = SIP_NULL;
-    return SIP_TRUE;
-}
-
-SIP_BOOL FetchTxn_NotExists(SIP_VOID* /*pvTxnKey*/, SIP_INT32 /*nOption*/,
-        SIP_VOID** /*ppvOutTxnKey*/, SIP_VOID** /*ppvTxn*/)
-{
-    return SIP_FALSE;
-}
-
-SIP_BOOL FetchTxn_Exists(SIP_VOID* /*pvTxnKey*/, SIP_INT32 /*nOption*/, SIP_VOID** /*ppvOutTxnKey*/,
-        SIP_VOID** ppvTxn)
-{
-    *ppvTxn = pTxn;
-    return SIP_TRUE;
-}
 
 class SipTransportHandlerTest : public ::testing::Test
 {
@@ -51,30 +39,41 @@ public:
     SipTxnKey* pTxnKey;
     SipTransportHandler* pTranspHandler;
     SipTransportParameter* pTranspParam;
+    MockISipTransactionCallback* pMockISipTransactionCallback;
 
 protected:
     virtual void SetUp() override
     {
-        SIPHdrAccess::Init();
+        SipMsgUtil::Init();
 
         pTranspInfo = SIP_NULL;
         pMessage = SIP_NULL;
         pTxnKey = SIP_NULL;
         pTranspHandler = SIP_NULL;
         pTranspParam = SIP_NULL;
+        pMockISipTransactionCallback = new MockISipTransactionCallback();
+        SipUtil::GetInstance()->SetTransactionCallback(pMockISipTransactionCallback);
     }
 
-    virtual void TearDown() override {}
+    virtual void TearDown() override
+    {
+        if (pMockISipTransactionCallback != SIP_NULL)
+        {
+            delete pMockISipTransactionCallback;
+            pMockISipTransactionCallback = SIP_NULL;
+        }
+        SipUtil::DestroyInstance();
+    }
 
     /* This utility is used only for receive message */
-    void FillTransportParameters(char* pMsg)
+    void FillTransportParameters(const SIP_CHAR* pMsg)
     {
-        unsigned short nError = 0;
-        unsigned int nLength = strlen(pMsg);
+        SIP_UINT16 nError = 0;
+        SIP_UINT32 nLength = SipPf_Strlen(pMsg);
 
         pMessage = new SipMessage();
         ASSERT_TRUE(pMessage != nullptr);
-        EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pMsg, nLength));
+        EXPECT_EQ(SIP_TRUE, pMessage->Decode(pMsg, nLength));
 
         pTranspHandler = new SipTransportHandler();
         ASSERT_TRUE(pTranspHandler != nullptr);
@@ -103,22 +102,22 @@ protected:
             if ((eMethodType == SipMessage::METHOD_INVITE) ||
                     (eMethodType == SipMessage::METHOD_ACK))
             {
-                eTxnType = SipTxn::INV_SER_TXN;
+                eTxnType = SipTxn::INVITE_SERVER;
             }
             else
             {
-                eTxnType = SipTxn::NON_INV_SER_TXN;
+                eTxnType = SipTxn::NON_INVITE_SERVER;
             }
         }
         else
         {
             if (eMethodType == SipMessage::METHOD_INVITE)
             {
-                eTxnType = SipTxn::INV_CLI_TXN;
+                eTxnType = SipTxn::INVITE_CLIENT;
             }
             else
             {
-                eTxnType = SipTxn::NON_INV_CLI_TXN;
+                eTxnType = SipTxn::NON_INVITE_CLIENT;
             }
         }
 
@@ -141,18 +140,18 @@ TEST_F(SipTransportHandlerTest, OnSendTransp)
     SipTransportHandler objTranspHandler;
     SipTransportInfo* pTranspInfo = SIP_NULL;
 
-    char* pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
+    const SIP_CHAR* pMsg = "INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
-    unsigned int nLength = strlen(pMsg);
+    SIP_UINT32 nLength = SipPf_Strlen(pMsg);
 
-    unsigned short nError = 0;
+    SIP_UINT16 nError = 0;
 
     /* SipMessage and pTranspParam null, fail */
     EXPECT_EQ(SIP_FALSE,
@@ -161,7 +160,7 @@ Content-Length: 0\r\n\
     SipMessage* pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pMessage->Decode(pMsg, nLength));
 
     /* pTranspParam null, fail */
     EXPECT_EQ(SIP_FALSE,
@@ -182,35 +181,22 @@ Content-Length: 0\r\n\
 TEST_F(SipTransportHandlerTest, OnRecvTransp)
 {
     /* INVITE Request */
-    char* pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
+    const SIP_CHAR* pMsg = "INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
     FillTransportParameters(pMsg);
 
-    /* Fecth txn wrong, fail */
-    // clang-format off
-    SipStackCallbacks stCallbacks = {
-            &FetchTxn_Fail,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Return(SIP_TRUE));
 
-    unsigned short nError = 0;
-    int nTxnStatus = 0;
+    SIP_UINT16 nError = 0;
+    SIP_INT32 nTxnStatus = 0;
     SIP_BOOL bTxnExist = SIP_FALSE;
     SipTxnKey* pNewTxnKey = SIP_NULL;
 
@@ -219,20 +205,8 @@ Content-Length: 0\r\n\
                     pMessage, pTranspParam, &nTxnStatus, &bTxnExist, &pNewTxnKey, &nError));
 
     /* Txn not exists - INVITE Request which is new request, success */
-    // clang-format off
-    stCallbacks = {
-            &FetchTxn_NotExists,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Return(SIP_FALSE));
 
     EXPECT_EQ(SIP_TRUE,
             pTranspHandler->OnRecvTransp(
@@ -240,20 +214,13 @@ Content-Length: 0\r\n\
     EXPECT_EQ(SipTxn::STATUS_NEW_REQ_RECVD, nTxnStatus);
 
     /* Txn exists - INVITE Request which is valid, success */
-    // clang-format off
-    stCallbacks = {
-            &FetchTxn_Exists,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Invoke(
+                    [&](Unused, Unused, OUT SipTxn*& pOutTxn)
+                    {
+                        pOutTxn = pTxn;
+                        return SIP_TRUE;
+                    }));
 
     nTxnStatus = 0;
     bTxnExist = SIP_FALSE;
@@ -267,32 +234,25 @@ Content-Length: 0\r\n\
     ClearTransportParameters();
 
     /* Non-Invite request message */
-    pMsg = const_cast<char*>("REGISTER sip:user@host SIP/2.0\r\n\
+    pMsg = "REGISTER sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:user@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 REGISTER\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
     FillTransportParameters(pMsg);
 
     /* Txn exists - NON-INVITE, success */
-    // clang-format off
-    stCallbacks = {
-            &FetchTxn_Exists,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _, _))
+            .WillByDefault(Invoke(
+                    [&](Unused, Unused, Unused, OUT SipTxn*& pOutTxn)
+                    {
+                        pOutTxn = pTxn;
+                        return SIP_TRUE;
+                    }));
 
     nTxnStatus = 0;
     bTxnExist = SIP_FALSE;
@@ -306,32 +266,20 @@ Content-Length: 0\r\n\
     ClearTransportParameters();
 
     /* Non-Invite response message */
-    pMsg = const_cast<char*>("SIP/2.0 200 OK\r\n\
+    pMsg = "SIP/2.0 200 OK\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:user@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 REGISTER\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
     FillTransportParameters(pMsg);
 
     /* Txn not exists - NON-INVITE Response, success */
-    // clang-format off
-    stCallbacks = {
-            &FetchTxn_NotExists,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Return(SIP_FALSE));
 
     nTxnStatus = 0;
     bTxnExist = SIP_FALSE;
@@ -345,32 +293,25 @@ Content-Length: 0\r\n\
     ClearTransportParameters();
 
     /* Invite response message */
-    pMsg = const_cast<char*>("SIP/2.0 200 OK\r\n\
+    pMsg = "SIP/2.0 200 OK\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:user@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
     FillTransportParameters(pMsg);
 
     /* Txn exists - INVITE Response which is valid, success */
-    // clang-format off
-    stCallbacks = {
-            &FetchTxn_Exists,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _, _))
+            .WillByDefault(Invoke(
+                    [&](Unused, Unused, Unused, OUT SipTxn*& pOutTxn)
+                    {
+                        pOutTxn = pTxn;
+                        return SIP_TRUE;
+                    }));
 
     nTxnStatus = 0;
     bTxnExist = SIP_FALSE;
@@ -384,27 +325,89 @@ Content-Length: 0\r\n\
     ClearTransportParameters();
 }
 
+TEST_F(SipTransportHandlerTest, OnReceiveInvalidMessage)
+{
+    /* INVITE Request */
+    const SIP_CHAR* pMsg = "INVITE sip:user@host SIP/2.0\r\n\
+Via: SIP/2.0/UDP host;branch=test-br\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:userA@host>\r\n\
+Call-ID: callid\r\n\
+CSeq: 3 INVITE\r\n\
+Content-Length: 0\r\n\
+\r\n";
+
+    FillTransportParameters(pMsg);
+
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Return(SIP_FALSE));
+
+    SIP_UINT16 nError = 0;
+    SIP_INT32 nTxnStatus = 0;
+    SIP_BOOL bTxnExist = SIP_FALSE;
+    SipTxnKey* pNewTxnKey = SIP_NULL;
+
+    EXPECT_EQ(SIP_TRUE,
+            pTranspHandler->OnRecvTransp(
+                    pMessage, pTranspParam, &nTxnStatus, &bTxnExist, &pNewTxnKey, &nError));
+    EXPECT_EQ(SipTxn::STATUS_NEW_REQ_RECVD, nTxnStatus);
+
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _, _))
+            .WillByDefault(Invoke(
+                    [&](IN SipTxnKey* pTxnKey, Unused, Unused, OUT SipTxn*& pOutTxn)
+                    {
+                        if (pTxnKey->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
+                        {
+                            pOutTxn = pTxn;
+                            return SIP_TRUE;
+                        }
+                        return SIP_FALSE;
+                    }));
+
+    nTxnStatus = 0;
+    bTxnExist = SIP_FALSE;
+    pNewTxnKey = SIP_NULL;
+
+    ClearTransportParameters();
+
+    pMsg = "SIP/2.0 480 Temporarily Unavailable \r\n\
+Via: SIP/2.0/UDP host;branch=test-br\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:userA@host>\r\n\
+Call-ID: callid\r\n\
+CSeq: 3 INVITE\r\n\
+Content-Length: 0\r\n\
+\r\n";
+
+    FillTransportParameters(pMsg);
+
+    EXPECT_EQ(SIP_TRUE,
+            pTranspHandler->OnRecvTransp(
+                    pMessage, pTranspParam, &nTxnStatus, &bTxnExist, &pNewTxnKey, &nError));
+    EXPECT_EQ(SipTxn::STATUS_STRAY_RESP, nTxnStatus);
+}
+
 TEST_F(SipTransportHandlerTest, OnRecvTanspError)
 {
-    unsigned short nError = 0;
-    int nTxnStatus = 0;
+    SIP_UINT16 nError = 0;
+    SIP_INT32 nTxnStatus = 0;
 
     SipTransportInfo* pNewTranspInfo = SIP_NULL;
 
-    char* pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
+    const SIP_CHAR* pMsg = "INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
-    unsigned int nLength = strlen(pMsg);
+    SIP_UINT32 nLength = SipPf_Strlen(pMsg);
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pMessage->Decode(pMsg, nLength));
 
     pTxnKey = new SipTxnKey(pMessage, &nError);
     ASSERT_TRUE(pTxnKey != nullptr);
@@ -413,62 +416,31 @@ Content-Length: 0\r\n\
     ASSERT_TRUE(pTranspHandler != nullptr);
 
     /* Fecth txn wrong, fail */
-    // clang-format off
-    SipStackCallbacks stCallbacks = {
-            &FetchTxn_Fail,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _, _))
+            .WillByDefault(Return(SIP_TRUE));
 
     EXPECT_EQ(SIP_FALSE,
             pTranspHandler->OnRecvTanspError(
                     0, pTxnKey, &nTxnStatus, &pNewTranspInfo, nullptr, &nError));
 
     /* Txn not exists, fail */
-    // clang-format off
-    stCallbacks = {
-            &FetchTxn_NotExists,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _, _))
+            .WillByDefault(Return(SIP_FALSE));
 
     EXPECT_EQ(SIP_FALSE,
             pTranspHandler->OnRecvTanspError(
                     0, pTxnKey, &nTxnStatus, &pNewTranspInfo, nullptr, &nError));
 
     /* Txn exists */
-    // clang-format off
-    stCallbacks = {
-            &FetchTxn_Exists,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Invoke(
+                    [&](Unused, Unused, OUT SipTxn*& pOutTxn)
+                    {
+                        pOutTxn = pTxn;
+                        return SIP_TRUE;
+                    }));
 
-    pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pMessage, nullptr, &nError);
+    pTxn = new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pMessage, nullptr, &nError);
     ASSERT_TRUE(pTxn != nullptr);
 
     /* TXN exists but no transport info, fail */
@@ -487,7 +459,7 @@ Content-Length: 0\r\n\
 
     pTxn->SipDelete();
 
-    pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pMessage, nullptr, &nError);
+    pTxn = new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pMessage, nullptr, &nError);
     ASSERT_TRUE(pTxn != nullptr);
 
     pTranspParam = new SipTransportParameter();
@@ -530,7 +502,7 @@ Content-Length: 0\r\n\
 
     EXPECT_EQ(SipTxn::STATUS_RETRANSMISSION, nTxnStatus);
 
-    SipTransportParameter* pMsgSentTransParam = pNewTranspInfo->GetMsgSentTranspParam();
+    const SipTransportParameter* pMsgSentTransParam = pNewTranspInfo->GetMsgSentTranspParam();
     ASSERT_TRUE(pMsgSentTransParam != nullptr);
 
     EXPECT_EQ(SipTransportInfo::PROTOCOL_UDP, pMsgSentTransParam->GetTranspProtocol());
@@ -540,20 +512,20 @@ Content-Length: 0\r\n\
     delete pTranspHandler;
 
     /* Transport protocol is not TCP/UDP */
-    pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
+    pMsg = "INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TLS host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
-    nLength = strlen(pMsg);
+    nLength = SipPf_Strlen(pMsg);
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pMessage->Decode(pMsg, nLength));
 
     pTxnKey = new SipTxnKey(pMessage, &nError);
     ASSERT_TRUE(pTxnKey != nullptr);
@@ -561,22 +533,15 @@ Content-Length: 0\r\n\
     pTranspHandler = new SipTransportHandler();
     ASSERT_TRUE(pTranspHandler != nullptr);
 
-    // clang-format off
-    stCallbacks = {
-            &FetchTxn_Exists,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _, _))
+            .WillByDefault(Invoke(
+                    [&](Unused, Unused, Unused, OUT SipTxn*& pOutTxn)
+                    {
+                        pOutTxn = pTxn;
+                        return SIP_TRUE;
+                    }));
 
-    pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pMessage, nullptr, &nError);
+    pTxn = new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pMessage, nullptr, &nError);
     ASSERT_TRUE(pTxn != nullptr);
 
     pTranspParam = new SipTransportParameter();
@@ -603,19 +568,19 @@ Content-Length: 0\r\n\
     delete pTranspHandler;
 
     /* No Via header to update transport header, fail */
-    pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
+    pMsg = "INVITE sip:user@host SIP/2.0\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n");
+\r\n";
 
-    nLength = strlen(pMsg);
+    nLength = SipPf_Strlen(pMsg);
 
     pMessage = new SipMessage();
     ASSERT_TRUE(pMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pMsg, nLength));
+    EXPECT_EQ(SIP_TRUE, pMessage->Decode(pMsg, nLength));
 
     pTxnKey = new SipTxnKey(pMessage, &nError);
     ASSERT_TRUE(pTxnKey != nullptr);
@@ -623,22 +588,10 @@ Content-Length: 0\r\n\
     pTranspHandler = new SipTransportHandler();
     ASSERT_TRUE(pTranspHandler != nullptr);
 
-    // clang-format off
-    stCallbacks = {
-            &FetchTxn_Exists,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _, _))
+            .WillByDefault(Return(SIP_TRUE));
 
-    pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pMessage, nullptr, &nError);
+    pTxn = new SipTxn(SipTxn::INVITE_SERVER, pTxnKey, pMessage, nullptr, &nError);
     ASSERT_TRUE(pTxn != nullptr);
 
     pTranspParam = new SipTransportParameter();
@@ -659,93 +612,6 @@ Content-Length: 0\r\n\
     EXPECT_EQ(SIP_FALSE,
             pTranspHandler->OnRecvTanspError(
                     0, pTxnKey, &nTxnStatus, &pNewTranspInfo, nullptr, &nError));
-
-    pMessage->SipDelete();
-    pTxn->SipDelete();
-    delete pTranspHandler;
-}
-
-TEST_F(SipTransportHandlerTest, IsInviteTxnPresentForAckTxn)
-{
-    unsigned short nError = 0;
-
-    char* pMsg = const_cast<char*>("ACK sip:user@host SIP/2.0\r\n\
-Via: SIP/2.0/TCP host;branch=test-br\r\n\
-From: <sip:user@host>;tag=abcd\r\n\
-To: <sip:userA@host>;tag=Totag\r\n\
-Call-ID: callid\r\n\
-CSeq: 3 ACK\r\n\
-Content-Length: 0\r\n\
-\r\n");
-
-    unsigned int nLength = strlen(pMsg);
-
-    pMessage = new SipMessage();
-    ASSERT_TRUE(pMessage != nullptr);
-    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pMsg, nLength));
-
-    pTxnKey = new SipTxnKey(pMessage, &nError);
-    ASSERT_TRUE(pTxnKey != nullptr);
-
-    pTranspHandler = new SipTransportHandler();
-    ASSERT_TRUE(pTranspHandler != nullptr);
-
-    /* Fecth txn wrong, fail */
-    // clang-format off
-    SipStackCallbacks stCallbacks = {
-            &FetchTxn_Fail,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
-
-    EXPECT_EQ(SIP_FALSE, pTranspHandler->IsInviteTxnPresentForAckTxn(pTxnKey));
-
-    /* Txn not exists, fail */
-    // clang-format off
-    stCallbacks = {
-            &FetchTxn_NotExists,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
-
-    EXPECT_EQ(SIP_FALSE, pTranspHandler->IsInviteTxnPresentForAckTxn(pTxnKey));
-
-    /* Txn exists */
-    // clang-format off
-    stCallbacks = {
-            &FetchTxn_Exists,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL,
-            SIP_NULL
-        };
-    // clang-format on
-    SipStackCallback_SetCallbacks(stCallbacks);
-
-    pTxn = new SipTxn(SipTxn::INV_SER_TXN, pTxnKey, pMessage, nullptr, &nError);
-    ASSERT_TRUE(pTxn != nullptr);
-
-    EXPECT_EQ(SIP_TRUE, pTranspHandler->IsInviteTxnPresentForAckTxn(pTxnKey));
 
     pMessage->SipDelete();
     pTxn->SipDelete();

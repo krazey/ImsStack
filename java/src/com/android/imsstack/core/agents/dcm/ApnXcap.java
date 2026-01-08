@@ -17,10 +17,11 @@
 package com.android.imsstack.core.agents.dcm;
 
 import android.content.Context;
-import android.os.AsyncResult;
 import android.os.Message;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
+
+import androidx.annotation.VisibleForTesting;
 
 import com.android.imsstack.core.agents.MsgProcInterface;
 import com.android.imsstack.core.agents.dcmif.EApnReqState;
@@ -32,26 +33,27 @@ import com.android.imsstack.util.ImsLog;
 /**
  * this is data connection class for xcap
  */
-public class ApnXcap extends Apn {
-
-    // Constants--------------------------------------------------
-    protected static final int OBTAIN_IPV6_ADDRESS_DELAY_INTERVAL = 2000;
+public final class ApnXcap extends Apn {
+    @VisibleForTesting
+    static final int OBTAIN_IPV6_ADDRESS_DELAY_INTERVAL = 2000;
 
     // Variables--------------------------------------------------
 
     // Public methods --------------------------------------------
     public ApnXcap(Context context, int slotId) {
-        super(context, slotId);
+        super(context, slotId, EApnType.XCAP);
 
-        initializeApn();
+        registerHandler(EVENT_NETWORK_AVAILABLE, new HandleNetworkAvailable());
+        registerHandler(EVENT_NETWORK_LOST, new HandleNetworkUnavailable());
+        registerHandler(EVENT_NETWORK_SUSPENDED, new HandleNetworkUnavailable());
+        registerHandler(EVENT_IP_CHANGED, new HandleIpChanged());
+        registerHandler(EVENT_WAITING_IPV6_ADDRESS, new HandleWaitingIpv6Address());
+        registerHandler(EVENT_DATA_CONNECTION_FAILED, new HandleDataConnectionFailed());
     }
 
     // Interface implementation methods --------------------------
     @Override
     public void cleanup() {
-        if (mDcNetWatcher != null) {
-            mDcNetWatcher.unregisterForAirplaneModeChanged(this);
-        }
         super.cleanup();
     }
 
@@ -93,23 +95,6 @@ public class ApnXcap extends Apn {
         return true;
     }
 
-    // Private/Protected methods ---------------------------------
-    protected void initializeApn() {
-        mType = EApnType.XCAP;
-
-        registerHandler(EVENT_NETWORK_AVAILABLE, new HandleNetworkAvailable());
-        registerHandler(EVENT_NETWORK_LOST, new HandleNetworkLost());
-        registerHandler(EVENT_IP_CHANGED, new HandleIpChanged());
-        registerHandler(EVENT_WAITING_IPV6_ADDRESS, new HandleWaitingIpv6Address());
-        registerHandler(EVENT_AIRPLANE_MODE_CHANGED, new HandleAirplanemodeChanged());
-        registerHandler(EVENT_DATA_CONNECTION_FAILED, new HandleDataConnectionFailed());
-
-        //register message handler to DcNetWatcher
-        if (mDcNetWatcher != null) {
-            mDcNetWatcher.registerForAirplaneModeChanged(this, EVENT_AIRPLANE_MODE_CHANGED, null);
-        }
-    }
-
     private boolean procWaitingLocalAddressForIpv6() {
         if (!hasLocalAddress(EIpVersion.IPV6.getInt())) {
             if (hasMessages(EVENT_WAITING_IPV6_ADDRESS)) {
@@ -125,7 +110,7 @@ public class ApnXcap extends Apn {
         return false;
     }
 
-    private class HandleNetworkAvailable implements MsgProcInterface {
+    private final class HandleNetworkAvailable implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             int curDataState = TelephonyManager.DATA_CONNECTED;
@@ -155,7 +140,7 @@ public class ApnXcap extends Apn {
         }
     }
 
-    private class HandleNetworkLost implements MsgProcInterface {
+    private final class HandleNetworkUnavailable implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             int curDataState = TelephonyManager.DATA_DISCONNECTED;
@@ -168,7 +153,6 @@ public class ApnXcap extends Apn {
                 ImsLog.i(mSlotId, "data state :: " + mDataState + " >> " + curDataState);
 
                 setDataState(curDataState);
-
                 sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_DISCONNECTED);
 
                 disconnect();
@@ -176,13 +160,12 @@ public class ApnXcap extends Apn {
         }
     }
 
-    private class HandleIpChanged implements MsgProcInterface {
+    private final class HandleIpChanged implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             ImsLog.i(mSlotId, "ip is changed");
 
             if (getDataState() == TelephonyManager.DATA_CONNECTED) {
-
                 if (!isIpChanged()) {
                     ImsLog.i(mSlotId, "ip is changed but ip address is same");
                     return;
@@ -199,44 +182,27 @@ public class ApnXcap extends Apn {
 
             removeMessages(EVENT_WAITING_IPV6_ADDRESS);
 
-            updateDataState();
+            setDataState(TelephonyManager.DATA_CONNECTED);
+            sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_CONNECTED);
         }
     }
 
-    private class HandleWaitingIpv6Address implements MsgProcInterface {
+    private final class HandleWaitingIpv6Address implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             ImsLog.i(mSlotId, "apn is delayed, data is updated");
-            updateDataState();
-        }
-    }
 
-    private class HandleAirplanemodeChanged implements MsgProcInterface {
-        @Override
-        public void procMsg(Message msg) {
-            AsyncResult ar = (AsyncResult) msg.obj;
-
-            if (ar == null) {
-                ImsLog.d(mSlotId, "ar is null");
+            if (getDataState() == TelephonyManager.DATA_CONNECTED) {
+                ImsLog.i(mSlotId, "apn is already connected");
                 return;
             }
 
-            Boolean radiooff = (Boolean) ar.result;
-
-            if (radiooff == null) {
-                ImsLog.d(mSlotId, "radiooff is null");
-                return;
-            }
-
-            ImsLog.i(mSlotId, "airplane mode = " + radiooff.booleanValue());
-
-            if (radiooff.booleanValue()) {
-                disconnect();
-            }
+            setDataState(TelephonyManager.DATA_CONNECTED);
+            sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_CONNECTED);
         }
     }
 
-    private class HandleDataConnectionFailed implements MsgProcInterface {
+    private final class HandleDataConnectionFailed implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
             ImsLog.d(mSlotId, "");

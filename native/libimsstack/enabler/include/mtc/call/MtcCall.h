@@ -17,13 +17,12 @@
 #ifndef MTC_CALL_H_
 #define MTC_CALL_H_
 
-#include "IMtcContext.h"
+#include "AString.h"
 #include "ISessionListener.h"
 #include "ISipClientConnectionListener.h"
 #include "ISipErrorListener.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "base/IRefreshListener.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
@@ -31,19 +30,20 @@
 #include "call/MtcPendingOperationHolder.h"
 #include "call/MtcUiNotifier.h"
 #include "call/ParticipantInfo.h"
-#include "call/UpdatingInfo.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/message/MtcMessageMediator.h"
-#include "call/state/CallStateFactory.h"
+#include "call/radio/IMtcRadioChecker.h"
 #include "call/state/IMtcCallState.h"
 #include "call/state/MtcCallStateMachine.h"
 #include "helper/IMtcAosStateListener.h"
+#include "helper/IMtcNetworkWatcherListener.h"
 #include "helper/IMtcTimerListener.h"
 #include "helper/ISrvccStateListener.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
 #include "media/IMediaReportEventListener.h"
 #include "media/MtcMediaManager.h"
+#include "precondition/IMtcPreconditionListener.h"
 #include "precondition/MtcPreconditionManager.h"
 #include <functional>
 #include <memory>
@@ -61,7 +61,6 @@ class IMtcDialingPlan;
 class IMtcEmergencyServiceManager;
 class IMtcMediaManager;
 class IMtcPreconditionManager;
-class IMtcRadioChecker;
 class IMtcService;
 class IMtcSession;
 class IMtcSipInterfaceFactory;
@@ -73,11 +72,15 @@ class ISession;
 class MessageSender;
 class MessageUtils;
 class MtcConfigurationProxy;
+class MtcLocationRefresher;
 class OperationAsyncRunner;
+class SuppService;
 class UdpKeepAliveSender;
+class UpdatingInfo;
 class UssiController;
 struct CallReasonInfo;
 struct ConfUser;
+struct MediaInfo;
 
 class MtcCall final :
         public IMtcCall,
@@ -92,21 +95,23 @@ class MtcCall final :
         public ISipErrorListener,
         public IMediaReportEventListener,
         public ISrvccStateListener,
-        public IMtcAosStateListener
+        public IMtcAosStateListener,
+        public IMtcNetworkWatcherListener,
+        public IMtcRadioCheckerListener
 {
 public:
     MtcCall(IN IMtcContext& objContext, IN IMtcService& objService, IN const CallInfo& objCallInfo,
-            IN std::unique_ptr<IMtcCallStateFactory> pStateFactory);
-    virtual ~MtcCall();
+            IN std::unique_ptr<IMtcCallStateFactory> pStateFactory, IN const AString& strLogTag);
+    virtual ~MtcCall() override;
     MtcCall(IN const MtcCall&) = delete;
     MtcCall& operator=(IN const MtcCall&) = delete;
 
     void Attach() override;
 
     void Start(IN CallType eCallType, IN const AString& strTarget, IN MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
+            IN const ImsList<SuppService*>& objSuppServices) override;
     void StartConference(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+            IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices,
             IN const ImsList<ConfUser*>& objUsers) override;
     void StartConference(IN CallType eCallType, IN const AString& strTarget,
             IN const ImsList<ConfUser*>& objUsers) override;
@@ -135,14 +140,18 @@ public:
     }
 
     inline IMS_UINTP GetCallKey() const override { return m_nKey; }
+    inline const AString& GetLogTag() const override { return m_strLogTag; }
+    inline IMS_BOOL IsEstablished() const override { return m_bEstablished; }
     inline IMS_BOOL IsHeldByMe() const override { return m_bHeldByMe; }
+    inline IMS_BOOL IsOnUnconfirmedRemoteHold() const override { return m_bUnconfirmedRemoteHold; }
     inline IMS_BOOL IsUssi() const override { return m_objCallInfo.bUssi; }
+    IMS_BOOL IsCsfbAvailable() override;
     inline CallInfo& GetCallInfo() override { return m_objCallInfo; }
     inline ParticipantInfo& GetParticipantInfo() override { return m_objParticipantInfo; }
     IMtcSession* GetSession(IN const ISession* piSession) const override;
     IMtcSession* GetSession() const override;
     inline const ImsList<IMtcSession*>& GetSessions() const override { return m_lstSessions; }
-    inline IMtcService& GetService() override { return m_objService; }
+    inline IMtcService& GetService() const override { return m_objService; }
     inline IMtcUiNotifier& GetUiNotifier() override { return m_objUiNotifier; }
     inline IMtcMediaManager& GetMediaManager() override { return m_objMediaManager; }
     inline IMtcPreconditionManager& GetPreconditionManager() override
@@ -161,19 +170,19 @@ public:
     }
     UpdatingInfo& GetUpdatingInfo() override;
     EpsFallbackTrigger& GetEpsFallbackTrigger() override;
-    UdpKeepAliveSender& GetUdpKeepAliveSender() override;
     CurrentLocationDiscoveryController& GetCurrentLocationDiscoveryController() override;
     IMtcSession* CreateSession(IN ISession* piSession) override;
     IMtcSession* CreateSession() override;
     IMtcBlockChecker* CreateBlockChecker(IN const ImsList<IMtcBlockRule*>& lstRules) override;
     JniCallInfo CreateJniCallInfo() override;
     ISipClientConnection* CreateClientConnection(IN SipMethod eMethod) override;
-    void RemoveSession(IN const ISession* piSession) override;
-    void RemoveInactiveSessions(IN const ISession* piActiveSession) override;
+    UdpKeepAliveSender* CreateUdpKeepAliveSender() override;
+    void RemoveSession(IN IMtcSession& objSession) override;
+    void RemoveAllSessions() override;
     void DeleteUpdatingInfo() override;
     void RunPendingOperationIfPossible() override;
 
-    inline MtcTimerWrapper& GetTimer() override { return m_objTimer; }
+    inline MtcTimerWrapper& GetTimer() const override { return *m_pTimer; }
     inline MtcSupplementaryService& GetSupplementaryService() override
     {
         return m_objSupplementaryService;
@@ -223,11 +232,19 @@ public:
     {
         return m_objContext.GetEmergencyServiceManager();
     }
-    inline OperationAsyncRunner* GetAsyncRunner(IN std::function<void()> objOperation) override
+    inline void RunAsyncOperation(IN void* pOwner, IN std::function<void()> objOperation) override
     {
-        return m_objContext.GetAsyncRunner(objOperation);
+        m_objContext.RunAsyncOperation(pOwner, objOperation);
+    }
+    inline void ReleaseAsyncOperation(IN void* pOwner) override
+    {
+        m_objContext.ReleaseAsyncOperation(pOwner);
     }
     inline IMessageUtils& GetMessageUtils() override { return m_objContext.GetMessageUtils(); }
+    inline std::unique_ptr<MtcTimerWrapper> CreateTimer() override
+    {
+        return m_objContext.CreateTimer();
+    }
     inline IPassiveTimerHolder& GetPassiveTimerHolder() override
     {
         return m_objContext.GetPassiveTimerHolder();
@@ -244,10 +261,20 @@ public:
     {
         return m_objContext.GetCallConnectionIdManager();
     }
+    inline MtcLocationRefresher& GetLocationRefresher() override
+    {
+        return m_objContext.GetLocationRefresher();
+    }
+    inline void CreateRttAutoUpgrader() override { m_objContext.CreateRttAutoUpgrader(); }
+    inline void DestroyRttAutoUpgrader() override { m_objContext.DestroyRttAutoUpgrader(); }
     inline IMS_BOOL IsWifiTestMode() override { return m_objContext.IsWifiTestMode(); }
     // end of IMtcContext
 
     inline void SetHeldByMe(IN IMS_BOOL bHeldByMe) override { m_bHeldByMe = bHeldByMe; }
+    inline void SetUnconfirmedRemoteHold(IN IMS_BOOL bUnconfirmedRemoteHold) override
+    {
+        m_bUnconfirmedRemoteHold = bUnconfirmedRemoteHold;
+    }
 
     void SessionAlerting(IN ISession* piSession) override;
     void SessionReferenceReceived(IN ISession* piSession, IN IReference* piReference) override;
@@ -257,6 +284,7 @@ public:
     void SessionUpdated(IN ISession* piSession) override;
     void SessionUpdateFailed(IN ISession* piSession) override;
     void SessionUpdateReceived(IN ISession* piSession) override;
+    void SessionCanceledOnAccepted(IN ISession* piSession) override;
     void SessionCancelDelivered(IN ISession* piSession) override;
     void SessionCancelDeliveryFailed(IN ISession* piSession) override;
     void SessionEarlyMediaUpdated(IN ISession* piSession) override;
@@ -301,22 +329,33 @@ public:
     void OnSrvccStateUpdated(IN SrvccState eState) override;
 
     void OnAosStateChanged(IN IMtcService& objMtcService, IN MtcAosState eState,
-            IN IMS_UINT32 eAosReason) override;
-    void OnIpcanChanged(IN IMtcService& objMtcService, IN IMS_UINT32 eIpcan) override;
+            IN IMS_UINT32 eAosReason, IN IMS_SINT32 nDataFailureReason) override;
+    void OnEventNotify(IN IMS_UINT32 nType, IN IMS_UINT32 nState) override;
+
+    void OnRatChanged(IN ServiceType eServiceType, IN IMS_SINT32 eOldRatType,
+            IN IMS_SINT32 eRatType) override;
+
+    inline void OnConnectionSetupPrepared() override {}
+    void OnConnectionFailed(IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) override;
+    const AString ToString() const;
 
 private:
     static IMutex* s_pKeyCreationLock;
 
     static CallKey CreateCallKey();
+    AString CreateLogTag(IN const AString& strLogTag) const;
     void OnInternalFailure();
-    void OnAttached();
+    IMS_BOOL IsInUpdateAfterConnectedDelay() const;
 
     IMtcContext& m_objContext;
     IMtcService& m_objService;
 
     CallKey m_nKey;
+    AString m_strLogTag;
 
+    IMS_BOOL m_bEstablished;
     IMS_BOOL m_bHeldByMe;
+    IMS_BOOL m_bUnconfirmedRemoteHold;
 
     CallInfo m_objCallInfo;
     ParticipantInfo m_objParticipantInfo;
@@ -324,7 +363,7 @@ private:
     ImsList<IMtcSession*> m_lstSessions;
     MtcCallStateMachine m_objStateMachine;
     MtcPendingOperationHolder m_objPendingOperationHolder;
-    MtcTimerWrapper m_objTimer;
+    std::unique_ptr<MtcTimerWrapper> m_pTimer;
     MtcUiNotifier m_objUiNotifier;
     MtcMediaManager m_objMediaManager;
     MtcPreconditionManager m_objPreconditionManager;
@@ -332,7 +371,6 @@ private:
     MtcMessageMediator m_objMessageMediator;
     UssiController* m_pUssiController;
     EpsFallbackTrigger* m_pEpsFallbackTrigger;
-    UdpKeepAliveSender* m_pUdpKeepAliveSender;
     CurrentLocationDiscoveryController* m_pCurrentLocationDiscoveryController;
 };
 

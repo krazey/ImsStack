@@ -18,7 +18,6 @@
 
 #include "ConfigMtc.h"
 #include "ConfigMts.h"
-#include "ConfigSipDelegate.h"
 #include "ConfigUce.h"
 #include "ImsServiceConfig.h"
 
@@ -59,10 +58,6 @@ TEST_F(ImsServiceConfigTest, GetAppId)
     eAppId = ImsServiceConfig::GetAppId(ImsServiceId::UCE);
 
     EXPECT_EQ(eAppId, ImsAppId::UCE);
-
-    eAppId = ImsServiceConfig::GetAppId(ImsServiceId::SIP_DELEGATE);
-
-    EXPECT_EQ(eAppId, ImsAppId::SIP_DELEGATE);
 }
 
 TEST_F(ImsServiceConfigTest, GetAppName)
@@ -82,10 +77,6 @@ TEST_F(ImsServiceConfigTest, GetAppName)
     strAppName = ImsServiceConfig::GetAppName(ImsAppId::UCE);
 
     EXPECT_EQ(strAppName, AString(ConfigUce::APP_NAME));
-
-    strAppName = ImsServiceConfig::GetAppName(ImsAppId::SIP_DELEGATE);
-
-    EXPECT_EQ(strAppName, AString(ConfigSipDelegate::APP_NAME));
 }
 
 TEST_F(ImsServiceConfigTest, GetServiceName)
@@ -113,10 +104,6 @@ TEST_F(ImsServiceConfigTest, GetServiceName)
     strServiceName = ImsServiceConfig::GetServiceName(ImsServiceId::UCE);
 
     EXPECT_EQ(strServiceName, AString(ConfigUce::SERVICE_NAME));
-
-    strServiceName = ImsServiceConfig::GetServiceName(ImsServiceId::SIP_DELEGATE);
-
-    EXPECT_EQ(strServiceName, AString(ConfigSipDelegate::SERVICE_NAME));
 }
 
 TEST_F(ImsServiceConfigTest, GetAppNameC)
@@ -136,10 +123,6 @@ TEST_F(ImsServiceConfigTest, GetAppNameC)
     pszAppName = ImsServiceConfig::GetAppNameC(ImsAppId::UCE);
 
     EXPECT_STREQ(pszAppName, ConfigUce::APP_NAME);
-
-    pszAppName = ImsServiceConfig::GetAppNameC(ImsAppId::SIP_DELEGATE);
-
-    EXPECT_STREQ(pszAppName, ConfigSipDelegate::APP_NAME);
 }
 
 TEST_F(ImsServiceConfigTest, GetServiceNameC)
@@ -167,10 +150,6 @@ TEST_F(ImsServiceConfigTest, GetServiceNameC)
     pszServiceName = ImsServiceConfig::GetServiceNameC(ImsServiceId::UCE);
 
     EXPECT_STREQ(pszServiceName, ConfigUce::SERVICE_NAME);
-
-    pszServiceName = ImsServiceConfig::GetServiceNameC(ImsServiceId::SIP_DELEGATE);
-
-    EXPECT_STREQ(pszServiceName, ConfigSipDelegate::SERVICE_NAME);
 }
 
 TEST_F(ImsServiceConfigTest, GetServiceProfile)
@@ -181,11 +160,9 @@ TEST_F(ImsServiceConfigTest, GetServiceProfile)
     {
         const ImsServiceIdentifier& objServiceId = objServiceProfile.pServiceIds[i];
 
-        EXPECT_THAT(objServiceId.eAppId,
-                AnyOf(ImsAppId::MTC, ImsAppId::MTS, ImsAppId::UCE, ImsAppId::SIP_DELEGATE));
+        EXPECT_THAT(objServiceId.eAppId, AnyOf(ImsAppId::MTC, ImsAppId::MTS, ImsAppId::UCE));
         EXPECT_THAT(objServiceId.eServiceId,
-                AnyOf(ImsServiceId::MTC, ImsServiceId::MTS, ImsServiceId::UCE,
-                        ImsServiceId::SIP_DELEGATE));
+                AnyOf(ImsServiceId::MTC, ImsServiceId::MTS, ImsServiceId::UCE));
     }
 }
 
@@ -214,11 +191,10 @@ TEST_F(ImsServiceConfigTest, GetServiceNamesForServiceProfile)
 
         EXPECT_THAT(objServiceName.GetAppId(),
                 AnyOf(AString(ConfigMtc::APP_NAME), AString(ConfigMts::APP_NAME),
-                        AString(ConfigUce::APP_NAME), AString(ConfigSipDelegate::APP_NAME)));
+                        AString(ConfigUce::APP_NAME)));
         EXPECT_THAT(objServiceName.GetServiceId(),
                 AnyOf(AString(ConfigMtc::SERVICE_NAME), AString(ConfigMts::SERVICE_NAME),
-                        AString(ConfigUce::SERVICE_NAME),
-                        AString(ConfigSipDelegate::SERVICE_NAME)));
+                        AString(ConfigUce::SERVICE_NAME)));
     }
 }
 

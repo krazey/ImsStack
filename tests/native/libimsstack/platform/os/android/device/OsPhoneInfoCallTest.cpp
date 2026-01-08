@@ -132,4 +132,15 @@ TEST_F(OsPhoneInfoCallTest, GetCsCallStateInOtherSlot)
     EXPECT_EQ(1, objOsPhoneInfoCall.GetCsCallStateInOtherSlot());
 }
 
+TEST_F(OsPhoneInfoCallTest, IsCrossSimRedialingAvailable)
+{
+    OsPhoneInfoCall objOsPhoneInfoCall(IMS_SLOT_0);
+
+    EXPECT_CALL(m_objSystem, IsCrossSimRedialingAvailable(_))
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_EQ(IMS_TRUE, objOsPhoneInfoCall.IsCrossSimRedialingAvailable());
+}
+
 }  // namespace android

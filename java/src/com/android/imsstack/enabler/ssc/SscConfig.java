@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.telephony.CarrierConfigManager;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ConfigAgent;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.ssc.SscConstant.AccessNetworkTypes;
@@ -41,7 +40,10 @@ public final class SscConfig {
     public static final int OIR_TEMP_MODE_RESTRICTED = 2;
     // CarrierConfigManager.OIR_TEMP_MODE_ALLOWED;
     public static final int OIR_TEMP_MODE_ALLOWED = 3;
+    // CarrierConfigManager.OIR_NO_REQUEST_TO_SERVER;
+    public static final int OIR_NO_REQUEST_TO_SERVER = 4;
 
+    public static final int GBA_NONE = 0;
     public static final int GBA_ME = CarrierConfigManager.GBA_ME; // 1
     public static final int GBA_U = CarrierConfigManager.GBA_U; // 2
     public static final int GBA_DIGEST = CarrierConfigManager.GBA_DIGEST; // 3
@@ -108,65 +110,88 @@ public final class SscConfig {
     @Retention(RetentionPolicy.SOURCE)
     public @interface CarrierConfigServiceType {}
 
-    private static HashMap<Integer, ConfigAgent> sConfigAgent = new HashMap<>();
+    public static final int URI_TYPE_TEL = 0;
+    public static final int URI_TYPE_SIP = 1;
+
+    public static final int CFNR_TIMER_UPDATE_METHOD_NOT_SUPPORT = 0;
+    public static final int CFNR_TIMER_UPDATE_METHOD_CDIV_NODE = 1;
+    public static final int CFNR_TIMER_UPDATE_METHOD_ACTIONS_NODE = 2;
+
+    @IntDef(prefix = {"CFNR_TIMER_UPDATE_METHOD_"}, value = {
+            CFNR_TIMER_UPDATE_METHOD_NOT_SUPPORT,
+            CFNR_TIMER_UPDATE_METHOD_CDIV_NODE,
+            CFNR_TIMER_UPDATE_METHOD_ACTIONS_NODE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CfnrTimerUpdateMethod {}
+
+    private static HashMap<Integer, ConfigInterface> sConfigInterfaces = new HashMap<>();
 
     public static void init(int slotId) {
         ImsLog.d("init(" + slotId + ")");
 
-        ConfigAgent ca = (ConfigAgent) AgentFactory.getInstance().getAgent(ConfigInterface.class,
-                slotId);
-        setConfigAgent(slotId, ca);
+        ConfigInterface ci = AgentFactory.getInstance().getAgent(ConfigInterface.class, slotId);
+        setConfigInterface(slotId, ci);
     }
 
     @VisibleForTesting
-    static void setConfigAgent(int slotId, ConfigAgent configAgent) {
-        if (configAgent == null) {
+    static void setConfigInterface(int slotId, ConfigInterface configInterface) {
+        if (configInterface == null) {
             return;
         }
 
-        sConfigAgent.put(slotId, configAgent);
+        sConfigInterfaces.put(slotId, configInterface);
     }
 
     public static void clear(int slotId) {
         ImsLog.d("clear (" + slotId + ")");
 
-        sConfigAgent.remove(slotId);
+        sConfigInterfaces.remove(slotId);
     }
 
     private static String getString(int slotId, String key) {
-        ConfigAgent ca = sConfigAgent.get(slotId);
-        if (ca == null) {
+        CarrierConfig cc = getCarrierConfig(slotId);
+        if (cc == null) {
             return null;
         }
 
-        return ca.getCarrierConfig().getString(key);
+        return cc.getString(key);
     }
 
     private static boolean getBoolean(int slotId, String key) {
-        ConfigAgent ca = sConfigAgent.get(slotId);
-        if (ca == null) {
+        CarrierConfig cc = getCarrierConfig(slotId);
+        if (cc == null) {
             return false;
         }
 
-        return ca.getCarrierConfig().getBoolean(key);
+        return cc.getBoolean(key);
     }
 
     private static int getInt(int slotId, String key) {
-        ConfigAgent ca = sConfigAgent.get(slotId);
-        if (ca == null) {
+        CarrierConfig cc = getCarrierConfig(slotId);
+        if (cc == null) {
             return -1;
         }
 
-        return ca.getCarrierConfig().getInt(key);
+        return cc.getInt(key);
     }
 
     private static int[] getIntArray(int slotId, String key) {
-        ConfigAgent ca = sConfigAgent.get(slotId);
-        if (ca == null) {
+        CarrierConfig cc = getCarrierConfig(slotId);
+        if (cc == null) {
             return null;
         }
 
-        return ca.getCarrierConfig().getIntArray(key);
+        return cc.getIntArray(key);
+    }
+
+    private static CarrierConfig getCarrierConfig(int slotId) {
+        ConfigInterface ci = sConfigInterfaces.get(slotId);
+        if (ci == null) {
+            return null;
+        }
+
+        return ci.getCarrierConfig();
     }
 
     // From CarrierConfigManager
@@ -217,6 +242,11 @@ public final class SscConfig {
                 CarrierConfigManager.ImsSs.KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY);
     }
 
+    static int[] getTerminalBasedServices(int slotId) {
+        return getIntArray(slotId,
+                CarrierConfigManager.ImsSs.KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY);
+    }
+
     static int[] getSupportedRats(int slotId) {
         return getIntArray(slotId,
                 CarrierConfigManager.ImsSs.KEY_XCAP_OVER_UT_SUPPORTED_RATS_INT_ARRAY);
@@ -239,85 +269,113 @@ public final class SscConfig {
         return getIntArray(slotId, CarrierConfig.ImsSs.KEY_UT_HTTP_PERMANENT_ERROR_CODE_INT_ARRAY);
     }
 
-    // Asset
     static int[] getSmCauseTempBlock(int slotId) {
-        return getIntArray(slotId, CarrierConfig.Assets.KEY_UT_SM_CAUSE_TEMPORARY_BLOCK_INT_ARRAY);
+        return getIntArray(slotId, CarrierConfig.ImsSs.KEY_UT_SM_CAUSE_TEMPORARY_BLOCK_INT_ARRAY);
     }
 
     static int[] getHttpTempBlockErrorCodes(int slotId) {
-        return getIntArray(slotId, CarrierConfig.Assets.KEY_UT_HTTP_TEMPORARY_ERROR_CODE_INT_ARRAY);
+        return getIntArray(slotId, CarrierConfig.ImsSs.KEY_UT_HTTP_TEMPORARY_ERROR_CODE_INT_ARRAY);
     }
 
     static int getMaxRetryCount(int slotId) {
-        return getInt(slotId, CarrierConfig.Assets.KEY_UT_MAX_RETRY_COUNT_INT);
+        return getInt(slotId, CarrierConfig.ImsSs.KEY_UT_MAX_RETRY_COUNT_INT);
     }
 
     static int getTimerForTempBlock(int slotId) {
-        return getInt(slotId, CarrierConfig.Assets.KEY_UT_TEMPORARY_BLOCK_TIMER_MIN_INT) * 60
+        return getInt(slotId, CarrierConfig.ImsSs.KEY_UT_TEMPORARY_BLOCK_TIMER_MIN_INT) * 60
                 * 1000;
     }
 
     static boolean isCfActionErasureSupported(int slotId) {
-        return getBoolean(slotId, CarrierConfig.Assets.KEY_UT_SUPPORT_CF_ACTION_ERASURE_BOOL);
+        return getBoolean(slotId, CarrierConfig.ImsSs.KEY_UT_SUPPORT_CF_ACTION_ERASURE_BOOL);
+    }
+
+    static @CfnrTimerUpdateMethod int getCfnrTimerUpdateMethod(int slotId) {
+        return getInt(slotId, CarrierConfig.ImsSs.KEY_UT_CFNR_TIMER_UPDATE_METHOD_INT);
     }
 
     static boolean isCfQueryAllAndCfAllConditionalSupported(int slotId) {
         return getBoolean(slotId,
-                CarrierConfig.Assets.KEY_UT_QUERY_CF_ALL_AND_CF_ALL_CONDITIONAL_SUPPORT_BOOL);
+                CarrierConfig.ImsSs.KEY_UT_QUERY_CF_ALL_AND_CF_ALL_CONDITIONAL_SUPPORT_BOOL);
     }
 
     static int getOirNetworkDefaultOperation(int slotId) {
-        return getInt(slotId, CarrierConfig.Assets.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT);
+        return getInt(slotId, CarrierConfig.ImsSs.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT);
     }
 
     static boolean isOirTirAlwaysTemporaryMode(int slotId) {
         return getBoolean(slotId,
-                CarrierConfig.Assets.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL);
+                CarrierConfig.ImsSs.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL);
     }
 
     static int getTimerForTempBlockWithAnyReason(int slotId) {
         return getInt(slotId,
-                CarrierConfig.Assets.KEY_UT_TEMPORARY_BLOCK_TIMER_WITH_ANY_REASON_SEC_INT) * 1000;
+                CarrierConfig.ImsSs.KEY_UT_TEMPORARY_BLOCK_TIMER_WITH_ANY_REASON_SEC_INT) * 1000;
     }
 
     static String getPhoneContextForTargetAddress(int slotId) {
-        return getString(slotId, CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_PHONE_CONTEXT_STRING);
+        return getString(slotId, CarrierConfig.ImsSs.KEY_UT_TARGET_ADDRESS_PHONE_CONTEXT_STRING);
     }
 
     static String getCountryCodeToReplaceCountryCodeWithZero(int slotId) {
         return getString(slotId,
-                CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_COUNTRY_CODE_REPLACE_TO_ZERO_STRING);
+                CarrierConfig.ImsSs.KEY_UT_TARGET_ADDRESS_COUNTRY_CODE_REPLACE_TO_ZERO_STRING);
     }
 
     static String getCountryCodeToReplaceZeroWithCountryCode(int slotId) {
         return getString(slotId,
-                CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_ZERO_REPLACE_TO_COUNTRY_CODE_STRING);
+                CarrierConfig.ImsSs.KEY_UT_TARGET_ADDRESS_ZERO_REPLACE_TO_COUNTRY_CODE_STRING);
     }
 
     static boolean isOmitNamespaceOfDocumentElement(int slotId) {
         return getBoolean(slotId,
-                CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_OF_DOCUMENT_ELEMENT_BOOL);
+                CarrierConfig.ImsSs.KEY_UT_OMIT_NAMESPACE_OF_DOCUMENT_ELEMENT_BOOL);
     }
 
     static boolean isOmitNamespaceSs(int slotId) {
-        return getBoolean(slotId, CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_SS_BOOL);
+        return getBoolean(slotId, CarrierConfig.ImsSs.KEY_UT_OMIT_NAMESPACE_SS_BOOL);
     }
 
     static boolean isOmitNamespaceCp(int slotId) {
-        return getBoolean(slotId, CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_CP_BOOL);
+        return getBoolean(slotId, CarrierConfig.ImsSs.KEY_UT_OMIT_NAMESPACE_CP_BOOL);
     }
 
     static int getXcapApnInactivityTimer(int slotId) {
-        return getInt(slotId, CarrierConfig.Assets.KEY_UT_XCAP_APN_INACTIVITY_TIMER_SEC_INT) * 1000;
+        return getInt(slotId, CarrierConfig.ImsSs.KEY_UT_XCAP_APN_INACTIVITY_TIMER_SEC_INT) * 1000;
     }
 
     static boolean isErrorPhraseDisplayedWith409(int slotId) {
         return getBoolean(slotId,
-                CarrierConfig.Assets.KEY_UT_DISPLAY_ERROR_PHRASE_WITH_409_ERROR_BOOL);
+                CarrierConfig.ImsSs.KEY_UT_DISPLAY_ERROR_PHRASE_WITH_409_ERROR_BOOL);
     }
 
     static boolean insertNewRule(int slotId) {
-        return getBoolean(slotId, CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL);
+        return getBoolean(slotId, CarrierConfig.ImsSs.KEY_UT_INSERT_NEW_RULE_BOOL);
+    }
+
+    static int getUriTypeForCfTargetNumber(int slotId) {
+        return getInt(slotId, CarrierConfig.ImsSs.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT);
+    }
+
+    static String getNafFqdn(int slotId) {
+        return getString(slotId, CarrierConfig.ImsSs.KEY_UT_NAF_FQDN_STRING);
+    }
+
+    static int getUtTransactionTimer(int slotId) {
+        return getInt(slotId, CarrierConfig.ImsSs.KEY_UT_TRANSACTION_TIMER_SEC_INT);
+    }
+
+    static boolean isSyncWithCsForTbSs(int slotId) {
+        return getBoolean(slotId, CarrierConfig.ImsSs.KEY_UT_SYNC_WITH_CS_FOR_TB_SS_BOOL);
+    }
+
+    static boolean isNetworkQueryForTbOirNetworkDefault(int slotId) {
+        return getBoolean(slotId,
+                CarrierConfig.ImsSs.KEY_UT_NETWORK_QUERY_FOR_TB_OIR_NETWORK_DEFAULT_BOOL);
+    }
+
+    static boolean isUpdateCbWithoutPassword(int slotId) {
+        return getBoolean(slotId, CarrierConfig.ImsSs.KEY_UT_UPDATE_CB_WITHOUT_PASSWORD_BOOL);
     }
 
     // Specific APIs
@@ -338,6 +396,19 @@ public final class SscConfig {
         }
 
         return Arrays.stream(serverBasedServices).anyMatch(value -> value == serviceType);
+    }
+
+    static boolean isTerminalBasedService(int slotId, @CarrierConfigServiceType int serviceType) {
+        int[] terminalBasedServices = getTerminalBasedServices(slotId);
+        if (terminalBasedServices == null) {
+            return false;
+        }
+
+        return Arrays.stream(terminalBasedServices).anyMatch(value -> value == serviceType);
+    }
+
+    static boolean isLocalUpdateRequiredForOir(int slotId) {
+        return getOirNetworkDefaultOperation(slotId) == SscConfig.OIR_NO_REQUEST_TO_SERVER;
     }
 
     static boolean isSupportedNetwork(int slotId, @AccessNetworkTypes int networkType) {
@@ -405,11 +476,5 @@ public final class SscConfig {
 
             return value == responseCode;
         });
-    }
-
-    // Temporary APIs
-    static String getTargetAddrScheme(int slotId) {
-        // TODO: Is this function really needed?
-        return "tel";
     }
 }

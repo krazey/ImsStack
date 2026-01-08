@@ -16,7 +16,6 @@
 #ifndef OS_TRACE_H_
 #define OS_TRACE_H_
 
-#include "AString.h"
 #include "ImsTrace.h"
 
 class IMutex;
@@ -26,23 +25,20 @@ class OsTrace : public ImsTrace
 {
 public:
     OsTrace();
-    virtual ~OsTrace();
+    ~OsTrace() override;
 
     OsTrace(IN const OsTrace&) = delete;
     OsTrace& operator=(IN const OsTrace&) = delete;
 
 public:
     void OutV(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule,
-            IN const IMS_CHAR* pszFormat, IN va_list args) override;
-
-    const IMS_CHAR* GetFileName(IN const IMS_CHAR* pszFileName) override;
-    const IMS_CHAR* GetFileName(
-            IN_OUT IMS_CHAR* pszOutFileName, IN const IMS_CHAR* pszFileName) override;
+            IN const IMS_CHAR* pszFile, IN IMS_UINT32 nLine, IN const IMS_CHAR* pszFormat,
+            IN va_list args) override;
 
 protected:
     const IMS_CHAR* GetDirName() const override;
-    void OutputString(
-            IN IMS_SINT32 nCategory, IN IMS_CHAR* pszTrace, IN IMS_UINT32 nLength) override;
+    void OutputString(IN IMS_SINT32 nCategory, IN IMS_CHAR* pszTrace, IN IMS_UINT32 nLength,
+            IN const IMS_CHAR* pszLogTag = IMS_NULL) override;
 
     void AddTraceNode(IN OsTraceNode* pNode);
     IMS_SINT32 GetTraceNodeCount();

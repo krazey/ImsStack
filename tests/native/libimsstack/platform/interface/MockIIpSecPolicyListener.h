@@ -24,8 +24,8 @@
 class MockIIpSecPolicyListener : public IIpSecPolicyListener
 {
 public:
-    inline MockIIpSecPolicyListener() {}
-    inline virtual ~MockIIpSecPolicyListener() {}
+    MockIIpSecPolicyListener() = default;
+    ~MockIIpSecPolicyListener() override = default;
 
     MOCK_METHOD(void, IpSecPolicy_OnSecurityAssociationExpired, (IN IIpSecPolicy*), (override));
 };

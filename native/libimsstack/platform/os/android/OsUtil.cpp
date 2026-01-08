@@ -16,13 +16,15 @@
 #include <cutils/properties.h>
 #include "zlib.h"
 
+#include "ByteArray.h"
+#include "ISystem.h"
 #include "ImsStrLib.h"
 #include "OsUtil.h"
 #include "PlatformContext.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 PUBLIC
 OsUtil::OsUtil() :
@@ -120,34 +122,11 @@ PUBLIC GLOBAL OsUtil* OsUtil::GetInstance()
     return s_pUtil;
 }
 
-PRIVATE VIRTUAL AString OsUtil::GetUuid(IN IMS_SINT32 /*nOption = 0*/)
+PRIVATE VIRTUAL void OsUtil::GetUuid(IN IMS_SINT32 nVersion, OUT AString& strUuid,
+        IN const AString& strName /* = AString::ConstNull()*/)
 {
-    // This function will be re-written or reviewed whether it's really needed or not.
-    /*
-    uuid_t stUuid;
-
-    if (nOption == 0)
-    {
-        uuid_generate_time(stUuid);
-
-        if (uuid_is_null(stUuid) == 1)
-        {
-            uuid_generate(stUuid);
-
-            if (uuid_is_null(stUuid) == 1)
-            {
-                uuid_generate_random(stUuid);
-            }
-        }
-
-        IMS_CHAR acUuid[64] = {0, };
-        uuid_unparse(stUuid, acUuid);
-
-        return AString(acUuid);
-    }
-    */
-
-    return AString("00000000-0000-0000-0000-000000000000");
+    ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
+    piSystem->GetUuid(nVersion, strName, strUuid);
 }
 
 PRIVATE VIRTUAL AString OsUtil::Get(IN const AString& strName)

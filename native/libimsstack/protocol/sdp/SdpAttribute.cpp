@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ServiceMemory.h"
+#include "TextParser.h"
 
 #include "Sdp.h"
 #include "SdpAttribute.h"
@@ -71,6 +71,7 @@ PRIVATE GLOBAL const IMS_CHAR* SdpAttribute::ATTRIBUTE[SdpAttribute::ATTRIBUTE_M
         "imageattr",
         "crypto",
         "3ge2ae",
+        "anbr",
         IMS_NULL,
 };
 
@@ -165,6 +166,10 @@ PUBLIC VIRTUAL IMS_BOOL SdpAttribute::Decode(IN const AString& strValue)
             else if (m_strAttribute.Equals(ATTRIBUTE[ACFG]))
             {
                 m_nAttribute = ACFG;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[ANBR]))
+            {
+                m_nAttribute = ANBR;
             }
             break;
 

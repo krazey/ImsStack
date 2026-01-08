@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ServiceMemory.h"
 #include "ImsLib.h"
 #include "ImsStrLib.h"
+#include "ServiceTrace.h"
+#include "TextParser.h"
 
 #include "SipHeaderName.h"
 #include "SipMessageFraming.h"
 #include "SipPrivate.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
-LOCAL inline void StripLeadingLWS(IN_OUT IMS_CHAR*& pszStart, IN const IMS_CHAR* pszEnd)
+static void StripLeadingLWS(IN_OUT IMS_CHAR*& pszStart, IN const IMS_CHAR* pszEnd)
 {
     while ((pszStart <= pszEnd) && IMS_ISSPACE(*pszStart))
     {
@@ -31,7 +32,7 @@ LOCAL inline void StripLeadingLWS(IN_OUT IMS_CHAR*& pszStart, IN const IMS_CHAR*
     }
 }
 
-LOCAL inline void StripTrailingLWS(IN const IMS_CHAR* pszStart, IN_OUT IMS_CHAR*& pszEnd)
+static void StripTrailingLWS(IN const IMS_CHAR* pszStart, IN_OUT IMS_CHAR*& pszEnd)
 {
     while ((pszEnd >= pszStart) && IMS_ISSPACE(*pszEnd))
     {
@@ -211,7 +212,7 @@ void SipMessageFraming::ParseContentLength()
     const IMS_CHAR acCF_CLEN[2] = {SipHeaderName::CF_CONTENT_LENGTH, '\0'};
 
     IMS_CHAR* pStart = reinterpret_cast<IMS_CHAR*>(m_objMessageBuffer.GetData() + m_nOffset);
-    IMS_CHAR* pEnd = pStart + m_objMessageBuffer.GetLength() - m_nOffset;  // over 1 byte
+    const IMS_CHAR* pEnd = pStart + m_objMessageBuffer.GetLength() - m_nOffset;  // over 1 byte
     IMS_CHAR* pCurrentPos;
     IMS_CHAR* pTemp;
 

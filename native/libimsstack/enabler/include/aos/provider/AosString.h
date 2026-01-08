@@ -25,17 +25,21 @@ public:
     static const IMS_CHAR STR_APPLICATION[];
     static const IMS_CHAR STR_3GPP_IMS_XML[];
     static const IMS_CHAR STR_VERSTAT_FEATURE[];
-    static const IMS_CHAR STR_USSI_FEATURE[];
+    static const IMS_CHAR STR_NW_INIT_USSI_FEATURE[];
     static const IMS_CHAR STR_RTT_FEATURE[];
     static const IMS_CHAR STR_ACCESS_TYPE_FEATURE[];
     static const IMS_CHAR STR_ACCESS_TYPE_CELLULAR[];
     static const IMS_CHAR STR_ACCESS_TYPE_CELLULAR2[];
     static const IMS_CHAR STR_ACCESS_TYPE_WLAN[];
     static const IMS_CHAR STR_ACCESS_TYPE_WLAN1[];
+    static const IMS_CHAR STR_P_CELLULAR_NETWORK_INFO[];
     static const IMS_CHAR STR_P_LAST_ACCESS_NETWORK_INFO[];
     static const IMS_CHAR STR_CS[];
     static const IMS_CHAR STR_CS_WITH_DQ[];
     static const IMS_CHAR STR_VOLTE[];
+    static const IMS_CHAR STR_REG_RETRY_TIME0[];
+    static const IMS_CHAR STR_REG_RETRY_TIME1[];
+    static const IMS_CHAR STR_EMERGENCY_CALL_FAIL_CAUSE[];
 };
 
 class FeatureTags

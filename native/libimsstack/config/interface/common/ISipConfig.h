@@ -16,10 +16,12 @@
 #ifndef INTERFACE_SIP_CONFIG_H_
 #define INTERFACE_SIP_CONFIG_H_
 
-#include "AString.h"
-#include "ISipConfigV.h"
+#include "ImsTypeDef.h"
+
+class AString;
 
 class IConfigurable;
+class ISipConfigV;
 
 class ISipConfig
 {
@@ -56,7 +58,6 @@ public:
      *         #SIP_FEATURE_CAPS_GRUU\n
      *         #SIP_FEATURE_CAPS_RPORT\n
      *         #SIP_FEATURE_CAPS_KEEP\n
-     *         #SIP_FEATURE_CAPS_MULTIPLE_REG\n
      *         #SIP_FEATURE_CAPS_TRUST_DOMAIN\n
      *         #SIP_FEATURE_CAPS_UDP_FALLBACK\n
      *         #SIP_FEATURE_CAPS_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR\n
@@ -64,7 +65,6 @@ public:
      *         #SIP_FEATURE_CAPS_SESSION_TIMER_UPDATE_REQUIRED_BY_REINVITE\n
      *         #SIP_FEATURE_CAPS_SIP_INSTANCE_PARAM_REQUIRED_IN_CONTACT_FOR_NON_REGISTER_REQUEST\n
      *         #SIP_FEATURE_CAPS_SUPPORT_SESSION_ID_HEADER\n
-     *         #SIP_FEATURE_CAPS_HIDE_MAC_ADDRESS_IN_PANI_HEADER\n
      *         #SIP_FEATURE_CAPS_LOCAL_TIMEZONE_PARAM_IN_PANI_HEADER\n
      *         #SIP_FEATURE_CAPS_PANI_HEADER_IN_INITIAL_REG\n
      *         #SIP_FEATURE_CAPS_PPI_HEADER_IN_REG_SUB\n
@@ -110,9 +110,8 @@ public:
         SIP_FEATURE_CAPS_GRUU = 1 << 1,
         SIP_FEATURE_CAPS_RPORT = 1 << 2,
         SIP_FEATURE_CAPS_KEEP = 1 << 3,
-        SIP_FEATURE_CAPS_MULTIPLE_REG = 1 << 4,
-        SIP_FEATURE_CAPS_TRUST_DOMAIN = 1 << 5,
-        SIP_FEATURE_CAPS_UDP_FALLBACK = 1 << 6,
+        SIP_FEATURE_CAPS_TRUST_DOMAIN = 1 << 4,
+        SIP_FEATURE_CAPS_UDP_FALLBACK = 1 << 5,
 
         /// For SIP engine operations
         SIP_FEATURE_CAPS_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR = 1 << 8,
@@ -120,8 +119,8 @@ public:
         SIP_FEATURE_CAPS_SESSION_TIMER_UPDATE_REQUIRED_BY_REINVITE = 1 << 10,
         SIP_FEATURE_CAPS_SIP_INSTANCE_PARAM_REQUIRED_IN_CONTACT_FOR_NON_REGISTER_REQUEST = 1 << 11,
         SIP_FEATURE_CAPS_SUPPORT_SESSION_ID_HEADER = 1 << 12,
-        SIP_FEATURE_CAPS_HIDE_MAC_ADDRESS_IN_PANI_HEADER = 1 << 13,
-        SIP_FEATURE_CAPS_LOCAL_TIMEZONE_PARAM_IN_PANI_HEADER = 1 << 14,
+        SIP_FEATURE_CAPS_LOCAL_TIMEZONE_PARAM_IN_PANI_HEADER = 1 << 13,
+        SIP_FEATURE_CAPS_IGNORE_UDP_TRANSPORT_PARAMETER_FOR_OUTGOING_REQUEST = 1 << 14,
 
         /// SIP header control
         /// 3GPP :: not required
@@ -154,6 +153,7 @@ public:
     {
         DEVICE_ID_NONE = (-1),  /// if device id is not used
         DEVICE_ID_GSMA_IMEI = 0,
+        DEVICE_ID_GSMA_IMEISV,
         DEVICE_ID_UUID_IMEI_MD5,
         DEVICE_ID_UUID_IMEI_SHA1,
         DEVICE_ID_UUID_IMEI_NAMED_V3,
@@ -161,6 +161,18 @@ public:
         DEVICE_ID_UUID_IMEI_V4,
         DEVICE_ID_PREDEFINED,
         DEVICE_ID_MAX
+    };
+
+    /// The policy that specifies whether to hide MAC address.
+    /// SHOW_MAC_IN_PANI : show MAC address in P-Access-Network-Info header is allowed.
+    /// HIDE_MAC_IN_PANI : showing MAC address in P-Access-Network-Info header is not allowed.
+    /// HIDE_MAC_IN_PANI_EXCEPT_N11_AND_ECALL : showing MAC address in P-Access-Network-Info header
+    ///                                         is not allowed except for N11 and emergency call.
+    enum
+    {
+        SHOW_MAC_IN_PANI = 0,
+        HIDE_MAC_IN_PANI = 1,
+        HIDE_MAC_IN_PANI_EXCEPT_N11_AND_ECALL = 2
     };
 };
 

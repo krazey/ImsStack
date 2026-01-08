@@ -16,6 +16,8 @@
 
 package com.android.imsstack.system;
 
+import androidx.annotation.Nullable;
+
 import com.android.imsstack.core.agents.WifiInterface;
 
 /**
@@ -75,6 +77,16 @@ public interface DefaultSystemCallInterface {
     String getExternalStoragePath();
 
     /**
+     * Returns the generated UUID string.
+     *
+     * @param version The UUID version.
+     * @param name The name to be used to construct UUID.
+     *             May be null according to the {@code version}.
+     * @return The generated UUID string or null if any errors occur.
+     */
+    String getUuid(int version, @Nullable String name);
+
+    /**
      * Returns a string value from the specified preference file for a specified slot.
      * If {@code fileName} is empty, then returns a string value from the default preference file.
      *
@@ -104,4 +116,13 @@ public interface DefaultSystemCallInterface {
      * @param slotId The slot-id to be set.
      */
     void setTrafficPriority(int priorityType, int slotId);
+
+    /**
+     * Excluding the slot provided as an input parameter, the SIM state of other slots is checked
+     * to determine and return the availability of cross SIM redialing.
+     *
+     * @param slotId The slot ID where the emergency call connection failed.
+     * @return {@code true} if cross SIM redialing is available, {@code false} otherwise.
+     */
+    boolean isCrossSimRedialingAvailable(int slotId);
 }

@@ -72,7 +72,7 @@ TEST_F(QosPropertyTest, SetQosAndGetQosString)
 
     EXPECT_EQ(objQosProperty.GetQosString(), strValidQos);
 
-    QosProperty::QualityOfService objQualityOfService = objQosProperty.GetQos();
+    const QosProperty::QualityOfService& objQualityOfService = objQosProperty.GetQos();
 
     EXPECT_EQ(objQualityOfService.nAverageRate, 1);
     EXPECT_EQ(objQualityOfService.nBufferSize, 2);

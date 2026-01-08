@@ -19,8 +19,9 @@ package com.android.imsstack.imsservice.mmtel.sms;
 
 import android.telephony.PhoneNumberUtils;
 
+import com.android.imsstack.imsservice.mmtel.sms.SmsTPdu.Direction;
 import com.android.imsstack.util.ImsLog;
-import com.android.internal.util.HexDump;
+import com.android.imsstack.util.ImsUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
@@ -50,7 +51,6 @@ public final class SmsRPdu {
     public static final byte RP_UD_IEI = 0x41;
     public static final byte RP_CAUSE_IEI = 0x42;
 
-    //TODO: More Values to be added as per specification
     //RP-Cause Values as per 3GPP 24.011 Table 8.4
     public static final byte RP_CAUSE_PROTOCOL_UNSPECIFIED = 0x6f;
 
@@ -64,21 +64,33 @@ public final class SmsRPdu {
     private int mRpCause;
     private byte[] mRpUserData;
     private byte[] mRpdu;
+    private SmsTPdu mTpdu;
+    private boolean mIsRetry;
 
     public SmsRPdu(int messageRef, int messageType,
                    String destinationAddress, int cause,
                    byte[] userData) {
+        this(messageRef, messageType, destinationAddress, cause, userData, false);
+    }
+
+    public SmsRPdu(int messageRef, int messageType,
+                    String destinationAddress, int cause,
+                    byte[] userData,
+                    boolean isRetry) {
         mMessageRef = messageRef;
         mRpMessageType = messageType;
         mDestAddr = destinationAddress;
         mRpCause = cause;
         mRpUserData = userData;
+        mIsRetry = isRetry;
         encodeRpduByteArray();
+        parseTpdu(Direction.MS_TO_SC);
     }
 
     public SmsRPdu(byte[] pdu) {
         mRpdu = pdu;
         parsePdu();
+        parseTpdu(Direction.SC_TO_MS);
     }
 
     /**
@@ -111,6 +123,10 @@ public final class SmsRPdu {
     public byte[] getRpduByteArray() {
         return mRpdu;
     }
+
+    public boolean isRetry() {
+        return mIsRetry;
+    }
     /**
      * Encodes of RPdu as per 3GPP TS 24.011
      */
@@ -134,13 +150,31 @@ public final class SmsRPdu {
         }
     }
 
+    private void parseTpdu(Direction direction) {
+        if (mRpUserData == null) {
+            log("RpUserData is null");
+            return;
+        }
+        try {
+            mTpdu = new SmsTPdu(this, direction);
+            mTpdu.parse();
+            if (DBG) {
+                log("DecodedSmsPdu:");
+                dumpToLog();
+            }
+        } catch (RuntimeException e) {
+            loge("Error parsing pdu: " + e.getMessage());
+        }
+    }
+
     /**
      *  Encoding RP-Data as Per 3GPP 24.011, Section 7.3.1.2
      */
     private byte[] getRpDataPdu() {
         log("getRpDataPdu");
+        mMessageTypeInd = MO_RP_DATA_MTI;
         ByteArrayOutputStream bo = new ByteArrayOutputStream(MAX_RPDU_LENGTH);
-        byte[] destinationAddress = HexDump.hexStringToByteArray(mDestAddr);
+        byte[] destinationAddress = ImsUtils.hexStringToBytes(mDestAddr);
         if (destinationAddress == null || destinationAddress.length == 0) {
             return null;
         }
@@ -163,6 +197,7 @@ public final class SmsRPdu {
      */
     private byte[] getRpAckPdu() {
         log("getRpAckPdu");
+        mMessageTypeInd = MO_RP_ACK_MTI;
         ByteArrayOutputStream bo = new ByteArrayOutputStream(MAX_RPDU_LENGTH);
         bo.write(MO_RP_ACK_MTI);
         bo.write((byte) mMessageRef);
@@ -181,10 +216,10 @@ public final class SmsRPdu {
      */
     private byte[] getRpErrorPdu() {
         log("getRpErrorPdu");
+        mMessageTypeInd = MO_RP_ERROR_MTI;
         ByteArrayOutputStream bo = new ByteArrayOutputStream(MAX_RPDU_LENGTH);
         bo.write(MO_RP_ERROR_MTI);
         bo.write((byte) mMessageRef);
-        // FIXME: Need to update Accurate Cause Values
         // RP-CAUSE Header as per 3GPP 24.011 section 8.2.5.4
         bo.write(RP_CAUSE_LENGTH_INDICATOR);
         bo.write((byte) mRpCause);
@@ -204,6 +239,7 @@ public final class SmsRPdu {
      */
     private byte[] getRpSmmaPdu() {
         log("getRpSmmaPdu");
+        mMessageTypeInd = MO_RP_SMMA_MTI;
         ByteArrayOutputStream bo = new ByteArrayOutputStream(MAX_RPDU_LENGTH);
         bo.write(MO_RP_SMMA_MTI);
 
@@ -385,5 +421,64 @@ public final class SmsRPdu {
 
     private static void logi(String s) {
         ImsLog.i(TAG + s);
+    }
+
+    // For logging purpose
+    private String byteArrayToString(byte[] array) {
+        if (array == null) {
+            return "Not Present";
+        }
+        return ImsLog.hiddenString(ImsUtils.bytesToHexString(array));
+    }
+
+    private byte[] getRpduHeader() {
+        if (mRpdu != null && mRpUserData != null && mRpdu.length > mRpUserData.length) {
+            return Arrays.copyOfRange(mRpdu, 0, mRpdu.length - mRpUserData.length);
+        } else {
+            return mRpdu;
+        }
+    }
+
+    private String getRpMessageTypeString() {
+        log("RP-MTI: " + mMessageTypeInd);
+        return switch (mMessageTypeInd) {
+            case MO_RP_DATA_MTI -> "RP-DATA MS_TO_SC";
+            case MT_RP_DATA_MTI -> "RP-DATA SC_TO_MS";
+            case MO_RP_ACK_MTI -> "RP-ACK MS_TO_SC";
+            case MT_RP_ACK_MTI -> "RP-ACK SC_TO_MS";
+            case MO_RP_ERROR_MTI -> "RP-ERROR MS_TO_SC";
+            case MT_RP_ERROR_MTI -> "RP-ERROR SC_TO MS";
+            case MO_RP_SMMA_MTI -> "RP-SMMA MS_TO_SC";
+            default -> "UNKNOWN (" + mMessageTypeInd + ")";
+        };
+    }
+
+    private String getMessageTypeIndicator() {
+        return String.format("%3s", Integer.toBinaryString(mMessageTypeInd)).replace(' ', '0');
+    }
+
+    // For logging purpose
+    private void dumpToLog() {
+        log("  RP Message Type: " + getRpMessageTypeString());
+        log("  RP-MTI (Message Type Indicator): " + getMessageTypeIndicator());
+        log("  RP-MR (Message Reference): " + mMessageRef);
+
+        if (mOrigAddr != null) {
+            log("  RP-OA (Origination Address): " + ImsLog.hiddenString(mOrigAddr));
+        }
+        if (mDestAddr != null) {
+            log("  RP-DA (Destination Address): " + ImsLog.hiddenString(mDestAddr));
+        }
+        if (mRpMessageType == SmsUtils.RP_ERROR) {
+            log("  RP-Cause: " + String.format("0x%02X", getRPCause()));
+        }
+
+        log("  R-PDU Header: " + byteArrayToString(getRpduHeader()));
+
+        if (mTpdu != null) {
+            mTpdu.dumpToLog();
+        } else {
+            log("  T-PDU: Not Present");
+        }
     }
 }

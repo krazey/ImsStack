@@ -28,8 +28,7 @@ class SubscriptionInterfaceHolder;
 class MockIMtcSipInterfaceFactory : public IMtcSipInterfaceFactory
 {
 public:
-    ~MockIMtcSipInterfaceFactory() {}
-    MOCK_METHOD(SessionInterfaceHolder*, GetISessionHolder, (), (override));
+    MOCK_METHOD(SessionInterfaceHolder&, GetISessionHolder, (), (override));
     MOCK_METHOD(ReferenceInterfaceHolder*, GetIReferenceHolder, (), (override));
     MOCK_METHOD(SubscriptionInterfaceHolder*, GetISubscriptionHolder, (), (override));
 };

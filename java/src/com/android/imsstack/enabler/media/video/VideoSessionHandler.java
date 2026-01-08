@@ -25,6 +25,7 @@ import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.imsmedia.ImsMediaSession;
 import android.telephony.imsmedia.ImsVideoSession;
 import android.telephony.imsmedia.MediaQualityThreshold;
+import android.telephony.imsmedia.RtpReceptionStats;
 import android.telephony.imsmedia.VideoConfig;
 import android.telephony.imsmedia.VideoSessionCallback;
 import android.util.Pair;
@@ -84,21 +85,28 @@ public class VideoSessionHandler extends MediaState {
     public VideoSessionHandler(IBaseContext context, @NonNull MediaManagerHelper mediaManager,
             IMtcMediaVideoCallProvider mtcMediaVideoCallProvider,
             @NonNull VideoSessionCallbackHandler videoCallbackHandler,
-            @NonNull ImsVideoSession videoSession, Looper looper) {
+            @NonNull ImsVideoSession videoSession, Looper looper, @Nullable QosAgent qosAgent) {
         super(ImsMediaSession.SESSION_TYPE_VIDEO);
         mContext = context;
         mMediaManager = mediaManager;
         mMtcMediaVideoCallProvider = mtcMediaVideoCallProvider;
         mVideoSessionCallbackHandler = videoCallbackHandler;
         mVideoSession = videoSession;
+        mVideoQosAgent = qosAgent;
         mVideoSessionCallback = new VideoSessionCallbackProxy();
         mVideoMessageHandler = new VideoMessageHandler(looper);
+        createQosAgent(mContext.getSlotId());
         ImsLog.d("VideoSessionHandler created");
     }
 
     @VisibleForTesting
     void setVideoSession(@Nullable ImsVideoSession videoSession) {
         mVideoSession = videoSession;
+    }
+
+    @VisibleForTesting
+    ImsVideoSession getVideoSession() {
+        return mVideoSession;
     }
 
     @VisibleForTesting
@@ -117,20 +125,28 @@ public class VideoSessionHandler extends MediaState {
     }
 
     @VisibleForTesting
+    VideoMessageHandler getVideoMessageHandler() {
+        return mVideoMessageHandler;
+    }
+
+    @VisibleForTesting
     int getVideoSessionId() {
         return mVideoSessionId;
     }
 
     @VisibleForTesting
-    VideoMessageHandler getVideoMessageHandler() {
-        return mVideoMessageHandler;
+    VideoImsQosCallback getVideoImsQosCallback() {
+        return mVideoImsQosCallback;
     }
 
-    private boolean isWaitRequired(int requestType) {
-        return (requestType != MediaConstants.REQUEST_OPEN_SESSION
-                && requestType != MediaConstants.RESPONSE_OPEN_SESSION
-                && requestType != MediaConstants.REQUEST_QOS
-                && requestType != MediaConstants.NOTIFY_MEDIA_DETACH);
+    @VisibleForTesting
+    boolean isPreviewSurfaceSet() {
+        return mPreviewSurfaceSet;
+    }
+
+    @VisibleForTesting
+    boolean isDisplaySurfaceSet() {
+        return mDisplaySurfaceSet;
     }
 
     /** Video session message Handler */
@@ -142,12 +158,18 @@ public class VideoSessionHandler extends MediaState {
 
         @Override
         public void handleMessage(Message msg) {
-            ImsLog.v("messageType = " + msg.what);
+            ImsLog.d("messageType = " + msg.what);
+
+            if (isClosed() && MediaSessionUtils.isDiscardRequired(msg.what)) {
+                ImsLog.w("Session=" + getVideoSessionId() + " is closing, discard request: "
+                        + msg.what);
+                return;
+            }
 
             // Till open session response is received, handling other commands has to wait
             try {
                 synchronized (mLock) {
-                    if (mVideoSession == null && isWaitRequired(msg.what)) {
+                    if (mVideoSession == null && MediaSessionUtils.isWaitRequired(msg.what)) {
                         ImsLog.d(Thread.currentThread().getName()
                                 + " is waiting for Video openSession response");
                         mLock.wait(MediaConstants.RESPONSE_WAIT_TIMEOUT);
@@ -166,106 +188,75 @@ public class VideoSessionHandler extends MediaState {
 
             switch (msg.what) {
                 case MediaConstants.REQUEST_OPEN_SESSION:
-                {
                     handleVideoOpenSession(null);
-                }
                     break;
-
                 case MediaConstants.REQUEST_CLOSE_SESSION:
-                {
                     handleVideoCloseSession();
-                }
                     break;
-
                 case MediaConstants.REQUEST_MODIFY_SESSION:
-                {
                     handleVideoModifySession((VideoConfig) msg.obj);
-                }
                     break;
-
                 case MediaConstants.REQUEST_QOS:
-                {
                     handleVideoQos((String) msg.obj, msg.arg1);
-                }
                     break;
-
                 case MediaConstants.REQUEST_SET_PREVIEW_SURFACE:
-                {
                     handleSetPreviewSurface();
-                }
                     break;
-
                 case MediaConstants.REQUEST_SET_DISPLAY_SURFACE:
-                {
                     handleSetDisplaySurface();
-                }
                     break;
-
                 case MediaConstants.REQUEST_SET_MEDIA_QUALITY:
-                {
                     handleVideoSetMediaQualityThreshold((MediaQualityThreshold) msg.obj);
-                }
                     break;
-
                 case MediaConstants.REQUEST_VIDEO_DATA_USAGE:
-                {
                     handleVideoDataUsageRequest();
-                }
                     break;
-
+                case MediaConstants.REQUEST_ADJUST_DELAY:
+                    handleAdjustDelay((int) msg.obj);
+                    break;
+                case MediaConstants.REQUEST_RTP_RECEPTION_STATS:
+                    handleVideoRequestRtpReceptionStats(msg.arg1);
+                    break;
                 case MediaConstants.RESPONSE_OPEN_SESSION:
-                {
                     handleVideoOpenSessionResponse((ImsMediaSession) msg.obj, msg.arg1);
-                }
                     break;
-
                 case MediaConstants.RESPONSE_SESSION_CLOSED:
-                case MediaConstants.NOTIFY_MEDIA_DETACH:
-                {
+                    mVideoMessageHandler.removeMessages(
+                            MediaConstants.RESPONSE_SESSION_CLOSED_TIMEOUT);
                     handleVideoSessionClosed();
-                }
                     break;
-
+                case MediaConstants.NOTIFY_MEDIA_DETACH:
+                    handleVideoSessionClosed();
+                    break;
+                case MediaConstants.RESPONSE_SESSION_CLOSED_TIMEOUT:
+                    ImsLog.e("onSessionClosed is not received within "
+                            + MediaConstants.RESPONSE_WAIT_TIMEOUT + "ms for SessionId["
+                            + getVideoSessionId() + "]. Forcing cleanup.");
+                    handleVideoSessionClosed();
+                    break;
                 case MediaConstants.RESPONSE_MODIFY_SESSION:
-                {
                     handleVideoModifySessionResponse((VideoConfig) msg.obj, msg.arg1);
-                }
                     break;
-
                 case MediaConstants.NOTIFY_FIRST_PACKET:
-                {
                     handleVideoFirstMediaPacketReceived((VideoConfig) msg.obj);
-                }
                     break;
-
                 case MediaConstants.NOTIFY_PEER_DIMENSION_CHANGED:
-                {
                     handlePeerDimensionChanged(msg.arg1, msg.arg2);
-                }
                     break;
-
                 case MediaConstants.NOTIFY_MEDIA_INACTIVITY:
-                {
                     handleVideoMediaInactivityNotification(msg.arg1);
-                }
                     break;
-
                 case MediaConstants.NOTIFY_BITRATE:
-                {
                     handleVideoBitrateNotification(msg.arg1);
-                }
                     break;
-
                 case MediaConstants.NOTIFY_VIDEO_DATA_USAGE:
-                {
                     handleVideoDataUsageNotification((long) msg.obj);
-                }
                     break;
-
+                case MediaConstants.NOTIFY_RTP_RECEPTION_STATS:
+                    handleNotifyRtpReceptionStats((RtpReceptionStats) msg.obj);
+                    break;
                 default:
-                {
                     ImsLog.e("Invalid RequestType");
-                }
                     break;
             }
         }
@@ -316,8 +307,8 @@ public class VideoSessionHandler extends MediaState {
         public void onFirstMediaPacketReceived(final VideoConfig videoConfig) {
             ImsLog.d("FirstMediaPacketReceived for SessionId[" + getVideoSessionId() + "]");
 
-            Message.obtain(mVideoMessageHandler, MediaConstants.NOTIFY_FIRST_PACKET,
-                    videoConfig).sendToTarget();
+            Message.obtain(mVideoMessageHandler, MediaConstants.NOTIFY_FIRST_PACKET, videoConfig)
+                    .sendToTarget();
         }
 
         @Override
@@ -347,17 +338,24 @@ public class VideoSessionHandler extends MediaState {
         public void notifyBitrate(final int bitrate) {
             ImsLog.d("notifyBitrate=" + bitrate);
 
-            Message.obtain(mVideoMessageHandler, MediaConstants.NOTIFY_BITRATE,
-                    bitrate, UNUSED).sendToTarget();
+            Message.obtain(mVideoMessageHandler, MediaConstants.NOTIFY_BITRATE, bitrate, UNUSED)
+                    .sendToTarget();
         }
 
         @Override
         public void notifyVideoDataUsage(final long bytes) {
             ImsLog.d("Video Data Usage in bytes: " + bytes);
 
-            Message.obtain(mVideoMessageHandler, MediaConstants.NOTIFY_VIDEO_DATA_USAGE,
-                    bytes).sendToTarget();
+            Message.obtain(mVideoMessageHandler, MediaConstants.NOTIFY_VIDEO_DATA_USAGE, bytes)
+                    .sendToTarget();
+        }
 
+        @Override
+        public void notifyRtpReceptionStats(final RtpReceptionStats stats) {
+            ImsLog.d("notifyRtpReceptionStats: stats=" + stats);
+
+            Message.obtain(mVideoMessageHandler, MediaConstants.NOTIFY_RTP_RECEPTION_STATS, stats)
+                    .sendToTarget();
         }
     }
 
@@ -370,8 +368,7 @@ public class VideoSessionHandler extends MediaState {
 
             if (mVideoSessionCallbackHandler != null) {
                 mVideoSessionCallbackHandler.onNotifyQosInfo(
-                        remoteAddress.getAddress().getHostAddress(),
-                        remoteAddress.getPort(), true);
+                        remoteAddress.getAddress().getHostAddress(), remoteAddress.getPort(), true);
             }
         }
 
@@ -382,7 +379,8 @@ public class VideoSessionHandler extends MediaState {
             if (mVideoSessionCallbackHandler != null) {
                 mVideoSessionCallbackHandler.onNotifyQosInfo(
                         remoteAddress.getAddress().getHostAddress(),
-                        remoteAddress.getPort(), false);
+                        remoteAddress.getPort(),
+                        false);
             }
         }
     }
@@ -394,7 +392,7 @@ public class VideoSessionHandler extends MediaState {
      * @param parcel parcel received from Media Native
      */
     public void onImsMediaVideoMessage(final int requestType, Parcel parcel) {
-        ImsLog.v("requestType= " + requestType);
+        ImsLog.d("requestType= " + requestType);
 
         switch (requestType) {
             /** Requests (ImsStack -> ImsMedia) */
@@ -403,7 +401,7 @@ public class VideoSessionHandler extends MediaState {
                 setMediaState(MEDIA_STATE_OPENING);
                 mLocalIpAddress = parcel.readString();
                 mLocalPortNumber = parcel.readInt();
-                ImsLog.v("localIpAddress= " + mLocalIpAddress
+                ImsLog.d("localIpAddress= " + mLocalIpAddress
                         + " localPortNumber= " + mLocalPortNumber);
 
                 Message.obtain(mVideoMessageHandler, requestType).sendToTarget();
@@ -431,7 +429,7 @@ public class VideoSessionHandler extends MediaState {
             {
                 String remoteIpAddress = parcel.readString();
                 int remotePortNumber = parcel.readInt();
-                ImsLog.v("remoteIpAddress= " + remoteIpAddress
+                ImsLog.d("remoteIpAddress= " + remoteIpAddress
                         + " remotePortNumber= " + remotePortNumber);
 
                 Message.obtain(
@@ -443,9 +441,21 @@ public class VideoSessionHandler extends MediaState {
             {
                 MediaQualityThreshold threshold =
                         MediaQualityThreshold.CREATOR.createFromParcel(parcel);
-                ImsLog.v("onVideoSetMediaQualityThreshold: " + threshold.toString());
+                ImsLog.d("onVideoSetMediaQualityThreshold: " + threshold.toString());
 
                 Message.obtain(mVideoMessageHandler, requestType, threshold).sendToTarget();
+            }
+                break;
+            case MediaConstants.REQUEST_ADJUST_DELAY:
+                Message.obtain(
+                        mVideoMessageHandler, requestType, parcel.readInt()).sendToTarget();
+                break;
+            case MediaConstants.REQUEST_RTP_RECEPTION_STATS:
+            {
+                int intervalMs = parcel.readInt();
+
+                Message.obtain(
+                        mVideoMessageHandler, requestType, intervalMs, UNUSED).sendToTarget();
             }
                 break;
 
@@ -478,6 +488,13 @@ public class VideoSessionHandler extends MediaState {
             mVideoImsQosCallback = new VideoImsQosCallback();
         }
         mVideoQosAgent.setCallback(mVideoImsQosCallback);
+    }
+
+    /**
+     * Gets the sampling rate of the rtp timestamp
+     */
+    public int getSamplingRateKHz() {
+        return 90;
     }
 
     private void handleVideoOpenSession(VideoConfig videoConfig) {
@@ -530,6 +547,9 @@ public class VideoSessionHandler extends MediaState {
         if (mVideoSession != null) {
             mMediaManager.closeSession(mVideoSession);
             setMediaState(MEDIA_STATE_CLOSED);
+            mVideoMessageHandler.sendEmptyMessageDelayed(
+                    MediaConstants.RESPONSE_SESSION_CLOSED_TIMEOUT,
+                    MediaConstants.RESPONSE_WAIT_TIMEOUT);
         }
     }
 
@@ -542,8 +562,7 @@ public class VideoSessionHandler extends MediaState {
     private void handleVideoModifySession(VideoConfig videoConfig) {
         if (mVideoSession != null) {
             mVideoSession.modifySession(videoConfig);
-        }
-        else {
+        } else {
             handleVideoModifySessionResponse(videoConfig, ImsMediaSession.RESULT_NOT_READY);
         }
     }
@@ -552,7 +571,7 @@ public class VideoSessionHandler extends MediaState {
         if (remoteIpAddress != null && remotePortNumber != 0
                 && isNewRemoteAddress(remoteIpAddress, remotePortNumber)) {
             mVideoQosAgent.updateQosConnection(mRtpSocket.first, mRtpSocket.second,
-                    remoteIpAddress, remotePortNumber);
+                    remoteIpAddress, remotePortNumber, false);
             ImsLog.d("Updated QoS Connection for remoteIpAddress= " + remoteIpAddress
                     + " remotePortNumber= " + remotePortNumber);
         }
@@ -590,9 +609,22 @@ public class VideoSessionHandler extends MediaState {
         }
     }
 
+    private void handleVideoRequestRtpReceptionStats(int reportingIntervalMillis) {
+        if (mVideoSession != null) {
+            ImsLog.d("handleVideoRequestRtpReceptionStats - intervalMs=" + reportingIntervalMillis);
+            mVideoSession.requestRtpReceptionStats(reportingIntervalMillis);
+        }
+    }
+
     private void handleVideoDataUsageRequest() {
         if (mVideoSession != null) {
             mVideoSession.requestVideoDataUsage();
+        }
+    }
+
+    private void handleAdjustDelay(int delay) {
+        if (mVideoSession != null) {
+            mVideoSession.adjustDelay(delay);
         }
     }
 
@@ -620,8 +652,7 @@ public class VideoSessionHandler extends MediaState {
                 Message.obtain(mVideoMessageHandler, MediaConstants.REQUEST_SET_DISPLAY_SURFACE)
                         .sendToTarget();
             }
-        }
-        else {
+        } else {
             setMediaState(MEDIA_STATE_IDLE);
         }
 
@@ -669,12 +700,18 @@ public class VideoSessionHandler extends MediaState {
     }
 
     private void handleVideoDataUsageNotification(final long bytes) {
-        if (mVideoSessionCallbackHandler != null) {
-            mVideoSessionCallbackHandler.onNotifyVideoDataUsage(bytes);
+        if (mMtcMediaVideoCallProvider != null) {
+            mMtcMediaVideoCallProvider.onNotifyVideoDataUsage(bytes);
         }
     }
 
-    private boolean isNewRemoteAddress(String remoteIpAddress, int remotePortNumber)  {
+    private void handleNotifyRtpReceptionStats(final RtpReceptionStats stats) {
+        if (mVideoSessionCallbackHandler != null) {
+            mVideoSessionCallbackHandler.onNotifyRtpReceptionStats(stats);
+        }
+    }
+
+    private boolean isNewRemoteAddress(String remoteIpAddress, int remotePortNumber) {
         if (remoteIpAddress != null) {
             InetSocketAddress remoteSocketAddress =
                     (InetSocketAddress) (mRtpSocket.first).getRemoteSocketAddress();

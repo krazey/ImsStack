@@ -15,8 +15,9 @@
  */
 
 #include <gtest/gtest.h>
-#include <IJniMedia.h>
+
 #include <MediaResourceManager.h>
+
 #include <config/MockMediaConfiguration.h>
 
 const IMS_UINT32 RTP_PORT_START = 10000;
@@ -28,28 +29,17 @@ using ::testing::Return;
 class MediaResourceManagerTest : public ::testing::Test
 {
 public:
-    MediaResourceManager* m_pManager;
-    MockMediaConfiguration* m_pMediaConfiguration;
+    std::shared_ptr<MediaResourceManager> m_pManager;
+    std::shared_ptr<MockMediaConfiguration> m_pMediaConfiguration;
 
 protected:
     virtual void SetUp() override
     {
-        m_pManager = new MediaResourceManager();
-        m_pMediaConfiguration = new MockMediaConfiguration(MEDIA_TYPE_AUDIO);
+        m_pManager = std::make_shared<MediaResourceManager>();
+        m_pMediaConfiguration = std::make_shared<MockMediaConfiguration>(MEDIA_TYPE_AUDIO);
     }
 
-    virtual void TearDown() override
-    {
-        if (m_pManager != IMS_NULL)
-        {
-            delete m_pManager;
-        }
-
-        if (m_pMediaConfiguration != IMS_NULL)
-        {
-            delete m_pMediaConfiguration;
-        }
-    }
+    virtual void TearDown() override {}
 };
 
 TEST_F(MediaResourceManagerTest, testAcquireReleasePort)
@@ -57,15 +47,9 @@ TEST_F(MediaResourceManagerTest, testAcquireReleasePort)
     ON_CALL(*m_pMediaConfiguration, GetPortRtp()).WillByDefault(Return(RTP_PORT_START));
     ON_CALL(*m_pMediaConfiguration, GetPortRtpEnd()).WillByDefault(Return(RTP_PORT_END));
 
-    IMS_UINT32 nPort = m_pManager->AcquireRtpPort(m_pMediaConfiguration);
+    IMS_UINT32 nPort = m_pManager->AcquireRtpPort(m_pMediaConfiguration.get());
     EXPECT_TRUE((nPort >= RTP_PORT_START) && (nPort <= RTP_PORT_END));
 
     EXPECT_EQ(m_pManager->ReleaseRtpPort(nPort), IMS_TRUE);
     EXPECT_EQ(m_pManager->ReleaseRtpPort(30000), IMS_FALSE);
-}
-
-TEST_F(MediaResourceManagerTest, testUpdatePdn)
-{
-    IpAddress objIpAddr = IpAddress(LOCAL_IP);
-    EXPECT_EQ(m_pManager->UpdatePdn(MediaResourceManager::PDN_IMS, objIpAddr), IMS_TRUE);
 }

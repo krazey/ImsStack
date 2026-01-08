@@ -16,9 +16,11 @@
 #ifndef DOCUMENT_BUILDER_H_
 #define DOCUMENT_BUILDER_H_
 
-#include "IDocument.h"
+#include "ImsTypeDef.h"
 
+class AString;
 class DocumentBuilderPrivate;
+class IDocument;
 
 /**
  * @brief This class provides the API to obtain DOM document instances from an XML document.

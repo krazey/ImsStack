@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,44 +17,70 @@
 #ifndef VIDEO_CONTROLLER_H_
 #define VIDEO_CONTROLLER_H_
 
-#include "MediaDef.h"
 #include "IMediaSessionListener.h"
 #include "config/VideoConfiguration.h"
-#include "video/VideoMediaSession.h"
+#include "video/VideoSession.h"
 #include "video/VideoNego.h"
 
 class VideoController
 {
 public:
+    enum VideoCallSessionState
+    {
+        EARLY_SESSION = 0,
+        CONFIRMED_SESSION,  // in confirmed already
+    };
+
     VideoController();
-    ~VideoController();
-    IMS_BOOL SendMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
+    virtual ~VideoController();
 
     /**
-     * @brief Create a VideoMediaSession instance with given parameters
+     * @brief Set the update condition for next transition
+     *
+     * @param bConfirmed it is IMS_TRUE when the session changed to confirmed session
+     */
+    virtual void SetCallSessionState(IN IMS_BOOL bConfirmed);
+
+    /**
+     * @brief Sends a message with parameters to the underlying video session or component.
+     *
+     * This method is typically used to forward control commands (like camera selection,
+     * orientation changes, etc.) received from the MediaSession down to the actual
+     * video processing layer.
+     *
+     * @param[in] nMsg The message identifier (e.g., IJniMedia::SETSURFACE_CMD).
+     * @param[in] pParam A parameter associated with the message, often a pointer cast to IMS_UINTP.
+     *                   The interpretation depends on the specific message ID.
+     * @return IMS_BOOL Returns IMS_TRUE if the message was successfully processed or forwarded,
+     *                  IMS_FALSE otherwise (e.g., invalid message ID, session not ready).
+     */
+    virtual IMS_BOOL SendMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
+
+    /**
+     * @brief Create a VideoSession instance with given parameters
      *
      * @param pListener A listener to IMediaSession
      * @param pConfig The configuration instance
      * @return IMS_BOOL Returns IMS_TRUE when the session created successfully, IMS_FALSE when it is
      * failed with invalid arguments
      */
-    IMS_BOOL CreateSession(IMediaSessionListener* pListener, VideoConfiguration* pConfig);
+    virtual IMS_BOOL CreateSession(IMediaSessionListener* pListener, VideoConfiguration* pConfig);
 
     /**
-     * @brief Send openSession message from the given id of the VideoMediaSession instance
+     * @brief Send openSession message from the given id of the VideoSession instance
      *
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
-    IMS_BOOL OpenSession();
+    virtual IMS_BOOL OpenSession();
 
     /**
-     * @brief Update session and send modifySesion of confirmConfig based on the update condition
+     * @brief Update session and send modifySession of confirmConfig based on the update condition
      *
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
-    IMS_BOOL UpdateSession();
+    virtual IMS_BOOL UpdateSession();
 
     /**
      * @brief Send closeSession message to java
@@ -63,7 +89,7 @@ public:
      * failed to send
      *
      */
-    IMS_BOOL CloseSession();
+    virtual IMS_BOOL CloseSession();
 
     /**
      * @brief Update local address from the parameters of the negotiation profile
@@ -71,40 +97,69 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when updates successfully, IMS_FALSE when it is
      * failed to update
      */
-    IMS_BOOL UpdateLocalAddress(IN VideoNego* pNego);
+    virtual IMS_BOOL UpdateLocalAddress(IN std::shared_ptr<VideoNego> pNego);
 
     /**
-     * @brief Update rtp config parameters from the negotiation profile
+     * @brief Update rtp config parameters from the negotiation profile.
      *
+     * @param pNego The VideoNego object to get the local, peer and the negotiated profile.
+     * @param bHold The option to enable the video hold when the direction is not sendrecv.
      * @return IMS_BOOL Returns IMS_TRUE when updates successfully, IMS_FALSE when it is
-     * failed to update
+     * failed to update.
      */
-    IMS_BOOL UpdateRtpConfig(IN VideoNego* pNego);
+    virtual IMS_BOOL UpdateRtpConfig(IN std::shared_ptr<VideoNego> pNego, IMS_BOOL bHold);
 
     /**
      * @brief Update AccessNetwork information in the RtpConfig
      *
      * @param nAccessNetwork : AccessNetwork information
      */
-    void UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork);
+    virtual void UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork);
+
+    /**
+     * @brief Set MTU size in the VideoConfig
+     *
+     * @param nMtu : The MTU size to be set to VideoConfig
+     */
+    virtual void SetMtu(IN IMS_SINT32 nMtu);
 
     /**
      * @brief Update MediaQualityThreshold and send message to java
+     * This method calculates the appropriate media quality thresholds and sends them
+     * to the media framework.
      *
-     * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
-     * failed to send
+     * @param bIsConference A flag to indicate if the session is a conference call.
+     * @return IMS_BOOL Returns IMS_TRUE if the quality threshold was applied successfully,
+     * IMS_FALSE if it failed to send
      */
-    IMS_BOOL UpdateQualityThreshold(IN VideoNego* pNego);
+    virtual IMS_BOOL ApplyQualityThreshold(IN IMS_BOOL bIsConference);
 
     /**
      * @brief Check there is a session opened
      *
      * @return IMS_BOOL Return IMS_TRUE when there is a session created
      */
-    IMS_BOOL IsSessionOpened();
+    virtual IMS_BOOL IsSessionOpened();
+
+    /**
+     * @brief Set p-early media header
+     *
+     * @param nNegoId The identification to get the audio profile from negotiated parameter
+     * @param ePemType The p-early media header value
+     */
+    virtual void SetMediaPemType(IN MEDIA_PEM_TYPE ePemType);
+
+    /**
+     * @brief Send RequestRtpReceptionStats api for the AV sync feature
+     *
+     * @param nReportingIntervalMs The interval period to notify the rtpReceptionStats
+     * @return IMS_BOOL returns IMS_TRUE when the requestRtpReceptionStats request is triggered
+     */
+    virtual IMS_BOOL RequestRtpReceptionStats(IN IMS_UINT32 nReportingIntervalMs);
 
 private:
-    VideoMediaSession* m_pSession;
+    VideoSession* m_pSession;
+    IMS_UINT32 m_eCallState;
     IpAddress m_objLocalAddr;
     IMS_UINT32 m_nPort;
 };

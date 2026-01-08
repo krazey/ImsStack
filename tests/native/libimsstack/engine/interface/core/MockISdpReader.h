@@ -23,7 +23,7 @@
 class MockISdpReader : public ISdpReader
 {
 public:
-    virtual ~MockISdpReader() = default;
+    ~MockISdpReader() override = default;
 
     MOCK_METHOD(ISessionDescriptor*, GetSessionDescriptor, (), (const, override));
     MOCK_METHOD(const ImsList<IMediaDescriptor*>&, GetMediaDescriptors, (), (const, override));

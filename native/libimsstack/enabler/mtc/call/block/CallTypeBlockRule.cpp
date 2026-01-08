@@ -19,18 +19,20 @@
 #include "ImsTypeDef.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
+#include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
-#include "call/UpdatingInfo.h"
 #include "call/block/CallTypeBlockRule.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "media/IMedia.h"
 #include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-CallTypeBlockRule::CallTypeBlockRule(IN IMtcCallContext& objContext) :
+CallTypeBlockRule::CallTypeBlockRule(IN IMtcCallContext& objContext, IN CallType eCallType) :
         m_objContext(objContext),
-        m_objConfiguration(objContext.GetConfigurationProxy())
+        m_objConfiguration(objContext.GetConfigurationProxy()),
+        m_eCallType(eCallType)
 {
 }
 
@@ -39,95 +41,99 @@ PUBLIC VIRTUAL CallTypeBlockRule::~CallTypeBlockRule() {}
 PUBLIC VIRTUAL CallTypeBlockRule::Result CallTypeBlockRule::Check(
         IN IMtcBlockRuleCheckListener& /* objListener */)
 {
-    Result objResult = CheckSupportTextVideo();
-    if (objResult.eStatus != Result::Status::UNBLOCKED)
+    if (IsBlockedByTextVideoCall())
     {
-        return objResult;
-    }
-
-    return CheckSupportVideoMultipleCall();
-}
-
-PRIVATE CallTypeBlockRule::Result CallTypeBlockRule::CheckSupportTextVideo()
-{
-    IMS_SINT32 nPolicyForTextAndVideo =
-            m_objConfiguration.GetInt(Feature::POLICY_FOR_TEXT_WITH_VIDEO);
-    if (nPolicyForTextAndVideo == CarrierConfig::ImsVt::TEXT_VIDEO_ALLOWED)
-    {
-        return Result(Result::Status::UNBLOCKED);
-    }
-
-    CallType eTargetCallToCheck;
-    if (m_objContext.GetCall().GetState() == IMtcCall::State::IDLE)
-    {
-        eTargetCallToCheck = m_objContext.GetSession()->GetCallType();
-    }
-    else if (nPolicyForTextAndVideo == CarrierConfig::ImsVt::TEXT_VIDEO_NOT_ALLOWED)
-    {
-        // not supporting text and video media description simultaneously irrespective of port
-        // eg. VZW
-        eTargetCallToCheck = m_objContext.GetMessageUtils().GetCallTypeFromSdp(
-                &m_objContext.GetSession()->GetISession(), IMS_FALSE, IMS_TRUE, IMS_FALSE);
-    }
-    else  // TEXT_VIDEO_NOT_ALLOWED_IF_ACTIVE
-    {
-        // not supporting text and video media description simultaneously.
-        // port 0 media is not included.
-        // eg. ATT
-        eTargetCallToCheck = m_objContext.GetUpdatingInfo().GetTargetCallType();
-    }
-
-    if (eTargetCallToCheck == CallType::VIDEO_RTT)
-    {
-        IMS_TRACE_I("CheckSupportTextVideo : Video RTT is not supported", 0, 0, 0);
         return Result(Result::Status::BLOCKED,
                 CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_BY_CALL_TYPE));
     }
+
+    if (IsBlockedByVideoMultipleCall())
+    {
+        CallReasonInfo objReason = m_objContext.GetCallInfo().ePeerType == PeerType::MO
+                ? CallReasonInfo(CODE_LOCAL_CALL_EXCEEDED)
+                : CallReasonInfo(CODE_REJECT_MAX_CALL_LIMIT_REACHED);
+        return Result(Result::Status::BLOCKED, objReason);
+    }
+
+    if (m_objContext.GetCallInfo().bConference &&
+            HasRttCall(m_objContext.GetCallManager().GetCalls()))
+    {
+        return Result(
+                Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_RTT_ON));
+    }
+
     return Result(Result::Status::UNBLOCKED);
 }
 
-PRIVATE CallTypeBlockRule::Result CallTypeBlockRule::CheckSupportVideoMultipleCall()
+PRIVATE IMS_BOOL CallTypeBlockRule::IsBlockedByTextVideoCall()
 {
-    if (m_objConfiguration.Is(Feature::ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL))
+    IMS_SINT32 nPolicyForTextAndVideo =
+            m_objConfiguration.GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT);
+    if (nPolicyForTextAndVideo == ConfigVt::TEXT_VIDEO_ALLOWED)
     {
-        return Result(Result::Status::UNBLOCKED);
+        return IMS_FALSE;
+    }
+
+    if ((nPolicyForTextAndVideo == ConfigVt::TEXT_VIDEO_NOT_ALLOWED ||
+                nPolicyForTextAndVideo == ConfigVt::TEXT_VIDEO_NOT_ALLOWED_IF_ACTIVE) &&
+            m_eCallType == CallType::VIDEO_RTT)
+    {
+        IMS_TRACE_I("IsBlockedByTextVideoCall : Video RTT is not supported", 0, 0, 0);
+        return IMS_TRUE;
+    }
+
+    if (nPolicyForTextAndVideo == ConfigVt::TEXT_VIDEO_NOT_ALLOWED)
+    {
+        IMS_SINT32 nVideoPort = GetRemotePort(SdpMedia::TYPE_VIDEO);
+        IMS_SINT32 nTextPort = GetRemotePort(SdpMedia::TYPE_TEXT);
+
+        IMS_TRACE_I(
+                "IsBlockedByTextVideoCall : video port=%d, text port=%d", nVideoPort, nTextPort, 0);
+
+        if (HasVideoRttSdp(nVideoPort, nTextPort))
+        {
+            // Allow downgrade request
+            if (nVideoPort == 0 && nTextPort == 0)
+            {
+                return IMS_FALSE;
+            }
+            // Block simultaneous video and text descriptions (e.g., VZW)
+            IMS_TRACE_I("IsBlockedByTextVideoCall : SDP contains video and text", 0, 0, 0);
+            return IMS_TRUE;
+        }
+    }
+
+    return IMS_FALSE;
+}
+
+PRIVATE IMS_BOOL CallTypeBlockRule::IsBlockedByVideoMultipleCall()
+{
+    if (m_objConfiguration.GetBoolean(
+                ConfigVoice::KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL))
+    {
+        return IMS_FALSE;
     }
 
     ImsList<IMtcCall*> lstOtherCalls = m_objContext.GetOtherCalls();
     if (lstOtherCalls.IsEmpty())
     {
-        return Result(Result::Status::UNBLOCKED);
+        return IMS_FALSE;
     }
 
-    if (!HasVideoCall(lstOtherCalls))
+    if (IsVideoCall(m_eCallType) || HasVideoCall(lstOtherCalls))
     {
-        CallType eTargetCallToCheck;
-        if (m_objContext.GetCall().GetState() == IMtcCall::State::ESTABLISHED)
-        {
-            eTargetCallToCheck = m_objContext.GetUpdatingInfo().GetTargetCallType();
-        }
-        else
-        {
-            eTargetCallToCheck = m_objContext.GetSession()->GetCallType();
-        }
-
-        if (!IsVideoCall(eTargetCallToCheck))
-        {
-            return Result(Result::Status::UNBLOCKED);
-        }
+        IMS_TRACE_I("IsBlockedByVideoMultipleCall : Video call cannot be placed with another call",
+                0, 0, 0);
+        return IMS_TRUE;
     }
 
-    IMS_TRACE_I("CheckSupportVideoMultipleCall : Video call cannot be placed with another call", 0,
-            0, 0);
+    return IMS_FALSE;
+}
 
-    if (m_objContext.GetCallInfo().ePeerType == PeerType::MO)
-    {
-        return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_CALL_EXCEEDED));
-    }
-    else
-    {
-        return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_REJECT_MAX_CALL_LIMIT_REACHED));
-    }
+PRIVATE IMS_SINT32 CallTypeBlockRule::GetRemotePort(IN IMS_SINT32 eMediaType) const
+{
+    ISession* piSession = &m_objContext.GetSession()->GetISession();
+    return m_objContext.GetMessageUtils().GetRemotePortFromSdp(piSession, eMediaType);
 }
 
 PRIVATE IMS_BOOL CallTypeBlockRule::HasVideoCall(IN const ImsList<IMtcCall*>& lstCalls)
@@ -135,6 +141,25 @@ PRIVATE IMS_BOOL CallTypeBlockRule::HasVideoCall(IN const ImsList<IMtcCall*>& ls
     for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
     {
         if (IsVideoCall(lstCalls.GetAt(nIndex)->GetCallType()))
+        {
+            return IMS_TRUE;
+        }
+    }
+
+    return IMS_FALSE;
+}
+
+PRIVATE IMS_BOOL CallTypeBlockRule::HasVideoRttSdp(IN IMS_SINT32 videoPort, IN IMS_SINT32 textPort)
+{
+    return videoPort != -1 && textPort != -1;
+}
+
+PRIVATE IMS_BOOL CallTypeBlockRule::HasRttCall(IN const ImsList<IMtcCall*>& lstCalls)
+{
+    for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
+    {
+        CallType eCallType = lstCalls.GetAt(nIndex)->GetCallType();
+        if (eCallType == CallType::RTT || eCallType == CallType::VIDEO_RTT)
         {
             return IMS_TRUE;
         }

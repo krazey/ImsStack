@@ -16,8 +16,6 @@
 #ifndef SIP_STREAM_SOCKET_NOTIFIER_H_
 #define SIP_STREAM_SOCKET_NOTIFIER_H_
 
-#include "private/SipConfig.h"
-
 #include "SipSocket.h"
 
 class ISipStreamSocketListener;
@@ -26,7 +24,7 @@ class SipStreamSocketNotifier : public SipSocket
 {
 public:
     explicit SipStreamSocketNotifier(IN IMS_SINT32 nSlotId);
-    virtual ~SipStreamSocketNotifier();
+    ~SipStreamSocketNotifier() override;
 
     SipStreamSocketNotifier(IN const SipStreamSocketNotifier&) = delete;
     SipStreamSocketNotifier& operator=(IN const SipStreamSocketNotifier&) = delete;

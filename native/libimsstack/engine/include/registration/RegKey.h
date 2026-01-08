@@ -36,7 +36,7 @@ public:
             m_nFlowId(other.m_nFlowId)
     {
     }
-    inline ~RegKey() {}
+    ~RegKey() = default;
 
 public:
     inline RegKey& operator=(IN const RegKey& other)

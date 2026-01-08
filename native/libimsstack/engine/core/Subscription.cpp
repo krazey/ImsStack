@@ -22,6 +22,7 @@
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ISipServerConnection.h"
+#include "ImsCoreContext.h"
 #include "Message.h"
 #include "Service.h"
 #include "SipConfigProxy.h"
@@ -40,7 +41,7 @@ __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
 Subscription::Subscription(IN Service* pService, IN const AString& strEvent,
-        IN IMS_BOOL bImplicitRoutingRequired /*= IMS_FALSE*/) :
+        IN IMS_BOOL bImplicitRoutingRequired /*= IMS_TRUE*/) :
         ServiceMethod(pService),
         m_nState(STATE_INACTIVE),
         m_strEvent(strEvent),
@@ -99,6 +100,7 @@ PUBLIC VIRTUAL void Subscription::Destroy()
 {
     CleanupOnDestroy();
     ServiceMethod::Destroy();
+    GetService()->DeregisterMethod(this);
 }
 
 PUBLIC VIRTUAL void Subscription::SetMessageMediator(IN IMessageMediator* piMediator)
@@ -374,9 +376,6 @@ PUBLIC
 void Subscription::SetImplicitRoutingRequired(IN IMS_BOOL bFlag)
 {
     m_bImplicitRoutingRequired = bFlag;
-
-    // FIXME: If the routing address needs to be provisioned by the application,
-    // please add a second argument for it.
 }
 
 PUBLIC
@@ -586,7 +585,7 @@ PROTECTED VIRTUAL IMS_BOOL Subscription::InitInstance()
     DialogMethodManager::GetInstance()->AddMethod(GetName(), this);
     ForkedDialogMethodManager::GetInstance()->AddMethod(GetName(), this);
     // CALLER_PREFERENCE_MANAGER
-    CallerPreferenceManager::GetInstance()->CreatePreferenceWrapper(
+    ImsCoreContext::GetInstance()->GetCallerPreferenceManager()->CreatePreferenceWrapper(
             GetName(), AString::ConstNull());
     GetService()->RegisterMethod(this);
 
@@ -600,7 +599,7 @@ PROTECTED VIRTUAL IMS_BOOL Subscription::InitInstance()
 
 PROTECTED VIRTUAL void Subscription::NotifySipResponse(IN ISipClientConnection* piScc)
 {
-    ISipMessage* piSipMsg = piScc->GetMessage();
+    const ISipMessage* piSipMsg = piScc->GetMessage();
     const SipMethod& objMethod = piSipMsg->GetMethod();
 
     IMS_TRACE_I("The response is received in the %s", StateToString(GetState()), 0, 0);
@@ -675,26 +674,28 @@ PROTECTED VIRTUAL void Subscription::NotifySipResponse(IN ISipClientConnection* 
         if ((nOperation == SubState::OPERATION_CREATE) ||
                 (nOperation == SubState::OPERATION_REFRESH))
         {
+            CallerPreferenceManager* pCallerPreferenceManager =
+                    ImsCoreContext::GetInstance()->GetCallerPreferenceManager();
+
             if (nOperation == SubState::OPERATION_CREATE)
             {
                 ISipDialog* piDialog = GetDialog();
 
                 if ((piDialog != IMS_NULL) && (piDialog->GetState() == ISipDialog::STATE_CONFIRMED))
                 {
-                    CallerPreferenceManager::GetInstance()->UpdateDialogId(
-                            GetName(), piDialog->GetDialogId());
+                    pCallerPreferenceManager->UpdateDialogId(GetName(), piDialog->GetDialogId());
                 }
             }
 
-            IMessage* piMessage = GetPreviousRequest(IMessage::SUBSCRIPTION_SUBSCRIBE);
+            const IMessage* piMessage = GetPreviousRequest(IMessage::SUBSCRIPTION_SUBSCRIBE);
 
             if (piMessage != IMS_NULL)
             {
-                ISipMessage* piPreviousSIPMsg = piMessage->GetMessage();
+                const ISipMessage* piPreviousSIPMsg = piMessage->GetMessage();
 
                 if (piPreviousSIPMsg != IMS_NULL)
                 {
-                    CallerPreferenceManager::GetInstance()->UpdateAcceptContacts(
+                    pCallerPreferenceManager->UpdateAcceptContacts(
                             GetName(), piPreviousSIPMsg->GetHeaders(ISipHeader::ACCEPT_CONTACT));
                 }
             }
@@ -791,7 +792,7 @@ PROTECTED VIRTUAL IMS_BOOL Subscription::Dialog_Compare(IN ISipServerConnection*
         if (GetState() == STATE_PENDING)
         {
             IMS_SINT32 nOperation = m_pSubState->GetOperation();
-            ISipClientConnection* piScc = IMS_NULL;
+            const ISipClientConnection* piScc = IMS_NULL;
 
             IMS_TRACE_I("Checks if the early NOTIFY is received or not ...", 0, 0, 0);
 
@@ -1001,8 +1002,7 @@ PROTECTED VIRTUAL IMS_BOOL Subscription::ForkedDialog_NotifyRequest(IN ISipServe
 
     if (!m_objForkedSubscriptions.Append(pSubscription))
     {
-        delete pSubscription;
-
+        pSubscription->Destroy();
         GetService()->SendResponse(piSsc, SipStatusCode::SC_500);
         piSsc->Close();
         return IMS_FALSE;
@@ -1098,7 +1098,7 @@ PROTECTED VIRTUAL IMS_BOOL Subscription::Refreshable_RefreshStarted()
         }
 
         ISipMessage* piSipMsg = piScc->GetMessage();
-        ISipMessage* piInitialSipMsg = m_pSubState->GetInitialMessage();
+        const ISipMessage* piInitialSipMsg = m_pSubState->GetInitialMessage();
 
         if (piInitialSipMsg != IMS_NULL)
         {
@@ -1167,7 +1167,7 @@ PRIVATE
 void Subscription::CheckDialogNCallListener()
 {
     // Check if the dialog is terminated or not
-    ISipDialog* piDialog = GetDialog();
+    const ISipDialog* piDialog = GetDialog();
 
     if (piDialog != IMS_NULL)
     {
@@ -1198,10 +1198,8 @@ void Subscription::CleanupOnDestroy()
     ForkedDialogMethodManager::GetInstance()->RemoveMethod(GetName());
 
     // CALLER_PREFERENCE_MANAGER
-    CallerPreferenceManager::GetInstance()->DestroyPreferenceWrapper(GetName());
-
-    // Clean up the resources
-    GetService()->DeregisterMethod(this);
+    ImsCoreContext::GetInstance()->GetCallerPreferenceManager()->DestroyPreferenceWrapper(
+            GetName());
 }
 
 PRIVATE
@@ -1256,7 +1254,7 @@ void Subscription::SetState(IN IMS_SINT32 nState)
 }
 
 PRIVATE
-void Subscription::UpdateResponse(IN ISipClientConnection* piScc)
+void Subscription::UpdateResponse(IN const ISipClientConnection* piScc)
 {
     switch (m_pSubState->GetOperation())
     {

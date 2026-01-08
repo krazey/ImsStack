@@ -35,7 +35,7 @@ using ::testing::Return;
 using ::testing::ReturnNull;
 using ::testing::ReturnRef;
 
-__IMS_TRACE_TAG_USER_DECL__("UCE");
+__IMS_TRACE_TAG_UCE__;
 
 class TestUceOptions : public UceOptions
 {
@@ -45,7 +45,7 @@ public:
             UceOptions(AString("UceOptionsManager"), piCoreService, piCapabilities, 1, IMS_TRUE, 0)
     {
     }
-    virtual ~TestUceOptions() {}
+    virtual ~TestUceOptions() override {}
 
     IMS_UINT32 getKey() const { return m_nKey; }
 

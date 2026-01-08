@@ -1,0 +1,80 @@
+// Copyright (C) 2023 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package {
+    default_team: "trendy_team_pmw_telephony",
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+java_defaults {
+    name: "ims_stack_test_defaults",
+    certificate: "platform",
+    platform_apis: true,
+
+    srcs: [
+        "src/**/*.java",
+    ],
+    resource_dirs: [
+        "res",
+    ],
+    javacflags: [
+        "-Xlint",
+    ],
+    static_libs: [
+        "androidx.test.core",
+        "androidx.test.rules",
+        "frameworks-base-testutils",
+        "imsstack",
+        "junit",
+        "mockito-target",
+        "platform-test-annotations",
+        "testables",
+        "truth",
+        "scm_proto",
+    ],
+    libs: [
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
+        "android.test.runner.stubs.system",
+    ],
+    jni_libs: [
+        "libimsstack",
+    ],
+    test_suites: ["general-tests"],
+}
+
+java_library {
+    name: "scm_proto",
+    proto: {
+        type: "lite",
+        canonical_path_from_root: false,
+    },
+    srcs: [
+        "proto/scm.proto",
+    ],
+}
+
+android_test {
+    name: "ImsStackTest",
+    defaults: ["ims_stack_test_defaults"],
+    manifest: "AndroidManifest.xml",
+    test_config: "AndroidTest.xml",
+}
+
+android_test {
+    name: "ImsStackPresubmitTest",
+    defaults: ["ims_stack_test_defaults"],
+    manifest: "AndroidManifestPresubmitTest.xml",
+    test_config: "AndroidPresubmitTest.xml",
+}

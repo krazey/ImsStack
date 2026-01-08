@@ -13,16 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
-#include "Configuration.h"
 #include "IConfigurable.h"
+#include "ISipConfigV.h"
 #include "ImsConfig.h"
+
+#include "Engine.h"
+#include "IConfiguration.h"
 
 #include "base/ConfigApp.h"
 
-__IMS_TRACE_TAG_USER_DECL__("ConfigApp");
+__IMS_TRACE_TAG_CONF__;
 
 PUBLIC
 ConfigApp::ConfigApp(IN const AString& strAppName) :
@@ -70,12 +72,12 @@ PROTECTED VIRTUAL void ConfigApp::UpdateAllForHidden(IN IMS_SINT32 nItem, IN IMS
             _TRACE_B_(bSubscriberChanged), _TRACE_B_(bSipConfigChanged),
             _TRACE_B_(bSipConfigVChanged));
 
-    Configuration* pConfiguration = Configuration::GetInstance();
+    const IConfiguration* piConfiguration = Engine::GetConfiguration();
 
     // SUBSCRIBER
     if (bSubscriberChanged)
     {
-        const ISubscriberConfig* piSubConfig = pConfiguration->GetSubscriberConfig(GetSlotId());
+        const ISubscriberConfig* piSubConfig = piConfiguration->GetSubscriberConfig(GetSlotId());
 
         if (piSubConfig != IMS_NULL)
         {
@@ -91,7 +93,7 @@ PROTECTED VIRTUAL void ConfigApp::UpdateAllForHidden(IN IMS_SINT32 nItem, IN IMS
     // SIP configuration
     if (bSipConfigChanged)
     {
-        const ISipConfig* piSipConfig = pConfiguration->GetSipConfig(GetSlotId());
+        const ISipConfig* piSipConfig = piConfiguration->GetSipConfig(GetSlotId());
 
         if (piSipConfig != IMS_NULL)
         {
@@ -111,7 +113,7 @@ PROTECTED VIRTUAL void ConfigApp::UpdateAllForHidden(IN IMS_SINT32 nItem, IN IMS
     // SIP configuration V
     if (bSipConfigVChanged)
     {
-        const ISipConfig* piSipConfig = pConfiguration->GetSipConfig(GetSlotId());
+        const ISipConfig* piSipConfig = piConfiguration->GetSipConfig(GetSlotId());
 
         if (piSipConfig != IMS_NULL)
         {
@@ -140,12 +142,12 @@ PROTECTED VIRTUAL void ConfigApp::UpdateAllForDm(IN IMS_SINT32 nItem, IN IMS_SIN
     IMS_TRACE_I("UpdateAllForDm :: sip=%s, sip-v=%s", _TRACE_B_(bSipConfigChanged),
             _TRACE_B_(bSipConfigVChanged), 0);
 
-    Configuration* pConfiguration = Configuration::GetInstance();
+    const IConfiguration* piConfiguration = Engine::GetConfiguration();
 
     // SIP configuration
     if (bSipConfigChanged)
     {
-        const ISipConfig* piSipConfig = pConfiguration->GetSipConfig(GetSlotId());
+        const ISipConfig* piSipConfig = piConfiguration->GetSipConfig(GetSlotId());
 
         if (piSipConfig != IMS_NULL)
         {
@@ -165,7 +167,7 @@ PROTECTED VIRTUAL void ConfigApp::UpdateAllForDm(IN IMS_SINT32 nItem, IN IMS_SIN
     // SIP configuration V
     if (bSipConfigVChanged)
     {
-        const ISipConfig* piSipConfig = pConfiguration->GetSipConfig(GetSlotId());
+        const ISipConfig* piSipConfig = piConfiguration->GetSipConfig(GetSlotId());
 
         if (piSipConfig != IMS_NULL)
         {
@@ -249,7 +251,7 @@ PROTECTED
 IMS_BOOL ConfigApp::UpdateSipConifgV(
         IN IMS_SINT32 nCpi, IN const AString& /*strServiceId = AString::ConstNull()*/)
 {
-    const ISipConfig* piSipConfig = Configuration::GetInstance()->GetSipConfig(GetSlotId());
+    const ISipConfig* piSipConfig = Engine::GetConfiguration()->GetSipConfig(GetSlotId());
 
     if (piSipConfig != IMS_NULL)
     {
@@ -279,7 +281,7 @@ PROTECTED
 IMS_BOOL ConfigApp::UpdateSubscriberConfig(IN IMS_SINT32 nCpi)
 {
     const ISubscriberConfig* piSubsConfig =
-            Configuration::GetInstance()->GetSubscriberConfig(GetSlotId());
+            Engine::GetConfiguration()->GetSubscriberConfig(GetSlotId());
 
     if (piSubsConfig != IMS_NULL)
     {

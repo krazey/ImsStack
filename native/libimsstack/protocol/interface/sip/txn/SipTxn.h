@@ -16,23 +16,13 @@
 #ifndef __SIP_TXN_H__
 #define __SIP_TXN_H__
 
-#include "txn/SipTxn.h"
 #include "ISipUserData.h"
+#include "SipRefBase.h"
 #include "SipTimerContext.h"
+#include "msg/SipMessage.h"
+#include "transport/SipTransportInfo.h"
 #include "txn/SipTxnKey.h"
 #include "txn/SipTxnTimerValues.h"
-#include "msg/SipMessage.h"
-#include "SipRefBase.h"
-#include "transport/SipTransportInfo.h"
-
-#define TXN_OPT_FETCH  0
-#define TXN_OPT_CREATE 1
-#define TXN_OPT_REMOVE 2
-
-extern SIP_BOOL Sip_Cbk_FetchTransaction(IN SIP_VOID* pvTxnKey, IN SIP_INT32 nOption,
-        OUT SIP_VOID** ppvOutTxnKey, OUT SIP_VOID** ppvTxn);
-extern SIP_BOOL Sip_Cbk_ReleaseTransaction(IN SIP_VOID* pvTxnKey, IN SIP_INT32 nOption,
-        OUT SIP_VOID** ppvOutTxnKey, OUT SIP_VOID** ppvTxn);
 
 class SipTxn : public SipRefBase
 {
@@ -49,11 +39,11 @@ public:
     /* Type of Transaction is defined */
     enum
     {
-        INV_CLI_TXN = 0,
-        INV_SER_TXN,
-        NON_INV_CLI_TXN,
-        NON_INV_SER_TXN,
-        INVALID_TXN
+        INVITE_CLIENT = 0,
+        INVITE_SERVER,
+        NON_INVITE_CLIENT,
+        NON_INVITE_SERVER,
+        INVALID
     };
 
     enum
@@ -86,8 +76,6 @@ public:
         STATUS_ERROR_ON_SEND,
         /* When txn handler fails to handle receive message --> failure conditions */
         STATUS_INVALID_MESSAGE,
-        /*For Handling Stray 2xx*/
-        STATUS_2XX_STRAY_RESP,
         STATUS_STRAY_PRACK,
         STATUS_INVALID
 
@@ -109,6 +97,8 @@ public:
         TIMER_I,
         TIMER_J,
         TIMER_K,
+        TIMER_L,
+        TIMER_M,
         TIMER_OTHER,
         TIMER_TYPE_INVALID
     };
@@ -116,12 +106,13 @@ public:
     enum
     {
         INV_CLI_SEND_INV_REQ_EVT = 0,
-        INV_CLI_TIMERA_B_TIME_OUT_EVT,
-        INV_CLI_TIMERD_TIME_OUT_EVT,
+        INV_CLI_TIMER_A_B_TIME_OUT_EVT,
+        INV_CLI_TIMER_D_TIME_OUT_EVT,
         INV_CLI_RECV_1XX_RESP_EVT,
         INV_CLI_RECV_2XX_RESP_EVT,
-        INV_CLI_RECV_3XX_6XX_RESP_EVT,
+        INV_CLI_RECV_FAILURE_RESP_EVT,
         INV_CLI_TRANSP_ERROR_EVT,
+        INV_CLI_TIMER_M_TIME_OUT_EVT,
         INV_CLI_INVALID_EVT
     };
 
@@ -131,6 +122,7 @@ public:
         INV_CLI_IDLE_ST = 0,
         INV_CLI_CALLING_ST,
         INV_CLI_PROCEEDING_ST,
+        INV_CLI_ACCEPTED_ST,
         INV_CLI_COMPLETED_ST,
         INV_CLI_TERMINATED_ST,
         INV_CLI_INVALID_ST
@@ -140,12 +132,13 @@ public:
     {
         INV_SER_RECV_INV_REQ_EVT = 0,
         INV_SER_SEND_NON_100_PROV_RESP_EVT,
-        INV_SER_SEND_3XX_6XX_FAILURE_RESP_EVT,
-        INV_SER_SEND_2XX_SUCCESS_RESP_EVT,
+        INV_SER_SEND_FAILURE_RESP_EVT,
+        INV_SER_SEND_2XX_RESP_EVT,
         INV_SER_TRANSP_ERROR_EVT,
         INV_SER_RECV_ACK_REQ_EVT,
         INV_SER_TIMER_G_H_TIME_OUT_EVT,
         INV_SER_TIMER_I_TIME_OUT_EVT,
+        INV_SER_TIMER_L_TIME_OUT_EVT,
         INV_SER_INVALID_EVT
     };
 
@@ -154,6 +147,7 @@ public:
     {
         INV_SER_IDLE_ST = 0,
         INV_SER_PROCEEDING_ST,
+        INV_SER_ACCEPTED_ST,
         INV_SER_COMPLETED_ST,
         INV_SER_CONFIRMED_ST,
         INV_SER_TERMINATED_ST,
@@ -165,7 +159,7 @@ public:
         NON_INV_CLI_SEND_NON_INV_REQ_EVT = 0,
         NON_INV_CLI_TIMER_E_F_TIME_OUT_EVT,
         NON_INV_CLI_RECV_1XX_RESP_EVT,
-        NON_INV_CLI_RECV_2XX_6XX_RESP_EVT,
+        NON_INV_CLI_RECV_FINAL_RESP_EVT,
         NON_INV_CLI_TRANSP_ERROR_EVT,
         NON_INV_CLI_TIMER_K_TIME_OUT_EVT,
         NON_INV_CLI_INVALID_EVT
@@ -187,7 +181,7 @@ public:
     {
         NON_INV_SER_RECV_NON_INV_REQ_EVT = 0,
         NON_INV_SER_SEND_1XX_RESP_EVT,
-        NON_INV_SER_SEND_2XX_6XX_RESP_EVT,
+        NON_INV_SER_SEND_FINAL_RESP_EVT,
         NON_INV_SER_TRANSP_ERROR_EVT,
         NON_INV_SER_TIMER_J_TIME_OUT_EVT,
         NON_INV_SER_INVALID_EVT
@@ -203,6 +197,10 @@ public:
         NON_INV_SER_TERMINATED_ST,
         NON_INV_SER_INVALID_ST
     };
+
+    static constexpr SIP_INT32 OPT_FETCH = 0;
+    static constexpr SIP_INT32 OPT_CREATE = 1;
+    static constexpr SIP_INT32 OPT_REMOVE = 2;
 
 private:
     /* Txn Type */
@@ -223,7 +221,7 @@ private:
     SIP_UINT16 m_nTxnState;
 
     /* Counter for Number of Retransmissions */
-    SIP_UINT16 m_nReTxCount;
+    SIP_UINT16 m_nRetransmissionCount;
 
     /* Transaction Related Timers */
     /* Type of Timer Started */
@@ -236,16 +234,15 @@ private:
     SIP_UINT32 m_nDurationExpired;
     /* Current Value of Timer Duration */
     SIP_UINT32 m_nCurrentDuration;
+    SIP_BOOL m_bRprTxnTerminated;
 
-    SipTxnTimerValues objTxnTimerValues;
+    SipTxnTimerValues m_objTxnTimerValues;
 
 public:
     SipTxn();
 
-    SipTxn(SIP_INT32 eTxnType, SipTxnKey* pTxnKey, SipMessage* pSipMsg,
-            SipTimerContext* pSipTxnTimerContext, SIP_UINT16* pnError);
-
-    virtual ~SipTxn();
+    SipTxn(SIP_INT32 eTxnType, const SipTxnKey* pTxnKey, const SipMessage* pSipMsg,
+            const SipTimerContext* pSipTxnTimerContext, SIP_UINT16* pnError);
 
     SIP_BOOL InvokeFsm(SIP_UINT16 nEvent, SIP_VOID* pvData, SIP_UINT16* pnError);
     SIP_BOOL AbortTxn();
@@ -267,7 +264,7 @@ public:
     SipTransportInfo* GetTranspInfo();
     inline SIP_UINT16 GetTxnState() const { return m_nTxnState; }
 
-    inline SIP_UINT16 GetReTxCount() const { return m_nReTxCount; }
+    inline SIP_UINT16 GetRetransmissionCount() const { return m_nRetransmissionCount; }
 
     inline SIP_UINT32 GetDurationExpired() const { return m_nDurationExpired; }
 
@@ -278,7 +275,7 @@ public:
     SIP_VOID* GetTimerId();
     ISipUserData* GetUserData();
     SIP_INT32 GetMsgSentProto();
-    inline const SipTxnTimerValues& GetSipTxnTimers() const { return objTxnTimerValues; }
+    inline const SipTxnTimerValues& GetSipTxnTimers() const { return m_objTxnTimerValues; }
     /* Fill Transaction Properties */
     inline SIP_VOID SetTxnState(SIP_UINT16 nTxnState) { m_nTxnState = nTxnState; }
     inline SIP_VOID SetMaxDuration(SIP_UINT32 nMaxDuration) { m_nMaxDuration = nMaxDuration; }
@@ -287,11 +284,14 @@ public:
         m_nCurrentDuration = nCurDuration;
     }
     inline SIP_VOID SetTimerId(SIP_VOID* pvTimerId) { m_pvTimerId = pvTimerId; }
-    SIP_BOOL SetUserData(ISipUserData* pUserData);
+    SIP_VOID SetUserData(ISipUserData* pUserData);
     /* Increment Txn Count by one*/
-    inline SIP_VOID IncrTxnCount() { m_nReTxCount = m_nReTxCount + SIP_ONE; }
+    inline SIP_VOID IncreaseTxnCount()
+    {
+        m_nRetransmissionCount = m_nRetransmissionCount + SIP_ONE;
+    }
 
-    inline SIP_VOID IncrDurationExpired(SIP_UINT32 nDuration)
+    inline SIP_VOID IncreaseDurationExpired(SIP_UINT32 nDuration)
     {
         m_nDurationExpired = m_nDurationExpired + nDuration;
     }
@@ -300,7 +300,13 @@ public:
 
     SIP_VOID InitRetransmissionInfo();
 
-    SIP_VOID SetRespCode(SIP_UINT16 nRespCode);
+    SIP_VOID SetResponseCode(SIP_UINT16 nRespCode);
+
+    inline SIP_BOOL IsRprTxnTerminated() const { return m_bRprTxnTerminated; }
+    inline void SetRprTxnTerminated(IN SIP_BOOL bTerminated) { m_bRprTxnTerminated = bTerminated; }
+
+private:
+    ~SipTxn() override;
 };
 
 /*Timer Callback API*/

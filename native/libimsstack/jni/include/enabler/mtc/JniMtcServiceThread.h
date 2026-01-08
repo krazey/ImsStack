@@ -20,23 +20,28 @@
 #include "BaseServiceThread.h"
 #include "IJniMtcServiceThread.h"
 #include "IMtcService.h"
-#include "ImsMap.h"
 #include "IuMtcService.h"
-#include "MtcDef.h"
+
+class SuppService;
+struct MediaInfo;
+template <class T>
+class ImsList;
 
 class JniMtcServiceThread final : public BaseServiceThread, public IJniMtcServiceThread
 {
 public:
     JniMtcServiceThread();
-    virtual ~JniMtcServiceThread();
+    virtual ~JniMtcServiceThread() override;
 
     void OnServiceChanged(IN IuMtcService::ServiceState eState, IN IMS_SINT32 eReason) override;
     void OnEmergencyServiceChanged(IN IuMtcService::EmergencyServiceState eState,
-            IN IMS_SINT32 eReason, IN ServiceType eServiceType) override;
-    void OnPreIncomingCallReceived(IN IMS_ULONG nCallKey) override;
-    void OnRejectedIncomingCall(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices, IN OipType eOipType,
-            IN const AString& strRemoteNumber, IN const CallReasonInfo& objReason) override;
+            IN IuMtcService::EmergencyServiceUnavailableReason eReason,
+            IN ServiceType eServiceType) override;
+    void OnPreIncomingCallReceived(IN IMS_ULONG nCallKey, IN const AString& strLogTag) override;
+    void OnRejectedIncomingCall(IN IMS_ULONG nCallKey, IN const JniCallInfo& objCallInfo,
+            IN const MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices,
+            IN OipType eOipType, IN const AString& strRemoteNumber,
+            IN const CallReasonInfo& objReason, IN const AString& strLogTag) override;
 
     void OnJniReady();
     void OnExternalCallsChanged(IN ImsList<const JniExternalCall*>& objJniExternalCalls) override;

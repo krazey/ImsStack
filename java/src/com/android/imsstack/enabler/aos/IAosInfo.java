@@ -17,6 +17,10 @@ package com.android.imsstack.enabler.aos;
 
 import android.content.Intent;
 
+import androidx.annotation.NonNull;
+
+import com.android.imsstack.core.agents.Sim;
+
 /**
  * This class provides the interworking interface between Java and native layer
  * for AoS(Always On Service) functionalities.
@@ -27,23 +31,17 @@ public interface IAosInfo {
      * Registers a new Listener to receive AoS Information updates.
      *
      * @param listener {@link IAosInfoListener} to listen to the events of this object.
+     * @throws NullPointerException if the listener is null.
      */
-    void addListener(IAosInfoListener listener);
+    void addListener(@NonNull IAosInfoListener listener);
 
     /**
      * Removes a listener previously registered with {@link #addListener(IAosInfoListener)}.
      *
      * @param listener {@link IAosInfoListener} previously registered.
+     * @throws NullPointerException if the listener is null.
      */
-    void removeListener(IAosInfoListener listener);
-
-    /**
-     * Called to notify the change of airplane setting.
-     * Native Listener : IAosServiceSettingListener.
-     *
-     * @param isOn {@code isOn} is {@code true} if on, {@code false} if off.
-     */
-    void notifyAirplaneSetting(boolean isOn);
+    void removeListener(@NonNull IAosInfoListener listener);
 
     /**
      * Called to notify the change of data roaming setting.
@@ -67,7 +65,7 @@ public interface IAosInfo {
      *
      * @param state {@code state} is type of {@link RoamingPreferredVoiceNetwork}.
      */
-    void notifyRoamingPreferredVoiceNetwork(int state);
+    void notifyRoamingPreferredVoiceNetwork(RoamingPreferredVoiceNetwork state);
 
     /**
      * Called to notify the change of service setting.
@@ -79,7 +77,7 @@ public interface IAosInfo {
      *          Valid values are the following : ALL(0xFFFFFFFF), MMTEL(0x00000001),
      *          VIDEO(0x00000002), SMSIP(0x00000020), and so on
      */
-    void notifyServiceSetting(int state, int serviceBits);
+    void notifyServiceSetting(ServiceSetting state, int serviceBits);
 
     /**
      * Called to notify the change of TTY setting.
@@ -121,30 +119,19 @@ public interface IAosInfo {
     void notifyAosStart();
 
     /**
-     * Called to notify the failure of IPCAN Handover.
-     * Native Listener : IAosServicePhoneListener.
-     *
-     * @param targetNetwork {@code targetNetwork} is the technology that has failed to be changed
-     * to. One of {@link com.android.imsstack.core.agents.dcmif.IApn#IPCAN_CATEGORY_XXX}.
-     * @param causeCode handover failure cause code. one of {@link android.telephony.DataFailCause}.
-     */
-    void notifyIpcanHandoverFailure(int targetNetwork, int causeCode);
-
-    /**
      * Called to notify the change of ISIM state.
      * Native Listener : IAosServicePhoneListener.
      *
-     * @param state {@code state} is type of {@link IsimState}.
+     * @param state {@code state} The ISIM state. Valid values are
+     *         {@link Sim#ISIM_STATE_UNKNOWN},
+     *         {@link Sim#ISIM_STATE_NOT_PRESENT},
+     *         {@link Sim#ISIM_STATE_NOT_READY},
+     *         {@link Sim#ISIM_STATE_LOADED},
+     *         {@link Sim#ISIM_STATE_REFRESH_STARTED},
+     *         {@link Sim#ISIM_STATE_REFRESH_COMPLETED},
+     *         {@link Sim#ISIM_STATE_REMOVED}.
      */
-    void notifyIsimState(int state);
-
-    /**
-     * Called to notify the change of location information.
-     * Native Listener : IAosServicePhoneListener.
-     *
-     * @param state {@code state} is type of {@link LocationInfo}.
-     */
-    void notifyLocationInfo(int state);
+    void notifyIsimState(@Sim.IsimState int state);
 
     /**
      * Called to notify the change of mobile data limit.
@@ -170,14 +157,7 @@ public interface IAosInfo {
      * action.
      * @param state {@code state} is type of {@link PhoneNumberState}
      */
-    void notifyPhoneNumberState(boolean isRefresh, int state);
-
-    /**
-     * Called to notify the change of PLMN.
-     * Native Listener : IAosServicePhoneListener.
-     *
-     */
-    void notifyPlmnChanged();
+    void notifyPhoneNumberState(boolean isRefresh, PhoneNumberState state);
 
     /**
      * Called to notify the power off.
@@ -187,123 +167,224 @@ public interface IAosInfo {
     void notifyPowerOff();
 
     /**
-     * Called to notify the change of precise call state.
-     * Native Listener : IAosServicePhoneListener.
+     * Notifies the listener of a change in carrier signal PCO value.
+     * Native Listener: IAosServicePhoneListener
      *
-     * @param state {@code state} is type of {@link PreciseCallState}.
+     * @param intent Intent containing the carrier signal PCO value information.
+     * @throws NullPointerException if {@code intent} is null.
      */
-    void notifyPreciseCallState(int state);
-
-    /**
-     * Called to notify the change of carrier signal PCO value.
-     * Native Listener : IAosServicePhoneListener.
-     *
-     * @param intent Intent for Carrier signal pco value.
-     */
-    void notifyCarrierSignalPcoValueChanged(Intent intent);
+    void notifyCarrierSignalPcoValueChanged(@NonNull Intent intent);
 
     /**
      * Called to notify the update of emergency callback mode.
      * Native Listener : IAosEmergencyListener.
      *
-     * @param type {@code type} is callback mode entry {@link EmcCallbackType}
-     * @param state {@code state} is type of {@link EmcCallbackMode}.
+     * @param type {@code type} is callback mode entry {@link EmergencyCallbackModeType}
+     * @param state {@code state} is type of {@link EmergencyCallbackModeState}.
      * @param duration is the number of seconds remaining in the emergency callback mode.
      */
-    void notifyEmcCallbackModeChanged(int type, int state, long duration);
+    void notifyEmergencyCallbackModeChanged(
+            EmergencyCallbackModeType type, EmergencyCallbackModeState state, long duration);
 
     /**
-     * Called to notify the change of CrossSim connection status.
+     * Called to notify the change of NAS security algorithm.
      *
-     * @param isConnectedOverCrossSim
-     * {@code isConnectedOverCrossSim} is {@code true} if CrossSim is used for IMS service,
-     * {@code false} if CrossSim feature is not used for IMS service
+     * @param isNullAlgo {@code isNullAlgo} {@code true} if NAS security algorithm is null,
+     * {@code false} if it's not null.
      */
-    void notifyCrossSimStatus(boolean isConnectedOverCrossSim);
+    void notifyNasSecurityAlgorithmChanged(boolean isNullAlgo);
 
     /**
-     * Roaming Preferred Voice Network
+     * Called to notify the change of the allowed network types.
+     *
+     * @param networkTypesBitMask A {@code long} value representing the allowed network types.
      */
-    class RoamingPreferredVoiceNetwork {
+    void notifyAllowedNetworkTypesChanged(long networkTypesBitMask);
 
-        public static final int CELLULAR = 0;
-        public static final int WIFI = 1;
+    /**
+     * Represents the preferred voice network for roaming.
+     */
+    enum RoamingPreferredVoiceNetwork {
+
+        CELLULAR(0),
+        WIFI(1);
+
+        private final int mValue;
+
+        RoamingPreferredVoiceNetwork(int value) {
+            mValue = value;
+        }
+
+        /**
+         * Returns the integer value associated with this network type.
+         *
+         * @return The integer value.
+         */
+        public int getValue() {
+            return mValue;
+        }
     }
 
     /**
-     * Service setting
+     * Represents the service setting.
      */
-    class ServiceSetting {
+    enum ServiceSetting {
 
-        public static final int OFF = 0;
-        public static final int ON = 1;
-        public static final int PRESENTITY = 2;
+        OFF(0),
+        ON(1),
+        PRESENTITY(2);
+
+        private final int mValue;
+
+        ServiceSetting(int value) {
+            mValue = value;
+        }
+
+        /**
+         * Returns the integer value associated with this service setting.
+         *
+         * @return The integer value.
+         */
+        public int getValue() {
+            return mValue;
+        }
     }
 
     /**
-     * ISIM State
+     * Represents the status of location information.
      */
-    class IsimState {
+    enum LocationInfo {
 
-        public static final int NOT_PRESENT = 0;
-        public static final int NOT_READY = 1;
-        public static final int LOADED = 2;
-        public static final int REFRESH_STARTED = 3;
-        public static final int REFRESH_COMPLETED = 4;
+        FIXED(1),
+        COUNTRY_CHANGED(2),
+        CHANGED(3),
+        AVAILABLE(4);
+
+        private final int mValue;
+
+        LocationInfo(int value) {
+            mValue = value;
+        }
+
+        /**
+         * Returns the integer value associated with this location status.
+         *
+         * @return The integer value.
+         */
+        public int getValue() {
+            return mValue;
+        }
     }
 
     /**
-     * Location Information
+     * Represents the state of a phone number.
      */
-    class LocationInfo {
+    enum PhoneNumberState {
 
-        public static final int FIXED = 1;
-        public static final int COUNTRY_CHANGED = 2;
-        public static final int CHANGED = 3;
-        public static final int AVAILABLE = 4;
+        SIM_LOADED(0),
+        RETRY_SUCCESS(1),
+        RETRY_FAILURE(2);
+
+        private final int mValue;
+
+        PhoneNumberState(int value) {
+            mValue = value;
+        }
+
+        /**
+         * Returns the integer value associated with this phone number state.
+         *
+         * @return The integer value.
+         */
+        public int getValue() {
+            return mValue;
+        }
+    }
+
+    /*
+     * Represents the connection status through cross sim
+     */
+    enum CrossSimStatus {
+
+        DATA_DISCONNECTED(0),
+        DATA_CONNECTED(1);
+
+        private final int mValue;
+
+        CrossSimStatus(int value) {
+            mValue = value;
+        }
+
+        /**
+         * Returns the integer value associated with the connection of cross sim.
+         *
+         * @return The integer value.
+         */
+        public int getValue() {
+            return mValue;
+        }
     }
 
     /**
-     * PhoneNumber state
+     * Represents the type of emergency callback mode.
      */
-    class PhoneNumberState {
+    enum EmergencyCallbackModeType {
 
-        public static final int SIM_LOADED = 0;
-        public static final int RETRY_SUCCESS = 1;
-        public static final int RETRY_FAILURE = 2;
+        CALL(1),
+        SMS(2);
+
+        private final int mValue;
+
+        EmergencyCallbackModeType(int value) {
+            mValue = value;
+        }
+
+        /**
+         * Returns the integer value associated with this emergency callback mode type.
+         *
+         * @return The integer value.
+         */
+        public int getValue() {
+            return mValue;
+        }
     }
 
     /**
-     * Precise call state
+     * Represents the state of the emergency callback mode.
      */
-    class PreciseCallState {
+    enum EmergencyCallbackModeState {
 
-        public static final int NOT_VALID = -1;
-        public static final int IDLE = 0;
-        public static final int ACTIVE = 1;
-        public static final int HOLDING = 2;
-        public static final int DIALING = 3;
-        public static final int ALERTING = 4;
-        public static final int INCOMING = 5;
-        public static final int WAITING = 6;
-        public static final int DISCONNECTED = 7;
-        public static final int DISCONNECTING = 8;
+        STOP(0),
+        START(1),
+        STOP_BY_EMERGENCY(2);
+
+        private final int mValue;
+
+        EmergencyCallbackModeState(int value) {
+            mValue = value;
+        }
+
+        /**
+         * Returns the integer value associated with this emergency callback mode state.
+         *
+         * @return The integer value.
+         */
+        public int getValue() {
+            return mValue;
+        }
+
+        /**
+         * Returns a string representation of this state, including both its
+         * symbolic name and its integer value (e.g., "START(1)").
+         * This format is useful for logging, debugging, and dumpsys output,
+         * providing more context than just the name.
+         *
+         * @return The string representation of the enum in "NAME(VALUE)" format
+         * (e.g., "START(1)").
+         */
+        @Override
+        public String toString() {
+            return this.name() + "(" + mValue + ")";
+        }
     }
-
-    /**
-     * Emergency callback mode type
-     */
-    class EmcCallbackModeType {
-        public static final int CALL = 1;
-        public static final int SMS = 2;
-    };
-
-    /**
-     * Emergency callback mode state
-     */
-    class EmcCallbackMode {
-        public static final int STOP = 0;
-        public static final int START = 1;
-        public static final int STOP_BY_EMC = 2;
-    };
 }

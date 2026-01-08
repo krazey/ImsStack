@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "msg/SipUnknownHeader.h"
 #include "SipDebug.h"
-#include "platform/SipString.h"
 #include "msg/SipMsgUtil.h"
+#include "msg/SipUnknownHeader.h"
+#include "platform/SipString.h"
 
 SipUnknownHeader::SipUnknownHeader() :
         SipHeaderBase(SipHeaderBase::UNKNOWN),
@@ -67,28 +67,23 @@ SIP_BOOL SipUnknownHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) co
     return SIP_TRUE;
 }
 
-SIP_BOOL SipUnknownHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
+SIP_BOOL SipUnknownHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     if (m_pszHdrName == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Header name not found", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Missing header name", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SipPf_Strcpy(*ppCurrPos, m_pszHdrName);
-    SipEnc_UpdateCurrPos(ppCurrPos);
-
-    SIP_ENC_COLON(*ppCurrPos);
-
-    SIP_ENC_SP(*ppCurrPos);
-
-    SipPf_Strcpy(*ppCurrPos, m_pszHdrValue);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipAbnfUtil::Append(*ppCurrPos, m_pszHdrName);
+    SipMsgUtil::Encode(*ppCurrPos, COLON);
+    SipMsgUtil::Encode(*ppCurrPos, SPACE);
+    SipAbnfUtil::Append(*ppCurrPos, m_pszHdrValue);
 
     return SIP_TRUE;
 }
 
-SIP_BOOL SipUnknownHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipUnknownHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     (void)pStartPt;
     (void)nDecLen;
@@ -96,14 +91,14 @@ SIP_BOOL SipUnknownHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     return SIP_TRUE;
 }
 
-SIP_BOOL SipUnknownHeader::SetHeaderName(const SIP_CHAR* pszHdrName)
+SIP_VOID SipUnknownHeader::SetHeaderName(const SIP_CHAR* pszHdrName)
 {
-    return SetCharVar(pszHdrName, m_pszHdrName);
+    SipMsgUtil::SetValue(pszHdrName, m_pszHdrName);
 }
 
-SIP_BOOL SipUnknownHeader::SetHeaderValue(const SIP_CHAR* pszHdrValue)
+SIP_VOID SipUnknownHeader::SetHeaderValue(const SIP_CHAR* pszHdrValue)
 {
-    return SetCharVar(pszHdrValue, m_pszHdrValue);
+    SipMsgUtil::SetValue(pszHdrValue, m_pszHdrValue);
 }
 
 SipHeaderBase* SipUnknownHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)

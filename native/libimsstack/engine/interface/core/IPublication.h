@@ -31,7 +31,7 @@ class IRefreshListener;
 class IPublication : public IServiceMethod
 {
 protected:
-    virtual ~IPublication() = default;
+    ~IPublication() override = default;
 
 public:
     /**

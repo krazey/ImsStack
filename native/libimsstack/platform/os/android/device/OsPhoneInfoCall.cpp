@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ISystem.h"
 #include "PlatformContext.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "device/OsPhoneInfoCall.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 PUBLIC
 OsPhoneInfoCall::OsPhoneInfoCall(IN IMS_SINT32 nSlotId) :
@@ -66,4 +67,9 @@ PUBLIC VIRTUAL AString OsPhoneInfoCall::GetWifiCallingAddressId()
 PUBLIC VIRTUAL IMS_SINT32 OsPhoneInfoCall::GetCsCallStateInOtherSlot() const
 {
     return PlatformContext::GetInstance()->GetSystem()->GetCsCallStateInOtherSlot(GetSlotId());
+}
+
+PUBLIC VIRTUAL IMS_BOOL OsPhoneInfoCall::IsCrossSimRedialingAvailable() const
+{
+    return PlatformContext::GetInstance()->GetSystem()->IsCrossSimRedialingAvailable(GetSlotId());
 }

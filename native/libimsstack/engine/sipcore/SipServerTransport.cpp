@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
+#include "ServiceTrace.h"
 
 #include "ISipHeader.h"
 #include "SipAddress.h"
 #include "SipDebug.h"
+#include "SipError.h"
 #include "SipPrivate.h"
 #include "SipServerTransport.h"
 #include "SipStack.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipServerTransport::SipServerTransport(IN IMS_SINT32 nSlotId,
@@ -112,7 +114,8 @@ PUBLIC VIRTUAL IMS_BOOL SipServerTransport::FormViaHeader(
 }
 
 PUBLIC VIRTUAL IMS_BOOL SipServerTransport::UpdateDestinationInfo(IN ::SipMessage* pSipMsg,
-        IN IMS_BOOL /*bRoutingLr = IMS_TRUE*/, IN SipAddrSpec* /*pImplicitRoute = IMS_NULL*/)
+        IN const SipProfile* /*pProfile*/, IN IMS_BOOL /*bRoutingLr = IMS_TRUE*/,
+        IN SipAddrSpec* /*pImplicitRoute = IMS_NULL*/)
 {
     // For a response which is being sent out, updating the destination info. is done as follows:
     //

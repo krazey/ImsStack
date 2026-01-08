@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 
+#include "AStringArray.h"
 #include "ImsNetworkConnectionState.h"
 
 namespace android
@@ -56,16 +57,16 @@ public:
             m_objIpAddr(objIpAddr)
     {
     }
-    inline ~TestImsNetworkConnection() {}
+    ~TestImsNetworkConnection() override = default;
 
 public:
-    inline IMS_BOOL Create(IN const AString& /*strNetProfile*/)
+    inline IMS_BOOL Create(IN const AString& /*strNetProfile*/) override
     {
         m_nConnectionHandle = ImsNetworkConnectionState::GetInstance()->GetAndIncrementHandle(
                 m_bMobileConnection);
         return IMS_TRUE;
     }
-    inline IMS_BOOL Create(IN IMS_SINT32 /*nApnType*/)
+    inline IMS_BOOL Create(IN IMS_SINT32 /*nApnType*/) override
     {
         m_nConnectionHandle = ImsNetworkConnectionState::GetInstance()->GetAndIncrementHandle(
                 m_bMobileConnection);
@@ -188,7 +189,7 @@ TEST_F(ImsNetworkConnectionStateTest, LookupHandle_ConnectionHandle)
     EXPECT_TRUE(m_pImsNetworkConnectionState->LookupHandle(HANDLE_MOBILE_MAX + 1) == IMS_NULL);
 
     // valid handle - success
-    ImsNetworkConnection* pImsNetworkConnection =
+    const ImsNetworkConnection* pImsNetworkConnection =
             m_pImsNetworkConnectionState->LookupHandle(objTestImsNetworkConnection1.GetHandle());
     ASSERT_TRUE(pImsNetworkConnection != nullptr);
     EXPECT_EQ(APN_TYPE_ONE, objTestImsNetworkConnection1.GetApnType());
@@ -221,7 +222,7 @@ TEST_F(ImsNetworkConnectionStateTest, LookupHandle_IpAddress)
     EXPECT_TRUE(m_pImsNetworkConnectionState->LookupHandle(IPADDRESS_THREE) == IMS_NULL);
 
     // valid IpAddress - success
-    ImsNetworkConnection* pImsNetworkConnection =
+    const ImsNetworkConnection* pImsNetworkConnection =
             m_pImsNetworkConnectionState->LookupHandle(IPADDRESS_ONE);
     ASSERT_TRUE(pImsNetworkConnection != nullptr);
     EXPECT_EQ(APN_TYPE_ONE, objTestImsNetworkConnection1.GetApnType());
@@ -262,7 +263,7 @@ TEST_F(ImsNetworkConnectionStateTest, LookupHandle_Profile_Slot)
     EXPECT_TRUE(m_pImsNetworkConnectionState->LookupHandle(PROFILE_TWO, IMS_SLOT_1) == IMS_NULL);
 
     // valid handle - success
-    ImsNetworkConnection* pImsNetworkConnection =
+    const ImsNetworkConnection* pImsNetworkConnection =
             m_pImsNetworkConnectionState->LookupHandle(PROFILE_TWO, IMS_SLOT_0);
     ASSERT_TRUE(pImsNetworkConnection != nullptr);
     EXPECT_EQ(APN_TYPE_TWO, pImsNetworkConnection->GetApnType());
@@ -312,7 +313,7 @@ TEST_F(ImsNetworkConnectionStateTest, LookupHandle_ApnType_Slot)
     EXPECT_TRUE(m_pImsNetworkConnectionState->LookupHandle(PROFILE_TWO, IMS_SLOT_1) == IMS_NULL);
 
     // valid handle - success
-    ImsNetworkConnection* pImsNetworkConnection =
+    const ImsNetworkConnection* pImsNetworkConnection =
             m_pImsNetworkConnectionState->LookupHandle(APN_TYPE_TWO, IMS_SLOT_0);
     ASSERT_TRUE(pImsNetworkConnection != nullptr);
     EXPECT_EQ(APN_TYPE_TWO, pImsNetworkConnection->GetApnType());

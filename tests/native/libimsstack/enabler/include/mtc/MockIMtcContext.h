@@ -21,6 +21,7 @@
 #include "ImsTypeDef.h"
 #include <gmock/gmock.h>
 #include <functional>
+#include <memory>
 
 class CallConnectionIdManager;
 class ICallStateProxy;
@@ -40,12 +41,13 @@ class IMultiEndpointManager;
 class IPassiveTimerHolder;
 class MessageUtils;
 class MtcConfigurationProxy;
+class MtcTimerWrapper;
 class OperationAsyncRunner;
 
 class MockIMtcContext : public IMtcContext
 {
 public:
-    virtual ~MockIMtcContext() {}
+    virtual ~MockIMtcContext() override {}
 
     MOCK_METHOD(IMS_SINT32, GetSlotId, (), (const, override));
     MOCK_METHOD(const ISubscriberConfig*, GetSubscriberConfig, (), (const, override));
@@ -62,12 +64,17 @@ public:
     MOCK_METHOD(IConferenceManager&, GetConferenceManager, (), (override));
     MOCK_METHOD(IEctManager&, GetEctManager, (), (override));
     MOCK_METHOD(IMtcEmergencyServiceManager&, GetEmergencyServiceManager, (), (override));
-    MOCK_METHOD(OperationAsyncRunner*, GetAsyncRunner, (IN std::function<void()>), (override));
+    MOCK_METHOD(void, RunAsyncOperation, (IN void*, IN std::function<void()>), (override));
+    MOCK_METHOD(void, ReleaseAsyncOperation, (IN void*), (override));
     MOCK_METHOD(IMessageUtils&, GetMessageUtils, (), (override));
+    MOCK_METHOD(std::unique_ptr<MtcTimerWrapper>, CreateTimer, (), (override));
     MOCK_METHOD(IPassiveTimerHolder&, GetPassiveTimerHolder, (), (override));
     MOCK_METHOD(IMultiEndpointManager*, GetMultiEndpointManager, (), (override));
     MOCK_METHOD(ILastComeFirstServedHelper&, GetLastComeFirstServedHelper, (), (override));
     MOCK_METHOD(CallConnectionIdManager&, GetCallConnectionIdManager, (), (override));
+    MOCK_METHOD(MtcLocationRefresher&, GetLocationRefresher, (), (override));
+    MOCK_METHOD(void, CreateRttAutoUpgrader, (), (override));
+    MOCK_METHOD(void, DestroyRttAutoUpgrader, (), (override));
     MOCK_METHOD(IMS_BOOL, IsWifiTestMode, (), (override));
 };
 

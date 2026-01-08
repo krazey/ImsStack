@@ -16,7 +16,9 @@
 #ifndef INTERFACE_PHONE_INFO_LOCATION_H_
 #define INTERFACE_PHONE_INFO_LOCATION_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
+
+class AString;
 
 class ILocationProperties
 {
@@ -39,6 +41,21 @@ public:
     virtual const AString& GetVerticalAccuracy() const = 0;
 };
 
+/**
+ * @brief A listener interface to receive events for location update.
+ */
+class ILocationUpdateListener
+{
+protected:
+    virtual ~ILocationUpdateListener() = default;
+
+public:
+    /**
+     * @brief Notifies that the location update is completed.
+     */
+    virtual void LocationUpdate_OnCompleted() = 0;
+};
+
 class ILocationInfo
 {
 protected:
@@ -48,7 +65,15 @@ public:
     virtual IMS_BOOL StartListeningForLocation(IN IMS_UINT32 nUpdateIntervalInSec) = 0;
     virtual void StopListeningForLocation() = 0;
     virtual ILocationProperties* GetLocationProperties(IN IMS_SINT32 nType = LOCATION_ALL) = 0;
-    virtual IMS_BOOL StartInstantLocationUpdate() = 0;
+    /**
+     * @brief Requests a location update (one-time update).
+     */
+    virtual void RequestLocationUpdate(
+            IN IMS_SINT32 nWaitTimeMs, IN ILocationUpdateListener* piListener) = 0;
+    /**
+     * @brief Cancels a previously requested location update.
+     */
+    virtual void CancelLocationUpdate(IN ILocationUpdateListener* piListener) = 0;
     virtual void SetDefaultLocationProperties(IN IMS_BOOL bFromUICC = IMS_TRUE) = 0;
     virtual const AString& GetLastKnownCountry() const = 0;
 

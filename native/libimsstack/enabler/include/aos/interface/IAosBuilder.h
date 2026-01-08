@@ -37,6 +37,7 @@ class IAosService;
 class IAosSubscriberManager;
 class IAosNConfiguration;
 class IAosRetryRepository;
+class IAosTracer;
 class IAosTransaction;
 
 class IAosBuilder
@@ -63,6 +64,7 @@ public:
     virtual IAosSubscriberManager* BuildSubscriberManager(IN IMS_SINT32 nSlotId) = 0;
     virtual IAosRetryRepository* BuildRetryRepository(IN IMS_SINT32 nSlotId) = 0;
     virtual IAosNConfiguration* BuildNConfiguration() = 0;
+    virtual IAosTracer* BuildTracer(IN IMS_SINT32 nSlotId) = 0;
     virtual IAosTransaction* BuildTransaction(IN IMS_SINT32 nSlotId) = 0;
 };
 #endif  // INTERFACE_AOS_BUILDER_H_

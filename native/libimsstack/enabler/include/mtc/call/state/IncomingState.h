@@ -17,9 +17,7 @@
 #ifndef INCOMING_STATE_H_
 #define INCOMING_STATE_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "call/state/MtcCallState.h"
 
 class AString;
@@ -37,7 +35,7 @@ class IncomingState : public MtcCallState
 {
 public:
     explicit IncomingState(IN IMtcCallContext& objContext);
-    virtual ~IncomingState();
+    virtual ~IncomingState() override;
     IncomingState(IN const IncomingState&) = delete;
     IncomingState& operator=(IN const IncomingState&) = delete;
 

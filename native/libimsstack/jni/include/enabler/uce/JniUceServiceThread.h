@@ -24,7 +24,7 @@ class JniUceServiceThread : public BaseServiceThread, public IUceJniThread
 {
 public:
     JniUceServiceThread();
-    virtual ~JniUceServiceThread();
+    virtual ~JniUceServiceThread() override;
 
     virtual IMS_BOOL NotifyImsDeregistered() override;
     virtual IMS_BOOL NotifyImsRegistered(

@@ -14,11 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 -->
+<!-- h3_gb -->
 <carrier_config>
-    <!-- Carrier configurations -->
+    <boolean name="ims.allow_sip_instance_param_in_contact_for_non_register_request_bool" value="true"/>
     <!-- Aos -->
+    <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
+    <int name="ims.reg_retry_default_policy_int" value="1"/>
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="1"/>
     </int-array>
-    <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
+    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
+
+    <!-- Ut/Xcap -->
+    <boolean name="imsss.ut_insert_new_rule_bool" value="true"/>
+
+    <!-- Mtc -->
+    <int name="imsemergency.emergency_ringback_timer_millis_int" value="120000"/>
+    <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
+        <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->
+    </int-array>
+    <int name="imsvoice.audio_maxred_int" value="220"/>
+    <int-array name="imsvoice.audio_rtcp_interval_int_array" num="2">
+        <item value="5"/>
+        <item value="2"/>
+    </int-array>
+    <int-array name="imsrtt.text_rtcp_interval_int_array" num="2">
+        <item value="5"/>
+        <item value="2"/>
+    </int-array>
 </carrier_config>

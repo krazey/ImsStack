@@ -18,9 +18,10 @@
 #define USSI_DATA_H_
 
 #include "AString.h"
-#include "INodeList.h"
 #include "ImsTypeDef.h"
 #include "ussi/UssiDef.h"
+
+class INode;
 
 class UssiData
 {
@@ -62,7 +63,7 @@ public:
     virtual IMS_BOOL Parse(IN const AString& strUssiBody);
 
 private:
-    void CreateAnyExtension(IN INode* piNode);
+    void CreateAnyExtension(IN const INode* piNode);
 
     AnyExtension objAnyExtension;
     AString m_strLanguage;

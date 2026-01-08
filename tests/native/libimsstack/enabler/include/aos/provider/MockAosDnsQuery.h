@@ -27,7 +27,7 @@ class MockAosDnsQuery : public AosDnsQuery
 {
 public:
     MockAosDnsQuery() {}
-    ~MockAosDnsQuery() {}
+    ~MockAosDnsQuery() override {}
 };
 
 class MockIAosDnsQueryListener : public IAosDnsQueryListener

@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "msg/SipCSeqHeader.h"
 #include "SipDebug.h"
-#include "platform/SipString.h"
+#include "msg/SipCSeqHeader.h"
 #include "msg/SipMsgUtil.h"
-
-#define MAX_CSEQ_LEN 12
+#include "platform/SipString.h"
 
 SipCSeqHeader::SipCSeqHeader() :
         SipHeaderBase(SipHeaderBase::CSEQ),
@@ -57,7 +55,7 @@ SIP_BOOL SipCSeqHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) c
     return SIP_TRUE;
 }
 
-SIP_BOOL SipCSeqHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
+SIP_BOOL SipCSeqHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     if (IsValidHeader() == SIP_FALSE)
     {
@@ -65,26 +63,20 @@ SIP_BOOL SipCSeqHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP
         return SIP_FALSE;
     }
 
-    SIP_CHAR szBuf[MAX_CSEQ_LEN];
-    SipPf_Sprintf(szBuf, "%u", m_nSeq);
-
-    SipPf_Strcpy(*ppCurrPos, szBuf);
-    SipEnc_UpdateCurrPos(ppCurrPos);
-
-    SIP_ENC_SP(*ppCurrPos);
-
-    SipPf_Strcpy(*ppCurrPos, m_pszMethod);
-    SipEnc_UpdateCurrPos(ppCurrPos);
+    SipPf_Sprintf(*ppCurrPos, "%u", m_nSeq);
+    SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
+    SipMsgUtil::Encode(*ppCurrPos, SPACE);
+    SipAbnfUtil::Append(*ppCurrPos, m_pszMethod);
 
     return SIP_TRUE;
 }
 
-SIP_BOOL SipCSeqHeader::SetMethod(const SIP_CHAR* pszMethod)
+SIP_VOID SipCSeqHeader::SetMethod(const SIP_CHAR* pszMethod)
 {
-    return SetCharVar(pszMethod, m_pszMethod);
+    SipMsgUtil::SetValue(pszMethod, m_pszMethod);
 }
 
-SIP_BOOL SipCSeqHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipCSeqHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -92,25 +84,25 @@ SIP_BOOL SipCSeqHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    SIP_CHAR* pTempPre = SIP_NULL;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pTempPre = SIP_NULL;
 
-    if (SipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
+    if (SipAbnfUtil::FindWhiteSpace(pStartPt, pEndPt, pTempPre) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "LWS missing in Cseq", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pszSeq = SipCreateString(pStartPt, pTempPre);
+    SIP_CHAR* pszSeq = SipAbnfUtil::CreateString(pStartPt, pTempPre);
     if (pszSeq == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation fail", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     if (SipPf_Atoi_Unsigned(pszSeq, m_nSeq) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid CSeq Value", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid CSeq value", SIP_ZERO, SIP_ZERO);
         delete[] pszSeq;
         return SIP_FALSE;
     }
@@ -118,9 +110,9 @@ SIP_BOOL SipCSeqHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     delete[] pszSeq;
 
     pTempPre = pTempPre + SIP_ONE;
-    pStartPt = SipSkipFwLWS(pTempPre, pEndPt);
+    pStartPt = SipAbnfUtil::SkipWhiteSpaceFromLeft(pTempPre, pEndPt);
 
-    m_pszMethod = SipCreateString(pStartPt, pEndPt);
+    m_pszMethod = SipAbnfUtil::CreateString(pStartPt, pEndPt);
     if (m_pszMethod == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);

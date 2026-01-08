@@ -14,33 +14,43 @@
  * limitations under the License.
  */
 #include "AStringBuffer.h"
+#include "ISystemProperty.h"
+#include "IZLib.h"
 #include "ImsStrLib.h"
+#include "IpAddress.h"
 #include "ServiceMemory.h"
+#include "ServiceTrace.h"
 #include "ServiceUtil.h"
 
+#include "ISipNetworkUtil.h"
+#include "SipContextUtils.h"
+#include "SipStackManager.h"
+#include "msg/SipMsgUtil.h"
+#include "transport/SipTransportBuffer.h"
+#include "txn/SipTimeoutData.h"
+#include "txn/SipTxn.h"
+#include "txn/SipTxnTimerValues.h"
+
+#include "SipClientTransactionState.h"
 #include "SipConfigProxy.h"
+#include "SipError.h"
 #include "SipHeader.h"
 #include "SipHeaderName.h"
+#include "SipParameter.h"
 #include "SipPrivate.h"
 #include "SipMessageBodyPart.h"
 #include "SipMessageBuffer.h"
 #include "SipStack.h"
-#include "SipTxnContextData.h"
-#include "SipUtil.h"
+#include "SipTransactionCallback.h"
 #include "SipUtils.h"
-#include "msg/SipMsgUtil.h"
-#include "txn/SipTimeoutData.h"
 
-__IMS_TRACE_TAG_SIP__;
-
-extern void SipStackTxnLayer_Initialize();
-extern SIP_VOID Sip_Cbk_OnTimerExpired(IN ISipUserData* pUserData, IN IMS_SINT32 eTimerType);
+__IMS_TRACE_TAG_SIP_CORE__;
 
 class SipNetworkUtil : public ISipNetworkUtil
 {
 public:
-    SipNetworkUtil() {}
-    virtual ~SipNetworkUtil() {}
+    SipNetworkUtil() = default;
+    ~SipNetworkUtil() override = default;
 
     SIP_BOOL SendToNetwork(IN SipTransportBuffer* pTransportBuffer,
             IN SipTransportParameter* pTransportParam, ISipUserData* pUserData) override;
@@ -55,33 +65,16 @@ SIP_BOOL SipNetworkUtil::SendToNetwork(IN SipTransportBuffer* pTransportBuffer,
         return SIP_FALSE;
     }
 
-    SipTxnContext* pTxnContext = static_cast<SipTxnContext*>(pUserData->GetUserData());
+    SipTransactionState* pTState = IMS_NULL;
+    SipStack::GetTransactionState(*pUserData, pTState);
 
-    if (pTxnContext == IMS_NULL)
+    if (pTState == IMS_NULL)
     {
-        IMS_TRACE_E(0, "pstTxnContext is NULL", 0, 0, 0);
+        IMS_TRACE_E(0, "No SipTransactionState in SipTxnContextData", 0, 0, 0);
         return SIP_FALSE;
     }
 
-    SipTxnContextData* pTxnContextData =
-            static_cast<SipTxnContextData*>(pTxnContext->pTxnContextData);
-
-    if (pTxnContextData == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "User data does not contains SipTxnContextData", 0, 0, 0);
-        return SIP_FALSE;
-    }
-
-    SipTransactionState* pTxnState = pTxnContextData->GetTxnState();
-
-    if (pTxnState == SIP_NULL)
-    {
-        IMS_TRACE_E(0, "SipTxnContextData does not contain TxnState", 0, 0, 0);
-        return SIP_FALSE;
-    }
-
-    if (!pTxnState->SendToNetwork(
-                reinterpret_cast<const IMS_BYTE*>(pTransportBuffer->GetSipBuffer()),
+    if (!pTState->SendToNetwork(reinterpret_cast<const IMS_BYTE*>(pTransportBuffer->GetSipBuffer()),
                 static_cast<IMS_SINT32>(pTransportBuffer->GetSipBufferLen())))
     {
         IMS_TRACE_E(0, "SendToNetwork failed", 0, 0, 0);
@@ -91,60 +84,20 @@ SIP_BOOL SipNetworkUtil::SendToNetwork(IN SipTransportBuffer* pTransportBuffer,
     return SIP_TRUE;
 }
 
-class SipTxnListenerProxy : public ISipTxnListener
-{
-public:
-    SipTxnListenerProxy() {}
-    virtual ~SipTxnListenerProxy() {}
-
-    SIP_BOOL TxnTimeout(ISipUserData* pUserData, IMS_SINT32 eTimerType) override;
-    SIP_BOOL TxnTerminated(ISipUserData* pUserData) override;
-};
-
-SIP_BOOL SipTxnListenerProxy::TxnTimeout(ISipUserData* pUserData, IMS_SINT32 eTimerType)
-{
-    IMS_TRACE_I("TxnTimeout", 0, 0, 0);
-    Sip_Cbk_OnTimerExpired(pUserData, eTimerType);
-    return SIP_TRUE;
-}
-
-SIP_BOOL SipTxnListenerProxy::TxnTerminated(ISipUserData* pUserData)
-{
-    IMS_TRACE_I("TxnTerminated", 0, 0, 0);
-
-    if (pUserData != SIP_NULL)
-    {
-        if (pUserData->GetDeleteFlag() == SIP_TRUE)
-        {
-            SipTxnContext* pTxnContext = reinterpret_cast<SipTxnContext*>(pUserData->GetUserData());
-
-            if (pTxnContext != SIP_NULL)
-            {
-                IMS_TRACE_D("Destroy::SipTxnContext", 0, 0, 0);
-                SipStack::DestroyTxnContext(pTxnContext);
-                pUserData->SetUserData(SIP_NULL);
-            }
-        }
-    }
-
-    return SIP_TRUE;
-}
-
 namespace SipStack
 {
 
-SipParameters* GetParameters(SipHeaderBase* pHeader, IMS_BOOL bCreateIfNotPresent);
-
 // SIP stack last error storage -- starts
-LOCAL SipEn_ErrorTypes s_eError;
+static SipEn_ErrorTypes s_eError;
+static SipTransactionCallback* s_pCallback = IMS_NULL;
 
-LOCAL inline void SIPStackError(IN SipEn_ErrorTypes eError)
+static void SIPStackError(IN SipEn_ErrorTypes eError)
 {
     s_eError = eError;
 }
 // SIP stack last error storage -- ends
 
-LOCAL void DeleteStackString(IN SIP_CHAR*& pszStr)
+static void DeleteStackString(IN SIP_CHAR*& pszStr)
 {
     if (pszStr != IMS_NULL)
     {
@@ -153,7 +106,7 @@ LOCAL void DeleteStackString(IN SIP_CHAR*& pszStr)
     }
 }
 
-LOCAL IMS_BOOL FormAddrSpec(
+static IMS_BOOL FormAddrSpec(
         IN const SipAddrSpec* pAddrSpec, IN IMS_BOOL bParams, OUT AStringBuffer& objStringBuffer)
 {
     if (pAddrSpec->Encode(objStringBuffer, bParams ? SIP_TRUE : SIP_FALSE) == SIP_FALSE)
@@ -164,21 +117,14 @@ LOCAL IMS_BOOL FormAddrSpec(
     return IMS_TRUE;
 }
 
-LOCAL IMS_BOOL GetParameter(
-        IN SipHeaderBase* pHeader, IN const AString& strName, OUT SipNameValue*& pParam)
+static IMS_BOOL GetParameter(
+        IN const SipHeaderBase* pHeader, IN const AString& strName, OUT SipNameValue*& pParam)
 {
     SIPStackError(EERR_NOERR);
 
-    SipParameters* pParams = GetParameters(pHeader, IMS_FALSE);
+    IMS_SINT32 nIndex = pHeader->GetParamIndex(strName.GetStr());
 
-    if (pParams == IMS_NULL)
-    {
-        SIPStackError(EERR_NOEXISTS);
-        return IMS_FALSE;
-    }
-
-    IMS_UINT32 nParamCount = 0;
-    SipNameValue* pTempParam = pParams->GetParamNode(strName.GetStr(), &nParamCount);
+    SipNameValue* pTempParam = (nIndex == -1) ? SIP_NULL : pHeader->GetParam(nIndex);
 
     if (pTempParam == SIP_NULL)
     {
@@ -223,7 +169,6 @@ GLOBAL void Initialize()
 
         IMS_TRACE_D("SIP Timers :: %s", strSipTimers.GetStr(), 0, 0);
 
-        // TODO - Verify and modify implementation for dualsim hot swap scenarios.
         // SetCompactForm Encoding
         SIP_BOOL bCompact = (SIP_BOOL)SipConfigProxy::IsCompactFormConfigured(nSlotId, NULL);
         pSipConfig->SetShortFormEncoding(bCompact);
@@ -234,12 +179,14 @@ GLOBAL void Initialize()
 
     if (pStackMngr != IMS_NULL)
     {
-        pStackMngr->GetSipUtil()->RegisterNetwork(new SipNetworkUtil());
-        pStackMngr->GetSipUtil()->RegisterTxnListener(new SipTxnListenerProxy());
+        pStackMngr->RegisterNetwork(new SipNetworkUtil());
+        if (s_pCallback == IMS_NULL)
+        {
+            s_pCallback = new SipTransactionCallback();
+        }
+        // Register SIP transaction layer's callback functions
+        pStackMngr->RegisterTransactionCallback(s_pCallback);
     }
-
-    // Register SIP transaction layer's callback functions
-    SipStackTxnLayer_Initialize();
 }
 
 GLOBAL void SetTransactionTimerValues(
@@ -349,7 +296,7 @@ GLOBAL SipHeaderBase* CloneHeader(IN SipHeaderBase* pHeader)
     return SipHeaders::CloneHdrObj(pHeader);
 }
 
-GLOBAL ::SipMessage* CloneMessage(IN ::SipMessage* pMessage)
+GLOBAL ::SipMessage* CloneMessage(IN const ::SipMessage* pMessage)
 {
     SIPStackError(EERR_NOERR);
 
@@ -362,7 +309,7 @@ GLOBAL ::SipMessage* CloneMessage(IN ::SipMessage* pMessage)
     return new ::SipMessage(*pMessage);
 }
 
-GLOBAL SipMsgBody* CloneMessageBody(IN SipMsgBody* pMsgBody)
+GLOBAL SipMsgBody* CloneMessageBody(IN const SipMsgBody* pMsgBody)
 {
     SIPStackError(EERR_NOERR);
 
@@ -455,7 +402,7 @@ GLOBAL IMS_BOOL CorrectMessageBody(IN_OUT ::SipMessage*& pMessage)
 
             if (pContentType == IMS_NULL)
             {
-                return IMS_NULL;
+                return IMS_FALSE;
             }
 
             AString strName(Sip::STR_BOUNDARY);
@@ -546,7 +493,7 @@ GLOBAL ::SipMessage* CreateMessage(IN IMS_SINT32 nType)
 
         if (pReqLine == SIP_NULL)
         {
-            delete pMessage;
+            pMessage->SipDelete();
             return IMS_NULL;
         }
 
@@ -559,7 +506,7 @@ GLOBAL ::SipMessage* CreateMessage(IN IMS_SINT32 nType)
 
         if (pStatusLine == SIP_NULL)
         {
-            delete pMessage;
+            pMessage->SipDelete();
             return IMS_NULL;
         }
 
@@ -585,17 +532,8 @@ GLOBAL SipHeaderBase* CreateViaHeader(
         return IMS_NULL;
     }
 
-    if (pVia->SetProtocolName("SIP") == SIP_FALSE)
-    {
-        delete pVia;
-        return IMS_NULL;
-    }
-
-    if (pVia->SetProtocolVer(Sip::STR_SIP_VERSION_ONLY) == SIP_FALSE)
-    {
-        delete pVia;
-        return IMS_NULL;
-    }
+    pVia->SetProtocolName("SIP");
+    pVia->SetProtocolVer(Sip::STR_SIP_VERSION_ONLY);
 
     const IMS_CHAR* pszTransport = strSentProtocol.GetStr();
 
@@ -604,11 +542,7 @@ GLOBAL SipHeaderBase* CreateViaHeader(
         pszTransport += 8;
     }
 
-    if (pVia->SetTransport(pszTransport) == SIP_FALSE)
-    {
-        delete pVia;
-        return IMS_NULL;
-    }
+    pVia->SetTransport(pszTransport);
 
     const IMS_CHAR* pszHost = strSentBy.GetStr();
     IMS_CHAR* pszTmp;
@@ -626,11 +560,7 @@ GLOBAL SipHeaderBase* CreateViaHeader(
                 pVia->SetHost(pszHost);
                 pszTmp++;
                 IMS_SINT32 nPort = IMS_Atoi(pszTmp);
-                if (pVia->SetPortNum(static_cast<SIP_UINT16>(nPort)) == SIP_FALSE)
-                {
-                    delete pVia;
-                    return IMS_NULL;
-                }
+                pVia->SetPortNum(static_cast<SIP_UINT16>(nPort));
             }
             else
             {
@@ -640,7 +570,7 @@ GLOBAL SipHeaderBase* CreateViaHeader(
         }
         else
         {
-            delete pVia;
+            pVia->SipDelete();
             return IMS_NULL;
         }
     }
@@ -652,25 +582,17 @@ GLOBAL SipHeaderBase* CreateViaHeader(
         pszTmp++;
 
         IMS_SINT32 nPort = IMS_Atoi(pszTmp);
-        if (pVia->SetPortNum(static_cast<SIP_UINT16>(nPort)) == SIP_FALSE)
-        {
-            delete pVia;
-            return IMS_NULL;
-        }
+        pVia->SetPortNum(static_cast<SIP_UINT16>(nPort));
     }
     else
     {
         // only host present
-        if (pVia->SetHost(pszHost) == SIP_FALSE)
-        {
-            delete pVia;
-            return IMS_NULL;
-        }
+        pVia->SetHost(pszHost);
     }
 
     if (pVia->SetBranchParam(strBranch.GetStr()) == SIP_FALSE)
     {
-        delete pVia;
+        pVia->SipDelete();
         return IMS_NULL;
     }
 
@@ -699,9 +621,9 @@ GLOBAL SipAddrSpec* DecodeAddrSpec(IN const AString& strAddress)
 
     SipAddrSpec* pAddrSpec = new SipAddrSpec();
 
-    if (pAddrSpec->DecodeAddrSpec(strAddrSpec.GetStr(), strAddrSpec.GetLength()) == SIP_FALSE)
+    if (pAddrSpec->Decode(strAddrSpec.GetStr(), strAddrSpec.GetLength()) == SIP_FALSE)
     {
-        delete pAddrSpec;
+        pAddrSpec->SipDelete();
         return IMS_NULL;
     }
 
@@ -715,7 +637,7 @@ GLOBAL SipHeaderBase* DecodeHeader(
 
     if (nType == SipHeaderBase::UNKNOWN && (strName.GetLength() != 0))
     {
-        SIP_INT32 nUnknownType = SipGetHdrType(strName.GetStr());
+        SIP_INT32 nUnknownType = SipMsgUtil::GetHeaderType(strName.GetStr());
 
         if (nUnknownType != SipHeaderBase::TYPE_INVALID)
         {
@@ -765,7 +687,7 @@ GLOBAL SipHeaderBase* DecodeHeader(
             return IMS_NULL;
         }
 
-        if (pHeader->DecodeHdr(pszTmpBody, nBodyLen) == SIP_FALSE)
+        if (pHeader->Decode(pszTmpBody, nBodyLen) == SIP_FALSE)
         {
             IMS_MEM_Free(pszTmpBody);
             FreeHeaderEx(pHeader);
@@ -787,7 +709,7 @@ GLOBAL IMS_BOOL DecodeMessage(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen
         pMessage = new ::SipMessage();
     }
 
-    SIP_CHAR* pszSipBuffer = reinterpret_cast<SIP_CHAR*>(const_cast<IMS_BYTE*>(pBuffer));
+    const SIP_CHAR* pszSipBuffer = reinterpret_cast<SIP_CHAR*>(const_cast<IMS_BYTE*>(pBuffer));
 
     if (nOptions == SipPrivate::OPTIONS_D_PARTIAL)
     {
@@ -798,7 +720,7 @@ GLOBAL IMS_BOOL DecodeMessage(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen
             return IMS_FALSE;
         }
     }
-    else if (pMessage->DecCompleteMsg(pszSipBuffer, nBuffLen) == SIP_FALSE)
+    else if (pMessage->Decode(pszSipBuffer, nBuffLen) == SIP_FALSE)
     {
         pMessage->SipDelete();
         pMessage = IMS_NULL;
@@ -858,11 +780,11 @@ GLOBAL IMS_BOOL DecodeMessageBody(IN ::SipMessage* pMessage)
         if (!IMS_UTIL_ZLIB_Uncompress(objCompBodyPart, objBodyPart))
         {
             IMS_TRACE_E(0, "Uncompressing a body part failed", 0, 0, 0);
-            delete[] pszBuffer;
+            DeleteStackString(pszBuffer);
             return IMS_FALSE;
         }
 
-        delete[] pszBuffer;
+        DeleteStackString(pszBuffer);
 
         if (IMS_UTIL_SYS_PROP_IS_DEBUG_MODE())
         {
@@ -870,10 +792,11 @@ GLOBAL IMS_BOOL DecodeMessageBody(IN ::SipMessage* pMessage)
         }
 
         IMS_CHAR* pszCompBodyStart = reinterpret_cast<IMS_CHAR*>(objBodyPart.GetData());
-        IMS_CHAR* pszCompBodyEnd = pszCompBodyStart + objBodyPart.GetLength() - 1;
+        const IMS_CHAR* pszCompBodyEnd = pszCompBodyStart + objBodyPart.GetLength() - 1;
         IMS_UINT32 nCompLength = objBodyPart.GetLength();
 
-        if (pMessage->DecMultiPartBody(pszCompBodyStart, pszCompBodyEnd, nCompLength) == SIP_FALSE)
+        if (pMessage->DecodeMultiPartBody(pszCompBodyStart, pszCompBodyEnd, nCompLength) ==
+                SIP_FALSE)
         {
             IMS_TRACE_E(0, "Decoding uncompressed body part failed", 0, 0, 0);
             return IMS_FALSE;
@@ -921,7 +844,7 @@ GLOBAL IMS_BOOL EncodeHeaderBody(
 
     if (pHeader->GetHdrType() == SipHeaderBase::UNKNOWN)
     {
-        SipUnknownHeader* pUnknownHeader = DYNAMIC_CAST(SipUnknownHeader*, pHeader);
+        const SipUnknownHeader* pUnknownHeader = DYNAMIC_CAST(SipUnknownHeader*, pHeader);
         strHeaderBody = pUnknownHeader->GetHeaderValue();
         return IMS_TRUE;
     }
@@ -949,7 +872,7 @@ GLOBAL IMS_BOOL EncodeMessage(IN ::SipMessage* pMessage, IN IMS_SINT32 nOptions,
         nMsgOptions |= SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM;
     }
 
-    if (pMessage->EncodeMsg(reinterpret_cast<SIP_CHAR**>(&pBuffer),
+    if (pMessage->Encode(reinterpret_cast<SIP_CHAR**>(&pBuffer),
                 reinterpret_cast<SIP_UINT32*>(&nBuffLen), nMsgOptions) == SIP_FALSE)
     {
         IMS_TRACE_D("EncodeMessage is failed", 0, 0, 0);
@@ -989,7 +912,7 @@ GLOBAL IMS_BOOL EncodePartialMessage(
 
             if (pRequestLine != SIP_NULL)
             {
-                bStatus = pRequestLine->EncodeRequestLine(&pszBuffer);
+                bStatus = pRequestLine->Encode(&pszBuffer);
                 pRequestLine->SipDelete();
             }
         }
@@ -999,7 +922,7 @@ GLOBAL IMS_BOOL EncodePartialMessage(
 
             if (pStatusLine != SIP_NULL)
             {
-                bStatus = pStatusLine->EncodeStatusLine(&pszBuffer);
+                bStatus = pStatusLine->Encode(&pszBuffer);
                 pStatusLine->SipDelete();
             }
         }
@@ -1011,10 +934,10 @@ GLOBAL IMS_BOOL EncodePartialMessage(
         }
 
         // Put CRLF at the end of Start-Line
-        SIP_ENC_CRLF(pszBuffer);
+        SipMsgUtil::EncodeCrlf(pszBuffer);
     }
 
-    SIP_CHAR aMsgBody[SIP_MAX_MSG_SIZE] = {
+    SIP_CHAR aMsgBody[SipMsgUtil::MAX_MSG_SIZE] = {
             0,
     };
     SIP_CHAR* pMsgBody = &(aMsgBody[0]);
@@ -1099,7 +1022,7 @@ GLOBAL IMS_BOOL EncodePartialMessage(
                 // Multiple message bodies
                 else
                 {
-                    pContentType = new SipContentTypeHeader();
+                    pContentType = new SipContentTypeHeader(SipHeaderBase::CONTENT_TYPE);
                     pContentType->SetMediaType(Sip::STR_MULTIPART);
                     pContentType->SetSubMediaType(Sip::STR_MIXED);
 
@@ -1119,7 +1042,7 @@ GLOBAL IMS_BOOL EncodePartialMessage(
             pContentLength->SipDelete();
         }
 
-        if (pMessage->GetMsgHdrs()->EncodeHdrs(&pszBuffer, SipConfiguration::MSG_OPT_ENCODE_NONE) ==
+        if (pMessage->GetMsgHdrs()->Encode(&pszBuffer, SipConfiguration::MSG_OPT_ENCODE_NONE) ==
                 SIP_FALSE)
         {
             IMS_TRACE_D("Encoding headers failed", 0, 0, 0);
@@ -1127,7 +1050,7 @@ GLOBAL IMS_BOOL EncodePartialMessage(
         }
     }
 
-    SIP_ENC_CRLF(pszBuffer);
+    SipMsgUtil::EncodeCrlf(pszBuffer);
 
     if ((nOptions & OPT_BODY_PART) == OPT_BODY_PART)
     {
@@ -1182,7 +1105,7 @@ GLOBAL IMS_BOOL IsUnknownHeader(IN_OUT IMS_SINT32& nType, IN const AString& strN
 {
     if (strName.GetLength() != 0)
     {
-        nType = SipGetHdrType(strName.GetStr());
+        nType = SipMsgUtil::GetHeaderType(strName.GetStr());
     }
 
     return (nType == ISipHeader::UNKNOWN);
@@ -1191,39 +1114,34 @@ GLOBAL IMS_BOOL IsUnknownHeader(IN_OUT IMS_SINT32& nType, IN const AString& strN
 GLOBAL ImsList<SipParameter*> ExtractParameters(IN const SipHeaderBase* pHeader)
 {
     ImsList<SipParameter*> objParams;
-    SipParameters* pParams = GetParameters(const_cast<SipHeaderBase*>(pHeader), IMS_FALSE);
 
-    if (pParams != IMS_NULL)
+    IMS_UINT32 nParamCount = pHeader->GetParamCount();
+
+    for (IMS_UINT32 i = 0; i < nParamCount; ++i)
     {
-        const SipParameterList& objParameterList = pParams->GetParameterList();
-        IMS_UINT32 nParamCount = objParameterList.GetCount();
+        SipNameValue* pNameVal = pHeader->GetParam(i);
 
-        for (IMS_UINT32 i = 0; i < nParamCount; ++i)
+        if (pNameVal == IMS_NULL)
         {
-            SipNameValue* pNameVal = objParameterList.GetNameValNode(i);
-
-            if (pNameVal == IMS_NULL)
-            {
-                continue;
-            }
-
-            SipParameter* pParameter = new SipParameter(pNameVal->m_pszName);
-
-            IMS_UINT32 nValueCount = pNameVal->m_valueList.GetSize();
-
-            for (IMS_UINT32 j = 0; j < nValueCount; ++j)
-            {
-                IMS_CHAR* pszValue = pNameVal->m_valueList.GetAt(j);
-
-                if (pszValue != IMS_NULL)
-                {
-                    AString strValue(pszValue);
-                    pParameter->AddValues(strValue);
-                }
-            }
-
-            objParams.Append(pParameter);
+            continue;
         }
+
+        SipParameter* pParameter = new SipParameter(pNameVal->m_pszName);
+
+        IMS_UINT32 nValueCount = pNameVal->m_objValueList.GetSize();
+
+        for (IMS_UINT32 j = 0; j < nValueCount; ++j)
+        {
+            IMS_CHAR* pszValue = pNameVal->m_objValueList.GetAt(j);
+
+            if (pszValue != IMS_NULL)
+            {
+                AString strValue(pszValue);
+                pParameter->AddValues(strValue);
+            }
+        }
+
+        objParams.Append(pParameter);
     }
 
     return objParams;
@@ -1246,54 +1164,46 @@ GLOBAL ImsList<SipParameter*> ExtractParameters(IN SipAddrSpec* pAddrSpec)
         return objParams;
     }
 
-    SipParameterList* pUriParamList = pSipUri->GetUriParamList();
+    IMS_UINT32 nParamCount = pSipUri->GetUriParamCount();
 
-    if (pUriParamList != IMS_NULL)
+    for (IMS_UINT32 i = 0; i < nParamCount; ++i)
     {
-        IMS_UINT32 nParamCount = pUriParamList->GetCount();
+        SipNameValue* pNameVal = pSipUri->GetUriParam(i);
 
-        for (IMS_UINT32 i = 0; i < nParamCount; ++i)
+        if (pNameVal == IMS_NULL)
         {
-            SipNameValue* pNameVal = pUriParamList->GetNameValNode(i);
-
-            if (pNameVal == IMS_NULL)
-            {
-                continue;
-            }
-
-            SipParameter* pParameter = new SipParameter(pNameVal->m_pszName);
-
-            if (pParameter == IMS_NULL)
-            {
-                pUriParamList->SipDelete();
-                pSipUri->SipDelete();
-                SipPrivate::SetLastError(SipError::PARSING_ERROR);
-                return objParams;
-            }
-
-            if (pNameVal->m_valueList.IsEmpty())
-            {
-                objParams.Append(pParameter);
-                continue;
-            }
-
-            IMS_UINT32 nValueCount = pNameVal->m_valueList.GetSize();
-
-            for (IMS_UINT32 j = 0; j < nValueCount; ++j)
-            {
-                IMS_CHAR* pszValue = pNameVal->m_valueList.GetAt(j);
-
-                if (pszValue != IMS_NULL)
-                {
-                    AString strValue(pszValue);
-                    pParameter->AddValues(strValue);
-                }
-            }
-
-            objParams.Append(pParameter);
+            continue;
         }
 
-        pUriParamList->SipDelete();
+        SipParameter* pParameter = new SipParameter(pNameVal->m_pszName);
+
+        if (pParameter == IMS_NULL)
+        {
+            pSipUri->SipDelete();
+            SipPrivate::SetLastError(SipError::PARSING_ERROR);
+            return objParams;
+        }
+
+        if (pNameVal->m_objValueList.IsEmpty())
+        {
+            objParams.Append(pParameter);
+            continue;
+        }
+
+        IMS_UINT32 nValueCount = pNameVal->m_objValueList.GetSize();
+
+        for (IMS_UINT32 j = 0; j < nValueCount; ++j)
+        {
+            IMS_CHAR* pszValue = pNameVal->m_objValueList.GetAt(j);
+
+            if (pszValue != IMS_NULL)
+            {
+                AString strValue(pszValue);
+                pParameter->AddValues(strValue);
+            }
+        }
+
+        objParams.Append(pParameter);
     }
 
     pSipUri->SipDelete();
@@ -2167,14 +2077,14 @@ GLOBAL AString GetChallengeScheme(IN SipHeaderBase* pHeader)
 
     SIPStackError(EERR_NOERR);
 
-    SipAuthBase* pAuthHeader = DYNAMIC_CAST(SipAuthBase*, pHeader);
+    const SipAuthBase* pAuthHeader = DYNAMIC_CAST(SipAuthBase*, pHeader);
     AString strScheme = pAuthHeader->GetValue();
 
     return strScheme;
 }
 
 GLOBAL IMS_BOOL GetContent(
-        IN SipMsgBody* pMsgBody, OUT IMS_BYTE*& pContent, OUT IMS_SINT32& nContentLength)
+        IN const SipMsgBody* pMsgBody, OUT IMS_BYTE*& pContent, OUT IMS_SINT32& nContentLength)
 {
     SIPStackError(EERR_NOERR);
 
@@ -2301,7 +2211,7 @@ GLOBAL IMS_SINT32 GetHeaderCount(IN ::SipMessage* pMessage, IN IMS_SINT32 nType)
         return SIP_ONE;
     }
 
-    SipHeaderList* pHeaderList = DYNAMIC_CAST(SipHeaderList*, pHeader);
+    const SipHeaderList* pHeaderList = DYNAMIC_CAST(SipHeaderList*, pHeader);
     IMS_SINT32 nHeaderCount = pHeaderList->GetSize();
 
     pHeader->SipDelete();
@@ -2404,7 +2314,7 @@ GLOBAL SipMethod GetMethod(IN ::SipMessage* pMessage)
     return objSipMethod;
 }
 
-GLOBAL IMS_SINT32 GetMessageBodyCount(IN ::SipMessage* pMessage)
+GLOBAL IMS_SINT32 GetMessageBodyCount(IN const ::SipMessage* pMessage)
 {
     return pMessage->GetMsgBodyCount();
 }
@@ -2598,27 +2508,23 @@ GLOBAL AString GetParameter(
             return AString::ConstNull();
         }
 
-        SipParameterList* pParamList = pSipUri->GetUriParamList();
-
-        if (pParamList == IMS_NULL)
+        if (pSipUri->GetUriParamCount() == 0)
         {
             pSipUri->SipDelete();
             return AString::ConstNull();
         }
 
-        IMS_CHAR* pszValue = pParamList->GetParamValue(strName.GetStr(), nIndex);
+        IMS_CHAR* pszValue = pSipUri->GetUriParamValue(strName.GetStr(), nIndex);
         AString strValue(pszValue);
 
         DeleteStackString(pszValue);
-
-        pParamList->SipDelete();
         pSipUri->SipDelete();
 
         return strValue;
     }
     else
     {
-        // FIXME: Tel URL
+        // Tel URL
         return AString::ConstNull();
     }
 
@@ -2652,16 +2558,7 @@ GLOBAL AString GetParameter(
     }
     else
     {
-        // Normal header parameters
-        SipParameters* pParams = GetParameters(pHeader, IMS_FALSE);
-
-        if (pParams == IMS_NULL)
-        {
-            SIPStackError(EERR_NOEXISTS);
-            return AString::ConstNull();
-        }
-
-        pszValue = pParams->GetParamValue(strName.GetStr());
+        pszValue = pHeader->GetParamValue(strName.GetStr());
     }
 
     if (pszValue == SIP_NULL)
@@ -2717,7 +2614,7 @@ GLOBAL AString GetSentByFromVia(IN SipHeaderBase* pHeader)
         return AString::ConstNull();
     }
 
-    SipViaHeader* pViaHeader = DYNAMIC_CAST(SipViaHeader*, pHeader);
+    const SipViaHeader* pViaHeader = DYNAMIC_CAST(SipViaHeader*, pHeader);
 
     if (pViaHeader == IMS_NULL)
     {
@@ -2870,7 +2767,7 @@ GLOBAL SipStatusCode GetStatusCodeEx(IN ::SipMessage* pMessage)
     }
 
     IMS_SINT32 nStatusCode = SipStatusCode::SC_INVALID;
-    const IMS_CHAR* pszReasonPhrase = pStatusLine->GetRsnPhrase();
+    const IMS_CHAR* pszReasonPhrase = pStatusLine->GetReasonPhrase();
     const IMS_CHAR* pszStatusCode = pStatusLine->GetStatusCode();
 
     if (pszStatusCode != IMS_NULL)
@@ -2998,7 +2895,7 @@ GLOBAL AString GetViaBranchParameter(IN ::SipMessage* pMessage)
 
 GLOBAL IMS_SINT32 GetHdrEnumType(IN IMS_SINT32 nType)
 {
-    return CheckAndGetHdrEnumType(nType);
+    return SipMsgUtil::CheckAndGetHeaderType(nType);
 }
 
 GLOBAL IMS_BOOL HasParameter(IN SipHeaderBase* pHeader, IN const AString& strName)
@@ -3010,16 +2907,7 @@ GLOBAL IMS_BOOL HasParameter(IN SipHeaderBase* pHeader, IN const AString& strNam
         return IMS_FALSE;
     }
 
-    SipParameters* pParams = GetParameters(pHeader, IMS_FALSE);
-
-    if (pParams == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    IMS_UINT32 nIndex = 0;
-
-    return (pParams->IsParamExists(strName.GetStr(), &nIndex) == SIP_TRUE) ? IMS_TRUE : IMS_FALSE;
+    return (pHeader->IsParamPresent(strName.GetStr()) == SIP_TRUE) ? IMS_TRUE : IMS_FALSE;
 }
 
 GLOBAL IMS_BOOL HasParameter(IN SipAddrSpec* pAddrSpec, IN const AString& strName)
@@ -3044,54 +2932,38 @@ GLOBAL IMS_BOOL HasParameter(IN SipAddrSpec* pAddrSpec, IN const AString& strNam
 
         IMS_UINT32 nCount = pSipUri->GetUriParamCount();
 
-        if (nCount > 0)
+        for (IMS_UINT32 i = 0; i < nCount; ++i)
         {
-            SipParameterList* pParamList = pSipUri->GetUriParamList();
+            const SipNameValue* pNameVal = pSipUri->GetUriParam(i);
 
-            for (IMS_UINT32 i = 0; i < nCount; ++i)
+            if (pNameVal == SIP_NULL)
             {
-                SipNameValue* pNameVal = pParamList->GetNameValNode(i);
-
-                if (pNameVal == SIP_NULL)
-                {
-                    continue;
-                }
-
-                if (strName.EqualsIgnoreCase(pNameVal->m_pszName))
-                {
-                    pParamList->SipDelete();
-                    pSipUri->SipDelete();
-                    return IMS_TRUE;
-                }
+                continue;
             }
 
-            pParamList->SipDelete();
+            if (strName.EqualsIgnoreCase(pNameVal->m_pszName))
+            {
+                pSipUri->SipDelete();
+                return IMS_TRUE;
+            }
         }
 
         nCount = pSipUri->GetHdrParamCount();
 
-        if (nCount > 0)
+        for (IMS_UINT32 i = 0; i < nCount; ++i)
         {
-            SipParameterList* pParamList = pSipUri->GetHdrParamList();
+            const SipNameValue* pNameVal = pSipUri->GetHdrParam(i);
 
-            for (IMS_UINT32 i = 0; i < nCount; ++i)
+            if (pNameVal == SIP_NULL)
             {
-                SipNameValue* pNameVal = pParamList->GetNameValNode(i);
-
-                if (pNameVal == SIP_NULL)
-                {
-                    continue;
-                }
-
-                if (strName.EqualsIgnoreCase(pNameVal->m_pszName))
-                {
-                    pParamList->SipDelete();
-                    pSipUri->SipDelete();
-                    return IMS_TRUE;
-                }
+                continue;
             }
 
-            pParamList->SipDelete();
+            if (strName.EqualsIgnoreCase(pNameVal->m_pszName))
+            {
+                pSipUri->SipDelete();
+                return IMS_TRUE;
+            }
         }
 
         pSipUri->SipDelete();
@@ -3305,7 +3177,7 @@ GLOBAL IMS_BOOL IsOptionSupported(IN ::SipMessage* pMessage, IN const AString& s
     return IMS_FALSE;
 }
 
-GLOBAL IMS_BOOL IsRequestMessage(IN ::SipMessage* pMessage)
+GLOBAL IMS_BOOL IsRequestMessage(IN const ::SipMessage* pMessage)
 {
     return (pMessage != IMS_NULL) ? (pMessage->GetMsgType() == ::SipMessage::REQ_TYPE) : IMS_FALSE;
 }
@@ -3454,33 +3326,14 @@ GLOBAL IMS_BOOL RemoveHeader(IN IMS_SINT32 nType, IN_OUT ::SipMessage*& pMessage
     return IMS_TRUE;
 }
 
-GLOBAL IMS_BOOL RemoveParameter(IN const AString& strName, IN_OUT SipHeaderBase*& pHeader)
+GLOBAL void RemoveParameter(IN const AString& strName, IN_OUT SipHeaderBase*& pHeader)
 {
     if (pHeader == IMS_NULL)
     {
-        return IMS_FALSE;
+        return;
     }
 
-    SipParameters* pParams = GetParameters(pHeader, IMS_FALSE);
-
-    if (pParams == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    IMS_UINT32 nIndex = 0;
-
-    if (pParams->IsParamExists(strName.GetStr(), &nIndex) == SIP_FALSE)
-    {
-        return IMS_TRUE;
-    }
-
-    if (pParams->RemoveParam(strName.GetStr()) == SIP_FALSE)
-    {
-        return IMS_FALSE;
-    }
-
-    return IMS_TRUE;
+    pHeader->RemoveParam(strName.GetStr());
 }
 
 GLOBAL IMS_BOOL RemoveParameter(IN const AString& strName, IN_OUT SipAddrSpec*& pAddrSpec)
@@ -3598,7 +3451,7 @@ GLOBAL IMS_BOOL SetHeader(IN SipHeaderBase* pHeader, IN_OUT ::SipMessage*& pMess
     if ((nType <= SipHeaderBase::TYPE_INVALID) || (nType >= SipHeaderBase::TYPE_END))
     {
         IMS_TRACE_D("SetHeader: Invalid header type(%d)", nType, 0, 0);
-        return IMS_NULL;
+        return IMS_FALSE;
     }
 
     // The existing value of the header will be overwritten with new value.
@@ -3734,20 +3587,6 @@ GLOBAL IMS_BOOL SetMimeHeader(IN IMS_SINT32 nType, IN const AString& strName,
     return IMS_TRUE;
 }
 
-SipParameters* GetParameters(IN SipHeaderBase* pHeader, IN IMS_BOOL bCreateIfNotPresent)
-{
-    SipParameters* pParams = pHeader->GetParameters();
-
-    if ((bCreateIfNotPresent == IMS_TRUE) && (pParams == IMS_NULL))
-    {
-        pHeader->InitParameters(IMS_NULL);
-
-        pParams = pHeader->GetParameters();
-    }
-
-    return pParams;
-}
-
 GLOBAL IMS_BOOL SetParameter(
         IN SipHeaderBase* pHeader, IN const AString& strName, IN const AString& strValue)
 {
@@ -3769,14 +3608,7 @@ GLOBAL IMS_BOOL SetParameter(
     }
     else
     {
-        SipParameters* pParams = GetParameters(pHeader, IMS_TRUE);
-
-        if (pParams == IMS_NULL)
-        {
-            return IMS_FALSE;
-        }
-
-        if (pParams->SetParamValue(strName.GetStr(), pszValue) == SIP_FALSE)
+        if (pHeader->SetParam(strName.GetStr(), pszValue) == SIP_FALSE)
         {
             SIPStackError(EERR_NOEXISTS);
             return IMS_FALSE;
@@ -3790,10 +3622,9 @@ GLOBAL IMS_BOOL SetRequestLine(
 {
     SipAddrSpec* pAddrSpec = new SipAddrSpec();
 
-    pAddrSpec->DecodeAddrSpec(const_cast<IMS_CHAR*>(strUri.GetStr()), strUri.GetLength());
+    pAddrSpec->Decode(strUri.GetStr(), strUri.GetLength());
 
-    SipRequestLine* pReqLine =
-            new SipRequestLine(const_cast<IMS_CHAR*>(strMethod.GetStr()), pAddrSpec, SIP_SIPVER);
+    SipRequestLine* pReqLine = new SipRequestLine(strMethod.GetStr(), pAddrSpec, SIP_SIPVER);
 
     pMessage->SetRequestline(pReqLine);
 
@@ -3964,14 +3795,8 @@ GLOBAL IMS_BOOL UpdateSentProtocol(IN ::SipMessage* pMessage, IN const AString& 
         nStartIndex = 8;
     }
 
-    if (pViaHeader->SetTransport(pszProtocol + nStartIndex) == SIP_FALSE)
-    {
-        FreeHeader(pViaHeader);
-        return IMS_FALSE;
-    }
-
+    pViaHeader->SetTransport(pszProtocol + nStartIndex);
     FreeHeader(pViaHeader);
-
     return IMS_TRUE;
 }
 
@@ -4012,7 +3837,7 @@ GLOBAL void DisplayBadHeaders(IN ::SipMessage* pMessage)
 #endif
 }
 
-GLOBAL IMS_SINT32 GetBadHeaderCount(IN ::SipMessage* pMessage)
+GLOBAL IMS_SINT32 GetBadHeaderCount(IN const ::SipMessage* pMessage)
 {
 #ifdef SIP_BADMESSAGE_PARSING
     return pMessage->GetBadHeaderCount();
@@ -4139,7 +3964,7 @@ GLOBAL ::SipTxnKey* CreateTxnKey(IN ::SipMessage* pMessage, IN IMS_SINT32 /*nApi
     return new ::SipTxnKey(pMessage, &nError);
 }
 
-GLOBAL sipcore::SipTxnKey* CreateTxnKeyFromKey(IN ::SipTxnKey* pTxnKey)
+GLOBAL sipcore::SipTxnKey* CreateTxnKeyFromKey(IN const ::SipTxnKey* pTxnKey)
 {
     if (pTxnKey == IMS_NULL)
     {
@@ -4150,7 +3975,7 @@ GLOBAL sipcore::SipTxnKey* CreateTxnKeyFromKey(IN ::SipTxnKey* pTxnKey)
     AString strViaBranch(TxnKey_GetViaBranch(pTxnKey));
 
     return new sipcore::SipTxnKey(
-            objMethod, pTxnKey->GetRespCode(), strViaBranch, pTxnKey->GetCSeqNum());
+            objMethod, pTxnKey->GetResponseCode(), strViaBranch, pTxnKey->GetCSeqNum());
 }
 
 GLOBAL IMS_BOOL CompareTxnKeys(IN ::SipTxnKey* pTxnKey1, IN ::SipTxnKey* pTxnKey2)
@@ -4168,7 +3993,7 @@ GLOBAL IMS_BOOL CompareTxnKeys(IN ::SipTxnKey* pTxnKey1, IN ::SipTxnKey* pTxnKey
     return IMS_TRUE;
 }
 
-GLOBAL IMS_BOOL CompareTxnKeysForAck(IN ::SipTxnKey* pTxnKey1, IN ::SipTxnKey* pTxnKey2)
+GLOBAL IMS_BOOL CompareTxnKeysForAck(IN const ::SipTxnKey* pTxnKey1, IN const ::SipTxnKey* pTxnKey2)
 {
     if ((pTxnKey1 == IMS_NULL) || (pTxnKey2 == IMS_NULL))
     {
@@ -4290,12 +4115,12 @@ GLOBAL void DestroyTxnContext(IN SipTxnContext* pContext)
     if (pContext != IMS_NULL)
     {
         SipTxnContextData* pTxnContextData =
-                static_cast<SipTxnContextData*>(pContext->pTxnContextData);
+                static_cast<SipTxnContextData*>(pContext->m_pTxnContextData);
 
         if (pTxnContextData != IMS_NULL)
         {
             delete pTxnContextData;
-            pContext->pTxnContextData = IMS_NULL;
+            pContext->m_pTxnContextData = IMS_NULL;
         }
 
         SipContextUtils::GetInstance()->Sip_DestroyTxnContext(pContext);
@@ -4319,7 +4144,7 @@ GLOBAL void DisplayTxnKey(IN const ::SipTxnKey* pTxnKey)
     };
 
     IMS_TRACE_I("\tCall-ID: %s", GetLogString(pTxnKey->GetCallId(), acCallId, 11, '@'), 0, 0);
-    IMS_TRACE_D("___ TRANSACTION INFO. - E ___\r\n", 0, 0, 0);
+    IMS_TRACE_D("___ TRANSACTION INFO. - E ___", 0, 0, 0);
 }
 
 GLOBAL void FreeTxnKey(IN ::SipTxnKey*& pTxnKey)
@@ -4363,6 +4188,8 @@ GLOBAL const IMS_CHAR* GetTimerTypeAsString(IN IMS_SINT32 eTimerType)
             "Timer_I >> ACK retransmit",
             "Timer_J >> non-INVITE server",
             "Timer_K >> non-INVITE client",
+            "Timer_L >> absorb retransmit INVITE & ACK receipt",
+            "Timer_M >> 2XX-INVITE retransmission or forked",
             "Timer_OTHER",
             "Timer_INVALID"
     };
@@ -4371,7 +4198,7 @@ GLOBAL const IMS_CHAR* GetTimerTypeAsString(IN IMS_SINT32 eTimerType)
     return acTimerType[eTimerType];
 }
 
-GLOBAL const IMS_CHAR* GetTimerTypeAsString(IN SipTimeoutData* pData)
+GLOBAL const IMS_CHAR* GetTimerTypeAsString(IN const SipTimeoutData* pData)
 {
     if (pData == IMS_NULL)
     {
@@ -4392,14 +4219,14 @@ GLOBAL void InvokeTimerCallback(
     pfnCallback(pData, pvExtraParam);
 }
 
-GLOBAL void SetTimerValues(IN SipTimerValues* pTv, IN_OUT SipTxnContext*& pTxnContext)
+GLOBAL void SetTimerValues(IN const SipTimerValues* pTv, IN_OUT SipTxnContext*& pTxnContext)
 {
-    if ((pTv == IMS_NULL) || (pTxnContext->pSipTimerContext == IMS_NULL))
+    if ((pTv == IMS_NULL) || (pTxnContext->m_pSipTimerContext == IMS_NULL))
     {
         return;
     }
 
-    SipTxnTimerValues* pTxnTimerValues = pTxnContext->pSipTimerContext->pTxnSipTxnTimers;
+    SipTxnTimerValues* pTxnTimerValues = pTxnContext->m_pSipTimerContext->m_pTxnSipTxnTimers;
 
     if (pTxnTimerValues == IMS_NULL)
     {
@@ -4415,60 +4242,85 @@ GLOBAL void SetTimerValues(IN SipTimerValues* pTv, IN_OUT SipTxnContext*& pTxnCo
 
     if (pTv->IsSet(SipTimerValues::TIMER_T1))
     {
-        nTxnTimerOptions |= SipTimerValues::TIMER_T1;
-        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_T1, pTv->GetValue(SipTimerValues::TIMER_T1));
+        IMS_SINT32 nT1 = pTv->GetValue(SipTimerValues::TIMER_T1);
+        nTxnTimerOptions |= SipTxnTimerValues::TV_T1;
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_T1, nT1);
+
+        // Timer-A, Timer-E, Timer-G is based on T1.
+        nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_A;
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_A, nT1);
+
+        nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_E;
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_E, nT1);
+
+        nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_G;
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_G, nT1);
+
+        // Timer-L is set based on T1 due to no configuration definition.
+        nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_L;
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_L, nT1 * 64);
+
+        // Timer-M is set based on T1 due to no configuration definition.
+        nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_M;
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_M, nT1 * 64);
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_T2))
     {
-        nTxnTimerOptions |= SipTimerValues::TIMER_T2;
-        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_T2, pTv->GetValue(SipTimerValues::TIMER_T2));
+        IMS_SINT32 nT2 = pTv->GetValue(SipTimerValues::TIMER_T2);
+        nTxnTimerOptions |= SipTxnTimerValues::TV_T2;
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_T2, nT2);
+
+        // Actually, T4 is used for Timer-I/Timer-K, but those are already set based on T4.
+        // Even if T4 value is not actually used, it's set to the default value of T4 based on T2.
+        nTxnTimerOptions |= SipTxnTimerValues::TV_T4;
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_T4, nT2 + 1000);
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_B))
     {
-        nTxnTimerOptions |= SipTimerValues::TIMER_B;
+        nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_B;
         pTxnTimerValues->SetTimerValue(SipTxn::TIMER_B, pTv->GetValue(SipTimerValues::TIMER_B));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_D))
     {
-        nTxnTimerOptions |= SipTimerValues::TIMER_D;
+        nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_D;
         pTxnTimerValues->SetTimerValue(SipTxn::TIMER_D, pTv->GetValue(SipTimerValues::TIMER_D));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_F))
     {
-        nTxnTimerOptions |= SipTimerValues::TIMER_F;
+        nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_F;
         pTxnTimerValues->SetTimerValue(SipTxn::TIMER_F, pTv->GetValue(SipTimerValues::TIMER_F));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_H))
     {
-        nTxnTimerOptions |= SipTimerValues::TIMER_H;
+        nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_H;
         pTxnTimerValues->SetTimerValue(SipTxn::TIMER_H, pTv->GetValue(SipTimerValues::TIMER_H));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_I))
     {
-        nTxnTimerOptions |= SipTimerValues::TIMER_I;
+        nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_I;
         pTxnTimerValues->SetTimerValue(SipTxn::TIMER_I, pTv->GetValue(SipTimerValues::TIMER_I));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_J))
     {
-        nTxnTimerOptions |= SipTimerValues::TIMER_J;
+        nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_J;
         pTxnTimerValues->SetTimerValue(SipTxn::TIMER_J, pTv->GetValue(SipTimerValues::TIMER_J));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_K))
     {
-        nTxnTimerOptions |= SipTimerValues::TIMER_K;
+        nTxnTimerOptions |= SipTxnTimerValues::TV_TIMER_K;
         pTxnTimerValues->SetTimerValue(SipTxn::TIMER_K, pTv->GetValue(SipTimerValues::TIMER_K));
     }
 
-    pTxnContext->pSipTimerContext->nTimerOptions = nTxnTimerOptions;
-    pTxnContext->pSipTimerContext->pTxnSipTxnTimers = pTxnTimerValues;
+    pTxnContext->m_pSipTimerContext->m_nTimerOptions = nTxnTimerOptions;
+    pTxnContext->m_pSipTimerContext->m_pTxnSipTxnTimers = pTxnTimerValues;
 }
 
 GLOBAL void DisplayUnknownHeaders(IN ::SipMessage* pMessage)
@@ -4612,28 +4464,19 @@ GLOBAL IMS_BOOL DecodeHeaderComponent(
         return IMS_FALSE;
     }
 
-    SipParameterList* pHdrParamList = pSipUri->GetHdrParamList();
-
-    if (pHdrParamList == IMS_NULL)
-    {
-        pSipUri->SipDelete();
-        return IMS_TRUE;
-    }
-
-    IMS_UINT32 nListCount = pHdrParamList->GetCount();
+    IMS_UINT32 nListCount = pSipUri->GetHdrParamCount();
 
     for (IMS_UINT32 i = 0; i < nListCount; ++i)
     {
-        SipNameValue* pNmVl = pHdrParamList->GetNameValNode(i);
+        SipNameValue* pNameValue = pSipUri->GetHdrParam(i);
 
-        if (pNmVl == IMS_NULL)
+        if (pNameValue == IMS_NULL)
         {
             continue;
         }
 
-        if (pNmVl->m_valueList.IsEmpty())
+        if (pNameValue->m_objValueList.IsEmpty())
         {
-            pHdrParamList->SipDelete();
             pSipUri->SipDelete();
             return IMS_FALSE;
         }
@@ -4642,9 +4485,9 @@ GLOBAL IMS_BOOL DecodeHeaderComponent(
 
         if (pHeader != IMS_NULL)
         {
-            pHeader->SetName(pNmVl->m_pszName);
+            pHeader->SetName(pNameValue->m_pszName);
 
-            IMS_CHAR* pszHdrVal = pNmVl->m_valueList.GetAt(0);
+            IMS_CHAR* pszHdrVal = pNameValue->m_objValueList.GetAt(0);
 
             AString strHdrValue(pszHdrVal);
 
@@ -4653,14 +4496,12 @@ GLOBAL IMS_BOOL DecodeHeaderComponent(
             if (!objHeaders.Append(pHeader))
             {
                 delete pHeader;
-                pHdrParamList->SipDelete();
                 pSipUri->SipDelete();
                 return IMS_FALSE;
             }
         }
     }
 
-    pHdrParamList->SipDelete();
     pSipUri->SipDelete();
 
     return IMS_TRUE;

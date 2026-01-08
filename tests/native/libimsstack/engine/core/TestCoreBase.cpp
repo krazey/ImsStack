@@ -72,7 +72,7 @@ void TestCoreBase::SetUpClientConnection(IN IMS_BOOL bMidDialog /*= IMS_FALSE*/)
     {
         m_pCoreService->SetScc(&m_objScc);
     }
-    m_pCoreService->SetImsConnected(IMS_TRUE);
+    m_pCoreService->MarkAsImsConnected(IMS_TRUE);
 
     ON_CALL(m_objScc, Close()).WillByDefault(Return());
     ON_CALL(m_objScc, SetErrorListener(_)).WillByDefault(Return());
@@ -92,7 +92,7 @@ void TestCoreBase::TearDownClientConnection()
 
 void TestCoreBase::SetUpServerConnection()
 {
-    m_pCoreService->SetImsConnected(IMS_TRUE);
+    m_pCoreService->MarkAsImsConnected(IMS_TRUE);
 
     ON_CALL(m_objSsc, Close()).WillByDefault(Return());
     ON_CALL(m_objSsc, SetErrorListener(_)).WillByDefault(Return());
@@ -114,6 +114,13 @@ void TestCoreBase::VerifyAndClear()
     Mock::VerifyAndClear(&m_objSipMsgBodyPart);
 }
 
+void TestCoreBase::SetUpDialog(IN IMS_SINT32 nState)
+{
+    ON_CALL(m_objDialog, Clone()).WillByDefault(Return(&m_objDialog));
+    ON_CALL(m_objDialog, GetState()).WillByDefault(Return(nState));
+    ON_CALL(m_objDialog, Destroy()).WillByDefault(Return());
+}
+
 void TestCoreBase::InitMethod(IN_OUT ServiceMethod* pMethod, IN IMS_BOOL bOriginated /*= IMS_TRUE*/)
 {
     pMethod->InitMethod(m_strLocalUserId, m_strRemoteUserId, m_objDefaultUserId, bOriginated);
@@ -129,6 +136,8 @@ void TestCoreBase::SetUp()
             .WillByDefault(Return(&m_objContactAddress));
     ON_CALL(m_pCoreService->GetMockRegBinding(), GetIpAddress())
             .WillByDefault(ReturnRef(m_objIpAddress));
+    ON_CALL(m_pCoreService->GetMockRegBinding(), GetServiceRoutes())
+            .WillByDefault(ReturnRef(AStringArray::ConstNull()));
 
     ON_CALL(m_objSipMsg, Destroy()).WillByDefault(Return());
     ON_CALL(m_objSipMsg, Clone()).WillByDefault(Return(&m_objSipMsg));
@@ -143,7 +152,7 @@ void TestCoreBase::TearDown()
     TearDownClientConnection();
     TearDownServerConnection();
 
-    m_pCoreService->SetImsConnected(IMS_FALSE);
+    m_pCoreService->MarkAsImsConnected(IMS_FALSE);
 }
 
 }  // namespace android

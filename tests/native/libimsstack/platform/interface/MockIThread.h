@@ -29,7 +29,7 @@ public:
     {
         m_strName.Sprintf("TT%02d", nSlotId);
     }
-    inline virtual ~MockIThread() {}
+    ~MockIThread() override = default;
 
     MOCK_METHOD(IMS_BOOL, Activate, (), (override));
     MOCK_METHOD(void, Deactivate, (), (override));

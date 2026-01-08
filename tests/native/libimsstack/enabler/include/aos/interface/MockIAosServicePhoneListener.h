@@ -18,6 +18,7 @@
 
 #include <gmock/gmock.h>
 
+#include "AString.h"
 #include "interface/IAosServicePhoneListener.h"
 
 class MockIAosServicePhoneListener : public IAosServicePhoneListener
@@ -32,11 +33,20 @@ public:
     MOCK_METHOD(void, ServicePhone_NetworkVideoCapabilityChanged, (IN IMS_BOOL bIsOn), (override));
     MOCK_METHOD(void, ServicePhone_PhoneNumberStateChanged,
             (IN IMS_BOOL bIsRefresh, IN PhoneNumberState eState), (override));
-    MOCK_METHOD(void, ServicePhone_PlmnChanged, (), (override));
+    MOCK_METHOD(void, ServicePhone_PlmnChanged, (IN const AString& strPlmn), (override));
+    MOCK_METHOD(void, ServicePhone_VopsStateChanged,
+            (IN IMS_UINT32 nState, IN const AString& strPlmn), (override));
     MOCK_METHOD(void, ServicePhone_PowerOff, (), (override));
     MOCK_METHOD(
             void, ServicePhone_PreciseCallStateChanged, (IN PreciseCallState eState), (override));
     MOCK_METHOD(void, ServicePhone_PcoValueChanged, (IN IMS_SINT32 nValue), (override));
+    MOCK_METHOD(
+            void, ServicePhone_CrossSimStatusChanged, (IN IMS_BOOL bCrossSimConnected), (override));
+    MOCK_METHOD(void, ServicePhone_AllowedNetworkTypesChanged, (IN IMS_ULONG nNetworkTypesBitMask),
+            (override));
+    MOCK_METHOD(void, ServicePhone_EmergencyRegistrationStateChanged,
+            (IN IMS_BOOL bEmergencyAttached), (override));
+    MOCK_METHOD(void, ServicePhone_SimStateChanged, (IN SimState eState), (override));
 };
 
 #endif  // MOCK_I_AOS_SERVICE_PHONE_LISTENER_H_

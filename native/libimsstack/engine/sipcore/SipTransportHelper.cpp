@@ -22,6 +22,7 @@
 #include "ISipTransportMessageListener.h"
 #include "SipDatagramSocket.h"
 #include "SipDebug.h"
+#include "SipError.h"
 #include "SipPrivate.h"
 #include "SipRtConfigUtils.h"
 #include "SipSocket.h"
@@ -30,7 +31,7 @@
 #include "SipTransport.h"
 #include "SipTransportHelper.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipTransportHelper::SipTransportHelper() :
@@ -120,24 +121,6 @@ PUBLIC VIRTUAL IMS_BOOL SipTransportHelper::DispatchMessage(IN ImsMessage& objMs
     }
 
     return EngineActivity::DispatchMessage(objMsg);
-}
-
-PUBLIC
-void SipTransportHelper::Clear()
-{
-    while (m_objSockets.GetSize() > 0)
-    {
-        SipSocket* pSocket = m_objSockets.GetAt(0);
-
-        if (pSocket != IMS_NULL)
-        {
-            delete pSocket;
-        }
-
-        m_objSockets.RemoveAt(0);
-    }
-
-    m_objClientInitiatedConnections.Clear();
 }
 
 PUBLIC
@@ -250,7 +233,7 @@ SipSocket* SipTransportHelper::CreateStreamSocket(
 }
 
 PUBLIC
-void SipTransportHelper::Destroy(IN SipSocket*& pSocket, IN ISipSocketListener* piListener)
+void SipTransportHelper::Destroy(IN SipSocket*& pSocket, IN const ISipSocketListener* piListener)
 {
     if (pSocket == IMS_NULL)
     {
@@ -271,7 +254,7 @@ void SipTransportHelper::Destroy(IN SipSocket*& pSocket, IN ISipSocketListener* 
 
         if ((nType == SipSocket::TYPE_TCP_CLIENT) || (nType == SipSocket::TYPE_TCP_CLIENT_OTHER))
         {
-            SipStreamSocket* pStreamSocket = DYNAMIC_CAST(SipStreamSocket*, pSocket);
+            const SipStreamSocket* pStreamSocket = DYNAMIC_CAST(SipStreamSocket*, pSocket);
 
             if ((pStreamSocket->IsKeepAliveTimerActive() ||
                         pStreamSocket->IsKeepAlivePermanent()) &&
@@ -399,6 +382,12 @@ void SipTransportHelper::DestroyStreamSocket(
 }
 
 PUBLIC
+IMS_BOOL SipTransportHelper::IsSocketPresent(IN SipSocket* pSocket) const
+{
+    return pSocket != IMS_NULL ? m_objSockets.Contains(pSocket) : IMS_FALSE;
+}
+
+PUBLIC
 SipSocket* SipTransportHelper::Open(IN const SipSocketAddress& objSockAddr)
 {
     return LookupSocket(objSockAddr);
@@ -518,36 +507,47 @@ PRIVATE VIRTUAL void SipTransportHelper::DestroyAllSockets(
 {
     if (nMethod == 0)
     {
-        IMS_TRACE_D("DestroyAllSockets (S) :: Sockets (%d)", m_objSockets.GetSize(), 0, 0);
+        IMS_TRACE_D("DestroyAllSockets(S): Sockets(%d)", m_objSockets.GetSize(), 0, 0);
 
         ImsList<SipSocket*> objTmpSockets = m_objSockets;
 
-        for (IMS_UINT32 i = 0; i < objTmpSockets.GetSize(); ++i)
+        // If the local IP address is not specified, clear all the sockets.
+        // Otherwise, clear all matched sockets that have the same local IP address.
+        if (objLocalIp.IsNoneAddress())
         {
-            SipSocket* pSocket = objTmpSockets.GetAt(i);
-
-            if (pSocket != IMS_NULL)
+            for (IMS_UINT32 i = 0; i < objTmpSockets.GetSize(); ++i)
             {
-                if (!objLocalIp.IsNoneAddress())
+                SipSocket* pSocket = objTmpSockets.GetAt(i);
+                pSocket->NotifyForceClosed();
+            }
+
+            ClearSockets(objTmpSockets);
+        }
+        else
+        {
+            ImsList<SipSocket*> objSocketsToClear;
+
+            for (IMS_UINT32 i = 0; i < objTmpSockets.GetSize(); ++i)
+            {
+                SipSocket* pSocket = objTmpSockets.GetAt(i);
+                IpAddress objIp(IpAddress::NONE);
+                IMS_UINT32 nPort = 0;
+
+                pSocket->GetSockName(objIp, nPort);
+
+                if (!objIp.IsNoneAddress() && !objLocalIp.Equals(objIp))
                 {
-                    IpAddress objIp(IpAddress::NONE);
-                    IMS_UINT32 nPort = 0;
-
-                    pSocket->GetSockName(objIp, nPort);
-
-                    if (!objLocalIp.Equals(objIp) && !objIp.IsNoneAddress())
-                    {
-                        continue;
-                    }
+                    continue;
                 }
 
                 pSocket->NotifyForceClosed();
+                objSocketsToClear.Append(pSocket);
             }
+
+            ClearSockets(objSocketsToClear);
         }
 
-        Clear();
-
-        IMS_TRACE_D("DestroyAllSockets (E) :: Sockets (%d)", m_objSockets.GetSize(), 0, 0);
+        IMS_TRACE_D("DestroyAllSockets(E): Sockets(%d)", m_objSockets.GetSize(), 0, 0);
     }
     else
     {
@@ -784,7 +784,7 @@ PRIVATE VIRTUAL void SipTransportHelper::DatagramSocket_DataReceived(IN SipSocke
     pBuffer->m_objNearEnd.SetIpAddress(objSockIp);
 
     // DEBUG ...
-    pBuffer->DisplayMessage(GetSlotId());
+    pBuffer->DisplayMessage(GetSlotId(), pSocket->GetSocketId());
 
     if (!m_objBuffers.Append(pBuffer))
     {
@@ -829,7 +829,7 @@ PRIVATE VIRTUAL void SipTransportHelper::StreamSocket_DataReceived(
         IpAddress objTmpIp;
         IMS_UINT32 nTmpPort;
         IMS_SINT32 nTransportProtocol = SipTransportAddress::PROTOCOL_TCP;
-        SipStreamSocket* pStreamSocket = DYNAMIC_CAST(SipStreamSocket*, pSocket);
+        const SipStreamSocket* pStreamSocket = DYNAMIC_CAST(SipStreamSocket*, pSocket);
 
         if ((pStreamSocket != IMS_NULL) && pStreamSocket->IsSecureSocket())
         {
@@ -853,7 +853,7 @@ PRIVATE VIRTUAL void SipTransportHelper::StreamSocket_DataReceived(
         pBuffer->m_objNearEnd.SetIpAddress(objTmpIp);
 
         // DEBUG ...
-        pBuffer->DisplayMessage(GetSlotId());
+        pBuffer->DisplayMessage(GetSlotId(), pSocket->GetSocketId());
 
         if (!m_objBuffers.Append(pBuffer))
         {
@@ -898,7 +898,7 @@ PRIVATE VIRTUAL void SipTransportHelper::StreamSocket_PassiveClosed(IN SipSocket
 
     for (IMS_UINT32 i = 0; i < m_objSockets.GetSize(); ++i)
     {
-        SipSocket* pTmpSocket = m_objSockets.GetAt(i);
+        const SipSocket* pTmpSocket = m_objSockets.GetAt(i);
 
         if (pSocket == pTmpSocket)
         {
@@ -918,22 +918,18 @@ IMS_BOOL SipTransportHelper::AttachSocket(IN SipSocket* pSocket)
 }
 
 PRIVATE
-IMS_BOOL SipTransportHelper::IsSocketPresent(IN const SipSocket* pSocket) const
+void SipTransportHelper::ClearSockets(IN ImsList<SipSocket*>& objSockets)
 {
-    if (pSocket != IMS_NULL)
+    for (IMS_UINT32 i = 0; i < objSockets.GetSize(); ++i)
     {
-        for (IMS_UINT32 i = 0; i < m_objSockets.GetSize(); ++i)
-        {
-            SipSocket* pTmpSocket = m_objSockets.GetAt(i);
+        SipSocket* pSocket = objSockets.GetAt(i);
+        DetachClientInitiatedConnection(pSocket);
 
-            if (pSocket == pTmpSocket)
-            {
-                return IMS_TRUE;
-            }
+        if (m_objSockets.Remove(pSocket))
+        {
+            delete pSocket;
         }
     }
-
-    return IMS_FALSE;
 }
 
 PRIVATE
@@ -1034,7 +1030,8 @@ SipSocket* SipTransportHelper::LookupStreamSocket(IN const SipSocketAddress& obj
         IMS_TRACE_D("Lookup :: TCP client (%s, %d) at (%d)", SipDebug::GetIp(objIp), nPort, i);
 
         if (objIp.Equals(objSockAddr.GetIpAddress()) &&
-                (nPort == static_cast<IMS_UINT32>(objSockAddr.GetPort())))
+                (nPort == static_cast<IMS_UINT32>(objSockAddr.GetPort())) &&
+                !pSocket->IsClosedOrBeingClosed())
         {
             IMS_TRACE_D("Lookup :: TCP client (%s, %d), %s", SipDebug::GetIp(objIp), nPort,
                     strNearEnd.GetStr());
@@ -1071,7 +1068,7 @@ SipSocket* SipTransportHelper::LookupStreamSocket(
     {
         SipSocket* pSocket = m_objSockets.GetAt(i);
 
-        if (pSocket->Equals(objFarEnd))
+        if (pSocket->Equals(objFarEnd) && !pSocket->IsClosedOrBeingClosed())
         {
             objCandidates.Prepend(pSocket);
         }
@@ -1133,8 +1130,9 @@ SipSocket* SipTransportHelper::LookupStreamSocket(
 }
 
 PRIVATE
-void SipTransportHelper::TransportBuffer::DisplayMessage(IN IMS_SINT32 nSlotId)
+void SipTransportHelper::TransportBuffer::DisplayMessage(
+        IN IMS_SINT32 nSlotId, IN IMS_SINT32 nSocketId)
 {
-    SipTransport::PrintMessage(nSlotId, IMS_FALSE, m_objFarEnd,
+    SipTransport::PrintMessage(nSlotId, nSocketId, IMS_FALSE, m_objFarEnd,
             reinterpret_cast<const IMS_CHAR*>(m_objData.GetData()), m_objData.GetLength());
 }

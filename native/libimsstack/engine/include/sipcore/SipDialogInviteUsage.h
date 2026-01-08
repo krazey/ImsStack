@@ -40,7 +40,7 @@ public:
             SipDialogUsage(other)
     {
     }
-    inline virtual ~SipDialogInviteUsage() {}
+    ~SipDialogInviteUsage() override = default;
 
     SipDialogInviteUsage() = delete;
     SipDialogInviteUsage& operator=(IN const SipDialogInviteUsage&) = delete;
@@ -49,10 +49,6 @@ public:
     // SipDialogUsage class
     inline SipDialogUsage* Clone() const override { return new SipDialogInviteUsage(*this); }
     IMS_BOOL CompareTo(IN const SipMessageInfo& objMsgInfo) const override;
-    inline IMS_SINT32 UpdateUsageDetails(IN const SipMessageInfo& objMsgInfo) override
-    {
-        return SipDialogUsage::UpdateUsageDetails(objMsgInfo);
-    }
 
     static IMS_SINT32 GetNextState(IN IMS_SINT32 nState, IN IMS_SINT32 nTrigger);
 

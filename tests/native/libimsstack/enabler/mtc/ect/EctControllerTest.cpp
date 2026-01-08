@@ -17,6 +17,7 @@
 #include "MockIMtcContext.h"
 #include "MockITimer.h"
 #include "PlatformContext.h"
+#include "SipStatusCode.h"
 #include "TestTimerService.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
@@ -26,7 +27,6 @@
 #include "ect/EctController.h"
 #include "ect/EctFactory.h"
 #include "ect/MockIEctControllerListener.h"
-#include "sipcore/SipStatusCode.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;
@@ -132,6 +132,13 @@ TEST_F(EctControllerTest, TransferDoesNothing)
     AString strNumber("12345");
     pController->Transfer(strNumber);
     pController->Transfer();
+}
+
+TEST_F(EctControllerTest, TimerExpiredNotifiesFailure)
+{
+    EXPECT_CALL(objListener, OnEctCompleted);
+    EXPECT_CALL(objNotifier, SendEctCompleted(IMS_FAILURE, CallReasonInfo(CODE_USER_TERMINATED)));
+    pController->Timer_TimerExpired(IMS_NULL);
 }
 
 }  // namespace android

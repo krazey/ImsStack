@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
 #include "ICoreService.h"
 #include "IMessage.h"
 #include "IPublication.h"
 #include "ISession.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
+#include "ISipMessageBodyPart.h"
 #include "ISipServerConnection.h"
 #include "ImsTypeDef.h"
+#include "RetryTaskHelper.h"
+#include "RetryTimer.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCallContext.h"
@@ -41,7 +45,8 @@ PUBLIC
 CurrentLocationDiscoveryController::CurrentLocationDiscoveryController(
         IN IMtcCallContext& objContext) :
         m_objContext(objContext),
-        m_piPublication(IMS_NULL)
+        m_piPublication(IMS_NULL),
+        m_pLocationTransmissionTask(IMS_NULL)
 {
     IMS_TRACE_I("+CurrentLocationDiscoveryController", 0, 0, 0);
 }
@@ -52,13 +57,21 @@ CurrentLocationDiscoveryController::~CurrentLocationDiscoveryController()
     IMS_TRACE_I("~CurrentLocationDiscoveryController", 0, 0, 0);
 
     DestroyPublication();
+
+    if (m_pLocationTransmissionTask != IMS_NULL)
+    {
+        m_pLocationTransmissionTask->Terminate();
+
+        RetryTimer* pTimer = m_pLocationTransmissionTask->SetTimer(IMS_NULL);
+        delete pTimer;
+    }
 }
 
 PUBLIC GLOBAL
 IMS_BOOL CurrentLocationDiscoveryController::IsCurrentLocationDiscoveryInfoReceived(
         IN const ISipServerConnection& objSipServerConnection)
 {
-    ISipMessage* piSipMessage = objSipServerConnection.GetMessage();
+    const ISipMessage* piSipMessage = objSipServerConnection.GetMessage();
     if (piSipMessage == IMS_NULL)
     {
         return IMS_FALSE;
@@ -76,19 +89,25 @@ IMS_BOOL CurrentLocationDiscoveryController::IsCurrentLocationDiscoveryInfoRecei
     return IMS_FALSE;
 }
 
+PUBLIC GLOBAL IMS_BOOL CurrentLocationDiscoveryController::IsPeriodicLocationDiscoveryRequired(
+        IN IMS_BOOL bEmergency, IN IMS_SINT32 nMethod)
+{
+    return bEmergency && nMethod == ConfigEmergency::CALL_PERIODIC_LOCATION_DISCOVERY_METHOD_UPDATE;
+}
+
 PUBLIC
 void CurrentLocationDiscoveryController::OnCurrentLocationDiscoveryInfoReceived(
         IN ISipServerConnection& objSipServerConnection)
 {
-    if (!m_objContext.GetConfigurationProxy().Is(
-            Feature::EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED) ||
-            !m_objContext.GetCallInfo().bEmergency)
+    if (!m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigEmergency::KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL) ||
+            !m_objContext.GetCallInfo().IsEmergency())
     {
         SendResponseForInfo(objSipServerConnection, SipStatusCode::SC_469);
         return;
     }
 
-    ISipMessage* piSipMessage = objSipServerConnection.GetMessage();
+    const ISipMessage* piSipMessage = objSipServerConnection.GetMessage();
     IMS_BOOL bNeedToSendPublish = (piSipMessage != IMS_NULL) ?
             HasRequestForCurrentLocation(*piSipMessage) : IMS_FALSE;
     SendResponseForInfo(objSipServerConnection, SipStatusCode::SC_200);
@@ -99,6 +118,29 @@ void CurrentLocationDiscoveryController::OnCurrentLocationDiscoveryInfoReceived(
     }
 
     SendCurrentLocationPublish();
+}
+
+PUBLIC
+void CurrentLocationDiscoveryController::StartPeriodicLocationDiscovery()
+{
+    if (m_pLocationTransmissionTask != IMS_NULL)
+    {
+        return;
+    }
+
+    m_pLocationTransmissionTask = std::make_unique<RetryTaskHelper>();
+    m_pLocationTransmissionTask->SetCommand(this);
+
+    RetryTimer* pTimer = new RetryTimer(IMS_TRUE);
+    pTimer->AddValue(m_objContext.GetConfigurationProxy().GetInt(
+            ConfigEmergency::KEY_CALL_PERIODIC_LOCATION_DISCOVERY_TIMER_MILLIS_INT));
+    m_pLocationTransmissionTask->SetTimer(pTimer);
+    m_pLocationTransmissionTask->Start(RetryTaskHelper::START_TIMER);
+}
+
+PUBLIC VIRTUAL IMS_RESULT CurrentLocationDiscoveryController::ExecuteCmd()
+{
+    return m_objContext.GetSession()->Update(UpdateType::LOCATION, IMS_FALSE, SipMethod::UPDATE);
 }
 
 PRIVATE
@@ -113,7 +155,7 @@ IMS_BOOL CurrentLocationDiscoveryController::HasRequestForCurrentLocation(
 
     for (IMS_UINT32 i = 0; i < objBodyParts.GetSize(); i++)
     {
-        ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(i);
+        const ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(i);
         if (piBodyPart == IMS_NULL)
         {
             continue;
@@ -159,7 +201,7 @@ void CurrentLocationDiscoveryController::SetLocationInformation()
         return;
     }
 
-    MtcLocationObject(m_objContext).SetLocationToMessage(*piMessage);
+    MtcLocationObject(m_objContext).SetLocationToMessage(*piMessage, IMS_TRUE);
 }
 
 PRIVATE

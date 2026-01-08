@@ -16,8 +16,9 @@
 #include "ServiceMemory.h"
 
 #include "ConfigAppFactory.h"
+#include "base/ConfigApp.h"
 
-LOCAL AString configAppFactory_CreateName(IN IMS_SINT32 nSlotId)
+static AString configAppFactory_CreateName(IN IMS_SINT32 nSlotId)
 {
     AString strName;
 

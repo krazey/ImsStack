@@ -24,7 +24,7 @@
 #include "condition/AosBlock.h"
 #include "condition/AosServiceAvailable.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 #define AOSTAG m_strTag.GetStr()
 
@@ -102,7 +102,7 @@ void AosServiceAvailable::SetListener(IN IAosServiceAvailableListener* piListene
 
     for (IMS_UINT32 nIndex = 0; nIndex < m_objListeners.GetSize(); nIndex++)
     {
-        IAosServiceAvailableListener* piTemp = m_objListeners.GetAt(nIndex);
+        const IAosServiceAvailableListener* piTemp = m_objListeners.GetAt(nIndex);
 
         if (piTemp == piListener)
         {
@@ -126,7 +126,7 @@ void AosServiceAvailable::RemoveListener(IN IAosServiceAvailableListener* piList
 
     for (IMS_UINT32 nIndex = 0; nIndex < m_objListeners.GetSize(); nIndex++)
     {
-        IAosServiceAvailableListener* piTemp = m_objListeners.GetAt(nIndex);
+        const IAosServiceAvailableListener* piTemp = m_objListeners.GetAt(nIndex);
 
         if (piTemp == piListener)
         {
@@ -137,9 +137,9 @@ void AosServiceAvailable::RemoveListener(IN IAosServiceAvailableListener* piList
 }
 
 PUBLIC
-void AosServiceAvailable::RefreshServiceAvailablility()
+void AosServiceAvailable::RefreshServiceAvailability()
 {
-    A_IMS_TRACE_I(AOSTAG, "RefreshServiceAvailablility", 0, 0, 0);
+    A_IMS_TRACE_I(AOSTAG, "RefreshServiceAvailability", 0, 0, 0);
     Notify();
 }
 
@@ -150,69 +150,70 @@ IMS_BOOL AosServiceAvailable::IsAvailable()
 }
 
 PUBLIC
-IMS_UINT32 AosServiceAvailable::HandleEvent(
+void AosServiceAvailable::HandleEvent(
         IN IMS_UINT32 eEvent, IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx)
 {
     A_IMS_TRACE_I(
             AOSTAG, "HandleEvent :: E(%s)/S1(%d)/S2(%d)", EventToString(eEvent), nState, nStateEx);
 
-    IMS_UINT32 eReturn = -1;
+    IMS_BOOL bNotify = IMS_TRUE;
 
     switch (eEvent)
     {
         case EVENT_CALL:
             HandleCallStateChanged(nState, nStateEx);
-            eReturn = EVENT_CALL;
             break;
 
         case EVENT_NETWORK:
             HandleNetworkStateChanged();
-            eReturn = EVENT_NETWORK;
             break;
 
         case EVENT_BLOCK:
             HandleBlockChanged(nState, nStateEx);
-            eReturn = EVENT_BLOCK;
+            break;
+
+        case EVENT_BLOCK_SILENT:
+            HandleBlockChanged(nState, nStateEx);
+            bNotify = IMS_FALSE;
             break;
 
         case EVENT_AIRPLANE:
             HandleAirplaneModeChanged(nState);
-            eReturn = EVENT_AIRPLANE;
             break;
 
         case EVENT_ROAMING:
             HandleRoamingChanged(nState);
-            eReturn = EVENT_ROAMING;
-            break;
-
-        case EVENT_VOPS:
-            HandleVopsChanged(nState);
-            eReturn = EVENT_VOPS;
             break;
 
         case EVENT_LOCATION:
             HandleLocationInfoChanged();
-            eReturn = EVENT_LOCATION;
             break;
 
         case EVENT_WIFI_STATE:
-            HandleWiFiConnectionChanged();
-            eReturn = EVENT_WIFI_STATE;
+            HandleWifiConnectionChanged();
             break;
 
         default:
             break;
     }
 
-    Notify();
-
-    return eReturn;
+    Notify(bNotify);
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosServiceAvailable::StopToCheckNetworkConnection(
         IN IMS_BOOL /*bNeedToCheckAvailable*/ /*= IMS_TRUE*/)
 {
     return IMS_FALSE;
+}
+
+PUBLIC void AosServiceAvailable::SetBlock(IN IAosBlock* piBlock)
+{
+    m_piBlock = piBlock;
+}
+
+PUBLIC IMS_BOOL AosServiceAvailable::IsRoaming()
+{
+    return m_bRoamingState;
 }
 
 PROTECTED VIRTUAL void AosServiceAvailable::HandleCallStateChanged(
@@ -247,14 +248,9 @@ PROTECTED VIRTUAL void AosServiceAvailable::HandleAirplaneModeChanged(IN IMS_UIN
     m_bAirplaneMode = (nState > 0) ? IMS_TRUE : IMS_FALSE;
 }
 
-PROTECTED VIRTUAL void AosServiceAvailable::HandleVopsChanged(IN IMS_UINT32 nState)
+PROTECTED VIRTUAL void AosServiceAvailable::HandleWifiConnectionChanged()
 {
-    A_IMS_TRACE_I(AOSTAG, "HandleVopsChanged :: nState(%d)", nState, 0, 0);
-}
-
-PROTECTED VIRTUAL void AosServiceAvailable::HandleWiFiConnectionChanged()
-{
-    A_IMS_TRACE_I(AOSTAG, "HandleWiFiConnectionChanged", 0, 0, 0);
+    A_IMS_TRACE_I(AOSTAG, "HandleWifiConnectionChanged", 0, 0, 0);
 }
 
 PROTECTED VIRTUAL void AosServiceAvailable::HandleLocationInfoChanged()
@@ -268,7 +264,7 @@ PROTECTED VIRTUAL IMS_BOOL AosServiceAvailable::CheckServiceAvailable()
 }
 
 PROTECTED
-void AosServiceAvailable::Notify()
+void AosServiceAvailable::Notify(IN IMS_BOOL bNotify /*=IMS_TRUE*/)
 {
     IMS_BOOL bAvailable = CheckServiceAvailable();
 
@@ -293,7 +289,7 @@ void AosServiceAvailable::Notify()
 
         if (piListener != IMS_NULL)
         {
-            piListener->ServiceAvailable_Changed();
+            piListener->ServiceAvailable_Changed(bNotify);
         }
     }
 }
@@ -337,9 +333,6 @@ PROTECTED GLOBAL const IMS_CHAR* AosServiceAvailable::EventToString(IN IMS_UINT3
         case EVENT_ROAMING:
             return "EVENT_ROAMING";
 
-        case EVENT_VOPS:
-            return "EVENT_VOPS";
-
         case EVENT_LOCATION:
             return "EVENT_LOCATION";
 
@@ -354,6 +347,9 @@ PROTECTED GLOBAL const IMS_CHAR* AosServiceAvailable::EventToString(IN IMS_UINT3
 
         case EVENT_BLOCK:
             return "EVENT_BLOCK";
+
+        case EVENT_BLOCK_SILENT:
+            return "EVENT_BLOCK_SILENT";
 
         default:
             return "EVENT_INVALID";

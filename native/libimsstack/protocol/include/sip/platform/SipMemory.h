@@ -24,4 +24,4 @@ SIP_VOID SipPf_Memcpy(SIP_VOID* pvMem_Dest, const SIP_VOID* pvMem_Source, SIP_SI
 
 SIP_UINT32 SipPf_Memcmp(const SIP_VOID* pvMem1, const SIP_VOID* pvMem2, SIP_SIZE_T nSize);
 
-#endif /*__SIP_MEMORY_H__*/
+#endif  //__SIP_MEMORY_H__

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,16 +17,18 @@
 #ifndef MEDIA_CARRIER_CONFIG_BUNDLE_H_
 #define MEDIA_CARRIER_CONFIG_BUNDLE_H_
 
-#include "ImsTypeDef.h"
 #include "AString.h"
-#include "ImsVector.h"
 #include "CarrierConfig.h"
+#include "ImsTypeDef.h"
+#include "ImsVector.h"
 
-// Public VoLTE
-struct MediaAudioCodecCapabilityPayloadTypesBundle
+/**
+ * @brief Defines the payload types for various audio codec capabilities.
+ */
+struct AudioCodecCapabilityPayloadTypesBundle
 {
 public:
-    MediaAudioCodecCapabilityPayloadTypesBundle() :
+    AudioCodecCapabilityPayloadTypesBundle() :
             // KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE
             objEvsPayloadType(ImsVector<IMS_SINT32>()),     // KEY_EVS_PAYLOAD_TYPE_INT_ARRAY
             objAmrwbPayloadType(ImsVector<IMS_SINT32>()),   // KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY
@@ -36,10 +38,10 @@ public:
     {
     }
 
-    MediaAudioCodecCapabilityPayloadTypesBundle(
-            IN const MediaAudioCodecCapabilityPayloadTypesBundle&) = delete;
-    MediaAudioCodecCapabilityPayloadTypesBundle& operator=(
-            IN const MediaAudioCodecCapabilityPayloadTypesBundle&) = delete;
+    AudioCodecCapabilityPayloadTypesBundle(
+            IN const AudioCodecCapabilityPayloadTypesBundle&) = delete;
+    AudioCodecCapabilityPayloadTypesBundle& operator=(
+            IN const AudioCodecCapabilityPayloadTypesBundle&) = delete;
 
 public:
     ImsVector<IMS_SINT32> objEvsPayloadType;
@@ -49,10 +51,13 @@ public:
     ImsVector<IMS_SINT32> objDtmfnbPayloadType;
 };
 
-struct MediaAmrnbPayloadDescriptionBundle
+/**
+ * @brief Defines the payload description for the AMR-NB (Narrowband) codec.
+ */
+struct AmrnbPayloadDescriptionBundle
 {
 public:
-    MediaAmrnbPayloadDescriptionBundle() :
+    AmrnbPayloadDescriptionBundle() :
             // KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE
             nAmrnbCodecAttributePayloadFormat(CarrierConfig::ImsVoice::AMR_BANDWIDTH_EFFICIENT),
             // KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT
@@ -61,19 +66,21 @@ public:
     {
     }
 
-    MediaAmrnbPayloadDescriptionBundle(IN const MediaAmrnbPayloadDescriptionBundle&) = delete;
-    MediaAmrnbPayloadDescriptionBundle& operator=(
-            IN const MediaAmrnbPayloadDescriptionBundle&) = delete;
+    AmrnbPayloadDescriptionBundle(IN const AmrnbPayloadDescriptionBundle&) = delete;
+    AmrnbPayloadDescriptionBundle& operator=(IN const AmrnbPayloadDescriptionBundle&) = delete;
 
 public:
     IMS_SINT32 nAmrnbCodecAttributePayloadFormat;
     ImsVector<IMS_SINT32> objAmrnbCodecAttributeModeset;
 };
 
-struct MediaAmrwbPayloadDescriptionBundle
+/**
+ * @brief Defines the payload description for the AMR-WB (Wideband) codec.
+ */
+struct AmrwbPayloadDescriptionBundle
 {
 public:
-    MediaAmrwbPayloadDescriptionBundle() :
+    AmrwbPayloadDescriptionBundle() :
             // KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE
             nAmrwbCodecAttributePayloadFormat(CarrierConfig::ImsVoice::AMR_BANDWIDTH_EFFICIENT),
             // KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT
@@ -82,40 +89,42 @@ public:
     {
     }
 
-    MediaAmrwbPayloadDescriptionBundle(IN const MediaAmrwbPayloadDescriptionBundle&) = delete;
-    MediaAmrwbPayloadDescriptionBundle& operator=(
-            IN const MediaAmrwbPayloadDescriptionBundle&) = delete;
+    AmrwbPayloadDescriptionBundle(IN const AmrwbPayloadDescriptionBundle&) = delete;
+    AmrwbPayloadDescriptionBundle& operator=(IN const AmrwbPayloadDescriptionBundle&) = delete;
 
 public:
     IMS_SINT32 nAmrwbCodecAttributePayloadFormat;
     ImsVector<IMS_SINT32> objAmrwbCodecAttributeModeset;
 };
 
-struct MediaEvsPayloadDescriptionBundle
+/**
+ * @brief Defines the payload description for the EVS (Enhanced Voice Services) codec.
+ */
+struct EvsPayloadDescriptionBundle
 {
 public:
-    MediaEvsPayloadDescriptionBundle() :
+    // TODO : the default values will be updated later
+    EvsPayloadDescriptionBundle() :
             // KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE
             nEvsCodecAttributeModeSwitch(0),  // KEY_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT
             nEvsCodecAttributeBandwidth(0),   // KEY_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT
             objEvsCodecAttributeBitrate(ImsVector<IMS_SINT32>()),
             // KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY
-            nEvsCodecAttributeChAwRecv(0),         // KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT
-            nEvsCodecAttributeHfOnly(0),           // KEY_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT
-            bEvsCodecAttributeDtx(IMS_FALSE),      // KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL
-            bEvsCodecAttributeDtxRecv(IMS_FALSE),  // KEY_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL
-            nEvsCodecAttributeChannels(0),         // KEY_EVS_CODEC_ATTRIBUTE_CHANNELS_INT
-            nEvsCodecAttributeCmr(0),              // KEY_EVS_CODEC_ATTRIBUTE_CMR_INT
-            nCodecAttributeModeChangePeriod(1),    // KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT
+            nEvsCodecAttributeChAwRecv(0),        // KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT
+            nEvsCodecAttributeHfOnly(0),          // KEY_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT
+            bEvsCodecAttributeDtx(IMS_TRUE),      // KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL
+            bEvsCodecAttributeDtxRecv(IMS_TRUE),  // KEY_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL
+            nEvsCodecAttributeChannels(1),        // KEY_EVS_CODEC_ATTRIBUTE_CHANNELS_INT
+            nEvsCodecAttributeCmr(0),             // KEY_EVS_CODEC_ATTRIBUTE_CMR_INT
+            nCodecAttributeModeChangePeriod(1),   // KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT
             nCodecAttributeModeChangeCapability(
                     1),                           // KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT
             nCodecAttributeModeChangeNeighbor(0)  // KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT
     {
     }
 
-    MediaEvsPayloadDescriptionBundle(IN const MediaEvsPayloadDescriptionBundle&) = delete;
-    MediaEvsPayloadDescriptionBundle& operator=(
-            IN const MediaEvsPayloadDescriptionBundle&) = delete;
+    EvsPayloadDescriptionBundle(IN const EvsPayloadDescriptionBundle&) = delete;
+    EvsPayloadDescriptionBundle& operator=(IN const EvsPayloadDescriptionBundle&) = delete;
 
 public:
     IMS_SINT32 nEvsCodecAttributeModeSwitch;            // KEY_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT
@@ -129,54 +138,60 @@ public:
     IMS_SINT32 nEvsCodecAttributeCmr;                   // KEY_EVS_CODEC_ATTRIBUTE_CMR_INT
     IMS_SINT32 nCodecAttributeModeChangePeriod;  // KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT
     IMS_SINT32
-            nCodecAttributeModeChangeCapability;   // KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT
+    nCodecAttributeModeChangeCapability;           // KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT
     IMS_SINT32 nCodecAttributeModeChangeNeighbor;  // KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT
 };
 
-// AOSP RTT
-struct MediaTextCodecCapabilityPayloadTypesBundle
+/**
+ * @brief Defines the payload types for text codec capabilities, used for Real-Time Text (RTT).
+ */
+struct TextCodecCapabilityPayloadTypesBundle
 {
 public:
-    MediaTextCodecCapabilityPayloadTypesBundle() :
+    TextCodecCapabilityPayloadTypesBundle() :
             // KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE
             m_nT140PayloadType(111),  // KEY_T140_PAYLOAD_TYPE_INT
             m_nRedPayloadType(112)    // KEY_RED_PAYLOAD_TYPE_INT
     {
     }
 
-    MediaTextCodecCapabilityPayloadTypesBundle(
-            IN const MediaTextCodecCapabilityPayloadTypesBundle&) = delete;
-    MediaTextCodecCapabilityPayloadTypesBundle& operator=(
-            IN const MediaTextCodecCapabilityPayloadTypesBundle&) = delete;
+    TextCodecCapabilityPayloadTypesBundle(IN const TextCodecCapabilityPayloadTypesBundle&) = delete;
+    TextCodecCapabilityPayloadTypesBundle& operator=(
+            IN const TextCodecCapabilityPayloadTypesBundle&) = delete;
 
 public:
     IMS_SINT32 m_nT140PayloadType;
     IMS_SINT32 m_nRedPayloadType;
 };
 
-// AOSP VT
-struct MediaVideoCodecCapabilityPayloadTypesBundle
+/**
+ * @brief Defines the payload types for video codec capabilities, used for Video Telephony (VT).
+ */
+struct VideoCodecCapabilityPayloadTypesBundle
 {
 public:
-    MediaVideoCodecCapabilityPayloadTypesBundle() :
+    VideoCodecCapabilityPayloadTypesBundle() :
             // KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE
             objAvcPayloadType(ImsVector<IMS_SINT32>())  // KEY_H264_PAYLOAD_TYPE_INT_ARRAY
     {
     }
 
-    MediaVideoCodecCapabilityPayloadTypesBundle(
-            IN const MediaVideoCodecCapabilityPayloadTypesBundle&) = delete;
-    MediaVideoCodecCapabilityPayloadTypesBundle& operator=(
-            IN const MediaVideoCodecCapabilityPayloadTypesBundle&) = delete;
+    VideoCodecCapabilityPayloadTypesBundle(
+            IN const VideoCodecCapabilityPayloadTypesBundle&) = delete;
+    VideoCodecCapabilityPayloadTypesBundle& operator=(
+            IN const VideoCodecCapabilityPayloadTypesBundle&) = delete;
 
 public:
     ImsVector<IMS_SINT32> objAvcPayloadType;
 };
 
-struct MediaH264PayloadDescriptionBundle
+/**
+ * @brief Defines the payload description for the H.264 (AVC) video codec.
+ */
+struct H264PayloadDescriptionBundle
 {
 public:
-    MediaH264PayloadDescriptionBundle() :
+    H264PayloadDescriptionBundle() :
             // KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE
             nVideoCodecAttributePacketizationMode(1),
             // KEY_VIDEO_CODEC_ATTRIBUTE_PACKETIZATION_MODE_INT
@@ -188,9 +203,8 @@ public:
     {
     }
 
-    MediaH264PayloadDescriptionBundle(IN const MediaH264PayloadDescriptionBundle&) = delete;
-    MediaH264PayloadDescriptionBundle& operator=(
-            IN const MediaH264PayloadDescriptionBundle&) = delete;
+    H264PayloadDescriptionBundle(IN const H264PayloadDescriptionBundle&) = delete;
+    H264PayloadDescriptionBundle& operator=(IN const H264PayloadDescriptionBundle&) = delete;
 
 public:
     IMS_SINT32 nVideoCodecAttributePacketizationMode;

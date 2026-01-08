@@ -26,9 +26,14 @@ import com.android.internal.annotations.VisibleForTesting;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.util.LinkedHashMap;
+
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 
 public class SscXmlCreator {
     private final LinkedHashMap<ESsType, IXmlCreator> mXmlCreatorTable;
@@ -67,21 +72,11 @@ public class SscXmlCreator {
         return xmlCreator.createXmlElement(doc, data);
     }
 
-    private Element getElementByTagName(Element rootElement, String tagName) {
-        NodeList elementList = rootElement.getElementsByTagName(tagName);
-        if (elementList.getLength() == 0) {
-            return null;
-        }
-
-        return (Element) elementList.item(0);
-    }
-
     private Element updateServiceElement(Document doc, int slotId, String serviceName, int state) {
         Element rootElement = doc.getDocumentElement();
-        String serviceTag = SscXmlFormat.getSsElement(slotId, serviceName);
-        Element serviceElement = getElementByTagName(rootElement, serviceTag);
+        Element serviceElement = SscUtils.getElementByName(rootElement, serviceName);
         if (serviceElement == null) {
-            ImsLog.d(serviceTag + " is null");
+            ImsLog.d(serviceName + " is null");
             return null;
         }
 
@@ -98,26 +93,42 @@ public class SscXmlCreator {
             return null;
         }
 
-        String conditionTag = SscXmlFormat.getCpElement(slotId, SscXmlFormat.CONDITIONS);
-        Element conditionElement = getElementByTagName(ruleElement, conditionTag);
+        Element conditionElement = SscUtils.getElementByName(ruleElement, SscXmlFormat.CONDITIONS);
         if (conditionElement == null) {
             ImsLog.d("condition is null");
             return null;
         }
 
-        String deactivationTag =
-                SscXmlFormat.getSsElement(slotId, SscXmlFormat.RULE_DEACTIVATED);
-        NodeList ruleDeactivatedList = conditionElement.getElementsByTagName(deactivationTag);
+        Element ruleDeactivatedElement = SscUtils.getElementByName(
+                conditionElement, SscXmlFormat.RULE_DEACTIVATED);
 
-        if (state == SscConstant.STATUS_ENABLE && ruleDeactivatedList.getLength() > 0) {
-            Element ruleDeactivatedElement = (Element) ruleDeactivatedList.item(0);
+        if (state == SscConstant.STATUS_ENABLE && ruleDeactivatedElement != null) {
+            removeEmptyTextNode(conditionElement);
             conditionElement.removeChild(ruleDeactivatedElement);
-        } else if (state == SscConstant.STATUS_DISABLE && ruleDeactivatedList.getLength() == 0) {
-            Element ruleDeactivatedElement = doc.createElement(deactivationTag);
+        } else if (state == SscConstant.STATUS_DISABLE && ruleDeactivatedElement == null) {
+            ruleDeactivatedElement = doc.createElement(
+                    SscXmlFormat.getSsElement(slotId, SscXmlFormat.RULE_DEACTIVATED));
             conditionElement.appendChild(ruleDeactivatedElement);
         }
 
         return ruleElement;
+    }
+
+    private static void removeEmptyTextNode(Element element) {
+        try {
+            XPath xpath = XPathFactory.newInstance().newXPath();
+            NodeList emptyTextNodes = (NodeList) xpath.evaluate(
+                    "./text()[normalize-space(.)='']", element, XPathConstants.NODESET);
+
+            for (int i = emptyTextNodes.getLength() - 1; i >= 0; i--) {
+                Node nodeToRemove = emptyTextNodes.item(i);
+                nodeToRemove.getParentNode().removeChild(nodeToRemove);
+            }
+
+        } catch (Exception e) {
+            ImsLog.e("Failed to evaluate XPath expression while cleaning element "
+                    + element.getTagName());
+        }
     }
 
     /**
@@ -135,9 +146,9 @@ public class SscXmlCreator {
             return null;
         }
 
-        String ruleSetTag = SscXmlFormat.getCpElement(slotId, SscXmlFormat.RULESET);
-        Element ruleSetElement = getElementByTagName(serviceElement, ruleSetTag);
+        Element ruleSetElement = SscUtils.getElementByName(serviceElement, SscXmlFormat.RULESET);
         if (ruleSetElement == null) {
+            String ruleSetTag = SscXmlFormat.getCpElement(slotId, SscXmlFormat.RULESET);
             ruleSetElement = doc.createElement(ruleSetTag);
             serviceElement.appendChild(ruleSetElement);
         }
@@ -254,16 +265,19 @@ public class SscXmlCreator {
                 defaultBehaviour = SscXmlFormat.PRESENTATION_NOT_RESTRICTED;
             }
 
-            String dbTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.DEFAULT_BEHAVIOUR);
-            Element defaultBehaviourElement = getElementByTagName(oirServiceElement, dbTag);
+            Element defaultBehaviourElement = SscUtils.getElementByName(
+                    oirServiceElement, SscXmlFormat.DEFAULT_BEHAVIOUR);
             if (defaultBehaviourElement != null) {
                 if (defaultBehaviour == null) {
+                    removeEmptyTextNode(oirServiceElement);
                     defaultBehaviourElement.getParentNode().removeChild(defaultBehaviourElement);
                 } else {
                     defaultBehaviourElement.setTextContent(defaultBehaviour);
                 }
             } else {
                 if (defaultBehaviour != null) {
+                    String dbTag =
+                            SscXmlFormat.getSsElement(slotId, SscXmlFormat.DEFAULT_BEHAVIOUR);
                     defaultBehaviourElement = doc.createElement(dbTag);
                     defaultBehaviourElement.setTextContent(defaultBehaviour);
                     oirServiceElement.appendChild(defaultBehaviourElement);
@@ -313,11 +327,12 @@ public class SscXmlCreator {
                 defaultBehaviour = SscXmlFormat.PRESENTATION_NOT_RESTRICTED;
             }
 
-            String dbTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.DEFAULT_BEHAVIOUR);
-            Element defaultBehaviourElement = getElementByTagName(tirServiceElement, dbTag);
+            Element defaultBehaviourElement = SscUtils.getElementByName(
+                    tirServiceElement, SscXmlFormat.DEFAULT_BEHAVIOUR);
             if (defaultBehaviourElement != null) {
                 defaultBehaviourElement.setTextContent(defaultBehaviour);
             } else {
+                String dbTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.DEFAULT_BEHAVIOUR);
                 defaultBehaviourElement = doc.createElement(dbTag);
                 defaultBehaviourElement.setTextContent(defaultBehaviour);
                 tirServiceElement.appendChild(defaultBehaviourElement);
@@ -384,32 +399,55 @@ public class SscXmlCreator {
             CfServiceUpdateData cfData = (CfServiceUpdateData) data;
             if (data.getState() == SscConstant.ACTION_REGISTRATION
                     || data.getState() == SscConstant.ACTION_ERASURE) {
-                String targetTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.TARGET);
-                Element targetElement = getElementByTagName(cfRuleElement, targetTag);
+                Element targetElement =
+                        SscUtils.getElementByName(cfRuleElement, SscXmlFormat.TARGET);
                 if (targetElement == null) {
+                    String targetTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.TARGET);
                     targetElement = doc.createElement(targetTag);
-                    String forwrdToTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.FORWARD_TO);
-                    Element forwrdToElement = getElementByTagName(cfRuleElement, forwrdToTag);
-                    if (forwrdToElement == null) {
-                        forwrdToElement = doc.createElement(forwrdToTag);
+
+                    Element forwardToElement = SscUtils.getElementByName(
+                            cfRuleElement, SscXmlFormat.FORWARD_TO);
+                    String forwardToTag =
+                            SscXmlFormat.getSsElement(slotId, SscXmlFormat.FORWARD_TO);
+                    if (forwardToElement == null) {
+                        forwardToElement = doc.createElement(forwardToTag);
+
+                        Element actionsElement = SscUtils.getElementByName(
+                                cfRuleElement, SscXmlFormat.ACTIONS);
                         String actionsTag = SscXmlFormat.getCpElement(slotId, SscXmlFormat.ACTIONS);
-                        Element actionsElement = getElementByTagName(cfRuleElement, actionsTag);
                         if (actionsElement == null) {
                             actionsElement = doc.createElement(actionsTag);
                             cfRuleElement.appendChild(actionsElement);
                         }
-                        actionsElement.appendChild(forwrdToElement);
-
+                        actionsElement.appendChild(forwardToElement);
                     }
-                    forwrdToElement.appendChild(targetElement);
+                    forwardToElement.appendChild(targetElement);
                 }
                 targetElement.setTextContent(getSscUtils().getUriFromNumber(slotId,
                         cfData.getForwardToNumber()));
             }
 
-            // Set Timer only when CFNR timer is in rule
+            // Set Timer only when CFNR timer is in rule.
             if (cfData.getReplyTimer() > 0 && cfData.getCondition() == SscConstant.CONDITION_CFNR) {
                 if (SscXmlFormat.getIsNoReplyTimerInRule(slotId)) {
+                    if (SscXmlFormat.getIsNoReplyTimerOmitted(slotId)) {
+                        if (SscUtils.getElementByName(
+                                cfRuleElement, SscXmlFormat.NOREPLYTIMER) != null) {
+                            ImsLog.d(slotId,
+                                    "noReplyTimer is already inserted. Don't create it again");
+                            SscXmlFormat.setIsNoReplyTimerOmitted(slotId, false);
+                        } else {
+                            Element actionsElement =
+                                    SscUtils.getElementByName(cfRuleElement, SscXmlFormat.ACTIONS);
+                            if (actionsElement != null) {
+                                String noReplyTimerTag = SscXmlFormat.getSsElement(
+                                        slotId, SscXmlFormat.NOREPLYTIMER);
+                                Element noReplyTimerElement = doc.createElement(noReplyTimerTag);
+                                actionsElement.appendChild(noReplyTimerElement);
+                            }
+                        }
+                    }
+
                     updateNoReplyTimer(doc, data);
                 }
             }
@@ -426,8 +464,7 @@ public class SscXmlCreator {
                 return null;
             }
 
-            return getElementByTagName(cfRuleElement, SscXmlFormat.getCpElement(slotId,
-                    SscXmlFormat.CONDITIONS));
+            return SscUtils.getElementByName(cfRuleElement, SscXmlFormat.CONDITIONS);
         }
 
         private Element updateNoReplyTimer(Document doc, SscServiceData data) {
@@ -435,10 +472,10 @@ public class SscXmlCreator {
             ImsLog.d(slotId, "");
 
             Element rootElement = doc.getDocumentElement();
-            String noReplyTimerTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.NOREPLYTIMER);
-            Element noReplyTimerElement = getElementByTagName(rootElement, noReplyTimerTag);
+            Element noReplyTimerElement =
+                    SscUtils.getElementByName(rootElement, SscXmlFormat.NOREPLYTIMER);
             if (noReplyTimerElement == null) {
-                ImsLog.d(noReplyTimerTag + " is null");
+                ImsLog.d(SscXmlFormat.NOREPLYTIMER + " is null");
                 return null;
             }
 
@@ -477,21 +514,21 @@ public class SscXmlCreator {
             ImsLog.d(slotId, "");
 
             Element rootElement = doc.getDocumentElement();
-            String serviceTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.CD);
-            Element cfServiceElement = getElementByTagName(rootElement, serviceTag);
+            Element cfServiceElement = SscUtils.getElementByName(rootElement, SscXmlFormat.CD);
             if (cfServiceElement == null) {
-                ImsLog.d(serviceTag + " is null");
+                ImsLog.d(SscXmlFormat.CD + " is null");
                 return null;
+            }
+
+            if (SscUtils.getElementByName(rootElement, SscXmlFormat.NOREPLYTIMER) != null) {
+                ImsLog.d("noReplyTimer is already inserted. Don't create it again");
+                SscXmlFormat.setIsNoReplyTimerOmitted(slotId, false);
+                return updateNoReplyTimer(doc, data);
             }
 
             String noReplyTimerTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.NOREPLYTIMER);
-            if (getElementByTagName(rootElement, noReplyTimerTag) != null) {
-                ImsLog.d("noReplyTimer is already inserted. Don't create it again");
-                return null;
-            }
-
             Element noReplyTimerElement = doc.createElement(noReplyTimerTag);
-            cfServiceElement.appendChild(noReplyTimerElement);
+            cfServiceElement.insertBefore(noReplyTimerElement, cfServiceElement.getFirstChild());
 
             CfServiceUpdateData cfData = (CfServiceUpdateData) data;
             noReplyTimerElement.setTextContent(Integer.toString(cfData.getReplyTimer()));
@@ -524,18 +561,23 @@ public class SscXmlCreator {
                         data.getCondition());
             }
 
+            if (ruleId == null) {
+                return null;
+            }
+
             Element cbRuleElement = updateRuleElement(doc, slotId, ruleId, data.getState());
             if (cbRuleElement == null) {
                 return null;
             }
 
-            String allowTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.ALLOW);
-            Element allowElement = getElementByTagName(cbRuleElement, allowTag);
+            Element allowElement = SscUtils.getElementByName(cbRuleElement, SscXmlFormat.ALLOW);
             if (allowElement == null) {
+                String allowTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.ALLOW);
                 allowElement = doc.createElement(allowTag);
-                String actionsTag = SscXmlFormat.getCpElement(slotId, SscXmlFormat.ACTIONS);
-                Element actionsElement = getElementByTagName(cbRuleElement, actionsTag);
+                Element actionsElement =
+                        SscUtils.getElementByName(cbRuleElement, SscXmlFormat.ACTIONS);
                 if (actionsElement == null) {
+                    String actionsTag = SscXmlFormat.getCpElement(slotId, SscXmlFormat.ACTIONS);
                     actionsElement = doc.createElement(actionsTag);
                     cbRuleElement.appendChild(actionsElement);
                 }

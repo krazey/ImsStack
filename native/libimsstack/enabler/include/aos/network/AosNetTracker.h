@@ -17,10 +17,12 @@
 #define AOS_NET_TRACKER_H_
 
 #include "AString.h"
-#include "ITimer.h"
+#include "IEventListener.h"
 #include "INetworkWatcher.h"
+#include "ITimer.h"
 #include "IWifiWatcher.h"
 #include "interface/IAosConnectionListener.h"
+#include "interface/IAosNetTrackerTimerListener.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosNConfigurationListener.h"
 #include "interface/IAosNetTracker.h"
@@ -39,15 +41,15 @@ class AosNetTracker :
         public ITimerListener
 {
 public:
-    explicit AosNetTracker(IN IAosAppContext* piAppContext);
-    virtual ~AosNetTracker();
+    explicit AosNetTracker(IN const IAosAppContext* piAppContext);
+    ~AosNetTracker() override;
 
 public:
     // IAosNetTracker
     IMS_BOOL IsServiceIn(IN IMS_UINT32 nType = TYPE_DEFAULT) override;
     IMS_BOOL IsDataIn() override;
     IMS_BOOL IsNetworkIn() override;
-    IMS_BOOL IsEmergencyLteAttach() override;
+    IMS_BOOL IsEmergencyAttach() override;
     IMS_BOOL IsSuspended() override;
     IMS_BOOL IsSessionContinuitySupported() override;
     IMS_BOOL IsServiceTimerRunning() override;
@@ -56,9 +58,13 @@ public:
 
     IMS_UINT32 GetMobileChangingNetworkType() override;
     IMS_UINT32 GetMobileNetworkType() override;
+    IMS_UINT32 GetMobileNetworkRegistrationRejectCause() override;
     IMS_SINT32 GetMobileVoiceServiceState() override;
     IMS_UINT32 GetMobileVoiceNetworkType() override;
+    IMS_SINT32 GetMobileServiceState() override;
     IMS_UINT32 GetNetworkType() override;
+    AString GetNetworkOperator() override;
+    AString GetMobileNetworkPlmn() override;
 
     void SetRatGuardTime(IN IMS_UINT32 nGuardTime) override;
     void SetSrvOutGuardTime(IN IMS_UINT32 nGuardTime) override;
@@ -66,6 +72,9 @@ public:
 
     void SetListener(IN IAosNetTrackerListener* piListener) override;
     void RemoveListener(IN IAosNetTrackerListener* piListener) override;
+
+    void SetTimerListener(IN IAosNetTrackerTimerListener* piListener) override;
+    void RemoveTimerListener(IN IAosNetTrackerTimerListener* piListener) override;
 
     // INetworkWatcherListener
     void NetworkWatcher_NotifyStatus(IN INetworkWatcher* piNetWatcherInfo) override;
@@ -97,7 +106,18 @@ public:
         TIMER_VOICE_RAT_GUARD
     };
 
-private:
+    enum
+    {
+        REASON_NONE = 0,
+        REASON_NET_STATE_CHANGED,
+        REASON_ROAMING_SATAE_CHANGED
+    };
+
+    static const IMS_UINT32 SERVICE_IN_TIME_MILLI_SEC = 2000;
+    static const IMS_UINT32 SERVICE_OUT_TIME_MILLI_SEC = 1000;
+
+protected:
+    void Init() override;
     void InitConfig();
     void InitCnxPolicy(IN ImsVector<IMS_SINT32>& objRats);
     void InitRoamingCnxPolicy(IN ImsVector<IMS_SINT32>& objRoamingRats);
@@ -105,6 +125,7 @@ private:
 
     IMS_BOOL UpdateNetworkStatus();
     void Notify();
+    void NotifyTimerChanged(IN IMS_UINT32 nType, IN NetTrackerTimerState eState);
 
     void GetStatus(OUT IMS_SINT32& nService, OUT IMS_UINT32& nRadioTech, OUT IMS_BOOL& bIsIn);
     IMS_UINT32 GetAccessPolicy() const;
@@ -121,12 +142,12 @@ private:
     IMS_BOOL IsEpdgEnabled() const;
     IMS_BOOL IsWlanEnabled() const;
     IMS_BOOL IsWifiConnected() const;
-    IMS_BOOL IsVonrSupported();
     IMS_BOOL IsRoamingAccessPolicyRequired() const;
 
     void SetDataConnected(IN IMS_BOOL bConnected);
     void SetEpdgEnabled(IN IMS_BOOL bEnabled);
     void SetWifiConnected(IN IMS_BOOL bConnected);
+    void UpdateWifiObserver();
 
     // Timer
     void ProcessInTimerExpired();
@@ -156,16 +177,6 @@ private:
     static const IMS_CHAR* TimerToString(IN IMS_UINT32 nType);
 
 protected:
-    void Init() override;
-
-private:
-    enum
-    {
-        REASON_NONE = 0,
-        REASON_NET_STATE_CHANGED,
-        REASON_ROAMING_SATAE_CHANGED
-    };
-
     // access_policy (ex 0x20000004)
     IMS_UINT32 m_nCnxPolicy;
     IMS_UINT32 m_nCnxPolicyInRoaming;
@@ -212,14 +223,9 @@ private:
     ITimer* m_piVoiceRatTimer;
 
     ImsList<IAosNetTrackerListener*> m_objListeners;
+    ImsList<IAosNetTrackerTimerListener*> m_objTimerListeners;
 
     AString m_strTag;
-
-    static const IMS_UINT32 SERVICE_IN_TIME_MILLI_SEC = 2000;
-    static const IMS_UINT32 SERVICE_OUT_TIME_MILLI_SEC = 1000;
-
-private:
-    friend class AosNetTrackerTest;
 };
 
 #endif  // AOS_NET_TRACKER_H_

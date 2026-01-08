@@ -16,399 +16,233 @@
 
 package com.android.imsstack.core.agents.dcmif;
 
-import android.os.Handler;
+import android.telephony.AccessNetworkConstants;
+import android.telephony.Annotation.NetworkType;
 
 /**
- * this class is the inferface about data connection watcher
+ * this class is the interface about data connection watcher
  */
 public interface IDcNetWatcher extends IDc {
+    // Access network types for IMS adaptation layer
+    int AN_UNKNOWN = 0;
+    int AN_EHRPD = 1;
+    int AN_GEREAN = 2;
+    int AN_UTRAN = 3;
+    int AN_EUTRAN = 4;
+    int AN_NGRAN = 5;
+    int AN_1XRTT = 6; // will be removed
+    int AN_EVDO = 7; // will be removed
+    int REGISTRATION_REJECT_CAUSE_NONE = 0;
 
     /**
-     * this class is data object to notify
-     */
-    class NotiObj {
-        public EApnType   eApnType;
-        public EDataState eDataState;
-        public int mSmCause;
-
-        public NotiObj(EApnType apnType, EDataState dataState, int smCause) {
-            this.eApnType = apnType;
-            this.eDataState = dataState;
-            this.mSmCause = smCause;
-        }
-    }
-
-    /**
+     * Returns the service state of the PS domain (cellular only).
      *
-     * Notify data state is changed to target apn object
-     *
-     * Only subject class can invoke this API.
-     * DO NOT allow to accessed by observer class
+     * The {@link #getDataServiceState} reads the service state of the current device's data
+     * network (including IWLAN), while this method reads the service state of the current device's
+     * cellular data network.
      */
-    void notifyResult(EApnType eApnType, EDataState eDataState);
+    int getCellularDataServiceState();
 
     /**
-     * Return service is available or not based on
-     * 1) RAT policy configuration
-     * 2) Current RAT information
-     */
-    boolean isRatPolicyAvailable();
-
-    /**
-     * Return call state stored in DcNetWatcher object
-     */
-    int getCallState();
-
-    /**
-     * Return call state stored in DcNetWatcher object
-     */
-    int getPreciseCallState();
-
-    /**
-     * Return data service state stored in DcNetWatcher object
+     * Returns service state of the PS domain (cellular + IWLAN).
      */
     int getDataServiceState();
 
     /**
-     * Return network type stored in DcNetWatcher object
+     * Returns data network type.
      */
-    int getNetworkType();
+    @NetworkType int getNetworkType();
 
     /**
-     * Return voice network type stored in DcNetWatcher object
+     * Returns voice network type.
      */
-    int getVoiceNetworkType();
+    @NetworkType int getVoiceNetworkType();
 
     /**
-     * Return voice service state stored in DcNetWatcher object
+     * Returns voice service state.
      */
     int getVoiceServiceState();
 
     /**
-     * Return NR registration info stored in DcNetWatcher object
+     * Returns network registration reject cause stored in DcNetWatcher object
      */
-    int getNrRegistrationInfo();
+    int getNetworkRegistrationRejectCause();
 
     /**
-     * Return MOCNPLMN info stored in DcNetWatcher object
+     * Clears network registration reject cause stored in DcNetWatcher object.
      */
-    int getMocnPlmnInfo();
+    void clearNetworkRegistrationRejectCause();
 
     /**
-     * Return operator info (numeric type) stored in DcNetWatcher object
+     * Returns the numeric name (MCC+MNC) of current registered operator.
      */
-    String getOperatorNumeric();
+    String getNetworkOperator();
 
     /**
-     * Return airplane mode availability stored in DcNetWatcher object
+     * Returns whether airplane mode is enabled.
      */
     boolean isAirplaneMode();
 
     /**
-     * Return if LTE is attached as emergency case
+     * Returns whether in an emergency attached state.
      */
-    boolean isLteEmergencyOnly();
+    boolean isEmergencyOnly();
 
     /**
-     * Return whether emergency service is supported by the network
+     * Returns whether emergency service is supported by the network
      */
     boolean isEmergencyServiceSupported();
 
     /**
-     * Return current roaming state
-     * (This roaming state could be overridden by the carrier config)
-     * @see CarrierConfigManager#KEY_FORCE_HOME_NETWORK_BOOL
-     * @see CarrierConfigManager#KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY
-     * @see CarrierConfigManager#KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY
-     * @see CarrierConfigManager#KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY
-     * @see CarrierConfigManager#KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY
+     * Returns current roaming indicator of phone.
+     * This roaming state could be overridden by the resource overlay or carrier config.
      */
     boolean isRoaming();
 
     /**
-     * Return voice roaming state of device
+     * Returns whether the voice network is roaming.
+     * This roaming state could be overridden by the resource overlay or carrier config.
      */
     boolean isVoiceRoaming();
 
     /**
-     * Return whether mobile data is registered on roaming network
-     * (This value is not affected by any carrier config or resource overlay override)
+     * Returns whether mobile data is registered on roaming network.
+     * This value is not affected by any carrier config or resource overlay override.
      */
     boolean isDataNetworkRoaming();
 
     /**
-     * Return Voice roaming type of device
+     * Returns voice roaming type.
+     * This roaming type could be overridden by the resource overlay or carrier config.
      */
     int getVoiceRoamingType();
 
     /**
-     * Return Data roaming type of device
+     * Returns data roaming type.
+     * This roaming type could be overridden by the resource overlay or carrier config.
      */
     int getDataRoamingType();
 
     /**
-     * Return VoPS value stored in DcNetWatcher object
+     * Returns whether VoPS is supported that stored in DcNetWatcher object.
+     * If {@link IDcSettings#isVopsIgnored} is true it always returns VoPS is supported.
      */
-    boolean isVops();
+    boolean isVopsSupported();
 
     /**
-     * Return LTE duplex mode stored in ServiceState object
-     */
-    int getLteDuplexMode();
-
-    /**
-     * Set if "Intent.ACTION_REBOOT" was delivered to IMS
-     * Special operator has requirement in this case related with data connection
-     */
-    void setDoingOffRadio(boolean b);
-
-    /**
-     * Return if "Intent.ACTION_REBOOT" was delivered to IMS or not
-     */
-    boolean isDoingOffRadio();
-
-    /**
-     * For check mismatch of DATA tech type between ServiceState and TelephonyManager
-     */
-    void setRatFromTelephonyManager(int nRat);
-
-    /**
-     * For check mismatch of Voice tech type between ServiceState and TelephonyManager
-     */
-    void setVoiceRatFromTelephonyManager(int nVoiceRat);
-
-    /**
-     * Set NR registration information
-     */
-    void setNrRegistrationInfo(int state, int reason);
-
-    /**
-     * Return current RAT is belong to 1xRTT RAT category
-     */
-    boolean is1xRtt();
-
-    /**
-     * Return current RAT is belong to 2G RAT category
-     */
-    boolean is2G();
-
-    /**
-     * Return current RAT is belong to 3G RAT category
+     * Returns whether the current network type belongs to the 3G category.
      */
     boolean is3G();
 
     /**
-     * Return current RAT is belong to 4G RAT category
+     * Returns whether the current network type belongs to the 4G category.
      */
     boolean is4G();
 
     /**
-     * Return current RAT is belong to 5G RAT category
+     * Returns whether the current network type belongs to the 5G category.
      */
     boolean is5G();
 
     /**
-     * Return condition if 5G RAT is supported
+     * Returns the access network type of the current network.
      */
-    boolean is5GRequired();
+    @AccessNetworkConstants.RadioAccessNetworkType int getAccessNetworkType();
 
     /**
-     * Return current RAT is belong to HRPD RAT category
-     */
-    boolean isEhrpd();
-
-    /**
-     * Return current RAT is belong to EVDO RAT category
-     */
-    boolean isEvdo();
-
-     /**
-      * Return current RAT is belong to 4G Voice RAT category
-      */
-    boolean isVoiceRat4G();
-
-     /**
-      * Return current RAT is belong to 4G Voice RAT category
-      */
-    boolean isVoiceRat5G();
-
-    /**
-     *     registerForDataStateChanged
+     * Returns whether IMS service is supported in the specified network type.
      *
-     *     Register listener to receive data state changed event
+     * @param networkType The network type to check whether IMS service is supported.
+     * @return true if the IMS service is supported in specified network type, false otherwise.
+     */
+    boolean isImsSupportedNetworkType(@NetworkType int networkType);
+
+    /**
+     * Listener interface to receive the change notification of network status.
+     */
+    interface Listener {
+        /**
+         * Invoked when data connection state is changed.
+         */
+        default void onDataConnectionStateChanged(EApnType apnType, EDataState dataState) {
+        }
+
+        /**
+         * Invoked when data service state is changed.
+         */
+        default void onDataServiceStateChanged(int state) {
+        }
+
+        /**
+         * Invoked when data network type is changed.
+         */
+        default void onDataNetworkTypeChanged() {
+        }
+
+        /**
+         * Invoked when voice network type is changed.
+         */
+        default void onVoiceNetworkTypeChanged() {
+        }
+
+        /**
+         * Invoked when the numeric ID of the network operator is changed.
+         */
+        default void onNetworkOperatorChanged(String networkOperator) {
+        }
+
+        /**
+         * Invoked when roaming state is changed.
+         */
+        default void onRoamingStateChanged(boolean roaming) {
+        }
+
+        /**
+         * Invoked when airplane mode is changed.
+         */
+        default void onAirplaneModeChanged(boolean airplaneMode) {
+        }
+
+        /**
+         * Invoked when VoPS state is changed.
+         */
+        default void onVopsStateChanged(int state, String plmn) {
+        }
+
+        /**
+         * Invoked when data connection attempt is failed.
+         */
+        default void onPdnConnectionFailed(EApnType apnType, int smCause) {
+        }
+
+        /**
+         * Invoked when network registration state is changed.
+         */
+        default void onNetworkRegistrationStateChanged(int regState) {
+        }
+    }
+
+    /**
+     * Adds a listener to monitor the network status change.
      *
-     *        Register "h" of Handler
-     *        The "h" will get message with "what" of event
-     *        and "obj" of IDcNetWatcher.NotiObj
+     * @param listener The listener to be set.
+     */
+    void addListener(Listener listener);
+
+    /**
+     * Removes the listener that was previously set.
      *
-     *        Typical usage.
-     *        {@code class Example extends Handler{
-     *            Example{
-     *                registerForDataStateChanged(this, EVENT_NAME, null);
-     *            }
-     *
-     *            @Override
-     *            public void handleMessage(Message msg) {
-     *                AsyncResult ar = (AsyncResult)msg.obj;
-
-     *                IDcNetWatcher.NotiObj res = (IDcNetWatcher.NotiObj) ar.result;
-     *                EApnType apnType = res.eApnType;
-     *                EDataState state = res.eDataState;
-     *                int smCause = res.mSmCause;
-     *            }
-     *        }}
+     * @param listener The listener to be removed.
      */
-    void registerForDataStateChanged(Handler h, int what, Object obj);
+    void removeListener(Listener listener);
 
     /**
-     * De-register listener to receive data state changed event
+     * Notifies data connection state is changed
      */
-    void unregisterForDataStateChanged(Handler h);
+    void notifyDataConnectionState(EApnType apnType, EDataState dataState);
 
     /**
-     * Registerlistener to receive data service state changed event
+     * Notifies data connection attempt is failed with the cause
      */
-    void registerForDataServiceStateChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive data service state changed event
-     */
-    void unregisterForDataServiceStateChanged(Handler h);
-
-    /**
-     * Register listener to receive RAT changed event
-     */
-    void registerForRatChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive RAT changed event
-     */
-    void unregisterForRatChanged(Handler h);
-
-    /**
-     * Register listener to receive voice RAT changed event
-     */
-    void registerForVoiceRatChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive voice RAT changed event
-     */
-    void unregisterForVoiceRatChanged(Handler h);
-
-    /**
-     * Register listener to receive roaming state changed event
-     */
-    void registerForRoamingStateChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive roaming state changed event
-     */
-    void unregisterForRoamingStateChanged(Handler h);
-
-    /**
-     * Register listener to receive voice roaming state changed event
-     */
-    void registerForVoiceRoamingStateChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive voice roaming state changed event
-     */
-    void unregisterForVoiceRoamingStateChanged(Handler h);
-
-     /**
-     * Register listener to receive voice roaming type changed event
-     */
-    void registerForVoiceRoamingTypeChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive voice roaming type changed event
-     */
-    void unregisterForVoiceRoamingTypeChanged(Handler h);
-
-     /**
-     * Register listener to receive data roaming type changed event
-     */
-    void registerForDataRoamingTypeChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive data roaming type changed event
-     */
-    void unregisterForDataRoamingTypeChanged(Handler h);
-
-    /**
-     * Register listener to receive airplane mode changed event
-     */
-    void registerForAirplaneModeChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive airplane mode changed event
-     */
-    void unregisterForAirplaneModeChanged(Handler h);
-
-    /**
-     * Register listener to receive network operator changed event
-     */
-    void registerForNetworkOperatorChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive network operator changed event
-     */
-    void unregisterForNetworkOperatorChanged(Handler h);
-
-    /**
-     * Register listener to receive CS call state changed event
-     */
-    void registerForCsCallStatusChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive CS call state changed event
-     */
-    void unregisterForCsCallStatusChanged(Handler h);
-
-    /**
-     * Register listener to receive precise CS call state changed event
-     */
-    void registerForPreciseCsCallStatusChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive precise CS call state changed event
-     */
-    void unregisterForPreciseCsCallStatusChanged(Handler h);
-
-    /**
-     * Register listener to receive Voice of PS changed event
-     */
-    void registerForImsVopsChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive Voice of PS changed event
-     */
-    void unregisterForImsVopsChanged(Handler h);
-
-    /**
-     * Register listener to receive power off changed event
-     */
-    void registerForPowerOffChanged(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive power off changed event
-     */
-    void unregisterForPowerOffChanged(Handler h);
-
-    /**
-     * Register listener to receive pdn connection fail event
-     * This api is used to handle XCAP pdn connection fail case, for now.
-     */
-    void registerForPdnConnectionFailed(Handler h, int what, Object obj);
-
-    /**
-     * De-register listener to receive pdn connection fail event
-     * This api is used to handle XCAP pdn connection fail case, for now.
-     */
-    void unregisterForPdnConnectionFailed(Handler h);
-
-    /**
-     * Notify pdn connection failed event with sm cause to listeners
-     */
-    void notifyPdnConnectionFailed(EApnType eApnType, int smCause);
+    void notifyPdnConnectionFailed(EApnType apnType, int smCause);
 }

@@ -28,8 +28,8 @@ class Publication : public ServiceMethod, public IRefreshable
 {
 public:
     Publication(IN Service* pService, IN const AString& strEvent,
-            IN IMS_BOOL bImplicitRoutingRequired = IMS_FALSE);
-    virtual ~Publication();
+            IN IMS_BOOL bImplicitRoutingRequired = IMS_TRUE);
+    ~Publication() override;
 
     Publication(IN const Publication&) = delete;
     Publication& operator=(IN const Publication&) = delete;
@@ -76,7 +76,7 @@ private:
     void CloseConnection();
     ISipClientConnection* CreateConnectionWithDialog(
             IN ISipDialog* piDialog, IN const SipMethod& objMethod);
-    void ReceiveResponse(IN ISipClientConnection* piScc);
+    void ReceiveResponse(IN const ISipClientConnection* piScc);
     void SetState(IN IMS_SINT32 nState);
 
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);

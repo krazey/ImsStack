@@ -19,6 +19,7 @@
 #include "ImsTypeDef.h"
 
 class IAosNetTrackerListener;
+class IAosNetTrackerTimerListener;
 
 class IAosNetTracker
 {
@@ -28,7 +29,7 @@ public:
     virtual IMS_BOOL IsServiceIn(IN IMS_UINT32 nType = TYPE_DEFAULT) = 0;
     virtual IMS_BOOL IsDataIn() = 0;
     virtual IMS_BOOL IsNetworkIn() = 0;
-    virtual IMS_BOOL IsEmergencyLteAttach() = 0;
+    virtual IMS_BOOL IsEmergencyAttach() = 0;
     virtual IMS_BOOL IsSuspended() = 0;
     virtual IMS_BOOL IsSessionContinuitySupported() = 0;
     virtual IMS_BOOL IsServiceTimerRunning() = 0;
@@ -38,13 +39,17 @@ public:
     // the network type of moblie
     virtual IMS_UINT32 GetMobileChangingNetworkType() = 0;
     virtual IMS_UINT32 GetMobileNetworkType() = 0;
+    virtual IMS_UINT32 GetMobileNetworkRegistrationRejectCause() = 0;
     virtual IMS_SINT32 GetMobileVoiceServiceState() = 0;
     virtual IMS_UINT32 GetMobileVoiceNetworkType() = 0;
+    virtual IMS_SINT32 GetMobileServiceState() = 0;
     /*
         the network type of serive in network
         return : mobile or WLAN
     */
     virtual IMS_UINT32 GetNetworkType() = 0;
+    virtual AString GetNetworkOperator() = 0;
+    virtual AString GetMobileNetworkPlmn() = 0;
 
     virtual void SetRatGuardTime(IN IMS_UINT32 nGuardTime) = 0;
     virtual void SetSrvOutGuardTime(IN IMS_UINT32 nGuardTime) = 0;
@@ -52,6 +57,9 @@ public:
 
     virtual void SetListener(IN IAosNetTrackerListener* piListener) = 0;
     virtual void RemoveListener(IN IAosNetTrackerListener* piListener) = 0;
+
+    virtual void SetTimerListener(IN IAosNetTrackerTimerListener* piListener) = 0;
+    virtual void RemoveTimerListener(IN IAosNetTrackerTimerListener* piListener) = 0;
 
     enum
     {

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ISystem.h"
 #include "ImsMessageDef.h"
 #include "ImsAccessNetworkInfoType.h"
 #include "ImsNetworkConnectionState.h"
@@ -26,10 +27,11 @@
 #include "ServiceThread.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
+#include "network/OsNetworkConstants.h"
 #include "network/OsWifiConnection.h"
 #include "system-intf/SystemConstants.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 PUBLIC
 OsWifiConnection::OsWifiConnection() :
@@ -344,7 +346,7 @@ PRIVATE VIRTUAL void OsWifiConnection::AddReferenceListener(
 
     for (IMS_UINT32 i = 0; i < m_objReferenceListeners.GetSize(); ++i)
     {
-        INetworkConnectionListener* piTmpListener = m_objReferenceListeners.GetAt(i);
+        const INetworkConnectionListener* piTmpListener = m_objReferenceListeners.GetAt(i);
 
         if (piTmpListener == piListener)
         {
@@ -365,7 +367,7 @@ PRIVATE VIRTUAL void OsWifiConnection::RemoveReferenceListener(
 
     for (IMS_UINT32 i = 0; i < m_objReferenceListeners.GetSize(); ++i)
     {
-        INetworkConnectionListener* piTmpListener = m_objReferenceListeners.GetAt(i);
+        const INetworkConnectionListener* piTmpListener = m_objReferenceListeners.GetAt(i);
 
         if (piTmpListener == piListener)
         {

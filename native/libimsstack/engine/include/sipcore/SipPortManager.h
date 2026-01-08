@@ -16,7 +16,9 @@
 #ifndef SIP_PORT_MANAGER_H_
 #define SIP_PORT_MANAGER_H_
 
-#include "IpAddress.h"
+#include "ImsTypeDef.h"
+
+class IpAddress;
 
 /**
  * @brief This class provides the port information for SIP TCP/TLS transport protocol.
@@ -49,26 +51,13 @@ private:
     static IMS_BOOL IsPortAvailable(IN const IpAddress& objIp, IN IMS_SINT32 nPort);
 
 private:
-    /// Port range as a default (not-inclusive).
-    enum
-    {
-        CLIENT_PORT_MIN = 1024,
-        CLIENT_PORT_MAX = 65535,
+    static constexpr IMS_SINT32 CLIENT_PORT_MIN = 1024;   // inclusive
+    static constexpr IMS_SINT32 CLIENT_PORT_MAX = 65535;  // non-inclusive
 
-        CLIENT_PORT_START = 40000,
-        CLIENT_PORT_END = CLIENT_PORT_MAX
-    };
-
-    /// Minimum Round-Robin Gap
-    /// Do not re-use a source port that has been used in any of the previous 32 TCP sockets.
-    enum
-    {
-        MIN_RR_GAP = 32
-    };
-
-    // Port range (not-inclusive)
-    IMS_SINT32 m_nPortCStart;
-    IMS_SINT32 m_nPortCEnd;
+    // REQ: Do not re-use a source port that has been used in any of the previous 32 TCP sockets.
+    // This needs to be done with caution when setting the port range as a config value.
+    IMS_SINT32 m_nPortCStart;  // inclusive
+    IMS_SINT32 m_nPortCEnd;    // non-inclusive
 
     // Next client port number
     mutable IMS_SINT32 m_nNextPortC;

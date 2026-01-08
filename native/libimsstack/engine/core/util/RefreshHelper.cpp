@@ -19,13 +19,14 @@
 
 #include "ISipClientConnection.h"
 #include "Sip.h"
+#include "SipError.h"
 #include "SipMethod.h"
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
 #include "util/IRefreshable.h"
 #include "util/RefreshHelper.h"
 
-__IMS_TRACE_TAG_IMS__;
+__IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
 RefreshHelper::RefreshHelper(IN IRefreshable* piRefreshable, IN IMS_BOOL bRepeatable) :
@@ -386,7 +387,7 @@ IMS_BOOL RefreshHelper::SetTimer(IN IMS_SINT32 nTimerDuration)
         return IMS_FALSE;
     }
 
-    m_piTimer->SetTimer(nTimerDuration * 1000, this);
+    m_piTimer->SetTimer(nTimerDuration * 1000L, this);
 
     IMS_TRACE_I("Refresh Timer (%p) :: START - Duration (%d)", m_piTimer, nTimerDuration, 0);
 

@@ -18,19 +18,13 @@
 
 #include <gmock/gmock.h>
 
-#include "ImsList.h"
-#include "ImsMessageDef.h"
-#include "ServiceMessage.h"
-#include "ServiceNetworkPolicy.h"
-#include "ServiceThread.h"
-
 #include "INetworkWatcher.h"
 
 class MockINetworkWatcher : public INetworkWatcher
 {
 public:
-    inline MockINetworkWatcher() {}
-    inline virtual ~MockINetworkWatcher() {}
+    MockINetworkWatcher() = default;
+    ~MockINetworkWatcher() override = default;
 
     MOCK_METHOD(IMS_UINT32, GetNetworkStatus, (IN const AString& strProfile), (override));
     MOCK_METHOD(NETRADIO_ENTYPE, GetNetRadioTechType,
@@ -43,21 +37,26 @@ public:
     MOCK_METHOD(NETSERVICE_ENTYPE, GetNetVoiceServiceType, (), (override));
     MOCK_METHOD(NETDOMAIN_ENTYPE, GetNetDomainType, (), (override));
     MOCK_METHOD(IMS_SINT32, GetNetworkType, (), (override));
+    MOCK_METHOD(IMS_SINT32, GetCellularServiceState, (), (override));
     MOCK_METHOD(IMS_SINT32, GetRoamingState, (), (override));
     MOCK_METHOD(IMS_SINT32, GetVoiceRoamingType, (), (override));
     MOCK_METHOD(IMS_SINT32, GetDataRoamingType, (), (override));
+    MOCK_METHOD(AString, GetNetworkOperator, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsImsEmergencyCallSupported, (), (override));
     MOCK_METHOD(IMS_BOOL, IsImsVoiceCallSupported, (), (override));
-    MOCK_METHOD(IMS_BOOL, IsLteEmergencyOnly, (), (override));
+    MOCK_METHOD(IMS_BOOL, IsImsServiceContinuitySupported,
+            (IN IMS_SINT32 ePreviousNetwork, IN IMS_SINT32 eCurrentNetwork), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsEmergencyOnly, (), (override));
     MOCK_METHOD(IMS_BOOL, IsEmergencyAttachSupported, (), (override));
-    MOCK_METHOD(IMS_SINT32, GetMocnPlmnInfo, (), (override));
+    MOCK_METHOD(IMS_SINT32, GetNetworkRegistrationRejectCause, (), (override));
+    MOCK_METHOD(AString, GetAccessNetworkPlmn, (), (const, override));
 };
 
 class MockINetworkWatcherListener : public INetworkWatcherListener
 {
 public:
-    inline MockINetworkWatcherListener() {}
-    inline virtual ~MockINetworkWatcherListener() {}
+    MockINetworkWatcherListener() = default;
+    ~MockINetworkWatcherListener() override = default;
 
     MOCK_METHOD(
             void, NetworkWatcher_NotifyStatus, (IN INetworkWatcher * piNetworkWatcher), (override));

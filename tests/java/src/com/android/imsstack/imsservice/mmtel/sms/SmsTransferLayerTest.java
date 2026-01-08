@@ -20,7 +20,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.timeout;
@@ -34,7 +33,7 @@ import android.telephony.ims.stub.ImsSmsImplBase;
 import com.android.imsstack.core.agents.Usat;
 import com.android.imsstack.core.agents.UsatInterface;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
-import com.android.internal.util.HexDump;
+import com.android.imsstack.util.ImsUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -71,8 +70,8 @@ public class SmsTransferLayerTest {
     private String mSmsc = "0791190791700590";
     private String mDecodedSmsc = "+917019075009";
     private String mDestinationAddress = "900080006200";
-    private byte[] mPdu = HexDump.hexStringToByteArray("21110A81785634121000000666B2996C2603");
-    private byte[] mTpdu = HexDump.hexStringToByteArray("01060C81090008002600000006536A905A9D02");
+    private byte[] mPdu = ImsUtils.hexStringToBytes("21110A81785634121000000666B2996C2603");
+    private byte[] mTpdu = ImsUtils.hexStringToBytes("01060C81090008002600000006536A905A9D02");
     private String mTpduString = "01060A817856341200000006536A905A9D02";
     private String mDestAddr = "8765432100";
     private String mUsatTpDestAddr = "1234567890";
@@ -106,15 +105,169 @@ public class SmsTransferLayerTest {
     public void test_sendMemoryAvailabilityNotification() {
         mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
         verify(mSmsRL).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc), eq(mSmsc),
-                eq(null), eq(STATUS_RESULT_NA));
+                eq(null), eq(STATUS_RESULT_NA), eq(false));
     }
+
+    @Test
+    public void test_sendMemoryAvailabilityNotification_fail() {
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+        mProxyListener  = mSmsTransferLayer.getListener();
+        mResult = ImsSmsImplBase.SEND_STATUS_ERROR_RETRY;
+        mProxyListener.notifyRLReportIndication(mToken, 1, mResult, mReason, 0);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(false));
+        verify(mListener, Mockito.times(1)).notifyMemoryAvailableResult(mToken, mResult, 0);
+    }
+
+    @Test
+    public void test_sendMemoryAvailabilityNotification_newPass_newFail() {
+        mProxyListener  = mSmsTransferLayer.getListener();
+
+        // First SMMA (new-passed)
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+        mResult = ImsSmsImplBase.SEND_STATUS_OK;
+        mProxyListener.notifyRLReportIndication(mToken, 1, mResult, mReason, 0);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(false));
+        verify(mListener, Mockito.times(1)).notifyMemoryAvailableResult(mToken, mResult, 0);
+
+        // Second SMMA  (new-failed)
+        mToken += 1;
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+        mResult = ImsSmsImplBase.SEND_STATUS_ERROR_RETRY;
+
+        mProxyListener.notifyRLReportIndication(mToken, 1, mResult, mReason, 0);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(false));
+        verify(mListener, Mockito.times(1)).notifyMemoryAvailableResult(mToken, mResult, 0);
+
+        // Third SMMA  (retry)
+        mToken += 1;
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(true));
+    }
+
+    @Test
+    public void test_sendMemoryAvailabilityNotification_newPass_newPass() {
+        mProxyListener  = mSmsTransferLayer.getListener();
+
+        // First SMMA (new-passed)
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+        mResult = ImsSmsImplBase.SEND_STATUS_OK;
+        mProxyListener.notifyRLReportIndication(mToken, 1, mResult, mReason, 0);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(false));
+        verify(mListener, Mockito.times(1)).notifyMemoryAvailableResult(mToken, mResult, 0);
+
+        // Second SMMA  (new-passed)
+        mToken += 1;
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+        mResult = ImsSmsImplBase.SEND_STATUS_OK;
+
+        mProxyListener.notifyRLReportIndication(mToken, 1, mResult, mReason, 0);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(false));
+        verify(mListener, Mockito.times(1)).notifyMemoryAvailableResult(mToken, mResult, 0);
+
+        // Third SMMA  (not retry)
+        mToken += 1;
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(false));
+    }
+
+    @Test
+    public void test_sendMemoryAvailabilityNotification_newFail_retryFail() {
+        mProxyListener  = mSmsTransferLayer.getListener();
+
+        // First SMMA (new-failed)
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+        mResult = ImsSmsImplBase.SEND_STATUS_ERROR_RETRY;
+        mProxyListener.notifyRLReportIndication(mToken, 1, mResult, mReason, 0);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(false));
+        verify(mListener, Mockito.times(1)).notifyMemoryAvailableResult(mToken, mResult, 0);
+
+        // Second SMMA  (retry-failed)
+        mToken += 1;
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+        mResult = ImsSmsImplBase.SEND_STATUS_ERROR_RETRY;
+
+        mProxyListener.notifyRLReportIndication(mToken, 1, mResult, mReason, 0);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(true));
+        verify(mListener, Mockito.times(1)).notifyMemoryAvailableResult(mToken, mResult, 0);
+
+        // Third SMMA  (new)
+        mToken += 1;
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(false));
+    }
+
+    @Test
+    public void test_sendMemoryAvailabilityNotification_newFail_retryPass() {
+        mProxyListener  = mSmsTransferLayer.getListener();
+
+        // First SMMA (new-failed)
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+        mResult = ImsSmsImplBase.SEND_STATUS_ERROR_RETRY;
+        mProxyListener.notifyRLReportIndication(mToken, 1, mResult, mReason, 0);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(false));
+        verify(mListener, Mockito.times(1)).notifyMemoryAvailableResult(mToken, mResult, 0);
+
+        // Second SMMA  (retry-passed)
+        mToken += 1;
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+        mResult = ImsSmsImplBase.SEND_STATUS_OK;
+
+        mProxyListener.notifyRLReportIndication(mToken, 1, mResult, mReason, 0);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(true));
+        verify(mListener, Mockito.times(1)).notifyMemoryAvailableResult(mToken, mResult, 0);
+
+        // Third SMMA  (new)
+        mToken += 1;
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+
+        verify(mSmsRL, Mockito.times(1)).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc),
+                eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA), eq(false));
+    }
+
     @Test
     public void test_sendMoTPdu() {
         assertEquals(SmsUtils.RESULT_SUCCESS, mSmsTransferLayer.sendMoTPdu(mToken,
                 mSmsFormat, mMessageRef, mSmsc, mPdu));
         mSmsTransferLayer.sendMoTPdu(mToken, SmsUtils.RP_ACK, mMessageRef, mSmsc, mPdu);
         verify(mSmsRL).sendRPMessage(anyInt(), anyInt(), anyString(), anyString(),
-                anyObject(), anyInt());
+                any(), anyInt(), eq(false));
     }
 
     @Test
@@ -122,7 +275,7 @@ public class SmsTransferLayerTest {
         when(mMockUsatInterface.isServiceAvailable(Usat.SERVICE_MO_SMS_CONTROL)).thenReturn(true);
         when(mMockUsatCmdRes.getResult()).thenReturn(Usat.RESULT_ALLOWED);
         when(mMockUsatCmdRes.getCommand()).thenReturn(mMoSmsCCmd);
-        byte[] tpdu = HexDump.hexStringToByteArray(mTpduString);
+        byte[] tpdu = ImsUtils.hexStringToBytes(mTpduString);
         mSmsTransferLayer.sendMoTPdu(mToken, SmsUtils.FORMAT_INT_3GPP, mMessageRef, mSmsc, tpdu);
         verify(mMockUsatInterface).createMoSmsControlCommand(mRpAddrCaptor.capture(),
                                                              mTpAddrCaptor.capture(), anyInt(),
@@ -139,7 +292,7 @@ public class SmsTransferLayerTest {
         when(mMoSmsCCmd.getTpDestinationAddress()).thenReturn(tpAddr);
         usatListener.onCommandResponse(mMockUsatCmdRes);
         verify(mSmsRL).sendRPMessage(eq(mToken), eq(SmsUtils.RP_DATA), eq(mSmsc), eq(tpAddr),
-                eq(tpdu), eq(STATUS_RESULT_NA));
+                eq(tpdu), eq(STATUS_RESULT_NA), eq(false));
     }
 
     @Test
@@ -149,7 +302,7 @@ public class SmsTransferLayerTest {
         when(mMockUsatCmdRes.getCommand()).thenReturn(mMoSmsCCmd);
         mSmsTransferLayer.sendMoTPdu(mToken, SmsUtils.FORMAT_INT_3GPP,
                                              mMessageRef, mSmsc,
-                                             HexDump.hexStringToByteArray(mTpduString));
+                                             ImsUtils.hexStringToBytes(mTpduString));
         verify(mMockUsatInterface).createMoSmsControlCommand(mRpAddrCaptor.capture(),
                                                              mTpAddrCaptor.capture(), anyInt(),
                                                              mUsatListenerCaptor.capture());
@@ -167,9 +320,9 @@ public class SmsTransferLayerTest {
         when(mMockUsatCmdRes.getRpDestinationAddress()).thenReturn(mUsatRpDestAddr);
         when(mMockUsatCmdRes.getTpDestinationAddress()).thenReturn(mUsatTpDestAddr);
         usatListener.onCommandResponse(mMockUsatCmdRes);
-        byte[] usatTpdu = HexDump.hexStringToByteArray(mUsatTpduString);
+        byte[] usatTpdu = ImsUtils.hexStringToBytes(mUsatTpduString);
         verify(mSmsRL).sendRPMessage(eq(mToken), eq(SmsUtils.RP_DATA), eq(mEncodedRpDestAddr),
-                             eq(mUsatTpDestAddr), eq(usatTpdu), eq(STATUS_RESULT_NA));
+                             eq(mUsatTpDestAddr), eq(usatTpdu), eq(STATUS_RESULT_NA), eq(false));
     }
 
     @Test
@@ -177,7 +330,7 @@ public class SmsTransferLayerTest {
         when(mMockUsatInterface.isServiceAvailable(Usat.SERVICE_MO_SMS_CONTROL)).thenReturn(true);
         when(mMockUsatCmdRes.getResult()).thenReturn(Usat.RESULT_NOT_ALLOWED);
         when(mMockUsatCmdRes.getCommand()).thenReturn(mMoSmsCCmd);
-        byte[] tpdu = HexDump.hexStringToByteArray(mTpduString);
+        byte[] tpdu = ImsUtils.hexStringToBytes(mTpduString);
         mSmsTransferLayer.sendMoTPdu(mToken, SmsUtils.FORMAT_INT_3GPP, mMessageRef, mSmsc, tpdu);
         verify(mMockUsatInterface).createMoSmsControlCommand(mRpAddrCaptor.capture(),
                                                              mTpAddrCaptor.capture(), anyInt(),
@@ -203,12 +356,12 @@ public class SmsTransferLayerTest {
     @Test
     public void test_calculateTpDestAddrLengthByte() {
         //for odd number of digits
-        byte[] tpDestAddrBytes = HexDump.hexStringToByteArray("9112345678F9");
+        byte[] tpDestAddrBytes = ImsUtils.hexStringToBytes("9112345678F9");
         int len = mSmsTransferLayer.calculateTpDestAddrLengthByte(tpDestAddrBytes);
         assertEquals(len, 9);
 
         //for even number of Digits
-        tpDestAddrBytes = HexDump.hexStringToByteArray("911234567899");
+        tpDestAddrBytes = ImsUtils.hexStringToBytes("911234567899");
         len = mSmsTransferLayer.calculateTpDestAddrLengthByte(tpDestAddrBytes);
         assertEquals(len, 10);
     }
@@ -216,9 +369,9 @@ public class SmsTransferLayerTest {
     @Test
     public void test_calculateIndexAfterTpDestAddr() {
         //without padding in TP-DA
-        byte[] tpdu1 = HexDump.hexStringToByteArray("01060A817856341200000006536A905A9D02");
+        byte[] tpdu1 = ImsUtils.hexStringToBytes("01060A817856341200000006536A905A9D02");
         //with padding in TP-DA
-        byte[] tpdu2 = HexDump.hexStringToByteArray("01060781214365F7000006536A905A9D02");
+        byte[] tpdu2 = ImsUtils.hexStringToBytes("01060781214365F7000006536A905A9D02");
 
         int index1 = mSmsTransferLayer.calculateIndexAfterTpDestAddr(tpdu1);
         int index2 = mSmsTransferLayer.calculateIndexAfterTpDestAddr(tpdu2);
@@ -234,12 +387,19 @@ public class SmsTransferLayerTest {
 
     @Test
     public void testCdmaPduGenerate() {
-        String pduString = "0000021002020702A848D159E24006010008"
-                         + "2300031010D0011410A48CBB366F418F465C"
-                         + "7AF4EECE819E7E1C19000306220707183319";
-        byte[] pdu = HexDump.hexStringToByteArray(pduString);
-        byte[] newCdmaPdu = mSmsTransferLayer.generateCdmaPdu(pdu);
-        assertTrue((newCdmaPdu.length > 0) ? true : false);
+        String pduString = "00000210020102000002070282055950C840"
+                         + "08100003101460010610268D2285000A0100";
+        byte[] pdu = ImsUtils.hexStringToBytes(pduString);
+        byte[] cdmaPdu = mSmsTransferLayer.generateCdmaPdu(pdu);
+        String expectedPduString = "0000000000001002000000000000"
+                                 + "00000A4438313536353433323100"
+                                 + "0000000000000000001000031014"
+                                 + "60010610268D2285000A0100";
+        byte[] expectedPdu = ImsUtils.hexStringToBytes(expectedPduString);
+        for (int i = 0; i < cdmaPdu.length; i++) {
+            assertEquals(cdmaPdu[i], expectedPdu[i]);
+        }
+        assertTrue((cdmaPdu.length > 0) ? true : false);
     }
 
     @Test
@@ -251,19 +411,19 @@ public class SmsTransferLayerTest {
         mSmsTransferLayer.sendMoTPdu(4, mSmsFormat, mMessageRef, mSmsc, mTpdu);
         mProxyListener = mSmsTransferLayer.getListener();
         verify(mSmsRL).sendRPMessage(eq(1), eq(mRpMessageType), eq(mSmsc), eq(mDestinationAddress),
-                eq(mTpdu), eq(STATUS_RESULT_NA));
+                eq(mTpdu), eq(STATUS_RESULT_NA), eq(false));
         mProxyListener.notifyRLReportIndication(1, mTpdu[1] & 0xff, ImsSmsImplBase.SEND_STATUS_OK,
                 SmsManager.RESULT_ERROR_NONE, successCause);
-        verify(mSmsRL, timeout(1000).times(1)).sendRPMessage(eq(2), eq(mRpMessageType), eq(mSmsc),
-                eq(mDestinationAddress), eq(mTpdu), eq(STATUS_RESULT_NA));
+        verify(mSmsRL, timeout(3000).times(1)).sendRPMessage(eq(2), eq(mRpMessageType), eq(mSmsc),
+                eq(mDestinationAddress), eq(mTpdu), eq(STATUS_RESULT_NA), eq(false));
         mProxyListener.notifyRLReportIndication(2, mTpdu[1] & 0xff, ImsSmsImplBase.SEND_STATUS_OK,
                 SmsManager.RESULT_ERROR_NONE, successCause);
-        verify(mSmsRL, timeout(1000).times(1)).sendRPMessage(eq(3), eq(mRpMessageType), eq(mSmsc),
-                eq(mDestinationAddress), eq(mTpdu), eq(STATUS_RESULT_NA));
+        verify(mSmsRL, timeout(3000).times(1)).sendRPMessage(eq(3), eq(mRpMessageType), eq(mSmsc),
+                eq(mDestinationAddress), eq(mTpdu), eq(STATUS_RESULT_NA), eq(false));
         mProxyListener.notifyRLReportIndication(3, mTpdu[1] & 0xff, ImsSmsImplBase.SEND_STATUS_OK,
                 SmsManager.RESULT_ERROR_NONE, successCause);
-        verify(mSmsRL, timeout(1000).times(1)).sendRPMessage(eq(4), eq(mRpMessageType), eq(mSmsc),
-                eq(mDestinationAddress), eq(mTpdu), eq(STATUS_RESULT_NA));
+        verify(mSmsRL, timeout(3000).times(1)).sendRPMessage(eq(4), eq(mRpMessageType), eq(mSmsc),
+                eq(mDestinationAddress), eq(mTpdu), eq(STATUS_RESULT_NA), eq(false));
     }
 
     private static class TestSmsTransferLayer extends SmsTransferLayer {
@@ -292,16 +452,19 @@ public class SmsTransferLayerTest {
 
     @Test
     public void test_notifyRLDataIndication_3GPP2() {
-        String pduString = "0000021002020702A848D159E24006010008"
-                         + "2300031010D0011410A48CBB366F418F465C"
-                         + "7AF4EECE819E7E1C19000306220707183319";
-        byte[] pdu = HexDump.hexStringToByteArray(pduString);
+        String pduString = "00000210020102000002070282055950C840"
+                         + "08100003101460010610268D2285000A0100";
+        byte[] pdu = ImsUtils.hexStringToBytes(pduString);
         mProxyListener  = mSmsTransferLayer.getListener();
         mProxyListener.notifyRLDataIndication(mToken, SmsUtils.FORMAT_INT_3GPP2,
                                               SmsUtils.RP_DATA, pdu);
-        byte[] newCdmaPdu = mSmsTransferLayer.generateCdmaPdu(pdu);
+        String formattedTpduString = "0000000000001002000000000000"
+                                 + "00000A4438313536353433323100"
+                                 + "0000000000000000001000031014"
+                                 + "60010610268D2285000A0100";
+        byte[] formattedTpdu = ImsUtils.hexStringToBytes(formattedTpduString);
         verify(mListener).notifySmsReceived(eq(mToken), eq(SmsUtils.FORMAT_INT_3GPP2),
-                                            eq(SmsUtils.TP_SMS_DELIVER), eq(newCdmaPdu));
+                                            eq(SmsUtils.TP_SMS_DELIVER), eq(formattedTpdu));
     }
 
     @Test
@@ -310,14 +473,12 @@ public class SmsTransferLayerTest {
         String invalidPduString = "00FF021002020702A848D159E24006010008"
                          + "2300031010D0011410A48CBB366F418F465C"
                          + "7AF4EECE819E7E1C19000306220707183319";
-        byte[] invalidPdu = HexDump.hexStringToByteArray(invalidPduString);
+        byte[] invalidPdu = ImsUtils.hexStringToBytes(invalidPduString);
         mProxyListener  = mSmsTransferLayer.getListener();
         int result = mProxyListener.notifyRLDataIndication(mToken, SmsUtils.FORMAT_INT_3GPP2,
                                               SmsUtils.RP_DATA, invalidPdu);
-        byte[] newCdmaPdu = mSmsTransferLayer.generateCdmaPdu(invalidPdu);
-        assertEquals(SmsUtils.SMSTL_RESULT_GENERATE_CDMA_PDU_FAILED, result);
         verify(mListener, times(0)).notifySmsReceived(eq(mToken), eq(SmsUtils.FORMAT_INT_3GPP2),
-                                            eq(SmsUtils.TP_SMS_DELIVER), eq(newCdmaPdu));
+                                            eq(SmsUtils.TP_SMS_DELIVER), any());
     }
 
     @Test

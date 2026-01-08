@@ -23,7 +23,7 @@ class OsWifiWatcher : public IWifiWatcher, public ISystemListener
 {
 public:
     OsWifiWatcher();
-    virtual ~OsWifiWatcher();
+    ~OsWifiWatcher() override;
 
     OsWifiWatcher(IN const OsWifiWatcher&) = delete;
     OsWifiWatcher& operator=(IN const OsWifiWatcher&) = delete;

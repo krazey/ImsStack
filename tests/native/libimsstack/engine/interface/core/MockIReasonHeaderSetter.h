@@ -23,7 +23,7 @@
 class MockIReasonHeaderSetter : public IReasonHeaderSetter
 {
 public:
-    virtual ~MockIReasonHeaderSetter() = default;
+    ~MockIReasonHeaderSetter() override = default;
 
 public:
     MOCK_METHOD(void, ReasonHeaderSetter_SetHeader,

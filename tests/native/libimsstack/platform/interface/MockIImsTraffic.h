@@ -19,20 +19,18 @@
 #include <gmock/gmock.h>
 
 #include "IImsTraffic.h"
-#include "ImsTypeDef.h"
-
-class IImsTrafficListener;
 
 class MockIImsTraffic : public IImsTraffic
 {
 public:
-    inline MockIImsTraffic() = default;
-    inline ~MockIImsTraffic() = default;
+    MockIImsTraffic() = default;
+    ~MockIImsTraffic() override = default;
 
     MOCK_METHOD(void, Disable, (IN IMS_SINT32), (override));
     MOCK_METHOD(IMS_BOOL, IsAllowed, (IN IMS_SINT32, IN IMS_UINT32), (override));
     MOCK_METHOD(void, Start, (IN IMS_SINT32, IN IMS_UINT32), (override));
     MOCK_METHOD(void, Stop, (IN IMS_SINT32, IN IMS_UINT32), (override));
+    MOCK_METHOD(void, SetSimultaneousCallingSupported, (IN IMS_SINT32, IN IMS_BOOL), (override));
     MOCK_METHOD(void, SetWlan, (IN IMS_SINT32, IN IMS_BOOL), (override));
     MOCK_METHOD(void, AddListener, (IN IImsTrafficListener*), (override));
     MOCK_METHOD(void, RemoveListener, (IN IImsTrafficListener*), (override));

@@ -34,6 +34,7 @@ public:
     MockIMtcService objService;
     MockIMtcImsEventReceiver objImsEventReceiver;
     MockIMtcCallContext objContext;
+    // cppcheck-suppress unusedStructMember
     MockIMtcBlockRuleCheckListener objListener;
     VopsBlockRule* pBlockRule;
 
@@ -94,6 +95,5 @@ TEST_F(VopsBlockRuleTest, CheckReturnsBlockedIfVopsNotSupported)
     Result objResult = pBlockRule->Check(objListener);
 
     EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
-    EXPECT_EQ(CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_SIP_488),
-            objResult.objReason);
+    EXPECT_EQ(CallReasonInfo(CODE_REJECT_CALL_TYPE_NOT_ALLOWED), objResult.objReason);
 }

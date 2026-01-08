@@ -187,18 +187,44 @@ public:
     virtual AString GetServiceRouteHeaderValue() const = 0;
 
     /**
+     * See {@link IImsAosInfo#IsCrossSimConnected}.
+     */
+    virtual IMS_BOOL IsCrossSimConnected() const = 0;
+
+    /**
      * @brief Notifys
      *
      * @param bIsInitialized
      */
-    virtual void NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized) = 0;
+    virtual void NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized) const = 0;
 
     /**
      * @brief Notifys
      *
      * @param nState
      */
-    virtual void NotifyEpsfbCallState(IN IMS_UINT32 nState) = 0;
+    virtual void NotifyEpsfbCallState(IN IMS_UINT32 nState) const = 0;
+
+    /**
+     * @brief Calls the AoS to register with next P-CSCF.
+     *        Current P-CSCF is marked as unavailable for nUnavailableTimeForCurrentPcscf value.
+     *        AoS would trigger P-CSCF discovery procedure if there is no available next P-CSCF.
+     *        This is only for handling 503 error response.
+     *
+     * @param nUnavailableTimeForCurrentPcscf The duration(sec) of marking current P-CSCF as
+     *        unavailable.
+     */
+    virtual void RegisterWithNextPcscf(IN IMS_UINT32 nUnavailableTimeForCurrentPcscf) const = 0;
+
+    /**
+     * @brief Requests the AoS to trigger an initial registration with current P-CSCF after a given
+     *        time.
+     *
+     * It's behavior is same as {@code Control(REGISTER_REINITIATE)} if {@code nAfterSec} is 0.
+     *
+     * @param nAfterSec The duration(sec) to wait before starting a new registration.
+     */
+    virtual void ReinitiateRegistration(IN IMS_UINT32 nAfterSec) const = 0;
 };
 
 #endif

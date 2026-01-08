@@ -22,8 +22,8 @@
 class MockINetworkPingListener : public INetworkPingListener
 {
 public:
-    inline MockINetworkPingListener() {}
-    inline virtual ~MockINetworkPingListener() {}
+    MockINetworkPingListener() = default;
+    ~MockINetworkPingListener() override = default;
 
     MOCK_METHOD(void, NetworkPing_NotifyResult, (IN INetworkPing * piPing, IN IMS_SINT32 nResult),
             (override));

@@ -20,11 +20,13 @@
 #include "SipClientTransactionState.h"
 #include "SipClientTransmissionProxy.h"
 #include "SipConfigProxy.h"
+#include "SipError.h"
 #include "SipFactoryProxy.h"
+#include "SipSocket.h"
 #include "SipTransport.h"
 #include "SipTransportHelper.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipClientTransmissionProxy::SipClientTransmissionProxy() :
@@ -146,7 +148,8 @@ void SipClientTransmissionProxy::DestroyStreamSocket()
 PRIVATE
 IMS_BOOL SipClientTransmissionProxy::IsUdpFallbackRequired() const
 {
-    SipTransport* pTransport = (m_pCtState != IMS_NULL) ? m_pCtState->GetSipTransport() : IMS_NULL;
+    const SipTransport* pTransport =
+            (m_pCtState != IMS_NULL) ? m_pCtState->GetSipTransport() : IMS_NULL;
 
     if (pTransport == IMS_NULL)
     {
@@ -162,7 +165,7 @@ IMS_BOOL SipClientTransmissionProxy::IsUdpFallbackRequired() const
 PRIVATE
 IMS_BOOL SipClientTransmissionProxy::IsUdpFallbackSupported() const
 {
-    SipProfile* pProfile = (m_pCtState != IMS_NULL) ? m_pCtState->GetSipProfile() : IMS_NULL;
+    const SipProfile* pProfile = (m_pCtState != IMS_NULL) ? m_pCtState->GetSipProfile() : IMS_NULL;
     return SipConfigProxy::IsUdpFallbackConfigured(GetSlotId(), pProfile);
 }
 

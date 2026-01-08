@@ -21,7 +21,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
-import android.telephony.AccessNetworkUtils;
 import android.telephony.CellIdentityGsm;
 import android.telephony.CellIdentityLte;
 import android.telephony.CellIdentityNr;
@@ -37,17 +36,17 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.ImsPrivateProperties;
+import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcm.DcUtils;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
-import com.android.imsstack.core.carrier.CarrierInfo;
-import com.android.imsstack.core.carrier.SimCarrierId;
-import com.android.imsstack.util.AppContext;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.Log;
-import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.time.Instant;
@@ -83,10 +82,10 @@ public class CellInfoAgent implements CellInfoInterface {
     private static final int EVENT_UPDATE_ALL_CELL_INFO = 1001;
     private static final int EVENT_NETWORK_TYPE_CHANGED = 1002;
     private static final int EVENT_VOICE_NETWORK_TYPE_CHANGED = 1003;
-
+    private static final int DEFAULT_CELL_INFO_CACHE_EXPIRATION_SEC = 7200;
     private static final String DELIMETER = ",";
 
-    /** Mapping from the radio access network type to the telephony's network type. */
+    // Mapping from the radio access network type to the telephony's network type.
     private static final Map<Integer, List<Integer>>
             ACCESS_NETWORK_TYPE_TO_TELEPHONY_NETWORK_TYPE = Map.ofEntries(
             Map.entry(AccessNetworkType.EUTRAN, List.of(TelephonyManager.NETWORK_TYPE_LTE)),
@@ -136,6 +135,15 @@ public class CellInfoAgent implements CellInfoInterface {
         }
     }
 
+    private final ConfigInterface.Listener mConfigListener = new ConfigInterface.Listener() {
+        @Override
+        public void onCarrierConfigChanged(int slotId, int subId) {
+            ImsLog.d(this, mSlotId, "onCarrierConfigChanged");
+            mTimeOffsetEnabledForUtcTimeFormat = isTimeOffsetEnabledForUtcTimeFormat();
+            mCellInfoCacheExpirationDuration = getCellInfoCacheExpirationDuration();
+        }
+    };
+
     private final int mSlotId;
     // To listen events like the network type change.
     private final CellInfoHandler mCellInfoHandler;
@@ -150,6 +158,8 @@ public class CellInfoAgent implements CellInfoInterface {
     private final ArrayMap<Integer, ImsCellInfo> mCellInfoPerAccessNetworkType =
             new ArrayMap<>(ACCESS_NETWORK_TYPE_TO_TELEPHONY_NETWORK_TYPE.size());
     private boolean mTimeOffsetEnabledForUtcTimeFormat;
+    private IDcNetWatcher.Listener mNetWatcherListener;
+    private int mCellInfoCacheExpirationDuration;
 
     public CellInfoAgent(int slotId) {
         mSlotId = slotId;
@@ -163,8 +173,12 @@ public class CellInfoAgent implements CellInfoInterface {
 
     @Override
     public void init(Context context) {
-        ImsLog.d(mSlotId, "init");
-        mTimeOffsetEnabledForUtcTimeFormat = isTimeOffsetEnabledForUtcTimeFormat();
+        ImsLog.d(this, mSlotId, "init");
+        ConfigInterface config = getConfigInterface();
+        if (config != null) {
+            config.addListener(mConfigListener);
+        }
+        mCellInfoCacheExpirationDuration = getCellInfoCacheExpirationDuration();
     }
 
     @Override
@@ -172,6 +186,11 @@ public class CellInfoAgent implements CellInfoInterface {
         mCellInfoHandler.removeCallbacksAndMessages(null);
         stopTrackingCellInfo();
         mTimeOffsetEnabledForUtcTimeFormat = false;
+
+        ConfigInterface config = getConfigInterface();
+        if (config != null) {
+            config.removeListener(mConfigListener);
+        }
     }
 
     /**
@@ -200,22 +219,22 @@ public class CellInfoAgent implements CellInfoInterface {
             int subId = (sim != null) ? sim.getSubId() : MSimUtils.INVALID_SUB_ID;
 
             if (!MSimUtils.isValidSubId(subId)) {
-                ImsLog.w(mSlotId, "CellInfo: Invalid sub id.");
+                ImsLog.w(this, mSlotId, "CellInfo: Invalid sub id.");
                 return;
             }
 
             mCellInfoListener = new CellInfoListener(subId);
             mCellInfoListener.register();
 
-            IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
-            if (dnw != null) {
-                dnw.registerForRatChanged(mCellInfoHandler,
-                        EVENT_NETWORK_TYPE_CHANGED, null);
-                dnw.registerForVoiceRatChanged(mCellInfoHandler,
-                        EVENT_VOICE_NETWORK_TYPE_CHANGED, null);
+            if (mNetWatcherListener == null) {
+                IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
+                if (dnw != null) {
+                    mNetWatcherListener = new NetWatcherListener();
+                    dnw.addListener(mNetWatcherListener);
+                }
             }
 
-            ImsLog.i(mSlotId, "CellInfo: start");
+            ImsLog.i(this, mSlotId, "CellInfo: start");
             mCellInfoHandler.sendEmptyMessage(EVENT_UPDATE_ALL_CELL_INFO);
         }
     }
@@ -223,14 +242,16 @@ public class CellInfoAgent implements CellInfoInterface {
     @Override
     public void stopTrackingCellInfo() {
         if (mCellInfoListener != null) {
-            ImsLog.i(mSlotId, "CellInfo: stop");
+            ImsLog.i(this, mSlotId, "CellInfo: stop");
             mCellInfoListener.unregister();
             mCellInfoListener = null;
 
-            IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
-            if (dnw != null) {
-                dnw.unregisterForRatChanged(mCellInfoHandler);
-                dnw.unregisterForVoiceRatChanged(mCellInfoHandler);
+            if (mNetWatcherListener != null) {
+                IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
+                if (dnw != null) {
+                    dnw.removeListener(mNetWatcherListener);
+                }
+                mNetWatcherListener = null;
             }
         }
     }
@@ -250,15 +271,20 @@ public class CellInfoAgent implements CellInfoInterface {
         String[] cellIdentity = formCellIdentity(imsCellInfo.getCellInfo(), mSlotId);
 
         if (cellIdentity == null) {
-            ImsLog.d(mSlotId, "CellInfo: fallback to cached LANI.");
+            ImsLog.d(this, mSlotId, "CellInfo: fallback to cached LANI.");
             return getAccessNetworkInfoFromPersistentStorage();
+        }
+
+        if (!isCellInfoValid(getCellInfoAge(imsCellInfo.getTimestamp()))) {
+            ImsLog.d(this, mSlotId, "Cached CellInfo age expired.");
+            return null;
         }
 
         String[] ani = new String[MAX_ACCESS_NETWORK_INFO];
 
         ani[ANI_INDEX_NETWORK_TYPE] = String.valueOf(networkType);
         ani[ANI_INDEX_UTC_TIME_FORMAT] = convertTimeToUtcFormat(imsCellInfo.getTimestamp());
-        ani[ANI_INDEX_CELL_INFO_AGE] = getCellInfoAge(imsCellInfo.getTimestamp());
+        ani[ANI_INDEX_CELL_INFO_AGE] = String.valueOf(getCellInfoAge(imsCellInfo.getTimestamp()));
         System.arraycopy(cellIdentity, 0, ani, 3, cellIdentity.length);
 
         return ani;
@@ -269,22 +295,20 @@ public class CellInfoAgent implements CellInfoInterface {
         int subId = (sim != null) ? sim.getSubId() : MSimUtils.INVALID_SUB_ID;
         List<CellInfo> cellInfos = null;
         if (MSimUtils.isValidSubId(subId)) {
-            TelephonyManager tm = AppContext.getTelephonyManager(subId);
-            if (tm != null) {
-                cellInfos = tm.getAllCellInfo();
+            TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(subId);
+            cellInfos = tmp.getAllCellInfo();
 
-                if (cellInfos == null || cellInfos.isEmpty()) {
-                    if (mCellInfoCallback == null) {
-                        mCellInfoCallback = new TelephonyManager.CellInfoCallback() {
-                            @Override
-                            public void onCellInfo(@NonNull List<CellInfo> cellInfo) {
-                                ImsLog.d(mSlotId, "onCellInfo");
-                                updateAllCellInfo(cellInfo);
-                            }
-                        };
-                    }
-                    tm.requestCellInfoUpdate(mCellInfoHandler::post, mCellInfoCallback);
+            if (cellInfos == null || cellInfos.isEmpty()) {
+                if (mCellInfoCallback == null) {
+                    mCellInfoCallback = new TelephonyManager.CellInfoCallback() {
+                        @Override
+                        public void onCellInfo(@NonNull List<CellInfo> cellInfo) {
+                            ImsLog.d(this, mSlotId, "onCellInfo");
+                            updateAllCellInfo(cellInfo);
+                        }
+                    };
                 }
+                tmp.requestCellInfoUpdate(mCellInfoHandler::post, mCellInfoCallback);
             }
         }
         return (cellInfos != null) ? cellInfos : Collections.emptyList();
@@ -315,11 +339,9 @@ public class CellInfoAgent implements CellInfoInterface {
                     }
                 });
 
-        /**
-         * If NR is not supported, then remove the updated access network type
-         * because NR cell information will not be used by the ImsStack.
-         */
-        if (!CapabilityConfigs.isVoNrEnabled(mSlotId)) {
+        // If NR is not supported, then remove the updated access network type
+        // because NR cell information will not be used by the ImsStack.
+        if (!CapabilityConfigs.isNgranSupported(mSlotId)) {
             updatedAccessNetworkTypes.remove(Integer.valueOf(AccessNetworkType.NGRAN));
         }
 
@@ -350,7 +372,7 @@ public class CellInfoAgent implements CellInfoInterface {
 
         mNetworkType = getTelephonyNetworkTypeFromAccessNetworkType(recentAccessNetworkType);
         mRecentCellInfo.copyFrom(recentImsCellInfo);
-        ImsLog.i(mSlotId, mRecentCellInfo.toString());
+        ImsLog.i(this, mSlotId, mRecentCellInfo.toString());
         setAccessNetworkInfoToPersistentStorage();
     }
 
@@ -363,9 +385,15 @@ public class CellInfoAgent implements CellInfoInterface {
             return null;
         }
 
+        long cellInfoAge = getCellInfoAge(Long.parseLong(ani[ANI_INDEX_CELL_INFO_AGE]));
+
+        if (!isCellInfoValid(cellInfoAge)) {
+            ImsLog.d(this, mSlotId, "Cached CellInfo age expired.");
+            return null;
+        }
+
         // Update cell-info-age based on the current time.
-        ani[ANI_INDEX_CELL_INFO_AGE] = getCellInfoAge(
-                Long.parseLong(ani[ANI_INDEX_CELL_INFO_AGE]));
+        ani[ANI_INDEX_CELL_INFO_AGE] = String.valueOf(cellInfoAge);
         return ani;
     }
 
@@ -391,7 +419,7 @@ public class CellInfoAgent implements CellInfoInterface {
             ImsPrivateProperties.Persistent.set(
                     ImsPrivateProperties.Persistent.KEY_LAST_ACCESS_NETWORK_INFO,
                     lastAni, mSlotId);
-            ImsLog.i(mSlotId, "CellInfo: store LANI=" + ImsLog.hiddenString(lastAni));
+            ImsLog.i(this, mSlotId, "CellInfo: store LANI=" + ImsLog.hiddenString(lastAni));
         }
     }
 
@@ -409,22 +437,34 @@ public class CellInfoAgent implements CellInfoInterface {
         return dateTime.format(dtf);
     }
 
-    private static int checkAndGetAccessNetworkTypeFromCellInfo(CellInfo cellInfo) {
+    private int checkAndGetAccessNetworkTypeFromCellInfo(CellInfo cellInfo) {
         if (cellInfo instanceof CellInfoLte) {
-            if (isCellIdentityLteValid((CellIdentityLte) cellInfo.getCellIdentity())) {
+            CellIdentityLte ci = (CellIdentityLte) cellInfo.getCellIdentity();
+            if (isCellIdentityLteValid(ci)) {
                 return AccessNetworkType.EUTRAN;
+            } else {
+                ImsLog.i(this, mSlotId, cellIdentityLteToString(ci));
             }
         } else if (cellInfo instanceof CellInfoNr) {
-            if (isCellIdentityNrValid((CellIdentityNr) cellInfo.getCellIdentity())) {
+            CellIdentityNr ci = (CellIdentityNr) cellInfo.getCellIdentity();
+            if (isCellIdentityNrValid(ci)) {
                 return AccessNetworkType.NGRAN;
+            } else {
+                ImsLog.i(this, mSlotId, cellIdentityNrToString(ci));
             }
         } else if (cellInfo instanceof CellInfoWcdma) {
-            if (isCellIdentityWcdmaValid((CellIdentityWcdma) cellInfo.getCellIdentity())) {
+            CellIdentityWcdma ci = (CellIdentityWcdma) cellInfo.getCellIdentity();
+            if (isCellIdentityWcdmaValid(ci)) {
                 return AccessNetworkType.UTRAN;
+            } else {
+                ImsLog.i(this, mSlotId, cellIdentityWcdmaToString(ci));
             }
         } else if (cellInfo instanceof CellInfoGsm) {
-            if (isCellIdentityGsmValid((CellIdentityGsm) cellInfo.getCellIdentity())) {
+            CellIdentityGsm ci = (CellIdentityGsm) cellInfo.getCellIdentity();
+            if (isCellIdentityGsmValid(ci)) {
                 return AccessNetworkType.GERAN;
+            } else {
+                ImsLog.i(this, mSlotId, cellIdentityGsmToString(ci));
             }
         }
         return AccessNetworkType.UNKNOWN;
@@ -447,16 +487,14 @@ public class CellInfoAgent implements CellInfoInterface {
                 .orElse(TelephonyManager.NETWORK_TYPE_UNKNOWN);
     }
 
-    private static String getCellInfoAge(long timestamp) {
-        return String.valueOf((System.currentTimeMillis() - timestamp) / 1000);
+    private static long getCellInfoAge(long timestamp) {
+        return (System.currentTimeMillis() - timestamp) / 1000;
     }
 
     private static String[] formCellIdentity(CellInfo cellInfo, int slotId) {
         if (cellInfo instanceof CellInfoLte) {
             CellIdentityLte ci = (CellIdentityLte) cellInfo.getCellIdentity();
-            // TODO: need to use the public or system API for this.
-            int band = AccessNetworkUtils.getOperatingBandForEarfcn(ci.getEarfcn());
-            int duplexMode = AccessNetworkUtils.getDuplexModeForEutranBand(band);
+            int duplexMode = DcUtils.getDuplexModeForLte(ci);
             return formCellIdentity(
                     ci.getMccString(),
                     ci.getMncString(),
@@ -493,63 +531,59 @@ public class CellInfoAgent implements CellInfoInterface {
     }
 
     private static boolean isCellIdentityLteValid(CellIdentityLte ci) {
-        if (TextUtils.isEmpty(ci.getMccString())
+        return !(TextUtils.isEmpty(ci.getMccString())
                 || TextUtils.isEmpty(ci.getMncString())
                 || ci.getCi() == CellInfo.UNAVAILABLE
-                || ci.getTac() == CellInfo.UNAVAILABLE) {
-            ImsLog.i("CellIdentityLte: mcc=" + ci.getMccString()
-                    + ", mnc=" + ci.getMncString()
-                    + ", ci=" + ImsLog.hiddenString(String.valueOf(ci.getCi()))
-                    + ", tac=" + ImsLog.hiddenString(String.valueOf(ci.getTac())));
-            return false;
-        }
-
-        return true;
+                || ci.getTac() == CellInfo.UNAVAILABLE);
     }
 
     private static boolean isCellIdentityNrValid(CellIdentityNr ci) {
-        if (TextUtils.isEmpty(ci.getMccString())
+        return !(TextUtils.isEmpty(ci.getMccString())
                 || TextUtils.isEmpty(ci.getMncString())
                 || ci.getNci() == CellInfo.UNAVAILABLE_LONG
-                || ci.getTac() == CellInfo.UNAVAILABLE) {
-            ImsLog.i("CellIdentityNr: mcc=" + ci.getMccString()
-                    + ", mnc=" + ci.getMncString()
-                    + ", nci=" + ImsLog.hiddenString(String.valueOf(ci.getNci()))
-                    + ", tac=" + ImsLog.hiddenString(String.valueOf(ci.getTac())));
-            return false;
-        }
-
-        return true;
+                || ci.getTac() == CellInfo.UNAVAILABLE);
     }
 
     private static boolean isCellIdentityWcdmaValid(CellIdentityWcdma ci) {
-        if (TextUtils.isEmpty(ci.getMccString())
+        return !(TextUtils.isEmpty(ci.getMccString())
                 || TextUtils.isEmpty(ci.getMncString())
                 || ci.getCid() == CellInfo.UNAVAILABLE
-                || ci.getLac() == CellInfo.UNAVAILABLE) {
-            ImsLog.i("CellIdentityWcdma: mcc=" + ci.getMccString()
-                    + ", mnc=" + ci.getMncString()
-                    + ", cid=" + ImsLog.hiddenString(String.valueOf(ci.getCid()))
-                    + ", lac=" + ImsLog.hiddenString(String.valueOf(ci.getLac())));
-            return false;
-        }
-
-        return true;
+                || ci.getLac() == CellInfo.UNAVAILABLE);
     }
 
     private static boolean isCellIdentityGsmValid(CellIdentityGsm ci) {
-        if (TextUtils.isEmpty(ci.getMccString())
+        return !(TextUtils.isEmpty(ci.getMccString())
                 || TextUtils.isEmpty(ci.getMncString())
                 || ci.getCid() == CellInfo.UNAVAILABLE
-                || ci.getLac() == CellInfo.UNAVAILABLE) {
-            ImsLog.i("CellIdentityGsm: mcc=" + ci.getMccString()
-                    + ", mnc=" + ci.getMncString()
-                    + ", cid=" + ImsLog.hiddenString(String.valueOf(ci.getCid()))
-                    + ", lac=" + ImsLog.hiddenString(String.valueOf(ci.getLac())));
-            return false;
-        }
+                || ci.getLac() == CellInfo.UNAVAILABLE);
+    }
 
-        return true;
+    private static String cellIdentityLteToString(CellIdentityLte ci) {
+        return ci.getClass().getSimpleName() + ": mcc=" + ci.getMccString()
+                + ", mnc=" + ci.getMncString()
+                + ", ci=" + ImsLog.hiddenString(String.valueOf(ci.getCi()))
+                + ", tac=" + ImsLog.hiddenString(String.valueOf(ci.getTac()));
+    }
+
+    private static String cellIdentityNrToString(CellIdentityNr ci) {
+        return ci.getClass().getSimpleName() + ": mcc=" + ci.getMccString()
+                + ", mnc=" + ci.getMncString()
+                + ", nci=" + ImsLog.hiddenString(String.valueOf(ci.getNci()))
+                + ", tac=" + ImsLog.hiddenString(String.valueOf(ci.getTac()));
+    }
+
+    private static String cellIdentityWcdmaToString(CellIdentityWcdma ci) {
+        return ci.getClass().getSimpleName() + ": mcc=" + ci.getMccString()
+                + ", mnc=" + ci.getMncString()
+                + ", cid=" + ImsLog.hiddenString(String.valueOf(ci.getCid()))
+                + ", lac=" + ImsLog.hiddenString(String.valueOf(ci.getLac()));
+    }
+
+    private static String cellIdentityGsmToString(CellIdentityGsm ci) {
+        return ci.getClass().getSimpleName() + ": mcc=" + ci.getMccString()
+                + ", mnc=" + ci.getMncString()
+                + ", cid=" + ImsLog.hiddenString(String.valueOf(ci.getCid()))
+                + ", lac=" + ImsLog.hiddenString(String.valueOf(ci.getLac()));
     }
 
     private static String[] formCellIdentity(String mcc, String mnc,
@@ -557,16 +591,37 @@ public class CellInfoAgent implements CellInfoInterface {
         return new String[] { mcc, mnc, cid, tacOrLac, duplextMode };
     }
 
-    // TODO_CONFIG
     private boolean isTimeOffsetEnabledForUtcTimeFormat() {
-        SimCarrierId cid = CarrierInfo.getInstance().getCarrierId(mSlotId);
+        ConfigInterface config = getConfigInterface();
+        if (config != null) {
+            CarrierConfig cc = config.getCarrierConfig();
+            return cc.getBoolean(
+                    CarrierConfig.Ims.KEY_CELLULAR_NETWORK_INFO_UTC_OFFSET_ENABLED_BOOL);
+        }
+        return false;
+    }
 
-        // MTS: Legacy, MTC: carrier-id
-        if (cid != null && cid.getCarrierId() == 1678) {
+    private boolean isCellInfoValid(long cellInfoAge) {
+        if (mCellInfoCacheExpirationDuration == 0) {
             return true;
         }
 
-        return false;
+        return (cellInfoAge >= 0) && (mCellInfoCacheExpirationDuration > cellInfoAge);
+    }
+
+    private int getCellInfoCacheExpirationDuration() {
+        ConfigInterface config = getConfigInterface();
+        if (config != null) {
+            CarrierConfig cc = config.getCarrierConfig();
+            return cc.getInt(
+                    CarrierConfig.Ims.KEY_CELLULAR_NETWORK_INFO_CACHE_EXPIRATION_SEC_INT,
+                    DEFAULT_CELL_INFO_CACHE_EXPIRATION_SEC);
+        }
+        return DEFAULT_CELL_INFO_CACHE_EXPIRATION_SEC;
+    }
+
+    private ConfigInterface getConfigInterface() {
+        return AgentFactory.getInstance().getAgent(ConfigInterface.class, mSlotId);
     }
 
     private final class CellInfoListener extends TelephonyCallback implements
@@ -574,27 +629,35 @@ public class CellInfoAgent implements CellInfoInterface {
         private final int mSubId;
 
         public CellInfoListener(int subId) {
-            ImsLog.i(mSlotId, "CellInfoListener: subId=" + subId);
+            ImsLog.i(this, mSlotId, "CellInfoListener: subId=" + subId);
             mSubId = subId;
         }
 
         public void register() {
-            TelephonyManager tm = AppContext.getTelephonyManager(mSubId);
-            if (tm != null) {
-                tm.registerTelephonyCallback(mCellInfoHandler::post, this);
-            }
+            TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(mSubId);
+            tmp.registerTelephonyCallback(mCellInfoHandler::post, this);
         }
 
         public void unregister() {
-            TelephonyManager tm = AppContext.getTelephonyManager(mSubId);
-            if (tm != null) {
-                tm.unregisterTelephonyCallback(this);
-            }
+            TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(mSubId);
+            tmp.unregisterTelephonyCallback(this);
         }
 
         @Override
         public void onCellInfoChanged(@NonNull List<CellInfo> cellInfo) {
             updateAllCellInfo(cellInfo);
+        }
+    }
+
+    private final class NetWatcherListener implements IDcNetWatcher.Listener {
+        @Override
+        public void onDataNetworkTypeChanged() {
+            mCellInfoHandler.sendEmptyMessage(EVENT_NETWORK_TYPE_CHANGED);
+        }
+
+        @Override
+        public void onVoiceNetworkTypeChanged() {
+            mCellInfoHandler.sendEmptyMessage(EVENT_VOICE_NETWORK_TYPE_CHANGED);
         }
     }
 
@@ -605,7 +668,7 @@ public class CellInfoAgent implements CellInfoInterface {
 
         @Override
         public void handleMessage(@NonNull Message msg) {
-            ImsLog.i(mSlotId, "CellInfoHandler: msg=" + msg.what);
+            ImsLog.i(this, mSlotId, "handleMessage: msg=" + msg.what);
 
             switch (msg.what) {
                 case EVENT_UPDATE_ALL_CELL_INFO: // fall through

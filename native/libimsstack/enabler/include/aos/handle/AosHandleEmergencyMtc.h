@@ -23,12 +23,11 @@ class AosHandleEmergencyMtc : public AosHandle
 public:
     AosHandleEmergencyMtc(IN IAosAppContext* piAppContext, IN const AString& strAppId,
             IN const AString& strServiceId, IN const IMS_SINT32 nServiceType);
-    virtual ~AosHandleEmergencyMtc();
+    ~AosHandleEmergencyMtc() override;
 
 protected:
     void InitializeServiceFeature() override;
 
-private:
-    friend class AosHandleEmergencyMtcTest;
+    IMS_BOOL IsVideoFeatureSupported() const;
 };
 #endif  // AOS_HANDLE_EMERGENCY_MTC_H_

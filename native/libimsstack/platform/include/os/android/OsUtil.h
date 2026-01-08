@@ -24,7 +24,7 @@ class OsUtil : public ISystemUtil, public ISystemProperty, public IZLib
 {
 public:
     OsUtil();
-    ~OsUtil();
+    ~OsUtil() override;
 
     OsUtil(IN const OsUtil&) = delete;
     OsUtil& operator=(IN const OsUtil&) = delete;
@@ -43,7 +43,8 @@ public:
 
 private:
     // ISystemUtil class
-    AString GetUuid(IN IMS_SINT32 nOption = 0) override;
+    void GetUuid(IN IMS_SINT32 nVersion, OUT AString& strUuid,
+            IN const AString& strName = AString::ConstNull()) override;
 
     // ISystemProperty class
     AString Get(IN const AString& strName) override;

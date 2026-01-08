@@ -70,7 +70,7 @@ IMS_BOOL RetryCondition::Verify(IN IMS_SINT32 nCode) const
 {
     for (IMS_UINT32 i = 0; i < m_objRetryCodes.GetSize(); ++i)
     {
-        RetryCode* pCode = m_objRetryCodes.GetAt(i);
+        const RetryCode* pCode = m_objRetryCodes.GetAt(i);
 
         if (pCode->IsIn(nCode))
         {

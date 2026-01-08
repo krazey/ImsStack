@@ -102,6 +102,14 @@ public:
      * @param bIsOn {@code IMS_TRUE} if on, {@code IMS_FALSE} if off.
      */
     virtual void ServiceSetting_WfcChanged(IN IMS_BOOL bIsOn) = 0;
+
+    /**
+     * Called to notify the change of wifi setting.
+     * Called by AosService (Java)
+     *
+     * @param bIsOn {@code IMS_TRUE} if on, {@code IMS_FALSE} if off.
+     */
+    virtual void ServiceSetting_WifiChanged(IN IMS_BOOL bIsOn) = 0;
 };
 
 /**
@@ -137,6 +145,7 @@ public:
     inline void ServiceSetting_VideoChanged(IN IMS_BOOL /*bIsOn*/) override{};
     inline void ServiceSetting_VolteChanged(IN IMS_BOOL /*bIsOn*/) override{};
     inline void ServiceSetting_WfcChanged(IN IMS_BOOL /*bIsOn*/) override{};
+    inline void ServiceSetting_WifiChanged(IN IMS_BOOL /*bIsOn*/) override {};
 };
 
 #endif  // INTERFACE_AOS_SERVICE_SETTING_LISTENER_H_

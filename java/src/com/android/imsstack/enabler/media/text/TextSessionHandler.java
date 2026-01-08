@@ -99,6 +99,7 @@ public class TextSessionHandler extends MediaState {
     void setRtpSocket(@Nullable Pair<DatagramSocket, DatagramSocket> rtpSocket) {
         mRtpSocket = rtpSocket;
     }
+
     @VisibleForTesting
     TextSessionCallback getTextSessionCallback() {
         return mTextSessionCallback;
@@ -114,13 +115,6 @@ public class TextSessionHandler extends MediaState {
         return mTextMessageHandler;
     }
 
-    private boolean isWaitRequired(int requestType) {
-        return (requestType != MediaConstants.REQUEST_OPEN_SESSION
-                && requestType != MediaConstants.RESPONSE_OPEN_SESSION
-                && requestType != MediaConstants.REQUEST_QOS
-                && requestType != MediaConstants.NOTIFY_MEDIA_DETACH);
-    }
-
     /** Text session message Handler */
     class TextMessageHandler extends Handler {
 
@@ -130,12 +124,18 @@ public class TextSessionHandler extends MediaState {
 
         @Override
         public void handleMessage(Message msg) {
-            ImsLog.v("messageType = " + msg.what);
+            ImsLog.d("messageType = " + msg.what);
+
+            if (isClosed() && MediaSessionUtils.isDiscardRequired(msg.what)) {
+                ImsLog.w("Session=" + getTextSessionId() + " is closing, discard request: "
+                        + msg.what);
+                return;
+            }
 
             // Till open session response is received, handling other commands has to wait
             try {
                 synchronized (mLock) {
-                    if (mTextSession == null && isWaitRequired(msg.what)) {
+                    if (mTextSession == null && MediaSessionUtils.isWaitRequired(msg.what)) {
                         ImsLog.d(Thread.currentThread().getName()
                                 + " is waiting for Text openSession response");
                         mLock.wait(MediaConstants.RESPONSE_WAIT_TIMEOUT);
@@ -196,8 +196,24 @@ public class TextSessionHandler extends MediaState {
                     break;
 
                 case MediaConstants.RESPONSE_SESSION_CLOSED:
+                {
+                    mTextMessageHandler.removeMessages(
+                            MediaConstants.RESPONSE_SESSION_CLOSED_TIMEOUT);
+                    handleTextSessionClosed();
+                }
+                    break;
+
                 case MediaConstants.NOTIFY_MEDIA_DETACH:
                 {
+                    handleTextSessionClosed();
+                }
+                    break;
+
+                case MediaConstants.RESPONSE_SESSION_CLOSED_TIMEOUT:
+                {
+                    ImsLog.e("onSessionClosed is not received within "
+                            + MediaConstants.RESPONSE_WAIT_TIMEOUT + "ms for SessionId["
+                            + getTextSessionId() + "]. Forcing cleanup.");
                     handleTextSessionClosed();
                 }
                     break;
@@ -320,7 +336,7 @@ public class TextSessionHandler extends MediaState {
      * @param parcel parcel received from Media Native
      */
     public void onImsMediaTextMessage(final int requestType, Parcel parcel) {
-        ImsLog.v("requestType= " + requestType);
+        ImsLog.d("requestType= " + requestType);
 
         switch (requestType) {
             /** Requests (ImsStack -> ImsMedia) */
@@ -329,7 +345,7 @@ public class TextSessionHandler extends MediaState {
                 setMediaState(MEDIA_STATE_OPENING);
                 String localIpAddress = parcel.readString();
                 int localPortNumber = parcel.readInt();
-                ImsLog.v("localIpAddress= " + localIpAddress
+                ImsLog.d("localIpAddress= " + localIpAddress
                         + " localPortNumber= " + localPortNumber);
 
                 Message.obtain(
@@ -356,7 +372,7 @@ public class TextSessionHandler extends MediaState {
             {
                 String remoteIpAddress = parcel.readString();
                 int remotePortNumber = parcel.readInt();
-                ImsLog.v("remoteIpAddress= " + remoteIpAddress
+                ImsLog.d("remoteIpAddress= " + remoteIpAddress
                         + " remotePortNumber= " + remotePortNumber);
 
                 Message.obtain(
@@ -368,7 +384,7 @@ public class TextSessionHandler extends MediaState {
             case MediaConstants.REQUEST_SEND_RTT:
             {
                 String rttMessage = parcel.readString();
-                ImsLog.v("rtt message");
+                ImsLog.d("rtt message");
 
                 Message.obtain(mTextMessageHandler, requestType, rttMessage).sendToTarget();
             }
@@ -378,7 +394,7 @@ public class TextSessionHandler extends MediaState {
             {
                 MediaQualityThreshold threshold =
                         MediaQualityThreshold.CREATOR.createFromParcel(parcel);
-                ImsLog.v("onTextSetMediaQualityThreshold: " + threshold.toString());
+                ImsLog.d("onTextSetMediaQualityThreshold: " + threshold.toString());
 
                 Message.obtain(mTextMessageHandler, requestType, threshold).sendToTarget();
             }
@@ -402,7 +418,7 @@ public class TextSessionHandler extends MediaState {
     public boolean isValidRequest(final int requestType) {
         return ((isIdle() && (requestType == MediaConstants.REQUEST_OPEN_SESSION))
                 || ((!isIdle() && (requestType != MediaConstants.REQUEST_OPEN_SESSION))
-                && !isClosed()));
+                        && !isClosed()));
     }
 
     private void createQosAgent(int slotId) {
@@ -453,8 +469,7 @@ public class TextSessionHandler extends MediaState {
                 setMediaState(MEDIA_STATE_IDLE);
             }
         } else {
-            ImsLog.w("Text Session is already created: SessionId="
-                    + mTextSession.getSessionId());
+            ImsLog.w("Text Session is already created: SessionId=" + mTextSession.getSessionId());
             if (mTextSessionCallbackHandler != null) {
                 mTextSessionCallbackHandler.openSessionResponse(
                         ImsMediaSession.RESULT_NOT_SUPPORTED);
@@ -466,6 +481,9 @@ public class TextSessionHandler extends MediaState {
         if (mTextSession != null) {
             mMediaManager.closeSession(mTextSession);
             setMediaState(MEDIA_STATE_CLOSED);
+            mTextMessageHandler.sendEmptyMessageDelayed(
+                    MediaConstants.RESPONSE_SESSION_CLOSED_TIMEOUT,
+                    MediaConstants.RESPONSE_WAIT_TIMEOUT);
         }
     }
 
@@ -478,8 +496,7 @@ public class TextSessionHandler extends MediaState {
     private void handleTextModifySession(TextConfig textConfig) {
         if (mTextSession != null) {
             mTextSession.modifySession(textConfig);
-        }
-        else {
+        } else {
             handleModifySessionResponse(textConfig, ImsMediaSession.RESULT_NOT_READY);
         }
     }
@@ -488,7 +505,7 @@ public class TextSessionHandler extends MediaState {
         if (remoteIpAddress != null && remotePortNumber != 0
                 && isNewRemoteAddress(remoteIpAddress, remotePortNumber)) {
             mTextQosAgent.updateQosConnection(mRtpSocket.first, mRtpSocket.second,
-                    remoteIpAddress, remotePortNumber);
+                    remoteIpAddress, remotePortNumber, false);
             ImsLog.d("Updated QoS Connection for remoteIpAddress= " + remoteIpAddress
                     + " remotePortNumber= " + remotePortNumber);
         }
@@ -521,8 +538,7 @@ public class TextSessionHandler extends MediaState {
             mTextSessionId = mTextSession.getSessionId();
             setMediaState(MEDIA_STATE_LIVE);
             ImsLog.d("Text Session created: SessionId=" + mTextSessionId);
-        }
-        else {
+        } else {
             setMediaState(MEDIA_STATE_IDLE);
         }
 
@@ -557,7 +573,7 @@ public class TextSessionHandler extends MediaState {
         }
     }
 
-    private boolean isNewRemoteAddress(String remoteIpAddress, int remotePortNumber)  {
+    private boolean isNewRemoteAddress(String remoteIpAddress, int remotePortNumber) {
         if (remoteIpAddress != null) {
             InetSocketAddress remoteSocketAddress =
                     (InetSocketAddress) (mRtpSocket.first).getRemoteSocketAddress();

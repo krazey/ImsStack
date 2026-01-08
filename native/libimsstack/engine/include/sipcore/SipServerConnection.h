@@ -19,14 +19,13 @@
 #include "ITimer.h"
 
 #include "SipConnection.h"
-
-class SipServerTransactionState;
+#include "SipServerTransactionState.h"
 
 class SipServerConnection : public SipConnection, public ITimerListener
 {
 public:
     explicit SipServerConnection(IN SipServerTransactionState* pStState);
-    virtual ~SipServerConnection();
+    ~SipServerConnection() override;
 
     SipServerConnection(IN const SipServerConnection&) = delete;
     SipServerConnection& operator=(IN const SipServerConnection&) = delete;
@@ -49,6 +48,7 @@ public:
     const ByteArray& GetContent() const override;
     IMS_RESULT SetContent(IN const ByteArray& objContent) override;
     IMS_SINT32 GetHeaderCount(IN const AString& strName) const override;
+    SipProfile* GetSipProfile() const override;
     void SetSipProfile(IN SipProfile* pProfile) override;
 
     // ISipServerConnection interface

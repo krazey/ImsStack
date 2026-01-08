@@ -23,7 +23,7 @@ class RegProperty : public ImsProperty
 public:
     explicit RegProperty(IN const AString& strServiceId);
     RegProperty(IN const RegProperty& other);
-    inline virtual ~RegProperty() {}
+    ~RegProperty() override = default;
 
 public:
     RegProperty& operator=(IN const RegProperty& other);

@@ -24,6 +24,7 @@
 
 #include "ISipHeader.h"
 #include "ISipMessage.h"
+#include "ISipMessageBodyPart.h"
 #include "SdpOaState.h"
 #include "SessionDescriptor.h"
 #include "Sip.h"
@@ -620,12 +621,7 @@ IMS_BOOL VirtualSession::CheckNCreateSessionDescriptor()
     }
 
     // Create a media capabilities for this service & session
-    const SipAddress::UserInfoPart* pUserInfo = m_objUserAor.GetUserInfoPart();
-    const AString& strUserId = (pUserInfo != IMS_NULL) ? pUserInfo->GetUser()
-            : m_objUserAor.IsSchemeTel()               ? m_objUserAor.GetHost()
-                                                       : m_objUserAor.GetUser();
-
-    if (!m_pOaState->CreateCapabilities(m_pService, strUserId))
+    if (!m_pOaState->CreateCapabilities(m_pService))
     {
         IMS_TRACE_E(0, "Creating SDP capabilities failed", 0, 0, 0);
         return IMS_FALSE;
@@ -694,7 +690,7 @@ IMS_SINT32 VirtualSession::HandleSdpOfferAnswer(IN const ISipMessage* piSipMsg)
                 ((nOaState == SdpOaState::STATE_OFFER_RECEIVED) ||
                         (nOaState == SdpOaState::STATE_OFFER_CHANGE_RECEIVED)))
         {
-            SessionParameter* pSessionParam = m_pOaState->GetProposalView();
+            const SessionParameter* pSessionParam = m_pOaState->GetProposalView();
 
             if (pSessionParam != IMS_NULL)
             {
@@ -969,7 +965,7 @@ IMS_BOOL VirtualSession::UpdateMediaOnAnswerSent(IN IMS_SINT32 nTrigger)
 PRIVATE
 IMS_BOOL VirtualSession::UpdateMediaOnOfferReceived(IN IMS_SINT32 nTrigger)
 {
-    SessionParameter* pSessionParam = m_pOaState->GetProposalView();
+    const SessionParameter* pSessionParam = m_pOaState->GetProposalView();
     IMS_SINT32 nMediaCount = pSessionParam->GetMediaCount();
 
     if (nMediaCount != 0)

@@ -24,7 +24,7 @@ class OsImsTrafficTimer : public IImsTrafficTimer, public ITimerListener
 {
 public:
     OsImsTrafficTimer(IN IMS_SINT32 nSlot, IN IMS_UINT32 nType, IN IMS_UINT32 nDuration);
-    virtual ~OsImsTrafficTimer();
+    ~OsImsTrafficTimer() override;
 
     OsImsTrafficTimer(IN const OsImsTrafficTimer&) = delete;
     OsImsTrafficTimer& operator=(IN const OsImsTrafficTimer&) = delete;

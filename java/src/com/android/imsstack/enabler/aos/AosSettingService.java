@@ -23,39 +23,37 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.telephony.TelephonyCallback;
-import android.telephony.TelephonyManager;
 
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
-import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
+/**
+ * A service that manages AoS settings and handles related events.
+ */
 public class AosSettingService {
 
+    /** public constants */
+    static final int EVENT_MOBILE_DATA_STATE_CHANGED = 1001;
+    static final int EVENT_REBOOT = 1002;
+    static final int EVENT_SHUTDOWN = 1003;
+
+    /** private members */
     private final Object mLock = new Object();
-    @VisibleForTesting
-    protected static final int EVENT_MOBILE_DATA_STATE_CHANGED = 1001;
-    @VisibleForTesting
-    protected static final int EVENT_REBOOT = 1002;
-    @VisibleForTesting
-    protected static final int EVENT_SHUTDOWN = 1003;
-
-    @VisibleForTesting
-    protected UserMobileDataStateListener mUserMobileDataStateListener = null;
-    @VisibleForTesting
-    protected Handler mHandler = null;
-
-    private int mSlotId = 0;
+    private final int mSlotId;
     private int mSubId = MSimUtils.INVALID_SUB_ID;
-    private boolean mMobileDataEnabled = false;
-    @VisibleForTesting
-    protected IntentReceiverListener mIntentReceiverListener = null;
+    private boolean mMobileDataEnabled;
+    private Handler mHandler;
     private Sim.Listener mSimListener;
     private NativeStateListener mNativeStateListener;
+    private UserMobileDataStateListener mUserMobileDataStateListener;
+    private IntentReceiverListener mIntentReceiverListener;
 
     public AosSettingService(int slotId) {
         ImsLog.d(slotId, "");
@@ -75,15 +73,14 @@ public class AosSettingService {
         }
 
         mIntentReceiverListener = new IntentReceiverListener();
-        AppContext.getInstance().registerReceiver(mIntentReceiverListener,
-                mIntentReceiverListener.getFilter(), Context.RECEIVER_EXPORTED);
+        mIntentReceiverListener.register();
 
         mSimListener = new Sim.Listener() {
-                @Override
-                public void onSimStateChanged() {
-                    updateSubscription();
-                }
-            };
+            @Override
+            public void onSimStateChanged() {
+                updateSubscription();
+            }
+        };
         SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
         if (sim != null) {
             sim.addListener(mSimListener);
@@ -113,7 +110,7 @@ public class AosSettingService {
         }
 
         if (mIntentReceiverListener != null) {
-            AppContext.getInstance().unregisterReceiver(mIntentReceiverListener);
+            mIntentReceiverListener.unregister();
             mIntentReceiverListener = null;
         }
 
@@ -135,19 +132,15 @@ public class AosSettingService {
     private void setListener(UserMobileDataStateListener listener) {
         ImsLog.d(mSlotId, "");
 
-        TelephonyManager tm = AppContext.getTelephonyManager(listener.getSubId());
-        if (tm != null) {
-            tm.registerTelephonyCallback(AppContext.getInstance().getMainExecutor(), listener);
-        }
+        TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(listener.getSubId());
+        tmp.registerTelephonyCallback(AppContext.getInstance().getMainExecutor(), listener);
     }
 
     private void removeListener(UserMobileDataStateListener listener) {
         ImsLog.d(mSlotId, "");
 
-        TelephonyManager tm = AppContext.getTelephonyManager(listener.getSubId());
-        if (tm != null) {
-            tm.unregisterTelephonyCallback(listener);
-        }
+        TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(listener.getSubId());
+        tmp.unregisterTelephonyCallback(listener);
     }
 
     private void updateSubscription() {
@@ -201,6 +194,11 @@ public class AosSettingService {
         }
     }
 
+    @VisibleForTesting
+    Handler getHandler() {
+        return mHandler;
+    }
+
     private final class SettingServiceHandler extends Handler {
         private SettingServiceHandler(Looper looper) {
             super(looper);
@@ -212,24 +210,19 @@ public class AosSettingService {
                 ImsLog.i(mSlotId, "handleMessage :: msg= " + msg.what);
 
                 switch (msg.what) {
-                    case EVENT_MOBILE_DATA_STATE_CHANGED:
-                        handleMobileDataStateChanged(msg);
-                        break;
-
-                    case EVENT_REBOOT: // FALL-THROUGH
-                    case EVENT_SHUTDOWN:
-                        notifyPowerOff();
-                        break;
-
-                    default:
-                        break;
+                    case EVENT_MOBILE_DATA_STATE_CHANGED -> handleMobileDataStateChanged(msg);
+                    case EVENT_REBOOT, EVENT_SHUTDOWN -> notifyPowerOff();
                 }
             }
         }
     }
 
     @VisibleForTesting
-    protected final class UserMobileDataStateListener extends TelephonyCallback implements
+    UserMobileDataStateListener getUserMobileDataStateListener() {
+        return mUserMobileDataStateListener;
+    }
+
+    final class UserMobileDataStateListener extends TelephonyCallback implements
             TelephonyCallback.UserMobileDataStateListener {
 
         private final int mSubId;
@@ -251,16 +244,21 @@ public class AosSettingService {
     }
 
     @VisibleForTesting
-    protected class IntentReceiverListener extends BroadcastReceiver {
-        IntentFilter mIntentFilter = new IntentFilter();
+    IntentReceiverListener getIntentReceiverListener() {
+        return mIntentReceiverListener;
+    }
 
-        public IntentReceiverListener() {
-            mIntentFilter.addAction(Intent.ACTION_REBOOT);
-            mIntentFilter.addAction(Intent.ACTION_SHUTDOWN);
+    final class IntentReceiverListener extends BroadcastReceiver {
+        public void register() {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_REBOOT);
+            filter.addAction(Intent.ACTION_SHUTDOWN);
+
+            AppContext.getInstance().getBroadcastReceiverProxy().registerReceiver(this, filter);
         }
 
-        public IntentFilter getFilter() {
-            return mIntentFilter;
+        public void unregister() {
+            AppContext.getInstance().getBroadcastReceiverProxy().unregisterReceiver(this);
         }
 
         @Override

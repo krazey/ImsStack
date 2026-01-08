@@ -33,7 +33,7 @@ public:
     Media(IN Service* pService, IN ISdpOaState* piOaState);
 
 protected:
-    virtual ~Media();
+    ~Media() override;
 
 public:
     Media(IN const Media&) = delete;

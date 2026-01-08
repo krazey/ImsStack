@@ -17,18 +17,22 @@
 package com.android.imsstack.imsservice;
 
 import android.content.Context;
-import android.telephony.TelephonyManager;
 import android.telephony.ims.feature.RcsFeature;
 
+import androidx.annotation.NonNull;
+
+import com.android.imsstack.base.DeviceConfig;
 import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.imsservice.mmtel.ImsMmTelService;
 import com.android.imsstack.imsservice.mmtel.ImsServiceManager;
 import com.android.imsstack.imsservice.mmtel.ImsServiceRecord;
 import com.android.imsstack.imsservice.uce.RcsFeatureImpl;
+import com.android.imsstack.internal.imsservice.ProvisioningStatusTracker;
 import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.imsstack.util.Log;
 import com.android.imsstack.util.MessageExecutor;
 
+import java.io.PrintWriter;
 import java.util.concurrent.Executor;
 
 /**
@@ -47,9 +51,9 @@ public class ImsServiceController {
     private boolean mStarted = false;
 
     private ImsServiceController(Context context) {
-        logi("ImsServiceController");
+        logi(this, "+ISC");
 
-        int simCount = getSimCount(context);
+        int simCount = DeviceConfig.getSupportedSimCount();
 
         mMmTelServices = new ImsMmTelService[simCount];
         mRcsFeature = new RcsFeatureImpl[simCount];
@@ -66,7 +70,7 @@ public class ImsServiceController {
         }
 
         if (!sImsServiceController.mReady) {
-            logi("ImsServiceController :: create");
+            logi(sImsServiceController, "ISC: create");
 
             sImsServiceController.mReady = true;
 
@@ -74,7 +78,7 @@ public class ImsServiceController {
             ImsServiceManager.setDefault(new ImsServiceManager(
                     appContext, sImsServiceController.mExecutor));
         } else {
-            logi("ImsServiceController :: already created");
+            logi(sImsServiceController, "ISC: already created");
         }
     }
 
@@ -89,7 +93,7 @@ public class ImsServiceController {
             sImsServiceController = new ImsServiceController(appContext);
         }
 
-        logi("ImsServiceController :: start - s" + slotId);
+        logi(sImsServiceController, "ISC: start - s" + slotId);
 
         boolean isrReconfigurationRequired = false;
 
@@ -102,6 +106,8 @@ public class ImsServiceController {
         } else {
             isrReconfigurationRequired = true;
         }
+
+        ProvisioningStatusTracker.getInstance(slotId).start();
 
         if (!sImsServiceController.mStarted) {
             sImsServiceController.mStarted = true;
@@ -129,14 +135,6 @@ public class ImsServiceController {
 
     public static synchronized ImsServiceController getInstance() {
         return sImsServiceController;
-    }
-
-    public static int getSimCount(Context c) {
-        TelephonyManager tm = c.getSystemService(TelephonyManager.class);
-
-        int count = (tm != null) ? tm.getActiveModemCount() : 1;
-
-        return (count == 0) ? 1 : count;
     }
 
     public static synchronized boolean isReady() {
@@ -175,37 +173,37 @@ public class ImsServiceController {
         return mExecutor;
     }
 
-    private static void log(String s) {
-        Log.d(Log.TAG, "[GII-IMPL] " + s);
-    }
-
-    private static void logi(String s) {
-        Log.i(Log.TAG, "[GII-IMPL] " + s);
-    }
-
-    private static void loge(String s) {
-        Log.e(Log.TAG, "[GII-IMPL] " + s);
+    private static void logi(Object o, String s) {
+        Log.i(o, "[GII-IMPL] " + s);
     }
 
     public RcsFeature getRcsFeature(int slotId) {
-        logi("getRcsFeature for slotId:" + slotId);
+        logi(this, "getRcsFeature: slotId=" + slotId + ", features=" + mRcsFeature.length);
         if (slotId >= 0 && slotId < mRcsFeature.length) {
             return mRcsFeature[slotId];
         }
-        loge("getRcsFeature is null for slotId:" + slotId);
         return null;
     }
 
-    /** Dump this instance into a readable format for dumpsys usage. */
-    public void dump(IndentingPrintWriter pw) {
-        pw.println("ImsServiceController:");
-        pw.increaseIndent();
-        for (ImsMmTelService mmTel : mMmTelServices) {
-            mmTel.dump(pw);
+    /**
+     * Dump this instance into a readable format for dumpsys usage.
+     */
+    public void dump(@NonNull PrintWriter printWriter) {
+        IndentingPrintWriter pw = new IndentingPrintWriter(printWriter, "  ");
+
+        for (int i = 0; i < mMmTelServices.length; ++i) {
+            pw.printf("Slot%d:\n", i);
+            pw.increaseIndent();
+
+            mMmTelServices[i].dump(pw);
+            mRcsFeature[i].dump(pw);
+
+            ImsServiceRecord isr = ImsServiceManager.getServiceRecord(i);
+            if (isr != null) {
+                isr.dump(pw);
+            }
+
+            pw.decreaseIndent();
         }
-        for (RcsFeatureImpl rcs : mRcsFeature) {
-            rcs.dump(pw);
-        }
-        pw.decreaseIndent();
     }
 }

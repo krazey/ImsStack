@@ -16,6 +16,7 @@
 #ifndef SIP_TXN_CONTEXT_DATA_H_
 #define SIP_TXN_CONTEXT_DATA_H_
 
+#include "SipMethod.h"
 #include "SipTransactionState.h"
 
 class SipTxnContextData

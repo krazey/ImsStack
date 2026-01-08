@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+#include "MtcDef.h"
 #include "ServiceMemory.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
+#include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceOperationQueue.h"
+#include "conferencecall/IConferenceOperationQueueListener.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -35,7 +38,7 @@ PUBLIC
 ConferenceOperationQueue::~ConferenceOperationQueue()
 {
     IMS_TRACE_D("~ConferenceOperationQueue", 0, 0, 0);
-    Clear();
+    ClearInternal();
     StopTimer();
 }
 
@@ -223,6 +226,12 @@ IMS_BOOL ConferenceOperationQueue::HasPendingOperation() const
 
 PUBLIC
 void ConferenceOperationQueue::Clear()
+{
+    ClearInternal();
+}
+
+PRIVATE
+void ConferenceOperationQueue::ClearInternal()
 {
     for (IMS_UINT32 i = 0; i < m_objOperationQueue.GetSize(); i++)
     {

@@ -90,7 +90,7 @@ void RegInfo::AddListener(IN IRegInfoListener* piListener)
 {
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        IRegInfoListener* piTmpListener = m_objListeners.GetAt(i);
+        const IRegInfoListener* piTmpListener = m_objListeners.GetAt(i);
 
         if (piTmpListener == piListener)
         {
@@ -106,7 +106,7 @@ void RegInfo::RemoveListener(IN const IRegInfoListener* piListener)
 {
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        IRegInfoListener* piTmpListener = m_objListeners.GetAt(i);
+        const IRegInfoListener* piTmpListener = m_objListeners.GetAt(i);
 
         if (piTmpListener == piListener)
         {
@@ -117,7 +117,7 @@ void RegInfo::RemoveListener(IN const IRegInfoListener* piListener)
 }
 
 PUBLIC
-IMS_BOOL RegInfo::Update(IN IDocument* piDocument)
+IMS_BOOL RegInfo::Update(IN const IDocument* piDocument)
 {
     if (piDocument == IMS_NULL)
     {
@@ -158,14 +158,25 @@ IMS_BOOL RegInfo::Update(IN IDocument* piDocument)
         return IMS_FALSE;
     }
 
+    // "state" attribute
+    const AString& strState = piElement->GetAttribute(RegInfoConst::ATTR_STATE);
+
     // If the version is 0, it means that an initial reginfo is received
     if (m_bIsCreated && (m_nVersion >= nNewVersion))
     {
-        IMS_TRACE_I("RegInfo :: Equal or less (%d) than the local version (%d) - discarded...",
-                nNewVersion, m_nVersion, 0);
+        if ((m_nVersion == nNewVersion) && (m_nVersion == 0) &&
+                strState.EqualsIgnoreCase(RegInfoConst::ATTR_STATE_FULL))
+        {
+            IMS_TRACE_I("RegInfo: Same version & full - being processed", 0, 0, 0);
+        }
+        else
+        {
+            IMS_TRACE_I("RegInfo: Equal or less (%d) than the local version (%d) - discarded",
+                    nNewVersion, m_nVersion, 0);
 
-        CallListener(STATUS_UPDATE_FAILED);
-        return IMS_TRUE;
+            CallListener(STATUS_UPDATE_FAILED);
+            return IMS_TRUE;
+        }
     }
 
     IMS_BOOL bSubscriptionRefreshRequired = IMS_FALSE;
@@ -181,15 +192,8 @@ IMS_BOOL RegInfo::Update(IN IDocument* piDocument)
                 nNewVersion, m_nVersion, 0);
     }
 
-    if (!m_bIsCreated)
-    {
-        m_bIsCreated = IMS_TRUE;
-    }
-
+    m_bIsCreated = IMS_TRUE;
     m_nVersion = nNewVersion;
-
-    // "state" attribute
-    const AString& strState = piElement->GetAttribute(RegInfoConst::ATTR_STATE);
 
     if (strState.EqualsIgnoreCase(RegInfoConst::ATTR_STATE_FULL))
     {

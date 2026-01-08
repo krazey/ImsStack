@@ -33,8 +33,8 @@ class SipProfile;
 class MockISipServerConnection : public ISipServerConnection
 {
 public:
-    inline MockISipServerConnection() {}
-    inline virtual ~MockISipServerConnection() {}
+    MockISipServerConnection() = default;
+    ~MockISipServerConnection() override = default;
 
     MOCK_METHOD(IMS_RESULT, InitResponse, (IN IMS_SINT32 nStatusCode), (override));
     MOCK_METHOD(IMS_RESULT, SetReasonPhrase, (IN const AString& strReasonPhrase), (override));
@@ -60,6 +60,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetHeaderCount, (IN const AString& strName), (const, override));
     MOCK_METHOD(ISipMessage*, GetMessage, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetSlotId, (), (const, override));
+    MOCK_METHOD(SipProfile*, GetSipProfile, (), (const, override));
     MOCK_METHOD(void, SetSipProfile, (IN SipProfile * pProfile), (override));
     MOCK_METHOD(void, SetTransactionTimerValues, (IN const SipTimerValues& objTv), (override));
 

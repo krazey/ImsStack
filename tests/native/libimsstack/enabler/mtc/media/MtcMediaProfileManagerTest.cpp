@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include "../../include/media/MockIMediaSession.h"
 #include "ImsTypeDef.h"
-#include "core/MockISession.h"
+#include "MockIMediaSession.h"
+#include "MockISession.h"
 #include "media/MtcMediaProfileManager.h"
 #include <gtest/gtest.h>
 
@@ -208,6 +208,23 @@ TEST_F(MtcMediaProfileManagerTest, IsConfirmedReturnsValueSet)
 
     objProfileManager.SetConfirmed(&objSession1, IMS_TRUE);
     EXPECT_TRUE(objProfileManager.IsConfirmed(&objSession1));
+}
+
+TEST_F(MtcMediaProfileManagerTest, IsForkedReturnsValueSet)
+{
+    EXPECT_FALSE(objProfileManager.IsForked(IMS_NULL));
+    EXPECT_FALSE(objProfileManager.IsForked(&objSession1));
+
+    ON_CALL(objMediaSession1, CreateProfile(0, MEDIA_TYPE_AUDIO)).WillByDefault(Return(1));
+    objProfileManager.CreateMediaProfile(
+            &objSession1, IMS_FALSE, IMS_FALSE, MEDIA_TYPE_AUDIO, &objMediaSession1);
+
+    EXPECT_FALSE(objProfileManager.IsForked(&objSession1));
+
+    ON_CALL(objMediaSession2, CreateProfile(0, MEDIA_TYPE_AUDIO)).WillByDefault(Return(2));
+    objProfileManager.CreateMediaProfile(
+            &objSession2, IMS_TRUE, IMS_FALSE, MEDIA_TYPE_AUDIO, &objMediaSession2);
+    EXPECT_TRUE(objProfileManager.IsForked(&objSession2));
 }
 
 TEST_F(MtcMediaProfileManagerTest, IsPemSendInOtherEarlySessionReturnsTrueIfExists)

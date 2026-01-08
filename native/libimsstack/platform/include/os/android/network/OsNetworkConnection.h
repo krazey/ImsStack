@@ -18,7 +18,6 @@
 
 #include "ISystemListener.h"
 #include "ImsNetworkConnection.h"
-#include "OsNetworkConstants.h"
 
 class IThread;
 class NetworkPolicy;
@@ -27,7 +26,7 @@ class OsNetworkConnection : public ImsNetworkConnection, public ISystemListener
 {
 public:
     explicit OsNetworkConnection(IN IMS_SINT32 nSlotId);
-    virtual ~OsNetworkConnection();
+    ~OsNetworkConnection() override;
 
     OsNetworkConnection(IN const OsNetworkConnection&) = delete;
     OsNetworkConnection& operator=(IN const OsNetworkConnection&) = delete;

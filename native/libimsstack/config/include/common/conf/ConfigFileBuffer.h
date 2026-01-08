@@ -17,13 +17,15 @@
 #define CONFIG_FILE_BUFFER_H_
 
 #include "ConfigBuffer.h"
-#include "conf/ConfigSection.h"
+#include "conf/ConfigComment.h"
+
+class ConfigSection;
 
 class ConfigFileBuffer : public ConfigBuffer
 {
 public:
     ConfigFileBuffer(IN const AString& strLocator, IN const AString& strName);
-    virtual ~ConfigFileBuffer();
+    ~ConfigFileBuffer() override;
 
     ConfigFileBuffer(IN const ConfigFileBuffer&) = delete;
     ConfigFileBuffer& operator=(IN const ConfigFileBuffer&) = delete;

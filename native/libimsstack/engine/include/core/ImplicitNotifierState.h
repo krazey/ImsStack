@@ -25,7 +25,7 @@ class ImplicitNotifierState : public SubState
 {
 public:
     ImplicitNotifierState();
-    inline virtual ~ImplicitNotifierState() {}
+    ~ImplicitNotifierState() override = default;
 
     ImplicitNotifierState(IN const ImplicitNotifierState&) = delete;
     ImplicitNotifierState& operator=(IN const ImplicitNotifierState&) = delete;
@@ -37,9 +37,9 @@ public:
 private:
     IMS_SINT32 TranslateMessage(IN const ISipMessage* piSipMsg) const;
     IMS_BOOL UpdateOnNotifyRequest(IN const ISipMessage* piSipMsg);
-    IMS_BOOL UpdateOnNotifyResponse(IN const ISipMessage* piSipMsg);
-    IMS_BOOL UpdateOnReferRequest(IN const ISipMessage* piSipMsg);
-    IMS_BOOL UpdateOnReferResponse(IN const ISipMessage* piSipMsg);
+    void UpdateOnNotifyResponse(IN const ISipMessage* piSipMsg);
+    void UpdateOnReferRequest(IN const ISipMessage* piSipMsg);
+    void UpdateOnReferResponse(IN const ISipMessage* piSipMsg);
 
     static void InitializeStateTable();
 

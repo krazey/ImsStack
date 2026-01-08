@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ISystemProperty.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
@@ -20,18 +21,21 @@
 #include "ImsIdentity.h"
 
 #include "Connector.h"
+#include "IRegInfoManager.h"
 #include "IRegSubscriptionListener.h"
 #include "ISipDialog.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
+#include "ISipMessageBodyPart.h"
 #include "ISipServerConnection.h"
+#include "ImsCoreContext.h"
 #include "PAccessNetworkInfoHeader.h"
 #include "RegContact.h"
 #include "RegInfo.h"
-#include "RegInfoManager.h"
 #include "RegSubscription.h"
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
+#include "SipError.h"
 #include "SipParameter.h"
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
@@ -41,7 +45,7 @@
 #include "base/Ims.h"
 #include "util/DialogMethodManager.h"
 // NOTIFY_REQUEST_HANDLING_AFTER_DE_REG
-#include "util/SipConnectionNotifierManager.h"
+#include "util/ISipConnectionNotifierManager.h"
 #include "util/UserAgentHeader.h"
 
 __IMS_TRACE_TAG_REG__;
@@ -95,14 +99,16 @@ RegSubscription::RegSubscription(IN const RegKey& objRegKey, IN RegStateTracker*
     // NOTIFY_REQUEST_HANDLING_AFTER_DE_REG
     if (!m_pRegStateTracker.IsNull())
     {
-        m_piReferredScn = SipConnectionNotifierManager::GetInstance()->GetConnectionNotifier(
-                m_pRegStateTracker->GetIpAddress(), m_pRegStateTracker->GetPortUs());
+        m_piReferredScn = ImsCoreContext::GetInstance()
+                                  ->GetSipConnectionNotifierManager()
+                                  ->GetConnectionNotifier(m_pRegStateTracker->GetIpAddress(),
+                                          m_pRegStateTracker->GetPortUs());
     }
 }
 
 PUBLIC VIRTUAL RegSubscription::~RegSubscription()
 {
-    RegInfoManager::GetInstance()->DestroyRegInfo(m_objRegKey);
+    ImsCoreContext::GetInstance()->GetRegInfoManager()->DestroyRegInfo(m_objRegKey);
     m_objRegKey.Invalidate();
 
     DialogMethodManager::GetInstance()->RemoveMethod(GetName());
@@ -136,11 +142,8 @@ PUBLIC VIRTUAL RegSubscription::~RegSubscription()
     }
 
     // NOTIFY_REQUEST_HANDLING_AFTER_DE_REG
-    if (m_piReferredScn != IMS_NULL)
-    {
-        SipConnectionNotifierManager::GetInstance()->ReleaseConnectionNotifier(m_piReferredScn);
-        m_piReferredScn = IMS_NULL;
-    }
+    ImsCoreContext::GetInstance()->GetSipConnectionNotifierManager()->ReleaseConnectionNotifier(
+            m_piReferredScn);
 
     IMS_TRACE_D("Destructor :: RegSubscription", 0, 0, 0);
 }
@@ -183,17 +186,14 @@ PUBLIC VIRTUAL void RegSubscription::DestroyEx()
         m_piOngoingScc = IMS_NULL;
     }
 
-    RegInfoManager::GetInstance()->DestroyRegInfo(m_objRegKey);
+    ImsCoreContext::GetInstance()->GetRegInfoManager()->DestroyRegInfo(m_objRegKey);
     m_objRegKey.Invalidate();
 
     DialogMethodManager::GetInstance()->RemoveMethod(GetName());
 
     // NOTIFY_REQUEST_HANDLING_AFTER_DE_REG
-    if (m_piReferredScn != IMS_NULL)
-    {
-        SipConnectionNotifierManager::GetInstance()->ReleaseConnectionNotifier(m_piReferredScn);
-        m_piReferredScn = IMS_NULL;
-    }
+    ImsCoreContext::GetInstance()->GetSipConnectionNotifierManager()->ReleaseConnectionNotifier(
+            m_piReferredScn);
 
     // SIP_MESSAGE_MEDIATOR
     SetSipMessageMediator(IMS_NULL);
@@ -217,7 +217,7 @@ PUBLIC VIRTUAL IMS_SINT32 RegSubscription::EnableFeatures(IN IMS_SINT32 nFeature
 
 PUBLIC VIRTUAL const IRegInfo* RegSubscription::GetRegInfo() const
 {
-    return RegInfoManager::GetInstance()->GetRegInfo(m_objRegKey);
+    return ImsCoreContext::GetInstance()->GetRegInfoManager()->GetRegInfo(m_objRegKey);
 }
 
 PUBLIC VIRTUAL IMS_RESULT RegSubscription::SetContactParameter(
@@ -578,9 +578,10 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::InitInstance()
 
     DialogMethodManager::GetInstance()->AddMethod(GetName(), this);
 
-    RegInfoManager::GetInstance()->CreateRegInfo(m_objRegKey);
+    IRegInfoManager* piRegInfoManager = ImsCoreContext::GetInstance()->GetRegInfoManager();
+    piRegInfoManager->CreateRegInfo(m_objRegKey);
 
-    RegInfo* pRegInfo = RegInfoManager::GetInstance()->GetRegInfo(m_objRegKey);
+    RegInfo* pRegInfo = piRegInfoManager->GetRegInfo(m_objRegKey);
 
     if (pRegInfo != IMS_NULL)
     {
@@ -607,8 +608,8 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::SendRequestToChallenge(IN ISipClientCo
     }
 
     // Set P-Access-Network-Info header
-    PAccessNetworkInfoHeader::SetHeader(GetSlotId(), m_pRegStateTracker->GetIpAddress(),
-            m_pRegStateTracker->GetSipProfile(), piSipMsg);
+    PAccessNetworkInfoHeader::SetHeader(
+            GetSlotId(), m_pRegStateTracker->GetIpAddress(), piScc->GetSipProfile(), piSipMsg);
 
     if (!Method::SendRequestToChallenge(piScc))
     {
@@ -630,7 +631,7 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::SendRequestToChallenge(IN ISipClientCo
 
 PRIVATE VIRTUAL void RegSubscription::NotifySipResponse(IN ISipClientConnection* piScc)
 {
-    ISipMessage* piSipMsg = piScc->GetMessage();
+    const ISipMessage* piSipMsg = piScc->GetMessage();
     const SipMethod& objMethod = piSipMsg->GetMethod();
 
     IMS_TRACE_I("___ Response (%s) received at the state, %d", objMethod.ToString().GetStr(),
@@ -889,7 +890,7 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::Dialog_NotifyRequest(IN ISipServerConn
         return IMS_FALSE;
     }
 
-    ISipMessage* piSipMsgNotify = piSsc->GetMessage();
+    const ISipMessage* piSipMsgNotify = piSsc->GetMessage();
 
     if (piSipMsgNotify == IMS_NULL)
     {
@@ -919,7 +920,7 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::Dialog_NotifyRequest(IN ISipServerConn
 
         for (IMS_UINT32 i = 0; i < objBodyParts.GetSize(); ++i)
         {
-            ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(i);
+            const ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(i);
 
             if (piBodyPart == IMS_NULL)
             {
@@ -949,7 +950,7 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::Dialog_NotifyRequest(IN ISipServerConn
                 IMS_TRACE_XML(strContentType.GetStr(), strRegInfo.GetStr(), strRegInfo.GetLength());
             }
 
-            RegInfoManager::GetInstance()->Update(m_objRegKey, strRegInfo);
+            ImsCoreContext::GetInstance()->GetRegInfoManager()->Update(m_objRegKey, strRegInfo);
 
             nBodyParts = 1;
         }
@@ -1106,7 +1107,7 @@ PRIVATE
 void RegSubscription::CheckDialogNCallListener()
 {
     // Check if the dialog is terminated or not
-    ISipDialog* piDialog = GetDialog();
+    const ISipDialog* piDialog = GetDialog();
 
     if (piDialog != IMS_NULL)
     {
@@ -1173,7 +1174,7 @@ void RegSubscription::SetOngoingConnection(IN ISipClientConnection* piScc)
 }
 
 PRIVATE
-void RegSubscription::SetPreviousRequest(IN ISipMessage* piSipMsg)
+void RegSubscription::SetPreviousRequest(IN const ISipMessage* piSipMsg)
 {
     if (m_piPreviousRequest != IMS_NULL)
     {
@@ -1188,7 +1189,7 @@ void RegSubscription::SetPreviousRequest(IN ISipMessage* piSipMsg)
 }
 
 PRIVATE
-void RegSubscription::SetPreviousResponse(IN ISipMessage* piSipMsg)
+void RegSubscription::SetPreviousResponse(IN const ISipMessage* piSipMsg)
 {
     if (m_piPreviousResponse != IMS_NULL)
     {
@@ -1249,8 +1250,8 @@ IMS_BOOL RegSubscription::SendResponse(IN ISipServerConnection* piSsc, IN IMS_SI
     }
 
     // Sets P-Access-Network-Info header field
-    PAccessNetworkInfoHeader::SetHeader(GetSlotId(), m_pRegStateTracker->GetIpAddress(),
-            m_pRegStateTracker->GetSipProfile(), piSipMsg);
+    PAccessNetworkInfoHeader::SetHeader(
+            GetSlotId(), m_pRegStateTracker->GetIpAddress(), piSsc->GetSipProfile(), piSipMsg);
 
     // Sets Server header field - User-Agent ?
     if (SipConfigProxy::IsUserAgentConfigured(GetSlotId(), m_pRegStateTracker->GetSipProfile()))
@@ -1299,8 +1300,7 @@ IMS_BOOL RegSubscription::SetContactHeader(
 
     if (SipConfigProxy::IsGruuConfigured(GetSlotId(), m_pRegStateTracker->GetSipProfile()))
     {
-        if (SipConfigProxy::IsMultipleRegConfigured(
-                    GetSlotId(), m_pRegStateTracker->GetSipProfile()))
+        if (SipConfigProxy::IsMultipleRegConfigured(GetSlotId()))
         {
             SipAddress objContact;
 
@@ -1332,12 +1332,7 @@ IMS_BOOL RegSubscription::SetContactHeader(
                                                     : m_pRegStateTracker->GetContactAddress();
             }
 
-            if (SipConfigProxy::IsMultipleRegConfigured(
-                        GetSlotId(), m_pRegStateTracker->GetSipProfile()))
-            {
-                objContact.AddParameter(Sip::STR_OB, AString::ConstNull());
-            }
-
+            objContact.AddParameter(Sip::STR_OB, AString::ConstNull());
             strContact = objContact.ToString();
         }
         else
@@ -1375,19 +1370,12 @@ IMS_BOOL RegSubscription::SetContactHeader(
     }
     else
     {
-        if (SipConfigProxy::IsMultipleRegConfigured(
-                    GetSlotId(), m_pRegStateTracker->GetSipProfile()))
+        if (SipConfigProxy::IsMultipleRegConfigured(GetSlotId()))
         {
             const SipAddress* pContact = m_pRegStateTracker->GetContactAddressForOutgoingMessage();
             SipAddress objContact =
                     (pContact != IMS_NULL) ? *pContact : m_pRegStateTracker->GetContactAddress();
-
-            if (SipConfigProxy::IsMultipleRegConfigured(
-                        GetSlotId(), m_pRegStateTracker->GetSipProfile()))
-            {
-                objContact.AddParameter(Sip::STR_OB, AString::ConstNull());
-            }
-
+            objContact.AddParameter(Sip::STR_OB, AString::ConstNull());
             strContact = objContact.ToString();
         }
         else
@@ -1400,27 +1388,11 @@ IMS_BOOL RegSubscription::SetContactHeader(
         }
     }
 
-    IMS_BOOL bDeviceIdRequired = IMS_FALSE;
-    IMS_BOOL bIsWithinTrustDomain = m_pRegStateTracker->IsWithinTrustDomain(GetSlotId());
-
-    if (!bIsContactGruu && bIsWithinTrustDomain)
-    {
-        bDeviceIdRequired = IMS_TRUE;
-    }
-
-    // FIXME: it is not required, if not necessary, remove it later.
-    if (!bDeviceIdRequired && !bIsContactGruu)
-    {
-        if (SipConfigProxy::IsGruuConfigured(GetSlotId(), m_pRegStateTracker->GetSipProfile()) &&
-                bIsWithinTrustDomain)
-        {
-            bDeviceIdRequired = IMS_TRUE;
-        }
-    }
-
     IMS_BOOL bInstanceParameterIncluded = IMS_FALSE;
 
-    if (bDeviceIdRequired && (pRegContact != IMS_NULL))
+    if (pRegContact != IMS_NULL && m_pRegStateTracker->IsWithinTrustDomain(GetSlotId()) &&
+            SipConfigProxy::IsSipInstanceParamRequiredInContactForNonRegisterRequest(
+                    GetSlotId(), m_pRegStateTracker->GetSipProfile()))
     {
         // Add the '+sip.instance' parameter
         const SipParameter* pParameter = pRegContact->GetInstanceParameter();
@@ -1436,7 +1408,7 @@ IMS_BOOL RegSubscription::SetContactHeader(
 
     if (piSipMsg->GetMethod().Equals(SipMethod::NOTIFY))
     {
-        ISipDialog* piDialog = GetDialog();
+        const ISipDialog* piDialog = GetDialog();
         const ISipHeader* piHeader =
                 (piDialog != IMS_NULL) ? piDialog->GetContactHeader() : IMS_NULL;
 
@@ -1455,7 +1427,7 @@ IMS_BOOL RegSubscription::SetContactHeader(
 
                 if (bInstanceParameterIncluded)
                 {
-                    if (pParameter->GetName().Equals("+sip.instance"))
+                    if (pParameter->GetName().Equals(Sip::STR_SIP_INSTANCE))
                     {
                         continue;
                     }
@@ -1522,7 +1494,7 @@ IMS_BOOL RegSubscription::SetHeaders(IN_OUT ISipMessage*& piSipMsg)
         }
         else
         {
-            ISipDialog* piDialog = GetDialog();
+            const ISipDialog* piDialog = GetDialog();
             const ISipHeader* piContactHeader =
                     (piDialog != IMS_NULL) ? piDialog->GetContactHeader() : IMS_NULL;
             const SipAddress* pContact =
@@ -1572,7 +1544,7 @@ IMS_BOOL RegSubscription::SubscribeOnImplicitRefresh()
     }
 
     ISipMessage* piSipMsg = piScc->GetMessage();
-    ISipMessage* piInitialSipMsg = m_pSubState->GetInitialMessage();
+    const ISipMessage* piInitialSipMsg = m_pSubState->GetInitialMessage();
 
     if (piInitialSipMsg != IMS_NULL)
     {
@@ -1615,7 +1587,7 @@ IMS_BOOL RegSubscription::SubscribeOnImplicitRefresh()
 // IMS_REQUEST_URI_VALIDATION_IN_MID_DIALOG
 PRIVATE
 IMS_BOOL RegSubscription::ValidateRequestUri(
-        IN const SipAddress& objRequestUri, IN ISipDialog* piDialog) const
+        IN const SipAddress& objRequestUri, IN const ISipDialog* piDialog) const
 {
     // Checks GRUU identities if it is supported
     if (SipConfigProxy::IsGruuConfigured(GetSlotId(), m_pRegStateTracker->GetSipProfile()))
@@ -1719,7 +1691,7 @@ IMS_BOOL RegSubscription::ValidateRequestUri(
 PRIVATE GLOBAL ISipClientConnection* RegSubscription::CreateConnection(IN RegSubscription* pRegSub)
 {
     AString strAor = pRegSub->GetUserAor()->ToString();
-    RegStateTracker* pStateTracker = pRegSub->m_pRegStateTracker.Get();
+    const RegStateTracker* pStateTracker = pRegSub->m_pRegStateTracker.Get();
     ISipClientConnection* piScc = IMS_NULL;
     IMS_BOOL bOverwriteTarget = IMS_FALSE;
     IMS_SINT32 nTransportExt = pStateTracker->GetTransportExt();
@@ -1766,7 +1738,9 @@ PRIVATE GLOBAL ISipClientConnection* RegSubscription::CreateConnection(IN RegSub
     // we needs to have a policy of which network will have a preference between the connections.
 
     // MULTI_REG_SIP_PROFILE
-    piScc->SetSipProfile(pStateTracker->GetSipProfile());
+    RcPtr<SipProfile> pSipProfile = SipProfile::Create(
+            pStateTracker->GetSipProfile(), pStateTracker->IsEmergencyRegistration());
+    piScc->SetSipProfile(pSipProfile.Get());
 
     // Sets the transport tuples
     // RFC5626_FLOW_CONTROL
@@ -1785,7 +1759,17 @@ PRIVATE GLOBAL ISipClientConnection* RegSubscription::CreateConnection(IN RegSub
                 pRegSub->GetSlotId(), pStateTracker->GetSipProfile()));
     }
 
-    if (pRegSub->GetState() != STATE_ACTIVE)
+    if (pRegSub->GetState() == STATE_ACTIVE)
+    {
+        // IMPLICIT_ROUTING_FOR_MID_DIALOG
+        const AStringArray& objServiceRoutes = pStateTracker->GetServiceRoutes();
+
+        if (!objServiceRoutes.IsEmpty())
+        {
+            piScc->SetImplicitRouteHeader(objServiceRoutes.GetElementAt(0));
+        }
+    }
+    else
     {
         if (piScc->InitRequest(SipMethod::ToName(SipMethod::SUBSCRIBE), IMS_NULL) != IMS_SUCCESS)
         {
@@ -1896,54 +1880,48 @@ PRIVATE GLOBAL ISipClientConnection* RegSubscription::CreateConnection(IN RegSub
     // }
 
     // Set P-Access-Network-Info header
-    PAccessNetworkInfoHeader::SetHeader(pRegSub->GetSlotId(), pStateTracker->GetIpAddress(),
-            pStateTracker->GetSipProfile(), piSipMsg);
+    PAccessNetworkInfoHeader::SetHeader(
+            pRegSub->GetSlotId(), pStateTracker->GetIpAddress(), piScc->GetSipProfile(), piSipMsg);
 
     return piScc;
 }
 
-PRIVATE GLOBAL IMS_UINT16 RegSubscription::GetReasonParameter(IN ISipMessage* piSipMsg)
+PRIVATE GLOBAL IMS_UINT16 RegSubscription::GetReasonParameter(IN const ISipMessage* piSipMsg)
 {
     AString strSubState = piSipMsg->GetHeader(ISipHeader::SUBSCRIPTION_STATE);
     ISipHeader* piHeader =
             SipParsingHelper::CreateHeader(ISipHeader::SUBSCRIPTION_STATE, strSubState);
     IMS_UINT16 nReason = IRegSubscription::PARAM_REASON_NONE;
 
-    if (piHeader == IMS_NULL)
+    if (piHeader != IMS_NULL)
     {
-        return nReason;
+        nReason = SubState::ExtractReasonParameter(piHeader);
+        nReason = GetReasonFromSubStateReason(nReason);
+        piHeader->Destroy();
     }
-
-    nReason = SubState::ExtractReasonParameter(piHeader);
-
-    if (nReason == SubState::REASON_NORESOURCE)
-    {
-        nReason = IRegSubscription::PARAM_REASON_NORESOURCE;
-    }
-    else if (nReason == SubState::REASON_DEACTIVATED)
-    {
-        nReason = IRegSubscription::PARAM_REASON_DEACTIVATED;
-    }
-    else if (nReason == SubState::REASON_PROBATION)
-    {
-        nReason = IRegSubscription::PARAM_REASON_PROBATION;
-    }
-    else if (nReason == SubState::REASON_REJECTED)
-    {
-        nReason = IRegSubscription::PARAM_REASON_REJECTED;
-    }
-    else if (nReason == SubState::REASON_TIMEOUT)
-    {
-        nReason = IRegSubscription::PARAM_REASON_TIMEOUT;
-    }
-    else if (nReason == SubState::REASON_GIVEUP)
-    {
-        nReason = IRegSubscription::PARAM_REASON_GIVEUP;
-    }
-
-    piHeader->Destroy();
 
     return nReason;
+}
+
+PRIVATE GLOBAL IMS_UINT16 RegSubscription::GetReasonFromSubStateReason(IN IMS_UINT16 nReason)
+{
+    switch (nReason)
+    {
+        case SubState::REASON_NORESOURCE:
+            return IRegSubscription::PARAM_REASON_NORESOURCE;
+        case SubState::REASON_DEACTIVATED:
+            return IRegSubscription::PARAM_REASON_DEACTIVATED;
+        case SubState::REASON_PROBATION:
+            return IRegSubscription::PARAM_REASON_PROBATION;
+        case SubState::REASON_REJECTED:
+            return IRegSubscription::PARAM_REASON_REJECTED;
+        case SubState::REASON_TIMEOUT:
+            return IRegSubscription::PARAM_REASON_TIMEOUT;
+        case SubState::REASON_GIVEUP:
+            return IRegSubscription::PARAM_REASON_GIVEUP;
+        default:
+            return nReason;
+    }
 }
 
 PRIVATE GLOBAL const IMS_CHAR* RegSubscription::StateToString(IN IMS_SINT32 nState)

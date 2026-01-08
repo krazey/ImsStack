@@ -17,6 +17,7 @@
 #ifndef _UCE_PUBLISH_MANAGER_H_
 #define _UCE_PUBLISH_MANAGER_H_
 
+#include "ImsMessage.h"
 #include "ImsStateMachine.h"
 #include "IPublicationListener.h"
 #include "ITimer.h"
@@ -96,7 +97,7 @@ class UcePublishManager :
 public:
     explicit UcePublishManager(IN ICoreService* _piCoreService, IN const AString& strAppName,
             IN IMS_SINT32 nSimSlot = 0);
-    virtual ~UcePublishManager();
+    virtual ~UcePublishManager() override;
 
 public:
     enum INTERNAL_TIMER
@@ -120,7 +121,7 @@ public:
     IMS_BOOL AosDisConnecting();                        // AoS-disconnecting
     IMS_BOOL ClosedService();                           // core service closed
 
-    void SetState(IMS_UINT32 _eState);
+    void SetPublishState(IMS_UINT32 _eState);
 
 protected:
     virtual void Timer_TimerExpired(IN ITimer* piTimer) override;
@@ -170,9 +171,12 @@ protected:
     // ALL
     virtual IMS_BOOL StateALL_Terminated(IN IMSMSG& objMsg);
 
+    inline IMS_UINT32 GetLastResponseCode() const { return m_nLastResponseCode; }
+    inline void SetLastResponseCode(IMS_UINT32 nCode) { m_nLastResponseCode = nCode; }
+
 private:
     void LoadConfigValue();
-    static IPublishResponseData* GetPublishResponseData(ISipMessage* piMessage);
+    static IPublishResponseData* GetPublishResponseData(const ISipMessage* piMessage);
     ISipMessage* GetISIPMessage(IMS_BOOL bRequireResponseMessage = IMS_FALSE);
     void SendPublishCommandErrorInd(IMS_UINT32 nKey, IMS_UINT32 nCommandError);
     void SendPublishResponseInd(IMS_UINT32 nKey, IMS_SINT32 nResponseCode, AString strReason,
@@ -188,7 +192,7 @@ private:
     IMS_BOOL Publish();
     IMS_BOOL Unpublish();
     IMS_BOOL SetPidfXmlBody(ISipMessage* piMessage);
-    void GetEtagAndExpireValue(ISipMessage* piMessage);
+    void GetEtagAndExpireValue(const ISipMessage* piMessage);
     IMS_BOOL HandleFailResponse(IMS_SINT32 nResponseCode);
     void SetPublishStateToAoS(IN IMS_UINT32 nState);
     IMS_BOOL ProcessRetryAfterHeader();
@@ -211,7 +215,7 @@ private:
 
     void SendPendingPublishRequest();
     void ClearPendingPublishRequest();
-    IMS_UINT32 GetState() const;
+    IMS_UINT32 GetPublishState() const;
     static const IMS_CHAR* StateToString(IMS_UINT32 _eState);
     IUceJniThread* GetJniThread();
     /* ------------------------------------------------------------------------------------------
@@ -288,5 +292,6 @@ private:
     IMS_UINT32 m_nImmediatelyRetryCount;
     IMS_UINT32 m_nRetryCount;
     IMS_UINT32 m_nExponentialRetryCount;
+    IMS_UINT32 m_nLastResponseCode;
 };
 #endif  // _UCE_PUBLISH_MANAGER_H_

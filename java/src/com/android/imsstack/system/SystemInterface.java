@@ -17,9 +17,14 @@ package com.android.imsstack.system;
 
 import android.annotation.NonNull;
 import android.os.Parcel;
+import android.telephony.ims.ProvisioningManager;
+import android.telephony.ims.stub.ImsConfigImplBase;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
+import com.android.imsstack.base.ImsPrivateProperties;
+import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.core.agents.LocationInterface;
 import com.android.imsstack.core.agents.WifiInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
@@ -31,12 +36,11 @@ import com.android.imsstack.jni.JniImsProxy;
 import com.android.imsstack.jni.JniObjectId;
 import com.android.imsstack.jni.JniSystemListener;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsPrivateProperties;
-import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.MessageExecutor;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.FileDescriptor;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -47,6 +51,7 @@ public class SystemInterface implements JniSystemListener {
     private static final Map<Integer, String> METHOD_TO_STRING = Map.ofEntries(
             Map.entry(SystemConstants.SET_TIMER, "SET_TIMER"),
             Map.entry(SystemConstants.KILL_TIMER, "KILL_TIMER"),
+            Map.entry(SystemConstants.GET_UUID, "GET_UUID"),
             Map.entry(SystemConstants.GET_BATTERY_LEVEL, "GET_BATTERY_LEVEL"),
             Map.entry(SystemConstants.IS_EMERGENCY_NUMBER, "IS_EMERGENCY_NUMBER"),
             Map.entry(SystemConstants.GET_TTY_MODE, "GET_TTY_MODE"),
@@ -65,9 +70,8 @@ public class SystemInterface implements JniSystemListener {
             Map.entry(SystemConstants.GET_PCSCF_ADDRESSES, "GET_PCSCF_ADDRESSES"),
             Map.entry(SystemConstants.GET_ROAMING_STATE, "GET_ROAMING_STATE"),
             Map.entry(SystemConstants.GET_SERVICE_STATE, "GET_SERVICE_STATE"),
-            Map.entry(SystemConstants.IS_LTE_EMERGENCY_ONLY, "IS_LTE_EMERGENCY_ONLY"),
+            Map.entry(SystemConstants.IS_EMERGENCY_ONLY, "IS_EMERGENCY_ONLY"),
             Map.entry(SystemConstants.IS_MOBILE_DATA_ENABLED, "IS_MOBILE_DATA_ENABLED"),
-            Map.entry(SystemConstants.GET_MOCN_PLMN_INFO, "GET_MOCN_PLMN_INFO"),
             Map.entry(SystemConstants.GET_VOICE_SERVICE_STATE, "GET_VOICE_SERVICE_STATE"),
             Map.entry(SystemConstants.GET_VOICE_ROAMING_TYPE, "GET_VOICE_ROAMING_TYPE"),
             Map.entry(SystemConstants.GET_DATA_ROAMING_TYPE, "GET_DATA_ROAMING_TYPE"),
@@ -76,6 +80,10 @@ public class SystemInterface implements JniSystemListener {
                     "IS_EMERGENCY_ATTACH_SUPPORTED"),
             Map.entry(SystemConstants.BIND_SOCKET, "BIND_SOCKET"),
             Map.entry(SystemConstants.IS_IPV6_PREFERRED, "IS_IPV6_PREFERRED"),
+            Map.entry(SystemConstants.GET_NETWORK_REGISTRATION_REJECT_CAUSE,
+                    "GET_NETWORK_REGISTRATION_REJECT_CAUSE"),
+            Map.entry(SystemConstants.GET_CELLULAR_SERVICE_STATE, "GET_CELLULAR_SERVICE_STATE"),
+            Map.entry(SystemConstants.GET_ACCESS_NETWORK_PLMN, "GET_ACCESS_NETWORK_PLMN"),
             Map.entry(SystemConstants.GET_PREFERENCE, "GET_PREFERENCE"),
             Map.entry(SystemConstants.SET_PREFERENCE, "SET_PREFERENCE"),
             Map.entry(SystemConstants.GET_PRIVATE_PROPERTY, "GET_PRIVATE_PROPERTY"),
@@ -83,8 +91,7 @@ public class SystemInterface implements JniSystemListener {
             Map.entry(SystemConstants.GET_CARRIER_CONFIG, "GET_CARRIER_CONFIG"),
             Map.entry(SystemConstants.SEND_EVENT, "SEND_EVENT"),
             Map.entry(SystemConstants.GET_ISIM_STATE, "GET_ISIM_STATE"),
-            Map.entry(SystemConstants.READ_ISIM_FILE_ATTR, "READ_ISIM_FILE_ATTR"),
-            Map.entry(SystemConstants.READ_ISIM_RECORD, "READ_ISIM_RECORD"),
+            Map.entry(SystemConstants.GET_ISIM_RECORD, "GET_ISIM_RECORD"),
             Map.entry(SystemConstants.REQUEST_ISIM_AUTH, "REQUEST_ISIM_AUTH"),
             Map.entry(SystemConstants.REQUEST_USIM_AUTH, "REQUEST_USIM_AUTH"),
             Map.entry(SystemConstants.GET_NETWORK_TYPE, "GET_NETWORK_TYPE"),
@@ -100,6 +107,7 @@ public class SystemInterface implements JniSystemListener {
             Map.entry(SystemConstants.GET_SIM_MNC, "GET_SIM_MNC"),
             Map.entry(SystemConstants.GET_SIM_COUNTRY_ISO, "GET_SIM_COUNTRY_ISO"),
             Map.entry(SystemConstants.GET_NETWORK_COUNTRY_ISO, "GET_NETWORK_COUNTRY_ISO"),
+            Map.entry(SystemConstants.GET_NETWORK_OPERATOR, "GET_NETWORK_OPERATOR"),
             Map.entry(SystemConstants.GET_WIFI_STATE, "GET_WIFI_STATE"),
             Map.entry(SystemConstants.GET_WIFI_CONNECTION_STATE, "GET_WIFI_CONNECTION_STATE"),
             Map.entry(SystemConstants.GET_WIFI_BSS_ID, "GET_WIFI_BSS_ID"),
@@ -111,8 +119,8 @@ public class SystemInterface implements JniSystemListener {
             Map.entry(SystemConstants.START_LISTENING_FOR_LOCATION, "START_LISTENING_FOR_LOCATION"),
             Map.entry(SystemConstants.STOP_LISTENING_FOR_LOCATION, "STOP_LISTENING_FOR_LOCATION"),
             Map.entry(SystemConstants.GET_LAST_KNOWN_LOCATION, "GET_LAST_KNOWN_LOCATION"),
-            Map.entry(SystemConstants.START_INSTANT_LOCATION_UPDATE,
-                    "START_INSTANT_LOCATION_UPDATE"),
+            Map.entry(SystemConstants.REQUEST_LOCATION_UPDATE, "REQUEST_LOCATION_UPDATE"),
+            Map.entry(SystemConstants.CANCEL_LOCATION_UPDATE, "CANCEL_LOCATION_UPDATE"),
             Map.entry(SystemConstants.SET_EVENT, "SET_EVENT"),
             Map.entry(SystemConstants.RESET_EVENT, "RESET_EVENT"),
             Map.entry(SystemConstants.GET_CS_CALL_STATE_IN_OTHER_SLOT,
@@ -124,7 +132,9 @@ public class SystemInterface implements JniSystemListener {
             Map.entry(SystemConstants.START_IMS_TRAFFIC, "START_IMS_TRAFFIC"),
             Map.entry(SystemConstants.STOP_IMS_TRAFFIC, "STOP_IMS_TRAFFIC"),
             Map.entry(SystemConstants.TRIGGER_EPS_FALLBACK, "TRIGGER_EPS_FALLBACK"),
-            Map.entry(SystemConstants.SET_TRAFFIC_PRIORITY, "SET_TRAFFIC_PRIORITY"));
+            Map.entry(SystemConstants.SET_TRAFFIC_PRIORITY, "SET_TRAFFIC_PRIORITY"),
+            Map.entry(SystemConstants.IS_CROSS_SIM_REDIALING_AVAILABLE,
+                    "IS_CROSS_SIM_REDIALING_AVAILABLE"));
 
     private static SystemInterface sSystemInterface = null;
     private long mNativeObject = 0;
@@ -452,8 +462,9 @@ public class SystemInterface implements JniSystemListener {
             case SystemConstants.GET_WIFI_SSID:
                 handleSystemCallForWifi(method, out);
                 break;
+            case SystemConstants.GET_UUID: // fall through
             case SystemConstants.GET_BATTERY_LEVEL:
-                handleSystemCallForBattery(method, out);
+                handleSystemCallForCommon(method, in, out);
                 break;
             case SystemConstants.GET_DEVICE_NAME: // fall through
             case SystemConstants.GET_EXTERNAL_STORAGE_PATH:
@@ -468,6 +479,9 @@ public class SystemInterface implements JniSystemListener {
             case SystemConstants.SET_TRAFFIC_PRIORITY:
                 handleSystemCallForRadio(method, in, out);
                 break;
+            case SystemConstants.IS_CROSS_SIM_REDIALING_AVAILABLE:
+                handleSystemCallForCrossSimRedialing(method, in, out);
+                break;
             default:
                 return false;
         }
@@ -477,7 +491,7 @@ public class SystemInterface implements JniSystemListener {
 
     private void handleSystemCallForTimer(int method, Parcel in, Parcel out) {
         if (method == SystemConstants.SET_TIMER) {
-            int duration = in.readInt();
+            long duration = in.readLong();
             long tid = in.readLong();
             out.writeInt(mDefaultSystemCall.startTimer(tid, duration) ? 1 : 0);
         } else if (method == SystemConstants.KILL_TIMER) {
@@ -531,8 +545,12 @@ public class SystemInterface implements JniSystemListener {
         }
     }
 
-    private void handleSystemCallForBattery(int method, Parcel out) {
-        if (method == SystemConstants.GET_BATTERY_LEVEL) {
+    private void handleSystemCallForCommon(int method, Parcel in, Parcel out) {
+        if (method == SystemConstants.GET_UUID) {
+            int version = in.readInt();
+            String name = (version == 3) ? in.readString() : null;
+            out.writeString(mDefaultSystemCall.getUuid(version, name));
+        } else if (method == SystemConstants.GET_BATTERY_LEVEL) {
             out.writeInt(mDefaultSystemCall.getBatteryLevel());
         }
     }
@@ -602,6 +620,13 @@ public class SystemInterface implements JniSystemListener {
             int slotId = in.readInt();
             mDefaultSystemCall.setTrafficPriority(priorityType, slotId);
             out.writeInt(1);
+        }
+    }
+
+    private void handleSystemCallForCrossSimRedialing(int method, Parcel in, Parcel out) {
+        if (method == SystemConstants.IS_CROSS_SIM_REDIALING_AVAILABLE) {
+            int slotId = in.readInt();
+            out.writeInt(mDefaultSystemCall.isCrossSimRedialingAvailable(slotId) ? 1 : 0);
         }
     }
 
@@ -809,29 +834,6 @@ public class SystemInterface implements JniSystemListener {
         }
 
         /**
-         * Notifies the voice call (CS / IMS) state.
-         *
-         * @param state the call state (TelephonyManager.CALL_STATE_*)
-         *          {@link TelephonyManager#CALL_STATE_IDLE} (0)
-         *          {@link TelephonyManager#CALL_STATE_RINGING} (1)
-         *          {@link TelephonyManager#CALL_STATE_OFFHOOK} (2)
-         */
-        @Override
-        public void notifyVoiceCallStateChanged(int state) {
-            mExecutor.execute(() -> {
-                Parcel parcel = Parcel.obtain();
-                try {
-                    parcel.writeInt(mSlotId);
-                    parcel.writeInt(SystemConstants.NOTIFY_VOICE_CALL_STATE_CHANGED);
-                    parcel.writeInt(state);
-                    sendSystemEvent(parcel);
-                } finally {
-                    parcel.recycle();
-                }
-            });
-        }
-
-        /**
          * Notifies the changes of the IMS configuration.
          *
          * @param configs the configuration items to be updated
@@ -889,46 +891,6 @@ public class SystemInterface implements JniSystemListener {
                     parcel.writeInt(SystemConstants.NOTIFY_ISIM_EVENT);
                     parcel.writeInt(event);
                     parcel.writeString(state);
-                    sendSystemEvent(parcel);
-                } finally {
-                    parcel.recycle();
-                }
-            });
-        }
-
-        @Override
-        public void notifyIsimFileAttributesResponse(int event,
-                int fileId, int size, String[] values) {
-            mExecutor.execute(() -> {
-                Parcel parcel = Parcel.obtain();
-                try {
-                    parcel.writeInt(mSlotId);
-                    parcel.writeInt(SystemConstants.NOTIFY_ISIM_EVENT);
-                    parcel.writeInt(event);
-                    parcel.writeInt(fileId);
-                    parcel.writeInt(size);
-                    for (int i = 0;  i < size; ++i) {
-                        parcel.writeString(values[i]);
-                    }
-                    sendSystemEvent(parcel);
-                } finally {
-                    parcel.recycle();
-                }
-            });
-        }
-
-        @Override
-        public void notifyIsimRecordResponse(int event,
-                int fileId, int index, String value) {
-            mExecutor.execute(() -> {
-                Parcel parcel = Parcel.obtain();
-                try {
-                    parcel.writeInt(mSlotId);
-                    parcel.writeInt(SystemConstants.NOTIFY_ISIM_EVENT);
-                    parcel.writeInt(event);
-                    parcel.writeInt(fileId);
-                    parcel.writeInt(index);
-                    parcel.writeString(value);
                     sendSystemEvent(parcel);
                 } finally {
                     parcel.recycle();
@@ -1027,6 +989,38 @@ public class SystemInterface implements JniSystemListener {
         }
 
         @Override
+        public void notifySimultaneousCallingSupportChanged(int event, boolean supported) {
+            mExecutor.execute(() -> {
+                Parcel parcel = Parcel.obtain();
+                try {
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_RADIO_EVENT);
+                    parcel.writeInt(event);
+                    parcel.writeInt(supported ? 1 : 0);
+                    sendSystemEvent(parcel);
+                } finally {
+                    parcel.recycle();
+                }
+            });
+        }
+
+        @Override
+        public void notifyLocationUpdateCompleted(int requestId) {
+            mExecutor.execute(() -> {
+                Parcel parcel = Parcel.obtain();
+                try {
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_LOCATION_EVENT);
+                    parcel.writeInt(LocationInterface.EVENT_LOCATION_UPDATE_COMPLETED);
+                    parcel.writeInt(requestId);
+                    sendSystemEvent(parcel);
+                } finally {
+                    parcel.recycle();
+                }
+            });
+        }
+
+        @Override
         public void onAdvancedCallingSettingChanged() {
             notifyEvent(ImsEventDef.IMS_EVENT_VOLTE_SETTING,
                     mMmTelFeatureRegistry.isAdvancedCallingSettingEnabled()
@@ -1116,21 +1110,22 @@ public class SystemInterface implements JniSystemListener {
                 case SystemConstants.GET_PCSCF_ADDRESSES: // fall through
                 case SystemConstants.GET_ROAMING_STATE: // fall through
                 case SystemConstants.GET_SERVICE_STATE: // fall through
-                case SystemConstants.IS_LTE_EMERGENCY_ONLY: // fall through
+                case SystemConstants.IS_EMERGENCY_ONLY: // fall through
                 case SystemConstants.IS_MOBILE_DATA_ENABLED:// fall through
-                case SystemConstants.GET_MOCN_PLMN_INFO: // fall through
                 case SystemConstants.GET_VOICE_SERVICE_STATE: // fall through
                 case SystemConstants.GET_VOICE_ROAMING_TYPE: // fall through
                 case SystemConstants.GET_DATA_ROAMING_TYPE: // fall through
                 case SystemConstants.GET_MTU: // fall through
                 case SystemConstants.IS_EMERGENCY_ATTACH_SUPPORTED: // fall through
                 case SystemConstants.BIND_SOCKET: // fall through
-                case SystemConstants.IS_IPV6_PREFERRED:
+                case SystemConstants.IS_IPV6_PREFERRED: // fall through
+                case SystemConstants.GET_NETWORK_REGISTRATION_REJECT_CAUSE: // fall through
+                case SystemConstants.GET_CELLULAR_SERVICE_STATE:  // fall through
+                case SystemConstants.GET_ACCESS_NETWORK_PLMN:
                     handleSystemCallForNetwork(method, in, fd, out);
                     break;
                 case SystemConstants.GET_ISIM_STATE: // fall through
-                case SystemConstants.READ_ISIM_FILE_ATTR: // fall through
-                case SystemConstants.READ_ISIM_RECORD: // fall through
+                case SystemConstants.GET_ISIM_RECORD: // fall through
                 case SystemConstants.REQUEST_ISIM_AUTH: // fall through
                 case SystemConstants.REQUEST_USIM_AUTH:
                     handleSystemCallForSim(method, in, out);
@@ -1143,6 +1138,7 @@ public class SystemInterface implements JniSystemListener {
                 case SystemConstants.GET_SIM_MNC: // fall through
                 case SystemConstants.GET_SIM_COUNTRY_ISO: // fall through
                 case SystemConstants.GET_NETWORK_COUNTRY_ISO: // fall through
+                case SystemConstants.GET_NETWORK_OPERATOR: // fall through
                 case SystemConstants.GET_NETWORK_TYPE: // fall through
                 case SystemConstants.GET_VOICE_NETWORK_TYPE: // fall through
                 case SystemConstants.GET_CS_CALL_STATE: // fall through
@@ -1153,7 +1149,8 @@ public class SystemInterface implements JniSystemListener {
                 case SystemConstants.START_LISTENING_FOR_LOCATION: // fall through
                 case SystemConstants.STOP_LISTENING_FOR_LOCATION: // fall through
                 case SystemConstants.GET_LAST_KNOWN_LOCATION: // fall through
-                case SystemConstants.START_INSTANT_LOCATION_UPDATE:
+                case SystemConstants.REQUEST_LOCATION_UPDATE: // fall through
+                case SystemConstants.CANCEL_LOCATION_UPDATE:
                     handleSystemCallForLocation(method, in, out);
                     break;
                 case SystemConstants.START_IMS_TRAFFIC: // fall through
@@ -1325,14 +1322,11 @@ public class SystemInterface implements JniSystemListener {
                 case SystemConstants.GET_SERVICE_STATE:
                     out.writeInt(mSystemCall.getDataServiceState());
                     break;
-                case SystemConstants.IS_LTE_EMERGENCY_ONLY:
-                    out.writeInt(mSystemCall.isLteEmergencyOnly() ? 1 : 0);
+                case SystemConstants.IS_EMERGENCY_ONLY:
+                    out.writeInt(mSystemCall.isEmergencyOnly() ? 1 : 0);
                     break;
                 case SystemConstants.IS_MOBILE_DATA_ENABLED:
                     out.writeInt(mSystemCall.isMobileDataEnabled() ? 1 : 0);
-                    break;
-                case SystemConstants.GET_MOCN_PLMN_INFO:
-                    out.writeInt(mSystemCall.getMocnPlmnInfo());
                     break;
                 case SystemConstants.GET_VOICE_SERVICE_STATE:
                     out.writeInt(mSystemCall.getVoiceServiceState());
@@ -1383,6 +1377,18 @@ public class SystemInterface implements JniSystemListener {
                     out.writeInt(mSystemCall.isIpv6Preferred(apnType) ? 1 : 0);
                     break;
                 }
+                case SystemConstants.GET_NETWORK_REGISTRATION_REJECT_CAUSE: {
+                    out.writeInt(mSystemCall.getNetworkRegistrationRejectCause());
+                    break;
+                }
+                case SystemConstants.GET_CELLULAR_SERVICE_STATE: {
+                    out.writeInt(mSystemCall.getCellularDataServiceState());
+                    break;
+                }
+                case SystemConstants.GET_ACCESS_NETWORK_PLMN: {
+                    out.writeString(mSystemCall.getAccessNetworkPlmn());
+                    break;
+                }
             }
         }
 
@@ -1391,15 +1397,14 @@ public class SystemInterface implements JniSystemListener {
                 case SystemConstants.GET_ISIM_STATE:
                     out.writeString(mSystemCall.getIsimState());
                     break;
-                case SystemConstants.READ_ISIM_FILE_ATTR: {
+                case SystemConstants.GET_ISIM_RECORD: {
                     int fileId = in.readInt();
-                    out.writeInt(mSystemCall.readIsimFileAttributes(fileId));
-                    break;
-                }
-                case SystemConstants.READ_ISIM_RECORD: {
-                    int fileId = in.readInt();
-                    int index = in.readInt();
-                    out.writeInt(mSystemCall.readIsimRecord(fileId, index));
+                    List<String> record = mSystemCall.getIsimRecord(fileId);
+                    out.writeInt(record.size());
+
+                    for (String s : record) {
+                        out.writeString(s);
+                    }
                     break;
                 }
                 case SystemConstants.REQUEST_ISIM_AUTH: {
@@ -1443,6 +1448,9 @@ public class SystemInterface implements JniSystemListener {
                 case SystemConstants.GET_NETWORK_COUNTRY_ISO:
                     out.writeString(mSystemCall.getNetworkCountryIso());
                     break;
+                case SystemConstants.GET_NETWORK_OPERATOR:
+                    out.writeString(mSystemCall.getNetworkOperator());
+                    break;
                 case SystemConstants.GET_NETWORK_TYPE:
                     out.writeInt(mSystemCall.getNetworkType());
                     break;
@@ -1472,9 +1480,9 @@ public class SystemInterface implements JniSystemListener {
                 // Need to be checked whether this is necessary or not.
                 out.writeInt(1);
             } else if (method == SystemConstants.GET_WFC_ADDRESS_ID) {
-                out.writeString(ImsPrivateProperties.Persistent.get(
-                        ImsPrivateProperties.Persistent.KEY_VOWIFI_ENTITLEMENT_ID,
-                        "", mSlotId));
+                ImsConfigImplBase config = ImsServiceRegistry.getInstance(mSlotId).getImsConfig();
+                out.writeString(config != null ? config.getConfigString(
+                        ProvisioningManager.KEY_VOICE_OVER_WIFI_ENTITLEMENT_ID) : "");
             }
         }
 
@@ -1492,8 +1500,10 @@ public class SystemInterface implements JniSystemListener {
                 for (int i = 0; i < locationParam.length; ++i) {
                     out.writeString(locationParam[i]);
                 }
-            } else if (method == SystemConstants.START_INSTANT_LOCATION_UPDATE) {
-                mSystemCall.startInstantLocationUpdate();
+            } else if (method == SystemConstants.REQUEST_LOCATION_UPDATE) {
+                out.writeInt(mSystemCall.requestLocationUpdate(in.readInt()));
+            } else if (method == SystemConstants.CANCEL_LOCATION_UPDATE) {
+                mSystemCall.cancelLocationUpdate(in.readInt());
                 out.writeInt(1);
             }
         }

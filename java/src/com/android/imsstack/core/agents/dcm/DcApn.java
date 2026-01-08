@@ -17,7 +17,6 @@
 package com.android.imsstack.core.agents.dcm;
 
 import android.content.Context;
-import android.net.ConnectivityManager;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
@@ -27,6 +26,10 @@ import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.SystemServiceProxy.ConnectivityManagerProxy;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.Sim;
@@ -36,9 +39,7 @@ import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.EIpVersion;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
-import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.FileDescriptor;
@@ -114,8 +115,8 @@ public class DcApn implements IDcApn {
         mPreciseDcStateListener = new PreciseDcStateListener();
         mSubId = MSimUtils.getSubId(mSlotId);
         if (mSubId != MSimUtils.INVALID_SUB_ID) {
-            TelephonyManager tm = AppContext.getTelephonyManager(mSubId);
-            mPreciseDcStateListener.register(tm);
+            TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(mSubId);
+            mPreciseDcStateListener.register(tmp);
         }
     }
 
@@ -153,6 +154,12 @@ public class DcApn implements IDcApn {
         if (iApn == null) {
             ImsLog.w(mSlotId, "apn is null, apnType = " + apnType);
             return false;
+        }
+
+        if (apnType == EApnType.EMERGENCY.getType() && mSubId == MSimUtils.INVALID_SUB_ID) {
+            TelephonyManagerProxy tmp = AppContext.getInstance()
+                    .getSystemServiceProxy(TelephonyManagerProxy.class);
+            mPreciseDcStateListener.register(tmp);
         }
 
         return iApn.connect();
@@ -360,14 +367,6 @@ public class DcApn implements IDcApn {
 
     @Override
     public String[] getPcscfAddress(int apnType, int ipVersion) {
-        if (ipVersion == 0) {
-            // Configuration-based ip selection
-            ipVersion = getIpVersion(apnType);
-        }
-
-        ImsLog.i(mSlotId, "P-CSCF address(PCO) :: apnType="
-                + EApnType.getApnSettingTypeFromType(apnType) + ", ipVersion=" + ipVersion);
-
         LinkProperties linkProperties = getLinkProperties(apnType);
         if (linkProperties == null) {
             ImsLog.w(mSlotId, "LinkProperties is null, apnType = " + apnType);
@@ -380,13 +379,35 @@ public class DcApn implements IDcApn {
             return null;
         }
 
-        String[] validAddresses = getValidPcscf(pcscfAddresses, ipVersion);
+        int preferredIpVersion = ipVersion;
+        if (ipVersion == 0) {
+            // Configuration-based ip selection
+            ipVersion = getIpVersion(apnType);
+            if (ipVersion == EIpVersion.IPV4V6.getInt() || ipVersion == EIpVersion.IPV4.getInt()) {
+                preferredIpVersion = EIpVersion.IPV4.getInt();
+            } else {
+                preferredIpVersion = EIpVersion.IPV6.getInt();
+            }
+        }
 
-        if (validAddresses == null || validAddresses.length == 0) {
+        ImsLog.i(mSlotId, "P-CSCF address::apnType=" + EApnType.getApnSettingTypeFromType(apnType)
+                + ", ipVersion=" + ipVersion + ", preferred ipVersion=" + preferredIpVersion);
+
+        String[] validAddresses = getValidPcscf(pcscfAddresses, preferredIpVersion);
+        Collection<LinkAddress> linkAddresses = linkProperties.getLinkAddresses();
+        String ipAddress = getIpAddress(linkAddresses, preferredIpVersion);
+
+        if (validAddresses == null || validAddresses.length == 0 || ipAddress == null) {
             if (ipVersion == EIpVersion.IPV4V6.getInt()) {
-                validAddresses = getValidPcscf(pcscfAddresses, EIpVersion.IPV6.getInt());
+                String ipv6LinkAddress = getIpAddress(linkAddresses, EIpVersion.IPV6.getInt());
+                if (ipv6LinkAddress != null) {
+                    validAddresses = getValidPcscf(pcscfAddresses, EIpVersion.IPV6.getInt());
+                }
             } else if (ipVersion == EIpVersion.IPV6V4.getInt()) {
-                validAddresses = getValidPcscf(pcscfAddresses, EIpVersion.IPV4.getInt());
+                String ipv4LinkAddress = getIpAddress(linkAddresses, EIpVersion.IPV4.getInt());
+                if (ipv4LinkAddress != null) {
+                    validAddresses = getValidPcscf(pcscfAddresses, EIpVersion.IPV4.getInt());
+                }
             }
         }
 
@@ -503,23 +524,10 @@ public class DcApn implements IDcApn {
     }
 
     private LinkProperties getLinkProperties(int apnType) {
-        if (mContext == null) {
-            return null;
-        }
-
-        ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
-
-        if (cm == null) {
-            return null;
-        }
-
+        ConnectivityManagerProxy cmp =
+                AppContext.getInstance().getSystemServiceProxy(ConnectivityManagerProxy.class);
         Network network = getNetworkByCapability(apnType);
-
-        if (network == null) {
-            return null;
-        } else {
-            return cm.getLinkProperties(network);
-        }
+        return network != null ? cmp.getLinkProperties(network) : null;
     }
 
     private String getIpAddress(Collection<LinkAddress> linkAddresses, int ipVersion) {
@@ -607,6 +615,9 @@ public class DcApn implements IDcApn {
             }
 
             if (inetAddress instanceof Inet6Address) {
+                if (((Inet6Address) inetAddress).isIPv4CompatibleAddress()) {
+                    continue;
+                }
                 if ((ipVersion == EIpVersion.IPV4.getInt())
                         || (ipVersion == EIpVersion.IPV4V6.getInt())) {
                     continue;
@@ -696,9 +707,9 @@ public class DcApn implements IDcApn {
             ImsLog.i(mSlotId, "updateSubscription :: subId=" + subId);
 
             if (mPreciseDcStateListener != null) {
-                TelephonyManager tm = AppContext.getTelephonyManager(mSubId);
+                TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(mSubId);
                 mPreciseDcStateListener.unregister();
-                mPreciseDcStateListener.register(tm);
+                mPreciseDcStateListener.register(tmp);
             }
         }
     }
@@ -706,24 +717,24 @@ public class DcApn implements IDcApn {
     @VisibleForTesting
     protected class PreciseDcStateListener extends TelephonyCallback
             implements TelephonyCallback.PreciseDataConnectionStateListener {
-        private TelephonyManager mTelephonyManager = null;
+        private TelephonyManagerProxy mTelephonyManagerProxy = null;
 
         PreciseDcStateListener() {
         }
 
-        public void register(TelephonyManager tm) {
-            mTelephonyManager = tm;
+        public void register(TelephonyManagerProxy tmp) {
+            mTelephonyManagerProxy = tmp;
 
-            if (mTelephonyManager != null) {
-                mTelephonyManager.registerTelephonyCallback(
+            if (mTelephonyManagerProxy != null) {
+                mTelephonyManagerProxy.registerTelephonyCallback(
                         AppContext.getInstance().getMainExecutor(), this);
             }
         }
 
         public void unregister() {
-            if (mTelephonyManager != null) {
-                mTelephonyManager.unregisterTelephonyCallback(this);
-                mTelephonyManager = null;
+            if (mTelephonyManagerProxy != null) {
+                mTelephonyManagerProxy.unregisterTelephonyCallback(this);
+                mTelephonyManagerProxy = null;
             }
         }
 
@@ -731,10 +742,6 @@ public class DcApn implements IDcApn {
         public void onPreciseDataConnectionStateChanged(
                 PreciseDataConnectionState dataConnectionState) {
             ImsLog.d(mSlotId, "onPreciseDataConnectionStateChanged :: " + dataConnectionState);
-
-            if (dataConnectionState.getState() == TelephonyManager.DATA_SUSPENDED) {
-                return;
-            }
 
             ApnSetting apnSetting = dataConnectionState.getApnSetting();
             if (apnSetting == null) {

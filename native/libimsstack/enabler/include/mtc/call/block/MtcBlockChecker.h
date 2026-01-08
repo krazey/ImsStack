@@ -19,11 +19,8 @@
 
 #include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/block/IMtcBlockRule.h"
-
-class IMtcCallContext;
 
 /**
  * This class checks if a call operation is blocked or not for the given ruleset.
@@ -41,12 +38,10 @@ public:
     MtcBlockChecker(
             IN const ImsList<IMtcBlockRule*>& lstRules, IN IMtcBlockCheckListener* pListener);
 
-    ~MtcBlockChecker();
+    ~MtcBlockChecker() override;
 
     MtcBlockChecker(IN const MtcBlockChecker&) = delete;
     MtcBlockChecker& operator=(IN const MtcBlockChecker&) = delete;
-
-    static ImsList<IMtcBlockRule*> GetCallUpdateRules(IN IMtcCallContext& objContext);
 
     Result Check() override;
 

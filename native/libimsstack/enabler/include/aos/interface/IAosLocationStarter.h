@@ -28,7 +28,7 @@ public:
     virtual IMS_SINT32 GetSlotId() const = 0;
     virtual void SetSlotId(IN IMS_SINT32 nSlotId) = 0;
 
-    virtual IMS_BOOL Init(IN IAosAppContext* piContext,
+    virtual void Init(IN IAosAppContext* piContext,
             IN IMS_UINT32 nPolicy = POLICY_START_ON_WFC_AVAILABILITY) = 0;
     virtual IMS_BOOL SetPolicy(
             IN IMS_UINT32 nPolicy, IN IMS_SINT32 nOperation = 0 /* (0: add, 1: remove) */) = 0;
@@ -38,8 +38,8 @@ public:
             IN BLOCK_REASON nReason, IN IMS_SINT32 nType = TYPE_VOLTE /* (0: VoLTE, 1: WFC) */) = 0;
 
     virtual IMS_BOOL SetUpdateInterval(IN IMS_UINT32 nInterval) = 0;
-    virtual IMS_BOOL StartLocationInfoUpdate() = 0;
-    virtual IMS_BOOL StopLocationInfoUpdate() = 0;
+    virtual void StartLocationInfoUpdate() = 0;
+    virtual void StopLocationInfoUpdate() = 0;
 
     enum
     {

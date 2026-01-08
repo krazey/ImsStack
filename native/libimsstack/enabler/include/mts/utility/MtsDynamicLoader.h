@@ -17,27 +17,41 @@
 #ifndef MTS_DYNAMIC_LOADER_
 #define MTS_DYNAMIC_LOADER_
 
+#include "utility/IMtsDynamicLoader.h"
+#include "utility/MtsAosUtils.h"
+#include "utility/MtsGeolocationUtils.h"
 #include "utility/MtsSipFormUtils.h"
 #include "utility/MtsSmUtils.h"
 
-class MtsDynamicLoader final
+class IMtsContext;
+
+class MtsDynamicLoader final : public IMtsDynamicLoader
 {
 public:
-    explicit MtsDynamicLoader(IN IMS_SINT32 nSlotId);
-    ~MtsDynamicLoader();
+    explicit MtsDynamicLoader(IN IMtsContext& objContext);
+    virtual ~MtsDynamicLoader() override;
+    MtsDynamicLoader(IN const MtsDynamicLoader&) = delete;
+    MtsDynamicLoader& operator=(IN const MtsDynamicLoader&) = delete;
 
-    void Initialize();
-
-    inline MtsSipFormUtils* GetMtsSipFormUtils() { return m_pMtsSipFormUtils; }
-    inline MtsSmUtils* GetMtsSmUtils() { return m_pMtsSmUtils; }
+    // IMtsDynamicLoader
+    inline MtsSipFormUtils* GetMtsSipFormUtils() const override { return m_pMtsSipFormUtils; };
+    inline MtsSmUtils* GetMtsSmUtils() const override { return m_pMtsSmUtils; };
+    inline MtsGeolocationUtils* GetMtsGeolocationUtils() const override
+    {
+        return m_pMtsGeolocationUtils;
+    };
+    inline MtsAosUtils* GetMtsAosUtils() const override { return m_pMtsAosUtils; };
 
 private:
+    void Initialize();
     void DestroyAll();
 
 private:
-    IMS_SINT32 m_nSlotId;
+    IMtsContext& m_objContext;
     MtsSipFormUtils* m_pMtsSipFormUtils;
     MtsSmUtils* m_pMtsSmUtils;
+    MtsGeolocationUtils* m_pMtsGeolocationUtils;
+    MtsAosUtils* m_pMtsAosUtils;
 };
 
 #endif

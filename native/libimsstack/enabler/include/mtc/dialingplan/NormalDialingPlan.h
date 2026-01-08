@@ -17,9 +17,10 @@
 #ifndef NORMAL_DIALING_PLAN_H_
 #define NORMAL_DIALING_PLAN_H_
 
-#include "AString.h"
-#include "ImsIdentity.h"
+#include "ImsTypeDef.h"
 
+class AString;
+class AccessNetworkInfo;
 class IMtcContext;
 class ImsIdentityProxy;
 
@@ -50,10 +51,11 @@ public:
         SIP
     };
 
-    // TODO: removing bAquot is for VZW GetEntryUri. should not be required.
     static AString& GetTranslatedUri(IN IMtcContext& objContext, IN_OUT AString& strNumber,
             Scheme eScheme, IN const ImsIdentityProxy& objIdentityProxy);
-    static AString& GetTranslatedUriForDialString(IN IMtcContext& objContext,
+    static AString& GetTranslatedUriForEmergencyTestNumber(IN IMtcContext& objContext,
+            IN_OUT AString& strNumber, IN const ImsIdentityProxy& objIdentityProxy);
+    static AString& GetTranslatedUriForDialString(IN const IMtcContext& objContext,
             IN_OUT AString& strNumber, IN const ImsIdentityProxy& objIdentityProxy);
 
 private:
@@ -64,12 +66,10 @@ private:
             IN const ImsIdentityProxy& objIdentityProxy);
     static void FormTelUri(IN IMtcContext& objContext, IN_OUT AString& strNumber,
             IN const ImsIdentityProxy& objIdentityProxy);
-    static void FormTelUriAsGlobal(IN IMtcContext& objContext, IN_OUT AString& strNumber);
-    static void FormTelUriAsLocal(IN IMtcContext& objContext, IN_OUT AString& strNumber,
-            IN const ImsIdentityProxy& objIdentityProxy);
 
     static IMS_BOOL IsVisualSeparator(IN IMS_CHAR ch);
     static IMS_BOOL IsNameAddress(IN const AString& strNumber);
+    static IMS_BOOL IsLocalNumberFormat(IN const AString& strNumber);
     static IMS_BOOL IsAddressSpec(IN const AString& strNumber);
     static void AddAquotIfRequired(IN_OUT AString& strNumber);
 
@@ -80,7 +80,6 @@ private:
             IN IMtcContext& objContext, OUT AccessNetworkInfo& objAni);
 
     static Scheme GetScheme(IN IMtcContext& objContext);
-    static NumberFormat GetNumberFormat(IN IMtcContext& objContext);
     static LocalNumberPolicy GetLocalNumberPolicy(IN IMtcContext& objContext);
     static IMS_UINT32 ConvertDialingPolicy(IN LocalNumberPolicy ePolicy);
 };

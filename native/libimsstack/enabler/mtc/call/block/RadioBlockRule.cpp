@@ -34,28 +34,38 @@ RadioBlockRule::RadioBlockRule(IN IMtcCallContext& objContext, IN CallType eCall
 
 PUBLIC VIRTUAL RadioBlockRule::~RadioBlockRule()
 {
-    m_objContext.GetRadioChecker().SetTrafficCheckerListener(IMS_NULL);
+    m_objContext.GetRadioChecker().RemoveTrafficCheckerListener(*this);
 }
 
 PUBLIC VIRTUAL RadioBlockRule::Result RadioBlockRule::Check(
         IN IMtcBlockRuleCheckListener& objListener)
 {
     m_piMtcBlockRuleCheckListener = &objListener;
-    m_objContext.GetRadioChecker().SetTrafficCheckerListener(this);
+    m_objContext.GetRadioChecker().AddTrafficCheckerListener(*this);
 
-    CheckResult eCheckResult = m_objContext.GetRadioChecker().Check(m_eCallType,
-            m_objContext.GetCallInfo().bEmergency, m_objContext.GetCallInfo().ePeerType,
-            m_objContext.GetService().IsWlanIpCanType(), m_objContext.GetCallKey());
+    IMtcRadioChecker::CheckResult eCheckResult = m_objContext.GetRadioChecker().Check(m_eCallType,
+            m_objContext.GetCallInfo().IsEmergency(), m_objContext.GetCallInfo().ePeerType,
+            m_objContext.GetService().GetRatType(), m_objContext.GetCallInfo().bUssi,
+            m_objContext.GetCallKey());
 
-    switch (eCheckResult)
+    switch (eCheckResult.eStatus)
     {
-        case CheckResult::UNBLOCKED:
+        case IMtcRadioChecker::CheckResult::Status::UNBLOCKED:
             return Result(IMtcBlockRule::Result::Status::UNBLOCKED);
-        case CheckResult::PENDING:
+        case IMtcRadioChecker::CheckResult::Status::PENDING:
             return Result(IMtcBlockRule::Result::Status::PENDING);
-        default:  //  CheckResult::BLOCKED:
-            return Result(IMtcBlockRule::Result::Status::BLOCKED,
-                    CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE));
+        default:  // Status::BLOCKED
+            if (eCheckResult.eReason != IMtcRadioChecker::RADIO_REASON_NONE)
+            {
+                return Result(IMtcBlockRule::Result::Status::BLOCKED,
+                        ConvertConnectionFailureToCallReasonInfo(
+                                eCheckResult.eReason, eCheckResult.nWaitTimeMillis));
+            }
+            else
+            {
+                return Result(IMtcBlockRule::Result::Status::BLOCKED,
+                        CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE));
+            }
     }
 }
 

@@ -63,7 +63,6 @@ protected:
 
 protected:
     TestConfigService* m_pConfigService;
-    MockICarrierConfig m_objMockICarrierConfig;
     AStringArray m_objAllowMethods;
 };
 
@@ -81,6 +80,96 @@ SipConfigVTest::SipConfigVTest() :
     m_objAllowMethods.AddElement("INFO");
     m_objAllowMethods.AddElement("MESSAGE");
     m_objAllowMethods.AddElement("OPTIONS");
+}
+
+TEST_F(SipConfigVTest, Init)
+{
+    const AString strUaString("IMS-client");
+    const IMS_SINT32 nMinSe = 90;
+    const IMS_SINT32 nSessionExpires = 900;
+    MockICarrierConfig& objCarrierConfig = m_pConfigService->GetMockCarrierConfig();
+
+    ON_CALL(objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_REQUEST_URI_TYPE_INT, _))
+            .WillByDefault(ReturnRoundRobin({CarrierConfig::Ims::REQUEST_URI_FORMAT_SIP,
+                    CarrierConfig::Ims::REQUEST_URI_FORMAT_TEL}));
+    ON_CALL(objCarrierConfig, GetString(CarrierConfig::Ims::KEY_IMS_USER_AGENT_STRING, _))
+            .WillByDefault(Return(strUaString));
+    ON_CALL(objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_T1_MILLIS_INT, _))
+            .WillByDefault(Return(SipConfigV::DEFAULT_TIMER_T1));
+    ON_CALL(objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_T2_MILLIS_INT, _))
+            .WillByDefault(Return(SipConfigV::DEFAULT_TIMER_T2));
+    ON_CALL(objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_T4_MILLIS_INT, _))
+            .WillByDefault(Return(SipConfigV::DEFAULT_TIMER_T4));
+    ON_CALL(objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_B_MILLIS_INT, _))
+            .WillByDefault(Return(SipConfigV::DEFAULT_TIMER_T1 * 64));
+    ON_CALL(objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_C_MILLIS_INT, _))
+            .WillByDefault(Return(SipConfigV::DEFAULT_TIMER_C));
+    ON_CALL(objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_D_MILLIS_INT, _))
+            .WillByDefault(Return(SipConfigV::DEFAULT_TIMER_D));
+    ON_CALL(objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_F_MILLIS_INT, _))
+            .WillByDefault(Return(SipConfigV::DEFAULT_TIMER_T1 * 64));
+    ON_CALL(objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_H_MILLIS_INT, _))
+            .WillByDefault(Return(SipConfigV::DEFAULT_TIMER_T1 * 64));
+    ON_CALL(objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_SIP_TIMER_J_MILLIS_INT, _))
+            .WillByDefault(Return(SipConfigV::DEFAULT_TIMER_T1 * 64));
+    ON_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::ImsVoice::KEY_SESSION_TIMER_SUPPORTED_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_LOCAL_SESSION_TIMER_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objCarrierConfig, GetInt(CarrierConfig::ImsVoice::KEY_SESSION_REFRESHER_TYPE_INT, _))
+            .WillByDefault(ReturnRoundRobin({CarrierConfig::ImsVoice::SESSION_REFRESHER_TYPE_UAC,
+                    CarrierConfig::ImsVoice::SESSION_REFRESHER_TYPE_UAS}));
+    ON_CALL(objCarrierConfig, GetInt(CarrierConfig::ImsVoice::KEY_SESSION_REFRESH_METHOD_INT, _))
+            .WillByDefault(ReturnRoundRobin({CarrierConfig::ImsVoice::SESSION_REFRESH_METHOD_INVITE,
+                    CarrierConfig::ImsVoice::SESSION_REFRESH_METHOD_UPDATE_PREFERRED}));
+    ON_CALL(objCarrierConfig,
+            GetInt(CarrierConfig::ImsVoice::KEY_MINIMUM_SESSION_EXPIRES_TIMER_SEC_INT, _))
+            .WillByDefault(Return(nMinSe));
+    ON_CALL(objCarrierConfig, GetInt(CarrierConfig::ImsVoice::KEY_SESSION_EXPIRES_TIMER_SEC_INT, _))
+            .WillByDefault(Return(nSessionExpires));
+    ON_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::Ims::
+                               KEY_SESSION_TIMER_UPDATE_REQUIRED_IN_SESSION_UPDATE_BY_REINVITE_BOOL,
+                    _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::Ims::KEY_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
+
+    SipConfigV objSipConfigV(IMS_SLOT_0);
+
+    objSipConfigV.Init();
+
+    const AStringArray& objAllowMethods = objSipConfigV.GetAllowMethods();
+    EXPECT_EQ(m_objAllowMethods.GetElements(), objAllowMethods.GetElements());
+    EXPECT_EQ(objSipConfigV.GetTargetScheme(), SipConfigV::TARGET_SCHEME_SIP);
+    EXPECT_EQ(objSipConfigV.GetServiceVersion(), strUaString);
+    EXPECT_EQ(objSipConfigV.GetTimerValueT1(), SipConfigV::DEFAULT_TIMER_T1);
+    EXPECT_EQ(objSipConfigV.GetTimerValueT2(), SipConfigV::DEFAULT_TIMER_T2);
+    EXPECT_EQ(objSipConfigV.GetTimerValueT4(), SipConfigV::DEFAULT_TIMER_T4);
+    EXPECT_EQ(objSipConfigV.GetTimerValueB(), SipConfigV::DEFAULT_TIMER_T1 * 64);
+    EXPECT_EQ(objSipConfigV.GetTimerValueC(), SipConfigV::DEFAULT_TIMER_C);
+    EXPECT_EQ(objSipConfigV.GetTimerValueD(), SipConfigV::DEFAULT_TIMER_D);
+    EXPECT_EQ(objSipConfigV.GetTimerValueF(), SipConfigV::DEFAULT_TIMER_T1 * 64);
+    EXPECT_EQ(objSipConfigV.GetTimerValueH(), SipConfigV::DEFAULT_TIMER_T1 * 64);
+    EXPECT_EQ(objSipConfigV.GetTimerValueJ(), SipConfigV::DEFAULT_TIMER_T1 * 64);
+    EXPECT_TRUE(objSipConfigV.IsSessionTimerSupported());
+    EXPECT_TRUE((objSipConfigV.GetSessionHeaders() &
+                        SipConfigV::SESSION_HEADER_LOCAL_TIMER_REQUIRED) != 0);
+    EXPECT_EQ(objSipConfigV.GetSessionRefresher(), SipConfigV::SESSION_REFRESHER_LOCAL);
+    EXPECT_EQ(objSipConfigV.GetSessionMethod(), SipConfigV::SESSION_REFRESH_INVITE);
+    EXPECT_EQ(objSipConfigV.GetSessionMinSe(), nMinSe);
+    EXPECT_EQ(objSipConfigV.GetSessionExpires(), nSessionExpires);
+    EXPECT_FALSE(objSipConfigV.IsSessionNoRefreshByReInvite());
+    EXPECT_TRUE(objSipConfigV.IsSessionSdpNonRprAllowed());
+
+    objSipConfigV.Init();
+
+    EXPECT_EQ(objSipConfigV.GetTargetScheme(), SipConfigV::TARGET_SCHEME_TEL);
+    EXPECT_EQ(objSipConfigV.GetSessionRefresher(), SipConfigV::SESSION_REFRESHER_REMOTE);
+    EXPECT_EQ(objSipConfigV.GetSessionMethod(), SipConfigV::SESSION_REFRESH_UPDATE_PREFERRED);
 }
 
 TEST_F(SipConfigVTest, Refresh)
@@ -101,14 +190,17 @@ TEST_F(SipConfigVTest, Refresh)
 TEST_F(SipConfigVTest, GetSessionHeaders)
 {
     ON_CALL(m_pConfigService->GetMockCarrierConfig(),
-            GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_LOCAL_SESSION_TIMER_BOOL, _))
+            GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_LOCAL_SESSION_TIMER_BOOL, _))
+            .WillByDefault(ReturnRoundRobin({IMS_FALSE, IMS_TRUE}));
+    ON_CALL(m_pConfigService->GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::Ims::KEY_ALLOW_SESSION_TIMER_TURN_OFF_BOOL, _))
             .WillByDefault(ReturnRoundRobin({IMS_FALSE, IMS_TRUE}));
 
     SipConfigV objSipConfigV(IMS_SLOT_0);
     objSipConfigV.Init();
 
-    IMS_SINT32 nDefaultSessionHeaders = SipConfigV::SESSION_HEADER_SESSION_EXPIRES |
-            SipConfigV::SESSION_HEADER_MIN_SE | SipConfigV::SESSION_HEADER_CHECK_SESSION_EXPIRES;
+    IMS_SINT32 nDefaultSessionHeaders =
+            SipConfigV::SESSION_HEADER_SESSION_EXPIRES | SipConfigV::SESSION_HEADER_MIN_SE;
     EXPECT_EQ(objSipConfigV.GetSessionHeaders(), nDefaultSessionHeaders);
 
     // Refresh
@@ -116,6 +208,7 @@ TEST_F(SipConfigVTest, GetSessionHeaders)
     objListener.CarrierConfig_NotifyConfigChanged(IMS_SLOT_0);
 
     nDefaultSessionHeaders |= SipConfigV::SESSION_HEADER_LOCAL_TIMER_REQUIRED;
+    nDefaultSessionHeaders |= SipConfigV::SESSION_HEADER_SESSION_TIMER_TURN_OFF_ALLOWED;
     EXPECT_EQ(objSipConfigV.GetSessionHeaders(), nDefaultSessionHeaders);
 }
 
@@ -133,14 +226,12 @@ TEST_F(SipConfigVTest, Update)
 
     strIntValue.SetNumber(nIntValue);
 
-    AString strValue("ServiceVersion");
+    MockICarrierConfig& objCarrierConfig = m_pConfigService->GetMockCarrierConfig();
+    AString strUaString("IMS-client");
 
-    m_pConfigService->SetCarrierConfig(&m_objMockICarrierConfig);
-
-    EXPECT_CALL(
-            m_objMockICarrierConfig, GetString(CarrierConfig::Ims::KEY_IMS_USER_AGENT_STRING, _))
+    EXPECT_CALL(objCarrierConfig, GetString(CarrierConfig::Ims::KEY_IMS_USER_AGENT_STRING, _))
             .Times(2)
-            .WillOnce(Return(strValue));
+            .WillOnce(Return(strUaString));
 
     EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_TIMER_T1, strIntValue));
     EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_TIMER_T2, strIntValue));
@@ -164,7 +255,7 @@ TEST_F(SipConfigVTest, Update)
     EXPECT_EQ(objSipConfigV.GetTargetNumberFormat(), ISipConfigV::TARGET_NUMBER_FORMAT_LOCAL);
     EXPECT_EQ(objSipConfigV.GetTargetScheme(), ISipConfigV::TARGET_SCHEME_TEL);
     EXPECT_EQ(objSipConfigV.GetPreferredId(), SipConfigV::PREFERRED_ID_DEFAULT);
-    EXPECT_EQ(objSipConfigV.GetServiceVersion(), strValue);
+    EXPECT_EQ(objSipConfigV.GetServiceVersion(), strUaString);
     EXPECT_EQ(objSipConfigV.GetPredefinedPaniForEutran(), AString::ConstNull());
     EXPECT_EQ(objSipConfigV.GetPredefinedPaniForUtran(), AString::ConstNull());
 
@@ -187,13 +278,13 @@ TEST_F(SipConfigVTest, Update)
     EXPECT_EQ(objSipConfigV.GetTimerValueJ(), nIntValue);
     EXPECT_EQ(objSipConfigV.GetTimerValueK(), nIntValue);
 
-    EXPECT_CALL(m_objMockICarrierConfig, GetBoolean(_, _))
+    EXPECT_CALL(objCarrierConfig, GetBoolean(_, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
     nIntValue = 1000;
 
-    EXPECT_CALL(m_objMockICarrierConfig, GetInt(_, _))
+    EXPECT_CALL(objCarrierConfig, GetInt(_, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(nIntValue));
 

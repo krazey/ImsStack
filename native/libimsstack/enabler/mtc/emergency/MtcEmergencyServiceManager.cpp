@@ -16,9 +16,11 @@
 
 #include "IMtcContext.h"
 #include "ServiceTrace.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "emergency/EmergencyServiceController.h"
 #include "emergency/MtcEmergencyServiceManager.h"
-#include "emergency/NormalRoutingEmergencyServiceController.h"
+#include "emergency/NormalServiceController.h"
+#include "helper/MtcLocationRefresher.h"
 #include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -26,7 +28,8 @@ __IMS_TRACE_TAG_COM_MTC__;
 PUBLIC
 MtcEmergencyServiceManager::MtcEmergencyServiceManager(IN IMtcContext& objContext) :
         m_pController(nullptr),
-        m_objContext(objContext)
+        m_objContext(objContext),
+        m_bLocationUpdateRequested(IMS_FALSE)
 {
     IMS_TRACE_I("+MtcEmergencyServiceManager", 0, 0, 0);
 }
@@ -36,15 +39,15 @@ PUBLIC VIRTUAL MtcEmergencyServiceManager::~MtcEmergencyServiceManager()
     IMS_TRACE_I("~MtcEmergencyServiceManager", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL void MtcEmergencyServiceManager::StartOpen(IN EmergencyCallRoutingPdn ePdn)
+PUBLIC VIRTUAL void MtcEmergencyServiceManager::StartOpen(IN ServiceType eServiceType)
 {
-    IMS_TRACE_D("StartOpen PDN=[%d]", ePdn, 0, 0);
+    IMS_TRACE_D("StartOpen Service=[%d]", eServiceType, 0, 0);
 
-    EmergencyCallRoutingPdn eRefinedPdn =
-            (ePdn == EmergencyCallRoutingPdn::UNKNOWN ? EmergencyCallRoutingPdn::EMERGENCY : ePdn);
-    if (!m_pController || m_pController->GetRoutingPdnType() != eRefinedPdn)
+    RequestLocationUpdateIfRequired();
+
+    if (!m_pController || m_pController->GetServiceType() != eServiceType)
     {
-        m_pController.reset(CreateController(eRefinedPdn));
+        m_pController.reset(CreateController(eServiceType));
     }
 
     if (m_pController)
@@ -62,14 +65,31 @@ PUBLIC VIRTUAL void MtcEmergencyServiceManager::StopOpen(IN IMS_BOOL bClose)
         m_pController->Close();
     }
     m_pController.reset();
+    m_bLocationUpdateRequested = IMS_FALSE;
 }
 
 PRIVATE IEmergencyServiceController* MtcEmergencyServiceManager::CreateController(
-        IN EmergencyCallRoutingPdn ePdn)
+        IN ServiceType eServiceType)
 {
-    if (ePdn == EmergencyCallRoutingPdn::NORMAL)
+    if (eServiceType == ServiceType::NORMAL)
     {
-        return new NormalRoutingEmergencyServiceController(*this, m_objContext);
+        return new NormalServiceController(*this, m_objContext);
     }
     return new EmergencyServiceController(*this, m_objContext);
+}
+
+PRIVATE void MtcEmergencyServiceManager::RequestLocationUpdateIfRequired()
+{
+    if (m_bLocationUpdateRequested)
+    {
+        return;
+    }
+
+    IMS_SINT32 nWaitTime = m_objContext.GetConfigurationProxy().GetInt(
+            ConfigEmergency::KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT);
+    if (nWaitTime > 0)
+    {
+        m_bLocationUpdateRequested = IMS_TRUE;
+        m_objContext.GetLocationRefresher().RequestUpdate(nWaitTime);
+    }
 }

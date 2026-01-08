@@ -24,6 +24,8 @@ class ISipConfigV;
 class ISipMessage;
 class IRegistration;
 
+enum class AosNetworkType;
+
 /**
  * @brief This class provides useful services to be used commonly to Aos classes
  */
@@ -42,7 +44,9 @@ public:
     IMS_SINT32 GetRetryAfterValue(IN const ISipMessage* piSipMsg);
     IMS_SINT32 GetMinExpiresValue(IN const ISipMessage* piSipMsg);
 
-    IMS_BOOL IsInitialRegistrationRequired(IN ISipMessage* piSipMsg);
+    IMS_BOOL IsInitialRegistrationRequired(IN const ISipMessage* piSipMsg);
+    IMS_BOOL IsAnonymousECallActionPresent(IN const ISipMessage* piSipMsg);
+
     // Check whether some extension is unsupported (included in "Unsupported" header)
     IMS_BOOL IsParameterIncluded(IN const ISipMessage* piSipMsg, IN IMS_SINT32 nHeaderType,
             IN const AString& strParameter);
@@ -76,6 +80,10 @@ public:
     IMS_BOOL IsElementExistInList(
             IN const ImsList<IMS_UINT32>& objElements, IN const ImsList<IMS_UINT32>& objTarget);
 
+    // Check whether a SIP error code is existed in the list.
+    IMS_BOOL IsErrorCodeExisted(
+            IN const ImsVector<IMS_SINT32>& objErrorCode, IN IMS_SINT32 nCode) const;
+
     // Misc
     IMS_UINT32 Pow(IN IMS_UINT32 nArg1, IN IMS_UINT32 nArg2);
     IMS_UINT32 CalculateUpperBoundTime(
@@ -97,8 +105,13 @@ public:
 
     IMS_BOOL IsDifferentCountry(IN AString strSimCountry, IN IMS_SINT32 nSlotId) const;
 
+    AosNetworkType GetAosNetworkType(IN IMS_UINT32 nNetworkType) const;
+
+    void GetUserInfo(IN const AString& strSipAddress, OUT AString& strUserInfo);
+
     // Test
     void SetISipConfigV(IN ISipConfigV* piSipConfigV);
+    void SetWifiTest(IN IMS_BOOL bEnabled);
 
 private:
     // ( 2^24 * BaseTime ) MUST be bigger than MaxTime
@@ -107,8 +120,5 @@ private:
     ISipConfigV* m_piSipConfigV;
 
     IMS_BOOL m_bIsWifiTest;
-
-private:
-    friend class AosUtilTest;
 };
 #endif  // AOS_UTIL_H_

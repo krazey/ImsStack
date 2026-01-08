@@ -21,13 +21,14 @@
 #include "IRegParameter.h"
 #include "IRegistrationEx.h"
 #include "ISipConnectionNotifier.h"
+#include "ImsCoreContext.h"
 #include "RegBinding.h"
 #include "RegInfo.h"
 #include "RegStateTracker.h"
 #include "Sip.h"
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
-#include "util/SipConnectionNotifierManager.h"
+#include "util/ISipConnectionNotifierManager.h"
 
 __IMS_TRACE_TAG_REG__;
 
@@ -542,6 +543,11 @@ PROTECTED VIRTUAL IMS_BOOL RegBinding::IsWithinTrustDomain() const
     return (m_piRegEx != IMS_NULL) ? m_piRegEx->IsWithinTrustDomain() : IMS_FALSE;
 }
 
+PROTECTED VIRTUAL IMS_BOOL RegBinding::IsEmergencyRegistration() const
+{
+    return (m_piRegEx != IMS_NULL) ? m_piRegEx->IsEmergencyRegistration() : IMS_FALSE;
+}
+
 PROTECTED VIRTUAL void RegBinding::NotifyCallerCapabilityChanged()
 {
     if (m_piRegEx == IMS_NULL)
@@ -560,7 +566,8 @@ PROTECTED VIRTUAL void RegBinding::SetListener(IN IRegBindingListener* piListene
 PRIVATE
 void RegBinding::CreateSipConnectionNotifier()
 {
-    SipConnectionNotifierManager* pScnMngr = SipConnectionNotifierManager::GetInstance();
+    ISipConnectionNotifierManager* piScnManager =
+            ImsCoreContext::GetInstance()->GetSipConnectionNotifierManager();
 
     if (m_piRegEx == IMS_NULL)
     {
@@ -587,7 +594,7 @@ void RegBinding::CreateSipConnectionNotifier()
     }
 
     // RFC5626_FLOW_CONTROL : GetPortFlowControl()
-    m_piScn = pScnMngr->CreateConnectionNotifier(m_piContact->GetContactAddress().GetScheme(),
+    m_piScn = piScnManager->CreateConnectionNotifier(m_piContact->GetContactAddress().GetScheme(),
             m_piContact->GetIpAddress(), GetPortUs(), GetPortUc(), GetPortFlowControl(), strParams,
             m_piRegEx->GetStateTracker()->GetAuthorizedAor());
 
@@ -608,7 +615,9 @@ void RegBinding::CreateSipConnectionNotifier()
     // MULTI_REG_SIP_PROFILE
     if (m_piScn != IMS_NULL)
     {
-        m_piScn->SetSipProfile(GetSipProfile());
+        RcPtr<SipProfile> pSipProfile =
+                SipProfile::Create(GetSipProfile(), IsEmergencyRegistration());
+        m_piScn->SetSipProfile(pSipProfile.Get());
     }
     else
     {
@@ -624,7 +633,7 @@ void RegBinding::CreateSipConnectionNotifier()
             m_piRegEx->RemoveReferenceForScnErrorListener();
         }
 
-        SipConnectionNotifierManager::GetInstance()->ReleaseConnectionNotifier(piTempScn);
+        piScnManager->ReleaseConnectionNotifier(piTempScn);
     }
 }
 
@@ -641,7 +650,8 @@ void RegBinding::DestroySipConnectionNotifier()
         m_piScn->RemoveErrorListener(m_piRegEx);
     }
 
-    SipConnectionNotifierManager::GetInstance()->ReleaseConnectionNotifier(m_piScn);
+    ImsCoreContext::GetInstance()->GetSipConnectionNotifierManager()->ReleaseConnectionNotifier(
+            m_piScn);
     m_piScn = IMS_NULL;
 }
 
@@ -671,7 +681,7 @@ void RegBinding::RestoreTransportResourceForClientInitiatedConnection()
         return;
     }
 
-    IRegParameter* piRegParam = m_piRegEx->GetParameter();
+    const IRegParameter* piRegParam = m_piRegEx->GetParameter();
 
     if (piRegParam == IMS_NULL)
     {

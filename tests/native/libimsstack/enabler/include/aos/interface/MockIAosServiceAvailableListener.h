@@ -23,7 +23,7 @@
 
 class MockIAosServiceAvailableListener : public IAosServiceAvailableListener {
 public:
-    MOCK_METHOD(void, ServiceAvailable_Changed, (), (override));
+    MOCK_METHOD(void, ServiceAvailable_Changed, (IN IMS_BOOL bNotify), (override));
     MOCK_METHOD(void, ServiceAvailable_RequestCommand,
             (IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason), (override));
 };

@@ -16,10 +16,12 @@
 #ifndef IMS_PROCESS_H_
 #define IMS_PROCESS_H_
 
-#include "IImsActivityController.h"
-#include "ImsAppThread.h"
+#include "AString.h"
 
+class BaseThread;
+class IImsActivityController;
 class IMutex;
+class ImsAppThread;
 class ImsThreadMap;
 
 typedef BaseThread* (*Thread_Entry)();

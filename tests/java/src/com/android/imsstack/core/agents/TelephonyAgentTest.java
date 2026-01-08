@@ -16,23 +16,26 @@
 
 package com.android.imsstack.core.agents;
 
+import static com.android.imsstack.base.TestAppContext.SLOT0;
+import static com.android.imsstack.base.TestAppContext.SLOT1;
+
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
-import android.test.suitebuilder.annotation.SmallTest;
 
-import com.android.imsstack.ContextFixture;
+import androidx.test.filters.SmallTest;
+
+import com.android.imsstack.base.DeviceConfig;
+import com.android.imsstack.base.SystemServiceProxy.SubscriptionManagerProxy;
+import com.android.imsstack.base.TelephonyManagerProxy;
+import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
-import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
 import org.junit.Before;
@@ -44,124 +47,102 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class TelephonyAgentTest {
-    private static final int SLOT0 = 0;
-    private static final int[] SUB_ID = { 1 };
-
     @Mock private PhoneStateInterface mPhoneStateInterface;
-    @Mock private IDcNetWatcher mDcNetWatcher;
 
-    private ContextFixture mContextFixture;
-    private SubscriptionManager mSubscriptionManager;
-    private TelephonyManager mTelephonyManager;
+    private TestAppContext mTestAppContext;
+    private TelephonyManagerProxy mTelephonyManagerProxy;
     private TelephonyAgent mTelephonyAgent;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mContextFixture = new ContextFixture();
-        Context context = mContextFixture.getTestDouble();
-        mSubscriptionManager = context.getSystemService(SubscriptionManager.class);
-        when(mSubscriptionManager.getSubscriptionIds(eq(SLOT0))).thenReturn(SUB_ID);
-        mTelephonyManager = context.getSystemService(TelephonyManager.class);
-        when(mTelephonyManager.createForSubscriptionId(eq(SUB_ID[0])))
-                .thenReturn(mTelephonyManager);
-        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, mPhoneStateInterface, SLOT0);
-        DcFactory.setDcAgent(IDcNetWatcher.class, mDcNetWatcher, SLOT0);
+        mTestAppContext = new TestAppContext();
+        mTestAppContext.setUp();
 
-        AppContext.init(context);
+        mTelephonyManagerProxy = mTestAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
+        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, mPhoneStateInterface, SLOT0);
+
         mTelephonyAgent = new TelephonyAgent(SLOT0);
-        mTelephonyAgent.init(context);
+        mTelephonyAgent.init(mTestAppContext.getContext());
     }
 
     @After
     public void tearDown() throws Exception {
-        mSubscriptionManager = null;
-        mTelephonyManager = null;
-        mContextFixture = null;
+        mTelephonyManagerProxy = null;
         mTelephonyAgent.cleanup();
         mTelephonyAgent = null;
         DcFactory.setDcAgent(IDcNetWatcher.class, null, SLOT0);
         AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, SLOT0);
-        AppContext.deinit();
+        DeviceConfig.setSimCount(1, 1);
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
     }
 
     @Test
     @SmallTest
     public void testGetCsCallState() {
+        mTelephonyAgent.getCsCallState();
+
+        verify(mPhoneStateInterface).getCsCallState();
+
+        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, SLOT0);
+
+        // Expect a default value.
         assertEquals(TelephonyManager.CALL_STATE_IDLE, mTelephonyAgent.getCsCallState());
     }
 
     @Test
     @SmallTest
     public void testGetCsCallStateInOtherSlot() {
-        assertEquals(TelephonyManager.CALL_STATE_IDLE, mTelephonyAgent.getCsCallStateInOtherSlot());
+        DeviceConfig.setSimCount(1, 1);
+
+        int callState = mTelephonyAgent.getCsCallStateInOtherSlot();
+        // Skipped for same SIM.
+        assertEquals(TelephonyManager.CALL_STATE_IDLE, callState);
+
+        DeviceConfig.setSimCount(2, 2);
+        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, mPhoneStateInterface, SLOT1);
+        when(mPhoneStateInterface.getCsCallState()).thenReturn(TelephonyManager.CALL_STATE_OFFHOOK);
+        callState = mTelephonyAgent.getCsCallStateInOtherSlot();
+
+        // Called once for SIM2.
+        verify(mPhoneStateInterface).getCsCallState();
+        assertEquals(TelephonyManager.CALL_STATE_OFFHOOK, callState);
+
+        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, SLOT1);
+
+        // Expect a default value.
+        callState = mTelephonyAgent.getCsCallStateInOtherSlot();
+        assertEquals(TelephonyManager.CALL_STATE_IDLE, callState);
     }
 
     @Test
     @SmallTest
     public void testGetNetworkType() {
         // LTE
-        when(mTelephonyManager.getDataNetworkType())
+        when(mTelephonyManagerProxy.getDataNetworkType(eq(SLOT0)))
                 .thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
-
         assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mTelephonyAgent.getNetworkType());
-        verify(mDcNetWatcher).setRatFromTelephonyManager(eq(TelephonyManager.NETWORK_TYPE_LTE));
 
-        // IWLAN & cellular network type: NR
-        when(mTelephonyManager.getDataNetworkType())
-                .thenReturn(TelephonyManager.NETWORK_TYPE_IWLAN);
-        when(mPhoneStateInterface.getCellularDataNetworkType())
+        // NR
+        when(mTelephonyManagerProxy.getDataNetworkType(eq(SLOT0)))
                 .thenReturn(TelephonyManager.NETWORK_TYPE_NR);
-        when(mDcNetWatcher.is5GRequired()).thenReturn(true);
-
         assertEquals(TelephonyManager.NETWORK_TYPE_NR, mTelephonyAgent.getNetworkType());
-        verify(mDcNetWatcher).setRatFromTelephonyManager(eq(TelephonyManager.NETWORK_TYPE_NR));
-
-        // IWLAN & PhoneStateInterface null
-        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, SLOT0);
-
-        assertEquals(TelephonyManager.NETWORK_TYPE_UNKNOWN, mTelephonyAgent.getNetworkType());
-        verify(mDcNetWatcher).setRatFromTelephonyManager(eq(TelephonyManager.NETWORK_TYPE_UNKNOWN));
-
-        // NR & 5G not support
-        when(mTelephonyManager.getDataNetworkType())
-                .thenReturn(TelephonyManager.NETWORK_TYPE_NR);
-        when(mDcNetWatcher.is5GRequired()).thenReturn(false);
-
-        assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mTelephonyAgent.getNetworkType());
-        verify(mDcNetWatcher, times(2))
-                .setRatFromTelephonyManager(eq(TelephonyManager.NETWORK_TYPE_LTE));
     }
 
     @Test
     @SmallTest
     public void testGetVoiceNetworkType() {
         // LTE
-        when(mTelephonyManager.getVoiceNetworkType())
+        when(mTelephonyManagerProxy.getVoiceNetworkType(eq(SLOT0)))
                 .thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
-
         assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mTelephonyAgent.getVoiceNetworkType());
-        verify(mDcNetWatcher)
-                .setVoiceRatFromTelephonyManager(eq(TelephonyManager.NETWORK_TYPE_LTE));
 
         // NR
-        when(mTelephonyManager.getVoiceNetworkType())
+        when(mTelephonyManagerProxy.getVoiceNetworkType(eq(SLOT0)))
                 .thenReturn(TelephonyManager.NETWORK_TYPE_NR);
-        when(mDcNetWatcher.is5GRequired()).thenReturn(true);
-
         assertEquals(TelephonyManager.NETWORK_TYPE_NR, mTelephonyAgent.getVoiceNetworkType());
-        verify(mDcNetWatcher)
-                .setVoiceRatFromTelephonyManager(eq(TelephonyManager.NETWORK_TYPE_NR));
-
-        // NR & 5G not support
-        when(mTelephonyManager.getVoiceNetworkType())
-                .thenReturn(TelephonyManager.NETWORK_TYPE_NR);
-        when(mDcNetWatcher.is5GRequired()).thenReturn(false);
-
-        assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mTelephonyAgent.getVoiceNetworkType());
-        verify(mDcNetWatcher, times(2))
-                .setVoiceRatFromTelephonyManager(eq(TelephonyManager.NETWORK_TYPE_LTE));
     }
 
     @Test
@@ -169,19 +150,16 @@ public class TelephonyAgentTest {
     public void testGetPhoneNumber() {
         mTelephonyAgent.getPhoneNumber();
 
-        verify(mSubscriptionManager).getPhoneNumber(
-                eq(SUB_ID[0]), eq(SubscriptionManager.PHONE_NUMBER_SOURCE_UICC));
-
-        mContextFixture.setSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE, null);
-        String phoneNumber = mTelephonyAgent.getPhoneNumber();
-
-        assertEquals("", phoneNumber);
+        SubscriptionManagerProxy smp =
+                mTestAppContext.getSystemServiceProxy(SubscriptionManagerProxy.class);
+        verify(smp).getPhoneNumber(
+                eq(TestAppContext.SUB_ID_1), eq(SubscriptionManager.PHONE_NUMBER_SOURCE_UICC));
     }
 
     @Test
     @SmallTest
     public void testGetSimOperator() {
-        when(mTelephonyManager.getSimOperator()).thenReturn("00101");
+        when(mTelephonyManagerProxy.getSimOperator()).thenReturn("00101");
         String operator = mTelephonyAgent.getSimOperator();
         String mcc = mTelephonyAgent.getSimMcc();
         String mnc = mTelephonyAgent.getSimMnc();
@@ -190,7 +168,7 @@ public class TelephonyAgentTest {
         assertEquals("001", mcc);
         assertEquals("01", mnc);
 
-        when(mTelephonyManager.getSimOperator()).thenReturn("001002");
+        when(mTelephonyManagerProxy.getSimOperator()).thenReturn("001002");
         operator = mTelephonyAgent.getSimOperator();
         mcc = mTelephonyAgent.getSimMcc();
         mnc = mTelephonyAgent.getSimMnc();
@@ -199,7 +177,7 @@ public class TelephonyAgentTest {
         assertEquals("001", mcc);
         assertEquals("002", mnc);
 
-        when(mTelephonyManager.getSimOperator()).thenReturn("0012");
+        when(mTelephonyManagerProxy.getSimOperator()).thenReturn("0012");
         operator = mTelephonyAgent.getSimOperator();
         mcc = mTelephonyAgent.getSimMcc();
         mnc = mTelephonyAgent.getSimMnc();
@@ -208,7 +186,7 @@ public class TelephonyAgentTest {
         assertNull(mcc);
         assertNull(mnc);
 
-        when(mTelephonyManager.getSimOperator()).thenReturn(null);
+        when(mTelephonyManagerProxy.getSimOperator()).thenReturn(null);
         operator = mTelephonyAgent.getSimOperator();
         mcc = mTelephonyAgent.getSimMcc();
         mnc = mTelephonyAgent.getSimMnc();
@@ -221,7 +199,7 @@ public class TelephonyAgentTest {
     @Test
     @SmallTest
     public void testGetNetworkOperator() {
-        when(mTelephonyManager.getNetworkOperator()).thenReturn("00101");
+        when(mTelephonyManagerProxy.getNetworkOperator()).thenReturn("00101");
         String operator = mTelephonyAgent.getNetworkOperator();
         String mcc = mTelephonyAgent.getNetworkMcc();
         String mnc = mTelephonyAgent.getNetworkMnc();
@@ -230,7 +208,7 @@ public class TelephonyAgentTest {
         assertEquals("001", mcc);
         assertEquals("01", mnc);
 
-        when(mTelephonyManager.getNetworkOperator()).thenReturn("001002");
+        when(mTelephonyManagerProxy.getNetworkOperator()).thenReturn("001002");
         operator = mTelephonyAgent.getNetworkOperator();
         mcc = mTelephonyAgent.getNetworkMcc();
         mnc = mTelephonyAgent.getNetworkMnc();
@@ -239,7 +217,7 @@ public class TelephonyAgentTest {
         assertEquals("001", mcc);
         assertEquals("002", mnc);
 
-        when(mTelephonyManager.getNetworkOperator()).thenReturn("0012");
+        when(mTelephonyManagerProxy.getNetworkOperator()).thenReturn("0012");
         operator = mTelephonyAgent.getNetworkOperator();
         mcc = mTelephonyAgent.getNetworkMcc();
         mnc = mTelephonyAgent.getNetworkMnc();
@@ -248,7 +226,7 @@ public class TelephonyAgentTest {
         assertNull(mcc);
         assertNull(mnc);
 
-        when(mTelephonyManager.getNetworkOperator()).thenReturn(null);
+        when(mTelephonyManagerProxy.getNetworkOperator()).thenReturn(null);
         operator = mTelephonyAgent.getNetworkOperator();
         mcc = mTelephonyAgent.getNetworkMcc();
         mnc = mTelephonyAgent.getNetworkMnc();
@@ -265,11 +243,11 @@ public class TelephonyAgentTest {
         final String formattedNumber = "+9-1-1";
         mTelephonyAgent.isEmergencyNumber(eNumber);
 
-        verify(mTelephonyManager).isEmergencyNumber(eq(eNumber));
+        verify(mTelephonyManagerProxy).isEmergencyNumber(eq(eNumber));
 
         mTelephonyAgent.isEmergencyNumber(formattedNumber);
 
-        verify(mTelephonyManager).isEmergencyNumber(eq(eNumber));
+        verify(mTelephonyManagerProxy).isEmergencyNumber(eq(eNumber));
     }
 
     @Test
@@ -285,46 +263,24 @@ public class TelephonyAgentTest {
         mTelephonyAgent.getSimOperatorName();
         mTelephonyAgent.getNetworkCountryIso();
 
-        verify(mTelephonyManager).getSimState(eq(SLOT0));
-        verify(mTelephonyManager).getImei(eq(SLOT0));
-        verify(mTelephonyManager).getDeviceSoftwareVersion(eq(SLOT0));
-        verify(mTelephonyManager).getSubscriberId();
-        verify(mTelephonyManager).getSimCountryIso();
-        verify(mTelephonyManager).getSimSerialNumber();
-        verify(mTelephonyManager).getGroupIdLevel1();
-        verify(mTelephonyManager).getSimOperatorName();
-        verify(mTelephonyManager).getNetworkCountryIso();
-    }
-
-    @Test
-    @SmallTest
-    public void testGetTelephonyStatesWhenTelephonyManagerNull() {
-        TelephonyAgent telephonyAgent = new TelephonyAgent(SLOT0);
-        mContextFixture.setSystemService(Context.TELEPHONY_SERVICE, null);
-
-        assertEquals(TelephonyManager.CALL_STATE_IDLE, telephonyAgent.getCsCallState());
-        assertEquals(TelephonyManager.CALL_STATE_IDLE, telephonyAgent.getCsCallStateInOtherSlot());
-        assertEquals(TelephonyManager.NETWORK_TYPE_UNKNOWN, telephonyAgent.getNetworkType());
-        assertEquals(TelephonyManager.NETWORK_TYPE_UNKNOWN, telephonyAgent.getVoiceNetworkType());
-        assertEquals(TelephonyManager.SIM_STATE_UNKNOWN, telephonyAgent.getSimState());
-        assertNull(telephonyAgent.getImei());
-        assertNull(telephonyAgent.getDeviceSoftwareVersion());
-        assertNull(telephonyAgent.getSubscriberId());
-        assertNull(telephonyAgent.getSimOperator());
-        assertEquals("", telephonyAgent.getSimCountryIso());
-        assertNull(telephonyAgent.getSimSerialNumber());
-        assertNull(telephonyAgent.getSimGid1());
-        assertNull(telephonyAgent.getSimOperatorName());
-        assertNull(telephonyAgent.getNetworkOperator());
-        assertEquals("", telephonyAgent.getNetworkCountryIso());
-        assertFalse(telephonyAgent.isEmergencyNumber("911"));
+        verify(mTelephonyManagerProxy).getSimState(eq(SLOT0));
+        verify(mTelephonyManagerProxy).getImei(eq(SLOT0));
+        verify(mTelephonyManagerProxy).getDeviceSoftwareVersion(eq(SLOT0));
+        verify(mTelephonyManagerProxy).getSubscriberId();
+        verify(mTelephonyManagerProxy).getSimCountryIso();
+        verify(mTelephonyManagerProxy).getSimSerialNumber();
+        verify(mTelephonyManagerProxy).getGroupIdLevel1();
+        verify(mTelephonyManagerProxy).getSimOperatorName();
+        verify(mTelephonyManagerProxy).getNetworkCountryIso();
     }
 
     @Test
     @SmallTest
     public void testGetTelephonyStatesWhenSubscriptionInvalid() {
-        int[] invalidSubId = { SubscriptionManager.INVALID_SUBSCRIPTION_ID };
-        when(mSubscriptionManager.getSubscriptionIds(eq(SLOT0))).thenReturn(invalidSubId);
+        SubscriptionManagerProxy smp =
+                mTestAppContext.getSystemServiceProxy(SubscriptionManagerProxy.class);
+        when(smp.getSubscriptionId(eq(SLOT0)))
+                .thenReturn(SubscriptionManager.INVALID_SUBSCRIPTION_ID);
 
         mTelephonyAgent.getSimState();
         mTelephonyAgent.getImei();
@@ -336,14 +292,14 @@ public class TelephonyAgentTest {
         mTelephonyAgent.getSimOperatorName();
         mTelephonyAgent.getNetworkCountryIso();
 
-        verify(mTelephonyManager).getSimState(eq(SLOT0));
-        verify(mTelephonyManager).getImei(eq(SLOT0));
-        verify(mTelephonyManager).getDeviceSoftwareVersion(eq(SLOT0));
-        verify(mTelephonyManager).getSubscriberId();
-        verify(mTelephonyManager).getSimCountryIso();
-        verify(mTelephonyManager).getSimSerialNumber();
-        verify(mTelephonyManager).getGroupIdLevel1();
-        verify(mTelephonyManager).getSimOperatorName();
-        verify(mTelephonyManager).getNetworkCountryIso();
+        verify(mTelephonyManagerProxy).getSimState(eq(SLOT0));
+        verify(mTelephonyManagerProxy).getImei(eq(SLOT0));
+        verify(mTelephonyManagerProxy).getDeviceSoftwareVersion(eq(SLOT0));
+        verify(mTelephonyManagerProxy).getSubscriberId();
+        verify(mTelephonyManagerProxy).getSimCountryIso();
+        verify(mTelephonyManagerProxy).getSimSerialNumber();
+        verify(mTelephonyManagerProxy).getGroupIdLevel1();
+        verify(mTelephonyManagerProxy).getSimOperatorName();
+        verify(mTelephonyManagerProxy).getNetworkCountryIso();
     }
 }

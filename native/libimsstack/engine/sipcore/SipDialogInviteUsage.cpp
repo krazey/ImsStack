@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
+#include "ServiceTrace.h"
 
+#include "SipDState.h"
 #include "SipDialogInviteUsage.h"
+#include "SipMessageInfo.h"
 #include "SipPrivate.h"
 #include "SipStack.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 // clang-format off
 PRIVATE GLOBAL const IMS_SINT32

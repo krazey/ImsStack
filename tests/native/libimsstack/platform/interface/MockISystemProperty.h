@@ -23,8 +23,8 @@
 class MockISystemProperty : public ISystemProperty
 {
 public:
-    inline MockISystemProperty() {}
-    inline virtual ~MockISystemProperty() {}
+    MockISystemProperty() = default;
+    ~MockISystemProperty() override = default;
 
     MOCK_METHOD(AString, Get, (IN const AString& strName), (override));
     MOCK_METHOD(IMS_BOOL, Set, (IN const AString& strName, IN const AString& strValue), (override));

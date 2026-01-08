@@ -98,7 +98,7 @@ void AsyncConfigHelper::Unregister(IN const IAsyncConfig* piConfig)
 {
     for (IMS_UINT32 i = 0; i < m_objAsyncConfigs.GetSize(); ++i)
     {
-        IAsyncConfig* piTmpConfig = m_objAsyncConfigs.GetAt(i);
+        const IAsyncConfig* piTmpConfig = m_objAsyncConfigs.GetAt(i);
 
         if (piTmpConfig == piConfig)
         {
@@ -150,7 +150,7 @@ IMS_BOOL AsyncConfigHelper::IsRegisteredConfig(IN const IAsyncConfig* piConfig)
 {
     for (IMS_UINT32 i = 0; i < m_objAsyncConfigs.GetSize(); ++i)
     {
-        IAsyncConfig* piTmpConfig = m_objAsyncConfigs.GetAt(i);
+        const IAsyncConfig* piTmpConfig = m_objAsyncConfigs.GetAt(i);
 
         if (piTmpConfig == piConfig)
         {

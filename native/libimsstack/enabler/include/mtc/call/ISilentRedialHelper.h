@@ -17,6 +17,7 @@
 #ifndef INTERFACE_SILENT_REDIAL_HELPER_H_
 #define INTERFACE_SILENT_REDIAL_HELPER_H_
 
+#include "CallReasonInfo.h"
 #include "ImsTypeDef.h"
 
 class ISilentRedialHelper
@@ -25,21 +26,27 @@ public:
     virtual ~ISilentRedialHelper() {}
 
     /**
-     * @brief Redials
+     * @brief Redials the previous call.
      *
-     * @param nIntervalInMillis
-     * @return
+     * @param nIntervalInMillis The interval in milliseconds to wait before redialing.
+     *                          If set to `INTERVAL_BY_TYPE`, the interval is determined by the
+     *                          redial type.
+     * @return The CallReasonInfo containing the result of the redial attempt.
+     *         If the `nCode` field of the returned object is `CallReasonInfo.CODE_NONE`, the redial
+     *         was successful.
+     *         Otherwise, the `nCode` field indicates the reason for failure.
      */
-    virtual IMS_RESULT Redial(IN IMS_SINT32 nIntervalInMillis = INTERVAL_BY_TYPE) = 0;
-
-    // unit test purpose only
+    virtual CallReasonInfo Redial(IN IMS_SINT32 nIntervalInMillis) = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the type of redial.
      *
-     * @return
+     * This method retrieves the type of redial used by the implementation.
+     * See {@link CallReasonInfo#CODE_INTERNAL_REDIAL_} enums.
+     *
+     * @return An integer value representing the redial type.
      */
-    virtual IMS_UINT32 GetType() = 0;
+    virtual IMS_UINT32 GetType() const = 0;
 
     static const IMS_SINT32 INTERVAL_BY_TYPE = -1;
 };

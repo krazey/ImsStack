@@ -18,13 +18,12 @@
 #define CONFERENCE_SUBSCRIPTION_H_
 
 #include "ISubscriptionListener.h"
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
-#include "conferencecall/IConferenceSubscriptionListener.h"
 
 class ConferenceFactory;
 class ConferenceParticipantList;
-class ISession;
-class ICoreService;
+class IConferenceSubscriptionListener;
 class ISubscription;
 class IMtcContext;
 enum class SubscriptionState;
@@ -35,7 +34,7 @@ public:
     explicit ConferenceSubscription(IN IMtcContext& objContext, IN CallKey nConfCallKey,
             IN ConferenceParticipantList& objList, IN IConferenceSubscriptionListener& objListener,
             IN ConferenceFactory& objFactory);
-    virtual ~ConferenceSubscription();
+    virtual ~ConferenceSubscription() override;
     ConferenceSubscription(IN const ConferenceSubscription&) = delete;
     ConferenceSubscription& operator=(IN const ConferenceSubscription&) = delete;
 
@@ -58,12 +57,12 @@ private:
     void ReSubscribe();
     void Initialize();
     void SetHeaders();
-    void UpdateConferenceInfo(IN IMessage* piNotify);
+    void UpdateConferenceInfo(IN const IMessage* piNotify);
     void HandleUpdateResult(IN IMS_UINT32 nResult);
     void Notify();
 
     IMS_BOOL OnReceiving403(IN ISubscription* piSubscription);
-    IMS_BOOL OnReceiving423(IN ISubscription* piSubscription);
+    IMS_BOOL OnReceiving423(IN const ISubscription* piSubscription);
 
     void ReleaseISubscription();
 

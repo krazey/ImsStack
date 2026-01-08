@@ -28,6 +28,7 @@ import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.mtc.SuppInfo;
+import com.android.imsstack.enabler.mtc.SuppServiceUtils.SuppService;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 
 import org.junit.After;
@@ -84,9 +85,9 @@ public class ImsSuppInfoUtilsTest {
 
     @Test
     public void test_addCallExtraForApp() {
-        mSuppInfo.addService_int(SuppInfo.TYPE_CDIV_CAUSE, 1);
+        mSuppInfo.addServiceInt(SuppInfo.SUPP_TYPE_CDIV_CAUSE, 1);
         when(mMockCarrierConfig.getBoolean(
-                CarrierConfig.Assets.KEY_SUPPINFO_CDIV_CAUSE_REQUIRED_BOOL)).thenReturn(true);
+                CarrierConfig.ImsVoice.KEY_SUPPINFO_CDIV_CAUSE_REQUIRED_BOOL)).thenReturn(true);
         ImsSuppInfoUtils.addCallExtraForApp(mMockContext, mSuppInfo, mCallProfile);
         assertEquals(1, mCallProfile.getCallExtraInt(ImsCallUtils.EXTRA_CDIV_CAUSE));
 
@@ -99,7 +100,7 @@ public class ImsSuppInfoUtilsTest {
     public void test_addSuppInfoForIms() {
         mCallProfile.setCallExtraBoolean(ImsSuppInfoUtils.EXTRA_GEOLOCATION, true);
         ImsSuppInfoUtils.addSuppInfoForIms(mMockContext, mCallProfile, mSuppInfo);
-        SuppInfo.SuppService ss = mSuppInfo.getService(SuppInfo.TYPE_GEOLOCATION);
+        SuppService ss = mSuppInfo.getService(SuppInfo.SUPP_TYPE_GEOLOCATION);
         assertNotNull(ss);
         assertEquals(true, ss.boolValue);
     }
@@ -121,8 +122,8 @@ public class ImsSuppInfoUtilsTest {
         final double longitude = 2.0;
         final String invalidNumber = "a";
 
-        mSuppInfo.addService_str(SuppInfo.TYPE_CALL_COMPOSER_LOCATION_LAT, invalidNumber);
-        mSuppInfo.addService_str(SuppInfo.TYPE_CALL_COMPOSER_LOCATION_LONG,
+        mSuppInfo.addServiceStr(SuppInfo.SUPP_TYPE_CALL_COMPOSER_LOCATION_LAT, invalidNumber);
+        mSuppInfo.addServiceStr(SuppInfo.SUPP_TYPE_CALL_COMPOSER_LOCATION_LONG,
                 String.valueOf(longitude));
         ImsSuppInfoUtils.addCallExtraForCallComposer(mSuppInfo, mCallProfile);
         assertEquals(null, mCallProfile.getCallExtraParcelable(ImsCallProfile.EXTRA_LOCATION));
@@ -133,9 +134,9 @@ public class ImsSuppInfoUtilsTest {
         final double latitude = 1.0;
         final String invalidNumber = "a";
 
-        mSuppInfo.addService_str(SuppInfo.TYPE_CALL_COMPOSER_LOCATION_LAT,
+        mSuppInfo.addServiceStr(SuppInfo.SUPP_TYPE_CALL_COMPOSER_LOCATION_LAT,
                 String.valueOf(latitude));
-        mSuppInfo.addService_str(SuppInfo.TYPE_CALL_COMPOSER_LOCATION_LONG, invalidNumber);
+        mSuppInfo.addServiceStr(SuppInfo.SUPP_TYPE_CALL_COMPOSER_LOCATION_LONG, invalidNumber);
         ImsSuppInfoUtils.addCallExtraForCallComposer(mSuppInfo, mCallProfile);
         assertEquals(null, mCallProfile.getCallExtraParcelable(ImsCallProfile.EXTRA_LOCATION));
     }
@@ -149,14 +150,14 @@ public class ImsSuppInfoUtilsTest {
         final double longitude = 2.0;
         final boolean business = true;
 
-        mSuppInfo.addService_int(SuppInfo.TYPE_CALL_COMPOSER_PRIORITY, priority);
-        mSuppInfo.addService_str(SuppInfo.TYPE_CALL_COMPOSER_SUBJECT, subject);
-        mSuppInfo.addService_str(SuppInfo.TYPE_CALL_COMPOSER_PICTURE_URL, picture);
-        mSuppInfo.addService_str(SuppInfo.TYPE_CALL_COMPOSER_LOCATION_LAT,
+        mSuppInfo.addServiceInt(SuppInfo.SUPP_TYPE_CALL_COMPOSER_PRIORITY, priority);
+        mSuppInfo.addServiceStr(SuppInfo.SUPP_TYPE_CALL_COMPOSER_SUBJECT, subject);
+        mSuppInfo.addServiceStr(SuppInfo.SUPP_TYPE_CALL_COMPOSER_PICTURE_URL, picture);
+        mSuppInfo.addServiceStr(SuppInfo.SUPP_TYPE_CALL_COMPOSER_LOCATION_LAT,
                 String.valueOf(latitude));
-        mSuppInfo.addService_str(SuppInfo.TYPE_CALL_COMPOSER_LOCATION_LONG,
+        mSuppInfo.addServiceStr(SuppInfo.SUPP_TYPE_CALL_COMPOSER_LOCATION_LONG,
                 String.valueOf(longitude));
-        mSuppInfo.addService_bool(SuppInfo.TYPE_CALL_COMPOSER_IS_BUSINESS, business);
+        mSuppInfo.addServiceBool(SuppInfo.SUPP_TYPE_CALL_COMPOSER_IS_BUSINESS, business);
 
         ImsSuppInfoUtils.addCallExtraForCallComposer(mSuppInfo, mCallProfile);
 
@@ -174,12 +175,12 @@ public class ImsSuppInfoUtilsTest {
     public void test_addSuppInfoForCallComposerWhenEmpty() {
         ImsSuppInfoUtils.addSuppInfoForCallComposer(mCallProfile, mSuppInfo);
 
-        assertNull(mSuppInfo.getService(SuppInfo.TYPE_CALL_COMPOSER_PRIORITY));
-        assertNull(mSuppInfo.getService(SuppInfo.TYPE_CALL_COMPOSER_SUBJECT));
-        assertNull(mSuppInfo.getService(SuppInfo.TYPE_CALL_COMPOSER_PICTURE_URL));
-        assertNull(mSuppInfo.getService(SuppInfo.TYPE_CALL_COMPOSER_LOCATION_LAT));
-        assertNull(mSuppInfo.getService(SuppInfo.TYPE_CALL_COMPOSER_LOCATION_LONG));
-        assertNull(mSuppInfo.getService(SuppInfo.TYPE_CALL_COMPOSER_IS_BUSINESS));
+        assertNull(mSuppInfo.getService(SuppInfo.SUPP_TYPE_CALL_COMPOSER_PRIORITY));
+        assertNull(mSuppInfo.getService(SuppInfo.SUPP_TYPE_CALL_COMPOSER_SUBJECT));
+        assertNull(mSuppInfo.getService(SuppInfo.SUPP_TYPE_CALL_COMPOSER_PICTURE_URL));
+        assertNull(mSuppInfo.getService(SuppInfo.SUPP_TYPE_CALL_COMPOSER_LOCATION_LAT));
+        assertNull(mSuppInfo.getService(SuppInfo.SUPP_TYPE_CALL_COMPOSER_LOCATION_LONG));
+        assertNull(mSuppInfo.getService(SuppInfo.SUPP_TYPE_CALL_COMPOSER_IS_BUSINESS));
     }
 
     @Test
@@ -199,23 +200,23 @@ public class ImsSuppInfoUtilsTest {
 
         ImsSuppInfoUtils.addSuppInfoForCallComposer(mCallProfile, mSuppInfo);
 
-        SuppInfo.SuppService ss = mSuppInfo.getService(SuppInfo.TYPE_CALL_COMPOSER_PRIORITY);
+        SuppService ss = mSuppInfo.getService(SuppInfo.SUPP_TYPE_CALL_COMPOSER_PRIORITY);
         assertNotNull(ss);
         assertEquals(priority, ss.intValue);
-        ss = mSuppInfo.getService(SuppInfo.TYPE_CALL_COMPOSER_SUBJECT);
+        ss = mSuppInfo.getService(SuppInfo.SUPP_TYPE_CALL_COMPOSER_SUBJECT);
         assertNotNull(ss);
         assertEquals(subject, ss.strValue);
-        ss = mSuppInfo.getService(SuppInfo.TYPE_CALL_COMPOSER_PICTURE_URL);
+        ss = mSuppInfo.getService(SuppInfo.SUPP_TYPE_CALL_COMPOSER_PICTURE_URL);
         assertNotNull(ss);
         assertEquals(picture, ss.strValue);
-        ss = mSuppInfo.getService(SuppInfo.TYPE_CALL_COMPOSER_LOCATION_LAT);
+        ss = mSuppInfo.getService(SuppInfo.SUPP_TYPE_CALL_COMPOSER_LOCATION_LAT);
         assertNotNull(ss);
         assertEquals(String.valueOf(location.getLatitude()), ss.strValue);
-        ss = mSuppInfo.getService(SuppInfo.TYPE_CALL_COMPOSER_LOCATION_LONG);
+        ss = mSuppInfo.getService(SuppInfo.SUPP_TYPE_CALL_COMPOSER_LOCATION_LONG);
         assertNotNull(ss);
         assertEquals(String.valueOf(location.getLongitude()), ss.strValue);
 
         // UE cannot make a business call
-        assertNull(mSuppInfo.getService(SuppInfo.TYPE_CALL_COMPOSER_IS_BUSINESS));
+        assertNull(mSuppInfo.getService(SuppInfo.SUPP_TYPE_CALL_COMPOSER_IS_BUSINESS));
     }
 }

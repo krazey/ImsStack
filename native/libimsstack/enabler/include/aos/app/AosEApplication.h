@@ -30,13 +30,23 @@ class AosEApplication : public AosApplication, public IAosRegStateManagerListene
 {
 public:
     AosEApplication(IN IAosAppContext* piAppContext, IN AString& strAppId);
-    virtual ~AosEApplication();
+    ~AosEApplication() override;
 
     // IAosApplication
     IMS_BOOL RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason = 0) override;
     void GetProperty(IN IMS_UINT32 nType, OUT IMS_UINT32& nValue, OUT AString& strValue) override;
 
 protected:
+    void InitEmergencyVariable();
+    void SetKeepEPdnWhenNoPcscf(IN IMS_BOOL bEnable);
+    void SetRegBlockInCbm(IN IMS_BOOL bBlock);
+    void ProcessFakeRegRequest(IN IMS_UINT32 nReason);
+    IMS_BOOL IsKeepEPdnWhenNoPcscf() const;
+    IMS_BOOL IsRegBlockInCbm() const;
+    IMS_BOOL IsReleaseEmergencyPdnUponEmergencyCallEnd();
+    IMS_BOOL MaybeRedialOverCrossStack();
+    void UpdateReadyState();
+
     // Clean
     void ClearConnection() override;
     virtual void ProcessCleanAll(IN IMS_UINT32 nReason = 0);
@@ -74,6 +84,7 @@ protected:
     virtual IMS_BOOL IsWifiConnected();
     virtual IMS_BOOL IsWlanEmergencyBlocked();
     virtual IMS_BOOL IsRegWaitingRequired();
+    virtual IMS_BOOL IsECallConnectedNetworkUnavailable();
     virtual void ProcessRegStateCheck();
     virtual void ProcessECallStarted();
     virtual void ProcessECallTerminated();
@@ -85,8 +96,15 @@ protected:
     // IAoSConditionListener
     void Condition_RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason = 0) override;
 
+    // IAosRegistrationListener
+    void Registration_StateChanged(IN IMS_UINT32 nResult, IN IMS_UINT32 nReason = 0) override;
+
     // IAosCallTrackerListener
     void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState) override;
+    void CallTracker_ECallSessionReleased(IN IMS_BOOL bEstablished) override;
+
+    // IAosNetTrackerListener
+    void NetTracker_StatusChanged() override;
 
     // IAosNConfigurationListener
     void NConfiguration_NotifyConfigChanged() override;
@@ -98,5 +116,8 @@ protected:
     void CleanUp() override;
 
     static const IMS_UINT32 EPDN_RELEASE_DELAY_TIME_MILLIS = 2000;
+
+    IMS_BOOL m_bKeepEPdnWhenNoPcscf;
+    IMS_BOOL m_bRegBlockInCbm;
 };
 #endif  // AOS_E_APPLICATION_H_

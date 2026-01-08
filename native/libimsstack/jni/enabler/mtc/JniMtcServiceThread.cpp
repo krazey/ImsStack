@@ -16,10 +16,12 @@
 
 #define IMS_STL_USE
 
+#include "ImsList.h"
 #include "IuMtcService.h"
 #include "JniMtcCall.h"
 #include "JniMtcServiceThread.h"
 #include "JniMtcUtils.h"
+#include "MtcDef.h"
 #include "ServiceTrace.h"
 #include <binder/Parcel.h>
 
@@ -54,39 +56,44 @@ void JniMtcServiceThread::OnServiceChanged(
 
 PUBLIC
 void JniMtcServiceThread::OnEmergencyServiceChanged(IN IuMtcService::EmergencyServiceState eState,
-        IN IMS_SINT32 eReason, IN ServiceType eServiceType)
+        IN IuMtcService::EmergencyServiceUnavailableReason eReason, IN ServiceType eServiceType)
 {
     IMS_TRACE_D("OnEmergencyServiceChanged [%d]", eState, 0, 0);
     Parcel objParcel;
     objParcel.writeInt32(IuMtcService::E_SERVICE_CHANGED);
     objParcel.writeInt32(static_cast<IMS_SINT32>(eState));
-    objParcel.writeInt32(eReason);
+    objParcel.writeInt32(static_cast<IMS_SINT32>(eReason));
     objParcel.writeInt32(static_cast<IMS_SINT32>(eServiceType));
 
     SendData2Java(objParcel);
 }
 
 PUBLIC
-void JniMtcServiceThread::OnPreIncomingCallReceived(IN IMS_ULONG nCallKey)
+void JniMtcServiceThread::OnPreIncomingCallReceived(
+        IN IMS_ULONG nCallKey, IN const AString& strLogTag)
 {
-    IMS_TRACE_D("OnPreIncomingCallReceived", 0, 0, 0);
+    IMS_TRACE_D("OnPreIncomingCallReceived logtag[%s]", strLogTag.GetStr(), 0, 0);
     Parcel objParcel;
     objParcel.writeInt32(IuMtcService::PRE_INCOMING_CALL);
     objParcel.writeInt64(nCallKey);
 
-    objParcel.writeString16(android::String16(AString("MTCLOG").GetStr()));  // TODO: Log.
+    objParcel.writeString16(android::String16(strLogTag.GetStr()));
 
     SendData2Java(objParcel);
 }
 
 PUBLIC
-void JniMtcServiceThread::OnRejectedIncomingCall(IN const JniCallInfo& objCallInfo,
-        IN const MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
-        IN OipType eOipType, IN const AString& strRemoteNumber, IN const CallReasonInfo& objReason)
+void JniMtcServiceThread::OnRejectedIncomingCall(IN IMS_ULONG nCallKey,
+        IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
+        IN const ImsList<SuppService*>& objSuppServices, IN OipType eOipType,
+        IN const AString& strRemoteNumber, IN const CallReasonInfo& objReason,
+        IN const AString& strLogTag)
 {
     IMS_TRACE_D("OnRejectedIncomingCall", 0, 0, 0);
     Parcel objParcel;
     objParcel.writeInt32(IuMtcService::AUTO_REJECTED_CALL);
+    objParcel.writeInt64(nCallKey);
+    objParcel.writeString16(android::String16(strLogTag.GetStr()));
 
     JniMtcUtils::WriteCallInfoToParcel(objCallInfo, objParcel);
     JniMtcUtils::WriteMediaInfoToParcel(objMediaInfo, objParcel);

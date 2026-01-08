@@ -17,8 +17,8 @@
 package com.android.imsstack.enabler.media;
 
 /**
- * Interface to send call-backs to the observer when the ImsMedia service is
- * connected or disconnected.
+ * Interface to send call-backs to the observer when the ImsMedia service is connected or
+ * disconnected.
  */
 public interface IMediaConnectionObserver {
     /**

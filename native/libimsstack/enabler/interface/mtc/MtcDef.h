@@ -22,15 +22,24 @@
 
 enum class UpdateType
 {
+    /** No ongoing update */
     NONE,
+    /** Update that doesn't change the call type (e.g. early updates or the RAT change) */
     NORMAL,
+    /** Hold operation */
     HOLD,
+    /** Resume operation */
     RESUME,
+    /** Media change during a confirmed session */
     SESSION,
-    CONF,
+    /** Session refresh by the session timer */
     REFRESH,
+    /** Recovery when the SRVCC is cancelled */
     SRVCC_RECOVERED_CANCEL,
+    /** Recovery when the SRVCC is failed */
     SRVCC_RECOVERED_FAILURE,
+    /** Current location discovery during an emergency call */
+    LOCATION,
 };
 
 enum class PemType
@@ -61,7 +70,13 @@ enum
 
 enum
 {
-    AUDIO_QUALITY_NONE = 0,
+    MEDIA_QUALITY_NONE = 0,
+    MEDIA_QUALITY_NOTUSED = 99,
+};
+
+enum
+{
+    AUDIO_QUALITY_NONE = MEDIA_QUALITY_NONE,
 
     AUDIO_QUALITY_AMR_NB = 1,
     AUDIO_QUALITY_AMR_WB = 2,
@@ -74,12 +89,12 @@ enum
     AUDIO_QUALITY_EVS_FB = 9,
     AUDIO_QUALITY_MAX = 10,
 
-    AUDIO_QUALITY_NOTUSED = 99,
+    AUDIO_QUALITY_NOTUSED = MEDIA_QUALITY_NOTUSED,
 };
 
 enum
 {
-    VIDEO_QUALITY_NONE = 0,
+    VIDEO_QUALITY_NONE = MEDIA_QUALITY_NONE,
 
     VIDEO_QUALITY_QCIF = 1,
     VIDEO_QUALITY_QVGA_LS = 2,
@@ -96,15 +111,15 @@ enum
     VIDEO_QUALITY_HD_LS = 13,
     VIDEO_QUALITY_HD_PR = 14,
 
-    VIDEO_QUALITY_NOTUSED = 99,
+    VIDEO_QUALITY_NOTUSED = MEDIA_QUALITY_NOTUSED,
 };
 
 enum
 {
-    TEXT_QUALITY_NONE = 0,
+    TEXT_QUALITY_NONE = MEDIA_QUALITY_NONE,
     TEXT_QUALITY_T140 = 1,
     TEXT_QUALITY_T140_RED = 2,
-    TEXT_QUALITY_NOTUSED = 99,
+    TEXT_QUALITY_NOTUSED = MEDIA_QUALITY_NOTUSED,
 };
 
 enum
@@ -121,31 +136,22 @@ enum class SuppType
     NONE = -1,
     CALLER_ID = 0,
     CNAP = 1,
-    CNAP_EX = 2,
-    MMC = 3,
-    GTT = 4,
-    CDIV_CAUSE = 5,
-    CDIV_HISTORY = 6,
-    CW = 7,
-    VM = 8,
-    HD = 9,
-    ANSWER_HOLD = 10,
-    MCID = 11,
-    DUAL_NUMBER = 12,
-    ENFORCE_LT = 13,
-    TARGET_URI = 14,
-    CALLING_NUM_VERIFICATION = 15,
-    VRBT = 16,
-    TIP = 17,
-    GEOLOCATION = 18,
-    CALL_PULL = 19,
-    CALL_COMPOSER_PRIORITY = 20,
-    CALL_COMPOSER_SUBJECT = 21,
-    CALL_COMPOSER_LOCATION_LAT = 22,
-    CALL_COMPOSER_LOCATION_LONG = 23,
-    CALL_COMPOSER_PICTURE_URL = 24,
-    CALL_COMPOSER_IS_BUSINESS = 25,
-    SESSION_ID = 26,
+    CDIV_CAUSE = 2,
+    CDIV_HISTORY = 3,
+    CW = 4,
+    ENFORCE_LT = 5,
+    TARGET_URI = 6,
+    CALLING_NUM_VERIFICATION = 7,
+    TIP = 8,
+    GEOLOCATION = 9,
+    CALL_PULL = 10,
+    CALL_COMPOSER_PRIORITY = 11,
+    CALL_COMPOSER_SUBJECT = 12,
+    CALL_COMPOSER_LOCATION_LAT = 13,
+    CALL_COMPOSER_LOCATION_LONG = 14,
+    CALL_COMPOSER_PICTURE_URL = 15,
+    CALL_COMPOSER_IS_BUSINESS = 16,
+    SESSION_ID = 17,
 };
 
 enum class OipType
@@ -154,6 +160,9 @@ enum class OipType
     NONE = 0,
     IDENTITY = 1,
     RESTRICTED = 2,
+    UNKNOWN = 3,
+    PAYPHONE = 4,
+    UNAVAILABLE = 5,
 };
 
 enum class CdivCause
@@ -206,6 +215,24 @@ enum
     CALLING_NUM_VERSTAT_NOT_VERIFIED = 2,
 };
 
+enum class PermanentSuppType
+{
+    TB_CW = 0,
+    TB_TIR = 1,
+    TB_CB_OUTGOING_ALL_VOICE = 2,
+    TB_CB_OUTGOING_ALL_VIDEO = 3,
+    TB_CB_OUTGOING_INTERNATIONAL_VOICE = 4,
+    TB_CB_OUTGOING_INTERNATIONAL_VIDEO = 5,
+    TB_CB_OUTGOING_INTERNATIONAL_EXCEPT_HOME_VOICE = 6,
+    TB_CB_OUTGOING_INTERNATIONAL_EXCEPT_HOME_VIDEO = 7,
+    TB_CB_INCOMING_ALL_VOICE = 8,
+    TB_CB_INCOMING_ALL_VIDEO = 9,
+    TB_CB_INCOMING_ROAMING_VOICE = 10,
+    TB_CB_INCOMING_ROAMING_VIDEO = 11,
+    TB_CB_INCOMING_ANONYMOUS_VOICE = 12,
+    TB_CB_INCOMING_ANONYMOUS_VIDEO = 13,
+};
+
 enum
 {
     CONF_CREATE_NONE = 0,
@@ -223,6 +250,97 @@ enum
     CALL_COMPOSER_PRIORITY_URGENT = 1,
 };
 
+/**
+ * @brief Represents the attributes of an audio codec, such as bitrate and bandwidth.
+ * This class is used to convey detailed codec parameters.
+ * The direction in which AudioCodecAttributes is relayed is always from native to Java,
+ * and the reverse is not allowed
+ */
+struct AudioCodecAttributes
+{
+public:
+    inline AudioCodecAttributes() :
+            nBitrateKbps(0.0f),
+            nBitrateStartKbps(0.0f),
+            nBitrateEndKbps(0.0f),
+            nBandwidthKhz(0.0f),
+            nBandwidthStartKhz(0.0f),
+            nBandwidthEndKhz(0.0f)
+    {
+    }
+
+    inline AudioCodecAttributes(IN const AudioCodecAttributes& objRhs) :
+            nBitrateKbps(objRhs.nBitrateKbps),
+            nBitrateStartKbps(objRhs.nBitrateStartKbps),
+            nBitrateEndKbps(objRhs.nBitrateEndKbps),
+            nBandwidthKhz(objRhs.nBandwidthKhz),
+            nBandwidthStartKhz(objRhs.nBandwidthStartKhz),
+            nBandwidthEndKhz(objRhs.nBandwidthEndKhz)
+    {
+    }
+
+    inline AudioCodecAttributes(IN IMS_FLOAT nInitBitrateKbps, IN IMS_FLOAT nInitBitrateStartKbps,
+            IN IMS_FLOAT nInitBitrateEndKbps, IN IMS_FLOAT nInitBandwidthKhz,
+            IN IMS_FLOAT nInitBandwidthStartKhz, IN IMS_FLOAT nInitBandwidthEndKhz) :
+            nBitrateKbps(nInitBitrateKbps),
+            nBitrateStartKbps(nInitBitrateStartKbps),
+            nBitrateEndKbps(nInitBitrateEndKbps),
+            nBandwidthKhz(nInitBandwidthKhz),
+            nBandwidthStartKhz(nInitBandwidthStartKhz),
+            nBandwidthEndKhz(nInitBandwidthEndKhz)
+    {
+    }
+
+    inline ~AudioCodecAttributes() {}
+
+public:
+    inline AudioCodecAttributes& operator=(IN const AudioCodecAttributes& objRhs)
+    {
+        if (this != &objRhs)
+        {
+            nBitrateKbps = objRhs.nBitrateKbps;
+            nBitrateStartKbps = objRhs.nBitrateStartKbps;
+            nBitrateEndKbps = objRhs.nBitrateEndKbps;
+            nBandwidthKhz = objRhs.nBandwidthKhz;
+            nBandwidthStartKhz = objRhs.nBandwidthStartKhz;
+            nBandwidthEndKhz = objRhs.nBandwidthEndKhz;
+        }
+
+        return (*this);
+    }
+
+    IMS_BOOL operator==(const AudioCodecAttributes& objRhs) const
+    {
+        if (this == &objRhs)
+        {
+            return IMS_TRUE;
+        }
+
+        return nBitrateKbps == objRhs.nBitrateKbps &&
+                nBitrateStartKbps == objRhs.nBitrateStartKbps &&
+                nBitrateEndKbps == objRhs.nBitrateEndKbps &&
+                nBandwidthKhz == objRhs.nBandwidthKhz &&
+                nBandwidthStartKhz == objRhs.nBandwidthStartKhz &&
+                nBandwidthEndKhz == objRhs.nBandwidthEndKhz;
+    }
+
+    IMS_BOOL operator!=(const AudioCodecAttributes& objRhs) const { return !(*this == objRhs); }
+
+public:
+    /** The audio codec bitrate in kbps. */
+    IMS_FLOAT nBitrateKbps;
+    /** The start of the audio codec bitrate range in kbps. */
+    IMS_FLOAT nBitrateStartKbps;
+    /** The end of the audio codec bitrate range in kbps. */
+    IMS_FLOAT nBitrateEndKbps;
+    /** The audio codec bandwidth in kHz. */
+    IMS_FLOAT nBandwidthKhz;
+    /** The start of the audio codec bandwidth range in kHz. */
+    IMS_FLOAT nBandwidthStartKhz;
+    /** The end of the audio codec bandwidth range in kHz. */
+    IMS_FLOAT nBandwidthEndKhz;
+};
+
 struct MediaInfo
 {
 public:
@@ -232,7 +350,8 @@ public:
             eTextDirection(DIRECTION_INVALID),
             eAudioQuality(AUDIO_QUALITY_NONE),
             eVideoQuality(VIDEO_QUALITY_NONE),
-            eGttMode(GTT_MODE_INVALID)
+            eGttMode(GTT_MODE_INVALID),
+            objAudioCodecAttributes()
     {
     }
     inline MediaInfo(IN const MediaInfo& objRhs) :
@@ -241,18 +360,21 @@ public:
             eTextDirection(objRhs.eTextDirection),
             eAudioQuality(objRhs.eAudioQuality),
             eVideoQuality(objRhs.eVideoQuality),
-            eGttMode(objRhs.eGttMode)
+            eGttMode(objRhs.eGttMode),
+            objAudioCodecAttributes(objRhs.objAudioCodecAttributes)
     {
     }
     inline MediaInfo(IN IMS_SINT32 eInitAudioDirection, IN IMS_SINT32 eInitVideoDirection,
             IN IMS_SINT32 eInitTextDirection, IN IMS_UINT32 eInitAudioQuality,
-            IN IMS_UINT32 eInitVideoQuality, IN IMS_SINT32 eInitGttMode) :
+            IN IMS_UINT32 eInitVideoQuality, IN IMS_SINT32 eInitGttMode,
+            IN const AudioCodecAttributes& objInitAudioCodecAttributes = AudioCodecAttributes()) :
             eAudioDirection(eInitAudioDirection),
             eVideoDirection(eInitVideoDirection),
             eTextDirection(eInitTextDirection),
             eAudioQuality(eInitAudioQuality),
             eVideoQuality(eInitVideoQuality),
-            eGttMode(eInitGttMode)
+            eGttMode(eInitGttMode),
+            objAudioCodecAttributes(objInitAudioCodecAttributes)
     {
     }
     inline ~MediaInfo() {}
@@ -268,6 +390,7 @@ public:
             eAudioQuality = objRhs.eAudioQuality;
             eVideoQuality = objRhs.eVideoQuality;
             eGttMode = objRhs.eGttMode;
+            objAudioCodecAttributes = objRhs.objAudioCodecAttributes;
         }
 
         return (*this);
@@ -283,7 +406,8 @@ public:
         return eAudioDirection == objRhs.eAudioDirection &&
                 eVideoDirection == objRhs.eVideoDirection &&
                 eTextDirection == objRhs.eTextDirection && eAudioQuality == objRhs.eAudioQuality &&
-                eVideoQuality == objRhs.eVideoQuality && eGttMode == objRhs.eGttMode;
+                eVideoQuality == objRhs.eVideoQuality && eGttMode == objRhs.eGttMode &&
+                objAudioCodecAttributes == objRhs.objAudioCodecAttributes;
     }
 
     IMS_BOOL operator!=(const MediaInfo& objRhs) const { return !(*this == objRhs); }
@@ -295,21 +419,24 @@ public:
     IMS_UINT32 eAudioQuality;
     IMS_UINT32 eVideoQuality;
     IMS_SINT32 eGttMode;
+    AudioCodecAttributes objAudioCodecAttributes;
 };
 
 class SuppService
 {
 public:
     inline SuppService() :
+            nType(0),
             strValue(AString::ConstNull()),
             nValue(0),
             bValue(IMS_FALSE)
     {
     }
-    inline SuppService(IN const SuppService& objRHS) :
-            strValue(objRHS.strValue),
-            nValue(objRHS.nValue),
-            bValue(objRHS.bValue)
+    inline SuppService(IN const SuppService& objRhs) :
+            nType(objRhs.nType),
+            strValue(objRhs.strValue),
+            nValue(objRhs.nValue),
+            bValue(objRhs.bValue)
     {
     }
     inline ~SuppService() {}
@@ -319,6 +446,7 @@ public:
     {
         if (this != &objRhs)
         {
+            nType = objRhs.nType;
             strValue = objRhs.strValue;
             nValue = objRhs.nValue;
             bValue = objRhs.bValue;
@@ -334,10 +462,15 @@ public:
             return IMS_TRUE;
         }
 
-        return strValue == objRhs.strValue && nValue == objRhs.nValue && bValue == objRhs.bValue;
+        return nType == objRhs.nType && strValue == objRhs.strValue && nValue == objRhs.nValue &&
+                bValue == objRhs.bValue;
     }
 
+    IMS_BOOL operator!=(const SuppService& objRhs) const { return !(*this == objRhs); }
+
 public:
+    IMS_SINT32 nType;
+
     AString strValue;
     IMS_SINT32 nValue;
     IMS_BOOL bValue;

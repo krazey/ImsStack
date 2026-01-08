@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!--
+ * Copyright (C) 2025 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+<!-- carrier_name: Orange (Tunisia) -->
+<carrier_config>
+    <!-- MTS -->
+    <int-array name="imssms.sms_rp_cause_values_to_fallback_int_array" num="23">
+        <item value="1"/>
+        <item value="8"/>
+        <item value="10"/>
+        <item value="11"/>
+        <item value="21"/>
+        <item value="27"/>
+        <item value="28"/>
+        <item value="29"/>
+        <item value="30"/>
+        <item value="38"/>
+        <item value="41"/>
+        <item value="42"/>
+        <item value="47"/>
+        <item value="50"/>
+        <item value="69"/>
+        <item value="81"/>
+        <item value="95"/>
+        <item value="96"/>
+        <item value="97"/>
+        <item value="98"/>
+        <item value="99"/>
+        <item value="111"/>
+        <item value="127"/>
+    </int-array>
+    <int-array name="imssms.sms_rp_cause_values_to_retry_over_ims_int_array" num="0">
+    </int-array>
+</carrier_config>

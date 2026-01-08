@@ -27,14 +27,17 @@ class AosBlock : public IAosBlock
 {
 public:
     explicit AosBlock(IN IAosAppContext* piAppContext);
-    virtual ~AosBlock();
+    ~AosBlock() override;
 
     void SetListener(IN IAosBlockListener* piListener) override;
     void RemoveListener(IN IAosBlockListener* piListener) override;
+    void SetSilentListener(IN IAosBlockSilentListener* piListener) override;
+    void RemoveSilentListener(IN IAosBlockSilentListener* piListener) override;
 
     IMS_BOOL SetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify = IMS_TRUE) override;
     IMS_BOOL ResetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify = IMS_TRUE) override;
     void ClearAllBlockReasons() override;
+    void GetBlockReasonsString(OUT AString& strOutLog) override;
     IMS_BOOL PrintBlockReasons() override;
 
     void GetBlockReasons(
@@ -47,12 +50,12 @@ public:
 
     static const IMS_CHAR* BlockReasonToString(IN IMS_UINT32 nReason);
 
-private:
-    void Notify(IN BLOCK_REASON eReason, IN IMS_BOOL bIsEnable);
+protected:
+    void Notify(IN BLOCK_REASON eReason, IN IMS_BOOL bIsEnable, IN IMS_BOOL bNotify = IMS_TRUE);
     static IMS_UINT32 GetBlockType(IN BLOCK_REASON eReason);
     static const IMS_CHAR* ServiceTypeToString(IN SERVICE_TYPE eType);
 
-private:
+protected:
     enum
     {
         BLOCK_COMMON = 0,
@@ -70,12 +73,10 @@ private:
     ImsHashMap m_objBlockWifi;
 
     ImsList<IAosBlockListener*> m_objListeners;
+    ImsList<IAosBlockSilentListener*> m_objSilentListeners;
 
     AString m_strTag;
     ImsList<IMS_UINT32> objServiceBlockReasons;
-
-private:
-    friend class AosBlockTest;
 };
 
 #endif  // AOS_BLOCK_H_

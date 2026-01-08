@@ -44,12 +44,11 @@ ForkedDialogMethodManager::~ForkedDialogMethodManager()
 }
 
 PUBLIC
-IMS_BOOL ForkedDialogMethodManager::AddMethod(
+void ForkedDialogMethodManager::AddMethod(
         IN const AString& strName, IN IForkedDialogMethod* piMethod)
 {
     LockGuard objLock(m_piLock);
-
-    return m_objDialogMethods.SetValue(strName, piMethod);
+    m_objDialogMethods.SetValue(strName, piMethod);
 }
 
 PUBLIC

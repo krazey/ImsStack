@@ -17,6 +17,7 @@ package com.android.imsstack.imsservice.mmtel.sms;
 
 import android.telephony.SmsManager;
 import android.telephony.ims.stub.ImsSmsImplBase;
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * Handles the SMS Error Cause
@@ -25,7 +26,6 @@ public enum  SmsRPErrorCause {
 
     SMS_NO_ERROR(0, ImsSmsImplBase.SEND_STATUS_OK, SmsManager.RESULT_ERROR_NONE),
 
-    //TODO:b/242793727 -Need to add new error result to SMSManager which match with below RPCause
     SMS_UNALLOCATED_NUMBER(1, ImsSmsImplBase.SEND_STATUS_ERROR,
      SmsManager.RESULT_ERROR_GENERIC_FAILURE),
 
@@ -102,7 +102,8 @@ public enum  SmsRPErrorCause {
      * returns the RP-Cause Value
      * @return the RP-Cause Value
      */
-    private int getRPCauseCode() {
+    @VisibleForTesting
+    public int getRPCauseCode() {
         return mRPCauseCode;
     }
 

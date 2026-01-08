@@ -32,7 +32,7 @@ public:
             ImsSocket()
     {
     }
-    inline ~TestImsSocket() {}
+    ~TestImsSocket() override = default;
 
 public:
     IMS_SINT32 GetSocketId() const override { return 0; }
@@ -114,6 +114,8 @@ public:
         return IMS_TRUE;
     }
 
+    IMS_BOOL IsClosedOrBeingClosed() const override { return IMS_FALSE; }
+
     void Destroy() override {}
     void DispatchServiceMessage(IN IMS_UINTP /*nWparam*/, IN IMS_UINTP /*nLparam*/) override {}
     SOCKET_RESULT Abort() override { return RESULT_SUCCESS; }
@@ -179,7 +181,7 @@ TEST_F(ImsSocketStateTest, AttachAndDetachHandle)
 
     pImsSocketState->AttachHandle(hSocket, pSocket);
 
-    ImsSocket* pImsSocket = pImsSocketState->LookupHandle(hSocket);
+    const ImsSocket* pImsSocket = pImsSocketState->LookupHandle(hSocket);
     ASSERT_TRUE(pImsSocket != nullptr);
 
     EXPECT_EQ(pImsSocket->GetNetworkConnection(), pSocket->GetNetworkConnection());
@@ -223,7 +225,7 @@ TEST_F(ImsSocketStateTest, DetachAll)
 
     pImsSocketState->AttachHandle(hSocket, pSocket);
 
-    ImsSocket* pImsSocket = pImsSocketState->LookupHandle(hSocket);
+    const ImsSocket* pImsSocket = pImsSocketState->LookupHandle(hSocket);
     ASSERT_TRUE(pImsSocket != nullptr);
 
     EXPECT_EQ(pImsSocket->GetNetworkConnection(), pSocket->GetNetworkConnection());

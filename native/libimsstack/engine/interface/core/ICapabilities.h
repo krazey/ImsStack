@@ -31,7 +31,7 @@ class ICapabilitiesListener;
 class ICapabilities : public IServiceMethod
 {
 protected:
-    virtual ~ICapabilities() = default;
+    ~ICapabilities() override = default;
 
 public:
     /**

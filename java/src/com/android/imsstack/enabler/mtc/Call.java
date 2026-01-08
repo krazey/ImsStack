@@ -21,7 +21,6 @@ import android.os.SystemClock;
 
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
 
 import java.io.Closeable;
 
@@ -322,31 +321,6 @@ public class Call implements Closeable {
                 ((callId != 0) ? String.valueOf(callId) : null);
     }
 
-    public static long getNativeCallIdFromCallId(String callId) {
-        if (callId == null) {
-            return 0;
-        }
-
-        if (callId.isEmpty() || "0".equals(callId)) {
-            return 0;
-        }
-
-        int index = callId.lastIndexOf(":");
-
-        if (index < 0) {
-            return 0;
-        }
-
-        try {
-            String nativeCallId = callId.substring(index + 1);
-            return Long.valueOf(nativeCallId).longValue();
-        } catch (IndexOutOfBoundsException e) {
-            ImsLog.e(e.getMessage());
-        }
-
-        return 0;
-    }
-
     public static boolean isCallExtraBoolean(String name) {
         return (name.equalsIgnoreCase(EXTRA_CONFERENCE)
                 || name.equalsIgnoreCase(EXTRA_E_CALL)
@@ -487,14 +461,10 @@ public class Call implements Closeable {
 
     private String createLogTag() {
         String id = "";
-        if (MSimUtils.isMultiSimEnabled()) {
-            if (mContext.getSlotId() == 0) {
-                id = mCallIndex + "x";
-            } else {
-                id = "x" + mCallIndex;
-            }
+        if (mContext.getSlotId() == 0) {
+            id = mCallIndex + "x";
         } else {
-            id = mCallIndex + "";
+            id = "x" + mCallIndex;
         }
 
         return "MO_" + id;

@@ -34,7 +34,6 @@ class IOnSessionListener;
 class IReasonHeaderSetter;
 class IRefreshListener;
 class ISessionParameter;
-class ISipAckPackage;
 class Media;
 class Publication;
 class Reference;
@@ -56,7 +55,7 @@ class Session :
 {
 public:
     explicit Session(IN Service* pService);
-    virtual ~Session();
+    ~Session() override;
 
     Session(IN const Session&) = delete;
     Session& operator=(IN const Session&) = delete;
@@ -87,6 +86,7 @@ public:
     IMS_BOOL IsFinalResponseReceivedForInitialInviteRequest() const;
     IMS_BOOL IsReliableProvResponseSupported() const;
     inline IMS_BOOL IsSdpNegotiationAllowedForNonRpr() const { return m_bSdpNonRprAllowed; }
+    IMS_BOOL IsSdpOaInPreviewMode() const;
     IMS_RESULT Reject();
     IMS_RESULT Reject(IN IMS_SINT32 nStatusCode);
     IMS_RESULT RejectEx(
@@ -140,6 +140,7 @@ public:
         m_piReasonHeaderSetter = piSetter;
     }
     inline SdpReader* GetRemoteMediaCapabilities() const { return m_pRemoteMediaCapabilities; }
+    inline IMS_BOOL IsSessionCanceledOnAccepted() const { return m_bSessionCanceledOnAccepted; }
 
 protected:
     // Activity class
@@ -191,7 +192,8 @@ protected:
     // Session class
     virtual Session* CreateSession();
     virtual SessionRefreshHelper* CreateRefreshHelper();
-    virtual IMS_RESULT HandleProvisionalResponse(IN ISipClientConnection* piScc);
+    virtual IMS_RESULT HandleProvisionalResponse(
+            IN ISipClientConnection* piScc, IN IMS_SINT32 nServiceMethod);
     virtual IMS_RESULT HandleRequestToUpdate(IN ISipServerConnection* piSsc);
     virtual IMS_RESULT HandleResponseToUpdate(IN ISipClientConnection* piScc);
     inline virtual IMS_BOOL HasPendingPrack() const { return IMS_FALSE; }
@@ -202,12 +204,12 @@ protected:
     // Methods for handling SDP & Session Descriptor related operations
     IMS_BOOL CheckNCreateSessionDescriptor();
     IMS_BOOL CheckNSetSdpBodyPart(IN_OUT ISipMessage*& piSipMsg);
-    IMS_BOOL CheckNTerminateSession(IN ISipMessage* piSipMsg);
+    IMS_BOOL CheckNTerminateSession(IN const ISipMessage* piSipMsg);
     ISipClientConnection* CreateConnectionL(IN ISipDialog* piDialog, IN const SipMethod& objMethod);
     inline IMS_SINT32 GetCallState() const { return m_objCallState.GetState(); }
     IMS_SINT32 GetOfferAnswerState() const;
     inline SessionRefreshHelper* GetRefreshHelper() const { return m_pRefreshHelper; }
-    IMS_SINT32 HandleSdpOfferAnswer(IN ISipMessage* piSipMsg);
+    IMS_SINT32 HandleSdpOfferAnswer(IN const ISipMessage* piSipMsg);
     IMS_BOOL IsInviteFinalResponseReceived(IN IMS_SINT32 nServiceMethod) const;
     IMS_BOOL IsMidDialogTransactionCreatable() const;
     inline IMS_BOOL IsTerminatePending() const { return m_bTerminatePending; }
@@ -268,7 +270,7 @@ private:
 
     // For UAC behavior
     IMS_RESULT HandleResponseToBye(IN ISipClientConnection* piScc);
-    IMS_RESULT HandleResponseToCancel(IN ISipClientConnection* piScc);
+    IMS_RESULT HandleResponseToCancel(IN const ISipClientConnection* piScc);
     IMS_RESULT HandleResponseToInvite(IN ISipClientConnection* piScc);
 
     // RACE_CONDITION : SESSION_UPDATE
@@ -276,13 +278,11 @@ private:
     {
         return m_bSessionUpdateNotificationInProgress;
     }
-    inline void SetSessionUpdateNotificationState(IN IMS_BOOL bInProgress)
+    inline void SetSessionUpdateNotificationInProgress(IN IMS_BOOL bInProgress)
     {
         m_bSessionUpdateNotificationInProgress = bInProgress;
     }
 
-    // ACK_RETRANSMISSION_TO_2XX
-    void RemoveStrayAcks();
     SipMethod SelectUpdateMethod() const;
 
     // For UAC behavior
@@ -298,6 +298,7 @@ private:
     IMS_RESULT SendResponseEx(IN ISipServerConnection* piSsc, IN IMS_SINT32 nServiceMethod,
             IN IMS_SINT32 nStatusCode);
 
+    void SetImplicitRouteHeader(IN ISipClientConnection* piScc);
     void SetReasonHeaderFromPreviousRequest(IN IMS_SINT32 nRequest);
     void Start2xxRetransmission();
     void Stop2xxRetransmission();
@@ -310,17 +311,19 @@ private:
     // RACE_CONDITION : 200 OK to CANCEL and 200 OK to forked INVITE
     void TerminateForkedSessionsOnNegotiating();
     void TerminateForkedSession();
+    void ClearForkedSessionsByTerminated();
+    void HandleForkedSessionTerminated();
 
     // Methods for handling SDP & Media related operations
     IMS_BOOL AddMedia(IN Media* pMedia);
     void CleanupMedia();
-    IMS_BOOL CreateMediaFromSdp();
+    void CreateMediaFromSdp();
     IMS_BOOL IsMediaInitializationDone() const;
     IMS_BOOL UpdateMediaOnAnswerReceived(IN IMS_SINT32 nTrigger);
     IMS_BOOL UpdateMediaOnAnswerSent(IN IMS_SINT32 nTrigger);
     IMS_BOOL UpdateMediaOnOfferReceived(IN IMS_SINT32 nTrigger);
     IMS_BOOL UpdateMediaOnOfferSent(IN IMS_SINT32 nTrigger);
-    void CreateRemoteMediaCapabilities(IN ISipMessage* piSipMsg);
+    void CreateRemoteMediaCapabilities(IN const ISipMessage* piSipMsg);
 
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
@@ -430,7 +433,12 @@ public:
         /// ex. VRBT (Video RingBack Tone) for KR operators
         CONFIG_SUPPORT_EARLY_SESSION_MODEL = 1 << 3,
         /// This is to specify whether the 100 Trying response needs to be notified to the enabler.
-        CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED = 1 << 4
+        CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED = 1 << 4,
+        /// Specify whether the subsequent SDP answer should be ignored
+        /// when SDP OA state is in preview mode.
+        CONFIG_IGNORE_SUBSEQUENT_SDP_ANSWER_IN_PREVIEW_MODE = 1 << 5,
+        /// Specify whether the preview mode is supported.
+        CONFIG_SUPPORT_PREVIEW = 1 << 6
     };
 
     /// Index for the most recent response message
@@ -451,6 +459,7 @@ protected:
         AMSG_SESSION_UPDATED,
         AMSG_SESSION_UPDATE_FAILED,
         AMSG_SESSION_UPDATE_RECEIVED,
+        AMSG_SESSION_CANCELED_ON_ACCEPTED,
         AMSG_SESSION_CANCEL_DELIVERED,
         AMSG_SESSION_CANCEL_DELIVERY_FAILED,
         AMSG_SESSION_FORKED_RESPONSE_RECEIVED,
@@ -468,6 +477,8 @@ protected:
         LISTENER_CALL_STARTED = 0x00000004
     };
 
+    static constexpr const IMS_CHAR* WARNING_304 = "304 IMS-client \"Media Type Not Available\"";
+
 private:
     IMS_SINT32 m_nState;
     // Call state
@@ -484,8 +495,9 @@ private:
     IMS_BOOL m_bSessionUpdateNotificationInProgress;
     // IMPLICIT_ROUTING_FOR_MID_DIALOG
     IMS_BOOL m_bImplicitRoutingRequired;
-    // FIX_TIMING_ISSUE: ACK_WITH_SDP_IN_PROGRESS
-    IMS_BOOL m_bAckWithSdpInProgress;
+    // Flag specifying whether the incoming session received CANCEL request
+    // while the session is in STATE_ESTABLISHING state.
+    IMS_BOOL m_bSessionCanceledOnAccepted;
     // Runtime configuration for session control
     IMS_SINT32 m_nConfigValue;
     // Manages completed listener calls
@@ -508,8 +520,6 @@ private:
     // For call transfer/hold/ ...
     IReferredMessageListener* m_piReferredMessageListener;
     RetryTaskHelper* m_pRetransmissionTask;
-    // ACK_RETRANSMISSION_TO_2XX
-    ISipAckPackage* m_piAckPackage;
     // Remote session id for 3rd-party call control
     AString m_strSessionIdForCallControl;
     // For internal BYE transaction

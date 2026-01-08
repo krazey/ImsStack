@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef _SIP_TXN_TIMEOUT_DATA_H
-#define _SIP_TXN_TIMEOUT_DATA_H
+#ifndef __SIP_TIMEOUT_DATA_H__
+#define __SIP_TIMEOUT_DATA_H__
 
-#include "txn/SipTxn.h"
 #include "txn/SipTxnKey.h"
 
 /*Timerdata returned at timeout of Timer */
@@ -35,13 +34,14 @@ class SipTimeoutData
 
 public:
     SipTimeoutData();
-    SipTimeoutData(SIP_INT32 eTxnType, SIP_INT32 eTimerType, SipTxnKey* pTxnKey);
+    SipTimeoutData(SIP_INT32 eTxnType, SIP_INT32 eTimerType, const SipTxnKey* pTxnKey);
     virtual ~SipTimeoutData();
 
     SipTxnKey* GetTxnKey() const;
     SIP_INT32 GetTimerType() const;
-    SIP_BOOL SetTxnKey(SipTxnKey* pTxnKey);
-    SIP_BOOL SetTimerType(SIP_INT32 eTimerType);
+
+    inline SIP_VOID SetTxnKey(SipTxnKey* pTxnKey) { this->m_pTxnKey = pTxnKey; }
+    inline SIP_VOID SetTimerType(SIP_INT32 eTimerType) { this->m_eTimerType = eTimerType; }
 };
 
-#endif
+#endif  //__SIP_TIMEOUT_DATA_H__

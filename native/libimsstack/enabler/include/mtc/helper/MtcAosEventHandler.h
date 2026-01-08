@@ -17,7 +17,6 @@
 #ifndef MTC_AOS_EVENT_HANDLER_H
 #define MTC_AOS_EVENT_HANDLER_H
 
-#include "ImsAosReason.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "IuMtcService.h"
@@ -40,9 +39,9 @@ public:
     virtual void AddListener(IN IMtcAosStateListener* piListener);
     virtual void RemoveListener(IN IMtcAosStateListener* piListener);
 
-    virtual void OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan);
+    virtual void OnConnected(IN IMS_UINT32 nFeatures);
     virtual void OnDisconnecting(IN IMS_UINT32 nReason);
-    virtual void OnDisconnected(IN IMS_UINT32 nReason);
+    virtual void OnDisconnected(IN IMS_UINT32 nReason, IN IMS_SINT32 nDataFailureReason);
     virtual void OnSuspended(IN IMS_UINT32 nReason);
     virtual void OnResumed();
 
@@ -50,13 +49,12 @@ public:
     virtual void OnEventNotify(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
 
 private:
-    void NotifyStateChanged(IN MtcAosState eState, IN IMS_UINT32 eAosReason) const;
-    void NotifyIpcanChanged(IN IMS_UINT32 eIpcan) const;
+    void NotifyStateChanged(IN MtcAosState eState, IN IMS_UINT32 eAosReason,
+            IN IMS_SINT32 nDataFailureReason = 0) const;
     IuMtcService::ServiceState ConvertAosFeatureToServiceState(IMS_UINT32 nFeatures) const;
 
     IMtcService& m_objService;
     MtcConfigurationProxy& m_objConfiguration;
-    IMS_UINT32 m_nIpcan;
     ImsList<IMtcAosStateListener*> m_objListeners;
 };
 

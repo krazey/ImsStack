@@ -23,6 +23,7 @@
 #include "JniEnablerConnector.h"
 #include "JniMtcService.h"
 #include "JniMtcServiceThread.h"
+#include "JniMtcUtils.h"
 #include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_USER_DECL__("JNI.MTC");
@@ -115,8 +116,8 @@ PROTECTED VIRTUAL void JniMtcService::HandleMessage(
         case IuMtcService::SRVCC_STATE_CHANGED:
             NotifySrvccStateChanged(objParcel);
             break;
-        case IuMtcService::SET_TERMINAL_BASED_CALL_WAITING:
-            SetTerminalBasedCallWaiting(objParcel);
+        case IuMtcService::PERMANENT_SUPP_CHANGED:
+            NotifyPermanentSuppChanged(objParcel);
             break;
         case IuMtcService::OPEN_EMERGENCY_SERVICE:
             OpenEmergencyService(objParcel);
@@ -158,15 +159,16 @@ void JniMtcService::NotifySrvccStateChanged(IN const android::Parcel& objParcel)
 }
 
 PRIVATE
-void JniMtcService::SetTerminalBasedCallWaiting(IN const android::Parcel& objParcel)
+void JniMtcService::NotifyPermanentSuppChanged(IN const android::Parcel& objParcel)
 {
     IMtcService* piNativeService = GetNativeService();
     if (piNativeService == IMS_NULL)
     {
         return;
     }
-    IMS_BOOL bEnabled = (objParcel.readInt32() == 1) ? IMS_TRUE : IMS_FALSE;
-    piNativeService->SetTerminalBasedCallWaiting(bEnabled);
+
+    ImsList<SuppService*> objSuppServices = JniMtcUtils::ReadSupplementaryService(objParcel);
+    piNativeService->UpdatePermanentSuppServices(objSuppServices);
 }
 
 PRIVATE
@@ -177,8 +179,7 @@ void JniMtcService::OpenEmergencyService(IN const android::Parcel& objParcel)
     {
         return;
     }
-    piNativeService->OpenEmergencyService(
-            static_cast<IuMtcService::EmergencyCallRoutingPdn>(objParcel.readInt32()));
+    piNativeService->OpenEmergencyService(static_cast<ServiceType>(objParcel.readInt32()));
 }
 
 PRIVATE

@@ -23,8 +23,8 @@
 class MockSystemCallback : public SystemCallback
 {
 public:
-    inline MockSystemCallback() = default;
-    inline ~MockSystemCallback() = default;
+    MockSystemCallback() = default;
+    ~MockSystemCallback() override = default;
 
     MOCK_METHOD(IMS_SINT32, SendDataToJava,
             (IN const android::Parcel& in, IN_OUT android::Parcel& out, int fileDescriptor),

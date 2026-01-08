@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "AStringArray.h"
 #include "RcObject.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
@@ -32,7 +33,7 @@ public:
             m_bRequire(IMS_FALSE)
     {
     }
-    inline virtual ~ServiceIdentifierPrivate() {}
+    ~ServiceIdentifierPrivate() override = default;
 
     ServiceIdentifierPrivate(IN const ServiceIdentifierPrivate&) = delete;
     ServiceIdentifierPrivate& operator=(IN const ServiceIdentifierPrivate&) = delete;

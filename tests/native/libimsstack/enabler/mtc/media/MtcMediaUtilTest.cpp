@@ -20,8 +20,10 @@
 #include "MediaDef.h"
 #include "MockIMtcService.h"
 #include "MtcDef.h"
+#include "SdpMedia.h"
 #include "call/IMtcCall.h"
 #include "media/MtcMediaUtil.h"
+#include <algorithm>
 #include <gtest/gtest.h>
 
 using ::testing::AnyNumber;
@@ -36,6 +38,12 @@ protected:
     virtual void SetUp() override {}
 
     virtual void TearDown() override {}
+
+    template <typename T>
+    IMS_BOOL contains(IN const std::vector<T>& list, T element)
+    {
+        return std::find(list.begin(), list.end(), element) != list.end();
+    }
 };
 
 TEST_F(MtcMediaUtilTest, GetCallTypeFromMediaTypes)
@@ -149,6 +157,63 @@ TEST_F(MtcMediaUtilTest, GetMediaTypesFromMediaContents)
     EXPECT_EQ(MtcMediaUtil::GetMediaTypesFromMediaContents(eMediaContents), MEDIATYPE_NONE);
 }
 
+TEST_F(MtcMediaUtilTest, GetMediaTypeListFromCallType)
+{
+    std::vector<IMS_UINT32> lstVoip = MtcMediaUtil::GetMediaTypeListFromCallType(CallType::VOIP);
+    EXPECT_EQ(lstVoip.size(), 1);
+    EXPECT_TRUE(contains(lstVoip, static_cast<IMS_UINT32>(MEDIATYPE_AUDIO)));
+
+    std::vector<IMS_UINT32> lstVt = MtcMediaUtil::GetMediaTypeListFromCallType(CallType::VT);
+    EXPECT_EQ(lstVt.size(), 2);
+    EXPECT_TRUE(contains(lstVt, static_cast<IMS_UINT32>(MEDIATYPE_AUDIO)));
+    EXPECT_TRUE(contains(lstVt, static_cast<IMS_UINT32>(MEDIATYPE_VIDEO)));
+
+    std::vector<IMS_UINT32> lstRtt = MtcMediaUtil::GetMediaTypeListFromCallType(CallType::RTT);
+    EXPECT_EQ(lstRtt.size(), 2);
+    EXPECT_TRUE(contains(lstRtt, static_cast<IMS_UINT32>(MEDIATYPE_AUDIO)));
+    EXPECT_TRUE(contains(lstRtt, static_cast<IMS_UINT32>(MEDIATYPE_TEXT)));
+
+    std::vector<IMS_UINT32> lstVideoRtt =
+            MtcMediaUtil::GetMediaTypeListFromCallType(CallType::VIDEO_RTT);
+    EXPECT_EQ(lstVideoRtt.size(), 3);
+    EXPECT_TRUE(contains(lstVideoRtt, static_cast<IMS_UINT32>(MEDIATYPE_AUDIO)));
+    EXPECT_TRUE(contains(lstVideoRtt, static_cast<IMS_UINT32>(MEDIATYPE_VIDEO)));
+    EXPECT_TRUE(contains(lstVideoRtt, static_cast<IMS_UINT32>(MEDIATYPE_TEXT)));
+
+    std::vector<IMS_UINT32> lstUnknown =
+            MtcMediaUtil::GetMediaTypeListFromCallType(CallType::UNKNOWN);
+    EXPECT_EQ(lstUnknown.size(), 0);
+}
+
+TEST_F(MtcMediaUtilTest, GetUnusedMediaTypeListFromCallType)
+{
+    std::vector<IMS_UINT32> lstVoip =
+            MtcMediaUtil::GetUnusedMediaTypeListFromCallType(CallType::VOIP);
+    EXPECT_EQ(lstVoip.size(), 2);
+    EXPECT_TRUE(contains(lstVoip, static_cast<IMS_UINT32>(MEDIATYPE_VIDEO)));
+    EXPECT_TRUE(contains(lstVoip, static_cast<IMS_UINT32>(MEDIATYPE_TEXT)));
+
+    std::vector<IMS_UINT32> lstVt = MtcMediaUtil::GetUnusedMediaTypeListFromCallType(CallType::VT);
+    EXPECT_EQ(lstVt.size(), 1);
+    EXPECT_TRUE(contains(lstVt, static_cast<IMS_UINT32>(MEDIATYPE_TEXT)));
+
+    std::vector<IMS_UINT32> lstRtt =
+            MtcMediaUtil::GetUnusedMediaTypeListFromCallType(CallType::RTT);
+    EXPECT_EQ(lstRtt.size(), 1);
+    EXPECT_TRUE(contains(lstRtt, static_cast<IMS_UINT32>(MEDIATYPE_VIDEO)));
+
+    std::vector<IMS_UINT32> lstVideoRtt =
+            MtcMediaUtil::GetUnusedMediaTypeListFromCallType(CallType::VIDEO_RTT);
+    EXPECT_EQ(lstVideoRtt.size(), 0);
+
+    std::vector<IMS_UINT32> lstUnknown =
+            MtcMediaUtil::GetUnusedMediaTypeListFromCallType(CallType::UNKNOWN);
+    EXPECT_EQ(lstUnknown.size(), 3);
+    EXPECT_TRUE(contains(lstUnknown, static_cast<IMS_UINT32>(MEDIATYPE_AUDIO)));
+    EXPECT_TRUE(contains(lstUnknown, static_cast<IMS_UINT32>(MEDIATYPE_VIDEO)));
+    EXPECT_TRUE(contains(lstUnknown, static_cast<IMS_UINT32>(MEDIATYPE_TEXT)));
+}
+
 TEST_F(MtcMediaUtilTest, GetMediaContentsFromMediaTypes)
 {
     IMS_UINT32 eMediaTypes = MEDIATYPE_NONE;
@@ -192,6 +257,21 @@ TEST_F(MtcMediaUtilTest, GetMediaContentsFromCallType)
 
     eCallType = CallType::VIDEO_RTT;
     EXPECT_EQ(MtcMediaUtil::GetMediaContentsFromCallType(eCallType), MEDIA_TYPE_AUDIOVIDEOTEXT);
+}
+
+TEST_F(MtcMediaUtilTest, GetSdpMediaType)
+{
+    IMS_UINT32 eMediaType = MEDIATYPE_NONE;
+    EXPECT_EQ(MtcMediaUtil::GetSdpMediaType(eMediaType), SdpMedia::TYPE_INVALID);
+
+    eMediaType = MEDIATYPE_AUDIO;
+    EXPECT_EQ(MtcMediaUtil::GetSdpMediaType(eMediaType), SdpMedia::TYPE_AUDIO);
+
+    eMediaType = MEDIATYPE_VIDEO;
+    EXPECT_EQ(MtcMediaUtil::GetSdpMediaType(eMediaType), SdpMedia::TYPE_VIDEO);
+
+    eMediaType = MEDIATYPE_TEXT;
+    EXPECT_EQ(MtcMediaUtil::GetSdpMediaType(eMediaType), SdpMedia::TYPE_TEXT);
 }
 
 TEST_F(MtcMediaUtilTest, GetMediaServiceType)
@@ -294,6 +374,101 @@ TEST_F(MtcMediaUtilTest, StringToMediaTypesReturnsMediaTypesFromString)
     strMediaTypes.Append("text");
     eMediaTypes |= MEDIATYPE_TEXT;
     EXPECT_EQ(MtcMediaUtil::StringToMediaTypes(strMediaTypes), eMediaTypes);
+}
+
+TEST_F(MtcMediaUtilTest, RefineMediaInfoByCallTypeReturnsMediaInfoWithOnlyAudioIfCallTypeIsVoip)
+{
+    MediaInfo objMediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_SEND_RECEIVE, DIRECTION_SEND_RECEIVE,
+            AUDIO_QUALITY_AMR_WB, VIDEO_QUALITY_QCIF, GTT_MODE_FULL);
+    MtcMediaUtil::RefineMediaInfoByCallType(CallType::VOIP, objMediaInfo);
+
+    EXPECT_NE(objMediaInfo.eAudioDirection, DIRECTION_INVALID);
+    EXPECT_NE(objMediaInfo.eAudioQuality, AUDIO_QUALITY_NONE);
+
+    EXPECT_EQ(objMediaInfo.eVideoDirection, DIRECTION_INVALID);
+    EXPECT_EQ(objMediaInfo.eVideoQuality, VIDEO_QUALITY_NONE);
+
+    EXPECT_EQ(objMediaInfo.eTextDirection, DIRECTION_INVALID);
+    EXPECT_EQ(objMediaInfo.eGttMode, GTT_MODE_INVALID);
+}
+
+TEST_F(MtcMediaUtilTest, RefineMediaInfoByCallTypeReturnsMediaInfoWithAudioAndVideoIfCallTypeIsVt)
+{
+    MediaInfo objMediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_SEND_RECEIVE, DIRECTION_SEND_RECEIVE,
+            AUDIO_QUALITY_AMR_WB, VIDEO_QUALITY_QCIF, GTT_MODE_FULL);
+    MtcMediaUtil::RefineMediaInfoByCallType(CallType::VT, objMediaInfo);
+
+    EXPECT_NE(objMediaInfo.eAudioDirection, DIRECTION_INVALID);
+    EXPECT_NE(objMediaInfo.eAudioQuality, AUDIO_QUALITY_NONE);
+
+    EXPECT_NE(objMediaInfo.eVideoDirection, DIRECTION_INVALID);
+    EXPECT_NE(objMediaInfo.eVideoQuality, VIDEO_QUALITY_NONE);
+
+    EXPECT_EQ(objMediaInfo.eTextDirection, DIRECTION_INVALID);
+    EXPECT_EQ(objMediaInfo.eGttMode, GTT_MODE_INVALID);
+}
+
+TEST_F(MtcMediaUtilTest, RefineMediaInfoByCallTypeReturnsMediaInfoWithAudioAndTextIfCallTypeIsRtt)
+{
+    MediaInfo objMediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_SEND_RECEIVE, DIRECTION_SEND_RECEIVE,
+            AUDIO_QUALITY_AMR_WB, VIDEO_QUALITY_QCIF, GTT_MODE_FULL);
+    MtcMediaUtil::RefineMediaInfoByCallType(CallType::RTT, objMediaInfo);
+
+    EXPECT_NE(objMediaInfo.eAudioDirection, DIRECTION_INVALID);
+    EXPECT_NE(objMediaInfo.eAudioQuality, AUDIO_QUALITY_NONE);
+
+    EXPECT_EQ(objMediaInfo.eVideoDirection, DIRECTION_INVALID);
+    EXPECT_EQ(objMediaInfo.eVideoQuality, VIDEO_QUALITY_NONE);
+
+    EXPECT_NE(objMediaInfo.eTextDirection, DIRECTION_INVALID);
+    EXPECT_NE(objMediaInfo.eGttMode, GTT_MODE_INVALID);
+}
+
+TEST_F(MtcMediaUtilTest,
+        RefineMediaInfoByCallTypeReturnsMediaInfoWithAudioVideoAndTextIfCallTypeIsVideoRtt)
+{
+    MediaInfo objMediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_SEND_RECEIVE, DIRECTION_SEND_RECEIVE,
+            AUDIO_QUALITY_AMR_WB, VIDEO_QUALITY_QCIF, GTT_MODE_FULL);
+    MtcMediaUtil::RefineMediaInfoByCallType(CallType::VIDEO_RTT, objMediaInfo);
+
+    EXPECT_NE(objMediaInfo.eAudioDirection, DIRECTION_INVALID);
+    EXPECT_NE(objMediaInfo.eAudioQuality, AUDIO_QUALITY_NONE);
+
+    EXPECT_NE(objMediaInfo.eVideoDirection, DIRECTION_INVALID);
+    EXPECT_NE(objMediaInfo.eVideoQuality, VIDEO_QUALITY_NONE);
+
+    EXPECT_NE(objMediaInfo.eTextDirection, DIRECTION_INVALID);
+    EXPECT_NE(objMediaInfo.eGttMode, GTT_MODE_INVALID);
+}
+
+TEST_F(MtcMediaUtilTest,
+        RefineMediaInfoByCallTypeReturnsMediaInfoWithoutValidMediaIfCallTypeIsUnknown)
+{
+    MediaInfo objMediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_SEND_RECEIVE, DIRECTION_SEND_RECEIVE,
+            AUDIO_QUALITY_AMR_WB, VIDEO_QUALITY_QCIF, GTT_MODE_FULL);
+    MtcMediaUtil::RefineMediaInfoByCallType(CallType::UNKNOWN, objMediaInfo);
+
+    EXPECT_EQ(objMediaInfo.eAudioDirection, DIRECTION_INVALID);
+    EXPECT_EQ(objMediaInfo.eAudioQuality, AUDIO_QUALITY_NONE);
+
+    EXPECT_EQ(objMediaInfo.eVideoDirection, DIRECTION_INVALID);
+    EXPECT_EQ(objMediaInfo.eVideoQuality, VIDEO_QUALITY_NONE);
+
+    EXPECT_EQ(objMediaInfo.eTextDirection, DIRECTION_INVALID);
+    EXPECT_EQ(objMediaInfo.eGttMode, GTT_MODE_INVALID);
+}
+
+TEST_F(MtcMediaUtilTest, GetPemTypeReturnsCorrectPemType)
+{
+    EXPECT_EQ(MtcMediaUtil::GetPemType("sendrecv"), PemType::SENDRECV);
+    EXPECT_EQ(MtcMediaUtil::GetPemType("sendonly"), PemType::SENDONLY);
+    EXPECT_EQ(MtcMediaUtil::GetPemType("recvonly"), PemType::RECVONLY);
+    EXPECT_EQ(MtcMediaUtil::GetPemType("inactive"), PemType::INACTIVE);
+
+    EXPECT_EQ(MtcMediaUtil::GetPemType("sendrecv;param=1"), PemType::SENDRECV);
+    EXPECT_EQ(MtcMediaUtil::GetPemType(""), PemType::NONE);
+    EXPECT_EQ(MtcMediaUtil::GetPemType("some_other_value"), PemType::NONE);
+    EXPECT_EQ(MtcMediaUtil::GetPemType("SendRecv"), PemType::NONE);
 }
 
 }  // namespace android

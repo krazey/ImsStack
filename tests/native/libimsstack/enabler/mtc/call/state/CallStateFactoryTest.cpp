@@ -14,19 +14,30 @@
  * limitations under the License.
  */
 
+#include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/state/CallStateFactory.h"
+#include "helper/MockICallStateProxy.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+using ::testing::ReturnRef;
 
 class CallStateFactoryTest : public ::testing::Test
 {
 public:
     MockIMtcCallContext objMockCallContext;
+    MockICallStateProxy objCallStateProxy;
     CallStateFactory* pStateFactory;
+    CallInfo objCallInfo;
 
 protected:
-    virtual void SetUp() override { pStateFactory = new CallStateFactory(); }
+    virtual void SetUp() override
+    {
+        ON_CALL(objMockCallContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
+        ON_CALL(objMockCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+        pStateFactory = new CallStateFactory();
+    }
 
     virtual void TearDown() override { delete pStateFactory; }
 };

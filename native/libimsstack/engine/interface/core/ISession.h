@@ -52,7 +52,7 @@ class Replaces;
 class ISession : public IServiceMethod
 {
 protected:
-    virtual ~ISession() = default;
+    ~ISession() override = default;
 
 public:
     /**
@@ -384,6 +384,14 @@ public:
     virtual IMS_BOOL IsSdpNegotiationAllowedForNonRpr() const = 0;
 
     /**
+     * @brief Checks if SDP OA state is in preview mode or not.
+     *
+     * @return If SDP OA state is in preview mode, returns IMS_TRUE.
+     *         Otherwise, returns IMS_FALSE.
+     */
+    virtual IMS_BOOL IsSdpOaInPreviewMode() const = 0;
+
+    /**
      * @brief This method can be used a reject a session invitation or a session update depending
      *        on the context with a specific SIP status code.
      *
@@ -693,6 +701,24 @@ public:
      */
     virtual ISdpReader* GetRemoteMediaCapabilities() const = 0;
 
+    /**
+     * @brief Checks whether this session received the CANCEL request while the session is in
+     *        STATE_ESTABLISHING state (i.e. user accepts the call - 200 OK sent).
+     *
+     * NOTE: Basically, the remote endpoint will terminate the session using BYE request
+     *       after receiving 200 OK for CANCEL request.
+     *
+     * @return IMS_TRUE if the CANCEL request is received while the session is
+     *         in STATE_ESTABLISHING state, IMS_FALSE otherwise.
+     */
+    virtual IMS_BOOL IsSessionCanceledOnAccepted() const = 0;
+
+    /**
+     * @brief Aborts an early UPDATE transaction sent before the session is established
+     *        or reestablished.
+     */
+    virtual void AbortEarlyUpdateTransaction() = 0;
+
 public:
     /// States of ISession
     enum
@@ -801,7 +827,12 @@ public:
         /// ex. VRBT (Video RingBack Tone) for KR operators
         CONFIG_SUPPORT_EARLY_SESSION_MODEL = 1 << 3,
         /// This is to specify whether the 100 Trying response needs to be notified to the enabler.
-        CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED = 1 << 4
+        CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED = 1 << 4,
+        /// Specify whether the subsequent SDP answer should be ignored
+        /// when SDP OA state is in preview mode.
+        CONFIG_IGNORE_SUBSEQUENT_SDP_ANSWER_IN_PREVIEW_MODE = 1 << 5,
+        /// Specify whether the preview mode is supported.
+        CONFIG_SUPPORT_PREVIEW = 1 << 6
     };
 
     /// Index for the most recent response message

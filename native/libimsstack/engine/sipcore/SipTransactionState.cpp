@@ -13,12 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "AStringBuffer.h"
 #include "ServiceMemory.h"
+#include "ServiceTrace.h"
 
+#include "SipStackManager.h"
+#include "transport/SipTransportInfo.h"
+#include "txn/SipTxn.h"
+
+#include "ISipHeader.h"
 #include "ISipTransactionStateListener.h"
 #include "SipFactoryProxy.h"
 #include "SipIpSecState.h"
 #include "SipMessage.h"
+#include "SipMessageInfo.h"
 #include "SipMessageTracker.h"
 #include "SipPacketTracker.h"
 #include "SipPrivate.h"
@@ -29,7 +37,7 @@
 #include "SipTransport.h"
 #include "SipTxnContextData.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipTransactionState::SipTransactionState() :
@@ -276,7 +284,8 @@ PUBLIC VIRTUAL IMS_RESULT SipTransactionState::RetransmitMessage()
         return IMS_FAILURE;
     }
 
-    if (!m_pTransport->SendToNetwork(objBuffer.GetData(), objBuffer.GetLength(), IMS_FALSE))
+    if (!m_pTransport->SendToNetwork(
+                objBuffer.GetData(), objBuffer.GetLength(), GetSipProfile(), IMS_FALSE))
     {
         IMS_TRACE_E(0, "Retransmitting ACK or 2xx to INVITE request failed", 0, 0, 0);
         return IMS_FAILURE;
@@ -297,7 +306,7 @@ PUBLIC VIRTUAL IMS_RESULT SipTransactionState::RetransmitMessage()
 
 PUBLIC VIRTUAL IMS_BOOL SipTransactionState::UpdateTransportDetails()
 {
-    if (!m_pTransport->UpdateDestinationInfo(m_pSipMsg))
+    if (!m_pTransport->UpdateDestinationInfo(m_pSipMsg, GetSipProfile()))
     {
         return IMS_FALSE;
     }
@@ -340,7 +349,7 @@ IMS_BOOL SipTransactionState::SendToNetwork(IN const IMS_BYTE* pBuffer, IN IMS_S
         return IMS_FALSE;
     }
 
-    return m_pTransport->SendToNetwork(pBuffer, nBuffLen);
+    return m_pTransport->SendToNetwork(pBuffer, nBuffLen, GetSipProfile());
 }
 
 PUBLIC
@@ -359,7 +368,7 @@ PROTECTED VIRTUAL SipTransactionState* SipTransactionState::Clone()
 }
 
 PROTECTED
-IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* pTimerValues)
+IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN const SipTimerValues* pTimerValues)
 {
     IMS_TRACE_D("Send", 0, 0, 0);
 
@@ -436,7 +445,7 @@ IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* 
         }
     }
 
-    pTxnContext->pTxnContextData = static_cast<SIP_VOID*>(pTxnContextData);
+    pTxnContext->m_pTxnContextData = static_cast<SIP_VOID*>(pTxnContextData);
 
     ISipUserData objUserData;
     objUserData.SetUserData(static_cast<SIP_VOID*>(pTxnContext));
@@ -459,12 +468,15 @@ IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* 
         return IMS_FALSE;  // throw exception : network not available
     }
 
+    const SipMethod objMethod = SipStack::GetMethod(pSipMsg);
+    SipMessageInfo objMsgInfo(GetSlotId(), objMethod, pSipMsg, SipMessageInfo::DIRECTION_OUTGOING);
+    LogSipMessageInfo(objMsgInfo);
+
     SipFactoryProxy* pFactoryProxy = SipFactoryProxy::GetInstance();
 
     if (pFactoryProxy->IsMessageTrackerEnabled(GetSlotId()))
     {
         SipMessageTracker* pMessageTracker = pFactoryProxy->GetMessageTracker(GetSlotId());
-        const SipMethod objMethod = SipStack::GetMethod(pSipMsg);
 
         if (SipStack::IsRequestMessage(pSipMsg))
         {
@@ -549,7 +561,7 @@ IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* 
             m_pTxnKey = pTxnKey;
         }
 
-        if (m_pTxnKey->GetTxnType() == SipTxn::INV_SER_TXN)
+        if (m_pTxnKey->GetTxnType() == SipTxn::INVITE_SERVER)
         {
             // If the method is INVITE, then store the txn key in the InvTxnKey.
             // This will be used when the application calls AbortCall().
@@ -557,7 +569,7 @@ IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* 
 
             if (nStatusCode != SipStatusCode::SC_INVALID)
             {
-                m_pTxnKey->SetRespCode(static_cast<SIP_UINT16>(nStatusCode));
+                m_pTxnKey->SetResponseCode(static_cast<SIP_UINT16>(nStatusCode));
             }
         }
     }
@@ -567,7 +579,7 @@ IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* 
 
 PROTECTED
 void SipTransactionState::SetTimerValues(
-        IN SipTimerValues* pTimerValues, IN_OUT SipTxnContext*& pTxnContext)
+        IN const SipTimerValues* pTimerValues, IN_OUT SipTxnContext*& pTxnContext)
 {
     SipStack::SetTimerValues(pTimerValues, pTxnContext);
 }
@@ -583,4 +595,95 @@ void SipTransactionState::SetFlowControlOption(IN const SipMethod& objMethod)
     {
         m_pTransport->SetTransactionFlowControlRequired(IMS_TRUE);
     }
+}
+
+PROTECTED GLOBAL void SipTransactionState::LogSipMessageInfo(IN const SipMessageInfo& objMsgInfo)
+{
+    AStringBuffer objBuffer(256);
+
+    objBuffer.Append("{ ");
+    objBuffer.Append(objMsgInfo.IsOutgoingMessage() ? "OUT, " : "IN, ");
+
+    AString strTemp;
+    ::SipMessage* pSipMsg = objMsgInfo.GetMessage();
+    // SIP request
+    if (pSipMsg->GetMsgType() == ::SipMessage::REQ_TYPE)
+    {
+        objBuffer.Append(objMsgInfo.GetMethod().ToString());
+        objBuffer.Append(", ");
+
+        strTemp = AString::ConstNull();
+        SipAddrSpec* pAddrSpec = SipStack::GetRequestUri(pSipMsg);
+        SipStack::EncodeAddrSpec(pAddrSpec, IMS_FALSE, strTemp);
+        SipStack::FreeAddrSpec(pAddrSpec);
+        // URI scheme + 3 characters only
+        strTemp.Replace(7, strTemp.GetLength(), "***");
+        objBuffer.Append(strTemp);
+    }
+    // SIP response
+    else
+    {
+        strTemp = AString::ConstNull();
+        SipStatusCode objStatusCode = SipStack::GetStatusCodeEx(pSipMsg);
+        strTemp.Sprintf("%d %s", objStatusCode.ToInt(), objStatusCode.GetReasonPhrase().GetStr());
+        objBuffer.Append(strTemp);
+    }
+
+    objBuffer.Append(", ");
+
+    // Include a general and mandatory SIP header information.
+    strTemp = SipStack::GetHeaderAsString(pSipMsg, ISipHeader::CSEQ);
+    objBuffer.Append("cseq: ");
+    objBuffer.Append(strTemp);
+    objBuffer.Append(", ");
+
+    strTemp = SipStack::GetHeaderAsString(pSipMsg, ISipHeader::CALL_ID);
+    strTemp = strTemp.GetSubStr(0, strTemp.GetIndexOf('@'));
+
+    // Strip the IPv6 address or port number if present.
+    IMS_SINT32 nIndex = strTemp.GetIndexOf(':');
+
+    if (nIndex != AString::NPOS)
+    {
+        strTemp = strTemp.GetSubStr(0, nIndex);
+    }
+
+    // Strip the IPv4 address if present.
+    nIndex = strTemp.GetIndexOf('.');
+
+    if (nIndex != AString::NPOS)
+    {
+        strTemp = strTemp.GetSubStr(0, nIndex);
+    }
+
+    objBuffer.Append("call-id: ");
+    objBuffer.Append(strTemp);
+    objBuffer.Append(", ");
+
+    strTemp = SipStack::GetViaBranchParameter(pSipMsg);
+    objBuffer.Append("via-branch: ");
+    objBuffer.Append(strTemp.GetSubStr(0, 32));
+    objBuffer.Append(", ");
+
+    // Include an extra information for the specific SIP messages
+    if (pSipMsg->GetMsgType() == ::SipMessage::REQ_TYPE &&
+            objMsgInfo.GetMethod().Equals(SipMethod::PRACK))
+    {
+        strTemp = SipStack::GetHeaderAsString(pSipMsg, ISipHeader::RACK);
+        objBuffer.Append("rack: ");
+        objBuffer.Append(strTemp);
+        objBuffer.Append(", ");
+    }
+    else if (SipStack::IsMessageRpr(pSipMsg))
+    {
+        strTemp = SipStack::GetHeaderAsString(pSipMsg, ISipHeader::RSEQ);
+        objBuffer.Append("rseq: ");
+        objBuffer.Append(strTemp);
+        objBuffer.Append(", ");
+    }
+
+    objBuffer.Append("}");
+
+    IMS_TRACE_I("SIPMSG[%d]=%s", objMsgInfo.GetSlotId(),
+            static_cast<const AStringBuffer&>(objBuffer).GetString().GetStr(), 0);
 }

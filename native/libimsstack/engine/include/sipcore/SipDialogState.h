@@ -18,12 +18,14 @@
 
 #include "RcObject.h"
 
-#include "SipDState.h"
-#include "SipHeader.h"
-#include "SipMessageInfo.h"
+#include "msg/SipMessage.h"
 
+class ISipHeader;
 class SipDialogEx;
 class SipDialogSharedState;
+class SipHeader;
+class SipMessageInfo;
+class SipMethod;
 
 /**
  * @brief This class contains certain pieces of state needed for further message transmissions
@@ -55,7 +57,7 @@ public:
 public:
     explicit SipDialogState(IN IMS_BOOL bIsCaller = IMS_TRUE);
     SipDialogState(IN const SipDialogState& other);
-    virtual ~SipDialogState();
+    ~SipDialogState() override;
 
     SipDialogState& operator=(IN const SipDialogState&) = delete;
 
@@ -77,7 +79,7 @@ public:
     inline IMS_BOOL IsCaller() const { return m_bIsCaller; }
 
     IMS_BOOL InitDialogDetails(IN ::SipMessage* pSipMsg);
-    IMS_BOOL InitDialogDetails(IN IMS_SINT32 nTrigger, IN SipDialogState* pDState);
+    IMS_BOOL InitDialogDetails(IN IMS_SINT32 nTrigger, IN const SipDialogState* pDState);
     IMS_BOOL InitRequest(IN const SipMethod& objMethod, IN_OUT ::SipMessage*& pSipMsg);
     // CONTACT_HEADER_PARAMETER_CONTROL_FOR_MID_DIALOG_REQUEST
     IMS_RESULT SetContactParameter(
@@ -99,8 +101,8 @@ public:
 private:
     void ClearRouteSet();
     IMS_BOOL CreateRouteSet(IN const SipMessageInfo& objMsgInfo);
-    IMS_BOOL UpdateComponents(IN const SipMessageInfo& objMsgInfo);
-    IMS_BOOL UpdateContact(IN const SipMessageInfo& objMsgInfo);
+    void UpdateComponents(IN const SipMessageInfo& objMsgInfo);
+    void UpdateContact(IN const SipMessageInfo& objMsgInfo);
     IMS_BOOL UpdateRemoteUri(IN const SipMessageInfo& objMsgInfo);
     IMS_BOOL UpdateRouteSet(IN const SipMessageInfo& objMsgInfo);
     // HEADER_REQ_SESSION-ID

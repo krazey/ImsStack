@@ -16,30 +16,33 @@
 
 package com.android.imsstack.enabler.aos;
 
+import static com.android.imsstack.base.TestAppContext.SLOT0;
+import static com.android.imsstack.base.TestAppContext.SUB_ID_1;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
+import android.content.IntentFilter;
 import android.os.Looper;
 import android.os.Message;
-import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyCallback;
-import android.telephony.TelephonyManager;
 
 import com.android.imsstack.ContextFixture;
+import com.android.imsstack.base.TelephonyManagerProxy;
+import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.enabler.aos.service.AosService;
-import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
 import org.junit.Before;
@@ -51,21 +54,12 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.lang.reflect.Field;
 import java.util.concurrent.Executor;
 
 @RunWith(JUnit4.class)
 public class AosSettingServiceTest {
-    private static final int MAX_SIM_SLOT = 1;
-    private static final int SLOT_0 = 0;
-    private static final int SLOT_1 = 1;
-    private static final int SUB_ID_0 = 1;
-    private static final int SUB_ID_1 = 2;
-    private static final int[] SUB_IDS = { SUB_ID_0 };
-
-    private Context mContext;
-    private SubscriptionManager mSubscriptionManager;
-    private TelephonyManager mTelephonyManager;
+    private TestAppContext mTestAppContext;
+    private TelephonyManagerProxy mTelephonyManagerProxy;
     private AosSettingService mAosSettingService;
 
     @Mock SimInterface mMockSimInterface;
@@ -79,32 +73,28 @@ public class AosSettingServiceTest {
 
         MockitoAnnotations.initMocks(this);
 
-        mContext = new ContextFixture().getTestDouble();
-        AppContext.init(mContext);
+        mTestAppContext = new TestAppContext(new ContextFixture().getTestDouble());
+        mTestAppContext.setUp();
 
-        mSubscriptionManager = mContext.getSystemService(SubscriptionManager.class);
-        when(mSubscriptionManager.getSubscriptionIds(SLOT_0)).thenReturn(SUB_IDS);
-
-        mTelephonyManager = mContext.getSystemService(TelephonyManager.class);
-        when(mTelephonyManager.createForSubscriptionId(SUB_ID_0)).thenReturn(mTelephonyManager);
-        when(mTelephonyManager.getActiveModemCount()).thenReturn(MAX_SIM_SLOT);
-        when(mTelephonyManager.getSupportedModemCount()).thenReturn(MAX_SIM_SLOT);
-
-        AgentFactory.getInstance().setAgent(SimInterface.class, mMockSimInterface, SLOT_0);
+        mTelephonyManagerProxy = mTestAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
         AgentFactory.getInstance().setAgent(
-                NativeStateInterface.class, mMockNativeStateInterface, SLOT_0);
-        when(mMockSimInterface.getSubId()).thenReturn(SUB_ID_0);
+                SimInterface.class, mMockSimInterface, SLOT0);
+        AgentFactory.getInstance().setAgent(
+                NativeStateInterface.class, mMockNativeStateInterface, SLOT0);
+        when(mMockSimInterface.getSubId()).thenReturn(SUB_ID_1);
 
-        mAosSettingService = new AosSettingService(SLOT_0);
+        mAosSettingService = new AosSettingService(SLOT0);
         mAosSettingService.init();
     }
 
     @After
     public void tearDown() throws Exception {
         mAosSettingService.cleanup();
-        AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT_0);
-        AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT_0);
-        AppContext.deinit();
+        AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT0);
+        AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT0);
+        AosFactory.getInstance().replaceService(SLOT0, null);
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
     }
 
     @Test
@@ -112,32 +102,30 @@ public class AosSettingServiceTest {
         // mAosSettingService.init() is called in setup()
 
         verify(mMockNativeStateInterface).addListener(any(NativeStateInterface.Listener.class));
-        verify(mContext).registerReceiver(mAosSettingService.mIntentReceiverListener,
-                mAosSettingService.mIntentReceiverListener.getFilter(), Context.RECEIVER_EXPORTED);
+        verify(mTestAppContext.getBroadcastReceiverProxy()).registerReceiver(
+                eq(mAosSettingService.getIntentReceiverListener()), any(IntentFilter.class));
         verify(mMockSimInterface).addListener(any(Sim.Listener.class));
-        verify(mTelephonyManager).registerTelephonyCallback(
-                AppContext.getInstance().getMainExecutor(),
-                mAosSettingService.mUserMobileDataStateListener);
+        verify(mTelephonyManagerProxy).registerTelephonyCallback(
+                any(Executor.class), eq(mAosSettingService.getUserMobileDataStateListener()));
     }
 
     @Test
     public void cleanup_cleanUpResources() {
-        TelephonyCallback callback = mAosSettingService.mUserMobileDataStateListener;
-        BroadcastReceiver receiver = mAosSettingService.mIntentReceiverListener;
-        Handler handler = mAosSettingService.mHandler;
+        TelephonyCallback callback = mAosSettingService.getUserMobileDataStateListener();
+        BroadcastReceiver receiver = mAosSettingService.getIntentReceiverListener();
 
         mAosSettingService.cleanup();
 
-        verify(mTelephonyManager).unregisterTelephonyCallback(callback);
+        verify(mTelephonyManagerProxy).unregisterTelephonyCallback(callback);
         verify(mMockSimInterface).removeListener(any(Sim.Listener.class));
-        verify(mContext).unregisterReceiver(receiver);
+        verify(mTestAppContext.getBroadcastReceiverProxy()).unregisterReceiver(receiver);
         verify(mMockNativeStateInterface).removeListener(any(NativeStateInterface.Listener.class));
     }
 
     @Test
     public void nativeStateListener_onNativeServiceReady() {
         AosService mockAosService = Mockito.mock(AosService.class);
-        AosFactory.getInstance().mAosServices.put(SLOT_0, mockAosService);
+        AosFactory.getInstance().replaceService(TestAppContext.SLOT0, mockAosService);
         ArgumentCaptor<NativeStateInterface.Listener> listenerCaptor =
                 ArgumentCaptor.forClass(NativeStateInterface.Listener.class);
         verify(mMockNativeStateInterface).addListener(listenerCaptor.capture());
@@ -151,11 +139,11 @@ public class AosSettingServiceTest {
     @Test
     public void settingServiceHandler_mobileDataStateNotChanged() {
         AosService mockAosService = Mockito.mock(AosService.class);
-        AosFactory.getInstance().mAosServices.put(SLOT_0, mockAosService);
+        AosFactory.getInstance().replaceService(TestAppContext.SLOT0, mockAosService);
 
-        Message msg = Message.obtain(mAosSettingService.mHandler,
+        Message msg = Message.obtain(mAosSettingService.getHandler(),
                 AosSettingService.EVENT_MOBILE_DATA_STATE_CHANGED, false);
-        mAosSettingService.mHandler.handleMessage(msg);
+        mAosSettingService.getHandler().handleMessage(msg);
 
         verify(mockAosService, never()).notifyMobileDataSetting(false);
     }
@@ -163,11 +151,10 @@ public class AosSettingServiceTest {
     @Test
     public void settingServiceHandler_mobileDataStateChanged() {
         AosService mockAosService = Mockito.mock(AosService.class);
-        AosFactory.getInstance().mAosServices.put(SLOT_0, mockAosService);
-
-        Message msg = Message.obtain(mAosSettingService.mHandler,
+        AosFactory.getInstance().replaceService(TestAppContext.SLOT0, mockAosService);
+        Message msg = Message.obtain(mAosSettingService.getHandler(),
                 AosSettingService.EVENT_MOBILE_DATA_STATE_CHANGED, true);
-        mAosSettingService.mHandler.handleMessage(msg);
+        mAosSettingService.getHandler().handleMessage(msg);
 
         verify(mockAosService).notifyMobileDataSetting(true);
     }
@@ -175,10 +162,10 @@ public class AosSettingServiceTest {
     @Test
     public void settingServiceHandler_shutDown() {
         AosService mockAosService = Mockito.mock(AosService.class);
-        AosFactory.getInstance().mAosServices.put(SLOT_0, mockAosService);
-
-        Message msg = Message.obtain(mAosSettingService.mHandler, AosSettingService.EVENT_SHUTDOWN);
-        mAosSettingService.mHandler.handleMessage(msg);
+        AosFactory.getInstance().replaceService(TestAppContext.SLOT0, mockAosService);
+        Message msg = Message.obtain(mAosSettingService.getHandler(),
+                AosSettingService.EVENT_SHUTDOWN);
+        mAosSettingService.getHandler().handleMessage(msg);
 
         verify(mockAosService).notifyPowerOff();
     }
@@ -189,11 +176,12 @@ public class AosSettingServiceTest {
         verify(mMockSimInterface).addListener(captor.capture());
         Sim.Listener simListener = captor.getValue();
 
-        AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT_0);
+        AgentFactory.getInstance().setAgent(SimInterface.class, null, TestAppContext.SLOT0);
         // Ignored because SimInterface is null.
         simListener.onSimStateChanged();
 
-        AgentFactory.getInstance().setAgent(SimInterface.class, mMockSimInterface, SLOT_0);
+        AgentFactory.getInstance().setAgent(
+                SimInterface.class, mMockSimInterface, TestAppContext.SLOT0);
         when(mMockSimInterface.isSimLoadCompleted()).thenReturn(false);
         // Ignored because SIM state is not fully loaded.
         simListener.onSimStateChanged();
@@ -202,58 +190,57 @@ public class AosSettingServiceTest {
         when(mMockSimInterface.isSimLoadCompleted()).thenReturn(true);
         simListener.onSimStateChanged();
 
-        when(mMockSimInterface.getSubId()).thenReturn(SUB_ID_1);
+        when(mMockSimInterface.getSubId()).thenReturn(TestAppContext.SUB_ID_2);
         // Different subscription
         simListener.onSimStateChanged();
 
-        verify(mTelephonyManager).unregisterTelephonyCallback(any(TelephonyCallback.class));
-        verify(mTelephonyManager)
+        verify(mTelephonyManagerProxy).unregisterTelephonyCallback(any(TelephonyCallback.class));
+        verify(mTelephonyManagerProxy, times(2))
                 .registerTelephonyCallback(any(Executor.class), any(TelephonyCallback.class));
     }
 
     @Test
     public void userMobileDataStateListener_onUserMobileDataStateChanged() {
-        mAosSettingService.mUserMobileDataStateListener.onUserMobileDataStateChanged(true);
+        mAosSettingService.getUserMobileDataStateListener().onUserMobileDataStateChanged(true);
 
-        assertTrue(mAosSettingService.mHandler
+        assertTrue(mAosSettingService.getHandler()
                 .hasMessages(AosSettingService.EVENT_MOBILE_DATA_STATE_CHANGED));
     }
 
     @Test
     public void intentReceiverListener_actionReboot() {
         Intent intent = new Intent(Intent.ACTION_REBOOT);
-        mAosSettingService.mIntentReceiverListener.onReceive(mContext, intent);
+        mAosSettingService.getIntentReceiverListener().onReceive(mTestAppContext.getContext(),
+                intent);
 
-        assertTrue(mAosSettingService.mHandler.hasMessages(AosSettingService.EVENT_REBOOT));
+        assertTrue(mAosSettingService.getHandler().hasMessages(
+                AosSettingService.EVENT_REBOOT));
     }
 
     @Test
     public void intentReceiverListener_actionShutdown() {
         Intent intent = new Intent(Intent.ACTION_SHUTDOWN);
-        mAosSettingService.mIntentReceiverListener.onReceive(mContext, intent);
+        mAosSettingService.getIntentReceiverListener().onReceive(mTestAppContext.getContext(),
+                intent);
 
-        assertTrue(mAosSettingService.mHandler.hasMessages(AosSettingService.EVENT_SHUTDOWN));
+        assertTrue(mAosSettingService.getHandler().hasMessages(
+                AosSettingService.EVENT_SHUTDOWN));
     }
 
     @Test
     public void intentReceiverListener_actionNotSupported() {
         Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        mAosSettingService.mIntentReceiverListener.onReceive(mContext, intent);
+        mAosSettingService.getIntentReceiverListener().onReceive(mTestAppContext.getContext(),
+                intent);
 
-        assertFalse(mAosSettingService.mHandler.hasMessagesOrCallbacks());
+        assertFalse(mAosSettingService.getHandler().hasMessagesOrCallbacks());
     }
 
     @Test
     public void intentReceiverListener_nullIntent() {
-        mAosSettingService.mIntentReceiverListener.onReceive(mContext, null);
+        mAosSettingService.getIntentReceiverListener().onReceive(mTestAppContext.getContext(),
+                null);
 
-        assertFalse(mAosSettingService.mHandler.hasMessagesOrCallbacks());
-    }
-
-    private synchronized void replaceInstance(final Class c, final String instanceName,
-            final Object obj, final Object newValue) throws Exception {
-        Field field = c.getDeclaredField(instanceName);
-        field.setAccessible(true);
-        field.set(obj, newValue);
+        assertFalse(mAosSettingService.getHandler().hasMessagesOrCallbacks());
     }
 }

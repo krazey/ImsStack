@@ -34,7 +34,7 @@ class SipProfile;
 class IRegistration : public IRegBase
 {
 protected:
-    virtual ~IRegistration() = default;
+    ~IRegistration() override = default;
 
 public:
     /**

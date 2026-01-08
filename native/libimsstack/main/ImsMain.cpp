@@ -25,7 +25,7 @@
 #include "ImsMain.h"
 #include "NativeCommandsHandler.h"
 
-__IMS_TRACE_TAG_USER_DECL__("Main")
+__IMS_TRACE_TAG_BASE__;
 
 static NativeCommandsHandler s_objCommandsHandler;
 

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#include "../../interface/aos/MockIImsAos.h"
-#include "../../interface/aos/MockIImsAosInfo.h"
 #include "IIpcan.h"
 #include "INetworkWatcher.h"
 #include "ImsAosParameter.h"
 #include "ImsAosReason.h"
+#include "MockIImsAos.h"
+#include "MockIImsAosInfo.h"
 #include "ServiceNetworkPolicy.h"
 #include "helper/MtcAosConnector.h"
 #include <gtest/gtest.h>
@@ -120,7 +120,7 @@ TEST_F(MtcAosConnectorTest, ControlInvokesImsAosApi)
     EXPECT_CALL(objMockIImsAos, Control(ImsAosControl::REGISTER_START)).Times(1);
     EXPECT_CALL(objMockIImsAos, Control(ImsAosControl::REGISTER_REFRESH)).Times(1);
     EXPECT_CALL(objMockIImsAos, Control(ImsAosControl::REGISTER_STOP)).Times(1);
-    EXPECT_CALL(objMockIImsAos, Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB)).Times(1);
+    EXPECT_CALL(objMockIImsAos, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
 
     EXPECT_CALL(objMockIImsAos, Control(ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF)).Times(0);
     EXPECT_CALL(objMockIImsAos, Control(ImsAosControl::PCSCF_NEXT)).Times(0);
@@ -129,7 +129,7 @@ TEST_F(MtcAosConnectorTest, ControlInvokesImsAosApi)
     pConnector->Control(ImsAosControl::REGISTER_START);
     pConnector->Control(ImsAosControl::REGISTER_REFRESH);
     pConnector->Control(ImsAosControl::REGISTER_STOP);
-    pConnector->Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB);
+    pConnector->Control(ImsAosControl::REGISTER_REINITIATE);
 }
 
 // IImsAosInfo
@@ -257,6 +257,13 @@ TEST_F(MtcAosConnectorTest, GetServiceRouteHeaderValueInvokesImsAosInfoApi)
     EXPECT_STREQ(pConnector->GetServiceRouteHeaderValue().GetStr(), strSrHeader.GetStr());
 }
 
+TEST_F(MtcAosConnectorTest, IsCrossSimConnectedInvokesImsAosInfoApi)
+{
+    ON_CALL(objMockIImsAosInfo, IsCrossSimConnected()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_EQ(pConnector->IsCrossSimConnected(), IMS_TRUE);
+}
+
 TEST_F(MtcAosConnectorTest, NotifyEmergencyCallStateInvokesImsAosInfoApi)
 {
     EXPECT_CALL(objMockIImsAosInfo, NotifyEmergencyCallState(IMS_TRUE)).Times(1);
@@ -272,6 +279,22 @@ TEST_F(MtcAosConnectorTest, NotifyEpsfbCallStateInvokesImsAosInfoApi)
     EXPECT_CALL(objMockIImsAosInfo, NotifyEpsfbCallState(nAnyState)).Times(1);
 
     pConnector->NotifyEpsfbCallState(nAnyState);
+}
+
+TEST_F(MtcAosConnectorTest, RegisterWithNextPcscfInvokesImsAosApi)
+{
+    IMS_UINT32 nAnyTime = 0;
+    EXPECT_CALL(objMockIImsAos, RegisterWithNextPcscf(nAnyTime)).Times(1);
+
+    pConnector->RegisterWithNextPcscf(nAnyTime);
+}
+
+TEST_F(MtcAosConnectorTest, ReinitiateRegistrationInvokesImsAosApi)
+{
+    IMS_UINT32 nAnyTime = 0;
+    EXPECT_CALL(objMockIImsAos, ReinitiateRegistration(nAnyTime)).Times(1);
+
+    pConnector->ReinitiateRegistration(nAnyTime);
 }
 
 }  // namespace android

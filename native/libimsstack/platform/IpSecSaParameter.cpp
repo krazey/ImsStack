@@ -146,9 +146,11 @@ PUBLIC
 AString IpSecSaParameter::Policy::ToString() const
 {
     AStringBuffer objSb(128);
+    AString strSpi;
+    strSpi.Sprintf("%08x", m_nSpi);
 
-    objSb.Append("[ spi=");
-    objSb.Append(m_nSpi);
+    objSb.Append("[ spi=0x");
+    objSb.Append(strSpi);
     objSb.Append(", direction=");
     objSb.Append(DirectionToString(m_nDirection));
     objSb.Append(", mode=");

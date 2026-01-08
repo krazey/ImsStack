@@ -17,9 +17,10 @@
 #ifndef INTERFACE_MTC_CONTEXT_H_
 #define INTERFACE_MTC_CONTEXT_H_
 
-#include "IMtcService.h"
 #include "ImsTypeDef.h"
+#include "helper/MtcTimerWrapper.h"
 #include <functional>
+#include <memory>
 
 class CallConnectionIdManager;
 class ICallStateProxy;
@@ -34,12 +35,16 @@ class IMtcDialingPlan;
 class IMtcEmergencyServiceManager;
 class IMtcImsEventReceiver;
 class IMtcRadioChecker;
+class IMtcService;
 class IMtcSipInterfaceFactory;
 class IMultiEndpointManager;
 class IPassiveTimerHolder;
 class ISubscriberConfig;
 class MtcConfigurationProxy;
+class MtcLocationRefresher;
+class RttAutoUpgrader;
 class OperationAsyncRunner;
+enum class ServiceType;
 
 class IMtcContext
 {
@@ -154,12 +159,39 @@ public:
     virtual IMtcEmergencyServiceManager& GetEmergencyServiceManager() = 0;
 
     /**
-     * @brief Gets
+     * @brief Runs an operation asynchronously using the EnablerThread.
      *
-     * @param objOperation
-     * @return
+     * This method schedules an asynchronous operation to be executed.
+     * The provided `pOwner` serves as the primary object managing the operation's context.
+     * It is the caller's responsibility to ensure that the owner object is appropriately
+     * set to represent the resources used in the operation.
+     *
+     * @param pOwner The object that serves as the owner or context of the operation.
+     *               This object must remain valid while the operation is being executed.
+     * @param objOperation A callable object (such as a lambda function) that defines the operation
+     *                     to be executed.
+     *
+     * @note The caller must invoke {@code ReleaseAsyncOperation} when the owner object is being
+     *       destroyed.
+     *       This ensures that resources related to the operation are not accessed incorrectly after
+     *       the owner is no longer valid.
      */
-    virtual OperationAsyncRunner* GetAsyncRunner(IN std::function<void()> objOperation) = 0;
+    virtual void RunAsyncOperation(IN void* pOwner, IN std::function<void()> objOperation) = 0;
+
+    /**
+     * @brief Releases all asynchronous operations associated with the specified owner.
+     *
+     * This method ensures that any operations linked to the provided `pOwner` are properly
+     * released or terminated. It is essential to call this method before the owner object is
+     * destroyed to prevent invalid resource access or undefined behavior.
+     *
+     * @param pOwner The object that owns the operations to be released. This should match
+     *               the owner object provided in previous `RunAsync` calls.
+     *
+     * @note Failure to call this method before destroying the owner object may result in
+     *       resource leaks or operations accessing invalid memory.
+     */
+    virtual void ReleaseAsyncOperation(IN void* pOwner) = 0;
 
     /**
      * @brief Gets
@@ -167,6 +199,13 @@ public:
      * @return
      */
     virtual IMessageUtils& GetMessageUtils() = 0;
+
+    /**
+     * @brief Creates MtcTimerWrapper. Each time it is called, a new MtcTimerWrapper is created.
+     *
+     * @return MtcTimerWrapper.
+     */
+    virtual std::unique_ptr<MtcTimerWrapper> CreateTimer() = 0;
 
     /**
      * @brief Gets
@@ -195,6 +234,27 @@ public:
      * @return
      */
     virtual CallConnectionIdManager& GetCallConnectionIdManager() = 0;
+
+    /**
+     * @brief Returns an instance of {@link MtcLocationRefresher}.
+     *
+     * @return {@link MtcLocationRefresher} instance.
+     */
+    virtual MtcLocationRefresher& GetLocationRefresher() = 0;
+
+    /**
+     * @brief Creates
+     *
+     * @return
+     */
+    virtual void CreateRttAutoUpgrader() = 0;
+
+    /**
+     * @brief Destroy
+     *
+     * @return
+     */
+    virtual void DestroyRttAutoUpgrader() = 0;
 
     /**
      * @brief Checks

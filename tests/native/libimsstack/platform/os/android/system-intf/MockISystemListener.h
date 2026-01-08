@@ -23,8 +23,8 @@
 class MockISystemListener : public ISystemListener
 {
 public:
-    inline MockISystemListener() = default;
-    inline ~MockISystemListener() = default;
+    MockISystemListener() = default;
+    ~MockISystemListener() override = default;
 
     MOCK_METHOD(void, System_NotifyEvent,
             (IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam), (override));

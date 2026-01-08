@@ -16,6 +16,7 @@
 
 package com.android.imsstack.enabler.mtc;
 
+import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 
 import com.android.imsstack.core.agents.AgentFactory;
@@ -31,11 +32,15 @@ public final class CallFeature {
     }
 
     public static boolean isAudioEvsSupported(int slotId) {
-        int[] evsCodecs = getConfigInterface(slotId).getCarrierConfig()
-                .getIntArray(CarrierConfigManager.ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY);
+        PersistableBundle audioCodecCapaPayloadTypes = getConfigInterface(slotId).getCarrierConfig()
+               .getBundle(CarrierConfigManager.ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
 
-        if (evsCodecs != null) {
-            return (evsCodecs.length > 0) ? true : false;
+        if (audioCodecCapaPayloadTypes != null){
+            int[] evsCodecs = audioCodecCapaPayloadTypes
+                    .getIntArray(CarrierConfigManager.ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY);
+            if (evsCodecs != null) {
+                return (evsCodecs.length > 0) ? true : false;
+            }
         }
 
         return false;
@@ -53,12 +58,12 @@ public final class CallFeature {
 
     public static boolean isCallHoldUsingInactive(int slotId) {
         return getConfigInterface(slotId).getCarrierConfig()
-                .getBoolean(CarrierConfig.Assets.KEY_AUDIO_HOLD_WITH_DIRECTION_INACTIVE_BOOL);
+                .getBoolean(CarrierConfig.ImsVoice.KEY_AUDIO_HOLD_WITH_DIRECTION_INACTIVE_BOOL);
     }
 
     public static boolean isIncomingResumeEventSupported(int slotId) {
         return getConfigInterface(slotId).getCarrierConfig()
-                .getBoolean(CarrierConfig.Assets.KEY_INCOMING_RESUME_EVENT_SUPPORT_BOOL);
+                .getBoolean(CarrierConfig.ImsVoice.KEY_INCOMING_RESUME_EVENT_SUPPORT_BOOL);
     }
 
     public static boolean isSrvccSupported(int slotId) {
@@ -77,44 +82,60 @@ public final class CallFeature {
                 .getBoolean(CarrierConfigManager.KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL, false);
     }
 
-    public static boolean isRttSupported(int slotId) {
-        return getConfigInterface(slotId).getCarrierConfig()
-                .getBoolean(CarrierConfigManager.KEY_RTT_SUPPORTED_BOOL, false);
-    }
-
     public static boolean isVideoDirectionInactiveOnVideoCallHold(int slotId) {
         return getConfigInterface(slotId).getCarrierConfig()
-                .getBoolean(CarrierConfig.Assets.KEY_VIDEO_HOLD_WITH_DIRECTION_INACTIVE_BOOL);
+                .getBoolean(CarrierConfig.ImsVt.KEY_VIDEO_HOLD_WITH_DIRECTION_INACTIVE_BOOL);
     }
 
     public static boolean isTextDirectionInactiveOnRttCallHold(int slotId) {
         return getConfigInterface(slotId).getCarrierConfig()
-                .getBoolean(CarrierConfig.Assets.KEY_TEXT_HOLD_WITH_DIRECTION_INACTIVE_BOOL);
+                .getBoolean(CarrierConfig.ImsRtt.KEY_TEXT_HOLD_WITH_DIRECTION_INACTIVE_BOOL);
     }
 
     public static boolean isDynamicVideoQualitySupported(int slotId) {
         return getConfigInterface(slotId).getCarrierConfig()
-                .getBoolean(CarrierConfig.Assets.KEY_DYNAMIC_VIDEO_QUALITY_SUPPORTED_BOOL);
+                .getBoolean(CarrierConfig.ImsVt.KEY_DYNAMIC_VIDEO_QUALITY_SUPPORTED_BOOL);
     }
 
     public static boolean isOneWayVideoCallByLocalEndSupported(int slotId) {
         return getConfigInterface(slotId).getCarrierConfig()
-                .getBoolean(CarrierConfig.Assets.KEY_ONE_WAY_VIDEO_BY_LOCAL_END_SUPPORTED_BOOL);
+                .getBoolean(CarrierConfig.ImsVt.KEY_ONE_WAY_VIDEO_CALL_BY_LOCAL_END_SUPPORTED_BOOL);
     }
 
     public static boolean isOneWayVideoCallByRemoteEndSupported(int slotId) {
         return getConfigInterface(slotId).getCarrierConfig()
-                .getBoolean(CarrierConfig.Assets.KEY_ONE_WAY_VIDEO_BY_REMOTE_END_SUPPORTED_BOOL);
+                .getBoolean(
+                    CarrierConfig.ImsVt.KEY_ONE_WAY_VIDEO_CALL_BY_REMOTE_END_SUPPORTED_BOOL);
     }
 
     public static boolean isNotifyConfStateWhenAnonymousUser(int slotId) {
         return getConfigInterface(slotId).getCarrierConfig()
-                .getBoolean(CarrierConfig.Assets.KEY_NOTIFY_CONF_STATE_WHEN_ANONYMOUS_USER_BOOL);
+                .getBoolean(CarrierConfig.ImsVoice.KEY_NOTIFY_CONF_STATE_WHEN_ANONYMOUS_USER_BOOL);
     }
 
     public static boolean isCallMergeableOnConferenceOnHold(int slotId) {
         return getConfigInterface(slotId).getCarrierConfig()
-                .getBoolean(CarrierConfig.Assets.KEY_CALL_MERGEABLE_ON_CONFERENCE_ON_HOLD_BOOL);
+                .getBoolean(CarrierConfig.ImsVoice.KEY_CALL_MERGEABLE_ON_CONFERENCE_ON_HOLD_BOOL);
+    }
+
+    /**
+     * Checks if the carrier supports WiFi emergency call over emergency PDN or not.
+     *
+     * @param slotId The slot-id to be checked.
+     * @return true if the carrier supports emergency PDN, false otherwise.
+     */
+    public static boolean isWiFiEmcOverEmergencyPdn(int slotId) {
+        return getConfigInterface(slotId).getCarrierConfig()
+                .getBoolean(
+                    CarrierConfigManager.ImsWfc.KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_BOOL);
+    }
+
+    /**
+     * Checks if the carrier requires additional SIP signaling based on Camera ID.
+     */
+    public static boolean isSipSignalingRequiredOnMultitasking(int slotId) {
+        return getConfigInterface(slotId).getCarrierConfig()
+                .getBoolean(CarrierConfig.ImsVt.KEY_REQUIRE_SIP_SIGNALING_ON_MULTITASKING_BOOL);
     }
 
     /**

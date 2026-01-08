@@ -16,14 +16,13 @@
 #ifndef NODE_H_
 #define NODE_H_
 
+#include "libxml/tree.h"
+
 #include "INode.h"
-#include "NamedNodeMap.h"
-#include "NodeList.h"
-#include "XmlApiParser.h"
-#include "XmlApiTree.h"
-#include "XmlApiXPath.h"
 
 class IDocument;
+class NamedNodeMap;
+class NodeList;
 
 class Node : public INode
 {
@@ -32,7 +31,7 @@ public:
     explicit Node(IN xmlNodePtr pstNode);
     explicit Node(IN xmlDocPtr pstDoc);
     explicit Node(IN xmlAttrPtr pstAttr);
-    virtual ~Node();
+    ~Node() override;
 
     Node(IN const Node&) = delete;
     Node& operator=(IN const Node&) = delete;

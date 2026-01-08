@@ -21,6 +21,9 @@ import android.os.Looper;
 import android.telephony.ims.ImsStreamMediaProfile;
 import android.text.TextUtils;
 
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.ImsPrivateProperties;
+import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.LocationInterface;
 import com.android.imsstack.core.agents.NativeStateInterface;
@@ -45,10 +48,7 @@ import com.android.imsstack.imsservice.mmtel.videocall.base.VideoCallUtils;
 import com.android.imsstack.internal.ImsStackRegistry;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
-import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsPrivateProperties;
-import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.concurrent.Executor;
@@ -176,7 +176,6 @@ public class ImsCallContext implements ICallContext {
 
     @Override
     public int getSlotId() {
-        // FIXME: slot-id equals to phone-id
         return getPhoneId();
     }
 

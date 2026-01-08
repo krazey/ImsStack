@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ImsActivity.h"
 #include "ImsActivityManager.h"
-#include "ServiceMemory.h"
 
 PUBLIC
 ImsActivityManager::ImsActivityManager() :
@@ -40,7 +40,7 @@ void ImsActivityManager::Detach(IN const ImsActivity* pActivity)
 {
     for (IMS_UINT32 i = 0; i < m_objActivities.GetSize(); ++i)
     {
-        ImsActivity* pTempActivity = m_objActivities.GetAt(i);
+        const ImsActivity* pTempActivity = m_objActivities.GetAt(i);
 
         if (pTempActivity == pActivity)
         {

@@ -19,6 +19,8 @@
 #include "TextParser.h"
 
 #include "conf/ConfigFileBuffer.h"
+#include "conf/ConfigSection.h"
+#include "conf/ConfigSectionData.h"
 
 __IMS_TRACE_TAG_CONF__;
 

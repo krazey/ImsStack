@@ -20,22 +20,20 @@
 #include "CallReasonInfo.h"
 #include "ITimer.h"
 #include "ImsList.h"
-#include "ImsMap.h"
-#include "MtcDef.h"
-#include "call/IMtcCall.h"
-#include "conferencecall/ConferenceDef.h"
-#include "conferencecall/IConferenceOperationQueueListener.h"
+#include "ImsTypeDef.h"
 
+class IConferenceOperationQueueListener;
+class SuppService;
 struct CallInfo;
+struct ConfUser;
+struct MediaInfo;
 
 struct CallStartOperationParams
 {
 public:
-    // TODO: copy or reference.
-    // if copy and delete every time an operation is deleted, then too many copy.
     CallStartOperationParams(IN IMS_UINT32 _nType, IN CallInfo& _objCallInfo,
             IN MediaInfo& _objMediaInfo, IN ImsList<ConfUser*>& _objUsers,
-            IN ImsMap<SuppType, SuppService*>& _objSuppServices) :
+            IN ImsList<SuppService*>& _objSuppServices) :
             nType(_nType),
             objCallInfo(_objCallInfo),
             objMediaInfo(_objMediaInfo),
@@ -49,7 +47,7 @@ public:
     CallInfo& objCallInfo;
     MediaInfo& objMediaInfo;
     ImsList<ConfUser*>& objUsers;
-    ImsMap<SuppType, SuppService*>& objSuppServices;
+    ImsList<SuppService*>& objSuppServices;
 };
 
 class ConferenceOperationQueue : public ITimerListener
@@ -75,7 +73,6 @@ public:
         // setters
         inline void SetConfUsers(IN const ImsList<ConfUser*>& objConfUsers)
         {
-            // Copy only ImsList.
             m_objConfUsers = objConfUsers;
         }
 
@@ -114,7 +111,7 @@ public:
 
 public:
     explicit ConferenceOperationQueue();
-    virtual ~ConferenceOperationQueue();
+    virtual ~ConferenceOperationQueue() override;
     ConferenceOperationQueue(IN const ConferenceOperationQueue&) = delete;
     ConferenceOperationQueue& operator=(IN const ConferenceOperationQueue&) = delete;
 
@@ -137,7 +134,7 @@ public:
     virtual void CreateNPutWithReason(IN IMS_UINT32 nType, IN IMS_SINT32 nTerminateReason,
             IN IMS_BOOL bStandAloneOperation = IMS_FALSE);
 
-    void SetAddingOperationSetCompleted();
+    virtual void SetAddingOperationSetCompleted();
 
     virtual ConferenceOperationQueue::ConferenceOperation* GetNextOperation();
     virtual IMS_BOOL CompleteCurrentOperation(
@@ -148,9 +145,10 @@ public:
 
     virtual IMS_BOOL HasPendingOperation() const;
 
-    void Clear();
+    virtual void Clear();
 
 private:
+    void ClearInternal();
     void Put(IN ConferenceOperation* pOperation, IN IMS_BOOL bStandAloneOperation);
     void RemoveActiveOperation();
     IMS_BOOL IsSameOperation(IN IMS_UINT32 nOperationType, IN const ConfUser* pConfUser) const;

@@ -20,15 +20,14 @@
 #include "ISipDialog.h"
 #include "Replaces.h"
 
-PRIVATE
+PUBLIC
 CallControlHelper::CallControlHelper() :
         m_nGlobalSessionId(0),
         m_objSessions(ImsMap<AString, Replaces*>())
 {
 }
 
-PRIVATE
-CallControlHelper::~CallControlHelper()
+PUBLIC VIRTUAL CallControlHelper::~CallControlHelper()
 {
     if (!m_objSessions.IsEmpty())
     {
@@ -47,11 +46,11 @@ CallControlHelper::~CallControlHelper()
 }
 
 PUBLIC
-IMS_BOOL CallControlHelper::AddSession(IN const AString& strSessionId, IN Replaces* pReplaces)
+void CallControlHelper::AddSession(IN const AString& strSessionId, IN Replaces* pReplaces)
 {
     if (pReplaces == IMS_NULL)
     {
-        return IMS_FALSE;
+        return;
     }
 
     IMS_SLONG nIndex = m_objSessions.GetIndexOfKey(strSessionId);
@@ -68,7 +67,7 @@ IMS_BOOL CallControlHelper::AddSession(IN const AString& strSessionId, IN Replac
         m_objSessions.RemoveAt(nIndex);
     }
 
-    return m_objSessions.Add(strSessionId, pReplaces);
+    m_objSessions.Add(strSessionId, pReplaces);
 }
 
 PUBLIC
@@ -135,7 +134,24 @@ const AString& CallControlHelper::GetSessionIdFromReplaces(IN const Replaces* pR
     return AString::ConstNull();
 }
 
-PUBLIC GLOBAL Replaces* CallControlHelper::CreateReplaces(IN IMS_BOOL bMo, IN ISipDialog* piDialog)
+PUBLIC
+const AString CallControlHelper::CreateSessionId()
+{
+    m_nGlobalSessionId++;
+
+    AString strSessionId;
+    strSessionId.Sprintf("sid%08x", m_nGlobalSessionId);
+
+    if (m_nGlobalSessionId == 0xFFFFFFFE)
+    {
+        m_nGlobalSessionId = 0;
+    }
+
+    return strSessionId;
+}
+
+PUBLIC GLOBAL Replaces* CallControlHelper::CreateReplaces(
+        IN const ISipDialog* piDialog, IN IMS_BOOL bMo)
 {
     (void)bMo;
 
@@ -154,34 +170,4 @@ PUBLIC GLOBAL Replaces* CallControlHelper::CreateReplaces(IN IMS_BOOL bMo, IN IS
     }
 
     return pReplaces;
-}
-
-PUBLIC GLOBAL const AString CallControlHelper::CreateSessionId()
-{
-    CallControlHelper* pCch = CallControlHelper::GetInstance();
-
-    pCch->m_nGlobalSessionId++;
-
-    AString strSessionId;
-
-    strSessionId.Sprintf("sid%08x", pCch->m_nGlobalSessionId);
-
-    if (pCch->m_nGlobalSessionId == 0xFFFFFFFE)
-    {
-        pCch->m_nGlobalSessionId = 0;
-    }
-
-    return strSessionId;
-}
-
-PUBLIC GLOBAL CallControlHelper* CallControlHelper::GetInstance()
-{
-    static CallControlHelper* s_pCcHelper = IMS_NULL;
-
-    if (s_pCcHelper == IMS_NULL)
-    {
-        s_pCcHelper = new CallControlHelper();
-    }
-
-    return s_pCcHelper;
 }

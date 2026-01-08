@@ -22,11 +22,11 @@ SipTxnFsmData::SipTxnFsmData(
         m_pTranspParam(pTranspParam),
         m_pUserData(pUserData),
         m_pSendSipMsg(SIP_NULL),
-        eTxnStatus(SipTxn::STATUS_INVALID),
+        m_eTxnStatus(SipTxn::STATUS_INVALID),
         m_pOutUserData(SIP_NULL),
         m_pTranspInfo(SIP_NULL),
-        bTxnTerminated(SIP_FALSE),
-        bTxnCreated(SIP_FALSE)
+        m_bTxnTerminated(SIP_FALSE),
+        m_bTxnCreated(SIP_FALSE)
 {
 }
 

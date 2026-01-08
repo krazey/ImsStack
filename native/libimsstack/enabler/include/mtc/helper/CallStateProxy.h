@@ -25,7 +25,6 @@
 #include "helper/ICallStateProxy.h"
 
 class IMtcCallManager;
-struct CallInfo;
 
 struct CallStateDetails
 {
@@ -58,7 +57,7 @@ class CallStateProxy final : public ImsActivity, public ICallStateProxy
 {
 public:
     explicit CallStateProxy(IN IMtcCallManager& objCallManager);
-    virtual ~CallStateProxy();
+    virtual ~CallStateProxy() override;
     CallStateProxy(IN const CallStateProxy&) = delete;
     CallStateProxy& operator=(IN const CallStateProxy&) = delete;
 
@@ -71,6 +70,8 @@ public:
 
     void UpdateCallState(IN CallKey nCallkey, IN IMtcCall::State eState, IN CallType eCallType,
             IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason = CODE_NONE) override;
+    void NotifyCallSessionReleased(
+            IN CallKey nCallkey, IN IMS_BOOL bEmergency, IN IMS_BOOL bEstablished) override;
 
     IMS_BOOL DispatchMessage(IN IMSMSG& objMsg) override;
 
@@ -83,6 +84,8 @@ private:
     static void NotifyCallState(
             IN ImsList<IMtcCallStateListener*> objListeners, IN CallStateDetails* pDetails);
     void NotifyTotalCallState(IN ImsList<IMtcCallStateListener*> objListeners) const;
+    void NotifyCallSessionReleased(IN ImsList<IMtcCallStateListener*> objListeners,
+            IN CallKey nCallkey, IN IMS_BOOL bEmergency, IN IMS_BOOL bEstablished) const;
 
 private:
     ImsList<IMtcCallStateListener*> m_objSynchronousListeners;

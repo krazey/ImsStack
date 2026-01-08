@@ -20,6 +20,7 @@
 #include "Sip.h"
 #include "SipHeaderName.h"
 #include "SipHeaderProperty.h"
+#include "SipMethod.h"
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
 #include "SubscriberState.h"
@@ -118,13 +119,7 @@ PUBLIC VIRTUAL IMS_BOOL SubscriberState::UpdateState(IN const ISipMessage* piSip
         {
             // Reset the flag for subscription duration changed
             SetDurationUpdated(IMS_FALSE);
-
-            if (!UpdateOnSubscribeResponse(piSipMsg))
-            {
-                IMS_TRACE_E(
-                        0, "Updating the subscriber state on SUBSCRIBE response failed", 0, 0, 0);
-                return IMS_FALSE;
-            }
+            UpdateOnSubscribeResponse(piSipMsg);
         }
     }
     else if (objMethod.Equals(SipMethod::NOTIFY))
@@ -144,11 +139,7 @@ PUBLIC VIRTUAL IMS_BOOL SubscriberState::UpdateState(IN const ISipMessage* piSip
         // On NOTIFY response sent ...
         else
         {
-            if (!UpdateOnNotifyResponse(piSipMsg))
-            {
-                IMS_TRACE_E(0, "Updating the subscriber state on NOTIFY response failed", 0, 0, 0);
-                return IMS_FALSE;
-            }
+            UpdateOnNotifyResponse(piSipMsg);
         }
     }
 
@@ -427,7 +418,7 @@ IMS_BOOL SubscriberState::UpdateOnNotifyRequest(IN const ISipMessage* piSipMsg)
 }
 
 PRIVATE
-IMS_BOOL SubscriberState::UpdateOnNotifyResponse(IN const ISipMessage* piSipMsg)
+void SubscriberState::UpdateOnNotifyResponse(IN const ISipMessage* piSipMsg)
 {
     IMS_SINT32 nStatusCode = piSipMsg->GetStatusCode();
 
@@ -469,8 +460,6 @@ IMS_BOOL SubscriberState::UpdateOnNotifyResponse(IN const ISipMessage* piSipMsg)
             }
         }
     }
-
-    return IMS_TRUE;
 }
 
 PRIVATE
@@ -532,12 +521,12 @@ IMS_BOOL SubscriberState::UpdateOnSubscribeRequest(IN const ISipMessage* piSipMs
 }
 
 PRIVATE
-IMS_BOOL SubscriberState::UpdateOnSubscribeResponse(IN const ISipMessage* piSipMsg)
+void SubscriberState::UpdateOnSubscribeResponse(IN const ISipMessage* piSipMsg)
 {
     if (GetState() == STATE_TERMINATED)
     {
         IMS_TRACE_D("Subscription is already in TERMINATED state...", 0, 0, 0);
-        return IMS_TRUE;
+        return;
     }
 
     IMS_SINT32 nStatusCode = piSipMsg->GetStatusCode();
@@ -545,7 +534,6 @@ IMS_BOOL SubscriberState::UpdateOnSubscribeResponse(IN const ISipMessage* piSipM
     if (SipStatusCode::Is1XX(nStatusCode))
     {
         // Do nothing ...
-        return IMS_TRUE;
     }
     else if (SipStatusCode::IsFinalSuccess(nStatusCode))
     {
@@ -588,7 +576,7 @@ IMS_BOOL SubscriberState::UpdateOnSubscribeResponse(IN const ISipMessage* piSipM
         {
             if (GetState() == STATE_SUBSCRIBING)
             {
-                EventPackage* pEventPackage = GetEventPackage();
+                const EventPackage* pEventPackage = GetEventPackage();
 
                 if (pEventPackage->GetDuration() <= 0)
                 {
@@ -628,8 +616,6 @@ IMS_BOOL SubscriberState::UpdateOnSubscribeResponse(IN const ISipMessage* piSipM
                 SetState(piSipMsg, STATE_INIT);
             }
         }
-
-        return IMS_TRUE;
     }
     else
     {
@@ -639,8 +625,6 @@ IMS_BOOL SubscriberState::UpdateOnSubscribeResponse(IN const ISipMessage* piSipM
             SetState(piSipMsg, STATE_TERMINATED);
         }
     }
-
-    return IMS_TRUE;
 }
 
 PRIVATE GLOBAL void SubscriberState::InitializeStateTable()

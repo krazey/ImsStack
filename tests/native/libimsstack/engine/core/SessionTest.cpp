@@ -24,7 +24,9 @@
 #include "TestCoreService.h"
 
 using ::testing::_;
+using ::testing::Eq;
 using ::testing::Return;
+using ::testing::ReturnRef;
 
 namespace android
 {
@@ -80,6 +82,7 @@ public:
     }
     inline void SetStateForTest(IN IMS_SINT32 nState) { SetState(nState); }
     inline void SendRequestToByeInternalForTest() { SendRequestToByeInternal(); }
+    inline void CreateDialog(IN const ISipConnection* piSc) { CheckNCreateDialog(piSc); }
 
 public:
     TestSessionRefreshHelper* m_pTestRefreshHelper;
@@ -93,7 +96,7 @@ public:
             m_pSession(IMS_NULL)
     {
     }
-    inline virtual ~SessionTest()
+    inline ~SessionTest() override
     {
         if (m_pSession != IMS_NULL)
         {
@@ -127,26 +130,29 @@ protected:
 
 TEST_F(SessionTest, SetConfiguration)
 {
-    EXPECT_EQ(Session::CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE, m_pSession->GetConfiguration());
+    EXPECT_EQ(Session::CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE |
+                    Session::CONFIG_IGNORE_SUBSEQUENT_SDP_ANSWER_IN_PREVIEW_MODE,
+            m_pSession->GetConfiguration());
 
-    m_pSession->SetConfiguration(m_pSession->GetConfiguration() |
-            Session::CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR |
-            Session::CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED);
+    m_pSession->SetConfiguration(
+            m_pSession->GetConfiguration() | Session::CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED);
 
     EXPECT_TRUE(m_pSession->IsConfigurationSet(Session::CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE));
-    EXPECT_TRUE(m_pSession->IsConfigurationSet(Session::CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR));
     EXPECT_TRUE(
             m_pSession->IsConfigurationSet(Session::CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED));
+    EXPECT_TRUE(m_pSession->IsConfigurationSet(
+            Session::CONFIG_IGNORE_SUBSEQUENT_SDP_ANSWER_IN_PREVIEW_MODE));
     EXPECT_EQ(Session::CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE |
-                    Session::CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR |
-                    Session::CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED,
+                    Session::CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED |
+                    Session::CONFIG_IGNORE_SUBSEQUENT_SDP_ANSWER_IN_PREVIEW_MODE,
             m_pSession->GetConfiguration());
 
     m_pSession->SetConfiguration(m_pSession->GetConfiguration() &
-            (~Session::CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR) &
             (~Session::CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED));
 
-    EXPECT_EQ(Session::CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE, m_pSession->GetConfiguration());
+    EXPECT_EQ(Session::CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE |
+                    Session::CONFIG_IGNORE_SUBSEQUENT_SDP_ANSWER_IN_PREVIEW_MODE,
+            m_pSession->GetConfiguration());
 }
 
 TEST_F(SessionTest, IsSessionRefreshInProgress)
@@ -181,6 +187,29 @@ TEST_F(SessionTest, SendRequestToByeInternal)
             .WillOnce(Return());
 
     m_pSession->SendRequestToByeInternalForTest();
+}
+
+TEST_F(SessionTest, CreateTransaction)
+{
+    SetUpClientConnection(IMS_TRUE);
+
+    // Create a SIP dialog
+    SetUpDialog(ISipDialog::STATE_CONFIRMED);
+    m_pSession->CreateDialog(&GetScc());
+
+    AString strServiceRoute("sip:192.168.0.1");
+    AStringArray objServiceRoutes;
+    objServiceRoutes.AddElement(strServiceRoute);
+    ON_CALL(GetCoreService()->GetMockRegBinding(), GetServiceRoutes())
+            .WillByDefault(ReturnRef(objServiceRoutes));
+    ON_CALL(GetSipMsg(), GetType()).WillByDefault(Return(ISipMessage::TYPE_REQUEST));
+
+    EXPECT_CALL(GetScc(), SetImplicitRouteHeader(Eq(strServiceRoute))).WillOnce(Return());
+
+    SipMethod objMethod(SipMethod::INFO);
+    const ISipClientConnection* piScc = m_pSession->CreateTransaction(objMethod);
+
+    ASSERT_TRUE(piScc != nullptr);
 }
 
 }  // namespace android

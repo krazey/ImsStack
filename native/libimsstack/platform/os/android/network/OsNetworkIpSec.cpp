@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ISocket.h"
+#include "ISystem.h"
 #include "PlatformContext.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
@@ -21,7 +23,7 @@
 #include "network/OsIpSecSp.h"
 #include "network/OsNetworkIpSec.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 PUBLIC
 OsNetworkIpSec::OsNetworkIpSec(IN IMS_SINT32 nSlotId) :
@@ -261,7 +263,7 @@ PUBLIC VIRTUAL IMS_BOOL OsNetworkIpSec::ApplyIpSecTransform(IN ISocket* piSocket
 }
 
 PUBLIC VIRTUAL IMS_BOOL OsNetworkIpSec::ApplyIpSecTransform(
-        IN ISocket* piSocket, IN ISocket* piServerSocket)
+        IN ISocket* piSocket, IN ISocket* piServerSocket, IN const SocketAddress& objRemote)
 {
     if (piSocket == IMS_NULL || piServerSocket == IMS_NULL)
     {
@@ -283,7 +285,9 @@ PUBLIC VIRTUAL IMS_BOOL OsNetworkIpSec::ApplyIpSecTransform(
                     const_cast<IpSecSaParameter::Policy&>(objPolicys.GetAt(j));
 
             if (objPolicy.GetSocketId() == piServerSocket->GetSocketId() &&
-                    !objPolicy.HasAcceptedSocketId(piSocket->GetSocketId()))
+                    !objPolicy.HasAcceptedSocketId(piSocket->GetSocketId()) &&
+                    (objRemote.Equals(objPolicy.GetRemoteAddress()) ||
+                            objRemote.Equals(objPolicy.GetLocalAddress())))
             {
                 if (PlatformContext::GetInstance()->GetSystem()->ApplyIpSecSa(
                             objSaParam.GetIpSecId(), objPolicy.GetSpi(), piSocket->GetSocketId(),
@@ -352,7 +356,7 @@ IMS_SINT32 OsNetworkIpSec::GetAvailableId()
         return nNewId;
     }
 
-    IIpSecPolicy* piPolicy = GetPolicy(nNewId);
+    const IIpSecPolicy* piPolicy = GetPolicy(nNewId);
 
     while (piPolicy != IMS_NULL)
     {

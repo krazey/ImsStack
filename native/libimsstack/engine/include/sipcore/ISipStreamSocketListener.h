@@ -16,7 +16,9 @@
 #ifndef INTERFACE_SIP_STREAM_SOCKET_LISTENER_H_
 #define INTERFACE_SIP_STREAM_SOCKET_LISTENER_H_
 
-#include "ByteArray.h"
+#include "ImsTypeDef.h"
+
+class ByteArray;
 
 class SipSocket;
 

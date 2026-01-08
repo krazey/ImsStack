@@ -20,7 +20,7 @@
 #include "ISubscriptionListener.h"
 #include "ImsList.h"
 #include "ImsMap.h"
-#include "ServiceTimer.h"
+#include "ImsTypeDef.h"
 
 class ISession;
 class ICoreService;
@@ -31,7 +31,7 @@ class SubscriptionInterfaceHolder : public ISubscriptionListener, public ITimerL
 {
 public:
     explicit SubscriptionInterfaceHolder(IN IInterfaceHolderListener& objListener);
-    virtual ~SubscriptionInterfaceHolder();
+    virtual ~SubscriptionInterfaceHolder() override;
     SubscriptionInterfaceHolder(IN const SubscriptionInterfaceHolder&) = delete;
     SubscriptionInterfaceHolder& operator=(IN const SubscriptionInterfaceHolder&) = delete;
 
@@ -61,7 +61,7 @@ public:
     inline virtual IMS_UINT32 GetSubscriptionCount() const { return m_objISubscriptions.GetSize(); }
 
 private:
-    static IMS_BOOL IsReadyToDestroy(IN ISubscription* piSubscription);
+    static IMS_BOOL IsReadyToDestroy(IN const ISubscription* piSubscription);
 
     void ClearISubscriptions();
 

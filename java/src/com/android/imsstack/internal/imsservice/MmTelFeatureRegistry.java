@@ -16,20 +16,24 @@
 
 package com.android.imsstack.internal.imsservice;
 
+import static android.telephony.ims.ImsService.ImsServiceCapability;
+
 import android.annotation.Nullable;
-import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.provider.Settings;
 import android.telecom.TelecomManager;
 import android.telephony.SubscriptionManager;
-import android.telephony.ims.ImsManager;
 import android.telephony.ims.ImsMmTelManager;
+import android.telephony.ims.ImsService;
 
-import com.android.imsstack.util.AppContext;
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.ContentProviderProxy;
+import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.SystemServiceProxy.ImsManagerProxy;
+import com.android.imsstack.base.SystemServiceProxy.ImsMmTelManagerProxy;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Set;
@@ -47,6 +51,14 @@ public class MmTelFeatureRegistry {
     public static final int SRVCC_STATE_COMPLETED = 1;
     public static final int SRVCC_STATE_FAILED = 2;
     public static final int SRVCC_STATE_CANCELED = 3;
+
+    public static @ImsServiceCapability long getTerminalBasedServiceCapabilities() {
+        return ImsService.CAPABILITY_TERMINAL_BASED_CALL_WAITING;
+    }
+
+    public static @ImsServiceCapability long getSimultaneousCallingCapabilities() {
+        return ImsService.CAPABILITY_SUPPORTS_SIMULTANEOUS_CALLING;
+    }
 
     /**
      * Notifies the components who monitor this class that any states have changed.
@@ -98,7 +110,7 @@ public class MmTelFeatureRegistry {
      */
     public class UserSettings {
         private int mSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
-        private ImsMmTelManager mMmTelManager;
+        private ImsMmTelManagerProxy mMmTelManagerProxy;
         private Uri mAdvancedCallingSettingUri;
         private Uri mVtSettingUri;
         private Uri mVoWiFiSettingUri;
@@ -116,9 +128,9 @@ public class MmTelFeatureRegistry {
                 unregisterSettingsObserver();
 
                 mSubId = subId;
-                mMmTelManager = getImsMmTelManager();
+                mMmTelManagerProxy = getImsMmTelManagerProxy();
 
-                if (SubscriptionManager.isValidSubscriptionId(mSubId)) {
+                if (MSimUtils.isValidSubId(mSubId)) {
                     registerSettingsObserver();
                 }
             }
@@ -139,8 +151,8 @@ public class MmTelFeatureRegistry {
          */
         public boolean isAdvancedCallingSettingEnabled() {
             try {
-                return (mMmTelManager != null)
-                        ? mMmTelManager.isAdvancedCallingSettingEnabled()
+                return (mMmTelManagerProxy != null)
+                        ? mMmTelManagerProxy.isAdvancedCallingSettingEnabled()
                         : false;
             } catch (Exception e) {
                 ImsLog.e(mSlotId, "isAdvancedCallingSettingEnabled: " + e.toString());
@@ -155,8 +167,8 @@ public class MmTelFeatureRegistry {
          */
         public boolean isVtSettingEnabled() {
             try {
-                return (mMmTelManager != null)
-                        ? mMmTelManager.isVtSettingEnabled()
+                return (mMmTelManagerProxy != null)
+                        ? mMmTelManagerProxy.isVtSettingEnabled()
                         : false;
             } catch (Exception e) {
                 ImsLog.e(mSlotId, "isVtSettingEnabled: " + e.toString());
@@ -171,8 +183,8 @@ public class MmTelFeatureRegistry {
          */
         public boolean isVoWiFiSettingEnabled() {
             try {
-                return (mMmTelManager != null)
-                        ? mMmTelManager.isVoWiFiSettingEnabled()
+                return (mMmTelManagerProxy != null)
+                        ? mMmTelManagerProxy.isVoWiFiSettingEnabled()
                         : false;
             } catch (Exception e) {
                 ImsLog.e(mSlotId, "isVoWiFiSettingEnabled: " + e.toString());
@@ -190,8 +202,8 @@ public class MmTelFeatureRegistry {
          */
         public int getVoWiFiModeSetting() {
             try {
-                return (mMmTelManager != null)
-                        ? mMmTelManager.getVoWiFiModeSetting()
+                return (mMmTelManagerProxy != null)
+                        ? mMmTelManagerProxy.getVoWiFiModeSetting()
                         : ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED;
             } catch (Exception e) {
                 ImsLog.e(mSlotId, "getVoWiFiModeSetting: " + e.toString());
@@ -206,8 +218,8 @@ public class MmTelFeatureRegistry {
          */
         public boolean isVoWiFiRoamingSettingEnabled() {
             try {
-                return (mMmTelManager != null)
-                        ? mMmTelManager.isVoWiFiRoamingSettingEnabled()
+                return (mMmTelManagerProxy != null)
+                        ? mMmTelManagerProxy.isVoWiFiRoamingSettingEnabled()
                         : false;
             } catch (Exception e) {
                 ImsLog.e(mSlotId, "isVoWiFiRoamingSettingEnabled: " + e.toString());
@@ -225,8 +237,8 @@ public class MmTelFeatureRegistry {
          */
         public int getVoWiFiRoamingModeSetting() {
             try {
-                return (mMmTelManager != null)
-                        ? mMmTelManager.getVoWiFiRoamingModeSetting()
+                return (mMmTelManagerProxy != null)
+                        ? mMmTelManagerProxy.getVoWiFiRoamingModeSetting()
                         : ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED;
             } catch (Exception e) {
                 ImsLog.e(mSlotId, "getVoWiFiRoamingModeSetting: " + e.toString());
@@ -234,13 +246,10 @@ public class MmTelFeatureRegistry {
             }
         }
 
-        private ImsMmTelManager getImsMmTelManager() {
-            if (!SubscriptionManager.isValidSubscriptionId(mSubId)) {
-                return null;
-            }
-
-            ImsManager imsManager = AppContext.getInstance().getSystemService(ImsManager.class);
-            return (imsManager != null) ? imsManager.getImsMmTelManager(mSubId) : null;
+        private ImsMmTelManagerProxy getImsMmTelManagerProxy() {
+            ImsManagerProxy imp =
+                    AppContext.getInstance().getSystemServiceProxy(ImsManagerProxy.class);
+            return imp.getImsMmTelManagerProxy(mSubId);
         }
 
         private void registerSettingsObserver() {
@@ -273,35 +282,35 @@ public class MmTelFeatureRegistry {
                 };
             }
 
-            ContentResolver cr = AppContext.getInstance().getContentResolver();
+            ContentProviderProxy cpp = AppContext.getInstance().getContentProviderProxy();
 
             mAdvancedCallingSettingUri =
                     getUriFor(SubscriptionManager.ADVANCED_CALLING_ENABLED_CONTENT_URI);
-            cr.registerContentObserver(mAdvancedCallingSettingUri, true, mSettingsObserver);
+            cpp.registerContentObserver(mAdvancedCallingSettingUri, mSettingsObserver);
 
             mVtSettingUri = getUriFor(SubscriptionManager.VT_ENABLED_CONTENT_URI);
-            cr.registerContentObserver(mVtSettingUri, true, mSettingsObserver);
+            cpp.registerContentObserver(mVtSettingUri, mSettingsObserver);
 
             mVoWiFiSettingUri = getUriFor(SubscriptionManager.WFC_ENABLED_CONTENT_URI);
-            cr.registerContentObserver(mVoWiFiSettingUri, true, mSettingsObserver);
+            cpp.registerContentObserver(mVoWiFiSettingUri, mSettingsObserver);
 
             mVoWiFiModeUri = getUriFor(SubscriptionManager.WFC_MODE_CONTENT_URI);
-            cr.registerContentObserver(mVoWiFiModeUri, true, mSettingsObserver);
+            cpp.registerContentObserver(mVoWiFiModeUri, mSettingsObserver);
 
             mVoWiFiRoamingSettingUri =
                     getUriFor(SubscriptionManager.WFC_ROAMING_ENABLED_CONTENT_URI);
-            cr.registerContentObserver(mVoWiFiRoamingSettingUri, true, mSettingsObserver);
+            cpp.registerContentObserver(mVoWiFiRoamingSettingUri, mSettingsObserver);
 
             mVoWiFiRoamingModeUri = getUriFor(SubscriptionManager.WFC_ROAMING_MODE_CONTENT_URI);
-            cr.registerContentObserver(mVoWiFiRoamingModeUri, true, mSettingsObserver);
+            cpp.registerContentObserver(mVoWiFiRoamingModeUri, mSettingsObserver);
 
             mRttModeUri = Settings.Secure.getUriFor(RTT_MODE_SETTING);
-            cr.registerContentObserver(mRttModeUri, true, mSettingsObserver);
+            cpp.registerContentObserver(mRttModeUri, mSettingsObserver);
         }
 
         private void unregisterSettingsObserver() {
             if (mSettingsObserver != null) {
-                AppContext.getInstance().getContentResolver()
+                AppContext.getInstance().getContentProviderProxy()
                         .unregisterContentObserver(mSettingsObserver);
 
                 mAdvancedCallingSettingUri = null;
@@ -327,7 +336,9 @@ public class MmTelFeatureRegistry {
     @VisibleForTesting
     public static final String RTT_MODE_SETTING = "dialer_rtt_configuration";
     private final int mSlotId;
-    private volatile boolean mTerminalBasedCallWaitingEnabled;
+    private volatile boolean mTerminalBasedCallWaitingEnabled =
+            (ImsService.CAPABILITY_TERMINAL_BASED_CALL_WAITING
+            & getTerminalBasedServiceCapabilities()) > 0;
     private volatile int mSrvccState = SRVCC_STATE_NONE;
     private volatile int mTtyMode = TelecomManager.TTY_MODE_OFF;
     private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
@@ -371,7 +382,7 @@ public class MmTelFeatureRegistry {
 
     /**
      * Sets the terminal-based call waiting status.
-     *updateServiceSettings
+     *
      * @param enabled The flag specifying that the service is capable.
      */
     public void setTerminalBasedCallWaitingStatus(boolean enabled) {
@@ -673,8 +684,8 @@ public class MmTelFeatureRegistry {
     }
 
     private void updateRttMode() {
-        int rttMode = Settings.Secure.getInt(
-                AppContext.getInstance().getContentResolver(), RTT_MODE_SETTING, 0);
+        int rttMode = AppContext.getInstance().getContentProviderProxy().getSecureSettings()
+                .getInt(RTT_MODE_SETTING, 0);
 
         if (mRttMode != rttMode) {
             ImsLog.i(mSlotId, "updateRttMode: " + mRttMode + " >> " + rttMode);

@@ -16,13 +16,14 @@
 #ifndef SIP_CONNECTION_NOTIFIER_H_
 #define SIP_CONNECTION_NOTIFIER_H_
 
+#include "IpAddress.h"
+
 #include "Connection.h"
 #include "ISipServerTransactionStateListener.h"
 #include "ISipSocketListener.h"
 #include "Sip.h"
 #include "SipProfile.h"
 #include "SipServerTransactionState.h"
-#include "SipTransportAddress.h"
 
 class IOnSipConnectionNotifierErrorListener;
 class IOnSipServerConnectionListener;
@@ -31,6 +32,7 @@ class ISipServerConnection;
 class SipParameter;
 class SipSocket;
 class SipSocketAddress;
+class SipTransportAddress;
 class SipTransportHelper;
 
 class SipConnectionNotifier :
@@ -41,7 +43,7 @@ class SipConnectionNotifier :
 public:
     SipConnectionNotifier(IN IMS_SINT32 nScheme, IN IMS_SINT32 nPort, IN const AString& strParams,
             IN IMS_BOOL bSharedMode = IMS_FALSE);
-    virtual ~SipConnectionNotifier();
+    ~SipConnectionNotifier() override;
 
     SipConnectionNotifier(IN const SipConnectionNotifier&) = delete;
     SipConnectionNotifier& operator=(IN const SipConnectionNotifier&) = delete;
@@ -101,7 +103,8 @@ private:
     void ClearTransportResource();
     // FIX_MESSAGE_ORDER_ON_MIXED_TRANSPORT_USE
     void ControlUdpClientReference(IN IMS_SINT32 nControl);
-    IMS_BOOL CreateClientInitiatedConnection(IN IMS_SINT32 nPort, IN SipSocketAddress* pFarEnd);
+    IMS_BOOL CreateClientInitiatedConnection(
+            IN IMS_SINT32 nPort, const IN SipSocketAddress* pFarEnd);
     IMS_BOOL ConnectClientInitiatedConnection();
     void DestroyClientInitiatedConnection(IN IMS_SINT32 nPort);
     void ExtractProperties(IN const AString& strParams);

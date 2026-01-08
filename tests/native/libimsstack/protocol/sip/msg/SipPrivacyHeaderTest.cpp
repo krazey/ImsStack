@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
+
 #include "msg/SipPrivacyHeader.h"
 
 namespace android
@@ -77,22 +78,22 @@ TEST_F(SipPrivacyHeaderTest, AddPrivacy)
 
 TEST_F(SipPrivacyHeaderTest, EncodeHdr)
 {
-    const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {
+    const SIP_INT32 BUFFER_SIZE = 4096;
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
 
     SipPrivacyHeader* pHeader = reinterpret_cast<SipPrivacyHeader*>(
             SipPrivacyHeader::GetNewObj(SipHeaderBase::PRIVACY, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Empty privacy value not allowed */
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
 
     /* Encode valid value */
     EXPECT_EQ(SIP_TRUE, pHeader->AddPrivacy("user"));
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
     EXPECT_STREQ("user", &(aBuffer[0]));
     pHeader->SipDelete();
 
@@ -104,7 +105,7 @@ TEST_F(SipPrivacyHeaderTest, EncodeHdr)
 
     EXPECT_EQ(SIP_TRUE, pHeader->AddPrivacy("id"));
     EXPECT_EQ(SIP_TRUE, pHeader->AddPrivacy("session"));
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
     EXPECT_STREQ("id;session", &(aBuffer[0]));
 
     pHeader->SipDelete();
@@ -140,52 +141,52 @@ TEST_F(SipPrivacyHeaderTest, Encode)
     pHeader->SipDelete();
 }
 
-TEST_F(SipPrivacyHeaderTest, DecodeHdr)
+TEST_F(SipPrivacyHeaderTest, Decode)
 {
     SipPrivacyHeader* pHeader = reinterpret_cast<SipPrivacyHeader*>(
             SipPrivacyHeader::GetNewObj(SipHeaderBase::PRIVACY, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Empty header not allowed for privacy*/
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(SIP_NULL, 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode(SIP_NULL, 0));
 
     /* Empty value after ; not allowed for privacy*/
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("user;"), 5));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("user;", 5));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipPrivacyHeader*>(
             SipPrivacyHeader::GetNewObj(SipHeaderBase::PRIVACY, nullptr));
     /* Decode ; value */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>(";"), 1));
-    const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode(";", 1));
+    const SIP_INT32 BUFFER_SIZE = 4096;
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipPrivacyHeader*>(
             SipPrivacyHeader::GetNewObj(SipHeaderBase::PRIVACY, nullptr));
 
     /* Decode valid value */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("history"), 7));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("history", 7));
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
     EXPECT_STREQ("history", &(aBuffer[0]));
     pHeader->SipDelete();
 
     pHeader = reinterpret_cast<SipPrivacyHeader*>(
             SipPrivacyHeader::GetNewObj(SipHeaderBase::PRIVACY, nullptr));
     /* Decode more than one value */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("user;header;id"), 14));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("user;header;id", 14));
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
     EXPECT_STREQ("user;header;id", &(aBuffer[0]));
     pHeader->SipDelete();
 }

@@ -13,14 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef _SIP_TXN_INFO_H
-#define _SIP_TXN_INFO_H
+#ifndef __SIP_TXN_INFO_H__
+#define __SIP_TXN_INFO_H__
 
-#include "txn/SipTxn.h"
-
-#include "msg/SipMessage.h"
-
-#include "transport/SipTransportInfo.h"
+class SipMessage;
+class SipTransportInfo;
 
 class SipTxnInfo
 {
@@ -38,13 +35,13 @@ public:
     SipTransportInfo* m_pTranspInfo;
 
     /* Recv Txn handling : transaction status */
-    SIP_INT32 eTxnStatus;
+    SIP_INT32 m_eTxnStatus;
 
     /* Recv/Send Txn handling : transaction termination status */
-    SIP_BOOL bTxnTerminated;
+    SIP_BOOL m_bTxnTerminated;
 
     /* Recv/Send Txn handling : transaction creation status */
-    SIP_BOOL bTxnCreated;
+    SIP_BOOL m_bTxnCreated;
 };
 
-#endif
+#endif  //__SIP_TXN_INFO_H__

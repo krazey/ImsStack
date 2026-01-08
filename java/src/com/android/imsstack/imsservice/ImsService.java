@@ -17,7 +17,6 @@
 package com.android.imsstack.imsservice;
 
 import android.annotation.Nullable;
-import android.content.Context;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.feature.RcsFeature;
@@ -26,9 +25,12 @@ import android.telephony.ims.stub.ImsFeatureConfiguration;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.telephony.ims.stub.SipTransportImplBase;
 
+import com.android.imsstack.base.DeviceConfig;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.imsservice.mmtel.ImsServiceManager;
 import com.android.imsstack.imsservice.mmtel.ImsServiceRecord;
-import com.android.imsstack.util.IndentingPrintWriter;
+import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -45,27 +47,18 @@ public class ImsService extends android.telephony.ims.ImsService {
     public void onCreate() {
         super.onCreate();
 
-        logi("ImsService created");
+        logi(this, "onCreate");
 
         ImsServiceController.create(getApplicationContext());
     }
 
     @Override
     public void onDestroy() {
-        logi("ImsService destroy...");
+        logi(this, "onDestroy");
 
         ImsServiceController.destroy(getApplicationContext());
 
         super.onDestroy();
-    }
-
-    /** This method is added to retrieve Context
-     *  Override this method to get Context in testing class
-     *  @return  Context The Context used by the ImsService.
-     */
-    @VisibleForTesting
-    protected Context getAppContext() {
-        return getApplicationContext();
     }
 
     /** This method is added to read ImsController is ready or not
@@ -80,16 +73,16 @@ public class ImsService extends android.telephony.ims.ImsService {
     @Override
     public ImsFeatureConfiguration querySupportedImsFeatures() {
         if (!isImsControllerReady()) {
-            logi("querySupportedImsFeatures :: not-ready");
+            logi(this, "querySupportedImsFeatures: not-ready");
             return super.querySupportedImsFeatures();
         }
 
-        logi("querySupportedImsFeatures");
+        logi(this, "querySupportedImsFeatures");
 
         // It will return the supported features by this ImsService.
         // Generally, the features are the same as defined in AndroidManifest.xml.
         ImsFeatureConfiguration.Builder fcBuilder = new ImsFeatureConfiguration.Builder();
-        int simCount = ImsServiceController.getSimCount(getAppContext());
+        int simCount = DeviceConfig.getActiveSimCount();
 
         for (int i = 0; i < simCount; i++) {
             fcBuilder.addFeature(i, ImsFeature.FEATURE_MMTEL);
@@ -102,26 +95,28 @@ public class ImsService extends android.telephony.ims.ImsService {
 
     @Override
     public @ImsServiceCapability long getImsServiceCapabilities() {
-      //TODO uncomment below statements for SIP Delegate Support.
-      //logi("getImsServiceCapabilities:CAPABILITY_SIP_DELEGATE_CREATION");
-      //return CAPABILITY_SIP_DELEGATE_CREATION;
-        logi("getImsServiceCapabilities");
-        return super.getImsServiceCapabilities();
+        //TODO uncomment below statements for SIP Delegate Support.
+        //logi("getImsServiceCapabilities:CAPABILITY_SIP_DELEGATE_CREATION");
+        //return CAPABILITY_SIP_DELEGATE_CREATION;
+        logi(this, "getImsServiceCapabilities");
+        return (super.getImsServiceCapabilities()
+                | MmTelFeatureRegistry.getTerminalBasedServiceCapabilities()
+                | MmTelFeatureRegistry.getSimultaneousCallingCapabilities());
     }
 
     @Override
     public void readyForFeatureCreation() {
-        logi("readyForFeatureCreation");
+        logi(this, "readyForFeatureCreation");
     }
 
     @Override
     public void enableIms(int slotId) {
         if (!ImsServiceController.isReady()) {
-            logi("enableIms :: not-ready, slotId=" + slotId);
+            logi(this, "enableIms: not-ready, slotId=" + slotId);
             return;
         }
 
-        logi("enableIms :: slotId=" + slotId);
+        logi(this, "enableIms: slotId=" + slotId);
 
         ImsServiceRecord isr = ImsServiceManager.getServiceRecord(slotId);
 
@@ -133,11 +128,11 @@ public class ImsService extends android.telephony.ims.ImsService {
     @Override
     public void disableIms(int slotId) {
         if (!ImsServiceController.isReady()) {
-            logi("disableIms :: not-ready, slotId=" + slotId);
+            logi(this, "disableIms: not-ready, slotId=" + slotId);
             return;
         }
 
-        logi("disableIms :: slotId=" + slotId);
+        logi(this, "disableIms: slotId=" + slotId);
 
         ImsServiceRecord isr = ImsServiceManager.getServiceRecord(slotId);
 
@@ -148,12 +143,12 @@ public class ImsService extends android.telephony.ims.ImsService {
 
     @Override
     public MmTelFeature createMmTelFeature(int slotId) {
-        logi("createMmTelFeature :: slotId=" + slotId);
+        logi(this, "createMmTelFeature: slotId=" + slotId);
 
         ImsServiceController isc = ImsServiceController.getInstance();
 
         if (isc == null) {
-            logi("No ImsServiceController");
+            logi(this, "No ISC");
             return null;
         }
 
@@ -162,12 +157,12 @@ public class ImsService extends android.telephony.ims.ImsService {
 
     @Override
     public RcsFeature createRcsFeature(int slotId) {
-        logi("createRcsFeature for slot : " + slotId);
+        logi(this, "createRcsFeature for slot" + slotId);
 
         ImsServiceController isc = ImsServiceController.getInstance();
 
         if (isc == null) {
-            logi("No ImsServiceController");
+            logi(this, "No ISC");
             return null;
         }
 
@@ -177,14 +172,14 @@ public class ImsService extends android.telephony.ims.ImsService {
     @Override
     public ImsConfigImplBase getConfig(int slotId) {
         if (!ImsServiceController.isReady()) {
-            logi("getConfig :: not-ready, slotId=" + slotId);
+            logi(this, "getConfig: not-ready, slotId=" + slotId);
             return null;
         }
 
         ImsServiceRecord isr = ImsServiceManager.getServiceRecord(slotId);
 
         if (isr == null) {
-            logi("getConfig :: Service is down for phone" + slotId);
+            logi(this, "getConfig: Service is down for phone" + slotId);
             return null;
         }
 
@@ -194,14 +189,14 @@ public class ImsService extends android.telephony.ims.ImsService {
     @Override
     public ImsRegistrationImplBase getRegistration(int slotId) {
         if (!ImsServiceController.isReady()) {
-            logi("getRegistration :: not-ready, slotId=" + slotId);
+            logi(this, "getRegistration: not-ready, slotId=" + slotId);
             return null;
         }
 
         ImsServiceRecord isr = ImsServiceManager.getServiceRecord(slotId);
 
         if (isr == null) {
-            logi("getRegistration :: Service is down for phone" + slotId);
+            logi(this, "getRegistration: Service is down for phone" + slotId);
             return null;
         }
 
@@ -210,42 +205,39 @@ public class ImsService extends android.telephony.ims.ImsService {
 
     @Override
     public @Nullable SipTransportImplBase getSipTransport(int slotId) {
-        logi("getSipTransport :: slotId=" + slotId);
-
-        if (!ImsServiceController.isReady()) {
-            logi("getSipTransport :: not-ready, slotId=" + slotId);
-            return null;
-        }
-
-        ImsServiceRecord isr = ImsServiceManager.getServiceRecord(slotId);
-
-        if (isr == null) {
-            logi("getSipTransport :: Service is down for phone" + slotId);
-            return null;
-        }
-        return isr.getSipTransport();
-    }
-
-    private static void logi(String s) {
-        Log.i(Log.TAG, "[GII-IMPL] " + s);
-    }
-
-    @Override
-    public void dump(FileDescriptor fd, PrintWriter printWriter, String[] args) {
-        super.dump(fd, printWriter, args);
-
-        IndentingPrintWriter pw = new IndentingPrintWriter(printWriter, "  ");
-        pw.println("--------ImsService--------");
-
-        ImsServiceController isc = ImsServiceController.getInstance();
-        if (isc != null) {
-            isc.dump(pw);
-        }
+        logi(this, "getSipTransport: slotId=" + slotId + ", not-support");
+        return null;
     }
 
     @Override
     public Executor getExecutor() {
         Executor executor = ImsServiceController.getInstance().getExecutor();
         return (executor != null) ? executor : Runnable::run;
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter printWriter, String[] args) {
+        printWriter.println("supportedSimCount=" + DeviceConfig.getSupportedSimCount());
+        printWriter.println("activeSimCount=" + DeviceConfig.getActiveSimCount());
+        printWriter.println();
+
+        printWriter.println("### IMS Services");
+        ImsServiceController isc = ImsServiceController.getInstance();
+        if (isc != null) {
+            isc.dump(printWriter);
+        }
+        printWriter.println();
+
+        printWriter.println("### Data Networks");
+        DcFactory.dump(printWriter);
+        printWriter.println();
+
+        printWriter.println("### Core Agents");
+        AgentFactory.getInstance().dump(printWriter);
+        printWriter.println();
+    }
+
+    private static void logi(Object o, String s) {
+        Log.i(o, "[GII-IMPL] " + s);
     }
 }

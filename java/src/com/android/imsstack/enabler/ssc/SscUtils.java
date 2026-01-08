@@ -16,6 +16,7 @@
 
 package com.android.imsstack.enabler.ssc;
 
+import android.annotation.SuppressLint;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
@@ -28,6 +29,10 @@ import com.android.imsstack.enabler.ssc.SscConfig.CarrierConfigServiceType;
 import com.android.imsstack.enabler.ssc.SscConstant.AccessNetworkTypes;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import java.util.List;
 import java.util.Locale;
@@ -193,30 +198,76 @@ public class SscUtils {
             number =  "0" + number.substring(ccToRemove.length());
         }
 
-        final String format = SscConfig.getTargetAddrScheme(slotId);
-        ImsLog.d("number : " + number + ", format : " + format + ", domain : " + domain);
+        final int uriType = SscConfig.getUriTypeForCfTargetNumber(slotId);
+        ImsLog.d("number : " + number + ", uriType : " + uriType + ", domain : " + domain);
 
         // IR92 2.2.3 Addressing
         String uri;
-        if ("sip".equalsIgnoreCase(format)) {
+        if (uriType == SscConfig.URI_TYPE_TEL) {
+            uri = "tel:" + number;
+            // local numbering
+            if (!number.startsWith("+")) {
+                uri += ";phone-context=" + domain;
+            }
+        } else if (uriType == SscConfig.URI_TYPE_SIP) {
             uri = "sip:" + number;
             // local numbering
             if (!number.startsWith("+")) {
                 uri += ";phone-context=" + domain;
             }
             uri += "@" + domain + ";user=phone";
-        } else if ("tel".equalsIgnoreCase(format)) {
-            uri = "tel:" + number;
-            // local numbering
-            if (!number.startsWith("+")) {
-                uri += ";phone-context=" + domain;
-            }
         } else {
-            uri = number;
+            ImsLog.w("Uri type is wrong");
+            return number;
         }
 
         ImsLog.d("uri is " + uri);
         return uri;
+    }
+
+    /**
+     * Gets the first Element with a specified name.
+     *
+     * @param element The root Element to begin the search from.
+     * @param name The name to match.
+     * @return The first matching {@code Element} if found, otherwise {@code null}.
+     */
+    public static Element getElementByName(Element element, String name) {
+        NodeList elementList = getNodeListByName(element, name);
+        if (elementList.getLength() == 0) {
+            return null;
+        }
+        return (Element) elementList.item(0);
+    }
+
+    /**
+     * Gets all Nodes with a specified name regardless of namespace.
+     *
+     * @param element The root Element to begin the search from.
+     * @param name The name to match.
+     * @return A {@code NodeList} containing all matching nodes.
+     *         an empty list if no matches are found.
+     */
+    public static NodeList getNodeListByName(Element element, String name) {
+        SscNodeListImpl results = new SscNodeListImpl();
+        getAllNodesByName(results, element, name);
+        return results;
+    }
+
+    private static void getAllNodesByName(SscNodeListImpl out, Element rootElement, String name) {
+        final String nodeName = rootElement.getNodeName();
+        final String localName = nodeName.contains(":") ? nodeName.split(":")[1] : nodeName;
+        if (name.equals(localName)) {
+            out.add(rootElement);
+        }
+
+        NodeList children = rootElement.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node node = children.item(i);
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                getAllNodesByName(out, (Element) node, name);
+            }
+        }
     }
 
     /**
@@ -332,6 +383,28 @@ public class SscUtils {
             default:
                 return SscConfig.SERVICE_TYPE_INVALID;
         }
+    }
+
+    @SuppressLint("SwitchIntDef")
+    protected static int getConditionFromSsType(@CarrierConfigServiceType int ssType) {
+        return switch (ssType) {
+            case SscConfig.SERVICE_TYPE_CFU -> SscConstant.CONDITION_CFU;
+            case SscConfig.SERVICE_TYPE_CFB -> SscConstant.CONDITION_CFB;
+            case SscConfig.SERVICE_TYPE_CFNRY -> SscConstant.CONDITION_CFNR;
+            case SscConfig.SERVICE_TYPE_CFNRC -> SscConstant.CONDITION_CFNRC;
+            case SscConfig.SERVICE_TYPE_CFNL -> SscConstant.CONDITION_CFNL;
+            case SscConfig.SERVICE_TYPE_BAOC -> SscConstant.CONDITION_BAOC;
+            case SscConfig.SERVICE_TYPE_BOIC -> SscConstant.CONDITION_BOIC;
+            case SscConfig.SERVICE_TYPE_BOIC_EXHC -> SscConstant.CONDITION_BOIC_EXHC;
+            case SscConfig.SERVICE_TYPE_BAIC -> SscConstant.CONDITION_BAIC;
+            case SscConfig.SERVICE_TYPE_BIC_ROAM -> SscConstant.CONDITION_BIC_WR;
+            case SscConfig.SERVICE_TYPE_ACR -> SscConstant.CONDITION_ACR;
+            default -> SscConstant.CONDITION_INVALID;
+        };
+    }
+
+    protected long getCurrentUtcTimeEpochMs() {
+        return java.time.Instant.now().toEpochMilli();
     }
 
     @VisibleForTesting

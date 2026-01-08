@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,7 @@
 #define _MOCK_MEDIA_CONFIGURATION_H_
 
 #include <gmock/gmock.h>
+
 #include <config/MediaConfiguration.h>
 
 class MockMediaConfiguration : public MediaConfiguration
@@ -35,8 +36,8 @@ public:
     MOCK_METHOD(IMS_SINT32, GetPortRtp, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPortRtpEnd, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPortRtcp, (), (const, override));
-    MOCK_METHOD(IMS_SINT32, GetRtcpLiveInterval, (), (const, override));
-    MOCK_METHOD(IMS_SINT32, GetRtcpInterval, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetRtcpIntervalOnActive, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetRtcpIntervalOnHold, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetAsBandwidthKbps, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRsBandwidthBps, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRrBandwidthBps, (), (const, override));
@@ -49,12 +50,12 @@ public:
             (override));
     MOCK_METHOD(IMS_UINT32, MakeCodec,
             (IN ICarrierConfig * piCc, IN IMS_UINT32 nCodec, IN IMS_UINT32 nCodecIndex,
-                    IN IMS_SINT32 nPayloadTypeNum, IMS_SINT32 nCodecIdx),
+                    IN IMS_SINT32 nPayloadTypeNum),
             (override));
     MOCK_METHOD(void, ToDebugString, (), (const, override));
-    MOCK_METHOD(void, ToDebugStringCodecs, (IN CodecConfig * pCodecConfig), (const, override));
+    MOCK_METHOD(void, ToDebugStringCodecs, (IN const CodecConfig* pCodecConfig), (const, override));
     MOCK_METHOD(void, Clear, (), (override));
-    MOCK_METHOD(IMS_UINT32, GetCodecType, (IN IMS_UINT32 nCodec), (const, override));
+    MOCK_METHOD(IMS_UINT32, ConvertCodecType, (IN IMS_UINT32 nCodec), (const, override));
     MOCK_METHOD(void, SetPorts, (IN ICarrierConfig * piCc, IN const IMS_CHAR* pszKey), (override));
     MOCK_METHOD(void, SetRtcpIntervals, (IN ICarrierConfig * piCc, IN const IMS_CHAR* pszKey),
             (override));

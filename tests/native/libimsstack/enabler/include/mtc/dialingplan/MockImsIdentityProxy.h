@@ -30,7 +30,7 @@ public:
             ImsIdentityProxy()
     {
     }
-    ~MockImsIdentityProxy() {}
+    ~MockImsIdentityProxy() override {}
 
     MOCK_METHOD(AString, CreateSipUserId,
             (IN const AString&, IN IMS_SINT32, IN IMS_BOOL, IN const AString&), (const, override));

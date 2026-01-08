@@ -17,34 +17,45 @@
 #ifndef INTERFACE_CONFERENCE_REFERENCE_LISTENER_H_
 #define INTERFACE_CONFERENCE_REFERENCE_LISTENER_H_
 
-#include "SipStatusCode.h"
+#include "ImsTypeDef.h"
 #include "conferencecall/IConferenceReference.h"
 
+/**
+ * @brief Listener for events from an {@link ConferenceReference}.
+ *
+ * This interface provides callbacks for the lifecycle of a SIP REFER transaction,
+ * which is used for operations like inviting or removing participants from a conference.
+ */
 class IConferenceReferenceListener
 {
 public:
     virtual ~IConferenceReferenceListener() = default;
 
     /**
-     * @brief Notifies
+     * @brief Notifies that the REFER request has been successfully sent and accepted.
      *
-     * @param piConfRef
+     * This is typically triggered upon receiving a 2xx response to the REFER request.
+     *
+     * @param piConfRef A pointer to the {@link IConferenceReference} that was successfully started.
      */
     virtual void OnReferenceStarted(IN IConferenceReference* piConfRef) = 0;
 
     /**
-     * @brief Notifies
+     * @brief Notifies that the REFER request has failed to be sent.
      *
-     * @param pConfRef
+     * This can be due to network issues or other errors preventing the request from being
+     * delivered.
+     *
+     * @param pConfRef A pointer to the {@link IConferenceReference} that failed to start.
      */
     virtual void OnReferenceStartFailed(IN IConferenceReference* pConfRef) = 0;
 
     /**
-     * @brief Notifies
+     * @brief Notifies that a NOTIFY message has been received for the REFER subscription.
      *
-     * @param piConfRef
-     * @param nSipFragCode
-     * @param eState
+     * @param piConfRef A pointer to the corresponding {@link IConferenceReference}.
+     * @param nSipFragCode The SIP status code from the sipfrag body of the NOTIFY message.
+     * @param eState The state of the subscription from the 'Subscription-State' header.
      */
     virtual void OnReferenceUpdated(IN IConferenceReference* piConfRef, IN IMS_SINT32 nSipFragCode,
             IN ReferSubscriptionState eState) = 0;

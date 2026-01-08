@@ -16,17 +16,21 @@
 
 package com.android.imsstack.enabler.media;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.CallQuality;
+import android.telephony.ims.MediaThreshold;
 import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.imsmedia.AudioConfig;
 import android.telephony.imsmedia.ImsMediaSession;
 import android.telephony.imsmedia.MediaQualityStatus;
+import android.telephony.imsmedia.RtpReceptionStats;
 
 import com.android.imsstack.enabler.mtc.MtcMediaSession;
 
@@ -43,6 +47,9 @@ import java.util.List;
 
 @RunWith(JUnit4.class)
 public class AudioSessionCallbackHandlerTest {
+    private static final int MEDIA_STREAM_TYPE_AUDIO = 1;
+    private static final int MEDIA_STREAM_DIRECTION_UPLINK = 1;
+    private static final int MEDIA_STREAM_TEST_BITRATE = 10;
 
     @Mock MtcMediaSession mMockMtcMediaSession;
     @Captor ArgumentCaptor<Parcel> mCaptorParcel;
@@ -155,6 +162,17 @@ public class AudioSessionCallbackHandlerTest {
     }
 
     @Test
+    public void testHandleTriggerAnbrQuery() {
+
+        mAudioSessionCallbackHandler.triggerAnbrQuery(MEDIA_STREAM_TYPE_AUDIO,
+                MEDIA_STREAM_DIRECTION_UPLINK, MEDIA_STREAM_TEST_BITRATE);
+
+        verify(mMockMtcMediaSession).triggerAnbrQuery(
+                eq(MEDIA_STREAM_TYPE_AUDIO), eq(MEDIA_STREAM_DIRECTION_UPLINK),
+                eq(MEDIA_STREAM_TEST_BITRATE));
+    }
+
+    @Test
     public void testHeaderExtensionReceived() {
 
         List<RtpHeaderExtension> rtpExtensions = MediaTestUtils.createRtpExtensions();
@@ -219,5 +237,62 @@ public class AudioSessionCallbackHandlerTest {
 
         verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
+    }
+
+    @Test
+    public void testOnNotifyIncomingDtmfReceived() {
+        int dtmfDigit = 1;
+        int duration = 200;
+        mAudioSessionCallbackHandler.onNotifyIncomingDtmfReceived(dtmfDigit, duration);
+        verify(mMockMtcMediaSession).onNotifyIncomingDtmfReceived(eq(dtmfDigit), eq(duration));
+    }
+
+    @Test
+    public void testGetMediaThreshold() {
+        MediaThreshold expectedThreshold = MediaTestUtils.createMediaThreshold();
+        when(mMockMtcMediaSession.getMediaThreshold(ImsMediaSession.SESSION_TYPE_AUDIO))
+                .thenReturn(expectedThreshold);
+
+        MediaThreshold actualThreshold =
+                mAudioSessionCallbackHandler.getMediaThreshold(ImsMediaSession.SESSION_TYPE_AUDIO);
+
+        verify(mMockMtcMediaSession).getMediaThreshold(ImsMediaSession.SESSION_TYPE_AUDIO);
+        assertEquals(expectedThreshold, actualThreshold);
+    }
+
+    @Test
+    public void testCloseSessionResponse() {
+        mAudioSessionCallbackHandler.closeSessionResponse();
+
+        verify(mMockMtcMediaSession).audioSessionClosed();
+    }
+
+    @Test
+    public void testNotifyAnbrReceived() {
+        int mediaType = ImsMediaSession.SESSION_TYPE_AUDIO;
+        int direction = 1;
+        int bitsPerSecond = 12650;
+
+        Parcel testParcel = Parcel.obtain();
+        testParcel.writeInt(MediaConstants.NOTIFY_ANBR_RECEIVED);
+        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
+        testParcel.writeInt(mediaType);
+        testParcel.writeInt(direction);
+        testParcel.writeInt(bitsPerSecond);
+
+        mAudioSessionCallbackHandler.notifyAnbrReceived(mediaType, direction, bitsPerSecond);
+
+        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
+        MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
+    }
+
+    @Test
+    public void testOnNotifyRtpReceptionStats() {
+        RtpReceptionStats stats = new RtpReceptionStats.Builder().build();
+
+        mAudioSessionCallbackHandler.onNotifyRtpReceptionStats(stats);
+
+        verify(mMockMtcMediaSession)
+                .onNotifyRtpReceptionStats(eq(ImsMediaSession.SESSION_TYPE_AUDIO), eq(stats));
     }
 }

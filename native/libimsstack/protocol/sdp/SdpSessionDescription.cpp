@@ -13,12 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "AStringArray.h"
 #include "AStringBuffer.h"
+#include "IpAddress.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
 #include "Sdp.h"
+#include "SdpConnection.h"
+#include "SdpEncryptionKey.h"
+#include "SdpInformation.h"
 #include "SdpSessionDescription.h"
+#include "SdpTime.h"
 #include "SdpTimezone.h"
 #include "SdpUri.h"
 

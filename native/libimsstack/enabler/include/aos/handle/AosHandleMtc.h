@@ -32,7 +32,10 @@ class AosHandleMtc :
 public:
     AosHandleMtc(IN IAosAppContext* piAppContext, IN const AString& strAppId,
             IN const AString& strServiceId, IN const IMS_SINT32 nServiceType);
-    virtual ~AosHandleMtc();
+    ~AosHandleMtc() override;
+
+    // IImsAos
+    IMS_UINT32 GetFeatures() const override;
 
     // IAosHandle
     IMS_BOOL App_Notify() override;
@@ -42,6 +45,20 @@ public:
 
     // IAosNetTrackerListener
     void NetTracker_StatusChanged() override;
+
+protected:
+    enum class VolteHysTimerBlock
+    {
+        NONE = 0,
+        VOPS = 0x1,
+        SSAC = 0x2
+    };
+
+    enum class VolteHysTimerCheckReason
+    {
+        VOPS_CHANGED = 1,
+        SSAC_CHANGED
+    };
 
 protected:
     void InitializeHoldingBlocksPolicy() override;
@@ -60,6 +77,7 @@ protected:
     void RemoveListeners() override;
 
     IMS_BOOL IsHandleBlocked() const override;
+    IMS_BOOL IsFeatureBlocked(IN IMS_UINT32 nFeature) const override;
 
     void ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked) override;
     void ProcessBlockChanged() override;
@@ -67,24 +85,38 @@ protected:
             IN const ImsMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities) override;
     void ProcessDataConnectionChanged() override;
     void ProcessNetworkChanged() override;
-    void ProcessVopsStateChanged(
-            IN IMS_UINT32 nState, IN IMS_BOOL bUpdateState = IMS_TRUE) override;
 
+    void ReevaluateCapabilities() override;
     void ReevaluateUnavailableFeature() override;
 
-private:
+    // IAosHandle
+    void Request(IN IMS_UINT32 nType, IN IMS_UINT32 nState = 0) override;
+
     void UpdateGGsmaRcsTelephonyFeatureTag();
-    IMS_UINT32 GetVoiceBlockReasonForIpcan();
-    IMS_UINT32 GetVideoBlockReasonForIpcan();
+    void UpdateSsacState();
+    void UpdateVopsState();
+    void SetVopsInfo(IN IMS_UINT32 nState, IN const AString& strPlmn);
+
+    IMS_UINT32 GetVoiceBlockReasonForIpcan() const;
+    IMS_UINT32 GetVideoBlockReasonForIpcan() const;
 
     IMS_BOOL IsCsFeatureTagRequired() const;
     IMS_BOOL IsInvalidMobileNetwork() const;
     IMS_BOOL IsPlmnBlockCondition() const;
+    IMS_BOOL IsVoiceCapableOnWiFiCalling() const;
+    IMS_BOOL IsVolteHysTimerBlocked(IN VolteHysTimerBlock eBlock) const;
+    IMS_BOOL IsVolteHysTimerStartingCondition(IN VolteHysTimerCheckReason eReason) const;
 
     IMS_BOOL ProcessHoldingVopsState(IN IMS_UINT32 nState);
     IMS_BOOL ProcessHoldingSsacState(IN IMS_SINT32 nBarringFactorForVoice);
 
+    void Process3G();
+    void ProcessCallTerminated();
     void ProcessVolteHysTimerExpired();
+    void ProcessVopsStateChanged(IN IMS_UINT32 nState, IN const AString& strPlmn);
+
+    void SetVolteHysTimerBlock(IN VolteHysTimerBlock eBlock);
+    void ResetVolteHysTimerBlock(IN VolteHysTimerBlock eBlock);
 
     // Timer
     IMS_BOOL StartVolteHysTimer(IN IMS_UINT32 nDuration);
@@ -98,20 +130,23 @@ private:
     void ImsRadio_OnSsacChanged(IN const SsacInfo& objSsacInfo) override;
 
     // IAosServicePhoneListener
-    void ServicePhone_PlmnChanged() override;
+    void ServicePhone_PlmnChanged(IN const AString& strPlmn) override;
+    void ServicePhone_VopsStateChanged(IN IMS_UINT32 nState, IN const AString& strPlmn) override;
 
     // ITimerListener
     void Timer_TimerExpired(IN ITimer* piTimer) override;
 
 protected:
     IImsRadio* m_piImsRadio;
-
-private:
     ITimer* m_piVolteHysTimer;
     IMS_BOOL m_bSsacBarred;
     IMS_BOOL m_bSsacHeld;
-
-private:
-    friend class AosHandleMtcTest;
+    IMS_BOOL m_bB2cCallComposerCapable;
+    IMS_BOOL m_bVopsIgnoredForVolteEnabled;
+    IMS_UINT32 m_nVopsState;
+    IMS_UINT32 m_nHoldingVopsState;
+    IMS_UINT32 m_nVolteHysTimerBlocks;
+    AString m_strVopsPlmn;
+    AString m_strSsacPlmn;
 };
 #endif  // AOS_HANDLE_MTC_H_

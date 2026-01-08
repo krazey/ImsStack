@@ -41,7 +41,7 @@ class Replaces;
 class MockISession : public ISession
 {
 public:
-    virtual ~MockISession() {}
+    ~MockISession() override = default;
 
     // IMethod
     MOCK_METHOD(void, Destroy, (), (override));
@@ -90,6 +90,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsFinalResponseReceivedForInitialInviteRequest, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsReliableProvResponseSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSdpNegotiationAllowedForNonRpr, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsSdpOaInPreviewMode, (), (const, override));
     MOCK_METHOD(IMS_RESULT, RejectEx,
             (IN IMS_SINT32 nStatusCode, IN const AString& strReasonPhrase), (override));
     MOCK_METHOD(IMS_RESULT, RespondToEarlyUpdate,
@@ -129,6 +130,8 @@ public:
     MOCK_METHOD(IMS_BOOL, IsSessionRefreshInProgress, (), (const, override));
     MOCK_METHOD(void, SetReasonHeaderSetter, (IN IReasonHeaderSetter * piSetter), (override));
     MOCK_METHOD(ISdpReader*, GetRemoteMediaCapabilities, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsSessionCanceledOnAccepted, (), (const, override));
+    MOCK_METHOD(void, AbortEarlyUpdateTransaction, (), (override));
 };
 
 #endif

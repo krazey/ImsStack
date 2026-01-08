@@ -29,7 +29,7 @@ class OsIpSecPolicy : public IIpSecPolicy, public ITimerListener
 {
 public:
     explicit OsIpSecPolicy(IN IMS_SINT32 nId);
-    virtual ~OsIpSecPolicy();
+    ~OsIpSecPolicy() override;
 
     // IIpSecPolicy Interface
     IMS_SINT32 GetId() const override;

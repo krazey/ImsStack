@@ -18,7 +18,6 @@
 #define MTC_SERVICE_H_
 
 #include "AString.h"
-#include "ICoreService.h"
 #include "ICoreServiceListener.h"
 #include "IImsAosListener.h"
 #include "IImsAosMonitor.h"
@@ -26,12 +25,20 @@
 #include "ImsService.h"
 #include "ImsTypeDef.h"
 #include "helper/SrvccStateManager.h"
+#include "helper/SsacTimerHandler.h"
+#include <memory>
 
+class ICoreService;
 class IJniMtcServiceThread;
 class IMtcAosConnector;
 class IMtcAosStateListener;
 class IMtcContext;
+class IPageMessage;
+class IReference;
+class ISsacTimerHandler;
 class MtcAosEventHandler;
+class MtcNetworkWatcher;
+class MtcPermanentSupplementaryService;
 class MtcRoutingRejectHandler;
 
 class MtcService :
@@ -43,7 +50,7 @@ class MtcService :
 {
 public:
     MtcService(IN IMtcContext& objContext, IN ServiceType eType);
-    virtual ~MtcService();
+    virtual ~MtcService() override;
     MtcService(IN const MtcService&) = delete;
     MtcService& operator=(IN const MtcService&) = delete;
 
@@ -53,11 +60,20 @@ public:
     void RemoveAosStateListener(IN IMtcAosStateListener* piListener) override;
     void AddSrvccStateListener(IN ISrvccStateListener* piListener) override;
     void RemoveSrvccStateListener(IN ISrvccStateListener* piListener) override;
+    void AddNetworkWatcherListener(IN IMtcNetworkWatcherListener* piListener) override;
+    void RemoveNetworkWatcherListener(IN IMtcNetworkWatcherListener* piListener) override;
+    IMS_SINT32 GetRatType() const override;
+    IMS_SINT32 GetMobileRatType() const override;
+    IMS_SINT32 GetLastConnectedRatType() const override;
 
     inline IMS_BOOL IsActive() const override { return m_eStatus == ServiceStatus::SERVICE_ACTIVE; }
     inline IMS_BOOL IsEmergency() const override { return m_eType == ServiceType::EMERGENCY; }
     IMS_BOOL IsNr() const override;
+    IMS_BOOL IsEpsOnlyAttach() const override;
+    IMS_BOOL IsEpsCombinedAttach() const override;
+    IMS_BOOL IsRoaming() const override;
     IMS_BOOL IsWlanIpCanType() const override;
+    IMS_BOOL IsCrossSimConnected() const override { return m_bCrossSimConnected; }
     inline ServiceStatus GetOldStatus() const override { return m_eOldStatus; }
     inline ServiceStatus GetStatus() const override { return m_eStatus; }
     inline ICoreService* GetICoreService() const override { return m_piCoreService; }
@@ -66,30 +82,32 @@ public:
     inline SrvccState GetSrvccState() const override { return m_pSrvccStateManager->GetState(); }
 
     void UpdateSrvccState(IN SrvccState eState) override;
-    void SetTerminalBasedCallWaiting(IN IMS_BOOL bEnabled) override;
-    void OpenEmergencyService(IN IuMtcService::EmergencyCallRoutingPdn ePdn) override;
+    void UpdatePermanentSuppServices(IN const ImsList<SuppService*>& objSuppServices) override;
+    IMS_BOOL IsPermanentSuppServiceEnabled(IN PermanentSuppType ePermanentSuppType) override;
+    void OpenEmergencyService(IN ServiceType eServiceType) override;
     void StopEmergencyService() override;
     void ProcessTestCommand(
             IN IMS_SINT32 nCommand, IN IMS_SINT32 nWParam, IN IMS_SINT32 nLParam) override;
-    TbcwStatus GetTbcwStatus() const override { return m_eTbcwStatus; }
+    ISsacTimerHandler& GetSsacTimerHandler() override { return m_objSsacTimerHandler; }
 
     inline void NotifyJniEnablerSet() override {}
 
     // ICoreServiceListener implementation
-    inline void CoreService_PageMessageReceived(IN ICoreService*, IN IPageMessage*) override {}
-    inline void CoreService_ReferenceReceived(IN ICoreService*, IN IReference*) override{};
-    void CoreService_ServiceClosed(
-            IN ICoreService* piService, IN IReasonInfo* piReasonInfo) override;
+    void CoreService_PageMessageReceived(
+            IN ICoreService* piService, IN IPageMessage* piMessage) override;
+    void CoreService_ReferenceReceived(
+            IN ICoreService* piService, IN IReference* piReference) override;
+    inline void CoreService_ServiceClosed(IN ICoreService*, IN IReasonInfo*) override {};
     void CoreService_SessionInvitationReceived(
             IN ICoreService* piService, IN ISession* piSession) override;
-    inline void CoreService_UnsolicitedNotifyReceived(IN ICoreService*, IN IMessage*) override{};
+    inline void CoreService_UnsolicitedNotifyReceived(IN ICoreService*, IN IMessage*) override {};
     void CoreService_CapabilityQueryReceived(
             IN ICoreService* piService, IN ICapabilities* piCapabilities) override;
 
     void ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan) override;
-    void ImsAos_Connecting() override;
+    inline void ImsAos_Connecting() override {}
     void ImsAos_Disconnecting(IN IMS_UINT32 nReason) override;
-    void ImsAos_Disconnected(IN IMS_UINT32 nReason) override;
+    void ImsAos_Disconnected(IN IMS_UINT32 nReason, IN IMS_SINT32 nDataFailureReason) override;
     void ImsAos_Suspended(IN IMS_UINT32 nReason) override;
     void ImsAos_Resumed() override;
 
@@ -99,6 +117,7 @@ public:
 
 private:
     IMS_BOOL m_bFeatureAddedForCallComposer;
+    IMS_BOOL m_bCrossSimConnected;
 
     void Init();
     void SetStatus(IN ServiceStatus eStatus);
@@ -119,12 +138,16 @@ protected:
     IMtcAosConnector* m_pAosConnector;
     MtcAosEventHandler* m_pAosEventHandler;
     SrvccStateManager* m_pSrvccStateManager;
+    MtcNetworkWatcher* m_pNetworkWatcher;
     MtcRoutingRejectHandler* m_pRoutingRejectHandler;
-    TbcwStatus m_eTbcwStatus;
-    enum
+    SsacTimerHandler m_objSsacTimerHandler;
+    std::unique_ptr<MtcPermanentSupplementaryService> m_pPermanentSuppService;
+
+    enum class TestCommand
     {
-        TEST_COMMAND_AOS_CONNECTED = 0,
-        TEST_COMMAND_AOS_DISCONNECTED = 1
+        AOS_CONNECTED = 0,
+        AOS_DISCONNECTED = 1,
+        RAT_CHANGED = 2,
     };
 };
 

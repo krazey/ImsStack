@@ -71,6 +71,14 @@ public:
     virtual void Stop(IN IMS_SINT32 nSlotId, IN IMS_UINT32 nTrafficType) = 0;
 
     /**
+     * @brief Sets modem's simultaneous calling support for a specified slot.
+     *
+     * @param nSlotId The slot ID.
+     * @param bSupported The information whether modem supports simultaneous calling.
+     */
+    virtual void SetSimultaneousCallingSupported(IN IMS_SINT32 nSlotId, IN IMS_BOOL bSupported) = 0;
+
+    /**
      * @brief Sets WLAN category for IPCAN.
      *
      * @param nSlotId The slot ID

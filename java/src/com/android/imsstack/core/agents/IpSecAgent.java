@@ -20,7 +20,6 @@ import android.util.SparseArray;
 
 import com.android.imsstack.system.IpSecSaParameter;
 import com.android.imsstack.system.SystemCallInterface;
-import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 
 import java.io.FileDescriptor;
@@ -49,7 +48,7 @@ public class IpSecAgent implements IpSecInterface {
 
     @Override
     public int addIpSecSaParameter(IpSecSaParameter param) {
-        ImsLog.d(mSlotId, "[IpSec] add: " + param.toString());
+        ImsLog.d(this, mSlotId, "IpSec: add=" + param.toString());
 
         IpSecConnector connector = mConnectors.get(param.getId());
 
@@ -60,8 +59,8 @@ public class IpSecAgent implements IpSecInterface {
 
         connector = new IpSecConnector(param);
 
-        if (!connector.init(AppContext.getInstance())) {
-            ImsLog.e(mSlotId, "[IpSec] Creating IpSecConnector failed.");
+        if (!connector.init()) {
+            ImsLog.e(this, mSlotId, "IpSec: Creating IpSecConnector failed.");
             return SystemCallInterface.RESULT_ERROR;
         }
 
@@ -74,15 +73,15 @@ public class IpSecAgent implements IpSecInterface {
     public void removeIpSecSaParameter(int ipSecId) {
         IpSecConnector connector = mConnectors.get(ipSecId);
 
+        ImsLog.d(this, mSlotId, "IpSec: remove="
+                + (connector != null ? connector.getSaParameter().toString() : "not-found"));
+
         if (connector != null) {
-            ImsLog.d(mSlotId, "[IpSec] remove: " + connector.getSaParameter().toString());
             connector.markAsRemoved();
-            connector.close(AppContext.getInstance());
+            connector.close();
             mConnectors.remove(ipSecId);
             return;
         }
-
-        ImsLog.d(mSlotId, "[IpSec] remove: not found");
     }
 
     @Override
@@ -90,7 +89,7 @@ public class IpSecAgent implements IpSecInterface {
         IpSecConnector connector = mConnectors.get(ipSecId);
 
         if (connector != null) {
-            if (!connector.applySa(AppContext.getInstance(), spi, intFd, socketFd)) {
+            if (!connector.applySa(spi, intFd, socketFd)) {
                 return SystemCallInterface.RESULT_ERROR;
             }
 
@@ -105,12 +104,12 @@ public class IpSecAgent implements IpSecInterface {
         IpSecConnector connector = mConnectors.get(ipSecId);
 
         if (connector != null) {
-            connector.removeSa(AppContext.getInstance(), spi, intFd, socketFd);
+            connector.removeSa(spi, intFd, socketFd);
 
             if (connector.isRemoved()) {
                 if (connector.isAllSocketsDetached()) {
-                    ImsLog.d(mSlotId, "[IpSec] removeIpSecSa: " +
-                            connector.getSaParameter().toString());
+                    ImsLog.d(this, mSlotId, "IpSec: removeIpSecSa="
+                            + connector.getSaParameter().toString());
                     mConnectors.remove(ipSecId);
                 }
             }

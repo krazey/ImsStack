@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-#include "video/VideoController.h"
 #include "ServiceTrace.h"
-#include "video/VideoProfile.h"
+#include "video/VideoController.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.VC");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC
 VideoController::VideoController() :
         m_pSession(IMS_NULL),
+        m_eCallState(EARLY_SESSION),
+        m_objLocalAddr(IpAddress::IPv6NONE),
         m_nPort(0)
 {
 }
@@ -30,11 +31,17 @@ VideoController::VideoController() :
 PUBLIC
 VideoController::~VideoController()
 {
-    if (m_pSession != NULL)
+    if (m_pSession != IMS_NULL)
     {
         delete m_pSession;
-        m_pSession = NULL;
+        m_pSession = IMS_NULL;
     }
+}
+
+PUBLIC
+void VideoController::SetCallSessionState(IN IMS_BOOL bConfirmed)
+{
+    m_eCallState = (bConfirmed) ? CONFIRMED_SESSION : EARLY_SESSION;
 }
 
 PUBLIC
@@ -54,19 +61,19 @@ IMS_BOOL VideoController::CreateSession(
 {
     if (pListener == IMS_NULL || pConfig == IMS_NULL)
     {
+        IMS_TRACE_E(0, "CreateSession() - invalid", 0, 0, 0);
         return IMS_FALSE;
     }
 
     if (m_pSession == IMS_NULL)
     {
         IMS_TRACE_D("CreateSession()", 0, 0, 0);
-        m_pSession = new VideoMediaSession();
+        m_pSession = new VideoSession();
         m_pSession->SetMediaSessionListener(pListener);
-        m_pSession->SetConfig(pConfig);
-        return IMS_TRUE;
+        m_pSession->SetConfiguration(pConfig);
     }
 
-    return IMS_FALSE;
+    return IMS_TRUE;
 }
 
 PUBLIC
@@ -76,9 +83,9 @@ IMS_BOOL VideoController::OpenSession()
     {
         IMS_TRACE_D("OpenSession() - state[%d]", m_pSession->GetState(), 0, 0);
 
-        if (m_pSession->GetState() == VideoMediaSession::STATE_IDLE)
+        if (m_pSession->GetState() == VideoSession::STATE_NONE)
         {
-            m_pSession->UpdateLocalEndPoint(m_objLocalAddr, m_nPort);
+            m_pSession->SetLocalEndPoint(m_objLocalAddr, m_nPort);
 
             if (m_nPort > 0)
             {
@@ -97,32 +104,37 @@ IMS_BOOL VideoController::OpenSession()
 PUBLIC
 IMS_BOOL VideoController::UpdateSession()
 {
-    IMS_TRACE_D("UpdateSession() - state[%d]", m_pSession->GetState(), 0, 0);
-
-    if (m_pSession != IMS_NULL)
+    if (m_pSession != IMS_NULL && m_pSession->GetState() != VideoSession::STATE_NONE)
     {
+        IMS_TRACE_D("UpdateSession() - state[%d]", m_pSession->GetState(), 0, 0);
+
+        if (m_pSession->GetRemotePort() < 0)
+        {
+            return IMS_FALSE;
+        }
+
         if (m_pSession->GetRemotePort() == 0 || m_pSession->GetLocalPort() == 0)
         {
             return CloseSession();
         }
         else
         {
-            m_pSession->SetMediaQuality();
             return m_pSession->Modify();
         }
     }
 
+    IMS_TRACE_E(0, "UpdateSession() - invalid", 0, 0, 0);
     return IMS_FALSE;
 }
 
 PUBLIC
 IMS_BOOL VideoController::CloseSession()
 {
-    IMS_TRACE_D("CloseSession()", 0, 0, 0);
-
     if (m_pSession != IMS_NULL)
     {
-        if (m_pSession->GetState() != VideoMediaSession::STATE_IDLE)
+        IMS_TRACE_D("CloseSession() - state[%d]", m_pSession->GetState(), 0, 0);
+
+        if (m_pSession->GetState() != VideoSession::STATE_NONE)
         {
             m_pSession->Close();
             delete m_pSession;
@@ -135,12 +147,13 @@ IMS_BOOL VideoController::CloseSession()
 }
 
 PUBLIC
-IMS_BOOL VideoController::UpdateLocalAddress(IN VideoNego* pNego)
+IMS_BOOL VideoController::UpdateLocalAddress(IN std::shared_ptr<VideoNego> pNego)
 {
     IMS_TRACE_I("UpdateLocalAddress()", 0, 0, 0);
 
     if (pNego == IMS_NULL)
     {
+        IMS_TRACE_E(0, "UpdateLocalAddress() - invalid", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -150,16 +163,19 @@ IMS_BOOL VideoController::UpdateLocalAddress(IN VideoNego* pNego)
 }
 
 PUBLIC
-IMS_BOOL VideoController::UpdateRtpConfig(IN VideoNego* pNego)
+IMS_BOOL VideoController::UpdateRtpConfig(IN std::shared_ptr<VideoNego> pNego, IN IMS_BOOL bHold)
 {
-    IMS_TRACE_I("UpdateRtpConfig()", 0, 0, 0);
-
-    if (pNego != NULL && m_pSession != IMS_NULL)
+    if (pNego != IMS_NULL && m_pSession != IMS_NULL)
     {
-        return m_pSession->UpdateRtpConfig(pNego->GetNegotiatedLocalProfile(),
-                pNego->GetNegotiatedPeerProfile(), pNego->GetNegotiatedNegoProfile());
+        IMS_TRACE_I("UpdateRtpConfig()", 0, 0, 0);
+        return m_pSession->UpdateRtpConfig(
+                static_cast<VideoProfile*>(pNego->GetNegotiatedLocalProfile()),
+                static_cast<VideoProfile*>(pNego->GetNegotiatedPeerProfile()),
+                static_cast<VideoProfile*>(pNego->GetNegotiatedNegoProfile()),
+                m_eCallState == CONFIRMED_SESSION, bHold);
     }
 
+    IMS_TRACE_E(0, "UpdateRtpConfig() - invalid", 0, 0, 0);
     return IMS_FALSE;
 }
 
@@ -170,40 +186,67 @@ void VideoController::UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork)
 
     if (m_pSession != IMS_NULL)
     {
-        m_pSession->UpdateAccessNetwork(nAccessNetwork);
+        m_pSession->SetAccessNetwork(nAccessNetwork);
     }
 }
 
 PUBLIC
-IMS_BOOL VideoController::UpdateQualityThreshold(IN VideoNego* pNego)
+void VideoController::SetMtu(IN IMS_SINT32 nMtu)
 {
-    IMS_TRACE_I("UpdateQualityThreshold()", 0, 0, 0);
+    IMS_TRACE_I("SetMtu() - mtu[%d]", nMtu, 0, 0);
 
-    if (m_pSession == IMS_NULL || pNego == IMS_NULL)
+    if (m_pSession != IMS_NULL)
     {
+        m_pSession->SetMtu(nMtu);
+    }
+}
+
+PUBLIC
+IMS_BOOL VideoController::ApplyQualityThreshold(IN IMS_BOOL bIsConference)
+{
+    if (m_pSession == IMS_NULL || m_pSession->GetState() == VideoSession::STATE_NONE)
+    {
+        IMS_TRACE_E(0, "ApplyQualityThreshold(): invalid", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    VideoProfile* pPeerProfile = pNego->GetNegotiatedPeerProfile();
-    IMS_BOOL bEnableRtcp = IMS_TRUE;
-
-    if (pPeerProfile != IMS_NULL && pPeerProfile->nBandwidthRs == 0 &&
-            pPeerProfile->nBandwidthRr == 0)
+    if (m_pSession->UpdateMediaQualityThreshold(bIsConference))
     {
-        bEnableRtcp = IMS_FALSE;
+        return m_pSession->SetMediaQuality();
     }
 
-    return m_pSession->UpdateMediaQualityThreshold(
-            MEDIA_DIRECTION_INVOLVED_RECV(m_pSession->GetDirection()), bEnableRtcp);
+    IMS_TRACE_E(0, "ApplyQualityThreshold(): fail to update", 0, 0, 0);
+    return IMS_FALSE;
+}
+
+PUBLIC
+IMS_BOOL VideoController::RequestRtpReceptionStats(IN IMS_UINT32 nReportingIntervalMs)
+{
+    if (m_pSession == IMS_NULL || m_pSession->GetState() == VideoSession::STATE_NONE)
+    {
+        IMS_TRACE_E(0, "RequestRtpReceptionStats(): invalid", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
+    return m_pSession->RequestRtpReceptionStats(nReportingIntervalMs);
 }
 
 PUBLIC
 IMS_BOOL VideoController::IsSessionOpened()
 {
-    if (m_pSession != NULL)
+    if (m_pSession != IMS_NULL && m_pSession->GetState() != VideoSession::STATE_NONE)
     {
         return IMS_TRUE;
     }
 
     return IMS_FALSE;
+}
+
+PUBLIC
+void VideoController::SetMediaPemType(IN MEDIA_PEM_TYPE ePemType)
+{
+    if (m_pSession != IMS_NULL)
+    {
+        m_pSession->SetMediaPemType(ePemType);
+    }
 }

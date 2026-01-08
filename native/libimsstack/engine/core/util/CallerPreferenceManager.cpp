@@ -17,7 +17,7 @@
 
 #include "util/CallerPreferenceManager.h"
 
-PRIVATE
+PUBLIC
 CallerPreferenceManager::CallerPreferenceManager() :
         m_objEmptyPreferenceWrapper(PreferenceWrapper()),
         m_objPreferenceWrappers(ImsMap<AString, PreferenceWrapper>())
@@ -25,21 +25,19 @@ CallerPreferenceManager::CallerPreferenceManager() :
 }
 
 PUBLIC
-IMS_BOOL CallerPreferenceManager::CreatePreferenceWrapper(
+void CallerPreferenceManager::CreatePreferenceWrapper(
         IN const AString& strName, IN const AString& strDialogId)
 {
     IMS_SLONG nIndex = m_objPreferenceWrappers.GetIndexOfKey(strName);
 
     if (nIndex >= 0)
     {
-        return IMS_TRUE;
+        return;
     }
 
     PreferenceWrapper objPreferenceWrapper;
-
     objPreferenceWrapper.SetDialogId(strDialogId);
-
-    return m_objPreferenceWrappers.SetValue(strName, objPreferenceWrapper);
+    m_objPreferenceWrappers.SetValue(strName, objPreferenceWrapper);
 }
 
 PUBLIC
@@ -111,16 +109,4 @@ void CallerPreferenceManager::UpdateDialogId(
     PreferenceWrapper& objPreferenceWrapper = m_objPreferenceWrappers.GetValueAt(nIndex);
 
     objPreferenceWrapper.SetDialogId(strDialogId);
-}
-
-PUBLIC GLOBAL CallerPreferenceManager* CallerPreferenceManager::GetInstance()
-{
-    static CallerPreferenceManager* s_pCallerPreferenceMngr = IMS_NULL;
-
-    if (s_pCallerPreferenceMngr == IMS_NULL)
-    {
-        s_pCallerPreferenceMngr = new CallerPreferenceManager();
-    }
-
-    return s_pCallerPreferenceMngr;
 }

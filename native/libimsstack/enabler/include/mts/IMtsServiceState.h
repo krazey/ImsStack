@@ -26,17 +26,85 @@ class IMtsServiceState
 public:
     virtual ~IMtsServiceState() {}
 
+    /**
+     * @brief Initializes the service state.
+     *
+     * @param piImsAos A pointer to the IImsAos interface.
+     */
     virtual void Init(IN IImsAos* piImsAos) = 0;
+
+    /**
+     * @brief Gets the current state of the service.
+     *
+     * @return The current state of the service. (e.g. MtsDef::STATE_INIT)
+     */
     virtual IMS_SINT32 GetState() const = 0;
+
+    /**
+     * @brief Indicate that the service is connected.
+     */
     virtual void OnImsConnected() = 0;
+
+    /**
+     * @brief Indicate that the service is disconnected with reason.
+     *
+     * @param nReason Indicate the reason that results that the service is disconnected.
+     *                (e.g. ImsAosReason::DATA_DISCONNECTED)
+     */
     virtual void OnImsDisconnected(IN IMS_UINT32 nReason) = 0;
+
+    /**
+     * @brief Indicate that the service is disconnected with reason.
+     *
+     * @param nReason Indicate the reason that results that the service is disconnected.
+     *                (e.g. ImsAosReason::DATA_DISCONNECTED)
+     */
     virtual void OnImsDisconnecting(IN IMS_UINT32 nReason) = 0;
+
+    /**
+     * @brief Indicate that the service is suspended with reason like out-of-servce
+     *        even though registration is kept.
+     *
+     * @param nReason Indicate the reason that results that the service is suspended.
+     *                (e.g. ImsAosReason::DATA_DISCONNECTED)
+     */
     virtual void OnImsSuspended(IN IMS_UINT32 nReason) = 0;
+
+    /**
+     * @brief Indicate that the service is resumed without the suspended reasons
+     */
     virtual void OnImsResumed() = 0;
+
+    /**
+     * @brief Sets the IMS registration connection status.
+     *
+     * @param bConnected {@code IMS_TRUE} If the IMS registration is connected,
+     *                   {@code IMS_FALSE} otherwise.
+     */
     virtual void SetImsRegConnected(IN IMS_BOOL bConnected) = 0;
+
+    /**
+     * @brief Gets the IMS registration connection status.
+     *
+     * @return {@code IMS_TRUE} If the IMS registration is connected,
+     *         {@code IMS_FALSE} otherwise.
+     */
     virtual IMS_BOOL GetImsRegConnected() = 0;
 
+    /**
+     * @brief Checks if the MO service is currently blocked.
+     *
+     * @return {@code IMS_TRUE} If the MO service is blocked,
+     *         {@code IMS_FALSE} otherwise.
+     */
     virtual IMS_BOOL IsMoServiceBlocked() const = 0;
+
+    /**
+     * @brief Checks if the MT service is currently blocked.
+     *
+     * @return {@code IMS_TRUE} If the MT service is blocked,
+     *         {@code IMS_FALSE} otherwise.
+     */
     virtual IMS_BOOL IsMtServiceBlocked() const = 0;
 };
 

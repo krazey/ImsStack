@@ -29,7 +29,7 @@ public:
     FileService& operator=(IN const FileService&) = delete;
 
 protected:
-    virtual ~FileService();
+    ~FileService() override;
 
 public:
     virtual IFile* CreateFile();

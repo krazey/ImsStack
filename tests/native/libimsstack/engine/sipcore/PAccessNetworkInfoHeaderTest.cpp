@@ -26,11 +26,13 @@
 
 #include "ISipConfig.h"
 
+#include "ISipHeader.h"
 #include "ISipRtConfigHelper.h"
 #include "MockISipMessage.h"
 #include "PAccessNetworkInfoHeader.h"
 #include "SipFactory.h"
 #include "SipHeaderName.h"
+#include "SipMethod.h"
 #include "SipProfile.h"
 #include "SipRtConfig.h"
 
@@ -49,7 +51,6 @@ class PAccessNetworkInfoHeaderTest : public ::testing::Test
 {
 public:
     inline PAccessNetworkInfoHeaderTest() :
-            m_objMethod(SipMethod::INVITE),
             m_pSipProfile(new SipProfile()),
             m_pPhoneInfoService(new TestPhoneInfoService()),
             m_pNetworkService(new TestNetworkService())
@@ -84,6 +85,8 @@ protected:
 
         // To disable all the features, set an arbitrary SIP feature
         m_pSipProfile->SetSipFeatureCaps(ISipConfig::SIP_FEATURE_CAPS_IPSEC);
+        // Sets the policy to show MAC address in PANI header.
+        m_pSipProfile->SetHideMacInPaniHeaderPolicy(ISipConfig::SHOW_MAC_IN_PANI);
 
         SetAccessNetworkInfoForDefault();
 
@@ -124,7 +127,7 @@ protected:
 
 protected:
     MockINetworkConnection m_objNetworkConnection;
-    SipMethod m_objMethod;
+    MockISipMessage m_objSipMsg;
     RcPtr<SipProfile> m_pSipProfile;
     AccessNetworkInfo m_objAni;
 
@@ -137,9 +140,9 @@ TEST_F(PAccessNetworkInfoHeaderTest, FormHeaderUsingNetworkConnectionWithInvalid
     AString strHeader;
 
     EXPECT_FALSE(PAccessNetworkInfoHeader::FormHeader(
-            IMS_SLOT_0, IMS_NULL, m_objMethod, m_pSipProfile.Get(), strHeader));
+            IMS_SLOT_0, IMS_NULL, &m_objSipMsg, m_pSipProfile.Get(), strHeader));
     EXPECT_FALSE(PAccessNetworkInfoHeader::FormHeader(
-            IMS_SLOT_0, &m_objNetworkConnection, m_objMethod, m_pSipProfile.Get(), strHeader));
+            IMS_SLOT_0, &m_objNetworkConnection, &m_objSipMsg, m_pSipProfile.Get(), strHeader));
 }
 
 TEST_F(PAccessNetworkInfoHeaderTest, FormHeaderUsingNetworkConnectionWithIwlan)
@@ -149,7 +152,7 @@ TEST_F(PAccessNetworkInfoHeaderTest, FormHeaderUsingNetworkConnectionWithIwlan)
 
     SetAccessNetworkInfoForWifi();
     ASSERT_TRUE(PAccessNetworkInfoHeader::FormHeader(
-            IMS_SLOT_0, &m_objNetworkConnection, m_objMethod, m_pSipProfile.Get(), strHeader));
+            IMS_SLOT_0, &m_objNetworkConnection, &m_objSipMsg, m_pSipProfile.Get(), strHeader));
     EXPECT_EQ(strHeader, strExpected);
 }
 
@@ -158,11 +161,10 @@ TEST_F(PAccessNetworkInfoHeaderTest, FormHeaderUsingNetworkConnectionWithIwlanIn
     AString strHeader;
     AString strExpected("IEEE-802.11;i-wlan-node-id=000000000000");
 
-    m_pSipProfile->SetSipFeatureCaps(m_pSipProfile->GetSipFeatureCaps() |
-            ISipConfig::SIP_FEATURE_CAPS_HIDE_MAC_ADDRESS_IN_PANI_HEADER);
+    m_pSipProfile->SetHideMacInPaniHeaderPolicy(ISipConfig::HIDE_MAC_IN_PANI);
     SetAccessNetworkInfoForWifi();
     ASSERT_TRUE(PAccessNetworkInfoHeader::FormHeader(
-            IMS_SLOT_0, &m_objNetworkConnection, m_objMethod, m_pSipProfile.Get(), strHeader));
+            IMS_SLOT_0, &m_objNetworkConnection, &m_objSipMsg, m_pSipProfile.Get(), strHeader));
     EXPECT_EQ(strHeader, strExpected);
 }
 
@@ -175,7 +177,7 @@ TEST_F(PAccessNetworkInfoHeaderTest, FormHeaderUsingNetworkConnectionWithIwlanLo
             ISipConfig::SIP_FEATURE_CAPS_LOCAL_TIMEZONE_PARAM_IN_PANI_HEADER);
     SetAccessNetworkInfoForWifi();
     ASSERT_TRUE(PAccessNetworkInfoHeader::FormHeader(
-            IMS_SLOT_0, &m_objNetworkConnection, m_objMethod, m_pSipProfile.Get(), strHeader));
+            IMS_SLOT_0, &m_objNetworkConnection, &m_objSipMsg, m_pSipProfile.Get(), strHeader));
     EXPECT_THAT(strHeader.GetStr(), StartsWith(strExpected.GetStr()));
 }
 
@@ -196,7 +198,7 @@ TEST_F(PAccessNetworkInfoHeaderTest, FormHeaderUsingNetworkConnectionWithIwlanCo
             ISipConfig::SIP_FEATURE_CAPS_COUNTRY_PARAM_IN_PANI_HEADER);
     SetAccessNetworkInfoForWifi();
     ASSERT_TRUE(PAccessNetworkInfoHeader::FormHeader(
-            IMS_SLOT_0, &m_objNetworkConnection, m_objMethod, m_pSipProfile.Get(), strHeader));
+            IMS_SLOT_0, &m_objNetworkConnection, &m_objSipMsg, m_pSipProfile.Get(), strHeader));
     EXPECT_EQ(strHeader, strExpected);
 }
 
@@ -217,7 +219,7 @@ TEST_F(PAccessNetworkInfoHeaderTest, FormHeaderUsingNetworkConnectionWithIwlanIn
             ISipConfig::SIP_FEATURE_CAPS_COUNTRY_PARAM_IN_PANI_HEADER);
     SetAccessNetworkInfoForWifi();
     ASSERT_TRUE(PAccessNetworkInfoHeader::FormHeader(
-            IMS_SLOT_0, &m_objNetworkConnection, m_objMethod, m_pSipProfile.Get(), strHeader));
+            IMS_SLOT_0, &m_objNetworkConnection, &m_objSipMsg, m_pSipProfile.Get(), strHeader));
     EXPECT_EQ(strHeader, strExpected);
     EXPECT_EQ(strCountry, objLocationProperties.GetCountry());
 }
@@ -234,12 +236,12 @@ TEST_F(PAccessNetworkInfoHeaderTest, FormHeaderUsingIpAddress)
     m_pNetworkService->SetConnection(IMS_NULL);
 
     EXPECT_FALSE(PAccessNetworkInfoHeader::FormHeader(
-            IMS_SLOT_0, objIpAddress, m_objMethod, m_pSipProfile.Get(), strHeader));
+            IMS_SLOT_0, objIpAddress, &m_objSipMsg, m_pSipProfile.Get(), strHeader));
 
     m_pNetworkService->SetConnection(&m_objNetworkConnection);
 
     ASSERT_TRUE(PAccessNetworkInfoHeader::FormHeader(
-            IMS_SLOT_0, objIpAddress, m_objMethod, m_pSipProfile.Get(), strHeader));
+            IMS_SLOT_0, objIpAddress, &m_objSipMsg, m_pSipProfile.Get(), strHeader));
     EXPECT_EQ(strHeader, strExpected);
 }
 
@@ -253,27 +255,19 @@ TEST_F(PAccessNetworkInfoHeaderTest, SetHeader)
 
     m_pNetworkService->SetConnection(IMS_NULL);
 
-    MockISipMessage objMockISipMessage;
-    piSipMsg = &objMockISipMessage;
+    piSipMsg = &m_objSipMsg;
 
     // Connection is null, no action
     PAccessNetworkInfoHeader::SetHeader(IMS_SLOT_0, objIpAddress, m_pSipProfile.Get(), piSipMsg);
 
     m_pNetworkService->SetConnection(&m_objNetworkConnection);
 
-    SipRtConfig::Header objPlciHeader;
-
-    objPlciHeader.strName = "P-Last-Cell-ID";
-    objPlciHeader.strParameter = "\\2023-03-05T13%3A15%3A30Z\\";
-
-    ISipRtConfigHelper* piConfHelper = SipFactory::GetRtConfigHelper(IMS_SLOT_0);
-    piConfHelper->SetConfig(SipRtConfig::CONFIG_I_SIP_HEADER, &objPlciHeader);
-
     SipRtConfig::Header objCniHeader;
 
     objCniHeader.strName = SipHeaderName::CELLULAR_NETWORK_INFO;
     objCniHeader.strParameter = "\\2023-03-05T13%3A15%3A32Z\\";
 
+    ISipRtConfigHelper* piConfHelper = SipFactory::GetRtConfigHelper(IMS_SLOT_0);
     piConfHelper->SetConfig(SipRtConfig::CONFIG_I_SIP_HEADER, &objCniHeader);
 
     SipRtConfig::Header objPlaniHeader;
@@ -283,15 +277,23 @@ TEST_F(PAccessNetworkInfoHeaderTest, SetHeader)
 
     piConfHelper->SetConfig(SipRtConfig::CONFIG_I_SIP_HEADER, &objPlaniHeader);
 
+    SipRtConfig::Header objPcniHeader;
+
+    objPcniHeader.strName = "P-Cellular-Network-Info";
+    objPcniHeader.strParameter = "\\2023-03-05T13%3A15%3A10Z\\";
+
+    piConfHelper->SetConfig(SipRtConfig::CONFIG_I_SIP_HEADER, &objPcniHeader);
+
     EXPECT_CALL(m_objNetworkConnection, IsePDGEnabled())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
     EXPECT_CALL(m_pPhoneInfoService->GetMockNetworkWatcher(), GetNetworkType())
             .WillRepeatedly(Return(INetworkWatcher::RADIOTECH_TYPE_LTE));
-    EXPECT_CALL(objMockISipMessage, GetMethod()).Times(4);
+    EXPECT_CALL(m_objSipMsg, GetMethod()).Times(3);
     EXPECT_CALL(m_objNetworkConnection, GetExtraInfo(_, _)).Times(AnyNumber());
 
-    ON_CALL(objMockISipMessage, GetMethod()).WillByDefault(ReturnRef(m_objMethod));
+    SipMethod objMethod(SipMethod::INVITE);
+    ON_CALL(m_objSipMsg, GetMethod()).WillByDefault(ReturnRef(objMethod));
 
     ON_CALL(m_objNetworkConnection, GetExtraInfo(_, _))
             .WillByDefault(Invoke(
@@ -303,10 +305,10 @@ TEST_F(PAccessNetworkInfoHeaderTest, SetHeader)
 
     EXPECT_CALL(m_objNetworkConnection, GetAccessNetworkInfo(_)).Times(1);
     EXPECT_CALL(m_objNetworkConnection, GetLastAccessNetworkInfo(_, _, _)).Times(3);
-    EXPECT_CALL(objMockISipMessage, SetHeader(ISipHeader::UNKNOWN, _, _))
+    EXPECT_CALL(m_objSipMsg, SetHeader(ISipHeader::UNKNOWN, _, _))
             .Times(3)
             .WillRepeatedly(Return(IMS_SUCCESS));
-    EXPECT_CALL(objMockISipMessage, SetHeader(ISipHeader::P_ACCESS_NETWORK_INFO, _, _))
+    EXPECT_CALL(m_objSipMsg, SetHeader(ISipHeader::P_ACCESS_NETWORK_INFO, _, _))
             .Times(1)
             .WillRepeatedly(Return(IMS_SUCCESS));
 
@@ -314,9 +316,9 @@ TEST_F(PAccessNetworkInfoHeaderTest, SetHeader)
 
     PAccessNetworkInfoHeader::SetHeader(IMS_SLOT_0, objIpAddress, m_pSipProfile.Get(), piSipMsg);
 
-    piConfHelper->RemoveConfig(SipRtConfig::CONFIG_I_SIP_HEADER, &objPlciHeader);
     piConfHelper->RemoveConfig(SipRtConfig::CONFIG_I_SIP_HEADER, &objCniHeader);
     piConfHelper->RemoveConfig(SipRtConfig::CONFIG_I_SIP_HEADER, &objPlaniHeader);
+    piConfHelper->RemoveConfig(SipRtConfig::CONFIG_I_SIP_HEADER, &objPcniHeader);
 }
 
 }  // namespace android

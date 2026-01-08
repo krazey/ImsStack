@@ -16,9 +16,9 @@
 
 package com.android.imsstack.test;
 
-import static com.android.imsstack.util.ImsPrivateProperties.Persistent.KEY_TEST_DEBUG_ENABLED;
-import static com.android.imsstack.util.ImsPrivateProperties.Persistent.KEY_TEST_IMS_DISABLED;
-import static com.android.imsstack.util.ImsPrivateProperties.Persistent.KEY_TEST_TESTMODE_ENABLED;
+import static com.android.imsstack.base.ImsPrivateProperties.Persistent.KEY_TEST_DEBUG_ENABLED;
+import static com.android.imsstack.base.ImsPrivateProperties.Persistent.KEY_TEST_IMS_DISABLED;
+import static com.android.imsstack.base.ImsPrivateProperties.Persistent.KEY_TEST_TESTMODE_ENABLED;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -31,9 +31,10 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.test.suitebuilder.annotation.SmallTest;
 
-import com.android.imsstack.util.AppContext;
+import androidx.test.filters.SmallTest;
+
+import com.android.imsstack.base.AppContext;
 
 import org.junit.After;
 import org.junit.Before;

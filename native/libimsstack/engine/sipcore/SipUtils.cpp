@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "IPhoneInfoDevice.h"
 #include "ImsHmac.h"
 #include "ImsMd5.h"
 #include "ImsStrLib.h"
@@ -21,6 +22,7 @@
 #include "ServiceSystemTime.h"
 #include "SystemConfig.h"
 
+#include "Sip.h"
 #include "SipFeatures.h"
 #include "SipPrivate.h"
 #include "SipUtils.h"
@@ -61,8 +63,6 @@ PUBLIC GLOBAL AString SipUtils::GenerateCallId(IN const AString& strHost)
 PUBLIC GLOBAL AString SipUtils::GenerateSessionId(
         IN IMS_SINT32 nSlotId, IN const AString& strCallId)
 {
-    // FIXME: add a runtime feature check routine in here (FEATURE)
-
     AString strSecretKey;
     IMS_UINT32 nRandom = IMS_SYS_GetRandom0();
 
@@ -214,7 +214,8 @@ PUBLIC GLOBAL void SipUtils::Init(IN IMS_SINT32 nSlotId)
         if ((nSlotId >= IMS_SLOT_0) && (nSlotId < SystemConfig::GetActiveSimCount()))
         {
             // Generates pseudo-random 128-bit system secret key
-            IDeviceInfo* piDeviceInfo = PhoneInfoService::GetPhoneInfoService()->GetDeviceInfo();
+            const IDeviceInfo* piDeviceInfo =
+                    PhoneInfoService::GetPhoneInfoService()->GetDeviceInfo();
             AString strImei;
 
             piDeviceInfo->GetDeviceId(nSlotId, strImei);

@@ -27,12 +27,12 @@ import android.test.mock.MockContentResolver;
 
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.ImsStackTest;
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
-import com.android.imsstack.util.AppContext;
-import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.MessageExecutor;
 
 import org.junit.After;
@@ -93,6 +93,11 @@ public class ImsCallLocationPolicyTest extends ImsStackTest {
         mContextFixture = null;
         AgentFactory.getInstance().setAgent(ConfigInterface.class, null, MSimUtils.DEFAULT_SLOT_ID);
         AppContext.deinit();
+        ImsServiceManager ism = ImsServiceManager.getDefault();
+        if (ism != null) {
+            ism.dispose();
+            ImsServiceManager.setDefault(null);
+        }
     }
 
     @Test
@@ -100,10 +105,10 @@ public class ImsCallLocationPolicyTest extends ImsStackTest {
         int[] intArray = {150, 155};
         int[] emptyArray = new int[0];
         when(mMockCarrierConfig.getInt(
-                CarrierConfig.Assets.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
+                CarrierConfig.Ims.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
                 .thenReturn(LOCATION_FOR_WIFI_ONLY);
         when(mMockCarrierConfig.getIntArray(
-                CarrierConfig.Assets.KEY_LOCATION_BASED_NUMBER_LIST_INT_ARRAY))
+                CarrierConfig.ImsVoice.KEY_LOCATION_BASED_NUMBER_LIST_INT_ARRAY))
                 .thenReturn(intArray);
         mImsCallLocationPolicy = new ImsCallLocationPolicy(mMockCallContext);
         assertTrue(mImsCallLocationPolicy.isPositionInfoRequired());
@@ -111,7 +116,7 @@ public class ImsCallLocationPolicyTest extends ImsStackTest {
         assertTrue(mImsCallLocationPolicy.getNumberSet().contains("150"));
 
         when(mMockCarrierConfig.getIntArray(
-                CarrierConfig.Assets.KEY_LOCATION_BASED_NUMBER_LIST_INT_ARRAY))
+                CarrierConfig.ImsVoice.KEY_LOCATION_BASED_NUMBER_LIST_INT_ARRAY))
                 .thenReturn(emptyArray);
         mImsCallLocationPolicy = new ImsCallLocationPolicy(mMockCallContext);
         assertTrue(mImsCallLocationPolicy.getNumberSet().isEmpty());
@@ -122,7 +127,7 @@ public class ImsCallLocationPolicyTest extends ImsStackTest {
         assertFalse(mImsCallLocationPolicy.isLocationRequired(mContext, MSimUtils.DEFAULT_SLOT_ID));
 
         when(mMockCarrierConfig.getInt(
-                CarrierConfig.Assets.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
+                CarrierConfig.Ims.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
                 .thenReturn(FLAG_LOCATION_REQUIRED);
         mImsCallLocationPolicy = new ImsCallLocationPolicy(mMockCallContext);
         assertTrue(mImsCallLocationPolicy.isLocationRequired(mContext, MSimUtils.DEFAULT_SLOT_ID));
@@ -152,7 +157,7 @@ public class ImsCallLocationPolicyTest extends ImsStackTest {
         ImsCallProfile callProfile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
                 ImsCallProfile.CALL_TYPE_VOICE);
         when(mMockCarrierConfig.getInt(
-                CarrierConfig.Assets.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
+                CarrierConfig.Ims.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
                 .thenReturn(LOCATION_FOR_EMERGENCY_WIFI_ONLY);
         mockForIsWiFi(true);
         mImsCallLocationPolicy = new ImsCallLocationPolicy(mMockCallContext);
@@ -174,7 +179,7 @@ public class ImsCallLocationPolicyTest extends ImsStackTest {
 
         //verify !isLocationRequiredForNumberListAndECall()
         when(mMockCarrierConfig.getInt(
-                CarrierConfig.Assets.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
+                CarrierConfig.Ims.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
                 .thenReturn(LOCATION_FOR_EMERGENCY_ONLY);
         mImsCallLocationPolicy = new ImsCallLocationPolicy(mMockCallContext);
         assertTrue(mImsCallLocationPolicy.isLocationRequired("910", callProfile));
@@ -182,7 +187,7 @@ public class ImsCallLocationPolicyTest extends ImsStackTest {
         //verify isLocationRequiredForWifiCallOnly()
         mockForIsWiFi(true);
         when(mMockCarrierConfig.getInt(
-                CarrierConfig.Assets.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
+                CarrierConfig.Ims.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
                 .thenReturn(LOCATION_FOR_WIFI_ONLY);
         mImsCallLocationPolicy = new ImsCallLocationPolicy(mMockCallContext);
         assertTrue(mImsCallLocationPolicy.isLocationRequired("910", callProfile));
@@ -190,7 +195,7 @@ public class ImsCallLocationPolicyTest extends ImsStackTest {
         //verify mNumberSet.contains -> true , it will return form isWifiCall() true
         int[] intArray = new int[]{-1, 150, 155};
         when(mMockCarrierConfig.getIntArray(
-                CarrierConfig.Assets.KEY_LOCATION_BASED_NUMBER_LIST_INT_ARRAY))
+                CarrierConfig.ImsVoice.KEY_LOCATION_BASED_NUMBER_LIST_INT_ARRAY))
                 .thenReturn(intArray);
         mockForIsWiFi(true);
         mImsCallLocationPolicy = new ImsCallLocationPolicy(mMockCallContext);
@@ -198,20 +203,20 @@ public class ImsCallLocationPolicyTest extends ImsStackTest {
 
         //verify mNumberSet.contains -> false and isLocationRequiredForNumberListAndECall -> true
         when(mMockCarrierConfig.getInt(
-                CarrierConfig.Assets.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
+                CarrierConfig.Ims.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
                 .thenReturn(LOCATION_FOR_EMERGENCY_WIFI_NUMBER_LIST_ONLY);
         mockForIsWiFi(true);
         mImsCallLocationPolicy = new ImsCallLocationPolicy(mMockCallContext);
         assertTrue(mImsCallLocationPolicy.isLocationRequired("910", callProfile));
 
         when(mMockCarrierConfig.getInt(
-                CarrierConfig.Assets.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
+                CarrierConfig.Ims.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
                 .thenReturn(LOCATION_FOR_EMERGENCY_NUMBER_LIST_ONLY);
         mImsCallLocationPolicy = new ImsCallLocationPolicy(mMockCallContext);
         assertTrue(mImsCallLocationPolicy.isLocationRequired("910", callProfile));
 
         when(mMockCarrierConfig.getInt(
-                CarrierConfig.Assets.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
+                CarrierConfig.Ims.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
                 .thenReturn(FLAG_LOCATION_REQUIRED);
         mImsCallLocationPolicy = new ImsCallLocationPolicy(mMockCallContext);
         assertFalse(mImsCallLocationPolicy.isLocationRequired("910", callProfile));

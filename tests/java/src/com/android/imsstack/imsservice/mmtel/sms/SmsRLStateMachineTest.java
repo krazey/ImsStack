@@ -28,6 +28,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -44,8 +45,8 @@ import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.mts.MtsController;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
+import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.MessageExecutor;
-import com.android.internal.util.HexDump;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -70,18 +71,18 @@ public class SmsRLStateMachineTest {
     MtsController mMtsController;
     private Handler mHandler = null;
     int mMessageType = 2;
-    private byte[] mMtRpAck = HexDump.hexStringToByteArray("0301");
-    private byte[] mMtRpError = HexDump.hexStringToByteArray("0501016f");
+    private byte[] mMtRpAck = ImsUtils.hexStringToBytes("0301");
+    private byte[] mMtRpError = ImsUtils.hexStringToBytes("0501016f");
     private String mDestinationAddress = "0987654321";
     private String mPsiSmsc = "+19037029920";
     private String mSmsc = "07912160130300F4";
     TestSmsRLStateMachine mSmsRLStateMachine;
     private SmsRLStateMachine.SmsRLState mCurrentState;
-    private byte[] mMtRpData = HexDump.hexStringToByteArray("010107919130079229"
+    private byte[] mMtRpData = ImsUtils.hexStringToBytes("010107919130079229"
                                                         + "F0001221110A81785634121000000666"
                                                         + "B2996C2603");
     private int mToken = 1;
-    private byte[] mTpdu = HexDump.hexStringToByteArray("21110A81785634121000000666B2996C2603");
+    private byte[] mTpdu = ImsUtils.hexStringToBytes("21110A81785634121000000666B2996C2603");
 
     private static Semaphore sSemaphore = new Semaphore(0);
 
@@ -193,9 +194,31 @@ public class SmsRLStateMachineTest {
 
         mHandler.post(()->mSmsRLStateMachine.mTR1TimerHandler.run());
         assertTrue(waitForEvent(sSemaphore, 1));
-        verify(mListener, Mockito.timeout(100).times(1)).notifyRLReportIndication(mToken,
+        // Verify that MtsController is notified about the timeout.
+        verify(mMtsController, Mockito.timeout(100)).notifyMoSmsTimedOut();
+        verify(mListener, Mockito.timeout(100)).notifyRLReportIndication(mToken,
                 mSmsRLStateMachine.mTpMr, ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,
                 SmsManager.RESULT_ERROR_GENERIC_FAILURE, 0);
+        assertEquals(IDLE, mSmsRLStateMachine.getState());
+    }
+
+    @Test
+    public void onSipResponseForRPMessageTR1TimerResets() {
+        Runnable runnable = () -> {};
+        mSmsRLStateMachine.setTR1TimerHandler(runnable);
+        mHandler.postDelayed(runnable, 1000);
+        mSmsRLStateMachine.setState(WAIT_FOR_RPACK_FROM_NW);
+
+        Assert.assertNotNull(mListener);
+        Assert.assertNotNull(mSmsRLStateMachine.getTR1TimerHandler());
+        assertTrue(mHandler.hasCallbacks(runnable));
+
+        mSmsRLStateMachine.onSipResponseForRPMessage(false, ImsSmsImplBase.SEND_STATUS_ERROR);
+
+        verify(mListener, times(1)).notifyRLReportIndication(mSmsRLStateMachine.mToken, 0,
+                ImsSmsImplBase.SEND_STATUS_ERROR, SmsManager.RESULT_NETWORK_ERROR, 0);
+        Assert.assertNull(mSmsRLStateMachine.getTR1TimerHandler());
+        Assert.assertFalse(mHandler.hasCallbacks(runnable));
         assertEquals(IDLE, mSmsRLStateMachine.getState());
     }
 
@@ -311,14 +334,14 @@ public class SmsRLStateMachineTest {
     public void onRpDatafromTL_timerWithOutExpiry_Idle() throws InterruptedException {
         mSmsRLStateMachine.setState(IDLE);
         when(mMtsController.sendMessage(anyInt(), any(), anyString(), anyString(),
-                 anyInt())).thenReturn(true);
-        SmsRPdu moRPData = new SmsRPdu(1, SmsUtils.RP_DATA, mSmsc, 0, mTpdu);
+                 anyInt(), anyBoolean())).thenReturn(true);
+        SmsRPdu moRPData = new SmsRPdu(1, SmsUtils.RP_DATA, mSmsc, 0, mTpdu, false);
         byte[] encodedPdu = moRPData.getRpduByteArray();
         int result = mSmsRLStateMachine.onRPDataFromTL(moRPData);
 
         verify(mMtsController).sendMessage(eq(SmsUtils.FORMAT_INT_3GPP),
                 eq(encodedPdu), eq(mPsiSmsc),
-                eq(mDestinationAddress), eq(1));
+                eq(mDestinationAddress), eq(1), eq(false));
         assertEquals(WAIT_FOR_RPACK_FROM_NW, mSmsRLStateMachine.getState());
         assertEquals(SmsUtils.RESULT_SUCCESS, result);
     }
@@ -397,6 +420,8 @@ public class SmsRLStateMachineTest {
     public void onTR1TimerExpiredTest_WaitForRPack() {
         mSmsRLStateMachine.setState(WAIT_FOR_RPACK_FROM_NW);
         mSmsRLStateMachine.onTR1TimerExpired();
+        // Verify that MtsController is notified about the timeout.
+        verify(mMtsController).notifyMoSmsTimedOut();
         verify(mListener).notifyRLReportIndication(mSmsRLStateMachine.mToken, 0,
                 ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,
                 SmsManager.RESULT_ERROR_GENERIC_FAILURE, 0);
@@ -423,7 +448,9 @@ public class SmsRLStateMachineTest {
                 mSmsRLStateMachine.getState());
 
         mSmsRLStateMachine.setState(WAIT_TO_SEND_RPACK_TO_NW);
+        mSmsRLStateMachine.mRpMr = 1;
         mSmsRLStateMachine.onTR2TimerExpired();
+        verify(mMtsController, times(1)).notifyMtSmsTimedOut(1);
         assertEquals(IDLE,
                 mSmsRLStateMachine.getState());
 
@@ -431,7 +458,6 @@ public class SmsRLStateMachineTest {
         mSmsRLStateMachine.onTR2TimerExpired();
         assertEquals(WAIT_FOR_RPACK_FROM_NW,
                 mSmsRLStateMachine.getState());
-        //TODO method is not implemented.
     }
 
     @Test
@@ -464,12 +490,125 @@ public class SmsRLStateMachineTest {
                                  SmsManager.RESULT_NETWORK_ERROR, 0);
     }
 
+    @Test
+    public void getSendStatus_errorWhenOnWifiAndRoaming() {
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfig.ImsSms.KEY_SMS_EVALUATE_RADIO_STATUS_FOR_RP_ERROR_CAUSES_INT_ARRAY))
+                .thenReturn(new int[]{41});
+        mSmsRLStateMachine.setImsRegisteredOnWifi(true);
+        mSmsRLStateMachine.setRoaming(true);
+
+        assertEquals(ImsSmsImplBase.SEND_STATUS_ERROR,
+                mSmsRLStateMachine.getSendStatus(41));
+    }
+
+    @Test
+    public void getSendStatus_errorWhenOnWifiAndCellularNotAvailable() {
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfig.ImsSms.KEY_SMS_EVALUATE_RADIO_STATUS_FOR_RP_ERROR_CAUSES_INT_ARRAY))
+                .thenReturn(new int[]{41});
+        mSmsRLStateMachine.setImsRegisteredOnWifi(true);
+        mSmsRLStateMachine.setRoaming(false);
+        mSmsRLStateMachine.setCellularNetworkAvailable(false);
+
+        assertEquals(ImsSmsImplBase.SEND_STATUS_ERROR,
+                mSmsRLStateMachine.getSendStatus(41));
+    }
+
+    @Test
+    public void getSendStatus_retryWhenOnWifiAndNotRoamingAndCellularAvailable() {
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfig.ImsSms.KEY_SMS_EVALUATE_RADIO_STATUS_FOR_RP_ERROR_CAUSES_INT_ARRAY))
+                .thenReturn(new int[]{41});
+        mSmsRLStateMachine.setImsRegisteredOnWifi(true);
+        mSmsRLStateMachine.setRoaming(false);
+        mSmsRLStateMachine.setCellularNetworkAvailable(true);
+
+        assertEquals(ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,
+                mSmsRLStateMachine.getSendStatus(41));
+    }
+
+    @Test
+    public void getSendStatus_retryWhenNotOnWifi() {
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfig.ImsSms.KEY_SMS_EVALUATE_RADIO_STATUS_FOR_RP_ERROR_CAUSES_INT_ARRAY))
+                .thenReturn(new int[]{41});
+        mSmsRLStateMachine.setImsRegisteredOnWifi(false);
+        mSmsRLStateMachine.setRoaming(true);
+
+        assertEquals(ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,
+                mSmsRLStateMachine.getSendStatus(41));
+    }
+
+    @Test
+    public void getSendStatus_retryWhenNetworkStatusNotChecked() {
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfig.ImsSms.KEY_SMS_EVALUATE_RADIO_STATUS_FOR_RP_ERROR_CAUSES_INT_ARRAY))
+                .thenReturn(new int[]{40});
+        mSmsRLStateMachine.setImsRegisteredOnWifi(true);
+        mSmsRLStateMachine.setRoaming(true);
+
+        assertEquals(ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,
+                mSmsRLStateMachine.getSendStatus(41));
+    }
+
+    @Test
+    public void onTR1TimerExpired_nullMtsController() {
+        // Create a new state machine with a null MtsController to test the null check
+        mSmsRLStateMachine = new TestSmsRLStateMachine(mToken, mMessageType,
+                null, mContext, mListener, mPsiSmsc, mDestinationAddress);
+
+        mSmsRLStateMachine.setState(WAIT_FOR_RPACK_FROM_NW);
+        // Set a mock message reference, which is passed to the listener
+        mSmsRLStateMachine.mTpMr = 17;
+
+        // Execute the timer expiry logic
+        mSmsRLStateMachine.onTR1TimerExpired();
+
+        // Verify that the listener is still notified and the state machine transitions to IDLE,
+        // and that no NullPointerException was thrown due to the null MtsController.
+        verify(mListener).notifyRLReportIndication(eq(mSmsRLStateMachine.mToken),
+                eq(mSmsRLStateMachine.mTpMr),
+                eq(ImsSmsImplBase.SEND_STATUS_ERROR_RETRY),
+                eq(SmsManager.RESULT_ERROR_GENERIC_FAILURE), eq(0));
+        assertEquals(IDLE, mSmsRLStateMachine.getState());
+    }
+
+    @Test
+    public void onTR1TimerExpired_notifyMoSmsTimedOut() {
+        mSmsRLStateMachine.setState(WAIT_FOR_RPACK_FROM_NW);
+        SmsRPdu moRPData = new SmsRPdu(1, SmsUtils.RP_DATA, mSmsc, 0, mTpdu, false);
+        mSmsRLStateMachine.mRPduData = moRPData;
+        mSmsRLStateMachine.mTpMr = mTpdu[SmsUtils.TPDU_MR_INDEX] & 0xff;
+
+        mSmsRLStateMachine.onTR1TimerExpired();
+
+        verify(mMtsController).notifyMoSmsTimedOut();
+        verify(mListener).notifyRLReportIndication(eq(mSmsRLStateMachine.mToken),
+                eq(mSmsRLStateMachine.mTpMr),
+                eq(ImsSmsImplBase.SEND_STATUS_ERROR_RETRY),
+                eq(SmsManager.RESULT_ERROR_GENERIC_FAILURE), eq(0));
+        assertEquals(IDLE, mSmsRLStateMachine.getState());
+    }
+
     private static class TestSmsRLStateMachine extends SmsRLStateMachine {
+        private boolean mIsImsRegisteredOnWifi = false;
+        private boolean mIsRoaming = false;
+        private boolean mIsCellularNetworkAvailable = true;
+
         TestSmsRLStateMachine(int token, int messageType, MtsController mtsController,
                 ImsCallContext context, SmsRelayLayer.Listener listener, String psiSmsc,
                 String destinationAddress) {
             super(token, messageType, mtsController, context, listener, psiSmsc,
                 destinationAddress);
+        }
+
+        protected Runnable getTR1TimerHandler() {
+            return super.mTR1TimerHandler;
+        }
+
+        protected void setTR1TimerHandler(Runnable runnable) {
+            super.mTR1TimerHandler = runnable;
         }
 
         protected Runnable mTR1TimerHandler = new Runnable() {
@@ -487,6 +626,33 @@ public class SmsRLStateMachineTest {
                 sSemaphore.release();
             }
         };
+
+        @Override
+        protected boolean isImsRegisteredOnWifi() {
+            return mIsImsRegisteredOnWifi;
+        }
+
+        @Override
+        protected boolean isRoaming() {
+            return mIsRoaming;
+        }
+
+        @Override
+        protected boolean isCellularNetworkAvailable() {
+            return mIsCellularNetworkAvailable;
+        }
+
+        public void setImsRegisteredOnWifi(boolean isImsRegisteredOnWifi) {
+            mIsImsRegisteredOnWifi = isImsRegisteredOnWifi;
+        }
+
+        public void setRoaming(boolean isRoaming) {
+            mIsRoaming = isRoaming;
+        }
+
+        public void setCellularNetworkAvailable(boolean isCellularNetworkAvailable) {
+            mIsCellularNetworkAvailable = isCellularNetworkAvailable;
+        }
     }
 
     private boolean waitForEvent(Semaphore semaphore, int expectedNumberOfEvents) {

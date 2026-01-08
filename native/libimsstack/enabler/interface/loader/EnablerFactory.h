@@ -36,6 +36,7 @@ public:
     void CreateEnablers(IN IMS_SINT32 nSlotId);
     void DestroyEnablers(IN IMS_SINT32 nSlotId);
     const ImsList<IEnabler*>* GetEnablers(IN IMS_SINT32 nSlotId) const;
+    IMS_BOOL HasEnablers(IN IMS_SINT32 nSlotId) const;
 
 private:
     void CreateEnablers(IN IMS_SINT32 nSlotId, OUT ImsList<IEnabler*>*& pEnablers);

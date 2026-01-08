@@ -15,6 +15,7 @@
  */
 
 #include "CallReasonInfo.h"
+#include "IImsRadio.h"
 #include "ImsTypeDef.h"
 #include "MockIMtcService.h"
 #include "call/IMtcCall.h"
@@ -26,6 +27,7 @@
 #include <gmock/gmock.h>
 
 using ::testing::_;
+using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using Result = IMtcBlockRule::Result;
@@ -42,6 +44,7 @@ public:
     MockIMtcRadioChecker objMockIMtcRadioChecker;
     CallInfo objCallInfo;
     MockIMtcService objMtcService;
+    // cppcheck-suppress unusedStructMember
     MockIMtcBlockRuleCheckListener BlockRuleCheckListener;
 
     RadioBlockRule* pRadioBlockRule;
@@ -60,39 +63,54 @@ protected:
     virtual void TearDown() override { delete pRadioBlockRule; }
 
     void CreateRadioBlockRuleWithGivenValue(
-            IN CallType eCallType, IN PeerType ePeerTypeIn, IN IMS_BOOL bEmergencyIn)
+            IN CallType eCallType, IN PeerType ePeerTypeIn, IN EmergencyType eEmergencyTypeIn)
     {
         objCallInfo.ePeerType = ePeerTypeIn;
-        objCallInfo.bEmergency = bEmergencyIn;
+        objCallInfo.eEmergencyType = eEmergencyTypeIn;
 
         pRadioBlockRule = new RadioBlockRule(objContext, eCallType);
     }
 };
 
-TEST_F(RadioBlockRuleTest, Check)
+TEST_F(RadioBlockRuleTest, CheckReturnsProperResult)
 {
-    CreateRadioBlockRuleWithGivenValue(CallType::VOIP, PeerType::MT, IMS_FALSE);
+    CreateRadioBlockRuleWithGivenValue(CallType::VOIP, PeerType::MT, EmergencyType::NONE);
 
-    EXPECT_CALL(objMockIMtcRadioChecker, SetTrafficCheckerListener(_)).Times(4);
+    EXPECT_CALL(objMockIMtcRadioChecker, AddTrafficCheckerListener(Ref(*pRadioBlockRule))).Times(6);
+
     EXPECT_CALL(objMockIMtcRadioChecker,
-            Check(CallType::VOIP, IMS_FALSE, PeerType::MT, IMS_FALSE, CALL_KEY))
-            .Times(3)
-            .WillOnce(Return(CheckResult::UNBLOCKED))
-            .WillOnce(Return(CheckResult::PENDING))
-            .WillOnce(Return(CheckResult::BLOCKED));
+            Check(CallType::VOIP, IMS_FALSE, PeerType::MT, IMS_FALSE, IMS_FALSE, CALL_KEY))
+            .Times(6)
+            .WillOnce(Return(IMtcRadioChecker::CheckResult::Unblocked()))
+            .WillOnce(Return(IMtcRadioChecker::CheckResult::Pending()))
+            .WillOnce(Return(IMtcRadioChecker::CheckResult::Blocked()))
+            .WillOnce(
+                    Return(IMtcRadioChecker::CheckResult::Blocked(IImsRadio::REASON_RRC_REJECT, 2)))
+            .WillOnce(Return(
+                    IMtcRadioChecker::CheckResult::Blocked(IImsRadio::REASON_ACCESS_DENIED, 2)))
+            .WillOnce(Return(IMtcRadioChecker::CheckResult::Blocked(IImsRadio::REASON_RF_BUSY, 2)));
 
     EXPECT_EQ(Result(Result::Status::UNBLOCKED), pRadioBlockRule->Check(BlockRuleCheckListener));
     EXPECT_EQ(Result(Result::Status::PENDING), pRadioBlockRule->Check(BlockRuleCheckListener));
     EXPECT_EQ(Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE)),
             pRadioBlockRule->Check(BlockRuleCheckListener));
+    EXPECT_EQ(Result(Result::Status::BLOCKED, CallReasonInfo(CODE_INTERNAL_RRC_REJECT, 2)),
+            pRadioBlockRule->Check(BlockRuleCheckListener));
+    EXPECT_EQ(Result(Result::Status::BLOCKED, CallReasonInfo(CODE_ACCESS_CLASS_BLOCKED)),
+            pRadioBlockRule->Check(BlockRuleCheckListener));
+    EXPECT_EQ(Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE)),
+            pRadioBlockRule->Check(BlockRuleCheckListener));
+
+    EXPECT_CALL(objMockIMtcRadioChecker, RemoveTrafficCheckerListener(Ref(*pRadioBlockRule)))
+            .Times(1);
 }
 
 TEST_F(RadioBlockRuleTest, OnConnectionSetupPreparedNotifiesUnblocked)
 {
-    CreateRadioBlockRuleWithGivenValue(CallType::VOIP, PeerType::MT, IMS_FALSE);
+    CreateRadioBlockRuleWithGivenValue(CallType::VOIP, PeerType::MT, EmergencyType::NONE);
 
-    ON_CALL(objMockIMtcRadioChecker, Check(_, _, _, _, _))
-            .WillByDefault(Return(CheckResult::PENDING));
+    ON_CALL(objMockIMtcRadioChecker, Check(_, _, _, _, _, _))
+            .WillByDefault(Return(IMtcRadioChecker::CheckResult::Pending()));
     pRadioBlockRule->Check(BlockRuleCheckListener);
 
     EXPECT_CALL(BlockRuleCheckListener, OnBlockRuleChecked(Result(Result::Status::UNBLOCKED)))
@@ -102,10 +120,11 @@ TEST_F(RadioBlockRuleTest, OnConnectionSetupPreparedNotifiesUnblocked)
 
 TEST_F(RadioBlockRuleTest, OnConnectionFailedNotifiesNoService)
 {
-    CreateRadioBlockRuleWithGivenValue(CallType::VT, PeerType::MO, IMS_TRUE);
+    CreateRadioBlockRuleWithGivenValue(
+            CallType::VT, PeerType::MO, EmergencyType::EMERGENCY_ROUTING);
 
-    ON_CALL(objMockIMtcRadioChecker, Check(_, _, _, _, _))
-            .WillByDefault(Return(CheckResult::PENDING));
+    ON_CALL(objMockIMtcRadioChecker, Check(_, _, _, _, _, _))
+            .WillByDefault(Return(IMtcRadioChecker::CheckResult::Pending()));
     pRadioBlockRule->Check(BlockRuleCheckListener);
 
     const IMS_UINT32 nRejectWaitTimeMillis = 2;
@@ -120,10 +139,11 @@ TEST_F(RadioBlockRuleTest, OnConnectionFailedNotifiesNoService)
 
 TEST_F(RadioBlockRuleTest, OnConnectionFailedNotifiesAcBlockedWhenAccessDenied)
 {
-    CreateRadioBlockRuleWithGivenValue(CallType::VT, PeerType::MO, IMS_TRUE);
+    CreateRadioBlockRuleWithGivenValue(
+            CallType::VT, PeerType::MO, EmergencyType::EMERGENCY_ROUTING);
 
-    ON_CALL(objMockIMtcRadioChecker, Check(_, _, _, _, _))
-            .WillByDefault(Return(CheckResult::PENDING));
+    ON_CALL(objMockIMtcRadioChecker, Check(_, _, _, _, _, _))
+            .WillByDefault(Return(IMtcRadioChecker::CheckResult::Pending()));
     pRadioBlockRule->Check(BlockRuleCheckListener);
 
     const IMS_UINT32 nRejectWaitTimeMillis = 2;
@@ -138,10 +158,11 @@ TEST_F(RadioBlockRuleTest, OnConnectionFailedNotifiesAcBlockedWhenAccessDenied)
 
 TEST_F(RadioBlockRuleTest, OnConnectionFailedNotifiesRrcRejectWhenRrcReject)
 {
-    CreateRadioBlockRuleWithGivenValue(CallType::VT, PeerType::MO, IMS_TRUE);
+    CreateRadioBlockRuleWithGivenValue(
+            CallType::VT, PeerType::MO, EmergencyType::EMERGENCY_ROUTING);
 
-    ON_CALL(objMockIMtcRadioChecker, Check(_, _, _, _, _))
-            .WillByDefault(Return(CheckResult::PENDING));
+    ON_CALL(objMockIMtcRadioChecker, Check(_, _, _, _, _, _))
+            .WillByDefault(Return(IMtcRadioChecker::CheckResult::Pending()));
     pRadioBlockRule->Check(BlockRuleCheckListener);
 
     const IMS_UINT32 nRejectWaitTimeMillis = 2;
@@ -156,10 +177,11 @@ TEST_F(RadioBlockRuleTest, OnConnectionFailedNotifiesRrcRejectWhenRrcReject)
 
 TEST_F(RadioBlockRuleTest, OnConnectionFailedNotifiesRadioInternalErrorWhenInternalError)
 {
-    CreateRadioBlockRuleWithGivenValue(CallType::VT, PeerType::MO, IMS_TRUE);
+    CreateRadioBlockRuleWithGivenValue(
+            CallType::VT, PeerType::MO, EmergencyType::EMERGENCY_ROUTING);
 
-    ON_CALL(objMockIMtcRadioChecker, Check(_, _, _, _, _))
-            .WillByDefault(Return(CheckResult::PENDING));
+    ON_CALL(objMockIMtcRadioChecker, Check(_, _, _, _, _, _))
+            .WillByDefault(Return(IMtcRadioChecker::CheckResult::Pending()));
     pRadioBlockRule->Check(BlockRuleCheckListener);
 
     const IMS_UINT32 nRejectWaitTimeMillis = 2;

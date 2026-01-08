@@ -14,15 +14,31 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
+#include "Engine.h"
+#include "IConfiguration.h"
+#include "ISipHeader.h"
+#include "ImsAosParameter.h"
 #include "ImsTypeDef.h"
+#include "MockIMessage.h"
+#include "MockIMtcService.h"
+#include "MockISipMessage.h"
+#include "PlatformContext.h"
+#include "SipStatusCode.h"
+#include "TestConfigService.h"
 #include "call/IMtcCall.h"
+#include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcCallManager.h"
 #include "call/termination/EarlyUpdateErrorHandler.h"
-#include "core/MockIMessage.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/SipStatusCode.h"
+#include "configuration/MockMtcConfigurationProxy.h"
+#include "configuration/MtcConfigurationProxy.h"
+#include "helper/MockIMtcAosConnector.h"
+#include "helper/MockIPassiveTimerHolder.h"
+#include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
 
+using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -32,37 +48,117 @@ public:
     MockIMtcCallContext objContext;
     MockISipMessage objSipMessage;
     MockIMessage objMessage;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     CallInfo objCallInfo;
+    MockIMtcCallManager objCallManager;
+    TestConfigService* pConfigService;
+    MockIMessageUtils objMessageUtils;
+    ImsList<IMtcCall*> objCalls;
+    MockIMtcService objMtcService;
+    MockIMtcAosConnector objAosConnector;
+    MockIPassiveTimerHolder objPassiveTimer;
+    ImsVector<AString> objActionSets;
 
 protected:
     virtual void SetUp() override
     {
+        pConfigService = new TestConfigService();
+        pConfigService->SetCarrierConfig(&(pConfigService->GetMockCarrierConfig()));
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, pConfigService);
+
+        pConfigurationProxy = new MockMtcConfigurationProxy();
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
+
         ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
+        ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
+        ON_CALL(objCallManager, GetCallsByState(_)).WillByDefault(Return(objCalls));
+        ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
+        ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objMtcService));
+        ON_CALL(objMtcService, GetAosConnector).WillByDefault(Return(&objAosConnector));
+        ON_CALL(objContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
+
+        SetActionConfigs(
+                SipStatusCode::SC_408, {ConfigVoice::EARLY_UPDATE_ERROR_ACTION_TERMINATE_DIALOG});
+        SetActionConfigs(
+                SipStatusCode::SC_481, {ConfigVoice::EARLY_UPDATE_ERROR_ACTION_TERMINATE_DIALOG});
+        SetActionConfigs(
+                SipStatusCode::SC_491, {ConfigVoice::EARLY_UPDATE_ERROR_ACTION_GLARE_CONDITION});
+        SetActionConfigs(SipStatusCode::SC_503,
+                {ConfigVoice::EARLY_UPDATE_ERROR_ACTION_BLOCK_CALL_BY_TIMER});
     }
 
-    virtual void TearDown() override {}
+    virtual void TearDown() override
+    {
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
+
+        delete pConfigService;
+        delete pConfigurationProxy;
+    }
+
+    void SetActionConfigs(
+            IN IMS_SINT32 nStatusCode, IN std::initializer_list<IMS_SINT32> objActions)
+    {
+        AString strActionSet;
+        strActionSet.SetNumber(nStatusCode);
+        strActionSet += ":";
+
+        bool bFirst = true;
+        for (IMS_SINT32 nAction : objActions)
+        {
+            if (!bFirst)
+            {
+                strActionSet += ",";
+            }
+            AString strAction;
+            strAction.SetNumber(nAction);
+            strActionSet += strAction;
+            bFirst = false;
+        }
+
+        objActionSets.Add(strActionSet);
+        ON_CALL(*pConfigurationProxy,
+                GetStringArray(
+                        ConfigVoice::KEY_EARLY_UPDATE_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY))
+                .WillByDefault(Return(objActionSets));
+    }
 };
 
-TEST_F(EarlyUpdateErrorHandlerTest, HandleNullMessageReturnsTimeout)
+TEST_F(EarlyUpdateErrorHandlerTest, HandleNullMessageReturnsConfiguredAction)
 {
-    EXPECT_EQ(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_UPDATE),
+    SetActionConfigs(
+            SipStatusCode::SC_INVALID, {ConfigVoice::EARLY_UPDATE_ERROR_ACTION_TERMINATE_DIALOG});
+    EXPECT_EQ(CallReasonInfo(CODE_INTERNAL_TERMINATE_EARLYDIALOG, SipStatusCode::SC_INVALID),
             EarlyUpdateErrorHandler(objContext).Handle(IMS_NULL));
 }
 
-TEST_F(EarlyUpdateErrorHandlerTest, HandleMessageWithInvalidStatusCodeReturnsTimeout)
+TEST_F(EarlyUpdateErrorHandlerTest, HandleMessageWithInvalidStatusCodeReturnsConfiguredAction)
 {
+    SetActionConfigs(SipStatusCode::SC_INVALID, {ConfigVoice::EARLY_UPDATE_ERROR_ACTION_TIMEOUT});
     ON_CALL(objSipMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_INVALID));
 
     EXPECT_EQ(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_UPDATE),
             EarlyUpdateErrorHandler(objContext).Handle(&objMessage));
 }
 
-TEST_F(EarlyUpdateErrorHandlerTest, Handle3xx4xx5xx6xxExcept491MessageReturnsInternalErrorWithCode)
+TEST_F(EarlyUpdateErrorHandlerTest, HandleMessageWithRegistrationRestorationReturnsConfiguredAction)
+{
+    SetActionConfigs(SipStatusCode::SC_INVALID,
+            {ConfigVoice::EARLY_UPDATE_ERROR_ACTION_REGISTRATION_RESTORATION});
+    ON_CALL(objSipMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_INVALID));
+
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY)).Times(1);
+    EXPECT_EQ(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_UPDATE),
+            EarlyUpdateErrorHandler(objContext).Handle(&objMessage));
+}
+
+TEST_F(EarlyUpdateErrorHandlerTest,
+        Handle3xx4xx5xx6xxExcept491MessageAnd503MessageReturnsInternalErrorWithCode)
 {
     for (IMS_SINT32 nStatusCode = SipStatusCode::SC_300; nStatusCode <= SipStatusCode::SC_699;
             nStatusCode++)
     {
-        if (nStatusCode == SipStatusCode::SC_491)
+        if (nStatusCode == SipStatusCode::SC_408 || nStatusCode == SipStatusCode::SC_481 ||
+                nStatusCode == SipStatusCode::SC_491 || nStatusCode == SipStatusCode::SC_503)
         {
             continue;
         }
@@ -73,6 +169,15 @@ TEST_F(EarlyUpdateErrorHandlerTest, Handle3xx4xx5xx6xxExcept491MessageReturnsInt
     }
 }
 
+TEST_F(EarlyUpdateErrorHandlerTest, Handle408MessageReturnsInternalRejectEarlyDialogError)
+{
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_408));
+    ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+
+    EXPECT_EQ(CODE_INTERNAL_TERMINATE_EARLYDIALOG,
+            EarlyUpdateErrorHandler(objContext).Handle(&objMessage).nCode);
+}
+
 TEST_F(EarlyUpdateErrorHandlerTest, Handle491MessageReturnsRequestPendingError)
 {
     ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_491));
@@ -80,4 +185,92 @@ TEST_F(EarlyUpdateErrorHandlerTest, Handle491MessageReturnsRequestPendingError)
 
     EXPECT_EQ(CODE_SIP_REQUEST_PENDING,
             EarlyUpdateErrorHandler(objContext).Handle(&objMessage).nCode);
+}
+
+TEST_F(EarlyUpdateErrorHandlerTest, Handle503MessageWithExistedCallReturnsInternalError)
+{
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_503));
+    MockIMtcCall objCall;
+    objCalls.Append(&objCall);
+    ON_CALL(objCallManager, GetCallsByState(_)).WillByDefault(Return(objCalls));
+
+    EXPECT_EQ(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR, SipStatusCode::SC_503),
+            EarlyUpdateErrorHandler(objContext).Handle(&objMessage));
+}
+
+TEST_F(EarlyUpdateErrorHandlerTest, Handle503MessageReturnsInternalRedial)
+{
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_503));
+    IMS_SINT32 nAnyRetryAfter = 10;
+    ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
+            .WillByDefault(Return(nAnyRetryAfter));
+    ON_CALL(pConfigService->GetMockCarrierConfig(),
+            GetInt(ConfigIms::KEY_SIP_TIMER_F_MILLIS_INT, _))
+            .WillByDefault(Return((nAnyRetryAfter - 1) * 1000));
+    Engine::GetConfiguration()->RefreshConfigs(objContext.GetSlotId());
+
+    EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(nAnyRetryAfter)).Times(1);
+    EXPECT_EQ(CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF),
+            EarlyUpdateErrorHandler(objContext).Handle(&objMessage));
+}
+
+TEST_F(EarlyUpdateErrorHandlerTest, Handle503MessageWithNoAosConnectorReturnsInternalError)
+{
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_503));
+    IMS_SINT32 nAnyRetryAfter = 10;
+    ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
+            .WillByDefault(Return(nAnyRetryAfter));
+    ON_CALL(pConfigService->GetMockCarrierConfig(),
+            GetInt(ConfigIms::KEY_SIP_TIMER_F_MILLIS_INT, _))
+            .WillByDefault(Return((nAnyRetryAfter - 1) * 1000));
+    Engine::GetConfiguration()->RefreshConfigs(objContext.GetSlotId());
+    ON_CALL(objMtcService, GetAosConnector).WillByDefault(Return(nullptr));
+
+    EXPECT_CALL(objAosConnector, RegisterWithNextPcscf(nAnyRetryAfter)).Times(0);
+    EXPECT_EQ(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR),
+            EarlyUpdateErrorHandler(objContext).Handle(&objMessage));
+}
+
+TEST_F(EarlyUpdateErrorHandlerTest, Handle503MessageWithCombinedAttachReturnsCsRetryRequired)
+{
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_503));
+    IMS_SINT32 nAnyRetryAfter = 10;
+    ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
+            .WillByDefault(Return(nAnyRetryAfter));
+    ON_CALL(pConfigService->GetMockCarrierConfig(),
+            GetInt(ConfigIms::KEY_SIP_TIMER_F_MILLIS_INT, _))
+            .WillByDefault(Return((nAnyRetryAfter + 1) * 1000));
+    Engine::GetConfiguration()->RefreshConfigs(objContext.GetSlotId());
+    ON_CALL(objContext, IsCsfbAvailable).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objPassiveTimer,
+            AddTimer(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, _, _, _))
+            .Times(1);
+
+    EXPECT_EQ(
+            CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL),
+            EarlyUpdateErrorHandler(objContext).Handle(&objMessage));
+}
+
+TEST_F(EarlyUpdateErrorHandlerTest, Handle503MessageWithNotCombinedAttachReturnsInternalRedial)
+{
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_503));
+    IMS_SINT32 nAnyRetryAfter = 10;
+    ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
+            .WillByDefault(Return(nAnyRetryAfter));
+    ON_CALL(pConfigService->GetMockCarrierConfig(),
+            GetInt(ConfigIms::KEY_SIP_TIMER_F_MILLIS_INT, _))
+            .WillByDefault(Return((nAnyRetryAfter + 1) * 1000));
+    Engine::GetConfiguration()->RefreshConfigs(objContext.GetSlotId());
+    ON_CALL(objContext, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMtcService, GetAosConnector).Times(0);
+    EXPECT_CALL(objPassiveTimer,
+            AddTimer(IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, _, _, _))
+            .Times(0);
+
+    AString strRetryAfter;
+    strRetryAfter.SetNumber(nAnyRetryAfter * 1000);
+    EXPECT_EQ(CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, strRetryAfter),
+            EarlyUpdateErrorHandler(objContext).Handle(&objMessage));
 }

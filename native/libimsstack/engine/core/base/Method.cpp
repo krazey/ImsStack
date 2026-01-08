@@ -27,6 +27,7 @@
 #include "ISipServerConnection.h"
 #include "Sip.h"
 #include "SipDebug.h"
+#include "SipError.h"
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
 #include "base/Ims.h"
@@ -276,7 +277,7 @@ IMS_RESULT Method::AdjustMessage(
 }
 
 PROTECTED
-void Method::CheckNCreateDialog(IN ISipConnection* piSc, IN IMS_BOOL bDestroy /*= IMS_FALSE*/,
+void Method::CheckNCreateDialog(IN const ISipConnection* piSc, IN IMS_BOOL bDestroy /*= IMS_FALSE*/,
         IN IMS_BOOL bTerminatedDialogRequired /*= IMS_FALSE*/)
 {
     if (bDestroy)
@@ -286,7 +287,7 @@ void Method::CheckNCreateDialog(IN ISipConnection* piSc, IN IMS_BOOL bDestroy /*
 
     if (m_piDialog == IMS_NULL)
     {
-        ISipDialog* piTmpDlg = piSc->GetDialog();
+        const ISipDialog* piTmpDlg = piSc->GetDialog();
 
         if ((piTmpDlg->GetState() == ISipDialog::STATE_EARLY) ||
                 (piTmpDlg->GetState() == ISipDialog::STATE_CONFIRMED))
@@ -618,9 +619,9 @@ IMS_BOOL Method::SetChallengeNCredentials(IN ISipClientConnection* piScc)
 }
 
 PROTECTED
-void Method::UpdateRemoteUserIds(IN ISipConnection* piSc)
+void Method::UpdateRemoteUserIds(IN const ISipConnection* piSc)
 {
-    ISipMessage* piSipMsg = (piSc != IMS_NULL) ? piSc->GetMessage() : IMS_NULL;
+    const ISipMessage* piSipMsg = (piSc != IMS_NULL) ? piSc->GetMessage() : IMS_NULL;
 
     if (piSipMsg == IMS_NULL)
     {

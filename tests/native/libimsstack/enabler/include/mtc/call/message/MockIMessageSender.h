@@ -18,17 +18,16 @@
 #define MOCK_I_MESSAGE_SENDER_H_
 
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
-#include "call/IMtcCall.h"
+#include "call/message/IMessageSender.h"
 #include <gmock/gmock.h>
 
+enum class CallType;
+enum class UpdateType;
 struct CallReasonInfo;
 
 class MockIMessageSender : public IMessageSender
 {
 public:
-    virtual ~MockIMessageSender() {}
-
     MOCK_METHOD(IMS_RESULT, Start, (IN CallType eCallType), (override));
     MOCK_METHOD(IMS_RESULT, SendProvisionalResponse,
             (IN IMS_SINT32 eStatusCode, IN IMS_BOOL bReliable, IN IMS_BOOL bIncludeSdp,

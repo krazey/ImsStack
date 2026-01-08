@@ -17,12 +17,8 @@
 #ifndef MESSAGE_FORMATTER_H_
 #define MESSAGE_FORMATTER_H_
 
+#include "IReasonHeaderSetter.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
-#include "call/IMtcCall.h"
-#include "configuration/ConfigDef.h"
-#include "core/IReasonHeaderSetter.h"
-
 class AString;
 class ICoreService;
 class IFeatureCaps;
@@ -31,13 +27,17 @@ class IMtcCallContext;
 class ISession;
 class ISipMessage;
 class MtcSupplementaryService;
+enum class CallType;
+enum class RejectType;
+enum class TerminateType;
+enum class UpdateType;
 struct CallReasonInfo;
 
 class MessageFormatter : public IReasonHeaderSetter
 {
 public:
     MessageFormatter(IN IMtcCallContext& objContext, IN ISession& objSession);
-    virtual ~MessageFormatter();
+    virtual ~MessageFormatter() override;
     MessageFormatter(IN const MessageFormatter&) = delete;
     MessageFormatter& operator=(IN const MessageFormatter&) = delete;
 
@@ -84,6 +84,9 @@ public:
 protected:
     virtual void SetAcceptHeader();
     virtual void SetLocation();
+    virtual void SetCallerIdHeader();
+    virtual void SetPPreferredIdentityHeader() {}
+    void SetOirHeaders();
 
     ICoreService* GetICoreService();
     IFeatureCaps* GetIFeatureCaps();
@@ -93,14 +96,14 @@ private:
     void SetAcceptContactHeader(IN CallType eCallType);
     void AddSrvccFeature();
     void SetSrvccContactParameter();
-    void SetCallerIdHeader();
-    // void SetTipHeader();
+    void SetTipHeader();
     void SetPEarlyMediaHeader();
     void SetAlertInfoHeader(IN IMS_BOOL bIncludeAlertInfo);
     void SetReasonHeader(IN const AString& strReason);
     void SetCarrierSpecificHeaders();
     void SetCallComposerElements();
     void SetReplacesHeader();
+    void SetHeadersForReject(IN const CallReasonInfo& objReason);
 
     IMS_SINT32 GetRejectStatusCode(IN const CallReasonInfo& objReason);
     void GetRejectPhrase(IN const CallReasonInfo& objReason, OUT AString& strPhrase);
@@ -108,6 +111,7 @@ private:
     void GetTerminateReason(IN const CallReasonInfo& objReason, OUT AString& strReason);
     AString GetTerminateReason(IN TerminateType eType);
     AString GetRejectPhrase(IN RejectType eType);
+    AString GetRejectPhraseForLocalCallBusy(IN IMS_SINT32 nExtraCode);
 
     IMS_RESULT InitVariables(IN FormType eFormType);
     IMS_RESULT SetNextMessage();

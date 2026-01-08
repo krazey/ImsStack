@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 #include "ServiceEvent.h"
-#include "ServiceMemory.h"
 
+#include "SipMethod.h"
 #include "SipWakeLock.h"
 
 PUBLIC GLOBAL void SipWakeLock::Acquire(

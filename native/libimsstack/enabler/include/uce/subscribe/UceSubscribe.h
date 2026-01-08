@@ -69,7 +69,7 @@ public:
     explicit UceSubscribe(IN ICoreService* piCoreService, IN const AString& strAppName,
             IN const AString& strManagerName, IN IMS_UINT32 conectedService,
             IN IMS_SINT32 nSimSlot = 0);
-    virtual ~UceSubscribe();
+    virtual ~UceSubscribe() override;
     virtual IMS_RESULT MessageMediator_AdjustMessage(
             IN_OUT ISipMessage* piSIPMsg, IN IMS_SINT32 nMessage = MESSAGE_NORMAL) override;
 
@@ -82,7 +82,7 @@ public:
 protected:
     virtual void Timer_TimerExpired(IN ITimer* piTimer) override;
 
-    virtual IMS_BOOL OnMessage(IN IMSMSG& objMsg);
+    virtual IMS_BOOL OnMessage(IN IMSMSG& objMsg) override;
     // IWatcherListener - start
     virtual void SubscriptionForkedNotify(
             IN ISubscription* piSubscription, IN ISubscription* piForkedSubscription) override;
@@ -106,7 +106,7 @@ protected:
     virtual IMS_BOOL StateSUBSCRIBED_SubscribeTerminated(IN IMSMSG& objMsg);
     virtual IMS_BOOL StateSUBSCRIBED_NotifyReceived(IN IMSMSG& objMsg);
 
-    void SetState(IMS_UINT32 _eState);
+    void UpdateState(IMS_UINT32 _eState);
 
 private:
     IUceJniThread* GetJniThread();
@@ -123,7 +123,7 @@ private:
             IMS_SINT32 nReasonHeaderCause, const AString& strReasonHeaderText);
     void SendSubscribeCommandErrorInd(IMS_UINT32 nCommandError);
     void SendPresenceNotifyInd(const ImsList<AString>& pidfXmls);
-    void SendSubscribeResourceTerminatedInd(UceNonCapabilityUsers* nonCapUsers);
+    void SendSubscribeResourceTerminatedInd(const UceNonCapabilityUsers* nonCapUsers);
     void SendSubscribeTerminatedInd();
 
     IMS_BOOL SetHeaderForSingleSubscription(IN_OUT ISipMessage* piSIPMessage) const;
@@ -136,12 +136,12 @@ private:
     IMS_BOOL SendSingleSubscribe();
     IMS_BOOL SendListSubscribe();
 
-    static ISubscribeResponseData* GetSubscribeResponseData(ISipMessage* piMessage);
+    static ISubscribeResponseData* GetSubscribeResponseData(const ISipMessage* piMessage);
 
-    IMS_BOOL HandleRetryAfterHeader(ISipMessage* piSIPMessage);
-    IMS_BOOL Handle403FailureResponse(ISipMessage* piSIPMessage);
-    IMS_BOOL Handle423FailureResponse(ISipMessage* piSIPMessage);
-    IMS_BOOL HandleNotifyInd(IN ISipMessage* piSIPMessage);
+    IMS_BOOL HandleRetryAfterHeader(const ISipMessage* piSIPMessage);
+    IMS_BOOL Handle403FailureResponse(const ISipMessage* piSIPMessage);
+    IMS_BOOL Handle423FailureResponse(const ISipMessage* piSIPMessage);
+    IMS_BOOL HandleNotifyInd(IN const ISipMessage* piSIPMessage);
 
     void StartWaitingNotifyMessageTimer(IMS_UINT32 nDuration);
     void StopWaitingNotifyMessageTimer();

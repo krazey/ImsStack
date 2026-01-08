@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,15 +15,15 @@
  */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
-#include "ImsStrLib.h"
-#include "ICarrierConfig.h"
 #include "CarrierConfig.h"
-#include "ServiceConfig.h"
-#include "MockICarrierConfig.h"
+#include "ImsStrLib.h"
 #include "config/CodecHevcConfig.h"
+#include "config/ImsCodec.h"
 
+#include "MockICarrierConfig.h"
+
+using ::testing::_;
 using ::testing::Return;
 
 static const IMS_SINT32 DEFAULT_CHANNEL = CodecHevcConfig::DEFAULT_CHANNEL;
@@ -32,8 +32,9 @@ static const IMS_SINT32 DEFAULT_RESOLUTION_HEIGHT = CodecHevcConfig::DEFAULT_HEV
 static const IMS_SINT32 DEFAULT_FRAMERATE = CodecHevcConfig::DEFAULT_HEVC_FRAMERATE;
 static const IMS_SINT32 DEFAULT_BITRATE = CodecHevcConfig::DEFAULT_HEVC_BITRATE;
 static const IMS_SINT32 DEFAULT_PACKETIZATION_MODE = CodecHevcConfig::DEFAULT_PACKETIZATION_MODE;
-static const IMS_SINT32 DEFAULT_PROFILE = CodecHevcConfig::DEFAULT_HEVC_PROFILE;
-static const IMS_SINT32 DEFAULT_LEVEL = CodecHevcConfig::DEFAULT_HEVC_LEVEL;
+static const IMS_SINT32 DEFAULT_HEVC_PROFILE = CodecHevcConfig::DEFAULT_HEVC_PROFILE;
+static const IMS_SINT32 DEFAULT_HEVC_LEVEL = CodecHevcConfig::DEFAULT_HEVC_LEVEL;
+
 #define DEFAULT_SPROP_PARAMS                                \
     "AAAAAUABDAH//wFgAAADALAAAAMAAAMAWqxZ,"                 \
     "AAAAAUIBAQFgAAADALAAAAMAAAMAWqAPCAKBZa7kyS7gC7QoSg==," \
@@ -43,13 +44,20 @@ static const IMS_SINT32 DEFAULT_LEVEL = CodecHevcConfig::DEFAULT_HEVC_LEVEL;
 
 using ::testing::Return;
 
-class CodecHevcConfigTest : public ::testing::Test {
+MATCHER_P(IsSameKey, key, "")
+{
+    return IMS_StrCmp(arg, key) == 0;
+}
+
+class CodecHevcConfigTest : public ::testing::Test
+{
 public:
     CodecHevcConfig* m_pConfig;
     MockICarrierConfig* m_pMockICarrierConfig;
     MockICarrierConfig* m_pVideoBundle;
     MockICarrierConfig* m_pVideoSubBundle;
     IMS_SINT32 m_nHevcPayloadTypeNumber = 120;
+    AString m_strPayloadTypeNumber;
 
 protected:
     virtual void SetUp() override
@@ -75,13 +83,12 @@ protected:
 
     inline void GetReadyToCreate()
     {
-        AString strPayloadTypeNumber;
-        strPayloadTypeNumber.SetNumber(m_nHevcPayloadTypeNumber);
+        m_strPayloadTypeNumber.SetNumber(m_nHevcPayloadTypeNumber);
 
         ON_CALL(*m_pMockICarrierConfig,
-                GetBundle(CarrierConfig::Assets::KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE))
+                GetBundle(CarrierConfig::ImsVt::KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE))
                 .WillByDefault(Return(m_pVideoBundle));
-        ON_CALL(*m_pVideoBundle, GetBundle(strPayloadTypeNumber.GetStr()))
+        ON_CALL(*m_pVideoBundle, GetBundle(IsSameKey(m_strPayloadTypeNumber.GetStr())))
                 .WillByDefault(Return(m_pVideoSubBundle));
     }
 };
@@ -95,8 +102,8 @@ TEST_F(CodecHevcConfigTest, GetConfigDefault)
     EXPECT_EQ(m_pConfig->GetBitrate(), DEFAULT_BITRATE);
     EXPECT_EQ(m_pConfig->GetPacketizationMode(), DEFAULT_PACKETIZATION_MODE);
     EXPECT_EQ(m_pConfig->GetSpropParameterSets(), DEFAULT_SPROP_PARAMS);
-    EXPECT_EQ(m_pConfig->GetHevcProfile(), DEFAULT_PROFILE);
-    EXPECT_EQ(m_pConfig->GetHevcLevel(), DEFAULT_LEVEL);
+    EXPECT_EQ(m_pConfig->GetHevcProfile(), DEFAULT_HEVC_PROFILE);
+    EXPECT_EQ(m_pConfig->GetHevcLevel(), DEFAULT_HEVC_LEVEL);
     EXPECT_EQ(m_pConfig->GetImageAttr(), DEFAULT_IMAGE_ATTR);
     EXPECT_EQ(m_pConfig->GetFrameSize(), DEFAULT_FRAME_SIZE);
 }
@@ -104,7 +111,7 @@ TEST_F(CodecHevcConfigTest, GetConfigDefault)
 TEST_F(CodecHevcConfigTest, GetChannel)
 {
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetChannel(), DEFAULT_CHANNEL);
 }
@@ -118,11 +125,11 @@ TEST_F(CodecHevcConfigTest, GetVideoResolution)
     objVideoResolution.Push(nVideoHeight);
 
     ON_CALL(*m_pVideoSubBundle,
-            GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY))
+            GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY, _))
             .WillByDefault(Return(objVideoResolution));
 
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetResolutionWidth(), nVideoWidth);
     EXPECT_EQ(m_pConfig->GetResolutionHeight(), nVideoHeight);
@@ -138,7 +145,7 @@ TEST_F(CodecHevcConfigTest, GetFramerate)
             .WillByDefault(Return(nFramerate));
 
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetFramerate(), nFramerate);
 }
@@ -150,11 +157,11 @@ TEST_F(CodecHevcConfigTest, GetVideoBitrate)
     objVideoBitrate.Push(nVideoBitrate);
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_BITRATE_INT_ARRAY))
+            GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_BITRATE_INT_ARRAY, _))
             .WillByDefault(Return(objVideoBitrate));
 
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetBitrate(), nVideoBitrate);
 }
@@ -169,7 +176,7 @@ TEST_F(CodecHevcConfigTest, GetPacketizationMode)
             .WillByDefault(Return(nPacketizationMode));
 
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetPacketizationMode(), nPacketizationMode);
 }
@@ -181,12 +188,12 @@ TEST_F(CodecHevcConfigTest, GetSpropParameterSets)
             "wFgAAADALAAAAMAAAMAWqxZ,AAAAAUIBAQFgAAADALAAAAMAAAMAWqAPCAKBZa7kyS7gC7QoSg==,"
             "AAAAAUQBwPPAAhA=");
     ON_CALL(*m_pVideoSubBundle,
-            GetString(CarrierConfig::Assets::KEY_HEVC_SPROP_PARAMETER_SETS_STRING,
+            GetString(CarrierConfig::ImsVt::KEY_HEVC_SPROP_PARAMETER_SETS_STRING,
                     AString::ConstNull()))
             .WillByDefault(Return(strSpropParameterSets));
 
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetSpropParameterSets(), strSpropParameterSets);
 }
@@ -195,11 +202,11 @@ TEST_F(CodecHevcConfigTest, GetHevcProfile)
 {
     IMS_SINT32 nHevcProfile = 3;
     ON_CALL(*m_pVideoSubBundle,
-            GetInt(CarrierConfig::Assets::KEY_HEVC_PROFILE_INT, DEFAULT_PROFILE))
+            GetInt(CarrierConfig::ImsVt::KEY_HEVC_PROFILE_INT, DEFAULT_HEVC_PROFILE))
             .WillByDefault(Return(nHevcProfile));
 
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetHevcProfile(), nHevcProfile);
 }
@@ -207,11 +214,12 @@ TEST_F(CodecHevcConfigTest, GetHevcProfile)
 TEST_F(CodecHevcConfigTest, GetHevcLevel)
 {
     IMS_SINT32 nHevcLevel = 3;
-    ON_CALL(*m_pVideoSubBundle, GetInt(CarrierConfig::Assets::KEY_HEVC_LEVEL_INT, DEFAULT_LEVEL))
+    ON_CALL(*m_pVideoSubBundle,
+            GetInt(CarrierConfig::ImsVt::KEY_HEVC_LEVEL_INT, DEFAULT_HEVC_LEVEL))
             .WillByDefault(Return(nHevcLevel));
 
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetHevcLevel(), nHevcLevel);
 }
@@ -222,11 +230,11 @@ TEST_F(CodecHevcConfigTest, GetImageAttr)
     objImageAttr.Push("send  [x=720,y=1280] recv [x=720,y=1280]");
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetStringArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_IMAGE_ATTR_STRING_ARRAY))
+            GetStringArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_IMAGE_ATTR_STRING_ARRAY, _))
             .WillByDefault(Return(objImageAttr));
 
     GetReadyToCreate();
-    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->GetImageAttr(), objImageAttr.GetAt(0));
 }

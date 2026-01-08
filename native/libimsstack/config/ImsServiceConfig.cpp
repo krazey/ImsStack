@@ -15,18 +15,16 @@
  */
 #include "ConfigMtc.h"
 #include "ConfigMts.h"
-#include "ConfigSipDelegate.h"
 #include "ConfigUce.h"
 #include "ImsServiceConfig.h"
 
-LOCAL ImsServiceIdentifier s_objServiceIdentifiers[] = {
-        {ImsAppId::MTC,          ImsServiceId::MTC         },
-        {ImsAppId::MTS,          ImsServiceId::MTS         },
-        {ImsAppId::UCE,          ImsServiceId::UCE         },
-        {ImsAppId::SIP_DELEGATE, ImsServiceId::SIP_DELEGATE}
+static const ImsServiceIdentifier SERVICE_IDENTIFIERS[] = {
+        {ImsAppId::MTC, ImsServiceId::MTC},
+        {ImsAppId::MTS, ImsServiceId::MTS},
+        {ImsAppId::UCE, ImsServiceId::UCE}
 };
 
-LOCAL ImsServiceIdentifier s_objEmergencyServiceIdentifiers[] = {
+static const ImsServiceIdentifier EMERGENCY_SERVICE_IDENTIFIERS[] = {
         {ImsAppId::MTC, ImsServiceId::MTC_EMERGENCY},
         {ImsAppId::MTS, ImsServiceId::MTS_EMERGENCY},
 };
@@ -43,8 +41,6 @@ PUBLIC GLOBAL ImsAppId ImsServiceConfig::GetAppId(IN ImsServiceId eServiceId)
             return ImsAppId::MTS;
         case ImsServiceId::UCE:
             return ImsAppId::UCE;
-        case ImsServiceId::SIP_DELEGATE:
-            return ImsAppId::SIP_DELEGATE;
         default:
             return ImsAppId::UNKNOWN;
     }
@@ -60,8 +56,6 @@ PUBLIC GLOBAL AString ImsServiceConfig::GetAppName(IN ImsAppId eAppId)
             return AString(ConfigMts::APP_NAME);
         case ImsAppId::UCE:
             return AString(ConfigUce::APP_NAME);
-        case ImsAppId::SIP_DELEGATE:
-            return AString(ConfigSipDelegate::APP_NAME);
         default:
             return AString::ConstNull();
     }
@@ -81,8 +75,6 @@ PUBLIC GLOBAL AString ImsServiceConfig::GetServiceName(IN ImsServiceId eServiceI
             return AString(ConfigMts::EMERGENCY_SERVICE_NAME);
         case ImsServiceId::UCE:
             return AString(ConfigUce::SERVICE_NAME);
-        case ImsServiceId::SIP_DELEGATE:
-            return AString(ConfigSipDelegate::SERVICE_NAME);
         default:
             return AString::ConstNull();
     }
@@ -98,8 +90,6 @@ PUBLIC GLOBAL const IMS_CHAR* ImsServiceConfig::GetAppNameC(IN ImsAppId eAppId)
             return ConfigMts::APP_NAME;
         case ImsAppId::UCE:
             return ConfigUce::APP_NAME;
-        case ImsAppId::SIP_DELEGATE:
-            return ConfigSipDelegate::APP_NAME;
         default:
             return IMS_NULL;
     }
@@ -119,8 +109,6 @@ PUBLIC GLOBAL const IMS_CHAR* ImsServiceConfig::GetServiceNameC(IN ImsServiceId 
             return ConfigMts::EMERGENCY_SERVICE_NAME;
         case ImsServiceId::UCE:
             return ConfigUce::SERVICE_NAME;
-        case ImsServiceId::SIP_DELEGATE:
-            return ConfigSipDelegate::SERVICE_NAME;
         default:
             return IMS_NULL;
     }
@@ -130,8 +118,8 @@ PUBLIC GLOBAL ImsServiceProfile ImsServiceConfig::GetServiceProfile()
 {
     ImsServiceProfile objProfile = {0, IMS_NULL};
 
-    objProfile.nCount = sizeof(s_objServiceIdentifiers) / sizeof(s_objServiceIdentifiers[0]);
-    objProfile.pServiceIds = s_objServiceIdentifiers;
+    objProfile.nCount = sizeof(SERVICE_IDENTIFIERS) / sizeof(SERVICE_IDENTIFIERS[0]);
+    objProfile.pServiceIds = SERVICE_IDENTIFIERS;
 
     return objProfile;
 }
@@ -141,8 +129,8 @@ PUBLIC GLOBAL ImsServiceProfile ImsServiceConfig::GetEmergencyServiceProfile()
     ImsServiceProfile objProfile = {0, IMS_NULL};
 
     objProfile.nCount =
-            sizeof(s_objEmergencyServiceIdentifiers) / sizeof(s_objEmergencyServiceIdentifiers[0]);
-    objProfile.pServiceIds = s_objEmergencyServiceIdentifiers;
+            sizeof(EMERGENCY_SERVICE_IDENTIFIERS) / sizeof(EMERGENCY_SERVICE_IDENTIFIERS[0]);
+    objProfile.pServiceIds = EMERGENCY_SERVICE_IDENTIFIERS;
 
     return objProfile;
 }

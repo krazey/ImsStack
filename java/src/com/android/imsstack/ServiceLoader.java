@@ -17,6 +17,8 @@ package com.android.imsstack;
 
 import android.content.Context;
 
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigAgent;
 import com.android.imsstack.core.agents.ConfigInterface;
@@ -25,17 +27,16 @@ import com.android.imsstack.core.carrier.CarrierInfo;
 import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.core.config.FeatureConfig;
 import com.android.imsstack.enabler.aos.AosFactory;
+import com.android.imsstack.enabler.media.VideoConfigSpropGenerator;
+import com.android.imsstack.imsservice.mmtel.ut.UtFactory;
 import com.android.imsstack.internal.ImsStackRegistry;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.jni.JniImsProxy;
 import com.android.imsstack.jni.NativeCommands;
-import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.test.ImsTestMode;
-import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.Log;
-import com.android.imsstack.util.MSimUtils;
 
 /**
  * A main entry for initializing, starting, and stopping the internal modules of ImsStack.
@@ -62,7 +63,7 @@ public class ServiceLoader {
         if (mJniReady) {
             return;
         }
-        Log.i(Log.TAG, "ServiceLoader: initJni");
+        Log.i(this, "initJni");
         NativeCommands.setDeviceConfig(AppContext.getInstance());
         JniImsProxy.init();
         mJniReady = true;
@@ -76,7 +77,7 @@ public class ServiceLoader {
             return;
         }
 
-        Log.i(Log.TAG, "ServiceLoader: init");
+        Log.i(this, "init");
 
         Context context = AppContext.getInstance();
         ImsLog.init();
@@ -96,7 +97,7 @@ public class ServiceLoader {
      * @param slotId The slot-id to be started.
      */
     public void start(int slotId) {
-        Log.i(Log.TAG, "ServiceLoader: started on slot" + slotId);
+        Log.i(this, "Started on slot" + slotId);
 
         Context context = AppContext.getInstance();
         ImsServiceRegistry.getInstance(slotId).getMmTelFeatureRegistry().initUserSettings();
@@ -111,9 +112,14 @@ public class ServiceLoader {
         DcFactory.createDcAgents(slotId);
         DcFactory.initDcAgents(context, slotId);
 
+        if (UtFactory.getInstance().getUtInterface(slotId) != null) {
+            UtFactory.getInstance().getUtInterface(slotId).start(context);
+        }
+
         ImsStackRegistry.setImsServiceState(slotId, true);
 
         AosFactory.getInstance().start(slotId);
+        VideoConfigSpropGenerator.init(slotId);
     }
 
     /**
@@ -122,9 +128,13 @@ public class ServiceLoader {
      * @param slotId The slot-id to be stopped.
      */
     public void stop(int slotId) {
-        Log.i(Log.TAG, "ServiceLoader: stopped on slot" + slotId);
+        Log.i(this, "Stopped on slot" + slotId);
 
         ImsStackRegistry.setImsServiceState(slotId, false);
+
+        if (UtFactory.getInstance().getUtInterface(slotId) != null) {
+            UtFactory.getInstance().getUtInterface(slotId).close();
+        }
 
         AosFactory.getInstance().stop(slotId);
         DcFactory.cleanUpDcAgents(slotId);
@@ -132,6 +142,7 @@ public class ServiceLoader {
         AgentFactory.getInstance().destroyAgentsForSlot(slotId);
         SystemInterface.getInstance().stop(slotId);
         ImsTestMode.getInstance().cleanUp(slotId);
+        VideoConfigSpropGenerator.cleanup(slotId);
     }
 
     /**
@@ -166,21 +177,6 @@ public class ServiceLoader {
             SimCarrierId id = CarrierInfo.getCarrierIdFromSim(slotId);
 
             ca.updateCarrierConfig(subId, id);
-
-            notifyCarrierConfigChanged(slotId);
-        }
-    }
-
-    /**
-     * Notifies the carrier configuration change to the native layer.
-     *
-     * @param slotId The slot-id to be notified.
-     */
-    public static void notifyCarrierConfigChanged(int slotId) {
-        ISystem system = SystemInterface.getInstance().getSystem(slotId);
-
-        if (system != null) {
-            system.notifyConfigurationChanged(0);
         }
     }
 }

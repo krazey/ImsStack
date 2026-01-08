@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-#include "core/MockICoreService.h"
-#include "core/MockIMessage.h"
-#include "core/MockISession.h"
-#include "core/MockISubscription.h"
+#include "MockICoreService.h"
+#include "MockIMessage.h"
+#include "MockISession.h"
+#include "MockISubscription.h"
+#include "MockITimer.h"
+#include "PlatformContext.h"
+#include "TestTimerService.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/SubscriptionInterfaceHolder.h"
 #include <gtest/gtest.h>
@@ -36,10 +39,15 @@ public:
     MockISubscription objMockISubscription;
     MockISession objMockISession;
     MockICoreService objMockICoreService;
+    TestTimerService objTimerService;
+    MockITimer objMockITimer;
 
 protected:
     virtual void SetUp() override
     {
+        objTimerService.SetTimer(&objMockITimer);
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_TIMER, &objTimerService);
         ON_CALL(objMockISession, CreateSubscription(_))
                 .WillByDefault(Return(&objMockISubscription));
         ON_CALL(objMockICoreService, CreateSubscription(_, _, _))
@@ -47,7 +55,11 @@ protected:
         pHolder = new SubscriptionInterfaceHolder(objListener);
     }
 
-    virtual void TearDown() override { delete pHolder; }
+    virtual void TearDown() override
+    {
+        delete pHolder;
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, IMS_NULL);
+    }
 };
 
 TEST_F(SubscriptionInterfaceHolderTest, HolderDoesNothingForSubscriptionListenerExceptTerminated)
@@ -99,6 +111,26 @@ TEST_F(SubscriptionInterfaceHolderTest, AddAndReleaseStartsTimer)
 
     pHolder->ReleaseISubscription(&objMockISubscription, IMS_FALSE);
     EXPECT_TRUE(pHolder->IsTimerExist(&objMockISubscription));
+}
+
+TEST_F(SubscriptionInterfaceHolderTest, AddAndReleaseWithTimerExpiredStopsTimer)
+{
+    ON_CALL(objMockISubscription, GetState).WillByDefault(Return(ISubscription::STATE_ACTIVE));
+    EXPECT_CALL(objMockISubscription, Destroy()).Times(1);
+
+    EXPECT_EQ(pHolder->GetSubscriptionCount(), 0);
+
+    pHolder->GetISubscription(&objMockISession, "someEvent");
+    EXPECT_FALSE(pHolder->IsTimerExist(&objMockISubscription));
+    EXPECT_EQ(pHolder->GetSubscriptionCount(), 1);
+
+    pHolder->ReleaseISubscription(&objMockISubscription, IMS_FALSE);
+    EXPECT_TRUE(pHolder->IsTimerExist(&objMockISubscription));
+
+    pHolder->Timer_TimerExpired(&objMockITimer);
+
+    EXPECT_FALSE(pHolder->IsTimerExist(&objMockISubscription));
+    EXPECT_EQ(pHolder->GetSubscriptionCount(), 0);
 }
 
 TEST_F(SubscriptionInterfaceHolderTest, AddAndReleaseWithTerminatedStopsTimer)

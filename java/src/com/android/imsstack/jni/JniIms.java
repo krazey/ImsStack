@@ -223,7 +223,7 @@ public class JniIms {
         JniImsListener listener = getListener(nativeObject);
 
         if (listener == null) {
-            Log.d(Log.TAG, "No listener :: nativeObject=" + nativeObject);
+            Log.d(this, "No listener :: nativeObject=" + nativeObject);
             return ERROR_NO_LISTENER;
         }
 
@@ -244,7 +244,7 @@ public class JniIms {
         JniSystemListener listener = getSystemListener(nativeObject);
 
         if (listener == null) {
-            Log.d(Log.TAG, "No listener :: nativeObject=" + nativeObject);
+            Log.d(this, "No listener :: nativeObject=" + nativeObject);
             return RESULT_FAILURE;
         }
 
@@ -280,11 +280,11 @@ public class JniIms {
 
     static {
         try {
-            Log.i(Log.TAG, "Loading library... start");
+            Log.i(JniIms.class, "Loading library... start");
             System.loadLibrary("imsstack");
-            Log.i(Log.TAG, "Loading library... end");
+            Log.i(JniIms.class, "Loading library... end");
         } catch (UnsatisfiedLinkError e) {
-            Log.e(Log.TAG, "Loading library failed: libimsstack");
+            Log.e(JniIms.class, "Loading library failed: libimsstack");
             e.printStackTrace();
         }
     }

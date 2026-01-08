@@ -14,23 +14,28 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
+#include "ServiceTimer.h"
+#include "ServiceTrace.h"
 
 #include "IOnSipClientConnectionListener.h"
-#include "SipAckPackage.h"
+#include "ISipHeader.h"
 #include "SipAuHelper.h"
 #include "SipClientConnection.h"
 #include "SipClientTransmissionProxy.h"
 #include "SipConfigProxy.h"
 #include "SipConnectionNotifier.h"
 #include "SipDebug.h"
+#include "SipDialog.h"
+#include "SipError.h"
 #include "SipMessage.h"
 #include "SipMethod.h"
 #include "SipPrivate.h"
 #include "SipRtConfigUtils.h"
 #include "SipStack.h"
+#include "SipTransport.h"
 #include "SipUnknownHeaders.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PRIVATE GLOBAL const AString SipClientConnection::ANONYMOUS_URI(
         "\"Anonymous\" <sip:thisis@anonymous.invalid>");
@@ -45,7 +50,8 @@ SipClientConnection::SipClientConnection() :
         m_pCtState(IMS_NULL),
         m_pAuHelper(IMS_NULL),
         m_piListener(IMS_NULL),
-        m_pTransmissionProxy(IMS_NULL)
+        m_pTransmissionProxy(IMS_NULL),
+        m_piTcpConnectionMonitoringTimer(IMS_NULL)
 {
     m_pCtState = new SipClientTransactionState(GetSlotId());
 
@@ -67,7 +73,8 @@ SipClientConnection::SipClientConnection(IN const AString& strTargetUri) :
         m_strTargetUri(strTargetUri),
         m_pCtState(IMS_NULL),
         m_pAuHelper(IMS_NULL),
-        m_piListener(IMS_NULL)
+        m_piListener(IMS_NULL),
+        m_piTcpConnectionMonitoringTimer(IMS_NULL)
 {
     m_pCtState = new SipClientTransactionState(GetSlotId());
 
@@ -89,7 +96,8 @@ SipClientConnection::SipClientConnection(IN SipClientTransactionState* pCtState)
         m_strTargetUri(AString::ConstNull()),
         m_pCtState(pCtState),
         m_pAuHelper(IMS_NULL),
-        m_piListener(IMS_NULL)
+        m_piListener(IMS_NULL),
+        m_piTcpConnectionMonitoringTimer(IMS_NULL)
 {
     m_pCtState->SetListener(this);
     m_pCtState->SetTransactionListener(this);
@@ -143,10 +151,14 @@ PUBLIC VIRTUAL SipClientConnection::~SipClientConnection()
     {
         delete m_pTransmissionProxy;
     }
+
+    StopTcpConnectionMonitoringTimer();
 }
 
 PUBLIC VIRTUAL void SipClientConnection::Close()
 {
+    StopTcpConnectionMonitoringTimer();
+
     if (m_pTransmissionProxy != IMS_NULL)
     {
         m_pTransmissionProxy->Abort();
@@ -354,6 +366,8 @@ PUBLIC VIRTUAL IMS_RESULT SipClientConnection::Send()
                     m_pDialog->UpdateDialog(m_pCtState->GetDialog());
                 }
             }
+
+            StartTcpConnectionMonitoringTimer();
         }
     }
 
@@ -424,12 +438,14 @@ PUBLIC VIRTUAL IMS_SINT32 SipClientConnection::GetHeaderCount(IN const AString& 
     return SipConnection::GetHeaderCount(strName);
 }
 
+PUBLIC VIRTUAL SipProfile* SipClientConnection::GetSipProfile() const
+{
+    return m_pCtState->GetSipProfile();
+}
+
 PUBLIC VIRTUAL void SipClientConnection::SetSipProfile(IN SipProfile* pProfile)
 {
-    if (!m_pCtState.IsNull())
-    {
-        m_pCtState->SetSipProfile(pProfile);
-    }
+    m_pCtState->SetSipProfile(pProfile);
 }
 
 PUBLIC
@@ -537,7 +553,7 @@ SipClientConnection* SipClientConnection::InitCancel()
 
 PUBLIC
 IMS_RESULT SipClientConnection::InitRequest(
-        IN const AString& strMethod, IN SipConnectionNotifier* pScn)
+        IN const AString& strMethod, IN const SipConnectionNotifier* pScn)
 {
     if (m_nState != STATE_CREATED)
     {
@@ -811,60 +827,6 @@ ISipGenericChallenge* SipClientConnection::GetAuthenticationChallenge(
 }
 
 PUBLIC
-ISipAckPackage* SipClientConnection::GrabAck()
-{
-    if (m_pDialog == IMS_NULL)
-    {
-        return IMS_NULL;
-    }
-
-    SipAckPackage* pAckPackage = SipAckPackage::CreateAckPackage(m_pDialog->GetCallId());
-
-    if (pAckPackage != IMS_NULL)
-    {
-        IMS_BOOL bSipConfigRequired = IMS_TRUE;
-        IMS_SINT32 nAliveInterval = 2000 * 64;
-        SipTimerValues* pTimerValues = GetTransactionTimerValues();
-
-        if (pTimerValues != IMS_NULL)
-        {
-            IMS_SINT32 nTimerValue = pTimerValues->GetValue(SipTimerValues::TIMER_H);
-
-            if (nTimerValue > 0)
-            {
-                bSipConfigRequired = IMS_FALSE;
-                nAliveInterval = nTimerValue;
-            }
-            else
-            {
-                nTimerValue = pTimerValues->GetValue(SipTimerValues::TIMER_T1);
-
-                if (nTimerValue > 0)
-                {
-                    bSipConfigRequired = IMS_FALSE;
-                    nAliveInterval = nTimerValue * 64;
-                }
-            }
-        }
-
-        if (bSipConfigRequired)
-        {
-            IMS_SINT32 nTimerValueT1 =
-                    SipConfigProxy::GetTimerValueT1(GetSlotId(), m_pCtState->GetSipProfile());
-
-            if (nTimerValueT1 > 0)
-            {
-                nAliveInterval = nTimerValueT1 * 64;
-            }
-        }
-
-        pAckPackage->AddAck(m_pCtState.Get(), nAliveInterval);
-    }
-
-    return pAckPackage;
-}
-
-PUBLIC
 IMS_RESULT SipClientConnection::InitResubmissionRequest()
 {
     if (m_bResubmissionRequestInitialized)
@@ -971,6 +933,15 @@ void SipClientConnection::SetTransportTuple(IN const IpAddress& objIp, IN IMS_SI
 }
 
 PUBLIC
+void SipClientConnection::RetransmitAck()
+{
+    if (m_pCtState->IsAckSent())
+    {
+        m_pCtState->RetransmitMessage();
+    }
+}
+
+PUBLIC
 IMS_RESULT SipClientConnection::InitDialogRequest(
         IN const SipMethod& objMethod, IN SipDialogEx* pDialogEx)
 {
@@ -1072,6 +1043,8 @@ IMS_RESULT SipClientConnection::SendWithCredentials()
                 m_pDialog->UpdateDialog(m_pCtState->GetDialog());
             }
         }
+
+        StartTcpConnectionMonitoringTimer();
     }
 
     m_bResubmissionRequestInitialized = IMS_FALSE;
@@ -1122,12 +1095,6 @@ PROTECTED VIRTUAL IMS_BOOL SipClientConnection::DispatchMessage(IN ImsMessage& o
 PRIVATE VIRTUAL void SipClientConnection::ClientTransactionState_ForkedResponseReceived(
         IN SipClientTransactionState* pCtState)
 {
-    if (m_piListener == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "No listener", 0, 0, 0);
-        return;
-    }
-
     SipClientConnection* pScc = new SipClientConnection(pCtState);
 
     IMS_TRACE_D("SCC :: Handling a forked response ...", 0, 0, 0);
@@ -1138,7 +1105,7 @@ PRIVATE VIRTUAL void SipClientConnection::ClientTransactionState_ForkedResponseR
     }
 
     // Copy the transaction timer values
-    SipTimerValues* pTimerValues = GetTransactionTimerValues();
+    const SipTimerValues* pTimerValues = GetTransactionTimerValues();
 
     if (pTimerValues != IMS_NULL)
     {
@@ -1198,6 +1165,8 @@ PRIVATE VIRTUAL void SipClientConnection::ClientTransactionState_ForkedResponseR
 PRIVATE VIRTUAL void SipClientConnection::ClientTransactionState_ResponseReceived(
         IN ::SipMessage* pSipMsg)
 {
+    StopTcpConnectionMonitoringTimer();
+
     IMS_SINT32 nStatusCode = SipStack::GetStatusCode(pSipMsg);
 
     //// DEBUG
@@ -1259,18 +1228,33 @@ PRIVATE VIRTUAL void SipClientConnection::ClientTransactionState_ResponseReceive
     PostMessage(AMSG_SIP_RESPONSE_RECEIVED, 0, 0);
 }
 
+PROTECTED VIRTUAL void SipClientConnection::Transport_NotifyError(
+        IN IMS_SINT32 nCode, IN const AString& strMessage)
+{
+    // If the following conditions are met, the retransmission of original SIP request is requested.
+    //    1) Socket is closed by peer. (SipError::TRANSPORT_E_CODE_104)
+    //    2) TCP connection monitoring timer is running.
+    //    3) No SIP response received.
+    if (nCode == SipError::TRANSPORT_ERROR && IsTransportErrorCode104(strMessage) &&
+            m_piTcpConnectionMonitoringTimer != IMS_NULL && GetStatusCode() < SipStatusCode::SC_100)
+    {
+        IMS_TRACE_I("SCC: TCP connection closed by peer, retransmit SIP request", 0, 0, 0);
+        StopTcpConnectionMonitoringTimer();
+        m_pCtState->RetransmitMessage();
+        return;
+    }
+
+    SipConnection::Transport_NotifyError(nCode, strMessage);
+}
+
 // SIP_TRANSPORT_ERROR_REPORT_ON_TXN
 PROTECTED VIRTUAL IMS_BOOL SipClientConnection::IsTransportErrorReportRequired(
         IN IMS_SINT32 nCode, IN const AString& strMessage) const
 {
     if (nCode == SipError::TRANSPORT_ERROR)
     {
-        AString strTransportErrorCode;
-
-        strTransportErrorCode.Sprintf("%d", SipError::TRANSPORT_E_CODE_104);
-
         // SipError::TRANSPORT_E_CODE_104
-        if (strMessage.StartsWith(strTransportErrorCode))
+        if (IsTransportErrorCode104(strMessage))
         {
             if ((m_nState == STATE_PROCEEDING) &&
                     SipConfigProxy::IsTransportErrorReportOnTxnRequired(
@@ -1312,6 +1296,57 @@ PRIVATE VIRTUAL void SipClientConnection::ClientTransmission_TransmissionComplet
             m_pDialog->UpdateDialog(m_pCtState->GetDialog());
         }
     }
+
+    StartTcpConnectionMonitoringTimer();
+}
+
+PRIVATE VIRTUAL void SipClientConnection::Timer_TimerExpired(IN ITimer* piTimer)
+{
+    if (m_piTcpConnectionMonitoringTimer == piTimer)
+    {
+        IMS_TRACE_I("SCC: TCP connection monitoring timer expired", 0, 0, 0);
+        StopTcpConnectionMonitoringTimer();
+    }
+}
+
+PRIVATE
+void SipClientConnection::StartTcpConnectionMonitoringTimer()
+{
+    if (!SipConnection::GetMethod().Equals(SipMethod::INVITE))
+    {
+        return;
+    }
+
+    const SipTransport* pTransport = m_pCtState->GetSipTransport();
+
+    if (pTransport == IMS_NULL ||
+            pTransport->GetProtocol(SipTransport::TA_FAR) != SipTransportAddress::PROTOCOL_TCP)
+    {
+        return;
+    }
+
+    m_piTcpConnectionMonitoringTimer = TimerService::GetTimerService()->CreateTimer();
+    const SipTimerValues* pTimerValues = GetTransactionTimerValues();
+    IMS_SINT32 nDuration =
+            (pTimerValues != IMS_NULL) ? pTimerValues->GetValue(SipTimerValues::TIMER_T1) : 0;
+
+    if (nDuration == 0)
+    {
+        nDuration = SipConfigProxy::GetTimerValueT1(GetSlotId(), m_pCtState->GetSipProfile(),
+                SipConfigProxy::GetSipConfigV(GetSlotId()));
+    }
+
+    m_piTcpConnectionMonitoringTimer->SetTimer(nDuration, this);
+}
+
+PRIVATE
+void SipClientConnection::StopTcpConnectionMonitoringTimer()
+{
+    if (m_piTcpConnectionMonitoringTimer != IMS_NULL)
+    {
+        m_piTcpConnectionMonitoringTimer->KillTimer();
+        TimerService::GetTimerService()->DestroyTimer(m_piTcpConnectionMonitoringTimer);
+    }
 }
 
 PRIVATE
@@ -1320,6 +1355,14 @@ void SipClientConnection::SetState(IN IMS_SINT32 nState)
     IMS_TRACE_I("SCC :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
     m_nState = nState;
+}
+
+PRIVATE GLOBAL IMS_BOOL SipClientConnection::IsTransportErrorCode104(IN const AString& strMessage)
+{
+    AString strTransportErrorCode;
+    strTransportErrorCode.Sprintf("%d", SipError::TRANSPORT_E_CODE_104);
+    // SipError::TRANSPORT_E_CODE_104
+    return strMessage.StartsWith(strTransportErrorCode);
 }
 
 PRIVATE GLOBAL const IMS_CHAR* SipClientConnection::StateToString(IN IMS_SINT32 nState)

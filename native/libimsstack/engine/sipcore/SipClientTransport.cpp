@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "INetworkConnection.h"
 #include "NatHelper.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
+#include "ServiceTrace.h"
 
 #include "private/SipConfig.h"
 
@@ -24,17 +26,19 @@
 #include "SipClientTransport.h"
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
+#include "SipError.h"
 #include "SipFeatures.h"
 #include "SipMessageBuffer.h"
 #include "SipPrivate.h"
 #include "SipRtConfigUtils.h"
+#include "SipSocket.h"
 #include "SipStack.h"
 #include "SipTransportHelper.h"
 #include "SipUtils.h"
 
 #define __IMS_DNS_QUERY_SIP__
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipClientTransport::SipClientTransport(IN IMS_SINT32 nSlotId) :
@@ -385,7 +389,8 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::ReserveResource(
 }
 
 PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessage* pSipMsg,
-        IN IMS_BOOL bRoutingLr /*= IMS_TRUE*/, IN SipAddrSpec* pImplicitRoute /*= IMS_NULL*/)
+        IN const SipProfile* pProfile, IN IMS_BOOL bRoutingLr /*= IMS_TRUE*/,
+        IN SipAddrSpec* pImplicitRoute /*= IMS_NULL*/)
 {
     const AString PARAM_TRANSPORT(SipAddress::PARAM_TRANSPORT);
 
@@ -411,7 +416,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
 
             if (pReqUri != IMS_NULL)
             {
-                // FIXME: consider "sips" URI scheme
+                // Consider "sips" URI scheme if needed.
                 if (IsSameHostAndPort(pAddrSpec, pReqUri))
                 {
                     bImplicitRoutingTransportRequired = IMS_TRUE;
@@ -481,7 +486,8 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
             }
             else if (strTemp.EqualsIgnoreCase(Sip::STR_UDP))
             {
-                if (SipFeatures::IsTransportParameterUdpIgnoredForOutgoingRequest(GetSlotId()))
+                if (SipConfigProxy::IsUdpTransportParameterIgnoredForOutgoingRequest(
+                            GetSlotId(), pProfile))
                 {
                     IMS_TRACE_I("SIP transport parameter(udp) is ignored", 0, 0, 0);
                 }
@@ -701,13 +707,13 @@ PROTECTED VIRTUAL void SipClientTransport::Socket_NotifyError(
 
     IMS_TRACE_D("ClientTransport :: Error (%d)", nErrorCode, 0, 0);
 
-    NotifyTransportError(nErrorCode);
-
     if (m_pServerSocket != IMS_NULL)
     {
         GetTransportHelper()->Destroy(m_pServerSocket, this);
         m_pServerSocket = IMS_NULL;
     }
+
+    NotifyTransportError(nErrorCode);
 }
 
 PRIVATE

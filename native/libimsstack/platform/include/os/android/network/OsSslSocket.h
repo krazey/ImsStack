@@ -25,7 +25,7 @@ class OsSslSocket : public OsSocket, public ITimerListener
 {
 public:
     explicit OsSslSocket(IN SslCertificate* pCertificate);
-    virtual ~OsSslSocket();
+    ~OsSslSocket() override;
 
     OsSslSocket(IN const OsSslSocket&) = delete;
     OsSslSocket& operator=(IN const OsSslSocket&) = delete;

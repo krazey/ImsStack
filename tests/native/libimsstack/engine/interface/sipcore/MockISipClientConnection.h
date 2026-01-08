@@ -18,13 +18,12 @@
 #define MOCK_I_SIP_CLIENT_CONNECTION_H_
 
 #include <gmock/gmock.h>
-#include "ImsTypeDef.h"
-#include "IpAddress.h"
+
 #include "ISipClientConnection.h"
-#include "Sip.h"
 
 class Credential;
-class ISipAckPackage;
+class IpAddress;
+
 class ISipClientConnectionListener;
 class ISipConnectionNotifier;
 class ISipGenericChallenge;
@@ -32,8 +31,8 @@ class ISipGenericChallenge;
 class MockISipClientConnection : public ISipClientConnection
 {
 public:
-    inline MockISipClientConnection() {}
-    inline virtual ~MockISipClientConnection() {}
+    MockISipClientConnection() = default;
+    ~MockISipClientConnection() override = default;
 
     MOCK_METHOD(IMS_RESULT, InitAck, (), (override));
     MOCK_METHOD(ISipClientConnection*, InitCancel, (), (override));
@@ -46,7 +45,6 @@ public:
     MOCK_METHOD(IMS_RESULT, SetRequestUri, (IN const AString& strUri), (override));
     MOCK_METHOD(ISipGenericChallenge*, GetAuthenticationChallenge, (IN IMS_SINT32 nIndex),
             (const, override));
-    MOCK_METHOD(ISipAckPackage*, GrabAck, (), (override));
     MOCK_METHOD(IMS_RESULT, InitResubmissionRequest, (), (override));
     MOCK_METHOD(void, RemoveAllChallenges, (), (override));
     MOCK_METHOD(void, RemoveAllCredentials, (), (override));
@@ -58,6 +56,7 @@ public:
             (IN const IpAddress& objIpAddr, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
                     IN IMS_SINT32 nPortFc, IN IMS_SINT32 nTransportExt),
             (override));
+    MOCK_METHOD(void, RetransmitAck, (), (override));
 
     MOCK_METHOD(IMS_RESULT, AddHeader, (IN const AString& strName, IN const AString& strValue),
             (override));
@@ -78,6 +77,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetHeaderCount, (IN const AString& strName), (const, override));
     MOCK_METHOD(ISipMessage*, GetMessage, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetSlotId, (), (const, override));
+    MOCK_METHOD(SipProfile*, GetSipProfile, (), (const, override));
     MOCK_METHOD(void, SetSipProfile, (IN SipProfile * pProfile), (override));
     MOCK_METHOD(void, SetTransactionTimerValues, (IN const SipTimerValues& objTv), (override));
 

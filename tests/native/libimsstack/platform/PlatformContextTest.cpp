@@ -32,14 +32,14 @@ protected:
 
 TEST_F(PlatformContextTest, SetOsFactory)
 {
-    IOsFactory* piDefaultOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+    const IOsFactory* piDefaultOsFactory = PlatformContext::GetInstance()->GetOsFactory();
     EXPECT_NE(piDefaultOsFactory, nullptr);
 
     MockIOsFactory* pOsFactory = new MockIOsFactory();
-    IOsFactory* piOldOsFactory = PlatformContext::GetInstance()->SetOsFactory(pOsFactory);
+    const IOsFactory* piOldOsFactory = PlatformContext::GetInstance()->SetOsFactory(pOsFactory);
     EXPECT_EQ(piOldOsFactory, nullptr);
 
-    IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+    const IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
     EXPECT_NE(piDefaultOsFactory, piOsFactory);
     EXPECT_EQ(pOsFactory, piOsFactory);
 
@@ -52,16 +52,16 @@ TEST_F(PlatformContextTest, SetOsFactory)
 
 TEST_F(PlatformContextTest, SetService)
 {
-    PlatformService* pDefaultConfigService =
+    const PlatformService* pDefaultConfigService =
             PlatformContext::GetInstance()->GetService(PlatformContext::SERVICE_CONFIG);
     EXPECT_NE(pDefaultConfigService, nullptr);
 
     TestConfigService* pTestConfigService = new TestConfigService();
-    PlatformService* pOldConfigService = PlatformContext::GetInstance()->SetService(
+    const PlatformService* pOldConfigService = PlatformContext::GetInstance()->SetService(
             PlatformContext::SERVICE_CONFIG, pTestConfigService);
     EXPECT_EQ(pOldConfigService, nullptr);
 
-    PlatformService* pConfigService =
+    const PlatformService* pConfigService =
             PlatformContext::GetInstance()->GetService(PlatformContext::SERVICE_CONFIG);
     EXPECT_NE(pDefaultConfigService, pConfigService);
     EXPECT_EQ(pTestConfigService, pConfigService);
@@ -80,14 +80,14 @@ TEST_F(PlatformContextTest, SetService)
 
 TEST_F(PlatformContextTest, SetSystem)
 {
-    ISystem* piDefaultSystem = PlatformContext::GetInstance()->GetSystem();
+    const ISystem* piDefaultSystem = PlatformContext::GetInstance()->GetSystem();
     EXPECT_NE(piDefaultSystem, nullptr);
 
     MockISystem* pSystem = new MockISystem();
-    ISystem* piOldSystem = PlatformContext::GetInstance()->SetSystem(pSystem);
+    const ISystem* piOldSystem = PlatformContext::GetInstance()->SetSystem(pSystem);
     EXPECT_EQ(piOldSystem, nullptr);
 
-    ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
+    const ISystem* piSystem = PlatformContext::GetInstance()->GetSystem();
     EXPECT_NE(piDefaultSystem, piSystem);
     EXPECT_EQ(pSystem, piSystem);
 

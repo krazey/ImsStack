@@ -13,22 +13,26 @@
 // limitations under the License.
 
 package {
+    default_team: "trendy_team_pmw_telephony",
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
 android_test {
     name: "ImsStackJavaTests",
+    certificate: "platform",
+    platform_apis: true,
     manifest: "AndroidManifest.xml",
 
+    defaults: [
+        "imsstack_mockito_target_extended_defaults",
+    ],
     srcs: [
-        ":imsstack_java_srcs",
-        ":imsstack_aidl_srcs",
-        "**/*.java",
+        "src/**/*.java",
     ],
     libs: [
-        "android.test.base",
-        "android.test.mock",
-        "android.test.runner",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
+        "android.test.runner.stubs.system",
         "ims-common",
         "telephony-common",
     ],
@@ -36,19 +40,12 @@ android_test {
         "androidx.test.core",
         "androidx.test.rules",
         "frameworks-base-testutils",
-        "imsstack-res",
-        "mockito-target",
-        "mockito-target-extended-minus-junit4",
+        "imsstack",
+        "junit",
         "platform-test-annotations",
         "testables",
         "truth",
-        // TODO: move this to libs after API review
-        "ImsMediaFramework",
-        "imsstack-prebuilt",
     ],
-
-    platform_apis: true,
-    certificate: "platform",
     instrumentation_for: "ImsStack",
     test_suites: ["general-tests"],
 }

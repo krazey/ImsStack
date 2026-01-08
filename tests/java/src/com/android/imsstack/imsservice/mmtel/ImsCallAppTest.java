@@ -37,12 +37,12 @@ import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsStreamMediaProfile;
 
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 import com.android.imsstack.imsservice.mmtel.base.TtyModeTracker;
-import com.android.imsstack.util.AppContext;
-import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.MessageExecutor;
 
 import org.junit.After;
@@ -50,6 +50,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -58,7 +59,6 @@ import org.mockito.MockitoAnnotations;
 public class ImsCallAppTest {
     private ImsCallApp mImsCallApp;
     private MessageExecutor mExecutor;
-    private MockIAosRegistration mAosReg;
     ImsUtImpl mImsUtImpl;
     ImsEcbmImpl mImsEcbmImpl;
     ImsMultiEndpointImpl mMultiEndpoint;
@@ -71,6 +71,9 @@ public class ImsCallAppTest {
     @Mock private ImsCallManager mMockImsCallManager;
     @Mock private ImsFeatureManager mFeatureManager;
     @Mock private ImsRegistrationTracker mRegTracker;
+    @Mock private ImsUtImpl mMockUt;
+    @Mock private ImsEcbmImpl mMockEcbm;
+    @Mock private ImsSmsImpl mMockSms;
 
     @Before
     public void setUp() throws Exception {
@@ -128,6 +131,39 @@ public class ImsCallAppTest {
         //for mInitCompleted == false
         mImsCallApp.bindCallApp();
         verify(mRegTracker, times(2)).refreshCallRegistrationState();
+        verify(mFeatureManager).updateFeaturesOnServiceUpDown(true);
+    }
+
+    @Test
+    public void testBindCallApp_initializationOrder() throws Exception {
+        // This test verifies a critical initialization order within bindCallApp:
+        // Ut.init() must be called before ImsCallContext.init() because the context
+        // adds a listener to Ut.
+        // It uses reflection to inject mocks for internally created components (Ut, Ecbm, Sms)
+        // as the class is not designed for easy injection of these dependencies.
+
+        // Get ImsCallApp into a state where bindCallApp performs full initialization.
+        // The test object is created with mInitCompleted = true, so unbind first.
+        mImsCallApp.unbindCallApp();
+        clearInvocations(mRegTracker, mMockImsCallContext, mMockImsCallManager, mFeatureManager);
+
+        // Inject mocks using reflection to take control of internal dependencies.
+        setPrivateField(mImsCallApp, "mUt", mMockUt);
+        setPrivateField(mImsCallApp, "mEcbm", mMockEcbm);
+        setPrivateField(mImsCallApp, "mSms", mMockSms);
+
+        // Call the method under test.
+        mImsCallApp.bindCallApp();
+
+        // Verify the critical initialization sequence using InOrder.
+        InOrder inOrder = Mockito.inOrder(mMockUt, mMockImsCallContext);
+        inOrder.verify(mMockUt).init();
+        inOrder.verify(mMockImsCallContext).init();
+
+        // Verify that other components are also initialized, without enforcing a strict order.
+        verify(mMockImsCallManager).init();
+        verify(mMockEcbm).init();
+        verify(mMockSms).init();
         verify(mFeatureManager).updateFeaturesOnServiceUpDown(true);
     }
 
@@ -297,5 +333,10 @@ public class ImsCallAppTest {
         mImsCallApp.setTtyMode(TelecomManager.TTY_MODE_FULL);
         verify(ttyModeTracker).setTtyMode(anyInt());
     }
-}
 
+    private void setPrivateField(Object target, String fieldName, Object value) throws Exception {
+        java.lang.reflect.Field field = target.getClass().getDeclaredField(fieldName);
+        field.setAccessible(true);
+        field.set(target, value);
+    }
+}

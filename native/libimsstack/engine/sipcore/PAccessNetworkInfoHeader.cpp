@@ -14,29 +14,49 @@
  * limitations under the License.
  */
 #include "AccessNetworkInfoFormatter.h"
+#include "INetworkConnection.h"
+#include "INetworkWatcher.h"
+#include "IPhoneInfoLocation.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
 #include "ServiceNetworkPolicy.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceSystemTime.h"
 #include "ServiceTrace.h"
-#include "ServiceUtil.h"
 
 #include "private/SipConfigV.h"
 
+#include "ISipConfig.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ISipRtConfigHelper.h"
 #include "PAccessNetworkInfoHeader.h"
+#include "SipAddress.h"
 #include "SipConfigProxy.h"
 #include "SipFactory.h"
 #include "SipFeatures.h"
 #include "SipHeaderName.h"
+#include "SipMethod.h"
+#include "SipParsingHelper.h"
+#include "SipProfile.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
+// clang-format off
+static const IMS_CHAR* N11[] = {
+        "211",
+        "311",
+        "411",
+        "511",
+        "611",
+        "711",
+        "811",
+        IMS_NULL
+};
+// clang-format on
+
 PUBLIC GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeader(IN IMS_SINT32 nSlotId,
-        IN INetworkConnection* piConnection, IN const SipMethod& /*objMethod*/,
+        IN INetworkConnection* piConnection, IN const ISipMessage* piSipMsg,
         IN const SipProfile* pSipProfile, OUT AString& strHeader)
 {
     if (piConnection == IMS_NULL)
@@ -48,9 +68,18 @@ PUBLIC GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeader(IN IMS_SINT32 nSlotI
 
     piConnection->GetAccessNetworkInfo(objAni);
 
-    if (SipConfigProxy::IsMacAddressHiddenInPaniHeader(nSlotId, pSipProfile))
+    if (IsAccessNetworkTypeWiFi(objAni))
     {
-        RefineMacAddressAsInvalid(objAni);
+        IMS_SINT32 nMacAddressDisplayRule =
+                SipConfigProxy::GetHideMacInPaniHeaderPolicy(nSlotId, pSipProfile);
+
+        if (nMacAddressDisplayRule == ISipConfig::HIDE_MAC_IN_PANI ||
+                (nMacAddressDisplayRule == ISipConfig::HIDE_MAC_IN_PANI_EXCEPT_N11_AND_ECALL &&
+                        !IsMessageForN11OrEmergency(pSipProfile, piSipMsg)))
+        {
+            // Hide MAC address in PANI header
+            IMS_MEM_Memset(&objAni.uniAI.i_wlan_node_id, 0x00, sizeof(I_WLAN_NODE_ID));
+        }
     }
 
     if (!FormHeader(nSlotId, objAni, strHeader))
@@ -59,24 +88,24 @@ PUBLIC GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeader(IN IMS_SINT32 nSlotI
         return IMS_FALSE;
     }
 
-    if (SipConfigProxy::IsLocalTimezoneParameterSupportedInPaniHeader(nSlotId, pSipProfile))
-    {
-        AddLocalTimezone(strHeader);
-    }
-
     if (IsAccessNetworkTypeWiFi(objAni))
     {
         if (SipConfigProxy::IsCountryParameterSupportedInPaniHeader(nSlotId, pSipProfile))
         {
-            AddCountryParameter(nSlotId, strHeader, IMS_FALSE);
+            AddCountryParameter(nSlotId, strHeader);
         }
+    }
+
+    if (SipConfigProxy::IsLocalTimezoneParameterSupportedInPaniHeader(nSlotId, pSipProfile))
+    {
+        AddLocalTimezone(strHeader);
     }
 
     return IMS_TRUE;
 }
 
 PUBLIC GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeader(IN IMS_SINT32 nSlotId,
-        IN const IpAddress& objIpAddr, IN const SipMethod& objMethod,
+        IN const IpAddress& objIpAddr, IN const ISipMessage* piSipMsg,
         IN const SipProfile* pSipProfile, OUT AString& strHeader)
 {
     INetworkConnection* piConnection =
@@ -84,7 +113,7 @@ PUBLIC GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeader(IN IMS_SINT32 nSlotI
 
     if (piConnection != IMS_NULL)
     {
-        return FormHeader(nSlotId, piConnection, objMethod, pSipProfile, strHeader);
+        return FormHeader(nSlotId, piConnection, piSipMsg, pSipProfile, strHeader);
     }
 
     return IMS_FALSE;
@@ -109,7 +138,7 @@ PUBLIC GLOBAL void PAccessNetworkInfoHeader::SetHeader(IN IMS_SINT32 nSlotId,
 
     AString strHeader;
 
-    if (!FormHeader(nSlotId, piConnection, piSipMsg->GetMethod(), pSipProfile, strHeader))
+    if (!FormHeader(nSlotId, piConnection, piSipMsg, pSipProfile, strHeader))
     {
         return;
     }
@@ -126,7 +155,7 @@ PUBLIC GLOBAL void PAccessNetworkInfoHeader::SetHeader(IN IMS_SINT32 nSlotId,
 
     if (piConnection->IsePDGEnabled())
     {
-        SetPrivateHeaderForPlci(nSlotId, piConnection, piSipMsg);
+        SetPrivateHeaderForPcni(nSlotId, piConnection, piSipMsg);
         SetCniHeader(nSlotId, piConnection, pSipProfile, piSipMsg);
     }
 }
@@ -183,26 +212,9 @@ PRIVATE GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeader(
     return IMS_TRUE;
 }
 
-PRIVATE GLOBAL void PAccessNetworkInfoHeader::RefineMacAddressAsInvalid(
-        IN_OUT AccessNetworkInfo& objAni)
-{
-    switch (objAni.nType)
-    {
-        case AccessNetworkInfo::TYPE_IEEE_802_11:   // FALL-THROUGH
-        case AccessNetworkInfo::TYPE_IEEE_802_11A:  // FALL-THROUGH
-        case AccessNetworkInfo::TYPE_IEEE_802_11B:  // FALL-THROUGH
-        case AccessNetworkInfo::TYPE_IEEE_802_11G:  // FALL-THROUGH
-        case AccessNetworkInfo::TYPE_IEEE_802_11N:
-            IMS_MEM_Memset(&objAni.uniAI.i_wlan_node_id, 0x00, sizeof(I_WLAN_NODE_ID));
-            break;
-        default:
-            break;
-    }
-}
-
 PRIVATE GLOBAL void PAccessNetworkInfoHeader::AddLocalTimezone(IN_OUT AString& strHeader)
 {
-    ISystemTime* piSysTime = SystemTimeService::GetSystemTimeService()->GetSystemTime();
+    const ISystemTime* piSysTime = SystemTimeService::GetSystemTimeService()->GetSystemTime();
 
     if (piSysTime != IMS_NULL)
     {
@@ -220,35 +232,19 @@ PRIVATE GLOBAL void PAccessNetworkInfoHeader::AddLocalTimezone(IN_OUT AString& s
 }
 
 PRIVATE GLOBAL void PAccessNetworkInfoHeader::AddCountryParameter(
-        IN IMS_SINT32 nSlotId, IN_OUT AString& strHeader, IN IMS_BOOL bUseUicc)
+        IN IMS_SINT32 nSlotId, IN_OUT AString& strHeader)
 {
     AString strCountry(AString::ConstEmpty());
 
     ILocationInfo* piLocationInfo =
             PhoneInfoService::GetPhoneInfoService()->GetLocationInfo(nSlotId);
-    ILocationProperties* piLocation = (piLocationInfo != IMS_NULL)
+    const ILocationProperties* piLocation = (piLocationInfo != IMS_NULL)
             ? piLocationInfo->GetLocationProperties(ILocationInfo::LOCATION_POSITION_N_COUNTRY)
             : IMS_NULL;
 
     if (piLocation != IMS_NULL)
     {
         strCountry = piLocation->GetCountry();
-    }
-
-    if ((strCountry.GetLength() == 0) || strCountry.Equals("ZZ"))
-    {
-        if (bUseUicc)
-        {
-            ISubscriberInfo* piSubsInfo =
-                    PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(nSlotId);
-
-            if (piSubsInfo != IMS_NULL)
-            {
-                // location information from mcc/mnc in uicc.
-                // it could be different from user's location.
-                piSubsInfo->GetSimCountryIso(strCountry);
-            }
-        }
     }
 
     if ((strCountry.GetLength() > 0) && !strCountry.Equals("ZZ"))
@@ -298,7 +294,7 @@ PRIVATE GLOBAL void PAccessNetworkInfoHeader::SetPrivateHeaderForPlani(
     // P-Last-Access-Network-Info header -- starts
     ////////
     const AString strPlaniHeaderName("P-Last-Access-Network-Info");
-    ISipRtConfigHelper* piRtConfigHelper = SipFactory::GetRtConfigHelper(nSlotId);
+    const ISipRtConfigHelper* piRtConfigHelper = SipFactory::GetRtConfigHelper(nSlotId);
     const SipRtConfig::Header* pHeader = piRtConfigHelper->GetHeader(strPlaniHeaderName);
 
     do
@@ -332,8 +328,10 @@ PRIVATE GLOBAL void PAccessNetworkInfoHeader::SetPrivateHeaderForPlani(
                 PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(nSlotId);
 
         IMS_SINT32 nNetworkType = piNetworkWatcher->GetNetworkType();
+        IMS_SINT32 nServiceState = piNetworkWatcher->GetCellularServiceState();
 
-        if (nNetworkType == INetworkWatcher::RADIOTECH_TYPE_UNKNOWN)
+        if (nNetworkType == INetworkWatcher::RADIOTECH_TYPE_UNKNOWN ||
+                nServiceState != INetworkWatcher::STATE_IN_SERVICE)
         {
             // Timestamp for last known cell identity
             strTimestamp.Replace(':', "%3A");
@@ -362,7 +360,7 @@ PRIVATE GLOBAL void PAccessNetworkInfoHeader::SetPrivateHeaderForPlani(
     ////////
 }
 
-PRIVATE GLOBAL void PAccessNetworkInfoHeader::SetPrivateHeaderForPlci(
+PRIVATE GLOBAL void PAccessNetworkInfoHeader::SetPrivateHeaderForPcni(
         IN IMS_SINT32 nSlotId, IN INetworkConnection* piConnection, IN_OUT ISipMessage*& piSipMsg)
 {
     if (piConnection == IMS_NULL)
@@ -371,57 +369,46 @@ PRIVATE GLOBAL void PAccessNetworkInfoHeader::SetPrivateHeaderForPlci(
     }
 
     const SipMethod& objMethod = piSipMsg->GetMethod();
-
     if (objMethod.Equals(SipMethod::ACK) || objMethod.Equals(SipMethod::CANCEL))
     {
         return;
     }
 
-    const AString strPlciHeaderName("P-Last-Cell-ID");
-    ISipRtConfigHelper* piRtConfigHelper = SipFactory::GetRtConfigHelper(nSlotId);
-    const SipRtConfig::Header* pHeader = piRtConfigHelper->GetHeader(strPlciHeaderName);
+    const AString strHeaderName("P-Cellular-Network-Info");
+    const ISipRtConfigHelper* piRtConfigHelper = SipFactory::GetRtConfigHelper(nSlotId);
+    const SipRtConfig::Header* pHeader = piRtConfigHelper->GetHeader(strHeaderName);
 
     if (pHeader == IMS_NULL)
     {
         return;
     }
 
-    AString strLastKnownPanInfo;
+    AString strHeader;
     AString strTimestamp;
     AString strCellInfoAge;
     AccessNetworkInfo objAnInfo;
 
     piConnection->GetLastAccessNetworkInfo(objAnInfo, strTimestamp, strCellInfoAge);
 
-    if (!FormHeader(nSlotId, objAnInfo, strLastKnownPanInfo))
+    if (!FormHeader(nSlotId, objAnInfo, strHeader))
     {
-        IMS_TRACE_D("PLCI: FormHeader fails", 0, 0, 0);
+        IMS_TRACE_D("P-CNI: FormHeader fails", 0, 0, 0);
         return;
     }
 
-    if (strLastKnownPanInfo.GetLength() == 0)
+    if (strHeader.GetLength() == 0)
     {
-        IMS_TRACE_D("PLCI: length 0", 0, 0, 0);
+        IMS_TRACE_D("P-CNI: length 0", 0, 0, 0);
         return;
     }
 
-    // Timestamp for last known cell identity
-    strLastKnownPanInfo.Append(';');
-    strLastKnownPanInfo.Append('\"');
-    strLastKnownPanInfo.Append(strTimestamp);
-    strLastKnownPanInfo.Append('\"');
+    // The relative time since the information about the cell identity was collected by the UE
+    strHeader.Append(";cell-info-age=");
+    strHeader.Append(strCellInfoAge);
 
-    // Timestamp for IMS-REG over WiFi (ePDG)
-    if (pHeader->strParameter.GetLength() > 0)
+    if (piSipMsg->SetHeader(ISipHeader::UNKNOWN, strHeader, strHeaderName) != IMS_SUCCESS)
     {
-        strLastKnownPanInfo.Append(';');
-        strLastKnownPanInfo.Append(pHeader->strParameter);
-    }
-
-    if (piSipMsg->SetHeader(ISipHeader::UNKNOWN, strLastKnownPanInfo, strPlciHeaderName) !=
-            IMS_SUCCESS)
-    {
-        IMS_TRACE_E(0, "Setting %s header failed", strPlciHeaderName.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "Setting %s header failed", strHeaderName.GetStr(), 0, 0);
     }
 }
 
@@ -451,7 +438,7 @@ PRIVATE GLOBAL void PAccessNetworkInfoHeader::SetCniHeader(IN IMS_SINT32 nSlotId
 
     if (!bCniHeaderRequired)
     {
-        ISipRtConfigHelper* piRtConfigHelper = SipFactory::GetRtConfigHelper(nSlotId);
+        const ISipRtConfigHelper* piRtConfigHelper = SipFactory::GetRtConfigHelper(nSlotId);
         const SipRtConfig::Header* pHeader = piRtConfigHelper->GetHeader(strHeaderName);
 
         if (pHeader == IMS_NULL)
@@ -502,5 +489,51 @@ PRIVATE GLOBAL IMS_BOOL PAccessNetworkInfoHeader::IsAccessNetworkTypeWiFi(
             break;
     }
 
+    return IMS_FALSE;
+}
+
+PRIVATE GLOBAL IMS_BOOL PAccessNetworkInfoHeader::IsMessageForN11OrEmergency(
+        IN const SipProfile* pSipProfile, IN const ISipMessage* piSipMsg)
+{
+    if (pSipProfile != IMS_NULL && pSipProfile->IsForEmergency())
+    {
+        return IMS_TRUE;
+    }
+
+    AString strHeader;
+
+    if (piSipMsg->GetType() == ISipMessage::TYPE_REQUEST)
+    {
+        strHeader = piSipMsg->GetHeader(ISipHeader::TO);
+    }
+    else
+    {
+        strHeader = piSipMsg->GetHeader(ISipHeader::FROM);
+    }
+
+    ISipHeader* piHeader = SipParsingHelper::CreateHeader(ISipHeader::TO, strHeader);
+
+    if (piHeader != IMS_NULL)
+    {
+        const SipAddress* pAddress = piHeader->GetSipAddress();
+        const SipAddress::UserInfoPart* pUserInfoPart =
+                pAddress != IMS_NULL ? pAddress->GetUserInfoPart() : IMS_NULL;
+        const AString& strUser =
+                pUserInfoPart != IMS_NULL ? pUserInfoPart->GetUser() : AString::ConstNull();
+
+        IMS_SINT32 i = 0;
+
+        while (N11[i] != IMS_NULL)
+        {
+            if (strUser.Equals(N11[i]))
+            {
+                piHeader->Destroy();
+                return IMS_TRUE;
+            }
+            ++i;
+        }
+
+        piHeader->Destroy();
+    }
     return IMS_FALSE;
 }

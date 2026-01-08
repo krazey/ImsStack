@@ -17,6 +17,7 @@
 #include "ICoreService.h"
 #include "ISession.h"
 #include "ISubscription.h"
+#include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "helper/sipinterfaceholder/IInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/SubscriptionInterfaceHolder.h"
@@ -51,7 +52,6 @@ PUBLIC VIRTUAL void SubscriptionInterfaceHolder::SubscriptionTerminated(
 {
     IMS_TRACE_D("SubscriptionTerminated", 0, 0, 0);
 
-    // TODO: delete piSubscription / timer???
     ReleaseISubscription(piSubscription, IMS_TRUE);
 }
 
@@ -135,7 +135,7 @@ void SubscriptionInterfaceHolder::ReleaseISubscription(
 }
 
 PRIVATE
-IMS_BOOL SubscriptionInterfaceHolder::IsReadyToDestroy(IN ISubscription* piSubscription)
+IMS_BOOL SubscriptionInterfaceHolder::IsReadyToDestroy(IN const ISubscription* piSubscription)
 {
     IMS_TRACE_D("IsReadyToDestroy [%d]", piSubscription->GetState(), 0, 0);
 

@@ -17,23 +17,20 @@
 #ifndef MOCK_CONFERENCE_OPERATION_QUEUE_H_
 #define MOCK_CONFERENCE_OPERATION_QUEUE_H_
 
-#include "ITimer.h"
-#include "ImsList.h"
-#include "ImsMap.h"
-#include "IuMtcCall.h"
-#include "MtcDef.h"
-#include "conferencecall/ConferenceDef.h"
+#include "ImsTypeDef.h"
 #include "conferencecall/ConferenceOperationQueue.h"
-#include "conferencecall/IConferenceOperationQueueListener.h"
 #include <gmock/gmock.h>
+
+class ITimer;
+struct ConfUser;
+template <typename T>
+class ImsList;
 
 class MockConferenceOperationQueue : public ConferenceOperationQueue
 {
 public:
-    ~MockConferenceOperationQueue() {}
-    MOCK_METHOD(void, Timer_TimerExpired, (IN ITimer* piTimer), (override));
-    MOCK_METHOD(void, SetListener, (IN IConferenceOperationQueueListener* piListener), ());
-    MOCK_METHOD(void, AddDelay, (IN IMS_UINT32 nDelayMillisec), ());
+    ~MockConferenceOperationQueue() override {}
+    MOCK_METHOD(void, Timer_TimerExpired, (IN ITimer * piTimer), (override));
     MOCK_METHOD(
             void, CreateNPut, (IN IMS_UINT32 nType, IN IMS_BOOL bStandAloneOperation), (override));
     MOCK_METHOD(void, CreateNPutWithUsers,
@@ -53,7 +50,7 @@ public:
     MOCK_METHOD(void, CreateNPutWithReason,
             (IN IMS_UINT32 nType, IN IMS_SINT32 nTerminateReason, IN IMS_BOOL bStandAloneOperation),
             (override));
-    MOCK_METHOD(void, SetAddingOperationSetCompleted, (), ());
+    MOCK_METHOD(void, SetAddingOperationSetCompleted, (), (override));
     MOCK_METHOD(ConferenceOperationQueue::ConferenceOperation*, GetNextOperation, (), (override));
     MOCK_METHOD(IMS_BOOL, CompleteCurrentOperation,
             (IN IMS_UINT32 nOperationType, IN ConfUser* pConfUser), (override));
@@ -62,17 +59,7 @@ public:
     MOCK_METHOD(IMS_UINT32, GetTypeOfCurrentOperation, (), (const, override));
     MOCK_METHOD(const ImsList<ConfUser*>&, GetUsersOfCurrentOperation, (), (const, override));
     MOCK_METHOD(IMS_BOOL, HasPendingOperation, (), (const, override));
-    MOCK_METHOD(void, Remove, (IN ConferenceOperation* pOperation), ());
-    MOCK_METHOD(void, Clear, (), ());
-    MOCK_METHOD(
-            void, Put, (IN ConferenceOperation* pOperation, IN IMS_BOOL bStandAloneOperation), ());
-    MOCK_METHOD(void, RemoveActiveOperation, (), ());
-    MOCK_METHOD(IMS_BOOL, IsSameOperation, (IN IMS_UINT32 nOperationType, IN ConfUser* pConfUser),
-            (const));
-    MOCK_METHOD(IMS_UINT32, GetAndResetDelay, (), ());
-    MOCK_METHOD(IMS_RESULT, StartTimer, (IN IMS_SINT32 nDuration), ());
-    MOCK_METHOD(void, StopTimer, (), ());
-    MOCK_METHOD(const IMS_CHAR*, ConvertOperationToString, (IN IMS_SINT32 nOperation), (const));
+    MOCK_METHOD(void, Clear, (), (override));
 };
 
 #endif

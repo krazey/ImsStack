@@ -18,7 +18,6 @@
 #define INTERFACE_MEDIA_QOS_EVENT_LISTENER_H_
 
 #include "ImsTypeDef.h"
-#include "precondition/IMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
 
 class ISession;
@@ -35,7 +34,7 @@ public:
      * @param eStatus
      * @param eMediaType
      */
-    virtual void OnQosStatusChanged(
-            IN ISession* piSession, IN QosStatus eStatus, IN IMS_UINT32 eMediaType) = 0;
+    virtual void OnQosStatusChanged(IN ISession* piSession, IN QosStatus eStatus,
+            IN IMS_UINT32 eMediaType, IN IMS_BOOL bNeedToNotify = IMS_TRUE) = 0;
 };
 #endif

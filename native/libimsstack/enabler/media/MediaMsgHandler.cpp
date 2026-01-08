@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
 #include "MediaMsgHandler.h"
-#include "JniEnablerConnector.h"
-#include "IJniMediaSessionThread.h"
-#include "IJniEnabler.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.MH");
+#include "IJniEnabler.h"
+#include "IJniMedia.h"
+#include "IJniMediaSessionThread.h"
+#include "JniEnablerConnector.h"
+#include "ServiceTrace.h"
+
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC
 MediaMsgHandler::MediaMsgHandler(IN IMS_SINT32 nSlotId, IN IMS_SINTP nCallKey) :
@@ -28,14 +30,10 @@ MediaMsgHandler::MediaMsgHandler(IN IMS_SINT32 nSlotId, IN IMS_SINTP nCallKey) :
         m_strListenerThread(AString::ConstNull()),
         m_nCallKey(nCallKey)
 {
-    IMS_TRACE_I("+MediaMsgHandler()", 0, 0, 0);
 }
 
 PUBLIC
-MediaMsgHandler::~MediaMsgHandler()
-{
-    IMS_TRACE_I("~MediaMsgHandler()", 0, 0, 0);
-}
+MediaMsgHandler::~MediaMsgHandler() {}
 
 PUBLIC
 void MediaMsgHandler::SetListener(IN CONST AString& strName)
@@ -49,13 +47,13 @@ IMS_BOOL MediaMsgHandler::SendMessageToJava(IN IMS_SINT32 eEvent, IN ImsMediaMsg
     IMS_TRACE_I("SendMessageToJava() - eEvent[%d], strListenerThread[%s]", eEvent,
             m_strListenerThread.GetStr(), 0);
 
-    IJniEnabler* piJniMediaSession = JniEnablerConnector::GetInstance().GetJniEnabler(
+    const IJniEnabler* piJniMediaSession = JniEnablerConnector::GetInstance().GetJniEnabler(
             m_nSlotId, EnablerType::MEDIA_SESSION, m_nCallKey);
 
     if (piJniMediaSession == IMS_NULL)
     {
         IMS_TRACE_D("SendMessageToJava() - piJniMediaSession is null", 0, 0, 0);
-        return IMS_NULL;
+        return IMS_FALSE;
     }
 
     IJniMediaSessionThread* piThread =
@@ -94,6 +92,12 @@ IMS_BOOL MediaMsgHandler::SendMessageToJava(IN IMS_SINT32 eEvent, IN ImsMediaMsg
         case IJniMedia::REQUEST_SET_DISPLAY_SURFACE:
             piThread->OnSetDisplaySurface();
             break;
+        case IJniMedia::REQUEST_UPDATE_ANBR_ENABLED_CONFIG:
+            return piThread->OnRequestUpdateAnbrEnabledConfig(
+                    static_cast<ImsMediaMsgAnbrNegotiationParam*>(pParam));
+        case IJniMedia::REQUEST_RTP_RECEPTION_STATS:
+            return piThread->OnRequestRtpReceptionStats(
+                    static_cast<ImsMediaMsgRtpReceptionStatsParam*>(pParam));
         default:
             IMS_TRACE_E(0, "SendMessageToJava() - eEvent[%d], not handled", eEvent, 0, 0);
             return IMS_FALSE;

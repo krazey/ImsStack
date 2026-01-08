@@ -17,10 +17,10 @@
 #ifndef USSI_EVENT_NOTIFIER_H_
 #define USSI_EVENT_NOTIFIER_H_
 
-#include "MtcDef.h"
-#include "call/IMtcCall.h"
+#include "ImsTypeDef.h"
 #include "ussi/UssiDef.h"
 
+class AString;
 class IMtcCallContext;
 
 class UssiEventNotifier final

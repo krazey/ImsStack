@@ -18,7 +18,8 @@
 #define INTERFACE_MEDIA_SESSION_LISTENER_H_
 
 #include "MediaDef.h"
-#include "IJniMedia.h"
+
+class ImsMediaMsgParamBase;
 
 class IMediaSessionListener
 {
@@ -26,7 +27,7 @@ public:
     /**
      * @brief Destructor of IMediaSessionListener
      */
-    virtual ~IMediaSessionListener(){};
+    virtual ~IMediaSessionListener() {};
 
     /**
      * @brief Send request message to java
@@ -37,6 +38,18 @@ public:
      */
     virtual IMS_BOOL MediaSession_SendMsgToMediaManager(
             IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam) = 0;
+
+    /**
+     * @brief Send notification to the client
+     *
+     * @param eReportType notification type definition of REPORT_TYPE in MediaDef.h.
+     * @param eMediaType The media type of notification
+     * @param eMediaProtocolType The protocol type of notification, it can be RTP or RTCP
+     * @return IMS_BOOL Return IMS_TRUE if the event sent without error
+     */
+    virtual IMS_BOOL MediaSession_NotifyToClient(IN IMS_UINT32 eReportType,
+            IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_INVALID,
+            IN MEDIA_TRANSPORT_PROTOCOL eMediaProtocolType = MEDIA_PROTOCOL_ANY) = 0;
 };
 
 #endif

@@ -23,7 +23,7 @@ class SipServerTransport : public SipTransport
 public:
     SipServerTransport(IN IMS_SINT32 nSlotId, IN const SipTransportAddress& objNearEnd,
             IN const SipTransportAddress& objFarEnd);
-    virtual ~SipServerTransport();
+    ~SipServerTransport() override;
 
     SipServerTransport(IN const SipServerTransport&) = delete;
     SipServerTransport& operator=(IN const SipServerTransport&) = delete;
@@ -31,8 +31,8 @@ public:
 public:
     IMS_BOOL FormViaHeader(
             IN_OUT ::SipMessage*& pSipMsg, IN const SipProfile* pProfile = IMS_NULL) override;
-    IMS_BOOL UpdateDestinationInfo(IN ::SipMessage* pSipMsg, IN IMS_BOOL bRoutingLr = IMS_TRUE,
-            IN SipAddrSpec* pImplicitRoute = IMS_NULL) override;
+    IMS_BOOL UpdateDestinationInfo(IN ::SipMessage* pSipMsg, IN const SipProfile* pProfile,
+            IN IMS_BOOL bRoutingLr = IMS_TRUE, IN SipAddrSpec* pImplicitRoute = IMS_NULL) override;
     IMS_SINT32 ValidateViaHeader(IN ::SipMessage* pSipMsg) override;
 };
 

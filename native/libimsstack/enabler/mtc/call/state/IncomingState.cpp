@@ -16,7 +16,6 @@
 
 #include "IMessage.h"
 #include "ISession.h"
-#include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "call/EpsFallbackTrigger.h"
 #include "call/IMtcCallContext.h"
@@ -34,45 +33,34 @@
 #include "precondition/QosDef.h"
 #include "utility/IMessageUtils.h"
 
-__IMS_TRACE_TAG_COM_MTC__;
-
 PUBLIC
 IncomingState::IncomingState(IN IMtcCallContext& objContext) :
         MtcCallState(CallStateName::INCOMING, objContext)
 {
-    IMS_TRACE_D("+IncomingState", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL IncomingState::~IncomingState()
-{
-    IMS_TRACE_D("~IncomingState", 0, 0, 0);
-}
+PUBLIC VIRTUAL IncomingState::~IncomingState() {}
 
 PUBLIC VIRTUAL void IncomingState::OnExit()
 {
-    m_objContext.GetTimer().Stop(TIMER_GLARE_CONDITION);
+    m_objContext.GetTimer().Stop(TIMER_RETRY_UPDATE);
 }
 
 PUBLIC VIRTUAL CallStateName IncomingState::Reject(IN const CallReasonInfo& objReason)
 {
-    IMS_TRACE_D("Reject reason[%s]", _TRACE_CR_(objReason), 0, 0);
     return RejectIncomingAndToTerminating(objReason);
 }
 
 PUBLIC VIRTUAL CallStateName IncomingState::Terminate(IN const CallReasonInfo& objReason)
 {
-    IMS_TRACE_D("Terminate", 0, 0, 0);
-
     HandleTerminate(objReason);
-    m_objContext.GetUiNotifier().SendTerminated(objReason);
+    m_objContext.GetUiNotifier().SendIncomingCallRejected(objReason);
 
     return CallStateName::TERMINATING;
 }
 
 PUBLIC VIRTUAL CallStateName IncomingState::SessionTerminated(IN ISession* piSession)
 {
-    IMS_TRACE_D("SessionTerminated", 0, 0, 0);
-
     m_objContext.GetUiNotifier().SendIncomingCallRejected(
             TerminationHandler(m_objContext).Handle(*piSession));
     return CallStateName::TERMINATING;
@@ -80,18 +68,18 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionTerminated(IN ISession* piSes
 
 PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdated(IN ISession* piSession)
 {
-    IMS_TRACE_D("SessionEarlyMediaUpdated", 0, 0, 0);
-    IMessage* piMessage = m_objContext.GetMessageUtils().GetPreviousResponse(
+    const IMessage* piMessage = m_objContext.GetMessageUtils().GetPreviousResponse(
             piSession, IMessage::SESSION_EARLY_UPDATE);
     m_objContext.GetSession()->HandleResponse(ResponseType::EARLY_UPDATE_RESPONSE, *piMessage);
 
-    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
+    CallReasonInfo objReason = HandleReceivedSdp(piSession, piMessage);
+    if (objReason.nCode != CODE_NONE)
     {
-        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
+        return RejectIncomingAndToTerminating(objReason);
     }
 
     const IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    if (objPreconditionManager.IsCheckingResourcesRequiredToAlertUser())
+    if (objPreconditionManager.IsCheckingResourcesRequiredToAlertUser(piSession))
     {
         if (!objPreconditionManager.IsAvailableToAlertUser(piSession))
         {
@@ -99,20 +87,18 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdated(IN ISession
         }
     }
 
-    m_objContext.GetUiNotifier().SendIncomingCallReceived();
-    return CallStateName::ALERTING;
+    return OnReadyToAlert();
 }
 
 PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateFailed(IN ISession* piSession)
 {
-    IMS_TRACE_D("SessionEarlyMediaUpdateFailed", 0, 0, 0);
-    IMessage* piResponse = m_objContext.GetMessageUtils().GetPreviousResponse(
+    const IMessage* piResponse = m_objContext.GetMessageUtils().GetPreviousResponse(
             piSession, IMessage::SESSION_EARLY_UPDATE);
     CallReasonInfo objReason = EarlyUpdateErrorHandler(m_objContext).Handle(piResponse);
     if (objReason.nCode == CODE_SIP_REQUEST_PENDING)
     {
         m_objContext.GetMediaManager().FinalizeSdp(piSession);
-        m_objContext.GetTimer().Start(TIMER_GLARE_CONDITION, objReason.nExtraCode);
+        m_objContext.GetTimer().Start(TIMER_RETRY_UPDATE, objReason.nExtraCode);
         return GetStateName();
     }
     m_objContext.GetUiNotifier().SendIncomingCallRejected(
@@ -122,12 +108,11 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateFailed(IN ISe
 
 PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN ISession* piSession)
 {
-    IMS_TRACE_D("SessionEarlyMediaUpdateReceived", 0, 0, 0);
-    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
+    const IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
     IMtcSession* pSession = m_objContext.GetSession();
     pSession->HandleRequest(RequestType::EARLY_UPDATE, *piMessage);
 
-    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage).nCode != CODE_NONE)
     {
         if (pSession->RespondToEarlyUpdate(SipStatusCode::SC_488) == IMS_FAILURE)
         {
@@ -142,7 +127,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN I
     }
 
     const IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    if (objPreconditionManager.IsCheckingResourcesRequiredToAlertUser())
+    if (objPreconditionManager.IsCheckingResourcesRequiredToAlertUser(piSession))
     {
         if (!objPreconditionManager.IsAvailableToAlertUser(piSession))
         {
@@ -150,20 +135,19 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN I
         }
     }
 
-    m_objContext.GetUiNotifier().SendIncomingCallReceived();
-    return CallStateName::ALERTING;
+    return OnReadyToAlert();
 }
 
 PUBLIC VIRTUAL CallStateName IncomingState::SessionPrackReceived(IN ISession* piSession)
 {
-    IMS_TRACE_D("SessionPrackReceived", 0, 0, 0);
+    StopTimer(TIMER_MT_PRACK_WAIT);
 
-    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
+    const IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
     IMtcSession* pSession = m_objContext.GetSession();
 
     pSession->HandleRequest(RequestType::PRACK, *piMessage);
 
-    if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
+    if (HandleReceivedSdp(piSession, piMessage).nCode != CODE_NONE)
     {
         pSession->RespondToPrack(SipStatusCode::SC_200);
         // According to RFC 6337, UE must send re-offer.
@@ -175,8 +159,15 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionPrackReceived(IN ISession* pi
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
     }
 
+    if (m_objContext.GetMessageUtils().IsResponseExist(
+                &pSession->GetISession(), SipStatusCode::SC_180))
+    {
+        m_objContext.GetUiNotifier().SendIncomingCallReceived();
+        return CallStateName::ALERTING;
+    }
+
     const IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    if (objPreconditionManager.IsCheckingResourcesRequiredToAlertUser())
+    if (objPreconditionManager.IsCheckingResourcesRequiredToAlertUser(piSession))
     {
         if (!objPreconditionManager.IsAvailableToAlertUser(piSession))
         {
@@ -184,20 +175,17 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionPrackReceived(IN ISession* pi
         }
     }
 
-    m_objContext.GetUiNotifier().SendIncomingCallReceived();
-    return CallStateName::ALERTING;
+    return OnReadyToAlert();
 }
 
 PUBLIC VIRTUAL CallStateName IncomingState::SessionRprDeliveryFailed(IN ISession* /* piSession*/)
 {
-    IMS_TRACE_D("SessionRprDeliveryFailed", 0, 0, 0);
     return RejectIncomingAndToTerminating(
             CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_PRACK));
 }
 
 PUBLIC VIRTUAL CallStateName IncomingState::SessionStartFailed(IN ISession* /* piSession */)
 {
-    IMS_TRACE_D("SessionStartFailed", 0, 0, 0);
     if (IsNeedToIgnoreStartFailure())
     {
         return GetStateName();
@@ -212,7 +200,12 @@ PUBLIC VIRTUAL CallStateName IncomingState::OnTimerExpired(IN IMS_SINT32 nType)
 {
     switch (nType)
     {
-        case TIMER_GLARE_CONDITION:
+        case TIMER_MT_ALERTING:
+            return RejectIncomingAndToTerminating(CallReasonInfo(CODE_TIMEOUT_NO_ANSWER));
+        case TIMER_MT_PRACK_WAIT:
+            return RejectIncomingAndToTerminating(
+                    CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_PRACK));
+        case TIMER_RETRY_UPDATE:
         {
             IMtcSession* pSession = m_objContext.GetSession();
             SendEarlyUpdate(pSession->GetOngoingUpdateType(), pSession);
@@ -226,16 +219,15 @@ PUBLIC VIRTUAL CallStateName IncomingState::OnTimerExpired(IN IMS_SINT32 nType)
 }
 
 PUBLIC VIRTUAL CallStateName IncomingState::QosReserved(
-        IN ISession* piSession, IN IMS_UINT32 eMediaType)
+        IN ISession* piSession, IN [[maybe_unused]] IMS_UINT32 eMediaType)
 {
-    IMS_TRACE_D("QosReserved : Media[%d] is reserved.", eMediaType, 0, 0);
     if (piSession->GetPreviousRequest(IMessage::SESSION_PRACK) == IMS_NULL)
     {
         return GetStateName();
     }
 
     const IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    if (!objPreconditionManager.IsCheckingResourcesRequiredToAlertUser())
+    if (!objPreconditionManager.IsCheckingResourcesRequiredToAlertUser(piSession))
     {
         return GetStateName();
     }
@@ -245,30 +237,23 @@ PUBLIC VIRTUAL CallStateName IncomingState::QosReserved(
         return GetStateName();
     }
 
-    m_objContext.GetUiNotifier().SendIncomingCallReceived();
-    return CallStateName::ALERTING;
+    return OnReadyToAlert();
 }
 
 PUBLIC VIRTUAL CallStateName IncomingState::QosReserveFailed(
-        IN ISession* /*piSession*/, IN QosLossPolicy eNextAction)
+        IN [[maybe_unused]] ISession* piSession, IN QosLossPolicy eNextAction)
 {
-    IMS_TRACE_D("QosReserveFailed", 0, 0, 0);
     if (eNextAction == QosLossPolicy::RELEASE)
     {
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_QOS_FAILURE));
     }
 
-    if (eNextAction == QosLossPolicy::MODIFY)
-    {
-        // TODO: downgrade to voip. send early update or send re-INVITE after call establishment.
-    }
-
+    // Will be notified again by QosTimerType::WAIT_VIDEO_TEXT_AVAILABLE after call establishing
     return GetStateName();
 }
 
 PUBLIC VIRTUAL CallStateName IncomingState::OnMediaFailed(IN const CallReasonInfo& objReason)
 {
-    IMS_TRACE_I("OnMediaFailed", 0, 0, 0);
     return RejectIncomingAndToTerminating(objReason);
 }
 
@@ -284,16 +269,11 @@ PUBLIC VIRTUAL CallStateName IncomingState::OnIpcanChanged(IN IMS_UINT32 eIpcan)
 
 PROTECTED VIRTUAL CallStateName IncomingState::HandleAosConnected()
 {
-    IMS_TRACE_I("HandleAosConnected", 0, 0, 0);
-    m_objContext.GetPreconditionManager().HandleQosOnIpcanChanged();
-
-    if (EpsFallbackTrigger::IsRequired(m_objContext.GetConfigurationProxy()) &&
-            m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoTrigger() &&
+    if (m_objContext.GetEpsFallbackTrigger().IsWaitingRegistration() &&
             !m_objContext.GetService().IsNr())
     {
         m_objContext.GetEpsFallbackTrigger().OnEpsFallbackCompleted();
-        m_objContext.GetUiNotifier().SendIncomingCallReceived();
-        return CallStateName::ALERTING;
+        return OnReadyToAlert();
     }
 
     return GetStateName();

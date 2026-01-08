@@ -85,7 +85,7 @@ PUBLIC VIRTUAL IMS_BOOL FakeRegistration::Equals(IN const IRegistration* piReg) 
 
 PUBLIC
 IMS_BOOL FakeRegistration::Create(IN IMS_UINT32 nFlowId, IN const SipAddress& objAor,
-        IN const AString& strSubsId /* = AString::ConstNull() */,
+        IN IMS_BOOL bEmergency, IN const AString& strSubsId /* = AString::ConstNull() */,
         IN SipProfile* pProfile /* = IMS_NULL*/)
 {
     m_pRegFlow = new RegFlow(RegKey(GetSlotId(), nFlowId));
@@ -114,6 +114,7 @@ IMS_BOOL FakeRegistration::Create(IN IMS_UINT32 nFlowId, IN const SipAddress& ob
 
     m_pStateTracker->SetAor(objAor);
     m_pStateTracker->SetSubscriberId(strSubsId);
+    m_pStateTracker->SetEmergencyRegistration(bEmergency);
 
     return IMS_TRUE;
 }
@@ -134,7 +135,7 @@ IMS_BOOL FakeRegistration::HasActiveBindings() const
 {
     for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
-        RegContact* pContact = m_objContacts.GetAt(i);
+        const RegContact* pContact = m_objContacts.GetAt(i);
 
         if (pContact->IsActiveBinding())
         {
@@ -150,7 +151,7 @@ IMS_BOOL FakeRegistration::IsAllBindingsRemoved() const
 {
     for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
-        RegContact* pContact = m_objContacts.GetAt(i);
+        const RegContact* pContact = m_objContacts.GetAt(i);
 
         if (!pContact->IsEmpty())
         {
@@ -250,11 +251,9 @@ PRIVATE VIRTUAL IRegContact* FakeRegistration::CreateContact(IN const IpAddress&
         }
     }
 
-    SipProfile* pProfile = m_pStateTracker->GetSipProfile();
-
     // If not present, add a new Contact information
-    RegContact* pNewContact = new RegContact(GetSlotId(), objIpAddr, nPort, this,
-            (-1) /*pRegFlow->GetRegKey().GetFlowId()*/, pProfile);
+    RegContact* pNewContact = new RegContact(GetSlotId(), objIpAddr, nPort,
+            IRegContact::USER_INFO_PART_IMPU, this, (-1) /*pRegFlow->GetRegKey().GetFlowId()*/);
 
     if (pNewContact == IMS_NULL)
     {
@@ -265,6 +264,7 @@ PRIVATE VIRTUAL IRegContact* FakeRegistration::CreateContact(IN const IpAddress&
     // Set user-info field
     pNewContact->SetAor(m_pStateTracker->GetAor());
 
+    const SipProfile* pProfile = m_pStateTracker->GetSipProfile();
     // Set "+sip.instance" parameter
     IMS_SINT32 nDeviceId = SipConfigProxy::GetDeviceId(GetSlotId(), pProfile);
 
@@ -413,7 +413,7 @@ PRIVATE VIRTUAL IMS_BOOL FakeRegistration::IsBindingsUpdated() const
 {
     for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
-        RegContact* pContact = m_objContacts.GetAt(i);
+        const RegContact* pContact = m_objContacts.GetAt(i);
 
         if (pContact->IsBindingsUpdated())
         {
@@ -656,7 +656,7 @@ PRIVATE VIRTUAL void FakeRegistration::AddObserver(IN RegObserver* pObserver)
 {
     for (IMS_UINT32 i = 0; i < m_objObservers.GetSize(); ++i)
     {
-        RegObserver* pTmpObserver = m_objObservers.GetAt(i);
+        const RegObserver* pTmpObserver = m_objObservers.GetAt(i);
 
         if (pObserver == pTmpObserver)
         {
@@ -671,7 +671,7 @@ PRIVATE VIRTUAL void FakeRegistration::RemoveObserver(IN RegObserver* pObserver)
 {
     for (IMS_UINT32 i = 0; i < m_objObservers.GetSize(); ++i)
     {
-        RegObserver* pTmpObserver = m_objObservers.GetAt(i);
+        const RegObserver* pTmpObserver = m_objObservers.GetAt(i);
 
         if (pObserver == pTmpObserver)
         {
@@ -1025,6 +1025,8 @@ void FakeRegistration::StorePersistentHeaders()
     // Security-Client / Security-Verify headers
     m_pStateTracker->SetSecurityClients(m_pRegParam->GetSecurityClients());
     m_pStateTracker->SetSecurityVerifys(m_pRegParam->GetSecurityVerifys());
+
+    m_pStateTracker->AdjustRegistrationDedicatedParameters();
 }
 
 PRIVATE

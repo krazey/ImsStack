@@ -18,36 +18,40 @@
 #define INTERFACE_MTC_DIALING_PLAN_H_
 
 #include "AString.h"
+#include "ImsTypeDef.h"
 #include "dialingplan/NormalDialingPlan.h"
 
-struct CallInfo;
+class IMtcCallContext;
 using Scheme = NormalDialingPlan::Scheme;
 
+/**
+ * @brief An interface for a dialing plan that translates a dialed number into a SIP or TEL URI.
+ */
 class IMtcDialingPlan
 {
 public:
     virtual ~IMtcDialingPlan() {}
 
     /**
-     * @brief returns a translated sip/tel To-Uri
+     * @brief Returns a translated SIP/TEL To URI.
      *
-     * @param strNumber the number a user dialed.
-     * @param objCallInfo the CallInfo of the call which contains the information of
-     *         emergency/ussi characteristic.
-     * @param eScheme the uri scheme for the translation.
-     * @return the translated sip/tel Uri.
+     * @param strNumber The number a user dialed.
+     * @param objContext Call context which provides the information needed to combine the To URI.
+     * @param eScheme The URI scheme for the translation.
+     * @return The translated SIP/TEL URI.
      */
-    virtual AString GetToUri(IN const AString& strNumber, IN const CallInfo& objCallInfo,
+    virtual AString GetToUri(IN const AString& strNumber, IN IMtcCallContext& objContext,
             IN Scheme eScheme = Scheme::UNKNOWN) = 0;
 
     /**
-     * @brief Notifies
+     * @brief Returns a translated URI for an emergency test number.
      *
-     * @param strNumber
-     * @param strServiceUrn
+     * @param strNumber The emergency test number dialed by the user.
+     * @param objContext Call context which provides the information needed to combine the To URI.
+     * @return The translated URI for the emergency test number.
      */
-    virtual void OnCountrySpecificServiceUrnReceived(
-            IN const AString& strNumber, IN const AString& strServiceUrn) = 0;
+    virtual AString GetToUriForEmergencyTestNumber(
+            IN const AString& strNumber, IN IMtcCallContext& objContext) = 0;
 };
 
 #endif

@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
+#include "ServiceTrace.h"
 
 #include "IOnSipErrorListener.h"
+#include "ISipHeader.h"
 #include "SipConnection.h"
+#include "SipDialog.h"
+#include "SipError.h"
 #include "SipFactoryProxy.h"
 #include "SipIpSecState.h"
+#include "SipMessageBodyPart.h"
 #include "SipMessageTracker.h"
 #include "SipPrivate.h"
 #include "SipStack.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipConnection::SipConnection() :
@@ -91,7 +96,6 @@ PUBLIC VIRTUAL IMS_RESULT SipConnection::AddHeader(
     }
     else
     {
-        // TODO:: IMS_SINT32 nHCount = pMessage->GetHeaderCount(nHType, strHNameFF);
         /*
          *    " abc , cde, fgh " --> abc/cde/fgh
          */
@@ -109,8 +113,6 @@ PUBLIC VIRTUAL IMS_RESULT SipConnection::AddHeader(
         for (IMS_SINT32 i = objTokens.GetCount() - 1; i >= 0; --i)
         {
             m_pMessage->PrependHeader(nHType, objTokens.GetElementAt(i), strName);
-
-            // TODO:: If failed, remove the appended headers from the message (using nHCount)
         }
     }
 
@@ -209,7 +211,6 @@ PUBLIC VIRTUAL IMS_RESULT SipConnection::SetHeader(
     }
     else
     {
-        // TODO:: IMS_SINT32 nHCount = pMessage->GetHeaderCount(nHType, strHNameFF);
         /*
          *    " abc , cde, fgh " --> abc/cde/fgh
          */
@@ -236,7 +237,6 @@ PUBLIC VIRTUAL IMS_RESULT SipConnection::SetHeader(
         for (IMS_SINT32 i = objTokens.GetCount() - 2; i >= 0; --i)
         {
             m_pMessage->PrependHeader(nHType, objTokens.GetElementAt(i), strName);
-            // TODO:: If failed, remove the appended headers from the message (using nHCount)
         }
     }
 
@@ -245,7 +245,7 @@ PUBLIC VIRTUAL IMS_RESULT SipConnection::SetHeader(
 
 PUBLIC VIRTUAL const ByteArray& SipConnection::GetContent() const
 {
-    SipMessageBodyPart* pBodyPart = m_pMessage->GetBodyPart();
+    const SipMessageBodyPart* pBodyPart = m_pMessage->GetBodyPart();
 
     if (pBodyPart == IMS_NULL)
     {
@@ -328,7 +328,7 @@ PROTECTED VIRTUAL void SipConnection::TransactionState_TimerExpired()
         }
         else
         {
-            ISipMessage* piMessage = GetMessage();
+            const ISipMessage* piMessage = GetMessage();
 
             pMessageTracker->NotifyMessageSent(objMethod, GetStatusCode(),
                     (piMessage != IMS_NULL) ? piMessage->GetHeader(ISipHeader::CALL_ID)
@@ -377,7 +377,7 @@ PROTECTED VIRTUAL void SipConnection::Transport_NotifyError(
         }
         else
         {
-            ISipMessage* piMessage = GetMessage();
+            const ISipMessage* piMessage = GetMessage();
 
             pMessageTracker->NotifyMessageSent(SipConnection::GetMethod(), GetStatusCode(),
                     (piMessage != IMS_NULL) ? piMessage->GetHeader(ISipHeader::CALL_ID)

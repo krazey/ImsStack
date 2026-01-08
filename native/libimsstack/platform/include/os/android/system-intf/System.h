@@ -27,7 +27,7 @@ class System : public ISystem
 {
 private:
     System();
-    virtual ~System();
+    ~System() override;
 
     System(IN const System&) = delete;
     System& operator=(IN const System&) = delete;
@@ -49,8 +49,9 @@ public:
             IN IMS_SINT32 nSlotId) override;
 
     ////
-    // Power-related information
+    // Common information
     ////
+    void GetUuid(IN IMS_SINT32 nVersion, IN const AString& strName, OUT AString& strUuid) override;
     IMS_SINT32 GetPowerLevel() override;
 
     ////
@@ -65,12 +66,11 @@ public:
     IMS_SINT32 GetSimMnc(OUT AString& strMnc, IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetSimCountryIso(OUT AString& strCountry, IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetNetworkCountryIso(OUT AString& strCountry, IN IMS_SINT32 nSlotId) override;
+    IMS_SINT32 GetNetworkOperator(OUT AString& strOperator, IN IMS_SINT32 nSlotId) override;
 
     // For UICC (ISIM)
     AString GetIsimState(IN IMS_SINT32 nSlotId) override;
-    IMS_SINT32 ReadIsimFileAttributes(IN IMS_SINT32 nFileId, IN IMS_SINT32 nSlotId) override;
-    IMS_SINT32 ReadIsimRecord(
-            IN IMS_SINT32 nFileId, IN IMS_SINT32 nIndex, IN IMS_SINT32 nSlotId) override;
+    AStringArray GetIsimRecord(IN IMS_SINT32 nFileId, IN IMS_SINT32 nSlotId) override;
     IMS_RESULT RequestIsimAuthentication(
             IN const AString& strNonce, IN IMS_SINTP nOwner, IN IMS_SINT32 nSlotId) override;
     // For UICC (USIM)
@@ -85,7 +85,7 @@ public:
     IMS_SINT32 GetTtyMode(IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetRttMode(IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetCsCallStateInOtherSlot(IN IMS_SINT32 nSlotId) override;
-
+    IMS_BOOL IsCrossSimRedialingAvailable(IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetDeviceName(OUT AString& strDeviceName) override;
 
     ////
@@ -97,6 +97,7 @@ public:
     IMS_SINT32 GetVoiceRoamingType(IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetDataRoamingType(IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetServiceState(IN IMS_SINT32 nSlotId) override;
+    IMS_SINT32 GetCellularServiceState(IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetVoiceServiceState(IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetAccessNetworkInfo(IN IMS_SINT32 nDefaultNetworkType, OUT IMS_SINT32& nNetworkType,
             OUT AStringArray& objAccessNetInfo, IN IMS_SINT32 nSlotId) override;
@@ -117,14 +118,15 @@ public:
             IN IMS_SINT32 nApnType, IN IMS_SINT32 nIpVersion, IN IMS_SINT32 nSlotId) override;
     IMS_BOOL IsImsEmergencyCallSupported(IN IMS_SINT32 nSlotId) override;
     IMS_BOOL IsImsVoiceCallSupported(IN IMS_SINT32 nSlotId) override;
-    IMS_BOOL IsLteEmergencyOnly(IN IMS_SINT32 nSlotId) override;
+    IMS_BOOL IsEmergencyOnly(IN IMS_SINT32 nSlotId) override;
     IMS_BOOL IsEmergencyAttachSupported(IN IMS_SINT32 nSlotId) override;
     IMS_BOOL IsMobileDataEnabled(IN IMS_SINT32 nSlotId) override;
-    IMS_SINT32 GetMocnPlmnInfo(IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetMtu(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 BindSocket(
             IN IMS_SINT32 nApnType, IN IMS_SINT32 nSockFd, IN IMS_SINT32 nSlotId) override;
     IMS_BOOL IsIpv6Preferred(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) override;
+    IMS_SINT32 GetNetworkRegistrationRejectCause(IN IMS_SINT32 nSlotId) override;
+    AString GetAccessNetworkPlmn(IN IMS_SINT32 nSlotId) override;
 
     ////
     // WiFi-related information
@@ -137,7 +139,7 @@ public:
     ////
     // Timer APIs
     ////
-    IMS_SINT32 SetTimer(IN IMS_UINT32 nDuration, IN IMS_UINTP nTimerId) override;
+    IMS_SINT32 SetTimer(IN IMS_SINT64 nDuration, IN IMS_UINTP nTimerId) override;
     IMS_SINT32 KillTimer(IN IMS_UINTP nTimerId) override;
 
     ////
@@ -177,7 +179,8 @@ public:
     void StopListeningForLocation(IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 GetLastKnownLocation(
             OUT AStringArray& objLocationInfo, IN IMS_SINT32 nType, IN IMS_SINT32 nSlotId) override;
-    IMS_BOOL StartInstantLocationUpdate(IN IMS_SINT32 nSlotId) override;
+    IMS_SINT32 RequestLocationUpdate(IN IMS_SINT32 nWaitTimeMs, IN IMS_SINT32 nSlotId) override;
+    void CancelLocationUpdate(IN IMS_SINT32 nId, IN IMS_SINT32 nSlotId) override;
 
     ////
     // Ims radio interface
@@ -213,13 +216,11 @@ private:
     void AddListenerIfCategoryMatched(IN IMS_UINT32 nCategories, IN IMS_UINT32 nCategory,
             IN ISystemListener* piListener, IN IMS_SINT32 nSlotId);
     void RemoveListenerIfCategoryMatched(IN IMS_UINT32 nCategories, IN IMS_UINT32 nCategory,
-            IN ISystemListener* piListener, IN IMS_SINT32 nSlotId);
+            IN const ISystemListener* piListener, IN IMS_SINT32 nSlotId);
 
     void NotifyNetworkCategory(
             IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
     void NotifyWifiCategory(
-            IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
-    void NotifyCallCategory(
             IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
     void NotifyPowerCategory(
             IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
@@ -232,6 +233,8 @@ private:
     void NotifySimCategory(IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN IMS_UINT32 nCategory,
             IN const android::Parcel& in);
     void NotifyRadioCategory(
+            IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
+    void NotifyLocationCategory(
             IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
 
 private:

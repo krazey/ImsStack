@@ -49,16 +49,16 @@ public class MtcCallUtils {
     }
 
     public static void copyMediaInfo(MediaInfo src, MediaInfo dest) {
-        dest.AQuality = src.AQuality;
-        dest.VQuality = src.VQuality;
-        dest.ADir = src.ADir;
-        dest.VDir = src.VDir;
-        dest.TDir = src.TDir;
-        dest.GTTMode = src.GTTMode;
+        dest.audioQuality = src.audioQuality;
+        dest.videoQuality = src.videoQuality;
+        dest.audioDir = src.audioDir;
+        dest.videoDir = src.videoDir;
+        dest.textDir = src.textDir;
+        dest.gttMode = src.gttMode;
 
-        if ((dest.VQuality == MediaInfo.VIDEO_QUALITY_NONE)
-                || (dest.VQuality == MediaInfo.VIDEO_QUALITY_NOTUSED)) {
-            dest.VDir = MediaInfo.DIRECTION_INVALID;
+        if ((dest.videoQuality == MediaInfo.VIDEO_QUALITY_NONE)
+                || (dest.videoQuality == MediaInfo.VIDEO_QUALITY_NOTUSED)) {
+            dest.videoDir = MediaInfo.DIRECTION_INVALID;
         }
     }
 
@@ -66,7 +66,6 @@ public class MtcCallUtils {
         UsersInfo usersInfo = new UsersInfo();
 
         for (String participant : participants) {
-            // FIXME: is it possible to use "entity" field as a conference id for this user???
             usersInfo.addUser(0L, participant, "", "", "",
                     UsersInfo.USER_STATUS_IDLE, UsersInfo.CCTYPE_TO, false);
         }
@@ -82,26 +81,27 @@ public class MtcCallUtils {
             boolean isVideoDirectionInactiveOnVideoCallHold,
             boolean isTextDirectionInactiveOnRttCallHold) {
         MediaInfo mediaInfo = new MediaInfo(
-                    mi.AQuality, mi.VQuality, mi.ADir, mi.VDir, mi.TDir, mi.GTTMode);
+                    mi.audioQuality, mi.videoQuality,
+                    mi.audioDir, mi.videoDir, mi.textDir, mi.gttMode);
 
-        mediaInfo.ADir = getHoldDirection(mi.ADir);
+        mediaInfo.audioDir = getHoldDirection(mi.audioDir);
 
         if (hasVideo(MtcCallInfo.getCallType(ci))) {
             if (isVideoDirectionInactiveOnVideoCallHold) {
-                mediaInfo.VDir = MediaInfo.DIRECTION_INACTIVE;
+                mediaInfo.videoDir = MediaInfo.DIRECTION_INACTIVE;
             } else {
-                mediaInfo.VDir = getHoldDirection(mi.VDir);
+                mediaInfo.videoDir = getHoldDirection(mi.videoDir);
             }
         }
 
         if (MtcCallInfo.isConference(ci)) {
-            mediaInfo.TDir = MediaInfo.DIRECTION_INVALID;
-            mediaInfo.GTTMode = MediaInfo.GTTMODE_INVALID;
-        } else if (isGttEnabled(mediaInfo.GTTMode)) {
+            mediaInfo.textDir = MediaInfo.DIRECTION_INVALID;
+            mediaInfo.gttMode = MediaInfo.GTTMODE_INVALID;
+        } else if (isGttEnabled(mediaInfo.gttMode)) {
             if (isTextDirectionInactiveOnRttCallHold) {
-                mediaInfo.TDir = MediaInfo.DIRECTION_INACTIVE;
+                mediaInfo.textDir = MediaInfo.DIRECTION_INACTIVE;
             } else {
-                mediaInfo.TDir = MediaInfo.DIRECTION_SEND;
+                mediaInfo.textDir = MediaInfo.DIRECTION_SEND;
             }
         }
 
@@ -115,23 +115,24 @@ public class MtcCallUtils {
     public static MediaInfo createUnholdMedia(final CallInfo ci, final MediaInfo mi,
             boolean isVideoDirectionInactiveOnVideoCallHold) {
         MediaInfo mediaInfo = new MediaInfo(
-                    mi.AQuality, mi.VQuality, mi.ADir, mi.VDir, mi.TDir, mi.GTTMode);
+                    mi.audioQuality, mi.videoQuality,
+                    mi.audioDir, mi.videoDir, mi.textDir, mi.gttMode);
 
-        mediaInfo.ADir = getUnholdDirection(mi.ADir);
+        mediaInfo.audioDir = getUnholdDirection(mi.audioDir);
 
         if (hasVideo(MtcCallInfo.getCallType(ci))) {
             if (isVideoDirectionInactiveOnVideoCallHold) {
-                mediaInfo.VDir = MediaInfo.DIRECTION_SEND_RECEIVE;
+                mediaInfo.videoDir = MediaInfo.DIRECTION_SEND_RECEIVE;
             } else {
-                mediaInfo.VDir = getUnholdDirection(mi.VDir);
+                mediaInfo.videoDir = getUnholdDirection(mi.videoDir);
             }
         }
 
         if (MtcCallInfo.isConference(ci)) {
-            mediaInfo.TDir = MediaInfo.DIRECTION_INVALID;
-            mediaInfo.GTTMode = MediaInfo.GTTMODE_INVALID;
-        } else if (isGttEnabled(mediaInfo.GTTMode)) {
-            mediaInfo.TDir = MediaInfo.DIRECTION_SEND_RECEIVE;
+            mediaInfo.textDir = MediaInfo.DIRECTION_INVALID;
+            mediaInfo.gttMode = MediaInfo.GTTMODE_INVALID;
+        } else if (isGttEnabled(mediaInfo.gttMode)) {
+            mediaInfo.textDir = MediaInfo.DIRECTION_SEND_RECEIVE;
         }
 
         return mediaInfo;
@@ -143,8 +144,8 @@ public class MtcCallUtils {
     }
 
     public static boolean hasVideoQuality(final MediaInfo mi) {
-        return (mi.VQuality != MediaInfo.VIDEO_QUALITY_NONE)
-                && (mi.VQuality != MediaInfo.VIDEO_QUALITY_NOTUSED);
+        return (mi.videoQuality != MediaInfo.VIDEO_QUALITY_NONE)
+                && (mi.videoQuality != MediaInfo.VIDEO_QUALITY_NOTUSED);
     }
 
     public static boolean hasVideo(final int callType) {
@@ -152,13 +153,13 @@ public class MtcCallUtils {
     }
 
     public static boolean is1WayVideo(MediaInfo mi) {
-        return (mi.ADir == MediaInfo.DIRECTION_SEND_RECEIVE)
-                && (mi.VDir == MediaInfo.DIRECTION_SEND);
+        return (mi.audioDir == MediaInfo.DIRECTION_SEND_RECEIVE)
+                && (mi.videoDir == MediaInfo.DIRECTION_SEND);
     }
 
     public static boolean is1WayVideoByRemoteEnd(MediaInfo mi) {
-        return (mi.ADir == MediaInfo.DIRECTION_SEND_RECEIVE)
-                && (mi.VDir == MediaInfo.DIRECTION_RECEIVE);
+        return (mi.audioDir == MediaInfo.DIRECTION_SEND_RECEIVE)
+                && (mi.videoDir == MediaInfo.DIRECTION_RECEIVE);
     }
 
     public static boolean isAudioEvsCategory(int audioQuality) {
@@ -194,20 +195,13 @@ public class MtcCallUtils {
         return (reason == CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
     }
 
-    public static boolean isCallTerminatedByECallRetry(int reason) {
-        return false;
-        // TODO : need to modify this after emergency domain selection policy is decided.
-        /*(reason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_E_1X)
-                || (reason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_E_VOLTE)
-                || (reason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_R_RAT)*/
-    }
-
     public static boolean isCallTerminatedByJoiningConference(int reason) {
         return (reason == CallReasonInfo.CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE);
     }
 
     public static boolean isCallWaitingEnabled(SuppInfo si) {
-        SuppInfo.SuppService ss = (si != null) ? si.getService(SuppInfo.TYPE_CW) : null;
+        SuppServiceUtils.SuppService ss = (si != null)
+                ? si.getService(SuppInfo.SUPP_TYPE_CW) : null;
         return (ss != null) && ss.boolValue;
     }
 
@@ -218,7 +212,6 @@ public class MtcCallUtils {
     }
 
     public static boolean isInfoTypeForMediaSession(int infoType) {
-        // FIXME: common or operator-specific?
         return (infoType == INFO_TYPE_MEDIA_VIDEO_NO_DATA)
                 || (infoType == INFO_TYPE_MEDIA_VIDEO_DATA_RECEIVED)
                 || (infoType == INFO_TYPE_MEDIA_CVO_CAPABILITY);
@@ -228,14 +221,14 @@ public class MtcCallUtils {
      * In the aspect of UAC (triggered by the local end).
      */
     public static boolean isHoldMediaOnVoiceCall(MediaInfo mi) {
-        return isHoldMedia(mi.ADir);
+        return isHoldMedia(mi.audioDir);
     }
 
     /**
      * In the aspect of UAS (triggered by the remote end).
      */
     public static boolean isHoldMediaOnVoiceCallByRemoteEnd(MediaInfo mi) {
-        return isHoldMediaByRemoteEnd(mi.ADir);
+        return isHoldMediaByRemoteEnd(mi.audioDir);
     }
 
     /**
@@ -243,8 +236,8 @@ public class MtcCallUtils {
      */
     public static boolean isHoldMediaOnVideoCall(MediaInfo mi,
             boolean isVideoDirectionInactiveOnVideoCallHold) {
-        return isHoldMedia(mi.ADir)
-                && isHoldVideo(mi.VDir, isVideoDirectionInactiveOnVideoCallHold);
+        return isHoldMedia(mi.audioDir)
+                && isHoldVideo(mi.videoDir, isVideoDirectionInactiveOnVideoCallHold);
     }
 
     /**
@@ -252,8 +245,8 @@ public class MtcCallUtils {
      */
     public static boolean isHoldMediaOnVideoCallByRemoteEnd(MediaInfo mi,
             boolean isVideoDirectionInactiveOnVideoCallHold) {
-        return isHoldMediaByRemoteEnd(mi.ADir)
-                && isHoldVideoByRemoteEnd(mi.VDir, isVideoDirectionInactiveOnVideoCallHold);
+        return isHoldMediaByRemoteEnd(mi.audioDir)
+                && isHoldVideoByRemoteEnd(mi.videoDir, isVideoDirectionInactiveOnVideoCallHold);
     }
 
     /**
@@ -261,20 +254,20 @@ public class MtcCallUtils {
      */
     public static boolean isUnholdMediaOnVideoCall(MediaInfo mi,
             boolean isVideoDirectionInactiveOnVideoCallHold) {
-        return isUnholdMedia(mi.ADir)
-                && isUnholdVideo(mi.VDir, isVideoDirectionInactiveOnVideoCallHold);
+        return isUnholdMedia(mi.audioDir)
+                && isUnholdVideo(mi.videoDir, isVideoDirectionInactiveOnVideoCallHold);
     }
 
     /**
      * In the aspect of UAS (triggered by the remote end).
      */
     public static boolean isUnholdMediaOnVideoCallByRemoteEnd(MediaInfo mi) {
-        return isUnholdMediaByRemoteEnd(mi.ADir) && isUnholdMediaByRemoteEnd(mi.VDir);
+        return isUnholdMediaByRemoteEnd(mi.audioDir) && isUnholdMediaByRemoteEnd(mi.videoDir);
     }
 
     public static boolean isLocalHoldToneEnforced(SuppInfo si) {
-        for (SuppInfo.SuppService ss : si.objSuppService) {
-            if (ss.type == SuppInfo.TYPE_ENFORCE_LT) {
+        for (SuppServiceUtils.SuppService ss : si.getServices()) {
+            if (ss.type == SuppInfo.SUPP_TYPE_ENFORCE_LT) {
                 return ss.boolValue;
             }
         }
@@ -295,23 +288,23 @@ public class MtcCallUtils {
     }
 
     public static boolean isSuppInfoBoolean(int type) {
-        return SuppInfoUtils.isValueBoolean(type);
+        return SuppServiceUtils.isValueBoolean(type);
     }
 
     public static boolean isSuppInfoInt(int type) {
-        return SuppInfoUtils.isValueInt(type);
+        return SuppServiceUtils.isValueInt(type);
     }
 
     public static boolean isSuppInfoString(int type) {
-        return SuppInfoUtils.isValueString(type);
+        return SuppServiceUtils.isValueString(type);
     }
 
     /**
      * Reverse the audio/video direction as local or remote capability.
      */
     public static void reverseMediaDirection(MediaInfo mi) {
-        mi.ADir = reverseMediaDirection(mi.ADir);
-        mi.VDir = reverseMediaDirection(mi.VDir);
+        mi.audioDir = reverseMediaDirection(mi.audioDir);
+        mi.videoDir = reverseMediaDirection(mi.videoDir);
     }
 
     /**
@@ -387,7 +380,7 @@ public class MtcCallUtils {
     }
 
     public static String toString(final SuppInfo suppInfo) {
-        int size = suppInfo.objSuppService.size();
+        int size = suppInfo.getServicesSize();
 
         if (size == 0) {
             return "[ SuppInfo: size=0 ]";
@@ -401,7 +394,7 @@ public class MtcCallUtils {
 
         if (size > 0)
         {
-            SuppInfo.SuppService ss = suppInfo.objSuppService.get(0);
+            SuppServiceUtils.SuppService ss = suppInfo.getServices().get(0);
 
             sb.append("{ ");
             sb.append(ss.type);
@@ -419,7 +412,7 @@ public class MtcCallUtils {
         }
 
         for (int i = 1; i < size; i++) {
-            SuppInfo.SuppService ss = suppInfo.objSuppService.get(i);
+            SuppServiceUtils.SuppService ss = suppInfo.getServices().get(i);
 
             sb.append(", { ");
             sb.append(ss.type);

@@ -51,19 +51,33 @@ class TestAosHandle : public AosHandle
     FRIEND_TEST(AosInfoTest, GetImsFeatures_Test1);
 };
 
+#define DECLARE_USING(Base) using Base::IsCrossSimConnected;
+
+class TestAosInfo : public AosInfo
+{
+public:
+    DECLARE_USING(AosInfo)
+
+    inline explicit TestAosInfo(IN IAosAppContext* piAppContext) :
+            AosInfo(piAppContext)
+    {
+    }
+};
+
 class AosInfoTest : public ::testing::Test
 {
 public:
     TestAosHandle* m_pTestAosHandle;
-    AosInfo* m_pAosInfo;
+    TestAosInfo* m_pAosInfo;
     MockIAosAppContext m_objMockIAosAppContext;
+    MockIAosApplication m_objMockIAosApplication;
 
     const AString m_strAppId = AString("ims.app.test");
     const AString m_strServiceId = AString("ims.service.test");
     const IMS_UINT32 m_nServiceType = -1;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         EXPECT_CALL(m_objMockIAosAppContext, GetSlotId())
                 .Times(AnyNumber())
@@ -74,14 +88,16 @@ protected:
                 .Times(AnyNumber())
                 .WillRepeatedly(ReturnRef(strValue));
 
+        ON_CALL(m_objMockIAosAppContext, GetApp()).WillByDefault(Return(&m_objMockIAosApplication));
+
         m_pTestAosHandle = new TestAosHandle(static_cast<IAosAppContext*>(&m_objMockIAosAppContext),
                 m_strAppId, m_strServiceId, m_nServiceType);
 
-        m_pAosInfo = new AosInfo(static_cast<IAosAppContext*>(&m_objMockIAosAppContext));
+        m_pAosInfo = new TestAosInfo(&m_objMockIAosAppContext);
         ASSERT_TRUE(m_pAosInfo != nullptr);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosInfo != nullptr)
         {
@@ -109,11 +125,10 @@ protected:
     {
         m_pAosInfo->NotifyEmergencyCallState(bIsInitialized);
     }
-    void NotifyScbmState(IN IMS_UINT32 nState) { m_pAosInfo->NotifyScbmState(nState); }
     void NotifyPublishState(IN IMS_BOOL bIsStarted) { m_pAosInfo->NotifyPublishState(bIsStarted); }
-    void NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized)
+    void NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized, IN EmergencyServicePdn ePdnType)
     {
-        m_pAosInfo->NotifyEmergencySmsState(bIsInitialized);
+        m_pAosInfo->NotifyEmergencySmsState(bIsInitialized, ePdnType);
     }
     void NotifyEpsfbCallState(IN IMS_UINT32 nState) { m_pAosInfo->NotifyEpsfbCallState(nState); }
     IMS_BOOL IsForbiddenBlock() { return m_pAosInfo->IsForbiddenBlock(); }
@@ -230,6 +245,9 @@ TEST_F(AosInfoTest, GetImsState_Test2)
     EXPECT_CALL(objMockIAosBlock, IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED, _, _))
             .Times(1)
             .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objMockIAosBlock, IsReasonBlocked(BLOCK_USIM_AUTHENTICATION_FAILED, _, _))
+            .Times(1)
+            .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objMockIAosBlock, IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED, _, _))
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
@@ -261,6 +279,9 @@ TEST_F(AosInfoTest, GetImsState_Test3)
             .Times(1)
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objMockIAosBlock, IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED, _, _))
+            .Times(1)
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objMockIAosBlock, IsReasonBlocked(BLOCK_USIM_AUTHENTICATION_FAILED, _, _))
             .Times(1)
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objMockIAosBlock, IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED, _, _))
@@ -493,6 +514,13 @@ TEST_F(AosInfoTest, GetServiceRouteHeaderValue_Test)
     GetServiceRouteHeaderValue();
 }
 
+TEST_F(AosInfoTest, GetCrossSimStatusFromApplicationWhenIsCrossSimConnectedCalled)
+{
+    ON_CALL(m_objMockIAosApplication, IsCrossSimConnected()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_TRUE(m_pAosInfo->IsCrossSimConnected());
+}
+
 TEST_F(AosInfoTest, NotifyEmergencyCallState_Test)
 {
     // Expectation: Call AosRegistration::RequestCmd(IAosRegistration::CMD_ECALL_INIT)
@@ -505,39 +533,10 @@ TEST_F(AosInfoTest, NotifyEmergencyCallState_Test)
             .WillRepeatedly(Return(static_cast<IAosRegistration*>(&objMockIAosRegistration)));
     EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_ECALL_INIT, _)).Times(1);
     EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_ECALL_DONE, _)).Times(1);
+    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(IAosApplication::CMD_ECALL_INIT, _));
 
     NotifyEmergencyCallState(IMS_TRUE);
     NotifyEmergencyCallState(IMS_FALSE);
-}
-
-TEST_F(AosInfoTest, NotifyScbmState_Test)
-{
-    // Expectation: Call AosRegistration::RequestCmd()
-    //      with (IAosRegistration::CMD_SCBM_STARTED) if param is SCBM_STARTED
-    //      with (IAosRegistration::CMD_SCBM_TERMINATED) if param is SCBM_TERMINATED
-    //      with (IAosRegistration::CMD_SCBM_TERMINATED_ECALL) if param is SCBM_TERMINATED_BY_ECALL
-    //      with (IAosRegistration::CMD_SCBM_TERMINATED_ESMS) if param is SCBM_TERMINATED_BY_ESMS
-    //      No call if param is invalid
-
-    MockIAosRegistration objMockIAosRegistration;
-    EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(static_cast<IAosRegistration*>(&objMockIAosRegistration)));
-
-    EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_SCBM_STARTED, _))
-            .Times(1);
-    EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_SCBM_TERMINATED, _))
-            .Times(1);
-    EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_SCBM_TERMINATED_ECALL, _))
-            .Times(1);
-    EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_SCBM_TERMINATED_ESMS, _))
-            .Times(1);
-
-    NotifyScbmState(IImsAosInfo::SCBM_STARTED);
-    NotifyScbmState(IImsAosInfo::SCBM_TERMINATED);
-    NotifyScbmState(IImsAosInfo::SCBM_TERMINATED_BY_ECALL);
-    NotifyScbmState(IImsAosInfo::SCBM_TERMINATED_BY_ESMS);
-    NotifyScbmState(0);
 }
 
 TEST_F(AosInfoTest, NotifyPublishState_Test)
@@ -557,21 +556,29 @@ TEST_F(AosInfoTest, NotifyPublishState_Test)
     NotifyPublishState(IMS_FALSE);
 }
 
-TEST_F(AosInfoTest, NotifyEmergencySmsState_Test)
+TEST_F(AosInfoTest, NotifyInitiatedWhenNotifyEmergencySmsStateWithInitiatedWithEmergencyPdn)
 {
-    // Expectation: Call AosRegistration::RequestCmd(IAosRegistration::CMD_ESMS_INIT)
-    //              if param is true
-    //              else Call AosRegistration::RequestCmd(IAosRegistration::CMD_ESMS_DONE)
-
     MockIAosRegistration objMockIAosRegistration;
     EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
-            .Times(AnyNumber())
             .WillRepeatedly(Return(static_cast<IAosRegistration*>(&objMockIAosRegistration)));
-    EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_ESMS_INIT, _)).Times(1);
-    EXPECT_CALL(objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_ESMS_DONE, _)).Times(1);
 
-    NotifyEmergencySmsState(IMS_TRUE);
-    NotifyEmergencySmsState(IMS_FALSE);
+    EXPECT_CALL(objMockIAosRegistration,
+            NotifyEmergencySmsState(IMS_TRUE, EmergencyServicePdn::EMERGENCY));
+    EXPECT_CALL(m_objMockIAosApplication, RequestCmd(IAosApplication::CMD_ESMS_INIT, _));
+
+    NotifyEmergencySmsState(IMS_TRUE, EmergencyServicePdn::EMERGENCY);
+}
+
+TEST_F(AosInfoTest, NotifyNotInitiatedWhenNotifyEmergencySmsStateWithNotInitiatedWithImsPdn)
+{
+    MockIAosRegistration objMockIAosRegistration;
+    EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
+            .WillRepeatedly(Return(static_cast<IAosRegistration*>(&objMockIAosRegistration)));
+
+    EXPECT_CALL(
+            objMockIAosRegistration, NotifyEmergencySmsState(IMS_FALSE, EmergencyServicePdn::IMS));
+
+    NotifyEmergencySmsState(IMS_FALSE, EmergencyServicePdn::IMS);
 }
 
 TEST_F(AosInfoTest, NotifyEpsfbCallState_Test)
@@ -602,21 +609,26 @@ TEST_F(AosInfoTest, IsForbiddenBlock_Test)
             .WillRepeatedly(Return(static_cast<IAosBlock*>(&objMockIAosBlock)));
 
     EXPECT_CALL(objMockIAosBlock, IsReasonBlocked(BLOCK_IMS_DISABLED, _, _))
-            .Times(4)
+            .Times(5)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objMockIAosBlock, IsReasonBlocked(BLOCK_PERMANENT_REG_FAILED, _, _))
-            .Times(3)
+            .Times(4)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objMockIAosBlock, IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED, _, _))
+            .Times(3)
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objMockIAosBlock, IsReasonBlocked(BLOCK_USIM_AUTHENTICATION_FAILED, _, _))
             .Times(2)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE));
 
+    EXPECT_TRUE(IsForbiddenBlock());
     EXPECT_TRUE(IsForbiddenBlock());
     EXPECT_TRUE(IsForbiddenBlock());
     EXPECT_TRUE(IsForbiddenBlock());

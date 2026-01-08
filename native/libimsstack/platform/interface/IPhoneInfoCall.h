@@ -119,6 +119,14 @@ public:
      * @return The call state.
      */
     virtual IMS_SINT32 GetCsCallStateInOtherSlot() const = 0;
+
+    /**
+     * @brief Excluding the current slot, the SIM state of other slots is checked to determine and
+     * return the availability of cross SIM redialing.
+     *
+     * @return {@code true} if cross SIM redialing is available, {@code false} otherwise.
+     */
+    virtual IMS_BOOL IsCrossSimRedialingAvailable() const = 0;
 };
 
 #endif

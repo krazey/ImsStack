@@ -32,7 +32,7 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnNull;
 
-__IMS_TRACE_TAG_USER_DECL__("UCE");
+__IMS_TRACE_TAG_UCE__;
 
 class TestUceXmlDocumentHelperThread : public UceXmlDocumentHelperThread
 {
@@ -41,7 +41,7 @@ public:
             UceXmlDocumentHelperThread(AString("UceXmlDocumentHelperThread"), 0)
     {
     }
-    virtual ~TestUceXmlDocumentHelperThread() {}
+    virtual ~TestUceXmlDocumentHelperThread() override {}
 
     void setThread(IThread* piThread) { m_piThread = piThread; }
     IThread* getThread() { return GetThread(); }

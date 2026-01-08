@@ -1,0 +1,66 @@
+/*
+ * Copyright (C) 2024 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef NETWORK_BLOCK_RULE_H_
+#define NETWORK_BLOCK_RULE_H_
+
+#include "CallReasonInfo.h"
+#include "ImsTypeDef.h"
+#include "call/IMtcCall.h"
+#include "call/block/IMtcBlockRule.h"
+
+class IMtcCallContext;
+class IMtcService;
+
+/**
+ * This class checks if the call is available or not by current IMS service state.
+ */
+class ServiceBlockRule final : public IMtcBlockRule
+{
+public:
+    ServiceBlockRule(IN IMtcCallContext& objContext, IN CallType eCallType);
+    virtual ~ServiceBlockRule() override;
+    ServiceBlockRule(IN const ServiceBlockRule&) = delete;
+    ServiceBlockRule& operator=(IN const ServiceBlockRule&) = delete;
+
+    Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
+
+private:
+    const IMtcService& m_objService;
+    IMtcCallContext& m_objContext;
+    CallType m_eCallType;
+
+    /**
+     * @brief Checks capabilities for initiating a call.
+     *
+     * This does not check for specific media capabilities. If the service is available, it
+     * returns {@code UNBLOCKED}, assuming any media mismatch will be handled during negotiation.
+     */
+    Result CheckForInitiatingCall() const;
+
+    /**
+     * @brief Checks capabilities for call type change.
+     *
+     * It returns {@code BLOCKED} if the capability is not enough for {@code m_eCallType}.
+     * No need to check for downgrade (from any call type to VOIP).
+     */
+    Result CheckForEstablishedCall() const;
+    CallReasonInfo GetBlockReasonForInitiatingCall() const;
+
+    IMS_BOOL HasCapabilitiesForCallType(IN const CallType eCallType) const;
+};
+
+#endif

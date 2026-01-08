@@ -31,7 +31,7 @@ public:
             m_pCapabilities(IMS_NULL)
     {
     }
-    inline virtual ~CapabilitiesTest()
+    inline ~CapabilitiesTest() override
     {
         if (m_pCapabilities != IMS_NULL)
         {
@@ -146,7 +146,7 @@ TEST_F(CapabilitiesTest, AcceptOnServiceNotConnected)
 
 TEST_F(CapabilitiesTest, AcceptOnSipServerConnectionNotFound)
 {
-    GetCoreService()->SetImsConnected(IMS_TRUE);
+    GetCoreService()->MarkAsImsConnected(IMS_TRUE);
     EXPECT_EQ(m_pCapabilities->Accept(), IMS_FAILURE);
 }
 

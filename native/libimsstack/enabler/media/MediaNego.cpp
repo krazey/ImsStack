@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,131 +14,101 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
-#include "ImsCore.h"
-#include "ICoreService.h"
-#include "ISdpReader.h"
-#include "ISessionDescriptor.h"
-
-#include "config/MediaSessionConfigFactory.h"
-#include "config/MediaSessionConfig.h"
-#include "config/MediaConfigUtil.h"
-#include "config/VideoConfiguration.h"
-#include "config/TextConfiguration.h"
 #include "MediaNego.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.MN");
+#include "ICoreService.h"
+#include "ISdpReader.h"
+#include "ISession.h"
+#include "ISessionDescriptor.h"
+#include "ImsCore.h"
+#include "MediaDef.h"
+#include "MediaEnvironment.h"
+#include "ServiceTrace.h"
+#include "audio/AudioNego.h"
+#include "config/AudioConfiguration.h"
+#include "config/MediaConfigUtil.h"
+#include "config/MediaSessionConfig.h"
+#include "config/MediaSessionConfigFactory.h"
+#include "media/IMedia.h"
+#include "text/TextNego.h"
+#include "video/VideoNego.h"
+
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC
 MediaNego::MediaNego(IN IMS_SINT32 nSlotId) :
         ImsSlot(nSlotId),
         m_eNegoState(STATE_IDLE),
-        m_pAudioNego(IMS_NULL),
-        m_pVideoNego(IMS_NULL),
-        m_pTextNego(IMS_NULL),
+        m_pAudioNego(std::make_shared<AudioNego>(nSlotId)),
+        m_pVideoNego(std::make_shared<VideoNego>(nSlotId)),
+        m_pTextNego(std::make_shared<TextNego>(nSlotId)),
         m_pMediaEnvironment(IMS_NULL),
         m_eSessionType(MEDIA_TYPE_INVALID),
-        m_bForking(IMS_FALSE)
+        m_bForking(IMS_FALSE),
+        m_bPreviewMode(IMS_FALSE)
 {
-    IMS_TRACE_I("MediaNego() - Slot[%d]", nSlotId, 0, 0);
 }
 
 PUBLIC
-MediaNego::~MediaNego()
-{
-    IMS_TRACE_I("~MediaNego()", 0, 0, 0);
-
-    if (m_pAudioNego != IMS_NULL)
-    {
-        delete m_pAudioNego;
-    }
-
-    if (m_pVideoNego != IMS_NULL)
-    {
-        delete m_pVideoNego;
-    }
-
-    if (m_pTextNego != IMS_NULL)
-    {
-        delete m_pTextNego;
-    }
-}
+MediaNego::~MediaNego() {}
 
 PUBLIC
-void MediaNego::CreateProfile(IN MediaEnvironment* pMediaEnvironment)
+IMS_BOOL MediaNego::CreateProfile(IN std::shared_ptr<MediaEnvironment> pMediaEnvironment)
 {
-    if (pMediaEnvironment == IMS_NULL)
+    if (pMediaEnvironment == IMS_NULL || m_pAudioNego == IMS_NULL || m_pVideoNego == IMS_NULL ||
+            m_pTextNego == IMS_NULL)
     {
-        return;
+        IMS_TRACE_E(0, "CreateProfile(): invalid instance", 0, 0, 0);
+        return IMS_FALSE;
     }
 
     m_pMediaEnvironment = pMediaEnvironment;
-
-    IMS_TRACE_D("CreateProfile() - eServiceType[%d]", pMediaEnvironment->eServiceType, 0, 0);
-    m_pAudioNego = new AudioNego(GetSlotId());
-    m_pVideoNego = new VideoNego(GetSlotId());
-    m_pTextNego = new TextNego(GetSlotId());
+    IMS_TRACE_D("CreateProfile(): service type[%d]", pMediaEnvironment->eServiceType, 0, 0);
 
     m_pAudioNego->CreateProfiles(m_pMediaEnvironment,
             MediaConfigUtil::GetAudioConfig(GetSlotId(), m_pMediaEnvironment->eServiceType));
-
     m_pVideoNego->CreateProfiles(m_pMediaEnvironment,
             MediaConfigUtil::GetVideoConfig(GetSlotId(), m_pMediaEnvironment->eServiceType));
-
     m_pTextNego->CreateProfiles(m_pMediaEnvironment,
             MediaConfigUtil::GetTextConfig(GetSlotId(), m_pMediaEnvironment->eServiceType));
+    return IMS_TRUE;
 }
 
 PUBLIC
 IMS_BOOL MediaNego::Forking(IN MediaNego* pMediaNego)
 {
-    if (pMediaNego == IMS_NULL)
+    if (pMediaNego == IMS_NULL || this == pMediaNego)
     {
-        IMS_TRACE_E(0, "Forking() - incomming MediaNego is NULL", 0, 0, 0);
+        IMS_TRACE_E(0, "Forking(): invalid MediaNego", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    IMS_TRACE_D("Forking() - nNegoId[%" PFLS_x "]", (IMS_UINTP)pMediaNego, 0, 0);
-
+    IMS_TRACE_D("Forking(): Id[%" PFLS_x "]", (IMS_UINTP)pMediaNego, 0, 0);
     m_eNegoState = STATE_OFFER_SENT;
+    m_pMediaEnvironment = pMediaNego->m_pMediaEnvironment;
+    m_eSessionType = pMediaNego->m_eSessionType;
     m_bForking = IMS_TRUE;
 
-    if (m_pAudioNego != IMS_NULL)
-    {
-        *m_pAudioNego = *pMediaNego->GetAudioNego();
-    }
-
-    if (m_pVideoNego != IMS_NULL)
-    {
-        *m_pVideoNego = *pMediaNego->GetVideoNego();
-    }
-
-    if (m_pTextNego != IMS_NULL)
-    {
-        *m_pTextNego = *pMediaNego->GetTextNego();
-    }
+    m_pAudioNego = std::make_shared<AudioNego>(*pMediaNego->GetAudioNego());
+    m_pVideoNego = std::make_shared<VideoNego>(*pMediaNego->GetVideoNego());
+    m_pTextNego = std::make_shared<TextNego>(*pMediaNego->GetTextNego());
 
     return IMS_TRUE;
 }
 
 PUBLIC
-IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType,
-        IN IMS_SINT32 nAudioDirection, IN IMS_SINT32 nVideoDirection, IN IMS_SINT32 nTextDirection,
-        IN IMS_BOOL bEnforceReofferMode)
+IMS_BOOL MediaNego::FormSdp(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType,
+        IN MEDIA_DIRECTION eAudioDirection, IN MEDIA_DIRECTION eVideoDirection,
+        IN MEDIA_DIRECTION eTextDirection, IN IMS_BOOL bEnforceReofferMode)
 {
-    IMS_TRACE_I("FormSDP(): eMediaType[%d], eNegoState[%x]", eMediaType, m_eNegoState, 0);
-    IMS_TRACE_I("FormSDP() - DIR = Audio[%d], Video[%d], Text[%d]", nAudioDirection,
-            nVideoDirection, nTextDirection);
-    IMS_TRACE_D("FormSDP() - eMediaType [%d], bEnforceReofferMode[%d]", eMediaType,
-            bEnforceReofferMode, 0);
+    IMS_TRACE_I("FormSdp(): type[%d], state[%x], mode[%d]", eMediaType, m_eNegoState,
+            bEnforceReofferMode);
+    IMS_TRACE_I("FormSdp(): direction audio[%d], video[%d], text[%d]", eAudioDirection,
+            eVideoDirection, eTextDirection);
 
-    if (m_pMediaEnvironment == IMS_NULL)
+    if (m_pMediaEnvironment == IMS_NULL || m_eNegoState == STATE_OFFER_SENT || m_bPreviewMode)
     {
-        return IMS_FALSE;
-    }
-
-    if (m_eNegoState == STATE_OFFER_SENT)
-    {
+        IMS_TRACE_E(0, "FormSdp(): invalid request, mode[%d]", m_bPreviewMode, 0, 0);
         return IMS_FALSE;
     }
 
@@ -149,7 +119,7 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
                     m_pVideoNego == IMS_NULL) ||
             (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT) && m_pTextNego == IMS_NULL))
     {
-        IMS_TRACE_E(0, "FormSDP() - INVALID : eMediaType[%d]", eMediaType, 0, 0);
+        IMS_TRACE_E(0, "FormSdp(): invalid type[%d]", eMediaType, 0, 0);
         return IMS_FALSE;
     }
 
@@ -177,11 +147,11 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
             eNeedToMakeMedia = (MEDIA_CONTENT_TYPE)((IMS_SINT32)eNeedToMakeMedia | MEDIA_TYPE_TEXT);
         }
 
-        IMS_TRACE_D("FormSDP() - Re-offer case. NeedToMakeMedia[%d]", eNeedToMakeMedia, 0, 0);
+        IMS_TRACE_D("FormSdp(): Re-offer case. new type[%d]", eNeedToMakeMedia, 0, 0);
     }
 
     // Get a list of media line
-    ImsList<IMedia*> lstIMedia = GetIMediaListFromSession(pSession, eNeedToMakeMedia);
+    ImsList<IMedia*> lstIMedia = CreateIMediaListFromSession(pSession, eNeedToMakeMedia);
 
     // Determine what descriptor will be used for each media
     IMediaDescriptor* pDescriptorForAudio = IMS_NULL;
@@ -221,6 +191,7 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
 
             if (pDescriptor == IMS_NULL)
             {
+                IMS_TRACE_E(0, "FormSdp(): invalid descriptor", 0, 0, 0);
                 return IMS_FALSE;
             }
 
@@ -228,16 +199,14 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
 
             if (pSDPMedia == IMS_NULL)
             {
+                IMS_TRACE_E(0, "FormSdp(): invalid media", 0, 0, 0);
                 return IMS_FALSE;
             }
-
-            IMS_TRACE_D("FormSDP() - pSDPMedia[%" PFLS_x "], Type[%d]", pSDPMedia,
-                    pSDPMedia->GetType(), 0);
 
             switch (pSDPMedia->GetType())
             {
                 case SdpMedia::TYPE_AUDIO:
-                    if (bAudioMLineSetted == IMS_FALSE)
+                    if (!bAudioMLineSetted)
                     {
                         pDescriptorForAudio = pDescriptor;
                         // if port 0, replace with another descriptor
@@ -250,7 +219,7 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
                     }
                     break;
                 case SdpMedia::TYPE_VIDEO:
-                    if (bVideoMLineSetted == IMS_FALSE)
+                    if (!bVideoMLineSetted)
                     {
                         pDescriptorForVideo = pDescriptor;
                         // if port 0, replace with another descriptor
@@ -263,7 +232,7 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
                     }
                     break;
                 case SdpMedia::TYPE_TEXT:
-                    if (bTextMLineSetted == IMS_FALSE)
+                    if (!bTextMLineSetted)
                     {
                         pDescriptorForText = pDescriptor;
 
@@ -278,7 +247,7 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
                     break;
                 default:
                     if (MEDIA_IS_CONTAINED_THIS_TYPE(eNeedToMakeMedia, MEDIA_TYPE_AUDIO) &&
-                            bAudioMLineSetted == IMS_FALSE)
+                            !bAudioMLineSetted)
                     {
                         pDescriptorForAudio = pDescriptor;
 
@@ -293,7 +262,7 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
                     }
 
                     if (MEDIA_IS_CONTAINED_THIS_TYPE(eNeedToMakeMedia, MEDIA_TYPE_VIDEO) &&
-                            bVideoMLineSetted == IMS_FALSE)
+                            !bVideoMLineSetted)
                     {
                         pDescriptorForVideo = pDescriptor;
 
@@ -308,7 +277,7 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
                     }
 
                     if (MEDIA_IS_CONTAINED_THIS_TYPE(eNeedToMakeMedia, MEDIA_TYPE_TEXT) &&
-                            bTextMLineSetted == IMS_FALSE)
+                            !bTextMLineSetted)
                     {
                         pDescriptorForText = pDescriptor;
                         // if port 0, replace with another descriptor
@@ -323,142 +292,50 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
                     break;
             }
 
-            IMS_TRACE_D("FormSDP() - m=audio[%d], m=video[%d], m=text[%d]", bAudioMLineSetted,
+            IMS_TRACE_D("FormSdp(): m=audio[%d], m=video[%d], m=text[%d]", bAudioMLineSetted,
                     bVideoMLineSetted, bTextMLineSetted);
         }
     }
 
-    // Send a "FormSDP" to each session
     IMS_SINT32 nTotalAs = 0;
-
-    if (pDescriptorForAudio != IMS_NULL)
+    if (!ProcessMediaLine(pSession, eMediaType, eAudioDirection, eVideoDirection, eTextDirection,
+                bEnforceReofferMode, nTotalAs, pDescriptorForAudio, pDescriptorForVideo,
+                pDescriptorForText))
     {
-        if (m_pAudioNego->FormSDP(GetNegoState(), pSession->GetSessionDescriptor(),
-                    pDescriptorForAudio, (MEDIA_DIRECTION)nAudioDirection,
-                    bEnforceReofferMode) == IMS_FALSE)
-        {
-            IMS_TRACE_E(0, "FormSDP() - Forming a m line of audio is failed", 0, 0, 0);
-            return IMS_FALSE;
-        }
-        else
-        {
-            IMS_SINT32 nTmpAs = m_pAudioNego->GetMediaBandwidth();
-
-            if (nTmpAs > 0)
-            {
-                nTotalAs += nTmpAs;
-            }
-        }
+        return IMS_FALSE;
     }
 
-    if (pDescriptorForVideo != IMS_NULL)
-    {
-        if (m_pVideoNego->FormSDP(GetNegoState(), pSession->GetSessionDescriptor(),
-                    pDescriptorForVideo, (MEDIA_DIRECTION)nVideoDirection,
-                    MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_VIDEO) == IMS_FALSE
-                            ? IMS_TRUE
-                            : IMS_FALSE,
-                    bEnforceReofferMode) == IMS_FALSE)
-        {
-            IMS_TRACE_E(0, "MediaNego::FormSDP() - Forming a m line of video is failed", 0, 0, 0);
-            return IMS_FALSE;
-        }
+    UpdateSessionLevelBandwidth(pSession, nTotalAs);
+    UpdateNegoState(IMS_TRUE);
 
-        if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_VIDEO))
-        {
-            IMS_SINT32 nTmpAS = m_pVideoNego->GetMediaBandwidth();
-
-            if (nTmpAS > 0)
-            {
-                nTotalAs += nTmpAS;
-            }
-        }
-    }
-
-    if (pDescriptorForText != IMS_NULL)
-    {
-        if (m_pTextNego->FormSDP(GetNegoState(), pSession->GetSessionDescriptor(),
-                    pDescriptorForText, (MEDIA_DIRECTION)nTextDirection,
-                    MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT) == IMS_FALSE
-                            ? IMS_TRUE
-                            : IMS_FALSE,
-                    bEnforceReofferMode) == IMS_FALSE)
-        {
-            IMS_TRACE_E(0, "MediaNego::FormSDP() - Forming a m line of text is failed", 0, 0, 0);
-            return IMS_FALSE;
-        }
-
-        if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT))
-        {
-            IMS_SINT32 nTmpAS = m_pTextNego->GetMediaBandwidth();
-
-            if (nTmpAS > 0)
-            {
-                nTotalAs += nTmpAS;
-            }
-        }
-    }
-
-    MediaSessionConfig* pMediaSessionConfig =
-            MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
-                    GetSlotId(), m_pMediaEnvironment->eServiceType);
-
-    if (pMediaSessionConfig != IMS_NULL)
-    {
-        if (pMediaSessionConfig->IsSessionLevelBandwidth())
-        {
-            IMS_TRACE_D("FormSDP() - Session level bandwidth [%d]", nTotalAs, 0, 0);
-            // remove session level bandwidth
-            pSession->GetSessionDescriptor()->RemoveAllBandwidths();
-            // add session level bandwidth
-            pSession->GetSessionDescriptor()->AddBandwidth(SdpBandwidth::TYPE_AS, nTotalAs);
-        }
-    }
-
-    // Change the negotiation state
-    switch (m_eNegoState)
-    {
-        case STATE_IDLE:
-        case STATE_NEGOTIATED:
-            m_eNegoState = STATE_OFFER_SENT;
-            break;
-        case STATE_OFFER_RECEIVED:
-            m_eNegoState = STATE_NEGOTIATED;
-            break;
-        case STATE_OFFER_SENT:
-        default:
-            break;
-    }
-    IMS_TRACE_D("FormSDP() - Done. NegoState[%d]", m_eNegoState, 0, 0);
-
+    IMS_TRACE_D("FormSdp(): done, state[%d]", m_eNegoState, 0, 0);
     return IMS_TRUE;
 }
 
 PUBLIC VIRTUAL MEDIA_CONTENT_TYPE MediaNego::GetSupportedMediaTypesFromSdp(IN ISession* pSession)
 {
-    IMS_TRACE_I("GetSupportedMediaTypesFromSdp(): pSession[%" PFLS_x "]", pSession, 0, 0);
-
     if (pSession == IMS_NULL)
     {
+        IMS_TRACE_E(0, "GetSupportedMediaTypesFromSdp(): invalid session", 0, 0, 0);
         return MEDIA_TYPE_INVALID;
     }
 
     MEDIA_CONTENT_TYPE eSupportedMediaType = MEDIA_TYPE_INVALID;
 
-    ISdpReader* piSdpReader = pSession->GetRemoteMediaCapabilities();
+    const ISdpReader* piSdpReader = pSession->GetRemoteMediaCapabilities();
     if (piSdpReader == IMS_NULL)
     {
+        IMS_TRACE_E(0, "GetSupportedMediaTypesFromSdp(): invalid reader", 0, 0, 0);
         return MEDIA_TYPE_INVALID;
     }
 
     if (piSdpReader->GetMediaDescriptors().IsEmpty())
     {
+        IMS_TRACE_E(0, "GetSupportedMediaTypesFromSdp(): reader is empty", 0, 0, 0);
         return MEDIA_TYPE_INVALID;
     }
-    const ImsList<IMediaDescriptor*>& objMediaDescriptors = piSdpReader->GetMediaDescriptors();
 
-    IMS_TRACE_I("GetSupportedMediaTypesFromSdp(): objMediaDescriptors size[%d]",
-            objMediaDescriptors.GetSize(), 0, 0);
+    const ImsList<IMediaDescriptor*>& objMediaDescriptors = piSdpReader->GetMediaDescriptors();
 
     for (IMS_UINT32 i = 0; i < objMediaDescriptors.GetSize(); i++)
     {
@@ -466,7 +343,7 @@ PUBLIC VIRTUAL MEDIA_CONTENT_TYPE MediaNego::GetSupportedMediaTypesFromSdp(IN IS
 
         if (pDescriptor == IMS_NULL)
         {
-            IMS_TRACE_I("GetSupportedMediaTypesFromSdp() - MediaDescriptor is null", 0, 0, 0);
+            IMS_TRACE_I("GetSupportedMediaTypesFromSdp(): invalid descriptor", 0, 0, 0);
             continue;
         }
 
@@ -474,12 +351,9 @@ PUBLIC VIRTUAL MEDIA_CONTENT_TYPE MediaNego::GetSupportedMediaTypesFromSdp(IN IS
 
         if (pSDPMedia == IMS_NULL)
         {
-            IMS_TRACE_I("GetSupportedMediaTypesFromSdp() - MediaDescriptionEx is null", 0, 0, 0);
+            IMS_TRACE_I("GetSupportedMediaTypesFromSdp(): invalid media", 0, 0, 0);
             continue;
         }
-
-        IMS_TRACE_I("GetSupportedMediaTypesFromSdp() - pSDPMedia : Type[%d], Port[%d]",
-                pSDPMedia->GetType(), pSDPMedia->GetPort(), 0);
 
         // Negotiate audio m line
         switch (pSDPMedia->GetType())
@@ -533,28 +407,27 @@ PUBLIC VIRTUAL MEDIA_CONTENT_TYPE MediaNego::GetSupportedMediaTypesFromSdp(IN IS
                 }
                 break;
             default:
-                IMS_TRACE_D("GetSupportedMediaTypesFromSdp() - Not supported media type", 0, 0, 0);
+                IMS_TRACE_D("GetSupportedMediaTypesFromSdp(): invalid media type", 0, 0, 0);
                 break;
         }
     }
 
-    IMS_TRACE_I("GetSupportedMediaTypesFromSdp() - return[%d]", eSupportedMediaType, 0, 0);
+    IMS_TRACE_I("GetSupportedMediaTypesFromSdp(): supported type[%d]", eSupportedMediaType, 0, 0);
     return eSupportedMediaType;
 }
 
 PUBLIC
-IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32& nAudioDirection,
-        OUT IMS_SINT32& nVideoDirection, OUT IMS_SINT32& nTextDirection,
-        OUT MediaNegoResult& errorReason)
+SdpNegotiationResult MediaNego::NegotiateSdp(IN ISession* pSession)
 {
-    IMS_TRACE_I("NegotiateSDP(): pSession[%" PFLS_x "]", pSession, 0, 0);
-
     if (m_pMediaEnvironment == IMS_NULL || m_pMediaEnvironment->pIService == IMS_NULL)
     {
-        return IMS_FALSE;
+        IMS_TRACE_E(0, "NegotiateSdp(): invalid MediaEnvironment", 0, 0, 0);
+        return SdpNegotiationResult(MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR);
     }
 
-    SetSessionType(pSession);
+    UpdateMediaTypeToNegotiate(pSession);
+
+    SdpNegotiationResult objResult;
 
     // get a list of media line
     ImsList<IMedia*> lstIMedia = pSession->GetMedia();
@@ -564,7 +437,8 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32& nAudioDi
     IMediaDescriptor* pNegotiatedVideoDescriptor = IMS_NULL;
     IMediaDescriptor* pNegotiatedTextDescriptor = IMS_NULL;
 
-    IMS_TRACE_I("NegotiateSDP(): lstIMedia.GetSize()[%d]", lstIMedia.GetSize(), 0, 0);
+    IMS_TRACE_I("NegotiateSdp(): state[%d], sessionType[%d], media list size[%d]", m_eNegoState,
+            m_eSessionType, lstIMedia.GetSize());
 
     for (IMS_UINT32 i = 0; i < lstIMedia.GetSize(); i++)
     {
@@ -572,8 +446,8 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32& nAudioDi
 
         if (pDescriptor == IMS_NULL)
         {
-            IMS_TRACE_I("NegotiateSDP() - MediaDescriptor is null", 0, 0, 0);
-            errorReason = ERROR_INVALID_DESCRIPTOR;
+            IMS_TRACE_I("NegotiateSdp(): invalid descriptor", 0, 0, 0);
+            objResult.eResult = MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR;
             continue;
         }
 
@@ -581,13 +455,10 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32& nAudioDi
 
         if (pSDPMedia == IMS_NULL)
         {
-            IMS_TRACE_I("NegotiateSDP() - MediaDescriptionEx is null", 0, 0, 0);
-            errorReason = ERROR_INVALID_DESCRIPTOR;
+            IMS_TRACE_I("NegotiateSdp(): invalid media", 0, 0, 0);
+            objResult.eResult = MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR;
             continue;
         }
-
-        IMS_TRACE_I("NegotiateSDP() - pSDPMedia : Type[%d], Port[%d]", pSDPMedia->GetType(),
-                pSDPMedia->GetPort(), 0);
 
         // Reject the peer media line with non-matching IP version
         if (pDescriptor->GetRemoteAddress().GetVersion() !=
@@ -595,158 +466,113 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32& nAudioDi
         {
             if (pDescriptor->GetRemotePort() != 0)
             {
-                IMS_TRACE_D("NegotiateSDP() - NOT Matched IP Version [%d / %d]",
+                IMS_TRACE_D("NegotiateSdp(): ip version mismatched[%d / %d]",
                         pDescriptor->GetRemoteAddress().GetVersion(),
                         m_pMediaEnvironment->pIService->GetIpAddress().GetVersion(), 0);
                 SetMediaDescriptorAsNotSupported(pDescriptor, pSDPMedia);
-                errorReason = ERROR_IP_MISMATCH;
+                objResult.eResult = MEDIA_NEGO_ERROR_IP_MISMATCH;
                 continue;
             }
         }
 
-        // Negotiate audio m line
-        switch (pSDPMedia->GetType())
-        {
-            case (SdpMedia::TYPE_AUDIO):
-                if (m_pAudioNego == IMS_NULL)
-                {
-                    break;
-                }
-
-                if (pNegotiatedAudioDescriptor == IMS_NULL)
-                {
-                    m_pAudioNego->NegotiateSDP(GetNegoState(), pSession->GetSessionDescriptor(),
-                            pDescriptor, nAudioDirection);
-                    pNegotiatedAudioDescriptor = pDescriptor;
-                }
-                else  // Negotiated descriptor is already exist
-                {
-                    SetMediaDescriptorAsNotSupported(pDescriptor, pSDPMedia);
-                }
-                break;
-            case (SdpMedia::TYPE_VIDEO):
-                if (m_pVideoNego == IMS_NULL)
-                {
-                    break;
-                }
-
-                if (pNegotiatedVideoDescriptor == IMS_NULL)
-                {
-                    m_pVideoNego->NegotiateSDP(GetNegoState(), pSession->GetSessionDescriptor(),
-                            pDescriptor, nVideoDirection);
-                    pNegotiatedVideoDescriptor = pDescriptor;
-                }
-                else  // Negotiated descriptor is already exist
-                {
-                    SetMediaDescriptorAsNotSupported(pDescriptor, pSDPMedia);
-                }
-                break;
-            case (SdpMedia::TYPE_TEXT):
-                if (m_pTextNego == IMS_NULL)
-                {
-                    break;
-                }
-
-                if (pNegotiatedTextDescriptor == IMS_NULL)
-                {
-                    m_pTextNego->NegotiateSDP(GetNegoState(), pSession->GetSessionDescriptor(),
-                            pDescriptor, nTextDirection);
-                    pNegotiatedTextDescriptor = pDescriptor;
-                }
-                else  // Negotiated descriptor is already exist
-                {
-                    SetMediaDescriptorAsNotSupported(pDescriptor, pSDPMedia);
-                }
-                break;
-            default:
-                IMS_TRACE_E(0, "NegotiateSDP() - Not supported media type[%d]",
-                        pSDPMedia->GetType(), 0, 0);
-                break;
-        }
+        UpdateMediaDescriptor(pSession, pDescriptor, pSDPMedia, pNegotiatedAudioDescriptor,
+                pNegotiatedVideoDescriptor, pNegotiatedTextDescriptor, objResult.eAudioDirection,
+                objResult.eVideoDirection, objResult.eTextDirection);
     }
 
     m_bForking = IMS_FALSE;
-    // check the result of negitation
-    MediaSessionConfig* pMediaSessionConfig =
-            MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
-                    GetSlotId(), m_pMediaEnvironment->eServiceType);
 
-    if (pMediaSessionConfig == IMS_NULL)
+    // Audio nego objResult
+    if (pNegotiatedAudioDescriptor != IMS_NULL &&
+            MEDIA_IS_CONTAINED_THIS_TYPE(m_eSessionType, MEDIA_TYPE_AUDIO) &&
+            GetNegotiatedAudioQuality() == AUDIO_CODEC_NOT_USED)
     {
-        return IMS_FALSE;
+        IMS_TRACE_E(0, "NegotiateSdp(): no valid audio codec", 0, 0, 0);
+        objResult.eResult = MEDIA_NEGO_ERROR_NO_CODEC_MATCHED;
+        return objResult;
     }
 
-    // Audio nego result
-    if (pNegotiatedAudioDescriptor != IMS_NULL)
+    // Video nego objResult
+    if (pNegotiatedVideoDescriptor != IMS_NULL &&
+            (m_pVideoNego->GetNegotiatedRtpPort() <= 0 ||
+                    GetNegotiatedVideoQuality() == VIDEO_RESOLUTION_NOT_USED))
     {
-        if (MEDIA_IS_CONTAINED_THIS_TYPE(m_eSessionType, MEDIA_TYPE_AUDIO) &&
-                GetNegotiatedAudioQuality() == AUDIO_CODEC_NOT_USED)
+        IMS_TRACE_I("NegotiateSdp(): disable video", 0, 0, 0);
+        objResult.eVideoDirection = MEDIA_DIRECTION_INVALID;
+    }
+
+    // Text nego objResult
+    if (pNegotiatedTextDescriptor != IMS_NULL)
+    {
+        objResult.eTextDirection = GetNegotiatedTextDirection();
+    }
+
+    objResult.eNegotiatedType = (MEDIA_CONTENT_TYPE)(objResult.eNegotiatedType |
+            (GetNegotiatedAudioQuality() != AUDIO_CODEC_NOT_USED ? MEDIA_TYPE_AUDIO : 0) |
+            (GetNegotiatedVideoQuality() != VIDEO_RESOLUTION_NOT_USED ? MEDIA_TYPE_VIDEO : 0) |
+            (GetNegotiatedTextQuality() != TEXT_CODEC_NOT_USED ? MEDIA_TYPE_TEXT : 0));
+
+    if (objResult.eNegotiatedType == MEDIA_TYPE_INVALID)
+    {
+        IMS_TRACE_E(0, "NegotiateSdp(): no negotiated media", 0, 0, 0);
+        if (objResult.eResult == MEDIA_NEGO_NO_ERROR)
         {
-            errorReason = ERROR_NO_CODEC_MATCHED;
-            return IMS_FALSE;
+            objResult.eResult = MEDIA_NEGO_ERROR_NO_CODEC_MATCHED;
         }
-    }
-    else
-    {
-        nAudioDirection = MEDIA_DIRECTION_INVALID;
-
-        if (MEDIA_IS_CONTAINED_THIS_TYPE(m_eSessionType, MEDIA_TYPE_AUDIO))
-        {
-            IMS_TRACE_E(0, "NegotiateSDP() - m line of audio is failed", 0, 0, 0);
-            errorReason = ERROR_NO_AUDIO;
-            return IMS_FALSE;
-        }
-    }
-
-    if (nAudioDirection == MEDIA_DIRECTION_INVALID && nVideoDirection == MEDIA_DIRECTION_INVALID &&
-            nTextDirection == MEDIA_DIRECTION_INVALID)
-    {
-        IMS_TRACE_E(0, "NegotiateSDP() - There's NO negotiated media", 0, 0, 0);
-        errorReason = ERROR_NO_CODEC_MATCHED;
-        return IMS_FALSE;
+        return objResult;
     }
 
     // Change the negotiation state
-    switch (m_eNegoState)
-    {
-        case STATE_IDLE:  // FALL-THROUGH
-        case STATE_NEGOTIATED:
-            m_eNegoState = STATE_OFFER_RECEIVED;
-            break;
-        case STATE_OFFER_SENT:
-            m_eNegoState = STATE_NEGOTIATED;
-            break;
-        case STATE_OFFER_RECEIVED:
-        default:
-            break;
-    }
+    UpdateNegoState(IMS_FALSE);
+    m_bPreviewMode = pSession->IsSdpOaInPreviewMode();
 
-    IMS_TRACE_D("NegotiateSDP() - NegoState[%d]", GetNegoState(), 0, 0);
-    IMS_TRACE_D("NegotiateSDP() - AudioDir[%d], VideoDir[%d], TextDir[%d]", nAudioDirection,
-            nVideoDirection, nTextDirection);
-    IMS_TRACE_D("NegotiateSDP() - AudioQuality[%d], VideoQuality[%d], TextQuality[%d]",
+    IMS_TRACE_D("NegotiateSdp(): state[%d], preview[%d]", GetNegoState(), m_bPreviewMode, 0);
+    IMS_TRACE_D("NegotiateSdp(): AudioDirection[%d], VideoDirection[%d], TextDirection[%d]",
+            objResult.eAudioDirection, objResult.eVideoDirection, objResult.eTextDirection);
+    IMS_TRACE_D("NegotiateSdp(): AudioQuality[%d], VideoQuality[%d], TextQuality[%d]",
             GetNegotiatedAudioQuality(), GetNegotiatedVideoQuality(), GetNegotiatedTextQuality());
 
-    errorReason = NO_ERROR;
-    return IMS_TRUE;
+    return objResult;
 }
 
 PUBLIC
-void MediaNego::FinalizeSDP(IN ISession* pSession)
+void MediaNego::FinalizeSdp(IN ISession* pSession)
 {
     if (pSession == IMS_NULL)
     {
+        IMS_TRACE_E(0, "FinalizeSdp(): invalid argument", 0, 0, 0);
         return;
     }
 
-    IMS_TRACE_D("FinalizeSDP - enter ISessionDescriptor[%" PFLS_x "]",
+    IMS_TRACE_D("FinalizeSdp - enter ISessionDescriptor[%" PFLS_x "]",
             reinterpret_cast<IMS_SINTP>(pSession->GetSessionDescriptor()), 0, 0);
 
+    ImsList<IMedia*> lstIMedia = pSession->GetMedia();
+    ImsList<IMedia*> lstMediaToRemove;
+
+    for (IMS_UINT32 i = 0; i < lstIMedia.GetSize(); i++)
+    {
+        IMedia* pIMedia = lstIMedia.GetAt(i);
+        if (pIMedia != IMS_NULL && pIMedia->GetState() == IMedia::STATE_DELETED)
+        {
+            lstMediaToRemove.Append(pIMedia);
+        }
+    }
+
+    for (IMS_UINT32 i = 0; i < lstMediaToRemove.GetSize(); i++)
+    {
+        pSession->RemoveMedia(lstMediaToRemove.GetAt(i));
+    }
+}
+
+PUBLIC
+void MediaNego::FinalizeNegotiation()
+{
     IMS_BOOL bNegotiated = IMS_FALSE;
 
     if (m_pAudioNego != IMS_NULL)
     {
-        m_pAudioNego->FinalizeSDP(pSession->GetSessionDescriptor(), m_eNegoState);
+        m_pAudioNego->CleanupIncompleteOaModels();
 
         if (m_pAudioNego->GetNegotiatedCodec() != AUDIO_CODEC_NONE)
         {
@@ -756,15 +582,17 @@ void MediaNego::FinalizeSDP(IN ISession* pSession)
 
     if (m_pVideoNego != IMS_NULL)
     {
-        m_pVideoNego->FinalizeSDP(pSession->GetSessionDescriptor(), m_eNegoState);
+        m_pVideoNego->CleanupIncompleteOaModels();
 
         if (m_pVideoNego->GetNegotiatedResolution() != VIDEO_RESOLUTION_INVALID)
+        {
             bNegotiated = IMS_TRUE;
+        }
     }
 
     if (m_pTextNego != IMS_NULL)
     {
-        m_pTextNego->FinalizeSDP(pSession->GetSessionDescriptor(), m_eNegoState);
+        m_pTextNego->CleanupIncompleteOaModels();
 
         if (m_pTextNego->GetNegotiatedCodec() != TEXT_CODEC_NONE)
         {
@@ -772,7 +600,7 @@ void MediaNego::FinalizeSDP(IN ISession* pSession)
         }
     }
 
-    if (bNegotiated == IMS_TRUE)
+    if (bNegotiated && m_eNegoState != STATE_IDLE)
     {
         SetNegoState(STATE_NEGOTIATED);
     }
@@ -780,52 +608,30 @@ void MediaNego::FinalizeSDP(IN ISession* pSession)
     {
         SetNegoState(STATE_IDLE);
     }
-
-    ImsList<IMedia*> lstIMedia = pSession->GetMedia();
-
-    for (IMS_UINT32 i = 0; i < lstIMedia.GetSize(); i++)
-    {
-        IMedia* pIMedia = lstIMedia.GetAt(i);
-
-        if (pIMedia == IMS_NULL)
-        {
-            return;
-        }
-
-        if (pIMedia->GetState() == IMedia::STATE_DELETED)
-        {
-            if (pSession->RemoveMedia(pIMedia) == IMS_SUCCESS)
-            {
-                IMS_TRACE_D("FinalizeSDP() remove IMedia[%d / %" PFLS_x "] SUCCESS", i, pIMedia, 0);
-            }
-        }
-    }
 }
 
 PUBLIC
 AUDIO_CODEC MediaNego::GetNegotiatedAudioQuality()
 {
-    if (m_pAudioNego != IMS_NULL)
+    if (m_pAudioNego == IMS_NULL || m_pAudioNego->GetRemotePort() < 0)
     {
-        AUDIO_CODEC eAudioQuality = m_pAudioNego->GetNegotiatedCodec();
-
-        if (eAudioQuality == AUDIO_CODEC_NONE)
-        {
-            return AUDIO_CODEC_NOT_USED;
-        }
-        else
-        {
-            return eAudioQuality;
-        }
+        return AUDIO_CODEC_NOT_USED;
     }
 
-    return AUDIO_CODEC_NOT_USED;
+    AUDIO_CODEC eAudioQuality = m_pAudioNego->GetNegotiatedCodec();
+
+    if (eAudioQuality == AUDIO_CODEC_NONE)
+    {
+        return AUDIO_CODEC_NOT_USED;
+    }
+
+    return eAudioQuality;
 }
 
 PUBLIC
 VIDEO_RESOLUTION MediaNego::GetNegotiatedVideoQuality()
 {
-    if (m_pVideoNego == IMS_NULL || m_pVideoNego->GetRemotePort() <= 0)
+    if (m_pVideoNego == IMS_NULL || m_pVideoNego->GetNegotiatedRtpPort() <= 0)
     {
         return VIDEO_RESOLUTION_NOT_USED;
     }
@@ -843,21 +649,79 @@ VIDEO_RESOLUTION MediaNego::GetNegotiatedVideoQuality()
 PUBLIC
 TEXT_CODEC MediaNego::GetNegotiatedTextQuality()
 {
-    if (m_pTextNego != IMS_NULL)
+    if (m_pTextNego == IMS_NULL || m_pTextNego->GetNegotiatedRtpPort() <= 0)
     {
-        TEXT_CODEC eQuality = m_pTextNego->GetNegotiatedCodec();
-
-        if (eQuality == TEXT_CODEC_NONE)
-        {
-            return TEXT_CODEC_NOT_USED;
-        }
-        else
-        {
-            return eQuality;
-        }
+        return TEXT_CODEC_NOT_USED;
     }
 
-    return TEXT_CODEC_NOT_USED;
+    TEXT_CODEC eQuality = m_pTextNego->GetNegotiatedCodec();
+
+    if (eQuality == TEXT_CODEC_NONE)
+    {
+        return TEXT_CODEC_NOT_USED;
+    }
+
+    return eQuality;
+}
+
+PUBLIC
+IMS_FLOAT MediaNego::GetNegotiatedCodecBitrateKbps(IN MEDIA_CONTENT_TYPE eMediaType)
+{
+    if (eMediaType == MEDIA_TYPE_AUDIO && m_pAudioNego != IMS_NULL)
+    {
+        return m_pAudioNego->GetNegotiatedCodecBitrateKbps();
+    }
+
+    IMS_TRACE_E(0, "GetNegotiatedCodecBitrateKbps(): invalid media type or nego object", 0, 0, 0);
+    return 0.0f;
+}
+
+PUBLIC
+IMS_FLOAT MediaNego::GetNegotiatedCodecBandwidthKhz(IN MEDIA_CONTENT_TYPE eMediaType)
+{
+    if (eMediaType == MEDIA_TYPE_AUDIO && m_pAudioNego != IMS_NULL)
+    {
+        return m_pAudioNego->GetNegotiatedCodecBandwidthKhz();
+    }
+
+    IMS_TRACE_E(0, "GetNegotiatedCodecBandwidthKhz(): invalid media type or nego object", 0, 0, 0);
+    return 0.0f;
+}
+
+PUBLIC
+void MediaNego::GetNegotiatedCodecBitrateRange(
+        IN MEDIA_CONTENT_TYPE eMediaType, OUT IMS_FLOAT& nBitrateStart, OUT IMS_FLOAT& nBitrateEnd)
+{
+    nBitrateStart = 0;
+    nBitrateEnd = 0;
+
+    if (eMediaType == MEDIA_TYPE_AUDIO && m_pAudioNego != IMS_NULL)
+    {
+        m_pAudioNego->GetNegotiatedCodecBitrateRange(nBitrateStart, nBitrateEnd);
+    }
+    else
+    {
+        IMS_TRACE_E(
+                0, "GetNegotiatedCodecBitrateRange(): invalid media type or nego object", 0, 0, 0);
+    }
+}
+
+PUBLIC
+void MediaNego::GetNegotiatedCodecBandwidthRange(IN MEDIA_CONTENT_TYPE eMediaType,
+        OUT IMS_FLOAT& nBandwidthStart, OUT IMS_FLOAT& nBandwidthEnd)
+{
+    nBandwidthStart = 0;
+    nBandwidthEnd = 0;
+
+    if (eMediaType == MEDIA_TYPE_AUDIO && m_pAudioNego != IMS_NULL)
+    {
+        m_pAudioNego->GetNegotiatedCodecBandwidthRange(nBandwidthStart, nBandwidthEnd);
+    }
+    else
+    {
+        IMS_TRACE_E(0, "GetNegotiatedCodecBandwidthRange(): invalid media type or nego object", 0,
+                0, 0);
+    }
 }
 
 PUBLIC
@@ -892,7 +756,7 @@ IMediaDescriptor* MediaNego::GetMediaDescriptor(IN IMedia* pIMedia)
     if (pIMedia->GetUpdateState() == IMedia::UPDATE_MODIFIED)
     {
         // After received re-invite
-        IMedia* pIMediaProposal = pIMedia->GetProposal();
+        const IMedia* pIMediaProposal = pIMedia->GetProposal();
 
         if (pIMediaProposal == IMS_NULL)
         {
@@ -913,17 +777,27 @@ IMS_BOOL MediaNego::IsForking()
     return m_bForking;
 }
 
+PUBLIC
+IMS_BOOL MediaNego::IsPreviewMode()
+{
+    return m_bPreviewMode;
+}
+
+PUBLIC
+void MediaNego::SetPreviewMode(IMS_BOOL bIsPreview)
+{
+    m_bPreviewMode = bIsPreview;
+}
+
 PRIVATE
-ImsList<IMedia*> MediaNego::GetIMediaListFromSession(
+ImsList<IMedia*> MediaNego::CreateIMediaListFromSession(
         IN ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType)
 {
     if (pSession == IMS_NULL || m_pMediaEnvironment == IMS_NULL)
     {
+        IMS_TRACE_E(0, "CreateIMediaListFromSession(): invalid argument", 0, 0, 0);
         return ImsList<IMedia*>();
     }
-
-    IMS_TRACE_D("GetIMediaListFromSession() - NegoState[%d], ServiceType[%d], MediaType[%d]",
-            m_eNegoState, m_pMediaEnvironment->eServiceType, eMediaType);
 
     IMS_UINT32 nCountMediaRequired = 0;
     ImsList<IMedia*> objIMediaList = pSession->GetMedia();
@@ -952,8 +826,7 @@ ImsList<IMedia*> MediaNego::GetIMediaListFromSession(
                 break;
         }
 
-        IMS_TRACE_I("GetIMediaListFromSession()- objIMediaList.GetSize()[%d], \
-                nCountMediaRequired[%d], MediaType[%d]",
+        IMS_TRACE_D("CreateIMediaListFromSession(): list[%d], count[%d], type[%d]",
                 objIMediaList.GetSize(), nCountMediaRequired, eMediaType);
     }
 
@@ -961,7 +834,6 @@ ImsList<IMedia*> MediaNego::GetIMediaListFromSession(
     {
         for (IMS_UINT32 i = nCountMediaRequired - objIMediaList.GetSize(); i > 0; i--)
         {
-            IMS_TRACE_D("GetIMediaListFromSession()- Create Media", 0, 0, 0);
             pSession->CreateMedia(ImsCore::MEDIA_STREAM, IMedia::DIRECTION_SEND_RECEIVE, 1);
         }
     }
@@ -970,7 +842,7 @@ ImsList<IMedia*> MediaNego::GetIMediaListFromSession(
 }
 
 PRIVATE
-void MediaNego::SetSessionType(IN ISession* pSession)
+void MediaNego::UpdateMediaTypeToNegotiate(IN ISession* pSession)
 {
     if (pSession == IMS_NULL)
     {
@@ -983,13 +855,13 @@ void MediaNego::SetSessionType(IN ISession* pSession)
 
     for (IMS_UINT32 i = 0; i < lstIMedia.GetSize(); i++)
     {
-        IMediaDescriptor* pDescriptor = GetMediaDescriptor(lstIMedia.GetAt(i));
+        const IMediaDescriptor* pDescriptor = GetMediaDescriptor(lstIMedia.GetAt(i));
         if (pDescriptor == IMS_NULL)
         {
             return;
         }
 
-        SdpMedia* pSDPMedia = const_cast<SdpMedia*>(pDescriptor->GetMediaDescriptionEx());
+        const SdpMedia* pSDPMedia = pDescriptor->GetMediaDescriptionEx();
         if (pSDPMedia != IMS_NULL && pSDPMedia->GetType() == SdpMedia::TYPE_AUDIO &&
                 pSDPMedia->GetPort() != -1)
         {
@@ -1016,18 +888,182 @@ PRIVATE
 void MediaNego::SetMediaDescriptorAsNotSupported(
         IN IMediaDescriptor* pDescriptor, IN SdpMedia* pSDPMedia)
 {
-    IMS_TRACE_I("SetMediaDescriptorAsNotSupported() - Clear descriptor[%" PFLS_x "]", pDescriptor,
-            0, 0);
-
-    // clean attr & bandwidth lines
     pDescriptor->RemoveAttribute(SdpAttribute::ATTRIBUTE_ALL);
     ImsList<AString> strEmptyList;
     pDescriptor->SetBandwidthInfo(strEmptyList);
 
     // set RTP Port to zero
     pSDPMedia->SetPort(0);
-    IMS_TRACE_I("SetMediaDescriptorAsNotSupported() - SetPort [0]", 0, 0, 0);
 
     pDescriptor->SetMediaDescription(
             pSDPMedia->GetType(), 0, pSDPMedia->GetTransportProtocol(), pSDPMedia->GetFormats());
+}
+
+PRIVATE
+void MediaNego::UpdateNegoState(IMS_BOOL bFormSdp)
+{
+    switch (m_eNegoState)
+    {
+        case STATE_IDLE:
+        case STATE_NEGOTIATED:
+            if (m_bPreviewMode && !bFormSdp)
+            {
+                m_eNegoState = STATE_NEGOTIATED;
+            }
+            else
+            {
+                m_eNegoState = bFormSdp ? STATE_OFFER_SENT : STATE_OFFER_RECEIVED;
+            }
+            break;
+        case STATE_OFFER_RECEIVED:
+            if (bFormSdp)
+            {
+                m_eNegoState = STATE_NEGOTIATED;
+            }
+            break;
+        case STATE_OFFER_SENT:
+            if (!bFormSdp)
+            {
+                m_eNegoState = STATE_NEGOTIATED;
+            }
+            break;
+        default:
+            IMS_TRACE_E(0, "UpdateNegoState(): invalid state[%d]", m_eNegoState, 0, 0);
+            break;
+    }
+}
+
+PRIVATE
+void MediaNego::UpdateSessionLevelBandwidth(IN ISession* pSession, IMS_UINT32 nTotalAs)
+{
+    if (m_pMediaEnvironment == IMS_NULL || m_pMediaEnvironment->pIService == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "UpdateSessionLevelBandwidth(): invalid MediaEnvironment", 0, 0, 0);
+    }
+
+    const MediaSessionConfig* pMediaSessionConfig =
+            MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
+                    GetSlotId(), m_pMediaEnvironment->eServiceType);
+
+    if (pMediaSessionConfig != IMS_NULL)
+    {
+        if (pMediaSessionConfig->IsSessionLevelBandwidth())
+        {
+            IMS_TRACE_D("UpdateSessionLevelBandwidth(): AS[%d]", nTotalAs, 0, 0);
+            pSession->GetSessionDescriptor()->RemoveAllBandwidths();
+            pSession->GetSessionDescriptor()->AddBandwidth(SdpBandwidth::TYPE_AS, nTotalAs);
+        }
+    }
+}
+
+PRIVATE
+IMS_BOOL MediaNego::ProcessMediaLine(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType,
+        IN MEDIA_DIRECTION eAudioDirection, IN MEDIA_DIRECTION eVideoDirection,
+        IN MEDIA_DIRECTION eTextDirection, IN IMS_BOOL bEnforceReofferMode,
+        OUT IMS_SINT32& nTotalAs, OUT IMediaDescriptor*& pDescriptorForAudio,
+        OUT IMediaDescriptor*& pDescriptorForVideo, OUT IMediaDescriptor*& pDescriptorForText)
+{
+    // Send a "FormSdp" to each session
+    if (pDescriptorForAudio != IMS_NULL)
+    {
+        if (!m_pAudioNego->FormSdp(GetNegoState(), pSession->GetSessionDescriptor(),
+                    pDescriptorForAudio, (MEDIA_DIRECTION)eAudioDirection,
+                    !MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_AUDIO) ? IMS_TRUE
+                                                                                : IMS_FALSE,
+                    bEnforceReofferMode))
+        {
+            IMS_TRACE_E(0, "ProcessMediaLine(): failed to form audio SDP", 0, 0, 0);
+            return IMS_FALSE;
+        }
+        else
+        {
+            IMS_SINT32 nTmpAs = m_pAudioNego->GetNegotiatedBandwidth();
+
+            if (nTmpAs > 0)
+            {
+                nTotalAs = nTmpAs;
+            }
+        }
+    }
+
+    if (pDescriptorForVideo != IMS_NULL)
+    {
+        if (!m_pVideoNego->FormSdp(GetNegoState(), pSession->GetSessionDescriptor(),
+                    pDescriptorForVideo, (MEDIA_DIRECTION)eVideoDirection,
+                    !MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_VIDEO) ? IMS_TRUE
+                                                                                : IMS_FALSE,
+                    bEnforceReofferMode))
+        {
+            IMS_TRACE_E(0, "ProcessMediaLine(): failed to form video SDP", 0, 0, 0);
+            return IMS_FALSE;
+        }
+
+        if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_VIDEO))
+        {
+            IMS_SINT32 nTmpAS = m_pVideoNego->GetNegotiatedBandwidth();
+
+            if (nTmpAS > 0)
+            {
+                nTotalAs = nTmpAS;
+            }
+        }
+    }
+
+    if (pDescriptorForText != IMS_NULL)
+    {
+        if (!m_pTextNego->FormSdp(GetNegoState(), pSession->GetSessionDescriptor(),
+                    pDescriptorForText, (MEDIA_DIRECTION)eTextDirection,
+                    !MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT) ? IMS_TRUE
+                                                                               : IMS_FALSE,
+                    bEnforceReofferMode))
+        {
+            IMS_TRACE_E(0, "ProcessMediaLine(): failed to form text SDP", 0, 0, 0);
+            return IMS_FALSE;
+        }
+
+        if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT))
+        {
+            IMS_SINT32 nTmpAS = m_pTextNego->GetNegotiatedBandwidth();
+
+            if (nTmpAS > 0)
+            {
+                nTotalAs = nTmpAS;
+            }
+        }
+    }
+
+    return IMS_TRUE;
+}
+
+PRIVATE
+void MediaNego::UpdateMediaDescriptor(IN ISession* pSession, IN IMediaDescriptor* pDescriptor,
+        IN const SdpMedia* pSDPMedia, OUT IMediaDescriptor*& pNegotiatedAudioDescriptor,
+        OUT IMediaDescriptor*& pNegotiatedVideoDescriptor,
+        OUT IMediaDescriptor*& pNegotiatedTextDescriptor, OUT MEDIA_DIRECTION& eAudioDirection,
+        OUT MEDIA_DIRECTION& eVideoDirection, OUT MEDIA_DIRECTION& eTextDirection)
+{
+    if (m_pAudioNego == IMS_NULL || m_pVideoNego == IMS_NULL || m_pTextNego == IMS_NULL ||
+            pSession == IMS_NULL || pSDPMedia == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "UpdateMediaDescriptor(): invalid arguments", 0, 0, 0);
+        return;
+    }
+    if (pSDPMedia->GetType() == SdpMedia::TYPE_AUDIO && pNegotiatedAudioDescriptor == IMS_NULL)
+    {
+        m_pAudioNego->NegotiateSdp(
+                GetNegoState(), pSession->GetSessionDescriptor(), pDescriptor, eAudioDirection);
+        pNegotiatedAudioDescriptor = pDescriptor;
+    }
+    else if (pSDPMedia->GetType() == SdpMedia::TYPE_VIDEO && pNegotiatedVideoDescriptor == IMS_NULL)
+    {
+        m_pVideoNego->NegotiateSdp(
+                GetNegoState(), pSession->GetSessionDescriptor(), pDescriptor, eVideoDirection);
+        pNegotiatedVideoDescriptor = pDescriptor;
+    }
+    else if (pSDPMedia->GetType() == SdpMedia::TYPE_TEXT && pNegotiatedTextDescriptor == IMS_NULL)
+    {
+        m_pTextNego->NegotiateSdp(
+                GetNegoState(), pSession->GetSessionDescriptor(), pDescriptor, eTextDirection);
+        pNegotiatedTextDescriptor = pDescriptor;
+    }
 }

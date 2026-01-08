@@ -28,13 +28,19 @@ public:
     virtual ~IAosSubscriber(){};
 
     virtual IMS_BOOL IsReady() const = 0;
-
+    virtual IMS_BOOL IsIsim() const = 0;
+    virtual IMS_BOOL IsUsim() const = 0;
     virtual void SetListener(IN IAosSubscriberListener* piListener) = 0;
 
     virtual const AStringArray& GetConfiguredImpus() const = 0;
     virtual const AStringArray& GetFakeImpus() const = 0;
 
     virtual const ISubscriberConfig* GetSubscriberConfig(IMS_SINT32 nType = NORMAL) const = 0;
+
+    virtual void CreateTemporaryPublicUserIdForGiba() = 0;
+    virtual void ClearTemporaryPublicUserIdForGiba() = 0;
+    virtual IMS_BOOL HasValidTemporaryPublicUserIdForGiba() const = 0;
+    virtual const AString& GetTemporaryPublicUserIdForGiba() const = 0;
 
     // Subscriber_StateChanged(nState)
     enum

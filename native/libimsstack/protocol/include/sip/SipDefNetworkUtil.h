@@ -13,21 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __ISIP_DEFNETWORKUTIL_H__
-#define __ISIP_DEFNETWORKUTIL_H__
+#ifndef __SIP_DEF_NETWORK_UTIL_H__
+#define __SIP_DEF_NETWORK_UTIL_H__
 
-#include "SipDatatypes.h"
 #include "ISipNetworkUtil.h"
+#include "SipDatatypes.h"
 
 class SipDefNetworkUtil : public ISipNetworkUtil
 {
 public:
     SipDefNetworkUtil();
-    ~SipDefNetworkUtil();
+    ~SipDefNetworkUtil() override;
 
 public:
     SIP_BOOL SendToNetwork(SipTransportBuffer* pTransportBuffer,
             SipTransportParameter* pTransportParam, ISipUserData* pUserData) override;
 };
 
-#endif  // __ISIP_DEFNETWORKUTIL_H__
+#endif  //__SIP_DEF_NETWORK_UTIL_H__

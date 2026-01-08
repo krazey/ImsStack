@@ -53,7 +53,8 @@ public:
         TYPE_NONE = 0,
         TYPE_REG = (0x0001),
         TYPE_SUB = (0x0002),
-        TYPE_EMERGENCY = (0x0004)
+        TYPE_EMERGENCY = (0x0004),
+        TYPE_DEREG = (0x0008)
     };
 };
 

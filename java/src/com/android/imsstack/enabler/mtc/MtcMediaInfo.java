@@ -85,59 +85,59 @@ public final class MtcMediaInfo {
     }
 
     public void updateMediaInfo(MediaInfo mi) {
-        mMediaInfo.AQuality = mi.AQuality;
-        mMediaInfo.ADir = mi.ADir;
-        mMediaInfo.VQuality = mi.VQuality;
-        mMediaInfo.VDir = mi.VDir;
-        mMediaInfo.TDir = mi.TDir;
-        mMediaInfo.GTTMode = mi.GTTMode;
+        mMediaInfo.audioQuality = mi.audioQuality;
+        mMediaInfo.audioDir = mi.audioDir;
+        mMediaInfo.videoQuality = mi.videoQuality;
+        mMediaInfo.videoDir = mi.videoDir;
+        mMediaInfo.textDir = mi.textDir;
+        mMediaInfo.gttMode = mi.gttMode;
     }
 
     public static int getAudioQuality(MediaInfo mi) {
-        return mi.AQuality;
+        return mi.audioQuality;
     }
 
     public static int getAudioDirection(MediaInfo mi) {
-        return mi.ADir;
+        return mi.audioDir;
     }
 
     public static int getVideoQuality(MediaInfo mi) {
-        return mi.VQuality;
+        return mi.videoQuality;
     }
 
     public static int getVideoDirection(MediaInfo mi) {
-        return mi.VDir;
+        return mi.videoDir;
     }
 
     public static int getTextDirection(MediaInfo mi) {
-        return mi.TDir;
+        return mi.textDir;
     }
 
     public static int getGttMode(MediaInfo mi) {
-        return mi.GTTMode;
+        return mi.gttMode;
     }
 
     public static void setAudioQuality(MediaInfo mi, int quality) {
-        mi.AQuality = quality;
+        mi.audioQuality = quality;
     }
 
     public static void setAudioDirection(MediaInfo mi, int direction) {
-        mi.ADir = direction;
+        mi.audioDir = direction;
     }
 
     public static void setVideoQuality(MediaInfo mi, int quality) {
-        mi.VQuality = quality;
+        mi.videoQuality = quality;
     }
 
     public static void setVideoDirection(MediaInfo mi, int direction) {
-        mi.VDir = direction;
+        mi.videoDir = direction;
     }
 
     public static void setTextDirection(MediaInfo mi, int direction) {
-        mi.TDir = direction;
+        mi.textDir = direction;
     }
 
     public static void setGttMode(MediaInfo mi, int gttMode) {
-        mi.GTTMode = gttMode;
+        mi.gttMode = gttMode;
     }
 }

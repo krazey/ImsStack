@@ -19,7 +19,7 @@
 #include "UceFactory.h"
 #include "service/UceEnabler.h"
 
-__IMS_TRACE_TAG_USER_DECL__("UCE");
+__IMS_TRACE_TAG_UCE__;
 
 PUBLIC
 UceEnabler::UceEnabler(IN IMS_SINT32 nSlotId) :

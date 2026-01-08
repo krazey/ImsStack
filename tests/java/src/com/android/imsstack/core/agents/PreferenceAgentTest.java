@@ -20,10 +20,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import android.test.suitebuilder.annotation.SmallTest;
+import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.TestApplication;
-import com.android.imsstack.util.AppContext;
+import com.android.imsstack.base.AppContext;
 
 import org.junit.After;
 import org.junit.Before;

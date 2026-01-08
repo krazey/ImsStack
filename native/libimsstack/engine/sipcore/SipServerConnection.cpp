@@ -15,19 +15,23 @@
  */
 #include "ServiceMemory.h"
 #include "ServiceTimer.h"
+#include "ServiceTrace.h"
 
 #include "private/ConfigurationManager.h"
 #include "private/SipConfig.h"
 
 #include "SipConfigProxy.h"
+#include "SipDState.h"
 #include "SipDebug.h"
+#include "SipDialog.h"
+#include "SipError.h"
 #include "SipFeatures.h"
 #include "SipPrivate.h"
 #include "SipServerConnection.h"
 #include "SipServerTransactionState.h"
 #include "SipTransport.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipServerConnection::SipServerConnection(IN SipServerTransactionState* pStState) :
@@ -65,13 +69,6 @@ PUBLIC VIRTUAL void SipServerConnection::Close()
             (m_nState == STATE_PROVISIONAL_RESPONDED))
     {
         m_pStState->Abort();
-    }
-    else if ((m_nState == STATE_COMPLETED) && m_pMessage != IMS_NULL &&
-            m_pMessage->GetMethod().Equals(SipMethod::INVITE) &&
-            SipStatusCode::IsFinalSuccess(m_pMessage->GetStatusCode()))
-    {
-        // Terminate INVITE server transaction promptly
-        m_pStState->Terminate();
     }
 
     // Grab the server connection until the response is not completely sent to the network,
@@ -321,12 +318,14 @@ PUBLIC VIRTUAL IMS_SINT32 SipServerConnection::GetHeaderCount(IN const AString& 
     return SipConnection::GetHeaderCount(strName);
 }
 
+PUBLIC VIRTUAL SipProfile* SipServerConnection::GetSipProfile() const
+{
+    return m_pStState->GetSipProfile();
+}
+
 PUBLIC VIRTUAL void SipServerConnection::SetSipProfile(IN SipProfile* pProfile)
 {
-    if (!m_pStState.IsNull())
-    {
-        m_pStState->SetSipProfile(pProfile);
-    }
+    m_pStState->SetSipProfile(pProfile);
 }
 
 PUBLIC
@@ -588,7 +587,7 @@ void SipServerConnection::StartClosePendingTimer()
     }
 
     IMS_UINT32 nTimerDuration = 2 * 64 * 1000;  // 128s
-    SipTimerValues* pTimerValues = GetTransactionTimerValues();
+    const SipTimerValues* pTimerValues = GetTransactionTimerValues();
 
     if (pTimerValues != IMS_NULL)
     {
@@ -629,7 +628,7 @@ IMS_BOOL SipServerConnection::WaitForMessageSent()
 {
     if (m_nState == STATE_COMPLETED)
     {
-        SipTransport* pTransport = m_pStState->GetSipTransport();
+        const SipTransport* pTransport = m_pStState->GetSipTransport();
 
         if ((pTransport != IMS_NULL) && pTransport->HasPendingMessage())
         {

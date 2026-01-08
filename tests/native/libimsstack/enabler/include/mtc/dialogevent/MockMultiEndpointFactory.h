@@ -17,13 +17,14 @@
 #ifndef MOCK_MULTI_ENDPOINT_FACTORY_H_
 #define MOCK_MULTI_ENDPOINT_FACTORY_H_
 
-#include "dialogevent/IDialogInfoManager.h"
-#include "dialogevent/IDialogSubscription.h"
+#include "ImsTypeDef.h"
 #include "dialogevent/MultiEndpointFactory.h"
 #include <gmock/gmock.h>
 #include <memory>
 
 class AString;
+class IDialogInfoManager;
+class IDialogSubscription;
 class IDialogSubscriptionListener;
 class IMtcContext;
 
@@ -31,7 +32,6 @@ class MockMultiEndpointFactory : public MultiEndpointFactory
 {
 public:
     // MockMultiEndpointFactory() : MultiEndpointFactory() {}
-    virtual ~MockMultiEndpointFactory() {}
 
     MOCK_METHOD(std::unique_ptr<IDialogInfoManager>, CreateDialogInfoManager, (), (override));
     MOCK_METHOD(std::unique_ptr<IDialogSubscription>, CreateDialogSubscription,

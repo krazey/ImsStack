@@ -17,19 +17,17 @@
 #ifndef INTERFACE_MTC_CALL_H_
 #define INTERFACE_MTC_CALL_H_
 
-#include "AString.h"
-#include "IMtcService.h"
-#include "ImsList.h"
-#include "ImsMap.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 
+class AString;
 class ISession;
 class SuppService;
 class IMtcCallContext;
 struct CallReasonInfo;
 struct ConfUser;
 struct MediaInfo;
+template <class T>
+class ImsList;
 
 using CallKey = IMS_ULONG;
 
@@ -40,6 +38,22 @@ enum class CallType
     VT = 2,
     RTT = 3,
     VIDEO_RTT = 4,
+};
+
+enum class EmergencyType
+{
+    // This applies when the service type of ImsCallProfile is set to
+    // ImsCallProfile.SERVICE_TYPE_NORMAL.
+    NONE = 0,
+    // This applies when the service type of ImsCallProfile is set to
+    // ImsCallProfile.SERVICE_TYPE_EMERGENCY and the emergency routing is set to either
+    // EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN or
+    // EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY.
+    EMERGENCY_ROUTING = 1,
+    // This applies when the service type of ImsCallProfile is set to
+    // ImsCallProfile.SERVICE_TYPE_EMERGENCY and the emergency routing is set to
+    // EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL.
+    NORMAL_ROUTING = 2,
 };
 
 enum class PeerType
@@ -62,7 +76,7 @@ public:
         TERMINATING,
     };
 
-    static const CallKey CALL_KEY_INVALID = 0;
+    static inline const CallKey CALL_KEY_INVALID = 0;
 
     virtual ~IMtcCall(){};
 
@@ -85,8 +99,7 @@ public:
      * @param objSuppServices
      */
     virtual void Start(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Starts
@@ -98,7 +111,7 @@ public:
      * @param objUsers
      */
     virtual void StartConference(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+            IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices,
             IN const ImsList<ConfUser*>& objUsers) = 0;
 
     /**
@@ -240,6 +253,13 @@ public:
      */
     virtual void SendUssd(IN const AString& strUssd) = 0;
 
+    /**
+     * @brief Gets the log tag of the call.
+     *
+     * @return The log tag.
+     */
+    virtual const AString& GetLogTag() const = 0;
+
     // Returns a key to uniquely identify this call.
 
     /**
@@ -277,7 +297,7 @@ public:
     explicit CallInfo() :
             ePeerType(PeerType::MO),
             eInitialCallType(CallType::VOIP),
-            bEmergency(IMS_FALSE),
+            eEmergencyType(EmergencyType::NONE),
             bOffline(IMS_FALSE),
             bUssi(IMS_FALSE),
             bConference(IMS_FALSE)
@@ -287,7 +307,7 @@ public:
     explicit CallInfo(IN const CallInfo& objRhs) :
             ePeerType(objRhs.ePeerType),
             eInitialCallType(objRhs.eInitialCallType),
-            bEmergency(objRhs.bEmergency),
+            eEmergencyType(objRhs.eEmergencyType),
             bOffline(objRhs.bOffline),
             bUssi(objRhs.bUssi),
             bConference(objRhs.bConference)
@@ -300,7 +320,7 @@ public:
         {
             ePeerType = objRhs.ePeerType;
             eInitialCallType = objRhs.eInitialCallType;
-            bEmergency = objRhs.bEmergency;
+            eEmergencyType = objRhs.eEmergencyType;
             bOffline = objRhs.bOffline;
             bUssi = objRhs.bUssi;
             bConference = objRhs.bConference;
@@ -317,16 +337,21 @@ public:
         }
 
         return ePeerType == objRhs.ePeerType && eInitialCallType == objRhs.eInitialCallType &&
-                bEmergency == objRhs.bEmergency && bOffline == objRhs.bOffline &&
+                eEmergencyType == objRhs.eEmergencyType && bOffline == objRhs.bOffline &&
                 bUssi == objRhs.bUssi && bConference == objRhs.bConference;
     }
 
     IMS_BOOL operator!=(const CallInfo& objRhs) const { return !(*this == objRhs); }
 
+    inline IMS_BOOL IsEmergency() const
+    {
+        return eEmergencyType == EmergencyType::EMERGENCY_ROUTING;
+    }
+
 public:
     PeerType ePeerType;
     CallType eInitialCallType;
-    IMS_BOOL bEmergency;
+    EmergencyType eEmergencyType;
     IMS_BOOL bOffline;
     IMS_BOOL bUssi;
     IMS_BOOL bConference;

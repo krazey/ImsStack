@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "AStringArray.h"
+#include "AStringBuffer.h"
 #include "ServiceMemory.h"
 
 PUBLIC
@@ -218,6 +219,25 @@ IMS_BOOL AStringArray::RemoveElement(
     }
 
     return IMS_FALSE;
+}
+
+PUBLIC
+AString AStringArray::ToString(IN IMS_CHAR cDelimiter /*= TextParser::CHAR_COMMA*/) const
+{
+    AStringBuffer objBuffer(128);
+
+    for (IMS_UINT32 i = 0; i < m_objElements.GetSize(); ++i)
+    {
+        objBuffer.Append(m_objElements.GetAt(i));
+        objBuffer.Append(cDelimiter);
+    }
+
+    if (objBuffer.GetLength() > 0)
+    {
+        objBuffer.Chop(1);
+    }
+
+    return static_cast<const AStringBuffer&>(objBuffer).GetString();
 }
 
 PUBLIC GLOBAL const AStringArray& AStringArray::ConstNull()

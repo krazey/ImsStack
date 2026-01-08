@@ -31,8 +31,8 @@ private:
     SipTxnContext& operator=(const SipTxnContext& objRHS);
 
 public:
-    SipTimerContext* pSipTimerContext;
-    SIP_VOID* pTxnContextData;
+    SipTimerContext* m_pSipTimerContext;
+    SIP_VOID* m_pTxnContextData;
 };
 
 #endif  //__SIP_TXN_CONTEXT_H__

@@ -26,7 +26,7 @@ public:
             m_nResponseCode(RESPONSE_CODE_SUCCESS)
     {
     }
-    inline virtual ~XmlResponse() {}
+    ~XmlResponse() override = default;
 
     XmlResponse(IN const XmlResponse&) = delete;
     XmlResponse& operator=(IN const XmlResponse&) = delete;

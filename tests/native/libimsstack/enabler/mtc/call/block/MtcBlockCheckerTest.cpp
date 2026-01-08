@@ -29,7 +29,7 @@ using Result = IMtcBlockChecker::Result;
 const CallReasonInfo objDefaultReason(CODE_NONE);
 const CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
 
-MockIMtcBlockRule* CreateMockIMtcBlockRule(Result objResult)
+static MockIMtcBlockRule* CreateMockIMtcBlockRule(Result objResult)
 {
     MockIMtcBlockRule* pRule = new MockIMtcBlockRule();
 

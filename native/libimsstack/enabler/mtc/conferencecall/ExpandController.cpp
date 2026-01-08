@@ -16,6 +16,7 @@
 
 #include "CarrierConfig.h"
 #include "IMtcContext.h"
+#include "ImsList.h"
 #include "ServiceTrace.h"
 #include "SipAddress.h"
 #include "call/IMtcCallContext.h"
@@ -24,6 +25,7 @@
 #include "conferencecall/ConferenceConfigurationHelper.h"
 #include "conferencecall/ExpandController.h"
 #include "conferencecall/IConferenceReference.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -39,46 +41,6 @@ ExpandController::ExpandController(IN CallKey nConfCallKey, IMtcContext& objCont
 PUBLIC VIRTUAL ExpandController::~ExpandController()
 {
     IMS_TRACE_I("~ExpandController", 0, 0, 0);
-}
-
-PUBLIC VIRTUAL void ExpandController::OnCallUpdated(IN IMS_UINT32 nType, IN IMS_UINTP nCallKey)
-{
-    // TODO: session updated...
-    // if (ntype != SESSION_UPDATED)
-    if (IMS_FALSE)
-    {
-        return ConferenceController::OnCallUpdated(nType, nCallKey);
-    }
-
-    if (nCallKey != m_nConfCallKey)
-    {
-        return;
-    }
-
-    if ((ConferenceConfigurationHelper::GetReferTypeForInvite(
-                 m_objContext.GetConfigurationProxy()) ==
-                CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE) ||
-            GetState() != STATE_EXPANDING)
-    {
-        return;
-    }
-
-    // Session is updated to conference during EXPANDING state - LGU+
-    // expanded_by will be notified via LGUPUCSession::StateCONVERSATION_Updated()
-
-    // Add the user of exist 1-to-1 session to participant list
-    IMS_TRACE_D("Updated : Add user of the exist 1-to-1 session", 0, 0, 0);
-
-    ConfUser* p1to1User = new ConfUser();
-    SipAddress objSIPAddress(
-            GetConferenceCall()->GetCallContext().GetParticipantInfo().GetRemoteUri());
-    p1to1User->strTarget = objSIPAddress.GetUserInfoPart()->GetUser();
-
-    m_pParticipantList->AddUser(p1to1User);
-    m_pParticipantList->Login();
-
-    CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_REFER_INVITE);
-    SetState(STATE_IDLE);
 }
 
 PUBLIC VIRTUAL void ExpandController::OnReferenceStarted(IN IConferenceReference* piConfRef)
@@ -209,8 +171,9 @@ void ExpandController::ProcessExpand(IN ImsList<ConfUser*>& objUsers)
     IMS_SINT32 nReferType = ConferenceConfigurationHelper::GetReferTypeForInvite(
             m_objContext.GetConfigurationProxy());
 
-    if (nReferType == CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE)  // SKT
+    if (nReferType == ConfigVoice::CONFERENCE_INVITE_REFER_SINGLE)  // SKT
     {
+        // This is not a verified operation.
         m_pOperationQueue->CreateNPutWithUsers(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objUsers);
         m_pOperationQueue->CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
         m_pOperationQueue->CreateNPutWithUser(CONTROL_OPERATION_REFER_INVITE,
@@ -219,7 +182,7 @@ void ExpandController::ProcessExpand(IN ImsList<ConfUser*>& objUsers)
         // Terminate the exist 1-to-1 session : it is triggered by GII operation.
         m_pOperationQueue->CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI);
     }
-    else if (nReferType == CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_MULTIPLE)  // LGU+
+    else if (nReferType == ConfigVoice::CONFERENCE_INVITE_REFER_MULTIPLE)  // LGU+
     {
         m_pOperationQueue->CreateNPutWithUsers(
                 CONTROL_OPERATION_REFER_INVITE, m_pParticipantList->GetConfUsers());
@@ -229,10 +192,9 @@ void ExpandController::ProcessExpand(IN ImsList<ConfUser*>& objUsers)
     m_pOperationQueue->SetAddingOperationSetCompleted();
 }
 
-PUBLIC VIRTUAL void ExpandController::StartConferenceCall(
+PROTECTED VIRTUAL void ExpandController::StartConferenceCall(
         IN ConferenceOperationQueue::ConferenceOperation* pOperation)
 {
-    // TODO: how to check nullcall? never be null so no need to check?
     /*
     if (piCall is null Call)
     {
@@ -248,24 +210,74 @@ PUBLIC VIRTUAL void ExpandController::StartConferenceCall(
 
 PROTECTED VIRTUAL IMS_BOOL ExpandController::IsStartFinalSipfragWaitTimer() const
 {
+    // This if-statement is always false because CheckNStartFinalSipfragWaitTimer() is called
+    // when the state is EXPANDING only.
+    /*
     if (GetState() != STATE_EXPANDING)
     {
         return IMS_FALSE;
     }
+    */
 
     IMS_TRACE_I("IsStartFinalSipfragWaitTimer : [%d]", m_nConditionFinalSipfragTimer, 0, 0);
 
+    // This if-statement is always false because CheckNStartFinalSipfragWaitTimer() is called
+    // with only CONDITION_SIPFRAG_100_RECEIVED.
+    /*
     if (IsConditionMet(CONDITION_SIPFRAG_100_RECEIVED) == IMS_FALSE)
     {
         return IMS_FALSE;
     }
+    */
 
+    // This if-statement is always true because OnCallUpdated() ignores non-conference call.
+    /*
     if (IsConditionMet(CONDITION_1TO1_TERMINATED) == IMS_FALSE)
     {
         return IMS_FALSE;
     }
-
     return IMS_TRUE;
+    */
+
+    return IMS_FALSE;
+}
+
+PROTECTED VIRTUAL void ExpandController::OnCallUpdated(IN IMS_UINT32, IN IMS_UINTP nCallKey)
+{
+    // if (ntype != SESSION_UPDATED)
+    // {
+    //     return ConferenceController::OnCallUpdated(nType, nCallKey);
+    // }
+
+    if (nCallKey != m_nConfCallKey)
+    {
+        return;
+    }
+
+    if ((ConferenceConfigurationHelper::GetReferTypeForInvite(
+                 m_objContext.GetConfigurationProxy()) ==
+                ConfigVoice::CONFERENCE_INVITE_REFER_SINGLE) ||
+            GetState() != STATE_EXPANDING)
+    {
+        return;
+    }
+
+    // Session is updated to conference during STATE_EXPANDING - LGU+.
+
+    // Add the user of exist 1-to-1 session to participant list
+    IMS_TRACE_D("Updated : Add user of the exist 1-to-1 session", 0, 0, 0);
+
+    ConfUser* p1to1User = new ConfUser();
+    SipAddress objSIPAddress(
+            GetConferenceCall()->GetCallContext().GetParticipantInfo().GetRemoteUri());
+    p1to1User->strTarget = objSIPAddress.GetUserInfoPart()->GetUser();
+
+    m_pParticipantList->AddUser(p1to1User);
+    delete p1to1User;
+    m_pParticipantList->LogLn();
+
+    CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_REFER_INVITE);
+    SetState(STATE_IDLE);
 }
 
 PROTECTED VIRTUAL void ExpandController::Recover()
@@ -276,12 +288,9 @@ PROTECTED VIRTUAL void ExpandController::Recover()
         case CONTROL_OPERATION_CREATE_CONFERENCE_CALL:
             RecoverOnCreating();
             break;
-        case CONTROL_OPERATION_SUBSCRIBE:
-            break;
         case CONTROL_OPERATION_REFER_INVITE:
             RecoverOnReferring();
             break;
-
         default:
             IMS_TRACE_I("Recover : not handled.", 0, 0, 0);
             break;
@@ -357,7 +366,6 @@ PROTECTED VIRTUAL void ExpandController::NotifyCmdResult()
         IMS_TRACE_D("NotifyCmdResult : Expanding conf. is completed, join new members", 0, 0, 0);
         ProcessJoinAfterExpand();
 
-        // TODO: control media manager.... params
         // m_objConfCallContext.GetMediaManager().Run();
     }
 }
@@ -367,21 +375,18 @@ void ExpandController::StopMedia1to1Session()
 {
     if (ConferenceConfigurationHelper::GetReferTypeForInvite(
                 m_objContext.GetConfigurationProxy()) !=
-            CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE)
+            ConfigVoice::CONFERENCE_INVITE_REFER_SINGLE)
     {
         return;
     }
 
-    // TODO: control media manager.
     // GetConferenceCall()->GetCallContext().GetMediaManager().SetLocalTone(IMS_FALSE);
-    // TODO: check if this is still required. No explicit 'stop' is needed.
     // 1to1 calls.GetMediaManager().();
 }
 
 PRIVATE
 void ExpandController::Resume1to1Session()
 {
-    // TODO: how to control??
     // for (IMS_UINT32 index = 0; index < m_objCallManager->GetNum(); index++)
     // {
     //     IMtcCall* pSession = m_objCallManager->GetAt(index);
@@ -410,7 +415,7 @@ void ExpandController::ProcessJoinAfterExpand()
 
     for (IMS_UINT32 i = 0; i < m_pParticipantList->GetSize(); i++)
     {
-        ConfUser* pConfUser = m_pParticipantList->GetConfUsers().GetAt(i);
+        const ConfUser* pConfUser = m_pParticipantList->GetConfUsers().GetAt(i);
         if (pConfUser->eStatus == STATUS_IDLE)
         {
             nStartIndex = i;
@@ -459,7 +464,7 @@ void ExpandController::RecoverOnReferring()
 
         if (ConferenceConfigurationHelper::GetReferTypeForInvite(
                     m_objContext.GetConfigurationProxy()) ==
-                CarrierConfig::ImsVoice::CONFERENCE_INVITE_REFER_SINGLE)
+                ConfigVoice::CONFERENCE_INVITE_REFER_SINGLE)
         {
             Resume1to1Session();
             GetConferenceCall()->Terminate(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR, -1));

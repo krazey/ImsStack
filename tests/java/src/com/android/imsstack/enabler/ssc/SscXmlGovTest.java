@@ -27,7 +27,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.android.imsstack.core.agents.ConfigAgent;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.ssc.data.CbServiceQueryData;
 import com.android.imsstack.enabler.ssc.data.CbServiceUpdateData;
@@ -63,7 +63,7 @@ public class SscXmlGovTest {
     private static final int SLOT_0 = 0;
 
     @Mock private CarrierConfig mMockCarrierConfig;
-    @Mock private ConfigAgent mMockConfigAgent;
+    @Mock private ConfigInterface mMockConfigInterface;
     @Mock private SscXmlCreator mMockXmlCreator;
     @Mock private SscXmlParser mMockXmlParser;
 
@@ -73,8 +73,8 @@ public class SscXmlGovTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        SscConfig.setConfigInterface(SLOT_0, mMockConfigInterface);
 
         mSscXmlGov = SscXmlGov.getInstance(SLOT_0);
         mSscXmlGov.init();
@@ -174,12 +174,12 @@ public class SscXmlGovTest {
         replaceInstance(SscXmlGov.class, "mSscXmlParser", mSscXmlGov, mMockXmlParser);
         when(mMockXmlParser.getSscServiceFromDoc(any(), any(), any())).thenReturn(parsedData);
 
-        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_SS_BOOL))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.ImsSs.KEY_UT_OMIT_NAMESPACE_SS_BOOL))
                 .thenReturn(false);
-        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_CP_BOOL))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.ImsSs.KEY_UT_OMIT_NAMESPACE_CP_BOOL))
                 .thenReturn(false);
         when(mMockCarrierConfig
-                .getBoolean(CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_OF_DOCUMENT_ELEMENT_BOOL))
+                .getBoolean(CarrierConfig.ImsSs.KEY_UT_OMIT_NAMESPACE_OF_DOCUMENT_ELEMENT_BOOL))
                 .thenReturn(true);
 
         SscServiceData result = mSscXmlGov.parseXmlStream(queryData, xmlDoc);
@@ -203,12 +203,12 @@ public class SscXmlGovTest {
         replaceInstance(SscXmlGov.class, "mSscXmlParser", mSscXmlGov, mMockXmlParser);
         when(mMockXmlParser.getSscServiceFromDoc(any(), any(), any())).thenReturn(parsedData);
 
-        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_SS_BOOL))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.ImsSs.KEY_UT_OMIT_NAMESPACE_SS_BOOL))
                 .thenReturn(true);
-        when(mMockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_CP_BOOL))
+        when(mMockCarrierConfig.getBoolean(CarrierConfig.ImsSs.KEY_UT_OMIT_NAMESPACE_CP_BOOL))
                 .thenReturn(true);
         when(mMockCarrierConfig
-                .getBoolean(CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_OF_DOCUMENT_ELEMENT_BOOL))
+                .getBoolean(CarrierConfig.ImsSs.KEY_UT_OMIT_NAMESPACE_OF_DOCUMENT_ELEMENT_BOOL))
                 .thenReturn(false);
 
         SscServiceData result = mSscXmlGov.parseXmlStream(queryData, xmlDoc);
@@ -535,6 +535,17 @@ public class SscXmlGovTest {
                 // OCB
                 + "<ss:outgoing-communication-barring active=\"true\">"
                 + "<cp:ruleset xmlns:cp=\"urn:ietf:params:xml:ns:common-policy\">"
+                // OCB audio media
+                + "<cp:rule id=\"call-barring-all-outgoing-audio\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:media>audio</ss:media>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:allow>false</ss:allow>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                // OCB no media
                 + "<cp:rule id=\"call-barring-all-outgoing\">"
                 + "<cp:conditions>"
                 + "<ss:rule-deactivated/>"
@@ -569,6 +580,25 @@ public class SscXmlGovTest {
                 + "<ss:communication-diversion active=\"true\">"
                 + "<ss:NoReplyTimer>25</ss:NoReplyTimer>"
                 + "<cp:ruleset>"
+                // CD - CFB audio
+                + "<cp:rule id=\"call-diversion-busy-audio\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:media>audio</ss:media>"
+                + "<ss:busy/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>tel:+1234567890</ss:target>"
+                + "<ss:notify-caller>true</ss:notify-caller>"
+                + "<ss:reveal-identity-to-caller>true</ss:reveal-identity-to-caller>"
+                + "<ss:reveal-served-user-identity-to-caller>false"
+                + "</ss:reveal-served-user-identity-to-caller>"
+                + "<ss:reveal-identity-to-target>false</ss:reveal-identity-to-target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                // CD - no media
                 + "<cp:rule id=\"call-diversion-unconditional\">"
                 + "<cp:conditions>"
                 + "<ss:rule-deactivated/>"
@@ -647,6 +677,26 @@ public class SscXmlGovTest {
                 + "<ss:reveal-identity-to-caller>true</ss:reveal-identity-to-caller>"
                 + "<ss:reveal-served-user-identity-to-caller>false"
                 + "</ss:reveal-served-user-identity-to-caller>"
+                + "<ss:reveal-identity-to-target>false</ss:reveal-identity-to-target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                // CD - CFU audio
+                + "<cp:rule id=\"call-diversion-unconditional-audio\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:media>audio</ss:media>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>tel:+1234567890</ss:target>"
+                + "<ss:notify-caller>true</ss:notify-caller>"
+                + "<ss:reveal-identity-to-caller>true</ss:reveal-identity-to-caller>"
+                + "<ss:reveal-served-user-identity-to-caller>false"
+                + "</ss:reveal-served-user-identity-to-caller>"
+                + "<ss:notify-served-user>false</ss:notify-served-user>"
+                + "<ss:notify-served-user-on-outbound-call>false"
+                + "</ss:notify-served-user-on-outbound-call>"
                 + "<ss:reveal-identity-to-target>false</ss:reveal-identity-to-target>"
                 + "</ss:forward-to>"
                 + "</cp:actions>"
@@ -807,6 +857,12 @@ public class SscXmlGovTest {
                 + "<ss:terminating-identity-presentation-restriction>"
                 + "<ss:default-behaviour>presentation-not-restricted</ss:default-behaviour>"
                 + "</ss:terminating-identity-presentation-restriction>"
+                // Etc
+                + "<mmt-serv:user-common-data xmlns:mmt-serv=\"http://schemas.ericsson.com/mmtel/services\">"
+                + "<mmt-serv:target-list fixed-targets=\"true\">"
+                + "<mmt-serv:target id=\"tel:+61482880000\" name=\"Secondary Device 1\"/>"
+                + "</mmt-serv:target-list>"
+                + "</mmt-serv:user-common-data>"
                 + "</ss:simservs>";
 
         Document document;

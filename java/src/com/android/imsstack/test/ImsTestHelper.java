@@ -21,12 +21,17 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Parcel;
 
+import androidx.annotation.Nullable;
+
+import com.android.imsstack.base.AppContext;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistration.CapabilityPairs;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.NetworkType;
 import com.android.imsstack.enabler.media.MediaConstants;
 import com.android.imsstack.enabler.mtc.IUMtcService;
+import com.android.imsstack.enabler.mtc.IncomingMtcCall;
 import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcCall;
@@ -40,7 +45,6 @@ import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.SystemInterface;
-import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -57,45 +61,48 @@ public final class ImsTestHelper {
 
     private static MtcCall sTempCall = null;
 
-    private Context mContext;
     private ImsTestHelperReceiver mReceiver;
 
-    public ImsTestHelper () {
-        ImsLog.d("ImsTestHelper is loaded");
-
-        mContext = AppContext.getInstance();
-        if (mContext == null) {
-            return;
-        }
-        mReceiver = new ImsTestHelperReceiver();
-        mContext.registerReceiver(mReceiver, mReceiver.getFilter(), Context.RECEIVER_EXPORTED);
-    }
-
     public static ImsTestHelper getInstance() {
-
-        if ( sImsTestHelper == null ) {
+        if (sImsTestHelper == null) {
             sImsTestHelper = new ImsTestHelper();
         }
         return sImsTestHelper;
     }
 
+    public void init() {
+        ImsLog.d("init");
+
+        if (mReceiver != null) {
+            mReceiver.unregister();
+        }
+        mReceiver = new ImsTestHelperReceiver();
+        mReceiver.register();
+    }
+
     public void cleanup() {
-        ImsLog.d("cleanup()");
+        ImsLog.d("cleanup");
+
+        if (mReceiver != null) {
+            mReceiver.unregister();
+            mReceiver = null;
+        }
     }
 
     @VisibleForTesting
     protected static class ImsTestHelperReceiver extends BroadcastReceiver {
-        IntentFilter mIntentFilter = new IntentFilter();
+        public void register() {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(INTENT_AOS_TEST);
+            filter.addAction(INTENT_SRVCC_TEST);
+            filter.addAction(INTENT_MTC_TEST);
+            filter.addAction(INTENT_QOS_TEST);
 
-        public ImsTestHelperReceiver() {
-            mIntentFilter.addAction(INTENT_AOS_TEST);
-            mIntentFilter.addAction(INTENT_SRVCC_TEST);
-            mIntentFilter.addAction(INTENT_MTC_TEST);
-            mIntentFilter.addAction(INTENT_QOS_TEST);
+            AppContext.getInstance().getBroadcastReceiverProxy().registerReceiver(this, filter);
         }
 
-        public IntentFilter getFilter() {
-            return mIntentFilter;
+        public void unregister() {
+            AppContext.getInstance().getBroadcastReceiverProxy().unregisterReceiver(this);
         }
 
         @Override
@@ -105,19 +112,25 @@ public final class ImsTestHelper {
             ImsLog.d(ImsLog.lastSubString(action, "."));
 
             if (action.equals(INTENT_AOS_TEST)) {
-                String strEvent = intent.getStringExtra("event");
-                if (strEvent.equalsIgnoreCase("capa")) {
-                    sendCapabilitiesChanged(intent.getStringExtra("network"),
+                String event = intent.getStringExtra("event");
+                if ("capa".equalsIgnoreCase(event)) {
+                    sendCapabilitiesChanged(
+                            intent.getIntExtra("slotid", 0),
+                            intent.getStringExtra("network"),
                             intent.getStringExtra("voice"), intent.getStringExtra("video"),
-                            intent.getStringExtra("call_composer"));
-                } else if (strEvent.equalsIgnoreCase("vops")) {
+                            intent.getStringExtra("sms"),
+                            intent.getStringExtra("text"),
+                            intent.getStringExtra("call_composer"),
+                            intent.getStringExtra("call_composer_business_only"));
+                } else if ("vops".equalsIgnoreCase(event)) {
                     sendVopsChanged(intent.getIntExtra("state", 0));
                 }
             } else if (action.equals(INTENT_SRVCC_TEST)) {
                 sendSrvccEvent(intent.getIntExtra("type", -1));
             } else if (action.equals(INTENT_MTC_TEST)) {
                 sendMtcTestCommand(intent.getIntExtra("command", -1),
-                        intent.getIntExtra("slotid", 0), intent.getIntArrayExtra("extras"));
+                        intent.getIntExtra("slotid", 0), intent.getStringExtra("callee"),
+                        intent.getIntArrayExtra("extras"));
             } else if (action.equals(INTENT_QOS_TEST)) {
                 sendQosChanged(intent.getIntExtra("call", -1),
                         intent.getIntExtra("media", -1), intent.getStringExtra("ipaddress"),
@@ -126,30 +139,38 @@ public final class ImsTestHelper {
         }
 
         // CAPABILITIES CHANGED TEST
-        // extra parameter : network type, voice capa, video capa, call_composer capa
+        // extra parameter : network type, voice capa, video capa, sms capa, call_composer capa,
+        //                   call_composer_business_only capa
         // network = LTE / NR / IWLAN / UTRAN (multiple use with comma separated)
         // capa = 0 / 1 (multiple use with comma separated in network input order.)
-        // ex) adb shell am broadcast -a com.android.imsstack.action.INTENT_AOS_TEST
+        // ex) adb shell am broadcast -a com.android.imsstack.action.INTENT_AOS_TEST --ei slotid 0
         //     --es event capa --es network LTE,NR,IWLAN,UTRAN --es voice 1,1,0,0 --es video 0,0,1,0
-        //     --es call_composer 1,1,1,0
-        private void sendCapabilitiesChanged(
-                String strNetwork, String strVoice, String strVideo, String strCallComposer) {
-            ImsLog.d("sendCapabilitiesChanged :: network=" + strNetwork + ", voice=" + strVoice +
-                    ", video=" + strVideo + ", call_composer=" + strCallComposer);
+        //     --es sms 1,1,1,0 --es text 1,1,1,0 --es call_composer 1,1,1,0
+        //     --es call_composer_business_only 1,1,1,0
+        private void sendCapabilitiesChanged(int slotId,
+                String strNetwork, String strVoice, String strVideo, String strSms, String strText,
+                String strCallComposer, String strBizCallComposer) {
+            ImsLog.d("sendCapabilitiesChanged :: slot id=" + slotId + ", network=" + strNetwork
+                    + ", voice=" + strVoice + ", video=" + strVideo + ", sms=" + strSms + ", text="
+                    + strText + ", call_composer=" + strCallComposer
+                    + ", call_composer_business_only=" + strBizCallComposer);
 
             AosFactory aosFactory = AosFactory.getInstance();
-            IAosRegistration iAosRegistration = aosFactory.getAosRegistration(0);
+            IAosRegistration iAosRegistration = aosFactory.getAosRegistration(slotId);
 
             String[] strNetworks = strNetwork.split(",");
             String[] strVoices = strVoice.split(",");
             String[] strVideos = strVideo.split(",");
+            String[] strSmss = strSms.split(",");
+            String[] strTexts = strText.split(",");
             String[] strCallComposers = strCallComposer.split(",");
+            String[] strBizCallComposers = strBizCallComposer.split(",");
 
             CapabilityPairs objCapabilityPairs = new CapabilityPairs();
 
             for (int i = 0; i < strNetworks.length; i++)
             {
-                int nNetwork = -1;
+                NetworkType nNetwork = NetworkType.NONE;
                 if (strNetworks[i].equalsIgnoreCase("LTE")) {
                     nNetwork = IAosRegistrationListener.NetworkType.LTE;
                 } else if (strNetworks[i].equalsIgnoreCase("NR")) {
@@ -169,8 +190,21 @@ public final class ImsTestHelper {
                     nCapabilities |= IAosRegistrationListener.Capability.VIDEO;
                 }
 
+                if (strSmss[i].equals("1")) {
+                    nCapabilities |= IAosRegistrationListener.Capability.SMS;
+                }
+
+                if (strTexts[i].equals("1")) {
+                    nCapabilities |= IAosRegistrationListener.Capability.TEXT;
+                }
+
                 if (strCallComposers[i].equals("1")) {
                     nCapabilities |= IAosRegistrationListener.Capability.CALL_COMPOSER;
+                }
+
+                if (strBizCallComposers[i].equals("1")) {
+                    nCapabilities |=
+                            IAosRegistrationListener.Capability.CALL_COMPOSER_BUSINESS_ONLY;
                 }
 
                 objCapabilityPairs.addCapability(nNetwork, nCapabilities);
@@ -202,27 +236,22 @@ public final class ImsTestHelper {
         private void sendSrvccEvent(int state) {
             ImsLog.d("sendSrvccEvent :: nState=" + state);
 
-            ImsServiceManager sm = ImsServiceManager.getDefault();
-            ImsCallApp callApp = sm.getCallApp(0);
-            if (callApp == null) {
+            MmTelFeatureRegistry mmTelFeatureRegistry = getMmTelFeatureRegistry();
+
+            if (mmTelFeatureRegistry == null) {
                 return;
             }
-
-            MmTelFeatureRegistry mmtelFeatureRegistry = ImsServiceRegistry.getInstance(
-                    callApp.getPhoneId()).getMmTelFeatureRegistry();
-
-            if (mmtelFeatureRegistry == null) {
-                return;
-            }
-            mmtelFeatureRegistry.setSrvccState(state);
+            mmTelFeatureRegistry.setSrvccState(state);
         }
 
         // MTC TEST COMMAND (Native MTC only)
         // extra parameter : test command, WParam, LParam
-        // ex)  adb shell am broadcast -a com.android.imsstack.action.INTENT_MTC_TEST
-        // .    --ei command 0 --ei slotid 0 --eia extras 0,0,1...
+        // ex)  adb shell am broadcast -a com.android.imsstack.action.INTENT_MTC_START_TEST
+        //     --ei command 102 --ei slotid 0 --es callee +1234567890 --eia extras 1,3,-1,-1
         // no exception check for the array as it's only for test
-        private void sendMtcTestCommand(int command, int slotId, int[] extras) {
+
+        private void sendMtcTestCommand(
+                int command, int slotId, @Nullable String callee, int[] extras) {
             ImsLog.d("sendMtcTestCommand :: command=" + command);
 
             ImsServiceManager sm = ImsServiceManager.getDefault();
@@ -245,24 +274,25 @@ public final class ImsTestHelper {
                 return;
             } else if (command == 101) {
                 // 0 : callAttributes
-                // 1 : serviceType, 2 : emergency, 3 : offline, 4 : ussi
+                // 1 : serviceType, 2 : emergencyType, 3 : offline, 4 : ussi
                 ImsLog.d("sendMtcTestCommand :: open call");
                 sTempCall = mtcApp.createMtcCallAndAttach(extras[0]);
-                sTempCall.open(extras[1], extras[2] != 0, extras[3] != 0, extras[4] != 0);
+                sTempCall.open(extras[1], extras[2], extras[3] != 0, extras[4] != 0, false);
                 return;
             } else if (command == 102) {
-                // 0 : callType
-                // 1 : callee, 2 : actualCallee, 3 ~ 5 : audio/video/text direction
                 ImsLog.d("sendMtcTestCommand :: start call");
                 if (sTempCall == null) {
                     return;
                 }
+
                 MediaInfo mediaInfo = new MediaInfo();
-                mediaInfo.ADir = extras[3];
-                mediaInfo.VDir = extras[4];
-                mediaInfo.TDir = extras[5];
-                SuppInfo suppInfo = new SuppInfo();
-                sTempCall.start(extras[0], extras[1] + "", extras[2] + "", mediaInfo, suppInfo);
+
+                // 0 : callType
+                // 1 ~ 2 : audio/video/text direction
+                mediaInfo.audioDir = extras[1];
+                mediaInfo.videoDir = extras[2];
+                mediaInfo.textDir = extras[3];
+                sTempCall.start(extras[0], callee, callee, mediaInfo, new SuppInfo());
                 return;
             } else if (command == 103) {
                 // 0 : reason
@@ -279,13 +309,63 @@ public final class ImsTestHelper {
                 }
                 sTempCall.close();
                 return;
+            } else if (command == 105) {
+                ImsLog.d("sendMtcTestCommand :: accept call");
+                if (sTempCall == null) {
+                    ImsLog.e("call is null");
+                    return;
+                }
+
+                MediaInfo mediaInfo = new MediaInfo();
+                mediaInfo.audioDir = extras[1];
+                mediaInfo.videoDir = extras[2];
+                mediaInfo.textDir = extras[3];
+                sTempCall.accept(extras[0], mediaInfo);
+                return;
+            } else if (command == 106) {
+                ImsLog.d("sendMtcTestCommand :: setCallListener");
+                mtcApp.setCallListener(new MtcApp.CallListener() {
+                    @Override
+                    public void onPreIncomingCallReceived(MtcApp app, long nativeCallObject) {
+                        ImsLog.d("onPreIncomingCallReceived");
+                        sTempCall = mtcApp.getPendingCall(nativeCallObject);
+                        if (sTempCall == null) {
+                            ImsLog.e("call is null");
+                            return;
+                        }
+                        sTempCall.setListener(new MtcCall.Listener() {
+                            @Override
+                            public void onCallIncomingReceived(
+                                    MtcCall call, IncomingMtcCall incomingCall) {
+                                ImsLog.d("onCallIncomingReceived");
+                                call.alertUser();
+                            }
+                        });
+                    }
+                });
+                return;
+            } else if (command == 107) {
+                ImsLog.d("sendMtcTestCommand :: setTerminalBasedCallWaiting");
+                MmTelFeatureRegistry mmTelFeatureRegistry = getMmTelFeatureRegistry();
+
+                if (mmTelFeatureRegistry == null) {
+                    return;
+                }
+                mmTelFeatureRegistry.setTerminalBasedCallWaitingStatus(extras[0] == 1);
+                return;
             }
 
             Parcel parcel = Parcel.obtain();
             parcel.writeInt(IUMtcService.TEST_COMMAND);
             parcel.writeInt(command);
-            parcel.writeInt(extras[0]);
-            parcel.writeInt(extras[1]);
+
+            if (extras != null && extras.length > 1) {
+                parcel.writeInt(extras[0]);
+                parcel.writeInt(extras[1]);
+            } else {
+                parcel.writeInt(0);
+                parcel.writeInt(0);
+            }
 
             MtcJniProxy.getInstance().sendDataToNative(mtcApp.getJNIService(), parcel);
         }
@@ -298,7 +378,11 @@ public final class ImsTestHelper {
         // ex)  adb shell am broadcast -a com.android.imsstack.action.INTENT_QOS_TEST
         // .    --ei call 0 --ei media 0 --es ipaddress 192.168.0.1 --ei port 50010 --ei result 1
         private void sendQosChanged(int call, int media, String ipAddress, int port, int result) {
-            ImsLog.d("sendQosChanged :: call=" + call + ", media=" + media);
+            ImsLog.d("sendQosChanged :: call=" + call
+                    + ", media=" + media
+                    + ", ipAddress=" + ipAddress
+                    + ", port=" + port
+                    + ", result=" + result);
 
             ImsServiceManager sm = ImsServiceManager.getDefault();
             ImsCallApp callApp = sm.getCallApp(0);
@@ -335,6 +419,23 @@ public final class ImsTestHelper {
             parcel.writeBoolean(result == 1);
 
             MtcJniProxy.getInstance().sendDataToNative(mtcCall.getNativeCallId(), parcel);
+        }
+
+        private MmTelFeatureRegistry getMmTelFeatureRegistry() {
+            ImsServiceManager sm = ImsServiceManager.getDefault();
+            ImsCallApp callApp = sm.getCallApp(0);
+            if (callApp == null) {
+                return null;
+            }
+
+            MmTelFeatureRegistry mmtelFeatureRegistry = ImsServiceRegistry.getInstance(
+                    callApp.getPhoneId()).getMmTelFeatureRegistry();
+
+            if (mmtelFeatureRegistry == null) {
+                return null;
+            }
+
+            return mmtelFeatureRegistry;
         }
     }
 }

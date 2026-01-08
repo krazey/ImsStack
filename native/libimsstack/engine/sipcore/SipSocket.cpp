@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 #include "CarrierConfig.h"
+#include "INetworkConnection.h"
 #include "INetworkIpSec.h"
+#include "ISystemProperty.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
+#include "ServiceTrace.h"
 #include "ServiceUtil.h"
 
 #include "ISipKeepAliveListener.h"
 #include "ISipSocketListener.h"
+#include "Sip.h"
 #include "SipDebug.h"
 #include "SipFeatures.h"
 #include "SipPrivate.h"
+#include "SipRtConfigHelper.h"
 #include "SipRtConfigUtils.h"
 #include "SipSocket.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipSocket::SipSocket(
@@ -149,7 +154,7 @@ IMS_SINT32 SipSocket::RemoveListener(IN const ISipSocketListener* piListener)
 {
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        ISipSocketListener* piTmpListener = m_objListeners.GetAt(i);
+        const ISipSocketListener* piTmpListener = m_objListeners.GetAt(i);
 
         if (piTmpListener != IMS_NULL)
         {
@@ -169,7 +174,7 @@ void SipSocket::SetListener(IN ISipSocketListener* piListener)
 {
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        ISipSocketListener* piTmpListener = m_objListeners.GetAt(i);
+        const ISipSocketListener* piTmpListener = m_objListeners.GetAt(i);
 
         if (piTmpListener != IMS_NULL)
         {
@@ -268,13 +273,14 @@ PROTECTED VIRTUAL void SipSocket::Socket_OnClosed(
 
 PROTECTED
 void SipSocket::ApplyIpSecInternal(IN const SocketAddress& objLocal,
-        IN const SocketAddress* pRemote /*= IMS_NULL*/, IN ISocket* piAcceptedSocket /*= IMS_NULL*/)
+        IN const SocketAddress* pRemote /*= IMS_NULL*/,
+        IN SipSocket* pAcceptedSocket /*= IMS_NULL*/)
 {
     INetworkIpSec* piIpSec = NetworkService::GetNetworkService()->GetIpSec(GetSlotId());
 
     if (piIpSec != IMS_NULL)
     {
-        if (piAcceptedSocket == IMS_NULL)
+        if (pAcceptedSocket == IMS_NULL)
         {
             IMS_TRACE_D("ApplyIpSecInternal: socket=%d, local-addr=(%s), remote-addr=(%s)",
                     m_piSocket->GetSocketId(), objLocal.ToString().GetStr(),
@@ -285,9 +291,10 @@ void SipSocket::ApplyIpSecInternal(IN const SocketAddress& objLocal,
         else
         {
             IMS_TRACE_D("ApplyIpSecInternal: socket=%d, serverSocket=%d",
-                    piAcceptedSocket->GetSocketId(), m_piSocket->GetSocketId(), 0);
+                    pAcceptedSocket->m_piSocket->GetSocketId(), m_piSocket->GetSocketId(), 0);
 
-            piIpSec->ApplyIpSecTransform(piAcceptedSocket, m_piSocket);
+            piIpSec->ApplyIpSecTransform(pAcceptedSocket->m_piSocket, m_piSocket,
+                    pAcceptedSocket->m_objSockAddr.GetSocketAddress());
         }
     }
 }
@@ -315,7 +322,7 @@ void SipSocket::NotifyPongReceived()
 
 PROTECTED
 void SipSocket::SetSocketOptionForTcpMaxSeg(
-        IN INetworkConnection* piConnection, IN const IpAddress& objLocalIp)
+        IN const INetworkConnection* piConnection, IN const IpAddress& objLocalIp)
 {
     // MSS(Max Segment Size) for TCP
     IMS_SINT32 nMss = piConnection->GetMtu();
@@ -383,7 +390,7 @@ void SipSocket::SetSocketOptions(IN const IpAddress& objLocalIp, IN IMS_UINT32 n
         }
     }
 
-    SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(GetSlotId());
+    const SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(GetSlotId());
 
     // IP-level QoS option
     if (pConfigHelper->IsItemConfigured(SipRtConfig::CONFIG_I_IP_QOS))
@@ -421,7 +428,7 @@ PROTECTED GLOBAL void SipSocket::SetSocketOption(IN IMS_SINT32 nSlotId, IN ISock
         IN const IpAddress& objLocalIp, IN IMS_UINT32 nLocalPort, IN IMS_SINT32 nConfigItem,
         IN IMS_SINT32 nSocketOption, IN const IMS_CHAR* pszOptionName)
 {
-    SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(nSlotId);
+    const SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(nSlotId);
 
     if (pConfigHelper->IsItemConfigured(nConfigItem))
     {

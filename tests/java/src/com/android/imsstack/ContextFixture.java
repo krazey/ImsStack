@@ -55,8 +55,11 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.hardware.SensorManager;
+import android.hardware.camera2.CameraManager;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
+import android.net.IpSecManager;
 import android.net.NetworkPolicyManager;
 import android.net.Uri;
 import android.net.vcn.VcnManager;
@@ -294,7 +297,6 @@ public class ContextFixture implements TestFixture<Context> {
                 case Context.POWER_SERVICE:
                 case Context.PERMISSION_SERVICE:
                 case Context.LEGACY_PERMISSION_SERVICE:
-                case Context.SMS_SERVICE:
                     // These are final classes so cannot be mocked,
                     // return real services.
                     return TestApplication.getAppContext().getSystemService(name);
@@ -304,6 +306,14 @@ public class ContextFixture implements TestFixture<Context> {
                     return mNetworkPolicyManager;
                 case Context.TELEPHONY_IMS_SERVICE:
                     return mImsManager;
+                case Context.SMS_SERVICE:
+                    return mSmsManager;
+                case Context.IPSEC_SERVICE:
+                    return mIpSecManager;
+                case Context.SENSOR_SERVICE:
+                    return mSensorManager;
+                case Context.CAMERA_SERVICE:
+                    return mCameraManager;
                 default:
                     return null;
             }
@@ -353,6 +363,12 @@ public class ContextFixture implements TestFixture<Context> {
                 return Context.POWER_SERVICE;
             } else if (serviceClass == SmsManager.class) {
                 return Context.SMS_SERVICE;
+            } else if (serviceClass == IpSecManager.class) {
+                return Context.IPSEC_SERVICE;
+            } else if (serviceClass == SensorManager.class) {
+                return Context.SENSOR_SERVICE;
+            } else if (serviceClass == CameraManager.class) {
+                return Context.CAMERA_SERVICE;
             }
             return super.getSystemServiceName(serviceClass);
         }
@@ -712,7 +728,7 @@ public class ContextFixture implements TestFixture<Context> {
     private final CarrierConfigManager mCarrierConfigManager = mock(CarrierConfigManager.class);
     private final SubscriptionManager mSubscriptionManager = mock(SubscriptionManager.class);
     private final AlarmManager mAlarmManager = mock(AlarmManager.class);
-    private final AssetManager mAssetManager = new AssetManager();
+    private final AssetManager mAssetManager = mock(AssetManager.class);
     private final ConnectivityManager mConnectivityManager = mock(ConnectivityManager.class);
     private final UsageStatsManager mUsageStatManager = null;
     private final WifiManager mWifiManager = mock(WifiManager.class);
@@ -728,6 +744,10 @@ public class ContextFixture implements TestFixture<Context> {
     private final VcnManager mVcnManager = mock(VcnManager.class);
     private final NetworkPolicyManager mNetworkPolicyManager = mock(NetworkPolicyManager.class);
     private final ImsManager mImsManager = mock(ImsManager.class);
+    private final SmsManager mSmsManager = mock(SmsManager.class);
+    private final IpSecManager mIpSecManager = mock(IpSecManager.class);
+    private final SensorManager mSensorManager = mock(SensorManager.class);
+    private final CameraManager mCameraManager = mock(CameraManager.class);
     private final Configuration mConfiguration = new Configuration();
     private final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
     private final SharedPreferences mSharedPreferences = PreferenceManager
@@ -773,7 +793,7 @@ public class ContextFixture implements TestFixture<Context> {
             Log.d(TAG, "NameNotFoundException: " + ex);
         }
 
-        doReturn(mBundle).when(mCarrierConfigManager).getConfigForSubId(anyInt());
+        doReturn(mBundle).when(mCarrierConfigManager).getConfigForSubId(anyInt(), any());
         //doReturn(mBundle).when(mCarrierConfigManager).getConfig(anyInt());
         doReturn(mBundle).when(mCarrierConfigManager).getConfig();
 

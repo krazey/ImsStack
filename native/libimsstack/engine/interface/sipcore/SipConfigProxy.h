@@ -16,7 +16,13 @@
 #ifndef SIP_CONFIG_PROXY_H_
 #define SIP_CONFIG_PROXY_H_
 
-#include "SipProfile.h"
+#include "ImsTypeDef.h"
+
+class AString;
+class AStringArray;
+
+class ISipConfigV;
+class SipProfile;
 
 /**
  * @brief This class providers a helper interface to check SIP configuration
@@ -38,6 +44,7 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return The type of device id(+sip.instance).\n
      *         #ISipConfig#DEVICE_ID_GSMA_IMEI\n
+     *         #ISipConfig#DEVICE_ID_GSMA_IMEISV\n
      *         #ISipConfig#DEVICE_ID_UUID_IMEI_MD5\n
      *         #ISipConfig#DEVICE_ID_UUID_IMEI_SHA1\n
      *         #ISipConfig#DEVICE_ID_UUID_IMEI_NAMED_V3\n
@@ -80,7 +87,6 @@ public:
      *         #ISipConfig#SIP_FEATURE_CAPS_GRUU\n
      *         #ISipConfig#SIP_FEATURE_CAPS_RPORT\n
      *         #ISipConfig#SIP_FEATURE_CAPS_KEEP\n
-     *         #ISipConfig#SIP_FEATURE_CAPS_MULTIPLE_REG\n
      *         #ISipConfig#SIP_FEATURE_CAPS_TRUST_DOMAIN\n
      *         #ISipConfig#SIP_FEATURE_CAPS_UDP_FALLBACK\n
      *         #ISipConfig#SIP_FEATURE_CAPS_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR\n
@@ -88,7 +94,6 @@ public:
      *         #ISipConfig#SIP_FEATURE_CAPS_SESSION_TIMER_UPDATE_REQUIRED_BY_REINVITE\n
      *         #ISipConfig#SIP_FEATURE_CAPS_SIP_INSTANCE_PARAM_REQUIRED_IN_CONTACT_FOR_NON_REGISTER_REQUEST\n
      *         #ISipConfig#SIP_FEATURE_CAPS_SUPPORT_SESSION_ID_HEADER\n
-     *         #ISipConfig#SIP_FEATURE_CAPS_HIDE_MAC_ADDRESS_IN_PANI_HEADER\n
      *         #ISipConfig#SIP_FEATURE_CAPS_LOCAL_TIMEZONE_PARAM_IN_PANI_HEADER\n
      *         #ISipConfig#SIP_FEATURE_CAPS_PANI_HEADER_IN_INITIAL_REG\n
      *         #ISipConfig#SIP_FEATURE_CAPS_PPI_HEADER_IN_REG_SUB\n
@@ -167,6 +172,13 @@ public:
      */
     static const AStringArray& GetRegAllowMethods(
             IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
+    /**
+     * @brief Gets the rule of user-info part of Contact header for IMS registration.
+     *
+     * @param nSlotId The current slot id
+     * @return The rule of user-info part of Contact header.
+     */
+    static IMS_SINT32 GetRegContactUserInfoPart(IN IMS_SINT32 nSlotId);
     /**
      * @brief Gets the expires value for IMS registration.
      *
@@ -356,16 +368,19 @@ public:
     static IMS_BOOL IsKeepAliveConfigured(
             IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
-     * @brief Checks if the multiple registration ("reg-id" parameter) is configured or not.
-     *
-     * SipProfile is preferred than a default SipConfig.
+     * @brief Checks if the multiple registration feature is configured or not.
      *
      * @param nSlotId The current slot id
-     * @param pProfile The dynamic SIP profile
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsMultipleRegConfigured(
-            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsMultipleRegConfigured(IN IMS_SINT32 nSlotId);
+    /**
+     * @brief Checks if the "reg-id" parameter in REGISTER request is configured or not.
+     *
+     * @param nSlotId The current slot id
+     * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
+     */
+    static IMS_BOOL IsRegIdParameterConfigured(IN IMS_SINT32 nSlotId);
     /**
      * @brief Checks if the Accept-Contact header in BYE request should not be added or not.
      *
@@ -549,6 +564,22 @@ public:
             IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
 
     /**
+     * @brief Checks if the transport parameter with "udp" should not be evaluated
+     *        when forming the outgoing request from SIP routing address URI.
+     *
+     * If it's a false, the transport parameter will be used to determine the transport protocol
+     * while sending an SIP request.
+     *
+     * SipProfile is preferred than a default SipConfig.
+     *
+     * @param nSlotId The current slot id
+     * @param pProfile The dynamic SIP profile
+     * @return IMS_TRUE if the transport parameter with "udp" is ignored, IMS_FALSE otherwise.
+     */
+    static IMS_BOOL IsUdpTransportParameterIgnoredForOutgoingRequest(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
+
+    /**
      * @brief Checks if the Session-Id header is supported or not.
      *
      * SipProfile is preferred than a default SipConfig.
@@ -561,15 +592,18 @@ public:
             IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
 
     /**
-     * @brief Checks if the MAC address should be hidden in PANI header on Wi-Fi.
+     * @brief Gets the display rule of MAC address in PANI header when using WLAN.
      *
      * SipProfile is preferred than a default SipConfig.
      *
      * @param nSlotId The current slot id
      * @param pProfile The dynamic SIP profile
-     * @return IMS_TRUE if it's required, IMS_FALSE otherwise.
+     * @return The display rule of MAC address.\n
+     *         #SipConfig#SHOW_MAC_IN_PANI\n
+     *         #SipConfig#HIDE_MAC_IN_PANI\n
+     *         #SipConfig#HIDE_MAC_IN_PANI_EXCEPT_N11_AND_ECALL
      */
-    static IMS_BOOL IsMacAddressHiddenInPaniHeader(
+    static IMS_SINT32 GetHideMacInPaniHeaderPolicy(
             IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
 
     /**

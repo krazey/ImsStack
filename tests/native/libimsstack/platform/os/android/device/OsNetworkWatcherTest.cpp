@@ -287,6 +287,36 @@ TEST_F(OsNetworkWatcherTest, GetNetVoiceServiceType)
     EXPECT_EQ(m_pOsNetworkWatcher->GetNetVoiceServiceType(), NW_REPORT_SRV_PWRSAVE);
 }
 
+TEST_F(OsNetworkWatcherTest, GetCellularServiceState)
+{
+    EXPECT_CALL(m_objMockSystem, GetCellularServiceState(_))
+            .Times(1)
+            .WillOnce(Return(INetworkWatcher::STATE_IN_SERVICE));
+    EXPECT_EQ(m_pOsNetworkWatcher->GetCellularServiceState(), INetworkWatcher::STATE_IN_SERVICE);
+
+    EXPECT_CALL(m_objMockSystem, GetCellularServiceState(_))
+            .Times(1)
+            .WillOnce(Return(INetworkWatcher::STATE_OUT_OF_SERVICE));
+    EXPECT_EQ(
+            m_pOsNetworkWatcher->GetCellularServiceState(), INetworkWatcher::STATE_OUT_OF_SERVICE);
+
+    EXPECT_CALL(m_objMockSystem, GetCellularServiceState(_))
+            .Times(1)
+            .WillOnce(Return(INetworkWatcher::STATE_EMERGENCY_ONLY));
+    EXPECT_EQ(
+            m_pOsNetworkWatcher->GetCellularServiceState(), INetworkWatcher::STATE_EMERGENCY_ONLY);
+
+    EXPECT_CALL(m_objMockSystem, GetCellularServiceState(_))
+            .Times(1)
+            .WillOnce(Return(INetworkWatcher::STATE_POWER_OFF));
+    EXPECT_EQ(m_pOsNetworkWatcher->GetCellularServiceState(), INetworkWatcher::STATE_POWER_OFF);
+
+    EXPECT_CALL(m_objMockSystem, GetCellularServiceState(_))
+            .Times(1)
+            .WillOnce(Return(INetworkWatcher::STATE_INVALID));
+    EXPECT_EQ(m_pOsNetworkWatcher->GetCellularServiceState(), INetworkWatcher::STATE_INVALID);
+}
+
 TEST_F(OsNetworkWatcherTest, GetRoamingState)
 {
     EXPECT_CALL(m_objMockSystem, GetRoamingState(_)).Times(1).WillOnce(Return(IMS_TRUE));
@@ -319,16 +349,106 @@ TEST_F(OsNetworkWatcherTest, IsImsVoiceCallSupported)
     EXPECT_EQ(m_pOsNetworkWatcher->IsImsVoiceCallSupported(), IMS_TRUE);
 }
 
-TEST_F(OsNetworkWatcherTest, IsLteEmergencyOnly)
+TEST_F(OsNetworkWatcherTest, IsImsServiceContinuitySupported)
 {
-    EXPECT_CALL(m_objMockSystem, IsLteEmergencyOnly(_)).Times(1).WillOnce(Return(IMS_FALSE));
-    EXPECT_EQ(m_pOsNetworkWatcher->IsLteEmergencyOnly(), IMS_FALSE);
+    // from NR to 2G/3G should be false
+    EXPECT_FALSE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_NR, RADIOTECH_TYPE_GPRS));
+    EXPECT_FALSE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_NR, RADIOTECH_TYPE_EDGE));
+    EXPECT_FALSE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_NR, RADIOTECH_TYPE_IDEN));
+    EXPECT_FALSE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_NR, RADIOTECH_TYPE_GSM));
+    EXPECT_FALSE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_NR, RADIOTECH_TYPE_UMTS));
+    EXPECT_FALSE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_NR, RADIOTECH_TYPE_HSDPA));
+    EXPECT_FALSE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_NR, RADIOTECH_TYPE_HSUPA));
+    EXPECT_FALSE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_NR, RADIOTECH_TYPE_HSPA));
+    EXPECT_FALSE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_NR, RADIOTECH_TYPE_HSPAP));
+    EXPECT_FALSE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_NR, RADIOTECH_TYPE_TD_SCDMA));
+    // from NR to others should be true
+    EXPECT_TRUE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_NR, RADIOTECH_TYPE_INVALID));
+    EXPECT_TRUE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_NR, RADIOTECH_TYPE_UNKNOWN));
+    EXPECT_TRUE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_NR, RADIOTECH_TYPE_LTE));
+    EXPECT_TRUE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_NR, RADIOTECH_TYPE_EHRPD));
+    EXPECT_TRUE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_NR, RADIOTECH_TYPE_IWLAN));
+    EXPECT_TRUE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_NR, RADIOTECH_TYPE_LTE_CA));
+    EXPECT_TRUE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_NR, RADIOTECH_TYPE_NR));
+    // from LTE to any should be true
+    EXPECT_TRUE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_LTE, RADIOTECH_TYPE_INVALID));
+    EXPECT_TRUE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_LTE, RADIOTECH_TYPE_UNKNOWN));
+    EXPECT_TRUE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_LTE, RADIOTECH_TYPE_GPRS));
+    EXPECT_TRUE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_LTE, RADIOTECH_TYPE_EDGE));
+    EXPECT_TRUE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_LTE, RADIOTECH_TYPE_UMTS));
+    EXPECT_TRUE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_LTE, RADIOTECH_TYPE_HSDPA));
+    EXPECT_TRUE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_LTE, RADIOTECH_TYPE_HSUPA));
+    EXPECT_TRUE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_LTE, RADIOTECH_TYPE_HSPA));
+    EXPECT_TRUE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_LTE, RADIOTECH_TYPE_IDEN));
+    EXPECT_TRUE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_LTE, RADIOTECH_TYPE_LTE));
+    EXPECT_TRUE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_LTE, RADIOTECH_TYPE_EHRPD));
+    EXPECT_TRUE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_LTE, RADIOTECH_TYPE_HSPAP));
+    EXPECT_TRUE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_LTE, RADIOTECH_TYPE_GSM));
+    EXPECT_TRUE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_LTE, RADIOTECH_TYPE_TD_SCDMA));
+    EXPECT_TRUE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_LTE, RADIOTECH_TYPE_IWLAN));
+    EXPECT_TRUE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_LTE, RADIOTECH_TYPE_LTE_CA));
+    EXPECT_TRUE(m_pOsNetworkWatcher->IsImsServiceContinuitySupported(
+            RADIOTECH_TYPE_LTE, RADIOTECH_TYPE_NR));
+}
+
+TEST_F(OsNetworkWatcherTest, IsEmergencyOnly)
+{
+    EXPECT_CALL(m_objMockSystem, IsEmergencyOnly(_)).Times(1).WillOnce(Return(IMS_FALSE));
+    EXPECT_EQ(m_pOsNetworkWatcher->IsEmergencyOnly(), IMS_FALSE);
 }
 
 TEST_F(OsNetworkWatcherTest, IsEmergencyAttachSupported)
 {
     EXPECT_CALL(m_objMockSystem, IsEmergencyAttachSupported(_)).Times(1).WillOnce(Return(IMS_TRUE));
     EXPECT_EQ(m_pOsNetworkWatcher->IsEmergencyAttachSupported(), IMS_TRUE);
+}
+
+TEST_F(OsNetworkWatcherTest, GetNetworkRegistrationRejectCause)
+{
+    EXPECT_CALL(m_objMockSystem, GetNetworkRegistrationRejectCause(_)).Times(1).WillOnce(Return(0));
+    EXPECT_EQ(m_pOsNetworkWatcher->GetNetworkRegistrationRejectCause(), 0);
+}
+
+TEST_F(OsNetworkWatcherTest, GetAccessNetworkPlmn)
+{
+    AString strPlmn("00101");
+
+    EXPECT_CALL(m_objMockSystem, GetAccessNetworkPlmn(_)).Times(1).WillOnce(Return(strPlmn));
+
+    EXPECT_EQ(m_pOsNetworkWatcher->GetAccessNetworkPlmn(), strPlmn);
 }
 
 TEST_F(OsNetworkWatcherTest, NotifyEvent)

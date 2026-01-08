@@ -25,21 +25,13 @@ private:
     SipUri* m_pSipUri;
 
 public:
-    /*constructor*/
     SipTriggerConsentHeader();
     SipTriggerConsentHeader(const SipTriggerConsentHeader& objHeader);
 
-    /*destructor*/
-    ~SipTriggerConsentHeader();
-    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
-
-    /*virtual methods*/
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
-    /*Function for encoding of headers*/
-    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
+    SIP_BOOL Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
-    /*Function for decoding of headers*/
-    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     SipUri* GetSipUri();
 
@@ -48,5 +40,10 @@ public:
     {
         return (m_pSipUri == SIP_NULL) ? SIP_FALSE : SIP_TRUE;
     }
+
+    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
+
+private:
+    ~SipTriggerConsentHeader() override;
 };
 #endif  //__SIP_TRIGGER_CONSENT_HEADER_H__

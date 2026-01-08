@@ -29,7 +29,7 @@ class ServerAddress;
 class ISubscriberConfig : public IAsyncConfig
 {
 protected:
-    virtual ~ISubscriberConfig() = default;
+    ~ISubscriberConfig() override = default;
 
 public:
     /**
@@ -155,14 +155,48 @@ public:
      *
      * @param piListener The listener to monitor the subscription change.
      */
-    virtual void RemoveListener(IN ISubscriberConfigListener* piListener) const = 0;
+    virtual void RemoveListener(IN ISubscriberConfigListener* piListener) = 0;
 
     /**
      * @brief Sets the listener to be notified the status of IMS subscriber information.
      *
      * @param piListener The listener to monitor the subscription change.
+     * @param nEvents The events of interest to listen.
      */
-    virtual void SetListener(IN ISubscriberConfigListener* piListener) const = 0;
+    virtual void SetListener(IN ISubscriberConfigListener* piListener,
+            IN IMS_SINT32 nEvents = LISTEN_EVENT_DEFAULT) = 0;
+
+    /**
+     * @brief Enables ISIM attribute. The IMS-AKA also performs using the ISIM instead of USIM.
+     *
+     * NOTE: If ISIM attribute is being enabled, the IMS identities will be loaded from
+     *       the ISIM application. Otherwise, there is no action.
+     */
+    virtual void EnableIsim() = 0;
+
+    /**
+     * @brief Updates IMS identities that are created based on USIM information.
+     *
+     * @param strHomeDomainName The home domain name.
+     * @param strPrivateUserId The private user identity.
+     * @param strPublicUserId The public user identity.
+     * @param bIsimEnabled The flag specifying whether ISIM should be enabled for IMS AKA.
+     */
+    virtual void UpdateSubscriberInfo(IN const AString& strHomeDomainName,
+            IN const AString& strPrivateUserId, IN const AString& strPublicUserId,
+            IN IMS_BOOL bIsimEnabled = IMS_FALSE) = 0;
+
+    /**
+     * @brief Updates IMS identities that are created based on USIM information.
+     *
+     * @param strHomeDomainName The home domain name.
+     * @param strPrivateUserId The private user identity.
+     * @param objPublicUserIds The list of public user identity.
+     * @param bIsimEnabled The flag specifying whether ISIM should be enabled for IMS AKA.
+     */
+    virtual void UpdateSubscriberInfo(IN const AString& strHomeDomainName,
+            IN const AString& strPrivateUserId, IN const AStringArray& objPublicUserIds,
+            IN IMS_BOOL bIsimEnabled = IMS_FALSE) = 0;
 
     //// APIs for the values of a default IImsSubscriberInfo
 
@@ -220,40 +254,20 @@ public:
      */
     virtual const AStringArray& GetPublicUserIds() const = 0;
 
+    /**
+     * @brief Gets the list of P-CSCF address strings (IP address or FQDN) that are stored in ISIM.
+     *        This will be used when the P-CSCF discovery method is #PCSCF_DISCOVERY_METHOD_ISIM.
+     *
+     * @return A list of P-CSCF address.
+     */
+    virtual const AStringArray& GetPcscfAddressesFromIsim() const = 0;
+
 public:
-    /// Error code when the provisioning failed
+    /// Error codes when the provisioning failed
     enum
     {
         ERROR_UNSPECIFIED = 0,
-        ERROR_INIT_FAILED,
-        ERROR_UPDATE_FAILED,
-        ERROR_ALL_CONFIG_DELETED,
         ERROR_NO_ISIM_APPLICATION
-    };
-
-    /// Contents of IST (ISIM Service Table)
-    enum
-    {
-        IST_1_NONE = 0x00,
-
-        /// P-CSCF address
-        IST_1_P_CSCF = 0x01,
-        /// Generic Bootstrapping Architecture (GBA)
-        IST_1_GBA = 0x02,
-        /// HTTP Digest
-        IST_1_HTTP_DIGEST = 0x04,
-        /// GBA-based Local Key Establishment Mechanism
-        IST_1_GBA_BASED_LKEM = 0x08,
-        /// Support of P-CSCF dicovery for IMS Local Break Out
-        IST_1_P_CSCF_DISCOVERY_FOR_IMS_LBO = 0x10,
-        /// Short Message Storage
-        IST_1_SMS = 0x20,
-        /// Short Message Status Reports
-        IST_1_SMSR = 0x40,
-        /// Support for SM-over-IP including data download via SMS-PP as defined in TS 31.111
-        IST_1_SM_OVER_IP = 0x80,
-
-        IST_1_MAX
     };
 
     /// Subscription attributes
@@ -280,7 +294,19 @@ public:
     enum
     {
         PCSCF_DISCOVERY_METHOD_PCO = CarrierConfig::Ims::PCSCF_DISCOVERY_METHOD_PCO,
-        PCSCF_DISCOVERY_METHOD_CONFIG = CarrierConfig::Ims::PCSCF_DISCOVERY_METHOD_CONFIG
+        PCSCF_DISCOVERY_METHOD_CONFIG = CarrierConfig::Ims::PCSCF_DISCOVERY_METHOD_CONFIG,
+        PCSCF_DISCOVERY_METHOD_ISIM = CarrierConfig::Ims::PCSCF_DISCOVERY_METHOD_ISIM
+    };
+
+    /// Listening events for ISubscriberConfigListener
+    enum
+    {
+        /// Calls the listener when anything related to ISIM provisioning changes.
+        LISTEN_EVENT_ISIM_PROVISIONING = 1 << 0,
+        /// Calls the listener when anything related to manual provisioning changes.
+        LISTEN_EVENT_MANUAL_PROVISIONING = 1 << 1,
+        /// Calls the listener when any information changes.
+        LISTEN_EVENT_DEFAULT = LISTEN_EVENT_ISIM_PROVISIONING | LISTEN_EVENT_MANUAL_PROVISIONING
     };
 };
 

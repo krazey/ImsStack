@@ -16,8 +16,13 @@
 #ifndef SIP_MANAGER_H_
 #define SIP_MANAGER_H_
 
-#include "SipConnectionNotifier.h"
-#include "SipDialogState.h"
+#include "AString.h"
+
+#include "msg/SipMessage.h"
+
+class SipConnectionNotifier;
+class SipDialogState;
+class SipTransportAddress;
 
 class SipManager
 {
@@ -32,7 +37,7 @@ public:
 
 public:
     IMS_BOOL AttachDialogState(IN SipDialogState* pDState);
-    void DetachDialogState(IN SipDialogState* pDState);
+    void DetachDialogState(IN const SipDialogState* pDState);
     RcPtr<SipDialogState> LookupDialogState(IN SipDialogState* pDState, IN ::SipMessage* pSipMsg,
             IN IMS_BOOL bCheckForked = IMS_FALSE, OUT IMS_BOOL* pbIsForked = IMS_NULL);
 

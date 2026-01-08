@@ -17,15 +17,11 @@
 #ifndef MOCK_I_MTC_CALL_H_
 #define MOCK_I_MTC_CALL_H_
 
-#include "AString.h"
-#include "IMtcService.h"
-#include "ImsList.h"
-#include "ImsMap.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include <gmock/gmock.h>
 
+class AString;
 class IMtcCallContext;
 class ISession;
 class SuppService;
@@ -33,20 +29,20 @@ enum class UpdateType;
 struct CallReasonInfo;
 struct ConfUser;
 struct MediaInfo;
+template <typename T>
+class ImsList;
 
 class MockIMtcCall : public IMtcCall
 {
 public:
-    ~MockIMtcCall() {}
-
     MOCK_METHOD(void, Attach, (), (override));
     MOCK_METHOD(void, Start,
             (IN CallType eCallType, IN const AString& strTarget, IN MediaInfo& objMediaInfo,
-                    (IN const ImsMap<SuppType, SuppService*>& objSuppServices)),
+                    (IN const ImsList<SuppService*>& objSuppServices)),
             (override));
     MOCK_METHOD(void, StartConference,
             (IN CallType eCallType, IN const AString& strTarget, IN MediaInfo& objMediaInfo,
-                    (IN const ImsMap<SuppType, SuppService*>& objSuppServices),
+                    (IN const ImsList<SuppService*>& objSuppServices),
                     IN const ImsList<ConfUser*>& objUsers),
             (override));
     MOCK_METHOD(void, StartConference,
@@ -69,6 +65,7 @@ public:
     MOCK_METHOD(void, CancelUpdate, (IN const CallReasonInfo& objReason), (override));
     MOCK_METHOD(void, Terminate, (IN const CallReasonInfo& objReason), (override));
     MOCK_METHOD(void, SendUssd, (IN const AString& strUssd), (override));
+    MOCK_METHOD(const AString&, GetLogTag, (), (const, override));
     MOCK_METHOD(CallKey, GetKey, (), (const, override));
     MOCK_METHOD(CallType, GetCallType, (), (const, override));
     MOCK_METHOD(State, GetState, (), (const, override));

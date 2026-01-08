@@ -25,7 +25,6 @@ public:
     static const IMS_CHAR STR_199[];
     static const IMS_CHAR STR_ALERT_URN_CALL_WAITING[];
     static const IMS_CHAR STR_ANONYMOUS[];
-    static const IMS_CHAR STR_UNAVAILABLE[];
     static const IMS_CHAR STR_CONTENT_DISPOSITION_RECIPIENT_LIST[];
     static const IMS_CHAR STR_CONTENT_ID[];
     static const IMS_CHAR STR_CONTENT_TYPE_3GPP_IMS_XML[];
@@ -53,15 +52,13 @@ public:
     static const IMS_CHAR STR_RELEASE_CAUSE_6[];
     static const IMS_CHAR STR_REPLACES[];
     static const IMS_CHAR STR_SERVICE[];
+    static const IMS_CHAR STR_SOS_AIEC[];
     static const IMS_CHAR STR_SOS_AMBULANCE[];
-    static const IMS_CHAR STR_SOS_ANIMAL_CONTROL[];
     static const IMS_CHAR STR_SOS_COUNTRY_SPECIFIC[];
     static const IMS_CHAR STR_SOS_FIRE[];
-    static const IMS_CHAR STR_SOS_GAS[];
     static const IMS_CHAR STR_SOS_MARINE[];
+    static const IMS_CHAR STR_SOS_MIEC[];
     static const IMS_CHAR STR_SOS_MOUNTAIN[];
-    static const IMS_CHAR STR_SOS_PHYSICIAN[];
-    static const IMS_CHAR STR_SOS_POISON[];
     static const IMS_CHAR STR_SOS_POLICE[];
     static const IMS_CHAR STR_SOS[];
     static const IMS_CHAR STR_SRVCC_FEATURE_A[];
@@ -77,8 +74,9 @@ public:
     static const IMS_CHAR STR_P_SKT_BYE_CAUSE[];
     static const IMS_CHAR STR_P_TTA_VOLTE_INFO[];
     static const IMS_CHAR STR_AVCHANGE[];
-    static const IMS_CHAR STR_REASON_USER_SESSIONEXPIRED[];
     static const IMS_CHAR STR_P_COM_ENABLETRANSCODING[];
+    static const IMS_CHAR STR_P_COM_SERVICETYPE[];
+    static const IMS_CHAR STR_STATIC_EMERGENCY[];
 };
 
 #endif

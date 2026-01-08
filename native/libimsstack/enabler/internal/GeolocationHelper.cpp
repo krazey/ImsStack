@@ -18,9 +18,11 @@
 #include "ServiceSystemTime.h"
 #include "SystemConfig.h"
 
-#include "Configuration.h"
+#include "Engine.h"
+#include "IConfiguration.h"
 
 #include "GeolocationHelper.h"
+#include "GeolocationPidfCreator.h"
 
 class GeolocationHelperPrivate
 {
@@ -167,7 +169,7 @@ PUBLIC GLOBAL AString GeolocationHelper::CreateContentId(
     else
     {
         const ISubscriberConfig* piSubsConfig =
-                Configuration::GetInstance()->GetSubscriberConfig(nSlotId);
+                Engine::GetConfiguration()->GetSubscriberConfig(nSlotId);
 
         strContentId.Sprintf("%05x%05x@%s", nMicroSeconds, nRandom,
                 (piSubsConfig == IMS_NULL) ? "unavailable.com"
@@ -191,7 +193,7 @@ PUBLIC GLOBAL const AString& GeolocationHelper::GetCountry(
 
     if (bLocationUpdate)
     {
-        ILocationProperties* piLocation =
+        const ILocationProperties* piLocation =
                 piLocationInfo->GetLocationProperties(ILocationInfo::LOCATION_POSITION_N_COUNTRY);
 
         if (piLocation != IMS_NULL)

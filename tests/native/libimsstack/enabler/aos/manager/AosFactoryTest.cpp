@@ -66,7 +66,7 @@ public:
     ImsMap<IMS_SINT32, ImsAosManager*> m_objOriginManagers;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         m_pOriginAosFactory = TestAosFactory::GetAosFactory();
         m_pOriginLock = TestAosFactory::GetLock();
@@ -77,12 +77,16 @@ protected:
         TestAosFactory::GetManagers().Remove(IMS_SLOT_0);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
+        const ImsAosManager* pAoSMngr = TestAosFactory::GetManager(IMS_SLOT_0);
+        if (pAoSMngr != null)
+        {
+            TestAosFactory::Stop(IMS_SLOT_0);
+        }
         TestAosFactory::DeleteAosFactory();
         TestAosFactory::SetAosFactory(IMS_NULL);
         TestAosFactory::SetLock(IMS_NULL);
-        TestAosFactory::GetManagers().Remove(IMS_SLOT_0);
 
         TestAosFactory::SetAosFactory(m_pOriginAosFactory);
         TestAosFactory::SetLock(m_pOriginLock);
@@ -90,50 +94,76 @@ protected:
     }
 };
 
-TEST_F(AosFactoryTest, Start)
+TEST_F(AosFactoryTest, SucceedStart)
 {
+    // GIVEN
     EXPECT_EQ(TestAosFactory::GetAosFactory(), nullptr);
     EXPECT_EQ(TestAosFactory::GetLock(), nullptr);
     EXPECT_EQ(TestAosFactory::GetManager(), nullptr);
     IMS_SINT32 nManagers = TestAosFactory::GetManagers().GetSize();
 
-    // Test1 : First Start
+    // WHEN
     TestAosFactory::Start(IMS_SLOT_0);
-    EXPECT_NE(TestAosFactory::GetAosFactory(), nullptr);
-    EXPECT_NE(TestAosFactory::GetLock(), nullptr);
-    EXPECT_NE(TestAosFactory::GetManager(), nullptr);
-    EXPECT_EQ(TestAosFactory::GetManagers().GetSize(), nManagers + 1);
 
-    // Test2 : Duplicate Start
-    TestAosFactory::Start(IMS_SLOT_0);
+    // THEN
     EXPECT_NE(TestAosFactory::GetAosFactory(), nullptr);
     EXPECT_NE(TestAosFactory::GetLock(), nullptr);
     EXPECT_NE(TestAosFactory::GetManager(), nullptr);
     EXPECT_EQ(TestAosFactory::GetManagers().GetSize(), nManagers + 1);
 }
 
-TEST_F(AosFactoryTest, Stop)
+TEST_F(AosFactoryTest, FailStartWhenDuplicate)
 {
+    // GIVEN
     EXPECT_EQ(TestAosFactory::GetAosFactory(), nullptr);
     EXPECT_EQ(TestAosFactory::GetLock(), nullptr);
     EXPECT_EQ(TestAosFactory::GetManager(), nullptr);
+    IMS_SINT32 nManagers = TestAosFactory::GetManagers().GetSize();
 
-    // Test1 : Stop without Start
-    TestAosFactory::Stop(IMS_SLOT_0);
+    TestAosFactory::Start(IMS_SLOT_0);
+
     EXPECT_NE(TestAosFactory::GetAosFactory(), nullptr);
     EXPECT_NE(TestAosFactory::GetLock(), nullptr);
-    EXPECT_EQ(TestAosFactory::GetManager(), nullptr);
+    EXPECT_NE(TestAosFactory::GetManager(), nullptr);
+    EXPECT_EQ(TestAosFactory::GetManagers().GetSize(), nManagers + 1);
 
-    // Test2 : Stop after Start
+    // WHEN
+    TestAosFactory::Start(IMS_SLOT_0);
+
+    // THEN
+    EXPECT_NE(TestAosFactory::GetAosFactory(), nullptr);
+    EXPECT_NE(TestAosFactory::GetLock(), nullptr);
+    EXPECT_NE(TestAosFactory::GetManager(), nullptr);
+    EXPECT_EQ(TestAosFactory::GetManagers().GetSize(), nManagers + 1);
+}
+
+TEST_F(AosFactoryTest, SucceedStop)
+{
+    // GIVEN
     TestAosFactory::Start(IMS_SLOT_0);
     EXPECT_NE(TestAosFactory::GetAosFactory(), nullptr);
     EXPECT_NE(TestAosFactory::GetLock(), nullptr);
     EXPECT_NE(TestAosFactory::GetManager(), nullptr);
     IMS_SINT32 nManagers = TestAosFactory::GetManagers().GetSize();
 
+    // WHEN
     TestAosFactory::Stop(IMS_SLOT_0);
-    EXPECT_NE(TestAosFactory::GetAosFactory(), nullptr);
-    EXPECT_NE(TestAosFactory::GetLock(), nullptr);
+
+    // THEN
     EXPECT_EQ(TestAosFactory::GetManager(), nullptr);
     EXPECT_EQ(TestAosFactory::GetManagers().GetSize(), nManagers - 1);
+}
+
+TEST_F(AosFactoryTest, FailStopWhenWithoutStart)
+{
+    // GIVEN
+    EXPECT_EQ(TestAosFactory::GetAosFactory(), nullptr);
+    EXPECT_EQ(TestAosFactory::GetLock(), nullptr);
+    EXPECT_EQ(TestAosFactory::GetManager(), nullptr);
+
+    // WHEN
+    TestAosFactory::Stop(IMS_SLOT_0);
+
+    // THEN
+    EXPECT_EQ(TestAosFactory::GetManager(), nullptr);
 }

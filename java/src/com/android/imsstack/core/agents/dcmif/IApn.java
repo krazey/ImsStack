@@ -21,79 +21,139 @@ import android.net.Network;
 import android.os.Message;
 
 public interface IApn {
-    public static final int IPCAN_CATEGORY_MOBILE = 0;
-    public static final int IPCAN_CATEGORY_WLAN = 1;
+    int IPCAN_CATEGORY_MOBILE = 0;
+    int IPCAN_CATEGORY_WLAN = 1;
 
-    public static final int HANDOVER_UNKNOWN = 10;
-    public static final int HANDOVER_START = 11;
-    public static final int HANDOVER_SUCCESS = 12;
-    public static final int HANDOVER_FAILURE = 13;
+    int HANDOVER_START = 11;
+    int HANDOVER_SUCCESS = 12;
+    int HANDOVER_FAILURE = 13;
 
+    /**
+     * Listener interface to receive the change of data network status.
+     */
+    interface Listener {
+        /**
+         * Invoked when the IPCAN(IP Connectivity Access Network) category is changed.
+         *
+         * @param apnType The APN type.
+         *                {@link EApnType#IMS},
+         *                {@link EApnType#INTERNET},
+         *                {@link EApnType#EMERGENCY}
+         * @param ipcanCategory The IPCAN type.
+         *                      {@link IApn#IPCAN_CATEGORY_MOBILE},
+         *                      {@link IApn#IPCAN_CATEGORY_WLAN}
+         */
+        default void onIpcanCategoryChanged(int apnType, int ipcanCategory) {
+        }
+
+        /**
+         * Invoked when the state of handover between WWAN and WLAN is changed.
+         *
+         * @param handoverState The state of handover
+         *                      {@link IApn#HANDOVER_START}
+         *                      {@link IApn#HANDOVER_SUCCESS}
+         *                      {@link IApn#HANDOVER_FAILURE}
+         * @param networkType The network type
+         * @param failCause The data connection failure causes code
+         */
+        default void onHandoverStateChanged(int handoverState, int networkType, int failCause) {
+        }
+
+        /**
+         * Invoked when the connection status through Cross SIM is changed.
+         *
+         * @param isCrossSimUsed {@code true} if CrossSim is used, {@code false} otherwise.
+         * @param isNetworkTypeIwlan {@code true} if connected over IWLAN, {@code false} otherwise.
+         */
+        default void onCrossSimStatusChanged(boolean isCrossSimUsed, boolean isNetworkTypeIwlan) {
+        }
+
+        /**
+         * Notifies the state of PreciseDataConnectionState by APN type.
+         *
+         * @param apnType The APN type.
+         *                {@link EApnType#IMS},
+         *                {@link EApnType#INTERNET},
+         *                {@link EApnType#EMERGENCY}
+         * @param state The data connection state.
+         * @param failCause The data connection failure causes code.
+         *                  {@link android.telephony.DataFailCause}
+         * @param networkType The network type
+         */
+        default void onPreciseDataConnectionStateChanged(int apnType, int state, int failCause,
+                int networkType) {
+        }
+    }
+
+    /**
+     * Adds a listener to monitor the change of data network status.
+     */
+    void addListener(Listener listener);
+
+    /**
+     * Removes the listener that was previously set.
+     */
+    void removeListener(Listener listener);
+
+    /**
+     * Cleans up the Apn object.
+     */
     void cleanup();
 
     /**
-     * Add/Remove Listener to receive ip category chaged event
-     */
-    void addListener(ApnStateListener listener);
-    void removeListener(ApnStateListener listener);
-
-    /**
-     * request apn connection to use target apn.
-     * There are many conditions before requesting to use target apn to connectivity manager
-     * This condition can be different based on operator requirement and apn type
+     * Requests a network that satisfies a set of network capabilities.
      */
     boolean connect();
 
     /**
-     * request apn disconnection to stop use of target apn.
+     * Requests to release a network that was requested through {@link #connect}.
      */
     boolean disconnect();
 
     /**
-     * Return Apn name value of target apn
+     * Returns the name of the APN.
      */
     String getApn();
 
     /**
-     * Return if target apn is connected state or not
+     * Returns whether the network of the APN is in a connected state.
      */
     boolean isConnected();
 
     /**
-     * Return data connection state of target apn
+     * Returns data connection state of the APN.
      */
     int getDataState();
 
     /**
-     * Return Ipcan category of target apn
-     * In default, return value is "IPCAN_CATEGORY_MOBILE"
+     * Returns current IPCAN(IP Connectivity Access Network) category.
+     * Default value is {@link #IPCAN_CATEGORY_MOBILE}
      */
     int getIpcanCategory();
 
     /**
-     * Return Ip version setting of target apn.
+     * Returns the IP version setting for the APN.
      */
     int getIpVersion();
 
     /**
-     * Return slot id of target apn.
+     * Returns the slot id of the APN.
      */
     int getSlotId();
 
     /**
-     * Return Context object that stored in target apn.
-     * Reference of context object delivered to child operator apn classes.
+     * Returns Context object that stored in the APN.
      */
     Context getContext();
 
     /**
-     * Send message object to target Apn.
-     * Apn extends Handler class,so each apn can handle those message
+     * Sends message object to the APN.
+     * Each APN extends the Handler class to process its messages.
      */
     boolean sendMessage(Message msg);
 
     /**
-     * Return cached network of APN
+     * Returns cached network of APN.
      */
     Network getCachedNetwork();
 }

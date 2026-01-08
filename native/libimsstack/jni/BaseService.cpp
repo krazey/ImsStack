@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include "BaseThread.h"
+#include "IThread.h"
+#include "ImsProcess.h"
 #include "ServiceTrace.h"
 
 #include "BaseService.h"
+#include "EnablerUtils.h"
 
-__IMS_TRACE_TAG_USER_DECL__("BaseService");
+__IMS_TRACE_TAG_USER_DECL__("JNI");
 
 PUBLIC
 BaseService::BaseService(IN IMS_SINT32 nSlotId) :
@@ -34,15 +37,26 @@ PUBLIC VIRTUAL BaseService::~BaseService()
     }
 }
 
+PUBLIC void BaseService::Destroy()
+{
+    delete this;
+}
+
 PROTECTED
 void BaseService::MessageCallback_OnMessage(IN ImsMessage& objMsg)
 {
+    if (objMsg.nMSG == MSG_DESTROY)
+    {
+        delete this;
+        return;
+    }
     android::Parcel* pParcel = reinterpret_cast<android::Parcel*>(objMsg.nLparam);
     pParcel->setDataPosition(0);
     pParcel->readInt32();  // consumes nMsg
 
     HandleMessage(objMsg.nMSG, *pParcel);
     delete pParcel;
+    objMsg.nLparam = 0;
 }
 
 PROTECTED
@@ -51,7 +65,6 @@ IMS_UINT32 BaseService::RemovePendingMessages()
     BaseThread* pEnablerThread =
             ImsProcess::GetInstance()->GetThread(EnablerUtils::GetEnablerThreadName(m_nSlotId));
     IThread* piThread = (pEnablerThread != IMS_NULL) ? pEnablerThread->GetThread() : IMS_NULL;
-
     if (piThread != IMS_NULL)
     {
         ImsList<ImsMessage> objImsMsgs;

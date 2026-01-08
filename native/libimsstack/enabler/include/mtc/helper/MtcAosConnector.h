@@ -31,7 +31,7 @@ public:
             m_objImsAosInfo(objImsAosInfo)
     {
     }
-    virtual inline ~MtcAosConnector() {}
+    virtual inline ~MtcAosConnector() override {}
     MtcAosConnector(IN const MtcAosConnector&) = delete;
     MtcAosConnector& operator=(IN const MtcAosConnector&) = delete;
 
@@ -41,7 +41,7 @@ public:
     {
         return m_objImsAos.GetSuspendedReason();
     }
-    inline IMS_BOOL IsFeatureConnected(IN IMS_UINT32 nFeature) const
+    inline IMS_BOOL IsFeatureConnected(IN IMS_UINT32 nFeature) const override
     {
         return m_objImsAos.IsFeatureConnected(nFeature);
     }
@@ -96,15 +96,28 @@ public:
     {
         return m_objImsAosInfo.GetServiceRouteHeaderValue();
     }
-
-    inline void NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized) override
+    inline IMS_BOOL IsCrossSimConnected() const override
+    {
+        return m_objImsAosInfo.IsCrossSimConnected();
+    }
+    inline void NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized) const override
     {
         return m_objImsAosInfo.NotifyEmergencyCallState(bIsInitialized);
     }
 
-    inline void NotifyEpsfbCallState(IN IMS_UINT32 nState) override
+    inline void NotifyEpsfbCallState(IN IMS_UINT32 nState) const override
     {
         return m_objImsAosInfo.NotifyEpsfbCallState(nState);
+    }
+
+    inline void RegisterWithNextPcscf(IN IMS_UINT32 nUnavailableTimeForCurrentPcscf) const override
+    {
+        return m_objImsAos.RegisterWithNextPcscf(nUnavailableTimeForCurrentPcscf);
+    }
+
+    inline void ReinitiateRegistration(IN IMS_UINT32 nAfterSec) const override
+    {
+        return m_objImsAos.ReinitiateRegistration(nAfterSec);
     }
 
 private:

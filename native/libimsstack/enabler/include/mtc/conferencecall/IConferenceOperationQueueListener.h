@@ -17,14 +17,22 @@
 #ifndef INTERFACE_CONFERENCE_OPERATION_QUEUE_LISTENER_H_
 #define INTERFACE_CONFERENCE_OPERATION_QUEUE_LISTENER_H_
 
+/**
+ * @brief Listener for events from the {@link ConferenceOperationQueue}.
+ *
+ * This interface allows for receiving notifications when the operation queue is ready
+ * to process the next operation.
+ */
 class IConferenceOperationQueueListener
 {
 public:
     virtual ~IConferenceOperationQueueListener() = default;
 
     /**
-     * @brief Notifies
+     * @brief Notifies that the operation queue is ready to process the next operation.
      *
+     * This callback is invoked when a new operation can be started, for example,
+     * after the previous operation has completed or a delay timer has expired.
      */
     virtual void OnOperationReady() = 0;
 };

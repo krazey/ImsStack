@@ -36,21 +36,18 @@ import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
-import android.telephony.SubscriptionManager;
-import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsException;
-import android.telephony.ims.ImsManager;
-import android.telephony.ims.ImsMmTelManager;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.imsstack.ContextFixture;
+import com.android.imsstack.base.ImsPrivateProperties;
+import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.SystemServiceProxy.ImsManagerProxy;
+import com.android.imsstack.base.SystemServiceProxy.ImsMmTelManagerProxy;
+import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.enabler.aos.AosFactory;
-import com.android.imsstack.util.AppContext;
-import com.android.imsstack.util.ImsPrivateProperties;
-import com.android.imsstack.util.MSimUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -64,7 +61,6 @@ import java.util.Map;
 
 @RunWith(JUnit4.class)
 public class TestConfigMenuTest {
-    private static final int MAX_MODEM_COUNT = 1;
     private static final int SLOT0 = 0;
     private static final int[] SUB_ID = { 1 };
     // Pair of preference key and boolean property key.
@@ -77,8 +73,8 @@ public class TestConfigMenuTest {
                     ImsPrivateProperties.Persistent.KEY_TEST_TESTMODE_ENABLED),
             Map.entry(TestConfigMenu.KEY_TEST_WIFI_TEST_ENABLED,
                     ImsPrivateProperties.Persistent.KEY_WIFI_TEST),
-            Map.entry(TestConfigMenu.KEY_TEST_CARRIER_SIGNAL_PCO_ENABLED,
-                    ImsPrivateProperties.Persistent.KEY_CARRIER_SIGNAL_PCO_TEST),
+            Map.entry(TestConfigMenu.KEY_TEST_SIMULATED_IMS_HAL,
+                    ImsPrivateProperties.Persistent.KEY_TEST_SIMULATED_IMS_HAL),
             Map.entry(TestConfigMenu.KEY_USER_AGENT_USE_PREDEFINED_UA_STRING,
                     ImsPrivateProperties.Persistent.KEY_USE_PREDEFINED_UA_STRING));
     // Pair of preference key and string property key.
@@ -102,11 +98,10 @@ public class TestConfigMenuTest {
 
     @Mock private SharedPreferences mSp;
     @Mock private SharedPreferences.Editor mSpEditor;
-    @Mock private ImsMmTelManager mMmTelManager;
+    @Mock private ImsMmTelManagerProxy mImsMmTelManagerProxy;
 
     private Instrumentation mInstrumentation;
-    private Context mContext;
-    private ContextFixture mContextFixture;
+    private TestAppContext mTestAppContext;
     private TestConfigMenu mTestConfigMenu;
 
     @Before
@@ -114,29 +109,25 @@ public class TestConfigMenuTest {
         MockitoAnnotations.initMocks(this);
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
 
-        mContextFixture = new ContextFixture();
-        mContext = mContextFixture.getTestDouble();
-        AppContext.init(mContext);
-        TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
-        when(tm.getActiveModemCount()).thenReturn(MAX_MODEM_COUNT);
-        when(tm.getSupportedModemCount()).thenReturn(MAX_MODEM_COUNT);
-        SubscriptionManager sm = mContext.getSystemService(SubscriptionManager.class);
-        when(sm.getSubscriptionIds(eq(SLOT0))).thenReturn(SUB_ID);
-        ImsManager imsManager = mContext.getSystemService(ImsManager.class);
-        when(imsManager.getImsMmTelManager(eq(SUB_ID[0]))).thenReturn(mMmTelManager);
-        setUpSharedPreferences(mContext);
+        mTestAppContext = new TestAppContext();
+        mTestAppContext.setUp();
+
+        ImsManagerProxy imsManagerProxy =
+                mTestAppContext.getSystemServiceProxy(ImsManagerProxy.class);
+        when(imsManagerProxy.getImsMmTelManagerProxy(eq(SUB_ID[0])))
+                .thenReturn(mImsMmTelManagerProxy);
+        setUpSharedPreferences(mTestAppContext.getContext());
     }
 
     @After
     public void tearDown() throws Exception {
         mSp = null;
         mSpEditor = null;
-        mMmTelManager = null;
+        mImsMmTelManagerProxy = null;
         mTestConfigMenu = null;
-        mContext = null;
-        mContextFixture = null;
         mInstrumentation = null;
-        AppContext.deinit();
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
     }
 
     @Test
@@ -145,7 +136,7 @@ public class TestConfigMenuTest {
         setUpActivity(false);
 
         // onCreate will be invoked when calling startActivity(...).
-        verify(mMmTelManager).isCrossSimCallingEnabled();
+        verify(mImsMmTelManagerProxy).isCrossSimCallingEnabled();
 
         for (String propKey : PREF_TO_PROP_BOOL.values()) {
             verify(mSp).getString(eq(propKey), any());
@@ -196,7 +187,7 @@ public class TestConfigMenuTest {
             listener.onPreferenceChange(preference, "true");
         });
 
-        verify(mMmTelManager).setCrossSimCallingEnabled(eq(true));
+        verify(mImsMmTelManagerProxy).setCrossSimCallingEnabled(eq(true));
     }
 
     @Test

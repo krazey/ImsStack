@@ -17,13 +17,11 @@
 #ifndef INTERFACE_MTC_UI_NOTIFIER_H_
 #define INTERFACE_MTC_UI_NOTIFIER_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "call/IMtcCall.h"
 
 class AString;
+enum class CallType;
 struct CallReasonInfo;
-struct ConfUser;
 
 /**
  * This class provides the convenience APIs to notify UI of call events through JNI.
@@ -64,6 +62,14 @@ public:
      * @param objReason The reason causing this event.
      */
     virtual void SendStartFailed(IN const CallReasonInfo& objReason) = 0;
+
+    /**
+     * @brief Notifies that the call setup is initiating.
+     *
+     * This method is called after sending an INVITE request, indicating that the call setup process
+     * has started.
+     */
+    virtual void SendInitiating() = 0;
 
     /**
      * @brief Notifies that the call setup is progressing.
@@ -159,79 +165,15 @@ public:
             IN IMS_SINT32 nValue = -1, IN IMS_BOOL bValue = IMS_FALSE) = 0;
 
     /**
-     * @brief
-     */
-    virtual void SendExpanded() = 0;
-
-    /**
-     * @brief
+     * @brief Notifies that the call is replaced.
      *
-     * @param objReason
-     */
-    virtual void SendExpandFailed(IN const CallReasonInfo& objReason) = 0;
-
-    /**
-     * @brief
+     * @deprecated This function is not used.
+     *             This API was used to notify of a call where the Transfer Target has changed in a
+     *             server environment that implements ECT (Explicit Call Transfer) using the 3GPP
+     *             method.
+     * @param nReplaceKey The CallKey to be replaced by the new call.
+     * @param nType Not used.
      *
-     * @param nReplaceKey
-     */
-    virtual void SendExpandedBy(IN IMS_SINTP nReplaceKey = 0) = 0;
-
-    /**
-     * @brief Notifies that the call is merged.
-     *
-     * @param lstConfUser Participants of the conference call.
-     */
-    virtual void SendMerged(IN const ImsList<ConfUser*>& lstConfUser) = 0;
-
-    /**
-     * @brief Notifies that the call is failed to be merged.
-     *
-     * @param objReason The reason causing this event.
-     */
-    virtual void SendMergeFailed(IN const CallReasonInfo& objReason) = 0;
-
-    /**
-     * @brief Notifies that a participant is joined or failed to join to the conference call.
-     *
-     * @param nResult IMS_SUCCESS if successfully joined. Otherwise IMS_FAILURE.
-     * @param objReason Reason of the failure. Only applicable if it's failed.
-     */
-    virtual void SendJoined(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) = 0;
-
-    /**
-     * @brief Notifies that a participant is dropped or failed to drop from the conference call.
-     *
-     * @param nResult IMS_SUCCESS if successfully dropped. Otherwise IMS_FAILURE.
-     * @param objReason Reason of the failure. Only applicable if it's failed.
-     */
-    virtual void SendDropped(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) = 0;
-
-    /**
-     * @brief Notifies that the conference participants are changed.
-     *
-     * @param lstConfUser Changed participants of the conference call.
-     */
-    virtual void SendNotifyUsersInfo(IN const ImsList<ConfUser*>& lstConfUser) = 0;
-
-    /**
-     * @brief Notifies that properties of the conference call is changed.
-     *
-     * @param strDisplayText
-     * @param strSubject
-     * @param nUserCount
-     * @param nMaxUserCount
-     * @param strHostEntity
-     */
-    virtual void SendNotifyConfInfo(IN const AString& strDisplayText, IN const AString& strSubject,
-            IN IMS_SINT32 nUserCount, IN IMS_UINT32 nMaxUserCount,
-            IN const AString& strHostEntity) = 0;
-
-    /**
-     * @brief
-     *
-     * @param nReplaceKey
-     * @param nType
      */
     virtual void SendReplacedBy(IN IMS_SINTP nReplaceKey = 0, IN IMS_UINTP nType = 0) = 0;
 
@@ -244,13 +186,30 @@ public:
     virtual void SendEctCompleted(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) = 0;
 
     /**
-     * @brief
+     * @brief Notifies that the Call push operation is completed.
      *
-     * @param nResult
-     * @param objReason
+     * @deprecated This function is not used.
+     *             Call push operation is not supported.
+     *
+     * @param nResult Not used.
+     * @param objReason Not used.
      */
     virtual void SendCallPushCompleted(
             IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) = 0;
+
+    /**
+     * @brief Notifies the call information has changed.
+     */
+    virtual void SendCallInfoChanged() = 0;
+
+    virtual void OnCallSessionReleased() = 0;
+
+    /**
+     * @brief Retrieves the reason for blocking.
+     *
+     * @return CallReasonInfo& The reason for blocking.
+     */
+    virtual const CallReasonInfo& GetBlockingReason() const = 0;
 };
 
 #endif

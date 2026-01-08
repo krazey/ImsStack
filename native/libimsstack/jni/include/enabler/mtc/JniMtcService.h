@@ -18,7 +18,6 @@
 #define JNI_MTC_SERVICE_H_
 
 #include "BaseService.h"
-#include "IJniEnabler.h"
 #include "ImsTypeDef.h"
 
 class IMtcService;
@@ -29,7 +28,7 @@ class JniMtcService : public BaseService
 {
 public:
     JniMtcService(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId);
-    virtual ~JniMtcService();
+    virtual ~JniMtcService() override;
 
     virtual int SendData(const android::Parcel& objParcel) override;
 
@@ -45,7 +44,7 @@ private:
     void Attach();
     IMtcService* GetNativeService();
     void NotifySrvccStateChanged(IN const android::Parcel& objParcel);
-    void SetTerminalBasedCallWaiting(IN const android::Parcel& objParcel);
+    void NotifyPermanentSuppChanged(IN const android::Parcel& objParcel);
     void OpenEmergencyService(IN const android::Parcel& objParcel);
     void StopEmergencyService();
     void ProcessTestCommand(IN const android::Parcel& objParcel);

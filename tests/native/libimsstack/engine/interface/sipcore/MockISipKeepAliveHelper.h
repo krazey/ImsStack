@@ -18,9 +18,8 @@
 #define MOCK_I_SIP_KEEP_ALIVE_HELPER_H_
 
 #include <gmock/gmock.h>
-#include "ImsTypeDef.h"
-#include "sipcore/ISipKeepAliveHelper.h"
-#include "sipcore/Sip.h"
+
+#include "ISipKeepAliveHelper.h"
 
 class IpAddress;
 class ISipKeepAliveHelperListener;
@@ -28,7 +27,7 @@ class ISipKeepAliveHelperListener;
 class MockISipKeepAliveHelper : public ISipKeepAliveHelper
 {
 public:
-    inline virtual ~MockISipKeepAliveHelper() {}
+    ~MockISipKeepAliveHelper() override = default;
 
     // ISipObject
     MOCK_METHOD(void, Destroy, (), (override));

@@ -17,12 +17,9 @@
 #ifndef MOCK_I_MTC_CALL_STATE_H_
 #define MOCK_I_MTC_CALL_STATE_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "call/IMtcCall.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/state/IMtcCallState.h"
-#include "helper/IMtcAosStateListener.h"
 #include <gmock/gmock.h>
 
 class AString;
@@ -31,10 +28,14 @@ class ISession;
 class ISipClientConnection;
 class ISipConnection;
 class ISipServerConnection;
+enum class CallType;
+enum class MtcAosState;
 enum class QosLossPolicy;
 struct CallReasonInfo;
 struct ConfUser;
 struct MediaInfo;
+template <typename T>
+class ImsList;
 
 class MockIMtcCallState : public IMtcCallState
 {
@@ -44,11 +45,11 @@ public:
     MOCK_METHOD(CallStateName, GetStateName, (), (const, override));
     MOCK_METHOD(CallStateName, Start,
             (IN CallType eCallType, IN const AString& strTarget, IN MediaInfo& objMediaInfo,
-                    (IN const ImsMap<SuppType, SuppService*>& objSuppServices)),
+                    (IN const ImsList<SuppService*>& objSuppServices)),
             (override));
     MOCK_METHOD(CallStateName, StartConference,
             (IN CallType eCallType, IN const AString& strTarget, IN MediaInfo& objMediaInfo,
-                    (IN const ImsMap<SuppType, SuppService*>& objSuppServices),
+                    (IN const ImsList<SuppService*>& objSuppServices),
                     IN const ImsList<ConfUser*>& lstUsers),
             (override));
     MOCK_METHOD(CallStateName, StartConference,
@@ -96,6 +97,7 @@ public:
     MOCK_METHOD(CallStateName, SessionUpdated, (IN ISession* piSession), (override));
     MOCK_METHOD(CallStateName, SessionUpdateFailed, (IN ISession* piSession), (override));
     MOCK_METHOD(CallStateName, SessionUpdateReceived, (IN ISession* piSession), (override));
+    MOCK_METHOD(CallStateName, SessionCanceledOnAccepted, (IN ISession * piSession), (override));
     MOCK_METHOD(CallStateName, SessionCancelDelivered, (IN ISession* piSession), (override));
     MOCK_METHOD(CallStateName, SessionCancelDeliveryFailed, (IN ISession* piSession), (override));
     MOCK_METHOD(CallStateName, SessionEarlyMediaUpdated, (IN ISession* piSession), (override));
@@ -142,9 +144,14 @@ public:
     MOCK_METHOD(CallStateName, OnReceivingNetworkToneFailed, (), (override));
     MOCK_METHOD(CallStateName, OnMediaFailed, (IN const CallReasonInfo& objReason), (override));
     MOCK_METHOD(CallStateName, OnSrvccStateUpdated, (IN SrvccState eState), (override));
-    MOCK_METHOD(CallStateName, OnAosStateChanged, (IN MtcAosState eState, IN IMS_UINT32 eAosReason),
+    MOCK_METHOD(CallStateName, OnAosStateChanged,
+            (IN MtcAosState eState, IN IMS_UINT32 eAosReason, IN IMS_SINT32 nDataFailureReason),
             (override));
     MOCK_METHOD(CallStateName, OnIpcanChanged, (IN IMS_UINT32 eIpcan), (override));
+    MOCK_METHOD(CallStateName, OnRatChanged, (IN IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType),
+            (override));
+    MOCK_METHOD(CallStateName, OnConnectionFailed,
+            (IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis), (override));
 };
 
 #endif

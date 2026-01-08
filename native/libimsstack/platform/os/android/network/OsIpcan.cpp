@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ISystem.h"
+#include "ISystemProperty.h"
 #include "PlatformContext.h"
 #include "ServiceMemory.h"
 #include "ServicePhoneInfo.h"
@@ -21,7 +23,7 @@
 #include "network/OsIpcan.h"
 #include "network/OsNetworkConstants.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 PUBLIC
 OsIpcan::OsIpcan() {}
@@ -55,6 +57,14 @@ PROTECTED VIRTUAL void OsIpcan::GetAccessInfo(
 PROTECTED VIRTUAL void OsIpcan::GetAccessInfoForWiFi(OUT AccessNetworkInfo& objAni)
 {
     AString strMacAddress = PlatformContext::GetInstance()->GetSystem()->GetWifiBssId();
+    // Fall back to a default MAC address because, in most cases, a valid one is not set
+    // due to privacy concerns.
+    // - specific case: Cross SIM dialing (no Wi-Fi, other SIM's data connection)
+    if (strMacAddress.GetLength() == 0)
+    {
+        IMS_TRACE_D("Fall back to a default MAC address", 0, 0, 0);
+        strMacAddress = WLAN_NULL_MAC;
+    }
     ImsList<AString> objTokens = strMacAddress.Split(':');
 
     if (objTokens.GetSize() == ANI_WLAN_MAX_MAC)

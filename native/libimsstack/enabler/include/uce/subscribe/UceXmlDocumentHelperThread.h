@@ -17,7 +17,9 @@
 #ifndef _UCE_XML_DOCUMENT_HELPER_THREAD_H_
 #define _UCE_XML_DOCUMENT_HELPER_THREAD_H_
 
+#include "AString.h"
 #include "ImsMap.h"
+#include "ImsMessage.h"
 #include "ImsQueue.h"
 #include "IRunnable.h"
 #include "IXmlStateListener.h"
@@ -42,7 +44,7 @@ class UceXmlDocumentHelperThread :
 
 public:
     explicit UceXmlDocumentHelperThread(IN const AString& strQueryName, IN IMS_SINT32 nSimSlot = 0);
-    virtual ~UceXmlDocumentHelperThread();
+    virtual ~UceXmlDocumentHelperThread() override;
     IMS_BOOL Start(IN const AString& strName, IN IMS_UINT32 nIndex = 10);
     void Terminate();
     void SendMsg(IN IMS_UINT32 nMSG, IN IMS_UINTP nWparam, IN IMS_UINTP nLparam);
@@ -62,10 +64,10 @@ private:
     IMS_RESULT XMLDataTokenization(IN const ByteArray& objBytes);
     IMS_BOOL StartMessageHandler(const IMSMSG& objMsg);
     IMS_BOOL TerminateMessageHandler(const IMSMSG& objMsg);
-    IMS_BOOL ReceivedRlmiNotifyMessageHandler(IMSMSG& objMsg);
-    IMS_BOOL ParsedRlmiXmlMessageHandler(IMSMSG& objMsg);
+    IMS_BOOL ReceivedRlmiNotifyMessageHandler(const IMSMSG& objMsg);
+    IMS_BOOL ParsedRlmiXmlMessageHandler(const IMSMSG& objMsg);
     void SendParseCompletedMsg(IMS_SINT32 eXMLInfoType);
-    IMS_RESULT ParseRLMIList(IN IDocument* piDocument);
+    IMS_RESULT ParseRLMIList(IN const IDocument* piDocument);
 
 public:
     typedef enum _XMLINFO

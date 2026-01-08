@@ -23,7 +23,7 @@
 
 class MockIAosCallTracker : public IAosCallTracker {
 public:
-    MOCK_METHOD(IMS_BOOL, SetMtcReady, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, SetMtcReady, (), (override));
     MOCK_METHOD(IMS_BOOL, IsCsCallActive, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsNormalCallActive, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergencyCallActive, (), (const, override));

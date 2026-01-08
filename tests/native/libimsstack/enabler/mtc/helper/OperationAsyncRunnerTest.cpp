@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+#include "BaseThread.h"
 #include "EnablerUtils.h"
 #include "ImsMessage.h"
 #include "ImsProcess.h"
 #include "MockIThread.h"
 #include "PlatformContext.h"
 #include "TestThreadService.h"
-#include "base/BaseThread.h"
 #include "helper/OperationAsyncRunner.h"
 #include <gtest/gtest.h>
 
@@ -37,7 +37,7 @@ public:
             BaseThread()
     {
     }
-    inline ~TestBaseThread() {}
+    inline ~TestBaseThread() override {}
 };
 
 class OperationAsyncRunnerTest : public ::testing::Test
@@ -79,10 +79,14 @@ TEST_F(OperationAsyncRunnerTest, OperationIsNotRunSynchronously)
     EXPECT_CALL(pThreadService->GetMockThread(), PostMessageI(_));
 
     IMS_BOOL bUpdated = IMS_FALSE;
-    OperationAsyncRunner* pRunner = new OperationAsyncRunner(SLOT_ID,
+    OperationAsyncRunner* pRunner = new OperationAsyncRunner(SLOT_ID);
+    pRunner->SetOperation(
             [&]()
             {
                 bUpdated = IMS_TRUE;
+            },
+            []()
+            {
             });
 
     EXPECT_FALSE(bUpdated);
@@ -90,6 +94,78 @@ TEST_F(OperationAsyncRunnerTest, OperationIsNotRunSynchronously)
     ImsMessage objMessage(0, 0, 0);
     pRunner->MessageCallback_OnMessage(objMessage);
     EXPECT_TRUE(bUpdated);
+
+    delete pRunner;
+}
+
+TEST_F(OperationAsyncRunnerTest, DeletedByRemoveCallback)
+{
+    EXPECT_CALL(pThreadService->GetMockThread(), PostMessageI(_));
+
+    IMS_BOOL bDeleted = IMS_FALSE;
+    OperationAsyncRunner* pRunner = new OperationAsyncRunner(SLOT_ID);
+    pRunner->SetOperation(
+            []()
+            {
+            },
+            [&]()
+            {
+                bDeleted = IMS_TRUE;
+                delete pRunner;
+            });
+
+    EXPECT_FALSE(bDeleted);
+
+    ImsMessage objMessage(0, 0, 0);
+    pRunner->MessageCallback_OnMessage(objMessage);
+    EXPECT_TRUE(bDeleted);
+}
+
+TEST_F(OperationAsyncRunnerTest, DestructorRemovesMessage)
+{
+    OperationAsyncRunner* pRunner = new OperationAsyncRunner(SLOT_ID);
+    pRunner->SetOperation(
+            []()
+            {
+            },
+            []()
+            {
+            });
+
+    EXPECT_CALL(pThreadService->GetMockThread(), RemoveMessages(pRunner, _));
+
+    delete pRunner;
+}
+
+TEST_F(OperationAsyncRunnerTest, IsOperationStartedReturnsFalse)
+{
+    OperationAsyncRunner* pRunner = new OperationAsyncRunner(SLOT_ID);
+    pRunner->SetOperation(
+            []()
+            {
+            },
+            []()
+            {
+            });
+    EXPECT_FALSE(pRunner->IsOperationStarted());
+
+    delete pRunner;
+}
+
+TEST_F(OperationAsyncRunnerTest, IsWaitingMessageReturnsFalseAfterOperationIsStarted)
+{
+    OperationAsyncRunner* pRunner = new OperationAsyncRunner(SLOT_ID);
+    pRunner->SetOperation(
+            []()
+            {
+            },
+            []()
+            {
+            });
+    ImsMessage objMessage(0, 0, 0);
+    pRunner->MessageCallback_OnMessage(objMessage);
+
+    delete pRunner;
 }
 
 }  // namespace android

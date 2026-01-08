@@ -19,6 +19,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.android.imsstack.base.AppContext;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.ServiceCaps;
@@ -27,7 +28,6 @@ import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.SystemInterface;
-import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -117,7 +117,7 @@ public class NativeStateAgent implements NativeStateInterface {
 
             if (dnw != null) {
                 system.notifyEvent(ImsEventDef.IMS_EVENT_IMS_VOICE_OVER_PS_STATE,
-                        dnw.isVops()
+                        dnw.isVopsSupported()
                         ? ImsEventDef.IMS_VOICE_OVER_PS_SUPPORTED
                         : ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED, 0);
             }
@@ -148,7 +148,7 @@ public class NativeStateAgent implements NativeStateInterface {
     }
 
     private void notifyNativeServiceReady() {
-        ImsLog.i(mSlotId, "NativeState#notifyNativeServiceReady");
+        ImsLog.i(this, mSlotId, "notifyNativeServiceReady");
         for (Listener l : mListeners) {
             l.onNativeServiceReady();
         }
@@ -156,7 +156,7 @@ public class NativeStateAgent implements NativeStateInterface {
 
     private void setServiceReady(boolean serviceReady) {
         if (mServiceReady != serviceReady) {
-            ImsLog.i(mSlotId, "NativeState#setServiceReady: "
+            ImsLog.i(this, mSlotId, "setServiceReady: "
                     + mServiceReady + " >> " + serviceReady);
             mServiceReady = serviceReady;
         }

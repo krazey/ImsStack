@@ -16,24 +16,28 @@
 #ifndef SIP_STACK_H_
 #define SIP_STACK_H_
 
-#include "ByteArray.h"
-
-#include "ISipTimerUtil.h"
-#include "SipContextUtils.h"
-#include "SipMethod.h"
-#include "SipParameter.h"
-#include "SipStackManager.h"
-#include "SipStatusCode.h"
-#include "SipTxnKey.h"
+#include "ISipTransactionCallback.h"
+#include "ISipUserData.h"
 #include "SipStackError.h"
+#include "SipTxnContext.h"
 #include "msg/SipMessage.h"
-#include "txn/SipTxn.h"
 #include "txn/SipTxnKey.h"
 
+#include "SipMethod.h"
+#include "SipStatusCode.h"
+#include "SipTxnContextData.h"
+#include "SipTxnKey.h"
+
+class ByteArray;
+
 class ISipConfigV;
-class ISipHeader;
-class SipProfile;
+
 class SipTimeoutData;
+class SipTxn;
+
+class ISipHeader;
+class SipParameter;
+class SipProfile;
 class SipTimerValues;
 
 namespace SipStack
@@ -163,6 +167,17 @@ inline IMS_SINT32 AddrSpec_GetPort(IN const SipAddrSpec* pAddrSpec)
     return pAddrSpec->GetSipUriAsRef()->GetPort();
 }
 
+template <typename T>
+inline void GetTransactionState(IN const ISipUserData& objUserData, IN_OUT T*& pTxnState)
+{
+    SipTxnContext* pTxnContext = static_cast<SipTxnContext*>(objUserData.GetUserData());
+    SipTxnContextData* pTxnContextData = (pTxnContext != IMS_NULL)
+            ? static_cast<SipTxnContextData*>(pTxnContext->m_pTxnContextData)
+            : IMS_NULL;
+    pTxnState = reinterpret_cast<T*>(
+            (pTxnContextData != IMS_NULL) ? pTxnContextData->GetTxnState() : IMS_NULL);
+}
+
 GLOBAL IMS_BOOL AppendHeader(IN SipHeaderBase* pHeader, IN_OUT ::SipMessage*& pMessage);
 GLOBAL IMS_BOOL AppendMessageBody(IN SipMsgBody* pMsgBody, IN_OUT ::SipMessage*& pMessage);
 GLOBAL IMS_BOOL PrependHeader(IN SipHeaderBase* pHeader, IN_OUT ::SipMessage*& pMessage);
@@ -172,8 +187,8 @@ GLOBAL IMS_BOOL PrependUnknownHeader(
 GLOBAL IMS_BOOL CheckMandatoryHeaders(IN const ::SipMessage* pMessage);
 
 GLOBAL SipHeaderBase* CloneHeader(IN SipHeaderBase* pHeader);
-GLOBAL ::SipMessage* CloneMessage(IN ::SipMessage* pMessage);
-GLOBAL SipMsgBody* CloneMessageBody(IN SipMsgBody* pMsgBody);
+GLOBAL ::SipMessage* CloneMessage(IN const ::SipMessage* pMessage);
+GLOBAL SipMsgBody* CloneMessageBody(IN const SipMsgBody* pMsgBody);
 GLOBAL SipHeaderBase* CopyHeader(IN SipHeaderBase* pHeader);
 GLOBAL SipHeaderBase* CopyHeader(IN SipHeaderBase* pDstHeader, IN SipHeaderBase* pSrcHeader);
 
@@ -226,7 +241,7 @@ GLOBAL SipAddrSpec* GetAddrSpec(
         IN ::SipMessage* pMessage, IN IMS_SINT32 nType, IN IMS_UINT32 nIndex = 0);
 GLOBAL AString GetChallengeScheme(IN SipHeaderBase* pHeader);
 GLOBAL IMS_BOOL GetContent(
-        IN SipMsgBody* pMsgBody, OUT IMS_BYTE*& pContent, OUT IMS_SINT32& nContentLength);
+        IN const SipMsgBody* pMsgBody, OUT IMS_BYTE*& pContent, OUT IMS_SINT32& nContentLength);
 GLOBAL IMS_UINT32 GetCSeqNumber(IN ::SipMessage* pMessage);
 GLOBAL IMS_BOOL GetEventHeader(
         IN ::SipMessage* pMessage, OUT AString& strEvent, OUT AString& strEventId);
@@ -241,7 +256,7 @@ GLOBAL IMS_BOOL GetHostNPortFromViaHeader(
         IN ::SipMessage* pMessage, OUT AString& strHost, OUT IMS_SINT32& nPort);
 GLOBAL SipMethod GetMethod(IN ::SipMessage* pMessage);
 GLOBAL SipMsgBody* GetMessageBody(IN ::SipMessage* pMessage, IN IMS_SINT32 nIndex = 0);
-GLOBAL IMS_SINT32 GetMessageBodyCount(IN ::SipMessage* pMessage);
+GLOBAL IMS_SINT32 GetMessageBodyCount(IN const ::SipMessage* pMessage);
 GLOBAL AString GetMimeHeader(
         IN SipMsgBody* pMsgBody, IN IMS_SINT32 nType, IN IMS_SINT32 nIndex = 0);
 GLOBAL IMS_SINT32 GetMimeHeaderCount(IN SipMsgBody* pMsgBody, IN IMS_SINT32 nType);
@@ -276,7 +291,7 @@ GLOBAL IMS_BOOL IsMessageBodySdp(IN SipMsgBody* pMsgBody);
 GLOBAL IMS_BOOL IsMessageRpr(IN ::SipMessage* pMessage);
 GLOBAL IMS_BOOL IsOptionRequired(IN ::SipMessage* pMessage, IN const AString& strOption);
 GLOBAL IMS_BOOL IsOptionSupported(IN ::SipMessage* pMessage, IN const AString& strOption);
-GLOBAL IMS_BOOL IsRequestMessage(IN ::SipMessage* pMessage);
+GLOBAL IMS_BOOL IsRequestMessage(IN const ::SipMessage* pMessage);
 GLOBAL IMS_BOOL IsSingleHeader(IN IMS_SINT32 nType);
 GLOBAL IMS_BOOL IsAddressFormatHeader(IN IMS_SINT32 nType, IN const AString& strName);
 GLOBAL IMS_BOOL IsAquotRequiredForAddressFormat(IN IMS_SINT32 nType, IN const AString& strName);
@@ -289,7 +304,7 @@ GLOBAL void ParseHostNPort(
 
 GLOBAL IMS_BOOL RemoveAllMessageBodies(IN_OUT ::SipMessage*& pMessage);
 GLOBAL IMS_BOOL RemoveHeader(IN IMS_SINT32 nType, IN_OUT ::SipMessage*& pMessage);
-GLOBAL IMS_BOOL RemoveParameter(IN const AString& strName, IN_OUT SipHeaderBase*& pHeader);
+GLOBAL void RemoveParameter(IN const AString& strName, IN_OUT SipHeaderBase*& pHeader);
 GLOBAL IMS_BOOL RemoveParameter(IN const AString& strName, IN_OUT SipAddrSpec*& pAddrSpec);
 GLOBAL void RemoveUserAndPassword(IN_OUT SipAddrSpec*& pAddrSpec);
 
@@ -313,34 +328,35 @@ GLOBAL IMS_BOOL UpdateSentProtocol(IN ::SipMessage* pMessage, IN const AString& 
 
 // APIs for bad header control
 GLOBAL void DisplayBadHeaders(IN ::SipMessage* pMessage);
-GLOBAL IMS_SINT32 GetBadHeaderCount(IN ::SipMessage* pMessage);
+GLOBAL IMS_SINT32 GetBadHeaderCount(IN const ::SipMessage* pMessage);
 GLOBAL IMS_BOOL HasMandatoryHeaders(IN ::SipMessage* pMessage);
 
 // APIs for SIP authentication
 GLOBAL IMS_BOOL GetEntityBody(IN ::SipMessage* pMessage, OUT AString& strEntityBody);
 
-inline const IMS_CHAR* TxnKey_GetViaBranch(IN ::SipTxnKey* pTxnKey)
+inline const IMS_CHAR* TxnKey_GetViaBranch(IN const ::SipTxnKey* pTxnKey)
 {
     return pTxnKey->GetViaBranchParam();
 }
-inline const IMS_CHAR* TxnKey_GetCallId(IN ::SipTxnKey* pTxnKey)
+inline const IMS_CHAR* TxnKey_GetCallId(IN const ::SipTxnKey* pTxnKey)
 {
     return pTxnKey->GetCallId();
 }
-inline const IMS_CHAR* TxnKey_GetMethod(IN ::SipTxnKey* pTxnKey)
+inline const IMS_CHAR* TxnKey_GetMethod(IN const ::SipTxnKey* pTxnKey)
 {
     return pTxnKey->GetMethod();
 }
-inline IMS_SINT32 TxnKey_GetStatusCode(IN ::SipTxnKey* pTxnKey)
+inline IMS_SINT32 TxnKey_GetStatusCode(IN const ::SipTxnKey* pTxnKey)
 {
-    return pTxnKey->GetRespCode();
+    return pTxnKey->GetResponseCode();
 }
 
 GLOBAL sipcore::SipTxnKey* CreateTxnKey(IN ::SipMessage* pMessage);
 GLOBAL ::SipTxnKey* CreateTxnKey(IN ::SipMessage* pMessage, IN IMS_SINT32 nApiCalled);
-GLOBAL sipcore::SipTxnKey* CreateTxnKeyFromKey(IN ::SipTxnKey* pTxnKey);
+GLOBAL sipcore::SipTxnKey* CreateTxnKeyFromKey(IN const ::SipTxnKey* pTxnKey);
 GLOBAL IMS_BOOL CompareTxnKeys(IN ::SipTxnKey* pTxnKey1, IN ::SipTxnKey* pTxnKey2);
-GLOBAL IMS_BOOL CompareTxnKeysForAck(IN ::SipTxnKey* pTxnKey1, IN ::SipTxnKey* pTxnKey2);
+GLOBAL IMS_BOOL CompareTxnKeysForAck(
+        IN const ::SipTxnKey* pTxnKey1, IN const ::SipTxnKey* pTxnKey2);
 GLOBAL IMS_BOOL CompareTxnKeysForCancel(IN ::SipTxnKey* pCancelKey, IN ::SipTxnKey* pTxnKey);
 
 GLOBAL IMS_BOOL AbortTransaction(IN ::SipTxnKey* pTxnKey, IN SipTxnContext* pTxnContext);
@@ -353,10 +369,10 @@ GLOBAL void TerminateTransaction(IN ::SipTxnKey* pTxnKey);
 
 // APIs for SIP transaction timer
 GLOBAL const IMS_CHAR* GetTimerTypeAsString(IN IMS_SINT32 eTimerType);
-GLOBAL const IMS_CHAR* GetTimerTypeAsString(IN SipTimeoutData* pData);
+GLOBAL const IMS_CHAR* GetTimerTypeAsString(IN const SipTimeoutData* pData);
 GLOBAL void InvokeTimerCallback(
         IN SipTimerCallback pfnCallback, IN SipTimeoutData* pData, IN IMS_PVOID pvExtraParam);
-GLOBAL void SetTimerValues(IN SipTimerValues* pTv, IN_OUT SipTxnContext*& pTxnContext);
+GLOBAL void SetTimerValues(IN const SipTimerValues* pTv, IN_OUT SipTxnContext*& pTxnContext);
 
 // APIs for trace or debugging
 GLOBAL void DisplayUnknownHeaders(IN ::SipMessage* pMessage);

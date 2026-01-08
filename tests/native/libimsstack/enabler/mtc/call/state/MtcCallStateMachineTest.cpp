@@ -28,8 +28,6 @@ using State = IMtcCall::State;
 class TestCallStateFactory : public IMtcCallStateFactory
 {
 public:
-    virtual ~TestCallStateFactory() {}
-
     IMtcCallState* CreateState(
             IN IMtcCall::State eState, IN IMtcCallContext& /* objContext */) override
     {
@@ -45,6 +43,7 @@ public:
 class MtcCallStateMachineTest : public ::testing::Test
 {
 public:
+    // cppcheck-suppress unusedStructMember
     MockIMtcCallContext objContext;
     std::unique_ptr<IMtcCallStateFactory> pStateFactory;
 
@@ -83,7 +82,7 @@ TEST_F(MtcCallStateMachineTest, RunStateOperationRunsOnInitialState)
 
     MtcCallStateMachine objStateMachine(objContext, eInitialState, std::move(pStateFactory));
     objStateMachine.RunStateOperation(
-            [&](IMtcCallState* pState)
+            [&](const IMtcCallState* pState)
             {
                 EXPECT_EQ(eInitialState, pState->GetStateName());
                 return eInitialState;
@@ -103,7 +102,7 @@ TEST_F(MtcCallStateMachineTest, RunStateOperationRunsOnChangedState)
             });
 
     objStateMachine.RunStateOperation(
-            [&](IMtcCallState* pState)
+            [&](const IMtcCallState* pState)
             {
                 EXPECT_EQ(eChangedState, pState->GetStateName());
                 return eChangedState;

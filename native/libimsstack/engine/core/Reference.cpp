@@ -29,6 +29,7 @@
 #include "ISipServerConnection.h"
 #include "ImplicitNotifierState.h"
 #include "ImplicitSubscriberState.h"
+#include "ImsCoreContext.h"
 #include "Reference.h"
 #include "Service.h"
 #include "Sip.h"
@@ -73,7 +74,7 @@ void Reference::NotifierState::RemoveScc(IN const ISipClientConnection* piScc)
 {
     for (IMS_UINT32 i = 0; i < m_objSccs.GetSize(); ++i)
     {
-        ISipClientConnection* piTempScc = m_objSccs.GetAt(i);
+        const ISipClientConnection* piTempScc = m_objSccs.GetAt(i);
 
         if (piScc == piTempScc)
         {
@@ -86,7 +87,7 @@ void Reference::NotifierState::RemoveScc(IN const ISipClientConnection* piScc)
 PUBLIC
 Reference::Reference(IN Service* pService, IN const AString& strReferToUri,
         IN const AString& strReferMethod, IN const Replaces& objReplaces,
-        IN IMS_BOOL bImplicitRoutingRequired /*= IMS_FALSE*/) :
+        IN IMS_BOOL bImplicitRoutingRequired /*= IMS_TRUE*/) :
         ServiceMethod(pService),
         m_nState(STATE_INITIATED),
         m_strReferToUri(strReferToUri),
@@ -103,7 +104,8 @@ Reference::Reference(IN Service* pService, IN const AString& strReferToUri,
         m_pNotifierState(IMS_NULL)
 {
     const AString& strSessionId =
-            CallControlHelper::GetInstance()->GetSessionIdFromReplaces(&objReplaces);
+            ImsCoreContext::GetInstance()->GetCallControlHelper()->GetSessionIdFromReplaces(
+                    &objReplaces);
 
     if (!strSessionId.IsNULL())
     {
@@ -152,6 +154,7 @@ PUBLIC VIRTUAL void Reference::Destroy()
 {
     CleanupOnDestroy();
     ServiceMethod::Destroy();
+    GetService()->DeregisterMethod(this);
 }
 
 PUBLIC
@@ -216,7 +219,8 @@ const AString& Reference::GetReplaces() const
     IMS_TRACE_D("___ Replaces: %s ___",
             SipDebug::GetStr1(m_pReplaces->ToString(IMS_FALSE), 8, '@').GetStr(), 0, 0);
 
-    return CallControlHelper::GetInstance()->GetSessionIdFromReplaces(m_pReplaces);
+    return ImsCoreContext::GetInstance()->GetCallControlHelper()->GetSessionIdFromReplaces(
+            m_pReplaces);
 }
 
 PUBLIC
@@ -382,8 +386,9 @@ IMS_RESULT Reference::SetReplaces(IN const AString& strSessionId)
         m_pReplaces = IMS_NULL;
     }
 
-    Replaces* pTmpReplaces =
-            CallControlHelper::GetInstance()->GetReplacesFromSessionId(strSessionId);
+    const Replaces* pTmpReplaces =
+            ImsCoreContext::GetInstance()->GetCallControlHelper()->GetReplacesFromSessionId(
+                    strSessionId);
 
     if (pTmpReplaces == IMS_NULL)
     {
@@ -673,9 +678,6 @@ PUBLIC
 void Reference::SetImplicitRoutingRequired(IN IMS_BOOL bFlag)
 {
     m_bImplicitRoutingRequired = bFlag;
-
-    // FIXME: If the routing address needs to be provisioned by the application,
-    // please add a second argument for it.
 }
 
 PROTECTED VIRTUAL IMS_BOOL Reference::DispatchMessage(IN ImsMessage& objMsg)
@@ -1049,7 +1051,7 @@ PROTECTED VIRTUAL IMS_BOOL Reference::Dialog_Compare(IN ISipServerConnection* pi
         // In case of an early NOTIFY received ...
         if (GetState() == STATE_PROCEEDING)
         {
-            ISipClientConnection* piScc = GetClientConnection(IMessage::REFERENCE_REFER);
+            const ISipClientConnection* piScc = GetClientConnection(IMessage::REFERENCE_REFER);
 
             IMS_TRACE_I("Checks if the early NOTIFY is received or not ...", 0, 0, 0);
 
@@ -1273,8 +1275,6 @@ void Reference::CleanupOnDestroy()
     }
 
     DialogMethodManager::GetInstance()->RemoveMethod(GetName());
-
-    GetService()->DeregisterMethod(this);
 }
 
 PRIVATE

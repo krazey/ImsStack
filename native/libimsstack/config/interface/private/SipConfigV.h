@@ -36,24 +36,28 @@ private:
         IMS_BOOL bNoRefreshByReInvite;
         IMS_BOOL bSdpVersionCheckSupported;
         IMS_BOOL bSdpNonRprAllowed;
+        IMS_SINT32 nSessionRefreshSdpVersionIncrement;
+        IMS_BOOL bIgnoreSubsequentSdpAnswerInPreviewMode;
 
         inline Session() :
                 bSessionTimerSupported(IMS_TRUE),
                 nRefresher(SESSION_REFRESHER_LOCAL),
-                nRefreshMethod(SESSION_REFRESH_UPDATE),
+                nRefreshMethod(SESSION_REFRESH_UPDATE_PREFERRED),
                 nMinSe(90),
                 nSessionExpires(3600),
                 nHeaders(SESSION_HEADER_ALL),
                 bNoRefreshByReInvite(IMS_FALSE),
                 bSdpVersionCheckSupported(IMS_TRUE),
-                bSdpNonRprAllowed(IMS_FALSE)
+                bSdpNonRprAllowed(IMS_FALSE),
+                nSessionRefreshSdpVersionIncrement(SESSION_REFRESH_SDP_VERSION_INCREMENT_NONE),
+                bIgnoreSubsequentSdpAnswerInPreviewMode(IMS_TRUE)
         {
         }
     };
 
 public:
     explicit SipConfigV(IN IMS_SINT32 nSlotId);
-    virtual ~SipConfigV();
+    ~SipConfigV() override;
 
     SipConfigV(IN const SipConfigV&) = delete;
     SipConfigV& operator=(IN const SipConfigV&) = delete;
@@ -111,6 +115,14 @@ public:
     {
         return m_objSession.bSdpVersionCheckSupported;
     }
+    inline IMS_SINT32 GetSessionRefreshSdpVersionIncrement() const
+    {
+        return m_objSession.nSessionRefreshSdpVersionIncrement;
+    }
+    inline IMS_BOOL ShouldIgnoreSubsequentSdpAnswerInPreviewMode() const
+    {
+        return m_objSession.bIgnoreSubsequentSdpAnswerInPreviewMode;
+    }
 
     // "capabilities"
     inline IMS_BOOL IsCapabilitiesRespByApp() const { return m_bRespByAppForCapabilities; }
@@ -134,7 +146,7 @@ private:
     void UpdateAllConfigs();
 
     static IMS_SINT32 GetTimerValue(
-            IN ICarrierConfig* piCc, IN const IMS_CHAR* pszKey, IN IMS_SINT32 nDefaultValue);
+            IN const ICarrierConfig* piCc, IN const IMS_CHAR* pszKey, IN IMS_SINT32 nDefaultValue);
 
 public:
     enum
@@ -167,9 +179,15 @@ public:
     enum
     {
         SESSION_REFRESH_INVITE = 0,
-        SESSION_REFRESH_UPDATE,
-        /// Depends on the context
-        SESSION_REFRESH_ANY
+        SESSION_REFRESH_UPDATE_PREFERRED
+    };
+
+    enum
+    {
+        SESSION_REFRESH_SDP_VERSION_INCREMENT_NONE = 0,
+        SESSION_REFRESH_SDP_VERSION_INCREMENT_AS_OFFERER,
+        SESSION_REFRESH_SDP_VERSION_INCREMENT_AS_ANSWERER,
+        SESSION_REFRESH_SDP_VERSION_INCREMENT_ALL
     };
 
     enum
@@ -179,11 +197,13 @@ public:
         SESSION_HEADER_SESSION_EXPIRES = 0x01,
         SESSION_HEADER_MIN_SE = 0x02,
         SESSION_HEADER_REQUIRE_TIMER_OPTION = 0x04,
-        /// For header checking in MT
-        /// (to check if the peer supports the session timer extension or not)
-        SESSION_HEADER_CHECK_SESSION_EXPIRES = 0x10,
+        /// For header checking in an incoming INVITE/UPDATE
+        /// to check if remote UA turns off the session timer or not.
+        /// If the Supported header contains "timer" option tag, but the Session-Expires header
+        /// is not present, local UA can treat this as if the session timer is turned off.
+        SESSION_HEADER_SESSION_TIMER_TURN_OFF_ALLOWED = 0x10,
         /// Even though the session timer is not supported (no Session-Expires),
-        /// if it sets, UE MUST start the session timer using the configured session interval.
+        /// if it sets, local UA MUST start the session timer using the configured session interval.
         SESSION_HEADER_LOCAL_TIMER_REQUIRED = 0x20,
         /// It indicates that "refresher" parameter can be updated
         /// when early UPDATE doesn't contain "refresher" parameter.

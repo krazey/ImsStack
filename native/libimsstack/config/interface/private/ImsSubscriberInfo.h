@@ -16,13 +16,15 @@
 #ifndef IMS_SUBSCRIBER_INFO_H_
 #define IMS_SUBSCRIBER_INFO_H_
 
+#include "Credential.h"
+
 #include "IImsSubscriberInfo.h"
 
 class ImsSubscriberInfo : public IImsSubscriberInfo
 {
 public:
     ImsSubscriberInfo();
-    inline virtual ~ImsSubscriberInfo() {}
+    ~ImsSubscriberInfo() override = default;
 
     ImsSubscriberInfo(IN const ImsSubscriberInfo&) = delete;
     ImsSubscriberInfo& operator=(IN const ImsSubscriberInfo&) = delete;

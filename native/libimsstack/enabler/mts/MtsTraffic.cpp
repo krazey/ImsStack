@@ -14,21 +14,29 @@
  * limitations under the License.
  */
 
+#include "IImsRadio.h"
+#include "IMtsContext.h"
 #include "IMtsTrafficListener.h"
+#include "MtsDef.h"
 #include "MtsStringDef.h"
 #include "MtsTraffic.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
+#include "message/IMtsMessageController.h"
 
 __IMS_TRACE_TAG_COM_MTS__;
 
-MtsTraffic::MtsTraffic(
-        IN IMS_UINT32 nDirection, IN IMS_UINT32 nTrafficType, IN IMtsTrafficListener& objListener) :
+MtsTraffic::MtsTraffic(IN IMtsContext& objContext, IN IMS_UINT32 nDirection,
+        IN IMS_UINT32 nTrafficType, IN IMtsTrafficListener& objListener) :
+        m_objContext(objContext),
+        m_bDefaultGuardTimerStarted(IMS_FALSE),
         m_nDirection(nDirection),
         m_nTrafficType(nTrafficType),
         m_objMtsTrafficListener(objListener),
         m_piRadioGuardTimer(IMS_NULL)
 {
+    IMS_TRACE_I("+MtsTraffic [slot_%d]- TrafficType[%s], Direction[%s]", m_objContext.GetSlotId(),
+            PS_TrafficType(m_nTrafficType), PS_TrafficDirection(m_nDirection));
 }
 
 PUBLIC VIRTUAL MtsTraffic::~MtsTraffic()
@@ -47,12 +55,11 @@ void MtsTraffic::ImsRadio_OnConnectionFailed(
     IMS_TRACE_I("ImsRadio_OnConnectionFailed : TrafficType[%s], Direction[%s]",
             PS_TrafficType(m_nTrafficType), PS_TrafficDirection(m_nDirection), 0);
 
-    /*
-     * TODO(Mts): Consider of nFailureReason, nCauseCode and nWaitTimeMillis
-     *            if there are some further required actions
-     */
-    m_objMtsTrafficListener.Traffic_OnConnectionFailed(
-            m_nTrafficType, m_nDirection, nFailureReason, nCauseCode, nWaitTimeMillis);
+    if (!IsReasonToIgnore(nFailureReason))
+    {
+        m_objMtsTrafficListener.Traffic_OnConnectionFailed(
+                m_nTrafficType, m_nDirection, nFailureReason, nCauseCode, nWaitTimeMillis);
+    }
 }
 
 PUBLIC
@@ -76,10 +83,23 @@ void MtsTraffic::Timer_TimerExpired(IN ITimer* piTimer)
     }
     else if (piTimer == m_piRadioGuardTimer)
     {
-        m_objMtsTrafficListener.Traffic_GuardTimerExpired(m_nTrafficType, m_nDirection);
+        m_piRadioGuardTimer = IMS_NULL;
         piTimer->KillTimer();
         TimerService::GetTimerService()->DestroyTimer(piTimer);
-        m_piRadioGuardTimer = IMS_NULL;
+
+        if (m_bDefaultGuardTimerStarted)
+        {
+            m_bDefaultGuardTimerStarted = IMS_FALSE;
+
+            if (m_nDirection == IImsRadio::DIRECTION_MO &&
+                    m_objContext.GetMessageController().HasPendingMoSms())
+            {
+                StartRadioGuardTimer(MTS_RADIO_EXTENDED_GUARD_TIMER_MS);
+                return;
+            }
+        }
+
+        m_objMtsTrafficListener.Traffic_GuardTimerExpired(m_nTrafficType, m_nDirection);
     }
     else
     {
@@ -100,7 +120,7 @@ IMS_BOOL MtsTraffic::IsRadioGuardTimerActive()
 }
 
 PUBLIC
-void MtsTraffic::StartRadioGuardTimer()
+void MtsTraffic::StartRadioGuardTimer(IN IMS_UINT32 nDuration)
 {
     IMS_TRACE_I("StartRadioGuardTimer : TrafficType[%s], Direction[%s]",
             PS_TrafficType(m_nTrafficType), PS_TrafficDirection(m_nDirection), 0);
@@ -112,5 +132,24 @@ void MtsTraffic::StartRadioGuardTimer()
     }
 
     m_piRadioGuardTimer = TimerService::GetTimerService()->CreateTimer();
-    m_piRadioGuardTimer->SetTimer(MTS_RADIO_GUARD_TIME, this);
+    m_piRadioGuardTimer->SetTimer(nDuration, this);
+
+    if (nDuration == MTS_RADIO_GUARD_TIMER_MS)
+    {
+        m_bDefaultGuardTimerStarted = IMS_TRUE;
+    }
+}
+
+PRIVATE GLOBAL IMS_BOOL MtsTraffic::IsReasonToIgnore(IN IMS_UINT32 nFailureReason)
+{
+    switch (nFailureReason)
+    {
+        case IImsRadio::REASON_ACCESS_DENIED:
+        case IImsRadio::REASON_RRC_REJECT:
+        case IImsRadio::REASON_INTERNAL_ERROR:
+            return IMS_FALSE;
+
+        default:
+            return IMS_TRUE;
+    }
 }

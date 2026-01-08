@@ -18,22 +18,26 @@
 
 #include "ImsSlot.h"
 
-#include "ISipSocketListener.h"
-#include "SipPrivate.h"
-#include "SipSocket.h"
-#include "SipTransportAddress.h"
-#include "msg/SipAddrSpec.h"
 #include "msg/SipMessage.h"
+
+#include "ISipSocketListener.h"
+#include "Sip.h"
+#include "SipPrivate.h"
+#include "SipSocketAddress.h"
+#include "SipTransportAddress.h"
+
+class SipAddrSpec;
 
 class ISipTransportListener;
 class SipProfile;
+class SipSocket;
 class SipTransportHelper;
 
 class SipTransport : public ImsSlot, public ISipSocketListener
 {
 public:
     SipTransport(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nType);
-    virtual ~SipTransport();
+    ~SipTransport() override;
 
     SipTransport(IN const SipTransport&) = delete;
     SipTransport& operator=(IN const SipTransport&) = delete;
@@ -65,8 +69,9 @@ public:
         return ((m_nTransportExt & Sip::TRANSPORT_EXT_TCP_ONLY) != 0);
     }
     inline IMS_BOOL IsTransactionFlowControlRequired() const { return m_bTxnFlowControlRequired; }
+    void NotifyTransactionTimeout();
     IMS_BOOL SendToNetwork(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
-            IN IMS_BOOL bNotifyError = IMS_TRUE);
+            IN const SipProfile* pProfile, IN IMS_BOOL bNotifyError = IMS_TRUE);
     void SetAddress(IN const SipTransportAddress& objTAddr, IN IMS_SINT32 nTaType = TA_NEAR);
     inline void SetExplicitTargetProtocol(IN IMS_BOOL bExplicitTargetProtocol)
     {
@@ -93,7 +98,8 @@ public:
     }
     virtual IMS_BOOL ReserveResource(IN const SipProfile* pProfile = IMS_NULL);
     inline virtual IMS_BOOL UpdateDestinationInfo(IN ::SipMessage* /*pSipMsg*/,
-            IN IMS_BOOL bRoutingLr = IMS_TRUE, IN SipAddrSpec* pImplicitRoute = IMS_NULL)
+            IN const SipProfile* /*pProfile*/, IN IMS_BOOL bRoutingLr = IMS_TRUE,
+            IN SipAddrSpec* pImplicitRoute = IMS_NULL)
     {
         (void)bRoutingLr;
         (void)pImplicitRoute;
@@ -111,7 +117,7 @@ public:
     static void ParseHostNPort(
             IN const AString& strHostNPort, OUT AString& strHost, OUT IMS_SINT32& nPort);
     // To display an SIP Protocol Message
-    static void PrintMessage(IN IMS_SINT32 nSlotId, IN IMS_BOOL bSend,
+    static void PrintMessage(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nSocketId, IN IMS_BOOL bSend,
             IN const SipTransportAddress& objFarEnd, IN const IMS_CHAR* pszMessage,
             IN IMS_SINT32 nLength);
 
@@ -138,6 +144,8 @@ protected:
                 ((m_nTransportExt & Sip::TRANSPORT_EXT_TLS) != 0));
     }
     void NotifyTransportError(IN IMS_SINT32 nErrorCode);
+    void NotifyTransportError(IN IMS_SINT32 nErrorCode, IN IMS_SINT32 nSocketType,
+            IN IMS_BOOL bIgnoreClosedOrConnectFailed);
 
 private:
     IMS_BOOL IsNetworkConnectionAvailable() const;

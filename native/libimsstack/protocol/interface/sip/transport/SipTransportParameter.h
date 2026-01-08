@@ -47,8 +47,9 @@ public:
             m_nTranspIpType(SIP_INVALID)
     {
     }
-    explicit SipTransportParameter(SipTransportParameter* pTranspParam);
-    SipTransportParameter(SIP_CHAR* pHostAddress, SIP_UINT16 nPort, SIP_INT32 eTranspProtocol);
+    explicit SipTransportParameter(const SipTransportParameter* pTranspParam);
+    SipTransportParameter(
+            const SIP_CHAR* pHostAddress, SIP_UINT16 nPort, SIP_INT32 eTranspProtocol);
     virtual ~SipTransportParameter()
     {
         if (m_pHostAddress != SIP_NULL)
@@ -66,7 +67,7 @@ public:
         this->m_nTranspProtocol = nTranspProtocol;
     }
 
-    SIP_BOOL SetHostAddress(const SIP_CHAR* pHostAddress);
+    SIP_VOID SetHostAddress(const SIP_CHAR* pHostAddress);
 
     SIP_VOID SetPort(SIP_UINT16 nPort) { this->m_nPort = nPort; }
 };

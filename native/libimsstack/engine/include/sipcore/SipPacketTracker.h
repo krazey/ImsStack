@@ -16,8 +16,9 @@
 #ifndef SIP_PACKET_TRACKER_H_
 #define SIP_PACKET_TRACKER_H_
 
-#include "ISipMessage.h"
 #include "ISipPacketTracker.h"
+
+class ISipMessage;
 
 class SipPacketTracker : public ISipPacketTracker
 {
@@ -26,7 +27,7 @@ public:
             m_piListener(IMS_NULL)
     {
     }
-    inline virtual ~SipPacketTracker() {}
+    ~SipPacketTracker() override = default;
 
     SipPacketTracker(IN const SipPacketTracker&) = delete;
     SipPacketTracker& operator=(IN const SipPacketTracker&) = delete;

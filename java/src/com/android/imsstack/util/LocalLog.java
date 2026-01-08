@@ -22,6 +22,7 @@ import java.io.PrintWriter;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
@@ -56,7 +57,7 @@ public final class LocalLog {
         }
         final String logLine;
         if (mUseLocalTimestamps) {
-            logLine = LocalDateTime.now() + " - " + msg;
+            logLine = LocalDateTime.now(ZoneId.systemDefault()) + " - " + msg;
         } else {
             logLine = Duration.ofMillis(SystemClock.elapsedRealtime())
                     + " / " + Instant.now() + " - " + msg;
@@ -72,14 +73,23 @@ public final class LocalLog {
     }
 
     /**
-     * Dumps the content of local log to print writer with each log entry predeced with indent
+     * Dumps the content of local log to print writer with each log entry.
      *
-     * @param pw printer writer to write into
+     * @param pw A {@link PrintWriter} object used to write the formatted logs
      */
     public synchronized void dump(PrintWriter pw) {
+        dump("", pw);
+    }
+
+    /**
+     * Dumps the content of local log to print writer with each log entry predeced with indent.
+     *
+     * @param pw A {@link PrintWriter} object used to write the formatted logs
+     */
+    public synchronized void dump(String indent, PrintWriter pw) {
         Iterator<String> itr = mLog.iterator();
         while (itr.hasNext()) {
-            pw.printf("%s\n", itr.next());
+            pw.printf("%s%s\n", indent, itr.next());
         }
     }
 }

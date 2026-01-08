@@ -21,8 +21,8 @@
 class ImsMutex : public IMutex
 {
 public:
-    inline ImsMutex() {}
-    inline virtual ~ImsMutex() {}
+    ImsMutex() = default;
+    ~ImsMutex() override = default;
 };
 
 #endif

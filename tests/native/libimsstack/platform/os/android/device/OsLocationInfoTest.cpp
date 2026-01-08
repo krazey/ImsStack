@@ -45,6 +45,7 @@ protected:
     {
         m_pPhoneInfoService = new TestPhoneInfoService();
 
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, IMS_NULL);
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_PHONE_INFO, m_pPhoneInfoService);
         m_pOldSystem = PlatformContext::GetInstance()->SetSystem(&m_objSystem);
@@ -157,7 +158,7 @@ TEST_F(OsLocationInfoTest, GetLocationProperties)
 
     // 2. Get default network country from GetNetworkCountryIso() if country not present in
     // location information received from GetLastKnownLocation()
-    ILocationProperties* piLocationProperties = objOsLocationInfo.GetLocationProperties();
+    const ILocationProperties* piLocationProperties = objOsLocationInfo.GetLocationProperties();
 
     EXPECT_TRUE(piLocationProperties != nullptr);
 
@@ -196,15 +197,68 @@ TEST_F(OsLocationInfoTest, GetLocationProperties)
             objOsLocationInfo.GetLastKnownCountry(), AString(OsLocationInfo::COUNTRY_ISO_UNKNOWN));
 }
 
-TEST_F(OsLocationInfoTest, StartInstantLocationUpdate)
+TEST_F(OsLocationInfoTest, RequestLocationUpdate)
 {
-    OsLocationInfo objOsLocationInfo(IMS_SLOT_0);
+    IMS_SINT32 nExpectedSlotId = IMS_SLOT_0;
+    OsLocationInfo objOsLocationInfo(nExpectedSlotId);
+    MockILocationUpdateListener objListener;
 
-    EXPECT_CALL(m_objSystem, StartInstantLocationUpdate(_))
-            .Times(1)
-            .WillRepeatedly(Return(IMS_TRUE));
+    IMS_SINT32 nExpectedWaitTimeMs = 2000;
+    IMS_SINT32 nActualWaitTimeMs;
+    IMS_SINT32 nActualSlotId;
+    IMS_SINT32 nExpectedRequestId = 1;
+    ON_CALL(m_objSystem, RequestLocationUpdate)
+            .WillByDefault(Invoke(
+                    [&](IN IMS_SINT32 nWaitTimeMs, IN IMS_SINT32 nSlotId)
+                    {
+                        nActualWaitTimeMs = nWaitTimeMs;
+                        nActualSlotId = nSlotId;
+                        return nExpectedRequestId;
+                    }));
 
-    EXPECT_EQ(IMS_TRUE, objOsLocationInfo.StartInstantLocationUpdate());
+    objOsLocationInfo.RequestLocationUpdate(nExpectedWaitTimeMs, &objListener);
+
+    EXPECT_EQ(nExpectedWaitTimeMs, nActualWaitTimeMs);
+    EXPECT_EQ(nExpectedSlotId, nActualSlotId);
+
+    IMS_SINT32 nActualRequestId;
+    EXPECT_CALL(m_objSystem, CancelLocationUpdate(_, _))
+            .WillOnce(Invoke(
+                    [&](IN IMS_SINT32 nId, IN IMS_SINT32 nSlotId)
+                    {
+                        nActualRequestId = nId;
+                        nActualSlotId = nSlotId;
+                    }));
+
+    objOsLocationInfo.CancelLocationUpdate(&objListener);
+
+    EXPECT_EQ(nExpectedRequestId, nActualRequestId);
+    EXPECT_EQ(nExpectedSlotId, nActualSlotId);
+}
+
+TEST_F(OsLocationInfoTest, RequestLocationUpdateWithInvalidId)
+{
+    IMS_SINT32 nExpectedSlotId = IMS_SLOT_0;
+    OsLocationInfo objOsLocationInfo(nExpectedSlotId);
+    MockILocationUpdateListener objListener;
+
+    IMS_SINT32 nExpectedWaitTimeMs = 2000;
+    IMS_SINT32 nActualWaitTimeMs;
+    IMS_SINT32 nActualSlotId;
+    ON_CALL(m_objSystem, RequestLocationUpdate)
+            .WillByDefault(Invoke(
+                    [&](IN IMS_SINT32 nWaitTimeMs, IN IMS_SINT32 nSlotId)
+                    {
+                        nActualWaitTimeMs = nWaitTimeMs;
+                        nActualSlotId = nSlotId;
+                        return 0;
+                    }));
+    EXPECT_CALL(objListener, LocationUpdate_OnCompleted()).Times(1);
+
+    objOsLocationInfo.RequestLocationUpdate(nExpectedWaitTimeMs, &objListener);
+
+    EXPECT_EQ(nExpectedWaitTimeMs, nActualWaitTimeMs);
+    EXPECT_EQ(nExpectedSlotId, nActualSlotId);
 }
 
 TEST_F(OsLocationInfoTest, SetDefaultLocationProperties)
@@ -246,6 +300,25 @@ TEST_F(OsLocationInfoTest, SetDefaultLocationProperties)
     objOsLocationInfo.SetDefaultLocationProperties(IMS_TRUE);  // Get from UICC
 
     EXPECT_EQ(objOsLocationInfo.GetLastKnownCountry(), strUiccCountry);
+}
+
+TEST_F(OsLocationInfoTest, ReturnCountryInCapitalWhenItIsInLowercase)
+{
+    OsLocationInfo objOsLocationInfo(IMS_SLOT_0);
+    AString strNetworkCountry("us");
+
+    ON_CALL(m_pPhoneInfoService->GetMockSubscriberInfo(), GetNetworkCountryIso(_))
+            .WillByDefault(Invoke(
+                    [strNetworkCountry](AString& strCountry)
+                    {
+                        strCountry = strNetworkCountry;
+                        return IMS_TRUE;
+                    }));
+
+    // Set the country code returned by GetNetworkCountryIso()
+    objOsLocationInfo.SetDefaultLocationProperties();
+
+    EXPECT_EQ(objOsLocationInfo.GetLastKnownCountry(), "US");
 }
 
 }  // namespace android

@@ -23,7 +23,7 @@ class OsDeviceInfo : public IDeviceInfo
 {
 public:
     OsDeviceInfo();
-    virtual ~OsDeviceInfo();
+    ~OsDeviceInfo() override;
 
     OsDeviceInfo(IN const OsDeviceInfo&) = delete;
     OsDeviceInfo& operator=(IN const OsDeviceInfo&) = delete;

@@ -30,7 +30,7 @@ class AosDnsQuery : public ImsActivityEx
 {
 public:
     explicit AosDnsQuery(IN IMS_BOOL bIsTest = IMS_FALSE);
-    virtual ~AosDnsQuery();
+    ~AosDnsQuery() override;
 
 private:
     AosDnsQuery(IN const AosDnsQuery& objRhs);
@@ -47,9 +47,26 @@ public:
     IMS_BOOL DnsQueryPrivate_Done(IN IMS_BOOL bResult, IN const ImsList<IpAddress>& objIps);
     IMS_BOOL DnsQueryPrivate_Terminated();
 
-public:
     // For Unit testing
     IMS_BOOL IsTestMode();
+
+public:
+    enum
+    {
+        DNS_QUERY_NONE = 0x0000,
+        DNS_QUERY_EXEC = 0x0001,
+
+        DNS_QUERY_TERMINATE = 0x8000
+    };
+
+    enum
+    {
+        MSG_READY = AOSMSG_SERVICE_INTERNAL,
+        MSG_REQUEST,
+        MSG_DONE,
+        MSG_DESTROY,
+        MSG_TERMINATED
+    };
 
 protected:
     // For Unit testing
@@ -71,18 +88,8 @@ protected:
     // For Unit testing
     void RunImp();
 
-protected:
     // ImsActivityEx
-    IMS_BOOL OnMessage(IN IMSMSG& objMsg);
-
-    enum
-    {
-        MSG_READY = AOSMSG_SERVICE_INTERNAL,
-        MSG_REQUEST,
-        MSG_DONE,
-        MSG_DESTROY,
-        MSG_TERMINATED
-    };
+    IMS_BOOL OnMessage(IN IMSMSG& objMsg) override;
 
 public:
     static IMS_UINT32 m_nIdentity;

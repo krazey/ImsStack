@@ -22,6 +22,7 @@
     <boolean name="carrier_wfc_ims_available_bool" value="false"/>
     <int name="carrier_ussd_method_int" value=""/>
     <boolean name="rtt_supported_bool" value=""/>
+    <boolean name="rtt_supported_while_roaming_bool" value=""/>
     <boolean name="allow_merging_rtt_calls_bool" value=""/> <!-- hide -->
     <boolean name="support_downgrade_vt_to_audio_bool" value=""/> <!-- hide -->
     <boolean name="carrier_cross_sim_ims_available_bool" value=""/>
@@ -52,6 +53,8 @@
     <boolean name="rtt_downgrade_supported_bool" value=""/>
     <int name="gba_mode_int" value="" />
     <boolean name="ignore_data_enabled_changed_for_video_calls" value=""/>
+    <string-array name="iwlan_handover_policy_string_array" num="0">
+    </string-array>
 
     <!-- vilte_data_is_metered_bool -->
     <!-- carrier_default_wfc_ims_mode_int -->

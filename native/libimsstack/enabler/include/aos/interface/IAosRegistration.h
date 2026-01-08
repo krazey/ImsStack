@@ -21,6 +21,11 @@
 class AString;
 class IAosRegistrationListener;
 
+enum class EmergencyServicePdn;
+enum class AosNetworkType;
+enum class AosRegistrationType;
+enum class AosReasonCode;
+
 /**
  * @brief This class provides the interface for AosRegistration.
  */
@@ -76,6 +81,15 @@ public:
     virtual void RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason = 0) = 0;
 
     /**
+     * @brief Notify the emergency sms state.
+     *
+     * @param bIsInitialized Indicated whether emergency sms is initialized or done.
+     * @param ePdnType Indicated the pdn type used for the emergency sms.
+     */
+    virtual void NotifyEmergencySmsState(
+            IN IMS_BOOL bIsInitialized, IN EmergencyServicePdn ePdnType) = 0;
+
+    /**
      * @brief Get the registration mode. (@see MODE_XXX enum)
      */
     virtual IMS_UINT32 GetMode() = 0;
@@ -99,6 +113,24 @@ public:
      * @brief Get the registration type. (@see AosRegistrationType)
      */
     virtual AosRegistrationType GetRegType() = 0;
+
+    /**
+     * @brief Get the registered network. (@see AosNetworkType)
+     */
+    virtual AosNetworkType GetImsRegNetwork() const = 0;
+
+    /**
+     * @brief Get the IMS registration type. (@see IMS_REG_TYPE_XXX enum)
+     *        This registration type is for notifying to the telephony module.
+     */
+    virtual IMS_SINT32 GetImsRegType() = 0;
+
+    /**
+     * @brief Check whether UE is in CBM(ECBM or SCBM) or not
+     *
+     * @return IMS_BOOL Return whether IMS is in Callback Mode or not.
+     */
+    virtual IMS_BOOL IsInCallbackMode() = 0;
 
     /**
      * @brief Check whether IMS is registered or not.
@@ -143,6 +175,13 @@ public:
     virtual void SetAppReady(IN IMS_BOOL bReady) = 0;
 
     /**
+     * @brief Set the reason code for IMS termination
+     *
+     * @param eReason Indicate the reason of IMS termination
+     */
+    virtual void SetReasonCode(IN AosReasonCode eReason) = 0;
+
+    /**
      * @brief Indicate the type and the detailed reason for requesting the operation.
      *
      * @see RequestCmd()
@@ -165,18 +204,18 @@ public:
         CMD_SCSCF_RESTORATION,
         CMD_CLEAR_SERVER_SOCKET_ERROR_COUNT,
         CMD_CLEAR_TRIED_PCSCFS,
-        CMD_SCBM_STARTED,
-        CMD_SCBM_TERMINATED,
-        CMD_SCBM_TERMINATED_ECALL,
-        CMD_SCBM_TERMINATED_ESMS,
         CMD_ECALL_INIT,
         CMD_ECALL_DONE,
         CMD_ESMS_INIT,
         CMD_ESMS_DONE,
         CMD_DELAY_CLEAR_SOCKET,
-        CMD_UNAVAILABLE_FEATURE_TAG,
+        CMD_UPDATE_FEATURE_WITHOUT_REG,
         CMD_INCREASE_FAILURE_COUNT_FOR_PDN_REACTIVATED,
         CMD_SET_EPS_5GS_ONLY,
+        CMD_CLOSE_UNSECURE_TCP_SOCKET,
+        CMD_UPDATE_STOP_RETRY_TIMER_WITH_DEFAULT,
+        CMD_REINITIATE_REG_WITH_RETRY_AFTER,
+        CMD_CLEAR_IPSEC_BLOCK,
 
         /// nReason
         REASON_INIT_PCSCF_CLEAR = 30,
@@ -205,6 +244,20 @@ public:
         MODE_NORMAL = 0,
         MODE_LIMITED,
         MODE_FAKE
+    };
+
+    /**
+     * @brief Indicate the IMS registration type.
+     *        This is for notifying to the telephony module.
+     *
+     *  @see GetImsRegType()
+     */
+    enum
+    {
+        IMS_REG_TYPE_INVALID = -1,
+        IMS_REG_TYPE_NORMAL,
+        IMS_REG_TYPE_EMERGENCY,
+        IMS_REG_TYPE_FAKE
     };
 
     /**
@@ -243,7 +296,8 @@ public:
         PROPERTY_SUPPORT_CALLING_NUMBER_VERIFICATION,
         PROPERTY_NETWORK_BINDING_FEATURES,
         PROPERTY_PDN_REACIVATE_WAIT_TIME,
-        PROPERTY_REG_FAILURE_COUNT
+        PROPERTY_REG_FAILURE_COUNT,
+        PROPERTY_TRAFFIC_PRIORITY_BLOCK
     };
 
     /**
@@ -281,7 +335,9 @@ public:
         REASON_FAILURE_SPECIAL,
 
         REASON_FAILURE_FORBIDDEN,
+        REASON_FAILURE_FORBIDDEN_IN_WIFI,
         REASON_FAILURE_AUTHENTICATION,
+        REASON_FAILURE_USIM_AUTHENTICATION,
         REASON_FAILURE_TERMINATED,
         REASON_FAILURE_INTERNAL,
         REASON_FAILURE_BANNDED,
@@ -289,6 +345,7 @@ public:
         REASON_FAILURE_PDN_RECONNECT,
         REASON_FAILURE_PDN_RECONNECT_WITH_AWT,
         REASON_FAILURE_NEXT_PCSCF_REQUIRED,
+        REASON_FAILURE_NO_PCSCF_AVAILABLE,
         REASON_FAILURE_REG_TERMINATING,
         REASON_FAILURE_PCO_LIMITED_SERVICE,
         REASON_FAILURE_PLMN_BLOCK_WITH_TIMEOUT

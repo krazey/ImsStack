@@ -19,11 +19,11 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.enabler.IContext;
-import com.android.imsstack.util.AppContext;
-import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.MessageExecutor;
 
 import java.util.concurrent.Executor;

@@ -40,12 +40,13 @@
 #include "provider/AosNConfiguration.h"
 #include "provider/AosSubscriberManager.h"
 #include "provider/AosRetryRepository.h"
+#include "provider/AosTracer.h"
 #include "provider/AosTransaction.h"
 #include "external/AosService.h"
 
 #include "manager/AosBuilder.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 PUBLIC
 AosBuilder::AosBuilder()
@@ -124,8 +125,7 @@ PUBLIC VIRTUAL IAosHandle* AosBuilder::BuildHandle(
 
         return new AosHandleUce(piAppContext, strAppId, strSrvId, nType);
     }
-    else if (strSrvId.EqualsIgnoreCase(
-            ImsServiceConfig::GetServiceName(ImsServiceId::SIP_DELEGATE)))
+    else if (strSrvId.EqualsIgnoreCase("ims.service.sip_delegate"))
     {
         nType = ImsAosService::SIP_CONTROLLER;
         IMS_TRACE_D("BuildHandle :: App ID(%s) , Service ID(%s), Type (AosHandleSipController)",
@@ -212,6 +212,13 @@ PUBLIC VIRTUAL IAosNConfiguration* AosBuilder::BuildNConfiguration()
     IMS_TRACE_D("BuildNConfiguration", 0, 0, 0);
 
     return new AosNConfiguration();
+}
+
+PUBLIC VIRTUAL IAosTracer* AosBuilder::BuildTracer(IN IMS_SINT32 nSlotId)
+{
+    IMS_TRACE_D("BuildTracer", 0, 0, 0);
+
+    return new AosTracer(nSlotId);
 }
 
 PUBLIC VIRTUAL IAosTransaction* AosBuilder::BuildTransaction(IN IMS_SINT32 nSlotId)

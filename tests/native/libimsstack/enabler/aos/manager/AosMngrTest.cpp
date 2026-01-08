@@ -17,20 +17,46 @@
 #include <gmock/gmock.h>
 
 #include "manager/AosMngr.h"
+#include "provider/AosStaticConfig.h"
+
+#define DECLARE_USING(Base) using Base::DestroyStaticConfig;
+
+class TestAosMngr : public AosMngr
+{
+public:
+    DECLARE_USING(AosMngr)
+
+    inline explicit TestAosMngr(IN IMS_UINT32 nSlotId) :
+            AosMngr(nSlotId)
+    {
+    }
+
+    inline AosBuildDirector* GetBuildDirector() { return m_pBuildDirector; }
+    inline AosStaticConfig* GetStaticConfig() { return m_pStaticConfig; }
+
+    void SetStaticConfig(AosStaticConfig* objStaticConfig)
+    {
+        if (m_pStaticConfig != nullptr)
+        {
+            DestroyStaticConfig();
+        }
+
+        m_pStaticConfig = objStaticConfig;
+    }
+};
 
 class AosMngrTest : public ::testing::Test
 {
 public:
-    AosMngr* m_pAosMngr;
+    TestAosMngr* m_pAosMngr;
 
     const AString m_strAppId = AString("ims.app.test");
     const AString m_strServiceId = AString("ims.service.test");
-    const IMS_UINT32 m_nServiceType = -1;
 
 protected:
-    virtual void SetUp() override { m_pAosMngr = new AosMngr(IMS_SLOT_0); }
+    void SetUp() override { m_pAosMngr = new TestAosMngr(IMS_SLOT_0); }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosMngr != nullptr)
         {
@@ -38,37 +64,39 @@ protected:
             m_pAosMngr = nullptr;
         }
     }
-
-    AosStaticConfig* GetStaticConfig() { return m_pAosMngr->m_pStaticConfig; }
-
-    void SetStaticConfig(AosStaticConfig* objStaticConfig)
-    {
-        m_pAosMngr->m_pStaticConfig = objStaticConfig;
-    }
-
-    AosBuildDirector* GetBuildDirector() { return m_pAosMngr->m_pBuildDirector; }
 };
 
 TEST_F(AosMngrTest, Constructor_Test)
 {
-    EXPECT_TRUE(GetStaticConfig() != IMS_NULL);
-    EXPECT_TRUE(GetBuildDirector() != IMS_NULL);
+    EXPECT_TRUE(m_pAosMngr->GetStaticConfig() != IMS_NULL);
+    EXPECT_TRUE(m_pAosMngr->GetBuildDirector() != IMS_NULL);
 }
 
-TEST_F(AosMngrTest, GetAosHandle_Test1)
+TEST_F(AosMngrTest, GetAosHandleReturnsNullIfStaticConfigIsNull)
 {
-    // Test1: static config is null
-    // Expectation: return null
+    // GIVEN
+    m_pAosMngr->SetStaticConfig(IMS_NULL);
 
-    SetStaticConfig(IMS_NULL);
+    // WHEN & THEN
     EXPECT_EQ(m_pAosMngr->GetAosHandle(m_strAppId, m_strServiceId), nullptr);
 }
-/*
-TEST_F(AosMngrTest, GetAosHandle_Test2)
-{
-    // Test2: static profile is null
-    // Expectation: return null
 
-    // TODO: Need a way that can make pProfile IMS_NULL
+TEST_F(AosMngrTest, GetAosHandleReturnsNullIfStaticProfileIsNull)
+{
+    // GIVEN
+    AosStaticConfig* pStaticConfig = new AosStaticConfig();
+    m_pAosMngr->SetStaticConfig(pStaticConfig);
+
+    // WHEN & THEN
+    EXPECT_EQ(m_pAosMngr->GetAosHandle(m_strAppId, m_strServiceId), nullptr);
 }
-*/
+
+TEST_F(AosMngrTest, StaticConfigShouldProperlyDestroyed)
+{
+    // WHEN
+    m_pAosMngr->DestroyStaticConfig();
+
+    // THEN
+    EXPECT_EQ(m_pAosMngr->GetStaticConfig(), nullptr);
+    EXPECT_EQ(m_pAosMngr->GetStaticConfig(), IMS_NULL);
+}

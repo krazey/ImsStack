@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
+
 #include "msg/SipBadHeader.h"
 
 namespace android
@@ -41,19 +42,19 @@ TEST_F(SipBadHeaderTest, CopyConstructor)
     pCopyHeader->SipDelete();
 }
 
-TEST_F(SipBadHeaderTest, EncodeHdr)
+TEST_F(SipBadHeaderTest, Encode)
 {
     SipBadHeader* pHeader = new SipBadHeader();
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->SetHeaderName("Name"));
+    pHeader->SetHeaderName("Name");
     EXPECT_STREQ("Name", pHeader->GetHeaderName());
-    const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {
+    const SIP_INT32 BUFFER_SIZE = 4096;
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
-    EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
+    SIP_CHAR* pBuff = &(aBuffer[0]);
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
 
     AStringBuffer objBuffer(512);
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_TRUE));
@@ -61,12 +62,12 @@ TEST_F(SipBadHeaderTest, EncodeHdr)
     pHeader->SipDelete();
 }
 
-TEST_F(SipBadHeaderTest, DecodeHdr)
+TEST_F(SipBadHeaderTest, Decode)
 {
     SipBadHeader* pHeader = new SipBadHeader();
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(SIP_NULL, 0));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode(SIP_NULL, 0));
     EXPECT_EQ(SIP_TRUE, pHeader->IsValidHeader());
 
     pHeader->SipDelete();

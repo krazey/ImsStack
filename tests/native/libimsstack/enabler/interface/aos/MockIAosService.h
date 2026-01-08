@@ -29,17 +29,16 @@
 class MockIAosService : public IAosService
 {
 public:
-    MOCK_METHOD(IMS_BOOL, AddListener, (IN IAosEmergencyListener * piListener), (override));
-    MOCK_METHOD(IMS_BOOL, RemoveListener, (IN IAosEmergencyListener * piListener), (override));
+    MOCK_METHOD(void, AddListener, (IN IAosEmergencyListener * piListener), (override));
+    MOCK_METHOD(void, RemoveListener, (IN IAosEmergencyListener * piListener), (override));
+    MOCK_METHOD(void, AddListener, (IN IAosRegistrationControlListener * piListener), (override));
     MOCK_METHOD(
-            IMS_BOOL, AddListener, (IN IAosRegistrationControlListener * piListener), (override));
-    MOCK_METHOD(IMS_BOOL, RemoveListener, (IN IAosRegistrationControlListener * piListener),
-            (override));
-    MOCK_METHOD(IMS_BOOL, AddListener, (IN IAosServiceSettingListener * piListener), (override));
-    MOCK_METHOD(IMS_BOOL, RemoveListener, (IN IAosServiceSettingListener * piListener), (override));
-    MOCK_METHOD(IMS_BOOL, AddListener, (IN IAosServicePhoneListener * piListener), (override));
-    MOCK_METHOD(IMS_BOOL, RemoveListener, (IN IAosServicePhoneListener * piListener), (override));
-    MOCK_METHOD(void, NotifyEmcCallbackModeChanged,
+            void, RemoveListener, (IN IAosRegistrationControlListener * piListener), (override));
+    MOCK_METHOD(void, AddListener, (IN IAosServiceSettingListener * piListener), (override));
+    MOCK_METHOD(void, RemoveListener, (IN IAosServiceSettingListener * piListener), (override));
+    MOCK_METHOD(void, AddListener, (IN IAosServicePhoneListener * piListener), (override));
+    MOCK_METHOD(void, RemoveListener, (IN IAosServicePhoneListener * piListener), (override));
+    MOCK_METHOD(void, NotifyEmergencyCallbackModeChanged,
             (IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_ULONG nDuration), (override));
     MOCK_METHOD(void, UpdateSipDelegateRegistration, (), (override));
     MOCK_METHOD(void, TriggerSipDelegateDeregistration, (), (override));
@@ -50,6 +49,7 @@ public:
     MOCK_METHOD(void, ControlRegistration,
             (IN IMS_SINT32 nRequestType, IN IMS_SINT32 nPcscfOrder, IN IMS_SINT32 nCause),
             (override));
+    MOCK_METHOD(void, UpdateDataFailureReason, (IN IMS_SINT32 nReason), (override));
     MOCK_METHOD(void, NotifyAirplaneSetting, (IN IMS_UINT32 nIsOn), (override));
     MOCK_METHOD(void, NotifyDataRoamingSetting, (IN IMS_UINT32 nIsAllowed), (override));
     MOCK_METHOD(void, NotifyMobileDataSetting, (IN IMS_UINT32 nIsOn), (override));
@@ -60,31 +60,46 @@ public:
     MOCK_METHOD(void, NotifyVideoSetting, (IN IMS_UINT32 nIsOn), (override));
     MOCK_METHOD(void, NotifyVolteSetting, (IN IMS_UINT32 nIsOn), (override));
     MOCK_METHOD(void, NotifyWfcSetting, (IN IMS_UINT32 nIsOn), (override));
+    MOCK_METHOD(void, NotifyWifiSetting, (IN IMS_UINT32 nIsOn), (override));
     MOCK_METHOD(void, NotifyAosStart, (), (override));
     MOCK_METHOD(void, NotifyIpcanHandoverFailure,
             (IN IMS_SINT32 nTargetNetwork, IN IMS_SINT32 nCauseCode), (override));
-    MOCK_METHOD(void, NotifyIsimState, (IN IMS_UINT32 nState), (override));
+    MOCK_METHOD(void, NotifyIsimState, (IN IMS_SINT32 nState), (override));
     MOCK_METHOD(void, NotifyLocationInfo, (IN IMS_UINT32 nState), (override));
     MOCK_METHOD(void, NotifyMobileDataLimit, (IN IMS_UINT32 nIsLimited), (override));
     MOCK_METHOD(void, NotifyNetworkVideoCapability, (IN IMS_UINT32 nIsOn), (override));
     MOCK_METHOD(void, NotifyPhoneNumberState, (IN IMS_UINT32 nIsRefresh, IN IMS_UINT32 nState),
             (override));
-    MOCK_METHOD(void, NotifyPlmnChanged, (), (override));
+    MOCK_METHOD(void, NotifyPlmnChanged, (IN const AString& strPlmn), (override));
+    MOCK_METHOD(void, NotifyVopsStateChanged, (IN IMS_UINT32 nState, IN const AString& strPlmn),
+            (override));
     MOCK_METHOD(void, NotifyPowerOff, (), (override));
     MOCK_METHOD(void, NotifyPreciseCallState, (IN IMS_SINT32 nState), (override));
     MOCK_METHOD(void, NotifyCarrierSignalPcoValueChanged, (IN IMS_SINT32 nValue), (override));
+    MOCK_METHOD(void, NotifyCrossSimStatus, (IN IMS_SINT32 nIsConnected), (override));
+    MOCK_METHOD(void, NotifyNasSecurityAlgorithmChanged, (IN IMS_UINT32 nIsNullAlgo), (override));
+    MOCK_METHOD(void, NotifyAllowedNetworkTypesChanged, (IN IMS_ULONG nNetworkTypesBitMask),
+            (override));
+    MOCK_METHOD(void, NotifyEmergencyRegistrationStateChanged, (IN IMS_UINT32 nIsEmergencyAttached),
+            (override));
+    MOCK_METHOD(void, NotifySimStateChanged, (IN IMS_SINT32 nSimState), (override));
+
     MOCK_METHOD(IMS_BOOL, NotifyRegistered,
-            (IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
+            (IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
                     IN const ImsList<AString>& objFeatureTags),
             (override));
     MOCK_METHOD(IMS_BOOL, NotifyRegistering,
-            (IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
+            (IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
                     IN const ImsList<AString>& objFeatureTags),
             (override));
     MOCK_METHOD(IMS_BOOL, NotifyDeregistered,
-            (IN AosNetworkType eNetworkType, IN AosReasonCode eReason), (override));
+            (IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, IN AosReasonCode eReason,
+                    IN IMS_SINT32 nDataFailureReason),
+            (override));
+    MOCK_METHOD(IMS_BOOL, NotifyDeregistering, (IN IMS_SINT32 nRegType), (override));
     MOCK_METHOD(IMS_BOOL, NotifyTechnologyChangeFailed,
-            (IN AosNetworkType eNetworkType, IN IMS_SINT32 nCauseCode), (override));
+            (IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, IN AosReasonCode eReason),
+            (override));
     MOCK_METHOD(
             IMS_BOOL, NotifyAssociatedUriChanged, (IN const ImsList<AString>& objUris), (override));
     MOCK_METHOD(IMS_BOOL, NotifyCapabilitiesUpdateFailed,
@@ -94,13 +109,17 @@ public:
     MOCK_METHOD(IMS_BOOL, NotifyAosIsimState, (IN AosIsimState eState), (override));
     MOCK_METHOD(IMS_BOOL, NotifyRegEventState,
             (IN IMS_UINT32 nStatusCode, IN const ImsList<AString>& objImpus), (override));
-    MOCK_METHOD(IMS_BOOL, RequestPhoneNumberRetry, (IN AosPhoneNumberRetryCommand eCommand),
+    MOCK_METHOD(IMS_BOOL, NotifyImsFeatureChanged,
+            (IN IMS_SINT32 nRegType, IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits),
+            (override));
+    MOCK_METHOD(IMS_BOOL, NotifyTrace, (IN AosRegistrationType eType, IN const AString& strLog),
             (override));
     MOCK_METHOD(IMS_BOOL, RequestWifiService, (IN IMS_BOOL bIsOn), (override));
     MOCK_METHOD((ImsMap<IMS_UINT32, IMS_UINT32>&), GetCapabilities, (), (override));
     MOCK_METHOD(IMS_UINT32, GetCapabilitiesForNetwork, (AosNetworkType eNetworkType), (override));
     MOCK_METHOD(IMS_BOOL, IsSupportCapabilitiesForNetwork,
             (AosNetworkType eNetworkType, AosCapability eCapability), (override));
+    MOCK_METHOD(IMS_BOOL, IsNasSecurityAlgorithmNull, (), (override));
 
     MOCK_METHOD(void, NotifyJniEnablerSet, (), (override));
 };

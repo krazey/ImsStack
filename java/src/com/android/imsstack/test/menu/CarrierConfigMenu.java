@@ -21,30 +21,30 @@ import android.os.PersistableBundle;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
-import android.preference.PreferenceActivity;
 import android.telephony.CarrierConfigManager;
 import android.telephony.CarrierConfigManager.ImsRtt;
 import android.telephony.CarrierConfigManager.ImsVoice;
 import android.telephony.CarrierConfigManager.ImsVt;
-import android.telephony.ims.ImsManager;
 import android.telephony.ims.ProvisioningManager;
+import android.text.TextUtils;
 import android.util.SparseArray;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.imsstack.R;
-import com.android.imsstack.ServiceLoader;
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.ImsPrivateProperties;
+import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.SystemServiceProxy.ImsManagerProxy;
+import com.android.imsstack.base.SystemServiceProxy.ProvisioningManagerProxy;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
-import com.android.imsstack.core.config.CarrierConfig.Assets;
+import com.android.imsstack.core.config.CarrierConfig.Ims;
+import com.android.imsstack.core.config.CarrierConfig.ImsWfc;
 import com.android.imsstack.core.config.ConfigXmlUtils;
-import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsPrivateProperties;
-import com.android.imsstack.util.IoUtils;
 import com.android.imsstack.util.Log;
-import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -60,14 +60,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@SuppressWarnings("deprecation")
-public class CarrierConfigMenu extends PreferenceActivity {
+public class CarrierConfigMenu extends AppCompatActivity {
     private static final String PUBLIC_CARRIER_CONFIG_FILE =
             "carrier_config/aosp_carrier_config.xml";
 
     protected static final String KEY_DUMP_CONFIG = "dump_config";
     protected static final String KEY_CLEAR_TEST_CONFIG = "clear_test_config";
     protected static final String KEY_TEST_CARRIER_ID = "test_carrier_id";
+    protected static final String KEY_TEST_ENTERED_CARRIER_ID = "test_entered_carrier_id";
+    protected static final String KEY_TEST_SPECIFIC_CARRIER_ID = "test_specific_carrier_id";
     protected static final String KEY_VOLTE_PROVISIONING = "volte_provisioning";
     protected static final String KEY_ASSETS_PREFIX = "assets_";
     protected static final String KEY_CONFIG_BOOLEAN_ITEMS = "config_boolean_items";
@@ -132,13 +133,14 @@ public class CarrierConfigMenu extends PreferenceActivity {
             CONFIG_I_BUNDLE, KEY_CONFIG_BUNDLE_VALUE,
             ASSETS_CONFIG_I_BUNDLE, KEY_ASSETS_PREFIX + KEY_CONFIG_BUNDLE_VALUE);
     private static final List<String> ASSETS_BUNDLE_KEYS = Arrays.asList(
-            Assets.KEY_EXTRA_REG_ERR_BUNDLE,
-            Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
-            Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE,
-            Assets.KEY_REG_RETRY_INTERVAL_BUNDLE,
-            Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE,
-            Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE,
-            Assets.KEY_WFC_ERR_MESSAGE_BUNDLE);
+            Ims.KEY_EXTRA_REG_ERR_BUNDLE,
+            Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
+            Ims.KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE,
+            Ims.KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE,
+            Ims.KEY_REG_RETRY_INTERVAL_BUNDLE,
+            Ims.KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE,
+            Ims.KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE,
+            ImsWfc.KEY_WFC_ERR_MESSAGE_BUNDLE);
     private static final Map<String, List<String>> BUNDLE_ITEMS_MAP = Map.ofEntries(
             Map.entry(ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE, Arrays.asList(
                     ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY,
@@ -146,12 +148,11 @@ public class CarrierConfigMenu extends PreferenceActivity {
                     ImsVoice.KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY,
                     ImsVoice.KEY_DTMFWB_PAYLOAD_TYPE_INT_ARRAY,
                     ImsVoice.KEY_DTMFNB_PAYLOAD_TYPE_INT_ARRAY)),
-            Map.entry(ImsVt.KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE, Arrays.asList(
-                    Assets.KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY,
+            Map.entry(ImsVt.KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
+                    Arrays.asList(CarrierConfig.ImsVt.KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY,
                     ImsVt.KEY_H264_PAYLOAD_TYPE_INT_ARRAY)),
             Map.entry(ImsRtt.KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE, Arrays.asList(
-                    ImsRtt.KEY_T140_PAYLOAD_TYPE_INT,
-                    ImsRtt.KEY_RED_PAYLOAD_TYPE_INT)),
+                    ImsRtt.KEY_T140_PAYLOAD_TYPE_INT, ImsRtt.KEY_RED_PAYLOAD_TYPE_INT)),
             Map.entry(ImsVoice.KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE, Arrays.asList(
                     ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT,
                     ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY,
@@ -182,58 +183,62 @@ public class CarrierConfigMenu extends PreferenceActivity {
                     ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_PACKETIZATION_MODE_INT,
                     ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT,
                     ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY)),
-            Map.entry(Assets.KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE, Arrays.asList(
+            Map.entry(CarrierConfig.ImsVt.KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE, Arrays.asList(
                     ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_PACKETIZATION_MODE_INT,
                     ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT,
                     ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY,
-                    Assets.KEY_HEVC_SPROP_PARAMETER_SETS_STRING,
-                    Assets.KEY_HEVC_PROFILE_INT,
-                    Assets.KEY_HEVC_LEVEL_INT)),
-            Map.entry(Assets.KEY_EXTRA_REG_ERR_BUNDLE, Arrays.asList(
-                    Assets.KEY_EXTRA_REG_ERR_CODE_AS_FAILURE_IN_ROAMING_FOR_UPDATE_BOOL,
-                    Assets.KEY_EXTRA_REG_ERR_CODE_FOR_UPDATE_INT_ARRAY,
-                    Assets.KEY_EXTRA_REG_ERR_CODE_INT_ARRAY,
-                    Assets.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT,
-                    Assets.KEY_EXTRA_REG_ERR_MAX_CNT_INT,
-                    Assets.KEY_EXTRA_REG_ERR_MIN_CNT_INT,
-                    Assets.KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT,
-                    Assets.KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_LTE_COMBINDED_ATTACHED_INT,
-                    Assets.KEY_EXTRA_REG_ERR_POLICY_INT,
-                    Assets.KEY_EXTRA_REG_ERR_RETRY_CNT_SHARED_FOR_REG_AND_SUB_BOOL,
-                    Assets.KEY_EXTRA_REG_ERR_WAIT_TIME_SEC_INT_ARRAY)),
-            Map.entry(Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE, Arrays.asList(
-                    Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY,
-                    Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_WITH_WAIT_TIME_INT_ARRAY,
-                    Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_WITH_WAIT_TIME_INT)),
-            Map.entry(Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE, Arrays.asList(
-                    Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY,
-                    Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY,
-                    Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_ONLY_DEFINED_BOOL)),
-            Map.entry(Assets.KEY_REG_RETRY_INTERVAL_BUNDLE, Arrays.asList(
-                    Assets.KEY_REG_RETRY_INTERVAL_RANDOM_UPPER_VALUE_SEC_INT_ARRAY,
-                    Assets.KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY,
-                    Assets.KEY_REG_RETRY_INTERVAL_USED_FOR_SUB_BOOL)),
-            Map.entry(Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE, Arrays.asList(
-                    Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY,
-                    Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT)),
-            Map.entry(Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE, Arrays.asList(
-                    Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY,
-                    Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_COUNT_INT)),
-            Map.entry(Assets.KEY_WFC_ERR_MESSAGE_BUNDLE, Arrays.asList(
-                    Assets.KEY_WFC_ERR_REG_403_STRING,
-                    Assets.KEY_WFC_ERR_REG_500_STRING,
-                    Assets.KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING,
-                    Assets.KEY_WFC_ERR_SUB_403_STRING,
-                    Assets.KEY_WFC_ERR_NOTIFY_TERMINATED_STRING,
-                    Assets.KEY_WFC_ERR_OTHER_FAILURES_STRING)));
+                    CarrierConfig.ImsVt.KEY_HEVC_SPROP_PARAMETER_SETS_STRING,
+                    CarrierConfig.ImsVt.KEY_HEVC_PROFILE_INT,
+                    CarrierConfig.ImsVt.KEY_HEVC_LEVEL_INT)),
+            Map.entry(Ims.KEY_EXTRA_REG_ERR_BUNDLE, Arrays.asList(
+                    Ims.KEY_EXTRA_REG_ERR_CODE_AS_FAILURE_IN_ROAMING_FOR_UPDATE_BOOL,
+                    Ims.KEY_EXTRA_REG_ERR_CODE_FOR_UPDATE_INT_ARRAY,
+                    Ims.KEY_EXTRA_REG_ERR_CODE_INT_ARRAY,
+                    Ims.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT,
+                    Ims.KEY_EXTRA_REG_ERR_MAX_CNT_INT,
+                    Ims.KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT,
+                    Ims.KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_LTE_COMBINED_ATTACHED_INT,
+                    Ims.KEY_EXTRA_REG_ERR_POLICY_INT,
+                    Ims.KEY_EXTRA_REG_ERR_RETRY_CNT_SHARED_FOR_REG_AND_SUB_BOOL,
+                    Ims.KEY_EXTRA_REG_ERR_WAIT_TIME_SEC_INT_ARRAY)),
+            Map.entry(Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE, Arrays.asList(
+                    Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY,
+                    Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_WITH_WAIT_TIME_INT_ARRAY,
+                    Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_WITH_WAIT_TIME_INT)),
+            Map.entry(Ims.KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE, Arrays.asList(
+                    Ims.KEY_PCSCF_RECOVERY_MAX_CNT_INT,
+                    Ims.KEY_PCSCF_RECOVERY_WAIT_TIME_SEC_INT,
+                    Ims.KEY_PCSCF_RECOVERY_BASE_TIME_SEC_INT,
+                    Ims.KEY_PCSCF_RECOVERY_MAX_TIME_SEC_INT)),
+            Map.entry(Ims.KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE, Arrays.asList(
+                    Ims.KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY,
+                    Ims.KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY,
+                    Ims.KEY_REG_ERR_CODE_WITH_RA_TIME_ONLY_DEFINED_BOOL)),
+            Map.entry(Ims.KEY_REG_RETRY_INTERVAL_BUNDLE, Arrays.asList(
+                    Ims.KEY_REG_RETRY_INTERVAL_RANDOM_UPPER_VALUE_SEC_INT_ARRAY,
+                    Ims.KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY,
+                    Ims.KEY_REG_RETRY_INTERVAL_USED_FOR_SUB_BOOL)),
+            Map.entry(Ims.KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE, Arrays.asList(
+                    Ims.KEY_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY,
+                    Ims.KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT)),
+            Map.entry(Ims.KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE, Arrays.asList(
+                    Ims.KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY,
+                    Ims.KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_CNT_INT)),
+            Map.entry(ImsWfc.KEY_WFC_ERR_MESSAGE_BUNDLE, Arrays.asList(
+                    ImsWfc.KEY_WFC_ERR_REG_403_STRING,
+                    ImsWfc.KEY_WFC_ERR_REG_500_STRING,
+                    ImsWfc.KEY_WFC_ERR_NOT_SUPPORTED_COUNTRY_STRING,
+                    ImsWfc.KEY_WFC_ERR_SUB_403_STRING,
+                    ImsWfc.KEY_WFC_ERR_NOTIFY_TERMINATED_STRING,
+                    ImsWfc.KEY_WFC_ERR_OTHER_FAILURES_STRING)));
     private static final List<String> KEYS_OF_VALUE_USED_AS_BUNDLE_KEY = List.of(
             ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY,
             ImsVoice.KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY,
             ImsVoice.KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY,
-            Assets.KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY,
+            CarrierConfig.ImsVt.KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY,
             ImsVt.KEY_H264_PAYLOAD_TYPE_INT_ARRAY);
 
-    private static SparseArray<ArrayList<String>> sConfigKeys = null;
+    private static SparseArray<List<String>> sConfigKeys = null;
 
     private int mSlotId = 0;
 
@@ -249,6 +254,8 @@ public class CarrierConfigMenu extends PreferenceActivity {
     private final List<String> mBundleKeys = new ArrayList<>();
     private ListPreference mClearTestConfig;
     private ListPreference mTestCarrierId;
+    private EditTextPreference mTestEnteredCarrierId;
+    private EditTextPreference mTestSpecificCarrierId;
     private ListPreference mVoLteProvisioning;
     private boolean mConfigChanged = false;
 
@@ -291,7 +298,12 @@ public class CarrierConfigMenu extends PreferenceActivity {
         storeTestConfig();
 
         if (isConfigChanged) {
-            ServiceLoader.notifyCarrierConfigChanged(mSlotId);
+            ConfigInterface config = AgentFactory.getInstance().getAgent(
+                    ConfigInterface.class, mSlotId);
+
+            if (config != null) {
+                config.notifyCarrierConfigChangedForNative();
+            }
         }
     }
 
@@ -302,11 +314,6 @@ public class CarrierConfigMenu extends PreferenceActivity {
         ImsLog.d(mSlotId, "CarrierConfigMenu: onResume");
 
         initTestConfig();
-    }
-
-    @Override
-    protected boolean isValidFragment(String fragmentName) {
-        return fragmentName != null;
     }
 
     @VisibleForTesting
@@ -361,7 +368,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
         for (int i = 0; i < CONFIG_I_MAX; ++i) {
             String key = KEY_LIST_PREFERENCES.get(i);
             if (key != null) {
-                ListPreference itemList = (ListPreference) findPreference(key);
+                SearchableListPreference itemList = (SearchableListPreference) findPreference(key);
                 mConfigItems.put(i, itemList);
 
                 if (itemList != null) {
@@ -389,7 +396,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
         for (int i = 0; i < CONFIG_I_BUNDLE_MAX; ++i) {
             String key = KEY_BUNDLE_KEY_LIST_PREFERENCES.get(i);
             if (key != null) {
-                ListPreference keyList = (ListPreference) findPreference(key);
+                SearchableListPreference keyList = (SearchableListPreference) findPreference(key);
                 mConfigBundleKeys.put(i, keyList);
 
                 if (keyList != null) {
@@ -448,6 +455,36 @@ public class CarrierConfigMenu extends PreferenceActivity {
             mTestCarrierId.setOnPreferenceChangeListener(new ListItemChangeListener());
         }
 
+        mTestEnteredCarrierId = (EditTextPreference) findPreference(KEY_TEST_ENTERED_CARRIER_ID);
+        if (mTestEnteredCarrierId != null) {
+            int carrierId = ImsPrivateProperties.Persistent.getInt(
+                    ImsPrivateProperties.Persistent.KEY_TEST_CARRIER_ID, mSlotId);
+
+            if (carrierId > 0) {
+                mTestEnteredCarrierId.setText(String.valueOf(carrierId));
+                mTestEnteredCarrierId.setSummary(String.valueOf(carrierId));
+            } else {
+                mTestEnteredCarrierId.setText("0");
+                mTestEnteredCarrierId.setSummary("0");
+            }
+            mTestEnteredCarrierId.setOnPreferenceChangeListener(new EditTextItemChangeListener());
+        }
+
+        mTestSpecificCarrierId = (EditTextPreference) findPreference(KEY_TEST_SPECIFIC_CARRIER_ID);
+        if (mTestSpecificCarrierId != null) {
+            int specificCarrierId = ImsPrivateProperties.Persistent.getInt(
+                    ImsPrivateProperties.Persistent.KEY_TEST_SPECIFIC_CARRIER_ID, mSlotId);
+
+            if (specificCarrierId > 0) {
+                mTestSpecificCarrierId.setText(String.valueOf(specificCarrierId));
+                mTestSpecificCarrierId.setSummary(String.valueOf(specificCarrierId));
+            } else {
+                mTestSpecificCarrierId.setText("0");
+                mTestSpecificCarrierId.setSummary("0");
+            }
+            mTestSpecificCarrierId.setOnPreferenceChangeListener(new EditTextItemChangeListener());
+        }
+
         mVoLteProvisioning = (ListPreference) findPreference(KEY_VOLTE_PROVISIONING);
         if (mVoLteProvisioning != null) {
             mVoLteProvisioning.setValue("-1");
@@ -466,12 +503,62 @@ public class CarrierConfigMenu extends PreferenceActivity {
 
                 if (pb != null) {
                     Set<String> keys = pb.keySet();
-                    Log.i(Log.TAG, "CarrierConfig(" + mSlotId + ") - starts");
+                    Log.i(this, "CarrierConfig(" + mSlotId + ") - starts");
                     for (String key : keys) {
-                        Log.i(Log.TAG, "CarrierConfig: " + key
+                        Log.i(this, "CarrierConfig: " + key
                                 + "=" + CarrierConfig.getValue(pb, key));
                     }
-                    Log.i(Log.TAG, "CarrierConfig(" + mSlotId + ") - ends");
+                    Log.i(this, "CarrierConfig(" + mSlotId + ") - ends");
+                }
+            }
+            return true;
+        }
+    }
+
+    private final class EditTextItemChangeListener
+            implements Preference.OnPreferenceChangeListener {
+        @Override
+        public boolean onPreferenceChange(Preference preference, Object newValue) {
+            String value = newValue.toString();
+
+            if (KEY_TEST_SPECIFIC_CARRIER_ID.equals(preference.getKey())) {
+                if (TextUtils.isEmpty(value)) {
+                    value = "0";
+                }
+                mTestSpecificCarrierId.setText(value);
+                mTestSpecificCarrierId.setSummary(value);
+
+                int oldSpecificCarrierId = ImsPrivateProperties.Persistent.getInt(
+                        ImsPrivateProperties.Persistent.KEY_TEST_SPECIFIC_CARRIER_ID, mSlotId);
+                int newSpecificCarrierId = parseInt(value, 0);
+
+                if (newSpecificCarrierId != oldSpecificCarrierId) {
+                    ImsLog.d(mSlotId, "TestSpecificCarrierId: " + oldSpecificCarrierId
+                            + " >> " + newSpecificCarrierId);
+                    ImsPrivateProperties.Persistent.setInt(
+                            ImsPrivateProperties.Persistent.KEY_TEST_SPECIFIC_CARRIER_ID,
+                            newSpecificCarrierId, mSlotId);
+                }
+            } else if (KEY_TEST_ENTERED_CARRIER_ID.equals(preference.getKey())) {
+                if (TextUtils.isEmpty(value)) {
+                    value = "0";
+                }
+                mTestEnteredCarrierId.setText(value);
+                mTestEnteredCarrierId.setSummary(value);
+
+                mTestCarrierId.setValue(value);
+                mTestCarrierId.setSummary(mTestCarrierId.getEntry());
+
+                int oldCarrierId = ImsPrivateProperties.Persistent.getInt(
+                        ImsPrivateProperties.Persistent.KEY_TEST_CARRIER_ID, mSlotId);
+                int newCarrierId = parseInt(value, 0);
+
+                if (newCarrierId != oldCarrierId) {
+                    ImsLog.d(mSlotId, "TestEnteredCarrierId: " + oldCarrierId
+                            + " >> " + newCarrierId);
+                    ImsPrivateProperties.Persistent.setInt(
+                            ImsPrivateProperties.Persistent.KEY_TEST_CARRIER_ID,
+                            newCarrierId, mSlotId);
                 }
             }
             return true;
@@ -502,6 +589,9 @@ public class CarrierConfigMenu extends PreferenceActivity {
                 mTestCarrierId.setValue(value);
                 mTestCarrierId.setSummary(mTestCarrierId.getEntry());
 
+                mTestEnteredCarrierId.setText(value);
+                mTestEnteredCarrierId.setSummary(value);
+
                 int oldCarrierId = ImsPrivateProperties.Persistent.getInt(
                         ImsPrivateProperties.Persistent.KEY_TEST_CARRIER_ID, mSlotId);
                 int newCarrierId = parseInt(value, 0);
@@ -527,27 +617,24 @@ public class CarrierConfigMenu extends PreferenceActivity {
                     ImsLog.d(mSlotId, "VoLte-Provisioning-Required: subId="
                             + subId + ", status=" + provisioningStatus);
 
-                    ImsManager imsMngr =
-                            AppContext.getInstance().getSystemService(ImsManager.class);
+                    ImsManagerProxy imp =
+                            AppContext.getInstance().getSystemServiceProxy(ImsManagerProxy.class);
+                    try {
+                        ProvisioningManagerProxy pmp = imp.getProvisioningManagerProxy(subId);
 
-                    if (imsMngr != null) {
-                        try {
-                            ProvisioningManager pm = imsMngr.getProvisioningManager(subId);
-
-                            if (pm != null) {
-                                pm.setProvisioningIntValue(
-                                        ProvisioningManager.KEY_VOLTE_PROVISIONING_STATUS,
-                                        provisioningStatus);
-                                pm.setProvisioningIntValue(
-                                        ProvisioningManager.KEY_VT_PROVISIONING_STATUS,
-                                        provisioningStatus);
-                                pm.setProvisioningIntValue(
-                                        ProvisioningManager.KEY_VOICE_OVER_WIFI_ENABLED_OVERRIDE,
-                                        provisioningStatus);
-                            }
-                        } catch (Throwable t) {
-                            ImsLog.e(mSlotId, "setProvisioningValue: " + t);
+                        if (pmp != null) {
+                            pmp.setProvisioningIntValue(
+                                    ProvisioningManager.KEY_VOLTE_PROVISIONING_STATUS,
+                                    provisioningStatus);
+                            pmp.setProvisioningIntValue(
+                                    ProvisioningManager.KEY_VT_PROVISIONING_STATUS,
+                                    provisioningStatus);
+                            pmp.setProvisioningIntValue(
+                                    ProvisioningManager.KEY_VOICE_OVER_WIFI_ENABLED_OVERRIDE,
+                                    provisioningStatus);
                         }
+                    } catch (Throwable t) {
+                        ImsLog.e(mSlotId, "setProvisioningValue: " + t);
                     }
                 }
             }
@@ -556,7 +643,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
         }
     }
 
-    private class ConfigListener {
+    private static class ConfigListener {
         protected final int mConfigType;
 
         ConfigListener(int configType) {
@@ -1071,10 +1158,9 @@ public class CarrierConfigMenu extends PreferenceActivity {
 
         if (videoPayloadTypes != null) {
             int[] hevcPayloadTypes = videoPayloadTypes.getIntArray(
-                    Assets.KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY);
+                    CarrierConfig.ImsVt.KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY);
             addPayloadDescriptionKeys(mBundleKeys,
-                    Assets.KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE,
-                    hevcPayloadTypes);
+                    CarrierConfig.ImsVt.KEY_HEVC_PAYLOAD_DESCRIPTION_BUNDLE, hevcPayloadTypes);
 
             int[] h264PayloadTypes = videoPayloadTypes.getIntArray(
                     ImsVt.KEY_H264_PAYLOAD_TYPE_INT_ARRAY);
@@ -1085,14 +1171,15 @@ public class CarrierConfigMenu extends PreferenceActivity {
     }
 
     private void initBundleKeys() {
-        ListPreference keyList = mConfigBundleKeys.valueAt(CONFIG_I_BUNDLE);
+        SearchableListPreference keyList =
+                (SearchableListPreference) mConfigBundleKeys.valueAt(CONFIG_I_BUNDLE);
         if (keyList != null) {
             String[] entries = mBundleKeys.toArray(new String[0]);
             keyList.setEntries(entries);
             keyList.setEntryValues(entries);
         }
 
-        keyList = mConfigBundleKeys.valueAt(ASSETS_CONFIG_I_BUNDLE);
+        keyList = (SearchableListPreference) mConfigBundleKeys.valueAt(ASSETS_CONFIG_I_BUNDLE);
         if (keyList != null) {
             String[] entries = ASSETS_BUNDLE_KEYS.toArray(new String[0]);
             keyList.setEntries(entries);
@@ -1110,14 +1197,15 @@ public class CarrierConfigMenu extends PreferenceActivity {
     }
 
     private void initConfigItems() {
-        SparseArray<ArrayList<String>> configKeys = getConfigKeys();
+        SparseArray<List<String>> configKeys = getConfigKeys();
 
         if (configKeys != null) {
             for (int i = 0; i < CONFIG_I_MAX; ++i) {
                 Collection<String> keys = configKeys.valueAt(i);
                 String[] entries = keys.toArray(new String[0]);
 
-                ListPreference itemList = mConfigItems.valueAt(i);
+                SearchableListPreference itemList =
+                        (SearchableListPreference) mConfigItems.valueAt(i);
 
                 if (itemList != null) {
                     itemList.setEntries(entries);
@@ -1127,7 +1215,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
         }
     }
 
-    private static SparseArray<ArrayList<String>> getConfigKeys() {
+    private static SparseArray<List<String>> getConfigKeys() {
         if (sConfigKeys == null) {
             ArrayList<String> publicConfigKeys = new ArrayList<>();
             ArrayList<String> assetsConfigKeys = new ArrayList<>();
@@ -1167,11 +1255,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
     }
 
     private static void readConfigKeys(String fileName, Collection<String> configKeys) {
-        InputStream is = null;
-
-        try {
-            is = AppContext.getInstance().getAssets().open(fileName);
-
+        try (InputStream is = AppContext.getInstance().getAssets().open(fileName)) {
             XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
             XmlPullParser parser = factory.newPullParser();
             parser.setInput(is, "utf-8");
@@ -1184,10 +1268,8 @@ public class CarrierConfigMenu extends PreferenceActivity {
                     ConfigXmlUtils.readConfigKeys(parser, configKeys);
                 }
             }
-        } catch (IOException | XmlPullParserException e) {
+        } catch (IllegalArgumentException | IOException | XmlPullParserException e) {
             ImsLog.e("readConfigKeys: " + e.toString());
-        } finally {
-            IoUtils.closeQuietly(is);
         }
     }
 

@@ -50,7 +50,7 @@ private:
     void SetState(IN IMS_SINT32 nState);
     void StoreMessage(IN const ISipMessage* piSipMsg);
     IMS_BOOL UpdateOnPublishRequest(IN const ISipMessage* piSipMsg);
-    IMS_BOOL UpdateOnPublishResponse(IN const ISipMessage* piSipMsg);
+    void UpdateOnPublishResponse(IN const ISipMessage* piSipMsg);
 
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 

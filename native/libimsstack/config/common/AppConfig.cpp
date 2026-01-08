@@ -17,6 +17,7 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
+#include "ImsRegistry.h"
 #include "private/AppConfig.h"
 #include "private/CapProperty.h"
 #include "private/CoreServiceConfig.h"
@@ -27,7 +28,7 @@ class AppConfigPrivate : public RcObject
 {
 public:
     explicit AppConfigPrivate(IN const AString& strAppId);
-    ~AppConfigPrivate();
+    ~AppConfigPrivate() override;
 
     AppConfigPrivate(IN const AppConfigPrivate&) = delete;
     AppConfigPrivate& operator=(IN const AppConfigPrivate&) = delete;
@@ -57,7 +58,7 @@ public:
     static IMS_BOOL AddCoreServiceProperty(
             IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigPrivate);
     static IMS_BOOL AddCoreServiceRelatedProperty(
-            IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigPrivate);
+            IN const AStringArray& objProperty, IN const AppConfigPrivate* pConfigPrivate);
 
 private:
     friend class AppConfig;
@@ -110,7 +111,7 @@ AppConfigPrivate::AppConfigPrivate(IN const AString& strAppId) :
 {
 }
 
-PUBLIC VIRTUAL AppConfigPrivate::~AppConfigPrivate()
+PUBLIC AppConfigPrivate::~AppConfigPrivate()
 {
     if (!m_objCoreServiceConfigs.IsEmpty())
     {
@@ -565,7 +566,7 @@ PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddCoreServiceProperty(
 }
 
 PUBLIC GLOBAL IMS_BOOL AppConfigPrivate::AddCoreServiceRelatedProperty(
-        IN const AStringArray& objProperty, IN_OUT AppConfigPrivate* pConfigPrivate)
+        IN const AStringArray& objProperty, IN const AppConfigPrivate* pConfigPrivate)
 {
     if (objProperty.GetCount() < 2)
     {
@@ -793,7 +794,7 @@ PUBLIC VIRTUAL ImsRegistry* AppConfig::ToRegistry() const
     {
         for (IMS_UINT32 i = 0; i < m_pConfigPrivate->m_objCoreServiceConfigs.GetSize(); ++i)
         {
-            CoreServiceConfig* pCoreServiceConfig =
+            const CoreServiceConfig* pCoreServiceConfig =
                     m_pConfigPrivate->m_objCoreServiceConfigs.GetAt(i);
 
             if (pCoreServiceConfig != IMS_NULL)
@@ -993,7 +994,7 @@ IMS_BOOL AppConfig::IsHeaderWritable(IN const AString& strHeader) const
 PUBLIC
 AStringArray AppConfig::GetCapabilitySdps(IN IMS_SINT32 nSector, IN IMS_SINT32 nMessageType) const
 {
-    CapProperty* pProperty = m_pConfigPrivate->GetCapProperty(nSector, nMessageType);
+    const CapProperty* pProperty = m_pConfigPrivate->GetCapProperty(nSector, nMessageType);
 
     if (pProperty != IMS_NULL)
     {

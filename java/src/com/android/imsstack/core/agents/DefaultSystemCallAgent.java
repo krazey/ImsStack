@@ -16,14 +16,20 @@
 
 package com.android.imsstack.core.agents;
 
+import android.telephony.TelephonyManager;
+
+import androidx.annotation.Nullable;
+
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.system.DefaultSystemCallInterface;
 import com.android.imsstack.system.SystemInterface;
-import com.android.imsstack.util.DeviceUtils;
+import com.android.imsstack.util.ImsUtils;
 
 /**
  * An agent class to handle the default system calls.
  */
-public class DefaultSystemCallAgent implements DefaultSystemCallInterface {
+public final class DefaultSystemCallAgent implements DefaultSystemCallInterface {
 
     public DefaultSystemCallAgent() {
         SystemInterface.getInstance().setSystemCallInterface(this);
@@ -109,7 +115,7 @@ public class DefaultSystemCallAgent implements DefaultSystemCallInterface {
      */
     @Override
     public String getDeviceName() {
-        return DeviceUtils.getDeviceName();
+        return AppContext.getInstance().getDeviceName();
     }
 
     /**
@@ -119,7 +125,28 @@ public class DefaultSystemCallAgent implements DefaultSystemCallInterface {
      */
     @Override
     public String getExternalStoragePath() {
-        return DeviceUtils.getExternalStoragePath();
+        return AppContext.getExternalStoragePath();
+    }
+
+    /**
+     * Returns the generated UUID string.
+     *
+     * @param version The UUID version.
+     * @param name The name to be used to construct UUID.
+     *             May be null according to the {@code version}.
+     * @return The generated UUID string or null if any errors occur.
+     */
+    @Override
+    public String getUuid(int version, @Nullable String name) {
+        if (version == 1) {
+            WifiInterface wifi = getWifiInterface();
+            return ImsUtils.getUuid1((wifi != null) ? wifi.getMacAddress() : null);
+        } else if (version == 3) {
+            return ImsUtils.getUuid3(name);
+        } else if (version == 4) {
+            return ImsUtils.getUuid4();
+        }
+        return null;
     }
 
     /**
@@ -174,5 +201,30 @@ public class DefaultSystemCallAgent implements DefaultSystemCallInterface {
         if (traffic != null) {
             traffic.setTrafficPriority(priorityType, slotId);
         }
+    }
+
+    /**
+     * Excluding the slot provided as an input parameter, the SIM state of other slots is checked
+     * to determine and return the availability of cross SIM redialing.
+     *
+     * @param slotId The slot ID where the emergency call connection failed.
+     * @return {@code true} if cross SIM redialing is available, {@code false} otherwise.
+     */
+    @Override
+    public boolean isCrossSimRedialingAvailable(int slotId) {
+        TelephonyManagerProxy tmp =
+                AppContext.getInstance().getSystemServiceProxy(TelephonyManagerProxy.class);
+        for (int i = 0; i < tmp.getActiveModemCount(); i++) {
+            if (i == slotId) {
+                continue;
+            }
+            int simState = tmp.getSimState(i);
+            if (simState == TelephonyManager.SIM_STATE_READY
+                    || simState == TelephonyManager.SIM_STATE_PRESENT) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

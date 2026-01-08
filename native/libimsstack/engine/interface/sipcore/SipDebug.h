@@ -16,8 +16,11 @@
 #ifndef SIP_DEBUG_H_
 #define SIP_DEBUG_H_
 
-#include "IpAddress.h"
+#include "AString.h"
+
 #include "SipMethod.h"
+
+class IpAddress;
 
 /**
  * @brief This class provides an interface for SIP debug operations.

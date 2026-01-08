@@ -24,10 +24,13 @@ class AosHandleMts : public AosHandle
 public:
     AosHandleMts(IN IAosAppContext* piAppContext, IN const AString& strAppId,
             IN const AString& strServiceId, IN const IMS_SINT32 nServiceType);
-    virtual ~AosHandleMts();
+    ~AosHandleMts() override;
 
     // IAosNConfigurationListener
     void NConfiguration_NotifyConfigChanged() override;
+
+    // IAosNetTrackerListener
+    void NetTracker_StatusChanged() override;
 
 protected:
     void InitializeSupportedRats();
@@ -38,17 +41,20 @@ protected:
     void InitializeServiceFeature() override;
 
     void ProcessCapabilitiesChanged(
-            IN const ImsMap<IMS_UINT32, IMS_UINT32>& objCapabilities) override;
+            IN const ImsMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities) override;
+
+    void ProcessNetworkChanged() override;
 
     IMS_BOOL IsHandleBlocked() const override;
+    IMS_BOOL IsFeatureBlocked(IN IMS_UINT32 nFeature) const override;
     IMS_BOOL IsSupportedNetworkTypeForCellular(IN IMS_UINT32 nType) const override;
     void Handle_Notify(IN IMS_UINT32 nType, IN IMS_BOOL bBlocked) override;
 
-private:
+    // IAosHandle
+    void Request(IN IMS_UINT32 nType, IN IMS_UINT32 nState = 0) override;
+
+protected:
     IMS_BOOL m_bMtcBlocked;
     IMS_UINT32 m_nSupportedRats;
-
-private:
-    friend class AosHandleMtsTest;
 };
 #endif  // AOS_HANDLE_MTS_H_

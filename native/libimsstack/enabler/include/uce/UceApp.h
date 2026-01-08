@@ -16,6 +16,7 @@
 #ifndef _UCE_APP_H_
 #define _UCE_APP_H_
 
+#include "IImsActivityController.h"
 #include "ImsApp.h"
 #include "INetworkWatcher.h"
 #include "ITimer.h"
@@ -43,16 +44,16 @@ class UceApp :
 public:
     explicit UceApp(IN const IMS_SINT32 nSlotId, IN const AString& strAppName);
     explicit UceApp(IN const IMS_SINT32 nSlotId, IN IImsAos* piImsAos);
-    virtual ~UceApp();
+    virtual ~UceApp() override;
     /* ------------------------------------------------------------------------------------------
         Methods
     ---------------------------------------------------------------------------------------------
    */
 
 protected:
-    virtual IMS_BOOL OnPreprocess(IN IMSMSG& objMSG);
-    virtual IMS_BOOL OnMessage(IN IMSMSG& objMSG);
-    virtual IMS_BOOL OnPostprocess(IN IMSMSG& objMSG);
+    virtual IMS_BOOL OnPreprocess(IN IMSMSG& objMSG) override;
+    virtual IMS_BOOL OnMessage(IN IMSMSG& objMSG) override;
+    virtual IMS_BOOL OnPostprocess(IN IMSMSG& objMSG) override;
     virtual IImsActivityController* GetController() override;
     virtual IMS_BOOL Control(
             IN IMS_UINT32 nCmdType, IN IMS_UINTP nInParam, OUT IMS_UINTP* pnOutParam) override;
@@ -68,7 +69,8 @@ protected:
     virtual void ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan) override;
     virtual void ImsAos_Connecting() override;
     virtual void ImsAos_Disconnecting(IN IMS_UINT32 nReason) override;
-    virtual void ImsAos_Disconnected(IN IMS_UINT32 nReason) override;
+    virtual void ImsAos_Disconnected(
+            IN IMS_UINT32 nReason, IN IMS_SINT32 nDataFailureReason) override;
     virtual void ImsAos_Suspended(IN IMS_UINT32 nReason) override;
     virtual void ImsAos_Resumed() override;
 

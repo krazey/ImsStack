@@ -16,12 +16,12 @@
 #ifndef INTERFACE_SIP_CLIENT_CONNECTION_H_
 #define INTERFACE_SIP_CLIENT_CONNECTION_H_
 
-#include "IpAddress.h"
 #include "ISipConnection.h"
 #include "Sip.h"
 
+class IpAddress;
 class Credential;
-class ISipAckPackage;
+
 class ISipClientConnectionListener;
 class ISipConnectionNotifier;
 class ISipGenericChallenge;
@@ -36,7 +36,7 @@ class ISipGenericChallenge;
 class ISipClientConnection : public ISipConnection
 {
 protected:
-    virtual ~ISipClientConnection() = default;
+    ~ISipClientConnection() override = default;
 
 public:
     /**
@@ -195,15 +195,6 @@ public:
     virtual ISipGenericChallenge* GetAuthenticationChallenge(IN IMS_SINT32 nIndex = 0) const = 0;
 
     /**
-     * @brief Returns the helper package for SIP ACK retransmission.
-     *
-     * The application SHOULD destroy the returned object if it does not use anymore.
-     *
-     * @return Pointer to ISipAckPackage.
-     */
-    virtual ISipAckPackage* GrabAck() = 0;
-
-    /**
      * @brief Initializes the resubmitting request message when the connection had received
      *        the authentication challenge.
      *
@@ -268,6 +259,11 @@ public:
     virtual void SetTransportTuple(IN const IpAddress& objIpAddr, IN IMS_SINT32 nPortS,
             IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFc = Sip::PORT_UNSPECIFIED,
             IN IMS_SINT32 nTransportExt = Sip::TRANSPORT_EXT_ANY) = 0;
+
+    /**
+     * @brief Retransmits the ACK request if it's already sent.
+     */
+    virtual void RetransmitAck() = 0;
 };
 
 #endif

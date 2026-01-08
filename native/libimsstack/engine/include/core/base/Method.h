@@ -34,7 +34,7 @@ class Method : public EngineActivity, public ISipClientConnectionListener, publi
 {
 public:
     Method();
-    virtual ~Method();
+    ~Method() override;
 
     Method(IN const Method&) = delete;
     Method& operator=(IN const Method&) = delete;
@@ -90,7 +90,7 @@ protected:
 
     IMS_RESULT AdjustMessage(
             IN_OUT ISipMessage* piSipMsg, IN IMS_SINT32 nMessage = MESSAGE_CLASS_NORMAL);
-    void CheckNCreateDialog(IN ISipConnection* piSc, IN IMS_BOOL bDestroy = IMS_FALSE,
+    void CheckNCreateDialog(IN const ISipConnection* piSc, IN IMS_BOOL bDestroy = IMS_FALSE,
             IN IMS_BOOL bTerminatedDialogRequired = IMS_FALSE);
     void DestroyDialog();
     inline const SipAddress* GetUserAor() const { return m_pUserAor; }
@@ -104,7 +104,7 @@ protected:
     IMS_BOOL RespondToChallenge(IN ISipClientConnection* piScc);
     IMS_BOOL SetChallengeNCredentials(IN ISipClientConnection* piScc);
 
-    void UpdateRemoteUserIds(IN ISipConnection* piSc);
+    void UpdateRemoteUserIds(IN const ISipConnection* piSc);
 
 private:
     // ISipClientConnectionListener interface
@@ -119,7 +119,7 @@ public:
     {
     public:
         SccListener();
-        virtual ~SccListener();
+        ~SccListener() override;
 
     protected:
         void Error_NotifyError(IN ISipConnection* piSc, IN IMS_SINT32 nCode,

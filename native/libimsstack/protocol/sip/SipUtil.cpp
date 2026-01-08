@@ -14,41 +14,26 @@
  * limitations under the License.
  */
 #include "SipDatatypes.h"
-
-#include "SipUtil.h"
-
-#include "SipDefTimerUtil.h"
 #include "SipDefLoggerUtil.h"
 #include "SipDefNetworkUtil.h"
+#include "SipUtil.h"
 #include "msg/SipMsgUtil.h"
 
-static SipUtil* gpUtil = SIP_NULL;
+SipUtil* SipUtil::s_pUtil = SIP_NULL;
 
 SipUtil::SipUtil() :
-        m_pTxnListener(SIP_NULL)
+        m_pLoggerUtil(new SipDefLoggerUtil()),
+        m_pNetworkUtil(new SipDefNetworkUtil()),
+        m_pCallback(SIP_NULL)
 {
-    /* Create Default In-Build Services */
-    m_pLoggerUtil = new SipDefLoggerUtil();
-    m_pTimerUtil = new SipDefTimerUtil();
-    m_pNetworkUtil = new SipDefNetworkUtil();
-    SIPHdrAccess::Init();
+    SipMsgUtil::Init();
 }
 
 SipUtil::~SipUtil()
 {
-    if (m_pTxnListener != SIP_NULL)
-    {
-        delete m_pTxnListener;
-    }
-
     if (m_pNetworkUtil != SIP_NULL)
     {
         delete m_pNetworkUtil;
-    }
-
-    if (m_pTimerUtil != SIP_NULL)
-    {
-        delete m_pTimerUtil;
     }
 
     if (m_pLoggerUtil != SIP_NULL)
@@ -57,73 +42,31 @@ SipUtil::~SipUtil()
     }
 }
 
-SIP_VOID SipUtil::RegisterNetwork(ISipNetworkUtil* pNwUtil)
+SIP_VOID SipUtil::SetNetwork(ISipNetworkUtil* pNetworkUtil)
 {
     if (m_pNetworkUtil != SIP_NULL)
     {
         delete m_pNetworkUtil;
     }
 
-    m_pNetworkUtil = pNwUtil;
+    m_pNetworkUtil = pNetworkUtil;
 }
 
-SIP_VOID SipUtil::RegisterTxnListener(ISipTxnListener* pTxnListener)
+SIP_VOID SipUtil::DestroyInstance()
 {
-    if (m_pTxnListener != SIP_NULL)
+    if (s_pUtil != SIP_NULL)
     {
-        delete m_pTxnListener;
+        delete s_pUtil;
+        s_pUtil = SIP_NULL;
+    }
+}
+
+SipUtil* SipUtil::GetInstance()
+{
+    if (s_pUtil == SIP_NULL)
+    {
+        s_pUtil = new SipUtil();
     }
 
-    m_pTxnListener = pTxnListener;
-}
-
-ISipTimerUtil* SipUtil::GetTimer()
-{
-    return m_pTimerUtil;
-}
-
-ISipLoggerUtil* SipUtil::GetLogger()
-{
-    return m_pLoggerUtil;
-}
-ISipNetworkUtil* SipUtil::GetNetwork()
-{
-    return m_pNetworkUtil;
-}
-
-ISipTxnListener* SipUtil::GetTxnListener()
-{
-    return m_pTxnListener;
-}
-
-SIP_VOID SipUtil_Construct()
-{
-    SipUtil* pUtil = gpUtil;
-
-    if (pUtil)
-    {
-        return;
-    }
-
-    pUtil = new SipUtil();
-    gpUtil = pUtil;
-}
-
-SIP_VOID SipUtil_Destruct()
-{
-    SipUtil* pUtil = gpUtil;
-
-    if (pUtil == SIP_NULL)
-    {
-        return;
-    }
-
-    delete pUtil;
-    gpUtil = SIP_NULL;
-}
-
-SipUtil* SipUtil_GetInstance()
-{
-    SipUtil* pUtil = gpUtil;
-    return pUtil;
+    return s_pUtil;
 }

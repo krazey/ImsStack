@@ -21,7 +21,10 @@
 /**
  * @brief This class provides the type for IImsAos#Control()
  *
- * The API using this class is below. \n
+ * Warning: The order of these enum values must not be changed.
+ *          Some modules rely on the hardcoded integer values of these enums.
+ *
+ * The API using this class is below.
  *     - IImsAos#Control(IN IMS_UINT32 nType)
  */
 class ImsAosControl
@@ -29,54 +32,66 @@ class ImsAosControl
 public:
     enum
     {
-        /// The initial registration is attempted in an offline state.
+        /// An initial registration is attempted in an offline state.
         REGISTER_START = 0,
-        /// The initial registration with WLAN is attempted in an offline state.
+        /// An initial registration with WLAN is attempted in an offline state.
         REGISTER_START_WITH_WLAN,
-        /// The re-registration is attempted in the registered state.
+        /// A re-registration is attempted in the registered state.
         REGISTER_REFRESH,
-        /// The de-registration is attempted.
+        /// A de-registration is attempted.
         REGISTER_STOP,
-        /// The de-registration is attempted and registration is blocked with some period.
-        REGISTER_STOP_BY_ROAMING,
-        /// The initial registration is attempted after the registration is destroyed.
+        /**
+         * An initial registration is attempted after the previous registration is destroyed.
+         *
+         * [NOTE] If there are any IMS calls, the registration will be performed after they are
+         *        terminated.
+         */
         REGISTER_REINITIATE,
-        /// The registration is destroyed and the initial registration is tried
-        /// based on CS call state and RAT.
-        REGISTER_REINITIATE_BY_CSFB,
-
-        /// The emergency registration is skipped and next PCSCF is used.
+        /// The emergency registration is skipped, and the next PCSCF is used.
         E_REGISTER_FAKE_WITH_NEXT_PCSCF,
-
-        /// The initial registration is attempted with next PCSCF.
+        /**
+         * An initial registration is attempted with the next PCSCF.
+         *
+         * [NOTE] If there are any IMS calls, the registration will be performed after they are
+         *        terminated.
+         */
         PCSCF_NEXT,
-        /// The current PCSCF is not used as unavailable. The initial registration is attempted
-        /// with the next PCSCF. PCSCF discovery is tried if PCSCF is unavailable.
+        /// The current PCSCF is not used because it is unavailable. An initial registration is
+        /// attempted with the next PCSCF. PCSCF discovery is tried if no PCSCF is available.
         PCSCF_NEXT_WITH_DISCOVERY,
-
-        /// The initial registration is attempted without IPSEC.
+        /// An initial registration is attempted without IPSEC.
         IPSEC_DISABLED,
-
-        /// The number of retry failures increases.
+        /**
+         * If the retry count is increased and reaches the maximum count, an initial registration
+         * is performed with an available P-CSCF if one exists. If no available P-CSCF is found,
+         * a RAT block operation is performed.
+         *
+         * [NOTE] If there are any IMS calls, the registration will be performed after they are
+         *        terminated.
+         */
         RETRY_COUNT_INCREASE,
-
-        /// The number of retry failures increases and the initial registration is attempted.
+        /**
+         * When the retry count increases and reaches the max count, it behaves like
+         * RETRY_COUNT_INCREASE. If it does not reach the max count, it performs an initial
+         * registration.
+         *
+         * [NOTE] If there are any IMS calls, the registration will be performed after they are
+         *        terminated.
+         */
         RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION,
-
-        /// Update of registration is attempted for SipDelegate include initial registration.
-        /// This is the replace of ImsRegistrationImplBase.updateSipDelegateRegistration().
+        /// An update of registration is attempted for SipDelegate, including the initial
+        /// registration. This replaces ImsRegistrationImplBase.updateSipDelegateRegistration().
         UPDATE_SIP_DELEGATE_REGISTRATION,
-
-        /// De-registration is attempted for SipDelegate.
-        /// This is the replace of ImsRegistrationImplBase.triggerSipDelegateDeregistration().
+        /// A de-registration is attempted for SipDelegate.
+        /// This replaces ImsRegistrationImplBase.triggerSipDelegateDeregistration().
         TRIGGER_SIP_DELEGATE_DEREGISTRATION,
-
-        /// Tear down the full IMS registration and re-register again for SipDelegate.
-        /// This is the replace of ImsRegistrationImplBase.triggerFullNetworkRegistration().
+        /// The full IMS registration is torn down, and a re-registration is performed for
+        /// SipDelegate. This replaces ImsRegistrationImplBase.triggerFullNetworkRegistration().
         TRIGGER_FULL_NETWORK_REGISTRATION,
-
-        /// Current plmn is blocked with timeout
-        PLMN_BLOCK_WITH_TIMEOUT
+        /// The current PLMN is blocked with a timeout.
+        PLMN_BLOCK_WITH_TIMEOUT,
+        /// The emergency registration is skipped, and the current PCSCF is used.
+        E_REGISTER_FAKE_WITH_SAME_PCSCF
     };
 };
 
@@ -97,11 +112,11 @@ public:
         NONE = 0,
 
         /// MTC
-        MMTEL = (0x00000001),    // "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\""
-        VIDEO = (0x00000002),    // "video"
-        TEXT = (0x00000004),     // "text"
-        USSI = (0x00000008),     // "+g.3gpp.nw-init-ussi"
-        VERSTAT = (0x00000010),  // "+g.3gpp.verstat"
+        MMTEL = (0x00000001),  // "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\""
+        VIDEO = (0x00000002),  // "video"
+        TEXT = (0x00000004),   // "text"
+        NW_INIT_USSI = (0x00000008),  // "+g.3gpp.nw-init-ussi"
+        VERSTAT = (0x00000010),       // "+g.3gpp.verstat"
 
         /// MTS
         SMSIP = (0x00000020),  // "+g.3gpp.smsip"

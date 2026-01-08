@@ -40,9 +40,14 @@ import android.os.Parcel;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsMmTelManager;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.telephony.ims.ProvisioningManager;
+import android.telephony.ims.stub.ImsConfigImplBase;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.ContextFixture;
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.core.agents.ImsRadioInterface;
 import com.android.imsstack.core.agents.LocationInterface;
 import com.android.imsstack.core.agents.Sim;
@@ -58,9 +63,6 @@ import com.android.imsstack.jni.JniIms;
 import com.android.imsstack.jni.JniImsProxy;
 import com.android.imsstack.jni.JniObjectId;
 import com.android.imsstack.jni.JniSystemListener;
-import com.android.imsstack.util.AppContext;
-import com.android.imsstack.util.ImsPrivateProperties;
-import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.MessageExecutor;
 
 import org.junit.After;
@@ -70,6 +72,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.io.FileDescriptor;
@@ -454,24 +457,6 @@ public class SystemInterfaceTest {
 
     @Test
     @SmallTest
-    public void testNotifyVoiceCallStateChanged() throws Exception {
-        setUpSystemInterface();
-        ISystem system = setUpSystemWithLooper();
-
-        system.notifyVoiceCallStateChanged(TelephonyManager.CALL_STATE_OFFHOOK);
-
-        Parcel data = getDataForSystem();
-        try {
-            assertEquals(SLOT0, data.readInt());
-            assertEquals(SystemConstants.NOTIFY_VOICE_CALL_STATE_CHANGED, data.readInt());
-            assertEquals(TelephonyManager.CALL_STATE_OFFHOOK, data.readInt());
-        } finally {
-            data.recycle();
-        }
-    }
-
-    @Test
-    @SmallTest
     public void testNotifyConfigurationChanged() throws Exception {
         setUpSystemInterface();
         ISystem system = setUpSystemWithLooper();
@@ -536,58 +521,6 @@ public class SystemInterfaceTest {
             assertEquals(SystemConstants.NOTIFY_ISIM_EVENT, data.readInt());
             assertEquals(event, data.readInt());
             assertEquals(state, data.readString());
-        } finally {
-            data.recycle();
-        }
-    }
-
-    @Test
-    @SmallTest
-    public void testNotifyIsimFileAttributesResponse() throws Exception {
-        setUpSystemInterface();
-        ISystem system = setUpSystemWithLooper();
-
-        int event = 103;
-        int fileId = Sim.ISIM_FILE_ID_IMPU;
-        int size = 1;
-        String[] values = new String[] { "sip:1234@ims.com" };
-        system.notifyIsimFileAttributesResponse(event, fileId, size, values);
-
-        Parcel data = getDataForSystem();
-        try {
-            assertEquals(SLOT0, data.readInt());
-            assertEquals(SystemConstants.NOTIFY_ISIM_EVENT, data.readInt());
-            assertEquals(event, data.readInt());
-            assertEquals(fileId, data.readInt());
-            assertEquals(size, data.readInt());
-            for (int i = 0; i < size; ++i) {
-                assertEquals(values[i], data.readString());
-            }
-        } finally {
-            data.recycle();
-        }
-    }
-
-    @Test
-    @SmallTest
-    public void testNotifyIsimRecordResponse() throws Exception {
-        setUpSystemInterface();
-        ISystem system = setUpSystemWithLooper();
-
-        int event = 104;
-        int fileId = Sim.ISIM_FILE_ID_IMPU;
-        int index = 0;
-        String value = "sip:1234@ims.com";
-        system.notifyIsimRecordResponse(event, fileId, index, value);
-
-        Parcel data = getDataForSystem();
-        try {
-            assertEquals(SLOT0, data.readInt());
-            assertEquals(SystemConstants.NOTIFY_ISIM_EVENT, data.readInt());
-            assertEquals(event, data.readInt());
-            assertEquals(fileId, data.readInt());
-            assertEquals(index, data.readInt());
-            assertEquals(value, data.readString());
         } finally {
             data.recycle();
         }
@@ -716,6 +649,25 @@ public class SystemInterfaceTest {
 
     @Test
     @SmallTest
+    public void testNotifyLocationUpdateCompleted() throws Exception {
+        setUpSystemInterface();
+        ISystem system = setUpSystemWithLooper();
+
+        int requestId = 1;
+        system.notifyLocationUpdateCompleted(requestId);
+
+        Parcel data = getDataForSystem();
+        try {
+            assertEquals(SLOT0, data.readInt());
+            assertEquals(SystemConstants.NOTIFY_LOCATION_EVENT, data.readInt());
+            assertEquals(LocationInterface.EVENT_LOCATION_UPDATE_COMPLETED, data.readInt());
+        } finally {
+            data.recycle();
+        }
+    }
+
+    @Test
+    @SmallTest
     public void testOnAdvancedCallingSettingChangedWhenEnabled() throws Exception {
         setUpSystemInterface();
         setUpSystemWithLooper(ImsEventDef.IMS_EVENT_VOLTE_SETTING, mMmTelFeatureRegistry);
@@ -836,7 +788,7 @@ public class SystemInterfaceTest {
         try {
             data.writeInt(MSimUtils.DEFAULT_SLOT_ID);
             data.writeInt(SystemConstants.SET_TIMER);
-            data.writeInt(duration);
+            data.writeLong(duration);
             data.writeLong(tid);
             data.setDataPosition(0);
             mSystemInterface.onMessage(data, null);
@@ -1024,6 +976,27 @@ public class SystemInterfaceTest {
         } finally {
             data.recycle();
         }
+    }
+
+    @Test
+    @SmallTest
+    public void testSystemCallGetUuid() {
+        setUpSystemInterface();
+        int version = 3;
+        String name = "device-name";
+        Parcel data = Parcel.obtain();
+        try {
+            data.writeInt(MSimUtils.DEFAULT_SLOT_ID);
+            data.writeInt(SystemConstants.GET_UUID);
+            data.writeInt(version);
+            data.writeString(name);
+            data.setDataPosition(0);
+            mSystemInterface.onMessage(data, null);
+        } finally {
+            data.recycle();
+        }
+
+        verify(mDefaultSystemCall).getUuid(eq(version), eq(name));
     }
 
     @Test
@@ -1431,12 +1404,15 @@ public class SystemInterfaceTest {
     @Test
     @SmallTest
     public void testSystemCallGetWfcAddressId() {
+        ImsConfigImplBase originalImsConfig = ImsServiceRegistry.getInstance(SLOT0).getImsConfig();
+        ImsConfigImplBase mockImsConfigImplBase = Mockito.mock(ImsConfigImplBase.class);
+        ImsServiceRegistry.getInstance(SLOT0).setImsConfig(mockImsConfigImplBase);
         setUpSystemInterface();
         setUpSystem();
         String entitlementId = "123456";
-        setUpSharedPreferences(ImsPrivateProperties.Persistent.KEY_VOWIFI_ENTITLEMENT_ID,
-                entitlementId);
-
+        when(mockImsConfigImplBase.getConfigString(
+                eq(ProvisioningManager.KEY_VOICE_OVER_WIFI_ENTITLEMENT_ID)))
+                .thenReturn(entitlementId);
         byte[] result;
         Parcel data = Parcel.obtain();
         try {
@@ -1457,6 +1433,7 @@ public class SystemInterfaceTest {
         } finally {
             resultData.recycle();
         }
+        ImsServiceRegistry.getInstance(SLOT0).setImsConfig(originalImsConfig);
     }
 
     @Test
@@ -1878,20 +1855,38 @@ public class SystemInterfaceTest {
 
     @Test
     @SmallTest
-    public void testSystemCallIsLteEmergencyOnly() {
+    public void testSystemCallGetCellularServiceState() {
         setUpSystemInterface();
         setUpSystem();
         Parcel data = Parcel.obtain();
         try {
             data.writeInt(SLOT0);
-            data.writeInt(SystemConstants.IS_LTE_EMERGENCY_ONLY);
+            data.writeInt(SystemConstants.GET_CELLULAR_SERVICE_STATE);
             data.setDataPosition(0);
             mSystemInterface.onMessage(data, null);
         } finally {
             data.recycle();
         }
 
-        verify(mSystemCall).isLteEmergencyOnly();
+        verify(mSystemCall).getCellularDataServiceState();
+    }
+
+    @Test
+    @SmallTest
+    public void testSystemCallIsEmergencyOnly() {
+        setUpSystemInterface();
+        setUpSystem();
+        Parcel data = Parcel.obtain();
+        try {
+            data.writeInt(SLOT0);
+            data.writeInt(SystemConstants.IS_EMERGENCY_ONLY);
+            data.setDataPosition(0);
+            mSystemInterface.onMessage(data, null);
+        } finally {
+            data.recycle();
+        }
+
+        verify(mSystemCall).isEmergencyOnly();
     }
 
     @Test
@@ -1910,24 +1905,6 @@ public class SystemInterfaceTest {
         }
 
         verify(mSystemCall).isMobileDataEnabled();
-    }
-
-    @Test
-    @SmallTest
-    public void testSystemCallGetMocnPlmnInfo() {
-        setUpSystemInterface();
-        setUpSystem();
-        Parcel data = Parcel.obtain();
-        try {
-            data.writeInt(SLOT0);
-            data.writeInt(SystemConstants.GET_MOCN_PLMN_INFO);
-            data.setDataPosition(0);
-            mSystemInterface.onMessage(data, null);
-        } finally {
-            data.recycle();
-        }
-
-        verify(mSystemCall).getMocnPlmnInfo();
     }
 
     @Test
@@ -2104,6 +2081,42 @@ public class SystemInterfaceTest {
 
     @Test
     @SmallTest
+    public void testSystemCallGetNetworkRegistrationRejectCause() {
+        setUpSystemInterface();
+        setUpSystem();
+        Parcel data = Parcel.obtain();
+        try {
+            data.writeInt(SLOT0);
+            data.writeInt(SystemConstants.GET_NETWORK_REGISTRATION_REJECT_CAUSE);
+            data.setDataPosition(0);
+            mSystemInterface.onMessage(data, null);
+        } finally {
+            data.recycle();
+        }
+
+        verify(mSystemCall).getNetworkRegistrationRejectCause();
+    }
+
+    @Test
+    @SmallTest
+    public void testSystemCallGetAccessNetworkPlmn() {
+        setUpSystemInterface();
+        setUpSystem();
+        Parcel data = Parcel.obtain();
+        try {
+            data.writeInt(SLOT0);
+            data.writeInt(SystemConstants.GET_ACCESS_NETWORK_PLMN);
+            data.setDataPosition(0);
+            mSystemInterface.onMessage(data, null);
+        } finally {
+            data.recycle();
+        }
+
+        verify(mSystemCall).getAccessNetworkPlmn();
+    }
+
+    @Test
+    @SmallTest
     public void testSystemCallGetIsimState() {
         setUpSystemInterface();
         setUpSystem();
@@ -2122,14 +2135,14 @@ public class SystemInterfaceTest {
 
     @Test
     @SmallTest
-    public void testSystemCallReadIsimFileAttributes() {
+    public void testSystemCallGetIsimRecord() {
         setUpSystemInterface();
         setUpSystem();
         int fileId = Sim.ISIM_FILE_ID_IMPU;
         Parcel data = Parcel.obtain();
         try {
             data.writeInt(SLOT0);
-            data.writeInt(SystemConstants.READ_ISIM_FILE_ATTR);
+            data.writeInt(SystemConstants.GET_ISIM_RECORD);
             data.writeInt(fileId);
             data.setDataPosition(0);
             mSystemInterface.onMessage(data, null);
@@ -2137,29 +2150,7 @@ public class SystemInterfaceTest {
             data.recycle();
         }
 
-        verify(mSystemCall).readIsimFileAttributes(eq(fileId));
-    }
-
-    @Test
-    @SmallTest
-    public void testSystemCallReadIsimRecord() {
-        setUpSystemInterface();
-        setUpSystem();
-        int fileId = Sim.ISIM_FILE_ID_IMPU;
-        int index = 0;
-        Parcel data = Parcel.obtain();
-        try {
-            data.writeInt(SLOT0);
-            data.writeInt(SystemConstants.READ_ISIM_RECORD);
-            data.writeInt(fileId);
-            data.writeInt(index);
-            data.setDataPosition(0);
-            mSystemInterface.onMessage(data, null);
-        } finally {
-            data.recycle();
-        }
-
-        verify(mSystemCall).readIsimRecord(eq(fileId), eq(index));
+        verify(mSystemCall).getIsimRecord(eq(fileId));
     }
 
     @Test
@@ -2352,6 +2343,24 @@ public class SystemInterfaceTest {
 
     @Test
     @SmallTest
+    public void testSystemCallGetNetworkOperator() {
+        setUpSystemInterface();
+        setUpSystem();
+        Parcel data = Parcel.obtain();
+        try {
+            data.writeInt(SLOT0);
+            data.writeInt(SystemConstants.GET_NETWORK_OPERATOR);
+            data.setDataPosition(0);
+            mSystemInterface.onMessage(data, null);
+        } finally {
+            data.recycle();
+        }
+
+        verify(mSystemCall).getNetworkOperator();
+    }
+
+    @Test
+    @SmallTest
     public void testSystemCallGetNetworkType() {
         setUpSystemInterface();
         setUpSystem();
@@ -2504,20 +2513,42 @@ public class SystemInterfaceTest {
 
     @Test
     @SmallTest
-    public void testSystemCallStartInstantLocationUpdate() {
+    public void testSystemCallRequestLocationUpdate() {
         setUpSystemInterface();
         setUpSystem();
+        int waitTimeMs = 2000; // 2s
         Parcel data = Parcel.obtain();
         try {
             data.writeInt(SLOT0);
-            data.writeInt(SystemConstants.START_INSTANT_LOCATION_UPDATE);
+            data.writeInt(SystemConstants.REQUEST_LOCATION_UPDATE);
+            data.writeInt(waitTimeMs);
             data.setDataPosition(0);
             mSystemInterface.onMessage(data, null);
         } finally {
             data.recycle();
         }
 
-        verify(mSystemCall).startInstantLocationUpdate();
+        verify(mSystemCall).requestLocationUpdate(eq(waitTimeMs));
+    }
+
+    @Test
+    @SmallTest
+    public void testSystemCallCancelLocationUpdate() {
+        setUpSystemInterface();
+        setUpSystem();
+        int requestId = 1;
+        Parcel data = Parcel.obtain();
+        try {
+            data.writeInt(SLOT0);
+            data.writeInt(SystemConstants.CANCEL_LOCATION_UPDATE);
+            data.writeInt(requestId);
+            data.setDataPosition(0);
+            mSystemInterface.onMessage(data, null);
+        } finally {
+            data.recycle();
+        }
+
+        verify(mSystemCall).cancelLocationUpdate(eq(requestId));
     }
 
     @Test
@@ -2685,6 +2716,26 @@ public class SystemInterfaceTest {
         }
 
         verify(mSystemCall).removeIpSecSa(eq(ipsecId), eq(spi), eq(intFd), eq(fd));
+    }
+
+    @Test
+    @SmallTest
+    public void testSystemCallIsCrossSimRedialingAvailable() {
+        setUpSystemInterface();
+        setUpSystem();
+        Parcel data = Parcel.obtain();
+        int slotId = 1;
+        try {
+            data.writeInt(SLOT0);
+            data.writeInt(SystemConstants.IS_CROSS_SIM_REDIALING_AVAILABLE);
+            data.writeInt(slotId);
+            data.setDataPosition(0);
+            mSystemInterface.onMessage(data, null);
+        } finally {
+            data.recycle();
+        }
+
+        verify(mDefaultSystemCall).isCrossSimRedialingAvailable(eq(slotId));
     }
 
     @Test

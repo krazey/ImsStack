@@ -15,53 +15,48 @@
  */
 package com.android.imsstack.core.agents;
 
+import static com.android.imsstack.base.TestAppContext.SLOT0;
+import static com.android.imsstack.base.TestAppContext.SLOT1;
+
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import android.content.Context;
-import android.telephony.TelephonyManager;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
-import com.android.imsstack.ContextFixture;
-import com.android.imsstack.util.AppContext;
+import androidx.test.filters.SmallTest;
+
+import com.android.imsstack.base.DeviceConfig;
+import com.android.imsstack.base.TestAppContext;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(JUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class ImsTrafficAgentTest {
-    private static final int SLOT0 = 0;
-    private static final int SLOT1 = 1;
+    @Mock private ImsTrafficInterface.PriorityListener mPriorityListener;
 
-    @Mock ImsTrafficInterface.PriorityListener mPriorityListener;
-
-    private TelephonyManager mTelephonyManager;
-    private ContextFixture mContextFixture;
-    private Context mContext;
     private TestableLooper mTestableLooper;
+    private TestAppContext mTestAppContext;
     private ImsTrafficAgent mImsTrafficAgent;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mContextFixture = new ContextFixture();
-        mContext = mContextFixture.getTestDouble();
-        AppContext.init(mContext);
-        mTelephonyManager = mContext.getSystemService(TelephonyManager.class);
-        when(mTelephonyManager.getSupportedModemCount()).thenReturn(2);
-        mTestableLooper = new TestableLooper(AppContext.getInstance().getMainLooper());
+        mTestableLooper = TestableLooper.get(this);
+        mTestAppContext = new TestAppContext();
+        mTestAppContext.setUpWithLooper(mTestableLooper.getLooper());
+        DeviceConfig.setSimCount(2, 2);
 
         mImsTrafficAgent = new ImsTrafficAgent();
-        mImsTrafficAgent.init(mContext);
+        mImsTrafficAgent.init(mTestAppContext.getContext());
         mImsTrafficAgent.addListener(mPriorityListener);
     }
 
@@ -73,14 +68,16 @@ public class ImsTrafficAgentTest {
             mImsTrafficAgent = null;
         }
 
-        if (mTestableLooper != null) {
-            mTestableLooper.destroy();
-            mTestableLooper = null;
-        }
+        DeviceConfig.setSimCount(1, 1);
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
+    }
 
-        AppContext.deinit();
-        mContext = null;
-        mContextFixture = null;
+    @Test
+    @SmallTest
+    public void testTrafficIsAllowedIfSimultaneousCallingIsSupported() {
+        mImsTrafficAgent.setSimultaneousCallingSupported(true, SLOT0);
+        assertTrue(mImsTrafficAgent.isAllowed(ImsRadioInterface.TRAFFIC_TYPE_REGISTRATION, SLOT0));
     }
 
     @Test

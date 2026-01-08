@@ -19,9 +19,8 @@
 
 #include "IMtcService.h"
 #include "INativeEnabler.h"
-#include "ImsList.h"
-#include "ImsMap.h"
 #include "call/IMtcCall.h"
+#include <functional>
 
 class AString;
 class IMtcCallContext;
@@ -34,28 +33,37 @@ enum class SuppType;
 struct CallReasonInfo;
 struct ConfUser;
 struct MediaInfo;
+template <class T>
+class ImsList;
 union Key;
 
 class IMtcCallController : public INativeEnabler
 {
 public:
-    virtual ~IMtcCallController() {}
-
     /**
      * Creates a new outgoing call.
      *
      * @param eServiceType Service type of the new call.
+     * @param objCallInfo Call information.
+     * @param strLogTag Log tag for the call.
      * @return The key of the new call.
      */
-    virtual CallKey Open(IN ServiceType eServiceType, IN CallInfo& objCallInfo) = 0;
+    virtual CallKey Open(
+            IN ServiceType eServiceType, IN CallInfo& objCallInfo, IN const AString& strLogTag) = 0;
 
     /**
      * Sets an interface to interact with the Java layer.
      *
      * @param nCallKey Key of the call to be manipulated.
-     * @param pJniMtcCallThread Interface to send messages to the Java layer.
      */
     virtual void Attach(IN CallKey nCallKey) = 0;
+
+    /**
+     * Detaches the call associated with the specified call key.
+     *
+     * @param nCallKey Key of the call to be manipulated.
+     */
+    virtual void Detach(IN CallKey nCallKey) = 0;
 
     /**
      * Creates a call to handle the incoming call.
@@ -75,8 +83,7 @@ public:
      * @param lstSuppServices Supplementary services.
      */
     virtual void Start(IN CallKey nCallKey, IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * Notifies the call that the user is alerted by the incoming call.
@@ -238,13 +245,6 @@ public:
      */
     virtual void SendUssd(IN CallKey nCallKey, IN const AString& strUssd) = 0;
 
-    // Handles conference call related IMS messages.
-    /*
-    void StartGroupCall(IN CallKey nCallKey, IN IMS_UINT32 nCmd, IN ImsList<ConfUser*>& objUsers,
-            IN CallInfo& objCallInfo, IN MediaInfo& objMediaInfo,
-            IN ImsMap<SuppType, SuppService*>& objSuppServices);
-    */
-
     /**
      * @brief Merges
      *
@@ -269,8 +269,6 @@ public:
      */
     virtual void RemoveFromConference(IN CallKey nCallKey, IN ImsList<ConfUser*>& objUsers) = 0;
 
-    // TODO: Consider ECT, SRVCC
-
     /**
      * @brief Transfers
      *
@@ -278,6 +276,15 @@ public:
      * @param strTarget
      */
     virtual void Transfer(IN CallKey nCallKey, IN const AString& strTarget) = 0;
+
+    /**
+     * @brief Handles a BYE transaction for a call.
+     *
+     * @param nCallKey Key of the call to be manipulated.
+     * @param objOperation The operation to be executed when the BYE transaction is completed.
+     */
+    virtual void HandleByeTransaction(
+            IN CallKey nCallKey, IN std::function<void(ISession&)> objOperation) = 0;
 
     /**
      * @brief Gets
@@ -288,6 +295,16 @@ public:
      */
     virtual ISilentRedialHelper& GetRedialHelper(
             IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason) = 0;
+
+    /**
+     * @brief Gets the currently active SilentRedialHelper instance.
+     *
+     * This function returns the pointer to the helper object that is currently managing a redial
+     * sequence, without creating a new one.
+     *
+     * @return Pointer to ISilentRedialHelper if one exists, otherwise nullptr.
+     */
+    virtual const ISilentRedialHelper* GetActiveRedialHelper() const = 0;
 
     /**
      * @brief Releases

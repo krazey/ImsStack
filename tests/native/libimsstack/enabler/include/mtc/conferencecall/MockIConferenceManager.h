@@ -17,8 +17,8 @@
 #ifndef MOCK_I_CONFERENCE_MANAGER_H_
 #define MOCK_I_CONFERENCE_MANAGER_H_
 
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
-#include "conferencecall/IConferenceControllerListener.h"
 #include "conferencecall/IConferenceManager.h"
 #include <gmock/gmock.h>
 
@@ -28,8 +28,6 @@ enum class ConferenceType;
 class MockIConferenceManager : public IConferenceManager
 {
 public:
-    virtual ~MockIConferenceManager() {}
-
     MOCK_METHOD(IConferenceController&, CreateController,
             (IN CallKey nCallKey, IN ConferenceType eType), (override));
     MOCK_METHOD(IConferenceController*, GetController, (IN IMS_UINTP nCallKey), (const, override));

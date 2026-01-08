@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "txn/SipTxn.h"
-#include "txn/SipTimeoutData.h"
 #include "SipStackError.h"
+#include "txn/SipTimeoutData.h"
+#include "txn/SipTxn.h"
 
 SipTimeoutData::SipTimeoutData()
 {
-    m_eTxnType = SipTxn::INVALID_TXN;
+    m_eTxnType = SipTxn::INVALID;
     m_eTimerType = SipTxn::TIMER_TYPE_INVALID;
     m_pTxnKey = SIP_NULL;
 }
 
-SipTimeoutData::SipTimeoutData(SIP_INT32 eTxnType, SIP_INT32 eTimerType, SipTxnKey* pTxnKey)
+SipTimeoutData::SipTimeoutData(SIP_INT32 eTxnType, SIP_INT32 eTimerType, const SipTxnKey* pTxnKey)
 {
     m_eTxnType = eTxnType;
     m_eTimerType = eTimerType;
@@ -33,14 +33,14 @@ SipTimeoutData::SipTimeoutData(SIP_INT32 eTxnType, SIP_INT32 eTimerType, SipTxnK
     m_pTxnKey = new SipTxnKey(pTxnKey, &nError);
     if (E_ERR_PF_MALLOCFAILED == nError)
     {
-        delete m_pTxnKey;
+        m_pTxnKey->SipDelete();
         m_pTxnKey = SIP_NULL;
     }
 }
 
 SipTimeoutData::~SipTimeoutData()
 {
-    delete m_pTxnKey;
+    m_pTxnKey->SipDelete();
     m_pTxnKey = SIP_NULL;
 }
 
@@ -52,16 +52,4 @@ SipTxnKey* SipTimeoutData::GetTxnKey() const
 SIP_INT32 SipTimeoutData::GetTimerType() const
 {
     return m_eTimerType;
-}
-
-SIP_BOOL SipTimeoutData::SetTxnKey(SipTxnKey* pTxnKey)
-{
-    this->m_pTxnKey = pTxnKey;
-    return SIP_TRUE;
-}
-
-SIP_BOOL SipTimeoutData::SetTimerType(SIP_INT32 eTimerType)
-{
-    this->m_eTimerType = eTimerType;
-    return SIP_TRUE;
 }

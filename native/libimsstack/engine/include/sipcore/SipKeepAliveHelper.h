@@ -25,7 +25,7 @@ class SipKeepAliveHelper : public ImsSlot, public ISipKeepAliveHelper, public IS
 {
 public:
     explicit SipKeepAliveHelper(IN IMS_SINT32 nSlotId);
-    inline virtual ~SipKeepAliveHelper() {}
+    ~SipKeepAliveHelper() override = default;
 
     SipKeepAliveHelper(IN const SipKeepAliveHelper&) = delete;
     SipKeepAliveHelper& operator=(IN const SipKeepAliveHelper&) = delete;

@@ -13,54 +13,57 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "txn/SipTxn.h"
-#include "txn/SipTxnFsm.h"
-
+#include "ISipNetworkUtil.h"
 #include "SipConfiguration.h"
 #include "SipDebug.h"
+#include "SipStackError.h"
 #include "SipUtil.h"
 #include "platform/SipString.h"
 #include "txn/SipTimeoutData.h"
-#include "SipStackError.h"
+#include "txn/SipTxn.h"
+#include "txn/SipTxnFsm.h"
+#include "txn/SipTxnUtil.h"
 
 SipTxn::SipTxn() :
-        m_eTxnType(SipTxn::INVALID_TXN),
+        m_eTxnType(SipTxn::INVALID),
         m_pTxnKey(SIP_NULL),
         m_pSipMsg(SIP_NULL),
         m_pTranspInfo(SIP_NULL),
         m_pUserData(SIP_NULL),
         m_nTxnState(SIP_ZERO),
-        m_nReTxCount(SIP_ZERO),
+        m_nRetransmissionCount(SIP_ZERO),
         m_eTimerType(SipTxn::TIMER_TYPE_INVALID),
         m_pvTimerId(SIP_NULL),
         m_nMaxDuration(SIP_ZERO),
         m_nDurationExpired(SIP_ZERO),
-        m_nCurrentDuration(SIP_ZERO)
+        m_nCurrentDuration(SIP_ZERO),
+        m_bRprTxnTerminated(SIP_FALSE)
 {
 }
 
-SipTxn::SipTxn(IN SIP_INT32 eTxnType, IN SipTxnKey* pTxnKey, IN SipMessage* pSipMsg,
-        IN SipTimerContext* pSipTxnTimerContext, OUT SIP_UINT16* pnError) :
-        m_eTxnType(SipTxn::INVALID_TXN),
+SipTxn::SipTxn(IN SIP_INT32 eTxnType, IN const SipTxnKey* pTxnKey, IN const SipMessage* pSipMsg,
+        IN const SipTimerContext* pSipTxnTimerContext, OUT SIP_UINT16* pnError) :
+        m_eTxnType(SipTxn::INVALID),
         m_pTxnKey(SIP_NULL),
         m_pSipMsg(SIP_NULL),
         m_pTranspInfo(SIP_NULL),
         m_pUserData(SIP_NULL),
         m_nTxnState(SIP_ZERO),
-        m_nReTxCount(SIP_ZERO),
+        m_nRetransmissionCount(SIP_ZERO),
         m_eTimerType(SipTxn::TIMER_TYPE_INVALID),
         m_pvTimerId(SIP_NULL),
         m_nMaxDuration(SIP_ZERO),
         m_nDurationExpired(SIP_ZERO),
-        m_nCurrentDuration(SIP_ZERO)
+        m_nCurrentDuration(SIP_ZERO),
+        m_bRprTxnTerminated(SIP_FALSE)
 {
     m_eTxnType = eTxnType;
     m_pTxnKey = new SipTxnKey(pTxnKey, pnError);
 
-    if ((pSipTxnTimerContext != SIP_NULL) && (pSipTxnTimerContext->pTxnSipTxnTimers != SIP_NULL))
+    if ((pSipTxnTimerContext != SIP_NULL) && (pSipTxnTimerContext->m_pTxnSipTxnTimers != SIP_NULL))
     {
-        objTxnTimerValues.UpdateSipTimers(
-                pSipTxnTimerContext->nTimerOptions, pSipTxnTimerContext->pTxnSipTxnTimers);
+        m_objTxnTimerValues.UpdateSipTimers(
+                pSipTxnTimerContext->m_nTimerOptions, pSipTxnTimerContext->m_pTxnSipTxnTimers);
     }
 
     if (m_pTxnKey == SIP_NULL)
@@ -72,7 +75,7 @@ SipTxn::SipTxn(IN SIP_INT32 eTxnType, IN SipTxnKey* pTxnKey, IN SipMessage* pSip
     if (*pnError == E_ERR_PF_MALLOCFAILED)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "SipTxn Malloc Failed \n", SIP_ZERO, SIP_ZERO);
-        delete m_pTxnKey;
+        m_pTxnKey->SipDelete();
         m_pTxnKey = SIP_NULL;
     }
 
@@ -80,7 +83,7 @@ SipTxn::SipTxn(IN SIP_INT32 eTxnType, IN SipTxnKey* pTxnKey, IN SipMessage* pSip
 
     /* IDLE State */
     m_nTxnState = SIP_ZERO;
-    m_nReTxCount = SIP_ZERO;
+    m_nRetransmissionCount = SIP_ZERO;
 }
 
 SipTxn::~SipTxn()
@@ -117,7 +120,7 @@ SIP_BOOL SipTxn::InvokeFsm(SIP_UINT16 nEvent, SIP_VOID* pvData, SIP_UINT16* pnEr
 
     switch (eTxnType)
     {
-        case SipTxn::INV_CLI_TXN:
+        case SipTxn::INVITE_CLIENT:
         {
             if (gpfSipInvClientTxnFsm[nTxnState][nEvent](this, pvData, pnError) == SIP_FALSE)
             {
@@ -128,7 +131,7 @@ SIP_BOOL SipTxn::InvokeFsm(SIP_UINT16 nEvent, SIP_VOID* pvData, SIP_UINT16* pnEr
         }
         break;
 
-        case SipTxn::INV_SER_TXN:
+        case SipTxn::INVITE_SERVER:
         {
             if (gpfSipInvSerTxnFsm[nTxnState][nEvent](this, pvData, pnError) == SIP_FALSE)
             {
@@ -138,7 +141,7 @@ SIP_BOOL SipTxn::InvokeFsm(SIP_UINT16 nEvent, SIP_VOID* pvData, SIP_UINT16* pnEr
         }
         break;
 
-        case SipTxn::NON_INV_CLI_TXN:
+        case SipTxn::NON_INVITE_CLIENT:
         {
             if (gpfSipNonInvClientTxnFsm[nTxnState][nEvent](this, pvData, pnError) == SIP_FALSE)
             {
@@ -149,7 +152,7 @@ SIP_BOOL SipTxn::InvokeFsm(SIP_UINT16 nEvent, SIP_VOID* pvData, SIP_UINT16* pnEr
         }
         break;
 
-        case SipTxn::NON_INV_SER_TXN:
+        case SipTxn::NON_INVITE_SERVER:
         {
             if (gpfSipNonInvSerTxnFsm[nTxnState][nEvent](this, pvData, pnError) == SIP_FALSE)
             {
@@ -176,17 +179,11 @@ SIP_BOOL SipTxn::InvokeFsm(SIP_UINT16 nEvent, SIP_VOID* pvData, SIP_UINT16* pnEr
 */
 SIP_BOOL SipTxn::AbortTxn()
 {
-    SipUtil* pUtil = SipUtil_GetInstance();
-    if (pUtil == SIP_NULL)
+    ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
+    if (m_pvTimerId != SIP_NULL && pCallback != SIP_NULL)
     {
-        return SIP_FALSE;
-    }
-
-    ISipTimerUtil* pTimer = pUtil->GetTimer();
-    if (m_pvTimerId != SIP_NULL)
-    {
-        SipTimeoutData* pTimeoutData =
-                static_cast<SipTimeoutData*>(pTimer->StopTimerEx(m_pvTimerId));
+        SipTimeoutData* pTimeoutData = SIP_NULL;
+        pCallback->StopTimer(m_pvTimerId, pTimeoutData);
         m_pvTimerId = SIP_NULL;
 
         if (pTimeoutData != SIP_NULL)
@@ -194,6 +191,8 @@ SIP_BOOL SipTxn::AbortTxn()
             delete pTimeoutData;
         }
     }
+
+    SipTxnUtil::DeleteTxnKey(m_pTxnKey, SIP_TRUE);
 
     return SIP_TRUE;
 }
@@ -212,19 +211,8 @@ SIP_BOOL SipTxn::StartTxnTimer(SIP_UINT32 eTimerType, SIP_UINT32 nDuration, SIP_
 
     if (nDuration > SIP_ZERO)
     {
-        SipUtil* pUtil = SipUtil_GetInstance();
-
-        if (pUtil == SIP_NULL)
-        {
-            SIP_DEBUG_WARNING(
-                    ESIPTRACE_MODTXN, "SipTxn::StartTxnTimer:pUtil is NULL ", SIP_ZERO, SIP_ZERO);
-            delete pTimeoutData;
-            return SIP_FALSE;
-        }
-
-        ISipTimerUtil* pTimer = pUtil->GetTimer();
-
-        if (pTimer == SIP_NULL)
+        ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
+        if (pCallback == SIP_NULL)
         {
             SIP_DEBUG_WARNING(
                     ESIPTRACE_MODTXN, "SipTxn::StartTxnTimer:pTimer is NULL ", SIP_ZERO, SIP_ZERO);
@@ -232,8 +220,8 @@ SIP_BOOL SipTxn::StartTxnTimer(SIP_UINT32 eTimerType, SIP_UINT32 nDuration, SIP_
             return SIP_FALSE;
         }
 
-        if (pTimer->StartTimer(&m_pvTimerId, nDuration, SIP_FALSE, CbkTxnTimeout, pTimeoutData) ==
-                SIP_FALSE)
+        m_pvTimerId = pCallback->StartTimer(nDuration, CbkTxnTimeout, pTimeoutData);
+        if (m_pvTimerId == SIP_NULL)
         {
             SIP_DEBUG_WARNING(
                     ESIPTRACE_MODTXN, "StartTxnTimer: StartTimer Failed", SIP_ZERO, SIP_ZERO);
@@ -264,16 +252,8 @@ SIP_BOOL SipTxn::StopTxnTimer()
         return SIP_TRUE;
     }
 
-    SipUtil* pUtil = SipUtil_GetInstance();
-    if (pUtil == SIP_NULL)
-    {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODTXN, "SipTxn::StopTxnTimer:pUtil is NULL ", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-
-    ISipTimerUtil* pTimer = pUtil->GetTimer();
-    if (pTimer == SIP_NULL)
+    ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
+    if (pCallback == SIP_NULL)
     {
         SIP_DEBUG_WARNING(
                 ESIPTRACE_MODTXN, "SipTxn::StopTxnTimer:pTimer is NULL ", SIP_ZERO, SIP_ZERO);
@@ -281,7 +261,7 @@ SIP_BOOL SipTxn::StopTxnTimer()
     }
 
     SipTimeoutData* pTimeoutData = SIP_NULL;
-    pTimeoutData = static_cast<SipTimeoutData*>(pTimer->StopTimerEx(m_pvTimerId));
+    pCallback->StopTimer(m_pvTimerId, pTimeoutData);
     m_pvTimerId = SIP_NULL;
     delete pTimeoutData;
 
@@ -346,7 +326,8 @@ SIP_BOOL SipTxn::PrepareACK(SipMessage* pSipRespMsg, /* IN */
         {
             SipAddrSpec* pNewObjReqUri = new SipAddrSpec(*pReqUri);
             pReqUri->SipDelete();
-            pReqLine = new SipRequestLine(ACK_METHOD, pNewObjReqUri, SIP_SIPVERSION);
+            pReqLine = new SipRequestLine(
+                    SipMsgUtil::METHOD_ACK, pNewObjReqUri, SipMsgUtil::SIP_VERSION);
             if (pReqLine == SIP_NULL)
             {
                 SIP_DEBUG_WARNING(
@@ -418,7 +399,7 @@ SIP_BOOL SipTxn::PrepareACK(SipMessage* pSipRespMsg, /* IN */
 
     /* Set MaxForward Header */
     SipIntegerHeader* pMaxForward = new SipIntegerHeader(SipHeaderBase::MAX_FORWARDS);
-    SIP_CHAR szMaxFwdValue[SIP_CONTLEN_LEN] = {
+    SIP_CHAR szMaxFwdValue[SipMsgUtil::MAX_INT_VALUE_LEN] = {
             0,
     };
     SipPf_Sprintf(szMaxFwdValue, "%d", SIP_MAX_HOP);
@@ -534,7 +515,7 @@ SIP_INT32 SipTxn::GetMsgSentProto()
         return SipTransportInfo::PROTOCOL_INVALID;
     }
 
-    SipTransportParameter* pMsgSentTransParam = m_pTranspInfo->GetMsgSentTranspParam();
+    const SipTransportParameter* pMsgSentTransParam = m_pTranspInfo->GetMsgSentTranspParam();
     if (pMsgSentTransParam == SIP_NULL)
     {
         /*  stack error */
@@ -548,28 +529,21 @@ SIP_INT32 SipTxn::GetMsgSentProto()
     return eTranspMsgSentProtocol;
 }
 
-SIP_BOOL SipTxn::SetUserData(ISipUserData* pUserData)
+SIP_VOID SipTxn::SetUserData(ISipUserData* pUserData)
 {
-    if (pUserData == SIP_NULL)
-    {
-        return SIP_FALSE;
-    }
-
     if (m_pUserData != SIP_NULL)
     {
         delete m_pUserData;
     }
 
     m_pUserData = pUserData;
-
-    return SIP_TRUE;
 }
 
 SIP_BOOL SipTxn::IsTxnTerminated()
 {
     switch (m_eTxnType)
     {
-        case SipTxn::INV_CLI_TXN:
+        case SipTxn::INVITE_CLIENT:
         {
             if (m_nTxnState == SipTxn::INV_CLI_TERMINATED_ST)
             {
@@ -578,7 +552,7 @@ SIP_BOOL SipTxn::IsTxnTerminated()
         }
         break;
 
-        case SipTxn::NON_INV_CLI_TXN:
+        case SipTxn::NON_INVITE_CLIENT:
         {
             if (m_nTxnState == SipTxn::NON_INV_CLI_TERMINATED_ST)
             {
@@ -587,7 +561,7 @@ SIP_BOOL SipTxn::IsTxnTerminated()
         }
         break;
 
-        case SipTxn::INV_SER_TXN:
+        case SipTxn::INVITE_SERVER:
         {
             if (m_nTxnState == SipTxn::INV_SER_TERMINATED_ST)
             {
@@ -595,7 +569,7 @@ SIP_BOOL SipTxn::IsTxnTerminated()
             }
         }
         break;
-        case SipTxn::NON_INV_SER_TXN:
+        case SipTxn::NON_INVITE_SERVER:
         {
             if (m_nTxnState == SipTxn::NON_INV_SER_TERMINATED_ST)
             {
@@ -615,17 +589,17 @@ SIP_BOOL SipTxn::IsTxnTerminated()
 
 SIP_VOID SipTxn::InitRetransmissionInfo()
 {
-    m_nReTxCount = SIP_ZERO;
+    m_nRetransmissionCount = SIP_ZERO;
     m_nMaxDuration = SIP_ZERO;
     m_nDurationExpired = SIP_ZERO;
     m_nCurrentDuration = SIP_ZERO;
 }
 
-SIP_VOID SipTxn::SetRespCode(SIP_UINT16 nRespCode)
+SIP_VOID SipTxn::SetResponseCode(SIP_UINT16 nRespCode)
 {
     if (m_pTxnKey != SIP_NULL)
     {
-        m_pTxnKey->SetRespCode(nRespCode);
+        m_pTxnKey->SetResponseCode(nRespCode);
     }
 }
 
@@ -641,8 +615,14 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
 
     SipTxnKey* pTxnKey = pTimeoutData->GetTxnKey();
     SipTxn* pTxn = SIP_NULL;
-    SIP_BOOL bTxnExist = Sip_Cbk_FetchTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey),
-            TXN_OPT_FETCH, SIP_NULL, reinterpret_cast<SIP_VOID**>(&pTxn));
+    SipUtil* pUtil = SipUtil::GetInstance();
+    ISipTransactionCallback* pCallback = pUtil->GetTransactionCallback();
+    SIP_BOOL bTxnExist = SIP_FALSE;
+
+    if (pCallback != SIP_NULL)
+    {
+        bTxnExist = pCallback->FetchTransaction(pTxnKey, SipTxn::OPT_FETCH, pTxn);
+    }
 
     if (bTxnExist == SIP_YES)
     {
@@ -678,26 +658,15 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
 
     pTxn->SetTimerId(SIP_NULL);
 
-    SipUtil* pUtil = SipUtil_GetInstance();
-    if (pUtil == SIP_NULL)
-    {
-        delete pTimeoutData;
-        pTxn->SipDelete();
-        return;
-    }
-
     ISipUserData* pUserData = pTxn->GetUserData();
-
     /*No need to notify txntimeout to listener if the txn is already terminated*/
     /* Notify user is txn is terminated */
-    ISipTxnListener* pTxnListener = pUtil->GetTxnListener();
-
     SIP_INT32 eTimerType = SipTxn::TIMER_TYPE_INVALID;
     if (pTxn->IsTxnTerminated() == SIP_TRUE)
     {
-        if (pTxnListener != SIP_NULL)
+        if (pCallback != SIP_NULL)
         {
-            pTxnListener->TxnTimeout(pUserData, (SIP_INT32)eTimerType);
+            pCallback->NotifyTimerExpired(pUserData, (SIP_INT32)eTimerType);
         }
 
         SipTxn_RemoveFromTxnPool(pTxnKey);
@@ -717,15 +686,19 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
 
     switch (eTxnType)
     {
-        case SipTxn::INV_CLI_TXN:
+        case SipTxn::INVITE_CLIENT:
         {
             if ((eTimerType == SipTxn::TIMER_A) || (eTimerType == SipTxn::TIMER_B))
             {
-                nEvent = SipTxn::INV_CLI_TIMERA_B_TIME_OUT_EVT;
+                nEvent = SipTxn::INV_CLI_TIMER_A_B_TIME_OUT_EVT;
             }
             else if (eTimerType == SipTxn::TIMER_D)
             {
-                nEvent = SipTxn::INV_CLI_TIMERD_TIME_OUT_EVT;
+                nEvent = SipTxn::INV_CLI_TIMER_D_TIME_OUT_EVT;
+            }
+            else if (eTimerType == SipTxn::TIMER_M)
+            {
+                nEvent = SipTxn::INV_CLI_TIMER_M_TIME_OUT_EVT;
             }
             else
             {
@@ -738,7 +711,7 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
         }
         break;
 
-        case SipTxn::NON_INV_CLI_TXN:
+        case SipTxn::NON_INVITE_CLIENT:
         {
             if ((eTimerType == SipTxn::TIMER_E) || (eTimerType == SipTxn::TIMER_F))
             {
@@ -759,7 +732,7 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
         }
         break;
 
-        case SipTxn::INV_SER_TXN:
+        case SipTxn::INVITE_SERVER:
         {
             if ((eTimerType == SipTxn::TIMER_G) || (eTimerType == SipTxn::TIMER_H))
             {
@@ -768,6 +741,10 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
             else if (eTimerType == SipTxn::TIMER_I)
             {
                 nEvent = SipTxn::INV_SER_TIMER_I_TIME_OUT_EVT;
+            }
+            else if (eTimerType == SipTxn::TIMER_L)
+            {
+                nEvent = SipTxn::INV_SER_TIMER_L_TIME_OUT_EVT;
             }
             else
             {
@@ -779,7 +756,7 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
             }
         }
         break;
-        case SipTxn::NON_INV_SER_TXN:
+        case SipTxn::NON_INVITE_SERVER:
         {
             if (eTimerType == SipTxn::TIMER_J)
             {
@@ -825,20 +802,25 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
     }
 
     /*No need to notify txntimeout to listener if the txn is already terminated*/
-    if (pTxn->IsTxnTerminated() == SIP_TRUE)
+    SIP_BOOL bTxnTerminated = pTxn->IsTxnTerminated();
+
+    if (bTxnTerminated == SIP_TRUE || pTxn->IsRprTxnTerminated() == SIP_TRUE)
     {
-        if (pTxnListener != SIP_NULL)
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "***CbkTxnTimeout: %s***",
+                (bTxnTerminated == SIP_TRUE) ? "TxnTerminated" : "RprTxnTerminated", SIP_ZERO);
+
+        if (pCallback != SIP_NULL)
         {
-            pTxnListener->TxnTimeout(pUserData, (SIP_INT32)eTimerType);
+            pCallback->NotifyTimerExpired(pUserData, (SIP_INT32)eTimerType);
         }
 
-        SipTxn_RemoveFromTxnPool(pTxnKey);
+        if (bTxnTerminated == SIP_TRUE)
+        {
+            SipTxn_RemoveFromTxnPool(pTxnKey);
+            pTxn->SipDelete();
+        }
 
         delete pTimeoutData;
-        pTxn->SipDelete();
-
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODTXN, "***CbkTxnTimeout --> TxnTerminated***\n", SIP_ZERO, SIP_ZERO);
         return;
     }
 
@@ -875,10 +857,15 @@ SIP_VOID SipTxn_RemoveFromTxnPool(SipTxnKey* pTxnKey)
 {
     SipTxn* pTempTxn = SIP_NULL;
     SipTxnKey* pTempTxnKey = SIP_NULL;
+    ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
+    SIP_BOOL bStatus = SIP_FALSE;
 
-    if (Sip_Cbk_ReleaseTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey), TXN_OPT_REMOVE,
-                reinterpret_cast<SIP_VOID**>(&pTempTxnKey),
-                reinterpret_cast<SIP_VOID**>(&pTempTxn)) == SIP_FALSE)
+    if (pCallback != SIP_NULL)
+    {
+        bStatus = pCallback->ReleaseTransaction(pTxnKey, SipTxn::OPT_REMOVE, pTempTxnKey, pTempTxn);
+    }
+
+    if (bStatus == SIP_FALSE)
     {
         SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN, "SipTxn_RemoveFromTxnPool:\n", SIP_ZERO, SIP_ZERO);
         return;

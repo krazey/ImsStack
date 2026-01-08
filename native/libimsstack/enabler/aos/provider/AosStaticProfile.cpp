@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "IImsPrivateProperty.h"
 #include "ServiceTrace.h"
 #include "ServiceNetworkPolicy.h"
 #include "ServiceUtil.h"
@@ -20,7 +21,7 @@
 #include "provider/AosStaticConfig.h"
 #include "provider/AosStaticProfile.h"
 
-//__IMS_TRACE_TAG_USER_DECL__("AOS");
+//__IMS_TRACE_TAG_AOS__;
 
 PUBLIC
 AosStaticProfile::AosStaticProfile() :
@@ -46,12 +47,6 @@ void AosStaticProfile::SetProfileType(IN Type eType)
         m_strRegistrationId = AString("aos_normal_reg");
         m_eRegistrationType = AosRegistrationType::NORMAL;
         m_nRegistrationFlowId = static_cast<IMS_UINT32>(AosRegistrationFlowId::NORMAL);
-
-        // For test purpose
-        if (IsWifiTest())
-        {
-            m_nConnectionType = NetworkPolicy::APN_WIFI;
-        }
     }
     else if (eType == Type::EMERGENCY)
     {
@@ -73,6 +68,12 @@ void AosStaticProfile::SetProfileType(IN Type eType)
     {
         m_strId = AString("aos_default");
         m_nConnectionType = NetworkPolicy::APN_NONE;
+    }
+
+    // For test purpose
+    if (IsWifiTest())
+    {
+        m_nConnectionType = NetworkPolicy::APN_WIFI;
     }
 }
 

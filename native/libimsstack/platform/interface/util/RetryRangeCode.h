@@ -39,7 +39,7 @@ public:
             m_nMax(other.m_nMax)
     {
     }
-    inline virtual ~RetryRangeCode() {}
+    ~RetryRangeCode() override = default;
 
 public:
     inline RetryRangeCode& operator=(IN const RetryRangeCode& other)

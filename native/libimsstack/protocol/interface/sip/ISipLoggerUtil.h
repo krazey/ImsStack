@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __ISIPLOGGERUTIL_H__
-#define __ISIPLOGGERUTIL_H__
+#ifndef __INTERFACE_SIP_LOGGER_UTIL_H__
+#define __INTERFACE_SIP_LOGGER_UTIL_H__
 
 #include "SipDatatypes.h"
 
@@ -26,6 +26,8 @@ public:
 
     virtual SIP_VOID DumpLog(SIP_UINT32 nCategory, const SIP_CHAR* pszFile, SIP_UINT16 nLine,
             const SIP_CHAR* pszFormat, ...) = 0;
+    virtual SIP_VOID DumpAssertLog(
+            IN const SIP_CHAR* pszCondition, IN const SIP_CHAR* pszModule, IN SIP_UINT16 nLine) = 0;
 };
 
-#endif  // __ISIPLOGGERUTIL_H__
+#endif  //__INTERFACE_SIP_LOGGER_UTIL_H__

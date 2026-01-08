@@ -33,12 +33,13 @@
 #include "provider/AosStaticProfile.h"
 #include "provider/AosSubscriberManager.h"
 #include "provider/AosRetryRepository.h"
+#include "provider/AosTracer.h"
 #include "provider/AosTransaction.h"
 #include "external/AosService.h"
 
 #include "manager/AosBuildDirector.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 PUBLIC
 AosBuildDirector::AosBuildDirector(IN IAosBuilder* piBuilder, IN IMS_SINT32 nSlotId) :
@@ -151,6 +152,7 @@ void AosBuildDirector::ConstructProvider()
     AosProvider::GetInstance()->SetRegStateManager(m_piBuilder->BuildRegStateManager(), m_nSlotId);
     AosProvider::GetInstance()->SetRetryRepository(
             m_piBuilder->BuildRetryRepository(m_nSlotId), m_nSlotId);
+    AosProvider::GetInstance()->SetTracer(m_piBuilder->BuildTracer(m_nSlotId), m_nSlotId);
     AosProvider::GetInstance()->SetTransaction(m_piBuilder->BuildTransaction(m_nSlotId), m_nSlotId);
 }
 
@@ -193,6 +195,13 @@ void AosBuildDirector::DestructProvider()
     {
         AosProvider::GetInstance()->SetTransaction(IMS_NULL, m_nSlotId);
         delete piTransaction;
+    }
+
+    IAosTracer* piTracer = AosProvider::GetInstance()->GetTracer(m_nSlotId);
+    if (piTracer != IMS_NULL)
+    {
+        AosProvider::GetInstance()->SetTracer(IMS_NULL, m_nSlotId);
+        delete piTracer;
     }
 
     IAosRetryRepository* piRetryRep = AosProvider::GetInstance()->GetRetryRepository(m_nSlotId);

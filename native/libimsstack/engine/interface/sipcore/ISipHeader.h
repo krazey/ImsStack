@@ -28,7 +28,7 @@ class SipParameter;
 class ISipHeader : public ISipObject
 {
 protected:
-    virtual ~ISipHeader() = default;
+    ~ISipHeader() override = default;
 
 public:
     /**
@@ -51,7 +51,7 @@ public:
      *
      * @return Pointer to SipAddress if the header is a format of SIP address, or null
      */
-    virtual const SipAddress* GetSipAddress() const = 0;
+    virtual SipAddress* GetSipAddress() const = 0;
 
     /**
      * @brief Returns the full header value including the header parameters.

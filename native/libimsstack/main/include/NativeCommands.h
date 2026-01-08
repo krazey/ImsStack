@@ -16,7 +16,7 @@
 #ifndef NATIVE_COMMANDS_H_
 #define NATIVE_COMMANDS_H_
 
-#include "DeviceConfig.h"
+#include "ImsTypeDef.h"
 
 class NativeCommands
 {

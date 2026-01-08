@@ -24,7 +24,7 @@ class OsNetworkWatcher : public ImsSlot, public INetworkWatcher, public ISystemL
 {
 public:
     explicit OsNetworkWatcher(IN IMS_SINT32 nSlotId);
-    virtual ~OsNetworkWatcher();
+    ~OsNetworkWatcher() override;
 
     OsNetworkWatcher(IN const OsNetworkWatcher&) = delete;
     OsNetworkWatcher& operator=(IN const OsNetworkWatcher&) = delete;
@@ -49,15 +49,19 @@ public:
      * @see #NETWORK_TYPE_UMTS
      */
     IMS_SINT32 GetNetworkType() override;
+    IMS_SINT32 GetCellularServiceState() override;
     IMS_SINT32 GetRoamingState() override;
     IMS_SINT32 GetVoiceRoamingType() override;
     IMS_SINT32 GetDataRoamingType() override;
+    AString GetNetworkOperator() const override;
     IMS_BOOL IsImsEmergencyCallSupported() override;
     IMS_BOOL IsImsVoiceCallSupported() override;
-    IMS_BOOL IsLteEmergencyOnly() override;
+    IMS_BOOL IsImsServiceContinuitySupported(
+            IN IMS_SINT32 ePreviousNetwork, IN IMS_SINT32 eCurrentNetwork) const override;
+    IMS_BOOL IsEmergencyOnly() override;
     IMS_BOOL IsEmergencyAttachSupported() override;
-    // 2nd PLMN info for MOCN
-    IMS_SINT32 GetMocnPlmnInfo() override;
+    IMS_SINT32 GetNetworkRegistrationRejectCause() override;
+    AString GetAccessNetworkPlmn() const override;
 
     // ISystemListener
     void System_NotifyEvent(

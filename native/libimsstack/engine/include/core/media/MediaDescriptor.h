@@ -29,7 +29,7 @@ public:
             m_nMid(nMid)
     {
     }
-    inline virtual ~MediaDescriptor() {}
+    ~MediaDescriptor() override = default;
 
     MediaDescriptor(IN const MediaDescriptor&) = delete;
     MediaDescriptor& operator=(IN const MediaDescriptor&) = delete;

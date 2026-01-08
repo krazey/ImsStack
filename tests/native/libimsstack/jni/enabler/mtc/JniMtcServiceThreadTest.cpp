@@ -15,7 +15,7 @@
  */
 #include "CallReasonInfo.h"
 #include "IMtcService.h"
-#include "ImsMap.h"
+#include "ImsList.h"
 #include "ImsProcess.h"
 #include "ImsTypeDef.h"
 #include "IuMtcService.h"
@@ -106,7 +106,7 @@ TEST_F(JniMtcServiceThreadTest, OnServiceChanged)
 TEST_F(JniMtcServiceThreadTest, OnEmergencyServiceChanged)
 {
     IMS_UINT32 eType = IuMtcService::E_SERVICE_CHANGED;
-    IuMtcService::EmergencyServiceState eState = IuMtcService::EmergencyServiceState::IN_CALL;
+    IuMtcService::EmergencyServiceState eState = IuMtcService::EmergencyServiceState::OPENED;
     ServiceType eServiceType = ServiceType::EMERGENCY;
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
@@ -116,7 +116,8 @@ TEST_F(JniMtcServiceThreadTest, OnEmergencyServiceChanged)
                     IsSameMessageTypeAndState(eType, static_cast<IMS_SINT32>(eState))))
             .Times(1);
 
-    pJniServiceThread->OnEmergencyServiceChanged(eState, -1, eServiceType);
+    pJniServiceThread->OnEmergencyServiceChanged(
+            eState, IuMtcService::EmergencyServiceUnavailableReason::UNKNOWN, eServiceType);
 }
 
 TEST_F(JniMtcServiceThreadTest, OnPreIncomingCallReceived)
@@ -128,13 +129,17 @@ TEST_F(JniMtcServiceThreadTest, OnPreIncomingCallReceived)
     EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
-    pJniServiceThread->OnPreIncomingCallReceived(1);
+    pJniServiceThread->OnPreIncomingCallReceived(1, AString());
 }
 
 TEST_F(JniMtcServiceThreadTest, OnRejectedIncomingCall)
 {
     IMS_UINT32 eType = IuMtcService::AUTO_REJECTED_CALL;
+    CallKey nCallKey = 1;
+    AString strLogTag("some_log_tag");
     objParcel.writeInt32(eType);
+    objParcel.writeInt64(nCallKey);
+    objParcel.writeString16(android::String16(strLogTag.GetStr()));
     objParcel.setDataPosition(0);
 
     EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
@@ -142,10 +147,10 @@ TEST_F(JniMtcServiceThreadTest, OnRejectedIncomingCall)
 
     JniCallInfo objCallInfo;
     MediaInfo objMediaInfo;
-    ImsMap<SuppType, SuppService*> objSuppServices;
+    ImsList<SuppService*> objSuppServices;
     CallReasonInfo objReason(CODE_NONE);
-    pJniServiceThread->OnRejectedIncomingCall(
-            objCallInfo, objMediaInfo, objSuppServices, OipType::NONE, "", objReason);
+    pJniServiceThread->OnRejectedIncomingCall(nCallKey, objCallInfo, objMediaInfo, objSuppServices,
+            OipType::NONE, "", objReason, strLogTag);
 }
 
 TEST_F(JniMtcServiceThreadTest, OnJniReady)

@@ -200,6 +200,15 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
     }
 
     @Test
+    public void testInvokeTerminatedForNullListenerAfterInvoked() {
+        mImsCallSessionCallback.invokeTerminated(mSession, mReasonInfo);
+        mImsCallSessionCallback.setListener(null);
+        verify(mMockListener, times(0)).callSessionTerminated(mReasonInfo);
+        processAllMessages();
+        verify(mMockListener).callSessionTerminated(mReasonInfo);
+    }
+
+    @Test
     public void testInvokeTerminatedException() {
         doThrow(newDeadSystemRuntimeException())
             .when(mMockListener).callSessionTerminated(mReasonInfo);

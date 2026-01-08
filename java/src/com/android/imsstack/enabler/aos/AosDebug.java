@@ -60,6 +60,11 @@ import android.telephony.data.ApnSetting;
 import android.widget.Toast;
 
 import com.android.imsstack.R;
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.ImsPrivateProperties;
+import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.SystemServiceProxy.ConnectivityManagerProxy;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.IPhoneStateNotifier;
 import com.android.imsstack.core.agents.ImsPhoneStateListener;
@@ -71,11 +76,9 @@ import com.android.imsstack.core.agents.TelephonyInterface;
 import com.android.imsstack.core.carrier.CarrierInfo;
 import com.android.imsstack.core.carrier.ImsCarrierResolver;
 import com.android.imsstack.core.carrier.SimCarrierId;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.NetworkType;
 import com.android.imsstack.test.DebugScreen;
-import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsPrivateProperties;
-import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.List;
@@ -89,57 +92,57 @@ import java.util.Set;
 public class AosDebug implements IAosDebug {
 
     @VisibleForTesting
-    protected static final int DEBUG_AIRPLANE_MODE_CHANGED = 1000;
+    static final int DEBUG_AIRPLANE_MODE_CHANGED = 1000;
     @VisibleForTesting
-    protected static final int DEBUG_SUBSCRIPTION_CHANGED = 1001;
+    static final int DEBUG_SUBSCRIPTION_CHANGED = 1001;
     @VisibleForTesting
-    protected static final int DEBUG_SIGNALSTRENGTHS_CHANGED = 1002;
+    static final int DEBUG_SIGNALSTRENGTHS_CHANGED = 1002;
     @VisibleForTesting
-    protected static final int DEBUG_WIFI_CONNECTIVITY_CHANGED = 1003;
+    static final int DEBUG_WIFI_CONNECTIVITY_CHANGED = 1003;
     @VisibleForTesting
-    protected static final int DEBUG_SERVICE_STATE_CHANGED = 1004;
+    static final int DEBUG_SERVICE_STATE_CHANGED = 1004;
     @VisibleForTesting
-    protected static final int DEBUG_PRECISE_DATA_CONNECTION_CHANGED = 1005;
+    static final int DEBUG_PRECISE_DATA_CONNECTION_CHANGED = 1005;
     @VisibleForTesting
-    protected static final int DEBUG_NOTIFY_REGISTERED = 1006;
+    static final int DEBUG_NOTIFY_REGISTERED = 1006;
     @VisibleForTesting
-    protected static final int DEBUG_NOTIFY_DEREGISTERED = 1007;
+    static final int DEBUG_NOTIFY_DEREGISTERED = 1007;
     @VisibleForTesting
-    protected static final int DEBUG_NOTIFY_CAPABILITIES_UPDATED = 1008;
+    static final int DEBUG_NOTIFY_CAPABILITIES_UPDATED = 1008;
     private static final String NOTIFICATION_CHANNEL_ID_DEBUG = "notification_channel_id_debug";
     private static final int NOTIFICATION_ID_DEBUG = 0;
     public static final int REQUEST_CODE_DEBUG = 1;
     private final int mSlotId;
     @VisibleForTesting
-    protected Context mContext;
+    Context mContext;
     @VisibleForTesting
-    protected DebugData mDebugData;
+    DebugData mDebugData;
     @VisibleForTesting
-    protected DebugHandler mHandler;
+    DebugHandler mHandler;
     @VisibleForTesting
-    protected DebugBroadcastReceiver mDebugBroadcastReceiver;
+    DebugBroadcastReceiver mDebugBroadcastReceiver;
     @VisibleForTesting
-    protected SignalStrengthsListener mSignalStrengthsListener;
+    SignalStrengthsListener mSignalStrengthsListener;
     @VisibleForTesting
-    protected ConnectivityCallback mConnectivityCallback;
+    ConnectivityCallback mConnectivityCallback;
     @VisibleForTesting
-    protected DebugImsPhoneStateListener mImsPhoneStateListener;
+    DebugImsPhoneStateListener mImsPhoneStateListener;
     @VisibleForTesting
-    protected RegistrationListener mRegistrationListener;
+    RegistrationListener mRegistrationListener;
     @VisibleForTesting
-    protected IAosRegistration mAosRegistration;
+    IAosRegistration mAosRegistration;
     @VisibleForTesting
-    protected NotificationManager mNotificationManager;
+    NotificationManager mNotificationManager;
     @VisibleForTesting
-    protected NativeStateListener mNativeStateListener;
+    NativeStateListener mNativeStateListener;
     @VisibleForTesting
-    protected Sim.Listener mSimListener;
+    Sim.Listener mSimListener;
     @VisibleForTesting
-    protected int mSubId = MSimUtils.INVALID_SUB_ID;
+    int mSubId = MSimUtils.INVALID_SUB_ID;
     @VisibleForTesting
-    protected String mOperator = DebugData.STR_EMPTY;
+    String mOperator = DebugData.STR_EMPTY;
     @VisibleForTesting
-    protected String mCountry = DebugData.STR_EMPTY;
+    String mCountry = DebugData.STR_EMPTY;
 
     private static final int INVALID_RSSI = -127;
 
@@ -180,11 +183,10 @@ public class AosDebug implements IAosDebug {
         }
 
         mDebugBroadcastReceiver = createDebugBroadcastReceiver();
-        mContext.registerReceiver(mDebugBroadcastReceiver,
-                mDebugBroadcastReceiver.getFilter(), null, mHandler);
+        mDebugBroadcastReceiver.register();
 
         mSubId = MSimUtils.getSubId(mSlotId);
-        mDebugData.putInt(DebugData.KEY_SUB_ID, mSubId);
+        mDebugData.putInt(DebugKey.SUB_ID, mSubId);
 
         mSignalStrengthsListener = createSignalStrengthsListener();
         mSignalStrengthsListener.register();
@@ -216,7 +218,7 @@ public class AosDebug implements IAosDebug {
         }
 
         if (mDebugBroadcastReceiver != null) {
-            mContext.unregisterReceiver(mDebugBroadcastReceiver);
+            mDebugBroadcastReceiver.unregister();
             mDebugBroadcastReceiver = null;
         }
 
@@ -272,7 +274,7 @@ public class AosDebug implements IAosDebug {
     }
 
     @VisibleForTesting
-    protected boolean isDebugScreenEnabled() {
+    boolean isDebugScreenEnabled() {
         return ImsPrivateProperties.Persistent.getBoolean(
                 ImsPrivateProperties.Persistent.KEY_TEST_DEBUG_SCREEN_ENABLED, mSlotId);
     }
@@ -305,7 +307,7 @@ public class AosDebug implements IAosDebug {
     }
 
     @VisibleForTesting
-    protected void handlePermissionDenied(Activity activity) {
+    void handlePermissionDenied(Activity activity) {
         Toast.makeText(activity, "Notification permission was denied!", Toast.LENGTH_SHORT).show();
         ImsPrivateProperties.Persistent.setBoolean(
                 ImsPrivateProperties.Persistent.KEY_TEST_DEBUG_SCREEN_ENABLED, false, mSlotId);
@@ -317,72 +319,72 @@ public class AosDebug implements IAosDebug {
         appendMessage(sb, "Last Update Time", getCurrentTime() + "\n");
 
         // IMS
-        appendMessage(sb, "SlotId/SubId", mSlotId + "/" + mDebugData.get(DebugData.KEY_SUB_ID));
+        appendMessage(sb, "SlotId/SubId", mSlotId + "/" + mDebugData.get(DebugKey.SUB_ID));
         appendMessage(sb, "Operator/Country", mOperator + "/" + mCountry);
 
-        if (DebugData.STR_IMS_REGISTERED.equals(mDebugData.get(DebugData.KEY_REGISTER))) {
+        if (DebugData.STR_IMS_REGISTERED.equals(mDebugData.get(DebugKey.REGISTER))) {
             appendMessage(sb, "IMS Status", DebugData.STR_IMS_REGISTERED
-                    + "(" + mDebugData.get(DebugData.KEY_REGISTER_TIME) + ")");
-            appendMessage(sb, "Registered FeatureTag", mDebugData.get(DebugData.KEY_FEATURES));
+                    + "(" + mDebugData.get(DebugKey.REGISTER_TIME) + ")");
+            appendMessage(sb, "Registered FeatureTag", mDebugData.get(DebugKey.FEATURES));
         } else {
             appendMessage(sb, "IMS Status", DebugData.STR_IMS_DEREGISTERED
-                    + "(" + mDebugData.get(DebugData.KEY_DEREGISTER_TIME) + ")");
+                    + "(" + mDebugData.get(DebugKey.DEREGISTER_TIME) + ")");
             appendMessage(sb, "Deregistered Reason",
-                    mDebugData.get(DebugData.KEY_DEREGISTER_REASON));
+                    mDebugData.get(DebugKey.DEREGISTER_REASON));
         }
 
         appendMessage(sb, "Registered Network",
-                mDebugData.get(DebugData.KEY_REGISTERED_NETWORK_TYPE));
+                mDebugData.get(DebugKey.REGISTERED_NETWORK_TYPE));
         appendMessage(sb, "Capabilities", "");
-        sb.append(mDebugData.get(DebugData.KEY_CAPABILITIES)).append("\n");
+        sb.append(mDebugData.get(DebugKey.CAPABILITIES)).append("\n");
 
         // Data Connection
         sb.append(" # Data Connection #\n");
-        String dataConnectionState = mDebugData.get(DebugData.KEY_DATA_CONNECTION_STATE);
+        String dataConnectionState = mDebugData.get(DebugKey.DATA_CONNECTION_STATE);
         appendMessage(sb, "Connection State", dataConnectionState);
 
         if (!dataConnectionState.equals(getDataStateToString(TelephonyManager.DATA_DISCONNECTED))
                 && !dataConnectionState.equals(DebugData.STR_EMPTY)) {
-            appendMessage(sb, "Network Type", mDebugData.get(DebugData.KEY_NETWORK_TYPE));
+            appendMessage(sb, "Network Type", mDebugData.get(DebugKey.NETWORK_TYPE));
             appendMessage(sb, "IP Addresses", "");
-            sb.append(" -").append(mDebugData.get(DebugData.KEY_IP_ADDRESSES)).append("\n");
-            appendMessage(sb, "Interface Name", mDebugData.get(DebugData.KEY_INTERFACE_NAME));
-            appendMessage(sb, "MTU", mDebugData.get(DebugData.KEY_MTU));
-            appendMessage(sb, "APN Name/Entry", mDebugData.get(DebugData.KEY_APN_NAME) + "/"
-                    + mDebugData.get(DebugData.KEY_APN_ENTRY_NAME));
-            appendMessage(sb, "APN Types", mDebugData.get(DebugData.KEY_APN_TYPES));
-            appendMessage(sb, "P-CSCF", mDebugData.get(DebugData.KEY_PCSCF_ADDRESSES));
+            sb.append(" -").append(mDebugData.get(DebugKey.IP_ADDRESSES)).append("\n");
+            appendMessage(sb, "Interface Name", mDebugData.get(DebugKey.INTERFACE_NAME));
+            appendMessage(sb, "MTU", mDebugData.get(DebugKey.MTU));
+            appendMessage(sb, "APN Name/Entry", mDebugData.get(DebugKey.APN_NAME) + "/"
+                    + mDebugData.get(DebugKey.APN_ENTRY_NAME));
+            appendMessage(sb, "APN Types", mDebugData.get(DebugKey.APN_TYPES));
+            appendMessage(sb, "P-CSCF", mDebugData.get(DebugKey.PCSCF_ADDRESSES));
             appendMessage(sb, "Reg State (Voice/Data)",
-                    mDebugData.get(DebugData.KEY_SERVICE_STATE) + "/"
-                            + mDebugData.get(DebugData.KEY_DATA_REG_STATE));
+                    mDebugData.get(DebugKey.SERVICE_STATE) + "/"
+                            + mDebugData.get(DebugKey.DATA_REG_STATE));
 
-            String cellularDataRAT = mDebugData.get(DebugData.KEY_CELLULAR_DATA_RAT);
+            String cellularDataRAT = mDebugData.get(DebugKey.CELLULAR_DATA_RAT);
             if (cellularDataRAT.equals(getNetworkTypeToString(TelephonyManager.NETWORK_TYPE_LTE))) {
                 appendMessage(sb, "LTE Attach Type",
-                        mDebugData.get(DebugData.KEY_LTE_ATTACH_TYPE));
+                        mDebugData.get(DebugKey.LTE_ATTACH_TYPE));
             }
 
-            appendMessage(sb, "Roaming State", mDebugData.get(DebugData.KEY_ROAMING_STATE));
+            appendMessage(sb, "Roaming State", mDebugData.get(DebugKey.ROAMING_STATE));
             appendMessage(sb, "Roaming Type(Voice/Data)",
-                    mDebugData.get(DebugData.KEY_VOICE_ROAMING_TYPE) + "/"
-                            + mDebugData.get(DebugData.KEY_DATA_ROAMING_TYPE));
-            appendMessage(sb, "RAT (Voice/Data)", mDebugData.get(DebugData.KEY_VOICE_RAT)
+                    mDebugData.get(DebugKey.VOICE_ROAMING_TYPE) + "/"
+                            + mDebugData.get(DebugKey.DATA_ROAMING_TYPE));
+            appendMessage(sb, "RAT (Voice/Data)", mDebugData.get(DebugKey.VOICE_RAT)
                     + "/" + cellularDataRAT);
-            appendMessage(sb, "Network Operator", mDebugData.get(DebugData.KEY_NETWORK_OPERATOR)
-                    + "(" + mDebugData.get(DebugData.KEY_NETWORK_OPERATOR_NUMERIC) + ")");
-            appendMessage(sb, "VOPS", mDebugData.get(DebugData.KEY_NETWORK_SUPPORT_VOPS));
-            appendMessage(sb, "EMCBS", mDebugData.get(DebugData.KEY_NETWORK_SUPPORT_EMCBS));
+            appendMessage(sb, "Network Operator", mDebugData.get(DebugKey.NETWORK_OPERATOR)
+                    + "(" + mDebugData.get(DebugKey.NETWORK_OPERATOR_NUMERIC) + ")");
+            appendMessage(sb, "VOPS", mDebugData.get(DebugKey.NETWORK_SUPPORT_VOPS));
+            appendMessage(sb, "EMCBS", mDebugData.get(DebugKey.NETWORK_SUPPORT_EMCBS));
 
             StringBuilder sbSignal = new StringBuilder();
-            String rsri = mDebugData.get(DebugData.KEY_UTRAN_RSRI);
-            String rscp = mDebugData.get(DebugData.KEY_UTRAN_RSCP);
-            String rsrp = mDebugData.get(DebugData.KEY_EUTRAN_RSRP);
-            String rsrq = mDebugData.get(DebugData.KEY_EUTRAN_RSRQ);
-            String ssrsrp = mDebugData.get(DebugData.KEY_NGRAN_SSRSRP);
-            String ssrsrq = mDebugData.get(DebugData.KEY_NGRAN_SSRSRQ);
+            String level = mDebugData.get(DebugKey.UTRAN_LEVEL);
+            String dbm = mDebugData.get(DebugKey.UTRAN_DBM);
+            String rsrp = mDebugData.get(DebugKey.EUTRAN_RSRP);
+            String rsrq = mDebugData.get(DebugKey.EUTRAN_RSRQ);
+            String ssrsrp = mDebugData.get(DebugKey.NGRAN_SSRSRP);
+            String ssrsrq = mDebugData.get(DebugKey.NGRAN_SSRSRQ);
 
-            if (!rsri.equals(DebugData.STR_EMPTY) || !rscp.equals(DebugData.STR_EMPTY)) {
-                appendMessage(sbSignal, " -UTRAN(RSRI/RSCP)", rsri + " dBm/" + rscp + " dBm");
+            if (!level.equals(DebugData.STR_EMPTY) || !dbm.equals(DebugData.STR_EMPTY)) {
+                appendMessage(sbSignal, " -UTRAN(Level/dbm)", level + " / " + dbm + " dBm");
             }
             if (!rsrp.equals(DebugData.STR_EMPTY) || !rsrq.equals(DebugData.STR_EMPTY)) {
                 appendMessage(sbSignal, " -EUTRN(RSRP/RSRQ)", rsrp + " dBm/" + rsrq + " dB");
@@ -400,16 +402,16 @@ public class AosDebug implements IAosDebug {
 
         // WiFi
         sb.append("\n# WiFi #\n");
-        String wifiConnectionState = mDebugData.get(DebugData.KEY_WIFI_CONNECTION_STATE);
+        String wifiConnectionState = mDebugData.get(DebugKey.WIFI_CONNECTION_STATE);
         appendMessage(sb, "Connection State", wifiConnectionState);
 
         if (wifiConnectionState.equals(DebugData.STR_CONNECTED)) {
-            appendMessage(sb, "Addresses", mDebugData.get(DebugData.KEY_WIFI_ADDRESSES));
-            appendMessage(sb, "Interface name", mDebugData.get(DebugData.KEY_WIFI_INTERFACE_NAME));
-            appendMessage(sb, "RSSI", mDebugData.get(DebugData.KEY_WIFI_RSSI));
-            appendMessage(sb, "BSSID/SSID", mDebugData.get(DebugData.KEY_WIFI_BSSID) + "/"
-                    + mDebugData.get(DebugData.KEY_WIFI_SSID));
-            appendMessage(sb, "MAC Address", mDebugData.get(DebugData.KEY_WIFI_MAC_ADDRESS));
+            appendMessage(sb, "Addresses", mDebugData.get(DebugKey.WIFI_ADDRESSES));
+            appendMessage(sb, "Interface name", mDebugData.get(DebugKey.WIFI_INTERFACE_NAME));
+            appendMessage(sb, "RSSI", mDebugData.get(DebugKey.WIFI_RSSI));
+            appendMessage(sb, "BSSID/SSID", mDebugData.get(DebugKey.WIFI_BSSID) + "/"
+                    + mDebugData.get(DebugKey.WIFI_SSID));
+            appendMessage(sb, "MAC Address", mDebugData.get(DebugKey.WIFI_MAC_ADDRESS));
         }
 
         return sb.toString();
@@ -420,7 +422,7 @@ public class AosDebug implements IAosDebug {
     }
 
     @VisibleForTesting
-    protected void updateCarrierInfo() {
+    void updateCarrierInfo() {
         SimCarrierId cid = getCarrierId();
         if (cid != null) {
             ImsCarrierResolver.Carrier c = ImsCarrierResolver.getCarrierFromCarrierId(cid);
@@ -430,7 +432,7 @@ public class AosDebug implements IAosDebug {
     }
 
     @VisibleForTesting
-    protected boolean checkPermission() {
+    boolean checkPermission() {
         return mContext.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
                 == PackageManager.PERMISSION_GRANTED;
     }
@@ -451,7 +453,7 @@ public class AosDebug implements IAosDebug {
     }
 
     @VisibleForTesting
-    protected void sendNotification() {
+    void sendNotification() {
         if (mNotificationManager != null) {
             Notification.Builder nb = getNotificationBuilder();
             int notificationId = NOTIFICATION_ID_DEBUG + mSlotId;
@@ -460,7 +462,7 @@ public class AosDebug implements IAosDebug {
     }
 
     @VisibleForTesting
-    protected Notification.Builder getNotificationBuilder() {
+    Notification.Builder getNotificationBuilder() {
         updateCarrierInfo();
 
         Intent intent = new Intent(mContext, DebugScreen.class);
@@ -472,10 +474,10 @@ public class AosDebug implements IAosDebug {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         String content =
-                (mDebugData.get(DebugData.KEY_REGISTER).equals(DebugData.STR_IMS_REGISTERED))
+                (mDebugData.get(DebugKey.REGISTER).equals(DebugData.STR_IMS_REGISTERED))
                         ? DebugData.STR_IMS_REGISTERED + "-"
-                        + mDebugData.get(DebugData.KEY_REGISTERED_NETWORK_TYPE) + "\n"
-                        + mDebugData.get(DebugData.KEY_FEATURES) : DebugData.STR_IMS_DEREGISTERED;
+                        + mDebugData.get(DebugKey.REGISTERED_NETWORK_TYPE) + "\n"
+                        + mDebugData.get(DebugKey.FEATURES) : DebugData.STR_IMS_DEREGISTERED;
 
         return new Notification.Builder(mContext, NOTIFICATION_CHANNEL_ID_DEBUG + mSlotId)
                 .setContentTitle("[" + (mSlotId + 1) + "]" + mOperator + "/" + mCountry)
@@ -486,7 +488,7 @@ public class AosDebug implements IAosDebug {
     }
 
     @VisibleForTesting
-    protected void requestPermission(Activity activity) {
+    void requestPermission(Activity activity) {
         if (activity != null) {
             activity.requestPermissions(
                     new String[] {android.Manifest.permission.POST_NOTIFICATIONS},
@@ -495,21 +497,20 @@ public class AosDebug implements IAosDebug {
     }
 
     @VisibleForTesting
-    protected String getCurrentTime() {
+    String getCurrentTime() {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
                 java.util.Locale.getDefault()).format(System.currentTimeMillis());
     }
 
     @VisibleForTesting
-    protected String getCapabilitiesListToString(IAosRegistration.CapabilityPairs pairs) {
+    String getCapabilitiesListToString(IAosRegistration.CapabilityPairs pairs) {
         if (pairs == null) {
             return DebugData.STR_EMPTY;
         }
 
         StringBuilder sb = new StringBuilder();
-        for (Map.Entry<Integer, Integer> entry : pairs.getCapabilities().entrySet()) {
-            sb.append("  -")
-                    .append(IAosRegistrationListener.NetworkType.toString(entry.getKey()));
+        for (Map.Entry<NetworkType, Integer> entry : pairs.getCapabilities().entrySet()) {
+            sb.append("  -").append(entry.getKey().toString());
             sb.append(": ")
                     .append(IAosRegistrationListener.Capability.toString(entry.getValue()))
                     .append("\n");
@@ -517,42 +518,41 @@ public class AosDebug implements IAosDebug {
         return sb.toString();
     }
 
-    private void updateNetworkType(int networkType) {
-        mDebugData.put(DebugData.KEY_REGISTERED_NETWORK_TYPE,
-                IAosRegistrationListener.NetworkType.toString(networkType));
+    private void updateNetworkType(NetworkType networkType) {
+        mDebugData.put(DebugKey.REGISTERED_NETWORK_TYPE, networkType.toString());
     }
 
     @VisibleForTesting
-    protected void updateRegisteredData(int networkType, int featureTagBits) {
-        mDebugData.put(DebugData.KEY_REGISTER, DebugData.STR_IMS_REGISTERED);
-        mDebugData.put(DebugData.KEY_REGISTER_TIME, getCurrentTime());
+    void updateRegisteredData(NetworkType networkType, int featureTagBits) {
+        mDebugData.put(DebugKey.REGISTER, DebugData.STR_IMS_REGISTERED);
+        mDebugData.put(DebugKey.REGISTER_TIME, getCurrentTime());
         updateNetworkType(networkType);
-        mDebugData.put(DebugData.KEY_FEATURES,
+        mDebugData.put(DebugKey.FEATURES,
                 IAosRegistrationListener.FeatureTagMask.toString(featureTagBits));
         showOrDismissNotification(null);
     }
 
     @VisibleForTesting
-    protected void updateDeregisterData(int networkType, int reason) {
-        mDebugData.put(DebugData.KEY_REGISTER, DebugData.STR_IMS_DEREGISTERED);
-        mDebugData.put(DebugData.KEY_DEREGISTER_TIME, getCurrentTime());
+    void updateDeregisterData(NetworkType networkType, int reason) {
+        mDebugData.put(DebugKey.REGISTER, DebugData.STR_IMS_DEREGISTERED);
+        mDebugData.put(DebugKey.DEREGISTER_TIME, getCurrentTime());
         updateNetworkType(networkType);
-        mDebugData.put(DebugData.KEY_FEATURES, IAosRegistrationListener.FeatureTagMask.toString(
+        mDebugData.put(DebugKey.FEATURES, IAosRegistrationListener.FeatureTagMask.toString(
                 IAosRegistrationListener.FeatureTagMask.NONE));
-        mDebugData.put(DebugData.KEY_DEREGISTER_REASON,
-                IAosRegistrationListener.ReasonCode.toString(reason));
+        mDebugData.put(DebugKey.DEREGISTER_REASON,
+                IAosRegistrationListener.ReasonCode.of(reason).toString());
 
         showOrDismissNotification(null);
     }
 
     @VisibleForTesting
-    protected void selfCheckDebugNotification() {
+    void selfCheckDebugNotification() {
         logi(mSlotId, "selfCheckDebugNotification");
         showOrDismissNotification(null);
     }
 
     @VisibleForTesting
-    protected void updateSubscription() {
+    void updateSubscription() {
         SimInterface si = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
         if (si == null || !si.isSimLoadCompleted()) {
             return;
@@ -565,56 +565,53 @@ public class AosDebug implements IAosDebug {
 
         mSubId = subId;
         logd(mSlotId, "updateSubscription :: subId=" + subId);
-        mDebugData.putInt(DebugData.KEY_SUB_ID, mSubId);
+        mDebugData.putInt(DebugKey.SUB_ID, mSubId);
 
         mSignalStrengthsListener.unregister();
         mSignalStrengthsListener.register();
     }
 
     @VisibleForTesting
-    protected void updateSignalStrengthData(CellSignalStrength cs, int network) {
+    void updateSignalStrengthData(CellSignalStrength cs, int network) {
 
         switch (network) {
-            case AccessNetworkType.UTRAN:
-                mDebugData.put(DebugData.KEY_UTRAN_RSRI, getSignalStrength(
-                        DebugData.KEY_UTRAN_RSRI, cs));
-                mDebugData.put(DebugData.KEY_UTRAN_RSCP, getSignalStrength(
-                        DebugData.KEY_UTRAN_RSCP, cs));
-                break;
-            case AccessNetworkType.EUTRAN:
-                mDebugData.put(DebugData.KEY_EUTRAN_RSRP, getSignalStrength(
-                        DebugData.KEY_EUTRAN_RSRP, cs));
-                mDebugData.put(DebugData.KEY_EUTRAN_RSRQ, getSignalStrength(
-                        DebugData.KEY_EUTRAN_RSRQ, cs));
-                break;
-            case AccessNetworkType.NGRAN:
-                mDebugData.put(DebugData.KEY_NGRAN_SSRSRP, getSignalStrength(
-                        DebugData.KEY_NGRAN_SSRSRP, cs));
-                mDebugData.put(DebugData.KEY_NGRAN_SSRSRQ, getSignalStrength(
-                        DebugData.KEY_NGRAN_SSRSRQ, cs));
-                break;
-            default:
-                logd(mSlotId, "Network = " + network + " not handled.");
-                break;
+            case AccessNetworkType.UTRAN -> {
+                mDebugData.put(DebugKey.UTRAN_LEVEL, getSignalStrength(
+                        DebugKey.UTRAN_LEVEL, cs));
+                mDebugData.put(DebugKey.UTRAN_DBM, getSignalStrength(
+                        DebugKey.UTRAN_DBM, cs));
+            }
+            case AccessNetworkType.EUTRAN -> {
+                mDebugData.put(DebugKey.EUTRAN_RSRP, getSignalStrength(
+                        DebugKey.EUTRAN_RSRP, cs));
+                mDebugData.put(DebugKey.EUTRAN_RSRQ, getSignalStrength(
+                        DebugKey.EUTRAN_RSRQ, cs));
+            }
+            case AccessNetworkType.NGRAN -> {
+                mDebugData.put(DebugKey.NGRAN_SSRSRP, getSignalStrength(
+                        DebugKey.NGRAN_SSRSRP, cs));
+                mDebugData.put(DebugKey.NGRAN_SSRSRQ, getSignalStrength(
+                        DebugKey.NGRAN_SSRSRQ, cs));
+            }
+            default -> logd(mSlotId, "Network = " + network + " not handled.");
         }
     }
 
-    private String getSignalStrength(int type, CellSignalStrength css) {
+    private String getSignalStrength(DebugKey type, CellSignalStrength css) {
         int ss = Integer.MAX_VALUE;
 
         if (css instanceof CellSignalStrengthWcdma
-                && (type == DebugData.KEY_UTRAN_RSRI || type == DebugData.KEY_UTRAN_RSCP)) {
-            ss = (type == DebugData.KEY_UTRAN_RSRI)
-                    ? ((CellSignalStrengthWcdma) css).getRssi()
-                    : ((CellSignalStrengthWcdma) css).getRscp();
+                && (type == DebugKey.UTRAN_LEVEL || type == DebugKey.UTRAN_DBM)) {
+            ss = (type == DebugKey.UTRAN_LEVEL)
+                    ? ((CellSignalStrengthWcdma) css).getLevel() : css.getDbm();
         } else if (css instanceof CellSignalStrengthLte
-                && (type == DebugData.KEY_EUTRAN_RSRP || type == DebugData.KEY_EUTRAN_RSRQ)) {
-            ss = (type == DebugData.KEY_EUTRAN_RSRP)
+                && (type == DebugKey.EUTRAN_RSRP || type == DebugKey.EUTRAN_RSRQ)) {
+            ss = (type == DebugKey.EUTRAN_RSRP)
                     ? ((CellSignalStrengthLte) css).getRsrp()
                     : ((CellSignalStrengthLte) css).getRsrq();
         } else if (css instanceof CellSignalStrengthNr
-                && (type == DebugData.KEY_NGRAN_SSRSRP || type == DebugData.KEY_NGRAN_SSRSRQ)) {
-            ss = (type == DebugData.KEY_NGRAN_SSRSRP)
+                && (type == DebugKey.NGRAN_SSRSRP || type == DebugKey.NGRAN_SSRSRQ)) {
+            ss = (type == DebugKey.NGRAN_SSRSRP)
                     ? ((CellSignalStrengthNr) css).getSsRsrp()
                     : ((CellSignalStrengthNr) css).getSsRsrq();
         }
@@ -623,45 +620,33 @@ public class AosDebug implements IAosDebug {
     }
 
     @VisibleForTesting
-    protected void updateServiceState(int state) {
-        String text;
+    void updateServiceState(int state) {
+        String text = switch (state) {
+            case ServiceState.STATE_IN_SERVICE -> "In Service";
+            case ServiceState.STATE_OUT_OF_SERVICE -> "Out of Service";
+            case ServiceState.STATE_EMERGENCY_ONLY -> "Emergency call only";
+            case ServiceState.STATE_POWER_OFF -> "Radio off";
+            default -> DebugData.STR_EMPTY;
+        };
 
-        switch (state) {
-            case ServiceState.STATE_IN_SERVICE:
-                text = "In Service";
-                break;
-            case ServiceState.STATE_OUT_OF_SERVICE:
-                text = "Out of Service";
-                break;
-            case ServiceState.STATE_EMERGENCY_ONLY:
-                text = "Emergency call only";
-                break;
-            case ServiceState.STATE_POWER_OFF:
-                text = "Radio off";
-                break;
-            default:
-                text = DebugData.STR_EMPTY;
-                break;
-        }
-
-        mDebugData.put(DebugData.KEY_SERVICE_STATE, text);
+        mDebugData.put(DebugKey.SERVICE_STATE, text);
     }
 
     @VisibleForTesting
-    protected void updateVoiceRat(ServiceState ss) {
+    void updateVoiceRat(ServiceState ss) {
         NetworkRegistrationInfo nri =
                 ss.getNetworkRegistrationInfo(
                         NetworkRegistrationInfo.DOMAIN_CS,
                         AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
 
-        mDebugData.put(DebugData.KEY_VOICE_RAT,
+        mDebugData.put(DebugKey.VOICE_RAT,
                 getNetworkTypeToString((nri == null)
                         ? TelephonyManager.NETWORK_TYPE_UNKNOWN
                                 : nri.getAccessNetworkTechnology()));
     }
 
     @VisibleForTesting
-    protected void updateDataRegState(ServiceState ss) {
+    void updateDataRegState(ServiceState ss) {
         final NetworkRegistrationInfo iwlanRegInfo =
                 ss.getNetworkRegistrationInfo(
                         NetworkRegistrationInfo.DOMAIN_PS,
@@ -695,69 +680,69 @@ public class AosDebug implements IAosDebug {
             text = "Emergency call only";
         }
 
-        mDebugData.put(DebugData.KEY_DATA_REG_STATE, text);
+        mDebugData.put(DebugKey.DATA_REG_STATE, text);
     }
 
     @VisibleForTesting
-    protected void updateCellularDataRat() {
+    void updateCellularDataRat() {
         TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
                 TelephonyInterface.class, mSlotId);
 
-        mDebugData.put(DebugData.KEY_CELLULAR_DATA_RAT,
+        mDebugData.put(DebugKey.CELLULAR_DATA_RAT,
                 getNetworkTypeToString((telephony != null)
                         ? telephony.getNetworkType() : TelephonyManager.NETWORK_TYPE_UNKNOWN));
     }
 
     @SuppressLint("MissingPermission")
     @VisibleForTesting
-    protected void updateNetworkOperator(ServiceState ss) {
-        mDebugData.put(DebugData.KEY_NETWORK_OPERATOR, ss.getOperatorAlphaLong());
+    void updateNetworkOperator(ServiceState ss) {
+        mDebugData.put(DebugKey.NETWORK_OPERATOR, ss.getOperatorAlphaLong());
     }
 
     @SuppressLint("MissingPermission")
     @VisibleForTesting
-    protected void updateOperatorNumeric(ServiceState ss) {
-        mDebugData.put(DebugData.KEY_NETWORK_OPERATOR_NUMERIC, ss.getOperatorNumeric());
+    void updateOperatorNumeric(ServiceState ss) {
+        mDebugData.put(DebugKey.NETWORK_OPERATOR_NUMERIC, ss.getOperatorNumeric());
     }
 
     @VisibleForTesting
-    protected void updateRoamingState(ServiceState ss) {
-        mDebugData.put(DebugData.KEY_ROAMING_STATE, (ss.getRoaming() ? "Roaming" : "Not Roaming"));
+    void updateRoamingState(ServiceState ss) {
+        mDebugData.put(DebugKey.ROAMING_STATE, (ss.getRoaming() ? "Roaming" : "Not Roaming"));
     }
 
     @VisibleForTesting
-    protected void updateVoiceRoamingType(ServiceState ss) {
+    void updateVoiceRoamingType(ServiceState ss) {
         NetworkRegistrationInfo regState =
                 ss.getNetworkRegistrationInfo(
                         NetworkRegistrationInfo.DOMAIN_CS,
                         AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
-        mDebugData.put(DebugData.KEY_VOICE_ROAMING_TYPE, (regState == null)
+        mDebugData.put(DebugKey.VOICE_ROAMING_TYPE, (regState == null)
                 ? getRoamingTypeToString(ServiceState.ROAMING_TYPE_NOT_ROAMING)
                 : getRoamingTypeToString(regState.getRoamingType()));
     }
 
     @VisibleForTesting
-    protected void updateDataRoamingType(ServiceState ss) {
+    void updateDataRoamingType(ServiceState ss) {
         NetworkRegistrationInfo regState =
                 ss.getNetworkRegistrationInfo(
                         NetworkRegistrationInfo.DOMAIN_PS,
                         AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
-        mDebugData.put(DebugData.KEY_DATA_ROAMING_TYPE, (regState == null)
+        mDebugData.put(DebugKey.DATA_ROAMING_TYPE, (regState == null)
                 ? getRoamingTypeToString(ServiceState.ROAMING_TYPE_NOT_ROAMING)
                 : getRoamingTypeToString(regState.getRoamingType()));
     }
 
     @VisibleForTesting
-    protected void updateNetworkFeature(ServiceState ss) {
+    void updateNetworkFeature(ServiceState ss) {
         NetworkRegistrationInfo regInfo =
                 ss.getNetworkRegistrationInfo(
                         NetworkRegistrationInfo.DOMAIN_PS,
                         AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
 
         if (regInfo == null) {
-            mDebugData.put(DebugData.KEY_NETWORK_SUPPORT_VOPS, DebugData.STR_EMPTY);
-            mDebugData.put(DebugData.KEY_NETWORK_SUPPORT_EMCBS, DebugData.STR_EMPTY);
-            mDebugData.put(DebugData.KEY_LTE_ATTACH_TYPE, DebugData.STR_EMPTY);
+            mDebugData.put(DebugKey.NETWORK_SUPPORT_VOPS, DebugData.STR_EMPTY);
+            mDebugData.put(DebugKey.NETWORK_SUPPORT_EMCBS, DebugData.STR_EMPTY);
+            mDebugData.put(DebugKey.LTE_ATTACH_TYPE, DebugData.STR_EMPTY);
             return;
         }
 
@@ -765,127 +750,112 @@ public class AosDebug implements IAosDebug {
         if (dsrInfo != null) {
             VopsSupportInfo vsi = dsrInfo.getVopsSupportInfo();
             if (vsi != null) {
-                mDebugData.put(DebugData.KEY_NETWORK_SUPPORT_VOPS,
+                mDebugData.put(DebugKey.NETWORK_SUPPORT_VOPS,
                         (vsi.isVopsSupported()) ? "Support" : "Not Support");
-                mDebugData.put(DebugData.KEY_NETWORK_SUPPORT_EMCBS,
+                mDebugData.put(DebugKey.NETWORK_SUPPORT_EMCBS,
                         (vsi.isEmergencyServiceSupported()) ? "Support" : "Not Support");
             }
 
-            mDebugData.put(DebugData.KEY_LTE_ATTACH_TYPE, (dsrInfo.getLteAttachResultType()
+            mDebugData.put(DebugKey.LTE_ATTACH_TYPE, (dsrInfo.getLteAttachResultType()
                     == DataSpecificRegistrationInfo.LTE_ATTACH_TYPE_COMBINED)
                     ? "Combined" : "EPS Only");
         }
     }
 
     @VisibleForTesting
-    protected void updatePreciseDataConnectionStateDate(PreciseDataConnectionState state) {
-        mDebugData.put(DebugData.KEY_DATA_CONNECTION_STATE, getDataStateToString(state.getState()));
-        mDebugData.put(DebugData.KEY_NETWORK_TYPE, getNetworkTypeToString(state.getNetworkType()));
+    void updatePreciseDataConnectionState(PreciseDataConnectionState state) {
+        mDebugData.put(DebugKey.DATA_CONNECTION_STATE, getDataStateToString(state.getState()));
+        mDebugData.put(DebugKey.NETWORK_TYPE, getNetworkTypeToString(state.getNetworkType()));
 
-        ApnSetting as = getApnSettingFromState(state);
-        mDebugData.put(DebugData.KEY_APN_NAME,
+        ApnSetting as = state.getApnSetting();
+        mDebugData.put(DebugKey.APN_NAME,
                 (as != null) ? as.getApnName() : DebugData.STR_EMPTY);
-        mDebugData.put(DebugData.KEY_APN_TYPES,
-                (as != null) ? as.getApnTypes().toString() : DebugData.STR_EMPTY);
-        mDebugData.put(DebugData.KEY_APN_ENTRY_NAME,
+        mDebugData.put(DebugKey.APN_TYPES,
+                (as != null) ? getApnTypesToString(as.getApnTypeBitmask()) : DebugData.STR_EMPTY);
+        mDebugData.put(DebugKey.APN_ENTRY_NAME,
                 (as != null) ? as.getEntryName() : DebugData.STR_EMPTY);
 
-        LinkProperties lp = getLinkPropertiesFromState(state);
-        mDebugData.put(DebugData.KEY_IP_ADDRESSES,
+        LinkProperties lp = state.getLinkProperties();
+        mDebugData.put(DebugKey.IP_ADDRESSES,
                 (lp != null) ? lp.getAddresses().toString() : DebugData.STR_EMPTY);
-        mDebugData.put(DebugData.KEY_INTERFACE_NAME,
+        mDebugData.put(DebugKey.INTERFACE_NAME,
                 (lp != null) ? lp.getInterfaceName() : DebugData.STR_EMPTY);
-        mDebugData.put(DebugData.KEY_MTU,
+        mDebugData.put(DebugKey.MTU,
                 (lp != null) ? String.valueOf(lp.getMtu()) : DebugData.STR_EMPTY);
-        mDebugData.put(DebugData.KEY_PCSCF_ADDRESSES,
+        mDebugData.put(DebugKey.PCSCF_ADDRESSES,
                 (lp != null) ? lp.getPcscfServers().toString() : DebugData.STR_EMPTY);
     }
 
-    @SuppressWarnings("deprecation")
-    @VisibleForTesting
-    protected static String getNetworkTypeToString(int type) {
-        switch (type) {
-            case TelephonyManager.NETWORK_TYPE_GPRS:
-                return "GPRS";
-            case TelephonyManager.NETWORK_TYPE_EDGE:
-                return "EDGE";
-            case TelephonyManager.NETWORK_TYPE_UMTS:
-                return "UMTS";
-            case TelephonyManager.NETWORK_TYPE_HSDPA:
-                return "HSDPA";
-            case TelephonyManager.NETWORK_TYPE_HSUPA:
-                return "HSUPA";
-            case TelephonyManager.NETWORK_TYPE_HSPA:
-                return "HSPA";
-            case TelephonyManager.NETWORK_TYPE_CDMA:
-                return "CDMA";
-            case TelephonyManager.NETWORK_TYPE_EVDO_0:
-                return "CDMA - EvDo rev. 0";
-            case TelephonyManager.NETWORK_TYPE_EVDO_A:
-                return "CDMA - EvDo rev. A";
-            case TelephonyManager.NETWORK_TYPE_EVDO_B:
-                return "CDMA - EvDo rev. B";
-            case TelephonyManager.NETWORK_TYPE_1xRTT:
-                return "CDMA - 1xRTT";
-            case TelephonyManager.NETWORK_TYPE_LTE:
-                return "LTE";
-            case TelephonyManager.NETWORK_TYPE_EHRPD:
-                return "CDMA - eHRPD";
-            case TelephonyManager.NETWORK_TYPE_IDEN:
-                return "iDEN";
-            case TelephonyManager.NETWORK_TYPE_HSPAP:
-                return "HSPA+";
-            case TelephonyManager.NETWORK_TYPE_GSM:
-                return "GSM";
-            case TelephonyManager.NETWORK_TYPE_TD_SCDMA:
-                return "TD_SCDMA";
-            case TelephonyManager.NETWORK_TYPE_IWLAN:
-                return "IWLAN";
-            case TelephonyManager.NETWORK_TYPE_LTE_CA:
-                return "LTE_CA";
-            case TelephonyManager.NETWORK_TYPE_NR:
-                return "NR";
-            default:
-                return DebugData.STR_EMPTY;
+    private String getApnTypesToString(int apnTypeBitmask) {
+        StringBuilder sb = new StringBuilder("[");
+
+        final String[] apnStrings = {
+                "DEFAULT", "MMS", "SUPL", "IMS", "EMERGENCY", "XCAP", "RCS"};
+        final int[] masks = { ApnSetting.TYPE_DEFAULT, ApnSetting.TYPE_MMS,
+                ApnSetting.TYPE_SUPL, ApnSetting.TYPE_IMS, ApnSetting.TYPE_EMERGENCY,
+                ApnSetting.TYPE_XCAP, ApnSetting.TYPE_RCS };
+
+        for (int i = 0; i < apnStrings.length; i++) {
+            if ((apnTypeBitmask & masks[i]) != 0) {
+                sb.append(" ").append(apnStrings[i]).append(" ");
+            }
         }
+        sb.append("]");
+
+        return sb.toString();
     }
 
     @VisibleForTesting
-    protected static String getDataStateToString(int state) {
-        switch (state) {
-            case TelephonyManager.DATA_DISCONNECTED:
-                return "DISCONNECTED";
-            case TelephonyManager.DATA_CONNECTING:
-                return "CONNECTING";
-            case TelephonyManager.DATA_CONNECTED:
-                return "CONNECTED";
-            case TelephonyManager.DATA_SUSPENDED:
-                return "SUSPENDED";
-            case TelephonyManager.DATA_DISCONNECTING:
-                return "DISCONNECTING";
-            case TelephonyManager.DATA_HANDOVER_IN_PROGRESS:
-                return "HANDOVER IN PROGRESS";
-            default:
-                return DebugData.STR_EMPTY;
-        }
+    static String getNetworkTypeToString(int type) {
+        return switch (type) {
+            case TelephonyManager.NETWORK_TYPE_GPRS -> "GPRS";
+            case TelephonyManager.NETWORK_TYPE_EDGE -> "EDGE";
+            case TelephonyManager.NETWORK_TYPE_UMTS -> "UMTS";
+            case TelephonyManager.NETWORK_TYPE_HSDPA -> "HSDPA";
+            case TelephonyManager.NETWORK_TYPE_HSUPA -> "HSUPA";
+            case TelephonyManager.NETWORK_TYPE_HSPA -> "HSPA";
+            case TelephonyManager.NETWORK_TYPE_CDMA -> "CDMA";
+            case TelephonyManager.NETWORK_TYPE_EVDO_0 -> "CDMA - EvDo rev. 0";
+            case TelephonyManager.NETWORK_TYPE_EVDO_A -> "CDMA - EvDo rev. A";
+            case TelephonyManager.NETWORK_TYPE_EVDO_B -> "CDMA - EvDo rev. B";
+            case TelephonyManager.NETWORK_TYPE_1xRTT -> "CDMA - 1xRTT";
+            case TelephonyManager.NETWORK_TYPE_LTE -> "LTE";
+            case TelephonyManager.NETWORK_TYPE_EHRPD -> "CDMA - eHRPD";
+            case TelephonyManager.NETWORK_TYPE_HSPAP -> "HSPA+";
+            case TelephonyManager.NETWORK_TYPE_GSM -> "GSM";
+            case TelephonyManager.NETWORK_TYPE_TD_SCDMA -> "TD_SCDMA";
+            case TelephonyManager.NETWORK_TYPE_IWLAN -> "IWLAN";
+            case TelephonyManager.NETWORK_TYPE_LTE_CA -> "LTE_CA";
+            case TelephonyManager.NETWORK_TYPE_NR -> "NR";
+            default -> DebugData.STR_EMPTY;
+        };
     }
 
     @VisibleForTesting
-    protected static String getRoamingTypeToString(int type) {
-        switch (type) {
-            case ServiceState.ROAMING_TYPE_NOT_ROAMING:
-                return "Not Roaming";
-            case ServiceState.ROAMING_TYPE_DOMESTIC:
-                return "Domestic";
-            case ServiceState.ROAMING_TYPE_INTERNATIONAL:
-                return "International";
-            default:
-                return DebugData.STR_EMPTY;
-        }
+    static String getDataStateToString(int state) {
+        return switch (state) {
+            case TelephonyManager.DATA_DISCONNECTED -> "DISCONNECTED";
+            case TelephonyManager.DATA_CONNECTING -> "CONNECTING";
+            case TelephonyManager.DATA_CONNECTED -> "CONNECTED";
+            case TelephonyManager.DATA_SUSPENDED -> "SUSPENDED";
+            case TelephonyManager.DATA_DISCONNECTING -> "DISCONNECTING";
+            case TelephonyManager.DATA_HANDOVER_IN_PROGRESS -> "HANDOVER IN PROGRESS";
+            default -> DebugData.STR_EMPTY;
+        };
     }
 
     @VisibleForTesting
-    protected int getAccessNetworkType(CellSignalStrength cs) {
+    static String getRoamingTypeToString(int type) {
+        return switch (type) {
+            case ServiceState.ROAMING_TYPE_NOT_ROAMING -> "Not Roaming";
+            case ServiceState.ROAMING_TYPE_DOMESTIC -> "Domestic";
+            case ServiceState.ROAMING_TYPE_INTERNATIONAL -> "International";
+            default -> DebugData.STR_EMPTY;
+        };
+    }
+
+    @VisibleForTesting
+    int getAccessNetworkType(CellSignalStrength cs) {
         if (cs instanceof CellSignalStrengthNr) {
             return AccessNetworkType.NGRAN;
         } else if (cs instanceof CellSignalStrengthLte) {
@@ -910,74 +880,64 @@ public class AosDebug implements IAosDebug {
     }
 
     @VisibleForTesting
-    protected NotificationManager getNotificationManager() {
+    NotificationManager getNotificationManager() {
         return mContext.getSystemService(NotificationManager.class);
     }
 
     @VisibleForTesting
-    protected SimCarrierId getCarrierId() {
+    SimCarrierId getCarrierId() {
         return CarrierInfo.getInstance().getCarrierId(mSlotId);
     }
 
     @VisibleForTesting
-    protected WifiInfo getWifiInfo(NetworkCapabilities capabilities) {
+    WifiInfo getWifiInfo(NetworkCapabilities capabilities) {
         return (WifiInfo) capabilities.getTransportInfo();
     }
 
     @VisibleForTesting
-    protected ApnSetting getApnSettingFromState(PreciseDataConnectionState state) {
-        return state.getApnSetting();
-    }
-
-    @VisibleForTesting
-    protected LinkProperties getLinkPropertiesFromState(PreciseDataConnectionState state) {
-        return state.getLinkProperties();
-    }
-
-    @VisibleForTesting
-    protected DebugData createDebugData() {
+    DebugData createDebugData() {
         return new DebugData();
     }
 
     @VisibleForTesting
-    protected DebugHandler createDebugHandler() {
+    DebugHandler createDebugHandler() {
         HandlerThread thread = new HandlerThread(AosDebug.class.getName());
         thread.start();
         return new DebugHandler(thread.getLooper());
     }
     @VisibleForTesting
-    protected NativeStateListener createNativeStateListener() {
+    NativeStateListener createNativeStateListener() {
         return new NativeStateListener();
     }
     @VisibleForTesting
-    protected RegistrationListener createRegistrationListener() {
+    RegistrationListener createRegistrationListener() {
         return new RegistrationListener();
     }
     @VisibleForTesting
-    protected DebugBroadcastReceiver createDebugBroadcastReceiver() {
+    DebugBroadcastReceiver createDebugBroadcastReceiver() {
         return new DebugBroadcastReceiver();
     }
     @VisibleForTesting
-    protected SignalStrengthsListener createSignalStrengthsListener() {
+    SignalStrengthsListener createSignalStrengthsListener() {
         return new SignalStrengthsListener();
     }
     @VisibleForTesting
-    protected ConnectivityCallback createConnectivityCallback() {
+    ConnectivityCallback createConnectivityCallback() {
         return new ConnectivityCallback();
     }
 
     @VisibleForTesting
-    protected DebugImsPhoneStateListener createDebugImsPhoneStateListener() {
+    DebugImsPhoneStateListener createDebugImsPhoneStateListener() {
         return new DebugImsPhoneStateListener();
     }
 
     @VisibleForTesting
-    protected int getSlotId(int subId) {
+    int getSlotId(int subId) {
         return MSimUtils.getSlotId(subId);
     }
 
     @VisibleForTesting
-    protected class NativeStateListener implements NativeStateInterface.Listener {
+    class NativeStateListener implements NativeStateInterface.Listener {
         @Override
         public void onNativeServiceReady() {
             logi(mSlotId, "NativeState: service ready.");
@@ -1004,7 +964,7 @@ public class AosDebug implements IAosDebug {
     }
 
     @VisibleForTesting
-    protected class DebugImsPhoneStateListener implements ImsPhoneStateListener {
+    class DebugImsPhoneStateListener implements ImsPhoneStateListener {
         private IPhoneStateNotifier mNotifier;
         private PhoneStateInterface mPhoneState;
 
@@ -1047,7 +1007,7 @@ public class AosDebug implements IAosDebug {
     }
 
     @VisibleForTesting
-    protected class ConnectivityCallback
+    class ConnectivityCallback
             extends ConnectivityManager.NetworkCallback {
 
         private LinkProperties mLinkProperties;
@@ -1100,31 +1060,25 @@ public class AosDebug implements IAosDebug {
         }
 
         public void register() {
-            ConnectivityManager cm = getConnectivityManager();
-            if (cm != null) {
-                NetworkRequest nr = new NetworkRequest.Builder()
-                        .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                        .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                        .build();
+            ConnectivityManagerProxy cmp =
+                    AppContext.getInstance().getSystemServiceProxy(ConnectivityManagerProxy.class);
+            NetworkRequest nr = new NetworkRequest.Builder()
+                    .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                    .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                    .build();
 
-                cm.registerNetworkCallback(nr, this, mHandler);
-            }
+            cmp.registerNetworkCallback(nr, this, mHandler);
         }
 
         public void unregister() {
-            ConnectivityManager cm = getConnectivityManager();
-            if (cm != null) {
-                cm.unregisterNetworkCallback(this);
-            }
-        }
-
-        private ConnectivityManager getConnectivityManager() {
-            return mContext.getSystemService(ConnectivityManager.class);
+            ConnectivityManagerProxy cmp =
+                    AppContext.getInstance().getSystemServiceProxy(ConnectivityManagerProxy.class);
+            cmp.unregisterNetworkCallback(this);
         }
     }
 
     @VisibleForTesting
-    protected class SignalStrengthsListener extends TelephonyCallback implements
+    class SignalStrengthsListener extends TelephonyCallback implements
             TelephonyCallback.SignalStrengthsListener {
 
         SignalStrengthsListener() {}
@@ -1140,27 +1094,29 @@ public class AosDebug implements IAosDebug {
                 return;
             }
 
-            TelephonyManager tm = AppContext.getTelephonyManager(mSubId);
-            if (tm != null) {
-                tm.registerTelephonyCallback(mHandler::post, this);
-            }
+            TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(mSubId);
+            tmp.registerTelephonyCallback(mHandler::post, this);
         }
 
         public void unregister() {
-            TelephonyManager tm = AppContext.getTelephonyManager(mSubId);
-            if (tm != null) {
-                tm.unregisterTelephonyCallback(this);
-            }
+            TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(mSubId);
+            tmp.unregisterTelephonyCallback(this);
         }
     }
 
     @VisibleForTesting
-    protected class DebugBroadcastReceiver extends BroadcastReceiver {
+    class DebugBroadcastReceiver extends BroadcastReceiver {
 
         public DebugBroadcastReceiver() {}
 
-        public IntentFilter getFilter() {
-            return new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        public void register() {
+            IntentFilter filter = new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+            AppContext.getInstance().getBroadcastReceiverProxy()
+                    .registerReceiver(this, filter, mHandler);
+        }
+
+        public void unregister() {
+            AppContext.getInstance().getBroadcastReceiverProxy().unregisterReceiver(this);
         }
 
         @Override
@@ -1175,33 +1131,47 @@ public class AosDebug implements IAosDebug {
     }
 
     @VisibleForTesting
-    protected class RegistrationListener implements IAosRegistrationListener {
+    class RegistrationListener implements IAosRegistrationListener {
 
         @Override
-        public void notifyRegistered(int networkType, int featureTagBits,
+        public void notifyRegistered(@RegistrationType.RegistrationTypeDef int regType,
+                NetworkType networkType, @FeatureTagMask.FeatureTagMaskDef int featureTagBits,
                 java.util.Set<String> featureTags) {
-            logi(mSlotId, "notifyRegistered - networkType:" + networkType
+            logi(mSlotId, "notifyRegistered - regType:" + regType
+                    + ", networkType:" + networkType
                     + ", featureTagBits:" + featureTagBits + ", featureTags:" + featureTags);
             Message.obtain(mHandler,
-                    DEBUG_NOTIFY_REGISTERED, networkType, featureTagBits).sendToTarget();
+                    DEBUG_NOTIFY_REGISTERED, networkType.getValue(), featureTagBits).sendToTarget();
         }
 
         @Override
-        public void notifyDeregistered(int networkType, int reason, String message) {
-            logi(mSlotId, "notifyDeregistered - networkType:" + networkType
-                    + ", reason:" + reason + "message:" + message);
-            Message.obtain(mHandler,
-                    DEBUG_NOTIFY_DEREGISTERED, networkType, reason).sendToTarget();
+        public void notifyDeregistered(
+                @RegistrationType.RegistrationTypeDef int regType, NetworkType networkType,
+                ReasonCode reason, String message, int dataFailCause) {
+            logi(mSlotId, "notifyDeregistered - regType:" + regType
+                    + ", networkType:" + networkType
+                    + ", reason:" + reason.toString() + "message:" + message + ", dataFailCause:"
+                    + dataFailCause);
+            Message.obtain(mHandler, DEBUG_NOTIFY_DEREGISTERED,
+                    networkType.getValue(), reason.getValue()).sendToTarget();
         }
 
         @Override
-        public void notifyRegistering(int networkType, int featureTagBits,
+        public void notifyRegistering(@RegistrationType.RegistrationTypeDef int regType,
+                NetworkType networkType, @FeatureTagMask.FeatureTagMaskDef int featureTagBits,
                 java.util.Set<String> featureTags) {
             // Do nothing.
         }
 
         @Override
-        public void notifyTechnologyChangeFailed(int networkType, int causeCode, String message) {
+        public void notifyDeregistering(@RegistrationType.RegistrationTypeDef int regType) {
+            // Do nothing.
+        }
+
+        @Override
+        public void notifyTechnologyChangeFailed(
+                @RegistrationType.RegistrationTypeDef int regType, NetworkType networkType,
+                ReasonCode reason, String message) {
             // Do nothing.
         }
 
@@ -1211,7 +1181,8 @@ public class AosDebug implements IAosDebug {
         }
 
         @Override
-        public void notifyCapabilitiesUpdateFailed(int capabilities, int networkType, int reason) {
+        public void notifyCapabilitiesUpdateFailed(@Capability.CapabilityMask int capabilities,
+                NetworkType networkType, @CapabilityReason.CapabilityReasonDef int reason) {
             // Do nothing.
         }
 
@@ -1225,10 +1196,17 @@ public class AosDebug implements IAosDebug {
         public void notifyRegEventStateChanged(int statusCode, @NonNull Set<Uri> impus) {
             // Do nothing.
         }
+
+        @Override
+        public void notifyImsFeatureChanged(
+                @RegistrationType.RegistrationTypeDef int regType, NetworkType networkType,
+                @FeatureTagMask.FeatureTagMaskDef int featureTagBits) {
+            // Do nothing.
+        }
     }
 
     @VisibleForTesting
-    protected final class DebugHandler extends Handler {
+    final class DebugHandler extends Handler {
         private DebugHandler(Looper looper) {
             super(looper);
         }
@@ -1239,35 +1217,16 @@ public class AosDebug implements IAosDebug {
                 logi(mSlotId, "handleMessage :: msg= " + msg.what);
 
                 switch (msg.what) {
-                    case DEBUG_AIRPLANE_MODE_CHANGED:
-                        handleAirplaneModeChanged(msg);
-                        break;
-                    case DEBUG_SUBSCRIPTION_CHANGED:
-                        handleSubscriptionChanged();
-                        break;
-                    case DEBUG_SIGNALSTRENGTHS_CHANGED:
-                        handleSignalStrengthsChanged(msg);
-                        break;
-                    case DEBUG_WIFI_CONNECTIVITY_CHANGED:
-                        handleWifiConnectivityChanged(msg);
-                        break;
-                    case DEBUG_SERVICE_STATE_CHANGED:
-                        handleServiceStateChanged(msg);
-                        break;
-                    case DEBUG_PRECISE_DATA_CONNECTION_CHANGED:
-                        handlePreciseDataConnectionChanged(msg);
-                        break;
-                    case DEBUG_NOTIFY_REGISTERED:
-                        handleNotifyRegistered(msg);
-                        break;
-                    case DEBUG_NOTIFY_DEREGISTERED:
-                        handleNotifyDeregistered(msg);
-                        break;
-                    case DEBUG_NOTIFY_CAPABILITIES_UPDATED:
-                        handleNotifyCapabilitiesUpdated(msg);
-                        break;
-                    default:
-                        break;
+                    case DEBUG_AIRPLANE_MODE_CHANGED -> handleAirplaneModeChanged(msg);
+                    case DEBUG_SUBSCRIPTION_CHANGED -> handleSubscriptionChanged();
+                    case DEBUG_SIGNALSTRENGTHS_CHANGED -> handleSignalStrengthsChanged(msg);
+                    case DEBUG_WIFI_CONNECTIVITY_CHANGED -> handleWifiConnectivityChanged(msg);
+                    case DEBUG_SERVICE_STATE_CHANGED -> handleServiceStateChanged(msg);
+                    case DEBUG_PRECISE_DATA_CONNECTION_CHANGED ->
+                            handlePreciseDataConnectionChanged(msg);
+                    case DEBUG_NOTIFY_REGISTERED -> handleNotifyRegistered(msg);
+                    case DEBUG_NOTIFY_DEREGISTERED -> handleNotifyDeregistered(msg);
+                    case DEBUG_NOTIFY_CAPABILITIES_UPDATED -> handleNotifyCapabilitiesUpdated(msg);
                 }
             }
         }
@@ -1290,25 +1249,24 @@ public class AosDebug implements IAosDebug {
                     ((SignalStrength) msg.obj).getCellSignalStrengths();
 
             for (CellSignalStrength cs : cellSignalStrengths) {
-                if (cs.isValid()) {
-                    updateSignalStrengthData(cs, getAccessNetworkType(cs));
-                }
+                updateSignalStrengthData(cs, getAccessNetworkType(cs));
             }
         }
 
-        private void handleWifiConnectivityChanged(Message msg) {
+        @VisibleForTesting
+        protected void handleWifiConnectivityChanged(Message msg) {
             if (msg == null || !mConnectivityCallback.isConnected()) {
                 clearWifiConnectivityData();
                 return;
             }
 
-            mDebugData.put(DebugData.KEY_WIFI_CONNECTION_STATE, DebugData.STR_CONNECTED);
+            mDebugData.put(DebugKey.WIFI_CONNECTION_STATE, DebugData.STR_CONNECTED);
 
             LinkProperties lp = mConnectivityCallback.getLinkProperties();
             String addresses = (lp != null) ? lp.getAddresses().toString() : DebugData.STR_EMPTY;
             String interfaceName = (lp != null) ? lp.getInterfaceName() : DebugData.STR_EMPTY;
-            mDebugData.put(DebugData.KEY_WIFI_ADDRESSES, addresses);
-            mDebugData.put(DebugData.KEY_WIFI_INTERFACE_NAME, interfaceName);
+            mDebugData.put(DebugKey.WIFI_ADDRESSES, addresses);
+            mDebugData.put(DebugKey.WIFI_INTERFACE_NAME, interfaceName);
 
             NetworkCapabilities capabilities = mConnectivityCallback.getNetworkCapabilities();
             if (capabilities != null) {
@@ -1319,24 +1277,24 @@ public class AosDebug implements IAosDebug {
                 @SuppressLint("HardwareIds")
                 String macAddress = (wifiInfo != null) ? wifiInfo.getMacAddress() : "";
 
-                mDebugData.put(DebugData.KEY_WIFI_RSSI, rssi + " dBm");
-                mDebugData.put(DebugData.KEY_WIFI_BSSID, (bssId.length() != 0)
+                mDebugData.put(DebugKey.WIFI_RSSI, rssi + " dBm");
+                mDebugData.put(DebugKey.WIFI_BSSID, (bssId.length() != 0)
                         ? bssId : DebugData.STR_EMPTY);
-                mDebugData.put(DebugData.KEY_WIFI_SSID, (ssId.length() != 0)
+                mDebugData.put(DebugKey.WIFI_SSID, (ssId.length() != 0)
                         ? ssId : DebugData.STR_EMPTY);
-                mDebugData.put(DebugData.KEY_WIFI_MAC_ADDRESS,
+                mDebugData.put(DebugKey.WIFI_MAC_ADDRESS,
                         (macAddress.length() != 0) ? macAddress : DebugData.STR_EMPTY);
             }
         }
 
         private void clearWifiConnectivityData() {
-            mDebugData.put(DebugData.KEY_WIFI_CONNECTION_STATE, DebugData.STR_DISCONNECTED);
-            mDebugData.put(DebugData.KEY_WIFI_ADDRESSES, DebugData.STR_EMPTY);
-            mDebugData.put(DebugData.KEY_WIFI_INTERFACE_NAME, DebugData.STR_EMPTY);
-            mDebugData.put(DebugData.KEY_WIFI_RSSI, INVALID_RSSI + " dBm");
-            mDebugData.put(DebugData.KEY_WIFI_BSSID, DebugData.STR_EMPTY);
-            mDebugData.put(DebugData.KEY_WIFI_SSID, DebugData.STR_EMPTY);
-            mDebugData.put(DebugData.KEY_WIFI_MAC_ADDRESS, DebugData.STR_EMPTY);
+            mDebugData.put(DebugKey.WIFI_CONNECTION_STATE, DebugData.STR_DISCONNECTED);
+            mDebugData.put(DebugKey.WIFI_ADDRESSES, DebugData.STR_EMPTY);
+            mDebugData.put(DebugKey.WIFI_INTERFACE_NAME, DebugData.STR_EMPTY);
+            mDebugData.put(DebugKey.WIFI_RSSI, INVALID_RSSI + " dBm");
+            mDebugData.put(DebugKey.WIFI_BSSID, DebugData.STR_EMPTY);
+            mDebugData.put(DebugKey.WIFI_SSID, DebugData.STR_EMPTY);
+            mDebugData.put(DebugKey.WIFI_MAC_ADDRESS, DebugData.STR_EMPTY);
         }
 
         private void handleServiceStateChanged(Message msg) {
@@ -1356,19 +1314,19 @@ public class AosDebug implements IAosDebug {
 
         private void handlePreciseDataConnectionChanged(Message msg) {
             PreciseDataConnectionState pdc = (PreciseDataConnectionState) msg.obj;
-            updatePreciseDataConnectionStateDate(pdc);
+            updatePreciseDataConnectionState(pdc);
         }
 
         private void handleNotifyRegistered(Message msg) {
-            updateRegisteredData(msg.arg1, msg.arg2);
+            updateRegisteredData(NetworkType.of(msg.arg1), msg.arg2);
         }
 
         private void handleNotifyDeregistered(Message msg) {
-            updateDeregisterData(msg.arg1, msg.arg2);
+            updateDeregisterData(NetworkType.of(msg.arg1), msg.arg2);
         }
 
         private void handleNotifyCapabilitiesUpdated(Message msg) {
-            mDebugData.put(DebugData.KEY_CAPABILITIES,
+            mDebugData.put(DebugKey.CAPABILITIES,
                     getCapabilitiesListToString((IAosRegistration.CapabilityPairs) msg.obj));
         }
     }

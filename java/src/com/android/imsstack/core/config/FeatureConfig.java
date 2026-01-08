@@ -20,9 +20,10 @@ import android.telephony.CarrierConfigManager;
 import android.util.ArrayMap;
 import android.util.SparseArray;
 
-import com.android.imsstack.util.AppContext;
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.SystemServiceProxy.CarrierConfigManagerProxy;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
 
 /**
  * This class provides the APIs to getting FEATURE_XXX in gims_feature table
@@ -55,18 +56,16 @@ public final class FeatureConfig {
     }
 
     public static synchronized void init(int slotId) {
-        CarrierConfigManager ccm = AppContext.getInstance().getSystemService(
-                CarrierConfigManager.class);
-
+        CarrierConfigManagerProxy ccmp =
+                AppContext.getInstance().getSystemServiceProxy(CarrierConfigManagerProxy.class);
         // If an invalid subId is used, this bundle will contain default values.
-        PersistableBundle config = (ccm != null)
-                ? ccm.getConfigForSubId(MSimUtils.getSubId(slotId)) : null;
-
-        if (config == null) {
-            initUnavailable(slotId);
-            return;
-        }
-
+        PersistableBundle config = ccmp.getConfigForSubId(MSimUtils.getSubId(slotId),
+                CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL,
+                CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL,
+                CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL,
+                CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL,
+                CarrierConfigManager.Ims.KEY_ENABLE_PRESENCE_PUBLISH_BOOL,
+                CarrierConfigManager.KEY_USE_RCS_SIP_OPTIONS_BOOL);
         ArrayMap<String, Integer> features = new ArrayMap<>();
         boolean available;
         StringBuilder sb = new StringBuilder();
@@ -99,18 +98,6 @@ public final class FeatureConfig {
         sFeatures.put(slotId, features);
 
         ImsLog.i(slotId, "FeatureConfig=" + sb.toString());
-    }
-
-    private static void initUnavailable(int slotId) {
-        ArrayMap<String, Integer> features = new ArrayMap<>();
-
-        features.put(VOLTE, 0);
-        features.put(VT, 0);
-        features.put(VOWIFI, 0);
-        features.put(SMS, 0);
-        features.put(UCE, 0);
-
-        sFeatures.put(slotId, features);
     }
 
     private FeatureConfig() {}

@@ -16,14 +16,16 @@
 
 package com.android.imsstack.system;
 
-import android.annotation.NonNull;
 import android.telephony.Annotation.CallState;
 import android.telephony.Annotation.NetworkType;
+
+import androidx.annotation.NonNull;
 
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.core.config.CarrierConfig;
 
 import java.io.FileDescriptor;
+import java.util.List;
 
 /** An interface for providing the system call. */
 public interface SystemCallInterface {
@@ -90,21 +92,12 @@ public interface SystemCallInterface {
     String getIsimState();
 
     /**
-     * Reads the file attributes of the specified ISIM record.
+     * Returns the list of the specified ISIM record.
      *
      * @param fileId The file id to be read.
-     * @return One of {@link #RESULT_FAIL} or {@link #RESULT_OK}.
+     * @return The list of ISIM record.
      */
-    int readIsimFileAttributes(int fileId);
-
-    /**
-     * Reads the value of the specified ISIM record.
-     *
-     * @param fileId The file id to be read.
-     * @param index The index of the record for the given file.
-     * @return One of {@link #RESULT_FAIL} or {@link #RESULT_OK}.
-     */
-    int readIsimRecord(int fileId, int index);
+    @NonNull List<String> getIsimRecord(int fileId);
 
     /**
      * Returns the response of ISIM authentication for the specified application type.
@@ -191,6 +184,12 @@ public interface SystemCallInterface {
      * Returns the ISO-3166-1 alpha-2 country code equivalent for the SIM provider's country code.
      */
     String getSimCountryIso();
+
+    /**
+     * Returns the MCC+MNC (Mobile Country Code + Mobile Network Code) of the current registered
+     * operator. 5 or 6 decimal digits.
+     */
+    String getNetworkOperator();
 
     /**
      * Returns the ISO-3166-1 alpha-2 country code equivalent of the MCC (Mobile Country Code) of
@@ -397,6 +396,17 @@ public interface SystemCallInterface {
     int getVoiceRoamingType();
 
     /**
+     * Returns the service state of the current cellular data network.
+     *
+     * @return A service state.
+     *         {@link ServiceState#STATE_IN_SERVICE},
+     *         {@link ServiceState#STATE_OUT_OF_SERVICE},
+     *         {@link ServiceState#STATE_EMERGENCY_ONLY},
+     *         {@link ServiceState#STATE_POWER_OFF}
+     */
+    int getCellularDataServiceState();
+
+    /**
      * Returns the service state of the current data network.
      *
      * @return A service state.
@@ -419,13 +429,6 @@ public interface SystemCallInterface {
     int getDataRoamingType();
 
     /**
-     * Returns the PLMN information of MOCN.
-     *
-     * @return A PLMN info. of MOCN.
-     */
-    int getMocnPlmnInfo();
-
-    /**
      * Checks whether the current network is attached as roaming.
      *
      * @return {@code true} if the network is in roaming, {@code false} otherwise.
@@ -433,11 +436,11 @@ public interface SystemCallInterface {
     boolean isNetworkRoaming();
 
     /**
-     * Checks whether the emergency is only available in the LTE network.
+     * Checks whether the emergency is only available in the network.
      *
      * @return {@code true} if the emergency is only available, {@code false} otherwise.
      */
-    boolean isLteEmergencyOnly();
+    boolean isEmergencyOnly();
 
     /**
      * Checks whether the emergency attach is supported or not.
@@ -540,7 +543,33 @@ public interface SystemCallInterface {
     void stopListeningForLocation();
 
     /**
-     * Starts an instant location update (one-time update).
+     * Requests a location update (one-time update).
+     *
+     * @param waitTimeMs A wait time to fix the location in milli-seconds.
+     * @return The request identifier for event handling for location update completion and
+     *         cancellation.
+     *         0(zero) indicates that the location update request cannot be performed,
+     *         otherwise an integer value greater than 0 is returned.
      */
-    void startInstantLocationUpdate();
+    int requestLocationUpdate(int waitTimeMs);
+
+    /**
+     * Cancels a previously requested location update.
+     *
+     * @param requestId A request identifier returned from {@link #requestLocationUpdate(int)}.
+     */
+    void cancelLocationUpdate(int requestId);
+
+    /**
+     * Returns the reject cause for the network registration.
+     *
+     * @return A reject cause.
+     */
+    int getNetworkRegistrationRejectCause();
+
+    /**
+     * Returns the MCC+MNC (Mobile Country Code + Mobile Network Code) of the current attached
+     * operator. 5 or 6 decimal digits.
+     */
+    @NonNull String getAccessNetworkPlmn();
 }

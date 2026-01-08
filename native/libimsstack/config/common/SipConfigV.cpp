@@ -17,6 +17,7 @@
 #include "ServiceTrace.h"
 
 #include "CarrierConfig.h"
+#include "ICarrierConfig.h"
 #include "private/SipConfigV.h"
 
 __IMS_TRACE_TAG_CONF__;
@@ -122,7 +123,7 @@ PUBLIC VIRTUAL IMS_SINT32 SipConfigV::GetTimerValue(IN IMS_SINT32 nType) const
 
 PROTECTED VIRTUAL IMS_BOOL SipConfigV::ReadFrom()
 {
-    ICarrierConfig* piCc = GetCarrierConfig();
+    const ICarrierConfig* piCc = GetCarrierConfig();
 
     IMS_SINT32 nRequestUriType = piCc->GetInt(CarrierConfig::Ims::KEY_REQUEST_URI_TYPE_INT);
 
@@ -213,13 +214,9 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::ReadFrom()
     {
         m_objSession.nRefreshMethod = SESSION_REFRESH_INVITE;
     }
-    else if (nRefreshMethod == CarrierConfig::ImsVoice::SESSION_REFRESH_METHOD_UPDATE_PREFERRED)
-    {
-        m_objSession.nRefreshMethod = SESSION_REFRESH_UPDATE;
-    }
     else
     {
-        m_objSession.nRefreshMethod = SESSION_REFRESH_ANY;
+        m_objSession.nRefreshMethod = SESSION_REFRESH_UPDATE_PREFERRED;
     }
 
     m_objSession.nMinSe =
@@ -228,21 +225,40 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::ReadFrom()
     m_objSession.nSessionExpires =
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_SESSION_EXPIRES_TIMER_SEC_INT);
 
-    m_objSession.nHeaders = SESSION_HEADER_SESSION_EXPIRES | SESSION_HEADER_MIN_SE |
-            SESSION_HEADER_CHECK_SESSION_EXPIRES;
+    m_objSession.nHeaders = SESSION_HEADER_SESSION_EXPIRES | SESSION_HEADER_MIN_SE;
 
-    if (piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_LOCAL_SESSION_TIMER_BOOL))
+    if (piCc->GetBoolean(CarrierConfig::Ims::KEY_ALLOW_SESSION_TIMER_TURN_OFF_BOOL))
+    {
+        m_objSession.nHeaders |= SESSION_HEADER_SESSION_TIMER_TURN_OFF_ALLOWED;
+    }
+
+    if (piCc->GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_LOCAL_SESSION_TIMER_BOOL))
     {
         m_objSession.nHeaders |= SESSION_HEADER_LOCAL_TIMER_REQUIRED;
     }
 
-    m_objSession.bNoRefreshByReInvite = !piCc->GetBoolean(CarrierConfig::Assets::
+    m_objSession.bNoRefreshByReInvite = !piCc->GetBoolean(CarrierConfig::Ims::
                     KEY_SESSION_TIMER_UPDATE_REQUIRED_IN_SESSION_UPDATE_BY_REINVITE_BOOL);
+
+    IMS_SINT32 nSessionRefreshSdpVersionIncrement = piCc->GetInt(
+            CarrierConfig::ImsVoice::KEY_SESSION_REFRESH_SDP_SESSION_VERSION_INCREMENT_INT,
+            SESSION_REFRESH_SDP_VERSION_INCREMENT_NONE);
+
+    m_objSession.nSessionRefreshSdpVersionIncrement = nSessionRefreshSdpVersionIncrement;
 
     m_objSession.bSdpVersionCheckSupported = IMS_TRUE;
 
+    if (nSessionRefreshSdpVersionIncrement == SESSION_REFRESH_SDP_VERSION_INCREMENT_AS_ANSWERER ||
+            nSessionRefreshSdpVersionIncrement == SESSION_REFRESH_SDP_VERSION_INCREMENT_ALL)
+    {
+        m_objSession.bSdpVersionCheckSupported = IMS_FALSE;
+    }
+
     m_objSession.bSdpNonRprAllowed =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR_BOOL);
+            piCc->GetBoolean(CarrierConfig::Ims::KEY_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR_BOOL);
+    m_objSession.bIgnoreSubsequentSdpAnswerInPreviewMode = piCc->GetBoolean(
+            CarrierConfig::ImsVoice::KEY_IGNORE_SUBSEQUENT_SDP_ANSWER_IN_PREVIEW_MODE_BOOL,
+            IMS_TRUE);
 
     m_bRespByAppForCapabilities = IMS_TRUE;
     m_bRespByAppForPageMessage = IMS_TRUE;
@@ -420,7 +436,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
             }
             else
             {
-                ICarrierConfig* piCc = GetCarrierConfig();
+                const ICarrierConfig* piCc = GetCarrierConfig();
                 m_strServiceVersion =
                         piCc->GetString(CarrierConfig::Ims::KEY_IMS_USER_AGENT_STRING);
             }
@@ -519,7 +535,7 @@ IMS_BOOL SipConfigV::GetTimerValueForUpdate(IN const IMS_CHAR* pszKey, IN IMS_SI
     }
     else
     {
-        ICarrierConfig* piCc = GetCarrierConfig();
+        const ICarrierConfig* piCc = GetCarrierConfig();
         nTimerValue = piCc->GetInt(pszKey, nDefaultValue);
     }
 
@@ -536,7 +552,7 @@ void SipConfigV::UpdateAllConfigs()
 }
 
 PRIVATE GLOBAL IMS_SINT32 SipConfigV::GetTimerValue(
-        IN ICarrierConfig* piCc, IN const IMS_CHAR* pszKey, IN IMS_SINT32 nDefaultValue)
+        IN const ICarrierConfig* piCc, IN const IMS_CHAR* pszKey, IN IMS_SINT32 nDefaultValue)
 {
     IMS_SINT32 nTimerValue = piCc->GetInt(pszKey, nDefaultValue);
 

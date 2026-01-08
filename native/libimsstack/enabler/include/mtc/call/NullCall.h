@@ -17,17 +17,17 @@
 #ifndef NULL_CALL_H_
 #define NULL_CALL_H_
 
-#include "ImsList.h"
+#include "AString.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "call/IMtcCall.h"
 
-class AString;
 class ISession;
 class SuppService;
 struct CallReasonInfo;
 struct ConfUser;
 struct MediaInfo;
+template <class T>
+class ImsList;
 
 /**
  * This class represents the call that doesn't exist. It has no states and basically does nothing.
@@ -36,19 +36,19 @@ class NullCall final : public IMtcCall
 {
 public:
     NullCall() {}
-    virtual ~NullCall() {}
+    virtual ~NullCall() override {}
     NullCall(IN const NullCall&) = delete;
     NullCall& operator=(IN const NullCall&) = delete;
 
     inline void Attach() override {}
 
-    inline void Start(IN CallType, IN const AString&, IN MediaInfo&,
-            IN const ImsMap<SuppType, SuppService*>&) override
+    inline void Start(
+            IN CallType, IN const AString&, IN MediaInfo&, IN const ImsList<SuppService*>&) override
     {
     }
 
     inline void StartConference(IN CallType, IN const AString&, IN MediaInfo&,
-            IN const ImsMap<SuppType, SuppService*>&, IN const ImsList<ConfUser*>&) override
+            IN const ImsList<SuppService*>&, IN const ImsList<ConfUser*>&) override
     {
     }
     inline void StartConference(
@@ -69,6 +69,11 @@ public:
     inline void CancelUpdate(IN const CallReasonInfo&) override {}
     inline void Terminate(IN const CallReasonInfo&) override {}
     inline void SendUssd(IN const AString&) override {}
+    inline const AString& GetLogTag() const override
+    {
+        static const AString sLogTag("Null_Call");
+        return sLogTag;
+    }
 
     inline CallKey GetKey() const override { return CALL_KEY_INVALID; }
     inline CallType GetCallType() const override { return CallType::UNKNOWN; }

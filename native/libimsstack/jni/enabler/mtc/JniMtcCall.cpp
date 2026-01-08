@@ -20,7 +20,10 @@
 #include "IJniEnablerThread.h"
 #include "IMtcCallController.h"
 #include "INativeEnabler.h"
+#include "IThread.h"
+#include "ImsList.h"
 #include "ImsProcess.h"
+#include "IuMtcCall.h"
 #include "IuMtcService.h"
 #include "JniEnablerConnector.h"
 #include "JniMediaSession.h"
@@ -37,7 +40,6 @@ JniMtcCall::JniMtcCall(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nS
         BaseService(nSlotId),
         m_pThread(IMS_NULL),
         m_pfnSendDataToJava(pfnSendDataToJava),
-        m_objCallController(GetCallController()),
         m_nCallKey(IMtcCall::CALL_KEY_INVALID),
         m_pJniMediaSession(IMS_NULL)
 {
@@ -47,7 +49,7 @@ JniMtcCall::JniMtcCall(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nS
 
 JniMtcCall::~JniMtcCall()
 {
-    IMS_TRACE_D("~JniMtcCall", 0, 0, 0);
+    IMS_TRACE_D("~JniMtcCall CallKey[%d]", m_nCallKey, 0, 0);
 
     JniEnablerConnector::GetInstance().SetJniEnabler(
             GetSlotId(), EnablerType::MTC_CALL, IMS_NULL, m_nCallKey);
@@ -56,6 +58,22 @@ JniMtcCall::~JniMtcCall()
         ImsProcess::GetInstance()->UnloadAppThread(m_pThread->GetName());
     }
     delete m_pJniMediaSession;
+
+    IMtcCallController* piCallController = GetCallController();
+    if (piCallController)
+    {
+        piCallController->Detach(m_nCallKey);
+    }
+}
+
+PUBLIC VIRTUAL void JniMtcCall::Destroy()
+{
+    IMS_TRACE_D("Destroy", 0, 0, 0);
+    ImsMessage objMsg(MSG_DESTROY, 0, 0, this);
+    IThread* piThread = ImsProcess::GetInstance()
+                                ->GetThread(EnablerUtils::GetEnablerThreadName(m_nSlotId))
+                                ->GetThread();
+    piThread->PostMessageI(objMsg);
 }
 
 PUBLIC VIRTUAL int JniMtcCall::SendData(IN const android::Parcel& objParcel)
@@ -116,99 +134,107 @@ PUBLIC VIRTUAL IJniEnablerThread* JniMtcCall::GetJniThread() const
 PROTECTED VIRTUAL void JniMtcCall::HandleMessage(
         IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
 {
-    IMS_TRACE_D("HandleCallMessage() Message=[%d]", nMsg, 0, 0);
-
+    IMS_TRACE_D("HandleCallMessage() CallKey[%d] Message=[%d]", m_nCallKey, nMsg, 0);
+    IMtcCallController* piCallController = GetCallController();
+    if (!piCallController)
+    {
+        IMS_TRACE_E(0, "INativeEnabler for MTC_CALL is null", 0, 0, 0);
+        return;
+    }
     switch (nMsg)
     {
         case IuMtcCall::OPEN:
-            Open(objParcel);
+            Open(*piCallController, objParcel);
             break;
 
         case IuMtcCall::ATTACH:
-            Attach(objParcel);
+            Attach(*piCallController, objParcel);
             break;
 
         case IuMtcCall::START:
-            Start(objParcel);
+            Start(*piCallController, objParcel);
             break;
 
         case IuMtcCall::USER_ALERT:
-            OnUserAlert(objParcel);
+            OnUserAlert(*piCallController, objParcel);
             break;
 
         case IuMtcCall::ACCEPT:
-            Accept(objParcel);
+            Accept(*piCallController, objParcel);
             break;
 
         case IuMtcCall::REJECT:
-            Reject(objParcel);
+            Reject(*piCallController, objParcel);
             break;
 
         case IuMtcCall::HOLD:
-            Hold(objParcel);
+            Hold(*piCallController, objParcel);
             break;
 
         case IuMtcCall::RESUME:
-            Resume(objParcel);
+            Resume(*piCallController, objParcel);
             break;
 
         case IuMtcCall::TERMINATE:
-            Terminate(objParcel);
+            Terminate(*piCallController, objParcel);
             break;
 
         case IuMtcCall::UPDATE:
-            Update(objParcel);
+            Update(*piCallController, objParcel);
             break;
 
         case IuMtcCall::ACCEPT_UPDATE:
-            AcceptUpdate(objParcel);
+            AcceptUpdate(*piCallController, objParcel);
             break;
 
         case IuMtcCall::REJECT_UPDATE:
-            RejectUpdate(objParcel);
+            RejectUpdate(*piCallController, objParcel);
             break;
 
         case IuMtcCall::CANCEL_UPDATE:
-            CancelUpdate(objParcel);
+            CancelUpdate(*piCallController, objParcel);
             break;
 
         case IuMtcCall::ACCEPT_RESUME:
-            AcceptResume(objParcel);
+            AcceptResume(*piCallController, objParcel);
             break;
 
         case IuMtcCall::REJECT_RESUME:
-            RejectResume(objParcel);
+            RejectResume(*piCallController, objParcel);
             break;
 
         case IuMtcCall::SEND_USSD:
-            SendUssd(objParcel);
+            SendUssd(*piCallController, objParcel);
             break;
 
         case IuMtcCall::STARTCONF:
-            StartGroupCall(objParcel);
+            StartGroupCall(*piCallController, objParcel);
             break;
 
         case IuMtcCall::CONF_MERGE:
-            MergeToConference(objParcel);
+            MergeToConference(*piCallController, objParcel);
             break;
 
         case IuMtcCall::CONF_EXPAND:
-            ExpandToConference(objParcel);
+            ExpandToConference(*piCallController, objParcel);
             break;
 
         case IuMtcCall::CONF_JOIN:
-            AddToConference(objParcel);
+            AddToConference(*piCallController, objParcel);
             break;
 
         case IuMtcCall::CONF_DROP:
-            RemoveFromConference(objParcel);
+            RemoveFromConference(*piCallController, objParcel);
             break;
+
         case IuMtcCall::ECT_START:
-            Transfer();
+            Transfer(*piCallController);
             break;
+
         case IuMtcCall::ECT_START_BLIND:
-            TransferWithNumber(objParcel);
+            TransferWithNumber(*piCallController, objParcel);
             break;
+
         default:
             break;
     }
@@ -226,64 +252,61 @@ PROTECTED VIRTUAL IMS_BOOL JniMtcCall::IsThreadSwitchingRequired(IN IMS_SINT32 n
 }
 
 PRIVATE
-IMtcCallController& JniMtcCall::GetCallController()
-{
-    INativeEnabler* piNativeEnabler =
-            JniEnablerConnector::GetInstance().GetNativeEnabler(GetSlotId(), EnablerType::MTC_CALL);
-    return DYNAMIC_CAST(IMtcCallController&, *piNativeEnabler);
-}
-
-PRIVATE
-void JniMtcCall::Attach()
+void JniMtcCall::Attach(IN IMtcCallController& objCallController)
 {
     IMS_TRACE_D("Attach Key[%d]", m_nCallKey, 0, 0);
 
     JniEnablerConnector::GetInstance().SetJniEnabler(
             GetSlotId(), EnablerType::MTC_CALL, this, m_nCallKey);
 
-    // TODO: create JniMediaSession in Java thread? Currently, it's done in Enabler thread.
     m_pJniMediaSession = new JniMediaSession(
             m_pfnSendDataToJava, GetSlotId(), m_nCallKey, reinterpret_cast<IMS_SINTP>(this));
-    m_objCallController.Attach(m_nCallKey);
+    objCallController.Attach(m_nCallKey);
 }
 
 PRIVATE
-void JniMtcCall::Attach(IN const android::Parcel& objParcel)
+void JniMtcCall::Attach(
+        IN IMtcCallController& objCallController, IN const android::Parcel& objParcel)
 {
     m_nCallKey = objParcel.readInt64();
 
     IMS_TRACE_D("Attach for incoming call case Key[%d]", m_nCallKey, 0, 0);
-    Attach();
+    Attach(objCallController);
 }
 
 PRIVATE
-void JniMtcCall::Open(IN const android::Parcel& objParcel)
+void JniMtcCall::Open(IN IMtcCallController& objCallController, IN const android::Parcel& objParcel)
 {
     IMS_TRACE_D("Open Key[%d]", m_nCallKey, 0, 0);
 
-    ServiceType eServiceType = JniMtcUtils::ReadServiceType(objParcel);
-    JniCallInfo objJniCallInfo = JniMtcUtils::ReadCallInfo(objParcel);
+    const ServiceType eServiceType = JniMtcUtils::ReadServiceType(objParcel);
+    const JniCallInfo objJniCallInfo = JniMtcUtils::ReadCallInfo(objParcel);
+    AString strLogTag;
+    JniMtcUtils::ConvertString(objParcel.readString16(), strLogTag);
 
     CallInfo objCallInfo;
-    objCallInfo.bEmergency = objJniCallInfo.bEmergency;
+    objCallInfo.eInitialCallType = objJniCallInfo.eCallType;
+    objCallInfo.eEmergencyType = objJniCallInfo.eEmergencyType;
     objCallInfo.bOffline = objJniCallInfo.bOffline;
     objCallInfo.bUssi = objJniCallInfo.bUssi;
 
-    m_nCallKey = m_objCallController.Open(eServiceType, objCallInfo);
+    m_nCallKey = objCallController.Open(eServiceType, objCallInfo, strLogTag);
+
     if (m_nCallKey != IMtcCall::CALL_KEY_INVALID)
     {
-        Attach();
+        Attach(objCallController);
     }
 }
 
 PRIVATE
-void JniMtcCall::Start(IN const android::Parcel& objParcel)
+void JniMtcCall::Start(
+        IN IMtcCallController& objCallController, IN const android::Parcel& objParcel)
 {
     if (m_nCallKey == IMtcCall::CALL_KEY_INVALID)
     {
-        IMS_TRACE_E(0, "Invalid call key. Try CSFB.", 0, 0, 0);
+        IMS_TRACE_E(0, "Invalid call key.", 0, 0, 0);
         return m_pThread->OnStartFailed(CallReasonInfo(
-                CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
+                CODE_LOCAL_INTERNAL_ERROR, EXTRA_CODE_INTERNAL_ERROR_INVALID_CALL_KEY));
     }
 
     CallType eCallType = JniMtcUtils::ReadCallType(objParcel);
@@ -291,104 +314,116 @@ void JniMtcCall::Start(IN const android::Parcel& objParcel)
     AString strTarget;
     JniMtcUtils::ConvertString(objParcel.readString16(), strTarget);
     MediaInfo objMediaInfo = JniMtcUtils::ReadMediaInfo(objParcel, objMediaInfo);
-    ImsMap<SuppType, SuppService*> objSuppService =
-            JniMtcUtils::ReadSupplementaryService(objParcel);
+    ImsList<SuppService*> objSuppServices = JniMtcUtils::ReadSupplementaryService(objParcel);
 
-    m_objCallController.Start(m_nCallKey, eCallType, strTarget, objMediaInfo, objSuppService);
+    objCallController.Start(m_nCallKey, eCallType, strTarget, objMediaInfo, objSuppServices);
 }
 
 PRIVATE
-void JniMtcCall::OnUserAlert(IN const android::Parcel& /*objParcel*/)
+void JniMtcCall::OnUserAlert(
+        IN IMtcCallController& objCallController, IN const android::Parcel& /*objParcel*/)
 {
-    m_objCallController.HandleUserAlert(m_nCallKey);
+    objCallController.HandleUserAlert(m_nCallKey);
 }
 
 PRIVATE
-void JniMtcCall::Accept(IN const android::Parcel& objParcel)
+void JniMtcCall::Accept(
+        IN IMtcCallController& objCallController, IN const android::Parcel& objParcel)
 {
     MediaInfo objMediaInfo;
-    m_objCallController.Accept(m_nCallKey, JniMtcUtils::ReadCallType(objParcel),
+    objCallController.Accept(m_nCallKey, JniMtcUtils::ReadCallType(objParcel),
             JniMtcUtils::ReadMediaInfo(objParcel, objMediaInfo));
 }
 
 PRIVATE
-void JniMtcCall::Reject(IN const android::Parcel& objParcel)
+void JniMtcCall::Reject(
+        IN IMtcCallController& objCallController, IN const android::Parcel& objParcel)
 {
-    m_objCallController.Reject(m_nCallKey, CallReasonInfo(objParcel.readInt32()));
+    objCallController.Reject(m_nCallKey, CallReasonInfo(objParcel.readInt32()));
 }
 
 PRIVATE
-void JniMtcCall::Hold(IN const android::Parcel& objParcel)
+void JniMtcCall::Hold(IN IMtcCallController& objCallController, IN const android::Parcel& objParcel)
 {
     MediaInfo objMediaInfo;
-    m_objCallController.Hold(m_nCallKey, JniMtcUtils::ReadMediaInfo(objParcel, objMediaInfo));
+    objCallController.Hold(m_nCallKey, JniMtcUtils::ReadMediaInfo(objParcel, objMediaInfo));
 }
 
 PRIVATE
-void JniMtcCall::Resume(IN const android::Parcel& objParcel)
+void JniMtcCall::Resume(
+        IN IMtcCallController& objCallController, IN const android::Parcel& objParcel)
 {
     MediaInfo objMediaInfo;
-    m_objCallController.Resume(m_nCallKey, JniMtcUtils::ReadMediaInfo(objParcel, objMediaInfo));
+    objCallController.Resume(m_nCallKey, JniMtcUtils::ReadMediaInfo(objParcel, objMediaInfo));
 }
 
 PRIVATE
-void JniMtcCall::Terminate(IN const android::Parcel& objParcel)
+void JniMtcCall::Terminate(
+        IN IMtcCallController& objCallController, IN const android::Parcel& objParcel)
 {
-    m_objCallController.Terminate(m_nCallKey, CallReasonInfo(objParcel.readInt32(), -1));
+    objCallController.Terminate(m_nCallKey, CallReasonInfo(objParcel.readInt32(), -1));
 }
 
 PRIVATE
-void JniMtcCall::Update(IN const android::Parcel& objParcel)
+void JniMtcCall::Update(
+        IN IMtcCallController& objCallController, IN const android::Parcel& objParcel)
 {
     MediaInfo objMediaInfo;
-    m_objCallController.Update(m_nCallKey, JniMtcUtils::ReadCallType(objParcel),
+    objCallController.Update(m_nCallKey, JniMtcUtils::ReadCallType(objParcel),
             JniMtcUtils::ReadMediaInfo(objParcel, objMediaInfo));
 }
 
 PRIVATE
-void JniMtcCall::AcceptUpdate(IN const android::Parcel& objParcel)
+void JniMtcCall::AcceptUpdate(
+        IN IMtcCallController& objCallController, IN const android::Parcel& objParcel)
 {
     MediaInfo objMediaInfo;
-    m_objCallController.AcceptUpdate(m_nCallKey, JniMtcUtils::ReadCallType(objParcel),
+    objCallController.AcceptUpdate(m_nCallKey, JniMtcUtils::ReadCallType(objParcel),
             JniMtcUtils::ReadMediaInfo(objParcel, objMediaInfo));
 }
 
 PRIVATE
-void JniMtcCall::RejectUpdate(IN const android::Parcel& objParcel)
+void JniMtcCall::RejectUpdate(
+        IN IMtcCallController& objCallController, IN const android::Parcel& objParcel)
 {
-    m_objCallController.RejectUpdate(m_nCallKey, CallReasonInfo(objParcel.readInt32()));
+    objCallController.RejectUpdate(m_nCallKey, CallReasonInfo(objParcel.readInt32()));
 }
 
 PRIVATE
-void JniMtcCall::CancelUpdate(IN const android::Parcel& objParcel)
+void JniMtcCall::CancelUpdate(
+        IN IMtcCallController& objCallController, IN const android::Parcel& objParcel)
 {
-    m_objCallController.CancelUpdate(m_nCallKey, CallReasonInfo(objParcel.readInt32()));
+    objCallController.CancelUpdate(m_nCallKey, CallReasonInfo(objParcel.readInt32()));
 }
 
 PRIVATE
-void JniMtcCall::AcceptResume(IN const android::Parcel& objParcel)
+void JniMtcCall::AcceptResume(
+        IN IMtcCallController& objCallController, IN const android::Parcel& objParcel)
 {
     MediaInfo objMediaInfo;
-    m_objCallController.AcceptResume(m_nCallKey, JniMtcUtils::ReadCallType(objParcel),
+    objCallController.AcceptResume(m_nCallKey, JniMtcUtils::ReadCallType(objParcel),
             JniMtcUtils::ReadMediaInfo(objParcel, objMediaInfo));
 }
 
 PRIVATE
-void JniMtcCall::RejectResume(IN const android::Parcel& objParcel)
+void JniMtcCall::RejectResume(
+        IN IMtcCallController& objCallController, IN const android::Parcel& objParcel)
 {
-    m_objCallController.RejectResume(m_nCallKey, CallReasonInfo(objParcel.readInt32()));
+    objCallController.RejectResume(m_nCallKey, CallReasonInfo(objParcel.readInt32()));
 }
 
 PRIVATE
-void JniMtcCall::SendUssd(IN const android::Parcel& objParcel)
+void JniMtcCall::SendUssd(
+        IN IMtcCallController& objCallController, IN const android::Parcel& objParcel)
 {
     android::String8 str8(objParcel.readString16());
     AString strUssd = str8.c_str();
-    m_objCallController.SendUssd(m_nCallKey, strUssd);
+    objCallController.SendUssd(m_nCallKey, strUssd);
 }
 
 PRIVATE
-void JniMtcCall::StartGroupCall(IN const android::Parcel& /*objParcel*/)
+void JniMtcCall::StartGroupCall(
+        IN IMtcCallController& /*objCallController*/, IN const android::Parcel& /*objParcel*/)
 {
     /*
     if (m_nCallKey != IMtcCall::CALL_KEY_INVALID)
@@ -401,45 +436,48 @@ void JniMtcCall::StartGroupCall(IN const android::Parcel& /*objParcel*/)
     AString strTarget;
     JniMtcUtils::ConvertString(objParcel.readString16(), strTarget);
     MediaInfo* pMediaInfo = JniMtcUtils::ReadMediaInfo(objParcel);
-    ImsMap<SuppType, SuppService*> objSuppService = JniMtcUtils::ReadSupplementaryService(
+    ImsList<SuppService*> objSuppServices = JniMtcUtils::ReadSupplementaryService(
             objParcel);
 
-    m_objCallController.StartGroupCall(m_nCallKey, eCallType, strTarget,
-            pMediaInfo, objSuppService);
+    objCallController.StartGroupCall(m_nCallKey, eCallType, strTarget,
+            pMediaInfo, objSuppServices);
     */
 }
 
 PRIVATE
-void JniMtcCall::MergeToConference(IN const android::Parcel& objParcel)
+void JniMtcCall::MergeToConference(
+        IN IMtcCallController& objCallController, IN const android::Parcel& objParcel)
 {
-    // TODO: delete pointers after function call.
     ImsList<ConfUser*> objUsers = JniMtcUtils::ReadConferenceParticipants(objParcel);
     for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
     {
         IMS_TRACE_D("MergeToConference connectionId=[%d]", objUsers.GetAt(i)->nConnectionId, 0, 0);
     }
-    m_objCallController.MergeToConference(m_nCallKey, objUsers);
+    objCallController.MergeToConference(m_nCallKey, objUsers);
 }
 
 PRIVATE
-void JniMtcCall::ExpandToConference(IN const android::Parcel& /*objParcel*/)
+void JniMtcCall::ExpandToConference(
+        IN IMtcCallController& /*objCallController*/, IN const android::Parcel& /*objParcel*/)
 {
-    // m_objCallController.ExpandToConference(m_nCallKey, ReadConferenceParticipants(objParcel));
+    // objCallController.ExpandToConference(m_nCallKey, ReadConferenceParticipants(objParcel));
 }
 
 PRIVATE
-void JniMtcCall::AddToConference(IN const android::Parcel& objParcel)
+void JniMtcCall::AddToConference(
+        IN IMtcCallController& objCallController, IN const android::Parcel& objParcel)
 {
     ImsList<ConfUser*> objUsers = JniMtcUtils::ReadConferenceParticipants(objParcel);
     for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
     {
         IMS_TRACE_D("AddToConference nConnectionId=[%d]", objUsers.GetAt(i)->nConnectionId, 0, 0);
     }
-    m_objCallController.AddToConference(m_nCallKey, objUsers);
+    objCallController.AddToConference(m_nCallKey, objUsers);
 }
 
 PRIVATE
-void JniMtcCall::RemoveFromConference(IN const android::Parcel& objParcel)
+void JniMtcCall::RemoveFromConference(
+        IN IMtcCallController& objCallController, IN const android::Parcel& objParcel)
 {
     ImsList<ConfUser*> objUsers = JniMtcUtils::ReadConferenceParticipants(objParcel);
     for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
@@ -447,19 +485,28 @@ void JniMtcCall::RemoveFromConference(IN const android::Parcel& objParcel)
         IMS_TRACE_D(
                 "RemoveFromConference nConnectionId=[%d]", objUsers.GetAt(i)->nConnectionId, 0, 0);
     }
-    m_objCallController.RemoveFromConference(m_nCallKey, objUsers);
+    objCallController.RemoveFromConference(m_nCallKey, objUsers);
 }
 
 PRIVATE
-void JniMtcCall::Transfer()
+void JniMtcCall::Transfer(IN IMtcCallController& objCallController)
 {
-    m_objCallController.Transfer(m_nCallKey, AString::ConstNull());
+    objCallController.Transfer(m_nCallKey, AString::ConstNull());
 }
 
 PRIVATE
-void JniMtcCall::TransferWithNumber(IN const android::Parcel& objParcel)
+void JniMtcCall::TransferWithNumber(
+        IN IMtcCallController& objCallController, IN const android::Parcel& objParcel)
 {
     AString strTarget;
     JniMtcUtils::ConvertString(objParcel.readString16(), strTarget);
-    m_objCallController.Transfer(m_nCallKey, strTarget);
+    objCallController.Transfer(m_nCallKey, strTarget);
+}
+
+PRIVATE
+IMtcCallController* JniMtcCall::GetCallController() const
+{
+    return DYNAMIC_CAST(IMtcCallController*,
+            JniEnablerConnector::GetInstance().GetNativeEnabler(
+                    GetSlotId(), EnablerType::MTC_CALL));
 }

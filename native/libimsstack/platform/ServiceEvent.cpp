@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "IEventListener.h"
 #include "IEventReceiver.h"
+#include "IEventReceiverListener.h"
 #include "IEventSender.h"
+#include "IOsFactory.h"
 #include "ImsActivity.h"
 #include "ImsMap.h"
 #include "ImsMessageDef.h"
@@ -32,7 +35,7 @@ class EventActivity : public ImsActivity
 {
 public:
     EventActivity(IN IMS_SINT32 nEvent, IN IEventListener* piListener);
-    virtual ~EventActivity();
+    ~EventActivity() override;
 
     EventActivity(IN const EventActivity&) = delete;
     EventActivity& operator=(IN const EventActivity&) = delete;
@@ -106,7 +109,7 @@ class EventHolder : public IEventReceiverListener
 {
 public:
     explicit EventHolder(IN IMS_SINT32 nSlotId);
-    virtual ~EventHolder();
+    ~EventHolder() override;
 
     EventHolder(IN const EventHolder&) = delete;
     EventHolder& operator=(IN const EventHolder&) = delete;

@@ -15,6 +15,8 @@
  */
 #include <gtest/gtest.h>
 
+#include "AString.h"
+
 #include "SdpLine.h"
 
 namespace android
@@ -27,13 +29,13 @@ public:
             SdpLine()
     {
     }
-    inline ~TestSdpLine() {}
+    ~TestSdpLine() override = default;
 };
 
 class SdpLineTest : public ::testing::Test
 {
 public:
-    inline SdpLineTest() {}
+    SdpLineTest() = default;
 
 protected:
     TestSdpLine m_objSdpLine;

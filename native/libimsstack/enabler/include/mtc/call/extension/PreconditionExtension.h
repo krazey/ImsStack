@@ -31,7 +31,7 @@ class PreconditionExtension final : public MtcExtension
 public:
     explicit PreconditionExtension(IN IMtcCallContext& objContext);
     PreconditionExtension(IN const PreconditionExtension& objRhs);
-    virtual ~PreconditionExtension();
+    virtual ~PreconditionExtension() override;
     PreconditionExtension& operator=(IN const PreconditionExtension&) = delete;
 
     IMtcExtension* Clone() const override;
@@ -40,6 +40,10 @@ public:
     void FormatResponse(IN ResponseType eType, IN_OUT IMessage& objResponse) override;
     void HandleRequest(IN RequestType eType, IN const IMessage& objRequest) override;
     void HandleResponse(IN ResponseType eType, IN const IMessage& objResponse) override;
+
+private:
+    IMS_BOOL IsRequestIncludingOffer() const;
+    IMS_BOOL HasSdpWithPrecondition(IN const IMessage& objMessage) const;
 };
 
 #endif

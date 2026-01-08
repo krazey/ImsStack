@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 #include "IpAddress.h"
-#include "msg/SipAddrSpec.h"
-#include "platform/SipString.h"
 #include "SipDebug.h"
+#include "msg/SipAddrSpec.h"
 #include "msg/SipMsgUtil.h"
-
-#define SIP_SIP_ENC  "sip:"
-#define SIP_SIPS_ENC "sips:"
+#include "msg/SipParameters.h"
+#include "msg/SipPercentEncoding.h"
+#include "platform/SipString.h"
 
 SipUri::SipUri() :
         m_pszUser(SIP_NULL),
@@ -28,8 +27,8 @@ SipUri::SipUri() :
         m_pszHost(SIP_NULL),
         m_nPort(SIP_ZERO),
         m_eHostType(SipAddrSpec::HOST_NAME),
-        m_pUriParamList(SIP_NULL),
-        m_pUriHdrParamList(SIP_NULL)
+        m_pUriParams(SIP_NULL),
+        m_pUriHdrParams(SIP_NULL)
 {
 }
 
@@ -40,17 +39,17 @@ SipUri::SipUri(const SipUri& objSipUri) :
         m_pszHost(SipPf_Strdup(objSipUri.m_pszHost)),
         m_nPort(objSipUri.m_nPort),
         m_eHostType(objSipUri.m_eHostType),
-        m_pUriParamList(SIP_NULL),
-        m_pUriHdrParamList(SIP_NULL)
+        m_pUriParams(SIP_NULL),
+        m_pUriHdrParams(SIP_NULL)
 {
-    if (objSipUri.m_pUriParamList != SIP_NULL)
+    if (objSipUri.m_pUriParams != SIP_NULL)
     {
-        m_pUriParamList = new SipParameterList(*(objSipUri.m_pUriParamList));
+        m_pUriParams = new SipParameters(*(objSipUri.m_pUriParams));
     }
 
-    if (objSipUri.m_pUriHdrParamList != SIP_NULL)
+    if (objSipUri.m_pUriHdrParams != SIP_NULL)
     {
-        m_pUriHdrParamList = new SipParameterList(*(objSipUri.m_pUriHdrParamList));
+        m_pUriHdrParams = new SipParameters(*(objSipUri.m_pUriHdrParams));
     }
 }
 
@@ -70,14 +69,14 @@ SipUri::~SipUri()
         delete[] m_pszHost;
     }
     /*List of obj of CSipNameValue*/
-    if (m_pUriParamList != SIP_NULL)
+    if (m_pUriParams != SIP_NULL)
     {
-        m_pUriParamList->SipDelete();
+        delete m_pUriParams;
     }
     /*List of obj of CSipNameValue*/
-    if (m_pUriHdrParamList != SIP_NULL)
+    if (m_pUriHdrParams != SIP_NULL)
     {
-        m_pUriHdrParamList->SipDelete();
+        delete m_pUriHdrParams;
     }
 }
 
@@ -102,48 +101,22 @@ SIP_BOOL SipUri::IsValidComponent(const SIP_CHAR* pszComponent) const
     return SIP_FALSE;
 }
 
-SIP_BOOL SipUri::SetUser(const SIP_CHAR* pszUser)
+SIP_VOID SipUri::SetUser(const SIP_CHAR* pszUser)
 {
-    return SetCharVar(pszUser, m_pszUser);
+    SipMsgUtil::SetValue(pszUser, m_pszUser);
 }
 
-SIP_BOOL SipUri::SetPassword(const SIP_CHAR* pszPass)
+SIP_VOID SipUri::SetPassword(const SIP_CHAR* pszPass)
 {
-    return SetCharVar(pszPass, m_pszPassword);
-}
-
-SipParameterList* SipUri::GetUriParamList()
-{
-    if (m_pUriParamList != SIP_NULL)
-    {
-        m_pUriParamList->Increment();
-    }
-    return m_pUriParamList;
-}
-
-SipParameterList* SipUri::GetHdrParamList()
-{
-    if (m_pUriHdrParamList != SIP_NULL)
-    {
-        m_pUriHdrParamList->Increment();
-    }
-    return m_pUriHdrParamList;
-}
-
-SIP_BOOL SipUri::RemoveHdrParam(const SIP_CHAR* pszName)
-{
-    if (m_pUriHdrParamList != SIP_NULL)
-    {
-        return m_pUriHdrParamList->Remove(pszName);
-    }
-    return SIP_FALSE;
+    SipMsgUtil::SetValue(pszPass, m_pszPassword);
 }
 
 SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
 {
     if (m_pszUser != SIP_NULL)
     {
-        SIP_CHAR* pszTempUser = SipPercentEncoding::DoPerEnc_UserAndHeader(m_pszUser, SIP_USER);
+        SIP_CHAR* pszTempUser =
+                SipPercentEncoding::DoPercentEncoding_UserAndHeader(m_pszUser, SIP_USER);
         objBuffer += pszTempUser;
         delete[] pszTempUser;
 
@@ -151,7 +124,8 @@ SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
         {
             objBuffer += COLON;
 
-            SIP_CHAR* pszTempPassword = SipPercentEncoding::DoPerEnc_Password(m_pszPassword);
+            SIP_CHAR* pszTempPassword =
+                    SipPercentEncoding::DoPercentEncoding_Password(m_pszPassword);
             objBuffer += pszTempPassword;
             delete[] pszTempPassword;
         }
@@ -169,7 +143,7 @@ SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
         }
         else
         {
-            SIP_CHAR* pszTempHost = SipPercentEncoding::DoPerEnc_Host(m_pszHost);
+            SIP_CHAR* pszTempHost = SipPercentEncoding::DoPercentEncoding_Host(m_pszHost);
             objBuffer += pszTempHost;
             delete[] pszTempHost;
         }
@@ -187,19 +161,17 @@ SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
         return SIP_FALSE;
     }
 
-    if ((bParams == SIP_TRUE) && (m_pUriParamList != SIP_NULL))
+    if ((bParams == SIP_TRUE) && (m_pUriParams != SIP_NULL))
     {
         const_cast<SipUri*>(this)->SetComponentType(IParameterComponent::URI);
-        m_pUriParamList->Encode(objBuffer, SIP_SEMI,
+        m_pUriParams->Encode(objBuffer, SIP_SEMI,
                 const_cast<IParameterComponent*>(static_cast<const IParameterComponent*>(this)));
     }
 
     // "?"   header   *( "&"   header )
-    if (m_pUriHdrParamList != SIP_NULL)
+    if (m_pUriHdrParams != SIP_NULL)
     {
-        SipVector<SipNameValue*>& objHeaders = m_pUriHdrParamList->GetList();
-
-        if (objHeaders.IsEmpty() == SIP_TRUE)
+        if (m_pUriHdrParams->GetParamCount() == 0)
         {
             SIP_DEBUG_WARNING(
                     ESIPTRACE_MODENCODER, "Encode: No URI header parameters", SIP_ZERO, SIP_ZERO);
@@ -208,15 +180,15 @@ SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
 
         objBuffer += QMARK;
 
-        SIP_UINT32 nSize = objHeaders.GetSize();
+        SIP_UINT32 nSize = m_pUriHdrParams->GetParamCount();
 
-        for (SIP_UINT32 i = SIP_ZERO; i < nSize; i++)
+        for (SIP_UINT32 nIndex = SIP_ZERO; nIndex < nSize; nIndex++)
         {
-            SipNameValue* pNameValue = objHeaders.GetAt(i);
+            const SipNameValue* pNameValue = m_pUriHdrParams->GetParam(nIndex);
 
             if (pNameValue != SIP_NULL)
             {
-                if (i != SIP_ZERO)
+                if (nIndex != SIP_ZERO)
                 {
                     objBuffer += AMPERSAND;
                 }
@@ -233,32 +205,29 @@ SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
     return SIP_TRUE;
 }
 
-#define MAX_PORT_LEN 20
-SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
+SIP_BOOL SipUri::Encode(SIP_CHAR** ppCurrPos)
 {
     /* encoding of user info
        userinfo = ( user / telephone-subscriber ) [ ":" password ] "@"  */
     if (m_pszUser != SIP_NULL)
     {
-        SIP_CHAR* pszTempUser = SipPercentEncoding::DoPerEnc_UserAndHeader(m_pszUser, SIP_USER);
-        SipPf_Strcpy(*ppCurrPos, pszTempUser);
+        SIP_CHAR* pszTempUser =
+                SipPercentEncoding::DoPercentEncoding_UserAndHeader(m_pszUser, SIP_USER);
+        SipAbnfUtil::Append(*ppCurrPos, pszTempUser);
         delete[] pszTempUser;
-
-        SipEnc_UpdateCurrPos(ppCurrPos);
 
         if (m_pszPassword != SIP_NULL)
         {
             /*encode the password*/
-            SIP_ENC_COLON(*ppCurrPos);
+            SipMsgUtil::Encode(*ppCurrPos, COLON);
 
-            SIP_CHAR* pszTempPassword = SipPercentEncoding::DoPerEnc_Password(m_pszPassword);
-            SipPf_Strcpy(*ppCurrPos, pszTempPassword);
+            SIP_CHAR* pszTempPassword =
+                    SipPercentEncoding::DoPercentEncoding_Password(m_pszPassword);
+            SipAbnfUtil::Append(*ppCurrPos, pszTempPassword);
             delete[] pszTempPassword;
-
-            SipEnc_UpdateCurrPos(ppCurrPos);
         }
 
-        SIP_ENC_ATTHERATE(*ppCurrPos);
+        SipMsgUtil::Encode(*ppCurrPos, ATRATE);
     }
 
     /* encoding of host port
@@ -271,8 +240,7 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
             **ppCurrPos = LEFT_SQUARE;
             (*ppCurrPos)++;
 
-            SipPf_Strcpy(*ppCurrPos, m_pszHost);
-            SipEnc_UpdateCurrPos(ppCurrPos);
+            SipAbnfUtil::Append(*ppCurrPos, m_pszHost);
 
             **ppCurrPos = RIGHT_SQUARE;
             (*ppCurrPos)++;
@@ -280,69 +248,54 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
         /*Do Percent Encoding if Required*/
         else
         {
-            SIP_CHAR* pszTempHost = SipPercentEncoding::DoPerEnc_Host(m_pszHost);
-            SipPf_Strcpy(*ppCurrPos, pszTempHost);
-            SipEnc_UpdateCurrPos(ppCurrPos);
+            SIP_CHAR* pszTempHost = SipPercentEncoding::DoPercentEncoding_Host(m_pszHost);
+            SipAbnfUtil::Append(*ppCurrPos, pszTempHost);
             delete[] pszTempHost;
         }
 
         /*Encoding of Port*/
         if ((m_nPort != SIP_ZERO) && (m_nPort != SIP_UNSPECIFIED_PORT))
         {
-            // TODO Percent Encoding
-            SIP_CHAR szTmp[MAX_PORT_LEN];
-            memset(szTmp, 0x0, sizeof(szTmp));
-            SipPf_Sprintf(szTmp, "%u", m_nPort);
-
-            SIP_ENC_COLON(*ppCurrPos);
-
-            SipPf_Strcpy(*ppCurrPos, szTmp);
-            SipEnc_UpdateCurrPos(ppCurrPos);
+            SipMsgUtil::Encode(*ppCurrPos, COLON);
+            SipPf_Sprintf(*ppCurrPos, "%u", m_nPort);
+            SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
         }
     }
     else
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODENCODER, "EncodeSipUri: Host value Missing", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode: Host value Missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     /*encoding of URI params*/
-    if (m_pUriParamList != SIP_NULL)
+    if (m_pUriParams != SIP_NULL)
     {
         SetComponentType(IParameterComponent::URI);
-        m_pUriParamList->Encode(ppCurrPos, SIP_SEMI, static_cast<IParameterComponent*>(this));
+        m_pUriParams->Encode(ppCurrPos, SIP_SEMI, static_cast<IParameterComponent*>(this));
     }
 
     /*encoding of Hdr params*/
     // "?"   header   *( "&"   header )
-    if (m_pUriHdrParamList != SIP_NULL)
+    if ((m_pUriHdrParams != SIP_NULL) && (m_pUriHdrParams->GetParamCount() != 0))
     {
         SetComponentType(IParameterComponent::HEADER);
 
-        SipVector<SipNameValue*>& sipList = m_pUriHdrParamList->GetList();
-        if (sipList.IsEmpty() == SIP_TRUE)
-        {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "EncodeSipUri: Empty list", SIP_ZERO, SIP_ZERO);
-            return SIP_FALSE;
-        }
-
         /*Put a QUESTION MARK*/
-        SIP_ENC_QMARK(*ppCurrPos);
+        SipMsgUtil::Encode(*ppCurrPos, QMARK);
 
-        SIP_UINT32 nSize = sipList.GetSize();
+        SIP_UINT32 nSize = m_pUriHdrParams->GetParamCount();
 
-        for (SIP_UINT32 nCount = SIP_ZERO; nCount < nSize; nCount++)
+        for (SIP_UINT32 nIndex = SIP_ZERO; nIndex < nSize; nIndex++)
         {
-            SipNameValue* pParamNamValue = sipList.GetAt(nCount);
+            const SipNameValue* pNameValue = m_pUriHdrParams->GetParam(nIndex);
 
-            if (pParamNamValue != SIP_NULL)
+            if (pNameValue != SIP_NULL)
             {
-                if (nCount != SIP_ZERO)
+                if (nIndex != SIP_ZERO)
                 {
-                    SIP_ENC_AMPERSAND(*ppCurrPos);
+                    SipMsgUtil::Encode(*ppCurrPos, AMPERSAND);
                 }
-                pParamNamValue->Encode(ppCurrPos,
+                pNameValue->Encode(ppCurrPos,
                         const_cast<IParameterComponent*>(
                                 static_cast<const IParameterComponent*>(this)));
             }
@@ -353,19 +306,19 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
     return SIP_TRUE;
 }
 
-SIP_BOOL SipUri::DecUserInfo(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
+SIP_BOOL SipUri::DecodeUserInfo(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
 {
     /* check for userinfo = ( user / telephone-subscriber ) [ ":" password ] "@" */
 
-    SIP_CHAR* pTempPos = SIP_NULL;
+    const SIP_CHAR* pTempPos = SIP_NULL;
     /* Decode password part in userinfo */
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_TRUE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, COLON) == SIP_TRUE)
     {
-        SIP_CHAR* pPasswordStart = pTempPos + SIP_TWO;
-        SIP_CHAR* pszPassword = SipCreateString(pPasswordStart, pEndPt);
+        const SIP_CHAR* pPasswordStart = pTempPos + SIP_TWO;
+        SIP_CHAR* pszPassword = SipAbnfUtil::CreateString(pPasswordStart, pEndPt);
         if (pszPassword == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
@@ -375,10 +328,10 @@ SIP_BOOL SipUri::DecUserInfo(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
         pEndPt = pTempPos;
     }
     /* Decode ( user   /   telephone-subscriber ) part in userinfo */
-    SIP_CHAR* pszUser = SipCreateString(pStartPt, pEndPt);
+    SIP_CHAR* pszUser = SipAbnfUtil::CreateString(pStartPt, pEndPt);
     if (pszUser == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     /*Do percentage Encoding*/
@@ -387,7 +340,7 @@ SIP_BOOL SipUri::DecUserInfo(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     return SIP_TRUE;
 }
 
-SIP_BOOL SipUri::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
+SIP_BOOL SipUri::DecodeHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
 {
     /*hostport = host [ ":" port ]
       host = hostname   /   IPv4address   /   IPv6reference
@@ -402,29 +355,29 @@ SIP_BOOL SipUri::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
       hex4 = 1*4HEXDIG
       port = 1*DIGIT */
 
-    SIP_CHAR* pTempPos = SIP_NULL;
+    const SIP_CHAR* pTempPos = SIP_NULL;
 
     /* IPV6 is enclosed in between '[' and ']', get start and end point of Ipv6 address*/
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, LEFT_SQUARE) == SIP_TRUE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, LEFT_SQUARE) == SIP_TRUE)
     {
         m_eHostType = SipAddrSpec::HOST_IPV6;
         pStartPt = pTempPos + SIP_TWO;
         pTempPos = SIP_NULL;
-        if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, RIGHT_SQUARE) == SIP_FALSE)
+        if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, RIGHT_SQUARE) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Host[IPV6]", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid host[IPV6]", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
     }
-    else if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
+    else if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, COLON) == SIP_FALSE)
     {
         pTempPos = pEndPt;
     }
     /* Host : Hostname or IPv4 or IPv6 */
-    m_pszHost = SipCreateString(pStartPt, pTempPos);
+    m_pszHost = SipAbnfUtil::CreateString(pStartPt, pTempPos);
     if (m_pszHost == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -435,7 +388,7 @@ SIP_BOOL SipUri::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     }
     else if (m_eHostType == SipAddrSpec::HOST_IPV6)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Host[IPV6]", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid host[IPV6]", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -446,13 +399,13 @@ SIP_BOOL SipUri::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 
     pStartPt = pTempPos + SIP_ONE;
     /* Port number */
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_TRUE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, COLON) == SIP_TRUE)
     {
         pTempPos = pTempPos + SIP_TWO;
-        SIP_CHAR* pszPort = SipCreateString(pTempPos, pEndPt);
+        SIP_CHAR* pszPort = SipAbnfUtil::CreateString(pTempPos, pEndPt);
         if (pszPort == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
@@ -479,7 +432,7 @@ SIP_BOOL SipUri::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     return SIP_TRUE;
 }
 
-SIP_BOOL SipUri::DecodeSipUri(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipUri::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -491,38 +444,39 @@ SIP_BOOL SipUri::DecodeSipUri(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
      * uri-parameters (parameter-name "=" parameter-value pairs) are separated by semi-colons and
      * headers (hname = hvalue pairs) are separated by Ampersand
      */
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    SIP_CHAR* pTempPos = SIP_NULL;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pTempPos = SIP_NULL;
 
     /* Decode user:password part in SIP URI */
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, ATRATE) == SIP_TRUE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, ATRATE) == SIP_TRUE)
     {
-        if (DecUserInfo(pStartPt, pTempPos) == SIP_FALSE)
+        if (DecodeUserInfo(pStartPt, pTempPos) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "User Info Decode Failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "User Info decode failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         pStartPt = pTempPos + SIP_TWO;
     }
     /* Decode headers part in SIP URI */
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, QMARK) == SIP_TRUE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, QMARK) == SIP_TRUE)
     {
-        SIP_CHAR* pHeaderStart = pTempPos + SIP_TWO;
+        const SIP_CHAR* pHeaderStart = pTempPos + SIP_TWO;
 
-        m_pUriHdrParamList = new SipParameterList();
-        if (m_pUriHdrParamList == SIP_NULL)
+        m_pUriHdrParams = new SipParameters();
+        if (m_pUriHdrParams == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
         SetComponentType(IParameterComponent::HEADER);
 
-        if (m_pUriHdrParamList->Decode(pHeaderStart, pEndPt, AMPERSAND,
+        if (m_pUriHdrParams->Decode(pHeaderStart, pEndPt, AMPERSAND,
                     static_cast<IParameterComponent*>(this)) == SIP_FALSE)
         {
             SetComponentType(IParameterComponent::NORMAL);
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Hdr prm Decode Failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODDECODER, "Header parameters decode failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
@@ -530,23 +484,24 @@ SIP_BOOL SipUri::DecodeSipUri(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         pTempPos = SIP_NULL;
     }
     /* Decode uri-parameters part in SIP URI */
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SIP_SEMI) == SIP_TRUE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, SIP_SEMI) == SIP_TRUE)
     {
-        SIP_CHAR* pUriParamStart = pTempPos + SIP_TWO;
+        const SIP_CHAR* pUriParamStart = pTempPos + SIP_TWO;
 
-        m_pUriParamList = new SipParameterList();
-        if (m_pUriParamList == SIP_NULL)
+        m_pUriParams = new SipParameters();
+        if (m_pUriParams == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
         SetComponentType(IParameterComponent::URI);
-        if (m_pUriParamList->Decode(pUriParamStart, pEndPt, SIP_SEMI,
+        if (m_pUriParams->Decode(pUriParamStart, pEndPt, SIP_SEMI,
                     static_cast<IParameterComponent*>(this)) == SIP_FALSE)
         {
             SetComponentType(IParameterComponent::NORMAL);
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Uri Prm Decode Failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODDECODER, "Uri parameters decode failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
@@ -554,14 +509,27 @@ SIP_BOOL SipUri::DecodeSipUri(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     }
 
     SetComponentType(IParameterComponent::NORMAL);
-    /* Decode host:port part in SIP URI */
-    if (DecHostPort(pStartPt, pEndPt) == SIP_FALSE)
+
+    if (DecodeHostPort(pStartPt, pEndPt) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Host port Decode Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Host port decode failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     return SIP_TRUE;
+}
+
+const SIP_CHAR* SipUri::GetSchemeString(SipUri::UriType eUriType)
+{
+    switch (eUriType)
+    {
+        case SipUri::SCHEME_SIP:
+            return "sip";
+        case SipUri::SCHEME_SIPS:
+            return "sips";
+        default:
+            return SIP_NULL;
+    }
 }
 
 SipAddrSpec::SipAddrSpec() :
@@ -594,9 +562,9 @@ SipAddrSpec::~SipAddrSpec()
     }
 }
 
-SIP_BOOL SipAddrSpec::SetAbsUri(const SIP_CHAR* pszSipUri)
+SIP_VOID SipAddrSpec::SetAbsUri(const SIP_CHAR* pszSipUri)
 {
-    return SetCharVar(pszSipUri, m_pszAbsUri);
+    SipMsgUtil::SetValue(pszSipUri, m_pszAbsUri);
 }
 
 SipUri* SipAddrSpec::GetSipUri()
@@ -612,13 +580,12 @@ SIP_BOOL SipAddrSpec::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
 {
     if (m_pSipUri != SIP_NULL)
     {
-        if (m_eUriType == SipUri::SCHEME_SIP)
+        const SIP_CHAR* pStrUri = SipUri::GetSchemeString(m_eUriType);
+
+        if (pStrUri != SIP_NULL)
         {
-            objBuffer += SIP_SIP_ENC;
-        }
-        else if (m_eUriType == SipUri::SCHEME_SIPS)
-        {
-            objBuffer += SIP_SIPS_ENC;
+            objBuffer += pStrUri;
+            objBuffer += COLON;
         }
 
         if (m_pSipUri->Encode(objBuffer, bParams) == SIP_FALSE)
@@ -640,62 +607,58 @@ SIP_BOOL SipAddrSpec::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
     return SIP_TRUE;
 }
 
-SIP_BOOL SipAddrSpec::EncodeAddrSpec(SIP_CHAR** ppCurrPos) const
+SIP_BOOL SipAddrSpec::Encode(SIP_CHAR** ppCurrPos) const
 {
     if (m_pSipUri != SIP_NULL)
     {
-        // implement this in cpp
         /*encoding of uri name*/
-        if (m_eUriType == SipUri::SCHEME_SIP)
+        const SIP_CHAR* pStrUri = SipUri::GetSchemeString(m_eUriType);
+
+        if (pStrUri != SIP_NULL)
         {
-            SipPf_Strcpy(*ppCurrPos, SIP_SIP_ENC);
-        }
-        else if (m_eUriType == SipUri::SCHEME_SIPS)
-        {
-            SipPf_Strcpy(*ppCurrPos, SIP_SIPS_ENC);
+            SipAbnfUtil::Append(*ppCurrPos, pStrUri);
+            SipMsgUtil::Encode(*ppCurrPos, COLON);
         }
 
-        SipEnc_UpdateCurrPos(ppCurrPos);
+        SipAbnfUtil::UpdateCurrentPosition(*ppCurrPos);
 
-        if (m_pSipUri->EncodeSipUri(ppCurrPos) == SIP_FALSE)
+        if (m_pSipUri->Encode(ppCurrPos) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Uri Encoding error", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "SipUri: Encoding error", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
     }
     else if (m_pszAbsUri != SIP_NULL)
     {
-        SipPf_Strcpy(*ppCurrPos, m_pszAbsUri);
-        SipEnc_UpdateCurrPos(ppCurrPos);
+        SipAbnfUtil::Append(*ppCurrPos, m_pszAbsUri);
     }
     else
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "No Uri set for encoding", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "No URI for encoding", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     return SIP_TRUE;
 }
 
-SIP_BOOL SipAddrSpec::DecodeAddrSpec(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipAddrSpec::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    /*Validate the input prm*/
     if ((nDecLen == SIP_ZERO) || (pStartPt == SIP_NULL))
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalide Input prm", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid input parameters", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    SIP_CHAR* pTempPos = SIP_NULL;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pTempPos = SIP_NULL;
 
-    if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, COLON) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "No URI scheme", SIP_ZERO, SIP_ZERO);
         m_eUriType = SipUri::SCHEME_ABS;
     }
     else
     {
-        m_eUriType = SipGetUriType(pStartPt, pTempPos);
+        m_eUriType = SipMsgUtil::GetUriType(pStartPt, pTempPos);
     }
 
     /*CAse of Sip or Sips URI*/
@@ -709,18 +672,16 @@ SIP_BOOL SipAddrSpec::DecodeAddrSpec(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         SipUri* pSipUri = new SipUri();
         if (pSipUri == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "SipAddrSpec::DecodeAddrSpec: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         /*Set PercentEncoding Value*/
 
         /*Decode the sip uri*/
-        if (pSipUri->DecodeSipUri(pStartPt, nDecLen) == SIP_FALSE)
+        if (pSipUri->Decode(pStartPt, nDecLen) == SIP_FALSE)
         {
             pSipUri->SipDelete();
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "SipAddrSpec::DecodeAddrSpec: Sip Uri Decode Failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Sip Uri decode failed", SIP_ZERO, SIP_ZERO);
 
             return SIP_FALSE;
         }
@@ -728,10 +689,10 @@ SIP_BOOL SipAddrSpec::DecodeAddrSpec(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     }
     else
     {
-        m_pszAbsUri = SipCreateString(pStartPt, pEndPt);
+        m_pszAbsUri = SipAbnfUtil::CreateString(pStartPt, pEndPt);
         if (m_pszAbsUri == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
     }
@@ -785,9 +746,9 @@ SIP_BOOL SipNameAddr::SetAddrSpec(SipAddrSpec* pSipAddrSpec)
     return SIP_TRUE;
 }
 
-SIP_BOOL SipNameAddr::SetDisplayName(const SIP_CHAR* pszDisplayName)
+SIP_VOID SipNameAddr::SetDisplayName(const SIP_CHAR* pszDisplayName)
 {
-    return SetCharVar(pszDisplayName, m_pszDispName);
+    SipMsgUtil::SetValue(pszDisplayName, m_pszDispName);
 }
 
 SIP_BOOL SipNameAddr::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
@@ -823,41 +784,40 @@ SIP_BOOL SipNameAddr::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
     return SIP_TRUE;
 }
 
-SIP_BOOL SipNameAddr::EncodeNameAddr(SIP_CHAR** ppCurrPos)
+SIP_BOOL SipNameAddr::Encode(SIP_CHAR** ppCurrPos)
 {
     if (m_pAddrSpec == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "No Addr Spec", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "No addr-spec", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     if (m_pszDispName != SIP_NULL)
     {
-        SipPf_Strcpy(*ppCurrPos, m_pszDispName);
-        SipEnc_UpdateCurrPos(ppCurrPos);
+        SipAbnfUtil::Append(*ppCurrPos, m_pszDispName);
 
         // FIX_MESSAGE_ENCODING_OPERATION
         //  Add LWS between the display name and left angle quote ('<').
         //  First, check the display name if it has a double quotation.
         //  If present, just do normal procedure. Else, add the display name and space.
         //  But, we will always add the space after the display name.
-        SIP_ENC_SP(*ppCurrPos);
+        SipMsgUtil::Encode(*ppCurrPos, SPACE);
     }
 
-    SIP_ENC_LAQUOT(*ppCurrPos);
+    SipMsgUtil::Encode(*ppCurrPos, LEFT_ANGLE);
 
-    if (m_pAddrSpec->EncodeAddrSpec(ppCurrPos) == SIP_FALSE)
+    if (m_pAddrSpec->Encode(ppCurrPos) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Addr Spec failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encoding Addr Spec failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_ENC_RAQUOT(*ppCurrPos);
+    SipMsgUtil::Encode(*ppCurrPos, RIGHT_ANGLE);
 
     return SIP_TRUE;
 }
 
-SIP_BOOL SipNameAddr::DecodeNameAddr(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
+SIP_BOOL SipNameAddr::Decode(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
 {
     if (pStartPt == pEndPt)
     {
@@ -865,21 +825,22 @@ SIP_BOOL SipNameAddr::DecodeNameAddr(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pTempPre = SIP_NULL;
-    SIP_CHAR* pTempNext = SIP_NULL;
+    const SIP_CHAR* pTempPre = SIP_NULL;
+    const SIP_CHAR* pTempNext = SIP_NULL;
 
-    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, LEFT_ANGLE) == SIP_FALSE)
+    if (SipAbnfUtil::FindActualPosition(pStartPt, pEndPt, pTempPre, pTempNext, LEFT_ANGLE) ==
+            SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Left Angle Not Found", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Left angle not found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     /*Case of display Name present*/
     if (pStartPt <= pTempPre)
     {
-        m_pszDispName = SipCreateString(pStartPt, pTempPre);
+        m_pszDispName = SipAbnfUtil::CreateString(pStartPt, pTempPre);
         if (m_pszDispName == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
     }
@@ -887,16 +848,16 @@ SIP_BOOL SipNameAddr::DecodeNameAddr(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     m_pAddrSpec = new SipAddrSpec();
     if (m_pAddrSpec == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     /*Get the length of address spec*/
     SIP_UINT32 nDecLen = pEndPt - pTempNext + SIP_ONE;
 
-    if (m_pAddrSpec->DecodeAddrSpec(pTempNext, nDecLen) == SIP_FALSE)
+    if (m_pAddrSpec->Decode(pTempNext, nDecLen) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Addr Spec decoding failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "addr-spec decoding failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 

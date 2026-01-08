@@ -18,6 +18,8 @@
 
 #include "AStringBuffer.h"
 
+#include "ISipConfig.h"
+
 /**
  * @brief This class provides an interface to create SIP URN string.
  */
@@ -27,18 +29,16 @@ public:
     /// Supported type of URN
     enum
     {
-        /// Default URN for IMS services
-        GSMA_IMEI = 0,
+        /// IMEI URN format (Default URN for IMS services)
+        GSMA_IMEI = ISipConfig::DEVICE_ID_GSMA_IMEI,
+        /// IMEI URN format with "svn" parameter
+        GSMA_IMEISV,
         /// Hashed value of IMEI - UUID (MD5)
         UUID_IMEI_MD5,
         /// Hashed value of IMEI - UUID (SHA1)
         UUID_IMEI_SHA1,
         /// UUID version 3
-        UUID_IMEI_NAMED_V3,
-        /// UUID version 5
-        UUID_IMEI_NAMED_V5,
-        /// UUID version 4
-        UUID_IMEI_V4
+        UUID_IMEI_NAMED_V3
     };
 
 private:
@@ -51,29 +51,26 @@ public:
      * @param nSlotId Slot id
      * @param nType URN type\n
      *              #GSMA_IMEI\n
+     *              #GSMA_IMEISV\n
      *              #UUID_IMEI_MD5\n
      *              #UUID_IMEI_SHA1\n
-     *              #UUID_IMEI_NAMED_V3\n
-     *              #UUID_IMEI_NAMED_V5\n
-     *              #UUID_IMEI_V4
-     * @param bSv Flag to indicate whether software version is included or not
+     *              #UUID_IMEI_NAMED_V3
      * @return An IMEI URN string.
      */
-    static AString GetUrn(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nType, IN IMS_BOOL bSv = IMS_TRUE);
+    static AString GetUrn(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nType);
 
     /**
      * @brief Creates UUID based URN string.
      *
      * @param nVersion UUID version\n
      *                 ImsUuid::VERSION_1\n
-     *                 ImsUuid::VERSION_2\n
      *                 ImsUuid::VERSION_3\n
-     *                 ImsUuid::VERSION_4\n
-     *                 ImsUuid::VERSION_5
+     *                 ImsUuid::VERSION_4
      * @param strName Any string to be hashed
      * @return An UUID URN string.
      */
-    static AString GetUrn(IN IMS_SINT32 nVersion, IN const AString& strName);
+    static AString GetUuidUrn(
+            IN IMS_SINT32 nVersion, IN const AString& strName = AString::ConstNull());
 
 private:
     static const IMS_CHAR IMEI[];

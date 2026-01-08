@@ -29,7 +29,7 @@
 class IComment : public ICharacterData, public INode
 {
 protected:
-    virtual ~IComment() = default;
+    ~IComment() override = default;
 };
 
 #endif

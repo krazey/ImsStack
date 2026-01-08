@@ -23,8 +23,8 @@
 class MockIFile : public IFile
 {
 public:
-    inline MockIFile() {}
-    inline virtual ~MockIFile() {}
+    MockIFile() = default;
+    ~MockIFile() override = default;
 
     MOCK_METHOD(IMS_BOOL, Open, (IN const AString& strName, IN FILE_OPEN_ENTYPE eMode), (override));
     MOCK_METHOD(void, Close, (), (override));
@@ -41,8 +41,8 @@ public:
 class MockIFileUtil : public IFileUtil
 {
 public:
-    inline MockIFileUtil() {}
-    inline virtual ~MockIFileUtil() {}
+    MockIFileUtil() = default;
+    ~MockIFileUtil() override = default;
 
     MOCK_METHOD(IMS_BOOL, ChangeMode, (IN const AString& strFileName, IN IMS_SINT32 nMode),
             (const, override));

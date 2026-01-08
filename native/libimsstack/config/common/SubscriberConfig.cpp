@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "IImsPrivateProperty.h"
+#include "IIsim.h"
+#include "ISystemProperty.h"
 #include "ServiceConfig.h"
 #include "ServiceMemory.h"
 #include "ServicePhoneInfo.h"
-#include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
 
@@ -26,6 +28,7 @@
 #include "ISubscriberInfoListener.h"
 #include "ImsIdentity.h"
 #include "ServerAddress.h"
+#include "private/ImsSubscriberInfo.h"
 #include "private/SubscriberConfig.h"
 
 __IMS_TRACE_TAG_CONF__;
@@ -38,35 +41,17 @@ SubscriberConfig::SubscriberConfig(IN IMS_SINT32 nSlotId, IN const AString& strC
         m_strConfName(strConfName),
         m_nSubscriptionAttributes(SUBSCRIPTION_ATTRIBUTE_IMS | SUBSCRIPTION_ATTRIBUTE_ISIM),
         m_piIsim(IMS_NULL),
-        m_bFlagRequestPending(IMS_FALSE),
-        m_nConfiguredIsimRecords(ISIM_DONE),
-        m_nIsimRecords(ISIM_NONE),
-        m_nIsimErrorCode(ISIM_NO_ERROR),
-        m_byIst1(IST_1_NONE),
         m_nState(STATE_INIT),
         m_piSubsInfoListener(IMS_NULL),
         m_pConfigurable(IMS_NULL),
-        m_nInitRetryCount(0),
-        m_piInitRetryTimer(IMS_NULL),
-        m_nInitRetryCountByStartRetry(0),
-        m_nStartRetryCount(0),
-        m_piStartRetryTimer(IMS_NULL),
         m_strLog(AString::ConstNull())
 {
     IMS_SINT32 nIndex = strConfName.GetIndexOf('_');
 
-    if (nIndex == AString::NPOS)
-    {
-        m_strId = GetDefaultId();
-    }
-    else
-    {
-        m_strId = strConfName.GetSubStr(nIndex + 1);
-    }
+    m_strId = (nIndex == AString::NPOS) ? GetDefaultId() : strConfName.GetSubStr(nIndex + 1);
+    m_objPcscfDiscoveryMethods.Add(PCSCF_DISCOVERY_METHOD_PCO);
 
     m_pConfigurable = new Configurable(this);
-
-    m_objPcscfDiscoveryMethods.Add(PCSCF_DISCOVERY_METHOD_PCO);
 }
 
 PUBLIC VIRTUAL SubscriberConfig::~SubscriberConfig()
@@ -74,21 +59,12 @@ PUBLIC VIRTUAL SubscriberConfig::~SubscriberConfig()
     ICarrierConfig* piCc = GetCarrierConfig();
     piCc->RemoveListener(this);
 
-    ClearPcscfAddressAndSubscriberInfo();
+    ClearPcscfAddresses();
+    ClearSubscriberInfos();
 
     if (m_pConfigurable != IMS_NULL)
     {
         delete m_pConfigurable;
-    }
-
-    if (m_piInitRetryTimer != IMS_NULL)
-    {
-        TimerService::GetTimerService()->DestroyTimer(m_piInitRetryTimer);
-    }
-
-    if (m_piStartRetryTimer != IMS_NULL)
-    {
-        TimerService::GetTimerService()->DestroyTimer(m_piStartRetryTimer);
     }
 
     if (m_piIsim != IMS_NULL)
@@ -128,46 +104,174 @@ PUBLIC VIRTUAL IMS_BOOL SubscriberConfig::IsAkaSupported() const
             (objCredential.GetType() == Credential::TYPE_AKAv2_MD5);
 }
 
+PUBLIC VIRTUAL void SubscriberConfig::RemoveListener(IN ISubscriberConfigListener* piListener)
+{
+    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
+    {
+        ImsList<ISubscriberConfigListener*>& objListeners = m_objListeners.GetValueAt(i);
+
+        if (objListeners.Remove(piListener))
+        {
+            IMS_TRACE_D("SubscriberConfig: Listener (%p, 0x%x) is removed", piListener,
+                    m_objListeners.GetKeyAt(i), 0);
+        }
+    }
+}
+
+PUBLIC VIRTUAL void SubscriberConfig::SetListener(
+        IN ISubscriberConfigListener* piListener, IN IMS_SINT32 nEvents /*= LISTEN_EVENT_DEFAULT*/)
+{
+    if (piListener == IMS_NULL)
+    {
+        return;
+    }
+
+    ImsList<IMS_SINT32> objEvents = GetListenEvents(nEvents);
+
+    for (IMS_UINT32 i = 0; i < objEvents.GetSize(); ++i)
+    {
+        IMS_SINT32 nEvent = objEvents.GetAt(i);
+        IMS_SLONG nIndex = m_objListeners.GetIndexOfKey(nEvent);
+
+        if (nIndex >= 0)
+        {
+            ImsList<ISubscriberConfigListener*>& objListeners = m_objListeners.GetValueAt(nIndex);
+
+            if (!objListeners.Contains(piListener))
+            {
+                objListeners.Append(piListener);
+            }
+        }
+        else
+        {
+            ImsList<ISubscriberConfigListener*> objListeners;
+            objListeners.Append(piListener);
+            m_objListeners.Add(nEvent, objListeners);
+        }
+    }
+
+    IMS_TRACE_D("SubscriberConfig: Listener (%p, 0x%x) is set", piListener, nEvents, 0);
+
+    if (objEvents.Contains(LISTEN_EVENT_ISIM_PROVISIONING) && IsServiceAllowed() &&
+            IsIsimSupported() &&
+            (m_piIsim != IMS_NULL && m_piIsim->GetState() == IIsim::STATE_NOT_PRESENT))
+    {
+        SendMessage(ACMSG_NOTIFY_ERROR, reinterpret_cast<IMS_SINTP>(piListener),
+                ERROR_NO_ISIM_APPLICATION);
+    }
+}
+
+PUBLIC VIRTUAL void SubscriberConfig::EnableIsim()
+{
+    IMS_BOOL bOldIsimSupported = IsIsimSupported();
+    SetOrClearSubscriptionAttributes(IMS_TRUE, SUBSCRIPTION_ATTRIBUTE_ISIM);
+    SetOrClearSubscriptionAttributes(IMS_FALSE, SUBSCRIPTION_ATTRIBUTE_USIM);
+
+    if (!bOldIsimSupported && IsIsimSupported())
+    {
+        CallSubscriberInfoListener(SUBSCRIBER_INFO_REMOVE_ALL);
+        ClearSubscriberInfos();
+
+        // Start ISIM provisioning.
+        if (GetState() == STATE_PROVISIONED)
+        {
+            IMS_TRACE_I("SubscriberConfig(%d): EnableIsim", GetSlotId(), 0, 0);
+            SetState(STATE_REFRESHING);
+            SendMessage(ACMSG_REFRESH_STARTED, LISTEN_EVENT_ISIM_PROVISIONING, 0);
+        }
+
+        SendMessage(ACMSG_REFRESH_ISIM_RECORDS, 0, 0);
+    }
+}
+
+PUBLIC VIRTUAL void SubscriberConfig::UpdateSubscriberInfo(IN const AString& strHomeDomainName,
+        IN const AString& strPrivateUserId, IN const AString& strPublicUserId,
+        IN IMS_BOOL bIsimEnabled /*= IMS_FALSE*/)
+{
+    AStringArray objPublicUserIds;
+    objPublicUserIds.AddElement(strPublicUserId);
+    UpdateSubscriberInfo(strHomeDomainName, strPrivateUserId, objPublicUserIds, bIsimEnabled);
+}
+
+PUBLIC VIRTUAL void SubscriberConfig::UpdateSubscriberInfo(IN const AString& strHomeDomainName,
+        IN const AString& strPrivateUserId, IN const AStringArray& objPublicUserIds,
+        IN IMS_BOOL bIsimEnabled /*= IMS_FALSE*/)
+{
+    CallSubscriberInfoListener(SUBSCRIBER_INFO_REMOVE_ALL);
+    ClearSubscriberInfos();
+
+    SetOrClearSubscriptionAttributes(bIsimEnabled, SUBSCRIPTION_ATTRIBUTE_ISIM);
+    SetOrClearSubscriptionAttributes(!bIsimEnabled, SUBSCRIPTION_ATTRIBUTE_USIM);
+
+    ImsSubscriberInfo* pSubsInfo = CreateSubscriberInfo();
+
+    UpdatePrivateUserId(pSubsInfo, strPrivateUserId);
+    UpdatePublicUserIds(pSubsInfo, objPublicUserIds);
+    UpdateHomeDomainName(pSubsInfo, strHomeDomainName);
+
+    if (bIsimEnabled)
+    {
+        // Even though ISIM is enabled, the index of the primary IMPU indicates a first position.
+        pSubsInfo->m_nRefIndexOfPrimaryImpu = 0;
+    }
+
+    IMS_SINT32 nOldState = GetState();
+    SetState(STATE_PROVISIONED);
+    StoreSubscriberInfo();
+    CallSubscriberInfoListener(SUBSCRIBER_INFO_ADD);
+
+    IMS_TRACE_I("SubscriberConfig(%d): UpdateSubscriberInfo", GetSlotId(), 0, 0);
+
+    if (nOldState == STATE_PROVISIONED || nOldState == STATE_REFRESHING)
+    {
+        SendMessage(ACMSG_REFRESH_STARTED_N_COMPLETED, LISTEN_EVENT_MANUAL_PROVISIONING, 0);
+    }
+    else
+    {
+        SendMessage(ACMSG_INIT_COMPLETED, LISTEN_EVENT_MANUAL_PROVISIONING, 0);
+    }
+}
+
 PUBLIC VIRTUAL const Credential& SubscriberConfig::GetCredential() const
 {
-    ImsSubscriberInfo* pSubsInfo = GetSubscriberInfoEx();
+    const ImsSubscriberInfo* pSubsInfo = GetSubscriberInfoEx();
     return (pSubsInfo != IMS_NULL) ? pSubsInfo->GetCredential() : Credential::ConstNull();
 }
 
 PUBLIC VIRTUAL const AString& SubscriberConfig::GetHomeDomainName() const
 {
-    IImsSubscriberInfo* piSubsInfo = GetSubscriberInfo();
+    const IImsSubscriberInfo* piSubsInfo = GetSubscriberInfo();
     return (piSubsInfo != IMS_NULL) ? piSubsInfo->GetHomeDomainName() : AString::ConstNull();
 }
 
 PUBLIC VIRTUAL IMS_SINT32 SubscriberConfig::GetIndexOfPrimaryPublicUserId() const
 {
-    IImsSubscriberInfo* piSubsInfo = GetSubscriberInfo();
+    const IImsSubscriberInfo* piSubsInfo = GetSubscriberInfo();
     return (piSubsInfo != IMS_NULL) ? piSubsInfo->GetIndexOfPrimaryPublicUserId() : (-1);
 }
 
 PUBLIC VIRTUAL const AString& SubscriberConfig::GetPhoneContext() const
 {
-    IImsSubscriberInfo* piSubsInfo = GetSubscriberInfo();
+    const IImsSubscriberInfo* piSubsInfo = GetSubscriberInfo();
     return (piSubsInfo != IMS_NULL) ? piSubsInfo->GetPhoneContext() : AString::ConstNull();
 }
 
 PUBLIC VIRTUAL const AString& SubscriberConfig::GetPrivateUserId() const
 {
-    ImsSubscriberInfo* pSubsInfo = GetSubscriberInfoEx();
+    const ImsSubscriberInfo* pSubsInfo = GetSubscriberInfoEx();
     return (pSubsInfo != IMS_NULL) ? pSubsInfo->GetPrivateUserId() : AString::ConstNull();
 }
 
 PUBLIC VIRTUAL const AString& SubscriberConfig::GetPublicUserId(
         IN IMS_SINT32 nImpuType /*= IImsSubscriberInfo::IMPU_REF_INDEX*/) const
 {
-    IImsSubscriberInfo* piSubsInfo = GetSubscriberInfo();
+    const IImsSubscriberInfo* piSubsInfo = GetSubscriberInfo();
     return (piSubsInfo != IMS_NULL) ? piSubsInfo->GetPublicUserId(nImpuType) : AString::ConstNull();
 }
 
 PUBLIC VIRTUAL const AStringArray& SubscriberConfig::GetPublicUserIds() const
 {
-    IImsSubscriberInfo* piSubsInfo = GetSubscriberInfo();
+    const IImsSubscriberInfo* piSubsInfo = GetSubscriberInfo();
     return (piSubsInfo != IMS_NULL) ? piSubsInfo->GetPublicUserIds() : AStringArray::ConstNull();
 }
 
@@ -181,47 +285,25 @@ PUBLIC VIRTUAL IMS_BOOL SubscriberConfig::Init()
 
 PUBLIC VIRTUAL void SubscriberConfig::Refresh()
 {
-    IMS_TRACE_D("Refresh", 0, 0, 0);
+    IMS_TRACE_D("Refresh(%s)", GetId().GetStr(), 0, 0);
 
     m_nSubscriptionAttributes = SUBSCRIPTION_ATTRIBUTE_IMS | SUBSCRIPTION_ATTRIBUTE_ISIM;
-    m_bFlagRequestPending = IMS_FALSE;
-    m_nConfiguredIsimRecords = ISIM_DONE;
-    m_nIsimRecords = ISIM_NONE;
-    m_byIst1 = IST_1_NONE;
-    m_nIsimErrorCode = ISIM_NO_ERROR;
-
-    m_nInitRetryCount = 0;
-    m_nInitRetryCountByStartRetry = 0;
-    m_nStartRetryCount = 0;
-
-    if (m_piInitRetryTimer != IMS_NULL)
-    {
-        TimerService::GetTimerService()->DestroyTimer(m_piInitRetryTimer);
-        m_piInitRetryTimer = IMS_NULL;
-    }
-
-    if (m_piStartRetryTimer != IMS_NULL)
-    {
-        TimerService::GetTimerService()->DestroyTimer(m_piStartRetryTimer);
-        m_piStartRetryTimer = IMS_NULL;
-    }
 
     SetState(STATE_INIT);
-
-    UpdateAllConfigs(IMS_TRUE);
+    UpdateAllConfigs();
 }
 
 PUBLIC
 const AString& SubscriberConfig::GetScscfAddress() const
 {
-    ImsSubscriberInfo* pSubsInfo = GetSubscriberInfoEx();
+    const ImsSubscriberInfo* pSubsInfo = GetSubscriberInfoEx();
     return (pSubsInfo != IMS_NULL) ? pSubsInfo->GetScscfAddress() : AString::ConstNull();
 }
 
 PUBLIC
 IMS_BOOL SubscriberConfig::IsAuthRealmLenient() const
 {
-    ImsSubscriberInfo* pSubsInfo = GetSubscriberInfoEx();
+    const ImsSubscriberInfo* pSubsInfo = GetSubscriberInfoEx();
     return (pSubsInfo != IMS_NULL) ? pSubsInfo->IsAuthRealmLenient() : IMS_FALSE;
 }
 
@@ -253,6 +335,8 @@ PROTECTED VIRTUAL void SubscriberConfig::HandleMessage(
         IN IMS_SINT32 nMsg, IN IMS_SINTP nParam1, IN IMS_SINTP nParam2)
 {
     (void)nParam1;
+    IMS_TRACE_D(
+            "HandleMessage: msg=%d, param1=%" PFLS_u ", param2=%" PFLS_u, nMsg, nParam1, nParam2);
 
     switch (nMsg)
     {
@@ -265,183 +349,62 @@ PROTECTED VIRTUAL void SubscriberConfig::HandleMessage(
                 m_pConfigHelper->Register(this);
             }
 
-            // Initialize the provisioning ...
-            InitProvisioning();
+            InitIsim();
             break;
         }
-        case ACMSG_START_PROVISIONING:
+        case ACMSG_UPDATE_ISIM_RECORDS:
         {
-            StartProvisioning(nParam1 == 1);
+            UpdateIsimRecords();
             break;
         }
-        case ACMSG_READ_ISIM_RECORD:
+        case ACMSG_REFRESH_ISIM_RECORDS:
         {
-            if (IsIsimSupported())
-            {
-                if (!IsIsimProvisioningDone())
-                {
-                    // FIX_TIMING_ISSUE
-                    if ((nParam1 == 1) && m_bFlagRequestPending)
-                    {
-                        IMS_TRACE_D("ISIM :: READ_ISIM_RECORD before read operation completion", 0,
-                                0, 0);
-                        m_bFlagRequestPending = IMS_FALSE;
-                    }
-
-                    ReadIsimProvisioning();
-                }
-                else
-                {
-                    if (IsProvisioningDone())
-                    {
-                        // If the provisioning is already done, do nothing...
-                        break;
-                    }
-
-                    IMS_SINT32 nPrevState = GetState();
-
-                    SetState(STATE_PROVISIONED);
-                    ToDebugString();
-
-                    WriteProvisioning();
-
-                    CallSubscriberInfoListener(SUBSCRIBER_INFO_ADD);
-
-                    if (m_objListeners.IsEmpty())
-                    {
-                        IMS_TRACE_D("No SubscriberConfig listener", 0, 0, 0);
-                        break;
-                    }
-
-                    if (nPrevState == STATE_PROVISIONING)
-                    {
-                        NotifyInitCompleted();
-                    }
-                    else
-                    {
-                        NotifyRefreshCompleted();
-                    }
-                }
-            }
+            RefreshIsimRecords();
             break;
         }
         case ACMSG_INIT_COMPLETED:
         {
-            WriteProvisioning();
-
-            CallSubscriberInfoListener(SUBSCRIBER_INFO_ADD);
-            NotifyInitCompleted();
+            NotifyInitCompleted(LONG_TO_SINT(nParam1));
             break;
         }
         case ACMSG_REFRESH_COMPLETED:
         {
-            WriteProvisioning();
-
-            CallSubscriberInfoListener(SUBSCRIBER_INFO_ADD);
-            NotifyRefreshCompleted();
-            // Notify configuration updates
-            NotifyUpdate(IConfigurable::CP_I_SUBSCRIBER_ALL, m_strConfName, m_strId);
+            NotifyRefreshCompleted(LONG_TO_SINT(nParam1));
             break;
         }
         case ACMSG_REFRESH_STARTED:
         {
-            NotifyRefreshStarted();
+            NotifyRefreshStarted(LONG_TO_SINT(nParam1));
+            break;
+        }
+        case ACMSG_REFRESH_STARTED_N_COMPLETED:
+        {
+            NotifyRefreshStarted(LONG_TO_SINT(nParam1));
+            NotifyRefreshCompleted(LONG_TO_SINT(nParam1));
             break;
         }
         case ACMSG_NOTIFY_ERROR:
         {
             if (nParam1 == 0)
             {
-                NotifyError(LONG_TO_INT(nParam2));
+                NotifyError(LISTEN_EVENT_ISIM_PROVISIONING, LONG_TO_SINT(nParam2));
             }
             else
             {
                 ISubscriberConfigListener* piNewListener =
                         reinterpret_cast<ISubscriberConfigListener*>(nParam1);
 
-                NotifyError(LONG_TO_INT(nParam2), piNewListener);
+                NotifyError(LISTEN_EVENT_ISIM_PROVISIONING, LONG_TO_SINT(nParam2), piNewListener);
             }
             break;
         }
         case ACMSG_UPDATE_ALL_CONFIGS:
         {
             SetState(STATE_REFRESHING);
-            NotifyRefreshStarted();
+            NotifyRefreshStarted(LISTEN_EVENT_MANUAL_PROVISIONING);
 
-            // Read all the subscriber configuration...
-            UpdateAllConfigs(IMS_FALSE);
-
-            if (!IsIsimSupported())
-            {
-                SendMessage(ACMSG_REFRESH_COMPLETED, 0, 0);
-                // Notify configuration updates
-                NotifyUpdate(IConfigurable::CP_I_SUBSCRIBER_ALL, m_strConfName, m_strId);
-            }
-            break;
-        }
-        case ACMSG_INIT_RETRY_TIMER:
-        {
-            if (m_piInitRetryTimer != IMS_NULL)
-            {
-                TimerService::GetTimerService()->DestroyTimer(m_piInitRetryTimer);
-            }
-
-            m_piInitRetryTimer = TimerService::GetTimerService()->CreateTimer();
-
-            if (m_piInitRetryTimer == IMS_NULL)
-            {
-                IMS_TRACE_E(0, "Creating a retry (Init) timer failed", 0, 0, 0);
-                break;
-            }
-
-            m_piInitRetryTimer->SetTimer(LONG_TO_UINT(nParam1 * 1000), this);
-            break;
-        }
-        case ACMSG_START_RETRY_TIMER:
-        {
-            if (m_piStartRetryTimer != IMS_NULL)
-            {
-                TimerService::GetTimerService()->DestroyTimer(m_piStartRetryTimer);
-            }
-
-            m_piStartRetryTimer = TimerService::GetTimerService()->CreateTimer();
-
-            if (m_piStartRetryTimer == IMS_NULL)
-            {
-                IMS_TRACE_E(0, "Creating a retry (Start) timer failed", 0, 0, 0);
-                break;
-            }
-
-            m_piStartRetryTimer->SetTimer(LONG_TO_UINT(nParam1 * 1000), this);
-            break;
-        }
-        case ACMSG_RECOVERY_REQUIRED:
-        {
-            if (nParam1 == 0)
-            {
-                m_nInitRetryCount = 0;
-                m_nStartRetryCount = 0;
-
-                // Initialize the provisioning ...
-                InitProvisioning();
-            }
-            else
-            {
-                if (m_piIsim != IMS_NULL)
-                {
-                    m_piIsim->Release();
-                }
-
-                m_nInitRetryCount = 1;
-
-                SendMessage(ACMSG_INIT_RETRY_TIMER, nParam1, 0);
-                IMS_TRACE_D("ISIM initialization will be retry after %d s", nParam1, 0, 0);
-            }
-            break;
-        }
-        case ACMSG_REFRESH_ISIM_PROVISIONING:
-        {
-            RefreshIsimProvisioning((nParam1 == 1) ? IMS_TRUE : IMS_FALSE);
+            // Read all the subscriber configuration again.
+            UpdateAllConfigs();
             break;
         }
         default:
@@ -451,183 +414,78 @@ PROTECTED VIRTUAL void SubscriberConfig::HandleMessage(
     }
 }
 
-PROTECTED VIRTUAL void SubscriberConfig::RemoveListener(
-        IN ISubscriberConfigListener* piListener) const
-{
-    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
-    {
-        ISubscriberConfigListener* piTmpListener = m_objListeners.GetAt(i);
-
-        if (piTmpListener == piListener)
-        {
-            m_objListeners.RemoveAt(i);
-
-            IMS_TRACE_D("SubscriberConfig :: Listener (%p) is removed", piListener, 0, 0);
-            return;
-        }
-    }
-}
-
-PROTECTED VIRTUAL void SubscriberConfig::SetListener(IN ISubscriberConfigListener* piListener) const
-{
-    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
-    {
-        ISubscriberConfigListener* piTmpListener = m_objListeners.GetAt(i);
-
-        if (piTmpListener == piListener)
-        {
-            IMS_TRACE_D("SubscriberConfig :: Listener (%p) is already set", piListener, 0, 0);
-            return;
-        }
-    }
-
-    m_objListeners.Append(piListener);
-
-    IMS_TRACE_D("SubscriberConfig :: Listener (%p) is set", piListener, 0, 0);
-
-    if (IsServiceAllowed() && IsIsimSupported() && (m_nIsimErrorCode != ISIM_NO_ERROR))
-    {
-        SubscriberConfig* pSubsConfig = const_cast<SubscriberConfig*>(this);
-
-        pSubsConfig->SendMessage(
-                ACMSG_NOTIFY_ERROR, reinterpret_cast<IMS_SINTP>(piListener), 0 /*Error Code*/);
-    }
-}
-
 PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::ReadFrom()
 {
-    ICarrierConfig* piCc = GetCarrierConfig();
-
-    m_nIsimErrorCode = ISIM_NO_ERROR;
+    const ICarrierConfig* piCc = GetCarrierConfig();
 
     m_nSubscriptionAttributes = ReadSubscriptionAttributes(piCc);
     m_objPcscfDiscoveryMethods = ReadPcscfDiscoveryMethods(piCc);
-
-    IMS_SINT32 nPort = piCc->GetInt(CarrierConfig::Ims::KEY_SIP_SERVER_PORT_NUMBER_INT);
-    IImsPrivateProperty* piProperty = GetPrivateProperty();
-    AString strPcscfAddressList = piProperty->GetPersistent(
-            ImsPrivateProperties::Persistent::KEY_CONFIG_PCSCF_ADDRESS_LIST, GetSlotId());
-    ImsList<AString> objPcscfAddresses = strPcscfAddressList.Split(',');
-
-    for (IMS_UINT32 i = 0; i < objPcscfAddresses.GetSize(); ++i)
-    {
-        ServerAddress* pSa = new ServerAddress(objPcscfAddresses.GetAt(i), nPort);
-
-        if (pSa == IMS_NULL)
-        {
-            return IMS_FALSE;
-        }
-
-        if (m_objPcscfAddresses.Add(pSa) < 0)
-        {
-            delete pSa;
-            return IMS_FALSE;
-        }
-    }
+    UpdatePcscfAddresses();
 
     if (IsDefaultConfig())
     {
-        piProperty->SetPersistentBoolean(
-                ImsPrivateProperties::Persistent::KEY_ISIM_ENABLED, IsIsimSupported(), GetSlotId());
-        piProperty->SetPersistentBoolean(
-                ImsPrivateProperties::Persistent::KEY_USIM_ENABLED, IsUsimSupported(), GetSlotId());
-
         // LOG_EXCLUDING_SERVER_INFO, only for default subscriber
         IMS_UTIL_SYS_PROP_SET_DEBUG_ON(IsDebugOn());
     }
 
-    //
-    // Device supports the ISIM application, so the subscriber info. should be read from ISIM.
-    //
+    ImsSubscriberInfo* pSubsInfo = CreateSubscriberInfo();
+
+    // Device supports the ISIM application, so the subscriber information should be read from ISIM.
     if (IsServiceAllowed() && IsIsimSupported())
     {
         IMS_TRACE_D("ISIM is enabled", 0, 0, 0);
 
-        ImsSubscriberInfo* pSubsInfo = new ImsSubscriberInfo();
+        StoreSubscriberInfo();
 
-        pSubsInfo->m_nRefIndexOfPrimaryImpu =
-                piCc->GetInt(CarrierConfig::Ims::KEY_ISIM_INDEX_FOR_IMPU_INT, 1);
-        pSubsInfo->m_strPhoneContext =
-                piCc->GetString(CarrierConfig::Ims::KEY_PHONE_CONTEXT_DOMAIN_NAME_STRING);
-        pSubsInfo->m_bIsAuthRealmLenient = IMS_TRUE;
-        pSubsInfo->m_objCredential.SetType(Credential::TYPE_AKAv1_MD5);
-        pSubsInfo->m_objCredential.SetPassword(AString::ConstNull());
-
-        if (!m_objSubscriberInfos.Append(pSubsInfo))
-        {
-            delete pSubsInfo;
-            return IMS_FALSE;
-        }
-
-        if (GetState() == STATE_REFRESHING)
-        {
-            // Do not transit the state
-        }
-        else
+        if (GetState() != STATE_REFRESHING)
         {
             SetState(STATE_PROVISIONING);
         }
 
         IMS_TRACE_D(
-                "SubscriberConfig (%s:%s) is loaded", m_strConfName.GetStr(), m_strId.GetStr(), 0);
+                "SubscriberConfig(%s:%s) is loaded", m_strConfName.GetStr(), m_strId.GetStr(), 0);
 
         return IMS_TRUE;
     }
 
-    ImsSubscriberInfo* pSubsInfo = new ImsSubscriberInfo();
+    AString strHomeDomainName;
+    AString strPrivateUserId;
+    AStringArray objPublicUserIds;
 
     if (IsDefaultConfig())
     {
-        pSubsInfo->m_strHomeDomainName = piProperty->GetPersistent(
+        IImsPrivateProperty* piProperty = GetPrivateProperty();
+
+        strHomeDomainName = piProperty->GetPersistent(
                 ImsPrivateProperties::Persistent::KEY_CONFIG_HOME_DOMAIN_NAME, GetSlotId());
 
-        pSubsInfo->m_strPrivateUserId = piProperty->GetPersistent(
+        strPrivateUserId = piProperty->GetPersistent(
                 ImsPrivateProperties::Persistent::KEY_CONFIG_IMPI, GetSlotId());
 
-        pSubsInfo->m_nRefIndexOfPrimaryImpu = 0;
         AString strPublicUserIds = piProperty->GetPersistent(
                 ImsPrivateProperties::Persistent::KEY_CONFIG_IMPU_LIST, GetSlotId());
 
-        pSubsInfo->m_objPublicUserIds = strPublicUserIds.Split(',');
-
-        if (pSubsInfo->m_objPublicUserIds.GetCount() > 0)
-        {
-            piProperty->SetPersistent(ImsPrivateProperties::Persistent::KEY_PRIMARY_IMPU,
-                    pSubsInfo->m_objPublicUserIds.GetElementAt(0), GetSlotId());
-        }
-
-        pSubsInfo->m_strPhoneContext =
-                piCc->GetString(CarrierConfig::Ims::KEY_PHONE_CONTEXT_DOMAIN_NAME_STRING);
+        objPublicUserIds = strPublicUserIds.Split(',');
     }
     else
     {
         const AString& strAnonymousUserId = ImsIdentity::GetAnonymousUserId();
         AString strTemp;
-        strAnonymousUserId.SplitF('@', strTemp, pSubsInfo->m_strHomeDomainName, IMS_FALSE);
-        strAnonymousUserId.SplitF(':', strTemp, pSubsInfo->m_strPrivateUserId, IMS_FALSE);
-        pSubsInfo->m_nRefIndexOfPrimaryImpu = 0;
-        pSubsInfo->m_objPublicUserIds.AddElement(strAnonymousUserId);
+        strAnonymousUserId.SplitF('@', strTemp, strHomeDomainName, IMS_FALSE);
+        strAnonymousUserId.SplitF(':', strTemp, strPrivateUserId, IMS_FALSE);
+
+        AString strPublicUserId;
+        strPublicUserId.Sprintf("\"Anonymous\" <%s>", strAnonymousUserId.GetStr());
+        objPublicUserIds.AddElement(strPublicUserId);
     }
 
-    pSubsInfo->m_bIsAuthRealmLenient = IMS_TRUE;
-    pSubsInfo->m_objCredential.SetType(Credential::TYPE_AKAv1_MD5);
-    pSubsInfo->m_objCredential.SetPassword(AString::ConstNull());
-    pSubsInfo->m_objCredential.SetUsername(pSubsInfo->m_strPrivateUserId);
-    pSubsInfo->m_objCredential.SetRealm(pSubsInfo->m_strHomeDomainName);
-
-    pSubsInfo->m_strScscfAddress = pSubsInfo->m_strHomeDomainName;
-
-    // Additional operation: set the primary IMPU
-    SetPrimaryImpu(pSubsInfo);
-
-    if (!m_objSubscriberInfos.Append(pSubsInfo))
-    {
-        delete pSubsInfo;
-        return IMS_FALSE;
-    }
+    UpdatePrivateUserId(pSubsInfo, strPrivateUserId);
+    UpdatePublicUserIds(pSubsInfo, objPublicUserIds);
+    UpdateHomeDomainName(pSubsInfo, strHomeDomainName);
 
     SetState(STATE_PROVISIONED);
-
+    StoreSubscriberInfo();
+    CallSubscriberInfoListener(SUBSCRIBER_INFO_ADD);
     ToDebugString();
 
     IMS_TRACE_D("SubscriberConfig (%d, %s:%s) is loaded", GetSlotId(), m_strConfName.GetStr(),
@@ -650,7 +508,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
 
         case IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_ALL:
         {
-            ICarrierConfig* piCc = GetCarrierConfig();
+            const ICarrierConfig* piCc = GetCarrierConfig();
 
             m_nSubscriptionAttributes = ReadSubscriptionAttributes(piCc);
             m_objPcscfDiscoveryMethods = ReadPcscfDiscoveryMethods(piCc);
@@ -658,7 +516,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
             // LOG_EXCLUDING_SERVER_INFO
             IMS_UTIL_SYS_PROP_SET_DEBUG_ON(IsDebugOn());
 
-            IMS_TRACE_D("SUBSCRIPTION_ATTRIBUTE_ALL :: Updated (attributes=%08X)",
+            IMS_TRACE_D("SUBSCRIPTION_ATTRIBUTE_ALL: Updated (attributes=%08X)",
                     GetSubscriptionAttributes(), 0, 0);
             break;
         }
@@ -678,7 +536,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
                         SUBSCRIPTION_ATTRIBUTE_ISIM);
             }
 
-            IMS_TRACE_D("SUBSCRIPTION_ATTRIBUTE_ISIM :: %s", _TRACE_B_(IsIsimSupported()), 0, 0);
+            IMS_TRACE_D("SUBSCRIPTION_ATTRIBUTE_ISIM: %s", _TRACE_B_(IsIsimSupported()), 0, 0);
             break;
         }
         case IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_USIM:
@@ -697,7 +555,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
                         SUBSCRIPTION_ATTRIBUTE_USIM);
             }
 
-            IMS_TRACE_D("SUBSCRIPTION_ATTRIBUTE_USIM :: %s", _TRACE_B_(IsUsimSupported()), 0, 0);
+            IMS_TRACE_D("SUBSCRIPTION_ATTRIBUTE_USIM: %s", _TRACE_B_(IsUsimSupported()), 0, 0);
             break;
         }
         case IConfigurable::CP_I_HOME_DOMAIN_NAME:
@@ -728,8 +586,8 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
             pSubsInfo->m_strHomeDomainName = piProperty->GetPersistent(
                     ImsPrivateProperties::Persistent::KEY_CONFIG_HOME_DOMAIN_NAME, GetSlotId());
 
-            IMS_TRACE_D("HOME_DOMAIN_NAME :: %s",
-                    GetLog(pSubsInfo->m_strHomeDomainName, 4).GetStr(), 0, 0);
+            IMS_TRACE_D("HOME_DOMAIN_NAME: %s", GetLog(pSubsInfo->m_strHomeDomainName, 4).GetStr(),
+                    0, 0);
             break;
         }
         case IConfigurable::CP_I_IMPI:
@@ -760,7 +618,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
             pSubsInfo->m_strPrivateUserId = piProperty->GetPersistent(
                     ImsPrivateProperties::Persistent::KEY_CONFIG_IMPI, GetSlotId());
 
-            IMS_TRACE_D("IMPI :: %s", GetLog(pSubsInfo->m_strPrivateUserId, 6).GetStr(), 0, 0);
+            IMS_TRACE_D("IMPI: %s", GetLog(pSubsInfo->m_strPrivateUserId, 6).GetStr(), 0, 0);
             break;
         }
         case IConfigurable::CP_I_IMPU_PRIMARY_REF_INDEX:
@@ -787,7 +645,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
                 pSubsInfo->m_nRefIndexOfPrimaryImpu = nIndex;
 
                 IMS_TRACE_D(
-                        "IMPU_PRIMARY_REF_INDEX :: %d", pSubsInfo->m_nRefIndexOfPrimaryImpu, 0, 0);
+                        "IMPU_PRIMARY_REF_INDEX: %d", pSubsInfo->m_nRefIndexOfPrimaryImpu, 0, 0);
                 break;
             }
 
@@ -799,12 +657,12 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
                 return IMS_FALSE;
             }
 
-            ICarrierConfig* piCc = GetCarrierConfig();
+            const ICarrierConfig* piCc = GetCarrierConfig();
 
             pSubsInfo->m_nRefIndexOfPrimaryImpu =
                     piCc->GetInt(CarrierConfig::Ims::KEY_ISIM_INDEX_FOR_IMPU_INT, 1);
 
-            IMS_TRACE_D("IMPU_PRIMARY_REF_INDEX :: %d", pSubsInfo->m_nRefIndexOfPrimaryImpu, 0, 0);
+            IMS_TRACE_D("IMPU_PRIMARY_REF_INDEX: %d", pSubsInfo->m_nRefIndexOfPrimaryImpu, 0, 0);
             break;
         }
         case IConfigurable::CP_I_IMPU_0:  // FALL-THROUGH
@@ -862,7 +720,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
                     pSubsInfo->m_objPublicUserIds.SetElementAt(strValue, nIndex);
                 }
 
-                IMS_TRACE_D("IMPU (%d) :: %s", nIndex, GetLog(strValue, 10).GetStr(), 0);
+                IMS_TRACE_D("IMPU(%d): %s", nIndex, GetLog(strValue, 10).GetStr(), 0);
                 break;
             }
 
@@ -902,7 +760,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
             // Update the primary IMPU
             SetPrimaryImpu(pSubsInfo);
 
-            IMS_TRACE_D("IMPU (%d) :: %s", nIndex, GetLog(strUserId, 10).GetStr(), 0);
+            IMS_TRACE_D("IMPU(%d): %s", nIndex, GetLog(strUserId, 10).GetStr(), 0);
             break;
         }
         case IConfigurable::CP_I_PHONE_CONTEXT:
@@ -928,14 +786,14 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
                 break;
             }
 
-            ICarrierConfig* piCc = GetCarrierConfig();
+            const ICarrierConfig* piCc = GetCarrierConfig();
 
             pSubsInfo->m_strPhoneContext = (piCc != IMS_NULL)
                     ? piCc->GetString(CarrierConfig::Ims::KEY_PHONE_CONTEXT_DOMAIN_NAME_STRING)
                     : AString::ConstNull();
 
             IMS_TRACE_D(
-                    "PHONE_CONTEXT :: %s", GetLog(pSubsInfo->m_strPhoneContext, 4).GetStr(), 0, 0);
+                    "PHONE_CONTEXT: %s", GetLog(pSubsInfo->m_strPhoneContext, 4).GetStr(), 0, 0);
             break;
         }
         case IConfigurable::CP_I_AUTH_USERNAME:
@@ -968,7 +826,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
 
             pSubsInfo->m_objCredential.SetUsername(strPrivateUserId);
 
-            IMS_TRACE_D("AUTH_USERNAME :: %s",
+            IMS_TRACE_D("AUTH_USERNAME: %s",
                     GetLog(pSubsInfo->m_objCredential.GetUsername(), 6).GetStr(), 0, 0);
             break;
         }
@@ -990,7 +848,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
 
             pSubsInfo->m_objCredential.SetPassword(AString::ConstNull());
 
-            IMS_TRACE_D("AUTH_PASSWORD :: %s",
+            IMS_TRACE_D("AUTH_PASSWORD: %s",
                     GetLog(pSubsInfo->m_objCredential.GetPassword(), 3).GetStr(), 0, 0);
             break;
         }
@@ -1024,8 +882,8 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
 
             pSubsInfo->m_objCredential.SetRealm(strHomeDomainName);
 
-            IMS_TRACE_D("AUTH_REALM :: %s",
-                    GetLog(pSubsInfo->m_objCredential.GetRealm(), 4).GetStr(), 0, 0);
+            IMS_TRACE_D("AUTH_REALM: %s", GetLog(pSubsInfo->m_objCredential.GetRealm(), 4).GetStr(),
+                    0, 0);
             break;
         }
         case IConfigurable::CP_I_AUTH_ALGORITHM:
@@ -1064,7 +922,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
 
             pSubsInfo->m_objCredential.SetType(Credential::TYPE_AKAv1_MD5);
 
-            IMS_TRACE_D("AUTH_ALGORITHM :: %d", pSubsInfo->m_objCredential.GetType(), 0, 0);
+            IMS_TRACE_D("AUTH_ALGORITHM: %d", pSubsInfo->m_objCredential.GetType(), 0, 0);
             break;
         }
         case IConfigurable::CP_I_SERVER_SCSCF:
@@ -1095,8 +953,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
             pSubsInfo->m_strScscfAddress = piProperty->GetPersistent(
                     ImsPrivateProperties::Persistent::KEY_CONFIG_HOME_DOMAIN_NAME, GetSlotId());
 
-            IMS_TRACE_D(
-                    "SERVER_SCSCF :: %s", GetLog(pSubsInfo->m_strScscfAddress, 4).GetStr(), 0, 0);
+            IMS_TRACE_D("SERVER_SCSCF: %s", GetLog(pSubsInfo->m_strScscfAddress, 4).GetStr(), 0, 0);
             break;
         }
         case IConfigurable::CP_I_PCSCF_DISCOVERY_METHODS:
@@ -1168,9 +1025,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
                 if (!strValue.IsNULL())
                 {
                     pSa->SetAddress(strValue);
-
-                    IMS_TRACE_D(
-                            "PCSCF_ADDRESS (%d) :: %s", nIndex, GetLog(strValue, 5).GetStr(), 0);
+                    IMS_TRACE_D("PCSCF_ADDRESS(%d): %s", nIndex, GetLog(strValue, 5).GetStr(), 0);
                 }
                 else
                 {
@@ -1184,7 +1039,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
                             : AString::ConstNull();
                     pSa->SetAddress(strPcscfAddress);
 
-                    IMS_TRACE_D("PCSCF_ADDRESS (%d) :: %s", nIndex,
+                    IMS_TRACE_D("PCSCF_ADDRESS(%d): %s", nIndex,
                             GetLog(pSa->GetAddress(), 5).GetStr(), 0);
                 }
             }
@@ -1244,17 +1099,17 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
 
                     pSa->SetPort(nPort);
 
-                    IMS_TRACE_D("PCSCF_PORT (%d) :: %d", nIndex, nPort, 0);
+                    IMS_TRACE_D("PCSCF_PORT(%d): %d", nIndex, nPort, 0);
                 }
                 else
                 {
-                    ICarrierConfig* piCc = GetCarrierConfig();
+                    const ICarrierConfig* piCc = GetCarrierConfig();
                     IMS_SINT32 nPort = (piCc != IMS_NULL)
                             ? piCc->GetInt(CarrierConfig::Ims::KEY_SIP_SERVER_PORT_NUMBER_INT)
                             : (-1);
                     pSa->SetPort(nPort);
 
-                    IMS_TRACE_D("PCSCF_PORT (%d) :: %d", nIndex, pSa->GetPort(), 0);
+                    IMS_TRACE_D("PCSCF_PORT(%d): %d", nIndex, pSa->GetPort(), 0);
                 }
             }
             break;
@@ -1273,7 +1128,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
                     ImsPrivateProperties::Persistent::KEY_CONFIG_PCSCF_ADDRESS_LIST, GetSlotId());
             ImsList<AString> objPcscfAddresses = strPcscfAddressList.Split(',');
 
-            ICarrierConfig* piCc = GetCarrierConfig();
+            const ICarrierConfig* piCc = GetCarrierConfig();
             IMS_SINT32 nPort = (piCc != IMS_NULL)
                     ? piCc->GetInt(CarrierConfig::Ims::KEY_SIP_SERVER_PORT_NUMBER_INT)
                     : (-1);
@@ -1290,7 +1145,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
                 pSa->SetAddress(strAddress);
                 pSa->SetPort(nPort);
 
-                IMS_TRACE_D("PCSCF_ADDRESS_PORT (%d) :: %s (%d)", nIndex,
+                IMS_TRACE_D("PCSCF_ADDRESS_PORT(%d): %s (%d)", nIndex,
                         GetLog(pSa->GetAddress(), 5).GetStr(), pSa->GetPort());
             }
             break;
@@ -1302,8 +1157,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
         }
         case IConfigurable::CP_I_WRITE_PROVISIONING_SUBSCRIBER:
         {
-            // Write the provisioning data to the storage medium
-            WriteProvisioning();
+            StoreSubscriberInfo();
             break;
         }
         default:
@@ -1335,339 +1189,35 @@ PROTECTED VIRTUAL void SubscriberConfig::CarrierConfig_NotifyConfigChanged(IN IM
     IMS_TRACE_D(
             "SubscriberConfig: CarrierConfigChanged(%d) on %s", nSlotId, m_strConfName.GetStr(), 0);
 
-    IMS_SINT32 nOldState = GetState();
-    IMS_BOOL bWasProvisioned = (nOldState == STATE_PROVISIONED);
+    const ICarrierConfig* piCc = GetCarrierConfig();
 
-    UpdateAllConfigs(bWasProvisioned);
+    m_objPcscfDiscoveryMethods = ReadPcscfDiscoveryMethods(piCc);
+    ClearPcscfAddresses();
+    UpdatePcscfAddresses();
 
-    if (IsIsimSupported())
+    IMS_SINT32 nRefIndexOfPrimaryImpu = IsIsimSupported()
+            ? piCc->GetInt(CarrierConfig::Ims::KEY_ISIM_INDEX_FOR_IMPU_INT, 1)
+            : 0;
+    AString strPhoneContext = IsDefaultConfig()
+            ? piCc->GetString(CarrierConfig::Ims::KEY_PHONE_CONTEXT_DOMAIN_NAME_STRING)
+            : AString::ConstNull();
+
+    ImsSubscriberInfo* pSubsInfo = GetSubscriberInfoEx();
+
+    if (pSubsInfo != IMS_NULL)
     {
-        if (bWasProvisioned)
+        pSubsInfo->m_strPhoneContext = strPhoneContext;
+
+        if (pSubsInfo->m_nRefIndexOfPrimaryImpu != nRefIndexOfPrimaryImpu)
         {
-            IMS_TRACE_I("SubscriberConfig(%d): ISIM refresh started", nSlotId, 0, 0);
-            SetState(STATE_REFRESHING);
-            NotifyRefreshStarted();
-        }
-    }
-    else
-    {
-        CallSubscriberInfoListener(SUBSCRIBER_INFO_ADD);
-    }
+            pSubsInfo->m_nRefIndexOfPrimaryImpu = nRefIndexOfPrimaryImpu;
 
-    if (!bWasProvisioned && (nOldState != STATE_INIT))
-    {
-        SetState(nOldState);
-    }
-}
-
-PRIVATE VIRTUAL void SubscriberConfig::Isim_OnField(
-        IN IMS_SINT32 nField, IN const ImsList<ByteArray>& objValues)
-{
-    switch (nField)
-    {
-        case IIsim::FIELD_IST:
-        {
-            m_bFlagRequestPending = IMS_FALSE;
-
-            if (!objValues.IsEmpty())
+            if (IsDefaultConfig() && pSubsInfo->m_objPublicUserIds.GetCount() > 0)
             {
-                const ByteArray& objIst = objValues.GetAt(0);
-
-                if (objIst.GetLength() > 0)
-                {
-                    m_byIst1 = objIst[0];
-                }
-            }
-
-            SetIsimRecord(ISIM_IST);
-            SendMessage(ACMSG_READ_ISIM_RECORD, 1, 0);
-            break;
-        }
-        case IIsim::FIELD_PCSCF_ADDRESS:
-        {
-            m_bFlagRequestPending = IMS_FALSE;
-
-            if (!objValues.IsEmpty())
-            {
-                IMS_UINT32 nServerCount = m_objPcscfAddresses.GetSize();
-                IMS_UINT32 nValueCount = objValues.GetSize();
-
-                if (nServerCount > nValueCount)
-                {
-                    nServerCount = nValueCount;
-                }
-
-                for (IMS_UINT32 i = 0; i < nServerCount; ++i)
-                {
-                    const ByteArray& objValue = objValues.GetAt(i);
-                    ServerAddress* pSa = m_objPcscfAddresses.GetAt(i);
-
-                    if (pSa == IMS_NULL)
-                    {
-                        IMS_TRACE_E(0, "No server address", 0, 0, 0);
-                        continue;
-                    }
-
-                    pSa->SetAddress(objValue.ToString());
-
-                    IMS_TRACE_D("PCSCF_ADDRESS :: %s", GetLog(pSa->GetAddress(), 5).GetStr(), 0, 0);
-                }
-
-                nServerCount = m_objPcscfAddresses.GetSize();
-
-                if (nServerCount > nValueCount)
-                {
-                    for (IMS_UINT32 i = nValueCount; i < nServerCount; ++i)
-                    {
-                        ServerAddress* pSa = m_objPcscfAddresses.GetAt(i);
-
-                        if (pSa == IMS_NULL)
-                        {
-                            IMS_TRACE_E(0, "No server address", 0, 0, 0);
-                            continue;
-                        }
-
-                        IMS_TRACE_D("PCSCF_ADDRESS :: %s >> empty",
-                                GetLog(pSa->GetAddress(), 5).GetStr(), 0, 0);
-
-                        pSa->SetAddress(AString::ConstNull());
-                    }
-                }
-            }
-            else
-            {
-                IMS_UINT32 nServerCount = m_objPcscfAddresses.GetSize();
-
-                for (IMS_UINT32 i = 0; i < nServerCount; ++i)
-                {
-                    ServerAddress* pSa = m_objPcscfAddresses.GetAt(i);
-
-                    if (pSa == IMS_NULL)
-                    {
-                        IMS_TRACE_E(0, "No server address", 0, 0, 0);
-                        continue;
-                    }
-
-                    IMS_TRACE_D("PCSCF_ADDRESS :: %s >> empty",
-                            GetLog(pSa->GetAddress(), 5).GetStr(), 0, 0);
-
-                    pSa->SetAddress(AString::ConstNull());
-                }
-            }
-
-            SetIsimRecord(ISIM_PCSCF);
-
-            SendMessage(ACMSG_READ_ISIM_RECORD, 1, 0);
-            break;
-        }
-        default:
-        {
-            IMS_TRACE_E(0, "Unsupported field : %d", nField, 0, 0);
-            break;
-        }
-    }
-}
-
-PRIVATE VIRTUAL void SubscriberConfig::Isim_OnHomeDomainName(IN const ByteArray& objDomainName)
-{
-    if (!IsIsimSupported())
-    {
-        IMS_TRACE_E(0, "ISIM is not supported", 0, 0, 0);
-        return;
-    }
-
-    m_bFlagRequestPending = IMS_FALSE;
-
-    ImsSubscriberInfo* pSubsInfo = m_objSubscriberInfos.GetAt(0);
-
-    if (pSubsInfo == IMS_NULL)
-    {
-        return;
-    }
-
-    // Updates the home domain name
-    pSubsInfo->m_strHomeDomainName = objDomainName.ToString();
-
-    // Updates the domain name related parameters
-    pSubsInfo->m_strScscfAddress = pSubsInfo->m_strHomeDomainName;
-
-    pSubsInfo->m_objCredential.SetUsername(pSubsInfo->m_strPrivateUserId);
-    pSubsInfo->m_objCredential.SetRealm(pSubsInfo->m_strHomeDomainName);
-
-    SetIsimRecord(ISIM_DOMAIN);
-
-    SendMessage(ACMSG_READ_ISIM_RECORD, 1, 0);
-}
-
-PRIVATE VIRTUAL void SubscriberConfig::Isim_OnImpi(IN const ByteArray& objPrivateUserId)
-{
-    if (!IsIsimSupported())
-    {
-        IMS_TRACE_E(0, "ISIM is not supported", 0, 0, 0);
-        return;
-    }
-
-    m_bFlagRequestPending = IMS_FALSE;
-
-    ImsSubscriberInfo* pSubsInfo = m_objSubscriberInfos.GetAt(0);
-
-    if (pSubsInfo == IMS_NULL)
-    {
-        return;
-    }
-
-    pSubsInfo->m_strPrivateUserId = objPrivateUserId.ToString();
-
-    SetIsimRecord(ISIM_IMPI);
-
-    SendMessage(ACMSG_READ_ISIM_RECORD, 1, 0);
-}
-
-PRIVATE VIRTUAL void SubscriberConfig::Isim_OnImpu(IN const ImsList<ByteArray>& objPublicUserIds)
-{
-    if (!IsIsimSupported())
-    {
-        IMS_TRACE_E(0, "ISIM is not supported", 0, 0, 0);
-        return;
-    }
-
-    m_bFlagRequestPending = IMS_FALSE;
-
-    ImsSubscriberInfo* pSubsInfo = m_objSubscriberInfos.GetAt(0);
-
-    if (pSubsInfo == IMS_NULL)
-    {
-        return;
-    }
-
-    pSubsInfo->m_objPublicUserIds.RemoveAllElements();
-
-    IMS_BOOL bUriSchemeRequiredWhenAbsent = IMS_TRUE;
-
-    for (IMS_UINT32 i = 0; i < objPublicUserIds.GetSize(); ++i)
-    {
-        const ByteArray& objPublicUserId = objPublicUserIds.GetAt(i);
-        AString strUserId = objPublicUserId.ToString();
-
-        // Remove the leading & trailing white spaces
-        strUserId = strUserId.Trim();
-
-        if (objPublicUserId.GetLength() != strUserId.GetLength())
-        {
-            IMS_TRACE_E(0, "IMPU :: IMPU (in record at %d) contains the white spaces (%d >> %d)", i,
-                    objPublicUserId.GetLength(), strUserId.GetLength());
-        }
-
-        if (strUserId.GetLength() == 0)
-        {
-            pSubsInfo->m_objPublicUserIds.AddElement(strUserId);
-            continue;
-        }
-
-        AString strScheme = AString::ConstNull();
-        IMS_SINT32 nStartIndex = strUserId.StartsWith('<') ? 1 : 0;
-
-        if (strUserId.GetLength() >= (4 + nStartIndex))
-        {
-            strScheme = strUserId.GetSubStr(nStartIndex, 4);
-
-            if (strScheme.EqualsIgnoreCase("sips") && (strUserId.GetLength() >= (5 + nStartIndex)))
-            {
-                strScheme = strUserId.GetSubStr(nStartIndex, 5);
+                StorePrimaryPublicUserId();
             }
         }
-
-        // As a default URI scheme, append "sip" URI scheme
-        if (bUriSchemeRequiredWhenAbsent && !strScheme.EqualsIgnoreCase("sip:") &&
-                !strScheme.EqualsIgnoreCase("tel:") && !strScheme.EqualsIgnoreCase("sips:"))
-        {
-            strUserId.Prepend("sip:");
-            IMS_TRACE_D("Add a default URI scheme (sip) at %d", i, 0, 0);
-        }
-
-        pSubsInfo->m_objPublicUserIds.AddElement(strUserId);
     }
-
-    SetIsimRecord(ISIM_IMPU);
-
-    // Additional operation: set the primary IMPU
-    SetPrimaryImpu(pSubsInfo);
-
-    SendMessage(ACMSG_READ_ISIM_RECORD, 1, 0);
-}
-
-PRIVATE VIRTUAL void SubscriberConfig::Isim_OnError(IN IMS_SINT32 nErrorCode)
-{
-    if (!IsIsimSupported())
-    {
-        IMS_TRACE_E(0, "ISIM is not supported", 0, 0, 0);
-        return;
-    }
-
-    if (nErrorCode == IIsim::ERROR_REFRESH_REG_FAILED)
-    {
-        IMS_TRACE_D("Registering ISIM refresh callback failed; "
-                    "in this moment, ignore this error code...",
-                0, 0, 0);
-        return;
-    }
-    else if (nErrorCode == IIsim::ERROR_INTERFACE_CHANNEL_ERROR)
-    {
-        IMS_TRACE_D("ISIM communication channel has an error; initializing ISIM ...", 0, 0, 0);
-
-        SendMessage(ACMSG_RECOVERY_REQUIRED, 0, 0);
-        return;
-    }
-    else if (nErrorCode == IIsim::ERROR_REFRESH_ERROR)
-    {
-        IMS_TRACE_D("ISIM refresh error; waits for ISIM initialization...", 0, 0, 0);
-
-        if (GetState() == STATE_REFRESHING)
-        {
-            SetState(STATE_PROVISIONED);
-        }
-        return;
-    }
-
-    m_bFlagRequestPending = IMS_FALSE;
-
-    // Reset the all items
-    ResetIsimRecord(m_nConfiguredIsimRecords);
-
-    if (nErrorCode == IIsim::ERROR_READ_DENIED)
-    {
-        IMS_TRACE_D("ISIM read denied - wait for PIN enabling ...", 0, 0, 0);
-        return;
-    }
-
-    IMS_SINT32 nSubsConfigErrorCode = 0;
-
-    if ((nErrorCode == IIsim::ERROR_START_FAILED) || (nErrorCode == IIsim::ERROR_CARD_ERROR) ||
-            (nErrorCode == IIsim::ERROR_CARD_REMOVED))
-    {
-        if (GetState() == STATE_PROVISIONED)
-        {
-            // No state transition
-            // SetState(STATE_REFRESHING);
-        }
-        else
-        {
-            SetState(STATE_PROVISIONING);
-        }
-    }
-    else if (nErrorCode == IIsim::ERROR_NO_ISIM_APPLICATION)
-    {
-        nSubsConfigErrorCode = ERROR_NO_ISIM_APPLICATION;
-    }
-
-    IMS_TRACE_D("ISIM operation failed - Error Code (%d)", nErrorCode, 0, 0);
-
-    RecoverIsimProvisioning(nErrorCode);
-
-    m_nIsimErrorCode = nErrorCode;
-
-    // 4 According to the case, notify the error to the application
-    SendMessage(ACMSG_NOTIFY_ERROR, 0, nSubsConfigErrorCode);
 }
 
 PRIVATE VIRTUAL void SubscriberConfig::Isim_OnStateChanged(IN IMS_SINT32 nState)
@@ -1681,70 +1231,50 @@ PRIVATE VIRTUAL void SubscriberConfig::Isim_OnStateChanged(IN IMS_SINT32 nState)
     AString strIdForLog;
     strIdForLog.Sprintf("%d, %s", GetSlotId(), GetId().GetStr());
 
-    IMS_TRACE_I("SubsConfig (%s) :: %s on %s", strIdForLog.GetStr(), IsimStateToString(nState),
-            StateToString(GetState()));
+    IMS_TRACE_I("SubscriberConfig(%s): Isim_OnStateChanged - %s on %s", strIdForLog.GetStr(),
+            IsimStateToString(nState), StateToString(GetState()));
 
     switch (nState)
     {
         case IIsim::STATE_IDLE:
         {
-            IMS_TRACE_D("ISIM is idle", 0, 0, 0);
+            if (GetState() != STATE_INIT)
+            {
+                SetState(STATE_INACTIVE);
+            }
             break;
         }
-        case IIsim::STATE_INIT:
+        case IIsim::STATE_NOT_PRESENT:
         {
-            IMS_TRACE_D("ISIM initialization is completed", 0, 0, 0);
-
+            SetState(STATE_PROVISIONED);
+            SendMessage(ACMSG_NOTIFY_ERROR, 0, ERROR_NO_ISIM_APPLICATION);
+            break;
+        }
+        case IIsim::STATE_LOADED:
+        {
             if (GetState() == STATE_REFRESHING)
             {
-                IMS_TRACE_D("ISIM is now refreshing; so, ignore STATE_INIT", 0, 0, 0);
-
-                // We can consider that "NO ISIM APPLICATION" is a temporary error
-                // such as subsystem silent restart, ...
-                if (m_nIsimErrorCode != IIsim::ERROR_NO_ISIM_APPLICATION)
-                {
-                    break;
-                }
+                UpdateIsimRecords();
             }
             else if (GetState() == STATE_PROVISIONED)
             {
-                // MODEM_RESTART :: Reset the all items
-                ResetIsimRecord(m_nConfiguredIsimRecords);
                 CallSubscriberInfoListener(SUBSCRIBER_INFO_REMOVE_ALL);
-
                 SetState(STATE_REFRESHING);
-                SendMessage(ACMSG_REFRESH_STARTED, 0, 0);
-
-                m_nInitRetryCount = 0;
-                m_nIsimErrorCode = ISIM_NO_ERROR;
-                m_bFlagRequestPending = IMS_FALSE;
-
-                // Start ISIM provisioning ...
-                SendMessage(ACMSG_START_PROVISIONING, 1, 0);
-                break;
+                SendMessage(ACMSG_REFRESH_STARTED, LISTEN_EVENT_ISIM_PROVISIONING, 0);
+                SendMessage(ACMSG_UPDATE_ISIM_RECORDS, 0, 0);
             }
-
-            m_nInitRetryCount = 0;
-            m_nIsimErrorCode = ISIM_NO_ERROR;
-            m_bFlagRequestPending = IMS_FALSE;
-
-            // Start ISIM provisioning ...
-            SendMessage(ACMSG_START_PROVISIONING, 0, 0);
-            break;
-        }
-        case IIsim::STATE_READY:
-        {
-            IMS_TRACE_D("ISIM is ready, the subscriber config can read a data from ISIM", 0, 0, 0);
-            m_nStartRetryCount = 0;
-            m_nIsimErrorCode = ISIM_NO_ERROR;
-            SendMessage(ACMSG_READ_ISIM_RECORD, 0, 0);
+            else
+            {
+                if (GetState() == STATE_INACTIVE)
+                {
+                    SetState(STATE_PROVISIONING);
+                }
+                UpdateIsimRecords();
+            }
             break;
         }
         case IIsim::STATE_REFRESHING:
         {
-            IMS_TRACE_D("ISIM refresh is started", 0, 0, 0);
-            m_nIsimErrorCode = ISIM_NO_ERROR;
-
             if (GetState() == STATE_PROVISIONING)
             {
                 // Waits for ISIM refresh completed.
@@ -1755,62 +1285,12 @@ PRIVATE VIRTUAL void SubscriberConfig::Isim_OnStateChanged(IN IMS_SINT32 nState)
                 SetState(STATE_REFRESHING);
             }
 
-            SendMessage(ACMSG_REFRESH_STARTED, 0, 0);
-            break;
-        }
-        case IIsim::STATE_REFRESHED:
-        {
-            IMS_TRACE_D("ISIM refresh is invoked, so the subscriber config will try "
-                        "to read a new records",
-                    0, 0, 0);
-
-            m_nStartRetryCount = 0;
-            m_nIsimErrorCode = ISIM_NO_ERROR;
-            m_bFlagRequestPending = IMS_FALSE;
-
-            if (GetState() == STATE_PROVISIONED)
-            {
-                SetState(STATE_REFRESHING);
-                SendMessage(ACMSG_REFRESH_STARTED, 0, 0);
-            }
-
-            // Reset the all items
-            ResetIsimRecord(m_nConfiguredIsimRecords);
-
-            CallSubscriberInfoListener(SUBSCRIBER_INFO_REMOVE_ALL);
-
-            // 4 Clear the ImsSubscriberInfo class
-
-            SendMessage(ACMSG_START_PROVISIONING, 1, 0);
+            SendMessage(ACMSG_REFRESH_STARTED, LISTEN_EVENT_ISIM_PROVISIONING, 0);
             break;
         }
         default:
         {
             break;
-        }
-    }
-}
-
-PRIVATE VIRTUAL void SubscriberConfig::Timer_TimerExpired(IN ITimer* piTimer)
-{
-    if (m_piInitRetryTimer == piTimer)
-    {
-        TimerService::GetTimerService()->DestroyTimer(m_piInitRetryTimer);
-
-        if (m_nInitRetryCount > 0)
-        {
-            // Initialize the provisioning ...
-            InitProvisioning();
-        }
-    }
-    else if (m_piStartRetryTimer == piTimer)
-    {
-        TimerService::GetTimerService()->DestroyTimer(m_piStartRetryTimer);
-
-        if (m_nStartRetryCount > 0)
-        {
-            // Start the provisioning ...
-            StartProvisioning();
         }
     }
 }
@@ -1842,7 +1322,7 @@ void SubscriberConfig::CallSubscriberInfoListener(IN IMS_SINT32 nSubsInfo)
         // ADD operation
         for (IMS_UINT32 i = 0; i < m_objSubscriberInfos.GetSize(); ++i)
         {
-            ImsSubscriberInfo* pSubsInfo = m_objSubscriberInfos.GetAt(i);
+            const ImsSubscriberInfo* pSubsInfo = m_objSubscriberInfos.GetAt(i);
             const AStringArray& objPublicUserIds = pSubsInfo->GetPublicUserIds();
 
             for (IMS_SINT32 j = 0; j < objPublicUserIds.GetCount(); ++j)
@@ -1864,7 +1344,7 @@ void SubscriberConfig::CallSubscriberInfoListener(IN IMS_SINT32 nSubsInfo)
         // REMOVE operation
         for (IMS_UINT32 i = 0; i < m_objSubscriberInfos.GetSize(); ++i)
         {
-            ImsSubscriberInfo* pSubsInfo = m_objSubscriberInfos.GetAt(i);
+            const ImsSubscriberInfo* pSubsInfo = m_objSubscriberInfos.GetAt(i);
             const AStringArray& objPublicUserIds = pSubsInfo->GetPublicUserIds();
 
             for (IMS_SINT32 j = 0; j < objPublicUserIds.GetCount(); ++j)
@@ -1889,7 +1369,7 @@ void SubscriberConfig::CallSubscriberInfoListener(IN IMS_SINT32 nSubsInfo)
 }
 
 PRIVATE
-void SubscriberConfig::ClearPcscfAddressAndSubscriberInfo()
+void SubscriberConfig::ClearPcscfAddresses()
 {
     if (!m_objPcscfAddresses.IsEmpty())
     {
@@ -1905,7 +1385,11 @@ void SubscriberConfig::ClearPcscfAddressAndSubscriberInfo()
 
         m_objPcscfAddresses.Clear();
     }
+}
 
+PRIVATE
+void SubscriberConfig::ClearSubscriberInfos()
+{
     if (!m_objSubscriberInfos.IsEmpty())
     {
         for (IMS_UINT32 i = 0; i < m_objSubscriberInfos.GetSize(); ++i)
@@ -1929,69 +1413,48 @@ const AString& SubscriberConfig::GetLog(IN const AString& strValue, IN IMS_SINT3
 }
 
 PRIVATE
-void SubscriberConfig::InitProvisioning()
+ImsSubscriberInfo* SubscriberConfig::CreateSubscriberInfo()
 {
-    // If IMS is disabled, do not process any operation...
-    if (!IsServiceAllowed())
+    const ICarrierConfig* piCc = GetCarrierConfig();
+    ImsSubscriberInfo* pSubsInfo = new ImsSubscriberInfo();
+
+    pSubsInfo->m_nRefIndexOfPrimaryImpu = IsIsimSupported()
+            ? piCc->GetInt(CarrierConfig::Ims::KEY_ISIM_INDEX_FOR_IMPU_INT, 1)
+            : 0;
+    pSubsInfo->m_strPhoneContext = IsDefaultConfig()
+            ? piCc->GetString(CarrierConfig::Ims::KEY_PHONE_CONTEXT_DOMAIN_NAME_STRING)
+            : AString::ConstNull();
+    pSubsInfo->m_bIsAuthRealmLenient = IMS_TRUE;
+    pSubsInfo->m_objCredential.SetType(Credential::TYPE_AKAv1_MD5);
+    pSubsInfo->m_objCredential.SetPassword(AString::ConstNull());
+
+    m_objSubscriberInfos.Append(pSubsInfo);
+
+    return pSubsInfo;
+}
+
+PRIVATE
+void SubscriberConfig::InitIsim()
+{
+    IMS_TRACE_D("InitIsim: serviceAllowed=%s, isimSupported=%s", _TRACE_B_(IsServiceAllowed()),
+            _TRACE_B_(IsIsimSupported()), 0);
+
+    if (IsServiceAllowed() && IsIsimSupported())
     {
-        // All the provisioning values will be filled by default...
-        IMS_TRACE_D("IMS is disabled on INIT", 0, 0, 0);
-
-        m_nInitRetryCount = 0;
-        return;
-    }
-
-    // If the device uses ISIM and it is not provisioned,
-    // try to read the IMS-related parameters from the ISIM.
-    if (IsIsimSupported())
-    {
-        m_nIsimErrorCode = ISIM_NO_ERROR;
-
-        IMS_TRACE_D("ISIM is enabled on INIT", 0, 0, 0);
-
-        if (m_piIsim != IMS_NULL)
-        {
-            m_piIsim->RemoveListener(this);
-        }
-
-        m_piIsim = PhoneInfoService::GetPhoneInfoService()->GetIsim(GetSlotId());
-
         if (m_piIsim == IMS_NULL)
         {
-            IMS_TRACE_E(0, "ISIM is null", 0, 0, 0);
-            return;
-        }
+            m_piIsim = PhoneInfoService::GetPhoneInfoService()->GetIsim(GetSlotId());
 
-        m_piIsim->AddListener(this);
-
-        if (m_piIsim->Init() != IMS_SUCCESS)
-        {
-            if (m_nInitRetryCount >= 0)
+            if (m_piIsim == IMS_NULL)
             {
-                // 2s, 4s, 8s, 16s, 32s, 1m, 1m, ...
-                static const IMS_SINT32 RETRY_INTERVAL[6] = {2, 2, 4, 8, 16, 32};
-                IMS_SINT32 nRetryInterval =
-                        (m_nInitRetryCount > 5) ? 60 : RETRY_INTERVAL[m_nInitRetryCount];
-
-                m_nInitRetryCount++;
-
-                // Start a retry timer
-                SendMessage(ACMSG_INIT_RETRY_TIMER, nRetryInterval, 0);
-
-                IMS_TRACE_D("ISIM initialization will be retry after %d s", nRetryInterval, 0, 0);
+                IMS_TRACE_E(0, "ISIM is null", 0, 0, 0);
                 return;
             }
 
-            IMS_TRACE_E(0,
-                    "Initializing ISIM failed; No operations "
-                    "until power cycle or UICC card removed & inserted",
-                    0, 0, 0);
-            return;
+            m_piIsim->AddListener(this);
+            // Initializes the ISIM module and waits for the ISIM state change.
+            m_piIsim->Init();
         }
-    }
-    else
-    {
-        IMS_TRACE_D("ISIM is disabled on INIT", 0, 0, 0);
     }
 }
 
@@ -2000,11 +1463,6 @@ void SubscriberConfig::SetPrimaryImpu(IN ImsSubscriberInfo* pSubsInfo)
 {
     pSubsInfo->m_strPrimaryImpuSipUri = AString::ConstEmpty();
     pSubsInfo->m_strPrimaryImpuTelUri = AString::ConstEmpty();
-
-    if (pSubsInfo->m_objPublicUserIds.IsEmpty())
-    {
-        return;
-    }
 
     // SIP URIs only
     //    -> First element is a default SIP URI.
@@ -2041,443 +1499,268 @@ void SubscriberConfig::SetPrimaryImpu(IN ImsSubscriberInfo* pSubsInfo)
 PRIVATE
 void SubscriberConfig::SetState(IN IMS_SINT32 nState)
 {
-    IMS_TRACE_I("SubscriberConfig(%d) :: %s to %s", GetSlotId(), StateToString(m_nState),
+    IMS_TRACE_I("SubscriberConfig(%d): %s to %s", GetSlotId(), StateToString(m_nState),
             StateToString(nState));
 
     m_nState = nState;
 }
 
+/**
+ * Refreshes the ISIM records when ISIM enablement is changed or ISIM refresh occurs.
+ */
 PRIVATE
-void SubscriberConfig::StartProvisioning(IN IMS_BOOL bIsRefresh /*= IMS_FALSE*/)
+void SubscriberConfig::RefreshIsimRecords()
 {
-    // Initialize the request state
-    m_bFlagRequestPending = IMS_FALSE;
-
-    // If IMS is disabled, do not process any operation...
-    if (!IsServiceAllowed())
-    {
-        // All the provisioning values will be filled by default...
-        IMS_TRACE_D("IMS is disabled on %s", (!bIsRefresh) ? "START" : "REFRESH", 0, 0);
-        return;
-    }
-
-    // If the device uses ISIM and it is not provisioned,
-    // try to read the IMS-related parameters from the ISIM.
-    if (IsIsimSupported())
-    {
-        IMS_TRACE_D("ISIM is enabled on %s", (!bIsRefresh) ? "START" : "REFRESH", 0, 0);
-
-        if (m_piIsim == IMS_NULL)
-        {
-            IMS_TRACE_E(0, "ISIM is null", 0, 0, 0);
-            return;
-        }
-
-        IMS_SINT32 nEFs = (IIsim::EF_IMPI | IIsim::EF_DOMAIN | IIsim::EF_IMPU);
-
-        if ((m_nConfiguredIsimRecords & ISIM_IST) == ISIM_IST)
-        {
-            nEFs |= IIsim::EF_IST;
-        }
-
-        if ((m_nConfiguredIsimRecords & ISIM_PCSCF) == ISIM_PCSCF)
-        {
-            nEFs |= IIsim::EF_PCSCF;
-        }
-
-        if (m_piIsim->Start(nEFs) != IMS_SUCCESS)
-        {
-            IMS_TRACE_E(0, "Starting ISIM provisioning failed", 0, 0, 0);
-
-            IMS_SINT32 nISIMState = m_piIsim->GetState();
-
-            if ((nISIMState == IIsim::STATE_INIT) || (nISIMState == IIsim::STATE_REFRESHED))
-            {
-                // 1s, 1s, 2s, 2s, 4s, ...
-                static const IMS_SINT32 RETRY_INTERVAL[5] = {1, 1, 2, 2, 4};
-                IMS_SINT32 nRetryInterval =
-                        (m_nStartRetryCount < 5) ? RETRY_INTERVAL[m_nStartRetryCount] : 10;
-
-                m_nStartRetryCount++;
-
-                // Start a retry timer
-                if (m_nStartRetryCount > 5)
-                {
-                    m_nInitRetryCountByStartRetry++;
-
-                    // Release ISIM resource and re-initialize the ISIM interface...
-                    m_piIsim->Release();
-
-                    m_nInitRetryCount = 1;
-
-                    if (m_nInitRetryCountByStartRetry > 6)
-                    {
-                        // 60s
-                        nRetryInterval = 60;
-                    }
-                    else
-                    {
-                        // 10s, 20s, 30s, 40s, 50s, 60s
-                        nRetryInterval = nRetryInterval * m_nInitRetryCountByStartRetry;
-                    }
-
-                    m_nStartRetryCount = 0;
-
-                    SendMessage(ACMSG_INIT_RETRY_TIMER, nRetryInterval, 0);
-                    IMS_TRACE_D(
-                            "ISIM initialization will be retry after %d s", nRetryInterval, 0, 0);
-                }
-                else
-                {
-                    SendMessage(ACMSG_START_RETRY_TIMER, nRetryInterval, 0);
-                    IMS_TRACE_D("ISIM start will be retry after %d s", nRetryInterval, 0, 0);
-                }
-            }
-            return;
-        }
-
-        m_nInitRetryCountByStartRetry = 0;
-
-        if (!m_piIsim->IsReady())
-        {
-            // Waits for the state changed callback
-            IMS_TRACE_D("Waits for the state changed notification from ISIM...", 0, 0, 0);
-            return;
-        }
-
-        if (!IsIsimProvisioningDone())
-        {
-            ReadIsimProvisioning();
-        }
-    }
-    else
-    {
-        IMS_TRACE_D("ISIM is disabled on %s", (!bIsRefresh) ? "START" : "REFRESH", 0, 0);
-    }
-}
-
-PRIVATE
-void SubscriberConfig::ReadIsimProvisioning()
-{
-    if (m_bFlagRequestPending)
-    {
-        IMS_TRACE_D("ISIM record is reading, so do not request to get the record...", 0, 0, 0);
-        return;
-    }
-
-    if (m_piIsim->GetState() != IIsim::STATE_READY)
-    {
-        IMS_TRACE_D("ISIM is not ready; waits for the readiness of ISIM ...", 0, 0, 0);
-        return;
-    }
-
-    // IMPI
-    if (!IsIsimRecordSet(ISIM_IMPI))
-    {
-        IMS_RESULT nResult = m_piIsim->GetImpi();
-
-        IMS_TRACE_D("Reading ISIM provisioning - IMPI ... result=%d", nResult, 0, 0);
-
-        if (nResult == IMS_FAILURE)
-        {
-            RecoverIsimProvisioning(IIsim::ERROR_READ_IMPI_FAILED);
-
-            m_nIsimErrorCode = IIsim::ERROR_READ_IMPI_FAILED;
-            SendMessage(ACMSG_NOTIFY_ERROR, 0, 0 /* Error Code */);
-            return;
-        }
-        else if (nResult == IIsim::RESULT_NO_RECORDS)
-        {
-            SetIsimRecord(ISIM_IMPI);
-            SendMessage(ACMSG_READ_ISIM_RECORD, 0, 0);
-            return;
-        }
-
-        m_bFlagRequestPending = IMS_TRUE;
-        return;
-    }
-
-    // IMPU
-    if (!IsIsimRecordSet(ISIM_IMPU))
-    {
-        IMS_RESULT nResult = m_piIsim->GetImpu();
-
-        IMS_TRACE_D("Reading ISIM provisioning - IMPU ... result=%d", nResult, 0, 0);
-
-        if (nResult == IMS_FAILURE)
-        {
-            RecoverIsimProvisioning(IIsim::ERROR_READ_IMPU_FAILED);
-
-            m_nIsimErrorCode = IIsim::ERROR_READ_IMPU_FAILED;
-            SendMessage(ACMSG_NOTIFY_ERROR, 0, 0 /* Error Code */);
-            return;
-        }
-        else if (nResult == IIsim::RESULT_NO_RECORDS)
-        {
-            SetIsimRecord(ISIM_IMPU);
-            SendMessage(ACMSG_READ_ISIM_RECORD, 0, 0);
-            return;
-        }
-
-        m_bFlagRequestPending = IMS_TRUE;
-        return;
-    }
-
-    // Home Domain Name
-    if (!IsIsimRecordSet(ISIM_DOMAIN))
-    {
-        IMS_RESULT nResult = m_piIsim->GetHomeDomainName();
-
-        IMS_TRACE_D("Reading ISIM provisioning - DOMAIN ... result=%d", nResult, 0, 0);
-
-        if (nResult == IMS_FAILURE)
-        {
-            RecoverIsimProvisioning(IIsim::ERROR_READ_DOMAIN_FAILED);
-
-            m_nIsimErrorCode = IIsim::ERROR_READ_DOMAIN_FAILED;
-            SendMessage(ACMSG_NOTIFY_ERROR, 0, 0 /* Error Code */);
-            return;
-        }
-        else if (nResult == IIsim::RESULT_NO_RECORDS)
-        {
-            SetIsimRecord(ISIM_DOMAIN);
-            SendMessage(ACMSG_READ_ISIM_RECORD, 0, 0);
-            return;
-        }
-
-        m_bFlagRequestPending = IMS_TRUE;
-        return;
-    }
-
-    // IST (ISIM Service Table)
-    if (((m_nConfiguredIsimRecords & ISIM_IST) == ISIM_IST) && !IsIsimRecordSet(ISIM_IST))
-    {
-        IMS_RESULT nResult = m_piIsim->GetField(IIsim::FIELD_IST);
-
-        IMS_TRACE_D("Reading ISIM provisioning - IST ... result=%d", nResult, 0, 0);
-
-        if (nResult == IMS_FAILURE)
-        {
-            m_nIsimErrorCode = IIsim::ERROR_READ_IST_FAILED;
-            SendMessage(ACMSG_NOTIFY_ERROR, 0, 0 /* Error Code */);
-            return;
-        }
-        else if (nResult == IIsim::RESULT_NO_RECORDS)
-        {
-            SetIsimRecord(ISIM_IST);
-            SendMessage(ACMSG_READ_ISIM_RECORD, 0, 0);
-            return;
-        }
-
-        m_bFlagRequestPending = IMS_TRUE;
-        return;
-    }
-
-    // Optional field : P-CSCF address
-    if (((m_nConfiguredIsimRecords & ISIM_PCSCF) == ISIM_PCSCF) && !IsIsimRecordSet(ISIM_PCSCF))
-    {
-        if ((m_nConfiguredIsimRecords & ISIM_IST) == ISIM_IST)
-        {
-            if ((m_byIst1 & IST_1_P_CSCF) != IST_1_P_CSCF)
-            {
-                for (IMS_UINT32 i = 0; i < m_objPcscfAddresses.GetSize(); ++i)
-                {
-                    ServerAddress* pSa = m_objPcscfAddresses.GetAt(i);
-
-                    if (pSa == IMS_NULL)
-                    {
-                        IMS_TRACE_E(0, "No server address", 0, 0, 0);
-                        continue;
-                    }
-
-                    IMS_TRACE_D("READ - PCSCF_ADDRESS :: %s >> empty",
-                            GetLog(pSa->GetAddress(), 5).GetStr(), 0, 0);
-
-                    pSa->SetAddress(AString::ConstNull());
-                }
-
-                SetIsimRecord(ISIM_PCSCF);
-                SendMessage(ACMSG_READ_ISIM_RECORD, 0, 0);
-                return;
-            }
-        }
-
-        IMS_RESULT nResult = m_piIsim->GetField(IIsim::FIELD_PCSCF_ADDRESS);
-
-        IMS_TRACE_D("Reading ISIM provisioning - P-CSCF address ... result=%d", nResult, 0, 0);
-
-        if (nResult == IMS_FAILURE)
-        {
-            m_nIsimErrorCode = IIsim::ERROR_READ_PCSCF_ADDRESS_FAILED;
-            SendMessage(ACMSG_NOTIFY_ERROR, 0, 0 /* Error Code */);
-            return;
-        }
-        else if (nResult == IIsim::RESULT_NO_RECORDS)
-        {
-            for (IMS_UINT32 i = 0; i < m_objPcscfAddresses.GetSize(); ++i)
-            {
-                ServerAddress* pSa = m_objPcscfAddresses.GetAt(i);
-
-                if (pSa == IMS_NULL)
-                {
-                    IMS_TRACE_E(0, "No server address", 0, 0, 0);
-                    continue;
-                }
-
-                IMS_TRACE_D("READ - PCSCF_ADDRESS :: %s >> empty",
-                        GetLog(pSa->GetAddress(), 5).GetStr(), 0, 0);
-
-                pSa->SetAddress(AString::ConstNull());
-            }
-
-            SetIsimRecord(ISIM_PCSCF);
-            SendMessage(ACMSG_READ_ISIM_RECORD, 0, 0);
-            return;
-        }
-
-        m_bFlagRequestPending = IMS_TRUE;
-        return;
-    }
-}
-
-PRIVATE
-void SubscriberConfig::RecoverIsimProvisioning(IN IMS_SINT32 nErrorCode)
-{
-    if ((nErrorCode == IIsim::ERROR_START_FAILED) ||
-            (nErrorCode == IIsim::ERROR_READ_IMPI_FAILED) ||
-            (nErrorCode == IIsim::ERROR_READ_IMPU_FAILED) ||
-            (nErrorCode == IIsim::ERROR_READ_DOMAIN_FAILED))
-    {
-        if ((m_nIsimErrorCode == IIsim::ERROR_START_FAILED) ||
-                (m_nIsimErrorCode == IIsim::ERROR_READ_IMPI_FAILED) ||
-                (m_nIsimErrorCode == IIsim::ERROR_READ_IMPU_FAILED) ||
-                (m_nIsimErrorCode == IIsim::ERROR_READ_DOMAIN_FAILED))
-        {
-            IMS_TRACE_D("ISIM recovery is already installed ...", 0, 0, 0);
-            return;
-        }
-
-        if (GetState() == STATE_REFRESHING)
-        {
-            SetState(STATE_PROVISIONED);
-        }
-    }
-}
-
-PRIVATE
-void SubscriberConfig::RefreshIsimProvisioning(IN IMS_BOOL bEnforceIsimRefresh)
-{
-    IMS_TRACE_I("RefreshIsimProvisioning :: isim=%s", _TRACE_B_(IsIsimSupported()), 0, 0);
-
-    if (IsIsimSupported())
+    if (IsServiceAllowed() && IsIsimSupported())
     {
         if (m_piIsim == IMS_NULL)
         {
-            InitProvisioning();
+            InitIsim();
+        }
+        else if (m_piIsim->IsLoadCompleted())
+        {
+            UpdateIsimRecords();
+        }
+    }
+}
+
+/**
+ * Updates the ISIM records when ISIM is in LOADED.
+ */
+PRIVATE
+void SubscriberConfig::UpdateIsimRecords()
+{
+    IMS_TRACE_D("UpdateIsimRecords: serviceAllowed=%s, isimSupported=%s",
+            _TRACE_B_(IsServiceAllowed()), _TRACE_B_(IsIsimSupported()), 0);
+
+    if (IsServiceAllowed() && IsIsimSupported())
+    {
+        ImsSubscriberInfo* pSubsInfo = GetSubscriberInfoEx();
+
+        if (pSubsInfo == IMS_NULL)
+        {
+            pSubsInfo = CreateSubscriberInfo();
+        }
+
+        UpdatePrivateUserId(pSubsInfo, m_piIsim->GetImpi());
+        UpdatePublicUserIds(pSubsInfo, m_piIsim->GetImpu());
+        UpdateHomeDomainName(pSubsInfo, m_piIsim->GetHomeDomainName());
+        UpdatePcscfAddressesFromIsim(m_piIsim->GetPcscf());
+
+        IMS_SINT32 nOldState = GetState();
+        SetState(STATE_PROVISIONED);
+        StoreSubscriberInfo();
+        CallSubscriberInfoListener(SUBSCRIBER_INFO_ADD);
+        ToDebugString();
+
+        if (nOldState == STATE_PROVISIONING)
+        {
+            SendMessage(ACMSG_INIT_COMPLETED, LISTEN_EVENT_ISIM_PROVISIONING, 0);
         }
         else
         {
-            if (m_piIsim->IsReady() && (IsIsimProvisioningDone() || bEnforceIsimRefresh))
-            {
-                if (bEnforceIsimRefresh)
-                {
-                    m_bFlagRequestPending = IMS_FALSE;
-                    m_nConfiguredIsimRecords = ISIM_DONE;
-                    m_nIsimRecords = ISIM_NONE;
-                    m_byIst1 = IST_1_NONE;
-                    m_nIsimErrorCode = ISIM_NO_ERROR;
-                }
-
-                // Clears all the EF records
-                m_piIsim->ClearRecords();
-
-                // Reset the all items
-                ResetIsimRecord(m_nConfiguredIsimRecords);
-                ReadIsimProvisioning();
-            }
-            else if (m_piIsim->GetState() == IIsim::STATE_INIT)
-            {
-                StartProvisioning(IMS_TRUE);
-            }
-            else
-            {
-                // Waits for ISIM ready or do nothing.
-                IMS_TRACE_D("RefreshIsimProvisioning: ready=%s, isimProvisioning=%s",
-                        _TRACE_B_(m_piIsim->IsReady()), _TRACE_B_(IsIsimProvisioningDone()), 0);
-            }
+            SendMessage(ACMSG_REFRESH_COMPLETED, LISTEN_EVENT_ISIM_PROVISIONING, 0);
         }
     }
 }
 
 PRIVATE
-void SubscriberConfig::NotifyInitCompleted()
+void SubscriberConfig::UpdateHomeDomainName(
+        IN ImsSubscriberInfo* pSubsInfo, IN const AString& strHomeDomainName)
 {
-    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
-    {
-        ISubscriberConfigListener* piListener = m_objListeners.GetAt(i);
+    AString strFinalHdn = strHomeDomainName;
 
-        if (piListener != IMS_NULL)
+    if (strHomeDomainName.Equals("0"))
+    {
+        // The "0" string indicates an invalid home domain name and is treated as empty.
+        strFinalHdn = AString::ConstNull();
+
+        for (IMS_SINT32 i = 0; i < pSubsInfo->m_objPublicUserIds.GetCount(); ++i)
         {
+            const AString& strImpu = pSubsInfo->m_objPublicUserIds.GetElementAt(i);
+            IMS_SINT32 nIndex = strImpu.GetIndexOf('@');
+
+            if (nIndex != AString::NPOS)
+            {
+                strFinalHdn = strImpu.GetSubStr(nIndex + 1).Trim();
+
+                if (strFinalHdn.GetLength() > 0)
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+    pSubsInfo->m_strHomeDomainName = strFinalHdn;
+    pSubsInfo->m_strScscfAddress = strFinalHdn;
+    pSubsInfo->m_objCredential.SetRealm(strFinalHdn);
+}
+
+PRIVATE
+void SubscriberConfig::UpdatePrivateUserId(
+        IN ImsSubscriberInfo* pSubsInfo, IN const AString& strPrivateUserId)
+{
+    pSubsInfo->m_strPrivateUserId = strPrivateUserId;
+    pSubsInfo->m_objCredential.SetUsername(pSubsInfo->m_strPrivateUserId);
+}
+
+PRIVATE
+void SubscriberConfig::UpdatePublicUserIds(
+        IN ImsSubscriberInfo* pSubsInfo, IN const AStringArray& objPublicUserIds)
+{
+    const ICarrierConfig* piCc = GetCarrierConfig();
+    IMS_SINT32 nRefIndexOfPrimaryImpu = IsIsimSupported()
+            ? piCc->GetInt(CarrierConfig::Ims::KEY_ISIM_INDEX_FOR_IMPU_INT, 1)
+            : 0;
+    pSubsInfo->m_nRefIndexOfPrimaryImpu = nRefIndexOfPrimaryImpu;
+
+    pSubsInfo->m_objPublicUserIds.RemoveAllElements();
+
+    IMS_BOOL bUriSchemeRequiredWhenAbsent = IMS_TRUE;
+
+    for (IMS_SINT32 i = 0; i < objPublicUserIds.GetCount(); ++i)
+    {
+        const AString& strPublicUserId = objPublicUserIds.GetElementAt(i);
+        AString strUserId = strPublicUserId;
+
+        // Remove the leading & trailing white spaces
+        strUserId = strUserId.Trim();
+
+        if (strPublicUserId.GetLength() != strUserId.GetLength())
+        {
+            IMS_TRACE_E(0, "IMPU: IMPU (in record at %d) contains the white spaces (%d >> %d)", i,
+                    strPublicUserId.GetLength(), strUserId.GetLength());
+        }
+
+        if (strUserId.GetLength() == 0)
+        {
+            pSubsInfo->m_objPublicUserIds.AddElement(strUserId);
+            continue;
+        }
+
+        AString strScheme = AString::ConstNull();
+        IMS_SINT32 nStartIndex = strUserId.GetIndexOf('<') + 1;
+
+        if (strUserId.GetLength() >= (4 + nStartIndex))
+        {
+            strScheme = strUserId.GetSubStr(nStartIndex, 4);
+
+            if (strScheme.EqualsIgnoreCase("sips") && (strUserId.GetLength() >= (5 + nStartIndex)))
+            {
+                strScheme = strUserId.GetSubStr(nStartIndex, 5);
+            }
+        }
+
+        // As a default URI scheme, append "sip" URI scheme
+        if (bUriSchemeRequiredWhenAbsent && !strScheme.EqualsIgnoreCase("sip:") &&
+                !strScheme.EqualsIgnoreCase("tel:") && !strScheme.EqualsIgnoreCase("sips:"))
+        {
+            strUserId.Prepend("sip:");
+            IMS_TRACE_D("Add a default URI scheme (sip) at %d", i, 0, 0);
+        }
+
+        pSubsInfo->m_objPublicUserIds.AddElement(strUserId);
+    }
+
+    // Additional operation: set the primary IMPU
+    SetPrimaryImpu(pSubsInfo);
+}
+
+PRIVATE
+void SubscriberConfig::UpdatePcscfAddressesFromIsim(IN const AStringArray& objPcscfAddresses)
+{
+    m_objPcscfAddressesFromIsim = objPcscfAddresses;
+}
+
+PRIVATE
+void SubscriberConfig::UpdatePcscfAddresses()
+{
+    const ICarrierConfig* piCc = GetCarrierConfig();
+    IMS_SINT32 nPort = piCc->GetInt(CarrierConfig::Ims::KEY_SIP_SERVER_PORT_NUMBER_INT);
+    IImsPrivateProperty* piProperty = GetPrivateProperty();
+    AString strPcscfAddressList = piProperty->GetPersistent(
+            ImsPrivateProperties::Persistent::KEY_CONFIG_PCSCF_ADDRESS_LIST, GetSlotId());
+    ImsList<AString> objPcscfAddresses = strPcscfAddressList.Split(',');
+
+    for (IMS_UINT32 i = 0; i < objPcscfAddresses.GetSize(); ++i)
+    {
+        m_objPcscfAddresses.Add(new ServerAddress(objPcscfAddresses.GetAt(i), nPort));
+    }
+}
+
+PRIVATE
+void SubscriberConfig::NotifyInitCompleted(IN IMS_SINT32 nEvent)
+{
+    IMS_SLONG nIndex = m_objListeners.GetIndexOfKey(nEvent);
+
+    if (nIndex >= 0)
+    {
+        ImsList<ISubscriberConfigListener*>& objListeners = m_objListeners.GetValueAt(nIndex);
+
+        for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
+        {
+            ISubscriberConfigListener* piListener = objListeners.GetAt(i);
             piListener->SubscriberConfig_InitCompleted();
         }
     }
 }
 
 PRIVATE
-void SubscriberConfig::NotifyRefreshCompleted()
+void SubscriberConfig::NotifyRefreshCompleted(IN IMS_SINT32 nEvent)
 {
-    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
-    {
-        ISubscriberConfigListener* piListener = m_objListeners.GetAt(i);
+    IMS_SLONG nIndex = m_objListeners.GetIndexOfKey(nEvent);
 
-        if (piListener != IMS_NULL)
+    if (nIndex >= 0)
+    {
+        ImsList<ISubscriberConfigListener*>& objListeners = m_objListeners.GetValueAt(nIndex);
+
+        for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
         {
+            ISubscriberConfigListener* piListener = objListeners.GetAt(i);
             piListener->SubscriberConfig_RefreshCompleted();
         }
     }
 }
 
 PRIVATE
-void SubscriberConfig::NotifyRefreshStarted()
+void SubscriberConfig::NotifyRefreshStarted(IN IMS_SINT32 nEvent)
 {
-    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
-    {
-        ISubscriberConfigListener* piListener = m_objListeners.GetAt(i);
+    IMS_SLONG nIndex = m_objListeners.GetIndexOfKey(nEvent);
 
-        if (piListener != IMS_NULL)
+    if (nIndex >= 0)
+    {
+        ImsList<ISubscriberConfigListener*>& objListeners = m_objListeners.GetValueAt(nIndex);
+
+        for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
         {
+            ISubscriberConfigListener* piListener = objListeners.GetAt(i);
             piListener->SubscriberConfig_RefreshStarted();
         }
     }
 }
 
 PRIVATE
-void SubscriberConfig::NotifyError(
-        IN IMS_SINT32 nErrorCode, IN ISubscriberConfigListener* piTargetListener /*= IMS_NULL*/)
+void SubscriberConfig::NotifyError(IN IMS_SINT32 nEvent, IN IMS_SINT32 nErrorCode,
+        IN ISubscriberConfigListener* piTargetListener /*= IMS_NULL*/)
 {
-    if (piTargetListener == IMS_NULL)
-    {
-        for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
-        {
-            ISubscriberConfigListener* piListener = m_objListeners.GetAt(i);
+    IMS_SLONG nIndex = m_objListeners.GetIndexOfKey(nEvent);
 
-            if (piListener != IMS_NULL)
+    if (nIndex >= 0)
+    {
+        ImsList<ISubscriberConfigListener*>& objListeners = m_objListeners.GetValueAt(nIndex);
+
+        if (piTargetListener == IMS_NULL)
+        {
+            for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
             {
+                ISubscriberConfigListener* piListener = objListeners.GetAt(i);
                 piListener->SubscriberConfig_NotifyError(nErrorCode);
             }
         }
-
-        return;
-    }
-
-    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
-    {
-        ISubscriberConfigListener* piListener = m_objListeners.GetAt(i);
-
-        if (piListener == piTargetListener)
+        else if (objListeners.Contains(piTargetListener))
         {
-            piListener->SubscriberConfig_NotifyError(nErrorCode);
-            break;
+            piTargetListener->SubscriberConfig_NotifyError(nErrorCode);
         }
     }
 }
@@ -2498,34 +1781,75 @@ void SubscriberConfig::SendMessage(IN IMS_SINT32 nMsg, IN IMS_SINTP nParam1, IN 
 }
 
 PRIVATE
-void SubscriberConfig::UpdateAllConfigs(IN IMS_BOOL bEnforceIsimRefresh)
+void SubscriberConfig::UpdateAllConfigs()
 {
     CallSubscriberInfoListener(SUBSCRIBER_INFO_REMOVE_ALL);
-    ClearPcscfAddressAndSubscriberInfo();
+    ClearPcscfAddresses();
+    ClearSubscriberInfos();
+
+    IMS_SINT32 nOldState = GetState();
 
     if (!ReadFrom())
     {
         IMS_TRACE_E(0, "Updating all the configs (%s) failed", m_strConfName.GetStr(), 0, 0);
     }
 
-    // Read ISIM records
     if (IsIsimSupported())
     {
-        SendMessage(ACMSG_REFRESH_ISIM_PROVISIONING, bEnforceIsimRefresh ? 1 : 0, 0);
+        SendMessage(ACMSG_REFRESH_ISIM_RECORDS, 0, 0);
+    }
+    else
+    {
+        if (nOldState == STATE_INIT)
+        {
+            SendMessage(ACMSG_INIT_COMPLETED, LISTEN_EVENT_MANUAL_PROVISIONING, 0);
+        }
+        else
+        {
+            NotifyUpdate(IConfigurable::CP_I_SUBSCRIBER_ALL, m_strConfName, m_strId);
+            SendMessage(ACMSG_REFRESH_COMPLETED, LISTEN_EVENT_MANUAL_PROVISIONING, 0);
+        }
     }
 }
 
 PRIVATE
-void SubscriberConfig::WriteProvisioning()
+void SubscriberConfig::StorePrimaryPublicUserId()
+{
+    ImsSubscriberInfo* pSubsInfo = GetSubscriberInfoEx();
+    IMS_SINT32 nPrimaryImpuIndex = 0;
+
+    if (IsIsimSupported())
+    {
+        nPrimaryImpuIndex = pSubsInfo->m_nRefIndexOfPrimaryImpu;
+
+        if (pSubsInfo->m_objPublicUserIds.GetCount() <= nPrimaryImpuIndex)
+        {
+            nPrimaryImpuIndex = 0;
+        }
+    }
+
+    IImsPrivateProperty* piProperty = GetPrivateProperty();
+    piProperty->SetPersistent(ImsPrivateProperties::Persistent::KEY_PRIMARY_IMPU,
+            pSubsInfo->m_objPublicUserIds.GetElementAt(nPrimaryImpuIndex), GetSlotId());
+}
+
+PRIVATE
+void SubscriberConfig::StoreSubscriberInfo()
 {
     if (!IsDefaultConfig())
     {
         return;
     }
 
-    IMS_TRACE_D("WriteProvisioning...", 0, 0, 0);
+    IMS_TRACE_D("StoreSubscriberInfo", 0, 0, 0);
 
     IImsPrivateProperty* piProperty = GetPrivateProperty();
+
+    piProperty->SetPersistentBoolean(
+            ImsPrivateProperties::Persistent::KEY_ISIM_ENABLED, IsIsimSupported(), GetSlotId());
+    piProperty->SetPersistentBoolean(
+            ImsPrivateProperties::Persistent::KEY_USIM_ENABLED, IsUsimSupported(), GetSlotId());
+
     ImsSubscriberInfo* pSubsInfo = GetSubscriberInfoEx();
 
     if (pSubsInfo != IMS_NULL)
@@ -2542,58 +1866,21 @@ void SubscriberConfig::WriteProvisioning()
                     pSubsInfo->m_strPrivateUserId, GetSlotId());
         }
 
-        AString strPublicUserIds;
-
-        for (IMS_SINT32 i = 0; i < pSubsInfo->m_objPublicUserIds.GetCount(); ++i)
-        {
-            strPublicUserIds.Append(pSubsInfo->m_objPublicUserIds.GetElementAt(i));
-            strPublicUserIds.Append(',');
-        }
-
-        if (strPublicUserIds.GetLength() > 0)
-        {
-            strPublicUserIds.Chop(1);
-        }
-
-        if (strPublicUserIds.GetLength() > 0)
-        {
-            piProperty->SetPersistent(ImsPrivateProperties::Persistent::KEY_CONFIG_IMPU_LIST,
-                    strPublicUserIds, GetSlotId());
-        }
-
-        IMS_SINT32 nPrimaryImpuIndex = 0;
-
-        if (IsIsimSupported())
-        {
-            nPrimaryImpuIndex = pSubsInfo->m_nRefIndexOfPrimaryImpu;
-
-            if (pSubsInfo->m_objPublicUserIds.GetCount() <= nPrimaryImpuIndex)
-            {
-                nPrimaryImpuIndex = 0;
-            }
-        }
-
         if (pSubsInfo->m_objPublicUserIds.GetCount() > 0)
         {
-            piProperty->SetPersistent(ImsPrivateProperties::Persistent::KEY_PRIMARY_IMPU,
-                    pSubsInfo->m_objPublicUserIds.GetElementAt(nPrimaryImpuIndex), GetSlotId());
+            AString strPublicUserIds = pSubsInfo->m_objPublicUserIds.ToString();
+
+            piProperty->SetPersistent(ImsPrivateProperties::Persistent::KEY_CONFIG_IMPU_LIST,
+                    strPublicUserIds, GetSlotId());
+
+            StorePrimaryPublicUserId();
         }
     }
-
-    piProperty->SetPersistentBoolean(
-            ImsPrivateProperties::Persistent::KEY_ISIM_ENABLED, IsIsimSupported(), GetSlotId());
-    piProperty->SetPersistentBoolean(
-            ImsPrivateProperties::Persistent::KEY_USIM_ENABLED, IsUsimSupported(), GetSlotId());
 }
 
 PRIVATE
 void SubscriberConfig::ToDebugString()
 {
-    if (!IsProvisioningDone())
-    {
-        return;
-    }
-
     IMS_TRACE_D("IMS subscriber's info (%d, %s) -- starts", GetSlotId(), GetId().GetStr(), 0);
     IMS_TRACE_D("Subscription-attributes=%08X", GetSubscriptionAttributes(), 0, 0);
 
@@ -2683,7 +1970,7 @@ void SubscriberConfig::ToDebugString()
 }
 
 PRIVATE
-IMS_SINT32 SubscriberConfig::ReadSubscriptionAttributes(IN ICarrierConfig* piCc)
+IMS_SINT32 SubscriberConfig::ReadSubscriptionAttributes(IN const ICarrierConfig* piCc)
 {
     IMS_SINT32 nSubsAttributes = SUBSCRIPTION_ATTRIBUTE_IMS;
 
@@ -2714,7 +2001,7 @@ IMS_SINT32 SubscriberConfig::ReadSubscriptionAttributes(IN ICarrierConfig* piCc)
 }
 
 PRIVATE GLOBAL ImsVector<IMS_SINT32> SubscriberConfig::ReadPcscfDiscoveryMethods(
-        IN ICarrierConfig* piCc)
+        IN const ICarrierConfig* piCc)
 {
     ImsVector<IMS_SINT32> objPcscfDiscoveryMethods =
             piCc->GetIntArray(CarrierConfig::Ims::KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY);
@@ -2727,20 +2014,35 @@ PRIVATE GLOBAL ImsVector<IMS_SINT32> SubscriberConfig::ReadPcscfDiscoveryMethods
     return objPcscfDiscoveryMethods;
 }
 
+PRIVATE GLOBAL ImsList<IMS_SINT32> SubscriberConfig::GetListenEvents(IN IMS_SINT32 nEvents)
+{
+    ImsList<IMS_SINT32> objEvents;
+
+    if ((nEvents & LISTEN_EVENT_ISIM_PROVISIONING) != 0)
+    {
+        objEvents.Append(LISTEN_EVENT_ISIM_PROVISIONING);
+    }
+
+    if ((nEvents & LISTEN_EVENT_MANUAL_PROVISIONING) != 0)
+    {
+        objEvents.Append(LISTEN_EVENT_MANUAL_PROVISIONING);
+    }
+
+    return objEvents;
+}
+
 PRIVATE GLOBAL const IMS_CHAR* SubscriberConfig::IsimStateToString(IN IMS_SINT32 nState)
 {
     switch (nState)
     {
         case IIsim::STATE_IDLE:
-            return "IDLE";
-        case IIsim::STATE_INIT:
-            return "INIT";
-        case IIsim::STATE_READY:
-            return "READY";
+            return "ISIM_IDLE";
+        case IIsim::STATE_NOT_PRESENT:
+            return "ISIM_NOT_PRESENT";
+        case IIsim::STATE_LOADED:
+            return "ISIM_LOADED";
         case IIsim::STATE_REFRESHING:
-            return "REFRESHING";
-        case IIsim::STATE_REFRESHED:
-            return "REFRESHED";
+            return "ISIM_REFRESHING";
         default:
             return "__INVALID__";
     }
@@ -2754,6 +2056,8 @@ PRIVATE GLOBAL const IMS_CHAR* SubscriberConfig::PcscfDiscoveryMethodToString(IN
             return "PCO";
         case PCSCF_DISCOVERY_METHOD_CONFIG:
             return "CONFIG";
+        case PCSCF_DISCOVERY_METHOD_ISIM:
+            return "ISIM";
         default:
             return "UNKNOWN";
     }
@@ -2767,10 +2071,12 @@ PRIVATE GLOBAL const IMS_CHAR* SubscriberConfig::StateToString(IN IMS_SINT32 nSt
             return "STATE_INIT";
         case STATE_PROVISIONING:
             return "STATE_PROVISIONING";
-        case STATE_REFRESHING:
-            return "STATE_REFRESHING";
         case STATE_PROVISIONED:
             return "STATE_PROVISIONED";
+        case STATE_REFRESHING:
+            return "STATE_REFRESHING";
+        case STATE_INACTIVE:
+            return "STATE_INACTIVE";
         default:
             return "__INVALID__";
     }

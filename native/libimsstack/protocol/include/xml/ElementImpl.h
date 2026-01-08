@@ -16,8 +16,9 @@
 #ifndef ELEMENT_IMPL_H_
 #define ELEMENT_IMPL_H_
 
+#include "libxml/tree.h"
+
 #include "IElement.h"
-#include "XmlApiTree.h"
 
 class Element;
 class INamedNodeMap;
@@ -26,7 +27,7 @@ class ElementImpl : public IElement
 {
 public:
     explicit ElementImpl(IN xmlNodePtr pstNode);
-    virtual ~ElementImpl();
+    ~ElementImpl() override;
 
     ElementImpl(IN const ElementImpl&) = delete;
     ElementImpl& operator=(IN const ElementImpl&) = delete;

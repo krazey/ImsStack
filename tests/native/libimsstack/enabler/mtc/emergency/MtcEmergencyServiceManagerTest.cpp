@@ -20,9 +20,14 @@
 #include "MockIJniMtcServiceThread.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
+#include "MockIPhoneInfoLocation.h"
+#include "configuration/MockMtcConfigurationProxy.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "emergency/MtcEmergencyServiceManager.h"
 #include "helper/MockICallStateProxy.h"
 #include "helper/MockIMtcAosConnector.h"
+#include "helper/MockIPassiveTimerHolder.h"
+#include "helper/MtcLocationRefresher.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;
@@ -46,8 +51,12 @@ protected:
     MockIMtcContext objContext;
     MockIMtcService objService;
     MockICallStateProxy objCallStateProxy;
+    MockIPassiveTimerHolder objPassiveTimer;
     MockIMtcAosConnector objAosConnector;
     MockIJniMtcServiceThread objJniMtcServiceThread;
+    MockMtcConfigurationProxy objConfigurationProxy;
+    MockILocationInfo objLocationInfo;
+    MtcLocationRefresher* pLocationRefresher;
 
     TestEmergencyServiceManager* pEsm;
 
@@ -55,54 +64,51 @@ protected:
     {
         ON_CALL(objContext, GetServiceByType(_)).WillByDefault(Return(&objService));
         ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
+        ON_CALL(objContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
         ON_CALL(objContext, GetAosConnector(ServiceType::EMERGENCY))
                 .WillByDefault(Return(&objAosConnector));
-
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
         ON_CALL(objService, GetJniServiceThread).WillByDefault(Return(&objJniMtcServiceThread));
+        pLocationRefresher = new MtcLocationRefresher(objLocationInfo);
+        ON_CALL(objContext, GetLocationRefresher).WillByDefault(ReturnRef(*pLocationRefresher));
+        ON_CALL(objAosConnector, Control(ImsAosControl::REGISTER_START))
+                .WillByDefault(Return(IMS_TRUE));
 
         pEsm = new TestEmergencyServiceManager(objContext);
     }
 
-    virtual void TearDown() override { delete pEsm; }
+    virtual void TearDown() override
+    {
+        delete pEsm;
+        delete pLocationRefresher;
+    }
 };
 
-TEST_F(MtcEmergencyServiceManagerTest, StartOpenNotifiesAsNormalServiceForNormalPdn)
+TEST_F(MtcEmergencyServiceManagerTest, StartOpenNotifiesAsNormalServiceForNormalService)
 {
     EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, ServiceType::NORMAL))
             .Times(1);
 
-    pEsm->StartOpen(EmergencyCallRoutingPdn::NORMAL);
+    pEsm->StartOpen(ServiceType::NORMAL);
 }
 
-TEST_F(MtcEmergencyServiceManagerTest, StartOpenNotifiesAsEmergencyServiceForEmergencyPdn)
+TEST_F(MtcEmergencyServiceManagerTest, StartOpenNotifiesAsEmergencyServiceForEmergencyService)
 {
     EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, ServiceType::EMERGENCY))
             .Times(1);
 
-    pEsm->StartOpen(EmergencyCallRoutingPdn::EMERGENCY);
-}
-
-TEST_F(MtcEmergencyServiceManagerTest, StartOpenNotifiesAsEmergencyServiceForUnknownPdn)
-{
-    EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, ServiceType::EMERGENCY))
-            .Times(1);
-
-    pEsm->StartOpen(EmergencyCallRoutingPdn::UNKNOWN);
+    pEsm->StartOpen(ServiceType::EMERGENCY);
 }
 
 TEST_F(MtcEmergencyServiceManagerTest, StartOpenNotifiesAsEachService)
 {
     EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, ServiceType::EMERGENCY))
             .Times(1);
-    pEsm->StartOpen(EmergencyCallRoutingPdn::EMERGENCY);
-
-    EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, ServiceType::EMERGENCY))
-            .Times(1);
-    pEsm->StartOpen(EmergencyCallRoutingPdn::UNKNOWN);
+    pEsm->StartOpen(ServiceType::EMERGENCY);
 
     EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, ServiceType::NORMAL))
             .Times(1);
-    pEsm->StartOpen(EmergencyCallRoutingPdn::NORMAL);
+    pEsm->StartOpen(ServiceType::NORMAL);
 }
 
 TEST_F(MtcEmergencyServiceManagerTest, StopOpenDoesNothing)
@@ -115,7 +121,7 @@ TEST_F(MtcEmergencyServiceManagerTest, StopOpenDoesNothing)
 
 TEST_F(MtcEmergencyServiceManagerTest, StopOpenStopsRegistrationForEmergencyService)
 {
-    pEsm->StartOpen(EmergencyCallRoutingPdn::EMERGENCY);
+    pEsm->StartOpen(ServiceType::EMERGENCY);
 
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_STOP)).Times(1);
 
@@ -124,27 +130,76 @@ TEST_F(MtcEmergencyServiceManagerTest, StopOpenStopsRegistrationForEmergencyServ
 
 TEST_F(MtcEmergencyServiceManagerTest, StopOpenDoesNotStopRegistrationForEmergencyService)
 {
-    pEsm->StartOpen(EmergencyCallRoutingPdn::EMERGENCY);
+    pEsm->StartOpen(ServiceType::EMERGENCY);
 
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_STOP)).Times(0);
 
     pEsm->StopOpen(IMS_FALSE);
 }
 
-TEST_F(MtcEmergencyServiceManagerTest, StartOpenMakesNewInstanceForPdnType)
+TEST_F(MtcEmergencyServiceManagerTest, StartOpenMakesNewInstanceForServiceType)
 {
-    IEmergencyServiceController* pPreviousController = nullptr;
-    pEsm->StartOpen(EmergencyCallRoutingPdn::EMERGENCY);
+    const IEmergencyServiceController* pPreviousController = nullptr;
+    pEsm->StartOpen(ServiceType::EMERGENCY);
 
     pPreviousController = pEsm->GetController();
-    pEsm->StartOpen(EmergencyCallRoutingPdn::EMERGENCY);
+    pEsm->StartOpen(ServiceType::EMERGENCY);
     ASSERT_EQ(pPreviousController, pEsm->GetController());
 
     pPreviousController = pEsm->GetController();
-    pEsm->StartOpen(EmergencyCallRoutingPdn::UNKNOWN);
-    ASSERT_EQ(pPreviousController, pEsm->GetController());
-
-    pPreviousController = pEsm->GetController();
-    pEsm->StartOpen(EmergencyCallRoutingPdn::NORMAL);
+    pEsm->StartOpen(ServiceType::NORMAL);
     ASSERT_NE(pPreviousController, pEsm->GetController());
+}
+
+TEST_F(MtcEmergencyServiceManagerTest, GetStateReturnsIdleInitially)
+{
+    EXPECT_EQ(pEsm->GetState(), IEmergencyServiceController::State::IDLE);
+}
+
+TEST_F(MtcEmergencyServiceManagerTest, GetStateReturnsControllerState)
+{
+    ON_CALL(objService, GetStatus).WillByDefault(Return(ServiceStatus::SERVICE_ACTIVE));
+    pEsm->StartOpen(ServiceType::NORMAL);
+
+    EXPECT_EQ(pEsm->GetState(), IEmergencyServiceController::State::OPENED);
+}
+
+TEST_F(MtcEmergencyServiceManagerTest, StartOpenDoesNotRequestsLocationUpdateIfTimerIsNotSet)
+{
+    ON_CALL(objConfigurationProxy,
+            GetInt(ConfigEmergency::KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT))
+            .WillByDefault(Return(0));
+
+    EXPECT_CALL(objLocationInfo, RequestLocationUpdate(_, _)).Times(0);
+
+    pEsm->StartOpen(ServiceType::EMERGENCY);
+}
+
+TEST_F(MtcEmergencyServiceManagerTest, StartOpenRequestsLocationUpdateOnceIfTimerIsSet)
+{
+    ON_CALL(objConfigurationProxy,
+            GetInt(ConfigEmergency::KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT))
+            .WillByDefault(Return(1000));
+
+    EXPECT_CALL(objLocationInfo, RequestLocationUpdate(1000, _)).Times(1);
+
+    pEsm->StartOpen(ServiceType::EMERGENCY);
+    pLocationRefresher->LocationUpdate_OnCompleted();
+    pEsm->StartOpen(ServiceType::NORMAL);
+}
+
+TEST_F(MtcEmergencyServiceManagerTest, StartOpenRequestsLocationUpdateAgainAfterStopOpen)
+{
+    ON_CALL(objConfigurationProxy,
+            GetInt(ConfigEmergency::KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT))
+            .WillByDefault(Return(1000));
+    pEsm->StartOpen(ServiceType::EMERGENCY);
+    pLocationRefresher->LocationUpdate_OnCompleted();
+    pEsm->StopOpen(IMS_TRUE);
+
+    EXPECT_CALL(objLocationInfo, RequestLocationUpdate(1000, _)).Times(1);
+
+    pEsm->StartOpen(ServiceType::EMERGENCY);
+    pLocationRefresher->LocationUpdate_OnCompleted();
+    pEsm->StartOpen(ServiceType::NORMAL);
 }

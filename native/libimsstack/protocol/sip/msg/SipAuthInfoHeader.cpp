@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "msg/SipAuthInfoHeader.h"
 #include "SipDebug.h"
-#include "platform/SipString.h"
+#include "msg/SipAuthInfoHeader.h"
 #include "msg/SipMsgUtil.h"
+#include "platform/SipString.h"
 
 SipAuthInfoHeader::SipAuthInfoHeader() :
         SipHeaderBase(SipHeaderBase::AUTHENTICATION_INFO),
@@ -35,11 +35,11 @@ SipAuthInfoHeader::SipAuthInfoHeader(const SipAuthInfoHeader& objHeader) :
 
         if (pElement != SIP_NULL)
         {
-            SipNameValue* pNmVl = new SipNameValue(*pElement);
+            SipNameValue* pNameValue = new SipNameValue(*pElement);
 
-            if (pNmVl != SIP_NULL)
+            if (pNameValue != SIP_NULL)
             {
-                m_pAuthInfoList.Add(pNmVl);
+                m_pAuthInfoList.Add(pNameValue);
             }
         }
     }
@@ -49,7 +49,7 @@ SipAuthInfoHeader::~SipAuthInfoHeader()
 {
     while (m_pAuthInfoList.IsEmpty() != SIP_TRUE)
     {
-        delete m_pAuthInfoList.Top();
+        m_pAuthInfoList.Top()->SipDelete();
         m_pAuthInfoList.Pop();
     }
 }
@@ -72,7 +72,7 @@ SIP_BOOL SipAuthInfoHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*
             objBuffer += COMMA;
         }
 
-        SipNameValue* pNameValue = m_pAuthInfoList.GetAt(nIndex);
+        const SipNameValue* pNameValue = m_pAuthInfoList.GetAt(nIndex);
 
         if (pNameValue == SIP_NULL)
         {
@@ -91,7 +91,7 @@ SIP_BOOL SipAuthInfoHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*
     return SIP_TRUE;
 }
 
-SIP_BOOL SipAuthInfoHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
+SIP_BOOL SipAuthInfoHeader::Encode(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     if (IsValidHeader() == SIP_FALSE)
     {
@@ -106,10 +106,10 @@ SIP_BOOL SipAuthInfoHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams =
     {
         if (nIndex != SIP_ZERO)
         {
-            SIP_ENC_COMMA(*ppCurrPos);
+            SipMsgUtil::Encode(*ppCurrPos, COMMA);
         }
 
-        SipNameValue* pNameValue = m_pAuthInfoList.GetAt(nIndex);
+        const SipNameValue* pNameValue = m_pAuthInfoList.GetAt(nIndex);
 
         if (pNameValue == SIP_NULL)
         {
@@ -137,7 +137,7 @@ const SipNameValue* SipAuthInfoHeader::GetAiInfoVal(SIP_UINT32 nIndex /*default 
     return SIP_NULL;
 }
 
-SIP_BOOL SipAuthInfoHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+SIP_BOOL SipAuthInfoHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
@@ -145,35 +145,35 @@ SIP_BOOL SipAuthInfoHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
 
     while (pStartPt <= pEndPt)
     {
-        SIP_CHAR* pTempPos = SIP_NULL;
+        const SIP_CHAR* pTempPos = SIP_NULL;
 
-        if (SipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COMMA) == SIP_FALSE)
+        if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pTempPos, COMMA) == SIP_FALSE)
         {
             pTempPos = pEndPt;
         }
 
-        SipNameValue* pNmVl = new SipNameValue();
-        if (pNmVl == SIP_NULL)
+        SipNameValue* pNameValue = new SipNameValue();
+        if (pNameValue == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
-        if (pNmVl->Decode(pStartPt, pTempPos, SIP_NULL) == SIP_FALSE)
+        if (pNameValue->Decode(pStartPt, pTempPos, SIP_NULL) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Name Value Decode fail", SIP_ZERO, SIP_ZERO);
-            delete pNmVl;
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Name value decode failed", SIP_ZERO, SIP_ZERO);
+            pNameValue->SipDelete();
             return SIP_FALSE;
         }
 
-        if (m_pAuthInfoList.Add(pNmVl) < SIP_ZERO)
+        if (m_pAuthInfoList.Add(pNameValue) < SIP_ZERO)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Append in list Failed", SIP_ZERO, SIP_ZERO);
-            delete pNmVl;
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Append in list failed", SIP_ZERO, SIP_ZERO);
+            pNameValue->SipDelete();
             return SIP_FALSE;
         }
 

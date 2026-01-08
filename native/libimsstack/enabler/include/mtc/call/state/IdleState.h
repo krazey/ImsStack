@@ -19,10 +19,9 @@
 
 #include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/state/MtcCallState.h"
-#include "precondition/QosDef.h"
+#include "conferencecall/ConferenceDef.h"
 #include <functional>
 #include <memory>
 
@@ -30,7 +29,6 @@ class AString;
 class IMessage;
 class IMtcCallContext;
 class SuppService;
-struct ConfUser;
 struct MediaInfo;
 
 /**
@@ -40,46 +38,54 @@ class IdleState : public MtcCallState
 {
 public:
     explicit IdleState(IN IMtcCallContext& objContext);
-    virtual ~IdleState();
+    virtual ~IdleState() override;
     IdleState(IN const IdleState&) = delete;
     IdleState& operator=(IN const IdleState&) = delete;
 
+    void OnEnter() override;
     CallStateName Start(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
+            IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices) override;
     CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+            IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices,
             IN const ImsList<ConfUser*>& lstUsers) override;
     CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
             IN const ImsList<ConfUser*>& lstUsers) override;
     CallStateName HandleIncoming(IN ISession* piSession) override;
     CallStateName Terminate(IN const CallReasonInfo& objReason) override;
+    CallStateName SessionTerminated(IN ISession* piSession) override;
+
     CallStateName OnBlockChecked(IN IMtcBlockChecker::Result objResult) override;
     CallStateName OnAttached() override;
+    CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
 
     CallStateName HandleIncomingUssi(IN ISession* piSession) override;
     CallStateName OnUssiAttached() override;
 
 protected:
     CallStateName HandleAosConnected() override;
+    const CallReasonInfo GetCallReasonInfoByAosDisconnection(
+            IN IMS_UINT32 nAosReason, IN IMS_SINT32 nDataFailureReason) const override;
 
 private:
-    CallStateName ContinueStart();
-    CallStateName ContinueConference(IN const ImsList<ConfUser*>& lstUsers);
+    CallStateName ContinueStart(IN const MediaInfo& objMediaInfo);
+    CallStateName ContinueConference(IN const MediaInfo& objMediaInfo);
     CallStateName ContinueHandleIncoming();
-    CallStateName ContinueStartUssi();
+    CallStateName ContinueStartUssi(IN const MediaInfo& objMediaInfo);
 
-    IMS_BOOL IsEpsFallbackRequired(IN const CallReasonInfo& objReason) const;
-    void SetResourceListForConference(
-            IN_OUT IMessage& objMessage, IN const ImsList<ConfUser*>& lstUsers);
+    void SetResourceListForConference(IN_OUT IMessage& objMessage);
     ImsList<IMtcBlockRule*> GetIncomingCallBlockRules();
     ImsList<IMtcBlockRule*> GetOutgoingCallBlockRules();
     ImsList<IMtcBlockRule*> GetBlockRulesAfterEpsFallback();
     IMS_BOOL IsCallPull() const;
-    IMS_RESULT HandleCallPull();
+    IMS_RESULT HandleCallPull(OUT MediaInfo& objMediaInfo);
+    void CopyConfUserListForAsynchronousHandling(const ImsList<ConfUser*> objUsers);
+    AString RemoveCallerIdServiceCodeAndUpdateSuppService(IN const AString& strTarget);
+    const CallReasonInfo GetInternalErrorReason() const;
+    void PerformPreRadioCheckForMo();
 
     std::unique_ptr<IMtcBlockChecker> m_pBlockChecker;
     std::function<CallStateName()> m_objOperationAfterBlockCheck;
+    ImsList<std::shared_ptr<ConfUser>> m_pConfUsers;
 };
 
 #endif

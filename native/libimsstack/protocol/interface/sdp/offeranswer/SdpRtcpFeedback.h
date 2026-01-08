@@ -16,6 +16,8 @@
 #ifndef SDP_RTCP_FEEDBACK_H_
 #define SDP_RTCP_FEEDBACK_H_
 
+#include "AString.h"
+
 #include "offeranswer/SdpMediaFormatParameter.h"
 
 class SdpRtcpFeedback : public SdpMediaFormatParameter
@@ -26,7 +28,7 @@ public:
             IN const AString& strParamName = AString::ConstNull(),
             IN const AString& strParamValue = AString::ConstNull());
     SdpRtcpFeedback(IN const SdpRtcpFeedback& other);
-    virtual ~SdpRtcpFeedback();
+    ~SdpRtcpFeedback() override;
 
 public:
     SdpRtcpFeedback& operator=(IN const SdpRtcpFeedback& other);

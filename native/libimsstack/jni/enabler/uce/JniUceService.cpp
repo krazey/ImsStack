@@ -29,7 +29,7 @@
 #include "ServiceTrace.h"
 #include "IUceJni.h"
 
-__IMS_TRACE_TAG_USER_DECL__("IMS_UCE");
+__IMS_TRACE_TAG_USER_DECL__("JNI.UCE");
 
 JniUceService::JniUceService(Jni_SendDataToJava pfnSendDataToJava, IN IMS_UINT32 nSimSlot) :
         BaseService(nSimSlot)
@@ -234,7 +234,6 @@ void JniUceService::SendOptionsRespCmd(IUceJni* pJniUce, const Parcel& pParcel)
 {
     IMS_TRACE_D("SendOptionsRespCmd", 0, 0, 0);
 
-    // cppcheck-suppress duplicateAssignExpression
     IMS_UINT32 key = pParcel.readInt32();
     IMS_SINT32 responseCode = pParcel.readInt32();
 

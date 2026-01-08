@@ -35,10 +35,10 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableLooper;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.imsstack.enabler.acs.impl.AcServiceImpl;
 import com.android.imsstack.enabler.acs.impl.CallbackManager;
@@ -142,7 +142,8 @@ public class AcServiceImplTest {
     private static final String LOCAL_FILE_NAME_PREFIX = "rcs_provisioning_";
     private static final String LOCAL_FILE_NAME_POSTFIX = ".xml";
 
-    private static final File FILE_DESCRIPTOR = InstrumentationRegistry.getContext().getFilesDir();
+    private static final File FILE_DESCRIPTOR =
+            InstrumentationRegistry.getInstrumentation().getContext().getFilesDir();
     private static final int SLOT_ID0 = 0;
     private static final int SUB_ID0 = 123;
     private static final int SLOT_ID1 = 1;

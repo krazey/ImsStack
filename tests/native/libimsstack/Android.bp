@@ -13,6 +13,7 @@
 // limitations under the License.
 
 package {
+    default_team: "trendy_team_pmw_telephony",
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
@@ -24,7 +25,8 @@ cc_defaults {
         "imsstack_tls_libs_defaults",
     ],
     test_suites: [
-        "general-tests"
+        "general-tests",
+        "device-tests",
     ],
     static_libs: [
         "libgmock",
@@ -51,7 +53,6 @@ cc_test {
         "enabler/interface/mtc",
         "enabler/interface/mts",
         "enabler/interface/uce",
-        "enabler/interface/sipcontroller",
     ],
     header_libs: [
         "libimsstack_config_headers",
@@ -62,7 +63,7 @@ cc_test {
         "libimsstack_platform_headers",
         "libimsstack_platform_os_android_system-intf_headers",
         "libimsstack_protocol_headers",
-        "libimsmedia_config_headers",
+        "libpixelimsmedia_config_headers",
     ] + [
         "libimsstack_test_config_headers",
         "libimsstack_test_enabler_headers",
@@ -78,7 +79,7 @@ cc_test {
         "libimsstack-main",
         "libimsstack-platform",
         "libimsstack-protocol",
-        "libimsmedia_config",
+        "libpixelimsmedia_config",
     ],
 
     test_config: "ImsStackNativeTests.xml",

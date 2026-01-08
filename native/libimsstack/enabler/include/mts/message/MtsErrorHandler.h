@@ -20,16 +20,18 @@
 #include "message/IMtsErrorHandler.h"
 
 class ICarrierConfig;
-class MtsDynamicLoader;
+class IMessage;
+class IMtsContext;
+class IMtsDynamicLoader;
+class IMtsService;
 
 class MtsErrorHandler final : public IMtsErrorHandler
 {
 public:
-    explicit MtsErrorHandler(IN ICarrierConfig* piCarrierConfig);
-    ~MtsErrorHandler();
+    explicit MtsErrorHandler(IN IMtsContext& objContext);
+    ~MtsErrorHandler() override;
 
-    IMS_SINT32 Handle(IN IMtsService* piMtsService, IN MtsDynamicLoader* pMtsDynamicLoader,
-            IN const IMessage* piMessage = IMS_NULL) override;
+    IMS_SINT32 Handle(IN const IMtsService& objMtsService, IN IMtsMessage* piMtsMessage) override;
     inline IMS_SINT32 GetRetryAfterValue() const override { return m_nRetryAfterValue; }
     inline void ResetRetryAfterStatus() override
     {
@@ -54,14 +56,20 @@ private:
     IMS_SINT32 Get503ResponsePolicy(IN const IMessage* piMessage) const;
     IMS_SINT32 Get504ResponsePolicy() const;
 
-    void CalculateRetryAfterCondition(IN const IMS_SINT32 nRetryAfterValue);
+    void SetRetryAfterStatus(IN const IMS_SINT32 nRetryAfterValue);
     IMS_BOOL IsRetryPossible() const;
+    IMS_BOOL IsRegisterWithNextPcscfRequired(IN const IMessage* piMessage) const;
+    IMS_BOOL NeedToCheckRadioStatusForRetry(IN IMS_UINT32 nRetryCount) const;
+    IMS_SINT32 EvaluateNetworkStatusForErrorCode(
+            IN const IMtsService& objMtsService, IN const IMessage* piMessage) const;
 
 private:
-    ICarrierConfig* m_piCarrierConfig;
+    IMtsContext& m_objContext;
     IMS_SINT32 m_nCumulativeDuration;
     IMS_SINT32 m_nCurrentRetryCount;
     IMS_SINT32 m_nRetryAfterValue;
+    IMS_SINT32 m_nSlotId;
+    ICarrierConfig* m_piCarrierConfig;
 };
 
 #endif

@@ -17,16 +17,14 @@
 #ifndef UPDATING_STATE_H_
 #define UPDATING_STATE_H_
 
-#include "CarrierConfig.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "call/state/MtcCallState.h"
-#include "configuration/ConfigDef.h"
-#include "configuration/MtcConfigurationProxy.h"
-#include "core/ISession.h"
 #include "precondition/QosDef.h"
 
+class ISession;
+class MtcConfigurationProxy;
+class UpdatingInfo;
 struct CallReasonInfo;
 struct MediaInfo;
 
@@ -34,7 +32,7 @@ class UpdatingState : public MtcCallState
 {
 public:
     explicit UpdatingState(IN IMtcCallContext& objContext);
-    virtual ~UpdatingState();
+    virtual ~UpdatingState() override;
     UpdatingState(IN const UpdatingState&) = delete;
     UpdatingState& operator=(IN const UpdatingState&) = delete;
 
@@ -56,7 +54,6 @@ public:
     CallStateName SessionUpdateFailed(IN ISession* piSession) override;
     CallStateName SessionUpdateReceived(IN ISession* piSession) override;
 
-    CallStateName SessionCancelDeliveryFailed(IN ISession* piSession) override;
     CallStateName SessionEarlyMediaUpdated(IN ISession* piSession) override;
     CallStateName SessionEarlyMediaUpdateFailed(IN ISession* piSession) override;
     CallStateName SessionEarlyMediaUpdateReceived(IN ISession* piSession) override;
@@ -91,11 +88,14 @@ private:
     CallStateName HandleRequestedModificationSucceeded();
     CallStateName HandleReceivedModificationSucceeded();
     CallStateName HandleRetry();
+    IMessage* GetUpdateResponse(const IN ISession* piSession) const;
+    IMS_BOOL WasTriggeredByOfferlessReinvite() const;
     void RecoverModificationFailure();
     void NotifyFailure();
     void StopTimer();
     void UpdateCallType();
     void CheckPreconditionAndNotifyIncomingUpdate(IN ISession* piSession);
+    void HandleUnconfirmedRemoteHold(IN UpdatingInfo& objUpdatingInfo);
 };
 
 #endif

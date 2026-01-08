@@ -33,13 +33,13 @@ public:
     MockIAosIpsecListener objIAosIpsecListener;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         m_pAosIpsec = new AosIpsec(static_cast<IAosIpsecListener*>(&objIAosIpsecListener), SLOT_ID);
         ASSERT_TRUE(m_pAosIpsec != nullptr);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (m_pAosIpsec)
         {
@@ -86,12 +86,6 @@ TEST_F(AosIpsecTest, IpSecPolicy_OnSecurityAssociationExpired)
     //        static_cast<IIpSecPolicy*>(&objMockIIpsecPolicy));
 }
 
-TEST_F(AosIpsecTest, CreateUePort)
-{
-    EXPECT_GE(39000, m_pAosIpsec->CreateUePort());
-    EXPECT_LE(38001, m_pAosIpsec->CreateUePort());
-}
-
 TEST_F(AosIpsecTest, CreateUeSpi)
 {
     EXPECT_LE(1000000000, m_pAosIpsec->CreateUeSpi());
@@ -109,28 +103,28 @@ TEST_F(AosIpsecTest, AddPolicy)
 
 TEST_F(AosIpsecTest, SetSecurityAlgorithm)
 {
-    m_pAosIpsec->SetSecurityAlgorithm(IpSecType::SECURITY_PROTOCOL_AH,
+    m_pAosIpsec->SetSecurityAlgorithm(SipSecurityHeader::PROTOCOL_AH,
             SipSecurityHeader::ALG_HMAC_MD5_96, SipSecurityHeader::EALG_DES_EDE3_CBC);
     EXPECT_EQ(GetSecurityProtocol(), IpSecType::SECURITY_PROTOCOL_AH);
-    EXPECT_EQ(m_pAosIpsec->GetIntegrityAlgorithm(), SipSecurityHeader::ALG_HMAC_MD5_96);
-    EXPECT_EQ(GetEncryptionlgorithm(), SipSecurityHeader::EALG_DES_EDE3_CBC);
+    EXPECT_EQ(m_pAosIpsec->GetIntegrityAlgorithm(), IpSecType::INTEGRITY_ALGORITHM_HMAC_MD5_96);
+    EXPECT_EQ(GetEncryptionlgorithm(), IpSecType::ENCRYPTION_ALGORITHM_DES_EDE3_CBC);
 
-    m_pAosIpsec->SetSecurityAlgorithm(IpSecType::SECURITY_PROTOCOL_ESP,
+    m_pAosIpsec->SetSecurityAlgorithm(SipSecurityHeader::PROTOCOL_ESP,
             SipSecurityHeader::ALG_HMAC_SHA_1_96, SipSecurityHeader::EALG_AES_CBC);
     EXPECT_EQ(GetSecurityProtocol(), IpSecType::SECURITY_PROTOCOL_ESP);
-    EXPECT_EQ(m_pAosIpsec->GetIntegrityAlgorithm(), SipSecurityHeader::ALG_HMAC_SHA_1_96);
-    EXPECT_EQ(GetEncryptionlgorithm(), SipSecurityHeader::EALG_AES_CBC);
+    EXPECT_EQ(m_pAosIpsec->GetIntegrityAlgorithm(), IpSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96);
+    EXPECT_EQ(GetEncryptionlgorithm(), IpSecType::ENCRYPTION_ALGORITHM_AES_CBC);
 
-    m_pAosIpsec->SetSecurityAlgorithm(IpSecType::SECURITY_PROTOCOL_ESP,
+    m_pAosIpsec->SetSecurityAlgorithm(SipSecurityHeader::PROTOCOL_ESP,
             SipSecurityHeader::ALG_HMAC_SHA_1_96, SipSecurityHeader::EALG_NULL);
     EXPECT_EQ(GetSecurityProtocol(), IpSecType::SECURITY_PROTOCOL_ESP);
-    EXPECT_EQ(m_pAosIpsec->GetIntegrityAlgorithm(), SipSecurityHeader::ALG_HMAC_SHA_1_96);
-    EXPECT_EQ(GetEncryptionlgorithm(), SipSecurityHeader::EALG_NULL);
+    EXPECT_EQ(m_pAosIpsec->GetIntegrityAlgorithm(), IpSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96);
+    EXPECT_EQ(GetEncryptionlgorithm(), IpSecType::ENCRYPTION_ALGORITHM_NO);
 
-    m_pAosIpsec->SetSecurityAlgorithm(IpSecType::SECURITY_PROTOCOL_ESP,
+    m_pAosIpsec->SetSecurityAlgorithm(SipSecurityHeader::PROTOCOL_ESP,
             SipSecurityHeader::ALG_HMAC_SHA_1_96, SipSecurityHeader::EALG_UNSPECIFIED);
     EXPECT_EQ(GetSecurityProtocol(), IpSecType::SECURITY_PROTOCOL_ESP);
-    EXPECT_EQ(m_pAosIpsec->GetIntegrityAlgorithm(), SipSecurityHeader::ALG_HMAC_SHA_1_96);
+    EXPECT_EQ(m_pAosIpsec->GetIntegrityAlgorithm(), IpSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96);
     EXPECT_EQ(GetEncryptionlgorithm(), IpSecType::ENCRYPTION_ALGORITHM_NO);
 }
 

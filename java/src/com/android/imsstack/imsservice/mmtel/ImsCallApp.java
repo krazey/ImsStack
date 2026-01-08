@@ -21,7 +21,12 @@ import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsStreamMediaProfile;
 
+import androidx.annotation.NonNull;
+
+import com.android.imsstack.base.DeviceConfig;
+import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
+import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcStateUtils;
 import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
@@ -29,7 +34,7 @@ import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListene
 import com.android.imsstack.imsservice.mmtel.base.ImsApp;
 import com.android.imsstack.imsservice.mmtel.base.TtyModeTracker;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
+import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.concurrent.Executor;
@@ -60,7 +65,6 @@ public class ImsCallApp extends ImsApp {
         mCallManager = new ImsCallManager(mCallContext,
                 mCallContext.getMtcApp(), callListener);
 
-        // FIXME: remove later if SS control configuration is properly provided
         getUtInterface();
 
         mFeatureManager.setRegistrationTracker(mRegTracker);
@@ -191,8 +195,13 @@ public class ImsCallApp extends ImsApp {
                 return;
             }
 
-            // FIXME: P-GII
             mRegTracker.refreshCallRegistrationState();
+
+            // Initialize Ut before initializing ImsCallContext since ImsCallContext adds a listener
+            // to Ut for terminal-based supplementary services.
+            if (mUt != null) {
+                mUt.init();
+            }
 
             mCallContext.init();
             mCallManager.init();
@@ -203,10 +212,6 @@ public class ImsCallApp extends ImsApp {
 
             if (mSms != null) {
                 mSms.init();
-            }
-
-            if (mUt != null) {
-                mUt.init();
             }
 
             mFeatureManager.updateFeaturesOnServiceUpDown(true);
@@ -261,15 +266,6 @@ public class ImsCallApp extends ImsApp {
                     ImsStreamMediaProfile.VIDEO_QUALITY_NONE,
                     ImsStreamMediaProfile.DIRECTION_INVALID,
                     ImsStreamMediaProfile.RTT_MODE_DISABLED);
-        }
-
-        if (callProfile == null) {
-            return null;
-        }
-
-        // DISPLAY_WFC_ICON_DURING_CALLING
-        if (serviceType == ImsCallProfile.SERVICE_TYPE_NORMAL) {
-            ImsCallSessionImpl.setCallExtraForRatType(mCallContext, callProfile);
         }
 
         return callProfile;
@@ -337,6 +333,25 @@ public class ImsCallApp extends ImsApp {
         }
     }
 
+    /**
+     * Dump this instance into a readable format for dumpsys usage.
+     */
+    public void dump(@NonNull IndentingPrintWriter pw) {
+        pw.println("MmTel:");
+        pw.increaseIndent();
+
+        MtcApp mtcApp = mCallContext.getMtcApp();
+        if (mtcApp != null) {
+            mtcApp.dump(pw);
+        }
+
+        if (mSms != null) {
+            mSms.dump(pw);
+        }
+
+        pw.decreaseIndent();
+    }
+
     private ImsCallProfile createCallProfileForVideoCall(int serviceType, int callType) {
         int audioQuality = ImsStreamMediaProfile.AUDIO_QUALITY_NONE;
         int videoQuality = ImsStreamMediaProfile.VIDEO_QUALITY_NONE;
@@ -347,7 +362,6 @@ public class ImsCallApp extends ImsApp {
         if (serviceType == ImsCallProfile.SERVICE_TYPE_NONE) {
             videoCallCapable = true;
         } else if (serviceType == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
-            // FIXME : need to add another conditions? (LTE system info. ?)
             videoCallCapable = true;
         } else {
             if ((mRegTracker.isCallVideoRegistered()
@@ -387,7 +401,6 @@ public class ImsCallApp extends ImsApp {
                 volteCallCapable = true;
             }
         } else if (serviceType == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
-            // FIXME : need to add another conditions? (LTE system info. ?)
             volteCallCapable = true;
         } else {
             if ((mCallContext.hasAccessBearerCapabilitiesForHDCall() || isAccessBearerUnknown())
@@ -411,7 +424,6 @@ public class ImsCallApp extends ImsApp {
     }
 
     private int getCallTypeByImsState(int serviceType, int callType) {
-        // FIXME: needs to improve for call type
         if (callType == ImsCallProfile.CALL_TYPE_VOICE_N_VIDEO) {
             if (serviceType == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
                 callType = ImsCallProfile.CALL_TYPE_VOICE;
@@ -446,7 +458,7 @@ public class ImsCallApp extends ImsApp {
     private void initializeImsStates(int initFlags) {
         int phoneId = MSimUtils.DEFAULT_PHONE_ID;
 
-        if (MSimUtils.isMultiSimEnabled()) {
+        if (DeviceConfig.isMultiSimEnabled()) {
             phoneId = getPhoneId();
         }
 

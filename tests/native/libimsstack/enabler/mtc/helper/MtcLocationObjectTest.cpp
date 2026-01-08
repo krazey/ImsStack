@@ -16,25 +16,28 @@
 
 #include "CarrierConfig.h"
 #include "GeolocationHelper.h"
+#include "IImsAosInfo.h"
 #include "INetworkWatcher.h"
+#include "ImsEventDef.h"
 #include "MockIMessage.h"
 #include "MockIMessageBodyPart.h"
+#include "MockIMtcImsEventReceiver.h"
 #include "MockIMtcService.h"
 #include "MockIPhoneInfoLocation.h"
 #include "MockIPhoneInfoSubscriber.h"
+#include "MockISubscriberConfig.h"
 #include "PlatformContext.h"
 #include "SipHeaderName.h"
 #include "TestPhoneInfoService.h"
-#include "../../../config/interface/common/MockISubscriberConfig.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/ParticipantInfo.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "helper/MockIMtcAosConnector.h"
 #include "helper/MtcLocationObject.h"
 #include "helper/MtcSupplementaryService.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/MockISipMessageBodyPart.h"
+#include "private/ConfigurationManager.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
 
@@ -42,7 +45,9 @@ using ::testing::_;
 using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::SafeMatcherCast;
 using ::testing::SetArgReferee;
+using ::testing::StrEq;
 
 LOCAL const IMS_SINT32 SLOT_ID = 0;
 LOCAL const AString HOME_DOMAIN = "homedomain";
@@ -67,8 +72,7 @@ public:
 
     MockIMtcCallContext objContext;
     MockIMtcService objService;
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy objConfigurationProxy;
     CallInfo objCallInfo;
     ParticipantInfo* pParticipantInfo;
     MtcSupplementaryService* pSupplementaryService;
@@ -76,6 +80,8 @@ public:
     MockILocationProperties objLocationProperties;
     MockISubscriberConfig objSubscriberConfig;
     MockIMessageUtils objMessageUtils;
+    MockIMtcImsEventReceiver objImsEventReceiver;
+    MockIMtcAosConnector objAosConnector;
 
 protected:
     virtual void SetUp() override
@@ -88,17 +94,21 @@ protected:
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
         ON_CALL(objContext, GetSubscriberConfig).WillByDefault(Return(&objSubscriberConfig));
+        ON_CALL(objContext, GetImsEventReceiver).WillByDefault(ReturnRef(objImsEventReceiver));
+        ConfigurationManager::GetInstance()->DestroyConfigs();
 
-        pConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
-        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
 
-        pSupplementaryService = new MtcSupplementaryService(objContext, *pConfigurationProxy);
+        pSupplementaryService = new MtcSupplementaryService(objContext, objConfigurationProxy);
         ON_CALL(objContext, GetSupplementaryService)
                 .WillByDefault(ReturnRef(*pSupplementaryService));
 
         ON_CALL(objSubscriberConfig, GetHomeDomainName).WillByDefault(ReturnRef(HOME_DOMAIN));
         ON_CALL(objSubscriberConfig, GetPrivateUserId).WillByDefault(ReturnRef(PRIVATE_USER_ID));
+
+        ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
+        ON_CALL(objAosConnector, GetRegistrationMode)
+                .WillByDefault(Return(IImsAosInfo::REG_MODE_NORMAL));
 
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_PHONE_INFO, &objPhoneInfoService);
@@ -109,7 +119,6 @@ protected:
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
 
         delete pParticipantInfo;
-        delete pConfigurationProxy;
         delete pSupplementaryService;
     }
 
@@ -134,7 +143,7 @@ protected:
                 .WillByDefault(ReturnRef(strVerticalAccuracy));
     }
 
-    void AddGeoLocationValue(IN IMS_BOOL bGeoLocation)
+    void AddGeolocationValue(IN IMS_BOOL bGeoLocation)
     {
         pSupplementaryService->Add(SuppType::GEOLOCATION, bGeoLocation);
     }
@@ -153,44 +162,103 @@ protected:
     }
 };
 
-TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsFalseIfAosConnectorIsNull)
+TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsFalseIfNoUiccAndNotAllowedByPlmn)
 {
-    ON_CALL(objService, GetAosConnector()).WillByDefault(Return(nullptr));
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
+                    ConfigIms::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR))
+            .WillByDefault(Return(IMS_TRUE));
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigEmergency::
+                             KEY_PLMN_ALLOWING_GEOLOCATION_PIDF_IN_SIP_INVITE_NO_UICC_STRING_ARRAY,
+                    SafeMatcherCast<const IMS_CHAR*>(StrEq("00101"))))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetworkOperator)
+            .WillByDefault(Return(AString("00101")));
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NOUICC));
 
     EXPECT_FALSE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
 }
 
+TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsTrueIfNoUiccAndPlmnIsEmpty)
+{
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
+                    ConfigIms::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR))
+            .WillByDefault(Return(IMS_TRUE));
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigEmergency::
+                             KEY_PLMN_ALLOWING_GEOLOCATION_PIDF_IN_SIP_INVITE_NO_UICC_STRING_ARRAY,
+                    SafeMatcherCast<const IMS_CHAR*>(StrEq("00101"))))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetworkOperator)
+            .WillByDefault(Return(AString("")));
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NOUICC));
+
+    EXPECT_TRUE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
+}
+
+TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsTrueIfNoUiccAndAllowedByPlmn)
+{
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
+                    ConfigIms::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR))
+            .WillByDefault(Return(IMS_TRUE));
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigEmergency::
+                             KEY_PLMN_ALLOWING_GEOLOCATION_PIDF_IN_SIP_INVITE_NO_UICC_STRING_ARRAY,
+                    SafeMatcherCast<const IMS_CHAR*>(StrEq("00101"))))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetworkOperator)
+            .WillByDefault(Return(AString("00101")));
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NOUICC));
+
+    EXPECT_TRUE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
+}
+
 TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForWifiNormal)
 {
-    ON_CALL(*pConfigurationManager,
-            IsSupportGeolocationPidfInSipInvite(
-                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI))
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
+                    ConfigIms::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI))
             .WillByDefault(Return(IMS_TRUE));
 
-    objCallInfo.bEmergency = IMS_FALSE;
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
 
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_EQ(IMS_TRUE, MtcLocationObject::IsGeolocationInfoRequired(objContext));
+    EXPECT_TRUE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
 
-    AddGeoLocationValue(IMS_TRUE);
+    AddGeolocationValue(IMS_TRUE);
 
-    EXPECT_EQ(IMS_TRUE, MtcLocationObject::IsGeolocationInfoRequired(objContext));
+    EXPECT_TRUE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
 
-    AddGeoLocationValue(IMS_FALSE);
+    AddGeolocationValue(IMS_FALSE);
 
-    EXPECT_EQ(IMS_FALSE, MtcLocationObject::IsGeolocationInfoRequired(objContext));
+    EXPECT_FALSE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
 }
 
 TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForWifiEmergency)
 {
     const IMS_BOOL bConfig = IMS_TRUE;
-    ON_CALL(*pConfigurationManager,
-            IsSupportGeolocationPidfInSipInvite(
-                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI))
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
+                    ConfigIms::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI))
             .WillByDefault(Return(bConfig));
 
-    objCallInfo.bEmergency = IMS_TRUE;
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
 
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
 
@@ -200,12 +268,12 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForWifiEmerg
 TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForCellularNormal)
 {
     const IMS_BOOL bConfig = IMS_TRUE;
-    ON_CALL(*pConfigurationManager,
-            IsSupportGeolocationPidfInSipInvite(
-                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR))
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
+                    ConfigIms::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR))
             .WillByDefault(Return(bConfig));
 
-    objCallInfo.bEmergency = IMS_FALSE;
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
 
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
 
@@ -215,16 +283,129 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForCellularN
 TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForCellularEmergency)
 {
     const IMS_BOOL bConfig = IMS_TRUE;
-    ON_CALL(*pConfigurationManager,
-            IsSupportGeolocationPidfInSipInvite(
-                    CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR))
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
+                    ConfigIms::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR))
             .WillByDefault(Return(bConfig));
 
-    objCallInfo.bEmergency = IMS_TRUE;
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
 
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_EQ(bConfig, MtcLocationObject::IsGeolocationInfoRequired(objContext));
+}
+
+TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsFalseIfBlockedByInRoamingCondition)
+{
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
+                    ConfigIms::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI))
+            .WillByDefault(Return(IMS_TRUE));
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigVoice::KEY_GEOLOCATION_BLOCK_CONDITION_INT_ARRAY,
+                    ConfigVoice::GEOLOCATION_BLOCK_CONDITION_IN_ROAMING))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_ROAMING_STATE))
+            .WillByDefault(Return(IMS_ROAMING_STATE_ON));
+
+    EXPECT_FALSE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
+}
+
+TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredBehavesAsNormalCallIfAosConnectorIsNull)
+{
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
+                    ConfigIms::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI))
+            .WillByDefault(Return(IMS_TRUE));
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(objService, GetAosConnector).WillByDefault(Return(IMS_NULL));
+
+    EXPECT_TRUE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
+}
+
+TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredForNormalRoutingEmergencyCall)
+{
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
+                    ConfigIms::GEOLOCATION_PIDF_FOR_NORMAL_ROUTING_EMERGENCY_ON_WIFI))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
+                    ConfigIms::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NORMAL));
+    AddGeolocationValue(IMS_TRUE);
+
+    objCallInfo.eEmergencyType = EmergencyType::NORMAL_ROUTING;
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigVoice::KEY_GEOLOCATION_BLOCK_CONDITION_INT_ARRAY,
+                    ConfigVoice::GEOLOCATION_BLOCK_CONDITION_FOR_NORMAL_ROUTING_EMERGENCY_CALL))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_TRUE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
+
+    objCallInfo.eEmergencyType = EmergencyType::NORMAL_ROUTING;
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigVoice::KEY_GEOLOCATION_BLOCK_CONDITION_INT_ARRAY,
+                    ConfigVoice::GEOLOCATION_BLOCK_CONDITION_FOR_NORMAL_ROUTING_EMERGENCY_CALL))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_FALSE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
+
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigVoice::KEY_GEOLOCATION_BLOCK_CONDITION_INT_ARRAY,
+                    ConfigVoice::GEOLOCATION_BLOCK_CONDITION_FOR_NORMAL_ROUTING_EMERGENCY_CALL))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_TRUE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
+
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigVoice::KEY_GEOLOCATION_BLOCK_CONDITION_INT_ARRAY,
+                    ConfigVoice::GEOLOCATION_BLOCK_CONDITION_FOR_NORMAL_ROUTING_EMERGENCY_CALL))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_TRUE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
+}
+
+TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredForNormalRoutingEmergencyCallOnCellular)
+{
+    // GIVEN: The device is on a cellular network
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
+
+    // GIVEN: Geolocation is allowed for normal routing emergency calls on cellular
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigIms::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY,
+                    ConfigIms::GEOLOCATION_PIDF_FOR_NORMAL_ROUTING_EMERGENCY_ON_CELLULAR))
+            .WillByDefault(Return(IMS_TRUE));
+
+    // GIVEN: Other conditions are met (not roaming, SS enabled, etc.)
+    ON_CALL(objAosConnector, GetRegistrationMode)
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NORMAL));
+    AddGeolocationValue(IMS_TRUE);
+
+    // GIVEN: The call is a normal routing emergency call
+    objCallInfo.eEmergencyType = EmergencyType::NORMAL_ROUTING;
+
+    // WHEN: The block condition for normal routing emergency calls is NOT set
+    // THEN: Geolocation info is required
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigVoice::KEY_GEOLOCATION_BLOCK_CONDITION_INT_ARRAY,
+                    ConfigVoice::GEOLOCATION_BLOCK_CONDITION_FOR_NORMAL_ROUTING_EMERGENCY_CALL))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_TRUE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
+
+    // WHEN: The block condition for normal routing emergency calls IS set
+    // THEN: Geolocation info is NOT required
+    ON_CALL(objConfigurationProxy,
+            Contains(ConfigVoice::KEY_GEOLOCATION_BLOCK_CONDITION_INT_ARRAY,
+                    ConfigVoice::GEOLOCATION_BLOCK_CONDITION_FOR_NORMAL_ROUTING_EMERGENCY_CALL))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_FALSE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
 }
 
 TEST_F(MtcLocationObjectTest, GetLocationFromMessageIfNoContent)
@@ -256,7 +437,8 @@ TEST_F(MtcLocationObjectTest, GetLocationFromMessageWithInvalidShape)
                                  "<gp:location-info>"
                                  "<invalid-shape/>"  // Malformed
                                  "</gp:location-info>"
-                                 "<gp:usage-rules/>"
+                                 "<gp:usage-rules>"
+                                 "</gp:usage-rules>"
                                  "</gp:geopriv>"
                                  "</dm:person>"
                                  "</presence>");
@@ -294,7 +476,8 @@ TEST_F(MtcLocationObjectTest, GetLocationFromMessageWithPointShape)
                                  "<gml:pos>-34.407 150.883</gml:pos>"
                                  "</gml:Point>"
                                  "</gp:location-info>"
-                                 "<gp:usage-rules/>"
+                                 "<gp:usage-rules>"
+                                 "</gp:usage-rules>"
                                  "</gp:geopriv>"
                                  "</dm:person>"
                                  "</presence>");
@@ -340,7 +523,8 @@ TEST_F(MtcLocationObjectTest, GetLocationFromMessageWithCircleShape)
             "<gs:radius uom=\"urn:ogc:def:uom:EPSG::9001\">30</gs:radius>"
             "</gs:Circle>"
             "</gp:location-info>"
-            "<gp:usage-rules/>"
+            "<gp:usage-rules>"
+            "</gp:usage-rules>"
             "</gp:geopriv>"
             "</dm:person>"
             "</presence>");
@@ -371,67 +555,61 @@ TEST_F(MtcLocationObjectTest, SetLocationToMessageDoesNothingIfContentEmpty)
 
     EXPECT_CALL(objMessage, AddHeader(_, _)).Times(0);
     EXPECT_CALL(objMessage, GetMessage).Times(0);
-    MtcLocationObject(objContext).SetLocationToMessage(objMessage, objEmptyContent, IMS_FALSE);
+    MtcLocationObject(objContext).SetLocationToMessage(objMessage, IMS_FALSE, objEmptyContent);
 }
 
 TEST_F(MtcLocationObjectTest, SetLocationToMessageSetHeadersAndBodyPartWithNoGeolocationRouting)
 {
     const AString strCid = "c-i-d";
     ON_CALL(objMessageUtils, GenerateContentId(_)).WillByDefault(Return(strCid));
+    ON_CALL(objConfigurationProxy, GetString(ConfigVoice::KEY_CONTENT_ID_FOR_GEOLOCATION_STRING))
+            .WillByDefault(Return(AString::ConstEmpty()));
 
     ByteArray objContent("PIDF-LO XML Content");
     MockIMessage objMessage;
-    MockISipMessage objSipMessage;
-    MockISipMessageBodyPart objSipMessageBodyPart;
-    ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
-    ON_CALL(objSipMessage, CreateSdpBodyPart).WillByDefault(Return(&objSipMessageBodyPart));
+    MockIMessageBodyPart objBodyPart;
+    ON_CALL(objMessage, CreateBodyPart).WillByDefault(Return(&objBodyPart));
 
     EXPECT_CALL(objMessage, AddHeader(AString("Geolocation"), AString("<cid:c-i-d>")));
     EXPECT_CALL(objMessage, AddHeader(AString("Geolocation-Routing"), AString("no")));
 
-    EXPECT_CALL(objSipMessageBodyPart, SetContent(objContent));
-    EXPECT_CALL(objSipMessageBodyPart,
-            SetHeader(ISipMessageBodyPart::CONTENT_UNKNOWN, AString("19"),
-                    AString("Content-Length")));
-    EXPECT_CALL(objSipMessageBodyPart,
-            SetHeader(ISipMessageBodyPart::CONTENT_ID, AString("<c-i-d>"), _));
-    EXPECT_CALL(objSipMessageBodyPart,
-            SetHeader(ISipMessageBodyPart::CONTENT_TYPE, AString("application/pidf+xml"), _));
-    EXPECT_CALL(objSipMessageBodyPart,
-            SetHeader(ISipMessageBodyPart::CONTENT_DISPOSITION, AString("render;handling=optional"),
-                    _));
+    EXPECT_CALL(objBodyPart, SetContent(objContent));
+    EXPECT_CALL(objBodyPart, SetHeader(AString(SipHeaderName::CONTENT_LENGTH), AString("19")));
+    EXPECT_CALL(objBodyPart, SetHeader(AString(SipHeaderName::CONTENT_ID), AString("<c-i-d>")));
+    EXPECT_CALL(objBodyPart,
+            SetHeader(AString(SipHeaderName::CONTENT_TYPE), AString("application/pidf+xml")));
+    EXPECT_CALL(objBodyPart,
+            SetHeader(AString(SipHeaderName::CONTENT_DISPOSITION),
+                    AString("render;handling=optional")));
 
-    MtcLocationObject(objContext).SetLocationToMessage(objMessage, objContent, IMS_FALSE);
+    MtcLocationObject(objContext).SetLocationToMessage(objMessage, IMS_FALSE, objContent);
 }
 
 TEST_F(MtcLocationObjectTest, SetLocationToMessageSetHeadersAndBodyPartWithGeolocationRouting)
 {
     const AString strCid = "c-i-d";
     ON_CALL(objMessageUtils, GenerateContentId(_)).WillByDefault(Return(strCid));
+    ON_CALL(objConfigurationProxy, GetString(ConfigVoice::KEY_CONTENT_ID_FOR_GEOLOCATION_STRING))
+            .WillByDefault(Return(AString::ConstEmpty()));
 
     ByteArray objContent("PIDF-LO XML Content");
     MockIMessage objMessage;
-    MockISipMessage objSipMessage;
-    MockISipMessageBodyPart objSipMessageBodyPart;
-    ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
-    ON_CALL(objSipMessage, CreateSdpBodyPart).WillByDefault(Return(&objSipMessageBodyPart));
+    MockIMessageBodyPart objBodyPart;
+    ON_CALL(objMessage, CreateBodyPart).WillByDefault(Return(&objBodyPart));
 
     EXPECT_CALL(objMessage, AddHeader(AString("Geolocation"), AString("<cid:c-i-d>")));
     EXPECT_CALL(objMessage, AddHeader(AString("Geolocation-Routing"), AString("yes")));
 
-    EXPECT_CALL(objSipMessageBodyPart, SetContent(objContent));
-    EXPECT_CALL(objSipMessageBodyPart,
-            SetHeader(ISipMessageBodyPart::CONTENT_UNKNOWN, AString("19"),
-                    AString("Content-Length")));
-    EXPECT_CALL(objSipMessageBodyPart,
-            SetHeader(ISipMessageBodyPart::CONTENT_ID, AString("<c-i-d>"), _));
-    EXPECT_CALL(objSipMessageBodyPart,
-            SetHeader(ISipMessageBodyPart::CONTENT_TYPE, AString("application/pidf+xml"), _));
-    EXPECT_CALL(objSipMessageBodyPart,
-            SetHeader(ISipMessageBodyPart::CONTENT_DISPOSITION, AString("render;handling=optional"),
-                    _));
+    EXPECT_CALL(objBodyPart, SetContent(objContent));
+    EXPECT_CALL(objBodyPart, SetHeader(AString(SipHeaderName::CONTENT_LENGTH), AString("19")));
+    EXPECT_CALL(objBodyPart, SetHeader(AString(SipHeaderName::CONTENT_ID), AString("<c-i-d>")));
+    EXPECT_CALL(objBodyPart,
+            SetHeader(AString(SipHeaderName::CONTENT_TYPE), AString("application/pidf+xml")));
+    EXPECT_CALL(objBodyPart,
+            SetHeader(AString(SipHeaderName::CONTENT_DISPOSITION),
+                    AString("render;handling=optional")));
 
-    MtcLocationObject(objContext).SetLocationToMessage(objMessage, objContent, IMS_TRUE);
+    MtcLocationObject(objContext).SetLocationToMessage(objMessage, IMS_TRUE, objContent);
 }
 
 TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsEmptyIfNoCreator)
@@ -447,8 +625,9 @@ TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsEmptyIfNoCreator)
 TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsLocationWithLatAndLong)
 {
     GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
-    ON_CALL(*pConfigurationManager, GetInformationLevelOfGeolocationPidf(_, _, _))
-            .WillByDefault(Return(CarrierConfig::ImsVoice::GEOLOCATION_PIDF_INFO_LAT_AND_LONG));
+    ON_CALL(objConfigurationProxy,
+            GetIntFromArray(ConfigIms::KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY, _))
+            .WillByDefault(Return(ConfigIms::GEOLOCATION_PIDF_INFO_LAT_AND_LONG));
     SetupDeviceLocation();
 
     AString strExpected =
@@ -459,7 +638,9 @@ TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsLocationWithLatAndLong)
             "xmlns:gml=\"http://www.opengis.net/gml\" "
             "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
             "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
-            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" entity=\"\">"
+            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" "
+            "xmlns:gbp=\"urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy\" "
+            "entity=\"\">"
             "<dm:device id=\"Phone\">"
             "<gp:geopriv>"
             "<gp:location-info>"
@@ -472,7 +653,8 @@ TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsLocationWithLatAndLong)
             "</gs:Ellipsoid>"
             "<con:confidence pdf=\"normal\">confidence</con:confidence>"
             "</gp:location-info>"
-            "<gp:usage-rules/>"
+            "<gp:usage-rules>"
+            "</gp:usage-rules>"
             "<gp:method>method</gp:method>"
             "</gp:geopriv>"
             "<dm:timestamp>time</dm:timestamp>"
@@ -485,9 +667,9 @@ TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsLocationWithLatAndLong)
 TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsLocationWithLatAndLongAndCivic)
 {
     GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
-    ON_CALL(*pConfigurationManager, GetInformationLevelOfGeolocationPidf(_, _, _))
-            .WillByDefault(
-                    Return(CarrierConfig::ImsVoice::GEOLOCATION_PIDF_INFO_LAT_AND_LONG_AND_CIVIC));
+    ON_CALL(objConfigurationProxy,
+            GetIntFromArray(ConfigIms::KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY, _))
+            .WillByDefault(Return(ConfigIms::GEOLOCATION_PIDF_INFO_LAT_AND_LONG_AND_CIVIC));
     SetupDeviceLocation();
 
     AString strExpected =
@@ -498,7 +680,9 @@ TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsLocationWithLatAndLongAnd
             "xmlns:gml=\"http://www.opengis.net/gml\" "
             "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
             "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
-            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" entity=\"\">"
+            "xmlns:con=\"urn:ietf:params:xml:ns:geopriv:conf\" "
+            "xmlns:gbp=\"urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy\" "
+            "entity=\"\">"
             "<dm:device id=\"Phone\">"
             "<gp:geopriv>"
             "<gp:location-info>"
@@ -517,7 +701,8 @@ TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsLocationWithLatAndLongAnd
             "</gs:Ellipsoid>"
             "<con:confidence pdf=\"normal\">confidence</con:confidence>"
             "</gp:location-info>"
-            "<gp:usage-rules/>"
+            "<gp:usage-rules>"
+            "</gp:usage-rules>"
             "<gp:method>method</gp:method>"
             "</gp:geopriv>"
             "<dm:timestamp>time</dm:timestamp>"
@@ -530,60 +715,65 @@ TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsLocationWithLatAndLongAnd
 TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsLocationWithCountry)
 {
     GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
-    ON_CALL(*pConfigurationManager, GetInformationLevelOfGeolocationPidf(_, _, _))
-            .WillByDefault(
-                    Return(CarrierConfig::ImsVoice::GEOLOCATION_PIDF_INFO_COUNTRY_CODE_ONLY));
+    ON_CALL(objConfigurationProxy,
+            GetIntFromArray(ConfigIms::KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY, _))
+            .WillByDefault(Return(ConfigIms::GEOLOCATION_PIDF_INFO_COUNTRY_CODE_ONLY));
     SetupDeviceLocation();
 
-    AString strExpected =
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-            "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
-            "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
-            "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
-            "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" entity=\"\">"
-            "<dm:device id=\"Phone\">"
-            "<gp:geopriv>"
-            "<gp:location-info>"
-            "<cl:civicAddress>"
-            "<cl:country>country</cl:country>"
-            "</cl:civicAddress>"
-            "</gp:location-info>"
-            "<gp:usage-rules/>"
-            "</gp:geopriv>"
-            "<dm:timestamp>time</dm:timestamp>"
-            "</dm:device>"
-            "</presence>";
+    AString strExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                          "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+                          "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+                          "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+                          "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
+                          "xmlns:gbp=\"urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy\" "
+                          "entity=\"\">"
+                          "<dm:device id=\"Phone\">"
+                          "<gp:geopriv>"
+                          "<gp:location-info>"
+                          "<cl:civicAddress>"
+                          "<cl:country>country</cl:country>"
+                          "</cl:civicAddress>"
+                          "</gp:location-info>"
+                          "<gp:usage-rules>"
+                          "</gp:usage-rules>"
+                          "</gp:geopriv>"
+                          "<dm:timestamp>time</dm:timestamp>"
+                          "</dm:device>"
+                          "</presence>";
     AssertPidfLoXmlExceptDeviceId(
             MtcLocationObject(objContext).CreateLocationBody().ToString(), strExpected);
 }
 
 TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsLocationWithCountryAndState)
 {
+    ConfigurationManager::GetInstance()->RefreshConfigs(objContext.GetSlotId());
     GeolocationHelper::GetInstance()->CreatePidfCreator(SLOT_ID);
-    ON_CALL(*pConfigurationManager, GetInformationLevelOfGeolocationPidf(_, _, _))
-            .WillByDefault(
-                    Return(CarrierConfig::ImsVoice::GEOLOCATION_PIDF_INFO_COUNTRY_CODE_AND_STATE));
+    ON_CALL(objConfigurationProxy,
+            GetIntFromArray(ConfigIms::KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY, _))
+            .WillByDefault(Return(ConfigIms::GEOLOCATION_PIDF_INFO_COUNTRY_CODE_AND_STATE));
     SetupDeviceLocation();
 
-    AString strExpected =
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-            "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
-            "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
-            "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
-            "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" entity=\"\">"
-            "<dm:device id=\"Phone\">"
-            "<gp:geopriv>"
-            "<gp:location-info>"
-            "<cl:civicAddress>"
-            "<cl:country>country</cl:country>"
-            "<cl:A1>state</cl:A1>"
-            "</cl:civicAddress>"
-            "</gp:location-info>"
-            "<gp:usage-rules/>"
-            "</gp:geopriv>"
-            "<dm:timestamp>time</dm:timestamp>"
-            "</dm:device>"
-            "</presence>";
+    AString strExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                          "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+                          "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+                          "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+                          "xmlns:cl=\"urn:ietf:params:xml:ns:pidf:geopriv10:civicAddr\" "
+                          "xmlns:gbp=\"urn:ietf:params:xml:ns:pidf:geopriv10:basicPolicy\" "
+                          "entity=\"pres:\">"
+                          "<dm:device id=\"Phone\">"
+                          "<gp:geopriv>"
+                          "<gp:location-info>"
+                          "<cl:civicAddress>"
+                          "<cl:country>country</cl:country>"
+                          "<cl:A1>state</cl:A1>"
+                          "</cl:civicAddress>"
+                          "</gp:location-info>"
+                          "<gp:usage-rules>"
+                          "</gp:usage-rules>"
+                          "</gp:geopriv>"
+                          "<dm:timestamp>time</dm:timestamp>"
+                          "</dm:device>"
+                          "</presence>";
     AssertPidfLoXmlExceptDeviceId(
             MtcLocationObject(objContext).CreateLocationBody().ToString(), strExpected);
 }
@@ -612,7 +802,8 @@ TEST_F(MtcLocationObjectTest, CreateCallComposerLocationBodyReturnsLocation)
                           "<gml:pos>lat long</gml:pos>"
                           "</gs:Circle>"
                           "</gp:location-info>"
-                          "<gp:usage-rules/>"
+                          "<gp:usage-rules>"
+                          "</gp:usage-rules>"
                           "</gp:geopriv>"
                           "</dm:person>"
                           "</presence>";
@@ -638,7 +829,8 @@ TEST_F(MtcLocationObjectTest, CreateCallComposerLocationBodyReturnsLocationIfSub
                           "<gml:pos>lat long</gml:pos>"
                           "</gs:Circle>"
                           "</gp:location-info>"
-                          "<gp:usage-rules/>"
+                          "<gp:usage-rules>"
+                          "</gp:usage-rules>"
                           "</gp:geopriv>"
                           "</dm:person>"
                           "</presence>";

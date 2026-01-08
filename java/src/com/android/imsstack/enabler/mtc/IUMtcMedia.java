@@ -45,6 +45,10 @@ public class IUMtcMedia {
 
     /** Send dtmf digit value to native */
     public static final int SEND_DTMF = (IMS_MSG_BASE_MEDIA_AUDIO_IND + 19);
+    /** Trigger the Anbr query to send to the NW */
+    public static final int TRIGGER_ANBR_QUERY              = (IMS_MSG_BASE_MEDIA_AUDIO_IND + 20);
+    /** Notify Anbr parameters to the media logic */
+    public static final int NOTIFY_ANBR_RECEIVED            = (IMS_MSG_BASE_MEDIA_AUDIO_IND + 21);
     /** Set surface buffer to native */
     public static final int SETSURFACE_CMD                  = (IMS_MSG_BASE_MEDIA_VIDEO_IND + 1);
     /** Set camera id to native */

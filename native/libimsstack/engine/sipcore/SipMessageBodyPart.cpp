@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
+#include "ServiceTrace.h"
 
+#include "msg/SipMsgBody.h"
+
+#include "SipError.h"
 #include "SipMessageBodyPart.h"
 #include "SipPrivate.h"
 #include "SipStack.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipMessageBodyPart::SipMessageBodyPart(IN IMS_BOOL bSdpBody /*= IMS_FALSE*/) :

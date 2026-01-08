@@ -19,8 +19,6 @@
 
 #include "IMtcCallController.h"
 #include "IMtcService.h"
-#include "ImsList.h"
-#include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include <gmock/gmock.h>
 
@@ -37,18 +35,22 @@ struct CallReasonInfo;
 struct ConfUser;
 struct MediaInfo;
 union Key;
+template <class T>
+class ImsList;
 
 class MockIMtcCallController : public IMtcCallController
 {
 public:
-    MOCK_METHOD(CallKey, Open, (IN ServiceType eServiceType, IN CallInfo& objCallInfo), (override));
+    MOCK_METHOD(CallKey, Open,
+            (IN ServiceType eServiceType, IN CallInfo& objCallInfo, IN const AString& strLogTag),
+            (override));
     MOCK_METHOD(void, Attach, (IN CallKey nCallKey), (override));
+    MOCK_METHOD(void, Detach, (IN CallKey nCallKey), (override));
     MOCK_METHOD(void, HandleIncoming,
             (IN IMtcService* pService, IN ISession* piSession), (override));
     MOCK_METHOD(void, Start,
             (IN CallKey nCallKey, IN CallType eCallType, IN const AString& strTarget,
-                    IN MediaInfo& objMediaInfo,
-                    (IN const ImsMap<SuppType, SuppService*>& objSuppServices)),
+                    IN MediaInfo& objMediaInfo, (IN const ImsList<SuppService*>& objSuppServices)),
             (override));
     MOCK_METHOD(void, HandleUserAlert, (IN CallKey nCallKey), (override));
     MOCK_METHOD(void, Accept,
@@ -79,8 +81,11 @@ public:
     MOCK_METHOD(void, RemoveFromConference, (IN CallKey nCallKey, IN ImsList<ConfUser*>& objUsers),
             (override));
     MOCK_METHOD(void, Transfer, (IN CallKey nCallKey, IN const AString& strTarget), (override));
+    MOCK_METHOD(void, HandleByeTransaction,
+            (IN CallKey nCallKey, IN std::function<void(ISession&)> objOperation), (override));
     MOCK_METHOD(ISilentRedialHelper&, GetRedialHelper, (
             IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason), (override));
+    MOCK_METHOD(const ISilentRedialHelper*, GetActiveRedialHelper, (), (const, override));
     MOCK_METHOD(void, ReleaseRedialHelper, (), (override));
 
     // IEnablerService interface

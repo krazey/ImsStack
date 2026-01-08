@@ -17,6 +17,8 @@
 #include <utils/String8.h>
 
 #include "IDigestAkaListener.h"
+#include "ISystem.h"
+#include "IThread.h"
 #include "ImsMessageDef.h"
 #include "OsUtil.h"
 #include "PlatformContext.h"
@@ -26,7 +28,7 @@
 #include "device/OsUsim.h"
 #include "system-intf/SystemConstants.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 // USIM system interface parameters for event notification
 class OsUsimParam
@@ -56,21 +58,19 @@ public:
             m_objResponse(ByteArray::ConstNull())
     {
     }
-    inline virtual ~OsUsimAuthResponseParam() {}
+    ~OsUsimAuthResponseParam() override = default;
 
 public:
     IMS_SINTP m_nOwner;
     ByteArray m_objResponse;
 };
 
-LOCAL
-OsUsim* osUsim_GetInstance(IN IMS_SINT32 nSlotId)
+static OsUsim* osUsim_GetInstance(IN IMS_SINT32 nSlotId)
 {
     return DYNAMIC_CAST(OsUsim*, PhoneInfoService::GetPhoneInfoService()->GetUsim(nSlotId));
 }
 
-LOCAL
-void osUsim_HandleAuthResponse(IN IMS_SINT32 nSlotId, IN OsUsimAuthResponseParam* pParam)
+static void osUsim_HandleAuthResponse(IN IMS_SINT32 nSlotId, IN OsUsimAuthResponseParam* pParam)
 {
     OsUsim* pUsim = osUsim_GetInstance(nSlotId);
     OsUsimDigestAka* pDigestAka = reinterpret_cast<OsUsimDigestAka*>(pParam->m_nOwner);
@@ -87,8 +87,7 @@ void osUsim_HandleAuthResponse(IN IMS_SINT32 nSlotId, IN OsUsimAuthResponseParam
     pDigestAka->OnAuthResponseReceived(pParam->m_objResponse);
 }
 
-LOCAL
-void osUsim_HandleUsimEvent(IN IMS_SINT32 nSlotId, IN OsUsimParam* pParam)
+static void osUsim_HandleUsimEvent(IN IMS_SINT32 nSlotId, IN OsUsimParam* pParam)
 {
     if (pParam == IMS_NULL)
     {
@@ -109,8 +108,7 @@ void osUsim_HandleUsimEvent(IN IMS_SINT32 nSlotId, IN OsUsimParam* pParam)
     delete pParam;
 }
 
-LOCAL
-void osUsim_SendMessage(IN IThread* piThread, IN IMS_SINT32 nSlotId, IN OsUsimParam* pParam)
+static void osUsim_SendMessage(IN IThread* piThread, IN IMS_SINT32 nSlotId, IN OsUsimParam* pParam)
 {
     if (piThread == IMS_NULL)
     {
@@ -150,14 +148,13 @@ void OsUsimDigestAka::OnAuthResponseReceived(IN const ByteArray& objAuthRes)
     }
 
     const IMS_BYTE* pbyAuthRes = objAuthRes.GetData();
-    IMS_SINT32 nAuthResLen = objAuthRes.GetLength();
 
     if (OsUtil::GetInstance()->IsDebugMode())
     {
         AString strHex;
         AString strBuffer = AString::ConstEmpty();
 
-        for (IMS_SINT32 i = 0; i < nAuthResLen; i++)
+        for (IMS_SINT32 i = 0; i < objAuthRes.GetLength(); i++)
         {
             strHex.Sprintf("%02X ", pbyAuthRes[i]);
             strBuffer.Append(strHex);
@@ -308,7 +305,7 @@ void OsUsim::DestroyDigestAka(IN OsUsimDigestAka* pDigestAka)
 
     for (IMS_UINT32 i = 0; i < m_objDigestAkas.GetSize(); ++i)
     {
-        OsUsimDigestAka* pTmp = m_objDigestAkas.GetAt(i);
+        const OsUsimDigestAka* pTmp = m_objDigestAkas.GetAt(i);
 
         if (pDigestAka == pTmp)
         {
@@ -404,7 +401,7 @@ IMS_BOOL OsUsim::IsDigestAkaPresent(IN const OsUsimDigestAka* pDigestAka)
 
     for (IMS_UINT32 i = 0; i < m_objDigestAkas.GetSize(); ++i)
     {
-        OsUsimDigestAka* pTmp = m_objDigestAkas.GetAt(i);
+        const OsUsimDigestAka* pTmp = m_objDigestAkas.GetAt(i);
 
         if (pDigestAka == pTmp)
         {

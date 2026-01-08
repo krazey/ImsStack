@@ -502,7 +502,8 @@ TEST_F(OsNetworkConnectionTest, GetAccessNetworkInfo)
             .Times(AnyNumber())
             .WillOnce(Return(AString("8c:3b:ad:8c:31:d0:8c:40")))
             .WillOnce(Return(AString(":::::")))
-            .WillOnce(Return(AString("8c:3b:ad:8c:31:d0")));
+            .WillOnce(Return(AString("8c:3b:ad:8c:31:d0")))
+            .WillOnce(Return(AString::ConstNull()));
 
     pINetworkConnection->GetAccessNetworkInfo(objWifiAccessNetInfo);
 
@@ -522,6 +523,13 @@ TEST_F(OsNetworkConnectionTest, GetAccessNetworkInfo)
     EXPECT_EQ(objWifiAccessNetInfo.nClass, AccessNetworkInfo::CLASS_NONE);
     EXPECT_STREQ(reinterpret_cast<char*>(&objWifiAccessNetInfo.uniAI.i_wlan_node_id.aMAC[0]),
             "\x8C\x3B\xAD\x8C\x31\xD0");
+
+    pINetworkConnection->GetAccessNetworkInfo(objWifiAccessNetInfo);
+
+    EXPECT_EQ(objWifiAccessNetInfo.nType, AccessNetworkInfo::TYPE_IEEE_802_11);
+    EXPECT_EQ(objWifiAccessNetInfo.nClass, AccessNetworkInfo::CLASS_NONE);
+    EXPECT_STREQ(reinterpret_cast<char*>(&objWifiAccessNetInfo.uniAI.i_wlan_node_id.aMAC[0]),
+            "\x00\x00\x00\x00\x00\x00");
 }
 
 TEST_F(OsNetworkConnectionTest, GetLastAccessNetworkInfo)
@@ -719,7 +727,7 @@ TEST_F(OsNetworkConnectionTest, GetPcscfAddress)
 TEST_F(OsNetworkConnectionTest, IsePDGEnabled)
 {
     OsNetworkConnection objOsNetworkConnection(IMS_SLOT_0);
-    INetworkConnection* pINetworkConnection = &objOsNetworkConnection;
+    const INetworkConnection* pINetworkConnection = &objOsNetworkConnection;
 
     ActivateConnection(objOsNetworkConnection, IIpcan::CATEGORY_WLAN);
 
@@ -729,7 +737,7 @@ TEST_F(OsNetworkConnectionTest, IsePDGEnabled)
 TEST_F(OsNetworkConnectionTest, IsIpv6Preferred)
 {
     OsNetworkConnection objOsNetworkConnection(IMS_SLOT_0);
-    INetworkConnection* pINetworkConnection = &objOsNetworkConnection;
+    const INetworkConnection* pINetworkConnection = &objOsNetworkConnection;
 
     EXPECT_CALL(m_objSystem, IsIpv6Preferred(_, _)).WillOnce(Return(IMS_TRUE));
 
@@ -739,7 +747,7 @@ TEST_F(OsNetworkConnectionTest, IsIpv6Preferred)
 TEST_F(OsNetworkConnectionTest, IsMobileDataEnabled)
 {
     OsNetworkConnection objOsNetworkConnection(IMS_SLOT_0);
-    INetworkConnection* pINetworkConnection = &objOsNetworkConnection;
+    const INetworkConnection* pINetworkConnection = &objOsNetworkConnection;
 
     EXPECT_CALL(m_objSystem, IsMobileDataEnabled(_)).WillOnce(Return(IMS_TRUE));
 
@@ -749,7 +757,7 @@ TEST_F(OsNetworkConnectionTest, IsMobileDataEnabled)
 TEST_F(OsNetworkConnectionTest, GetMtu)
 {
     OsNetworkConnection objOsNetworkConnection(IMS_SLOT_0);
-    INetworkConnection* pINetworkConnection = &objOsNetworkConnection;
+    const INetworkConnection* pINetworkConnection = &objOsNetworkConnection;
 
     EXPECT_CALL(m_objSystem, GetMtu(_, _)).WillOnce(Return(1200));
 
@@ -823,7 +831,7 @@ TEST_F(OsNetworkConnectionTest, Create_ApnType)
 TEST_F(OsNetworkConnectionTest, Equals)
 {
     OsNetworkConnection objOsNetworkConnection(IMS_SLOT_0);
-    ImsNetworkConnection* pImsNetworkConnection = &objOsNetworkConnection;
+    const ImsNetworkConnection* pImsNetworkConnection = &objOsNetworkConnection;
     IpAddress onjIpv4Address(m_strLocalIpv4Addr);
     IpAddress onjIpv6Address(m_strLocalIpv6Addr);
 
@@ -983,6 +991,9 @@ TEST_F(OsNetworkConnectionTest, DispatchServiceMessage)
 
     EXPECT_EQ(INetworkConnection::STATE_CONNECTED, pINetworkConnection->GetState());
 
+    EXPECT_CALL(m_objSystem, GetLocalAddress(_, -1, _))
+            .Times(1)
+            .WillRepeatedly(Return(AString::ConstNull()));
     EXPECT_CALL(m_objMockINetworkConnectionListener, NetworkConnection_OnPcscfChanged(_)).Times(1);
     EXPECT_CALL(m_objMockINetworkConnectionRefListener, NetworkConnection_OnPcscfChanged(_))
             .Times(1);

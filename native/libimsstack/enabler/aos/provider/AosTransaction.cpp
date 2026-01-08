@@ -25,7 +25,7 @@
 #include "provider/AosUtil.h"
 #include "provider/AosTransaction.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 #define AOSTAG m_strTag.GetStr()
 
@@ -54,6 +54,7 @@ AosTransaction::AosTransaction(IN IMS_SINT32 nSlotId) :
     m_objTraffics.Add(TYPE_REG, new AosTraffic(TYPE_REG, this));
     m_objTraffics.Add(TYPE_SUB, new AosTraffic(TYPE_SUB, this));
     m_objTraffics.Add(TYPE_EMERGENCY, new AosTraffic(TYPE_EMERGENCY, this));
+    m_objTraffics.Add(TYPE_DEREG, new AosTraffic(TYPE_DEREG, this));
 }
 
 PUBLIC VIRTUAL AosTransaction::~AosTransaction()
@@ -107,14 +108,7 @@ PUBLIC VIRTUAL void AosTransaction::SetListener(
         ImsList<IAosTransactionListener*> objListeners;
 
         objListeners.Append(piListener);
-
-        if (!m_objListeners.Add(nType, objListeners))
-        {
-            A_IMS_TRACE_D(AOSTAG, "AosTransactionListener :: failed - %d / %d / %p", nType,
-                    m_objListeners.GetSize(), piListener);
-
-            return;
-        }
+        m_objListeners.Add(nType, objListeners);
 
         A_IMS_TRACE_D(AOSTAG, "AosTransactionListener :: add - %d / %d / %p", nType,
                 objListeners.GetSize(), piListener);
@@ -286,7 +280,15 @@ PUBLIC VIRTUAL void AosTransaction::StopTraffic(IN IMS_UINT32 nType)
     {
         if (!IsStarted())
         {
-            StartTimer(TIME_STOP_DELAY);
+            if (nType == TYPE_DEREG)
+            {
+                StopTimer();
+                ProcessTimerExpired();
+            }
+            else
+            {
+                StartTimer(TIME_STOP_DELAY);
+            }
         }
     }
 }
@@ -345,24 +347,7 @@ PROTECTED IMS_BOOL AosTransaction::IsTrafficResponseWaiting() const
     return m_bIsTrafficResponseWaiting;
 }
 
-PROTECTED VIRTUAL void AosTransaction::Timer_TimerExpired(IN ITimer* piTimer)
-{
-    if (piTimer == IMS_NULL)
-    {
-        return;
-    }
-
-    if (piTimer != m_piStopTimer)
-    {
-        return;
-    }
-
-    StopTimer();
-
-    ProcessTimerExpired();
-}
-
-PRIVATE IMS_UINT32 AosTransaction::GetAccessNetworkType(IN IMS_UINT32 nRadioType)
+PROTECTED IMS_UINT32 AosTransaction::GetAccessNetworkType(IN IMS_UINT32 nRadioType)
 {
     switch (nRadioType)
     {
@@ -383,6 +368,87 @@ PRIVATE IMS_UINT32 AosTransaction::GetAccessNetworkType(IN IMS_UINT32 nRadioType
         default:
             return IImsRadio::ACCESS_NETWORK_TYPE_UNKNOWN;
     }
+}
+
+PROTECTED VIRTUAL void AosTransaction::Timer_TimerExpired(IN ITimer* piTimer)
+{
+    if (piTimer == IMS_NULL)
+    {
+        return;
+    }
+
+    if (piTimer != m_piStopTimer)
+    {
+        return;
+    }
+
+    StopTimer();
+
+    ProcessTimerExpired();
+}
+
+PROTECTED VIRTUAL void AosTransaction::Traffic_OnConnectionFailed(IN IMS_UINT32 nType,
+        IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis)
+{
+    if (nType != TYPE_DEREG)
+    {
+        NotifyConnectionFailed(nType, nFailureReason, nCauseCode, nWaitTimeMillis);
+    }
+
+    if (IsResponseWaiting(TYPE_REG))
+    {
+        NotifyConnectionFailed(TYPE_REG, nFailureReason, nCauseCode, nWaitTimeMillis);
+        RemoveForWaitingResponse(TYPE_REG);
+    }
+
+    if (IsResponseWaiting(TYPE_SUB))
+    {
+        NotifyConnectionFailed(TYPE_SUB, nFailureReason, nCauseCode, nWaitTimeMillis);
+        RemoveForWaitingResponse(TYPE_SUB);
+    }
+
+    if (IsResponseWaiting(TYPE_DEREG))
+    {
+        // Connection callback is not required.
+        RemoveForWaitingResponse(TYPE_DEREG);
+    }
+
+    m_bIsTrafficResponseWaiting = IMS_FALSE;
+}
+
+PROTECTED VIRTUAL void AosTransaction::Traffic_OnConnectionSetupPrepared(IN IMS_UINT32 nType)
+{
+    if (nType != TYPE_DEREG)
+    {
+        NotifyConnectionSetupPrepared(nType);
+    }
+
+    if (IsResponseWaiting(TYPE_REG))
+    {
+        NotifyConnectionSetupPrepared(TYPE_REG);
+        RemoveForWaitingResponse(TYPE_REG);
+    }
+
+    if (IsResponseWaiting(TYPE_SUB))
+    {
+        NotifyConnectionSetupPrepared(TYPE_SUB);
+        RemoveForWaitingResponse(TYPE_SUB);
+    }
+
+    if (IsResponseWaiting(TYPE_DEREG))
+    {
+        // Connection callback is not required.
+        RemoveForWaitingResponse(TYPE_DEREG);
+    }
+
+    m_bIsTrafficResponseWaiting = IMS_FALSE;
+}
+
+PROTECTED VIRTUAL void AosTransaction::ImsRadio_OnTrafficPriorityChanged()
+{
+    NotifyTrafficPriorityChanged(TYPE_REG);
+    NotifyTrafficPriorityChanged(TYPE_SUB);
+    NotifyTrafficPriorityChanged(TYPE_DEREG);
 }
 
 PRIVATE void AosTransaction::NotifyConnectionFailed(IN IN IMS_UINT32 nType,
@@ -519,49 +585,4 @@ PRIVATE void AosTransaction::ProcessTimerExpired()
             }
         }
     }
-}
-
-PRIVATE VIRTUAL void AosTransaction::Traffic_OnConnectionFailed(IN IMS_UINT32 nType,
-        IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis)
-{
-    NotifyConnectionFailed(nType, nFailureReason, nCauseCode, nWaitTimeMillis);
-
-    if (IsResponseWaiting(TYPE_REG))
-    {
-        NotifyConnectionFailed(TYPE_REG, nFailureReason, nCauseCode, nWaitTimeMillis);
-        RemoveForWaitingResponse(TYPE_REG);
-    }
-
-    if (IsResponseWaiting(TYPE_SUB))
-    {
-        NotifyConnectionFailed(TYPE_SUB, nFailureReason, nCauseCode, nWaitTimeMillis);
-        RemoveForWaitingResponse(TYPE_SUB);
-    }
-
-    m_bIsTrafficResponseWaiting = IMS_FALSE;
-}
-
-PRIVATE VIRTUAL void AosTransaction::Traffic_OnConnectionSetupPrepared(IN IMS_UINT32 nType)
-{
-    NotifyConnectionSetupPrepared(nType);
-
-    if (IsResponseWaiting(TYPE_REG))
-    {
-        NotifyConnectionSetupPrepared(TYPE_REG);
-        RemoveForWaitingResponse(TYPE_REG);
-    }
-
-    if (IsResponseWaiting(TYPE_SUB))
-    {
-        NotifyConnectionSetupPrepared(TYPE_SUB);
-        RemoveForWaitingResponse(TYPE_SUB);
-    }
-
-    m_bIsTrafficResponseWaiting = IMS_FALSE;
-}
-
-PRIVATE VIRTUAL void AosTransaction::ImsRadio_OnTrafficPriorityChanged()
-{
-    NotifyTrafficPriorityChanged(TYPE_REG);
-    NotifyTrafficPriorityChanged(TYPE_SUB);
 }

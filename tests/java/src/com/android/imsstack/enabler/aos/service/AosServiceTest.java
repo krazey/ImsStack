@@ -17,7 +17,8 @@
 package com.android.imsstack.enabler.aos.service;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
@@ -29,8 +30,13 @@ import static org.mockito.Mockito.when;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcel;
+import android.telephony.DataFailCause;
+import android.telephony.DisconnectCause;
+import android.telephony.PreciseCallState;
+import android.telephony.PreciseDisconnectCause;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
@@ -39,18 +45,25 @@ import android.testing.TestableLooper;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
+import androidx.test.filters.SmallTest;
+
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.agents.LocationInterface;
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
+import com.android.imsstack.core.agents.TelephonyInterface;
+import com.android.imsstack.core.agents.WifiInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
+import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
-import com.android.imsstack.enabler.aos.IAosInfo.IsimState;
+import com.android.imsstack.core.config.CarrierConfig;
+import com.android.imsstack.enabler.aos.IAosInfo.CrossSimStatus;
 import com.android.imsstack.enabler.aos.IAosInfo.LocationInfo;
 import com.android.imsstack.enabler.aos.IAosInfo.PhoneNumberState;
-import com.android.imsstack.enabler.aos.IAosInfo.PreciseCallState;
 import com.android.imsstack.enabler.aos.IAosInfo.RoamingPreferredVoiceNetwork;
 import com.android.imsstack.enabler.aos.IAosInfo.ServiceSetting;
 import com.android.imsstack.enabler.aos.IAosInfoListener;
@@ -63,12 +76,15 @@ import com.android.imsstack.enabler.aos.IAosRegistrationListener.FeatureTagMask;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.NetworkType;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.ReasonCode;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.RegistrationState;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.RegistrationType;
 import com.android.imsstack.enabler.aos.IIAosService;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.jni.JniIms;
 import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.jni.JniImsProxy;
 import com.android.imsstack.jni.JniObjectId;
+import com.android.imsstack.system.ImsEventDef;
+import com.android.imsstack.util.IndentingPrintWriter;
 
 import org.junit.After;
 import org.junit.Before;
@@ -78,25 +94,30 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.StringWriter;
 import java.util.Set;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class AosServiceTest extends ImsStackTest {
     private static final int SLOT_0 = 0;
-    public static final int PCO_TARGET_ID = 0xff00;
     public static final int PCO_NONE_VALUE = 0;
     public static final int PCO_LIMITED_SERVICE_VALUE = 5;
 
-    private AosService mAosService;
+    private FakeAosService mAosService;
     private final long mNativeObject = 1000;
 
     @Mock JniIms mMockJniIms;
     @Mock SparseArray<ImsServiceRegistry> mMockImsServiceRegistrys;
     @Mock ImsServiceRegistry mMockImsServiceRegistry;
     @Mock SimInterface mMockSimInterface;
+    @Mock TelephonyInterface mMockTelephonyInterface;
     @Mock IAosRegistrationListener mMockAosRegistrationListener;
     @Mock IAosInfoListener mMockAosInfoListener;
+    @Mock CarrierConfig mMockCarrierConfig;
+    @Mock ConfigInterface mMockConfigInterface;
+    @Mock LocationInterface mMockLocationInterface;
+    @Mock WifiInterface mMockWifiInterface;
     @Mock NativeStateInterface mMockNativeStateInterface;
     @Mock IDcNetWatcher mMockDcNetWatcher;
 
@@ -116,13 +137,19 @@ public class AosServiceTest extends ImsStackTest {
         replaceInstance(ImsServiceRegistry.class, "sImsServiceRegistrys", null,
                 mMockImsServiceRegistrys);
 
-        DcFactory.setDcAgent(IDcNetWatcher.class, mMockDcNetWatcher, SLOT_0);
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
 
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT_0);
         AgentFactory.getInstance().setAgent(SimInterface.class, mMockSimInterface, SLOT_0);
         AgentFactory.getInstance().setAgent(
                 NativeStateInterface.class, mMockNativeStateInterface, SLOT_0);
+        AgentFactory.getInstance().setAgent(
+                LocationInterface.class, mMockLocationInterface, SLOT_0);
+        AgentFactory.getInstance().setAgent(WifiInterface.class, mMockWifiInterface);
 
-        mAosService = new AosService();
+        DcFactory.setDcAgent(IDcNetWatcher.class, mMockDcNetWatcher, SLOT_0);
+
+        mAosService = new FakeAosService();
         mAosService.init(SLOT_0);
         mAosService.start();
     }
@@ -134,8 +161,11 @@ public class AosServiceTest extends ImsStackTest {
 
         DcFactory.setDcAgent(IDcNetWatcher.class, null, SLOT_0);
 
+        AgentFactory.getInstance().setAgent(WifiInterface.class, null);
+        AgentFactory.getInstance().setAgent(LocationInterface.class, null, SLOT_0);
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT_0);
         AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT_0);
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT_0);
 
         super.tearDown();
     }
@@ -143,9 +173,9 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void initAndStart() {
         // mAosService.init(SLOT_0) and mAosService.start() are called in setup
-        verify(mMockJniIms).setListener(mNativeObject, mAosService.mNativeListener);
+        verify(mMockJniIms).setListener(mNativeObject, mAosService.getJniImsListenerProxy());
         verify(mMockNativeStateInterface).addListener(any(NativeStateInterface.Listener.class));
-        verify(mMockImsServiceRegistry).addListener(mAosService.mListener);
+        verify(mMockImsServiceRegistry).addListener(mAosService.getServiceRegistryListener());
         verify(mMockSimInterface).addListener(mAosService);
         verify(mMockSimInterface).addIsimListener(mAosService);
     }
@@ -157,7 +187,7 @@ public class AosServiceTest extends ImsStackTest {
         verify(mMockSimInterface).removeIsimListener(mAosService);
 
         mAosService.cleanup();
-        verify(mMockImsServiceRegistry).removeListener(mAosService.mListener);
+        verify(mMockImsServiceRegistry).removeListener(mAosService.getServiceRegistryListener());
         verify(mMockNativeStateInterface).removeListener(any(NativeStateInterface.Listener.class));
         verify(mMockJniIms).removeListener(mNativeObject);
         verify(mMockJniIms).releaseInterface(mNativeObject);
@@ -166,19 +196,19 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void addAndRemoveAosRegistrationListener() {
         mAosService.addListener(mMockAosRegistrationListener);
-        assertEquals(1, mAosService.mAosRegistationListeners.size());
+        assertEquals(1, mAosService.getAosRegistrationListeners().size());
 
         mAosService.removeListener(mMockAosRegistrationListener);
-        assertEquals(0, mAosService.mAosRegistationListeners.size());
+        assertEquals(0, mAosService.getAosRegistrationListeners().size());
     }
 
     @Test
     public void addAndRemoveAosInfoListener() {
         mAosService.addListener(mMockAosInfoListener);
-        assertEquals(1, mAosService.mAosInfoListeners.size());
+        assertEquals(1, mAosService.getAosInfoListeners().size());
 
         mAosService.removeListener(mMockAosInfoListener);
-        assertEquals(0, mAosService.mAosInfoListeners.size());
+        assertEquals(0, mAosService.getAosInfoListeners().size());
     }
 
     @Test
@@ -220,10 +250,13 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
-    public void changeCapabilities_nullParam() {
-        mAosService.changeCapabilities(null);
+    public void changeCapabilitiesWithNullThrowsNullPointerException() {
 
-        assertNull(mAosService.mCapabilityPairs);
+        Throwable exception = assertThrows(NullPointerException.class, () -> {
+            mAosService.changeCapabilities(null);
+        });
+
+        assertEquals("listener must not be null", exception.getMessage());
     }
 
     @Test
@@ -232,7 +265,7 @@ public class AosServiceTest extends ImsStackTest {
                 IAosRegistrationListener.Capability.UT);
         CapabilityPairs newPairs = new CapabilityPairs(IAosRegistrationListener.NetworkType.LTE,
                 IAosRegistrationListener.Capability.UT);
-        mAosService.mCapabilityPairs = oldPairs;
+        mAosService.setCapabilityPairs(oldPairs);
 
         mAosService.changeCapabilities(newPairs);
 
@@ -240,73 +273,26 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
-    public void changeCapabilities_lteVideo() {
-        byte[] capabilityData = createBytes(IIAosService.J2N_REQUEST_CAPABILITIES_CHANGED, 2,
-                IAosRegistrationListener.NetworkType.LTE, IAosRegistrationListener.Capability.VIDEO,
-                IAosRegistrationListener.NetworkType.IWLAN,
-                IAosRegistrationListener.Capability.VIDEO);
-        CapabilityPairs pairs = new CapabilityPairs(IAosRegistrationListener.NetworkType.LTE,
-                IAosRegistrationListener.Capability.VIDEO);
-
-        mAosService.changeCapabilities(pairs);
-
-        verify(mMockJniIms).sendData(mNativeObject, capabilityData);
-        assertTrue(mAosService.mCapabilityPairs.hasCapability(
-                IAosRegistrationListener.NetworkType.LTE,
-                IAosRegistrationListener.Capability.VIDEO));
-        assertTrue(mAosService.mCapabilityPairs.hasCapability(
-                IAosRegistrationListener.NetworkType.IWLAN,
-                IAosRegistrationListener.Capability.VIDEO));
-    }
-
-    @Test
-    public void changeCapabilities_nrVideo() {
-        byte[] capabilityData = createBytes(IIAosService.J2N_REQUEST_CAPABILITIES_CHANGED, 2,
-                IAosRegistrationListener.NetworkType.NR, IAosRegistrationListener.Capability.VIDEO,
-                IAosRegistrationListener.NetworkType.IWLAN,
-                IAosRegistrationListener.Capability.VIDEO);
-        CapabilityPairs pairs = new CapabilityPairs(IAosRegistrationListener.NetworkType.NR,
-                IAosRegistrationListener.Capability.VIDEO);
-
-        mAosService.changeCapabilities(pairs);
-
-        verify(mMockJniIms).sendData(mNativeObject, capabilityData);
-        assertTrue(mAosService.mCapabilityPairs.hasCapability(
-                IAosRegistrationListener.NetworkType.NR,
-                IAosRegistrationListener.Capability.VIDEO));
-        assertTrue(mAosService.mCapabilityPairs.hasCapability(
-                IAosRegistrationListener.NetworkType.IWLAN,
-                IAosRegistrationListener.Capability.VIDEO));
-    }
-
-    @Test
     public void controlRegistration() {
         byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
-                IAosRegistration.RequestType.START, IAosRegistration.Pcscf.CURRENT,
-                IAosRegistration.Cause.IMS_SERVICE);
+                IAosRegistration.RequestType.START.getValue(),
+                IAosRegistration.Pcscf.CURRENT.getValue(),
+                IAosRegistration.Cause.IMS_SERVICE.getValue());
 
         mAosService.controlRegistration(IAosRegistration.RequestType.START,
-                IAosRegistration.Pcscf.CURRENT, IAosRegistration.Cause.IMS_SERVICE);
+                IAosRegistration.Pcscf.CURRENT,
+                IAosRegistration.Cause.IMS_SERVICE);
 
         verify(mMockJniIms).sendData(mNativeObject, registrationData);
     }
 
     @Test
     public void getRegisteredNetworkType() {
-        mAosService.mRegisteredNetworkType = NetworkType.UTRAN;
+        mAosService.setRegisteredNetworkType(NetworkType.UTRAN);
 
-        int registeredNetworkType = mAosService.getRegisteredNetworkType();
+        NetworkType registeredNetworkType = mAosService.getRegisteredNetworkType();
 
         assertEquals(NetworkType.UTRAN, registeredNetworkType);
-    }
-
-    @Test
-    public void notifyAirplaneSetting() {
-        byte[] airplaneSettingData = createBytes(IIAosService.J2N_NOTIFY_AIRPLANE_SETTING, true);
-
-        mAosService.notifyAirplaneSetting(true);
-
-        verify(mMockJniIms).sendData(mNativeObject, airplaneSettingData);
     }
 
     // currently, not used
@@ -335,7 +321,7 @@ public class AosServiceTest extends ImsStackTest {
     public void notifyRoamingPreferredVoiceNetwork() {
         byte[] preferredVoiceNetworkData = createBytes(
                 IIAosService.J2N_NOTIFY_ROAMING_PREFERRED_VOICE_NETWORK,
-                RoamingPreferredVoiceNetwork.CELLULAR);
+                RoamingPreferredVoiceNetwork.CELLULAR.getValue());
 
         mAosService.notifyRoamingPreferredVoiceNetwork(RoamingPreferredVoiceNetwork.CELLULAR);
 
@@ -346,7 +332,7 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void notifyServiceSetting() {
         byte[] serviceSettingData = createBytes(IIAosService.J2N_NOTIFY_SERVICE_SETTING,
-                ServiceSetting.ON, FeatureTagMask.MMTEL);
+                ServiceSetting.ON.getValue(), FeatureTagMask.MMTEL);
 
         mAosService.notifyServiceSetting(ServiceSetting.ON, FeatureTagMask.MMTEL);
 
@@ -403,34 +389,13 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
-    public void notifyIpcanHandoverFailure() {
-        byte[] ipcanHandoverFailureData = createBytes(
-                IIAosService.J2N_NOTIFY_IPCAN_HANDOVER_FAILURE, IApn.IPCAN_CATEGORY_MOBILE,
-                android.telephony.DataFailCause.OPERATOR_BARRED);
-
-        mAosService.notifyIpcanHandoverFailure(IApn.IPCAN_CATEGORY_MOBILE,
-                android.telephony.DataFailCause.OPERATOR_BARRED);
-
-        verify(mMockJniIms).sendData(mNativeObject, ipcanHandoverFailureData);
-    }
-
-    @Test
     public void notifyIsimState() {
-        byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE, IsimState.LOADED);
+        byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
+                Sim.ISIM_STATE_LOADED);
 
-        mAosService.notifyIsimState(IsimState.LOADED);
+        mAosService.notifyIsimState(Sim.ISIM_STATE_LOADED);
 
         verify(mMockJniIms).sendData(mNativeObject, isimStateData);
-    }
-
-    @Test
-    public void notifyLocationInfo() {
-        byte[] locationInfoData = createBytes(IIAosService.J2N_NOTIFY_LOCATION_INFO,
-                LocationInfo.COUNTRY_CHANGED);
-
-        mAosService.notifyLocationInfo(LocationInfo.COUNTRY_CHANGED);
-
-        verify(mMockJniIms).sendData(mNativeObject, locationInfoData);
     }
 
     // currently, not used
@@ -457,20 +422,11 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void notifyPhoneNumberState() {
         byte[] phoneNumberStateData = createBytes(IIAosService.J2N_NOTIFY_PHONE_NUMBER_STATE, 1,
-                PhoneNumberState.SIM_LOADED);
+                PhoneNumberState.SIM_LOADED.getValue());
 
         mAosService.notifyPhoneNumberState(true, PhoneNumberState.SIM_LOADED);
 
         verify(mMockJniIms).sendData(mNativeObject, phoneNumberStateData);
-    }
-
-    @Test
-    public void notifyPlmnChanged() {
-        byte[] plmnChangedData = createBytes(IIAosService.J2N_NOTIFY_PLMN_CHANGED);
-
-        mAosService.notifyPlmnChanged();
-
-        verify(mMockJniIms).sendData(mNativeObject, plmnChangedData);
     }
 
     @Test
@@ -480,16 +436,6 @@ public class AosServiceTest extends ImsStackTest {
         mAosService.notifyPowerOff();
 
         verify(mMockJniIms).sendData(mNativeObject, powerOffData);
-    }
-
-    @Test
-    public void notifyPreciseCallState() {
-        byte[] callStateData = createBytes(IIAosService.J2N_NOTIFY_PRECISE_CALL_STATE,
-                PreciseCallState.ACTIVE);
-
-        mAosService.notifyPreciseCallState(PreciseCallState.ACTIVE);
-
-        verify(mMockJniIms).sendData(mNativeObject, callStateData);
     }
 
     @Test
@@ -504,7 +450,7 @@ public class AosServiceTest extends ImsStackTest {
         intent.setAction(TelephonyManager.ACTION_CARRIER_SIGNAL_PCO_VALUE);
         intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, 0);
         intent.putExtra(TelephonyManager.EXTRA_APN_TYPE, ApnSetting.TYPE_IMS);
-        intent.putExtra(TelephonyManager.EXTRA_PCO_ID, PCO_TARGET_ID);
+        intent.putExtra(TelephonyManager.EXTRA_PCO_ID, AosService.PCO_TARGET_ID);
         intent.putExtra(TelephonyManager.EXTRA_PCO_VALUE, pcoData);
 
         mAosService.notifyCarrierSignalPcoValueChanged(intent);
@@ -525,7 +471,7 @@ public class AosServiceTest extends ImsStackTest {
         intent.setAction(TelephonyManager.ACTION_CARRIER_SIGNAL_PCO_VALUE);
         intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, 0);
         intent.putExtra(TelephonyManager.EXTRA_APN_TYPE, ApnSetting.TYPE_IMS);
-        intent.putExtra(TelephonyManager.EXTRA_PCO_ID, PCO_TARGET_ID);
+        intent.putExtra(TelephonyManager.EXTRA_PCO_ID, AosService.PCO_TARGET_ID);
         intent.putExtra(TelephonyManager.EXTRA_PCO_VALUE, pcoData);
 
         mAosService.notifyCarrierSignalPcoValueChanged(intent);
@@ -546,7 +492,7 @@ public class AosServiceTest extends ImsStackTest {
         intent.setAction(TelephonyManager.ACTION_CARRIER_SIGNAL_PCO_VALUE);
         intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, 0);
         intent.putExtra(TelephonyManager.EXTRA_APN_TYPE, ApnSetting.TYPE_IMS);
-        intent.putExtra(TelephonyManager.EXTRA_PCO_ID, PCO_TARGET_ID);
+        intent.putExtra(TelephonyManager.EXTRA_PCO_ID, AosService.PCO_TARGET_ID);
         intent.putExtra(TelephonyManager.EXTRA_PCO_VALUE, pcoData);
 
         mAosService.notifyCarrierSignalPcoValueChanged(intent);
@@ -566,7 +512,7 @@ public class AosServiceTest extends ImsStackTest {
         intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, 0);
         // Set unexpected Apn
         intent.putExtra(TelephonyManager.EXTRA_APN_TYPE, ApnSetting.TYPE_MMS);
-        intent.putExtra(TelephonyManager.EXTRA_PCO_ID, PCO_TARGET_ID);
+        intent.putExtra(TelephonyManager.EXTRA_PCO_ID, AosService.PCO_TARGET_ID);
         intent.putExtra(TelephonyManager.EXTRA_PCO_VALUE, pcoData);
 
         mAosService.notifyCarrierSignalPcoValueChanged(intent);
@@ -596,58 +542,54 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
-    public void notifyCrossSimStatus() {
-        mAosService.addListener(mMockAosRegistrationListener);
+    public void notifyNasSecurityAlgorithmChanged() {
+        byte[] nasSecurityAlgoData = createBytes(IIAosService.J2N_NOTIFY_NAS_ALGORITHM_CHANGED,
+                false);
 
-        // do not update registered network type when registered network is not IWLAN nor CROSS_SIM
-        mAosService.mIsConnectedOverCrossSim = false;
-        mAosService.mRegisteredNetworkType = NetworkType.LTE;
-        mAosService.notifyCrossSimStatus(true);
-        assertEquals(NetworkType.LTE, mAosService.mRegisteredNetworkType);
-        verify(mMockAosRegistrationListener, never()).notifyRegistered(
-                NetworkType.CROSS_SIM, mAosService.mFeatureTagBits, mAosService.mFeatureTags);
+        mAosService.notifyNasSecurityAlgorithmChanged(false);
 
-        // update registered network type to IWLAN
-        mAosService.mIsConnectedOverCrossSim = true;
-        mAosService.mRegisteredNetworkType = NetworkType.CROSS_SIM;
-        mAosService.notifyCrossSimStatus(false);
-        assertEquals(NetworkType.IWLAN, mAosService.mRegisteredNetworkType);
-        verify(mMockAosRegistrationListener, times(1)).notifyRegistered(
-                NetworkType.IWLAN, mAosService.mFeatureTagBits, mAosService.mFeatureTags);
+        verify(mMockJniIms).sendData(mNativeObject, nasSecurityAlgoData);
+    }
 
-        // update registered network type to CROSS_SIM
-        mAosService.mIsConnectedOverCrossSim = false;
-        mAosService.mRegisteredNetworkType = NetworkType.IWLAN;
-        mAosService.notifyCrossSimStatus(true);
-        assertEquals(NetworkType.CROSS_SIM, mAosService.mRegisteredNetworkType);
-        verify(mMockAosRegistrationListener, times(1)).notifyRegistered(
-                NetworkType.CROSS_SIM, mAosService.mFeatureTagBits, mAosService.mFeatureTags);
+    @Test
+    public void notifyllowedNetworkTypesChanged() {
+        byte[] allowedNetworkTypesData = createBytesWithLong(
+                IIAosService.J2N_NOTIFY_ALLOWED_NETWORK_TYPES_CHANGED, 1L);
+
+        mAosService.notifyAllowedNetworkTypesChanged(1L);
+
+        verify(mMockJniIms).sendData(mNativeObject, allowedNetworkTypesData);
     }
 
     @Test
     public void onSimStateChanged_simLoaded() {
-        byte[] simStateData = createBytes(IIAosService.J2N_NOTIFY_PHONE_NUMBER_STATE, 0,
-                PhoneNumberState.SIM_LOADED);
+        byte[] phoneNumberStateData = createBytes(IIAosService.J2N_NOTIFY_PHONE_NUMBER_STATE, 0,
+                PhoneNumberState.SIM_LOADED.getValue());
+        byte[] simStateData = createBytes(IIAosService.J2N_NOTIFY_SIM_STATE_CHANGED,
+                Sim.STATE_LOADED);
         when(mMockSimInterface.isSimLoaded()).thenReturn(true);
+        when(mMockSimInterface.getSimState()).thenReturn(Sim.STATE_LOADED);
 
         mAosService.onSimStateChanged();
 
+        verify(mMockJniIms).sendData(mNativeObject, phoneNumberStateData);
         verify(mMockJniIms).sendData(mNativeObject, simStateData);
     }
 
     @Test
-    public void onSimStateChanged_simNotLoaded() {
+    public void onSimStateChanged_simAbsent() {
         when(mMockSimInterface.isSimLoaded()).thenReturn(false);
+        when(mMockSimInterface.getSimState()).thenReturn(Sim.STATE_ABSENT);
 
         mAosService.onSimStateChanged();
 
-        verify(mMockJniIms, never()).sendData(eq(mNativeObject), any());
+        verify(mMockJniIms).sendData(eq(mNativeObject), any()); // Should trigger only once.
     }
 
     @Test
     public void onIsimStateChanged_notPresent() {
         byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
-                IsimState.NOT_PRESENT);
+                Sim.ISIM_STATE_NOT_PRESENT);
         when(mMockSimInterface.getIsimState()).thenReturn(Sim.ISIM_STATE_NOT_PRESENT);
 
         mAosService.onIsimStateChanged();
@@ -657,7 +599,8 @@ public class AosServiceTest extends ImsStackTest {
 
     @Test
     public void onIsimStateChanged_notReady() {
-        byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE, IsimState.NOT_READY);
+        byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
+                Sim.ISIM_STATE_NOT_READY);
         when(mMockSimInterface.getIsimState()).thenReturn(Sim.ISIM_STATE_NOT_READY);
 
         mAosService.onIsimStateChanged();
@@ -667,7 +610,8 @@ public class AosServiceTest extends ImsStackTest {
 
     @Test
     public void onIsimStateChanged_loaded() {
-        byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE, IsimState.LOADED);
+        byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
+                Sim.ISIM_STATE_LOADED);
         when(mMockSimInterface.getIsimState()).thenReturn(Sim.ISIM_STATE_LOADED);
 
         mAosService.onIsimStateChanged();
@@ -678,7 +622,7 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void onIsimStateChanged_refreshStarted() {
         byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
-                IsimState.REFRESH_STARTED);
+                Sim.ISIM_STATE_REFRESH_STARTED);
         when(mMockSimInterface.getIsimState()).thenReturn(Sim.ISIM_STATE_REFRESH_STARTED);
 
         mAosService.onIsimStateChanged();
@@ -687,12 +631,379 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
+    public void onPreciseCallStateChanged_csCallStateIsIdle_notifyPreciseCallStateWithIdle() {
+        AgentFactory.getInstance().setAgent(
+                    TelephonyInterface.class, mMockTelephonyInterface, SLOT_0);
+        byte[] callStateData = createBytes(IIAosService.J2N_NOTIFY_PRECISE_CALL_STATE,
+                PreciseCallState.PRECISE_CALL_STATE_IDLE);
+        PreciseCallState preciseCallState = new PreciseCallState(
+                PreciseCallState.PRECISE_CALL_STATE_NOT_VALID,
+                PreciseCallState.PRECISE_CALL_STATE_ACTIVE,
+                PreciseCallState.PRECISE_CALL_STATE_IDLE,
+                DisconnectCause.NOT_VALID,
+                PreciseDisconnectCause.NOT_VALID);
+        mAosService.setPreciseCallState(PreciseCallState.PRECISE_CALL_STATE_ACTIVE);
+        when(mMockTelephonyInterface.getCsCallState()).thenReturn(TelephonyManager.CALL_STATE_IDLE);
+
+        mAosService.onPreciseCallStateChanged(preciseCallState);
+
+        verify(mMockJniIms).sendData(mNativeObject, callStateData);
+    }
+
+    @Test
+    public void onPreciseCallStateChanged_notifyPreciseCallStateWithBackgroundCall() {
+        AgentFactory.getInstance().setAgent(
+                    TelephonyInterface.class, mMockTelephonyInterface, SLOT_0);
+        byte[] callStateData = createBytes(IIAosService.J2N_NOTIFY_PRECISE_CALL_STATE,
+                PreciseCallState.PRECISE_CALL_STATE_ACTIVE);
+        PreciseCallState preciseCallState = new PreciseCallState(
+                PreciseCallState.PRECISE_CALL_STATE_NOT_VALID,
+                PreciseCallState.PRECISE_CALL_STATE_IDLE,
+                PreciseCallState.PRECISE_CALL_STATE_ACTIVE,
+                DisconnectCause.NOT_VALID,
+                PreciseDisconnectCause.NOT_VALID);
+        when(mMockTelephonyInterface.getCsCallState())
+                .thenReturn(TelephonyManager.CALL_STATE_OFFHOOK);
+
+        mAosService.onPreciseCallStateChanged(preciseCallState);
+
+        verify(mMockJniIms).sendData(mNativeObject, callStateData);
+    }
+
+    @Test
+    public void onPreciseCallStateChanged_notifyPreciseCallStateWithForegroundCall() {
+        AgentFactory.getInstance().setAgent(
+                    TelephonyInterface.class, mMockTelephonyInterface, SLOT_0);
+        byte[] callStateData = createBytes(IIAosService.J2N_NOTIFY_PRECISE_CALL_STATE,
+                PreciseCallState.PRECISE_CALL_STATE_ACTIVE);
+        PreciseCallState preciseCallState = new PreciseCallState(
+                PreciseCallState.PRECISE_CALL_STATE_NOT_VALID,
+                PreciseCallState.PRECISE_CALL_STATE_ACTIVE,
+                PreciseCallState.PRECISE_CALL_STATE_IDLE,
+                DisconnectCause.NOT_VALID,
+                PreciseDisconnectCause.NOT_VALID);
+        when(mMockTelephonyInterface.getCsCallState())
+                .thenReturn(TelephonyManager.CALL_STATE_OFFHOOK);
+
+        mAosService.onPreciseCallStateChanged(preciseCallState);
+
+        verify(mMockJniIms).sendData(mNativeObject, callStateData);
+    }
+
+    @Test
+    public void onLastKnownCountryUpdated_notifyCountryChanged() {
+        ArgumentCaptor<LocationInterface.Listener> listenerCaptor =
+                ArgumentCaptor.forClass(LocationInterface.Listener.class);
+        verify(mMockLocationInterface).addListener(listenerCaptor.capture());
+
+        LocationInterface.Listener listener = listenerCaptor.getValue();
+        listener.onLastKnownCountryUpdated();
+
+        byte[] locationInfoData = createBytes(IIAosService.J2N_NOTIFY_LOCATION_INFO,
+                LocationInfo.COUNTRY_CHANGED.getValue());
+        verify(mMockJniIms).sendData(mNativeObject, locationInfoData);
+    }
+
+    @Test
+    public void onInstantRequestedLocationUpdated_notifyLocationUpdatedByRequest() {
+        ArgumentCaptor<LocationInterface.Listener> listenerCaptor =
+                ArgumentCaptor.forClass(LocationInterface.Listener.class);
+        verify(mMockLocationInterface).addListener(listenerCaptor.capture());
+
+        LocationInterface.Listener listener = listenerCaptor.getValue();
+        listener.onInstantRequestedLocationUpdated();
+
+        byte[] locationInfoData = createBytes(IIAosService.J2N_NOTIFY_LOCATION_INFO,
+                LocationInfo.FIXED.getValue());
+        verify(mMockJniIms).sendData(mNativeObject, locationInfoData);
+    }
+
+    @Test
+    public void onWifiStateChanged_notifyWifiSettingChanged() {
+        byte[] wifiSettingData = createBytes(IIAosService.J2N_NOTIFY_WIFI_SETTING, true);
+        when(mMockWifiInterface.isWifiEnabled()).thenReturn(true);
+        ArgumentCaptor<WifiInterface.Listener> listenerCaptor =
+                ArgumentCaptor.forClass(WifiInterface.Listener.class);
+        verify(mMockWifiInterface).addListener(listenerCaptor.capture());
+
+        WifiInterface.Listener listener = listenerCaptor.getValue();
+        listener.onWifiStateChanged();
+
+        verify(mMockJniIms).sendData(mNativeObject, wifiSettingData);
+    }
+
+    @Test
+    public void onNetworkOperatorChanged_notifyChange() {
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.J2N_NOTIFY_PLMN_CHANGED);
+        parcel.writeString("123456");
+        byte[] plmnChangedData = parcel.marshall();
+        parcel.recycle();
+
+        mAosService.onNetworkOperatorChanged("123456");
+
+        verify(mMockJniIms).sendData(mNativeObject, plmnChangedData);
+    }
+
+    @Test
+    public void onAirplaneModeChanged_notifyChange() {
+        byte[] airplaneSettingData = createBytes(IIAosService.J2N_NOTIFY_AIRPLANE_SETTING, true);
+
+        mAosService.onAirplaneModeChanged(true);
+
+        verify(mMockJniIms).sendData(mNativeObject, airplaneSettingData);
+    }
+
+    @Test
+    public void onVopsStateChanged_notifyChange() {
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.J2N_NOTIFY_VOPS_STATE_CHANGED);
+        parcel.writeInt(ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+        parcel.writeString("123456");
+        byte[] vopsData = parcel.marshall();
+        parcel.recycle();
+
+        mAosService.onVopsStateChanged(ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED, "123456");
+
+        verify(mMockJniIms).sendData(mNativeObject, vopsData);
+    }
+
+    @Test
+    public void onNetworkRegistrationStateChanged_notifyEmergencyRegistrationStateChange() {
+        mAosService.setEmergencyAttached(false);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.J2N_NOTIFY_EMERGENCY_REGISTRATION_STATE_CHANGED);
+        parcel.writeInt(1);
+        byte[] emergencyRegistrationData = parcel.marshall();
+        parcel.recycle();
+
+        mAosService.onNetworkRegistrationStateChanged(
+                android.telephony.NetworkRegistrationInfo.REGISTRATION_STATE_EMERGENCY);
+
+        verify(mMockJniIms).sendData(mNativeObject, emergencyRegistrationData);
+    }
+
+    @Test
+    public void onHandoverStateChanged_doNotNotifyIpcanHandoverExceptFailure() {
+        int reason = DataFailCause.OPERATOR_BARRED;
+        byte[] ipcanHandoverFailureData = createBytes(
+                IIAosService.J2N_NOTIFY_IPCAN_HANDOVER_FAILURE, IApn.IPCAN_CATEGORY_MOBILE, reason);
+
+        mAosService.onHandoverStateChanged(IApn.HANDOVER_START,
+                TelephonyManager.NETWORK_TYPE_IWLAN, reason);
+        mAosService.onHandoverStateChanged(IApn.HANDOVER_SUCCESS,
+                TelephonyManager.NETWORK_TYPE_IWLAN, reason);
+
+        verify(mMockJniIms, never()).sendData(mNativeObject, ipcanHandoverFailureData);
+    }
+
+    @Test
+    public void onHandoverStateChanged_notifyIpcanHandoverFailure() {
+        int reason = DataFailCause.OPERATOR_BARRED;
+        byte[] ipcanHandoverFailureData = createBytes(
+                IIAosService.J2N_NOTIFY_IPCAN_HANDOVER_FAILURE, IApn.IPCAN_CATEGORY_MOBILE, reason);
+
+        mAosService.onHandoverStateChanged(IApn.HANDOVER_FAILURE,
+                TelephonyManager.NETWORK_TYPE_IWLAN, reason);
+
+        verify(mMockJniIms).sendData(mNativeObject, ipcanHandoverFailureData);
+    }
+
+    @Test
+    public void onHandoverStateChanged_notifyIkeAuthFailureForWfcActivation() {
+        mAosService.addListener(mMockAosRegistrationListener);
+        // Do not notify IKE auth failure if KEY_NOTIFY_IKE_AUTH_FAILURE_FOR_WFC_ACTIVATION_BOOL
+        // is false.
+        mAosService.onHandoverStateChanged(IApn.HANDOVER_FAILURE,
+                TelephonyManager.NETWORK_TYPE_IWLAN,
+                DataFailCause.IWLAN_IKEV2_AUTH_FAILURE);
+        processAllMessages();
+        verify(mMockAosRegistrationListener, never()).notifyTechnologyChangeFailed(
+                RegistrationType.NORMAL, NetworkType.IWLAN,
+                ReasonCode.DATA_EPDG_TUNNEL_IKEV2_AUTH_FAILURE, null);
+
+        // Notify IKE auth failure if KEY_NOTIFY_IKE_AUTH_FAILURE_FOR_WFC_ACTIVATION_BOOL is true.
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.ImsWfc.KEY_NOTIFY_IKE_AUTH_FAILURE_FOR_WFC_ACTIVATION_BOOL))
+                .thenReturn(true);
+        mAosService.onHandoverStateChanged(IApn.HANDOVER_FAILURE,
+                TelephonyManager.NETWORK_TYPE_IWLAN,
+                DataFailCause.IWLAN_IKEV2_AUTH_FAILURE);
+        processAllMessages();
+        verify(mMockAosRegistrationListener).notifyTechnologyChangeFailed(RegistrationType.NORMAL,
+                NetworkType.IWLAN, ReasonCode.DATA_EPDG_TUNNEL_IKEV2_AUTH_FAILURE, null);
+    }
+
+    @Test
+    public void onCrossSimStatusChanged_doNotUpdateRegisteredNetworkTypeFromCellular() {
+        byte[] crossSimInfo = createBytes(IIAosService.J2N_NOTIFY_CROSS_SIM_STATUS,
+                CrossSimStatus.DATA_CONNECTED.getValue());
+        mAosService.addListener(mMockAosRegistrationListener);
+        mAosService.setConnectedOverCrossSim(false);
+        mAosService.setRegisteredNetworkType(NetworkType.LTE);
+
+        mAosService.onCrossSimStatusChanged(true, true);
+
+        assertEquals(NetworkType.LTE, mAosService.getRegisteredNetworkType());
+        verifyNoMoreInteractions(mMockAosRegistrationListener);
+        verify(mMockJniIms).sendData(mNativeObject, crossSimInfo);
+    }
+
+    @Test
+    public void onCrossSimStatusChanged_doNotUpdateRegisteredNetworkTypeToCellular() {
+        byte[] crossSimInfo = createBytes(IIAosService.J2N_NOTIFY_CROSS_SIM_STATUS,
+                CrossSimStatus.DATA_DISCONNECTED.getValue());
+        mAosService.addListener(mMockAosRegistrationListener);
+        mAosService.setConnectedOverCrossSim(true);
+        mAosService.setRegisteredNetworkType(NetworkType.CROSS_SIM);
+
+        mAosService.onCrossSimStatusChanged(false, false);
+
+        assertEquals(NetworkType.CROSS_SIM, mAosService.getRegisteredNetworkType());
+        verifyNoMoreInteractions(mMockAosRegistrationListener);
+        verify(mMockJniIms).sendData(mNativeObject, crossSimInfo);
+    }
+
+    @Test
+    public void onCrossSimStatusChanged_updateRegisteredNetworkTypeToIwlan() {
+        byte[] crossSimInfo = createBytes(IIAosService.J2N_NOTIFY_CROSS_SIM_STATUS,
+                CrossSimStatus.DATA_DISCONNECTED.getValue());
+        mAosService.addListener(mMockAosRegistrationListener);
+        mAosService.setConnectedOverCrossSim(true);
+        mAosService.setRegisteredNetworkType(NetworkType.CROSS_SIM);
+
+        mAosService.onCrossSimStatusChanged(false, true);
+
+        assertEquals(NetworkType.IWLAN, mAosService.getRegisteredNetworkType());
+        verify(mMockAosRegistrationListener).notifyRegistered(RegistrationType.NORMAL,
+                NetworkType.IWLAN, mAosService.getFeatureTagBits(), mAosService.getFeatureTags());
+        verify(mMockJniIms).sendData(mNativeObject, crossSimInfo);
+    }
+
+    @Test
+    public void onCrossSimStatusChanged_updateRegisteredNetworkTypeToCrossSim() {
+        byte[] crossSimInfo = createBytes(IIAosService.J2N_NOTIFY_CROSS_SIM_STATUS,
+                CrossSimStatus.DATA_CONNECTED.getValue());
+        mAosService.addListener(mMockAosRegistrationListener);
+        mAosService.setConnectedOverCrossSim(false);
+        mAosService.setRegisteredNetworkType(NetworkType.IWLAN);
+
+        mAosService.onCrossSimStatusChanged(true, true);
+
+        assertEquals(NetworkType.CROSS_SIM, mAosService.getRegisteredNetworkType());
+        verify(mMockAosRegistrationListener).notifyRegistered(RegistrationType.NORMAL,
+                NetworkType.CROSS_SIM, mAosService.getFeatureTagBits(),
+                mAosService.getFeatureTags());
+        verify(mMockJniIms).sendData(mNativeObject, crossSimInfo);
+    }
+
+    @Test
+    public void onPreciseDataConnectionStateChanged_shouldNotHandleNonImsTypeApn() {
+        byte[] startEstTimerData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
+                IAosRegistration.RequestType.START_IMS_EST_TIMER.getValue(),
+                IAosRegistration.Pcscf.CURRENT.getValue(),
+                IAosRegistration.Cause.DATA_CONNECTING.getValue());
+
+        mAosService.onPreciseDataConnectionStateChanged(EApnType.EMERGENCY.getType(),
+                TelephonyManager.DATA_CONNECTING, 0, TelephonyManager.NETWORK_TYPE_LTE);
+
+        verify(mMockJniIms, never()).sendData(mNativeObject, startEstTimerData);
+    }
+
+    @Test
+    public void onPreciseDataConnectionStateChanged_controlRegistrationUponConnecting() {
+        byte[] startEstTimerData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
+                IAosRegistration.RequestType.START_IMS_EST_TIMER.getValue(),
+                IAosRegistration.Pcscf.CURRENT.getValue(),
+                IAosRegistration.Cause.DATA_CONNECTING.getValue());
+
+        mAosService.onPreciseDataConnectionStateChanged(EApnType.IMS.getType(),
+                TelephonyManager.DATA_CONNECTING, 0, TelephonyManager.NETWORK_TYPE_LTE);
+
+        verify(mMockJniIms).sendData(mNativeObject, startEstTimerData);
+    }
+
+    @Test
+    public void onPreciseDataConnectionStateChanged_controlRegistrationUponDisConnecting() {
+        byte[] stopData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
+                IAosRegistration.RequestType.STOP.getValue(),
+                IAosRegistration.Pcscf.CURRENT.getValue(),
+                IAosRegistration.Cause.DATA.getValue());
+        mAosService.mRegisteredNetworkType = NetworkType.LTE;
+
+        mAosService.onPreciseDataConnectionStateChanged(
+                EApnType.IMS.getType(), TelephonyManager.DATA_DISCONNECTING, 0,
+                TelephonyManager.NETWORK_TYPE_LTE);
+
+        verify(mMockJniIms).sendData(mNativeObject, stopData);
+    }
+
+    @Test
+    public void onPreciseDataConnectionStateChanged_updateDataFailureReasonUponDisconnecting() {
+        int anyDataFailReason = 1;
+        byte[] updateData = createBytes(IIAosService.J2N_UPDATE_DATA_FAILURE_REASON,
+                anyDataFailReason);
+        mAosService.mRegisteredNetworkType = NetworkType.LTE;
+
+        mAosService.onPreciseDataConnectionStateChanged(
+                EApnType.IMS.getType(), TelephonyManager.DATA_DISCONNECTING, anyDataFailReason,
+                TelephonyManager.NETWORK_TYPE_LTE);
+
+        verify(mMockJniIms).sendData(mNativeObject, updateData);
+    }
+
+    @Test
+    public void onPreciseDataConnectionStateChanged_updateDataFailureReasonUponDisconnected() {
+        int anyDataFailReason = 1;
+        byte[] updateData = createBytes(IIAosService.J2N_UPDATE_DATA_FAILURE_REASON,
+                anyDataFailReason);
+        mAosService.mRegisteredNetworkType = NetworkType.LTE;
+
+        mAosService.onPreciseDataConnectionStateChanged(
+                EApnType.IMS.getType(), TelephonyManager.DATA_DISCONNECTED, anyDataFailReason,
+                TelephonyManager.NETWORK_TYPE_LTE);
+
+        verify(mMockJniIms).sendData(mNativeObject, updateData);
+    }
+
+    @Test
+    public void onPreciseDataConnectionStateChanged_notifyIkeAuthFailureForWfcActivation() {
+        mAosService.addListener(mMockAosRegistrationListener);
+        // Do not notify IKE auth failure if KEY_NOTIFY_IKE_AUTH_FAILURE_FOR_WFC_ACTIVATION_BOOL
+        // is false.
+        mAosService.onPreciseDataConnectionStateChanged(EApnType.IMS.getType(),
+                TelephonyManager.DATA_DISCONNECTED,
+                DataFailCause.IWLAN_IKEV2_AUTH_FAILURE,
+                TelephonyManager.NETWORK_TYPE_IWLAN);
+        processAllMessages();
+        verify(mMockAosRegistrationListener, never()).notifyDeregistered(RegistrationType.NORMAL,
+                NetworkType.IWLAN, ReasonCode.DATA_EPDG_TUNNEL_IKEV2_AUTH_FAILURE, null,
+                DataFailCause.IWLAN_IKEV2_AUTH_FAILURE);
+
+        // Notify IKE auth failure if KEY_NOTIFY_IKE_AUTH_FAILURE_FOR_WFC_ACTIVATION_BOOL is true.
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.ImsWfc.KEY_NOTIFY_IKE_AUTH_FAILURE_FOR_WFC_ACTIVATION_BOOL))
+                .thenReturn(true);
+        mAosService.addListener(mMockAosRegistrationListener);
+        mAosService.onPreciseDataConnectionStateChanged(EApnType.IMS.getType(),
+                TelephonyManager.DATA_DISCONNECTED,
+                DataFailCause.IWLAN_IKEV2_AUTH_FAILURE,
+                TelephonyManager.NETWORK_TYPE_IWLAN);
+        processAllMessages();
+        verify(mMockAosRegistrationListener).notifyDeregistered(RegistrationType.NORMAL,
+                NetworkType.IWLAN, ReasonCode.DATA_EPDG_TUNNEL_IKEV2_AUTH_FAILURE, null,
+                DataFailCause.IWLAN_IKEV2_AUTH_FAILURE);
+    }
+
+    @Test
     public void nativeStateListener_onNativeServiceReadyWhenSimNotPresent() {
         byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
-                IAosRegistration.RequestType.START, IAosRegistration.Pcscf.CURRENT,
-                IAosRegistration.Cause.IMS_SERVICE);
+                IAosRegistration.RequestType.START.getValue(),
+                IAosRegistration.Pcscf.CURRENT.getValue(),
+                IAosRegistration.Cause.IMS_SERVICE.getValue());
         byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
-                IsimState.NOT_PRESENT);
+                Sim.ISIM_STATE_NOT_PRESENT);
         byte[] aosStartData = createBytes(IIAosService.J2N_NOTIFY_AOS_START);
         when(mMockImsServiceRegistry.isImsEnabled()).thenReturn(true);
         when(mMockSimInterface.isSimLoaded()).thenReturn(false);
@@ -713,9 +1024,11 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void nativeStateListener_onNativeServiceReadyWhenSimNotReady() {
         byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
-                IAosRegistration.RequestType.START, IAosRegistration.Pcscf.CURRENT,
-                IAosRegistration.Cause.IMS_SERVICE);
-        byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE, IsimState.NOT_READY);
+                IAosRegistration.RequestType.START.getValue(),
+                IAosRegistration.Pcscf.CURRENT.getValue(),
+                IAosRegistration.Cause.IMS_SERVICE.getValue());
+        byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
+                Sim.ISIM_STATE_NOT_READY);
         byte[] aosStartData = createBytes(IIAosService.J2N_NOTIFY_AOS_START);
         when(mMockImsServiceRegistry.isImsEnabled()).thenReturn(true);
         when(mMockSimInterface.isSimLoaded()).thenReturn(false);
@@ -736,16 +1049,19 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void nativeStateListener_onNativeServiceReadyWhenSimLoaded() {
         byte[] capabilityData = createBytes(IIAosService.J2N_REQUEST_CAPABILITIES_CHANGED, 1,
-                IAosRegistrationListener.NetworkType.LTE, IAosRegistrationListener.Capability.UT);
-        byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
-                IAosRegistration.RequestType.START, IAosRegistration.Pcscf.CURRENT,
-                IAosRegistration.Cause.IMS_SERVICE);
-        byte[] phoneNumberStateData = createBytes(IIAosService.J2N_NOTIFY_PHONE_NUMBER_STATE, 0,
-                PhoneNumberState.SIM_LOADED);
-        byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE, IsimState.LOADED);
-        byte[] aosStartData = createBytes(IIAosService.J2N_NOTIFY_AOS_START);
-        mAosService.mCapabilityPairs = new CapabilityPairs(IAosRegistrationListener.NetworkType.LTE,
+                IAosRegistrationListener.NetworkType.LTE.getValue(),
                 IAosRegistrationListener.Capability.UT);
+        byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
+                IAosRegistration.RequestType.START.getValue(),
+                IAosRegistration.Pcscf.CURRENT.getValue(),
+                IAosRegistration.Cause.IMS_SERVICE.getValue());
+        byte[] phoneNumberStateData = createBytes(IIAosService.J2N_NOTIFY_PHONE_NUMBER_STATE, 0,
+                PhoneNumberState.SIM_LOADED.getValue());
+        byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
+                Sim.ISIM_STATE_LOADED);
+        byte[] aosStartData = createBytes(IIAosService.J2N_NOTIFY_AOS_START);
+        mAosService.setCapabilityPairs(new CapabilityPairs(IAosRegistrationListener.NetworkType.LTE,
+                IAosRegistrationListener.Capability.UT));
         when(mMockImsServiceRegistry.isImsEnabled()).thenReturn(true);
         when(mMockSimInterface.isSimLoaded()).thenReturn(true);
         when(mMockSimInterface.getIsimState()).thenReturn(Sim.ISIM_STATE_LOADED);
@@ -767,15 +1083,17 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void nativeStateListener_onNativeServiceReadyWhenRefreshStarted() {
         byte[] capabilityData = createBytes(IIAosService.J2N_REQUEST_CAPABILITIES_CHANGED, 1,
-                IAosRegistrationListener.NetworkType.LTE, IAosRegistrationListener.Capability.UT);
-        byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
-                IAosRegistration.RequestType.START, IAosRegistration.Pcscf.CURRENT,
-                IAosRegistration.Cause.IMS_SERVICE);
-        byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
-                IsimState.REFRESH_STARTED);
-        byte[] aosStartData = createBytes(IIAosService.J2N_NOTIFY_AOS_START);
-        mAosService.mCapabilityPairs = new CapabilityPairs(IAosRegistrationListener.NetworkType.LTE,
+                IAosRegistrationListener.NetworkType.LTE.getValue(),
                 IAosRegistrationListener.Capability.UT);
+        byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
+                IAosRegistration.RequestType.START.getValue(),
+                IAosRegistration.Pcscf.CURRENT.getValue(),
+                IAosRegistration.Cause.IMS_SERVICE.getValue());
+        byte[] isimStateData = createBytes(IIAosService.J2N_NOTIFY_ISIM_STATE,
+                Sim.ISIM_STATE_REFRESH_STARTED);
+        byte[] aosStartData = createBytes(IIAosService.J2N_NOTIFY_AOS_START);
+        mAosService.setCapabilityPairs(new CapabilityPairs(IAosRegistrationListener.NetworkType.LTE,
+                IAosRegistrationListener.Capability.UT));
         when(mMockImsServiceRegistry.isImsEnabled()).thenReturn(true);
         when(mMockSimInterface.isSimLoaded()).thenReturn(false);
         when(mMockSimInterface.getIsimState()).thenReturn(Sim.ISIM_STATE_REFRESH_STARTED);
@@ -796,11 +1114,12 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void imsServiceRegistryListener_onImsOnOffChanged() {
         byte[] registrationData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
-                IAosRegistration.RequestType.STOP, IAosRegistration.Pcscf.CURRENT,
-                IAosRegistration.Cause.IMS_SERVICE);
+                IAosRegistration.RequestType.STOP.getValue(),
+                IAosRegistration.Pcscf.CURRENT.getValue(),
+                IAosRegistration.Cause.IMS_SERVICE.getValue());
         when(mMockImsServiceRegistry.isImsEnabled()).thenReturn(false);
 
-        ImsServiceRegistry.Listener listener = mAosService.mListener;
+        ImsServiceRegistry.Listener listener = mAosService.getServiceRegistryListener();
         listener.onImsOnOffChanged();
 
         verify(mMockJniIms).sendData(mNativeObject, registrationData);
@@ -814,19 +1133,20 @@ public class AosServiceTest extends ImsStackTest {
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IIAosService.N2J_NOTIFY_REGISTERED);
-        parcel.writeInt(NetworkType.LTE);
+        parcel.writeInt(RegistrationType.NORMAL);
+        parcel.writeInt(NetworkType.LTE.getValue());
         parcel.writeInt(FeatureTagMask.MMTEL);
         parcel.writeInt(featureTags.size()); // count
         parcel.writeString(featureTags.valueAt(0));
         parcel.setDataPosition(0);
-        JniImsListener jniImsListener = mAosService.mNativeListener;
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
         jniImsListener.onMessage(parcel);
         processAllMessages();
 
         assertEquals(NetworkType.LTE, mAosService.getRegisteredNetworkType());
         assertEquals(RegistrationState.REGISTERED, mAosService.getRegistrationState());
-        verify(mMockAosRegistrationListener).notifyRegistered(NetworkType.LTE, FeatureTagMask.MMTEL,
-                featureTags);
+        verify(mMockAosRegistrationListener).notifyRegistered(RegistrationType.NORMAL,
+                NetworkType.LTE, FeatureTagMask.MMTEL, featureTags);
     }
 
     @Test
@@ -837,102 +1157,224 @@ public class AosServiceTest extends ImsStackTest {
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IIAosService.N2J_NOTIFY_REGISTERING);
-        parcel.writeInt(NetworkType.LTE);
+        parcel.writeInt(RegistrationType.NORMAL);
+        parcel.writeInt(NetworkType.LTE.getValue());
         parcel.writeInt(FeatureTagMask.MMTEL);
         parcel.writeInt(featureTags.size()); // count
         parcel.writeString(featureTags.valueAt(0));
         parcel.setDataPosition(0);
-        JniImsListener jniImsListener = mAosService.mNativeListener;
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
         jniImsListener.onMessage(parcel);
         processAllMessages();
 
         assertEquals(NetworkType.NONE, mAosService.getRegisteredNetworkType());
         assertEquals(RegistrationState.REGISTERING, mAosService.getRegistrationState());
-        verify(mMockAosRegistrationListener).notifyRegistering(NetworkType.LTE,
-                FeatureTagMask.MMTEL, featureTags);
+        verify(mMockAosRegistrationListener).notifyRegistering(RegistrationType.NORMAL,
+                NetworkType.LTE, FeatureTagMask.MMTEL, featureTags);
     }
 
     @Test
     public void jniImsListenerProxy_notifyDeregistered() {
-        mAosService.mRegisteredNetworkType = NetworkType.LTE;
+        mAosService.setRegisteredNetworkType(NetworkType.LTE);
         mAosService.addListener(mMockAosRegistrationListener);
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IIAosService.N2J_NOTIFY_DEREGISTERED);
-        parcel.writeInt(NetworkType.LTE);
-        parcel.writeInt(ReasonCode.CODE_REGISTRATION_ERROR);
+        parcel.writeInt(RegistrationType.NORMAL);
+        parcel.writeInt(NetworkType.LTE.getValue());
+        parcel.writeInt(ReasonCode.REGISTRATION_ERROR.getValue());
+        parcel.writeInt(DataFailCause.NONE);
         parcel.setDataPosition(0);
-        JniImsListener jniImsListener = mAosService.mNativeListener;
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
         jniImsListener.onMessage(parcel);
         processAllMessages();
 
         assertEquals(NetworkType.NONE, mAosService.getRegisteredNetworkType());
         assertEquals(RegistrationState.DEREGISTERED, mAosService.getRegistrationState());
 
-        verify(mMockAosRegistrationListener).notifyDeregistered(NetworkType.LTE,
-                ReasonCode.CODE_REGISTRATION_ERROR, null);
+        verify(mMockAosRegistrationListener).notifyDeregistered(RegistrationType.NORMAL,
+                NetworkType.LTE, ReasonCode.REGISTRATION_ERROR, null,
+                DataFailCause.NONE);
+    }
+
+    @Test
+    public void jniImsListenerProxy_notifyDeregisteredWhenInvalidHandler() {
+        mAosService.addListener(mMockAosRegistrationListener);
+        mAosService.setHandler(null);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.N2J_NOTIFY_DEREGISTERED);
+        parcel.writeInt(RegistrationType.NORMAL);
+        parcel.writeInt(NetworkType.LTE.getValue());
+        parcel.writeInt(ReasonCode.REGISTRATION_ERROR.getValue());
+        parcel.writeInt(DataFailCause.NONE);
+        parcel.setDataPosition(0);
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
+        jniImsListener.onMessage(parcel);
+        processAllMessages();
+
+        verify(mMockAosRegistrationListener, never()).notifyDeregistered(RegistrationType.NORMAL,
+                NetworkType.LTE, ReasonCode.REGISTRATION_ERROR, null,
+                DataFailCause.NONE);
+    }
+
+    @Test
+    public void jniImsListenerProxy_notifyDeregistering() {
+        mAosService.setRegisteredNetworkType(NetworkType.LTE);
+        mAosService.addListener(mMockAosRegistrationListener);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.N2J_NOTIFY_DEREGISTERING);
+        parcel.writeInt(RegistrationType.NORMAL);
+        parcel.setDataPosition(0);
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
+        jniImsListener.onMessage(parcel);
+        processAllMessages();
+
+        verify(mMockAosRegistrationListener).notifyDeregistering(RegistrationType.NORMAL);
     }
 
     @Test
     public void jniImsListenerProxy_notifyDeregisteredWhenInvalidNetwork() {
-        mAosService.mRegisteredNetworkType = NetworkType.LTE;
+        mAosService.setRegisteredNetworkType(NetworkType.LTE);
         mAosService.addListener(mMockAosRegistrationListener);
         when(mMockDcNetWatcher.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_NR);
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IIAosService.N2J_NOTIFY_DEREGISTERED);
-        parcel.writeInt(NetworkType.NONE);
-        parcel.writeInt(ReasonCode.CODE_REGISTRATION_ERROR);
+        parcel.writeInt(RegistrationType.NORMAL);
+        parcel.writeInt(NetworkType.NONE.getValue());
+        parcel.writeInt(ReasonCode.REGISTRATION_ERROR.getValue());
+        parcel.writeInt(DataFailCause.NONE);
         parcel.setDataPosition(0);
-        JniImsListener jniImsListener = mAosService.mNativeListener;
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
         jniImsListener.onMessage(parcel);
         processAllMessages();
 
         assertEquals(NetworkType.NONE, mAosService.getRegisteredNetworkType());
         assertEquals(RegistrationState.DEREGISTERED, mAosService.getRegistrationState());
 
-        verify(mMockAosRegistrationListener).notifyDeregistered(NetworkType.NONE,
-                ReasonCode.CODE_REGISTRATION_ERROR, null);
+        verify(mMockAosRegistrationListener).notifyDeregistered(RegistrationType.NORMAL,
+                NetworkType.NONE, ReasonCode.REGISTRATION_ERROR, null,
+                DataFailCause.NONE);
     }
 
     @Test
     public void jniImsListenerProxy_notifyDeregisteredWhenInvalidNetworkAndPlmnBlock() {
-        mAosService.mRegisteredNetworkType = NetworkType.NONE;
+        mAosService.setRegisteredNetworkType(NetworkType.NONE);
         mAosService.addListener(mMockAosRegistrationListener);
         when(mMockDcNetWatcher.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_TD_SCDMA);
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IIAosService.N2J_NOTIFY_DEREGISTERED);
-        parcel.writeInt(NetworkType.NONE);
-        parcel.writeInt(ReasonCode.CODE_PLMN_BLOCK);
+        parcel.writeInt(RegistrationType.NORMAL);
+        parcel.writeInt(NetworkType.NONE.getValue());
+        parcel.writeInt(ReasonCode.PLMN_BLOCK.getValue());
+        parcel.writeInt(DataFailCause.NONE);
         parcel.setDataPosition(0);
-        JniImsListener jniImsListener = mAosService.mNativeListener;
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
         jniImsListener.onMessage(parcel);
         processAllMessages();
 
         assertEquals(NetworkType.NONE, mAosService.getRegisteredNetworkType());
         assertEquals(RegistrationState.DEREGISTERED, mAosService.getRegistrationState());
 
-        verify(mMockAosRegistrationListener).notifyDeregistered(NetworkType.UTRAN,
-                ReasonCode.CODE_PLMN_BLOCK, null);
+        verify(mMockAosRegistrationListener).notifyDeregistered(RegistrationType.NORMAL,
+                NetworkType.UTRAN, ReasonCode.PLMN_BLOCK, null,
+                DataFailCause.NONE);
+    }
+
+    @Test
+    public void jniImsListenerProxy_notifyDeregisteredWhenInvalidNetworkAndVopsNotSupported() {
+        mAosService.setRegisteredNetworkType(NetworkType.NONE);
+        mAosService.addListener(mMockAosRegistrationListener);
+        when(mMockDcNetWatcher.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_TD_SCDMA);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.N2J_NOTIFY_DEREGISTERED);
+        parcel.writeInt(RegistrationType.NORMAL);
+        parcel.writeInt(NetworkType.NONE.getValue());
+        parcel.writeInt(ReasonCode.PLMN_BLOCK_WITH_TIMEOUT_BY_VOPS_NOT_SUPPORTED.getValue());
+        parcel.writeInt(DataFailCause.NONE);
+        parcel.setDataPosition(0);
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
+        jniImsListener.onMessage(parcel);
+        processAllMessages();
+
+        assertEquals(NetworkType.NONE, mAosService.getRegisteredNetworkType());
+        assertEquals(RegistrationState.DEREGISTERED, mAosService.getRegistrationState());
+
+        verify(mMockAosRegistrationListener).notifyDeregistered(RegistrationType.NORMAL,
+                NetworkType.UTRAN, ReasonCode.PLMN_BLOCK_WITH_TIMEOUT_BY_VOPS_NOT_SUPPORTED, null,
+                DataFailCause.NONE);
+    }
+
+    @Test
+    public void jniImsListenerProxy_notifyDeregisteredWhenInvalidNetworkAndSsacBarred() {
+        mAosService.setRegisteredNetworkType(NetworkType.NONE);
+        mAosService.addListener(mMockAosRegistrationListener);
+        when(mMockDcNetWatcher.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_TD_SCDMA);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.N2J_NOTIFY_DEREGISTERED);
+        parcel.writeInt(RegistrationType.NORMAL);
+        parcel.writeInt(NetworkType.NONE.getValue());
+        parcel.writeInt(ReasonCode.PLMN_BLOCK_WITH_TIMEOUT_BY_SSAC_BARRED.getValue());
+        parcel.writeInt(DataFailCause.NONE);
+        parcel.setDataPosition(0);
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
+        jniImsListener.onMessage(parcel);
+        processAllMessages();
+
+        assertEquals(NetworkType.NONE, mAosService.getRegisteredNetworkType());
+        assertEquals(RegistrationState.DEREGISTERED, mAosService.getRegistrationState());
+
+        verify(mMockAosRegistrationListener).notifyDeregistered(RegistrationType.NORMAL,
+                NetworkType.UTRAN, ReasonCode.PLMN_BLOCK_WITH_TIMEOUT_BY_SSAC_BARRED, null,
+                DataFailCause.NONE);
+    }
+
+    @Test
+    public void jniImsListenerProxy_notifyDeregisteredWithDataDisconnected() {
+        mAosService.setRegisteredNetworkType(NetworkType.LTE);
+        mAosService.addListener(mMockAosRegistrationListener);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.N2J_NOTIFY_DEREGISTERED);
+        parcel.writeInt(RegistrationType.NORMAL);
+        parcel.writeInt(NetworkType.LTE.getValue());
+        parcel.writeInt(ReasonCode.DATA_DISCONNECTED.getValue());
+        parcel.writeInt(DataFailCause.LOST_CONNECTION);
+        parcel.setDataPosition(0);
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
+        jniImsListener.onMessage(parcel);
+        processAllMessages();
+
+        assertEquals(NetworkType.NONE, mAosService.getRegisteredNetworkType());
+        assertEquals(RegistrationState.DEREGISTERED, mAosService.getRegistrationState());
+
+        verify(mMockAosRegistrationListener).notifyDeregistered(RegistrationType.NORMAL,
+                NetworkType.LTE, ReasonCode.DATA_DISCONNECTED, null,
+                DataFailCause.LOST_CONNECTION);
     }
 
     @Test
     public void jniImsListenerProxy_notifyTechnologyChangeFailed() {
-        int reason = android.telephony.DataFailCause.OPERATOR_BARRED;
+        int reason = ReasonCode.REGISTRATION_ERROR.getValue();
         mAosService.addListener(mMockAosRegistrationListener);
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IIAosService.N2J_NOTIFY_TECHNOLOGY_CHANGE_FAILED);
-        parcel.writeInt(NetworkType.LTE);
+        parcel.writeInt(RegistrationType.NORMAL);
+        parcel.writeInt(NetworkType.LTE.getValue());
         parcel.writeInt(reason);
         parcel.setDataPosition(0);
-        JniImsListener jniImsListener = mAosService.mNativeListener;
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
         jniImsListener.onMessage(parcel);
         processAllMessages();
 
-        verify(mMockAosRegistrationListener).notifyTechnologyChangeFailed(
-                NetworkType.LTE, reason, null);
+        verify(mMockAosRegistrationListener).notifyTechnologyChangeFailed(RegistrationType.NORMAL,
+                NetworkType.LTE, ReasonCode.REGISTRATION_ERROR, null);
     }
 
     @Test
@@ -943,7 +1385,7 @@ public class AosServiceTest extends ImsStackTest {
         parcel.writeInt(IIAosService.N2J_NOTIFY_ASSOCIATED_URI_CHANGED);
         parcel.writeInt(0); // num of URI
         parcel.setDataPosition(0);
-        JniImsListener jniImsListener = mAosService.mNativeListener;
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
         jniImsListener.onMessage(parcel);
         processAllMessages();
 
@@ -961,7 +1403,7 @@ public class AosServiceTest extends ImsStackTest {
         parcel.writeInt(1); // num of URI
         parcel.writeString("sip:test@ims.com");
         parcel.setDataPosition(0);
-        JniImsListener jniImsListener = mAosService.mNativeListener;
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
         jniImsListener.onMessage(parcel);
         processAllMessages();
 
@@ -975,10 +1417,10 @@ public class AosServiceTest extends ImsStackTest {
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IIAosService.N2J_NOTIFY_CAPABILITIES_UPDATE_FAILED);
         parcel.writeInt(Capability.VOICE);
-        parcel.writeInt(NetworkType.LTE);
+        parcel.writeInt(NetworkType.LTE.getValue());
         parcel.writeInt(CapabilityReason.ERROR_GENERIC);
         parcel.setDataPosition(0);
-        JniImsListener jniImsListener = mAosService.mNativeListener;
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
         jniImsListener.onMessage(parcel);
         processAllMessages();
 
@@ -997,7 +1439,7 @@ public class AosServiceTest extends ImsStackTest {
         parcel.writeString("sip:test1@ims.com");
         parcel.writeString("sip:test2@ims.com");
         parcel.setDataPosition(0);
-        JniImsListener jniImsListener = mAosService.mNativeListener;
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
         jniImsListener.onMessage(parcel);
         processAllMessages();
 
@@ -1007,34 +1449,48 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
-    public void jniImsListenerProxy_notifyAosIsimState() {
+    public void jniImsListenerProxy_notifyAosIsimState_AllCases() {
         mAosService.addListener(mMockAosInfoListener);
 
-        Parcel parcel = Parcel.obtain();
-        parcel.writeInt(IIAosService.N2J_NOTIFY_AOS_ISIM_STATE);
-        parcel.writeInt(IAosInfoListener.IsimState.VALID);
-        parcel.setDataPosition(0);
-        JniImsListener jniImsListener = mAosService.mNativeListener;
-        jniImsListener.onMessage(parcel);
-        processAllMessages();
+        int[] isimStates = {
+                IAosInfoListener.IsimState.INVALID,
+                IAosInfoListener.IsimState.VALID,
+                IAosInfoListener.IsimState.REFRESH_STARTED,
+                IAosInfoListener.IsimState.REFRESH_COMPLETE
+        };
 
-        verify(mMockAosInfoListener).notifyAosIsimStateChanged(IAosInfoListener.IsimState.VALID);
+        for (int state : isimStates) {
+            Parcel parcel = Parcel.obtain();
+            parcel.writeInt(IIAosService.N2J_NOTIFY_AOS_ISIM_STATE);
+            parcel.writeInt(state);
+            parcel.setDataPosition(0);
+
+            JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
+            jniImsListener.onMessage(parcel);
+            processAllMessages();
+
+            verify(mMockAosInfoListener).notifyAosIsimStateChanged(state);
+        }
     }
 
     @Test
-    public void jniImsListenerProxy_requestPhoneNumberRetry() {
+    public void jniImsListenerProxy_updateImsFeatureChanged() {
         mAosService.addListener(mMockAosRegistrationListener);
 
         Parcel parcel = Parcel.obtain();
-        parcel.writeInt(IIAosService.N2J_REQUEST_PHONE_NUMBER_RETRY);
-        parcel.writeInt(0); // command
+        parcel.writeInt(IIAosService.N2J_NOTIFY_IMS_FEATURE_CHANGED);
+        parcel.writeInt(RegistrationType.NORMAL);
+        parcel.writeInt(NetworkType.LTE.getValue());
+        parcel.writeInt(FeatureTagMask.MMTEL);
         parcel.setDataPosition(0);
-        JniImsListener jniImsListener = mAosService.mNativeListener;
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
         jniImsListener.onMessage(parcel);
         processAllMessages();
 
-        // TODO: No implementation
+        verify(mMockAosRegistrationListener).notifyImsFeatureChanged(RegistrationType.NORMAL,
+                NetworkType.LTE, FeatureTagMask.MMTEL);
     }
+
 
     @Test
     public void jniImsListenerProxy_requestWifiService() {
@@ -1044,7 +1500,7 @@ public class AosServiceTest extends ImsStackTest {
         parcel.writeInt(IIAosService.N2J_REQUEST_WIFI_SERVICE);
         parcel.writeInt(0); // command
         parcel.setDataPosition(0);
-        JniImsListener jniImsListener = mAosService.mNativeListener;
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
         jniImsListener.onMessage(parcel);
         processAllMessages();
 
@@ -1059,12 +1515,66 @@ public class AosServiceTest extends ImsStackTest {
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IIAosService.EVENT_N2J_INFO);
         parcel.setDataPosition(0);
-        JniImsListener jniImsListener = mAosService.mNativeListener;
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
         jniImsListener.onMessage(parcel);
         processAllMessages();
 
         verifyNoMoreInteractions(mMockAosRegistrationListener);
         verifyNoMoreInteractions(mMockAosInfoListener);
+    }
+
+    @Test
+    @SmallTest
+    public void dumpVerifiesPresenceOfKeyInfo() {
+        // GIVEN: Setup the service state and log content
+
+        final String dumpsysIndentPrefix = "  ";
+        StringWriter stringWriter = new StringWriter();
+        IndentingPrintWriter pw = new IndentingPrintWriter(stringWriter, dumpsysIndentPrefix);
+
+        CapabilityPairs pairs = new CapabilityPairs(NetworkType.IWLAN, Capability.VIDEO);
+        mAosService.setCapabilityPairs(pairs);
+        mAosService.setConnectedOverCrossSim(true);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.N2J_NOTIFY_REGISTERING);
+        parcel.writeInt(RegistrationType.NORMAL);
+        parcel.writeInt(NetworkType.LTE.getValue());
+        parcel.writeInt(FeatureTagMask.MMTEL);
+        parcel.writeInt(0);
+        parcel.setDataPosition(0);
+
+        JniImsListener jniImsListener = mAosService.getJniImsListenerProxy();
+        assertNotNull("JNI Listener should not be null", jniImsListener);
+        jniImsListener.onMessage(parcel);
+
+        processAllMessages();
+
+        // WHEN: The dump() method is called
+        mAosService.dump(pw);
+        pw.flush();
+        String output = stringWriter.toString();
+
+
+        // THEN: The output string loosely contains all key information
+
+        // Check for section headers
+        assertTrue("Output should contain the 'Service:' header",
+                output.contains("Service:"));
+        assertTrue("Output should contain the 'Most recent logs:' header",
+                output.contains("Most recent logs:"));
+
+        // Check for key state values
+        assertTrue("Dump should contain the correct registration state",
+                output.contains("state=" + RegistrationState.REGISTERING));
+        assertTrue("Dump should contain the correct CrossSim status",
+                output.contains("CrossSim=true"));
+        assertTrue("Dump should contain the capability pairs string",
+                output.contains(pairs.toString()));
+
+        // Check that the log content was dumped
+        assertTrue("Dump should contain the log message from the JNI call",
+                output.contains("N2J_NOTIFY_REGISTERING: type=NORMAL"));
     }
 
     @Test
@@ -1101,6 +1611,17 @@ public class AosServiceTest extends ImsStackTest {
         return data;
     }
 
+    private byte[] createBytesWithLong(int event, long code) {
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(event);
+        parcel.writeLong(code);
+
+        byte[] data = parcel.marshall();
+        parcel.recycle();
+
+        return data;
+    }
+
     private byte[] createBytes(int event, int code, String reason) {
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(event);
@@ -1111,5 +1632,56 @@ public class AosServiceTest extends ImsStackTest {
         parcel.recycle();
 
         return data;
+    }
+
+    public static class FakeAosService extends AosService {
+
+        public FakeAosService() {
+            super();
+        }
+
+        public void setRegisteredNetworkType(NetworkType networkType) {
+            mRegisteredNetworkType = networkType;
+        }
+
+        public int getFeatureTagBits() {
+            return mFeatureTagBits;
+        }
+
+        public void setPreciseCallState(int state) {
+            mPreciseCallState = state;
+        }
+
+        public void setEmergencyAttached(boolean isEmergencyAttached) {
+            mIsEmergencyAttached = isEmergencyAttached;
+        }
+
+        public void setConnectedOverCrossSim(boolean isConnected) {
+            mIsConnectedOverCrossSim = isConnected;
+        }
+
+        public void setHandler(Handler handler) {
+            mHandler = handler;
+        }
+
+        public CapabilityPairs getCapabilityPairs() {
+            return mCapabilityPairs;
+        }
+
+        public void setCapabilityPairs(CapabilityPairs pairs) {
+            mCapabilityPairs = pairs;
+        }
+
+        public Set<IAosRegistrationListener> getAosRegistrationListeners() {
+            return mAosRegistrationListeners;
+        }
+
+        public Set<IAosInfoListener> getAosInfoListeners() {
+            return mAosInfoListeners;
+        }
+
+        public Set<String> getFeatureTags() {
+            return mFeatureTags;
+        }
     }
 }

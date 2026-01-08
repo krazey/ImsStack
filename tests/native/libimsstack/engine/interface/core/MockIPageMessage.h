@@ -24,7 +24,7 @@
 class MockIPageMessage : public IPageMessage
 {
 public:
-    virtual ~MockIPageMessage() {}
+    ~MockIPageMessage() override = default;
 
     // IMethod
     MOCK_METHOD(void, Destroy, (), (override));

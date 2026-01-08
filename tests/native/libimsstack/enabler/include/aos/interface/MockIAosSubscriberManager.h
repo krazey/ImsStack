@@ -27,13 +27,17 @@
 class MockIAosSubscriberManager : public IAosSubscriberManager {
 public:
     MOCK_METHOD(IMS_BOOL, IsReady, (IN IMS_BOOL bIsFake), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsIsim, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsUsim, (), (const, override));
     MOCK_METHOD(void, AddListener, (IN IAosSubscriberManagerListener* piListener), (override));
     MOCK_METHOD(void, RemoveListener, (IN IAosSubscriberManagerListener* piListener), (override));
     MOCK_METHOD(void, AddListenerForMonitor, (IN IAosSubscriberManagerListener* piListener),
             (override));
     MOCK_METHOD(void, RemoveListenerForMonitor, (IN IAosSubscriberManagerListener* piListener),
             (override));
-    MOCK_METHOD(const AStringArray&, GetConfiguredImpus, (IN IMS_BOOL bIsFake), (const, override));
+    MOCK_METHOD(const AStringArray&, GetConfiguredImpus, (), (const, override));
+    MOCK_METHOD(const AStringArray&, GetOrderedImpus, (), (const, override));
+    MOCK_METHOD(const AStringArray&, GetConfiguredImpusForFake, (), (const, override));
     MOCK_METHOD(const AStringArray&, GetFakeImpus, (), (const, override));
     MOCK_METHOD(const ISubscriberConfig*, GetSubscriberConfig, (IN IMS_SINT32 nType),
             (const, override));

@@ -17,10 +17,10 @@ package com.android.imsstack.test;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.KeyEvent;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
@@ -28,14 +28,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.imsstack.R;
+import com.android.imsstack.base.ImsPrivateProperties;
+import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.core.carrier.CarrierInfo;
 import com.android.imsstack.core.carrier.ImsCarrierResolver;
 import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosDebug;
 import com.android.imsstack.test.menu.ImsConfigMenu;
-import com.android.imsstack.util.ImsPrivateProperties;
-import com.android.imsstack.util.MSimUtils;
+import com.android.imsstack.util.ImsUtils;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -70,6 +71,24 @@ public class DebugScreen extends Activity {
     }
 
     @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (isSystemKeyToConsume(keyCode)) {
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (isSystemKeyToConsume(keyCode)) {
+            return true;
+        }
+
+        return super.onKeyUp(keyCode, event);
+    }
+
+    @Override
     public void onRequestPermissionsResult(
             int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -79,7 +98,7 @@ public class DebugScreen extends Activity {
     private void handleCreate() {
         // Check slotId and build type.
         mSlotId = getIntent().getIntExtra(MSimUtils.EXTRA_KEY_SLOT_ID, MSimUtils.INVALID_SLOT_ID);
-        if (mSlotId < 0 || !Build.IS_USERDEBUG) {
+        if (mSlotId < 0 || ImsUtils.IS_USER) {
             showToast("Not support Debug Screen!");
             finish();
             return;
@@ -201,5 +220,12 @@ public class DebugScreen extends Activity {
 
     private void showToast(String text) {
         Toast.makeText(DebugScreen.this, text, Toast.LENGTH_SHORT).show();
+    }
+
+    private static boolean isSystemKeyToConsume(int keyCode) {
+        return keyCode == KeyEvent.KEYCODE_CALL ||
+                keyCode == KeyEvent.KEYCODE_ENDCALL ||
+                keyCode == KeyEvent.KEYCODE_HEADSETHOOK ||
+                keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE;
     }
 }

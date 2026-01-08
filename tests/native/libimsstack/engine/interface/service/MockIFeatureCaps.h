@@ -18,15 +18,12 @@
 
 #include <gmock/gmock.h>
 
-#include "ImsTypeDef.h"
-#include "service/IFeatureCaps.h"
-
-class AString;
+#include "IFeatureCaps.h"
 
 class MockIFeatureCaps : public IFeatureCaps
 {
 public:
-    virtual ~MockIFeatureCaps() {}
+    ~MockIFeatureCaps() override = default;
 
     MOCK_METHOD(
             void, AddFeature, (IN const AString& strName, IN const AString& strValue), (override));

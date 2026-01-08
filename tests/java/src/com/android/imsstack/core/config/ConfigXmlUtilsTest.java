@@ -23,9 +23,9 @@ import static org.junit.Assert.fail;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import android.test.suitebuilder.annotation.SmallTest;
+import androidx.test.filters.SmallTest;
 
-import com.android.imsstack.util.IoUtils;
+import com.android.imsstack.util.ImsUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -55,7 +55,7 @@ public class ConfigXmlUtilsTest {
 
     @After
     public void tearDown() throws Exception {
-        IoUtils.closeQuietly(mInputStream);
+        ImsUtils.closeQuietly(mInputStream);
         mInputStream = null;
         mParser = null;
     }
@@ -81,10 +81,10 @@ public class ConfigXmlUtilsTest {
                 + "    <item value=\"text1\"/>\n"
                 + "    <item value=\"text2\"/>\n"
                 + "</string-array>\n"
-                + "<pbundle name=\"config_bundle\">\n"
+                + "<pbundle_as_map name=\"config_bundle\">\n"
                 + "    <boolean name=\"config_bool\" value=\"false\"/>\n"
                 + "    <int name=\"config_int\" value=\"111\"/>\n"
-                + "</pbundle>\n"
+                + "</pbundle_as_map>\n"
                 + "</config>";
         setUpXmlParser(xmlConfig);
 
@@ -386,12 +386,12 @@ public class ConfigXmlUtilsTest {
                 + "    <item value=\"text1\"/>\n"
                 + "    <item value=\"text2\"/>\n"
                 + "</string-array>\n"
-                + "<pbundle name=\"config_bundle\">\n"
-                + "    <pbundle name=\"inner_config_bundle\">\n"
+                + "<pbundle_as_map name=\"config_bundle\">\n"
+                + "    <pbundle_as_map name=\"inner_config_bundle\">\n"
                 + "        <boolean name=\"config_bool\" value=\"true\"/>\n"
                 + "        <int name=\"config_int\" value=\"111\"/>\n"
-                + "    </pbundle>\n"
-                + "</pbundle>\n"
+                + "    </pbundle_as_map>\n"
+                + "</pbundle_as_map>\n"
                 + "</config>";
         setUpXmlParser(xmlConfig);
         ConfigXmlUtils.readConfigKeys(mParser, configKeys);
@@ -428,7 +428,7 @@ public class ConfigXmlUtilsTest {
 
     private void setUpXmlParser(String xml) throws XmlPullParserException {
         if (mInputStream != null) {
-            IoUtils.closeQuietly(mInputStream);
+            ImsUtils.closeQuietly(mInputStream);
             mInputStream = null;
         }
         try {

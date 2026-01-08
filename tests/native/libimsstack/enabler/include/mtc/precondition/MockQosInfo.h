@@ -33,17 +33,19 @@ public:
             QosInfo(pListener)
     {
     }
-    ~MockQosInfo() {}
+    ~MockQosInfo() override {}
     MOCK_METHOD(QosStatus, GetAudioStatus, (), (const, override));
     MOCK_METHOD(QosStatus, GetVideoStatus, (), (const, override));
     MOCK_METHOD(QosStatus, GetTextStatus, (), (const, override));
     MOCK_METHOD(QosTimer&, GetTimer, (), (override));
     MOCK_METHOD(QosStatusTable&, GetStatusTable, (), (override));
     MOCK_METHOD(IMS_BOOL, IsPreconditionSupported, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsWaitAudioDedicatedBearerTimerStarted, (), (const, override));
     MOCK_METHOD(void, SetAudioStatus, (IN QosStatus eStatus), (override));
     MOCK_METHOD(void, SetVideoStatus, (IN QosStatus eStatus), (override));
     MOCK_METHOD(void, SetTextStatus, (IN QosStatus eStatus), (override));
     MOCK_METHOD(void, SetSupportingPrecondition, (IN IMS_BOOL bSupported), (override));
+    MOCK_METHOD(void, SetWaitAudioDedicatedBearerTimerStarted, (), (override));
 };
 
 #endif

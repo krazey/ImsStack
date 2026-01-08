@@ -105,17 +105,6 @@ void JniMediaSession::Initialize(
 }
 
 PUBLIC
-void JniMediaSession::SetMtcCallId(IN IMS_SINTP nCallKey)
-{
-    m_nCallKey = nCallKey;
-}
-
-PUBLIC VIRTUAL void JniMediaSession::NotifyNativeEnablerSet()
-{
-    // TODO: send pending messages if needed.
-}
-
-PUBLIC
 IJniEnablerThread* JniMediaSession::GetJniThread() const
 {
     return DYNAMIC_CAST(IJniEnablerThread*, m_pThread);
@@ -165,19 +154,19 @@ PROTECTED VIRTUAL void JniMediaSession::HandleMessage(
             OnResponses(nMsg, IMS_TRUE, objParcel);
             break;
         case IJniMedia::NOTIFY_MEDIA_INACTIVITY:
-            OnNofityMediaInactitivy(nMsg, objParcel);
+            OnNotifyMediaInactivity(nMsg, objParcel);
             break;
         case IJniMedia::NOTIFY_PACKET_LOSS:
-            OnNofityPacketLosses(nMsg, objParcel);
+            OnNotifyPacketLosses(nMsg, objParcel);
             break;
         case IJniMedia::NOTIFY_JITTER:
             // TODO : implementation
             break;
         case IJniMedia::NOTIFY_CALL_QUALITY_CHANGE:
-            OnNofityCallQualityChange(nMsg, objParcel);
+            OnNotifyCallQualityChange(nMsg, objParcel);
             break;
         case IJniMedia::NOTIFY_HEADER_EXTENSION:
-            OnNofityHeaderExtension(nMsg, objParcel);
+            OnNotifyHeaderExtension(nMsg, objParcel);
             break;
         case IJniMedia::NOTIFY_MEDIA_DETACH:
             OnNotifyMediaDetach(nMsg);
@@ -187,6 +176,12 @@ PROTECTED VIRTUAL void JniMediaSession::HandleMessage(
             break;
         case IJniMedia::SEND_DTMF:
             OnSendDtmf(nMsg, objParcel);
+            break;
+        case IJniMedia::NOTIFY_ANBR_RECEIVED:
+            OnNotifyAnbrReceived(nMsg, objParcel);
+            break;
+        case IJniMedia::REQUEST_RTP_RECEPTION_STATS:
+            OnNotifyRtpReceptionStats(nMsg, objParcel);
             break;
         case IJniMedia::SETSURFACE_CMD:
         case IJniMedia::SELECT_CAMERA_CMD:
@@ -267,7 +262,32 @@ void JniMediaSession::OnResponses(
 }
 
 PRIVATE
-void JniMediaSession::OnNofityMediaInactitivy(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
+void JniMediaSession::OnNotifyAnbrReceived(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
+{
+    ImsMediaMsgAnbrReceivedParam* pParam = new ImsMediaMsgAnbrReceivedParam(
+            ConvertToMediaType((SessionType)objParcel.readInt32()));
+
+    pParam->m_nAnbrMediaType = objParcel.readInt32();
+    pParam->m_nAnbrDirection = objParcel.readInt32();
+    pParam->m_nAnbrBitrate = objParcel.readInt32();
+
+    GetMediaManager()->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+}
+
+PRIVATE
+void JniMediaSession::OnNotifyRtpReceptionStats(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
+{
+    ImsMediaMsgRtpReceptionStatsParam* pParam =
+            new ImsMediaMsgRtpReceptionStatsParam(MEDIA_TYPE_AUDIO);
+
+    pParam->m_nIntervalMs = objParcel.readInt32();
+    IMS_TRACE_D("OnNotifyRtpReceptionStats() - interval[%d], nCallKey[%d]", pParam->m_nIntervalMs,
+            m_nCallKey, 0);
+    GetMediaManager()->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+}
+
+PRIVATE
+void JniMediaSession::OnNotifyMediaInactivity(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
 {
     MEDIA_CONTENT_TYPE eMediaType =
             ConvertToMediaType(static_cast<SessionType>(objParcel.readInt32()));
@@ -296,7 +316,7 @@ void JniMediaSession::OnNofityMediaInactitivy(IN IMS_SINT32 nMsg, IN const Parce
 }
 
 PRIVATE
-void JniMediaSession::OnNofityPacketLosses(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
+void JniMediaSession::OnNotifyPacketLosses(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
 {
     ImsMediaNotifyPacketParam* pParam = new ImsMediaNotifyPacketParam();
 
@@ -307,14 +327,14 @@ void JniMediaSession::OnNofityPacketLosses(IN IMS_SINT32 nMsg, IN const Parcel& 
 }
 
 PRIVATE
-void JniMediaSession::OnNofityCallQualityChange(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
+void JniMediaSession::OnNotifyCallQualityChange(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
 {
     (void)nMsg;
     (void)objParcel;
 }
 
 PRIVATE
-void JniMediaSession::OnNofityHeaderExtension(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
+void JniMediaSession::OnNotifyHeaderExtension(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
 {
     (void)nMsg;
     (void)objParcel;
@@ -330,7 +350,7 @@ void JniMediaSession::OnNofityHeaderExtension(IN IMS_SINT32 nMsg, IN const Parce
 PRIVATE
 void JniMediaSession::OnNotifyMediaDetach(IN IMS_SINT32 nMsg)
 {
-    GetMediaManager()->SendMessage(nMsg, m_nCallKey, IMS_NULL);
+    GetMediaManager()->SendMessage(nMsg, m_nCallKey, 0);
 }
 
 PRIVATE

@@ -18,6 +18,7 @@
 #define JNI_CALL_INFO_H_
 
 #include "IMtcService.h"
+#include "INetworkWatcher.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 
@@ -27,28 +28,32 @@ public:
     JniCallInfo() :
             eServiceType(ServiceType::NORMAL),
             eCallType(CallType::VOIP),
-            bEmergency(IMS_FALSE),
+            eEmergencyType(EmergencyType::NONE),
             bOffline(IMS_FALSE),
             bUssi(IMS_FALSE),
             bConference(IMS_FALSE),
             bConferenceEnabled(IMS_FALSE),
             bConferenceSubscriptionRequired(IMS_FALSE),
             bRttCapable(IMS_FALSE),
-            bVideoCapable(IMS_FALSE)
+            bVideoCapable(IMS_FALSE),
+            bCrossSim(IMS_FALSE),
+            eRatType(INetworkWatcher::RADIOTECH_TYPE_INVALID)
     {
     }
 
     JniCallInfo(IN const JniCallInfo& objRhs) :
             eServiceType(objRhs.eServiceType),
             eCallType(objRhs.eCallType),
-            bEmergency(objRhs.bEmergency),
+            eEmergencyType(objRhs.eEmergencyType),
             bOffline(objRhs.bOffline),
             bUssi(objRhs.bUssi),
             bConference(objRhs.bConference),
             bConferenceEnabled(objRhs.bConferenceEnabled),
             bConferenceSubscriptionRequired(objRhs.bConferenceSubscriptionRequired),
             bRttCapable(objRhs.bRttCapable),
-            bVideoCapable(objRhs.bVideoCapable)
+            bVideoCapable(objRhs.bVideoCapable),
+            bCrossSim(objRhs.bCrossSim),
+            eRatType(objRhs.eRatType)
     {
     }
 
@@ -58,7 +63,7 @@ public:
         {
             eServiceType = objRhs.eServiceType;
             eCallType = objRhs.eCallType;
-            bEmergency = objRhs.bEmergency;
+            eEmergencyType = objRhs.eEmergencyType;
             bOffline = objRhs.bOffline;
             bUssi = objRhs.bUssi;
             bConference = objRhs.bConference;
@@ -66,6 +71,8 @@ public:
             bConferenceSubscriptionRequired = objRhs.bConferenceSubscriptionRequired;
             bRttCapable = objRhs.bRttCapable;
             bVideoCapable = objRhs.bVideoCapable;
+            bCrossSim = objRhs.bCrossSim;
+            eRatType = objRhs.eRatType;
         }
 
         return *this;
@@ -79,18 +86,19 @@ public:
         }
 
         return eServiceType == objRhs.eServiceType && eCallType == objRhs.eCallType &&
-                bEmergency == objRhs.bEmergency && bOffline == objRhs.bOffline &&
+                eEmergencyType == objRhs.eEmergencyType && bOffline == objRhs.bOffline &&
                 bUssi == objRhs.bUssi && bConference == objRhs.bConference &&
                 bConferenceEnabled == objRhs.bConferenceEnabled &&
                 bConferenceSubscriptionRequired == objRhs.bConferenceSubscriptionRequired &&
-                bRttCapable == objRhs.bRttCapable && bVideoCapable == objRhs.bVideoCapable;
+                bRttCapable == objRhs.bRttCapable && bVideoCapable == objRhs.bVideoCapable &&
+                bCrossSim == objRhs.bCrossSim && eRatType == objRhs.eRatType;
     }
 
 public:
     ServiceType eServiceType;
     CallType eCallType;
+    EmergencyType eEmergencyType;
 
-    IMS_BOOL bEmergency;
     IMS_BOOL bOffline;
     IMS_BOOL bUssi;
     IMS_BOOL bConference;
@@ -98,6 +106,8 @@ public:
     IMS_BOOL bConferenceSubscriptionRequired;
     IMS_BOOL bRttCapable;
     IMS_BOOL bVideoCapable;
+    IMS_BOOL bCrossSim;
+    IMS_SINT32 eRatType;
 };
 
 #endif

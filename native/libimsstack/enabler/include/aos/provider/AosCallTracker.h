@@ -32,9 +32,9 @@ class AosCallTracker :
 {
 public:
     explicit AosCallTracker(IN IMS_SINT32 nSlotId);
-    virtual ~AosCallTracker();
+    ~AosCallTracker() override;
 
-    IMS_BOOL SetMtcReady() const override;
+    IMS_BOOL SetMtcReady() override;
 
     IMS_BOOL IsCsCallActive() const override;
     IMS_BOOL IsNormalCallActive() const override;
@@ -50,11 +50,11 @@ public:
     void SetListener(IN IAosCallTrackerListener* piListener) override;
     void RemoveListener(IN IAosCallTrackerListener* piListener) override;
 
-private:
+protected:
     template <typename T>
     void AddOrUpdateCall(OUT ImsMap<CallKey, T>& objCalls, IN CallKey eKey, IN T eValue);
     template <typename T>
-    void RemoveCall(OUT ImsMap<CallKey, T>& objCalls, IN CallKey eKey);
+    IMS_BOOL RemoveCall(OUT ImsMap<CallKey, T>& objCalls, IN CallKey eKey);
 
     CallState GetConvertedState(IN IMtcCall::State eState);
     CallState GetTotalState(IN ImsMap<CallKey, CallState>& objCalls);
@@ -81,6 +81,8 @@ private:
     void OnCallStateChanged(IN CallKey nCallKey, IN State eState, IN Type eType,
             IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;
     void OnTotalCallStateChanged(IN State eState) override;
+    void OnCallSessionReleased(
+            IN CallKey nCallKey, IN IMS_BOOL bEmergency, IN IMS_BOOL bEstablished) override;
 
     // Log
     static const IMS_CHAR* TypeToString(IN IMS_UINT32 nType);
@@ -89,13 +91,14 @@ private:
 
     AString PrintCallTypes(IN IMS_UINT32 nCallTypes);
 
-private:
+protected:
     IMS_SINT32 m_nSlotId;
     CallState m_eCsState;
     CallState m_eNormalState;
     CallState m_eEmergencyState;
     IMS_UINT32 m_nNormalCallType;
     CallState m_eActiveCsState;
+    IMS_BOOL m_bMtcReady;
 
     ImsMap<CallKey, CallState> m_objNormalCalls;
     ImsMap<CallKey, CallState> m_objEmergencyCalls;
@@ -104,9 +107,6 @@ private:
     ImsList<IAosCallTrackerListener*> m_objListeners;
 
     AString m_strTag;
-
-private:
-    friend class AosCallTrackerTest;
 };
 
 #endif  // AOS_CALL_TRACKER_H_

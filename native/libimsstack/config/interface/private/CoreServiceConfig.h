@@ -29,7 +29,7 @@ class CoreServiceConfig : public ICoreServiceConfig
 {
 public:
     explicit CoreServiceConfig(IN const AString& strServiceId);
-    virtual ~CoreServiceConfig();
+    ~CoreServiceConfig() override;
 
     CoreServiceConfig(IN const CoreServiceConfig&) = delete;
     CoreServiceConfig& operator=(IN const CoreServiceConfig&) = delete;

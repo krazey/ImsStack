@@ -18,12 +18,12 @@
 #define USSI_CONTROLLER_H_
 
 #include "ImsTypeDef.h"
-#include "call/IMtcCallContext.h"
 #include "ussi/UssiData.h"
 #include "ussi/UssiEventNotifier.h"
 
 class IMessage;
 class IMessageUtils;
+class IMtcCallContext;
 class ISipClientConnection;
 class ISipMessage;
 class ISipServerConnection;
@@ -37,14 +37,14 @@ public:
     UssiController& operator=(IN const UssiController&) = delete;
 
     static IMS_BOOL IsNetworkInitiatedUssi(
-            IN IMessageUtils& objMessageUtils, IN IMessage* piMessage);
+            IN IMessageUtils& objMessageUtils, IN const IMessage* piMessage);
 
-    virtual IMS_BOOL HasValidXmlBodyForNetworkInitiatedUssi(IN IMessage* piMessage);
-    IMS_BOOL IsByeForUssi(IN IMessage* piMessage);
-    virtual IMS_BOOL IsUssiInfoReceived(IN ISipServerConnection* piSipServerConnection);
-    virtual IMS_BOOL HasXmlBodyInInfo(IN ISipServerConnection* piSipServerConnection);
-    virtual UssiResult ParseUssiBodyAndCheckResult(
-            IN ISipMessage* piSipMessage, IN IMS_SINT32 nReceivedMethod);
+    virtual IMS_BOOL HasValidXmlBodyForNetworkInitiatedUssi(IN const IMessage* piMessage);
+    virtual IMS_BOOL IsByeForUssi(IN const IMessage* piMessage);
+    virtual IMS_BOOL IsUssiInfoReceived(IN const ISipServerConnection* piSipServerConnection);
+    virtual IMS_BOOL HasXmlBodyInInfo(IN const ISipServerConnection* piSipServerConnection);
+    virtual UssiResult HandleUssiBody(
+            IN const ISipMessage* piSipMessage, IN IMS_SINT32 nReceivedMethod);
 
     virtual IMS_RESULT FormStartUssiRequest(IN const AString& strTargetNumber);
     virtual IMS_RESULT FormAcceptUssi();
@@ -66,7 +66,7 @@ private:
     IMS_RESULT FormBodyForInfo(
             IN ISipMessage* piSipMessage, IN const AString& strUssdString, IN UssiError eErrorCode);
 
-    UssiData* GetParsedUssiData(IN ISipMessage* piSipMessage) const;
+    UssiData* GetParsedUssiData(IN const ISipMessage* piSipMessage) const;
     void NotifyUssiEvent(
             IN const AString& strUssdString, IN UssiModeType eType, IN UssiError eErrorCode);
 

@@ -24,7 +24,7 @@ class OsEventReceiver : public ImsSlot, public IEventReceiver, public ISystemLis
 {
 public:
     explicit OsEventReceiver(IN IMS_SINT32 nSlotId);
-    virtual ~OsEventReceiver();
+    ~OsEventReceiver() override;
 
 private:
     // IEventReceiver class

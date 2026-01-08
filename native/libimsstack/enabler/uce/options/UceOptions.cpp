@@ -22,6 +22,7 @@
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "IUce.h"
+#include "ServiceMessage.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "Sip.h"
@@ -30,7 +31,7 @@
 #include "IUceJniThread.h"
 #include "JniEnablerConnector.h"
 
-__IMS_TRACE_TAG_USER_DECL__("UCE");
+__IMS_TRACE_TAG_UCE__;
 
 PUBLIC
 UceOptions::UceOptions(IN const AString& strManagerName, IN ICoreService* piCoreService,
@@ -444,7 +445,7 @@ PROTECTED VIRTUAL void UceOptions::CapabilityQueryDelivered(IN ICapabilities* pi
         return;
     }
 
-    IMessage* piMessage = m_piCapabilities->GetPreviousResponse(IMessage::CAPABILITIES_QUERY);
+    const IMessage* piMessage = m_piCapabilities->GetPreviousResponse(IMessage::CAPABILITIES_QUERY);
     if (piMessage == IMS_NULL)
     {
         IMS_TRACE_I("CapabilityQueryDelivered:piMessage is null", 0, 0, 0);
@@ -453,7 +454,7 @@ PROTECTED VIRTUAL void UceOptions::CapabilityQueryDelivered(IN ICapabilities* pi
         return;
     }
 
-    ISipMessage* piSIPMessage = piMessage->GetMessage();
+    const ISipMessage* piSIPMessage = piMessage->GetMessage();
     if (piSIPMessage == IMS_NULL)
     {
         IMS_TRACE_I("CapabilityQueryDelivered:piSIPMessage is null", 0, 0, 0);
@@ -479,7 +480,7 @@ PROTECTED VIRTUAL void UceOptions::CapabilityQueryDeliveryFailed(IN ICapabilitie
         return;
     }
 
-    IMessage* piMessage = m_piCapabilities->GetPreviousResponse(IMessage::CAPABILITIES_QUERY);
+    const IMessage* piMessage = m_piCapabilities->GetPreviousResponse(IMessage::CAPABILITIES_QUERY);
     if (piMessage == IMS_NULL)
     {
         IMS_TRACE_I("CapabilityQueryDeliveryFailed:piMessage is null", 0, 0, 0);
@@ -504,7 +505,7 @@ PROTECTED VIRTUAL void UceOptions::CapabilityQueryDeliveryFailed(IN ICapabilitie
 PRIVATE
 void UceOptions::SetContactHeader(IN IMS_UINT32 capabilities, ISipMessage* piSIPMessage) const
 {
-    IService* piService = m_piCoreService;
+    const IService* piService = m_piCoreService;
     AString strMyContact = AString::ConstEmpty();
 
     if (piService->GetPublicGruu() == IMS_NULL)
@@ -607,7 +608,7 @@ void UceOptions::DestroyCapabilities()
 
 IUceJniThread* UceOptions::GetJniThread()
 {
-    IJniEnabler* piJniEnabler =
+    const IJniEnabler* piJniEnabler =
             JniEnablerConnector::GetInstance().GetJniEnabler(m_nSimSlot, EnablerType::UCE);
     if (piJniEnabler == IMS_NULL)
     {

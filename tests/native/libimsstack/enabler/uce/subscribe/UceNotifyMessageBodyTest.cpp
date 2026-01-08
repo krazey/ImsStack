@@ -21,7 +21,7 @@
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 
-__IMS_TRACE_TAG_USER_DECL__("UCE");
+__IMS_TRACE_TAG_UCE__;
 
 class UceNotifyMessageBodyTest : public ::testing::Test
 {

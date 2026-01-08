@@ -24,19 +24,43 @@
 
 class MockIAosBlock : public IAosBlock {
 public:
+    MockIAosBlock()
+    {
+        ON_CALL(*this, GetBlockReasons)
+                .WillByDefault(
+                        [this](OUT ImsList<IMS_UINT32>& objReasons, IN SERVICE_TYPE eType)
+                        {
+                            GetBlockReasonsInternal(&objReasons, eType);
+                        });
+        ON_CALL(*this, GetBlockReasonsString)
+                .WillByDefault(
+                        [this](OUT AString& strOutLog)
+                        {
+                            GetBlockReasonsStringInternal(&strOutLog);
+                        });
+    }
+
     MOCK_METHOD(void, SetListener, (IN IAosBlockListener* piListener), (override));
     MOCK_METHOD(void, RemoveListener, (IN IAosBlockListener* piListener), (override));
+    MOCK_METHOD(void, SetSilentListener, (IN IAosBlockSilentListener * piListener), (override));
+    MOCK_METHOD(void, RemoveSilentListener, (IN IAosBlockSilentListener * piListener), (override));
     MOCK_METHOD(IMS_BOOL, SetBlockReason, (IN BLOCK_REASON eReason, IN IMS_BOOL bNotify),
             (override));
     MOCK_METHOD(IMS_BOOL, ResetBlockReason, (IN BLOCK_REASON eReason, IN IMS_BOOL bNotify),
             (override));
     MOCK_METHOD(void, ClearAllBlockReasons, (), (override));
+    MOCK_METHOD(void, GetBlockReasonsString, (OUT AString & strOutLog), (override));
     MOCK_METHOD(IMS_BOOL, PrintBlockReasons, (), (override));
     MOCK_METHOD(void, GetBlockReasons,
             (OUT ImsList<IMS_UINT32> & objReasons, IN SERVICE_TYPE eType), (override));
     MOCK_METHOD(IMS_BOOL, IsReasonBlocked, (IN BLOCK_REASON eReason, IN IMS_BOOL bOnlyEnabled,
             IN SERVICE_TYPE eType), (override));
     MOCK_METHOD(IMS_BOOL, IsCleared, (IN SERVICE_TYPE eType), (override));
+
+    // Add mock method that can set OUT parameter
+    MOCK_METHOD(void, GetBlockReasonsInternal,
+            (OUT ImsList<IMS_UINT32> * objReasons, IN SERVICE_TYPE eType));
+    MOCK_METHOD(void, GetBlockReasonsStringInternal, (OUT AString * strOutLog));
 };
 
 #endif // MOCK_I_AOS_BLOCK_H_

@@ -24,7 +24,7 @@
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 
-__IMS_TRACE_TAG_USER_DECL__("UCE");
+__IMS_TRACE_TAG_UCE__;
 
 class TestUceSubscribeManager : public UceSubscribeManager
 {
@@ -33,7 +33,7 @@ public:
             UceSubscribeManager(AString("UceSubscribeManager"), IMS_NULL, AString("UceApp"), 0)
     {
     }
-    virtual ~TestUceSubscribeManager() {}
+    virtual ~TestUceSubscribeManager() override {}
 
     IMS_UINT32 GetListCount() const { return m_objUceSubscribeList.GetSize(); }
 

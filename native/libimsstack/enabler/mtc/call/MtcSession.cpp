@@ -15,9 +15,12 @@
  */
 
 #include "CallReasonInfo.h"
+#include "CarrierConfig.h"
 #include "IMessage.h"
+#include "IMtcCallController.h"
 #include "ISession.h"
 #include "ISipHeader.h"
+#include "ISipMessage.h"
 #include "ImsAosParameter.h"
 #include "MtcDef.h"
 #include "ServiceTrace.h"
@@ -28,6 +31,10 @@
 #include "call/MtcSession.h"
 #include "call/extension/MtcExtension.h"
 #include "call/extension/PreconditionExtension.h"
+#include "call/message/IMessageSender.h"
+#include "conferencecall/ConferenceController.h"
+#include "conferencecall/IConferenceController.h"
+#include "conferencecall/IConferenceManager.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/IMtcAosConnector.h"
@@ -38,6 +45,7 @@
 #include "utility/IMessageUtils.h"
 #include "utility/MessageUtil.h"
 #include <algorithm>
+#include <optional>
 #include <vector>
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -54,15 +62,23 @@ MtcSession::MtcSession(IN IMtcCallContext& objContext, IN ISession& objSession,
         m_bVideoCapable(IMS_FALSE),
         m_bRttCapable(IMS_FALSE),
         m_bTerminated(IMS_FALSE),
+        m_bSessionTerminatedOrStartFailed(IMS_FALSE),
+        m_bPrackPending(IMS_FALSE),
         m_eOngoingUpdateType(UpdateType::NONE),
         m_objCallTypeHistory({})
 {
     IMS_TRACE_I("+MtcSession", 0, 0, 0);
     IMS_ASSERT(m_pMessageSender != IMS_NULL);
 
+    if (m_eCallType != CallType::UNKNOWN)
+    {
+        SaveCallTypeHistory(m_eCallType);
+    }
+
     if (m_objContext.GetCallInfo().ePeerType == PeerType::MT)
     {
-        m_objContext.GetSipInterfaceFactory().GetISessionHolder()->AddISession(&m_objSession);
+        m_objContext.GetSipInterfaceFactory().GetISessionHolder().AddISession(
+                m_objContext.GetCallKey(), &m_objSession);
     }
 
     UpdateSessionProperty();
@@ -75,19 +91,21 @@ PUBLIC VIRTUAL MtcSession::~MtcSession()
 {
     IMS_TRACE_I("~MtcSession", 0, 0, 0);
 
+    m_objContext.GetMediaManager().DestroyMediaForSession(&m_objSession);
     m_objContext.GetPreconditionManager().DestroyQos(&m_objSession);
     m_objSession.SetMessageMediator(IMS_NULL);
     m_objSession.SetRefreshListener(IMS_NULL);
     delete m_pMessageSender;
 
-    m_objContext.GetSipInterfaceFactory().GetISessionHolder()->ReleaseISession(&m_objSession);
+    m_objContext.GetSipInterfaceFactory().GetISessionHolder().ReleaseISession(
+            &m_objSession, IMS_FALSE, m_bSessionTerminatedOrStartFailed);
 }
 
 PUBLIC VIRTUAL IMS_RESULT MtcSession::Start()
 {
     IMS_TRACE_D("Start", 0, 0, 0);
 
-    if (SetSdpToSend(IMS_FALSE) == ResultSetSdp::FAILURE)
+    if (SetSdpToSend(IMS_FALSE, IMS_FALSE, IMS_TRUE) == ResultSetSdp::FAILURE)
     {
         return IMS_FAILURE;
     }
@@ -96,36 +114,39 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::Start()
     return m_pMessageSender->Start(GetCallType());
 }
 
-PUBLIC VIRTUAL IMS_RESULT MtcSession::SendProvisionalResponse(IN IMS_BOOL bUserAlert)
+PUBLIC VIRTUAL IMS_RESULT MtcSession::SendProvisionalResponse(
+        IN IMS_BOOL bUserAlert, IN IMS_BOOL bReliable)
 {
     IMS_TRACE_D("SendProvisionalResponse", 0, 0, 0);
 
-    IMS_BOOL bIncludeSdp = true;
-    switch (SetSdpToSend(IMS_FALSE))
+    IMS_BOOL bIncludeSdp = bReliable;
+    if (bReliable)
     {
-        case ResultSetSdp::NO_SDP:
-            bIncludeSdp = IMS_FALSE;
-            break;
-        case ResultSetSdp::FAILURE:
-            return IMS_FAILURE;
-        case ResultSetSdp::SUCCESS:
-            break;
+        switch (SetSdpToSend(IMS_FALSE))
+        {
+            case ResultSetSdp::NO_SDP:
+                bIncludeSdp = IMS_FALSE;
+                break;
+            case ResultSetSdp::FAILURE:
+                return IMS_FAILURE;
+            case ResultSetSdp::SUCCESS:
+                break;
+        }
     }
 
-    // TODO: determine the response code based on the configuration for KR carriers?
-    IMS_SINT32 nStatusCode = bUserAlert ? SipStatusCode::SC_180 : SipStatusCode::SC_183;
+    IMS_SINT32 nStatusCode = bUserAlert ? GetStatusCodeForAlerting() : SipStatusCode::SC_183;
 
     m_objExtensionSet.FormatResponse(
             ResponseType::PROVISIONAL_RESPONSE, *m_objSession.GetNextResponse());
     return m_pMessageSender->SendProvisionalResponse(
-            nStatusCode, IsNeedToReliable(bIncludeSdp), bIncludeSdp, IsCallWaiting());
+            nStatusCode, bReliable, bIncludeSdp, IsAlertInfoRequired(nStatusCode));
 }
 
-PUBLIC VIRTUAL IMS_RESULT MtcSession::SendPrack(IN IMS_BOOL bAllowReOffer)
+PUBLIC VIRTUAL IMS_RESULT MtcSession::SendPrack(IN IMS_BOOL bSdpOfferRequired)
 {
-    IMS_TRACE_D("SendPrack", 0, 0, 0);
+    IMS_TRACE_D("SendPrack offer required[%s]", _TRACE_B_(bSdpOfferRequired), 0, 0);
 
-    if (SetSdpToSend(bAllowReOffer) == ResultSetSdp::FAILURE)
+    if (SetSdpToSend(bSdpOfferRequired) == ResultSetSdp::FAILURE)
     {
         return IMS_FAILURE;
     }
@@ -165,7 +186,6 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::RespondToEarlyUpdate(IN IMS_SINT32 eStatus
 {
     IMS_TRACE_D("RespondToEarlyUpdate", 0, 0, 0);
 
-    // TODO: check status code in SetSdpToSend()?
     if (SipStatusCode::IsFinalSuccess(eStatusCode) &&
             SetSdpToSend(IMS_FALSE) == ResultSetSdp::FAILURE)
     {
@@ -194,7 +214,6 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::Accept()
 {
     IMS_TRACE_D("Accept", 0, 0, 0);
 
-    // TODO: "REJECT_REASON_MEDIA_FORMFAIL" is required?
     if (SetSdpToSend(IMS_FALSE) == ResultSetSdp::FAILURE)
     {
         return IMS_FAILURE;
@@ -217,7 +236,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::Update(
 {
     IMS_TRACE_D("Update", 0, 0, 0);
 
-    if (SetSdpToSend(IMS_TRUE) == ResultSetSdp::FAILURE)
+    if (SetSdpToSend(UpdateType::LOCATION != eUpdateType) == ResultSetSdp::FAILURE)
     {
         return IMS_FAILURE;
     }
@@ -229,8 +248,9 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::Update(
 
 PUBLIC VIRTUAL IMS_RESULT MtcSession::AcceptUpdate()
 {
-    IMS_BOOL bAnswerForOfferlessReInvite = !m_objContext.GetMessageUtils().HasSdp(
-            m_objSession.GetPreviousRequest(IMessage::SESSION_UPDATE));
+    const IMessage* piMessage = m_objSession.GetPreviousRequest(IMessage::SESSION_UPDATE);
+    IMS_BOOL bAnswerForOfferlessReInvite = !m_objContext.GetMessageUtils().HasSdp(piMessage) &&
+            piMessage->GetMethod().Equals(SipMethod::INVITE);
     IMS_TRACE_D("AcceptUpdate Offerless case[%s]", _TRACE_B_(bAnswerForOfferlessReInvite), 0, 0);
 
     // bAnswerForOfferlessReInvite should allow re-offer.
@@ -265,6 +285,10 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::Terminate(
 
     if (CallReasonInfo::IsTerminateRequired(objReason.nCode))
     {
+        if (bUseBye)
+        {
+            HandleByeTransactionIfNeeded();
+        }
         m_objExtensionSet.FormatRequest(RequestType::TERMINATE, *m_objSession.GetNextRequest());
         return m_pMessageSender->Terminate(bUseBye, objReason);
     }
@@ -275,25 +299,45 @@ PUBLIC VIRTUAL void MtcSession::HandleRequest(IN RequestType eType, IN const IMe
 {
     m_objExtensionSet.HandleRequest(eType, objRequest);
 
-    if (eType == RequestType::START || eType == RequestType::ACK || eType == RequestType::UPDATE)
+    switch (eType)
     {
-        if (m_objContext.GetMessageUtils().HasSdp(&objRequest))
-        {
-            UpdateCallTypeFromMessage(objRequest, IMS_FALSE);
-        }
-        else
-        {
-            UpdateCallTypeFromCurrentCapability();
-        }
+        case RequestType::START:
+            if (m_objContext.GetMessageUtils().HasSdp(&objRequest))
+            {
+                UpdateCallTypeFromMessage(objRequest, IMS_FALSE);
+            }
+            else
+            {
+                SetCallType(GetCallTypeForOfferlessInvite());
+            }
 
-        UpdateCapabilityFromMessage(objRequest);
-        SetInConference(objRequest);
+            HandleInConference(objRequest);
+            break;
+
+        case RequestType::PRACK:
+        case RequestType::EARLY_UPDATE:
+        case RequestType::ACK:
+            UpdateCallTypeFromMessage(objRequest, IMS_TRUE);
+            break;
+
+        case RequestType::UPDATE:
+            if (m_objContext.GetMessageUtils().HasSdp(&objRequest))
+            {
+                UpdateCallTypeFromMessage(objRequest, IMS_FALSE);
+            }
+            else
+            {
+                SetCallType(GetCallTypeForOfferlessReInvite());
+            }
+
+            HandleInConference(objRequest);
+            break;
+
+        default:
+            break;
     }
-    else if (eType == RequestType::EARLY_UPDATE)
-    {
-        UpdateCallTypeFromMessage(objRequest, IMS_TRUE);
-        UpdateCapabilityFromMessage(objRequest);
-    }
+
+    UpdateCapabilityFromMessage(objRequest);
 }
 
 PUBLIC VIRTUAL void MtcSession::HandleResponse(
@@ -301,10 +345,23 @@ PUBLIC VIRTUAL void MtcSession::HandleResponse(
 {
     m_objExtensionSet.HandleResponse(eType, objResponse);
 
-    if (eType == ResponseType::PROVISIONAL_RESPONSE || eType == ResponseType::EARLY_UPDATE_RESPONSE)
+    if (eType == ResponseType::REJECT)
     {
-        UpdateCallTypeFromMessage(objResponse, IMS_TRUE);
-        UpdateCapabilityFromMessage(objResponse);
+        return;
+    }
+
+    UpdateCallTypeFromMessage(objResponse, IMS_TRUE);
+    UpdateCapabilityFromMessage(objResponse);
+
+    if (objResponse.GetStatusCode() == SipStatusCode::SC_183 &&
+            objResponse.GetMessage()->IsMessageRpr())
+    {
+        m_bPrackPending = IMS_TRUE;
+    }
+
+    if (eType == ResponseType::PRACK_RESPONSE)
+    {
+        m_bPrackPending = IMS_FALSE;
     }
 
     if (eType == ResponseType::EARLY_UPDATE_RESPONSE &&
@@ -320,7 +377,7 @@ PUBLIC VIRTUAL void MtcSession::HandleResponse(
 
     if (eType == ResponseType::PROVISIONAL_RESPONSE || eType == ResponseType::ACCEPT_UPDATE)
     {
-        SetInConference(objResponse);
+        HandleInConference(objResponse);
     }
 }
 
@@ -330,6 +387,36 @@ PUBLIC VIRTUAL void MtcSession::SetCallType(IN CallType eNewCallType)
     m_ePreviousCallType = m_eCallType;
     m_eCallType = eNewCallType;
     SaveCallTypeHistory(m_eCallType);
+}
+
+PUBLIC VIRTUAL void MtcSession::SetCapableCallType(IN CallType eNewCallType)
+{
+    CallType eCapableCallType = eNewCallType;
+
+    if (!m_bVideoCapable)
+    {
+        if (eCapableCallType == CallType::VT)
+        {
+            eCapableCallType = CallType::VOIP;
+        }
+        else if (eCapableCallType == CallType::VIDEO_RTT)
+        {
+            eCapableCallType = CallType::RTT;
+        }
+    }
+    if (!m_bRttCapable)
+    {
+        if (eCapableCallType == CallType::RTT)
+        {
+            eCapableCallType = CallType::VOIP;
+        }
+        else if (eCapableCallType == CallType::VIDEO_RTT)
+        {
+            eCapableCallType = CallType::VT;
+        }
+    }
+
+    SetCallType(eCapableCallType);
 }
 
 PRIVATE
@@ -342,7 +429,8 @@ ImsList<IMtcExtension*> MtcSession::GetSupportedExtensions() const
     lstExtensions.Append(new MtcExtension(
             m_objContext, MtcExtensionSet::OPTION_TAG_HISTORY_INFO, {RequestType::START}, {}));
     lstExtensions.Append(
-            new MtcExtension(m_objContext, MtcExtensionSet::OPTION_TAG_REPLACES, {}, {}));
+            new MtcExtension(m_objContext, MtcExtensionSet::OPTION_TAG_REPLACES,
+            {RequestType::START}, {ResponseType::PROVISIONAL_RESPONSE}));
     lstExtensions.Append(new MtcExtension(m_objContext, MtcExtensionSet::OPTION_TAG_TARGET_DIALOG,
             {RequestType::START}, {ResponseType::ACCEPT}));
     lstExtensions.Append(new MtcExtension(m_objContext,
@@ -352,9 +440,8 @@ ImsList<IMtcExtension*> MtcSession::GetSupportedExtensions() const
     lstExtensions.Append(
             new MtcExtension(m_objContext, MtcExtensionSet::OPTION_TAG_SESSION_TIMER, {}, {}));
 
-    // TODO: check CallType.
-    if (!m_objContext.GetCallInfo().bUssi &&
-            m_objContext.GetConfigurationProxy().Is(Feature::VOICE_QOS_PRECONDITION_SUPPORTED))
+    if (m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigVoice::KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL))
     {
         lstExtensions.Append(new PreconditionExtension(m_objContext));
     }
@@ -365,8 +452,8 @@ ImsList<IMtcExtension*> MtcSession::GetSupportedExtensions() const
 PRIVATE
 void MtcSession::UpdateSessionProperty()
 {
-    IMS_SINT32 nInterval =
-            m_objContext.GetConfigurationProxy().GetInt(Feature::SESSION_REFRESH_TRIGGER_INTERVAL);
+    IMS_SINT32 nInterval = m_objContext.GetConfigurationProxy().GetInt(
+            ConfigVoice::KEY_SESSION_REFRESH_TRIGGER_INTERVAL_SEC_INT);
     if (nInterval > 0)
     {
         m_objSession.SetRefreshPolicy(ISession::REFRESH_POLICY_REMAIN_TIME, 0, 0, nInterval);
@@ -376,19 +463,38 @@ void MtcSession::UpdateSessionProperty()
             m_objSession.GetConfiguration() | ISession::CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED);
 
     m_objSession.SetImplicitRoutingRequired(IMS_TRUE);
+    SetSessionSdpPreviewMode();
 }
 
 PRIVATE
-void MtcSession::UpdateCallTypeFromCurrentCapability()
+void MtcSession::SetSessionSdpPreviewMode()
 {
-    if (!m_objCallTypeHistory.empty())
+    switch (m_objContext.GetConfigurationProxy().GetInt(
+            ConfigVoice::KEY_POLICY_FOR_SDP_PREVIEW_MODE_INT))
     {
-        SetCallType(GetCallTypeByHistory());
+        case ConfigVoice::SDP_PREVIEW_MODE_DISABLED:
+            return;
+        case ConfigVoice::SDP_PREVIEW_MODE_FOR_NORMAL_CALL_ONLY:
+            if (m_objContext.GetCallInfo().IsEmergency())
+            {
+                return;
+            }
+            break;
+        case ConfigVoice::SDP_PREVIEW_MODE_FOR_EMERGENCY_CALL_ONLY:
+            if (!m_objContext.GetCallInfo().IsEmergency())
+            {
+                return;
+            }
+            break;
+        default:  // case ConfigVoice::SDP_PREVIEW_MODE_FOR_ALL_CALLS:
+            break;
     }
-    else
-    {
-        SetCallType(GetCallTypeByRegisteredFeature());
-    }
+
+    // If `Preview mode` is allowed to this session, 2 session configurations should be enabled.
+    // ISession::CONFIG_SUPPORT_PREVIEW be set to explicitly support Preview.
+    // ISession::CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR be set to allow SDP negotiation on non-RPR.
+    m_objSession.SetConfiguration(m_objSession.GetConfiguration() |
+            ISession::CONFIG_SUPPORT_PREVIEW | ISession::CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR);
 }
 
 PRIVATE
@@ -415,13 +521,17 @@ IMS_RESULT MtcSession::UpdateCallTypeFromMessage(
 PRIVATE
 void MtcSession::UpdateCapabilityFromMessage(IN const IMessage& objMessage)
 {
-    if (m_objContext.GetConfigurationProxy().Is(
-                Feature::SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS))
+    const CallType eCallTypeFromRemoteSdp = m_objContext.GetMessageUtils().GetCallTypeFromSdp(
+            &m_objSession, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+
+    if (m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigVt::KEY_SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS_BOOL))
     {
         m_bVideoCapable = IMS_TRUE;
     }
-    else if (m_objContext.GetConfigurationProxy().Is(
-                     Feature::CARRIER_SPECIFIC_SIP_HEADER, MessageUtil::STR_P_TTA_VOLTE_INFO))
+    else if (m_objContext.GetConfigurationProxy().Contains(
+                     ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
+                     MessageUtil::STR_P_TTA_VOLTE_INFO))
     {
         AString strAvchange = m_objContext.GetMessageUtils().GetHeader(
                 &objMessage, ISipHeader::UNKNOWN, MessageUtil::STR_P_TTA_VOLTE_INFO);
@@ -429,29 +539,80 @@ void MtcSession::UpdateCapabilityFromMessage(IN const IMessage& objMessage)
     }
     else
     {
-        m_bVideoCapable = IsRegisteredFeature(ImsAosFeature::VIDEO) &&
-                m_objContext.GetMessageUtils().IsVideoFeatureIncluded(&objMessage);
+        const std::optional<IMS_BOOL> bHasVideoSdp = (eCallTypeFromRemoteSdp == CallType::UNKNOWN)
+                ? std::nullopt
+                : std::optional(eCallTypeFromRemoteSdp == CallType::VT ||
+                          eCallTypeFromRemoteSdp == CallType::VIDEO_RTT);
+        if (auto bRemoteCapability = IdentifyRemoteCapability(
+                    m_objContext.GetMessageUtils().IsVideoFeatureIncluded(&objMessage),
+                    bHasVideoSdp))
+        {
+            m_bVideoCapable = *bRemoteCapability && IsRegisteredFeature(ImsAosFeature::VIDEO);
+        }
     }
-    m_bRttCapable = IsRegisteredFeature(ImsAosFeature::TEXT) &&
-            m_objContext.GetMessageUtils().IsTextFeatureIncluded(&objMessage);
 
-    IMS_TRACE_D("UpdateCapabilityFromMessage : Video[%s] Rtt[%s]", _TRACE_B_(m_bVideoCapable),
+    const std::optional<IMS_BOOL> bHasTextSdp = (eCallTypeFromRemoteSdp == CallType::UNKNOWN)
+            ? std::nullopt
+            : std::optional(eCallTypeFromRemoteSdp == CallType::RTT ||
+                      eCallTypeFromRemoteSdp == CallType::VIDEO_RTT);
+    if (auto bRemoteCapability = IdentifyRemoteCapability(
+                m_objContext.GetMessageUtils().IsTextFeatureIncluded(&objMessage), bHasTextSdp))
+    {
+        m_bRttCapable = *bRemoteCapability && IsRegisteredFeature(ImsAosFeature::TEXT);
+    }
+
+    IMS_TRACE_D("UpdateCapabilityFromMessage : Video[%s] RTT[%s]", _TRACE_B_(m_bVideoCapable),
             _TRACE_B_(m_bRttCapable), 0);
 }
 
 PRIVATE
-void MtcSession::SetInConference(IN const IMessage& objMessage)
+std::optional<IMS_BOOL> MtcSession::IdentifyRemoteCapability(
+        IN std::optional<IMS_BOOL> bHasFeatureTag,
+        IN std::optional<IMS_BOOL> bContainsMediaInSdp) const
 {
-    if (m_objContext.GetCallInfo().bConference == IMS_TRUE)
+    if (bHasFeatureTag.value_or(IMS_FALSE))
+    {
+        return IMS_TRUE;  // Feature tag exists, capable.
+    }
+
+    if (!bHasFeatureTag.has_value())
+    {
+        // Feature tag is unknown. Capable only if media is in SDP.
+        // Otherwise, the capability is unknown.
+        return bContainsMediaInSdp.value_or(IMS_FALSE) ? std::optional(IMS_TRUE) : std::nullopt;
+    }
+
+    // Feature tag does not exist. The capability depends on the SDP.
+    return bContainsMediaInSdp;
+}
+
+// This handles the case for a conference participant. The conference host sets bConference when it
+// starts.
+PRIVATE
+void MtcSession::HandleInConference(IN const IMessage& objMessage)
+{
+    if (m_objContext.GetCallInfo().bConference ||
+            !m_objContext.GetMessageUtils().IsFocusConf(&objMessage))
     {
         return;
     }
-    m_objContext.GetCallInfo().bConference =
-            m_objContext.GetMessageUtils().IsFocusConf(&objMessage);
+
+    m_objContext.GetCallInfo().bConference = IMS_TRUE;
+    IConferenceController* pController =
+            m_objContext.GetConferenceManager().GetController(m_objContext.GetCallKey());
+    if (!pController &&
+            ConferenceController::IsRequiredForParticipant(m_objContext.GetConfigurationProxy()))
+    {
+        // This operation must be performed after the call state changes to EstablishedState,
+        // and this is guaranteed by the ConferenceController itself.
+        pController = &m_objContext.GetConferenceManager().CreateController(
+                m_objContext.GetCallKey(), ConferenceType::PARTICIPANT);
+        pController->ProcessCommand(IConferenceController::JOINED);
+    }
 }
 
 PRIVATE
-CallType MtcSession::RestrictCallTypeByRegisteredFeature(IN CallType& eCallType)
+CallType MtcSession::RestrictCallTypeByRegisteredFeature(IN const CallType& eCallType) const
 {
     IMS_BOOL bVideoFeature = IsRegisteredFeature(ImsAosFeature::VIDEO);
     IMS_BOOL bTextFeature = IsRegisteredFeature(ImsAosFeature::TEXT);
@@ -466,7 +627,42 @@ CallType MtcSession::RestrictCallTypeByRegisteredFeature(IN CallType& eCallType)
 }
 
 PRIVATE
-CallType MtcSession::GetCallTypeByRegisteredFeature()
+CallType MtcSession::GetCallTypeForOfferlessInvite() const
+{
+    IMS_SINT32 eMediaType = m_objContext.GetConfigurationProxy().GetInt(
+            ConfigVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_INVITE_INT);
+    if (eMediaType == ConfigVoice::OFFERLESS_INVITE_MEDIA_TYPE_FULL_CAPABILITY)
+    {
+        return GetCallTypeByRegisteredFeature();
+    }
+    else  // ConfigVoice::OFFERLESS_INVITE_MEDIA_TYPE_AUDIO
+    {
+        return CallType::VOIP;
+    }
+}
+
+PRIVATE
+CallType MtcSession::GetCallTypeForOfferlessReInvite() const
+{
+    IMS_SINT32 eMediaType = m_objContext.GetConfigurationProxy().GetInt(
+            ConfigVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT);
+    switch (eMediaType)
+    {
+        case ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_FULL:
+            return GetCallTypeByRegisteredFeature();
+        case ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_AUDIO:
+            return CallType::VOIP;
+        case ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_CURRENT:
+            return m_eCallType;
+        case ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_BY_HISTORY:
+            return GetCallTypeByHistory();
+        default:  // OFFERLESS_REINVITE_MEDIA_TYPE_INITIALLY_OFFERED
+            return MayGetFirstCallType();
+    }
+}
+
+PRIVATE
+CallType MtcSession::GetCallTypeByRegisteredFeature() const
 {
     IMS_BOOL bVideoFeature = IsRegisteredFeature(ImsAosFeature::VIDEO);
     IMS_BOOL bTextFeature = IsRegisteredFeature(ImsAosFeature::TEXT);
@@ -482,10 +678,10 @@ CallType MtcSession::GetCallTypeByRegisteredFeature()
     else if (bVideoFeature && bTextFeature)
     {
         // Video && RTT
-        IMS_SINT32 nPolicyForTextAndVideo =
-                m_objContext.GetConfigurationProxy().GetInt(Feature::POLICY_FOR_TEXT_WITH_VIDEO);
-        if (nPolicyForTextAndVideo == CarrierConfig::ImsVt::TEXT_VIDEO_NOT_ALLOWED ||
-                nPolicyForTextAndVideo == CarrierConfig::ImsVt::TEXT_VIDEO_NOT_ALLOWED_IF_ACTIVE)
+        IMS_SINT32 nPolicyForTextAndVideo = m_objContext.GetConfigurationProxy().GetInt(
+                ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT);
+        if (nPolicyForTextAndVideo == ConfigVt::TEXT_VIDEO_NOT_ALLOWED ||
+                nPolicyForTextAndVideo == ConfigVt::TEXT_VIDEO_NOT_ALLOWED_IF_ACTIVE)
         {
             return CallType::VT;
         }
@@ -500,24 +696,48 @@ CallType MtcSession::GetCallTypeByRegisteredFeature()
 }
 
 PRIVATE
-CallType MtcSession::GetCallTypeByHistory()
+CallType MtcSession::GetCallTypeByHistory() const
 {
     std::vector<CallType> objCallTypesInPriority{
             CallType::VIDEO_RTT, CallType::VT, CallType::RTT, CallType::VOIP};
-    for (CallType eType : objCallTypesInPriority)
-    {
-        if (IsInHistory(eType))
-        {
-            return eType;
-        }
-    }
+    auto pCallType = std::find_if(objCallTypesInPriority.begin(), objCallTypesInPriority.end(),
+            [this](CallType eType)
+            {
+                return IsInHistory(eType);
+            });
 
-    return CallType::UNKNOWN;
+    return (pCallType != objCallTypesInPriority.end()) ? *pCallType : CallType::UNKNOWN;
 }
 
 PRIVATE
-MtcSession::ResultSetSdp MtcSession::SetSdpToSend(
-        IN IMS_BOOL bAllowReOffer, IN IMS_BOOL bAnswerForOfferlessReInvite /* = IMS_FALSE*/)
+CallType MtcSession::MayGetFirstCallType() const
+{
+    auto pCallType = std::find_if(m_objCallTypeHistory.begin(), m_objCallTypeHistory.end(),
+            [](CallType callType)
+            {
+                return callType != CallType::UNKNOWN;
+            });
+
+    return (pCallType != m_objCallTypeHistory.end()) ? *pCallType : CallType::VOIP;
+}
+
+PRIVATE
+IMS_SINT32 MtcSession::GetStatusCodeForAlerting() const
+{
+    if (!m_objExtensionSet.IsAvailableOnBoth(MtcExtensionSet::OPTION_TAG_RPR) &&
+            m_objContext.GetConfigurationProxy().GetBoolean(
+                    ConfigVoice::KEY_FORCE_183_FOR_ALERTING_ON_NON_100REL_INVITE_BOOL))
+    {
+        return SipStatusCode::SC_183;
+    }
+
+    return SipStatusCode::SC_180;
+}
+
+PRIVATE
+MtcSession::ResultSetSdp MtcSession::SetSdpToSend(IN IMS_BOOL bAllowReOffer,
+        IN IMS_BOOL bAnswerForOfferlessReInvite /* = IMS_FALSE*/,
+        IN IMS_BOOL bInitialInvite /* = IMS_FALSE */)
 {
     // Answering for offerless re-INVITE case must not come into this.
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
@@ -544,16 +764,17 @@ MtcSession::ResultSetSdp MtcSession::SetSdpToSend(
 
     IMS_TRACE_D("SetSdpToSend - Set Done", 0, 0, 0);
 
-    // TODO: bFailure to true for failure cases is not in this api?
-    m_objContext.GetPreconditionManager().FormPreconditionSdp(&m_objSession, IMS_FALSE);
+    IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
+    objPreconditionManager.FormPreconditionSdp(&m_objSession, IMS_FALSE);
+    objPreconditionManager.OnSdpSent(&m_objSession, bInitialInvite);
 
     return ResultSetSdp::SUCCESS;
 }
 
 PRIVATE
-IMS_BOOL MtcSession::IsRegisteredFeature(IMS_UINT32 nFeature)
+IMS_BOOL MtcSession::IsRegisteredFeature(IMS_UINT32 nFeature) const
 {
-    IMtcAosConnector* pAosConnector =
+    const IMtcAosConnector* pAosConnector =
             m_objContext.GetAosConnector(m_objContext.GetService().GetServiceType());
     if (pAosConnector == IMS_NULL)
     {
@@ -564,8 +785,13 @@ IMS_BOOL MtcSession::IsRegisteredFeature(IMS_UINT32 nFeature)
 }
 
 PRIVATE
-IMS_BOOL MtcSession::IsCallWaiting() const
+IMS_BOOL MtcSession::IsAlertInfoRequired(IMS_SINT32 nStatusCode) const
 {
+    if (nStatusCode != SipStatusCode::SC_180)
+    {
+        return IMS_FALSE;
+    }
+
     if (m_objContext.GetCall().GetState() != IMtcCall::State::IDLE &&
             m_objContext.GetCall().GetState() != IMtcCall::State::INCOMING &&
             m_objContext.GetCall().GetState() != IMtcCall::State::ALERTING)
@@ -587,33 +813,7 @@ IMS_BOOL MtcSession::IsCallWaiting() const
 }
 
 PRIVATE
-IMS_BOOL MtcSession::IsNeedToReliable(IN IMS_BOOL bIncludeSdp) const
-{
-    if (!m_objExtensionSet.IsAvailableOnBoth(MtcExtensionSet::OPTION_TAG_RPR))
-    {
-        return IMS_FALSE;
-    }
-
-    if (m_objExtensionSet.IsRequiredOnRemote(MtcExtensionSet::OPTION_TAG_RPR))
-    {
-        return IMS_TRUE;
-    }
-
-    if (bIncludeSdp)
-    {
-        return IMS_TRUE;
-    }
-
-    if (m_objContext.GetConfigurationProxy().Is(Feature::PRACK_SUPPORTED_FOR_18X))
-    {
-        return IMS_TRUE;
-    }
-
-    return IMS_FALSE;
-}
-
-PRIVATE
-IMS_BOOL MtcSession::IsInHistory(IN CallType eCallType)
+IMS_BOOL MtcSession::IsInHistory(IN CallType eCallType) const
 {
     return std::find(m_objCallTypeHistory.begin(), m_objCallTypeHistory.end(), eCallType) !=
             m_objCallTypeHistory.end();
@@ -627,4 +827,42 @@ void MtcSession::SaveCallTypeHistory(IN CallType eCallType)
         IMS_TRACE_D("SaveCallTypeHistory [%d]", eCallType, 0, 0);
         m_objCallTypeHistory.push_back(eCallType);
     }
+}
+
+PRIVATE
+void MtcSession::HandleByeTransactionIfNeeded()
+{
+    if (!m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigVoice::KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_BYE_TRANSACTION_TIMEOUT_BOOL))
+    {
+        return;
+    }
+
+    if (m_objContext.GetSessions().GetSize() > 1 || m_objContext.GetCallInfo().IsEmergency())
+    {
+        return;
+    }
+
+    const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    if (!pAosConnector)
+    {
+        return;
+    }
+
+    m_objContext.GetCallController().HandleByeTransaction(m_objContext.GetCallKey(),
+            [pAosConnector](const ISession& objSession)
+            {
+                const IMessage* piByeMessage =
+                        objSession.GetPreviousRequest(IMessage::SESSION_TERMINATE);
+                if (piByeMessage == IMS_NULL || piByeMessage->GetState() != IMessage::STATE_SENT)
+                {
+                    return;
+                }
+
+                if (objSession.GetPreviousResponse(IMessage::SESSION_TERMINATE) == IMS_NULL)
+                {
+                    IMS_TRACE_E(0, "BYE transaction timed out", 0, 0, 0);
+                    pAosConnector->Control(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY);
+                }
+            });
 }

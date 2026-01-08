@@ -26,6 +26,7 @@
 #include "call/ISilentRedialHelper.h"
 
 class IMtcCallContext;
+class IMtcSession;
 
 class SilentRedialHelper :
         public ISilentRedialHelper,
@@ -34,7 +35,7 @@ class SilentRedialHelper :
 {
 public:
     SilentRedialHelper(IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason);
-    virtual ~SilentRedialHelper();
+    virtual ~SilentRedialHelper() override;
     SilentRedialHelper(IN const SilentRedialHelper&) = delete;
     SilentRedialHelper& operator=(IN const SilentRedialHelper&) = delete;
 
@@ -44,13 +45,13 @@ public:
     }
 
     // ISilentRedialHelper implementation
-    IMS_RESULT Redial(IN IMS_SINT32 nIntervalInMillis = INTERVAL_BY_TYPE) override;
-    inline IMS_UINT32 GetType() override { return m_nType; }
+    CallReasonInfo Redial(IN IMS_SINT32 nIntervalInMillis = INTERVAL_BY_TYPE) override;
+    inline IMS_UINT32 GetType() const override { return m_nType; }
 
     // IMtcCallStateListener implementation
     void OnCallStateChanged(IN CallKey nCallKey, IN State eState, IN Type eType,
             IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;
-    inline void OnTotalCallStateChanged(IN State) override{};
+    inline void OnTotalCallStateChanged(IN State) override {};
     // must be true. Otherwise, Context will be null when State is changed to Terminating
     inline IMS_BOOL IsSynchronousCallRequired() override { return IMS_TRUE; }
 
@@ -59,20 +60,26 @@ public:
 private:
     void ReStart();
     void SetRedialDetail();
+    void LoadRetryLimitsFromConfiguration();
     void ReleaseCallResources();
     void StopCallTimers();
     IMS_BOOL IsRedialAvailable() const;
+    CallReasonInfo HandleFailure(IN IMtcSession& objMtcSession) const;
     CallType GetCallType() const;
     const AString GetRemoteTarget() const;
+    void ControlAos(IN IMS_UINT32 eCommand) const;
 
     IMtcCallContext& m_objContext;
     CallKey m_nCallKey;
     IMS_SINT32 m_nType;
+    IMS_SINT32 m_nMaxDuration;
     IMS_SINT32 m_nInterval;
-    IMS_UINT32 m_nMaxCount;
-    IMS_UINT32 m_nCount;
+    IMS_SINT32 m_nMaxCount;
+    IMS_SINT32 m_nCount;
+    IMS_SINT32 m_nTotalRetryDuration;
     const AString m_strExtra;
-    ITimer* m_piTimer;
+    ITimer* m_piRetryTimer;
+    MediaInfo m_objMediaInfo;
 
     LOCAL const IMS_UINT32 NO_LIMIT = 999;
 };

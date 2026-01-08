@@ -28,7 +28,7 @@ class AosKeepAlive : public ISipKeepAliveHelperListener, public ITimerListener
 {
 public:
     explicit AosKeepAlive(IN IMS_SINT32 nSlotId);
-    virtual ~AosKeepAlive();
+    ~AosKeepAlive() override;
 
     virtual void SetListener(IN IAosKeepAliveListener* piListener);
 
@@ -36,7 +36,7 @@ public:
     void Start(IN IMS_UINT32 nRepeatTime, IN IMS_BOOL bCheckingPong = IMS_TRUE);
     void Stop();
 
-    IMS_BOOL SetTransport(IN const IpAddress& objSourceIpAddress, IN IMS_SINT32 nSourcePort,
+    void SetTransport(IN const IpAddress& objSourceIpAddress, IN IMS_SINT32 nSourcePort,
             IN const IpAddress& objDestIpAddress, IN IMS_SINT32 nDestPort,
             IN IMS_SINT32 nProtocol = AosKeepAlive::TRANSPORT_UDP);
 
@@ -49,7 +49,13 @@ public:
         TRANSPORT_MAX,
     };
 
-private:
+    enum
+    {
+        TIMER_KEEP_ALIVE = 0,
+        TIMER_PONG_WAIT
+    };
+
+protected:
     void SendPing();
 
     void SetCheckingPong(IN IMS_BOOL bCheck);
@@ -58,8 +64,8 @@ private:
     void ProcessKeepAliveTimerExpired();
     void ProcessPongWaitTimerExpired();
 
-    void StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration);
-    void StopTimer(IN IMS_UINT32 nType);
+    IMS_BOOL StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration);
+    IMS_BOOL StopTimer(IN IMS_UINT32 nType);
     void ClearTimer();
 
     // ISipKeepAliveHelperListener
@@ -70,13 +76,7 @@ private:
 
     static const IMS_CHAR* TimerToString(IN IMS_UINT32 nType);
 
-    enum
-    {
-        TIMER_KEEP_ALIVE = 0,
-        TIMER_PONG_WAIT
-    };
-
-private:
+protected:
     ISipKeepAliveHelper* m_piKeepAliveHelper;
     IAosKeepAliveListener* m_piListener;
     ITimer* m_piKeepAliveTimer;
@@ -84,11 +84,9 @@ private:
     IMS_UINT32 m_nKeepAliveTime;
     IMS_BOOL m_bIsPongChecked;
     IMS_SINT32 m_nSlotId;
-
     AString m_strTag;
 
-private:
-    friend class AosKeepAliveTest;
+    static const IMS_UINT32 PONG_WAIT_TIME_MILLIS = 10000;
 };
 
 class IAosKeepAliveListener

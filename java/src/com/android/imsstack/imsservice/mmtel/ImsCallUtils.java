@@ -16,6 +16,7 @@
 
 package com.android.imsstack.imsservice.mmtel;
 
+import android.annotation.Nullable;
 import android.os.Bundle;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.emergency.EmergencyNumber.EmergencyCallRouting;
@@ -26,21 +27,30 @@ import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsStreamMediaProfile;
 import android.text.TextUtils;
 
+import com.android.imsstack.base.ImsPrivateProperties;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.agents.TelephonyInterface;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.mtc.CallFeature;
 import com.android.imsstack.enabler.mtc.CallInfo;
 import com.android.imsstack.enabler.mtc.CallReasonInfo;
+import com.android.imsstack.enabler.mtc.IServiceStateTracker;
 import com.android.imsstack.enabler.mtc.IUMtcCall;
+import com.android.imsstack.enabler.mtc.IUMtcService;
 import com.android.imsstack.enabler.mtc.IncomingMtcCall;
 import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.enabler.mtc.MtcCallInfo;
 import com.android.imsstack.enabler.mtc.MtcCallUtils;
 import com.android.imsstack.enabler.mtc.SuppInfo;
+import com.android.imsstack.enabler.mtc.SuppServiceUtils.SuppService;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
-import com.android.imsstack.util.ImsConstants;
-import com.android.imsstack.util.ImsPrivateProperties;
+import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.imsphone.ImsExternalCallTracker;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,14 +59,6 @@ import java.util.List;
  * IMS call related utility methods.
  */
 public class ImsCallUtils {
-    /**
-     * Flags to indicate the conversion of the reason code & extra code
-     */
-    public static final int FLAG_REASON_INFO_NONE = 0x00;
-    public static final int FLAG_REASON_INFO_CODE = 0x01;
-    public static final int FLAG_REASON_INFO_EXTRA_CODE = 0x02;
-    public static final int FLAG_REASON_INFO_ALL = 0xFF;
-
     /**
      * Variable types.
      */
@@ -93,12 +95,22 @@ public class ImsCallUtils {
      */
     private static final boolean CALL_TYPE_OVERRIDE_VT_FROM_MEDIA_INFO = true;
 
+    /**
+     * Definition of the index as configured in
+     * CarrierConfig::ImsEmergency::KEY_DYNAMIC_ROUTING_NUMBER_PER_PLMN_STRING_ARRAY
+     */
+    private static final int DYNAMIC_ROUTING_NUMBER_CONFIG_INDEX_COUNTRY_ISO = 0;
+    private static final int DYNAMIC_ROUTING_NUMBER_CONFIG_INDEX_MNC = 1;
+    private static final int DYNAMIC_ROUTING_NUMBER_CONFIG_INDEX_NUMBER = 2;
+
     /** "sos" URN for IMS emergency call */
     private static final String SOS_SERVICE_URN_POLICE = "urn:service:sos.police";
     private static final String SOS_SERVICE_URN_AMBULANCE = "urn:service:sos.ambulance";
     private static final String SOS_SERVICE_URN_FIRE = "urn:service:sos.fire";
     private static final String SOS_SERVICE_URN_MARINE = "urn:service:sos.marine";
     private static final String SOS_SERVICE_URN_MOUNTAIN = "urn:service:sos.mountain";
+    private static final String SOS_SERVICE_URN_MIEC = "urn:service:sos.ecall.manual";
+    private static final String SOS_SERVICE_URN_AIEC = "urn:service:sos.ecall.automatic";
     private static final String SOS_SERVICE_URN_GENERIC = "urn:service:sos";
     //To-Do: Need to check AOSP behaviour.
     // for supplementary Service
@@ -179,6 +191,7 @@ public class ImsCallUtils {
                 && (callType == ImsCallProfile.CALL_TYPE_VT)) {
             callType = ImsCallMediaUtils.getVideoCallType(mediaProfile);
         }
+        ImsCallMediaUtils.updateMediaProfileFromMediaInfoForAudioCodecAttributes(mediaProfile, mi);
 
         ImsCallProfile profile = new ImsCallProfile(serviceType, callType, new Bundle(),
                 mediaProfile);
@@ -187,9 +200,11 @@ public class ImsCallUtils {
                 MtcCallInfo.isConference(ci));
         profile.setCallExtraBoolean(ImsCallProfile.EXTRA_CALL_MODE_CHANGEABLE,
                 MtcCallInfo.isVideoCapable(ci));
+        profile.setCallExtraBoolean(ImsCallProfile.EXTRA_IS_CROSS_SIM_CALL,
+                MtcCallInfo.isCrossSim(ci));
 
-        boolean isAudioHD = MtcCallUtils.isAudioHDQuality(mi.AQuality);
-        boolean isAudioUHD = MtcCallUtils.isAudioUHDQuality(mi.AQuality);
+        boolean isAudioHD = MtcCallUtils.isAudioHDQuality(mi.audioQuality);
+        boolean isAudioUHD = MtcCallUtils.isAudioUHDQuality(mi.audioQuality);
 
         if (isAudioHD || isAudioUHD) {
             profile.setCallRestrictCause(ImsCallProfile.CALL_RESTRICT_CAUSE_NONE);
@@ -197,11 +212,8 @@ public class ImsCallUtils {
             profile.setCallRestrictCause(ImsCallProfile.CALL_RESTRICT_CAUSE_HD);
         }
 
-        if (CallFeature.isRttSupported(context.getSlotId())) {
-            profile.setCallExtraBoolean(ImsCallUtils.EXTRA_RTT_AVAIL, ci.rttCapable);
-        }
-
-        return profile;
+        profile.setCallExtraBoolean(ImsCallUtils.EXTRA_RTT_AVAIL, ci.rttCapable);
+        return getSanitizedCallProfileForVideoDirection(profile);
     }
 
     public static ImsCallProfile createCallProfileFromIncomingCallInfo(
@@ -226,9 +238,10 @@ public class ImsCallUtils {
             oir = ImsCallProfile.OIR_PRESENTATION_NOT_RESTRICTED;
         } else if (incomingCall.OIPType == IncomingMtcCall.OIPTYPE_UNKNOWN) {
             oir = ImsCallProfile.OIR_PRESENTATION_UNKNOWN;
-        } else if (incomingCall.OIPType == (IncomingMtcCall.OIPTYPE_UNKNOWN + 1)) {
-            // FIXME: The constant value SHOULD be defined if it's used...
+        } else if (incomingCall.OIPType == (IncomingMtcCall.OIPTYPE_PAYPHONE)) {
             oir = ImsCallProfile.OIR_PRESENTATION_PAYPHONE;
+        } else if (incomingCall.OIPType == (IncomingMtcCall.OIPTYPE_UNAVAILABLE)) {
+            oir = ImsCallProfile.OIR_PRESENTATION_UNAVAILABLE;
         }
 
         profile.setCallExtraInt(ImsCallProfile.EXTRA_OIR, oir);
@@ -244,7 +257,7 @@ public class ImsCallUtils {
 
 
         profile.setCallExtra(ImsCallProfile.EXTRA_CALL_DISCONNECT_CAUSE,
-                Integer.toString(getReasonFromMTC(incomingCall.rejectedReason)));
+                Integer.toString(getCodeFromCallReasonInfo(incomingCall.rejectedReason)));
 
         updateCallProfileForEmergency(profile, incomingCall.callInfo);
         updateCallProfileFromCallInfo(context, profile, incomingCall.callInfo);
@@ -279,47 +292,95 @@ public class ImsCallUtils {
     }
 
     /**
+     * Sanitizes the video direction within an {@code ImsCallProfile} to prevent unexpected behavior
+     * from the dialer.
+     *
+     * If the video direction in the provided {@code ImsCallProfile}'s {@code ImsStreamMediaProfile}
+     * is {@code DIRECTION_INACTIVE}, it is converted to {@code DIRECTION_INVALID}. It's to address
+     * scenarios where the dialer assumes {@code DIRECTION_INACTIVE} as an unexpected status,
+     * leading to unintended video call resumption.
+     *
+     * @param profile The {@code ImsCallProfile} to be sanitized.
+     * @return A new {@code ImsCallProfile} instance with the sanitized video direction.
+     *         Null if {@code profile} is null.
+     */
+    public static ImsCallProfile getSanitizedCallProfileForVideoDirection(
+            final ImsCallProfile profile) {
+        if (profile == null) {
+            return null;
+        }
+
+        final ImsStreamMediaProfile mediaProfile = profile.getMediaProfile();
+        if (mediaProfile == null
+                || mediaProfile.getVideoDirection() != ImsStreamMediaProfile.DIRECTION_INACTIVE) {
+            return profile;
+        }
+
+        ImsCallProfile newProfile = cloneCallProfile(profile);
+        final ImsStreamMediaProfile newMediaProfile = new ImsStreamMediaProfile(
+                mediaProfile.getAudioQuality(),
+                mediaProfile.getAudioDirection(),
+                mediaProfile.getVideoQuality(),
+                ImsStreamMediaProfile.DIRECTION_INVALID,
+                mediaProfile.getRttMode());
+        newProfile.getMediaProfile().copyFrom(newMediaProfile);
+        return newProfile;
+    }
+
+    /**
     * Helper for creating the object of {@code ImsReasonInfo}
     *
     * @param callReasonInfo the target to be converted
-    * @param flags indicates which member of the {@code CallReasonInfo} to be converted
     */
-    public static ImsReasonInfo createReasonInfo(final CallReasonInfo callReasonInfo, int flags) {
-        return createReasonInfo(callReasonInfo.mCode, callReasonInfo.mExtraCode,
-                callReasonInfo.mExtraMessage, flags);
+    public static ImsReasonInfo createImsReasonInfo(final CallReasonInfo callReasonInfo) {
+        return new ImsReasonInfo(getCodeFromCallReasonInfo(callReasonInfo.mCode),
+                getExtraCodeFromCallReasonInfo(callReasonInfo.mCode, callReasonInfo.mExtraCode),
+                callReasonInfo.mExtraMessage);
     }
 
-    public static ImsReasonInfo createReasonInfo(
-            int code, int extraCode, String message, int flags) {
-        return createReasonInfo(code, extraCode, message, flags, 0);
+    /**
+     * Helper for creating an object of {@code ImsReasonInfo} with only a reason code.
+     *
+     * @param code The reason code.
+     * @return a new {@link ImsReasonInfo} object.
+     */
+    public static ImsReasonInfo createImsReasonInfo(int code) {
+        return createImsReasonInfo(code, "");
     }
 
-    public static ImsReasonInfo createReasonInfo(
-            int code, int extraCode, String message, int flags, int preferredCode) {
-        // FIXME: convert reason to the proper code of ImsReasonInfo
-        int convertedCode = (preferredCode <= 0) ? code : preferredCode;
-        int convertedExtraCode = extraCode;
+    /**
+     * Helper for creating an object of {@code ImsReasonInfo} with an unspecified extra code.
+     *
+     * @param code The reason code.
+     * @param extraMessage The extra message.
+     * @return a new {@link ImsReasonInfo} object.
+     */
+    public static ImsReasonInfo createImsReasonInfo(int code, String extraMessage) {
+        return createImsReasonInfo(code, ImsReasonInfo.CODE_UNSPECIFIED, extraMessage);
+    }
 
-        if ((preferredCode <= 0) && ((flags & FLAG_REASON_INFO_CODE) != 0)) {
-            convertedCode = getReasonFromMTC(code);
-        }
-
-        if ((flags & FLAG_REASON_INFO_EXTRA_CODE) != 0) {
-            convertedExtraCode = getExtraCodeFromMtc(code, extraCode);
-        }
-
-        return new ImsReasonInfo(convertedCode, convertedExtraCode, message);
+    /**
+     * Helper for creating an object of {@code ImsReasonInfo}.
+     *
+     * @param code The reason code.
+     * @param extraCode The extra code.
+     * @param extraMessage The extra message.
+     * @return a new {@link ImsReasonInfo} object.
+     */
+    public static ImsReasonInfo createImsReasonInfo(int code, int extraCode, String extraMessage) {
+        return new ImsReasonInfo(code, extraCode, extraMessage);
     }
 
     public static SuppInfo createSuppInfoFromCallProfile(
-            ICallContext context, final ImsCallProfile profile) {
+            ICallContext context, final ImsCallProfile profile, @Nullable String callee,
+            String countryIso) {
         SuppInfo si = new SuppInfo();
 
         // OIR (0 : default, 1 : presentation restricted, 2 : presentation not restricted)
         int oir = getSuppInfoTypeForOIR(profile.getCallExtraInt(ImsCallProfile.EXTRA_OIR, -1));
 
         if (oir != (-1)) {
-            si.addService_int(SuppInfo.TYPE_CALLERID, oir);
+            si.addServiceInt(SuppInfo.SUPP_TYPE_CALLERID, oir);
         }
 
         Bundle oemExtras = profile.getCallExtras().getBundle(ImsCallProfile.EXTRA_OEM_EXTRAS);
@@ -331,7 +392,7 @@ public class ImsCallUtils {
             String cna = getCallExtra(profile, oemExtras, ImsCallProfile.EXTRA_CNA, "");
 
             if (!TextUtils.isEmpty(cna)) {
-                si.addService_str(SuppInfo.TYPE_CNAP, cna);
+                si.addServiceStr(SuppInfo.SUPP_TYPE_CNAP, cna);
             }
         }
 
@@ -341,23 +402,43 @@ public class ImsCallUtils {
         if (isCallPull) {
             int dialogId = profile.getProprietaryCallExtras()
                     .getInt(ImsExternalCallTracker.EXTRA_IMS_EXTERNAL_CALL_ID, -1);
-            si.addService(SuppInfo.TYPE_CALL_PULL, isCallPull, dialogId, null);
+            si.addService(SuppInfo.SUPP_TYPE_CALL_PULL, isCallPull, dialogId, null);
         }
 
         // "sos" URN for IMS emergency call
         if (isEmergencyCall(profile)) {
-            List<String> urns = profile.getEmergencyUrns();
             String urn = null;
 
-            if (urns.isEmpty()) {
-                urn = getSosUrnFromECallServiceCategory(profile.getEmergencyServiceCategories());
+            if (profile.isEmergencyCallTesting()) {
+                ImsLog.d("Omit TYPE_TARGET_URI");
             } else {
-                // The first item has priority ??
-                urn = urns.get(0);
+                List<String> urns = profile.getEmergencyUrns();
+
+                if (urns.isEmpty()) {
+                    @EmergencyCallRouting
+                    int emergencyRouting = getEmergencyRoutingFromCallProfile(profile);
+                    if (callee != null && !callee.isEmpty()) {
+                        emergencyRouting = maybeUpdateEmergencyRouting(
+                                context, emergencyRouting, callee, countryIso);
+                    }
+
+                    if (emergencyRouting != EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL) {
+                        ConfigInterface config = AgentFactory.getInstance().getAgent(
+                                ConfigInterface.class, context.getSlotId());
+                        CarrierConfig cc = config != null ? config.getCarrierConfig() : null;
+                        int[] policies = cc != null ? cc.getIntArray(
+                            CarrierConfig.ImsEmergency.KEY_POLICY_FOR_EMERGENCY_URN_INT_ARRAY) : null;
+                        urn = getSosUrnFromECallServiceCategory(
+                                profile.getEmergencyServiceCategories(), policies, context);
+                    }
+                } else {
+                    // The first item has priority ??
+                    urn = urns.get(0);
+                }
             }
 
             if (urn != null) {
-                si.addService_str(SuppInfo.TYPE_TARGET_URI, urn);
+                si.addServiceStr(SuppInfo.SUPP_TYPE_TARGET_URI, urn);
             }
         }
 
@@ -409,7 +490,17 @@ public class ImsCallUtils {
     }
 
     public static String getSosUrnFromECallServiceCategory(
-            @EmergencyServiceCategories int category) {
+            @EmergencyServiceCategories int category, int[] policies,
+            ICallContext context) {
+        if (shouldUseGenericUrn(category, policies, context)) {
+            return SOS_SERVICE_URN_GENERIC;
+        }
+        if ((category == EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED)
+                && containsPolicy(
+                policies, CarrierConfig.ImsEmergency.USE_POLICE_FOR_UNSPECIFIED)) {
+            return SOS_SERVICE_URN_POLICE;
+        }
+
         if ((category & EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE) != 0) {
             return SOS_SERVICE_URN_POLICE;
         } else if ((category & EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_AMBULANCE) != 0) {
@@ -420,16 +511,27 @@ public class ImsCallUtils {
             return SOS_SERVICE_URN_MARINE;
         } else if ((category & EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_MOUNTAIN_RESCUE) != 0) {
             return SOS_SERVICE_URN_MOUNTAIN;
+        } else if ((category & EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_MIEC) != 0) {
+            return SOS_SERVICE_URN_MIEC;
+        } else if ((category & EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_AIEC) != 0) {
+            return SOS_SERVICE_URN_AIEC;
         } else {
             return SOS_SERVICE_URN_GENERIC;
         }
     }
 
-    public static void setSosUrnFromCallReasonInfo(int category, ImsCallProfile profile) {
+    /**
+     * Sets the emergency URN information to {@link ImsCallProfile}.
+     *
+     * @param info The {@link CallReasonInfo} which contains the emergency URN information.
+     * @param profile The {@link ImsCallProfile} will be updated.
+     */
+    public static void setSosUrnFromCallReasonInfo(
+            final CallReasonInfo info, ImsCallProfile profile) {
         String sosUrn = null;
         int emergencyServiceCategory = 0;
 
-        switch (category)  {
+        switch (info.mExtraCode)  {
             case CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_POLICE: {
                 sosUrn = SOS_SERVICE_URN_POLICE;
                 emergencyServiceCategory = EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE;
@@ -456,6 +558,28 @@ public class ImsCallUtils {
                         EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_MOUNTAIN_RESCUE;
                 break;
             }
+            case CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_MIEC: {
+                sosUrn = SOS_SERVICE_URN_MIEC;
+                emergencyServiceCategory =
+                        EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_MIEC;
+                break;
+            }
+            case CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_AIEC: {
+                sosUrn = SOS_SERVICE_URN_AIEC;
+                emergencyServiceCategory =
+                        EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_AIEC;
+                break;
+            }
+            case CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC:
+            case CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_UNSPECIFIED: {
+                if (info.mExtraMessage.length() > 0) {
+                    sosUrn = info.mExtraMessage;
+                } else {
+                    sosUrn = SOS_SERVICE_URN_GENERIC;
+                }
+                emergencyServiceCategory = EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED;
+                break;
+            }
             default: {
                 sosUrn = SOS_SERVICE_URN_GENERIC;
                 emergencyServiceCategory = EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED;
@@ -466,6 +590,30 @@ public class ImsCallUtils {
         emergencyUrn.add(sosUrn);
         profile.setEmergencyUrns(emergencyUrn);
         profile.setEmergencyServiceCategories(emergencyServiceCategory);
+    }
+
+   public static @EmergencyCallRouting int maybeUpdateEmergencyRouting(
+            ICallContext context, @EmergencyCallRouting int emergencyRouting, String callee,
+            String countryIso) {
+        if (emergencyRouting != EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN) {
+            return emergencyRouting;
+        }
+
+        IServiceStateTracker serviceStateTracker = context.getServiceStateTracker();
+        if (isFromNetworkOrSim(context, callee)) {
+            return emergencyRouting;
+        }
+
+        if (!isDynamicRoutingNumber(context, callee, countryIso)) {
+            return emergencyRouting;
+        }
+
+        if (serviceStateTracker.isServiceRegistered(IUMtcService.SERVICE_VOIP)) {
+            ImsLog.d("update to EMERGENCY_CALL_ROUTING_NORMAL");
+            emergencyRouting = EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL;
+        }
+
+        return emergencyRouting;
     }
 
     public static String getStringFromUserStatus(int status) {
@@ -485,30 +633,33 @@ public class ImsCallUtils {
         }
     }
 
-    public static int getExtraCodeFromMtc(int reason, int extraCode) {
-        if (MtcCallUtils.isCallTerminatedByCSRetry(reason)) {
+    /**
+     * Converts the native information to an {@link ImsReasonInfo} extra code.
+     *
+     * @param code The native call termination reason.
+     * @param extraCode The native extra code.
+     * @return The corresponding {@link ImsReasonInfo} extra code.
+     */
+    public static int getExtraCodeFromCallReasonInfo(int code, int extraCode) {
+        if (MtcCallUtils.isCallTerminatedByCSRetry(code)) {
             if (extraCode == CallReasonInfo.EXTRA_CODE_CALL_RETRY_SILENT_REDIAL) {
                 return ImsReasonInfo.EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
-            } else {
-                return (extraCode > 0) ? extraCode : ImsReasonInfo.CODE_UNSPECIFIED;
             }
-        } else if (MtcCallUtils.isCallTerminatedByECallRetry(reason)) {
-            return (extraCode >= 300) ? extraCode : getEmergencyServiceCode(extraCode);
-        } else if (extraCode > 0) {
-        // TODO : need to modify this after emergency domain selection policy is decided.
-        /*else if (reason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRYVOLTE) {
-            // SIP status code
-            return (extraCode > 0) ? extraCode : ImsReasonInfo.CODE_UNSPECIFIED;
-        }*/
-            return extraCode;
-        } else {
-            return ImsReasonInfo.CODE_UNSPECIFIED;
         }
+
+        return (extraCode > 0) ? extraCode : ImsReasonInfo.CODE_UNSPECIFIED;
     }
 
-    public static int getReasonFromMTC(int reason) {
-        Integer code = sMtcReasonToImsReason.get(reason);
-        return (code != null) ? code.intValue() : ImsReasonInfo.CODE_UNSPECIFIED;
+    /**
+     * Converts the native call termination reason to an {@link ImsReasonInfo} code.
+     *
+     * @param code The native call termination reason.
+     * @return The corresponding {@link ImsReasonInfo} code, or
+     *         {@link ImsReasonInfo#CODE_UNSPECIFIED} if no mapping is found.
+     */
+    public static int getCodeFromCallReasonInfo(int code) {
+        Integer imsCode = sMtcReasonToImsReason.get(code);
+        return (imsCode != null) ? imsCode.intValue() : ImsReasonInfo.CODE_UNSPECIFIED;
     }
 
     /**
@@ -604,13 +755,8 @@ public class ImsCallUtils {
         }
     }
 
-    public static boolean isGoogleNativeCompliant(ICallContext context) {
-        return ImsConstants.USE_GOOGLE_NATIVE_APPS;
-    }
-
     public static boolean isCallOnNativeAppsAndCountryKR(ICallContext context) {
-        return ImsConstants.USE_GOOGLE_NATIVE_APPS
-                && "KR".equals(ImsPrivateProperties.getSimCountry(context.getSlotId()));
+        return "KR".equals(ImsPrivateProperties.getSimCountry(context.getSlotId()));
     }
 
     public static boolean isCallTypeChanged(int callType, int otherCallType) {
@@ -698,22 +844,6 @@ public class ImsCallUtils {
         return ImsCallMediaUtils.isVideoProfileChanged(profile.getMediaProfile(), mi);
     }
 
-    /**
-    * converts the {@code mCode} of {@code CallReasonInfo} with specific case.
-    *
-    * @param profile used for this operation
-    * @param callReasonInfo the target to be converted
-    */
-    public static void refineCallReasonInfoForCode(ICallContext context,
-            ImsCallProfile profile, CallReasonInfo callReasonInfo) {
-        if ((callReasonInfo.mCode == CallReasonInfo.CODE_SIP_NOT_SUPPORTED)
-                && (callReasonInfo.mExtraCode == 415)
-                && ImsCallUtils.isVideoCall(profile.getCallType())
-                && "LGU".equals(ImsPrivateProperties.getSimOperator(context.getSlotId()))) {
-            callReasonInfo.mCode = CallReasonInfo.CODE_LOCAL_CALL_VOLTE_RETRY_REQUIRED;
-        }
-    }
-
     public static void removeCallExtra(ImsCallProfile profile, String key) {
         if (profile == null) {
             return;
@@ -757,10 +887,11 @@ public class ImsCallUtils {
                 MtcCallInfo.isVideoCapable(ci));
         profile.setCallExtra(ImsCallProfile.EXTRA_USSD,
                 MtcCallInfo.isUssi(ci) ? "true" : "false");
-        if (CallFeature.isRttSupported(context.getSlotId())) {
-            profile.setCallExtraBoolean(ImsCallUtils.EXTRA_RTT_AVAIL,
-                MtcCallInfo.isRttCapable(ci));
-        }
+        profile.setCallExtraBoolean(ImsCallUtils.EXTRA_RTT_AVAIL, MtcCallInfo.isRttCapable(ci));
+        profile.setCallExtraBoolean(
+                ImsCallProfile.EXTRA_IS_CROSS_SIM_CALL, MtcCallInfo.isCrossSim(ci));
+        profile.setCallExtraInt(
+                ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, MtcCallInfo.getRatType(ci));
 
         int callType = getProfileCallTypeFromCallInfo(ci);
 
@@ -771,7 +902,7 @@ public class ImsCallUtils {
 
     public static void updateCallProfileOnSessionStarted(ImsCallProfile profile,
             final SuppInfo suppInfo) {
-        SuppInfo.SuppService ss = suppInfo.getService(SuppInfo.TYPE_TIP);
+        SuppService ss = suppInfo.getService(SuppInfo.SUPP_TYPE_TIP);
         if (ss != null) {
             if (ss.intValue != SuppInfo.TIP_NONE) {
                 profile.setCallExtraInt(ImsCallProfile.EXTRA_OIR,
@@ -795,13 +926,9 @@ public class ImsCallUtils {
 
     public static void updateCallProfileFromSuppInfo(ICallContext context,
             ImsCallProfile profile, final SuppInfo si) {
-        // FIXME: need to improve to handle MMC field for U+
-        boolean mmcPresent = false;
 
-        for (SuppInfo.SuppService ss : si.objSuppService) {
-            if (ss.type == SuppInfo.TYPE_MMC) {
-                mmcPresent = true;
-            } else if (MtcCallUtils.isSuppInfoBoolean(ss.type)) {
+        for (SuppService ss : si.getServices()) {
+            if (MtcCallUtils.isSuppInfoBoolean(ss.type)) {
                 String key = getCallExtraNameForBoolean(context, ss.type);
 
                 if (key != null) {
@@ -809,7 +936,7 @@ public class ImsCallUtils {
                 }
             } else if (MtcCallUtils.isSuppInfoInt(ss.type)) {
                 String key = getCallExtraNameForInt(context, ss.type);
-                if (ss.type == SuppInfo.TYPE_CALLING_NUM_VERIFICATION) {
+                if (ss.type == SuppInfo.SUPP_TYPE_CALLING_NUM_VERIFICATION) {
                     int verStat =  getOIVerStatusFromCallingNumVerificationType(ss.intValue);
                     if (verStat != -1) {
                         profile.setCallerNumberVerificationStatus(verStat);
@@ -840,9 +967,22 @@ public class ImsCallUtils {
         profile.updateCallType(new ImsCallProfile(profile.getServiceType(), callType));
     }
 
-    public static boolean isEmergencyPdnUsedForEmergencyCallViaWfc(ICallContext context) {
-        // TODO: need to add a carrier configuration.
-        return false;
+    /**
+     * Convert the Dtmf digit from int to char
+     *
+     * @param numDtmf int type Dtmf digit
+     * @return char type Dtmf digit
+     */
+    public static char convertIntToDtmfDigit(int numDtmf) {
+        if (numDtmf < 10) {
+            return (char) (numDtmf + '0');       // convert to '0'~'9'
+        } else if (numDtmf == 10) {
+            return '*';
+        } else if (numDtmf == 11) {
+            return '#';
+        }
+
+        return (char) numDtmf;
     }
 
     private static String getCallExtra(ImsCallProfile profile, Bundle oemExtras,
@@ -873,21 +1013,12 @@ public class ImsCallUtils {
     }
 
     private static String getCallExtraNameForBoolean(ICallContext context, int suppInfo) {
-        switch (suppInfo) {
-        case SuppInfo.TYPE_MMC:
-            // no-op
-            break;
-        default:
-            // no-op
-            break;
-        }
-
         return ImsSuppInfoUtils.getCallExtraNameForBoolean(context, suppInfo);
     }
 
     private static String getCallExtraNameForInt(ICallContext context, int suppInfo) {
         switch (suppInfo) {
-            case SuppInfo.TYPE_CDIV_CAUSE:
+            case SuppInfo.SUPP_TYPE_CDIV_CAUSE:
                 return ImsCallUtils.EXTRA_CDIV_CAUSE;
             default:
                 // no-op
@@ -899,9 +1030,9 @@ public class ImsCallUtils {
 
     private static String getCallExtraNameForString(ICallContext context, int suppInfo) {
         switch (suppInfo) {
-            case SuppInfo.TYPE_CNAP:
+            case SuppInfo.SUPP_TYPE_CNAP:
                 return ImsCallProfile.EXTRA_CNA;
-            case SuppInfo.TYPE_CDIV_HISTORY:
+            case SuppInfo.SUPP_TYPE_CDIV_HISTORY:
                 return ImsCallUtils.EXTRA_CDIV_HISTORY;
             default:
                 // no-op
@@ -911,24 +1042,63 @@ public class ImsCallUtils {
         return ImsSuppInfoUtils.getCallExtraNameForString(context, suppInfo);
     }
 
-    private static int getEmergencyServiceCode(int code) {
-        switch (code) {
-        // TODO : need to modify this after emergency domain selection policy is decided.
-        /*case IUMtcCall.Fail_Reason.CODE_EMERGENCYSERVICE_GENERIC:
-            return ImsReasonInfoEx.EXTRA_CODE_ECALL_RETRY_GENERIC;
-        case IUMtcCall.Fail_Reason.CODE_EMERGENCYSERVICE_POLICE:
-            return ImsReasonInfoEx.EXTRA_CODE_ECALL_RETRY_POLICE;
-        case IUMtcCall.Fail_Reason.CODE_EMERGENCYSERVICE_AMBULANCE:
-            return ImsReasonInfoEx.EXTRA_CODE_ECALL_RETRY_AMBULANCE;
-        case IUMtcCall.Fail_Reason.CODE_EMERGENCYSERVICE_FIRE:
-            return ImsReasonInfoEx.EXTRA_CODE_ECALL_RETRY_FIRE_BRIGADE;
-        case IUMtcCall.Fail_Reason.CODE_EMERGENCYSERVICE_MARINE:
-            return ImsReasonInfoEx.EXTRA_CODE_ECALL_RETRY_MARINE_GUARD;
-        case IUMtcCall.Fail_Reason.CODE_EMERGENCYSERVICE_MOUNTAIN:
-            return ImsReasonInfoEx.EXTRA_CODE_ECALL_RETRY_MOUNTAIN_RESCUE;*/
-            default:
-                return CallReasonInfo.EXTRA_CODE_CALL_RETRY_NORMAL;
+    private static boolean isFromNetworkOrSim(ICallContext context, String callee) {
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, context.getSlotId());
+        if (telephony == null) {
+            return false;
         }
+        for (EmergencyNumber number : telephony.getEmergencyNumberList()) {
+            if (number.getNumber().equals(callee)) {
+                if (number.isFromSources(EmergencyNumber.EMERGENCY_NUMBER_SOURCE_NETWORK_SIGNALING)
+                        || number.isFromSources(EmergencyNumber.EMERGENCY_NUMBER_SOURCE_SIM)) {
+                    ImsLog.d("SIM or NETWORK emergency number");
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean isDynamicRoutingNumber(ICallContext context, String callee,
+            String countryIso) {
+        String[] configs = AgentFactory.getInstance().getAgent(ConfigInterface.class,
+                context.getSlotId()).getCarrierConfig().getStringArray(CarrierConfig.ImsEmergency
+                        .KEY_DYNAMIC_ROUTING_NUMBER_PER_PLMN_STRING_ARRAY);
+        if (configs == null) {
+            return false;
+        }
+
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, context.getSlotId());
+        if (telephony == null) {
+            return false;
+        }
+        String mnc = telephony.getNetworkMnc();
+        ImsLog.d("isDynamicRoutingNumber :: countryIso=" + countryIso + ", mnc=" + mnc);
+
+        for (String config : configs) {
+            String[] fields = config.split(",");
+            // Format: "iso,mnc,number1,number2,..."
+            if (fields == null || fields.length < 3) {
+                continue;
+            }
+            if (!countryIso.equals(fields[DYNAMIC_ROUTING_NUMBER_CONFIG_INDEX_COUNTRY_ISO])) {
+                continue;
+            }
+            if (!fields[DYNAMIC_ROUTING_NUMBER_CONFIG_INDEX_MNC].isEmpty() && mnc != null
+                    && !mnc.equals(fields[DYNAMIC_ROUTING_NUMBER_CONFIG_INDEX_MNC])) {
+                continue;
+            }
+            for (int i = DYNAMIC_ROUTING_NUMBER_CONFIG_INDEX_NUMBER; i < fields.length; i++) {
+                if (callee.equals(fields[i])) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private static int getOIRTypeFromTIPType(int tip) {
@@ -968,6 +1138,46 @@ public class ImsCallUtils {
         }
     }
 
+    private static boolean containsPolicy(int[] policies, int policy) {
+        if (policies == null) {
+            return false;
+        }
+
+        return Arrays.stream(policies).anyMatch(value -> value == policy);
+    }
+
+    @VisibleForTesting
+    protected static boolean containsCategory(int[] source, int categories) {
+        if (source == null) {
+            return false;
+        }
+
+        return Arrays.stream(source).anyMatch(value -> value == categories);
+    }
+
+    @VisibleForTesting
+    protected static boolean shouldUseGenericUrn(int categories,
+            int[] policies, ICallContext context) {
+        ConfigInterface config = AgentFactory.getInstance().getAgent(
+                ConfigInterface.class, context.getSlotId());
+        CarrierConfig cc = config != null ? config.getCarrierConfig() : null;
+        int[] list = cc != null ? cc.getIntArray(
+                CarrierConfig.ImsEmergency.KEY_CATEGORY_FOR_GENERIC_URN_INT_ARRAY) : null;
+
+        if (containsPolicy(policies, CarrierConfig.ImsEmergency.NOT_USE_SERVICE_CATEGORY)) {
+            return true;
+        } else if ((Integer.bitCount(categories) > 1)
+                && containsPolicy(policies,
+                        CarrierConfig.ImsEmergency.USE_GENERIC_FOR_MULTIPLE_CATEGORIES)) {
+            return true;
+        } else if (containsCategory(list, categories)
+                && containsPolicy(policies,
+                        CarrierConfig.ImsEmergency.USE_GENERIC_FOR_SPECIAL_CATEGORIES)) {
+            return true;
+        }
+        return false;
+    }
+
     static {
         // Reason codes: from MtcCall to ImsCall
         sMtcReasonToImsReason = new LinkedHashMap<Integer, Integer>();
@@ -989,6 +1199,8 @@ public class ImsCallUtils {
                 ImsReasonInfo.CODE_LOCAL_NETWORK_NO_SERVICE);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_NETWORK_NO_LTE_COVERAGE,
                 ImsReasonInfo.CODE_LOCAL_NETWORK_NO_LTE_COVERAGE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_NETWORK_IP_CHANGED,
+                ImsReasonInfo.CODE_LOCAL_NETWORK_IP_CHANGED);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE,
                 ImsReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_NOT_REGISTERED,
@@ -1059,6 +1271,10 @@ public class ImsCallUtils {
                 ImsReasonInfo.CODE_SIP_USER_REJECTED);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_GLOBAL_ERROR,
                 ImsReasonInfo.CODE_SIP_GLOBAL_ERROR);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_EMERGENCY_TEMP_FAILURE,
+                ImsReasonInfo.CODE_EMERGENCY_TEMP_FAILURE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_EMERGENCY_PERM_FAILURE,
+                ImsReasonInfo.CODE_EMERGENCY_PERM_FAILURE);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_METHOD_NOT_ALLOWED,
                 ImsReasonInfo.CODE_SIP_METHOD_NOT_ALLOWED);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_PROXY_AUTHENTICATION_REQUIRED,
@@ -1133,12 +1349,16 @@ public class ImsCallUtils {
                 ImsReasonInfo.CODE_REMOTE_CALL_DECLINE);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_WIFI_LOST,
                 ImsReasonInfo.CODE_WIFI_LOST);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_RADIO_OFF,
+                ImsReasonInfo.CODE_RADIO_OFF);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_RADIO_INTERNAL_ERROR,
                 ImsReasonInfo.CODE_RADIO_INTERNAL_ERROR);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_NETWORK_RESP_TIMEOUT,
                 ImsReasonInfo.CODE_NETWORK_RESP_TIMEOUT);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_ACCESS_CLASS_BLOCKED,
                 ImsReasonInfo.CODE_ACCESS_CLASS_BLOCKED);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_NETWORK_DETACH,
+                ImsReasonInfo.CODE_NETWORK_DETACH);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_SIP_ALTERNATE_EMERGENCY_CALL,
                 ImsReasonInfo.CODE_SIP_ALTERNATE_EMERGENCY_CALL);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_UNKNOWN,
@@ -1159,6 +1379,8 @@ public class ImsCallUtils {
                 ImsReasonInfo.CODE_REJECT_MAX_CALL_LIMIT_REACHED);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_UNSUPPORTED_SIP_HEADERS,
                 ImsReasonInfo.CODE_REJECT_UNSUPPORTED_SIP_HEADERS);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_UNSUPPORTED_SDP_HEADERS,
+                ImsReasonInfo.CODE_REJECT_UNSUPPORTED_SDP_HEADERS);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_ONGOING_CALL_TRANSFER,
                 ImsReasonInfo.CODE_REJECT_ONGOING_CALL_TRANSFER);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_INTERNAL_ERROR,
@@ -1173,6 +1395,9 @@ public class ImsCallUtils {
                 ImsReasonInfo.CODE_REJECT_ONGOING_CONFERENCE_CALL);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_REJECT_ONGOING_CS_CALL,
                 ImsReasonInfo.CODE_REJECT_ONGOING_CS_CALL);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_EMERGENCY_CALL_OVER_WFC_NOT_AVAILABLE,
+                ImsReasonInfo.CODE_EMERGENCY_CALL_OVER_WFC_NOT_AVAILABLE);
+        sMtcReasonToImsReason.put(CallReasonInfo.CODE_OEM_CAUSE_3, ImsReasonInfo.CODE_OEM_CAUSE_3);
 
         // User's status: from user status (int) to user status (string)
         sUserStatusToString = new LinkedHashMap<Integer, String>();

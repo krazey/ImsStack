@@ -17,7 +17,6 @@
 #ifndef VOPS_BLOCK_RULE_H_
 #define VOPS_BLOCK_RULE_H_
 
-#include "call/IMtcCall.h"
 #include "call/block/IMtcBlockRule.h"
 
 class IMtcCallContext;
@@ -28,7 +27,7 @@ class VopsBlockRule final : public IMtcBlockRule
 {
 public:
     explicit VopsBlockRule(IN IMtcCallContext& objContext);
-    virtual ~VopsBlockRule();
+    virtual ~VopsBlockRule() override;
     VopsBlockRule(IN const VopsBlockRule&) = delete;
     VopsBlockRule& operator=(IN const VopsBlockRule&) = delete;
 

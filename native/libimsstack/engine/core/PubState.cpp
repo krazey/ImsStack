@@ -19,6 +19,7 @@
 #include "ISipHeader.h"
 #include "PubState.h"
 #include "SipHeaderName.h"
+#include "SipMethod.h"
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
 
@@ -156,11 +157,7 @@ IMS_BOOL PubState::UpdateState(IN const ISipMessage* piSipMsg)
     // On PUBLISH response received ...
     else
     {
-        if (!UpdateOnPublishResponse(piSipMsg))
-        {
-            IMS_TRACE_E(0, "Updating the publication state on PUBLISH response failed", 0, 0, 0);
-            return IMS_FALSE;
-        }
+        UpdateOnPublishResponse(piSipMsg);
     }
 
     return IMS_TRUE;
@@ -298,14 +295,13 @@ IMS_BOOL PubState::UpdateOnPublishRequest(IN const ISipMessage* piSipMsg)
 }
 
 PRIVATE
-IMS_BOOL PubState::UpdateOnPublishResponse(IN const ISipMessage* piSipMsg)
+void PubState::UpdateOnPublishResponse(IN const ISipMessage* piSipMsg)
 {
     IMS_SINT32 nStatusCode = piSipMsg->GetStatusCode();
 
     if (SipStatusCode::Is1XX(nStatusCode))
     {
         // Do nothing ...
-        return IMS_TRUE;
     }
     else if (SipStatusCode::IsFinalSuccess(nStatusCode))
     {
@@ -350,8 +346,6 @@ IMS_BOOL PubState::UpdateOnPublishResponse(IN const ISipMessage* piSipMsg)
 
         // Clear the entity-tag
         m_strEntityTag = AString::ConstNull();
-
-        return IMS_TRUE;
     }
     else
     {
@@ -364,8 +358,6 @@ IMS_BOOL PubState::UpdateOnPublishResponse(IN const ISipMessage* piSipMsg)
         // Clear the entity-tag
         m_strEntityTag = AString::ConstNull();
     }
-
-    return IMS_TRUE;
 }
 
 PRIVATE GLOBAL const IMS_CHAR* PubState::StateToString(IN IMS_SINT32 nState)

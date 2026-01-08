@@ -49,6 +49,14 @@ public interface ImsTrafficInterface extends IAgent {
     void setTrafficPriority(int priorityType, int slotId);
 
     /**
+     * Sets modem's simultaneous calling support for a specified slot.
+     *
+     * @param supported The information whether modem supports simultaneous calling.
+     * @param slotId The slot-id to be set.
+     */
+    void setSimultaneousCallingSupported(boolean supported, int slotId);
+
+    /**
      * Sets WLAN category for IPCAN.
      *
      * @param enabled The information if IPCAN is WLAN or mobile

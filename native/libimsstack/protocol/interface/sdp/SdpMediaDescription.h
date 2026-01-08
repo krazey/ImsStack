@@ -16,6 +16,7 @@
 #ifndef SDP_MEDIA_DESCRIPTION_H_
 #define SDP_MEDIA_DESCRIPTION_H_
 
+#include "SdpConnection.h"
 #include "SdpDescription.h"
 #include "SdpMedia.h"
 
@@ -24,7 +25,7 @@ class SdpMediaDescription : public SdpDescription
 public:
     SdpMediaDescription();
     SdpMediaDescription(IN const SdpMediaDescription& other);
-    virtual ~SdpMediaDescription();
+    ~SdpMediaDescription() override;
 
 public:
     SdpMediaDescription& operator=(IN const SdpMediaDescription& other);

@@ -17,25 +17,28 @@
 #ifndef MTC_EMERGENCY_SERVICE_MANAGER_H_
 #define MTC_EMERGENCY_SERVICE_MANAGER_H_
 
+#include "IMtcService.h"
 #include "ImsTypeDef.h"
-#include "IuMtcService.h"
 #include "emergency/IMtcEmergencyServiceManager.h"
 #include <memory>
 
 class IMtcContext;
 
-using EmergencyCallRoutingPdn = IuMtcService::EmergencyCallRoutingPdn;
-
 class MtcEmergencyServiceManager : public IMtcEmergencyServiceManager
 {
 public:
     explicit MtcEmergencyServiceManager(IN IMtcContext& objContext);
-    virtual ~MtcEmergencyServiceManager();
+    virtual ~MtcEmergencyServiceManager() override;
     MtcEmergencyServiceManager(IN const MtcEmergencyServiceManager&) = delete;
     MtcEmergencyServiceManager& operator=(IN const MtcEmergencyServiceManager&) = delete;
 
-    void StartOpen(IN EmergencyCallRoutingPdn ePdn) override;
+    void StartOpen(IN ServiceType eServiceType) override;
     void StopOpen(IN IMS_BOOL bClose) override;
+
+    inline IEmergencyServiceController::State GetState() const override
+    {
+        return m_pController ? m_pController->GetState() : IEmergencyServiceController::State::IDLE;
+    }
 
 protected:
     // Visible for test
@@ -43,8 +46,10 @@ protected:
 
 private:
     IMtcContext& m_objContext;
+    IMS_BOOL m_bLocationUpdateRequested;
 
-    IEmergencyServiceController* CreateController(IN EmergencyCallRoutingPdn ePdn);
+    IEmergencyServiceController* CreateController(IN ServiceType eServiceType);
+    void RequestLocationUpdateIfRequired();
 };
 
 #endif

@@ -29,7 +29,7 @@
 #include "handle/AosHandle.h"
 #include "handle/AosInfo.h"
 
-//__IMS_TRACE_TAG_USER_DECL__("AOS");
+//__IMS_TRACE_TAG_AOS__;
 
 PUBLIC
 AosInfo::AosInfo(IN IAosAppContext* piContext) :
@@ -58,10 +58,10 @@ PRIVATE VIRTUAL IMS_UINT32 AosInfo::GetImsFeatures()
     ImsMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
     IMS_UINT32 nFeatures = ImsAosFeature::NONE;
 
-    for (int i = 0; i < objHandles.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < objHandles.GetSize(); ++i)
     {
         IAosHandle* piHandle = objHandles.GetValueAt(i);
-        AosHandle* pHandle = DYNAMIC_CAST(AosHandle*, piHandle);
+        const AosHandle* pHandle = DYNAMIC_CAST(AosHandle*, piHandle);
 
         if (pHandle->IsImsConnected())
         {
@@ -223,11 +223,17 @@ PRIVATE VIRTUAL AString AosInfo::GetServiceRouteHeaderValue()
     return strServiceRoute;
 }
 
+PRIVATE VIRTUAL IMS_BOOL AosInfo::IsCrossSimConnected()
+{
+    return m_piContext->GetApp()->IsCrossSimConnected();
+}
+
 PRIVATE VIRTUAL void AosInfo::NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized)
 {
     if (bIsInitialized)
     {
         m_piContext->GetRegistration()->RequestCmd(IAosRegistration::CMD_ECALL_INIT);
+        m_piContext->GetApp()->RequestCmd(IAosApplication::CMD_ECALL_INIT);
     }
     else
     {
@@ -235,45 +241,18 @@ PRIVATE VIRTUAL void AosInfo::NotifyEmergencyCallState(IN IMS_BOOL bIsInitialize
     }
 }
 
-PRIVATE VIRTUAL void AosInfo::NotifyScbmState(IN IMS_UINT32 nState)
-{
-    IMS_UINT32 nCommand = 0;
-
-    switch (nState)
-    {
-        case SCBM_STARTED:
-            nCommand = IAosRegistration::CMD_SCBM_STARTED;
-            break;
-        case SCBM_TERMINATED:
-            nCommand = IAosRegistration::CMD_SCBM_TERMINATED;
-            break;
-        case SCBM_TERMINATED_BY_ECALL:
-            nCommand = IAosRegistration::CMD_SCBM_TERMINATED_ECALL;
-            break;
-        case SCBM_TERMINATED_BY_ESMS:
-            nCommand = IAosRegistration::CMD_SCBM_TERMINATED_ESMS;
-            break;
-        default:
-            return;
-    }
-
-    m_piContext->GetRegistration()->RequestCmd(nCommand);
-}
-
 PRIVATE VIRTUAL void AosInfo::NotifyPublishState(IN IMS_BOOL bIsStarted)
 {
     m_piContext->GetApp()->NotifyPublishState(bIsStarted);
 }
 
-PRIVATE VIRTUAL void AosInfo::NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized)
+PRIVATE VIRTUAL void AosInfo::NotifyEmergencySmsState(
+        IN IMS_BOOL bIsInitialized, IN EmergencyServicePdn ePdnType)
 {
+    m_piContext->GetRegistration()->NotifyEmergencySmsState(bIsInitialized, ePdnType);
     if (bIsInitialized)
     {
-        m_piContext->GetRegistration()->RequestCmd(IAosRegistration::CMD_ESMS_INIT);
-    }
-    else
-    {
-        m_piContext->GetRegistration()->RequestCmd(IAosRegistration::CMD_ESMS_DONE);
+        m_piContext->GetApp()->RequestCmd(IAosApplication::CMD_ESMS_INIT);
     }
 }
 
@@ -289,7 +268,8 @@ IMS_BOOL AosInfo::IsForbiddenBlock()
 
     if (piBlock->IsReasonBlocked(BLOCK_IMS_DISABLED) ||
             piBlock->IsReasonBlocked(BLOCK_PERMANENT_REG_FAILED) ||
-            piBlock->IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED))
+            piBlock->IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED) ||
+            piBlock->IsReasonBlocked(BLOCK_USIM_AUTHENTICATION_FAILED))
     {
         return IMS_TRUE;
     }

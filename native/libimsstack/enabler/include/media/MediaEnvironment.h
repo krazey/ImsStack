@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,6 @@
 #define MEDIA_ENVIRONMENT_H_
 
 #include "IService.h"
-#include "ImsTypeDef.h"
 #include "MediaDef.h"
 
 class MediaEnvironment
@@ -29,24 +28,12 @@ public:
     IService* pIService;
 
 public:
-    MediaEnvironment() :
-            eNetworkType(MEDIA_NETWORK_NONE),
-            eServiceType(MEDIA_SERVICE_DEFAULT),
-            pIService(IMS_NULL){};
-
-    MediaEnvironment(MEDIA_NETWORK_TYPE eNetwork, MEDIA_SERVICE_TYPE eCapa, IService* service) :
+    explicit MediaEnvironment(MEDIA_NETWORK_TYPE eNetwork = MEDIA_NETWORK_NONE,
+            MEDIA_SERVICE_TYPE eServiceType = MEDIA_SERVICE_DEFAULT,
+            IService* pService = IMS_NULL) :
             eNetworkType(eNetwork),
-            eServiceType(eCapa),
-            pIService(service){};
-    void Copy(IN MediaEnvironment* pEnvironment)
-    {
-        if (pEnvironment != IMS_NULL)
-        {
-            eNetworkType = pEnvironment->eNetworkType;
-            eServiceType = pEnvironment->eServiceType;
-            pIService = pEnvironment->pIService;
-        }
-    };
+            eServiceType(eServiceType),
+            pIService(pService) {};
 };
 
 #endif

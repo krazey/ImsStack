@@ -28,8 +28,7 @@ PRIVATE GLOBAL ByteArray::Data ByteArray::SHARED_NULL =
 };
 // clang-format on
 
-LOCAL
-IMS_SINT32 ByteArray_AllocateMore(IN IMS_SIZE_T nAlloc, IN IMS_SIZE_T nExtra)
+static IMS_SINT32 byteArray_AllocateMore(IN IMS_SIZE_T nAlloc, IN IMS_SIZE_T nExtra)
 {
     const IMS_SIZE_T nPage = 1 << 12;  // 4096 bytes
     IMS_SIZE_T nNumAlloc;
@@ -296,7 +295,7 @@ ByteArray& ByteArray::Append(IN IMS_BYTE byte)
 {
     if (m_pData->nSize + 1 > m_pData->nAlloc)
     {
-        Realloc(ByteArray_AllocateMore(m_pData->nSize + 1, sizeof(Data)));
+        Realloc(byteArray_AllocateMore(m_pData->nSize + 1, sizeof(Data)));
     }
 
     m_pData->pValue[m_pData->nSize++] = byte;
@@ -315,7 +314,7 @@ ByteArray& ByteArray::Append(IN const IMS_BYTE* pValue, IN IMS_SINT32 nSize)
 
     if (m_pData->nSize + nSize > m_pData->nAlloc)
     {
-        Realloc(ByteArray_AllocateMore(m_pData->nSize + nSize, sizeof(Data)));
+        Realloc(byteArray_AllocateMore(m_pData->nSize + nSize, sizeof(Data)));
     }
 
     IMS_MEM_Memcpy(m_pData->pValue + m_pData->nSize, pValue, nSize);
@@ -336,7 +335,7 @@ ByteArray& ByteArray::Append(IN const ByteArray& objBa)
     {
         if (m_pData->nSize + objBa.m_pData->nSize > m_pData->nAlloc)
         {
-            Realloc(ByteArray_AllocateMore(m_pData->nSize + objBa.m_pData->nSize, sizeof(Data)));
+            Realloc(byteArray_AllocateMore(m_pData->nSize + objBa.m_pData->nSize, sizeof(Data)));
         }
 
         IMS_MEM_Memcpy(
@@ -375,7 +374,7 @@ ByteArray& ByteArray::Prepend(IN IMS_BYTE byte)
 {
     if (m_pData->nSize + 1 > m_pData->nAlloc)
     {
-        Realloc(ByteArray_AllocateMore(m_pData->nSize + 1, sizeof(Data)));
+        Realloc(byteArray_AllocateMore(m_pData->nSize + 1, sizeof(Data)));
     }
 
     IMS_MEM_Memmove(m_pData->pValue + 1, m_pData->pValue, m_pData->nSize);
@@ -396,7 +395,7 @@ ByteArray& ByteArray::Prepend(IN const IMS_BYTE* pValue, IN IMS_SINT32 nSize)
 
     if (m_pData->nSize + nSize > m_pData->nAlloc)
     {
-        Realloc(ByteArray_AllocateMore(m_pData->nSize + nSize, sizeof(Data)));
+        Realloc(byteArray_AllocateMore(m_pData->nSize + nSize, sizeof(Data)));
     }
 
     IMS_MEM_Memmove(m_pData->pValue + nSize, m_pData->pValue, m_pData->nSize);
@@ -474,7 +473,7 @@ void ByteArray::Resize(IN IMS_SINT32 nSize)
         if ((nSize > m_pData->nAlloc) ||
                 ((nSize < m_pData->nSize) && (nSize < (m_pData->nAlloc >> 1))))
         {
-            Realloc(ByteArray_AllocateMore(nSize, sizeof(Data)));
+            Realloc(byteArray_AllocateMore(nSize, sizeof(Data)));
         }
 
         if (m_pData->nAlloc >= nSize)

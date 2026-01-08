@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ISystem.h"
 #include "OsUtil.h"
 #include "PlatformApi.h"
 #include "PlatformContext.h"

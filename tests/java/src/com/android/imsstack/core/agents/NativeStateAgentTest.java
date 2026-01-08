@@ -15,6 +15,8 @@
  */
 package com.android.imsstack.core.agents;
 
+import static com.android.imsstack.base.TestAppContext.SLOT0;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -25,19 +27,18 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.telephony.TelephonyManager;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
-import com.android.imsstack.ContextFixture;
+import androidx.test.filters.SmallTest;
+
+import com.android.imsstack.base.AppContext;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.ServiceCaps;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.SystemInterface;
-import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
 import org.junit.Before;
@@ -50,16 +51,14 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class NativeStateAgentTest {
-    private static final int SLOT0 = 0;
+    @Mock private Context mContext;
+    @Mock private BatteryStateInterface mBatteryState;
+    @Mock private CellInfoInterface mCellInfoInterface;
+    @Mock private IDcNetWatcher mDcNetWatcher;
+    @Mock private ISystem mSystem;
+    @Mock private SystemInterface mSystemInterface;
+    @Mock private NativeStateInterface.Listener mNativeStateListener;
 
-    @Mock BatteryStateInterface mBatteryState;
-    @Mock CellInfoInterface mCellInfoInterface;
-    @Mock IDcNetWatcher mDcNetWatcher;
-    @Mock ISystem mSystem;
-    @Mock SystemInterface mSystemInterface;
-    @Mock NativeStateInterface.Listener mNativeStateListener;
-
-    private ContextFixture mContextFixture;
     private TestableLooper mTestableLooper;
     private NativeStateAgent mNativeStateAgent;
 
@@ -67,11 +66,7 @@ public class NativeStateAgentTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mTestableLooper = TestableLooper.get(this);
-        mContextFixture = new ContextFixture();
-        Context context = mContextFixture.getTestDouble();
-        AppContext.init(context);
-        TelephonyManager tm = context.getSystemService(TelephonyManager.class);
-        when(tm.getSupportedModemCount()).thenReturn(1);
+        AppContext.init(mContext);
         ServiceCaps.setServiceCapabilities(SLOT0, false, false, true);
         SystemInterface.setSystemInterface(mSystemInterface);
         when(mSystemInterface.getSystem(eq(SLOT0))).thenReturn(mSystem);
@@ -80,7 +75,7 @@ public class NativeStateAgentTest {
         DcFactory.setDcAgent(IDcNetWatcher.class, mDcNetWatcher, SLOT0);
 
         mNativeStateAgent = new NativeStateAgent(SLOT0, mTestableLooper.getLooper());
-        mNativeStateAgent.init(context);
+        mNativeStateAgent.init(mContext);
         mNativeStateAgent.addListener(mNativeStateListener);
     }
 
@@ -102,7 +97,7 @@ public class NativeStateAgentTest {
         mSystem = null;
         mSystemInterface = null;
         mNativeStateListener = null;
-        mContextFixture = null;
+        mContext = null;
         AppContext.deinit();
         ServiceCaps.clear();
     }

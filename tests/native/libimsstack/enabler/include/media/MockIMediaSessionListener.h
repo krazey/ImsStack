@@ -19,14 +19,14 @@
 
 #include <gmock/gmock.h>
 
-#include "ImsTypeDef.h"
+#include "IJniMedia.h"
 #include "IMediaSessionListener.h"
 
 class FakeIMediaSessionListener : public IMediaSessionListener
 {
 public:
     FakeIMediaSessionListener() {}
-    virtual ~FakeIMediaSessionListener() {}
+    virtual ~FakeIMediaSessionListener() override {}
 
     IMS_BOOL MediaSession_SendMsgToMediaManager(
             IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam) override
@@ -39,29 +39,26 @@ public:
         switch (eEvent)
         {
             case IJniMedia::REQUEST_OPEN_SESSION:
-                delete static_cast<ImsMediaMsgOpenConfigParam*>(pParam);
-                break;
             case IJniMedia::REQUEST_MODIFY_SESSION:
-                delete static_cast<ImsMediaMsgConfigParam*>(pParam);
-                break;
             case IJniMedia::REQUEST_CLOSE_SESSION:
-                delete pParam;
-                break;
             case IJniMedia::REQUEST_ADD_CONFIG:
             case IJniMedia::REQUEST_DELETE_CONFIG:
             case IJniMedia::REQUEST_CONFIRM_CONFIG:
-                delete static_cast<ImsMediaMsgConfigParam*>(pParam);
-                break;
             case IJniMedia::REQUEST_SEND_DTMF:
-                delete static_cast<ImsMediaMsgDtmfParam*>(pParam);
-                break;
             case IJniMedia::REQUEST_SET_MEDIA_QUALITY:
-                delete static_cast<ImsMediaMsgSetMediaQualityParam*>(pParam);
+                delete pParam;
                 break;
             default:
                 break;
         }
 
+        return IMS_TRUE;
+    }
+
+    IMS_BOOL MediaSession_NotifyToClient(IN IMS_UINT32 /* eReportType */,
+            IN MEDIA_CONTENT_TYPE /* eMediaType */,
+            IN MEDIA_TRANSPORT_PROTOCOL /* eMediaProtocolType */) override
+    {
         return IMS_TRUE;
     }
 };
@@ -70,10 +67,14 @@ class MockIMediaSessionListener : public IMediaSessionListener
 {
 public:
     MockIMediaSessionListener() { m_pFake = IMS_NULL; }
-    virtual ~MockIMediaSessionListener() {}
+    virtual ~MockIMediaSessionListener() override {}
 
     MOCK_METHOD(IMS_BOOL, MediaSession_SendMsgToMediaManager,
             (IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam), (override));
+    MOCK_METHOD(IMS_BOOL, MediaSession_NotifyToClient,
+            (IN IMS_UINT32 eReportType, IN MEDIA_CONTENT_TYPE eMediaType,
+                    IN MEDIA_TRANSPORT_PROTOCOL eMediaProtocolType),
+            (override));
 
     void DelegateToFake()
     {

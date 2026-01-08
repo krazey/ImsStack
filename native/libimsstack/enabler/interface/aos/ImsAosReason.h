@@ -34,20 +34,18 @@ public:
         /// Indicate that there is no reason.
         NONE = 0,
 
-        /// Indicate that service is out-of-service.
-        OUT_OF_SERVICE = 10000,  // SRV_OUT
-                                 /// Indicate that power is down.
-        POWER_OFF,
-        /// Indicate that the current RAT is not supported in IMS services. e.g.) not LTE/NR/WLAN
-        NO_RAT_COVERAGE,  // NO_LTE_COVERAGE
-                          /// Indicate that IMS services are not available based on network feature
-                          /// or something
+        /// Indicate that power is down.
+        POWER_OFF = 10000,
+        /// Indicate that airplane mode is on.
+        AIRPLANE_MODE,
+        /// Indicate that wifi is off.
+        WIFI_OFF,
+        /// Indicate that IMS services are not available based on network feature or something.
         SERVICE_POLICY,
-        /// Indicate that service is blocked temporarily. After IMS call is terminated,
-        /// the initial registration is tried.
-        SERVICE_BLOCKED,
         /// Indicate that data connection is disconnected.
         DATA_DISCONNECTED,
+        /// Indicate that the data connection is rejected permanently.
+        DATA_PERMANENTLY_FAILED,
         /// Indicate that registration is terminated with the specific causes.
         /// Indicate that the initial registration is tried soon.
         REG_TERMINATED,
@@ -56,7 +54,12 @@ public:
         /// Indicate that registration is terminating.
         /// So services may send a BYE message to terminate the session if there is on a session.
         REG_TERMINATING,
-
+        /// Indicate that registration is failed for all pcscfs.
+        REG_ALL_PCSCF_FAILED,
+        /// Indicate that IP changed during registration.
+        IP_CHANGED,
+        /// Indicate that the network attach is rejected because the UICC is invalid.
+        NETWORK_ATTACH_REJECTED,
         NOT_SPECIFIED
     };
 

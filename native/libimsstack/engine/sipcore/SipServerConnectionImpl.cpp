@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
+#include "ServiceTrace.h"
 
 #include "ISipErrorListener.h"
+#include "SipDialog.h"
 #include "SipDialogImpl.h"
+#include "SipError.h"
 #include "SipPrivate.h"
 #include "SipServerConnection.h"
 #include "SipServerConnectionImpl.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipServerConnectionImpl::SipServerConnectionImpl(IN SipServerConnection* pSsc) :
@@ -31,7 +34,7 @@ SipServerConnectionImpl::SipServerConnectionImpl(IN SipServerConnection* pSsc) :
 {
     m_pSsc->SetErrorListener(this);
 
-    SipDialog* pDialog = m_pSsc->GetDialog();
+    const SipDialog* pDialog = m_pSsc->GetDialog();
 
     if (pDialog != IMS_NULL)
     {
@@ -154,6 +157,11 @@ PRIVATE VIRTUAL ISipMessage* SipServerConnectionImpl::GetMessage() const
 PRIVATE VIRTUAL IMS_SINT32 SipServerConnectionImpl::GetSlotId() const
 {
     return m_pSsc->GetSlotId();
+}
+
+PRIVATE VIRTUAL SipProfile* SipServerConnectionImpl::GetSipProfile() const
+{
+    return m_pSsc->GetSipProfile();
 }
 
 PRIVATE VIRTUAL void SipServerConnectionImpl::SetSipProfile(IN SipProfile* pProfile)

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-#include "text/TextController.h"
 #include "ServiceTrace.h"
+#include "text/TextController.h"
 #include "text/TextProfile.h"
+#include "text/TextSession.h"
 
-__IMS_TRACE_TAG_USER_DECL__("MED.TC");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC
 TextController::TextController() :
@@ -30,10 +31,10 @@ TextController::TextController() :
 PUBLIC
 TextController::~TextController()
 {
-    if (m_pSession != NULL)
+    if (m_pSession != IMS_NULL)
     {
         delete m_pSession;
-        m_pSession = NULL;
+        m_pSession = IMS_NULL;
     }
 }
 
@@ -42,19 +43,19 @@ IMS_BOOL TextController::CreateSession(IMediaSessionListener* pListener, TextCon
 {
     if (pListener == IMS_NULL || pConfig == IMS_NULL)
     {
+        IMS_TRACE_E(0, "CreateSession() - invalid", 0, 0, 0);
         return IMS_FALSE;
     }
 
     if (m_pSession == IMS_NULL)
     {
         IMS_TRACE_D("CreateSession()", 0, 0, 0);
-        m_pSession = new TextMediaSession();
+        m_pSession = new TextSession();
         m_pSession->SetMediaSessionListener(pListener);
-        m_pSession->SetConfig(pConfig);
-        return IMS_TRUE;
+        m_pSession->SetConfiguration(pConfig);
     }
 
-    return IMS_FALSE;
+    return IMS_TRUE;
 }
 
 PUBLIC
@@ -64,9 +65,9 @@ IMS_BOOL TextController::OpenSession()
     {
         IMS_TRACE_D("OpenSession() - state[%d]", m_pSession->GetState(), 0, 0);
 
-        if (m_pSession->GetState() == TextMediaSession::STATE_NONE)
+        if (m_pSession->GetState() == TextSession::STATE_NONE)
         {
-            m_pSession->UpdateLocalEndPoint(m_objLocalAddr, m_nPort);
+            m_pSession->SetLocalEndPoint(m_objLocalAddr, m_nPort);
 
             if (m_nPort > 0)
             {
@@ -85,10 +86,13 @@ IMS_BOOL TextController::OpenSession()
 PUBLIC
 IMS_BOOL TextController::UpdateSession()
 {
-    IMS_TRACE_D("UpdateSession()", 0, 0, 0);
-
-    if (m_pSession != IMS_NULL)
+    if (m_pSession != IMS_NULL && m_pSession->GetState() != TextSession::STATE_NONE)
     {
+        if (m_pSession->GetRemotePort() < 0)
+        {
+            return IMS_FALSE;
+        }
+
         if (m_pSession->GetRemotePort() == 0 || m_pSession->GetLocalPort() == 0)
         {
             return CloseSession();
@@ -100,17 +104,18 @@ IMS_BOOL TextController::UpdateSession()
         }
     }
 
+    IMS_TRACE_E(0, "UpdateSession() - invalid", 0, 0, 0);
     return IMS_FALSE;
 }
 
 PUBLIC
 IMS_BOOL TextController::CloseSession()
 {
-    IMS_TRACE_D("CloseSession()", 0, 0, 0);
-
     if (m_pSession != IMS_NULL)
     {
-        if (m_pSession->GetState() != TextMediaSession::STATE_NONE)
+        IMS_TRACE_D("CloseSession() - state[%d]", m_pSession->GetState(), 0, 0);
+
+        if (m_pSession->GetState() != TextSession::STATE_NONE)
         {
             m_pSession->Close();
         }
@@ -124,12 +129,11 @@ IMS_BOOL TextController::CloseSession()
 }
 
 PROTECTED
-IMS_BOOL TextController::UpdateLocalAddress(IN TextNego* pNego)
+IMS_BOOL TextController::UpdateLocalAddress(IN std::shared_ptr<TextNego> pNego)
 {
-    IMS_TRACE_I("UpdateLocalAddress()", 0, 0, 0);
-
     if (pNego == IMS_NULL)
     {
+        IMS_TRACE_E(0, "UpdateLocalAddress() - invalid", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -139,53 +143,58 @@ IMS_BOOL TextController::UpdateLocalAddress(IN TextNego* pNego)
 }
 
 PUBLIC
-IMS_BOOL TextController::UpdateRtpConfig(IN TextNego* pNego)
+IMS_BOOL TextController::UpdateRtpConfig(IN std::shared_ptr<TextNego> pNego)
 {
-    IMS_TRACE_I("UpdateRtpConfig()", 0, 0, 0);
-
     if (pNego == IMS_NULL)
     {
+        IMS_TRACE_E(0, "UpdateRtpConfig() - invalid", 0, 0, 0);
         return IMS_FALSE;
     }
 
     if (m_pSession != IMS_NULL)
     {
-        return m_pSession->UpdateRtpConfig(pNego->GetNegotiatedLocalProfile(),
-                pNego->GetNegotiatedPeerProfile(), pNego->GetNegotiatedNegoProfile());
+        return m_pSession->UpdateRtpConfig(
+                static_cast<TextProfile*>(pNego->GetNegotiatedLocalProfile()),
+                static_cast<TextProfile*>(pNego->GetNegotiatedPeerProfile()),
+                static_cast<TextProfile*>(pNego->GetNegotiatedNegoProfile()));
     }
 
     return IMS_FALSE;
 }
 
 PUBLIC
-void TextController::UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork)
+IMS_BOOL TextController::UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork)
 {
     IMS_TRACE_I("UpdateAccessNetwork() - accessNetwork[%d]", nAccessNetwork, 0, 0);
 
     if (m_pSession != IMS_NULL)
     {
-        m_pSession->UpdateAccessNetwork(nAccessNetwork);
+        m_pSession->SetAccessNetwork(nAccessNetwork);
+        return IMS_TRUE;
     }
+
+    return IMS_FALSE;
 }
 
 PUBLIC
-IMS_BOOL TextController::UpdateQualityThreshold(IN TextNego* pNego)
+IMS_BOOL TextController::ApplyQualityThreshold()
 {
-    IMS_TRACE_I("UpdateQualityThreshold()", 0, 0, 0);
-
-    if (m_pSession == IMS_NULL || pNego == IMS_NULL)
+    if (m_pSession == IMS_NULL)
     {
+        IMS_TRACE_E(0, "ApplyQualityThreshold() - invalid", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    TextProfile* pPeerProfile = pNego->GetNegotiatedPeerProfile();
-    IMS_BOOL bEnableRtcp = IMS_TRUE;
+    return m_pSession->UpdateMediaQualityThreshold();
+}
 
-    if (pPeerProfile != IMS_NULL && pPeerProfile->nBandwidthRs == 0 &&
-            pPeerProfile->nBandwidthRr == 0)
+PUBLIC
+IMS_BOOL TextController::IsSessionOpened()
+{
+    if (m_pSession != IMS_NULL && m_pSession->GetState() != TextSession::STATE_NONE)
     {
-        bEnableRtcp = IMS_FALSE;
+        return IMS_TRUE;
     }
 
-    return m_pSession->UpdateMediaQualityThreshold(IMS_TRUE, bEnableRtcp);
+    return IMS_FALSE;
 }

@@ -16,11 +16,11 @@
 #ifndef SERVICE_IMS_RADIO_H_
 #define SERVICE_IMS_RADIO_H_
 
-#include "IImsRadio.h"
-#include "IImsTraffic.h"
-#include "ImsMessage.h"
 #include "PlatformService.h"
 
+class IImsRadio;
+class IImsTraffic;
+class ImsMessage;
 class ImsRadioServicePrivate;
 
 class ImsRadioService : public PlatformService
@@ -31,7 +31,7 @@ public:
     ImsRadioService& operator=(IN const ImsRadioService&) = delete;
 
 protected:
-    virtual ~ImsRadioService();
+    ~ImsRadioService() override;
 
 public:
     virtual IImsRadio* GetImsRadio(IN IMS_SINT32 nSlotId);

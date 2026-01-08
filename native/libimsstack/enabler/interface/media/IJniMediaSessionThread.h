@@ -18,12 +18,20 @@
 
 #include "BaseServiceThread.h"
 #include "IJniEnablerThread.h"
-#include "IJniMedia.h"
+
+class ImsMediaMsgAnbrNegotiationParam;
+class ImsMediaMsgConfigParam;
+class ImsMediaMsgDtmfParam;
+class ImsMediaMsgOpenConfigParam;
+class ImsMediaMsgParamBase;
+class ImsMediaMsgQosParam;
+class ImsMediaMsgSetMediaQualityParam;
+class ImsMediaMsgRtpReceptionStatsParam;
 
 class IJniMediaSessionThread : public IJniEnablerThread
 {
 public:
-    virtual ~IJniMediaSessionThread() {}
+    virtual ~IJniMediaSessionThread() override = default;
 
     /**
      * @brief Called to request open session to each media session
@@ -98,6 +106,14 @@ public:
     virtual IMS_BOOL OnRequestQos(IN ImsMediaMsgQosParam* pParam);
 
     /**
+     * @brief Called to notify the Anbr negotiation result
+     *
+     * @param pParam the Anbr negotiation result
+     * @return IMS_BOOL Returns false when the parameter is invalid
+     */
+    virtual IMS_BOOL OnRequestUpdateAnbrEnabledConfig(IN ImsMediaMsgAnbrNegotiationParam* pParam);
+
+    /**
      * @brief Called to inform the preview surface is ready
      */
     virtual void OnSetPreviewSurface();
@@ -106,6 +122,14 @@ public:
      * @brief Called to inform the display surface is ready
      */
     virtual void OnSetDisplaySurface();
+
+    /**
+     * @brief Called to request rtp reception stats for the av sync
+     *
+     * @param pParam The parameter set for requestRtpReceptionStats
+     * @return IMS_BOOL Returns false when the parameter is invalid
+     */
+    virtual IMS_BOOL OnRequestRtpReceptionStats(IN ImsMediaMsgRtpReceptionStatsParam* pParam);
 };
 
 #endif

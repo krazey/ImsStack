@@ -18,17 +18,13 @@
 
 #include <gmock/gmock.h>
 
-#include "AStringArray.h"
-#include "IIpcan.h"
 #include "INetworkConnection.h"
-#include "INetworkPing.h"
-#include "IpAddress.h"
 
 class MockINetworkConnection : public INetworkConnection
 {
 public:
-    inline MockINetworkConnection() {}
-    inline virtual ~MockINetworkConnection() {}
+    MockINetworkConnection() = default;
+    ~MockINetworkConnection() override = default;
 
     MOCK_METHOD(RESULT_ENTYPE, Activate, (IN IMS_BOOL bEnableApn), (override));
     MOCK_METHOD(RESULT_ENTYPE, Deactivate, (IN IMS_BOOL bDisableApn), (override));

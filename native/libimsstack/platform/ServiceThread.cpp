@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "IOsFactory.h"
 #include "ImsThread.h"
 #include "PlatformContext.h"
 #include "ServiceMemory.h"
@@ -73,7 +74,7 @@ void ThreadService::DestroyThread(IN IThread*& piThread)
 
     for (IMS_UINT32 i = 0; i < m_objThreads.GetSize(); ++i)
     {
-        IThread* piExThread = m_objThreads.GetAt(i);
+        const IThread* piExThread = m_objThreads.GetAt(i);
 
         if (piExThread == piThread)
         {
@@ -102,7 +103,7 @@ IMS_BOOL ThreadService::Contains(IN const IThread* piThread) const
 
     for (IMS_UINT32 i = 0; i < m_objThreads.GetSize(); ++i)
     {
-        IThread* piExThread = m_objThreads.GetAt(i);
+        const IThread* piExThread = m_objThreads.GetAt(i);
 
         IMS_ASSERT(piExThread != IMS_NULL);
 
@@ -213,7 +214,7 @@ PUBLIC GLOBAL ThreadService* ThreadService::GetThreadService()
 PUBLIC GLOBAL IMS_SINT32 ThreadService::GetCurrentSlotId(
         IN IMS_SINT32 nDefaultSlotId /* = IMS_SLOT_ANY*/)
 {
-    IThread* piThread = GetThreadService()->GetCurrentThread();
+    const IThread* piThread = GetThreadService()->GetCurrentThread();
     return (piThread != IMS_NULL) ? piThread->GetSlotId() : nDefaultSlotId;
 }
 

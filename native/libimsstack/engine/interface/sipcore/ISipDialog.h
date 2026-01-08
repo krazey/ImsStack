@@ -16,9 +16,12 @@
 #ifndef INTERFACE_SIP_DIALOG_H_
 #define INTERFACE_SIP_DIALOG_H_
 
-#include "ISipClientConnection.h"
+#include "AString.h"
+
 #include "ISipObject.h"
 
+class ISipClientConnection;
+class ISipConnection;
 class ISipHeader;
 
 /**
@@ -33,7 +36,7 @@ class ISipHeader;
 class ISipDialog : public ISipObject
 {
 protected:
-    virtual ~ISipDialog() = default;
+    ~ISipDialog() override = default;
 
 public:
     /**

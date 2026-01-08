@@ -16,9 +16,11 @@
 #ifndef INTERFACE_SIP_KEEP_ALIVE_HELPER_H_
 #define INTERFACE_SIP_KEEP_ALIVE_HELPER_H_
 
-#include "IpAddress.h"
 #include "ISipObject.h"
 #include "Sip.h"
+
+class ByteArray;
+class IpAddress;
 
 class ISipKeepAliveHelperListener;
 
@@ -28,7 +30,7 @@ class ISipKeepAliveHelperListener;
 class ISipKeepAliveHelper : public ISipObject
 {
 protected:
-    virtual ~ISipKeepAliveHelper() = default;
+    ~ISipKeepAliveHelper() override = default;
 
 public:
     /**

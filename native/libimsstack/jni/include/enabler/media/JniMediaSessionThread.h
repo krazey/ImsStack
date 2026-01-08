@@ -18,14 +18,16 @@
 #define JNI_MEDIA_SESSION_THREAD_H_
 
 #include <MediaQualityThreshold.h>
+
 #include "BaseServiceThread.h"
+#include "IJniMedia.h"
 #include "IJniMediaSessionThread.h"
 
 class JniMediaSessionThread final : public BaseServiceThread, public IJniMediaSessionThread
 {
 public:
     JniMediaSessionThread();
-    virtual ~JniMediaSessionThread();
+    ~JniMediaSessionThread() override;
     IMS_BOOL OnOpenSession(IN ImsMediaMsgOpenConfigParam* pParam) override;
     IMS_BOOL OnModifySession(IN ImsMediaMsgConfigParam* pParam) override;
     IMS_BOOL OnCloseSession(IN ImsMediaMsgParamBase* pParam) override;
@@ -35,6 +37,8 @@ public:
     IMS_BOOL OnSendDtmf(IN ImsMediaMsgDtmfParam* pParam) override;
     IMS_BOOL OnSetMediaQualityThreshold(IN ImsMediaMsgSetMediaQualityParam* pParam) override;
     IMS_BOOL OnRequestQos(IN ImsMediaMsgQosParam* pParam) override;
+    IMS_BOOL OnRequestUpdateAnbrEnabledConfig(IN ImsMediaMsgAnbrNegotiationParam* pParam) override;
+    IMS_BOOL OnRequestRtpReceptionStats(IN ImsMediaMsgRtpReceptionStatsParam* pParam) override;
     void OnSetPreviewSurface() override;
     void OnSetDisplaySurface() override;
 

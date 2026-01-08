@@ -15,6 +15,7 @@
  */
 #include "BaseServiceThread.h"
 #include "CallReasonInfo.h"
+#include "ImsList.h"
 #include "ImsProcess.h"
 #include "IuMtcCall.h"
 #include "JniCallInfo.h"
@@ -70,7 +71,7 @@ public:
     CallReasonInfo objReason;
     JniCallInfo objCallInfo;
     MediaInfo objMediaInfo;
-    ImsMap<SuppType, SuppService*> objSuppServices;
+    ImsList<SuppService*> objSuppServices;
 
 protected:
     virtual void SetUp() override {}
@@ -108,6 +109,18 @@ TEST_F(JniMtcCallThreadTest, OnStartFailed)
             .Times(1);
 
     pJniCallThread->OnStartFailed(objReason);
+}
+
+TEST_F(JniMtcCallThreadTest, OnInitiating)
+{
+    IMS_UINT32 eType = IuMtcCall::INITIATING;
+    objParcel.writeInt32(eType);
+    objParcel.setDataPosition(0);
+
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
+            .Times(1);
+
+    pJniCallThread->OnInitiating(objCallInfo, objMediaInfo);
 }
 
 TEST_F(JniMtcCallThreadTest, OnProgressing)
@@ -389,6 +402,18 @@ TEST_F(JniMtcCallThreadTest, OnInformationNotificationReceived)
 
     ImsList<ConfUser*> objUsers;
     pJniCallThread->OnInformationNotificationReceived(0, "", 0, 0);
+}
+
+TEST_F(JniMtcCallThreadTest, OnCallInfoChanged)
+{
+    IMS_UINT32 eType = IuMtcCall::CALL_INFO_CHANGED;
+    objParcel.writeInt32(eType);
+    objParcel.setDataPosition(0);
+
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
+            .Times(1);
+
+    pJniCallThread->OnCallInfoChanged(objCallInfo);
 }
 
 }  // namespace android

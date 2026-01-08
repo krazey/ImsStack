@@ -29,20 +29,21 @@ public:
     virtual void Out(IN const IMS_CHAR* pszFormat, ...) = 0;
 
     virtual void Out(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule,
-            IN const IMS_CHAR* pszFormat, ...) = 0;
+            IN const IMS_CHAR* pszFile, IN IMS_UINT32 nLine, IN const IMS_CHAR* pszFormat, ...) = 0;
 
-    virtual void OutE(IN IMS_SINT32 nErrorCode, IN const IMS_CHAR* pszFunction, IN IMS_UINT16 nLine,
-            IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule, IN const IMS_CHAR* pszFormat,
-            ...) = 0;
+    virtual void OutE(IN IMS_SINT32 nErrorCode, IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule,
+            IN const IMS_CHAR* pszFile, IN const IMS_CHAR* pszFunc, IN IMS_UINT32 nLine,
+            IN const IMS_CHAR* pszFormat, ...) = 0;
 
     //// For C-style adaptation (ex. protocol stacks, ...)
     virtual void OutV(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule,
-            IN const IMS_CHAR* pszFormat, IN va_list args) = 0;
+            IN const IMS_CHAR* pszFile, IN IMS_UINT32 nLine, IN const IMS_CHAR* pszFormat,
+            IN va_list args) = 0;
 
-    //// For a large TEXT message (HTTP, MSRP, SDP, SIP, XML, ...)
+    //// For a large TEXT message (SDP, SIP, XML, ...)
     virtual void OutText(IN IMS_UINT32 nModule, IN IMS_SINT32 nType,
-            IN const IMS_CHAR* pszDescription, IN const IMS_CHAR* pszText, IN IMS_UINT32 nTextSize,
-            IN IMS_BOOL bBinaryBody = IMS_FALSE) = 0;
+            IN const IMS_CHAR* pszDescription, IN const IMS_CHAR* pszText,
+            IN IMS_UINT32 nTextSize) = 0;
 
     //// For checking Trace-enabed
     virtual IMS_BOOL IsTraceEnabled(IN IMS_SINT32 nCategory, IN IMS_UINT32 nModule) = 0;

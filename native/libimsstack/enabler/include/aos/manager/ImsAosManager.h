@@ -30,7 +30,7 @@ class ImsAosManager : public ImsApp
 {
 public:
     explicit ImsAosManager(IN const AString& strAppName);
-    virtual ~ImsAosManager();
+    ~ImsAosManager() override;
 
     /// Implement child class
     virtual IImsAos* GetImsAos(IN const AString& strAppId, IN const AString& strServiceId);
@@ -39,9 +39,9 @@ public:
     virtual ImsList<IImsAos*> GetImsAosList(IN const AString& strAppId);
 
     /// ImsApp Class
-    virtual IMS_BOOL OnPreprocess(IN IMSMSG& objMSG);
-    virtual IMS_BOOL OnMessage(IN IMSMSG& objMSG);
-    virtual IMS_BOOL OnPostprocess(IN IMSMSG& objMSG);
+    IMS_BOOL OnPreprocess(IN IMSMSG& objMSG) override;
+    IMS_BOOL OnMessage(IN IMSMSG& objMSG) override;
+    IMS_BOOL OnPostprocess(IN IMSMSG& objMSG) override;
 };
 
 #endif  // IMS_AOS_MANAGER_H_

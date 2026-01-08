@@ -19,6 +19,7 @@ package com.android.imsstack.enabler.media;
 import android.os.Parcel;
 import android.telephony.imsmedia.ImsMediaManager;
 import android.telephony.imsmedia.ImsMediaSession;
+import android.telephony.imsmedia.RtpReceptionStats;
 
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.IMtcMediaInterface;
@@ -38,13 +39,14 @@ public class MediaSession implements IMediaConnectionObserver {
     private TextSessionHandler mTextSessionHandler;
     private final MediaListener mMediaListener;
     private final MediaManagerHelper mMediaManager;
+    private AudioVideoSync mAvSync;
 
     /**
      * Called by the ImsMediaManagerCallback when the ImsMedia service is connected.
      */
     @Override
     public void onMediaConnected() {
-        ImsLog.v("handle ImsMedia Connected");
+        ImsLog.d("handle ImsMedia Connected");
     }
 
     /**
@@ -52,7 +54,7 @@ public class MediaSession implements IMediaConnectionObserver {
      */
     @Override
     public void onMediaDisconnected() {
-        ImsLog.v("Handle ImsMedia disconnection");
+        ImsLog.d("Handle ImsMedia disconnection");
         if (mAudioSessionHandler != null) {
             mAudioSessionHandler.onImsMediaAudioMessage(MediaConstants.NOTIFY_MEDIA_DETACH, null);
         }
@@ -67,13 +69,53 @@ public class MediaSession implements IMediaConnectionObserver {
     }
 
     public MediaSession(IBaseContext context, MtcMediaSession mtcMediaSession) {
-        ImsLog.v("MediaSession created");
+        ImsLog.d("MediaSession created");
         mContext = context;
         mMtcMediaSession = mtcMediaSession;
         mMediaManager = new MediaManagerHelper(this);
         createAudioSession();
         mMediaListener = new MediaListener();
         setMtcMediaListener(mtcMediaSession);
+        mAvSync = null;
+    }
+
+    /**
+     * Set the RtpReceptionStats from the ImsMedia to AudioVideoSync to compare the delay for the AV
+     * synchronization
+     *
+     * @param type The media type of the session
+     * @param stats The RtpReceptionStats of the session
+     */
+    public void notifyRtpReceptionStats(int type, RtpReceptionStats stats) {
+        if (mAvSync != null) {
+            switch (type) {
+                default:
+                    break;
+                case ImsMediaSession.SESSION_TYPE_AUDIO:
+                    mAvSync.setAudioClockRate(mAudioSessionHandler.getSamplingRateKHz());
+                    mAvSync.setAudioStats(stats);
+                    break;
+                case ImsMediaSession.SESSION_TYPE_VIDEO:
+                    mAvSync.setVideoClockRate(mVideoSessionHandler.getSamplingRateKHz());
+                    mAvSync.setVideoStats(stats);
+                    adjustDelay(ImsMediaSession.SESSION_TYPE_VIDEO, mAvSync.getVideoDelay());
+                    break;
+            }
+        }
+    }
+
+    /**
+     * request Video call data usage to the ImsMedia
+     */
+
+    public void requestCallDataUsage() {
+        ImsLog.v("requestCallDataUsage");
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(MediaConstants.REQUEST_VIDEO_DATA_USAGE);
+        parcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
+        parcel.setDataPosition(0);
+        mMediaListener.onMediaMessage(parcel);
     }
 
     @VisibleForTesting
@@ -81,11 +123,11 @@ public class MediaSession implements IMediaConnectionObserver {
             ImsMediaManager imsMediaManager, Executor executor) {
         mContext = context;
         mMtcMediaSession = mtcMediaSession;
-        mMediaManager = new MediaManagerHelper(context.getContext(), this,
-                imsMediaManager, executor);
+        mMediaManager =
+                new MediaManagerHelper(context.getContext(), this, imsMediaManager, executor);
         mMediaListener = new MediaListener();
         setMtcMediaListener(mtcMediaSession);
-        ImsLog.v("MediaSession created");
+        ImsLog.d("MediaSession created");
     }
 
     @VisibleForTesting
@@ -104,8 +146,18 @@ public class MediaSession implements IMediaConnectionObserver {
     }
 
     @VisibleForTesting
+    AudioSessionHandler getAudioSessionHandler() {
+        return mAudioSessionHandler;
+    }
+
+    @VisibleForTesting
     void setVideoSessionHandler(VideoSessionHandler videoSessionHandler) {
         mVideoSessionHandler = videoSessionHandler;
+    }
+
+    @VisibleForTesting
+    VideoSessionHandler getVideoSessionHandler() {
+        return mVideoSessionHandler;
     }
 
     @VisibleForTesting
@@ -113,10 +165,20 @@ public class MediaSession implements IMediaConnectionObserver {
         mTextSessionHandler = textSessionHandler;
     }
 
+    @VisibleForTesting
+    TextSessionHandler getTextSessionHandler() {
+        return mTextSessionHandler;
+    }
+
+    @VisibleForTesting
+    void setAvSync(AudioVideoSync avSync) {
+        mAvSync = avSync;
+    }
+
     private void createAudioSession() {
         if (mAudioSessionHandler == null) {
-            mAudioSessionHandler = new AudioSessionHandler(mContext, mMediaManager,
-                    mMtcMediaSession);
+            mAudioSessionHandler =
+                    new AudioSessionHandler(mContext, mMediaManager, mMtcMediaSession);
         }
     }
 
@@ -125,12 +187,15 @@ public class MediaSession implements IMediaConnectionObserver {
             mVideoSessionHandler = new VideoSessionHandler(mContext, mMediaManager,
                     mMtcMediaSession, mMtcMediaSession);
         }
+        if (mAvSync == null) {
+            mAvSync = new AudioVideoSync();
+        }
     }
 
     private void createTextSession() {
         if (mTextSessionHandler == null) {
-            mTextSessionHandler = new TextSessionHandler(mContext, mMediaManager,
-                    mMtcMediaSession);
+            mTextSessionHandler =
+                    new TextSessionHandler(mContext, mMediaManager, mMtcMediaSession);
         }
     }
 
@@ -140,13 +205,22 @@ public class MediaSession implements IMediaConnectionObserver {
         }
     }
 
+    private void adjustDelay(int type, int delay) {
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(MediaConstants.REQUEST_ADJUST_DELAY);
+        parcel.writeInt(type);
+        parcel.writeInt(delay);
+        parcel.setDataPosition(0);
+        mMediaListener.onMediaMessage(parcel);
+    }
+
     private class MediaListener implements IMediaListener {
 
         @Override
         public void onMediaMessage(Parcel parcel) {
             final int requestType = parcel.readInt();
             final int sessionType = parcel.readInt();
-            ImsLog.v("requestType=" + requestType + ", sessionType=" + sessionType);
+            ImsLog.d("requestType=" + requestType + ", sessionType=" + sessionType);
 
             switch (sessionType) {
                 case ImsMediaSession.SESSION_TYPE_AUDIO: {

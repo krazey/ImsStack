@@ -35,6 +35,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * Provides APIs for keeping, tracking calls.
  */
 public final class MtcCallManager implements ICallStateTracker, IMtcCallManager {
+    private static final int MAX_CALL_INDEX = 1000;
+    private static int sNextCallIndex = 1;
     private final IBaseContext mContext;
     private CallStateNotifier mCallStateNotifier = new CallStateNotifier();
     private List<CallNode> mCallNodes = new ArrayList<CallNode>();
@@ -213,26 +215,11 @@ public final class MtcCallManager implements ICallStateTracker, IMtcCallManager 
     }
 
     @Override
-    public synchronized int getVacantCallIndex() {
-        List<Call> allCalls = getAllCalls();
-
-        int index = 1;
-
-        while (true) {
-            boolean indexExist = false;
-            for (Call call : allCalls) {
-                if (call.getCallIndex() == index) {
-                    indexExist = true;
-                    break;
-                }
-            }
-            if (indexExist == false) {
-                break;
-            }
-            index++;
+    public synchronized int getNextCallIndex() {
+        if (sNextCallIndex >= MAX_CALL_INDEX) {
+            sNextCallIndex = 1;
         }
-
-        return index;
+        return sNextCallIndex++;
     }
 
     private void doCallStateChanged() {
@@ -566,7 +553,8 @@ public final class MtcCallManager implements ICallStateTracker, IMtcCallManager 
                 ? serviceRecord.getRegistrationTracker() : null;
 
         if ((regTracker != null) && (regTracker.isCallRegistered())) {
-            int regNetworkType = regTracker.getRegisteredNetworkType();
+            IAosRegistrationListener.NetworkType regNetworkType =
+                    regTracker.getRegisteredNetworkType();
 
             if (regNetworkType == IAosRegistrationListener.NetworkType.IWLAN) {
                 isNetworkTypeWifi = true;

@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "IOsFactory.h"
+#include "ImsMessage.h"
 #include "ImsTimer.h"
 #include "PlatformContext.h"
 #include "ServiceMemory.h"
@@ -60,7 +62,7 @@ void TimerService::DestroyTimer(IN ITimer*& piTimer, IN IMS_BOOL bOnOwnerThread 
 
     for (IMS_UINT32 i = 0; i < m_objTimers.GetSize(); ++i)
     {
-        ITimer* piExTimer = m_objTimers.GetAt(i);
+        const ITimer* piExTimer = m_objTimers.GetAt(i);
 
         if (piExTimer == IMS_NULL)
         {
@@ -89,7 +91,7 @@ void TimerService::DestroyTimer(IN ITimer*& piTimer, IN IMS_BOOL bOnOwnerThread 
 }
 
 PUBLIC
-void TimerService::DispatchServiceMessage(IN ImsMessage& objMsg)
+void TimerService::DispatchServiceMessage(IN const ImsMessage& objMsg)
 {
     // FIX_TIMING_ISSUE: same timer id issue
     // If the internal timer id is MSG_PARAM_DESTROY,

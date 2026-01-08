@@ -19,9 +19,9 @@ import android.content.Context;
 import android.os.Handler;
 import android.util.SparseArray;
 
-import com.android.imsstack.util.AppContext;
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.DeviceConfig;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
 
 import java.util.Map;
 import java.util.Set;
@@ -56,7 +56,7 @@ public class ImsTrafficAgent implements ImsTrafficInterface {
             new CopyOnWriteArraySet<PriorityListener>();
 
     public ImsTrafficAgent() {
-        int supportedSimCount = MSimUtils.getSupportedSimCount();
+        int supportedSimCount = DeviceConfig.getSupportedSimCount();
         mTraffics = new SparseArray<>(supportedSimCount);
 
         for (int i = 0; i < supportedSimCount; i++) {
@@ -78,18 +78,22 @@ public class ImsTrafficAgent implements ImsTrafficInterface {
     @Override
     public boolean isAllowed(int trafficType, int slotId) {
         synchronized (mTraffics) {
+            if (isSimultaneousCallingSupported(slotId)) {
+                return true;
+            }
+
             if (isEmergency(slotId)) {
-                ImsLog.d(slotId, "emergency is ongoing");
+                ImsLog.d(this, slotId, "emergency is ongoing");
                 return true;
             }
 
             if (isEmergencyInOtherSlot(slotId)) {
-                ImsLog.d(slotId, "emergency is ongoing in other slot");
+                ImsLog.d(this, slotId, "emergency is ongoing in other slot");
                 return false;
             }
 
             if (isWlan(slotId) || isWlanInOtherSlot(slotId)) {
-                ImsLog.d(slotId, "wlan is enabled");
+                ImsLog.d(this, slotId, "wlan is enabled");
                 return true;
             }
 
@@ -97,8 +101,8 @@ public class ImsTrafficAgent implements ImsTrafficInterface {
                 return true;
             }
 
-            if (hasHighPriorityInOtherSlot(slotId, getPriorityType(trafficType))) {
-                ImsLog.d(slotId, "priority is low");
+            if (hasHighPriorityInOtherSlot(getPriorityType(trafficType), slotId)) {
+                ImsLog.d(this, slotId, "priority is low");
                 return false;
             }
         }
@@ -108,7 +112,7 @@ public class ImsTrafficAgent implements ImsTrafficInterface {
 
     @Override
     public void setTrafficPriority(int priorityType, int slotId) {
-        ImsLog.d(slotId, "type=" + PRIORITY_TYPE_TO_STRING.get(priorityType));
+        ImsLog.d(this, slotId, "type=" + PRIORITY_TYPE_TO_STRING.get(priorityType));
 
         synchronized (mTraffics) {
             Traffic traffic = mTraffics.get(slotId);
@@ -120,8 +124,20 @@ public class ImsTrafficAgent implements ImsTrafficInterface {
     }
 
     @Override
+    public void setSimultaneousCallingSupported(boolean supported, int slotId) {
+        ImsLog.d(this, slotId, "setSimultaneousCallingSupported=" + supported);
+
+        synchronized (mTraffics) {
+            Traffic traffic = mTraffics.get(slotId);
+            if (traffic != null) {
+                traffic.setSimultaneousCallingSupported(supported);
+            }
+        }
+    }
+
+    @Override
     public void setWlan(boolean enabled, int slotId) {
-        ImsLog.d(slotId, "enable=" + enabled);
+        ImsLog.d(this, slotId, "setWlan: enable=" + enabled);
 
         synchronized (mTraffics) {
             Traffic traffic = mTraffics.get(slotId);
@@ -210,6 +226,11 @@ public class ImsTrafficAgent implements ImsTrafficInterface {
         return true;
     }
 
+    private boolean isSimultaneousCallingSupported(int slotId) {
+        Traffic traffic = mTraffics.get(slotId);
+        return (traffic != null) ? traffic.isSimultaneousCallingSupported() : false;
+    }
+
     private boolean isWlan(int slotId) {
         Traffic traffic = mTraffics.get(slotId);
         return (traffic != null) ? traffic.isWlan() : false;
@@ -255,9 +276,10 @@ public class ImsTrafficAgent implements ImsTrafficInterface {
     /**
      * This class provides the top priority type of the IMS traffic for a specified slot.
      */
-    private final class Traffic {
+    private static final class Traffic {
         private int mPriorityType = TRAFFIC_PRIORITY_NONE;
         private boolean mWlan = false;
+        private boolean mIsSimultaneousCallingSupported = false;
 
         Traffic() {
         }
@@ -271,12 +293,20 @@ public class ImsTrafficAgent implements ImsTrafficInterface {
                     || mPriorityType == TRAFFIC_PRIORITY_EMERGENCY_SMS);
         }
 
+        public boolean isSimultaneousCallingSupported() {
+            return mIsSimultaneousCallingSupported;
+        }
+
         public boolean isWlan() {
             return mWlan;
         }
 
         public void setPriorityType(int type) {
             mPriorityType = type;
+        }
+
+        public void setSimultaneousCallingSupported(boolean supported) {
+            mIsSimultaneousCallingSupported = supported;
         }
 
         public void setWlan(boolean enabled) {

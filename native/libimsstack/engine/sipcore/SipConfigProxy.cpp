@@ -18,6 +18,7 @@
 #include "private/SipConfig.h"
 
 #include "SipConfigProxy.h"
+#include "SipProfile.h"
 
 PUBLIC GLOBAL IMS_SINT32 SipConfigProxy::GetDeviceId(
         IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile /* = IMS_NULL*/)
@@ -172,6 +173,12 @@ PUBLIC GLOBAL const AStringArray& SipConfigProxy::GetRegAllowMethods(
     return pSipConfig->GetRegAllowMethods();
 }
 
+PUBLIC GLOBAL IMS_SINT32 SipConfigProxy::GetRegContactUserInfoPart(IN IMS_SINT32 nSlotId)
+{
+    const SipConfig* pSipConfig = ConfigurationManager::GetInstance()->GetSipConfig(nSlotId);
+    return pSipConfig->GetRegContactUserInfoPart();
+}
+
 PUBLIC GLOBAL IMS_SINT32 SipConfigProxy::GetRegExpires(
         IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile /* = IMS_NULL*/)
 {
@@ -284,8 +291,6 @@ PUBLIC GLOBAL const ISipConfigV* SipConfigProxy::GetSipConfigV(IN IMS_SINT32 nSl
 }
 
 // SIP_FEATURES {
-// FIXME: If the SIP features in SipProfile is zero, how to handle it?
-// Do we need to check the default configuration??
 PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsAuthenticationAlgorithmRequired(
         IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile /* = IMS_NULL*/)
 {
@@ -446,20 +451,16 @@ PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsKeepAliveConfigured(
     return pSipConfig->IsKeepAliveConfigured();
 }
 
-PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsMultipleRegConfigured(
-        IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile /* = IMS_NULL*/)
+PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsMultipleRegConfigured(IN IMS_SINT32 nSlotId)
 {
-    if (pProfile != IMS_NULL)
-    {
-        if (pProfile->IsSipFeatureProvisioned())
-        {
-            return pProfile->IsMultipleRegConfigured();
-        }
-    }
-
     const SipConfig* pSipConfig = ConfigurationManager::GetInstance()->GetSipConfig(nSlotId);
-
     return pSipConfig->IsMultipleRegConfigured();
+}
+
+PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsRegIdParameterConfigured(IN IMS_SINT32 nSlotId)
+{
+    const SipConfig* pSipConfig = ConfigurationManager::GetInstance()->GetSipConfig(nSlotId);
+    return pSipConfig->IsRegIdParameterConfigured();
 }
 
 PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsNoAcceptContactHeaderInBye(
@@ -686,6 +687,22 @@ PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsSipInstanceParamRequiredInContactForNon
     return pSipConfig->IsSipInstanceParamRequiredInContactForNonRegisterRequest();
 }
 
+PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsUdpTransportParameterIgnoredForOutgoingRequest(
+        IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile /* = IMS_NULL*/)
+{
+    if (pProfile != IMS_NULL)
+    {
+        if (pProfile->IsSipFeatureProvisioned())
+        {
+            return pProfile->IsUdpTransportParameterIgnoredForOutgoingRequest();
+        }
+    }
+
+    const SipConfig* pSipConfig = ConfigurationManager::GetInstance()->GetSipConfig(nSlotId);
+
+    return pSipConfig->IsUdpTransportParameterIgnoredForOutgoingRequest();
+}
+
 PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsSessionIdHeaderSupported(
         IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile /* = IMS_NULL*/)
 {
@@ -702,20 +719,19 @@ PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsSessionIdHeaderSupported(
     return pSipConfig->IsSessionIdHeaderSupported();
 }
 
-PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsMacAddressHiddenInPaniHeader(
+PUBLIC GLOBAL IMS_SINT32 SipConfigProxy::GetHideMacInPaniHeaderPolicy(
         IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile /* = IMS_NULL*/)
 {
     if (pProfile != IMS_NULL)
     {
         if (pProfile->IsSipFeatureProvisioned())
         {
-            return pProfile->IsMacAddressHiddenInPaniHeader();
+            return pProfile->GetHideMacInPaniHeaderPolicy();
         }
     }
 
     const SipConfig* pSipConfig = ConfigurationManager::GetInstance()->GetSipConfig(nSlotId);
-
-    return pSipConfig->IsMacAddressHiddenInPaniHeader();
+    return pSipConfig->GetHideMacInPaniHeaderPolicy();
 }
 
 PUBLIC GLOBAL IMS_BOOL SipConfigProxy::IsLocalTimezoneParameterSupportedInPaniHeader(

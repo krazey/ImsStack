@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
+#include "ISipHeader.h"
 #include "ImsList.h"
+#include "MockIMessage.h"
+#include "MockISession.h"
+#include "MockISipClientConnection.h"
+#include "MockISipMessage.h"
+#include "MockISipMessageBodyPart.h"
+#include "MockISipServerConnection.h"
+#include "SipHeaderName.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcSession.h"
 #include "call/MockIMtcUiNotifier.h"
-#include "core/MockIMessage.h"
-#include "core/MockISession.h"
-#include "sipcore/ISipHeader.h"
-#include "sipcore/MockISipClientConnection.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/MockISipMessageBodyPart.h"
-#include "sipcore/MockISipServerConnection.h"
-#include "sipcore/SipHeaderName.h"
 #include "ussi/MockUssiData.h"
 #include "ussi/UssiConstants.h"
 #include "ussi/UssiController.h"
@@ -237,7 +237,7 @@ TEST_F(UssiControllerTest, ParseUssiReturnsDefaultResultIfParsingUssiDataFails)
 {
     ON_CALL(*pUssiDataParser, Parse(_)).WillByDefault(Return(nullptr));
 
-    EXPECT_EQ(objUssiController.ParseUssiBodyAndCheckResult(&objSipMessage, SipMethod::BYE),
+    EXPECT_EQ(objUssiController.HandleUssiBody(&objSipMessage, SipMethod::BYE),
             UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE));
     EXPECT_EQ(objUssiController.GetLastResult(),
             UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE));
@@ -253,7 +253,7 @@ TEST_F(UssiControllerTest, ParseUssiInByeNotifiesResultWithUssiNotifyType)
     EXPECT_CALL(objUiNotifier,
             SendNotifyInfo(INFO_TYPE_USSI, strUssdString, (IMS_SINT32)UssiModeType::NOTIFY, _));
 
-    EXPECT_EQ(objUssiController.ParseUssiBodyAndCheckResult(&objSipMessage, SipMethod::BYE),
+    EXPECT_EQ(objUssiController.HandleUssiBody(&objSipMessage, SipMethod::BYE),
             UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE));
     EXPECT_EQ(objUssiController.GetLastResult(),
             UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE));
@@ -267,7 +267,7 @@ TEST_F(UssiControllerTest, ParseUssiSetsResultWithErrorCode1IfNoUssdString)
 
     EXPECT_CALL(objUiNotifier, SendNotifyInfo(_, _, _, _)).Times(0);
 
-    EXPECT_EQ(objUssiController.ParseUssiBodyAndCheckResult(&objSipMessage, SipMethod::INVITE),
+    EXPECT_EQ(objUssiController.HandleUssiBody(&objSipMessage, SipMethod::INVITE),
             UssiResult(UssiNextAction::SEND_INFO_WITH_ERROR_CODE, UssiError::CODE_1));
     EXPECT_EQ(objUssiController.GetLastResult(),
             UssiResult(UssiNextAction::SEND_INFO_WITH_ERROR_CODE, UssiError::CODE_1));
@@ -288,7 +288,7 @@ TEST_F(UssiControllerTest, ParseUssiInAckSetsResultWithErrorCode4IfAnotherCallEx
 
     EXPECT_CALL(objUiNotifier, SendNotifyInfo(_, _, _, _)).Times(0);
 
-    EXPECT_EQ(objUssiController.ParseUssiBodyAndCheckResult(&objSipMessage, SipMethod::ACK),
+    EXPECT_EQ(objUssiController.HandleUssiBody(&objSipMessage, SipMethod::ACK),
             UssiResult(UssiNextAction::SEND_INFO_WITH_ERROR_CODE_AND_TERMINATE, UssiError::CODE_4));
     EXPECT_EQ(objUssiController.GetLastResult(),
             UssiResult(UssiNextAction::SEND_INFO_WITH_ERROR_CODE_AND_TERMINATE, UssiError::CODE_4));
@@ -304,7 +304,7 @@ TEST_F(UssiControllerTest, ParseUssiInInfoNotifiesResultWithUssiNotifyTypeIfMo)
     EXPECT_CALL(objUiNotifier,
             SendNotifyInfo(INFO_TYPE_USSI, strUssdString, (IMS_SINT32)UssiModeType::REQUEST, _));
 
-    EXPECT_EQ(objUssiController.ParseUssiBodyAndCheckResult(&objSipMessage, SipMethod::INFO),
+    EXPECT_EQ(objUssiController.HandleUssiBody(&objSipMessage, SipMethod::INFO),
             UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE));
     EXPECT_EQ(objUssiController.GetLastResult(),
             UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE));
@@ -321,7 +321,7 @@ TEST_F(UssiControllerTest, ParseUssiNotifiesResultWithUssiNotifyTypeIfMtAndUssdD
     EXPECT_CALL(objUiNotifier,
             SendNotifyInfo(INFO_TYPE_USSI, strUssdString, (IMS_SINT32)UssiModeType::NOTIFY, _));
 
-    EXPECT_EQ(objUssiController.ParseUssiBodyAndCheckResult(&objSipMessage, SipMethod::INVITE),
+    EXPECT_EQ(objUssiController.HandleUssiBody(&objSipMessage, SipMethod::INVITE),
             UssiResult(UssiNextAction::SEND_INFO_WITH_NOTIFY_ELEMENT, UssiError::CODE_NONE));
     EXPECT_EQ(objUssiController.GetLastResult(),
             UssiResult(UssiNextAction::SEND_INFO_WITH_NOTIFY_ELEMENT, UssiError::CODE_NONE));
@@ -338,7 +338,7 @@ TEST_F(UssiControllerTest, ParseUssiNotifiesUssiErrorIfUssiDataIsError)
     EXPECT_CALL(objUiNotifier,
             SendNotifyInfo(INFO_TYPE_USSI, strUssdString, (IMS_SINT32)UssiModeType::ERROR, _));
 
-    EXPECT_EQ(objUssiController.ParseUssiBodyAndCheckResult(&objSipMessage, SipMethod::BYE),
+    EXPECT_EQ(objUssiController.HandleUssiBody(&objSipMessage, SipMethod::BYE),
             UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE));
     EXPECT_EQ(objUssiController.GetLastResult(),
             UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE));
@@ -527,7 +527,7 @@ TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureIfConnectionIsNull)
             objUssiController.FormInfoRequest(IMS_NULL, strAnyUssdString, UssiError::CODE_NONE));
 }
 
-TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureifSettingInfoPackageFails)
+TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureIfSettingInfoPackageFails)
 {
     EXPECT_CALL(objSipClientConnection, SetHeader(HEADER_INFO_PACKAGE, HEADER_USSD_PACKAGE))
             .WillOnce(Return(IMS_FAILURE));
@@ -538,7 +538,7 @@ TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureifSettingInfoPackageFail
                     &objSipClientConnection, strAnyUssdString, UssiError::CODE_NONE));
 }
 
-TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureifSettingApplicationUssdxmlFails)
+TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureIfSettingApplicationUssdxmlFails)
 {
     EXPECT_CALL(objSipClientConnection, SetHeader(HEADER_INFO_PACKAGE, HEADER_USSD_PACKAGE))
             .WillOnce(Return(IMS_SUCCESS));
@@ -552,7 +552,7 @@ TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureifSettingApplicationUssd
                     &objSipClientConnection, strAnyUssdString, UssiError::CODE_NONE));
 }
 
-TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureifSettingContentDispositionFails)
+TEST_F(UssiControllerTest, FormInfoRequestReturnsFailureIfSettingContentDispositionFails)
 {
     EXPECT_CALL(objSipClientConnection, SetHeader(HEADER_INFO_PACKAGE, HEADER_USSD_PACKAGE))
             .WillOnce(Return(IMS_SUCCESS));

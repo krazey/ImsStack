@@ -29,7 +29,7 @@ class JniUceService : public BaseService
 {
 public:
     explicit JniUceService(Jni_SendDataToJava pfnSendDataToJava, IN IMS_UINT32 nSimSlot = 0);
-    virtual ~JniUceService();
+    virtual ~JniUceService() override;
 
     IJniEnablerThread* GetJniThread() const override;
     virtual int SendData(const Parcel& pParcel) override;

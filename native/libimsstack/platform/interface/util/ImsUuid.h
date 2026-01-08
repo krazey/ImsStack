@@ -16,7 +16,7 @@
 #ifndef IMS_UUID_H_
 #define IMS_UUID_H_
 
-#include "AStringBuffer.h"
+#include "AString.h"
 
 class ImsUuid
 {
@@ -24,28 +24,27 @@ public:
     enum
     {
         /// Time-based version (based on platform)
-        VERSION_1,
-        /// DCE security version with embedded POSIX UIDs - NOT IMPLEMENTED
-        VERSION_2,
+        VERSION_1 = 1,
         /// Name-based version (MD5 hashing)
-        VERSION_3,
-        /// Randomly or pseudo-randomly generated version - NOT IMPLEMENTED
-        VERSION_4,
-        /// Name-based version (SHA-1 hashing) - NOT IMPLEMENTED
-        VERSION_5
+        VERSION_3 = 3,
+        /// Randomly or pseudo-randomly generated version
+        VERSION_4 = 4
     };
 
 public:
     ImsUuid() = delete;
 
 public:
+    /**
+     * @brief Returns the generated UUID string based on the specified version and name.
+     *
+     * @param nVersion The UUID type
+     * @param strName The name to be used to construct UUID string.
+     *                This is a mandatory field for version 3.
+     * @return A generated UUID string.
+     */
     static AString GetUuid(
-            IN IMS_SINT32 nVersion = VERSION_4, IN const AString& strName = AString::ConstNull());
-
-private:
-    static void GetUuidv3(IN const AString& strName, OUT AStringBuffer& objUuidStr);
-    static void GetUuidv4(IN const AString& strRandom, OUT AStringBuffer& objUuidStr);
-    static void GetUuidv5(IN const AString& strName, OUT AStringBuffer& objUuidStr);
+            IN IMS_SINT32 nVersion, IN const AString& strName = AString::ConstNull());
 };
 
 #endif

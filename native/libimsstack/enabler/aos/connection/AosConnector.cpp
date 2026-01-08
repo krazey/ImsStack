@@ -23,6 +23,7 @@
 #include "IAosService.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosApplication.h"
+#include "interface/IAosCallTracker.h"
 #include "interface/IAosConnection.h"
 #include "interface/IAosConnectorListener.h"
 #include "interface/IAosNConfiguration.h"
@@ -31,7 +32,7 @@
 #include "provider/AosProvider.h"
 #include "provider/AosUtil.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 #define APPPROFILE strTag.GetStr()
 
@@ -51,10 +52,10 @@ AosConnector::AosConnector(IN IAosAppContext* piAppContext) :
         m_nReadyRecoveryCount(0),
         m_bPcscfConfigured(IMS_FALSE),
         m_bDataConnected(IMS_FALSE),
+        m_bCrossSimConnected(IMS_FALSE),
         m_bEmergencyType(IMS_FALSE),
         m_bIsTerminating(IMS_FALSE),
-        m_bIsPcscfChangeIgnored(IMS_FALSE),
-        m_bIsPdnDeactivationRequired(IMS_FALSE)
+        m_bIsPcscfChangeIgnored(IMS_FALSE)
 {
     strTag.Sprintf("%d:%s", m_piAppContext->GetSlotId(), m_piAppContext->GetProfileId().GetStr());
 
@@ -123,7 +124,6 @@ PUBLIC VIRTUAL IMS_BOOL AosConnector::Start()
 PUBLIC VIRTUAL void AosConnector::Stop()
 {
     m_piConnection->Deactivate();
-    m_bIsPdnDeactivationRequired = IMS_FALSE;
     CleanAll();
     Notify(LISTENER_TYPE_DEACTIVATED);
 }
@@ -161,14 +161,33 @@ PUBLIC VIRTUAL IMS_BOOL AosConnector::IsReady() const
     return (m_nState == STATE_READY);
 }
 
-PUBLIC VIRTUAL void AosConnector::SetPdnDeactivationRequired(IN IMS_BOOL bIsRequired)
+PUBLIC VIRTUAL void AosConnector::ResetReadyRecovery()
 {
-    m_bIsPdnDeactivationRequired = bIsRequired;
+    m_nReadyRecoveryCount = 0;
+    if (IsTimerRunning(TIMER_READY_RECOVERY))
+    {
+        ProcessReadyRecoveryTimerExpired();
+    }
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosConnector::IsPdnDeactivationRequired()
+PUBLIC VIRTUAL IMS_BOOL AosConnector::IsCrossSimConnected() const
 {
-    return m_bIsPdnDeactivationRequired;
+    return m_bCrossSimConnected;
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosConnector::ProcessPendingPcscfChange()
+{
+    if (m_bIsPcscfChangeIgnored)
+    {
+        m_bIsPcscfChangeIgnored = IMS_FALSE;
+        if (m_piPcscf->CheckAndProcessChangeFromPco())
+        {
+            Notify(LISTENER_TYPE_UPDATED, REASON_PCSCF_CHANGED);
+            return IMS_TRUE;
+        }
+    }
+
+    return IMS_FALSE;
 }
 
 PROTECTED
@@ -258,28 +277,21 @@ IMS_BOOL AosConnector::IsPcscfConfigured() const
 PROTECTED
 IMS_BOOL AosConnector::IsPcoWaitingRequired() const
 {
-    IMS_BOOL bResult = IMS_FALSE;
-
-    if (!IsCarrierSignalPcoEnabled())
+    if (IsEmergencyType())
     {
-        return bResult;
+        return IMS_FALSE;
     }
 
     IMS_SINT32 nSlotId = m_piAppContext->GetSlotId();
-    if (GET_N_CONFIG(nSlotId) != IMS_NULL && GET_N_CONFIG(nSlotId)->IsSupportLimitedAdminSmsMode())
+    if (GET_N_CONFIG(nSlotId) == IMS_NULL || !GET_N_CONFIG(nSlotId)->IsSupportLimitedAdminSmsMode())
     {
-        bResult = m_piConnection->GetCarrierSignalPcoValue() == PCO_INVALID_VALUE;
+        return IMS_FALSE;
     }
+
+    IMS_BOOL bResult = (m_piConnection->GetCarrierSignalPcoValue() == PCO_INVALID_VALUE);
 
     A_IMS_TRACE_D(APPPROFILE, "IsPcoWaitingRequired : %s", _TRACE_B_(bResult), 0, 0);
     return bResult;
-}
-
-PROTECTED
-IMS_BOOL AosConnector::IsCarrierSignalPcoEnabled() const
-{
-    return (UtilService::GetUtilService()->GetPrivateProperty()->GetPersistentInt(
-                    ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST, 0) == 1);
 }
 
 PROTECTED
@@ -336,14 +348,34 @@ IMS_BOOL AosConnector::IsDataConnectedWithoutPending() const
 }
 
 PROTECTED
+IMS_BOOL AosConnector::IsIpv6PcscfUnavailable() const
+{
+    if (!m_piPcscf->IsSinglePcoScheme())
+    {
+        return IMS_FALSE;
+    }
+
+    const AStringArray& objPcscfs = m_piConnection->GetPcscfAddress(IpAddress::IPV6);
+    for (IMS_SINT32 nAt = 0; nAt < objPcscfs.GetCount(); nAt++)
+    {
+        const AString& strPcscf = objPcscfs.GetElementAt(nAt);
+        IpAddress objIpa;
+        if (objIpa.Parse(strPcscf) && !objIpa.IsAnyAddress())
+        {
+            return IMS_FALSE;
+        }
+    }
+    return IMS_TRUE;
+}
+
+PROTECTED
 void AosConnector::CheckReadyRecoveryAndSetTimer()
 {
     if (m_piConnection->GetConnectionType() == NetworkPolicy::APN_IMS)
     {
         if (m_piPcscf->IsSinglePcoScheme() && !m_piPcscf->IsAsyncDnsDiscovery())
         {
-            m_nReadyRecoveryCount++;
-            StartTimer(TIMER_READY_RECOVERY, GetActualRecoveryWaitingTime() * 1000);
+            HandleInvalidPcscfAddress();
         }
     }
 }
@@ -410,9 +442,7 @@ IMS_BOOL AosConnector::CheckIpaAndProcessReadyRecovery()
 
         if (!bIsReady)
         {
-            m_nReadyRecoveryCount++;
-
-            StartTimer(TIMER_READY_RECOVERY, GetActualRecoveryWaitingTime() * 1000);
+            HandleInvalidPcscfAddress();
             return IMS_FALSE;
         }
     }
@@ -421,18 +451,36 @@ IMS_BOOL AosConnector::CheckIpaAndProcessReadyRecovery()
 }
 
 PROTECTED
-IMS_UINT32 AosConnector::GetActualRecoveryWaitingTime()
+void AosConnector::HandleInvalidPcscfAddress()
 {
     A_IMS_TRACE_D(
-            APPPROFILE, "GetActualRecoveryWaitingTime :: count (%d)", m_nReadyRecoveryCount, 0, 0);
-
-    if (m_nReadyRecoveryCount <= READY_RECOVERY_DEFAULT_COUNT)
+            APPPROFILE, "HandleInvalidPcscfAddress::fail count (%d)", m_nReadyRecoveryCount, 0, 0);
+    IMS_SINT32 nSlotId = m_piAppContext->GetSlotId();
+    if (GET_N_CONFIG(nSlotId) == IMS_NULL)
     {
-        return READY_RECOVERY_DEFAULT_TIME;
+        A_IMS_TRACE_D(APPPROFILE, "Can not get configurations for PCSCF recovery", 0, 0, 0);
+        return;
     }
 
-    return m_pUtil->WaitTimeForFlowRecovery(READY_RECOVERY_BASE_TIME, READY_RECOVERY_MAX_TIME,
-            m_nReadyRecoveryCount - READY_RECOVERY_DEFAULT_COUNT);
+    m_nReadyRecoveryCount++;
+    IMS_SINT32 nMaxRetryCnt = GET_N_CONFIG(nSlotId)->GetPcscfRecoveryMaxRetryCnt();
+    if (m_nReadyRecoveryCount <= nMaxRetryCnt)
+    {
+        StartTimer(TIMER_READY_RECOVERY, GET_N_CONFIG(nSlotId)->GetPcscfRecoveryWaitTime() * 1000);
+        return;
+    }
+
+    IMS_SINT32 nBaseTime = GET_N_CONFIG(nSlotId)->GetPcscfRecoveryBaseTime();
+    IMS_SINT32 nMaxTime = GET_N_CONFIG(nSlotId)->GetPcscfRecoveryMaxTime();
+    if (nBaseTime == 0 || nMaxTime == 0)
+    {
+        Notify(LISTENER_TYPE_DEACTIVATED, REASON_PCSCF_DISCOVERY_FAILED);
+        return;
+    }
+
+    IMS_SINT32 nDeterminedWaitTime = m_pUtil->WaitTimeForFlowRecovery(
+            nBaseTime, nMaxTime, m_nReadyRecoveryCount - nMaxRetryCnt);
+    StartTimer(TIMER_READY_RECOVERY, nDeterminedWaitTime * 1000);
 }
 
 PROTECTED
@@ -532,6 +580,7 @@ PROTECTED VIRTUAL void AosConnector::CleanAll()
     ClearPending();
     SetPcscfConfigured(IMS_FALSE);
     SetDataConnected(IMS_FALSE);
+    m_bIsPcscfChangeIgnored = IMS_FALSE;
 
     SetState(STATE_IDLE);
 }
@@ -708,7 +757,7 @@ PROTECTED VIRTUAL void AosConnector::ClearTimers()
 
 PROTECTED VIRTUAL void AosConnector::AosConnection_StateChanged(IN IMS_UINT32 nDataState)
 {
-    A_IMS_TRACE_I(APPPROFILE, "AoSConnection_StateChanged :: state(%d)", nDataState, 0, 0);
+    A_IMS_TRACE_I(APPPROFILE, "AosConnection_StateChanged :: state(%d)", nDataState, 0, 0);
 
     if (nDataState == IAosConnection::STATE_ACTIVE)
     {
@@ -724,7 +773,7 @@ PROTECTED VIRTUAL void AosConnector::AosConnection_StateChanged(IN IMS_UINT32 nD
             IpAddress objIpAddress = m_piConnection->GetLocalAddress();
             IMS_BOOL bLocalIpv4 = objIpAddress.IsIPv4Address();
 
-            if (!IsDataConnected() && bLocalIpv4)
+            if (!IsDataConnected() && !IsIpv6PcscfUnavailable() && bLocalIpv4)
             {
                 A_IMS_TRACE_I(APPPROFILE, "wait for obtaining IPv6 address", 0, 0, 0);
 
@@ -765,7 +814,8 @@ PROTECTED VIRTUAL void AosConnector::AosConnection_IpChanged()
 
     if (IsReady())
     {
-        if (CheckIpChangedForEmergency())
+        if (CheckIpChangedForEmergency() &&
+                !(GET_N_CONFIG(m_piAppContext->GetSlotId())->IsEmergencyCallbackModeSupported()))
         {
             A_IMS_TRACE_I(APPPROFILE, "AosConnection_IpChanged :: ip change is ignored", 0, 0, 0);
             return;
@@ -778,7 +828,7 @@ PROTECTED VIRTUAL void AosConnector::AosConnection_IpChanged()
         else
         {
             SetState(STATE_IDLE);
-            Notify(LISTENER_TYPE_DEACTIVATED, REASON_FAILED);
+            Notify(LISTENER_TYPE_DEACTIVATED, REASON_IP_CHANGED);
         }
 
         return;
@@ -842,16 +892,18 @@ PROTECTED VIRTUAL void AosConnector::AosConnection_PcscfChanged()
         return;
     }
 
-    if (!IsEmergencyType() && GET_N_CONFIG(m_piAppContext->GetSlotId())->IsNoInitRegOnPcscfChange())
+    IMS_SINT32 nSlotId = m_piAppContext->GetSlotId();
+    const IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(nSlotId);
+    if (!IsEmergencyType() &&
+        GET_N_CONFIG(nSlotId)->ShouldKeepExistingPcscfOnPcscfChangeDuringTheCall() &&
+        m_piAppContext->GetApp()->IsOn() &&
+        (piCallTracker != IMS_NULL && piCallTracker->IsNormalCallActive()))
     {
-        if (m_piAppContext->GetApp()->IsOn())
-        {
-            A_IMS_TRACE_D(APPPROFILE, "AosConnection_PcscfChanged :: ignore in registered state", 0,
-                    0, 0);
+        A_IMS_TRACE_D(APPPROFILE, "AosConnection_PcscfChanged :: ignore in incall mode", 0, 0,
+                0);
 
-            m_bIsPcscfChangeIgnored = IMS_TRUE;
-            return;
-        }
+        m_bIsPcscfChangeIgnored = IMS_TRUE;
+        return;
     }
 
     if (!m_piPcscf->CheckAndProcessChangeFromPco())
@@ -918,6 +970,17 @@ PROTECTED VIRTUAL void AosConnector::ServicePhone_PcoValueChanged(IN IMS_SINT32 
     {
         Notify(LISTENER_TYPE_DEACTIVATED, REASON_LIMITED_SERVICE_PCO);
     }
+}
+
+PROTECTED VIRTUAL void AosConnector::ServicePhone_CrossSimStatusChanged(
+        IN IMS_BOOL bCrossSimConnected)
+{
+    if (IsEmergencyType())
+    {
+        return;
+    }
+
+    m_bCrossSimConnected = bCrossSimConnected;
 }
 
 PROTECTED VIRTUAL void AosConnector::Timer_TimerExpired(IN ITimer* piTimer)

@@ -19,6 +19,7 @@
 #include "SipDialogBase.h"
 
 class SipDialogUsage;
+class SipMethod;
 
 /**
  * @brief This class defines an extended SIP dialog.
@@ -31,7 +32,7 @@ public:
     SipDialogEx() = delete;
     explicit SipDialogEx(IN SipDialogState* pDState);
     SipDialogEx(IN const SipDialogEx& other);
-    virtual ~SipDialogEx();
+    ~SipDialogEx() override;
 
 public:
     SipDialogEx& operator=(IN const SipDialogEx& other);

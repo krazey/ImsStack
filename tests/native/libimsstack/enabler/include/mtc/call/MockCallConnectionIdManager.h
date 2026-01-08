@@ -30,7 +30,7 @@ public:
             CallConnectionIdManager(objContext)
     {
     }
-    ~MockCallConnectionIdManager() {}
+    ~MockCallConnectionIdManager() override {}
     MOCK_METHOD(
             void, OnConferenceParticipantDisconnected, (IN IMS_UINT32 nConnectionId), (override));
     MOCK_METHOD(CallKey, GetCallKey, (IN IMS_UINT32 nConnectionId), (const, override));

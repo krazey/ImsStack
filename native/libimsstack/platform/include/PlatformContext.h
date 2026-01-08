@@ -16,10 +16,11 @@
 #ifndef PLATFORM_CONTEXT_H_
 #define PLATFORM_CONTEXT_H_
 
-#include "IOsFactory.h"
-#include "ISystem.h"
 #include "ImsMap.h"
-#include "PlatformService.h"
+
+class IOsFactory;
+class ISystem;
+class PlatformService;
 
 class PlatformContext
 {

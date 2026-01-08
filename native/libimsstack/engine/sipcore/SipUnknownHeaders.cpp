@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
+#include "TextParser.h"
 
+#include "SipError.h"
 #include "SipHeader.h"
 #include "SipPrivate.h"
 #include "SipUnknownHeaders.h"
@@ -278,7 +280,7 @@ const AString& SipUnknownHeaders::GetHeaderName(
 PUBLIC
 ImsList<AString> SipUnknownHeaders::GetHeaders(IN const AString& strName) const
 {
-    Header* pHeader = FindHeader(strName);
+    const Header* pHeader = FindHeader(strName);
 
     if (pHeader == IMS_NULL)
     {

@@ -27,7 +27,7 @@ class ITimer;
 class MockMtcTimerWrapper : public MtcTimerWrapper
 {
 public:
-    ~MockMtcTimerWrapper() {}
+    ~MockMtcTimerWrapper() override {}
     MOCK_METHOD(void, Timer_TimerExpired, (IN ITimer*), (override));
     MOCK_METHOD(void, SetListener, (IN IMtcTimerListener*), (override));
     MOCK_METHOD(void, Start, (IN IMS_UINT32, IN IMS_SINT32), (override));

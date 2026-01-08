@@ -18,8 +18,14 @@ package com.android.imsstack.imsservice.mmtel.ut.base;
 
 import static android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
 
+import android.annotation.IntDef;
 import android.content.Context;
 
+import com.android.imsstack.enabler.ssc.SscConstant;
+import com.android.imsstack.enabler.ssc.SscServiceClassUtil;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -149,4 +155,148 @@ public interface IUtInterface {
      * Implementation of IImsUt.
      */
     void updateCOLP(int tId, boolean enable);
+
+    /**
+     * Adds the listener to be notified when the terminal-based supplementary service configuration
+     * is changed.
+     *
+     * @param listener The listener to be added.
+     */
+    void addTbSscChangeListener(
+            TerminalBasedSupplementaryServiceConfigurationChangeListener listener);
+
+    /**
+     * Removes the listener not to be notified when the terminal-based supplementary service
+     * configuration is changed.
+     *
+     * @param listener The listener to be removed.
+     */
+    void removeTbSscChangeListener(
+            TerminalBasedSupplementaryServiceConfigurationChangeListener listener);
+
+    abstract class SupplementaryServiceConfiguration {
+        public static final int SS_TYPE_CB = 0;
+        public static final int SS_TYPE_OIP = 1;
+        public static final int SS_TYPE_OIR = 2;
+        public static final int SS_TYPE_TIP = 3;
+        public static final int SS_TYPE_TIR = 4;
+
+        @IntDef(prefix = {"SS_TYPE_"}, value = {
+                SS_TYPE_CB,
+                SS_TYPE_OIP,
+                SS_TYPE_OIR,
+                SS_TYPE_TIP,
+                SS_TYPE_TIR,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface SupplementaryServiceType {}
+
+        public static final int STATUS_ENABLED = SscConstant.STATUS_ENABLE;
+        public static final int STATUS_DISABLED = SscConstant.STATUS_DISABLE;
+
+        @IntDef(prefix = {"STATUS_"}, value = {
+                STATUS_ENABLED,
+                STATUS_DISABLED,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface Status {}
+
+        private final @SupplementaryServiceType int mType;
+        private final @Status int mStatus;
+
+        SupplementaryServiceConfiguration(int type, int status) {
+            mType = type;
+            mStatus = status;
+        }
+
+        public @SupplementaryServiceType int getType() {
+            return mType;
+        }
+
+        public @Status int getStatus() {
+            return mStatus;
+        }
+    }
+
+    final class CbData extends SupplementaryServiceConfiguration {
+        public static final int CONDITION_BAIC = SscConstant.CONDITION_BAIC;
+        public static final int CONDITION_BAOC = SscConstant.CONDITION_BAOC;
+        public static final int CONDITION_BOIC = SscConstant.CONDITION_BOIC;
+        public static final int CONDITION_BOIC_EXHC = SscConstant.CONDITION_BOIC_EXHC;
+        public static final int CONDITION_BIC_WR = SscConstant.CONDITION_BIC_WR;
+        public static final int CONDITION_ACR = SscConstant.CONDITION_ACR;
+
+        @IntDef(prefix = {"CONDITION_"}, value = {
+                CONDITION_BAIC,
+                CONDITION_BAOC,
+                CONDITION_BOIC,
+                CONDITION_BOIC_EXHC,
+                CONDITION_BIC_WR,
+                CONDITION_ACR,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface Condition {}
+
+        public static final int SERVICE_CLASS_VOICE = SscServiceClassUtil.SERVICE_CLASS_VOICE;
+        public static final int SERVICE_CLASS_VIDEO = SscServiceClassUtil.SERVICE_CLASS_VIDEO;
+
+        @IntDef(prefix = {"SERVICE_CLASS_"}, value = {
+                SERVICE_CLASS_VOICE,
+                SERVICE_CLASS_VIDEO,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface ServiceClass {}
+
+        private final @Condition int mCondition;
+        private final @ServiceClass int mServiceClass;
+
+        public CbData(int condition, int serviceClass, int status) {
+            super(SS_TYPE_CB, status);
+            mCondition = condition;
+            mServiceClass = serviceClass;
+        }
+
+        public @Condition int getCondition() {
+            return mCondition;
+        }
+
+        public @ServiceClass int getServiceClass() {
+            return mServiceClass;
+        }
+    }
+
+    final class OipData extends SupplementaryServiceConfiguration {
+        public OipData(int status) {
+            super(SS_TYPE_OIP, status);
+        }
+    }
+
+    final class OirData extends SupplementaryServiceConfiguration {
+        public OirData(int status) {
+            super(SS_TYPE_OIR, status);
+        }
+    }
+
+    final class TipData extends SupplementaryServiceConfiguration {
+        public TipData(int status) {
+            super(SS_TYPE_TIP, status);
+        }
+    }
+
+    final class TirData extends SupplementaryServiceConfiguration {
+        public TirData(int status) {
+            super(SS_TYPE_TIR, status);
+        }
+    }
+
+    interface TerminalBasedSupplementaryServiceConfigurationChangeListener {
+        /**
+         * Indicates that the terminal-based supplementary service configurations are updated by the
+         * user.
+         *
+         * @param data A list of {@link SupplementaryServiceConfiguration}.
+         */
+        void onSupplementaryServiceConfigurationChanged(
+                List<SupplementaryServiceConfiguration> data);
+    }
 }

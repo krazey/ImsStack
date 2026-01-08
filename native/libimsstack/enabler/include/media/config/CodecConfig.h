@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,9 +17,9 @@
 #ifndef CODEC_CONFIG_H_
 #define CODEC_CONFIG_H_
 
-#include "CarrierConfig.h"
-#include "ICarrierConfig.h"
-#include "config/ImsCodec.h"
+#include "ImsTypeDef.h"
+
+class ICarrierConfig;
 
 class CodecConfig
 {
@@ -27,10 +27,10 @@ public:
     /**
      * @brief Construct a new codec config object
      *
-     * @param nCodec_ codec type
-     * @param nPayloadTypeNum_ payload type number
+     * @param nCodec codec type
+     * @param nPayloadTypeNum payload type number
      */
-    CodecConfig(IN IMS_SINT32 nCodec_, IN IMS_SINT32 nPayloadTypeNum_);
+    CodecConfig(IN IMS_SINT32 nCodec, IN IMS_SINT32 nPayloadTypeNum);
     /**
      * @brief Destroy the codec config object
      *
@@ -40,11 +40,10 @@ public:
      * @brief Create codec using the configuration
      *
      * @param piCc configuration
-     * @param nCodecIdx codec index within each codec type
      * @return IMS_BOOL Return true if the create function is executed without error
      * Return false if the create function is failed
      */
-    virtual IMS_BOOL Create(IN ICarrierConfig* piCc, IN IMS_SINT32 nCodecIdx);
+    virtual IMS_BOOL Create(IN ICarrierConfig* piCc);
     /**
      * @brief Print debug string
      *

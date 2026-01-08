@@ -18,6 +18,8 @@
 #include "private/SipConfig.h"
 
 #include "SipConfigProxy.h"
+#include "SipProfile.h"
+#include "SipTimerValues.h"
 
 namespace android
 {
@@ -54,6 +56,8 @@ TEST_F(SipConfigProxyTest, GetAndIsConfiguredMethods)
     const AStringArray& regAllowMethods = SipConfigProxy::GetRegAllowMethods(IMS_SLOT_0);
     EXPECT_TRUE(regAllowMethods.IsEmpty());
 
+    EXPECT_EQ(SipConfigProxy::GetRegContactUserInfoPart(IMS_SLOT_0),
+            CarrierConfig::Ims::REGISTRATION_CONTACT_USER_INFO_PART_UUID);
     EXPECT_EQ(SipConfigProxy::GetRegExpires(IMS_SLOT_0), SipConfig::INVALID_EXPIRATION);
     EXPECT_EQ(SipConfigProxy::GetRegSubExpires(IMS_SLOT_0), SipConfig::INVALID_EXPIRATION);
     EXPECT_EQ(SipConfigProxy::GetRegUaString(IMS_SLOT_0), AString::ConstNull());
@@ -73,6 +77,7 @@ TEST_F(SipConfigProxyTest, GetAndIsConfiguredMethods)
     EXPECT_FALSE(SipConfigProxy::IsGruuConfigured(IMS_SLOT_0));
     EXPECT_FALSE(SipConfigProxy::IsKeepAliveConfigured(IMS_SLOT_0));
     EXPECT_FALSE(SipConfigProxy::IsMultipleRegConfigured(IMS_SLOT_0));
+    EXPECT_FALSE(SipConfigProxy::IsRegIdParameterConfigured(IMS_SLOT_0));
     EXPECT_FALSE(SipConfigProxy::IsNoAcceptContactHeaderInBye(IMS_SLOT_0));
     EXPECT_FALSE(SipConfigProxy::IsPanInfoInInitialRegRequired(IMS_SLOT_0));
     EXPECT_FALSE(SipConfigProxy::IsPPreferredIdInRegSubRequired(IMS_SLOT_0));
@@ -88,8 +93,10 @@ TEST_F(SipConfigProxyTest, GetAndIsConfiguredMethods)
     EXPECT_FALSE(SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(IMS_SLOT_0));
     EXPECT_FALSE(
             SipConfigProxy::IsSipInstanceParamRequiredInContactForNonRegisterRequest(IMS_SLOT_0));
+    EXPECT_FALSE(SipConfigProxy::IsUdpTransportParameterIgnoredForOutgoingRequest(IMS_SLOT_0));
     EXPECT_FALSE(SipConfigProxy::IsSessionIdHeaderSupported(IMS_SLOT_0));
-    EXPECT_FALSE(SipConfigProxy::IsMacAddressHiddenInPaniHeader(IMS_SLOT_0));
+    EXPECT_EQ(
+            SipConfigProxy::GetHideMacInPaniHeaderPolicy(IMS_SLOT_0), ISipConfig::HIDE_MAC_IN_PANI);
     EXPECT_FALSE(SipConfigProxy::IsLocalTimezoneParameterSupportedInPaniHeader(IMS_SLOT_0));
 
     EXPECT_EQ(SipConfigProxy::GetTimerValue100Trying(IMS_SLOT_0), 200);
@@ -239,6 +246,7 @@ TEST_F(SipConfigProxyTest, GetAndIsConfiguredMethods)
     IMS_SINT32 nRegSub = 1;
 
     objSipProfile.SetRegSubscription(nRegSub);
+    objSipProfile.SetHideMacInPaniHeaderPolicy(ISipConfig::HIDE_MAC_IN_PANI);
 
     EXPECT_TRUE(SipConfigProxy::IsRegExpiresConfigured(IMS_SLOT_0, &objSipProfile));
     EXPECT_TRUE(SipConfigProxy::IsRegSubExpiresConfigured(IMS_SLOT_0, &objSipProfile));
@@ -254,7 +262,6 @@ TEST_F(SipConfigProxyTest, GetAndIsConfiguredMethods)
     EXPECT_TRUE(SipConfigProxy::IsIpSecConfigured(IMS_SLOT_0, &objSipProfile));
     EXPECT_TRUE(SipConfigProxy::IsGruuConfigured(IMS_SLOT_0, &objSipProfile));
     EXPECT_TRUE(SipConfigProxy::IsKeepAliveConfigured(IMS_SLOT_0, &objSipProfile));
-    EXPECT_TRUE(SipConfigProxy::IsMultipleRegConfigured(IMS_SLOT_0, &objSipProfile));
     EXPECT_TRUE(SipConfigProxy::IsNoAcceptContactHeaderInBye(IMS_SLOT_0, &objSipProfile));
     EXPECT_TRUE(SipConfigProxy::IsPanInfoInInitialRegRequired(IMS_SLOT_0, &objSipProfile));
     EXPECT_TRUE(SipConfigProxy::IsPPreferredIdInRegSubRequired(IMS_SLOT_0, &objSipProfile));
@@ -271,8 +278,11 @@ TEST_F(SipConfigProxyTest, GetAndIsConfiguredMethods)
     EXPECT_TRUE(SipConfigProxy::IsSessionTimerUpdateRequiredByReInvite(IMS_SLOT_0, &objSipProfile));
     EXPECT_TRUE(SipConfigProxy::IsSipInstanceParamRequiredInContactForNonRegisterRequest(
             IMS_SLOT_0, &objSipProfile));
+    EXPECT_TRUE(SipConfigProxy::IsUdpTransportParameterIgnoredForOutgoingRequest(
+            IMS_SLOT_0, &objSipProfile));
     EXPECT_TRUE(SipConfigProxy::IsSessionIdHeaderSupported(IMS_SLOT_0, &objSipProfile));
-    EXPECT_TRUE(SipConfigProxy::IsMacAddressHiddenInPaniHeader(IMS_SLOT_0, &objSipProfile));
+    EXPECT_EQ(SipConfigProxy::GetHideMacInPaniHeaderPolicy(IMS_SLOT_0, &objSipProfile),
+            ISipConfig::HIDE_MAC_IN_PANI);
     EXPECT_TRUE(SipConfigProxy::IsLocalTimezoneParameterSupportedInPaniHeader(
             IMS_SLOT_0, &objSipProfile));
 

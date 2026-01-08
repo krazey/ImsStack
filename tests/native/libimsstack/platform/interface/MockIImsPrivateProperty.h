@@ -23,8 +23,8 @@
 class MockIImsPrivateProperty : public IImsPrivateProperty
 {
 public:
-    inline MockIImsPrivateProperty() {}
-    inline virtual ~MockIImsPrivateProperty() {}
+    MockIImsPrivateProperty() = default;
+    ~MockIImsPrivateProperty() override = default;
 
     MOCK_METHOD(AString, Get, (IN const AString& strKey, IN IMS_SINT32 nSlotId), (override));
     MOCK_METHOD(

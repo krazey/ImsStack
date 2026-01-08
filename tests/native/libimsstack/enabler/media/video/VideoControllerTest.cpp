@@ -34,7 +34,7 @@ public:
     VideoConfiguration* m_pConfig;
     FakeIMediaSessionListener m_objFakeListener;
     MockIMediaSessionListener m_objListener;
-    MockVideoNego* m_pVideoNego;
+    std::shared_ptr<MockVideoNego> m_pVideoNego;
 
     VideoProfile* m_pLocalProfile;
     VideoProfile* m_pPeerProfile;
@@ -47,18 +47,19 @@ protected:
         m_pController = new VideoController();
         m_pConfig = new VideoConfiguration(MEDIA_TYPE_VIDEO);
         m_pConfig->Create(ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID));
-        m_pVideoNego = new MockVideoNego(DEFAULT_SLOT_ID);
+        m_pVideoNego = std::make_shared<MockVideoNego>(DEFAULT_SLOT_ID);
 
         m_objListener.SetDelegate(&m_objFakeListener);
         m_objListener.DelegateToFake();
 
         m_pLocalProfile = new VideoProfile();
-        m_pLocalProfile->strTransportType = "RTP/AVP";
-        VideoProfile::AvcFmtp* pAvcFmtp = new VideoProfile::AvcFmtp();
+        m_pLocalProfile->SetTransportType("RTP/AVP");
+        auto pAvcFmtp = std::make_shared<VideoProfile::AvcFmtp>();
         VideoProfile::Payload* pAvcPayload = new VideoProfile::Payload();
-        pAvcPayload->pFmtp = pAvcFmtp;
-        m_pLocalProfile->lstPayload.Append(pAvcPayload);
-        m_pLocalProfile->eDirection = MEDIA_DIRECTION_SEND_RECEIVE;
+        pAvcPayload->GetRtpMap().SetPayloadType("H264");
+        pAvcPayload->SetFmtp(pAvcFmtp);
+        m_pLocalProfile->AddPayload(pAvcPayload);
+        m_pLocalProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
 
         m_pPeerProfile = new VideoProfile(*m_pLocalProfile);
         m_pNegoProfile = new VideoProfile(*m_pLocalProfile);
@@ -74,7 +75,7 @@ protected:
     virtual void TearDown() override
     {
         delete m_pController;
-        delete m_pVideoNego;
+        delete m_pConfig;
         delete m_pLocalProfile;
         delete m_pPeerProfile;
         delete m_pNegoProfile;
@@ -84,6 +85,12 @@ protected:
 TEST_F(VideoControllerTest, testCreateSessionFail)
 {
     EXPECT_EQ(m_pController->CreateSession(nullptr, nullptr), IMS_FALSE);
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, nullptr), IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, testUpdateRtpConfigWithNoSession)
+{
+    EXPECT_EQ(m_pController->UpdateRtpConfig(m_pVideoNego, IMS_FALSE), IMS_FALSE);
 }
 
 TEST_F(VideoControllerTest, testUpdateLocalAddressFail)
@@ -91,14 +98,93 @@ TEST_F(VideoControllerTest, testUpdateLocalAddressFail)
     EXPECT_EQ(m_pController->UpdateLocalAddress(nullptr), IMS_FALSE);
 }
 
+TEST_F(VideoControllerTest, testUpdateQualityThresholdWithNoSession)
+{
+    EXPECT_EQ(m_pController->ApplyQualityThreshold(IMS_FALSE), IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, testUpdateSessionWithNoSession)
+{
+    EXPECT_EQ(m_pController->UpdateSession(), IMS_FALSE);
+}
+
 TEST_F(VideoControllerTest, testOpenSessionFail)
 {
     EXPECT_EQ(m_pController->OpenSession(), IMS_FALSE);
 }
 
+TEST_F(VideoControllerTest, testOpenSessionMultipleTimes)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, testUpdateSessionBeforeOpenSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateSession(), IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, testUpdateSessionBeforeUpdateRtpConfig)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateSession(), IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, testUpdateQualityThresholdBeforeOpenSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->ApplyQualityThreshold(IMS_FALSE), IMS_FALSE);
+}
+
 TEST_F(VideoControllerTest, testCloseSessionFail)
 {
     EXPECT_EQ(m_pController->CloseSession(), IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, testCloseSessionWithSessionCreated)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->CloseSession(), IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, testCloseSessionAfterOpenSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
+}
+
+TEST_F(VideoControllerTest, testUpdateSessionAfterCloseSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateSession(), IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, testUpdateRtpConfigAfterCloseSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateRtpConfig(m_pVideoNego, IMS_FALSE), IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, testUpdateQualityThresholdAfterCloseSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->ApplyQualityThreshold(IMS_FALSE), IMS_FALSE);
 }
 
 TEST_F(VideoControllerTest, testModifySession)
@@ -120,15 +206,117 @@ TEST_F(VideoControllerTest, testModifySession)
                       IJniMedia::SELECT_CAMERA_CMD, reinterpret_cast<IMS_UINTP>(pParam)),
             IMS_TRUE);
 
-    EXPECT_EQ(m_pController->UpdateRtpConfig(m_pVideoNego), IMS_TRUE);
-    EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateRtpConfig(m_pVideoNego, IMS_FALSE), IMS_TRUE);
+    EXPECT_EQ(m_pController->ApplyQualityThreshold(IMS_FALSE), IMS_TRUE);
     EXPECT_EQ(m_pController->UpdateSession(), IMS_TRUE);
 }
 
-TEST_F(VideoControllerTest, testUpdateQualityThreshold)
+TEST_F(VideoControllerTest, testUpdateSessionWithZeroRemotePortClosesSession)
 {
     EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
 
-    EXPECT_EQ(m_pController->UpdateQualityThreshold(nullptr), IMS_FALSE);
-    EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pVideoNego), IMS_TRUE);
+    // Set peer port to 0
+    m_pPeerProfile->SetDataPort(0);
+    EXPECT_EQ(m_pController->UpdateRtpConfig(m_pVideoNego, IMS_FALSE), IMS_TRUE);
+
+    // UpdateSession should detect port 0 and close the session.
+    EXPECT_EQ(m_pController->UpdateSession(), IMS_TRUE);
+    EXPECT_FALSE(m_pController->IsSessionOpened());
+}
+
+TEST_F(VideoControllerTest, testUpdateSessionWithZeroLocalPortClosesSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+
+    // Set negotiated local port to 0
+    m_pNegoProfile->SetDataPort(0);
+    EXPECT_EQ(m_pController->UpdateRtpConfig(m_pVideoNego, IMS_FALSE), IMS_TRUE);
+
+    // UpdateSession should detect port 0 and close the session.
+    EXPECT_EQ(m_pController->UpdateSession(), IMS_TRUE);
+    EXPECT_FALSE(m_pController->IsSessionOpened());
+}
+
+TEST_F(VideoControllerTest, testSendMessageWithNoSession)
+{
+    ImsMediaVideoParam* pSetSurfaceParam = new ImsMediaVideoParam();
+    pSetSurfaceParam->nValue = SURFACE_FAR;
+    EXPECT_EQ(m_pController->SendMessage(
+                      IJniMedia::SETSURFACE_CMD, reinterpret_cast<IMS_UINTP>(pSetSurfaceParam)),
+            IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, testSendMessageWithInvalidCommand)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+
+    ImsMediaVideoParam* pSetSurfaceParam = new ImsMediaVideoParam();
+    pSetSurfaceParam->nValue = SURFACE_FAR;
+    EXPECT_EQ(m_pController->SendMessage(-1, reinterpret_cast<IMS_UINTP>(pSetSurfaceParam)),
+            IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, testSendMessageWithInvalidParameter)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+
+    EXPECT_EQ(m_pController->SendMessage(
+                      IJniMedia::SETSURFACE_CMD, reinterpret_cast<IMS_UINTP>(nullptr)),
+            IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, testSendMessageAfterCloseSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
+    ImsMediaVideoParam* pSetSurfaceParam = new ImsMediaVideoParam();
+    pSetSurfaceParam->nValue = SURFACE_FAR;
+    EXPECT_EQ(m_pController->SendMessage(
+                      IJniMedia::SETSURFACE_CMD, reinterpret_cast<IMS_UINTP>(pSetSurfaceParam)),
+            IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, testIsSessionOpened)
+{
+    // Initial state: No session
+    EXPECT_EQ(m_pController->IsSessionOpened(), IMS_FALSE);
+
+    // Create session
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    // Session created but not opened (state is STATE_NONE)
+    EXPECT_EQ(m_pController->IsSessionOpened(), IMS_FALSE);
+
+    // Open session
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pVideoNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    // Session is now open (state is STATE_IDLE or higher)
+    EXPECT_EQ(m_pController->IsSessionOpened(), IMS_TRUE);
+
+    // Close session
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
+    // Session is closed (state is STATE_NONE)
+    EXPECT_EQ(m_pController->IsSessionOpened(), IMS_FALSE);
+}
+
+TEST_F(VideoControllerTest, RequestRtpReceptionStats)
+{
+    // Arrange
+    const IMS_UINT32 intervalMs = 3000;
+    // Ensure a session exists and is opened
+    m_pController->CreateSession(&m_objListener, m_pConfig);
+    m_pController->UpdateLocalAddress(m_pVideoNego);
+    m_pController->OpenSession();
+
+    // Act & Assert
+    EXPECT_TRUE(m_pController->RequestRtpReceptionStats(intervalMs));
 }

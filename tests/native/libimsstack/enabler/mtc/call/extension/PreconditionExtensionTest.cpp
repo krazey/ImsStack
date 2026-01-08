@@ -15,15 +15,17 @@
  */
 
 #include "ISipHeader.h"
-#include "ImsList.h"
+#include "MockIMessage.h"
+#include "MockISession.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcSession.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/extension/PreconditionExtension.h"
-#include "core/MockIMessage.h"
-#include "sipcore/MockISipMessage.h"
-#include "utility/MessageUtils.h"
+#include "media/MockIMtcMediaManager.h"
+#include "precondition/MockIMtcPreconditionManager.h"
+#include "utility/MockIMessageUtils.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -35,59 +37,51 @@ class PreconditionExtensionTest : public ::testing::Test
 {
 public:
     PreconditionExtension* pExtension;
-
-    MockISipMessage objSipMessage;
-    MockISipMessage objSipMessageRequiresExtension;
-    MockISipMessage objSipMessageSupportsExtension;
     MockIMessage objMessage;
     MockIMessage objMessageRequiresExtension;
     MockIMessage objMessageSupportsExtension;
     MockIMtcCallContext objContext;
-    MessageUtils objMessageUtils;
+    MockIMessageUtils objMessageUtils;
+    MockIMtcSession objMtcSession;
+    MockISession objSession;
+    MockIMtcMediaManager objMediaManager;
+    MockIMtcPreconditionManager objPreconditionManager;
 
 protected:
     virtual void SetUp() override
     {
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
+        ON_CALL(objMessageUtils,
+                ContainsValue(&objMessageRequiresExtension,
+                        MtcExtensionSet::OPTION_TAG_PRECONDITION, ISipHeader::REQUIRE, _))
+                .WillByDefault(Return(IMS_TRUE));
+        ON_CALL(objMessageUtils,
+                ContainsValue(&objMessageSupportsExtension,
+                        MtcExtensionSet::OPTION_TAG_PRECONDITION, ISipHeader::SUPPORTED, _))
+                .WillByDefault(Return(IMS_TRUE));
+        ON_CALL(objMessageUtils,
+                ContainsValueIgnoreCase(&objMessageRequiresExtension,
+                        MtcExtensionSet::OPTION_TAG_PRECONDITION, ISipHeader::REQUIRE, _))
+                .WillByDefault(Return(IMS_TRUE));
+        ON_CALL(objMessageUtils,
+                ContainsValueIgnoreCase(&objMessageSupportsExtension,
+                        MtcExtensionSet::OPTION_TAG_PRECONDITION, ISipHeader::SUPPORTED, _))
+                .WillByDefault(Return(IMS_TRUE));
 
         pExtension = new PreconditionExtension(objContext);
 
-        ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
-
-        InitMessageRequiresExtension(MtcExtensionSet::OPTION_TAG_PRECONDITION);
-        InitMessageSupportsExtension(MtcExtensionSet::OPTION_TAG_PRECONDITION);
+        ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
+        ON_CALL(objMtcSession, GetISession()).WillByDefault(ReturnRef(objSession));
+        ON_CALL(objContext, GetPreconditionManager)
+                .WillByDefault(ReturnRef(objPreconditionManager));
     }
 
     virtual void TearDown() override { delete pExtension; }
 
-    void InitMessageRequiresExtension(IN const AString& strOptionTag)
+    void SetUpMediaNegoState(IN NegotiationState eNegoState)
     {
-        ImsList<AString> lstEmptyHeaders;
-        ImsList<AString> lstRequiredHeaders;
-        lstRequiredHeaders.Append(strOptionTag);
-
-        ON_CALL(objSipMessageRequiresExtension, GetHeaders(_, _))
-                .WillByDefault(Return(lstEmptyHeaders));
-        ON_CALL(objSipMessageRequiresExtension, GetHeaders(ISipHeader::REQUIRE, _))
-                .WillByDefault(Return(lstRequiredHeaders));
-
-        ON_CALL(objMessageRequiresExtension, GetMessage)
-                .WillByDefault(Return(&objSipMessageRequiresExtension));
-    }
-
-    void InitMessageSupportsExtension(IN const AString& strOptionTag)
-    {
-        ImsList<AString> lstEmptyHeaders;
-        ImsList<AString> lstSupportedHeaders;
-        lstSupportedHeaders.Append(strOptionTag);
-
-        ON_CALL(objSipMessageSupportsExtension, GetHeaders(_, _))
-                .WillByDefault(Return(lstEmptyHeaders));
-        ON_CALL(objSipMessageSupportsExtension, GetHeaders(ISipHeader::SUPPORTED, _))
-                .WillByDefault(Return(lstSupportedHeaders));
-
-        ON_CALL(objMessageSupportsExtension, GetMessage)
-                .WillByDefault(Return(&objSipMessageSupportsExtension));
+        ON_CALL(objContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
+        ON_CALL(objMediaManager, GetNegotiationState(_)).WillByDefault(Return(eNegoState));
     }
 };
 
@@ -109,33 +103,52 @@ TEST_F(PreconditionExtensionTest, GetOptionTag)
 
 TEST_F(PreconditionExtensionTest, FormatRequestForSomeMessageDoesNothingIfRemoteNotAvailable)
 {
-    EXPECT_CALL(objSipMessage, AddHeader(_, _, _)).Times(0);
+    SetUpMediaNegoState(NegotiationState::STATE_OFFER_SENT);
+    EXPECT_CALL(objMediaManager, GetNegotiationState(_)).Times(0);
 
-    pExtension->FormatRequest(RequestType::PRACK, objMessage);
-    pExtension->FormatRequest(RequestType::EARLY_UPDATE, objMessage);
-    pExtension->FormatRequest(RequestType::ACK, objMessage);
     pExtension->FormatRequest(RequestType::UPDATE, objMessage);
+    pExtension->FormatRequest(RequestType::EARLY_UPDATE, objMessage);
+    pExtension->FormatRequest(RequestType::PRACK, objMessage);
+    pExtension->FormatRequest(RequestType::ACK, objMessage);
     pExtension->FormatRequest(RequestType::CANCEL_UPDATE, objMessage);
     pExtension->FormatRequest(RequestType::TERMINATE, objMessage);
 }
 
-TEST_F(PreconditionExtensionTest, FormatRequestForSomeMessageDoesNothingIfRemoteAvailable)
+TEST_F(PreconditionExtensionTest,
+        FormatRequestForSomeMessageDoesNothingIfRemoteAvailableAndNegoStateIsIdle)
 {
     // Set remote availability true
     pExtension->HandleRequest(RequestType::START, objMessageRequiresExtension);
+    SetUpMediaNegoState(NegotiationState::STATE_IDLE);
 
-    EXPECT_CALL(objSipMessage, AddHeader(_, _, _)).Times(0);
+    EXPECT_CALL(objMessage, GetMessage).Times(0);
 
+    pExtension->FormatRequest(RequestType::UPDATE, objMessage);
+    pExtension->FormatRequest(RequestType::EARLY_UPDATE, objMessage);
     pExtension->FormatRequest(RequestType::PRACK, objMessage);
     pExtension->FormatRequest(RequestType::ACK, objMessage);
+    pExtension->FormatRequest(RequestType::CANCEL_UPDATE, objMessage);
+    pExtension->FormatRequest(RequestType::TERMINATE, objMessage);
+}
+
+TEST_F(PreconditionExtensionTest,
+        FormatRequestForSomeMessageDoesNothingIfRemoteAvailableAndNegoStateIsOfferSent)
+{
+    // Set remote availability true
+    pExtension->HandleRequest(RequestType::START, objMessageRequiresExtension);
+    SetUpMediaNegoState(NegotiationState::STATE_OFFER_SENT);
+
+    EXPECT_CALL(objMessage, GetMessage).Times(0);
+
     pExtension->FormatRequest(RequestType::CANCEL_UPDATE, objMessage);
     pExtension->FormatRequest(RequestType::TERMINATE, objMessage);
 }
 
 TEST_F(PreconditionExtensionTest, FormatRequestForStartMessageSetsSupportedHeader)
 {
-    EXPECT_CALL(objSipMessage, AddHeader(ISipHeader::SUPPORTED, pExtension->GetOptionTag(), _))
-            .Times(1);
+    SetUpMediaNegoState(NegotiationState::STATE_OFFER_SENT);
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, pExtension->GetOptionTag(), ISipHeader::SUPPORTED, _));
 
     pExtension->FormatRequest(RequestType::START, objMessage);
 }
@@ -144,9 +157,10 @@ TEST_F(PreconditionExtensionTest, FormatRequestForUpdateMessageSetsSupportedHead
 {
     // Set remote availability true
     pExtension->HandleRequest(RequestType::START, objMessageRequiresExtension);
+    SetUpMediaNegoState(NegotiationState::STATE_OFFER_SENT);
 
-    EXPECT_CALL(objSipMessage, AddHeader(ISipHeader::SUPPORTED, pExtension->GetOptionTag(), _))
-            .Times(1);
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, pExtension->GetOptionTag(), ISipHeader::SUPPORTED, _));
 
     pExtension->FormatRequest(RequestType::UPDATE, objMessage);
 }
@@ -159,10 +173,13 @@ TEST_F(PreconditionExtensionTest, FormatRequestForEarlyUpdateMessageSetsRequireH
 
     // Set remote availability true
     pExtension->HandleRequest(RequestType::START, objMessageRequiresExtension);
+    SetUpMediaNegoState(NegotiationState::STATE_OFFER_SENT);
 
-    EXPECT_CALL(objSipMessage, AddHeader(ISipHeader::REQUIRE, pExtension->GetOptionTag(), _))
-            .Times(1);
-    EXPECT_CALL(objSipMessage, AddHeader(ISipHeader::SUPPORTED, _, _)).Times(0);
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, pExtension->GetOptionTag(), ISipHeader::SUPPORTED, _))
+            .Times(0);
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, pExtension->GetOptionTag(), ISipHeader::REQUIRE, _));
 
     pExtension->FormatRequest(RequestType::EARLY_UPDATE, objMessage);
 }
@@ -175,17 +192,52 @@ TEST_F(PreconditionExtensionTest, FormatRequestForEarlyUpdateMessageSetsSupporte
 
     // Set remote availability true
     pExtension->HandleRequest(RequestType::START, objMessageRequiresExtension);
+    SetUpMediaNegoState(NegotiationState::STATE_OFFER_SENT);
 
-    EXPECT_CALL(objSipMessage, AddHeader(ISipHeader::SUPPORTED, pExtension->GetOptionTag(), _))
-            .Times(1);
-    EXPECT_CALL(objSipMessage, AddHeader(ISipHeader::REQUIRE, _, _)).Times(0);
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, pExtension->GetOptionTag(), ISipHeader::REQUIRE, _))
+            .Times(0);
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, pExtension->GetOptionTag(), ISipHeader::SUPPORTED, _));
 
     pExtension->FormatRequest(RequestType::EARLY_UPDATE, objMessage);
 }
 
+TEST_F(PreconditionExtensionTest,
+        FormatRequestForPrackMessageSetsRequireHeaderIfRemoteAvailableAndNegoStateIsOfferSent)
+{
+    // Set remote availability true
+    pExtension->HandleRequest(RequestType::START, objMessageRequiresExtension);
+    SetUpMediaNegoState(NegotiationState::STATE_OFFER_SENT);
+
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, pExtension->GetOptionTag(), ISipHeader::SUPPORTED, _))
+            .Times(0);
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, pExtension->GetOptionTag(), ISipHeader::REQUIRE, _));
+
+    pExtension->FormatRequest(RequestType::PRACK, objMessage);
+}
+
+TEST_F(PreconditionExtensionTest,
+        FormatRequestForAckMessageSetsSetsRequireHeaderIfRemoteAvailableAndNegoStateIsOfferSent)
+{
+    // Set remote availability true
+    pExtension->HandleRequest(RequestType::START, objMessageRequiresExtension);
+    SetUpMediaNegoState(NegotiationState::STATE_OFFER_SENT);
+
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, pExtension->GetOptionTag(), ISipHeader::SUPPORTED, _))
+            .Times(0);
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, pExtension->GetOptionTag(), ISipHeader::REQUIRE, _));
+
+    pExtension->FormatRequest(RequestType::ACK, objMessage);
+}
+
 TEST_F(PreconditionExtensionTest, FormatResponseDoesNothingIfRemoteNotAvailable)
 {
-    EXPECT_CALL(objSipMessage, AddHeader(_, _, _)).Times(0);
+    EXPECT_CALL(objMessageUtils, AddValueIfNotExists(_, _, _, _)).Times(0);
 
     pExtension->FormatResponse(ResponseType::PROVISIONAL_RESPONSE, objMessage);
     pExtension->FormatResponse(ResponseType::PRACK_RESPONSE, objMessage);
@@ -200,7 +252,7 @@ TEST_F(PreconditionExtensionTest, FormatResponseForRejectMessageDoesNothing)
     // Set remote availability true
     pExtension->HandleRequest(RequestType::START, objMessageRequiresExtension);
 
-    EXPECT_CALL(objSipMessage, AddHeader(_, _, _)).Times(0);
+    EXPECT_CALL(objMessageUtils, AddValueIfNotExists(_, _, _, _)).Times(0);
 
     pExtension->FormatResponse(ResponseType::REJECT, objMessage);
 }
@@ -210,7 +262,8 @@ TEST_F(PreconditionExtensionTest, FormatResponseSetsRequireHeader)
     // Set remote availability true
     pExtension->HandleRequest(RequestType::START, objMessageRequiresExtension);
 
-    EXPECT_CALL(objSipMessage, AddHeader(ISipHeader::REQUIRE, pExtension->GetOptionTag(), _))
+    EXPECT_CALL(objMessageUtils,
+            AddValueIfNotExists(&objMessage, pExtension->GetOptionTag(), ISipHeader::REQUIRE, _))
             .Times(5);
 
     pExtension->FormatResponse(ResponseType::PROVISIONAL_RESPONSE, objMessage);
@@ -241,7 +294,26 @@ TEST_F(PreconditionExtensionTest, HandleRequestForSomeMessageDoesNothing)
 
 TEST_F(PreconditionExtensionTest, HandleRequestForRequiringMessageWithoutSdpDoesNothing)
 {
-    ON_CALL(objSipMessageRequiresExtension, GetSdpBodyPart).WillByDefault(Return(nullptr));
+    ON_CALL(objMessageUtils, HasSdp(_)).WillByDefault(Return(IMS_FALSE));
+    pExtension->HandleRequest(RequestType::PRACK, objMessageRequiresExtension);
+    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
+    EXPECT_FALSE(pExtension->IsRequiredOnRemote());
+
+    pExtension->HandleRequest(RequestType::EARLY_UPDATE, objMessageRequiresExtension);
+    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
+    EXPECT_FALSE(pExtension->IsRequiredOnRemote());
+}
+
+TEST_F(PreconditionExtensionTest,
+        HandleRequestForRequiringMessageWithSdpWithoutQosAttributeDoesNothing)
+{
+    // SDP: exists
+    // QoS Precondition attribute: not exist
+    // Require: precondition
+    // -> Not update extension
+    ON_CALL(objMessageUtils, HasSdp(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsPreconditionIncludedInSdp(&objSession))
+            .WillByDefault(Return(IMS_FALSE));
 
     pExtension->HandleRequest(RequestType::PRACK, objMessageRequiresExtension);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
@@ -254,8 +326,13 @@ TEST_F(PreconditionExtensionTest, HandleRequestForRequiringMessageWithoutSdpDoes
 
 TEST_F(PreconditionExtensionTest, HandleRequestForRequiringMessageWithSdpUpdatesAvailability)
 {
-    ISipMessageBodyPart* pSdpBody = reinterpret_cast<ISipMessageBodyPart*>(1);
-    ON_CALL(objSipMessageRequiresExtension, GetSdpBodyPart).WillByDefault(Return(pSdpBody));
+    // SDP: exists
+    // QoS Precondition attribute: exists
+    // Require: precondition
+    // -> Update extension
+    ON_CALL(objMessageUtils, HasSdp(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsPreconditionIncludedInSdp(&objSession))
+            .WillByDefault(Return(IMS_TRUE));
 
     pExtension->HandleRequest(RequestType::PRACK, objMessageRequiresExtension);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());
@@ -275,7 +352,30 @@ TEST_F(PreconditionExtensionTest, HandleRequestForRequiringStartMessageUpdatesAv
 
 TEST_F(PreconditionExtensionTest, HandleRequestForSupportingMessageWithoutSdpDoesNothing)
 {
-    ON_CALL(objSipMessageSupportsExtension, GetSdpBodyPart).WillByDefault(Return(nullptr));
+    // SDP: not exist
+    // Supported: precondition
+    // -> Not update extension
+    ON_CALL(objMessageUtils, HasSdp(_)).WillByDefault(Return(IMS_FALSE));
+
+    pExtension->HandleRequest(RequestType::PRACK, objMessageSupportsExtension);
+    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
+    EXPECT_FALSE(pExtension->IsRequiredOnRemote());
+
+    pExtension->HandleRequest(RequestType::EARLY_UPDATE, objMessageSupportsExtension);
+    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
+    EXPECT_FALSE(pExtension->IsRequiredOnRemote());
+}
+
+TEST_F(PreconditionExtensionTest,
+        HandleRequestForSupportingMessageWithSdpWithoutQosAttributeDoesNothing)
+{
+    // SDP: exists
+    // QoS Precondition attribute: not exist
+    // Supported: precondition
+    // -> Not update extension
+    ON_CALL(objMessageUtils, HasSdp(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsPreconditionIncludedInSdp(&objSession))
+            .WillByDefault(Return(IMS_FALSE));
 
     pExtension->HandleRequest(RequestType::PRACK, objMessageSupportsExtension);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
@@ -288,8 +388,13 @@ TEST_F(PreconditionExtensionTest, HandleRequestForSupportingMessageWithoutSdpDoe
 
 TEST_F(PreconditionExtensionTest, HandleRequestForSupportingMessageWithSdpUpdatesAvailability)
 {
-    ISipMessageBodyPart* pSdpBody = reinterpret_cast<ISipMessageBodyPart*>(1);
-    ON_CALL(objSipMessageSupportsExtension, GetSdpBodyPart).WillByDefault(Return(pSdpBody));
+    // SDP: exists
+    // QoS Precondition attribute: exists
+    // Supported: precondition
+    // -> Update Supported extension only
+    ON_CALL(objMessageUtils, HasSdp(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsPreconditionIncludedInSdp(&objSession))
+            .WillByDefault(Return(IMS_TRUE));
 
     pExtension->HandleRequest(RequestType::PRACK, objMessageSupportsExtension);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());
@@ -332,7 +437,26 @@ TEST_F(PreconditionExtensionTest, HandleResponseForSomeMessageDoesNothing)
 
 TEST_F(PreconditionExtensionTest, HandleResponseForRequiringPrMessageWithoutSdpDoesNothing)
 {
-    ON_CALL(objSipMessageRequiresExtension, GetSdpBodyPart).WillByDefault(Return(nullptr));
+    // SDP: not exist
+    // Require: precondition
+    // -> Not update extension
+    ON_CALL(objMessageUtils, HasSdp(_)).WillByDefault(Return(IMS_FALSE));
+
+    pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessageRequiresExtension);
+    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
+    EXPECT_FALSE(pExtension->IsRequiredOnRemote());
+}
+
+TEST_F(PreconditionExtensionTest,
+        HandleResponseForRequiringPrMessageWithSdpWithoutQosAttributeDoesNothing)
+{
+    // SDP: exists
+    // QoS Precondition attribute: not exist
+    // Require: precondition
+    // -> Not update extension
+    ON_CALL(objMessageUtils, HasSdp(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsPreconditionIncludedInSdp(&objSession))
+            .WillByDefault(Return(IMS_FALSE));
 
     pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessageRequiresExtension);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
@@ -341,8 +465,13 @@ TEST_F(PreconditionExtensionTest, HandleResponseForRequiringPrMessageWithoutSdpD
 
 TEST_F(PreconditionExtensionTest, HandleResponseForRequiringPrMessageWithSdpUpdatesAvailability)
 {
-    ISipMessageBodyPart* pSdpBody = reinterpret_cast<ISipMessageBodyPart*>(1);
-    ON_CALL(objSipMessageRequiresExtension, GetSdpBodyPart).WillByDefault(Return(pSdpBody));
+    // SDP: exists
+    // QoS Precondition attribute: exists
+    // Require: precondition
+    // -> Update extension
+    ON_CALL(objMessageUtils, HasSdp(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsPreconditionIncludedInSdp(&objSession))
+            .WillByDefault(Return(IMS_TRUE));
 
     pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessageRequiresExtension);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());
@@ -351,7 +480,26 @@ TEST_F(PreconditionExtensionTest, HandleResponseForRequiringPrMessageWithSdpUpda
 
 TEST_F(PreconditionExtensionTest, HandleResponseForSupportingPrMessageWithoutSdpDoesNothing)
 {
-    ON_CALL(objSipMessageSupportsExtension, GetSdpBodyPart).WillByDefault(Return(nullptr));
+    // SDP: not exist
+    // Supported: precondition
+    // -> Update Supported extension only
+    ON_CALL(objMessageUtils, HasSdp(_)).WillByDefault(Return(IMS_FALSE));
+
+    pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessageSupportsExtension);
+    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
+    EXPECT_FALSE(pExtension->IsRequiredOnRemote());
+}
+
+TEST_F(PreconditionExtensionTest,
+        HandleResponseForSupportingPrMessageWithSdpWithoutQosAttributeDoesNothing)
+{
+    // SDP: exists
+    // QoS Precondition attribute: not exist
+    // Supported: precondition
+    // -> Not update extension
+    ON_CALL(objMessageUtils, HasSdp(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsPreconditionIncludedInSdp(&objSession))
+            .WillByDefault(Return(IMS_FALSE));
 
     pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessageSupportsExtension);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
@@ -360,8 +508,13 @@ TEST_F(PreconditionExtensionTest, HandleResponseForSupportingPrMessageWithoutSdp
 
 TEST_F(PreconditionExtensionTest, HandleResponseForSupportingPrMessageWithSdpUpdatesAvailability)
 {
-    ISipMessageBodyPart* pSdpBody = reinterpret_cast<ISipMessageBodyPart*>(1);
-    ON_CALL(objSipMessageSupportsExtension, GetSdpBodyPart).WillByDefault(Return(pSdpBody));
+    // SDP: exists
+    // QoS Precondition attribute: exists
+    // Supported: precondition
+    // -> Update Supported extension only
+    ON_CALL(objMessageUtils, HasSdp(_)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsPreconditionIncludedInSdp(&objSession))
+            .WillByDefault(Return(IMS_TRUE));
 
     pExtension->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, objMessageSupportsExtension);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());

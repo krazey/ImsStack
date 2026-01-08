@@ -26,6 +26,17 @@
 
 class MockIAosConnection : public IAosConnection {
 public:
+    MockIAosConnection()
+    {
+        ON_CALL(*this, GetHostByName)
+                .WillByDefault(
+                        [this](IN const AString& strHostName, OUT ImsList<IpAddress>& objIps,
+                                IN IMS_SINT32 nIpVersion)
+                        {
+                            return GetHostByNameInternal(strHostName, &objIps, nIpVersion);
+                        });
+    }
+
     MOCK_METHOD(IMS_BOOL, Activate, (), (override));
     MOCK_METHOD(void, Deactivate, (), (override));
     MOCK_METHOD(IMS_BOOL, IsActivationRequested, (), (override));
@@ -36,14 +47,10 @@ public:
     MOCK_METHOD(IMS_SINT32, GetMtu, (), (override));
     MOCK_METHOD(const IpAddress&, GetLocalAddress, (IN IMS_SINT32 nIpVersion), (override));
     MOCK_METHOD(const AStringArray&, GetPcscfAddress, (IN IMS_SINT32 nIpVersion), (override));
-    IMS_SINT32 GetHostByName(IN const AString& strHostName, OUT ImsList<IpAddress>& objIps,
-            IN IMS_SINT32 nIpVersion = 0) override
-    {
-        return GetHostByNameInternal(strHostName, &objIps, nIpVersion);
-    }
-    MOCK_METHOD(IMS_SINT32, GetHostByNameInternal,
-            (IN const AString& strHostName, OUT ImsList<IpAddress>* objIps,
-                    IN IMS_SINT32 nIpVersion));
+    MOCK_METHOD(IMS_SINT32, GetHostByName,
+            (IN const AString& strHostName, OUT ImsList<IpAddress>& objIps,
+                    IN IMS_SINT32 nIpVersion),
+            (override));
     MOCK_METHOD(const AString&, GetIfaceName, (), (override));
     MOCK_METHOD(IMS_BOOL, IsEpdgEnabled, (), (override));
     MOCK_METHOD(IMS_BOOL, IsIpv6Preferred, (), (override));
@@ -51,6 +58,11 @@ public:
     MOCK_METHOD(IMS_BOOL, IsLimitedServicePcoValue, (), (override));
     MOCK_METHOD(IMS_SINT32, GetCarrierSignalPcoValue, (), (override));
     MOCK_METHOD(void, SetCarrierSignalPcoValue, (IN IMS_SINT32 nValue), (override));
+
+    // Add mock method that can set OUT parameter
+    MOCK_METHOD(IMS_SINT32, GetHostByNameInternal,
+            (IN const AString& strHostName, OUT ImsList<IpAddress>* objIps,
+                    IN IMS_SINT32 nIpVersion));
 };
 
 #endif // MOCK_I_AOS_CONNECTION_H_

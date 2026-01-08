@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "MtcDef.h"
+#include "ImsList.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
@@ -69,7 +71,7 @@ PUBLIC VIRTUAL void GroupCallController::OnReferenceStartFailed(IN IConferenceRe
 
 PROTECTED VIRTUAL void GroupCallController::ProcessGroupCall(IN ImsList<ConfUser*>& objUsers,
         IN CallInfo& objCallInfo, IN MediaInfo& objMediaInfo,
-        IN ImsMap<SuppType, SuppService*>& objSuppServices)
+        IN ImsList<SuppService*>& objSuppServices)
 {
     IMS_TRACE_I("ProcessGroupCall", 0, 0, 0);
     if (IsReadyToPerformCmd() == IMS_FALSE)
@@ -95,20 +97,15 @@ PROTECTED VIRTUAL void GroupCallController::ProcessGroupCall(IN ImsList<ConfUser
 PUBLIC VIRTUAL void GroupCallController::StartConferenceCall(
         IN ConferenceOperationQueue::ConferenceOperation*)
 {
-    // TODO: TEMP.
-    // IMtcCall* piCall = m_objCallManager.GetCallByCallKey(m_objConfCallContext.GetCallKey());
-
     /*
+    IMtcCall* piCall = m_objCallManager.GetCallByCallKey(m_objConfCallContext.GetCallKey());
+    if (piCall == IMS_NULL)
     {
-        IMS_TRACE_I("StartConferenceCall : session is null", 0, 0, 0);
         delete pParams;
         Recover();
         SendClosed();
     }
-    */
 
-    // TODO: CallType? start type?
-    /*
     piCall->StartConference(CallType::VOIP, pParams->objSuppServices, &(pParams->objMediaInfo),
             pParams->objUsers);
     */

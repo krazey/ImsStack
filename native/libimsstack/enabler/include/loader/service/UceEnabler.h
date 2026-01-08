@@ -24,7 +24,7 @@ class UceEnabler : public Enabler
 {
 public:
     explicit UceEnabler(IN IMS_SINT32 nSlotId);
-    virtual ~UceEnabler();
+    ~UceEnabler() override;
 
     UceEnabler(IN const UceEnabler&) = delete;
     UceEnabler& operator=(IN const UceEnabler&) = delete;

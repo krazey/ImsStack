@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
+#include "ICoreService.h"
+#include "IImsAosInfo.h"
+#include "IMtcService.h"
+#include "INetworkWatcher.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ImsTrace.h"
+#include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "SipParsingHelper.h"
 #include "TextParser.h"
@@ -24,7 +30,10 @@
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
 #include "call/message/MtcMessageMediator.h"
+#include "call/message/TemplateFormatter.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "configuration/MtcConfigurationResolver.h"
+#include "helper/IMtcAosConnector.h"
 #include "utility/IMessageUtils.h"
 #include "utility/MessageUtil.h"
 
@@ -43,56 +52,95 @@ MtcMessageMediator::~MtcMessageMediator() {}
 PUBLIC IMS_RESULT MtcMessageMediator::MessageMediator_AdjustMessage(
         IN_OUT ISipMessage* piSipMessage, IN IMS_SINT32 /* nMessage */)
 {
-    if (m_strOriginalContactHeader.GetLength() <= 0)
+    if (piSipMessage->IsHeaderPresent(ISipHeader::CONTACT_NORMAL))
     {
-        m_strOriginalContactHeader = piSipMessage->GetHeader(ISipHeader::CONTACT_NORMAL);
-    }
-
-    if (piSipMessage->IsHeaderPresent(ISipHeader::CONTACT_NORMAL) &&
-            m_objContext.GetConfigurationProxy().Is(
-                    Feature::SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE))
-    {
-        switch (GetCallTypeOfCurrentMessage())
-        {
-            case CallType::VT:
-                piSipMessage->SetHeader(ISipHeader::CONTACT_NORMAL,
-                        GetContactHeaderWithoutFeatureTag(MessageUtil::STR_TEXT));
-                break;
-            case CallType::RTT:
-                piSipMessage->SetHeader(ISipHeader::CONTACT_NORMAL,
-                        GetContactHeaderWithoutFeatureTag(MessageUtil::STR_VIDEO));
-                break;
-            default:
-                piSipMessage->SetHeader(ISipHeader::CONTACT_NORMAL, m_strOriginalContactHeader);
-                break;
-        }
+        MayAdjustContactHeader(piSipMessage);
     }
 
     return IMS_SUCCESS;
 }
 
 PRIVATE
-AString MtcMessageMediator::GetContactHeaderWithoutFeatureTag(IN const AString& strFeatureTag)
+void MtcMessageMediator::MayAdjustContactHeader(IN_OUT ISipMessage* pMessage)
 {
-    IMS_TRACE_D(
-            "GetContactHeaderWithoutFeatureTag : Feature tag[%s]", strFeatureTag.GetStr(), 0, 0);
+    ISipHeader* pContactHeader = IMS_NULL;
+    MaySetVideoTextFeatureExclusively(&pContactHeader, pMessage);
+    MayFormatContactAddress(&pContactHeader, pMessage);
 
-    ISipHeader* piHeader =
-            SipParsingHelper::CreateHeader(ISipHeader::CONTACT_NORMAL, m_strOriginalContactHeader);
-    if (!piHeader)
+    if (pContactHeader)
     {
-        return m_strOriginalContactHeader;
+        pMessage->SetHeader(ISipHeader::CONTACT_NORMAL, pContactHeader->ToStringWithoutName());
+        pContactHeader->Destroy();
     }
-
-    piHeader->RemoveParameter(strFeatureTag);
-    AString strModifiedHeader = piHeader->GetHeaderValue();
-    piHeader->Destroy();
-
-    return strModifiedHeader;
 }
 
 PRIVATE
-CallType MtcMessageMediator::GetCallTypeOfCurrentMessage()
+void MtcMessageMediator::MaySetVideoTextFeatureExclusively(
+        IN_OUT ISipHeader** pContactHeader, IN const ISipMessage* pMessage)
+{
+    if (!m_objContext.GetConfigurationProxy().GetBoolean(ConfigVt::
+                        KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL))
+    {
+        return;
+    }
+
+    if (*pContactHeader == IMS_NULL)
+    {
+        *pContactHeader = CreateContactHeader(pMessage);
+    }
+    switch (GetCallType())
+    {
+        case CallType::VT:
+            return (*pContactHeader)->RemoveParameter(MessageUtil::STR_TEXT);
+        case CallType::RTT:
+            return (*pContactHeader)->RemoveParameter(MessageUtil::STR_VIDEO);
+        default:
+            return;
+    }
+}
+
+PRIVATE
+void MtcMessageMediator::MayFormatContactAddress(
+        IN_OUT ISipHeader** pContactHeader, IN const ISipMessage* pMessage)
+{
+    if (m_objContext.GetService().GetServiceType() != ServiceType::EMERGENCY)
+    {
+        return;
+    }
+
+    AString strFormat = MtcConfigurationResolver::GetContactHeaderAddressInInviteForEmergency(
+            m_objContext.GetConfigurationProxy(), GetAosEmergencyRegMode(),
+            PhoneInfoService::GetPhoneInfoService()
+                    ->GetNetworkWatcher(m_objContext.GetSlotId())
+                    ->GetDataRoamingType());
+
+    if (strFormat.GetLength() <= 0)
+    {
+        return;
+    }
+
+    if (*pContactHeader == IMS_NULL)
+    {
+        *pContactHeader = CreateContactHeader(pMessage);
+    }
+    (*pContactHeader)->GetSipAddress()->SetUri(TemplateFormatter::Format(strFormat, m_objContext));
+}
+
+PRIVATE
+ISipHeader* MtcMessageMediator::CreateContactHeader(IN const ISipMessage* pMessage) const
+{
+    ISipHeader* pContactHeader = SipParsingHelper::CreateHeader(
+            ISipHeader::CONTACT_NORMAL, pMessage->GetHeader(ISipHeader::CONTACT_NORMAL));
+    if (!pContactHeader)
+    {
+        IMS_TRACE_E(0, "Failed to create a Contact header", 0, 0, 0);
+    }
+
+    return pContactHeader;
+}
+
+PRIVATE
+CallType MtcMessageMediator::GetCallType() const
 {
     // VZ_REQ_5GNRSAVOICEVIDEO_4105999311948863
     // The device shall treat a "downgraded video call" as a video call, ...
@@ -104,4 +152,17 @@ CallType MtcMessageMediator::GetCallTypeOfCurrentMessage()
     }
 
     return m_objContext.GetSession()->GetCallType();
+}
+
+PRIVATE
+IMS_UINT32 MtcMessageMediator::GetAosEmergencyRegMode() const
+{
+    const IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
+    if (pAosConnector == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "IMtcAosConnector is null", 0, 0, 0);
+        return IImsAosInfo::REG_MODE_UNKNOWN;
+    }
+
+    return pAosConnector->GetRegistrationMode();
 }

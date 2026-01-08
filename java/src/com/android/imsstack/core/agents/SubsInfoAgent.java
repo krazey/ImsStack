@@ -18,8 +18,8 @@ package com.android.imsstack.core.agents;
 
 import android.content.Context;
 
+import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.core.agents.SubsInfoInterface;
-import com.android.imsstack.util.ImsPrivateProperties;
 
 public class SubsInfoAgent implements SubsInfoInterface {
     private final int mSlotId;

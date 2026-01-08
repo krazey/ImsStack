@@ -38,14 +38,15 @@ public:
     virtual void ResetNonInviteTransactionTimer();
 
 private:
-    void UpdateTimer(IN IMS_BOOL bInviteTransaction, IN IMS_SINT32 nValue);
-    IMS_BOOL IsNeedToUpdate() const;
+    IMS_BOOL UpdateTimer(IN IMS_BOOL bInviteTransaction, IN IMS_SINT32 nValue);
+    IMS_BOOL MayUpdateForEpsFallbackTrigger();
+    IMS_BOOL MayUpdateForTcallTimerExpiry();
 
+    IMtcCallContext& m_objContext;
     const ISipConfig* m_pSipConfig;
-    IMS_SINT32 m_nSlotId;
     MtcConfigurationProxy& m_objConfiguration;
-    IMS_BOOL m_bEmergency;
-    IMS_BOOL m_bWifi;
+
+    IMS_BOOL m_bUpdated;
 };
 
 #endif

@@ -20,6 +20,7 @@
 #include "MtcDef.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
+#include "SipStatusCode.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
@@ -28,7 +29,6 @@
 #include "ect/EctFactory.h"
 #include "ect/EctReference.h"
 #include "ect/IEctControllerListener.h"
-#include "sipcore/SipStatusCode.h"
 #include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -69,7 +69,7 @@ PUBLIC VIRTUAL void EctController::OnReferenceUpdated(IN IMS_SINT32 nSipFragCode
     IMS_TRACE_D("OnReferenceUpdated", 0, 0, 0);
     if (SipStatusCode::IsFinalSuccess(nSipFragCode))
     {
-        OnCompleted();
+        OnSuccess();
     }
     else if (SipStatusCode::IsFinalFailure(nSipFragCode))
     {
@@ -92,16 +92,10 @@ PROTECTED
 IMtcCall* EctController::GetTransferee() const
 {
     IMtcCall* piTransferee = m_objContext.GetCallManager().GetCallByCallKey(m_nTransfereeKey);
-    if (m_nTransfereeKey != piTransferee->GetKey())
-    {
-        IMS_TRACE_E(0, "NullCall.", 0, 0, 0);
-        // TODO: What to do?
-    }
-
     return piTransferee;
 }
 
-PROTECTED VIRTUAL void EctController::OnCompleted()
+PROTECTED VIRTUAL void EctController::OnSuccess()
 {
     NotifyResult(IMS_SUCCESS, CODE_USER_TERMINATED);
     TerminateTransfereeCall();
@@ -111,7 +105,6 @@ PROTECTED VIRTUAL void EctController::OnCompleted()
 
 PROTECTED VIRTUAL void EctController::OnFailed()
 {
-    // TODO: Recover()?
     NotifyResult(IMS_FAILURE, CODE_USER_TERMINATED);
     StopTimer();
     m_objListener.OnEctCompleted();
@@ -122,7 +115,6 @@ void EctController::NotifyResult(
         IN IMS_RESULT nResult, IN IMS_SINT32 nReason /* = CODE_NONE*/) const
 {
     IMS_TRACE_D("NotifyResult [%d]", nResult, 0, 0);
-    // TODO: is reason meaningful? what kind of reason to be used for ECT failure?
     IMtcUiNotifier& objNotifier = GetTransferee()->GetCallContext().GetUiNotifier();
     objNotifier.SendEctCompleted(nResult, CallReasonInfo(nReason));
 }

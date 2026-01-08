@@ -36,7 +36,7 @@ public:
         m_pConfigurable = new Configurable(this);
     }
 
-    inline ~TestConfigBase() { delete m_pConfigurable; }
+    ~TestConfigBase() override { delete m_pConfigurable; }
 
     inline IConfigurable* GetConfigurable() const { return m_pConfigurable; }
 

@@ -25,8 +25,7 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-LOCAL
-void virtualSessionImpl_MethodNotSupported()
+static void virtualSessionImpl_MethodNotSupported()
 {
     IMS_TRACE_I("Method call is not supported...", 0, 0, 0);
 }
@@ -476,6 +475,16 @@ PRIVATE VIRTUAL IMS_BOOL VirtualSessionImpl::IsSdpNegotiationAllowedForNonRpr() 
     if (m_piOwnerSession != IMS_NULL)
     {
         return m_piOwnerSession->IsSdpNegotiationAllowedForNonRpr();
+    }
+
+    return IMS_FALSE;
+}
+
+PRIVATE VIRTUAL IMS_BOOL VirtualSessionImpl::IsSdpOaInPreviewMode() const
+{
+    if (m_piOwnerSession != IMS_NULL)
+    {
+        return m_piOwnerSession->IsSdpOaInPreviewMode();
     }
 
     return IMS_FALSE;

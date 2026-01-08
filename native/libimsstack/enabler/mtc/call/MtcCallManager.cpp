@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
+#include "CallReasonInfo.h"
+#include "IMtcService.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "call/MtcCall.h"
 #include "call/MtcCallManager.h"
 #include "call/NullCall.h"
-#include "helper/ICallStateProxy.h"
-#include "interface/mtc/IMtcCallStateListener.h"
+#include "call/state/CallStateFactory.h"
 #include <functional>
 #include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
+static const IMS_UINT32 MAX_CALL_INDEX = 1000;
 NullCall* const MtcCallManager::s_pNullCall = new NullCall();
+IMS_UINT32 MtcCallManager::s_nNextCallIndex = 1;
 
 PUBLIC
 MtcCallManager::MtcCallManager(IN IMtcContext& objContext) :
@@ -35,29 +38,26 @@ MtcCallManager::MtcCallManager(IN IMtcContext& objContext) :
 {
 }
 
-PUBLIC VIRTUAL MtcCallManager::~MtcCallManager()
-{
-    for (IMS_UINT32 nIndex = 0; nIndex < m_lstCalls.GetSize(); nIndex++)
-    {
-        delete m_lstCalls.GetAt(nIndex);
-    }
-    m_lstCalls.Clear();
-}
+PUBLIC VIRTUAL MtcCallManager::~MtcCallManager() {}
 
 PUBLIC
-void MtcCallManager::Init()
-{
-    m_objContext.GetCallStateProxy().AddListener(this);
-}
+void MtcCallManager::Init() {}
 
 PUBLIC
 void MtcCallManager::DeInit()
 {
-    m_objContext.GetCallStateProxy().RemoveListener(this);
+    for (IMS_SINT32 nIndex = static_cast<IMS_SINT32>(m_lstCalls.GetSize()) - 1; nIndex >= 0;
+            nIndex--)
+    {
+        MtcCall* pCall = m_lstCalls.GetAt(nIndex);
+        pCall->Terminate(CallReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE));
+        delete pCall;
+        m_lstCalls.RemoveAt(nIndex);
+    }
 }
 
 PUBLIC VIRTUAL IMtcCall* MtcCallManager::CreateCall(
-        IN ServiceType eServiceType, IN CallInfo& objCallInfo)
+        IN ServiceType eServiceType, IN CallInfo& objCallInfo, IN const AString& strLogTag)
 {
     IMtcService* pService = m_objContext.GetServiceByType(eServiceType);
     if (pService == IMS_NULL || pService->GetStatus() != ServiceStatus::SERVICE_ACTIVE)
@@ -67,18 +67,36 @@ PUBLIC VIRTUAL IMtcCall* MtcCallManager::CreateCall(
         return s_pNullCall;
     }
 
-    MtcCall* pCall =
-            new MtcCall(m_objContext, *pService, objCallInfo, std::make_unique<CallStateFactory>());
+    MtcCall* pCall = new MtcCall(
+            m_objContext, *pService, objCallInfo, std::make_unique<CallStateFactory>(), strLogTag);
     m_lstCalls.Append(pCall);
     IMS_TRACE_D("CreateCall : call count[%d]", m_lstCalls.GetSize(), 0, 0);
 
     return pCall;
 }
 
+PUBLIC VIRTUAL void MtcCallManager::RemoveCall(IN CallKey nCallKey)
+{
+    IMS_SINT32 nIndex = GetFirstIndexByFilter(
+            [nCallKey](const MtcCall* pCall)
+            {
+                return pCall->GetKey() == nCallKey;
+            });
+
+    if (nIndex >= 0)
+    {
+        MtcCall* pCall = m_lstCalls.GetAt(nIndex);
+        delete pCall;
+        m_lstCalls.RemoveAt(nIndex);
+    }
+
+    IMS_TRACE_D("RemoveCall : call count[%d]", m_lstCalls.GetSize(), 0, 0);
+}
+
 PUBLIC VIRTUAL IMtcCall* MtcCallManager::GetCallByCallKey(IN CallKey nCallKey)
 {
     IMS_SINT32 nIndex = GetFirstIndexByFilter(
-            [nCallKey](MtcCall* pCall)
+            [nCallKey](const MtcCall* pCall)
             {
                 return pCall->GetKey() == nCallKey;
             });
@@ -94,6 +112,17 @@ PUBLIC VIRTUAL IMtcCall* MtcCallManager::GetCallByCallKey(IN CallKey nCallKey)
     }
 }
 
+PUBLIC VIRTUAL IMS_UINT32 MtcCallManager::GetNextCallIndex()
+{
+    if (s_nNextCallIndex >= MAX_CALL_INDEX)
+    {
+        s_nNextCallIndex = 1;
+    }
+
+    IMS_TRACE_D("GetNextCallIndex index[%d]", s_nNextCallIndex, 0, 0);
+    return s_nNextCallIndex++;
+}
+
 PUBLIC VIRTUAL ImsList<IMtcCall*> MtcCallManager::GetCalls()
 {
     return GetCallsByFilter(
@@ -106,7 +135,7 @@ PUBLIC VIRTUAL ImsList<IMtcCall*> MtcCallManager::GetCalls()
 PUBLIC VIRTUAL ImsList<IMtcCall*> MtcCallManager::GetCallsExcluding(IN CallKey nExcludingCallKey)
 {
     return GetCallsByFilter(
-            [nExcludingCallKey](MtcCall* pCall)
+            [nExcludingCallKey](const MtcCall* pCall)
             {
                 return pCall->GetCallKey() != nExcludingCallKey;
             });
@@ -115,7 +144,7 @@ PUBLIC VIRTUAL ImsList<IMtcCall*> MtcCallManager::GetCallsExcluding(IN CallKey n
 PUBLIC VIRTUAL ImsList<IMtcCall*> MtcCallManager::GetCallsByType(IN CallType eCallType)
 {
     return GetCallsByFilter(
-            [eCallType](MtcCall* pCall)
+            [eCallType](const MtcCall* pCall)
             {
                 return pCall->GetCallType() == eCallType;
             });
@@ -124,7 +153,7 @@ PUBLIC VIRTUAL ImsList<IMtcCall*> MtcCallManager::GetCallsByType(IN CallType eCa
 PUBLIC VIRTUAL ImsList<IMtcCall*> MtcCallManager::GetCallsByServiceType(IN ServiceType eServiceType)
 {
     return GetCallsByFilter(
-            [eServiceType](MtcCall* pCall)
+            [eServiceType](const MtcCall* pCall)
             {
                 return pCall->GetService().GetServiceType() == eServiceType;
             });
@@ -142,25 +171,11 @@ PUBLIC VIRTUAL ImsList<IMtcCall*> MtcCallManager::GetCallsInConference()
 PUBLIC VIRTUAL ImsList<IMtcCall*> MtcCallManager::GetCallsByState(IN State eState)
 {
     return GetCallsByFilter(
-            [eState](MtcCall* pCall)
+            [eState](const MtcCall* pCall)
             {
                 return pCall->GetState() == eState;
             });
 }
-
-PUBLIC VIRTUAL void MtcCallManager::OnCallStateChanged(IN CallKey nCallKey, IN State eState,
-        IN Type /* eType */, IN IMS_BOOL /* bEmergency */, IN IMS_SINT32 /* nReason */)
-{
-    IMS_TRACE_D(
-            "OnCallStateChanged : key[%d] state[%d]", nCallKey, static_cast<IMS_SINT32>(eState), 0);
-
-    if (eState == State::TERMINATING)
-    {
-        RemoveCall(nCallKey);
-    }
-}
-
-PUBLIC VIRTUAL void MtcCallManager::OnTotalCallStateChanged(IN State /* eState */) {}
 
 PRIVATE
 IMS_SINT32 MtcCallManager::GetFirstIndexByFilter(
@@ -197,23 +212,4 @@ ImsList<IMtcCall*> MtcCallManager::GetCallsByFilter(
     }
 
     return lstResult;
-}
-
-PRIVATE void MtcCallManager::RemoveCall(IN CallKey nCallKey)
-{
-    IMS_SINT32 nIndex = GetFirstIndexByFilter(
-            [nCallKey](MtcCall* pCall)
-            {
-                return pCall->GetKey() == nCallKey;
-            });
-
-    if (nIndex >= 0)
-    {
-        MtcCall* pCall = m_lstCalls.GetAt(nIndex);
-        IMS_ASSERT(pCall->GetState() == IMtcCall::State::TERMINATING);
-        delete pCall;
-        m_lstCalls.RemoveAt(nIndex);
-    }
-
-    IMS_TRACE_D("RemoveCall : call count[%d]", m_lstCalls.GetSize(), 0, 0);
 }

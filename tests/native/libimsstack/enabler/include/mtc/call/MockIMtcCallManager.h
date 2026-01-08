@@ -17,21 +17,22 @@
 #ifndef MOCK_I_MTC_CALL_MANAGER_H_
 #define MOCK_I_MTC_CALL_MANAGER_H_
 
-#include "IMtcService.h"
-#include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
-#include "call/IMtcCall.h"
 #include "call/IMtcCallManager.h"
 #include <gmock/gmock.h>
+
+class IMtcCall;
+enum class ServiceType;
+template <typename T>
+class ImsList;
 
 class MockIMtcCallManager : public IMtcCallManager
 {
 public:
-    ~MockIMtcCallManager() {}
-
-    MOCK_METHOD(IMtcCall*, CreateCall, (IN ServiceType eServiceType, IN CallInfo& objCallInfo),
+    MOCK_METHOD(IMtcCall*, CreateCall,
+            (IN ServiceType eServiceType, IN CallInfo& objCallInfo, IN const AString& strLogTag),
             (override));
+    MOCK_METHOD(void, RemoveCall, (IN CallKey nCallKey), (override));
     MOCK_METHOD(IMtcCall*, GetCallByCallKey, (IN CallKey nCallKey), (override));
     MOCK_METHOD(ImsList<IMtcCall*>, GetCalls, (), (override));
     MOCK_METHOD(ImsList<IMtcCall*>, GetCallsExcluding, (IN CallKey nExcludingCallKey), (override));
@@ -40,6 +41,7 @@ public:
             ImsList<IMtcCall*>, GetCallsByServiceType, (IN ServiceType eServiceType), (override));
     MOCK_METHOD(ImsList<IMtcCall*>, GetCallsInConference, (), (override));
     MOCK_METHOD(ImsList<IMtcCall*>, GetCallsByState, (IN State eState), (override));
+    MOCK_METHOD(IMS_UINT32, GetNextCallIndex, (), (override));
 };
 
 #endif

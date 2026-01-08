@@ -17,6 +17,7 @@
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
 #include "ServiceSystemTime.h"
+#include "ServiceTrace.h"
 
 #include "private/SipConfig.h"
 
@@ -24,6 +25,7 @@
 #include "ISipTransportListener.h"
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
+#include "SipError.h"
 #include "SipFactoryProxy.h"
 #include "SipMessageBuffer.h"
 #include "SipPortManager.h"
@@ -33,7 +35,7 @@
 #include "SipTransport.h"
 #include "SipTransportHelper.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipTransport::SipTransport(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nType) :
@@ -135,7 +137,7 @@ SipSocket* SipTransport::CreateTcpClientSocket()
         {
             if (SipRtConfigUtils::IsTcpPortRangeConfigured(GetSlotId()))
             {
-                SipPortManager* pPortMngr = SipPortManager::GetInstance();
+                const SipPortManager* pPortMngr = SipPortManager::GetInstance();
 
                 if (pPortMngr->IsPortCProvisioned())
                 {
@@ -322,18 +324,45 @@ IMS_BOOL SipTransport::InitTransportOnMessageReceived(IN ::SipMessage* /*pSipMsg
 }
 
 PUBLIC
-IMS_BOOL SipTransport::SendToNetwork(
-        IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen, IN IMS_BOOL bNotifyError /*= IMS_TRUE*/)
+void SipTransport::NotifyTransactionTimeout()
 {
-    // Find a socket to send an SIP message
+    if (!IsFlowControlPortConfigured() && !IsTcpConnectionOnlyRequired() &&
+            GetTransportHelper()->IsSocketPresent(m_pSocket) &&
+            m_pSocket->GetType() == SipSocketAddress::SOCKET_TCP_CLIENT)
+    {
+        // If SIP transaction timeout occurs and a client-initiated TCP connection exists,
+        // close the TCP socket so that new SIP requests can use the newly created socket.
+        SipStreamSocket* pStreamSocket = static_cast<SipStreamSocket*>(m_pSocket);
+
+        if (pStreamSocket->IsKeepAlivePermanent() || pStreamSocket->IsKeepAliveTimerActive())
+        {
+            IMS_TRACE_I("NotifyTransactionTimeout: TCP connection is ready to close", 0, 0, 0);
+            // Allow the socket close when the transport is being destroyed.
+            pStreamSocket->SetKeepAlivePolicy(0);
+        }
+    }
+}
+
+PUBLIC
+IMS_BOOL SipTransport::SendToNetwork(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
+        IN const SipProfile* pProfile, IN IMS_BOOL bNotifyError /*= IMS_TRUE*/)
+{
+    // Find a socket to send an SIP message, and if not found, try to create a new socket.
+    m_pSocket = (m_pSocket == IMS_NULL) ? LookupSocket() : m_pSocket;
+
+    if (GetTransportHelper()->IsSocketPresent(m_pSocket) && m_pSocket->IsClosedOrBeingClosed())
+    {
+        IMS_TRACE_D("Socket is already closed or being closed", 0, 0, 0);
+        ReleaseSocket();
+    }
+
     if (m_pSocket == IMS_NULL)
     {
-        m_pSocket = LookupSocket();
+        ReserveResource(pProfile);
 
         if (m_pSocket == IMS_NULL)
         {
-            IMS_TRACE_E(0, "Can't find a proper SIP socket information from the transport layer.",
-                    0, 0, 0);
+            IMS_TRACE_E(0, "Can't find a proper SIP socket from the transport layer.", 0, 0, 0);
             goto EXIT_SendToNetwork;
         }
     }
@@ -366,10 +395,7 @@ IMS_BOOL SipTransport::SendToNetwork(
         goto EXIT_SendToNetwork;
     }
 
-    if (!m_bIsRetransmission)
-    {
-        m_bIsRetransmission = IMS_TRUE;
-    }
+    m_bIsRetransmission = IMS_TRUE;
 
     return IMS_TRUE;
 
@@ -558,14 +584,16 @@ PUBLIC GLOBAL void SipTransport::ParseHostNPort(
     SipStack::ParseHostNPort(strHostNPort, strHost, nPort);
 }
 
-PUBLIC GLOBAL void SipTransport::PrintMessage(IN IMS_SINT32 nSlotId, IN IMS_BOOL bSend,
-        IN const SipTransportAddress& objFarEnd, IN const IMS_CHAR* pszMessage,
+PUBLIC GLOBAL void SipTransport::PrintMessage(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nSocketId,
+        IN IMS_BOOL bSend, IN const SipTransportAddress& objFarEnd, IN const IMS_CHAR* pszMessage,
         IN IMS_SINT32 nLength)
 {
-    // SEND or RECV:Message Length:Transport Type:IP address:Port
+    // SEND or RECV:Message Length:Transport Type:IP address:Port [Additional information]
     // For example,
-    //    SEND:    <<<==SEND:512:UDP:10.168.114.153:5060==
-    //    RECV:    ==RECV:512:TCP:10.168.114.153:5060==>>>
+    //    Socket FD: 101
+    //    Slot ID: 0
+    //    SEND:    <<<==SEND:512:UDP:10.168.114.153:5060_101_s0==
+    //    RECV:    ==RECV:512:TCP:10.168.114.153:5060_101_s0==>>>
     const IMS_CHAR* pszFormat;
     const IMS_CHAR* pszTransport;
     AString strLog;
@@ -574,11 +602,11 @@ PUBLIC GLOBAL void SipTransport::PrintMessage(IN IMS_SINT32 nSlotId, IN IMS_BOOL
 
     if (bSend)
     {
-        pszFormat = "<<<==SEND:%d:%s:%s:%d_s%d==";
+        pszFormat = "<<<==SEND:%d:%s:%s:%d_%d_s%d==";
     }
     else
     {
-        pszFormat = "==RECV:%d:%s:%s:%d_s%d==>>>";
+        pszFormat = "==RECV:%d:%s:%s:%d_%d_s%d==>>>";
     }
 
     if (objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_UDP)
@@ -603,12 +631,12 @@ PUBLIC GLOBAL void SipTransport::PrintMessage(IN IMS_SINT32 nSlotId, IN IMS_BOOL
     {
         strLog.Sprintf(pszFormat, nLength, pszTransport,
                 objFarEnd.GetIpAddress().IsIPv6Address() ? "::" : "0.0.0.0", objFarEnd.GetPort(),
-                nSlotId);
+                nSocketId, nSlotId);
     }
     else
     {
         strLog.Sprintf(pszFormat, nLength, pszTransport, SipDebug::GetIp(objFarEnd.GetIpAddress()),
-                objFarEnd.GetPort(), nSlotId);
+                objFarEnd.GetPort(), nSocketId, nSlotId);
     }
 
     // Summary of message -- ends
@@ -617,11 +645,11 @@ PUBLIC GLOBAL void SipTransport::PrintMessage(IN IMS_SINT32 nSlotId, IN IMS_BOOL
     // LOG_EXCLUDING_SERVER_INFO
     if (SipRtConfigUtils::IsMessageHiddenInLog(nSlotId))
     {
-        IMS_TRACE_SIP(strLog.GetStr(), pszMessage, (nLength < 11) ? nLength : 11, IMS_FALSE);
+        IMS_TRACE_SIP(strLog.GetStr(), pszMessage, (nLength < 11) ? nLength : 11);
     }
     else
     {
-        IMS_TRACE_SIP(strLog.GetStr(), pszMessage, nLength, IMS_FALSE);
+        IMS_TRACE_SIP(strLog.GetStr(), pszMessage, nLength);
     }
 }
 
@@ -634,7 +662,9 @@ PROTECTED VIRTUAL void SipTransport::Socket_NotifyError(
         return;
     }
 
-    NotifyTransportError(nErrorCode);
+    IMS_BOOL bIgnoreClosedOrConnectFailed = (m_pSocket == IMS_NULL);
+    IMS_SINT32 nSocketType =
+            (m_pSocket != IMS_NULL) ? m_pSocket->GetType() : SipSocketAddress::SOCKET_NONE;
 
     if (m_pSendBuffer != IMS_NULL)
     {
@@ -643,6 +673,7 @@ PROTECTED VIRTUAL void SipTransport::Socket_NotifyError(
     }
 
     ReleaseSocket();
+    NotifyTransportError(nErrorCode, nSocketType, bIgnoreClosedOrConnectFailed);
 }
 
 PROTECTED VIRTUAL void SipTransport::Socket_SendEnabled(IN SipSocket* pSocket)
@@ -687,10 +718,7 @@ PROTECTED VIRTUAL void SipTransport::Socket_SendEnabled(IN SipSocket* pSocket)
         {
             // If this message(first message) is successfully sent,
             // then the retransmission flag will be set in here.
-            if (!m_bIsRetransmission)
-            {
-                m_bIsRetransmission = IMS_TRUE;
-            }
+            m_bIsRetransmission = IMS_TRUE;
 
             // The pending message is completely sent.
             if (m_pSendBuffer == IMS_NULL)
@@ -730,6 +758,15 @@ SipTransportHelper* SipTransport::GetTransportHelper() const
 PROTECTED
 void SipTransport::NotifyTransportError(IN IMS_SINT32 nErrorCode)
 {
+    IMS_SINT32 nSocketType =
+            (m_pSocket != IMS_NULL) ? m_pSocket->GetType() : SipSocketAddress::SOCKET_NONE;
+    NotifyTransportError(nErrorCode, nSocketType, (m_pSocket == IMS_NULL));
+}
+
+PROTECTED
+void SipTransport::NotifyTransportError(IN IMS_SINT32 nErrorCode, IN IMS_SINT32 nSocketType,
+        IN IMS_BOOL bIgnoreClosedOrConnectFailed)
+{
     if (m_piListener == IMS_NULL)
     {
         IMS_TRACE_D("Transport :: No Listener, Error (%d)", nErrorCode, 0, 0);
@@ -743,7 +780,7 @@ void SipTransport::NotifyTransportError(IN IMS_SINT32 nErrorCode)
         case SipSocket::ERROR_CLOSED:          // FALL-THROUGH
         case SipSocket::ERROR_CONNECT_FAILED:  // FALL-THROUGH
         case SipSocket::ERROR_DATA_CONNECTION_LOST:
-            if (m_pSocket == IMS_NULL)
+            if (bIgnoreClosedOrConnectFailed)
             {
                 // no-op
                 return;
@@ -751,13 +788,6 @@ void SipTransport::NotifyTransportError(IN IMS_SINT32 nErrorCode)
             break;
         default:
             break;
-    }
-
-    IMS_SINT32 nSocketType = SipSocketAddress::SOCKET_NONE;
-
-    if (nErrorCode == SipSocket::ERROR_CLOSED)
-    {
-        nSocketType = m_pSocket->GetType();
     }
 
     AString strError = CreateSocketErrorMessage(nErrorCode, nSocketType);
@@ -838,7 +868,7 @@ IMS_BOOL SipTransport::ReserveSocket(IN const SipProfile* pProfile /*= IMS_NULL*
     }
 
     // If the transport has already the connected socket, do not reserve the socket again.
-    if (m_pSocket != IMS_NULL)
+    if (GetTransportHelper()->IsSocketPresent(m_pSocket))
     {
         // Check if the port is same or not...
         if (m_nType != TYPE_CLIENT)
@@ -980,8 +1010,8 @@ IMS_BOOL SipTransport::TransmitMessage(IN const IMS_BYTE* pBuffer, IN IMS_SINT32
     // don't send the packet via Socket.
     if (SipRtConfigUtils::IsFeatureSipTxPacketBlockedEnabled(GetSlotId()))
     {
-        PrintMessage(GetSlotId(), IMS_TRUE, m_objFarEnd, reinterpret_cast<const IMS_CHAR*>(pBuffer),
-                nBuffLen);
+        PrintMessage(GetSlotId(), m_pSocket->GetSocketId(), IMS_TRUE, m_objFarEnd,
+                reinterpret_cast<const IMS_CHAR*>(pBuffer), nBuffLen);
         return IMS_TRUE;
     }
 
@@ -990,8 +1020,8 @@ IMS_BOOL SipTransport::TransmitMessage(IN const IMS_BYTE* pBuffer, IN IMS_SINT32
 
     // DEBUGGING message ...
     {
-        PrintMessage(GetSlotId(), IMS_TRUE, m_objFarEnd, reinterpret_cast<const IMS_CHAR*>(pBuffer),
-                nBuffLen);
+        PrintMessage(GetSlotId(), m_pSocket->GetSocketId(), IMS_TRUE, m_objFarEnd,
+                reinterpret_cast<const IMS_CHAR*>(pBuffer), nBuffLen);
     }
 
     if (nSentBytes == ISocket::RESULT_ERROR)

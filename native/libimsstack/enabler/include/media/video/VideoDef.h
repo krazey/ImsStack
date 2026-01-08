@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,14 +28,14 @@ typedef enum
 typedef enum
 {
     VIDEO_RESOLUTION_INVALID = 0,
-    VIDEO_RESOLUTION_QCIF_LS,  // QCIF Landscape (LGU+ group VT)
-    VIDEO_RESOLUTION_QVGA_LS,  // QVGA Landscape
-    VIDEO_RESOLUTION_QVGA_PR,  // QVGA Portrait
-    VIDEO_RESOLUTION_VGA_LS,   // VGA Landscape
-    VIDEO_RESOLUTION_VGA_PR,   // VGA Portrait
-    VIDEO_RESOLUTION_CIF_LS,   // CIF Landscape
-    VIDEO_RESOLUTION_CIF_PR,   // COF Portrait
-    VIDEO_RESOLUTION_QCIF_PR,  // QCIF Portrait (base)
+    VIDEO_RESOLUTION_QCIF_LS,
+    VIDEO_RESOLUTION_QCIF_PR,
+    VIDEO_RESOLUTION_QVGA_LS,
+    VIDEO_RESOLUTION_QVGA_PR,
+    VIDEO_RESOLUTION_VGA_LS,
+    VIDEO_RESOLUTION_VGA_PR,
+    VIDEO_RESOLUTION_CIF_LS,
+    VIDEO_RESOLUTION_CIF_PR,
     VIDEO_RESOLUTION_SQCIF_LS,
     VIDEO_RESOLUTION_SQCIF_PR,
     VIDEO_RESOLUTION_SIF_LS,

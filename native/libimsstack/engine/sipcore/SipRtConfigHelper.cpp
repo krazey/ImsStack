@@ -20,7 +20,7 @@
 #include "SipPortManager.h"
 #include "SipRtConfigHelper.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipRtConfigHelper::SipRtConfigHelper() :
@@ -413,7 +413,7 @@ PRIVATE VIRTUAL IMS_RESULT SipRtConfigHelper::SetConfig(
     {
         case SipRtConfig::CONFIG_I_LOG_MASK:
         {
-            SipRtConfig::LogMask* pLogMask = DYNAMIC_CAST(SipRtConfig::LogMask*, pParam);
+            const SipRtConfig::LogMask* pLogMask = DYNAMIC_CAST(SipRtConfig::LogMask*, pParam);
 
             if (pLogMask == IMS_NULL)
             {
@@ -522,7 +522,7 @@ PRIVATE VIRTUAL IMS_RESULT SipRtConfigHelper::SetConfig(
 
         case SipRtConfig::CONFIG_I_IPSEC_SA:
         {
-            SipRtConfig::IpSecSa* pIpSecSa = DYNAMIC_CAST(SipRtConfig::IpSecSa*, pParam);
+            const SipRtConfig::IpSecSa* pIpSecSa = DYNAMIC_CAST(SipRtConfig::IpSecSa*, pParam);
 
             if (pIpSecSa == IMS_NULL)
             {
@@ -532,7 +532,7 @@ PRIVATE VIRTUAL IMS_RESULT SipRtConfigHelper::SetConfig(
 
             for (IMS_UINT32 i = 0; i < m_objIpSecSas.GetSize(); ++i)
             {
-                SipRtConfig::IpSecSa& objIpSecSa = m_objIpSecSas.GetAt(i);
+                const SipRtConfig::IpSecSa& objIpSecSa = m_objIpSecSas.GetAt(i);
 
                 if (objIpSecSa.Equals(*pIpSecSa))
                 {

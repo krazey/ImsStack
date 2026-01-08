@@ -24,7 +24,7 @@ class SubscriberRefreshHelper : public RefreshHelper
 {
 public:
     SubscriberRefreshHelper(IN IRefreshable* piRefreshable, IN const SubState* pSubState);
-    virtual ~SubscriberRefreshHelper();
+    ~SubscriberRefreshHelper() override;
 
     SubscriberRefreshHelper(IN const SubscriberRefreshHelper&) = delete;
     SubscriberRefreshHelper& operator=(IN const SubscriberRefreshHelper&) = delete;

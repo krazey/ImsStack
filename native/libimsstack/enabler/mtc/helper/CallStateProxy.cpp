@@ -118,7 +118,6 @@ void CallStateProxy::UpdateCallState(IN CallKey nCallkey, IN IMtcCall::State eSt
     }
     if (m_objAsynchronousListeners.GetSize() > 0)
     {
-        // TODO: use OperationAsyncRunner?
         PostMessage(MESSAGE_ASYNC_NOTIFY, reinterpret_cast<IMS_UINTP>(pDetails),
                 static_cast<IMS_UINTP>(bTotalCallStateUpdated));
     }
@@ -126,6 +125,14 @@ void CallStateProxy::UpdateCallState(IN CallKey nCallkey, IN IMtcCall::State eSt
     {
         delete pDetails;
     }
+}
+
+PUBLIC
+void CallStateProxy::NotifyCallSessionReleased(
+        IN CallKey nCallKey, IN IMS_BOOL bEmergency, IN IMS_BOOL bEstablished)
+{
+    NotifyCallSessionReleased(m_objSynchronousListeners, nCallKey, bEmergency, bEstablished);
+    NotifyCallSessionReleased(m_objAsynchronousListeners, nCallKey, bEmergency, bEstablished);
 }
 
 PUBLIC VIRTUAL IMS_BOOL CallStateProxy::DispatchMessage(IN ImsMessage& objMsg)
@@ -238,5 +245,15 @@ void CallStateProxy::NotifyTotalCallState(IN ImsList<IMtcCallStateListener*> obj
     {
         objListeners.GetAt(i)->OnTotalCallStateChanged(
                 static_cast<IMtcCallStateListener::State>(m_eTotalState));
+    }
+}
+
+PRIVATE
+void CallStateProxy::NotifyCallSessionReleased(IN ImsList<IMtcCallStateListener*> objListeners,
+        IN CallKey nCallKey, IN IMS_BOOL bEmergency, IN IMS_BOOL bEstablished) const
+{
+    for (IMS_UINT32 i = 0; i < objListeners.GetSize(); i++)
+    {
+        objListeners.GetAt(i)->OnCallSessionReleased(nCallKey, bEmergency, bEstablished);
     }
 }

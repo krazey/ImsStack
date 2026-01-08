@@ -34,7 +34,7 @@ class MtcRoutingRejectHandler final : public ISipRoutingRejectListener
 public:
     explicit MtcRoutingRejectHandler(
             IN IMtcContext& objContext, IN INetworkWatcher& objNetworkWatcher);
-    ~MtcRoutingRejectHandler();
+    ~MtcRoutingRejectHandler() override;
     MtcRoutingRejectHandler(const MtcRoutingRejectHandler&) = delete;
     MtcRoutingRejectHandler& operator=(const MtcRoutingRejectHandler&) = delete;
 

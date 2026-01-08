@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 #include "AStringBuffer.h"
-#include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
 #include "Sdp.h"
+#include "SdpEncryptionKey.h"
+#include "SdpInformation.h"
 #include "SdpMediaDescription.h"
 
 __IMS_TRACE_TAG_SDP__;

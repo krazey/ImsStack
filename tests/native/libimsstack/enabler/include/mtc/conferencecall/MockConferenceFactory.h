@@ -17,7 +17,8 @@
 #ifndef MOCK_CONFERENCE_FACTORY_H_
 #define MOCK_CONFERENCE_FACTORY_H_
 
-#include "ImsList.h"
+#include "ImsTypeDef.h"
+#include "call/IMtcCall.h"
 #include "conferencecall/ConferenceFactory.h"
 #include <gmock/gmock.h>
 
@@ -31,8 +32,9 @@ class ConferenceSubscription;
 class IConferenceReference;
 class IConferenceReferenceListener;
 class IConferenceSubscriptionListener;
-class IMtcCallContext;
 class IMtcContext;
+template <typename T>
+class ImsList;
 
 class MockConferenceFactory : public ConferenceFactory
 {
@@ -41,7 +43,7 @@ public:
             ConferenceFactory(objContext)
     {
     }
-    virtual ~MockConferenceFactory(){};
+    virtual ~MockConferenceFactory() override {};
 
     MOCK_METHOD(ConferenceSubscription*, CreateSubscription,
             (IN CallKey nConfCallKey, IN ConferenceParticipantList& objList,
@@ -58,8 +60,7 @@ public:
     MOCK_METHOD(ConferenceParticipantList*, CreateParticipantList, (), (override));
     MOCK_METHOD(ConferenceOperationQueue*, CreateOperationQueue, (), (override));
     MOCK_METHOD(ConferenceEventNotifier*, CreateEventNotifier,
-            (IN IMtcCallContext& objConfCallContext,
-                    IN CallConnectionIdManager& objConnectionIdManager),
+            (IN CallKey nConfCallKey, IN CallConnectionIdManager& objConnectionIdManager),
             (override));
     MOCK_METHOD(ConferenceInfoUpdater*, CreateInfoUpdater, (), (override));
     MOCK_METHOD(ConferenceInfo*, CreateInfo, (), (override));

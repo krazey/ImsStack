@@ -50,6 +50,7 @@
         <item>Telus</item>
         <item>Freedom</item>
         <item>Videotron</item>
+        <item>FirstNet</item>
     </string-array>
 
     <string-array name="carrier_config_carrier_id_value">
@@ -73,6 +74,7 @@
         <item>1404</item>
         <item>1895</item>
         <item>2008</item>
+        <item>2119</item>
     </string-array>
 
     <string-array name="volte_provisioning_entry">

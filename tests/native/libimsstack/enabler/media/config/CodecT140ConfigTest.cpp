@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +15,14 @@
  */
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
-#include "ICarrierConfig.h"
 #include "CarrierConfig.h"
+#include "ICarrierConfig.h"
 #include "ServiceConfig.h"
-#include "MockICarrierConfig.h"
 #include "config/CodecT140Config.h"
+#include "config/ImsCodec.h"
+
+#include "MockICarrierConfig.h"
 
 using ::testing::Return;
 
@@ -32,7 +33,8 @@ static const IMS_SINT32 DEFAULT_RED_LEVEL_NONE = CodecT140Config::DEFAULT_RED_LE
 static const IMS_SINT32 DEFAULT_RED_LEVEL = CodecT140Config::DEFAULT_RED_LEVEL;
 static const IMS_SINT32 DEFAULT_TEXT_SAMPLING_RATE = CodecT140Config::DEFAULT_TEXT_SAMPLING_RATE;
 
-class CodecT140ConfigTest : public ::testing::Test {
+class CodecT140ConfigTest : public ::testing::Test
+{
 public:
     ICarrierConfig* m_piCc;
 
@@ -61,10 +63,10 @@ TEST_F(CodecT140ConfigTest, GetConfigTest)
     IMS_UINT32 nTextRedLevel = 5;
     MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
     ON_CALL(*pMockICarrierConfig,
-            GetInt(CarrierConfig::Assets::KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT, -1))
+            GetInt(CarrierConfig::ImsRtt::KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT, -1))
             .WillByDefault(Return(nTextRedLevel));
 
-    EXPECT_TRUE(m_pConfig_redlevel->Create(pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig_redlevel->Create(pMockICarrierConfig));
     EXPECT_EQ(m_pConfig_redlevel->GetRedLevel(), 5);
     EXPECT_EQ(m_pConfig_redlevel->GetSamplingRate(), DEFAULT_TEXT_SAMPLING_RATE);
 
@@ -78,10 +80,10 @@ TEST_F(CodecT140ConfigTest, GetConfigTestT140)
     IMS_UINT32 nTextRedLevel = 5;
     MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
     ON_CALL(*pMockICarrierConfig,
-            GetInt(CarrierConfig::Assets::KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT, -1))
+            GetInt(CarrierConfig::ImsRtt::KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT, -1))
             .WillByDefault(Return(nTextRedLevel));
 
-    EXPECT_TRUE(m_pConfig_redlevel->Create(pMockICarrierConfig, 0));
+    EXPECT_TRUE(m_pConfig_redlevel->Create(pMockICarrierConfig));
     EXPECT_EQ(m_pConfig_redlevel->GetRedLevel(), DEFAULT_RED_LEVEL_NONE);
     EXPECT_EQ(m_pConfig_redlevel->GetSamplingRate(), DEFAULT_TEXT_SAMPLING_RATE);
 

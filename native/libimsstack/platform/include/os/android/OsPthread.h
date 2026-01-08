@@ -17,15 +17,15 @@
 #define OS_PTHREAD_H_
 
 #include "ImsThread.h"
-#include "IThreadImpListener.h"
 
+class IThreadImpListener;
 class OsPthreadPrivate;
 
 class OsPthread : public ImsThread
 {
 public:
     OsPthread();
-    virtual ~OsPthread();
+    ~OsPthread() override;
 
     OsPthread(IN const OsPthread&) = delete;
     OsPthread& operator=(IN const OsPthread&) = delete;

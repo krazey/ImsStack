@@ -15,21 +15,23 @@
  */
 
 #include "IMtcService.h"
+#include "MockICoreService.h"
+#include "MockIMessage.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
+#include "MockIReference.h"
+#include "MockISession.h"
+#include "MockISipMessage.h"
 #include "MtcDef.h"
+#include "SipStatusCode.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcSession.h"
 #include "call/ParticipantInfo.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/MockICoreService.h"
-#include "core/MockIMessage.h"
-#include "core/MockIReference.h"
-#include "core/MockISession.h"
 #include "dialingplan/MockIMtcDialingPlan.h"
 #include "ect/EctReference.h"
 #include "ect/MockIEctReferenceListener.h"
@@ -37,13 +39,12 @@
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockReferenceInterfaceHolder.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/SipStatusCode.h"
 #include "utility/MessageUtils.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
+using ::testing::ReturnNull;
 using ::testing::ReturnRef;
 
 namespace android
@@ -56,12 +57,21 @@ LOCAL AString ANY_TRANSFER_TARGET = "1111";
 class EctReferenceTest : public ::testing::Test
 {
 public:
+    inline EctReferenceTest() :
+            pConfigurationProxy(IMS_NULL),
+            pMockReferenceInterfaceHolder(IMS_NULL),
+            pParticipantInfo(IMS_NULL),
+            pEctReference(IMS_NULL),
+            objMessageUtils(objMockContext),
+            pSupplementaryService(IMS_NULL)
+    {
+    }
+
     MockIMtcContext objMockContext;
     MockIMtcService objMtcService;
     MockICoreService objCoreService;
     MockIEctReferenceListener objMockListener;
-    MtcConfigurationProxy* pConfigurationProxy;
-    MockIMtcConfigurationManager* pMockConfigurationManager;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     MockIMtcSipInterfaceFactory objMockInterfaceFactory;
     MockReferenceInterfaceHolder* pMockReferenceInterfaceHolder;
     MockIInterfaceHolderListener objMockHolderListener;
@@ -90,8 +100,7 @@ public:
 protected:
     virtual void SetUp() override
     {
-        pMockConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pMockConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objMockContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
 
@@ -105,6 +114,7 @@ protected:
                 .WillByDefault(ReturnRef(objMockInterfaceFactory));
 
         ON_CALL(objMockContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
+        ON_CALL(objMockContext, GetDialingPlan).WillByDefault(ReturnRef(objDialingPlan));
 
         pMockReferenceInterfaceHolder = new MockReferenceInterfaceHolder(objMockHolderListener);
         ON_CALL(objMockInterfaceFactory, GetIReferenceHolder)
@@ -153,6 +163,9 @@ protected:
 
     void SetUpUriFormatter(IN const AString& strUri)
     {
+        ON_CALL(objMtcService, IsEmergency).WillByDefault(Return(IMS_FALSE));
+        ON_CALL(objMockTargetContext, GetService).WillByDefault(ReturnRef(objMtcService));
+
         ON_CALL(objMockTargetContext, GetCallInfo).WillByDefault(ReturnRef(objTargetInfo));
         objTargetInfo.bConference = IMS_TRUE;  // to get Remote Uri from ParticipantInfo easily
 
@@ -163,7 +176,8 @@ protected:
         ON_CALL(objMockTargetContext, GetParticipantInfo)
                 .WillByDefault(ReturnRef(*pParticipantInfo));
 
-        ON_CALL(*pMockConfigurationManager, IsConferenceReferToUriSourcePaid)
+        ON_CALL(*pConfigurationProxy,
+                GetBoolean(ConfigVoice::KEY_CONFERENCE_REFER_TO_URI_SOURCE_PAID_BOOL))
                 .WillByDefault(Return(IMS_FALSE));
 
         ON_CALL(objDialingPlan, GetToUri(_, _, Scheme::SIP)).WillByDefault(Return(strUri));
@@ -212,6 +226,16 @@ TEST_F(EctReferenceTest, ReferenceDeliveryFailedCallsListener)
     pEctReference->ReferenceDeliveryFailed(&objMockReference);
 }
 
+TEST_F(EctReferenceTest, ReferenceNotifyInvokesOnReferenceUpdated)
+{
+    MockIMessage objMockNotifyMessage;
+    ON_CALL(objMockNotifyMessage, GetMessage).WillByDefault(ReturnNull());
+
+    EXPECT_CALL(objMockListener, OnReferenceUpdated(_)).Times(1);
+
+    pEctReference->ReferenceNotify(&objMockReference, &objMockMessage);
+}
+
 TEST_F(EctReferenceTest, ReferenceTerminatedDoesNothing)
 {
     EXPECT_CALL(objMockListener, OnReferenceStarted).Times(0);
@@ -246,15 +270,61 @@ TEST_F(EctReferenceTest, SendInviteWithKeyReturnsSuccess)
     EXPECT_EQ(IMS_SUCCESS, pEctReference->SendInvite(ANY_TRANSFER_TARGET_CALL_KEY));
 }
 
-TEST_F(EctReferenceTest, SendInviteWithNumberReturnsFailure)
+TEST_F(EctReferenceTest, SendInviteWithKeyReturnsSuccessAndNotSetReferredByHeaderIfNoLocalUserId)
+{
+    AString strAnySessionId("sessionid");
+    SetUpForSuccessfulReferenceOperation(strAnySessionId);
+    ON_CALL(objCoreService, GetLocalUserId).WillByDefault(Return(""));
+
+    EXPECT_CALL(objMockReference, SetListener(pEctReference)).Times(1);
+    EXPECT_CALL(objMockReference, SetReplaces(strAnySessionId)).Times(1);
+    EXPECT_CALL(objMockSipMessage, AddHeader(_, _, _)).Times(0);
+    EXPECT_CALL(objMockReference, ReferEx(IMS_TRUE, _)).Times(1);
+
+    EXPECT_EQ(IMS_SUCCESS, pEctReference->SendInvite(ANY_TRANSFER_TARGET_CALL_KEY));
+}
+
+TEST_F(EctReferenceTest, SendInviteWithKeyReturnsSuccessAndNotSetReferredByHeaderIfMessageIsNull)
+{
+    AString strAnySessionId("sessionid");
+    SetUpForSuccessfulReferenceOperation(strAnySessionId);
+    ON_CALL(objMockReference, GetNextRequest).WillByDefault(ReturnNull());
+
+    EXPECT_CALL(objMockReference, SetListener(pEctReference)).Times(1);
+    EXPECT_CALL(objMockReference, SetReplaces(strAnySessionId)).Times(1);
+    EXPECT_CALL(objMockSipMessage, AddHeader(_, _, _)).Times(0);
+    EXPECT_CALL(objMockReference, ReferEx(IMS_TRUE, _)).Times(1);
+
+    EXPECT_EQ(IMS_SUCCESS, pEctReference->SendInvite(ANY_TRANSFER_TARGET_CALL_KEY));
+}
+
+TEST_F(EctReferenceTest, SendInviteWithNumberReturnsFailureIfCallStatusIsTerminating)
 {
     ON_CALL(objMockTransfereeCall, GetState).WillByDefault(Return(IMtcCall::State::TERMINATING));
 
     EXPECT_EQ(IMS_FAILURE, pEctReference->SendInvite(ANY_TRANSFER_TARGET));
 
     ON_CALL(objMockTransfereeCall, GetState).WillByDefault(Return(IMtcCall::State::ESTABLISHED));
+}
 
-    // success case is done by SendInviteWithKeyReturnsSuccess
+TEST_F(EctReferenceTest, SendInviteWithNumberReturnsFailureIfReferenceIsNull)
+{
+    AString strAnySessionId("sessionid");
+    SetUpForSuccessfulReferenceOperation(strAnySessionId);
+
+    ON_CALL(*pMockReferenceInterfaceHolder, GetIReference(_, _, _)).WillByDefault(ReturnNull());
+
+    EXPECT_CALL(objMockReference, SetListener(pEctReference)).Times(0);
+
+    EXPECT_EQ(IMS_FAILURE, pEctReference->SendInvite(ANY_TRANSFER_TARGET));
+}
+
+TEST_F(EctReferenceTest, SendInviteWithNumberReturnsSuccess)
+{
+    AString strAnySessionId("sessionid");
+    SetUpForSuccessfulReferenceOperation(strAnySessionId);
+
+    EXPECT_EQ(IMS_SUCCESS, pEctReference->SendInvite(ANY_TRANSFER_TARGET));
 }
 
 TEST_F(EctReferenceTest, GetResponseCode)

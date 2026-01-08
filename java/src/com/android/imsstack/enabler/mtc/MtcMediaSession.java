@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,12 +23,16 @@ import android.telephony.CallQuality;
 import android.telephony.ims.MediaQualityStatus;
 import android.telephony.ims.MediaThreshold;
 import android.telephony.ims.RtpHeaderExtension;
+import android.telephony.imsmedia.RtpReceptionStats;
 import android.view.Surface;
+
+import androidx.annotation.VisibleForTesting;
 
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.media.IMediaListener;
 import com.android.imsstack.enabler.media.MediaFactory;
 import com.android.imsstack.enabler.media.MediaSession;
+import com.android.imsstack.imsservice.mmtel.videocall.base.ImsCamera;
 import com.android.imsstack.internal.imsservice.MmTelMediaQualityReporter;
 import com.android.imsstack.internal.imsservice.MmTelMediaRegistry;
 import com.android.imsstack.util.ImsLog;
@@ -73,6 +77,20 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
         public void onRtpHeaderExtensionsReceived(Set<RtpHeaderExtension> extensions) {
             // no-op
         }
+
+        /**
+         * Called when the ANBR query is triggered for the audio stream
+         */
+        public void onTriggerAnbrQueryReceived(int mediaType, int direction, int bitsPerSecond) {
+            // no-op
+        }
+
+        /**
+         * Called when the incoming dtmf digit received from peer device
+         */
+        public void onNotifyIncomingDtmfReceived(int dtmfDigit) {
+            // no-op
+        }
     }
 
     /**
@@ -104,6 +122,13 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
          */
         public void onMediaSessionPeerDimensionsChanged(MtcMediaSession session,
                 final int width, final int height) {
+            // no-op
+        }
+
+        /**
+         * Called when the ANBR query is triggered for the video stream
+         */
+        public void onTriggerAnbrQueryReceived(int mediaType, int direction, int bitsPerSecond) {
             // no-op
         }
     }
@@ -207,6 +232,7 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
     private boolean mIsAudioSessionOpened = false;
     private MmTelMediaQualityReporter mMediaQualityReporter = null;
     private MmTelMediaRegistry.Listener mMediaThresholdListener = null;
+    private int mSlotId = -1;
 
     public MtcMediaSession(IBaseContext context, Call call) {
         mCall = call;
@@ -215,6 +241,7 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
         mIsPendingSelectCamera = false;
         mIsAudioSessionOpened = false;
         mMediaThresholdListener = new MediaThresholdListener();
+        mSlotId = context.getSlotId();
     }
 
     public void dispose() {
@@ -356,6 +383,19 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
     }
 
     /**
+     * Notify an accumulated video data usage of the current session.
+     *
+     * @param bytes bytes of send and received rtp video data.
+     */
+    public void onNotifyVideoDataUsage(final long bytes) {
+        log("onNotifyVideoDataUsage bytes=" + bytes);
+
+        if (mVideoListener != null) {
+            mVideoListener.onMediaSessionDataUsageChanged(this, bytes);
+        }
+    }
+
+    /**
      * Notifies when the remote party has sent text message via RTT
      * @param rttMessage String containing the received characters.
      */
@@ -417,6 +457,20 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
     }
 
     /**
+     * A notification is sent when an incoming audio dtmf is received.
+     * @param dtmfDigit Received incoming dtmf digit
+     * @param durationMs Dtmf tone playback time
+     */
+    @Override
+    public void onNotifyIncomingDtmfReceived(int dtmfDigit, int durationMs) {
+        log("onNotifyIncomingDtmfReceived");
+
+        if (mAudioListener != null) {
+            mAudioListener.onNotifyIncomingDtmfReceived(dtmfDigit);
+        }
+    }
+
+    /**
      * Notified when video session is opened
      */
     @Override
@@ -429,6 +483,19 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
             parcel.writeInt(mCamera);
             sendRequest(parcel);
             mIsPendingSelectCamera = false;
+        }
+    }
+
+    /**
+     * Notified when the audio session got the notification of the rtp reception stats
+     * @param type The media session type
+     * @param stats The rtp reception stats for the av sync
+     */
+    @Override
+    public void onNotifyRtpReceptionStats(int type, RtpReceptionStats stats) {
+        log("onNotifyRtpReceptionStats, type=" + type + ", stats=" + stats);
+        if (mMediaSession != null) {
+            mMediaSession.notifyRtpReceptionStats(type, stats);
         }
     }
 
@@ -467,6 +534,23 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
                     mediaQualityStatus.getRtpPacketLossRate(),
                     mediaQualityStatus.getRtpJitterMillis(),
                     mediaQualityStatus.getRtpInactivityTimeMillis());
+        }
+    }
+
+    /**
+     * Trigger Anbr query to the network
+     *
+     * @param mediaType is used to identify media stream such as audio or video.
+     * @param direction of this packet stream (e.g. uplink or downlink).
+     * @param bitsPerSecond This value is the bitrate requested by the other party UE
+     *        through RTP CMR, RTCPAPP or TMMBR, and ImsStack converts this value
+     *        to the MAC bitrate (defined in TS36.321, range: 0 ~ 8000 kbit/s).
+     */
+    @Override
+    public void triggerAnbrQuery(int mediaType, int direction, int bitsPerSecond) {
+        log("triggerAnbrQuery");
+        if (mAudioListener != null) {
+            mAudioListener.onTriggerAnbrQueryReceived(mediaType, direction, bitsPerSecond);
         }
     }
 
@@ -532,7 +616,10 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
      */
     public void requestCallDataUsage() {
         log("requestCallDataUsage");
-        // TODO: add implementation
+
+        if (mMediaSession != null) {
+            mMediaSession.requestCallDataUsage();
+        }
     }
 
     public void notifyMediaInfoChanged(int mediaInfo, int intParam, String strParam) {
@@ -629,6 +716,29 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
             RtpHeaderExtension rtpExt = extensions.next();
             rtpExt.writeToParcel(parcel, 1);
         }
+        parcel.setDataPosition(0);
+
+        onMessage(parcel);
+    }
+
+    /**
+     * Deliver the bitrate for the indicated media type, direction and bitrate to the upper layer.
+     *
+     * @param mediaType MediaType is used to identify media stream such as audio or video.
+     * @param direction Direction of this packet stream (e.g. uplink or downlink).
+     * @param bitsPerSecond This value is the bitrate received from the NW through the Recommended
+     *        bitrate MAC Control Element message and ImsStack converts this value from MAC bitrate
+     *        to audio/video codec bitrate (defined in TS26.114).
+     */
+    public void notifyAnbr(int mediaType, int direction, int bitsPerSecond) {
+        log("notifyAnbr");
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IUMtcMedia.NOTIFY_ANBR_RECEIVED);
+        parcel.writeInt(IUMtcMedia.SESSION_TYPE_AUDIO); // TODO: need to consider video type later
+        parcel.writeInt(mediaType);
+        parcel.writeInt(direction);
+        parcel.writeInt(bitsPerSecond);
         parcel.setDataPosition(0);
 
         onMessage(parcel);
@@ -734,5 +844,10 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
 
     private static void log(String s) {
         ImsLog.d("[GII-MTC] " + s);
+    }
+
+    @VisibleForTesting
+    void setMediaSession(MediaSession mediaSession) {
+        mMediaSession = mediaSession;
     }
 }

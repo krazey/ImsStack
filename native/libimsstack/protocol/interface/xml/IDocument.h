@@ -33,7 +33,7 @@ class IText;
 class IDocument : public INode
 {
 protected:
-    virtual ~IDocument() = default;
+    ~IDocument() override = default;
 
 public:
     /**

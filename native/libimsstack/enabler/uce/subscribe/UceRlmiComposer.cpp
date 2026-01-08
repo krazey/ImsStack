@@ -21,7 +21,7 @@
 #include "TextParser.h"
 #include "XmlFactory.h"
 
-__IMS_TRACE_TAG_USER_DECL__("UCE");
+__IMS_TRACE_TAG_UCE__;
 
 PUBLIC
 UceRlmiComposer::UceRlmiComposer()

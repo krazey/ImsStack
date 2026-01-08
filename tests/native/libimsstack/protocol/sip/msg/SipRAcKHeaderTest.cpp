@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
+
 #include "msg/SipRAcKHeader.h"
 
 namespace android
@@ -36,48 +37,48 @@ TEST_F(SipRAcKHeaderTest, IsValidHeader)
 
     EXPECT_EQ(SIP_FALSE, pHeader->IsValidHeader());
 
-    EXPECT_EQ(SIP_TRUE, pHeader->SetMethod("REGISTER"));
+    pHeader->SetMethod("REGISTER");
 
     EXPECT_EQ(SIP_TRUE, pHeader->IsValidHeader());
 
     pHeader->SipDelete();
 }
 
-TEST_F(SipRAcKHeaderTest, EncodeHdrAndDecodeHdr)
+TEST_F(SipRAcKHeaderTest, EncodeAndDecode)
 {
     SipRAcKHeader* pHeader = reinterpret_cast<SipRAcKHeader*>(
             SipRAcKHeader::GetNewObj(SipHeaderBase::RACK, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {
+    const SIP_INT32 BUFFER_SIZE = 4096;
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
 
     AStringBuffer objBuffer(256);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_FALSE, pHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(""), 0));
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("2"), 1));
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("2 "), 2));
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(" 2"), 2));
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("INVITE"), 6));
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(" INVITE"), 7));
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("99 INVITE"), 9));
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(" 99 INVITE"), 10));
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("212 7"), 5));
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("212 7 "), 6));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("", 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("2", 1));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("2 ", 2));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode(" 2", 2));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("INVITE", 6));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode(" INVITE", 7));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("99 INVITE", 9));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode(" 99 INVITE", 10));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("212 7", 5));
+    EXPECT_EQ(SIP_FALSE, pHeader->Decode("212 7 ", 6));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("7183 1 INVITE"), 13));
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode("7183 1 INVITE", 13));
 
     SipRAcKHeader* pCopyHeader = reinterpret_cast<SipRAcKHeader*>(
             SipRAcKHeader::GetNewObj(SipHeaderBase::RACK, pHeader));
     ASSERT_TRUE(pCopyHeader != nullptr);
     pHeader->SipDelete();
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(&pBuff));
     EXPECT_EQ(SIP_TRUE, pCopyHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("7183 1 INVITE", &(aBuffer[0]));
     EXPECT_STREQ("7183 1 INVITE", objBuffer.GetCharString());

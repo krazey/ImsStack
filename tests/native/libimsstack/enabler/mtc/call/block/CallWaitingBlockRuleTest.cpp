@@ -17,6 +17,7 @@
 #include "IMtcService.h"
 #include "ImsList.h"
 #include "MockIMtcService.h"
+#include "MtcDef.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/block/CallWaitingBlockRule.h"
@@ -34,6 +35,7 @@ public:
     MockIMtcCallContext objContext;
     MockIMtcService objService;
     CallInfo objCallInfo;
+    // cppcheck-suppress unusedStructMember
     MockIMtcBlockRuleCheckListener objListener;
     ImsList<IMtcCall*> lstOtherCalls;
     CallWaitingBlockRule* pBlockRule;
@@ -76,7 +78,7 @@ TEST_F(CallWaitingBlockRuleTest, CheckReturnsUnblockedIfNoOtherCalls)
 
     Result objResult = pBlockRule->Check(objListener);
 
-    EXPECT_CALL(objService, GetTbcwStatus).Times(0);
+    EXPECT_CALL(objService, IsPermanentSuppServiceEnabled(PermanentSuppType::TB_CW)).Times(0);
     EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
 }
 
@@ -87,24 +89,7 @@ TEST_F(CallWaitingBlockRuleTest, CheckReturnsUnblockedIfNoOtherActiveCalls)
 
     Result objResult = pBlockRule->Check(objListener);
 
-    EXPECT_CALL(objService, GetTbcwStatus).Times(0);
-    EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
-}
-
-TEST_F(CallWaitingBlockRuleTest, CheckReturnsUnblockedIfActiveCallExistsAndCwUnprovisioned)
-{
-    lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::IDLE));
-    lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::OUTGOING));
-    lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::INCOMING));
-    lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::ALERTING));
-    lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::ESTABLISHED));
-    lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::UPDATING));
-    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
-
-    ON_CALL(objService, GetTbcwStatus).WillByDefault(Return(TbcwStatus::UNPROVISIONED));
-
-    Result objResult = pBlockRule->Check(objListener);
-
+    EXPECT_CALL(objService, IsPermanentSuppServiceEnabled(PermanentSuppType::TB_CW)).Times(0);
     EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
 }
 
@@ -118,8 +103,8 @@ TEST_F(CallWaitingBlockRuleTest, CheckReturnsUnblockedIfActiveCallExistsAndCwEna
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::UPDATING));
     ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(objService, GetTbcwStatus).WillByDefault(Return(TbcwStatus::PROVISIONED_ENABLED));
-
+    ON_CALL(objService, IsPermanentSuppServiceEnabled(PermanentSuppType::TB_CW))
+            .WillByDefault(Return(IMS_TRUE));
     Result objResult = pBlockRule->Check(objListener);
 
     EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
@@ -130,8 +115,8 @@ TEST_F(CallWaitingBlockRuleTest, CheckReturnsBlockedIfIdleCallExistsAndCwDisable
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::IDLE));
     ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(objService, GetTbcwStatus).WillByDefault(Return(TbcwStatus::PROVISIONED_DISABLED));
-
+    ON_CALL(objService, IsPermanentSuppServiceEnabled(PermanentSuppType::TB_CW))
+            .WillByDefault(Return(IMS_FALSE));
     Result objResult = pBlockRule->Check(objListener);
 
     EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
@@ -143,8 +128,8 @@ TEST_F(CallWaitingBlockRuleTest, CheckReturnsBlockedIfOutgoingCallExistsAndCwDis
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::OUTGOING));
     ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(objService, GetTbcwStatus).WillByDefault(Return(TbcwStatus::PROVISIONED_DISABLED));
-
+    ON_CALL(objService, IsPermanentSuppServiceEnabled(PermanentSuppType::TB_CW))
+            .WillByDefault(Return(IMS_FALSE));
     Result objResult = pBlockRule->Check(objListener);
 
     EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
@@ -156,7 +141,8 @@ TEST_F(CallWaitingBlockRuleTest, CheckReturnsBlockedIfIncomingCallExistsAndCwDis
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::INCOMING));
     ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(objService, GetTbcwStatus).WillByDefault(Return(TbcwStatus::PROVISIONED_DISABLED));
+    ON_CALL(objService, IsPermanentSuppServiceEnabled(PermanentSuppType::TB_CW))
+            .WillByDefault(Return(IMS_FALSE));
     Result objResult = pBlockRule->Check(objListener);
 
     EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
@@ -168,8 +154,8 @@ TEST_F(CallWaitingBlockRuleTest, CheckReturnsBlockedIfAlertingCallExistsAndCwDis
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::ALERTING));
     ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(objService, GetTbcwStatus).WillByDefault(Return(TbcwStatus::PROVISIONED_DISABLED));
-
+    ON_CALL(objService, IsPermanentSuppServiceEnabled(PermanentSuppType::TB_CW))
+            .WillByDefault(Return(IMS_FALSE));
     Result objResult = pBlockRule->Check(objListener);
 
     EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
@@ -181,8 +167,8 @@ TEST_F(CallWaitingBlockRuleTest, CheckReturnsBlockedIfEstablishedCallExistsAndCw
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::ESTABLISHED));
     ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(objService, GetTbcwStatus).WillByDefault(Return(TbcwStatus::PROVISIONED_DISABLED));
-
+    ON_CALL(objService, IsPermanentSuppServiceEnabled(PermanentSuppType::TB_CW))
+            .WillByDefault(Return(IMS_FALSE));
     Result objResult = pBlockRule->Check(objListener);
 
     EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
@@ -194,8 +180,8 @@ TEST_F(CallWaitingBlockRuleTest, CheckReturnsBlockedIfHasUpdatingCallAndCwDisabl
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::UPDATING));
     ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(objService, GetTbcwStatus).WillByDefault(Return(TbcwStatus::PROVISIONED_DISABLED));
-
+    ON_CALL(objService, IsPermanentSuppServiceEnabled(PermanentSuppType::TB_CW))
+            .WillByDefault(Return(IMS_FALSE));
     Result objResult = pBlockRule->Check(objListener);
 
     EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);

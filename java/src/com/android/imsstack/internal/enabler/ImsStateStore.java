@@ -20,7 +20,7 @@ import android.telephony.TelephonyManager;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
-import com.android.imsstack.util.AppContext;
+import com.android.imsstack.base.AppContext;
 
 /**
  * This class provides the cache information of ImsStack's internal states.

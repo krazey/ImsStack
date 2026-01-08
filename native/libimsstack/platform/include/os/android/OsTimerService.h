@@ -19,22 +19,22 @@
 #include "ISystemListener.h"
 #include "ImsList.h"
 #include "OsMutex.h"
-#include "OsTimer.h"
 
+class OsTimer;
 class OsTimerWrapper;
 
 class OsTimerService : public ISystemListener
 {
 public:
     OsTimerService();
-    virtual ~OsTimerService();
+    ~OsTimerService() override;
 
     OsTimerService(IN const OsTimerService&) = delete;
     OsTimerService& operator=(IN const OsTimerService&) = delete;
 
 public:
-    void KillTimer(IN OsTimer* pTimer);
-    IMS_BOOL SetTimer(IN IMS_UINT32 nDuration, IN OsTimer* pTimer);
+    void KillTimer(IN const OsTimer* pTimer);
+    IMS_BOOL SetTimer(IN IMS_SINT64 nDuration, IN OsTimer* pTimer);
 
     static void CleanUp();
     static void StartUp();

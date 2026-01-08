@@ -26,13 +26,12 @@ class JniAosService : public BaseService
 {
 public:
     JniAosService(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId);
-    virtual ~JniAosService();
+    ~JniAosService() override;
 
     virtual int SendData(const android::Parcel& objParcel) override;
 
     void Initialize(IN Jni_SendDataToJava pfnSendDataToJava);
 
-    inline void NotifyNativeEnablerSet() override {}
     IJniEnablerThread* GetJniThread() const override;
 
 private:
@@ -44,6 +43,7 @@ private:
     void TriggerFullNetworkRegistration(IN const android::Parcel& objParcel);
     void NotifyCapabilitiesChanged(IN const android::Parcel& objParcel);
     void ControlRegistration(IN const android::Parcel& objParcel);
+    void UpdateDataFailureReason(IN const android::Parcel& objParcel);
 
     void NotifyAirplaneSetting(IN const android::Parcel& objParcel);
     void NotifyDataRoamingSetting(IN const android::Parcel& objParcel);
@@ -54,6 +54,7 @@ private:
     void NotifyVideoSetting(IN const android::Parcel& objParcel);
     void NotifyVolteSetting(IN const android::Parcel& objParcel);
     void NotifyWfcSetting(IN const android::Parcel& objParcel);
+    void NotifyWifiSetting(IN const android::Parcel& objParcel);
 
     void NotifyAosStart(IN const android::Parcel& objParcel);
     void NotifyIpcanHandoverFailure(IN const android::Parcel& objParcel);
@@ -63,10 +64,16 @@ private:
     void NotifyNetworkVideoCapability(IN const android::Parcel& objParcel);
     void NotifyPhoneNumberState(IN const android::Parcel& objParcel);
     void NotifyPlmnChanged(IN const android::Parcel& objParcel);
+    void NotifyVopsStateChanged(IN const android::Parcel& objParcel);
     void NotifyPowerOff(IN const android::Parcel& objParcel);
     void NotifyPreciseCallState(IN const android::Parcel& objParcel);
     void NotifyCarrierSignalPcoValueChanged(IN const android::Parcel& objParcel);
-    void NotifyEmcCallbackModeChanged(IN const android::Parcel& objParcel);
+    void NotifyCrossSimStatus(IN const android::Parcel& objParcel);
+    void NotifyEmergencyCallbackModeChanged(IN const android::Parcel& objParcel);
+    void NotifyNasSecurityAlgorithmChanged(IN const android::Parcel& objParcel);
+    void NotifyAllowedNetworkTypesChanged(IN const android::Parcel& objParcel);
+    void NotifyEmergencyRegistrationStateChanged(IN const android::Parcel& objParcel);
+    void NotifySimStateChanged(IN const android::Parcel& objParcel);
 
     static void ConvertString(IN const android::String16& strSource, OUT AString& strDest);
 

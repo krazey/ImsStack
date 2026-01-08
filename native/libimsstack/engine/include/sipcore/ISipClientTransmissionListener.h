@@ -16,7 +16,9 @@
 #ifndef INTERFACE_SIP_CLIENT_TRANSMISSION_LISTENER_H_
 #define INTERFACE_SIP_CLIENT_TRANSMISSION_LISTENER_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
+
+class AString;
 
 class ISipClientTransmissionListener
 {

@@ -34,8 +34,8 @@ class Subscription :
 {
 public:
     Subscription(IN Service* pService, IN const AString& strEvent,
-            IN IMS_BOOL bImplicitRoutingRequired = IMS_FALSE);
-    virtual ~Subscription();
+            IN IMS_BOOL bImplicitRoutingRequired = IMS_TRUE);
+    ~Subscription() override;
 
     Subscription(IN const Subscription&) = delete;
     Subscription& operator=(IN const Subscription&) = delete;
@@ -95,7 +95,7 @@ private:
     void CloseConnection();
     ISipClientConnection* CreateConnectionL(IN ISipDialog* piDialog, IN const SipMethod& objMethod);
     void SetState(IN IMS_SINT32 nState);
-    void UpdateResponse(IN ISipClientConnection* piScc);
+    void UpdateResponse(IN const ISipClientConnection* piScc);
 
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 

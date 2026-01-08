@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "utility/MtsSmUtils.h"
+#include <gtest/gtest.h>
 
 namespace android
 {

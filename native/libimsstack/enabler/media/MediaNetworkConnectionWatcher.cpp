@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,33 +14,39 @@
  * limitations under the License.
  */
 
+#include "MediaNetworkConnectionWatcher.h"
+
+#include "IMediaNetworkConnectionListener.h"
 #include "ServiceTrace.h"
 #include "ServiceNetwork.h"
 
-#include "IMediaNetworkConnectionListener.h"
-#include "MediaNetworkConnectionWatcher.h"
-
-__IMS_TRACE_TAG_USER_DECL__("MED.CW");
+__IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC MediaNetworkConnectionWatcher::MediaNetworkConnectionWatcher(
         IN const IpAddress& objIpAddress) :
         m_piListener(IMS_NULL),
-        m_pNetConnection(NetworkService::GetNetworkService()->FindConnection(objIpAddress)),
+        m_pNetConnection(IMS_NULL),
         m_nMediaConnectionType(0),
         m_nMtu(0)
 {
+    m_pNetConnection = NetworkService::GetNetworkService()->FindConnection(objIpAddress);
+
+    if (m_pNetConnection == IMS_NULL)
+    {
+        IMS_TRACE_D("MediaNetworkConnectionWatcher(): FindConnection failed", 0, 0, 0);
+        return;
+    }
+
     UpdateParameters(m_pNetConnection);
 
-    if (m_pNetConnection != NULL)
+    if (m_pNetConnection != IMS_NULL)
     {
         m_pNetConnection->AddReferenceListener(this);
     }
 }
 
-PUBLIC MediaNetworkConnectionWatcher::~MediaNetworkConnectionWatcher()
+PUBLIC VIRTUAL MediaNetworkConnectionWatcher::~MediaNetworkConnectionWatcher()
 {
-    IMS_TRACE_D("~NetConnectionWatcher()", 0, 0, 0);
-
     if (m_pNetConnection != IMS_NULL)
     {
         m_pNetConnection->RemoveReferenceListener(this);
@@ -163,6 +169,7 @@ PRIVATE void MediaNetworkConnectionWatcher::UpdateParameters(IN INetworkConnecti
 {
     if (pNetConnection == IMS_NULL)
     {
+        IMS_TRACE_E(0, "UpdateParameters() - pNetConnection is null", 0, 0, 0);
         return;
     }
 

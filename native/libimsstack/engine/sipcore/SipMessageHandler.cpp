@@ -16,11 +16,14 @@
 #include "ByteArray.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
+#include "ServiceTrace.h"
 #include "SystemConfig.h"
 
+#include "ISipHeader.h"
 #include "ISipServerTransactionStateListener.h"
 #include "SipClientTransactionState.h"
 #include "SipConfigProxy.h"
+#include "SipConnectionNotifier.h"
 #include "SipDebug.h"
 #include "SipFactoryProxy.h"
 #include "SipManager.h"
@@ -29,13 +32,14 @@
 #include "SipPacketTracker.h"
 #include "SipPrivate.h"
 #include "SipRoutingRejectNotifier.h"
+#include "SipRtConfigHelper.h"
 #include "SipRtConfigUtils.h"
 #include "SipServerTransactionState.h"
 #include "SipStack.h"
 #include "SipTransport.h"
 #include "SipWakeLock.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PRIVATE
 SipMessageHandler::SipMessageHandler() {}
@@ -178,7 +182,6 @@ IMS_SINT32 SipMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN ::SipMessa
             {
                 if (SipStack::IsLastErrorNoExist())
                 {
-                    // FIXME: should we get SIP profile?
                     nPort = SipConfigProxy::GetPort(nSlotId);
                 }
             }
@@ -187,7 +190,6 @@ IMS_SINT32 SipMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN ::SipMessa
                 // NO_EXIST (for port only)
                 if ((nPort == Sip::PORT_UNSPECIFIED) && SipStack::IsLastErrorNoExist())
                 {
-                    // FIXME: should we get SIP profile?
                     nPort = SipConfigProxy::GetPort(nSlotId);
                     IMS_TRACE_D("ConnectionNotifier :: port(%d) from config.", nPort, 0, 0);
                 }
@@ -433,7 +435,7 @@ IMS_SINT32 SipMessageHandler::NotifyResponse(IN IMS_SINT32 nSlotId, IN ::SipMess
 
 PRIVATE
 IMS_BOOL SipMessageHandler::CheckIpSecValidityForRequest(IN IMS_SINT32 nSlotId,
-        IN SipTransactionState* pTState, IN const SipTransportAddress& objNearEnd,
+        IN const SipTransactionState* pTState, IN const SipTransportAddress& objNearEnd,
         IN const SipTransportAddress& objFarEnd)
 {
     if (pTState->IsIpSecRequired() && SipRtConfigUtils::IsIpSecSaConfigured(nSlotId))
@@ -469,7 +471,7 @@ PRIVATE
 IMS_BOOL SipMessageHandler::IsIpSecSaMatched(IN IMS_SINT32 nSlotId,
         IN const SipTransportAddress& objNearEnd, IN const SipTransportAddress& objFarEnd)
 {
-    SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(nSlotId);
+    const SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(nSlotId);
     IMS_BOOL bAtLeastOneSaMatched = IMS_FALSE;
     const ImsList<SipRtConfig::IpSecSa>& objIpSecSas = pConfigHelper->GetIpSecSas();
 
@@ -527,7 +529,7 @@ PRIVATE
 IMS_BOOL SipMessageHandler::IsIpSecSaMatchedForUs(
         IN IMS_SINT32 nSlotId, IN const IpAddress& objIp, IN IMS_SINT32 nPort)
 {
-    SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(nSlotId);
+    const SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(nSlotId);
     const ImsList<SipRtConfig::IpSecSa>& objIpSecSas = pConfigHelper->GetIpSecSas();
 
     for (IMS_UINT32 i = 0; i < objIpSecSas.GetSize(); ++i)
@@ -596,7 +598,7 @@ IMS_BOOL SipMessageHandler::CheckRegContactValidity(IN IMS_SINT32 nSlotId, IN ::
     }
 
     AString strCallId = SipStack::GetHeaderAsString(pSipMsg, ISipHeader::CALL_ID);
-    SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(nSlotId);
+    const SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(nSlotId);
     const SipAddress* pContact = pConfigHelper->GetRegContactUri(strCallId);
 
     if (pContact == IMS_NULL)

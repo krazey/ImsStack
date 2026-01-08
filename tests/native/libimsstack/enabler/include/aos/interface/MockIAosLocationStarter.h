@@ -27,13 +27,13 @@ class MockIAosLocationStarter : public IAosLocationStarter
 public:
     MOCK_METHOD(IMS_SINT32, GetSlotId, (), (const, override));
     MOCK_METHOD(void, SetSlotId, (IN IMS_SINT32 nSlotId), (override));
-    MOCK_METHOD(IMS_BOOL, Init, (IN IAosAppContext * piContext, IN IMS_UINT32 nPolicy), (override));
+    MOCK_METHOD(void, Init, (IN IAosAppContext * piContext, IN IMS_UINT32 nPolicy), (override));
     MOCK_METHOD(IMS_BOOL, SetPolicy, (IN IMS_UINT32 nPolicy, IN IMS_SINT32 nOperation), (override));
     MOCK_METHOD(IMS_BOOL, IsPolicyEnabled, (IN IMS_UINT32 nPolicy), (override));
     MOCK_METHOD(void, AddBlockReason, (IN BLOCK_REASON nReason, IN IMS_SINT32 nType), (override));
     MOCK_METHOD(IMS_BOOL, SetUpdateInterval, (IN IMS_UINT32 nInterval), (override));
-    MOCK_METHOD(IMS_BOOL, StartLocationInfoUpdate, (), (override));
-    MOCK_METHOD(IMS_BOOL, StopLocationInfoUpdate, (), (override));
+    MOCK_METHOD(void, StartLocationInfoUpdate, (), (override));
+    MOCK_METHOD(void, StopLocationInfoUpdate, (), (override));
 };
 
 #endif  // MOCK_I_AOS_LOCATION_STARTER_H_

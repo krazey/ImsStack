@@ -17,6 +17,7 @@
 #include "AStringBuffer.h"
 
 #include "SipAddress.h"
+#include "SipError.h"
 #include "SipHeader.h"
 #include "SipHeaderName.h"
 #include "SipParameter.h"
@@ -322,8 +323,6 @@ PUBLIC VIRTUAL IMS_BOOL SipHeader::Equals(IN const ISipHeader* piHeader) const
     {
         return IMS_FALSE;
     }
-
-    // TODO:: comparison of parameter fields
 
     return IMS_TRUE;
 }

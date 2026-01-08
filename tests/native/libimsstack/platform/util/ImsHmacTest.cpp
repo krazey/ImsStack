@@ -31,9 +31,10 @@ protected:
 protected:
     static const IMS_CHAR HMAC_TEXT[];
     static const IMS_UCHAR HMAC_KEY[];
-    static const IMS_SINT32 HMAC_KEY_LEN = 7;
+    static const IMS_SINT32 HMAC_KEY_LEN;
 };
 
+const IMS_SINT32 ImsHmacTest::HMAC_KEY_LEN = 7;
 const IMS_CHAR ImsHmacTest::HMAC_TEXT[] = "This is an IMS world.";
 const IMS_UCHAR ImsHmacTest::HMAC_KEY[] = {0x63, 0x72, 0x79, 0x70, 0x74, 0x69, 0x69};
 

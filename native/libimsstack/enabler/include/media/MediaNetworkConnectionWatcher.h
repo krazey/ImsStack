@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -58,7 +58,7 @@ public:
     };
 
     explicit MediaNetworkConnectionWatcher(IN const IpAddress& objIpAddress);
-    virtual ~MediaNetworkConnectionWatcher();
+    virtual ~MediaNetworkConnectionWatcher() override;
     virtual void SetListener(IN IMediaNetworkConnectionListener* piListener);
     /* INetworkConnectionListener Interface Impl */
     virtual void NetworkConnection_OnConnected(IN INetworkConnection* pNetConnection) override;
@@ -71,10 +71,10 @@ public:
     virtual void NetworkConnection_OnPcscfChanged(IN INetworkConnection* pNetConnection) override;
 
     /** Get the network connection type */
-    IMS_SINT32 GetNetworkType() const { return m_nMediaConnectionType; }
+    virtual IMS_SINT32 GetNetworkType() const { return m_nMediaConnectionType; }
 
     /** Get the mtu size */
-    IMS_SINT32 GetMtu() const { return m_nMtu; }
+    virtual IMS_SINT32 GetMtu() const { return m_nMtu; }
 
 private:
     static IMS_SINT32 ConvertNetworkType(IN INetworkConnection* pNetConnection);

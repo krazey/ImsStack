@@ -16,7 +16,6 @@
 
 package com.android.imsstack.enabler.mtc;
 
-import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -25,7 +24,7 @@ import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
-import com.android.imsstack.enabler.mtc.reg.ImsServiceState;
+import com.android.imsstack.enabler.mtc.reg.MtcServiceState;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.util.ImsLog;
@@ -68,6 +67,7 @@ public class MtcECallStateTracker implements IECallStateTracker {
     private boolean mEcbmEntered = false;
 
     private MtcECallStateListener mCallListener = null;
+    private MtcServiceStateListener mServiceStateListener = null;
     private int mECallState = ECALLSTATE_IDLE;
     private boolean mEcbmExitedByNewCall = false;
     private boolean mProceedingExitEmergency = false;
@@ -80,8 +80,8 @@ public class MtcECallStateTracker implements IECallStateTracker {
         mHandler = new ECallStateHandler(mContext.getContext().getMainLooper());
 
         IServiceStateTracker sst = mContext.getServiceStateTracker();
-        sst.registerForEmergencyServiceStateChanged(
-                mHandler, EVENT_EMERGENCY_SERVICE_STATE_CHANGED, null);
+        mServiceStateListener = new MtcServiceStateListener();
+        sst.addListener(mServiceStateListener);
 
         initEcbmSupportType();
     }
@@ -89,8 +89,11 @@ public class MtcECallStateTracker implements IECallStateTracker {
     public void dispose() {
         log("dispose");
 
-        IServiceStateTracker sst = mContext.getServiceStateTracker();
-        sst.unregisterForEmergencyServiceStateChanged(mHandler);
+        if (mServiceStateListener != null) {
+            IServiceStateTracker sst = mContext.getServiceStateTracker();
+            sst.removeListener(mServiceStateListener);
+            mServiceStateListener = null;
+        }
 
         if (mCallListener != null) {
             mCallStateTracker.removeListener(mCallListener);
@@ -117,7 +120,7 @@ public class MtcECallStateTracker implements IECallStateTracker {
         log("exitEmergencyCallbackMode - ExitedByNewCall=" + bExitedByNewCall);
         mEcbmExitedByNewCall = bExitedByNewCall;
 
-        mHandler.sendEmptyMessage(EVENT_EXIT_ECBM);
+        sendEmptyMessage(EVENT_EXIT_ECBM);
     }
 
     @Override
@@ -189,11 +192,6 @@ public class MtcECallStateTracker implements IECallStateTracker {
     }
 
     private void setEcbmSupportType(int ecbmType) {
-        // TODO : need to apply below to carreir id xml.
-        //USC : VoLTE ECBM supported
-        //SPR : VoLTE ECBM supported
-        //ACG : VoLTE ECBM supported
-
         mEcbmSupportType = ecbmType;
     }
 
@@ -226,14 +224,14 @@ public class MtcECallStateTracker implements IECallStateTracker {
             setEcbmEntered(false);
 
             if (checkEcbmExitedDelayAndDisconnectEApn()) {
-                mHandler.sendEmptyMessageDelayed(EVENT_ECBM_EXITED, 1000);
+                sendEmptyMessageDelayed(EVENT_ECBM_EXITED, 1000);
             } else {
-                mHandler.sendEmptyMessage(EVENT_ECBM_EXITED);
+                sendEmptyMessage(EVENT_ECBM_EXITED);
             }
         }
         // Calls onEcbmExited() even the ECBM is not entered for preventing timing issue.
         else {
-            mHandler.sendEmptyMessage(EVENT_ECBM_EXITED);
+            sendEmptyMessage(EVENT_ECBM_EXITED);
         }
 
         setECallStarted(false);
@@ -262,7 +260,6 @@ public class MtcECallStateTracker implements IECallStateTracker {
 
         setProceedingExitEmergency(false);
     }
-
 
     private void notifyEventForEcmState(boolean isEntered) {
         ISystem system = mContext.getSystem();
@@ -326,7 +323,7 @@ public class MtcECallStateTracker implements IECallStateTracker {
                 if (reason == IUMtcService.ES_IDLE_REASON_WITH_ECM) {
                     setEcbmEntered(true);
                     sendStatus(EMERGENCY_CALL_STOP_WITH_ECB, 0);
-                    mHandler.sendEmptyMessage(EVENT_ECBM_ENTERED);
+                    sendEmptyMessage(EVENT_ECBM_ENTERED);
                 } else if (isECallStarted()) {
                     exitEcbm();
                 }
@@ -338,7 +335,6 @@ public class MtcECallStateTracker implements IECallStateTracker {
      * Sends an emergency call status to modem.
      */
     private void sendStatus(int status, int reason) {
-        // TODO : need to consider this after modem side work is finished
         log("ECallState(forModem) :: status="
                 + e911StatusToString(status) + ", reason=" + reason);
     }
@@ -356,9 +352,6 @@ public class MtcECallStateTracker implements IECallStateTracker {
     }
 
     private boolean isRetryReason(int reason) {
-        // TODO : need to modify this after emergency domain selection policy is decided.
-        /*if ((reason >= IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY)
-                && (reason <= IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_E_RAT)) {*/
         if ((reason == CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED)
                 || reason == CallReasonInfo.CODE_LOCAL_CALL_VOLTE_RETRY_REQUIRED) {
             return true;
@@ -389,7 +382,7 @@ public class MtcECallStateTracker implements IECallStateTracker {
      * @return whether emergency callback mode for VoLTE is supported or not.
      */
     public static boolean isEcbmSupportedForVolte(int slotId) {
-        return getBoolean(slotId, CarrierConfig.Assets.KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL);
+        return getBoolean(slotId, CarrierConfig.ImsEmergency.KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL);
     }
 
     /**
@@ -399,16 +392,17 @@ public class MtcECallStateTracker implements IECallStateTracker {
      * @return whether emergency callback mode for VoWIFI is supported or not.
      */
     public static boolean isEcbmSupportedForVowifi(int slotId) {
-        return getBoolean(slotId, CarrierConfig.Assets.KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL);
+        return getBoolean(slotId, CarrierConfig.ImsEmergency.KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL);
     }
 
     private static boolean getBoolean(int slotId, String key) {
-        return getCarrierConfig(slotId).getBoolean(key);
+        CarrierConfig cc = getCarrierConfig(slotId);
+        return cc != null ? cc.getBoolean(key) : false;
     }
 
     private static CarrierConfig getCarrierConfig(int slotId) {
-        return AgentFactory.getInstance().getAgent(ConfigInterface.class, slotId)
-                .getCarrierConfig();
+        ConfigInterface config = AgentFactory.getInstance().getAgent(ConfigInterface.class, slotId);
+        return config != null ? config.getCarrierConfig() : null;
     }
 
     private static void log(String s) {
@@ -417,6 +411,14 @@ public class MtcECallStateTracker implements IECallStateTracker {
 
     private static void logi(String s) {
         ImsLog.i("[GII-MTC] " + s);
+    }
+
+    private boolean sendEmptyMessage(int what) {
+        return mHandler != null ? mHandler.sendEmptyMessage(what) : false;
+    }
+
+    private boolean sendEmptyMessageDelayed(int what, long delayMillis) {
+        return mHandler != null ? mHandler.sendEmptyMessageDelayed(what, delayMillis) : false;
     }
 
     @VisibleForTesting
@@ -436,9 +438,7 @@ public class MtcECallStateTracker implements IECallStateTracker {
 
             switch (msg.what) {
             case EVENT_EMERGENCY_SERVICE_STATE_CHANGED: {
-                AsyncResult ar = (AsyncResult)msg.obj;
-                ImsServiceState ss = (ar != null) ? (ImsServiceState)ar.result : null;
-
+                    MtcServiceState ss = (MtcServiceState) msg.obj;
                 if (ss != null) {
                     onEmergencyServiceStateChanged(ss.mExtraState, ss.mReason);
                 }
@@ -497,8 +497,7 @@ public class MtcECallStateTracker implements IECallStateTracker {
 
                 if (isECallState(ECALLSTATE_CREATED)) {
                     if (!isProceedingExitEmergency()) {
-                        mHandler.sendEmptyMessageDelayed(
-                                EVENT_EXIT_EMERGENCY_BY_CALL_DESTROYED, 1000);
+                        sendEmptyMessageDelayed(EVENT_EXIT_EMERGENCY_BY_CALL_DESTROYED, 1000);
                         setProceedingExitEmergency(true);
                     }
                 }
@@ -567,7 +566,7 @@ public class MtcECallStateTracker implements IECallStateTracker {
 
                         if (!isRetryReason(callReasonInfo.mCode)) {
                             if (!isProceedingExitEmergency()) {
-                                mHandler.sendEmptyMessageDelayed(
+                                sendEmptyMessageDelayed(
                                         EVENT_EXIT_EMERGENCY_BY_CALL_TERMINATED, 1000);
                                 setProceedingExitEmergency(true);
                             }
@@ -589,7 +588,7 @@ public class MtcECallStateTracker implements IECallStateTracker {
 
                     if (!ecbmSupported && (isECallState(ECALLSTATE_ESTABLISHED))) {
                         if (!isProceedingExitEmergency()) {
-                            mHandler.sendEmptyMessageDelayed(
+                            sendEmptyMessageDelayed(
                                     EVENT_EXIT_EMERGENCY_BY_CALL_TERMINATED, 1000);
                             setProceedingExitEmergency(true);
                         }
@@ -597,6 +596,16 @@ public class MtcECallStateTracker implements IECallStateTracker {
                 }
 
                 setECallState(ECALLSTATE_IDLE);
+            }
+        }
+    }
+
+    protected class MtcServiceStateListener implements IServiceStateTracker.Listener {
+        @Override
+        public void onEmergencyServiceStateChanged(MtcServiceState serviceState) {
+            if (mHandler != null) {
+                Message.obtain(mHandler, EVENT_EMERGENCY_SERVICE_STATE_CHANGED, serviceState)
+                        .sendToTarget();
             }
         }
     }

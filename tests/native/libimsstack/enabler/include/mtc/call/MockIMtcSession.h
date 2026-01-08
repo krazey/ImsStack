@@ -32,11 +32,10 @@ struct CallReasonInfo;
 class MockIMtcSession : public IMtcSession
 {
 public:
-    virtual ~MockIMtcSession() {}
-
     MOCK_METHOD(IMS_RESULT, Start, (), (override));
-    MOCK_METHOD(IMS_RESULT, SendProvisionalResponse, (IN IMS_BOOL bUserAlert), (override));
-    MOCK_METHOD(IMS_RESULT, SendPrack, (IN IMS_BOOL bAllowReOffer), (override));
+    MOCK_METHOD(IMS_RESULT, SendProvisionalResponse,
+            (IN IMS_BOOL bUserAlert, IN IMS_BOOL bReliable), (override));
+    MOCK_METHOD(IMS_RESULT, SendPrack, (IN IMS_BOOL bSdpOfferRequired), (override));
     MOCK_METHOD(IMS_RESULT, RespondToPrack, (IN IMS_SINT32 eStatusCode), (override));
     MOCK_METHOD(IMS_RESULT, SendEarlyUpdate, (IN UpdateType eUpdateType), (override));
     MOCK_METHOD(IMS_RESULT, RespondToEarlyUpdate, (IN IMS_SINT32 eStatusCode), (override));
@@ -50,17 +49,20 @@ public:
     MOCK_METHOD(IMS_RESULT, CancelUpdate, (IN const CallReasonInfo& objReason), (override));
     MOCK_METHOD(IMS_RESULT, Terminate, (IMS_BOOL bUseBye, IN const CallReasonInfo& objReason),
             (override));
+    MOCK_METHOD(void, SetSessionTerminatedOrStartFailed, (), (override));
     MOCK_METHOD(
             void, HandleRequest, (IN RequestType eType, IN const IMessage& objRequest), (override));
     MOCK_METHOD(void, HandleResponse, (IN ResponseType eType, IN const IMessage& objResponse),
             (override));
     MOCK_METHOD(void, SetCallType, (IN CallType eCallType), (override));
+    MOCK_METHOD(void, SetCapableCallType, (IN CallType eCallType), (override));
     MOCK_METHOD(CallType, GetCallType, (), (const, override));
     MOCK_METHOD(CallType, GetPreviousCallType, (), (const, override));
     MOCK_METHOD(ISession&, GetISession, (), (override));
     MOCK_METHOD(MtcExtensionSet&, GetExtensionSet, (), (override));
     MOCK_METHOD(IMS_BOOL, IsVideoCapable, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRttCapable, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsPrackPending, (), (const, override));
     MOCK_METHOD(UpdateType, GetOngoingUpdateType, (), (const, override));
 };
 

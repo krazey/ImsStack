@@ -16,7 +16,7 @@
 
 package com.android.imsstack.enabler.mtc;
 
-import android.os.Handler;
+import com.android.imsstack.enabler.mtc.reg.MtcServiceState;
 
 public interface IServiceStateTracker {
     /**
@@ -26,13 +26,41 @@ public interface IServiceStateTracker {
      */
     public boolean isServiceRegistered(int serviceType);
 
-    // The Message object contains AsyncResult object in "obj" field.
-    // The AsyncResult object contains ImsServiceState object in "result" field.
-    public void registerForEmergencyServiceStateChanged(Handler h, int what, Object obj);
-    public void unregisterForEmergencyServiceStateChanged(Handler h);
+    /**
+     * When an emergency call ends, if the emergency service state is ES_UNAVAILABLE, change it to
+     * ES_IDLE to ensure the next emergency call attempt.
+     *
+     */
+    void handleEmergencyCallDestroyed();
 
-    // The Message object contains AsyncResult object in "obj" field.
-    // The AsyncResult object contains ImsServiceState object in "result" field.
-    public void registerForServiceStateChanged(Handler h, int what, Object obj);
-    public void unregisterForServiceStateChanged(Handler h);
+    /**
+     * Adds a listener to monitor the Mtc service state change.
+     *
+     * @param listener The listener to be set.
+     */
+    void addListener(Listener listener);
+
+    /**
+     * Removes the listener that was previously set.
+     *
+     * @param listener The listener to be removed.
+     */
+    void removeListener(Listener listener);
+
+    /**
+     * Listener interface to receive the change notification of {@link MtcServiceState}.
+     */
+    interface Listener {
+        /**
+         * Invoked when emergency service state is changed.
+         */
+        default void onEmergencyServiceStateChanged(MtcServiceState serviceState) {
+        }
+
+        /**
+         * Invoked when normal service state is changed.
+         */
+        default void onNormalServiceStateChanged(MtcServiceState serviceState) {
+        }
+    }
 }

@@ -23,6 +23,7 @@
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "SipConfigProxy.h"
+#include "SipMethod.h"
 #include "util/UserAgentHeader.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;

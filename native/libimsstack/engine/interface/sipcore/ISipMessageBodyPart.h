@@ -16,8 +16,11 @@
 #ifndef INTERFACE_SIP_MESSAGE_BODY_PART_H_
 #define INTERFACE_SIP_MESSAGE_BODY_PART_H_
 
-#include "ByteArray.h"
+#include "AString.h"
+
 #include "ISipObject.h"
+
+class ByteArray;
 
 /**
  * @brief This class provides an interface to handle SIP message body part.
@@ -27,7 +30,7 @@
 class ISipMessageBodyPart : public ISipObject
 {
 protected:
-    virtual ~ISipMessageBodyPart() = default;
+    ~ISipMessageBodyPart() override = default;
 
 public:
     /**

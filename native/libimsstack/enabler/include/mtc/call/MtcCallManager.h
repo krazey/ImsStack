@@ -17,11 +17,8 @@
 #ifndef MTC_CALL_MANAGER_H_
 #define MTC_CALL_MANAGER_H_
 
-#include "IMtcCallStateListener.h"
-#include "IMtcService.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "IuMtcService.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallManager.h"
 
@@ -29,21 +26,25 @@ class ICoreService;
 class IMtcContext;
 class MtcCall;
 class NullCall;
+enum class ServiceType;
 
-class MtcCallManager final : public IMtcCallManager, public IMtcCallStateListener
+class MtcCallManager final : public IMtcCallManager
 {
 public:
+    static IMS_UINT32 s_nNextCallIndex;
     static NullCall* const s_pNullCall;
 
     explicit MtcCallManager(IN IMtcContext& objContext);
-    virtual ~MtcCallManager();
+    virtual ~MtcCallManager() override;
     MtcCallManager(IN const MtcCallManager&) = delete;
     MtcCallManager& operator=(IN const MtcCallManager&) = delete;
 
     void Init();
     void DeInit();
 
-    IMtcCall* CreateCall(IN ServiceType eServiceType, IN CallInfo& objCallInfo) override;
+    IMtcCall* CreateCall(IN ServiceType eServiceType, IN CallInfo& objCallInfo,
+            IN const AString& strLogTag) override;
+    void RemoveCall(IN CallKey nCallKey) override;
 
     IMtcCall* GetCallByCallKey(IN CallKey nCallKey) override;
 
@@ -53,22 +54,11 @@ public:
     ImsList<IMtcCall*> GetCallsByServiceType(IN ServiceType eServiceType) override;
     ImsList<IMtcCall*> GetCallsInConference() override;
     ImsList<IMtcCall*> GetCallsByState(IN State eState) override;
-
-    void OnCallStateChanged(IN CallKey nCallKey, IN State eState, IN Type eType,
-            IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;
-    void OnTotalCallStateChanged(IN State eState) override;
+    IMS_UINT32 GetNextCallIndex() override;
 
 private:
     IMS_SINT32 GetFirstIndexByFilter(IN const std::function<IMS_BOOL(MtcCall*)>& objFilter);
     ImsList<IMtcCall*> GetCallsByFilter(IN const std::function<IMS_BOOL(MtcCall*)>& objFilter);
-
-    /**
-     * Deletes the call matching the given call key. Does nothing if the call doesn't exist.
-     * Mtc must guarantee that the target MtcCall is in TERMINATING state when it's removed.
-     *
-     * @param nCallKey Key of the call to be deleted.
-     */
-    void RemoveCall(IN CallKey nCallKey);
 
     IMtcContext& m_objContext;
     ImsList<MtcCall*> m_lstCalls;

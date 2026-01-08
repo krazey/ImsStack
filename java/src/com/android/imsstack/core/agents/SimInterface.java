@@ -19,6 +19,7 @@ package com.android.imsstack.core.agents;
 import android.annotation.NonNull;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * This interface provides the SIM related operations to get the SIM related information
@@ -81,9 +82,9 @@ public interface SimInterface extends IAgent {
     /**
      * Returns the USIM service table that contains a bit field of enabled services.
      *
-     * @return The value of USIM service table.
+     * @return The value of the USIM service table or an empty byte array if not available.
      */
-    byte[] getUsimServiceTable();
+    @NonNull byte[] getUsimServiceTable();
 
     /**
      * Returns the SMS center address.
@@ -159,6 +160,20 @@ public interface SimInterface extends IAgent {
      * @return A list of IMPU string or empty list if not present or not loaded.
      */
     @NonNull List<String> getIsimImpu();
+
+    /**
+     * Returns the IMS Proxy Call Session Control Function(P-CSCF) that were loaded from the ISIM.
+     *
+     * @return A list of P-CSCF address or empty list if not present or not loaded.
+     */
+    @NonNull List<String> getIsimPcscf();
+
+    /**
+     * Returns the IMS Application Reference Identifier(IARI) that were loaded from the UICC.
+     *
+     * @return A set of IARI or empty set if not present or not loaded.
+     */
+    @NonNull Set<String> getUiccIari();
 
     /**
      * Checks if GBA is available in the ISIM service table.

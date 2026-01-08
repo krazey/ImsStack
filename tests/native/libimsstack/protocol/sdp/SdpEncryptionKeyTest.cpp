@@ -15,6 +15,8 @@
  */
 #include <gtest/gtest.h>
 
+#include "AString.h"
+
 #include "Sdp.h"
 #include "SdpEncryptionKey.h"
 
@@ -129,11 +131,8 @@ TEST_F(SdpEncryptionKeyTest, OperatorAssignment)
 
     SdpEncryptionKey objNewEncryptionKey;
     objNewEncryptionKey = objEncryptionKey;
-    EXPECT_EQ(objNewEncryptionKey.GetMethod(), objEncryptionKey.GetMethod());
-    // cppcheck-suppress knownConditionTrueFalse
-    EXPECT_EQ(objNewEncryptionKey.GetKey(), objEncryptionKey.GetKey());
-    // cppcheck-suppress knownConditionTrueFalse
-    EXPECT_EQ(objNewEncryptionKey.GetValue(), objEncryptionKey.GetValue());
+    EXPECT_EQ(objNewEncryptionKey.GetMethod(), m_objTestKey.m_nMethod);
+    EXPECT_EQ(objNewEncryptionKey.GetKey(), m_objTestKey.m_strKey);
 }
 
 TEST_F(SdpEncryptionKeyTest, Decode)

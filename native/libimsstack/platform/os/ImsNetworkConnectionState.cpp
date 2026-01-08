@@ -99,7 +99,7 @@ void ImsNetworkConnectionState::DetachHandle(IN const AString& strNetProfile, IN
 
     for (IMS_UINT32 i = 0; i < m_objNetConnectionList.GetSize(); ++i)
     {
-        ImsNetworkConnection* pConnection = m_objNetConnectionList.GetAt(i);
+        const ImsNetworkConnection* pConnection = m_objNetConnectionList.GetAt(i);
 
         if (pConnection != IMS_NULL)
         {
@@ -211,7 +211,7 @@ IMS_BOOL ImsNetworkConnectionState::IsHandlePresent(IN IMS_CONNECTION hConnectio
 
     for (IMS_UINT32 i = 0; i < m_objNetConnectionList.GetSize(); ++i)
     {
-        ImsNetworkConnection* pConnection = m_objNetConnectionList.GetAt(i);
+        const ImsNetworkConnection* pConnection = m_objNetConnectionList.GetAt(i);
 
         if (pConnection != IMS_NULL)
         {

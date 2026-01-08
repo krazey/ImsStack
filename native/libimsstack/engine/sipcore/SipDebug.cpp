@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "IpAddress.h"
 #include "ServiceEvent.h"
 #include "ServiceMemory.h"
 #include "ServiceThread.h"

@@ -17,15 +17,15 @@
 #define OS_IPSEC_SA_H_
 
 #include "IIpSecSa.h"
-#include "IpSecSaParameter.h"
 
+class IpSecSaParameter;
 class OsIpSecSaPrivate;
 
 class OsIpSecSa : public IIpSecSa
 {
 public:
     OsIpSecSa();
-    virtual ~OsIpSecSa();
+    ~OsIpSecSa() override;
 
     OsIpSecSa(IN const OsIpSecSa&) = delete;
     OsIpSecSa& operator=(IN const OsIpSecSa&) = delete;

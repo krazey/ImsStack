@@ -17,16 +17,15 @@
 #ifndef MOCK_I_SILENT_REDIAL_HELPER_H_
 #define MOCK_I_SILENT_REDIAL_HELPER_H_
 
+#include "CallReasonInfo.h"
 #include "call/ISilentRedialHelper.h"
 #include <gmock/gmock.h>
 
 class MockISilentRedialHelper : public ISilentRedialHelper
 {
 public:
-    ~MockISilentRedialHelper() {}
-
-    MOCK_METHOD(IMS_RESULT, Redial, (IN IMS_SINT32), (override));
-    MOCK_METHOD(IMS_UINT32, GetType, (), (override));
+    MOCK_METHOD(CallReasonInfo, Redial, (IN IMS_SINT32), (override));
+    MOCK_METHOD(IMS_UINT32, GetType, (), (const, override));
 };
 
 #endif

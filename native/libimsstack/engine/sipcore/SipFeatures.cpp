@@ -65,12 +65,6 @@ PUBLIC GLOBAL IMS_BOOL SipFeatures::IsTransportParameterIgnoredForIncomingReques
     return IMS_FALSE;
 }
 
-PUBLIC GLOBAL IMS_BOOL SipFeatures::IsTransportParameterUdpIgnoredForOutgoingRequest(
-        IN IMS_SINT32 /* nSlotId*/)
-{
-    return IMS_FALSE;
-}
-
 PUBLIC GLOBAL IMS_BOOL SipFeatures::IsTransportParameterIgnoredForRegBinding(
         IN IMS_SINT32 /* nSlotId*/)
 {

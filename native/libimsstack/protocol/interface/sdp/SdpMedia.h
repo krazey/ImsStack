@@ -25,7 +25,7 @@ class SdpMedia : public SdpLine
 public:
     SdpMedia();
     SdpMedia(IN const SdpMedia& other);
-    virtual ~SdpMedia();
+    ~SdpMedia() override;
 
 public:
     SdpMedia& operator=(IN const SdpMedia& other);

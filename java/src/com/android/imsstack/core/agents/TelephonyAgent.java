@@ -22,13 +22,20 @@ import android.telephony.PhoneNumberUtils;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.TelephonyManager.SimState;
+import android.telephony.emergency.EmergencyNumber;
 import android.util.SparseArray;
 
-import com.android.imsstack.core.agents.dcm.DcFactory;
-import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
-import com.android.imsstack.util.AppContext;
+import androidx.annotation.NonNull;
+
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.DeviceConfig;
+import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.SystemServiceProxy.SubscriptionManagerProxy;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A class for accessing the Telephony or SIM states through {@link TelephonyManager} or
@@ -36,7 +43,7 @@ import com.android.imsstack.util.MSimUtils;
  */
 public class TelephonyAgent implements TelephonyInterface {
     private final int mSlotId;
-    private final SparseArray<TelephonyManager> mTelephonyManagers = new SparseArray<>();
+    private final SparseArray<TelephonyManagerProxy> mTelephonyManagerProxies = new SparseArray<>();
 
     public TelephonyAgent(int slotId) {
         mSlotId = slotId;
@@ -44,89 +51,72 @@ public class TelephonyAgent implements TelephonyInterface {
 
     @Override
     public void init(Context context) {
-        // Cache the TelephonyManager object.
-        getTelephonyManager();
+        // Cache the TelephonyManagerProxy object.
+        getTelephonyManagerProxy();
     }
 
     @Override
     public void cleanup() {
-        mTelephonyManagers.clear();
+        mTelephonyManagerProxies.clear();
     }
 
     @Override
     public @CallState int getCsCallState() {
-        return TelephonyManager.CALL_STATE_IDLE;
-        /** TODO(b/281756154): need to integrate with the IMS calls.
-        TelephonyManager tm = getTelephonyManager();
-        return (tm != null) ? tm.getCallStateForSubscription() : TelephonyManager.CALL_STATE_IDLE;
-        */
+        PhoneStateInterface phoneState = AgentFactory.getInstance().getAgent(
+                PhoneStateInterface.class, mSlotId);
+        return (phoneState != null)
+                ? phoneState.getCsCallState()
+                : TelephonyManager.CALL_STATE_IDLE;
     }
 
     @Override
     public @CallState int getCsCallStateInOtherSlot() {
+        int simCount = DeviceConfig.getActiveSimCount();
+
+        for (int i = 0; i < simCount; ++i) {
+            if (mSlotId != i) {
+                PhoneStateInterface phoneState = AgentFactory.getInstance().getAgent(
+                        PhoneStateInterface.class, i);
+                int state = phoneState != null
+                        ? phoneState.getCsCallState()
+                        : TelephonyManager.CALL_STATE_IDLE;
+                if (state != TelephonyManager.CALL_STATE_IDLE) {
+                    return state;
+                }
+            }
+        }
+
         return TelephonyManager.CALL_STATE_IDLE;
-        /** TODO(b/281756154): need to integrate with the IMS calls.
-        TelephonyManager tm = getTelephonyManager();
-        return (tm != null) ? tm.getCallStateForSubscription() : TelephonyManager.CALL_STATE_IDLE;
-        */
     }
 
     @Override
     public @NetworkType int getNetworkType() {
-        TelephonyManager tm = getTelephonyManager();
-        int networkType = (tm != null)
-                ? tm.getDataNetworkType()
-                : TelephonyManager.NETWORK_TYPE_UNKNOWN;
-
-        if (networkType == TelephonyManager.NETWORK_TYPE_IWLAN) {
-            networkType = getCellularDataNetworkType();
-        }
-
-        IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
-        if (dnw != null) {
-            if (is5G(networkType) && !dnw.is5GRequired()) {
-                networkType = TelephonyManager.NETWORK_TYPE_LTE;
-            }
-            dnw.setRatFromTelephonyManager(networkType);
-        }
-
-        return networkType;
+        TelephonyManagerProxy tmp = getTelephonyManagerProxy();
+        return tmp.getDataNetworkType(mSlotId);
     }
 
     @Override
     public @NetworkType int getVoiceNetworkType() {
-        TelephonyManager tm = getTelephonyManager();
-        int voiceNetworkType = (tm != null)
-                ? tm.getVoiceNetworkType()
-                : TelephonyManager.NETWORK_TYPE_UNKNOWN;
-
-        IDcNetWatcher dnw = DcFactory.getDcAgent(IDcNetWatcher.class, mSlotId);
-        if (dnw != null) {
-            if (is5G(voiceNetworkType) && !dnw.is5GRequired()) {
-                voiceNetworkType = TelephonyManager.NETWORK_TYPE_LTE;
-            }
-            dnw.setVoiceRatFromTelephonyManager(voiceNetworkType);
-        }
-
-        return voiceNetworkType;
+        TelephonyManagerProxy tmp = getTelephonyManagerProxy();
+        return tmp.getVoiceNetworkType(mSlotId);
     }
 
     @Override
     public @SimState int getSimState() {
-        TelephonyManager tm = getTelephonyManager();
-        return (tm != null) ? tm.getSimState(mSlotId) : TelephonyManager.SIM_STATE_UNKNOWN;
+        TelephonyManagerProxy tmp = getTelephonyManagerProxy();
+        return tmp.getSimState(mSlotId);
     }
 
     @Override
     public String getImei() {
-        TelephonyManager tm = getTelephonyManager();
-        return (tm != null) ? tm.getImei(mSlotId) : null;
+        TelephonyManagerProxy tmp = getTelephonyManagerProxy();
+        return tmp.getImei(mSlotId);
     }
 
     @Override
     public String getDeviceSoftwareVersion() {
-        TelephonyManager tm = getTelephonyManager();
-        return (tm != null) ? tm.getDeviceSoftwareVersion(mSlotId) : null;
+        TelephonyManagerProxy tmp = getTelephonyManagerProxy();
+        return (tmp != null) ? tmp.getDeviceSoftwareVersion(mSlotId) : null;
     }
 
     @Override
@@ -135,24 +125,21 @@ public class TelephonyAgent implements TelephonyInterface {
         // CarrierConfigManager#KEY_USE_USIM_BOOL may need to be enabled
         // to read the phone number from USIM application.
         int subId = MSimUtils.getSubId(mSlotId);
-        SubscriptionManager sm =
-                AppContext.getInstance().getSystemService(SubscriptionManager.class);
-
-        return (sm != null)
-                ? sm.getPhoneNumber(subId, SubscriptionManager.PHONE_NUMBER_SOURCE_UICC)
-                : "";
+        SubscriptionManagerProxy smp =
+                AppContext.getInstance().getSystemServiceProxy(SubscriptionManagerProxy.class);
+        return smp.getPhoneNumber(subId, SubscriptionManager.PHONE_NUMBER_SOURCE_UICC);
     }
 
     @Override
     public String getSubscriberId() {
-        TelephonyManager tm = getTelephonyManager();
-        return (tm != null) ? tm.getSubscriberId() : null;
+        TelephonyManagerProxy tmp = getTelephonyManagerProxy();
+        return tmp.getSubscriberId();
     }
 
     @Override
     public String getSimOperator() {
-        TelephonyManager tm = getTelephonyManager();
-        return (tm != null) ? tm.getSimOperator() : null;
+        TelephonyManagerProxy tmp = getTelephonyManagerProxy();
+        return tmp.getSimOperator();
     }
 
     @Override
@@ -167,32 +154,32 @@ public class TelephonyAgent implements TelephonyInterface {
 
     @Override
     public String getSimCountryIso() {
-        TelephonyManager tm = getTelephonyManager();
-        return (tm != null) ? tm.getSimCountryIso() : "";
+        TelephonyManagerProxy tmp = getTelephonyManagerProxy();
+        return tmp.getSimCountryIso();
     }
 
     @Override
     public String getSimSerialNumber() {
-        TelephonyManager tm = getTelephonyManager();
-        return (tm != null) ? tm.getSimSerialNumber() : null;
+        TelephonyManagerProxy tmp = getTelephonyManagerProxy();
+        return tmp.getSimSerialNumber();
     }
 
     @Override
     public String getSimGid1() {
-        TelephonyManager tm = getTelephonyManager();
-        return (tm != null) ? tm.getGroupIdLevel1() : null;
+        TelephonyManagerProxy tmp = getTelephonyManagerProxy();
+        return tmp.getGroupIdLevel1();
     }
 
     @Override
     public String getSimOperatorName() {
-        TelephonyManager tm = getTelephonyManager();
-        return (tm != null) ? tm.getSimOperatorName() : null;
+        TelephonyManagerProxy tmp = getTelephonyManagerProxy();
+        return tmp.getSimOperatorName();
     }
 
     @Override
     public String getNetworkOperator() {
-        TelephonyManager tm = getTelephonyManager();
-        return (tm != null) ? tm.getNetworkOperator() : null;
+        TelephonyManagerProxy tmp = getTelephonyManagerProxy();
+        return tmp.getNetworkOperator();
     }
 
     @Override
@@ -207,44 +194,43 @@ public class TelephonyAgent implements TelephonyInterface {
 
     @Override
     public String getNetworkCountryIso() {
-        TelephonyManager tm = getTelephonyManager();
-        return (tm != null) ? tm.getNetworkCountryIso() : "";
+        TelephonyManagerProxy tmp = getTelephonyManagerProxy();
+        return tmp.getNetworkCountryIso();
     }
 
     @Override
     public boolean isEmergencyNumber(String number) {
-        TelephonyManager tm = getTelephonyManager();
+        TelephonyManagerProxy tmp = getTelephonyManagerProxy();
 
         final String eNumber = PhoneNumberUtils.stripSeparators(number);
-        boolean isEmergencyNumber = (tm != null) ? tm.isEmergencyNumber(eNumber) : false;
+        boolean isEmergencyNumber = tmp.isEmergencyNumber(eNumber);
 
-        ImsLog.d(mSlotId, "isEmergencyNumber: " + isEmergencyNumber
+        ImsLog.d(this, mSlotId, "isEmergencyNumber: " + isEmergencyNumber
                 + " (number=" + number + ", eNumber=" + eNumber + ")");
 
         return isEmergencyNumber;
     }
 
-    private @NetworkType int getCellularDataNetworkType() {
-        PhoneStateInterface phoneState = AgentFactory.getInstance().getAgent(
-                PhoneStateInterface.class, mSlotId);
-        return (phoneState != null)
-                ? phoneState.getCellularDataNetworkType()
-                : TelephonyManager.NETWORK_TYPE_UNKNOWN;
+    @Override
+    public @NonNull List<EmergencyNumber> getEmergencyNumberList() {
+        TelephonyManagerProxy tmp = getTelephonyManagerProxy();
+        return tmp.getEmergencyNumberList().getOrDefault(
+                MSimUtils.getSubId(mSlotId), Collections.emptyList());
     }
 
-    private TelephonyManager getTelephonyManager() {
+    private TelephonyManagerProxy getTelephonyManagerProxy() {
         int subId = MSimUtils.getSubId(mSlotId);
         if (MSimUtils.isValidSubId(subId)) {
-            TelephonyManager tm = mTelephonyManagers.get(subId);
-            if (tm == null) {
-                ImsLog.i(mSlotId, "TelephonyManager created for sub" + subId);
-                tm = AppContext.getTelephonyManager(subId);
-                mTelephonyManagers.put(subId, tm);
+            TelephonyManagerProxy tmp = mTelephonyManagerProxies.get(subId);
+            if (tmp == null) {
+                ImsLog.i(this, mSlotId, "TelephonyManager created for sub" + subId);
+                tmp = AppContext.getTelephonyManagerProxy(subId);
+                mTelephonyManagerProxies.put(subId, tmp);
             }
-            return tm;
+            return tmp;
         }
 
-        return AppContext.getTelephonyManager();
+        return AppContext.getInstance().getSystemServiceProxy(TelephonyManagerProxy.class);
     }
 
     private static String getMcc(String mccmnc) {

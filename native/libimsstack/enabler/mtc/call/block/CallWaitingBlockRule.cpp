@@ -15,6 +15,8 @@
  */
 
 #include "IMtcService.h"
+#include "ImsList.h"
+#include "MtcDef.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
@@ -40,8 +42,7 @@ PUBLIC VIRTUAL CallWaitingBlockRule::Result CallWaitingBlockRule::Check(
         return Result(Result::Status::UNBLOCKED);
     }
 
-    if (m_objService.GetTbcwStatus() == TbcwStatus::UNPROVISIONED ||
-            m_objService.GetTbcwStatus() == TbcwStatus::PROVISIONED_ENABLED)
+    if (m_objService.IsPermanentSuppServiceEnabled(PermanentSuppType::TB_CW))
     {
         return Result(Result::Status::UNBLOCKED);
     }

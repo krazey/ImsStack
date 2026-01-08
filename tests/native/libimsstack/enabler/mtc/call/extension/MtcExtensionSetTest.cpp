@@ -17,13 +17,13 @@
 #include "IMessage.h"
 #include "ISipMessage.h"
 #include "ImsList.h"
+#include "MockIMessage.h"
+#include "MockISipMessage.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/extension/IMtcExtension.h"
 #include "call/extension/MockIMtcExtension.h"
 #include "call/extension/MtcExtension.h"
 #include "call/extension/MtcExtensionSet.h"
-#include "core/MockIMessage.h"
-#include "sipcore/MockISipMessage.h"
 #include "utility/MessageUtils.h"
 #include "utility/MockIMessageUtils.h"
 #include <gmock/gmock.h>
@@ -36,7 +36,7 @@ using ::testing::ReturnRef;
 
 const LOCAL AString OPTION_TAG("some_tag");
 
-MtcExtensionSet CreateExtensionSetSupportsRprOnly(IN IMtcCallContext& objContext)
+static MtcExtensionSet CreateExtensionSetSupportsRprOnly(IN IMtcCallContext& objContext)
 {
     ImsList<IMtcExtension*> lstExtensions;
     lstExtensions.Append(new MtcExtension(objContext, MtcExtensionSet::OPTION_TAG_RPR, {}, {}));
@@ -44,7 +44,7 @@ MtcExtensionSet CreateExtensionSetSupportsRprOnly(IN IMtcCallContext& objContext
     return MtcExtensionSet(objContext, lstExtensions);
 }
 
-MtcExtensionSet CreateExtensionSetSupportsTdialogOnly(IN IMtcCallContext& objContext)
+static MtcExtensionSet CreateExtensionSetSupportsTdialogOnly(IN IMtcCallContext& objContext)
 {
     ImsList<IMtcExtension*> lstExtensions;
     lstExtensions.Append(
@@ -53,7 +53,7 @@ MtcExtensionSet CreateExtensionSetSupportsTdialogOnly(IN IMtcCallContext& objCon
     return MtcExtensionSet(objContext, lstExtensions);
 }
 
-MockIMtcExtension* CreateMockIMtcExtension(IN const AString& strOptionTag)
+static MockIMtcExtension* CreateMockIMtcExtension(IN const AString& strOptionTag)
 {
     MockIMtcExtension* pExtension = new MockIMtcExtension();
 
@@ -92,7 +92,7 @@ TEST(MtcExtensionSetTest, CopyConstructor)
             objCopiedExtensionSet.IsAvailableOnLocal(MtcExtensionSet::OPTION_TAG_TARGET_DIALOG));
 }
 
-TEST(MtcExtensionSetTest, AssignOperator)
+TEST(MtcExtensionSetTest, AssignmentOperator)
 {
     MockIMtcCallContext objContext;
     MtcExtensionSet objAssignedExtensionSet = CreateExtensionSetSupportsTdialogOnly(objContext);
@@ -111,6 +111,7 @@ TEST(MtcExtensionSetTest, IsAvailableOnBothInitiallyReturnsFalse)
     MtcExtensionSet objExtensionSet = CreateExtensionSetSupportsRprOnly(objContext);
 
     EXPECT_FALSE(objExtensionSet.IsAvailableOnBoth(MtcExtensionSet::OPTION_TAG_RPR));
+    EXPECT_FALSE(objExtensionSet.IsAvailableOnBoth(MtcExtensionSet::OPTION_TAG_RPR.MakeUpper()));
     EXPECT_FALSE(objExtensionSet.IsAvailableOnBoth(MtcExtensionSet::OPTION_TAG_TARGET_DIALOG));
 }
 
@@ -120,6 +121,7 @@ TEST(MtcExtensionSetTest, IsAvailableOnLocalInitiallyReturnsInitialValue)
     MtcExtensionSet objExtensionSet = CreateExtensionSetSupportsRprOnly(objContext);
 
     EXPECT_TRUE(objExtensionSet.IsAvailableOnLocal(MtcExtensionSet::OPTION_TAG_RPR));
+    EXPECT_TRUE(objExtensionSet.IsAvailableOnLocal(MtcExtensionSet::OPTION_TAG_RPR.MakeUpper()));
     EXPECT_FALSE(objExtensionSet.IsAvailableOnLocal(MtcExtensionSet::OPTION_TAG_TARGET_DIALOG));
 }
 
@@ -157,9 +159,35 @@ TEST(MtcExtensionSetTest, IsRequiredOnRemoteReturnsTrueIfRemoteRequires)
     MtcExtensionSet objExtensionSet(objContext, lstExtensions);
 
     EXPECT_TRUE(objExtensionSet.IsRequiredOnRemote(OPTION_TAG));
+    EXPECT_TRUE(objExtensionSet.IsRequiredOnRemote(OPTION_TAG.MakeUpper()));
 }
 
-TEST(MtcExtensionSetTest, IsSupportRequiredExtensionsReturnsTrueForNotAvailableExtension)
+TEST(MtcExtensionSetTest,
+        IsSupportRequiredExtensionsReturnsTrueForAvailableExtensionRegardlessOfCase)
+{
+    MockIMtcCallContext objContext;
+    MockIMessageUtils objMessageUtils;
+    AString strUppercaseOptionTag = MtcExtensionSet::OPTION_TAG_RPR.MakeUpper();
+    ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
+
+    MtcExtensionSet objExtensionSet = CreateExtensionSetSupportsRprOnly(objContext);
+
+    ImsList<AString> lstRequiredHeaders;
+    lstRequiredHeaders.Append(strUppercaseOptionTag);
+
+    MockISipMessage objSipMessageRequiresRpr;
+    ON_CALL(objSipMessageRequiresRpr, GetHeaders(_, _)).WillByDefault(Return(lstRequiredHeaders));
+
+    MockIMessage objMessageRequiresRpr;
+    ON_CALL(objMessageRequiresRpr, GetMessage).WillByDefault(Return(&objSipMessageRequiresRpr));
+
+    AString strNotSupportedExtension;
+    EXPECT_TRUE(objExtensionSet.IsSupportRequiredExtensions(
+            objMessageRequiresRpr, strNotSupportedExtension));
+    EXPECT_TRUE(strNotSupportedExtension.GetLength() == 0);
+}
+
+TEST(MtcExtensionSetTest, IsSupportRequiredExtensionsReturnsTrueForAvailableExtension)
 {
     MockIMtcCallContext objContext;
     MockIMessageUtils objMessageUtils;
@@ -185,7 +213,7 @@ TEST(MtcExtensionSetTest, IsSupportRequiredExtensionsReturnsTrueForNotAvailableE
 TEST(MtcExtensionSetTest, IsSupportRequiredExtensionsReturnsFalseForNotAvailableExtension)
 {
     MockIMtcCallContext objContext;
-    MessageUtils objMessageUtils;
+    MessageUtils objMessageUtils(objContext);
     ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
     MtcExtensionSet objExtensionSet = CreateExtensionSetSupportsRprOnly(objContext);

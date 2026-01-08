@@ -134,17 +134,17 @@ public class ImsCallSessionCallback {
 
     public void invokeTerminated(final ImsCallSessionImplBase session,
             final ImsReasonInfo reasonInfo) {
+        final ImsCallSessionListener listener = mListener;
+        if (listener == null) {
+            return;
+        }
+
         postAndRunTask(new Runnable() {
             @Override
             public void run() {
                 try {
-                    if (mListener == null) {
-                        return;
-                    }
-
                     logi("invokeTerminated :: " + reasonInfo);
-
-                    mListener.callSessionTerminated(reasonInfo);
+                    listener.callSessionTerminated(reasonInfo);
                 } catch (Throwable t) {
                     log(t, "invokeTerminated");
                     closeSession(session, t);
@@ -674,7 +674,6 @@ public class ImsCallSessionCallback {
     // @QUALCOMM_API
     public void invokeHandover(final ImsCallSessionImplBase session,
             final int srcAccessTech, final int targetAccessTech) {
-        // FIXME: need to implement
         postAndRunTask(new Runnable() {
             @Override
             public void run() {
@@ -700,7 +699,6 @@ public class ImsCallSessionCallback {
     public void invokeHandoverFailed(final ImsCallSessionImplBase session,
             final int srcAccessTech, final int targetAccessTech,
             final ImsReasonInfo reasonInfo) {
-        // FIXME: need to implement
         postAndRunTask(new Runnable() {
             @Override
             public void run() {
@@ -722,7 +720,6 @@ public class ImsCallSessionCallback {
     // @QUALCOMM_API
     public void invokeTtyModeReceived(final ImsCallSessionImplBase session,
             final int mode) {
-        // FIXME: need to implement
         postAndRunTask(new Runnable() {
             @Override
             public void run() {
@@ -742,45 +739,11 @@ public class ImsCallSessionCallback {
 
     // @QUALCOMM_API
     public void invokeDeflected(final ImsCallSessionImplBase session) {
-        // FIXME: need to implement
-        postAndRunTask(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (mListener == null) {
-                        return;
-                    }
-
-                    // FIXME: M_OS_GII
-                    //mListener.callSessionDeflected();
-                } catch (Throwable t) {
-                    log(t, "invokeDeflected");
-                    closeSession(session, t);
-                }
-            }
-        });
     }
 
     // @QUALCOMM_API
     public void invokeDeflectFailed(final ImsCallSessionImplBase session,
             final ImsReasonInfo reasonInfo) {
-        // FIXME: need to implement
-        postAndRunTask(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (mListener == null) {
-                        return;
-                    }
-
-                    // FIXME: M_OS_GII
-                    //mListener.callSessionDeflectFailed(reasonInfo);
-                } catch (Throwable t) {
-                    log(t, "invokeDeflectFailed");
-                    closeSession(session, t);
-                }
-            }
-        });
     }
 
     // @QUALCOMM_API
@@ -856,7 +819,7 @@ public class ImsCallSessionCallback {
                         return;
                     }
 
-                    log("invokeRttMessageReceived :: " + data);
+                    log("invokeRttMessageReceived");
 
                     mListener.callSessionRttMessageReceived(data);
                 } catch (Throwable t) {
@@ -950,6 +913,31 @@ public class ImsCallSessionCallback {
                     mListener.callSessionRtpHeaderExtensionsReceived(extensions);
                 } catch (Throwable t) {
                     log(t, "invokeRtpHeaderExtensionsReceived");
+                }
+            }
+        });
+    }
+
+    /**
+     * Called to deliver the Anbr query.
+     *
+     * @param mediaType is used to identify media stream such as audio or video.
+     * @param direction of this packet stream (e.g. uplink or downlink).
+     * @param bitsPerSecond This value is the bitrate requested by the other party UE through
+     *        RTP CMR, RTCPAPP or TMMBR, and ImsStack converts this value to the MAC bitrate
+     *        (defined in TS36.321, range: 0 ~ 8000 kbit/s).
+     */
+    public void invokeSendAnbrQuery(int mediaType, int direction, int bitsPerSecond) {
+        postAndRunTask(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (mListener == null) {
+                        return;
+                    }
+                    mListener.callSessionSendAnbrQuery(mediaType, direction, bitsPerSecond);
+                } catch (Throwable t) {
+                    log(t, "invokeSendAnbrQuery");
                 }
             }
         });

@@ -144,6 +144,15 @@ public class MtcConferenceTest extends ImsStackTest {
         assertEquals(IUConf.EXPAND, mCommand);
         verify(mMockConferenceTracker).updateConferenceState(
                 eq(mTestConference), eq(ConferenceTracker.EVENT_EXTEND_TO_CONFERENCE), any());
+
+        mTestConference.dispose();
+        mTestConference.setListener(mMockConferenceListener);
+
+        mTestConference.extendToConference(new UsersInfo());
+        processAllMessages();
+
+        verify(mMockConferenceListener).onCallConferenceExtendFailed(
+                eq(mTestConference), any());
     }
 
     @Test

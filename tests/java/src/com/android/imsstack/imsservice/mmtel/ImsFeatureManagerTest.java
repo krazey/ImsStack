@@ -25,9 +25,13 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.os.Looper;
 import android.telephony.ims.feature.MmTelFeature;
-import android.test.mock.MockContentResolver;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.util.ArraySet;
 
+import com.android.imsstack.base.ContentProviderProxy.SettingsProxy;
+import com.android.imsstack.base.TestAppContext;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.enabler.aos.IAosRegistration;
@@ -39,34 +43,42 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(JUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class ImsFeatureManagerTest {
+    private TestAppContext mTestAppContext;
+    private TestableLooper mTestableLooper;
     private ImsFeatureManager mFeatureManager;
     private MmTelFeature.MmTelCapabilities mMmTelCapabilities;
     private ImsRegistrationTracker mRegTracker;
     private IAosRegistrationListener mAosRegListener;
-    private MockContentResolver mContentResolver;
-    MockIAosRegistration mAosReg;
+    private MockIAosRegistration mAosReg;
 
     @Mock Context mContext;
+    @Mock SettingsProxy mSettingsProxy;
     @Mock IBaseContext mMockBaseContext;
     @Mock IContext mMockContext;
+    @Mock IDcNetWatcher mMockDcNetWatcher;
     @Mock IMmTelFeatureCapabilityListener mMockFeatureCapabilityListener;
     @Mock IUtInterface mMockUt;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mTestableLooper = TestableLooper.get(this);
+        mTestAppContext = new TestAppContext(mContext);
+        mTestAppContext.setUp();
 
-        mContentResolver = new MockContentResolver();
+        when(mTestAppContext.getContentProviderProxy().getGlobalSettings())
+                .thenReturn(mSettingsProxy);
         when(mMockContext.getContext()).thenReturn(mContext);
-        when(mMockBaseContext.getDefaultLooper()).thenReturn(Looper.getMainLooper());
+        when(mMockBaseContext.getDefaultLooper()).thenReturn(mTestableLooper.getLooper());
+        when(mMockBaseContext.getDcNetWatcher()).thenReturn(mMockDcNetWatcher);
         when(mMockContext.getDefaultLooper()).thenReturn(Looper.getMainLooper());
-        when(mContext.getContentResolver()).thenReturn(mContentResolver);
         mAosReg = new MockIAosRegistration();
         mFeatureManager = new ImsFeatureManager(mMockBaseContext, mMockFeatureCapabilityListener);
         mRegTracker = new FakeImsRegistrationTracker(mMockContext, new ImsRegistrationImpl());
@@ -78,7 +90,9 @@ public class ImsFeatureManagerTest {
     @After
     public void tearDown() {
         mFeatureManager.dispose();
-        mContentResolver = null;
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
+        mTestableLooper = null;
     }
 
     @Test
@@ -92,7 +106,7 @@ public class ImsFeatureManagerTest {
                 | IAosRegistrationListener.FeatureTagMask.VIDEO
                 | IAosRegistrationListener.FeatureTagMask.SMSIP);
 
-        mAosRegListener.notifyRegistered(
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.RegistrationType.NORMAL,
                 IAosRegistrationListener.NetworkType.LTE,
                 features, new ArraySet<String>());
 
@@ -114,7 +128,7 @@ public class ImsFeatureManagerTest {
         int features = (IAosRegistrationListener.FeatureTagMask.MMTEL
                 | IAosRegistrationListener.FeatureTagMask.SMSIP);
 
-        mAosRegListener.notifyRegistered(
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.RegistrationType.NORMAL,
                 IAosRegistrationListener.NetworkType.IWLAN,
                 features, new ArraySet<String>());
         when(mMockUt.isUtAvailable()).thenReturn(true);
@@ -132,8 +146,10 @@ public class ImsFeatureManagerTest {
 
     @Test
     public void testupdateFeatureCapabilities_deReg() {
-        mAosRegListener.notifyDeregistered(IAosRegistrationListener.NetworkType.LTE,
-                IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR, null);
+        mAosRegListener.notifyDeregistered(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE,
+                IAosRegistrationListener.ReasonCode.REGISTRATION_ERROR, null,
+                android.telephony.DataFailCause.NONE);
         when(mMockUt.isUtAvailable()).thenReturn(true);
 
         int removeCapabilities = MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_UT
@@ -153,7 +169,7 @@ public class ImsFeatureManagerTest {
                 | IAosRegistrationListener.FeatureTagMask.VIDEO
                 | IAosRegistrationListener.FeatureTagMask.SMSIP);
 
-        mAosRegListener.notifyRegistered(
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.RegistrationType.NORMAL,
                 IAosRegistrationListener.NetworkType.LTE,
                 features, new ArraySet<String>());
         when(mMockUt.isUtAvailable()).thenReturn(true);
@@ -185,6 +201,56 @@ public class ImsFeatureManagerTest {
         verify(mMockFeatureCapabilityListener).onFeatureCapabilityChanged(
                 eq(mMmTelCapabilities));
     }
+
+    @Test
+    public void testUpdateAvailableFeatures() {
+        // Initial capabilities are set with registered features
+        int features = (IAosRegistrationListener.FeatureTagMask.MMTEL
+                | IAosRegistrationListener.FeatureTagMask.VIDEO);
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE,
+                features, new ArraySet<String>());
+
+        // VIDEO capability is disabled
+        int addedCapabilities = MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_NONE;
+        int removedCapabilities = MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO;
+        mFeatureManager.updateAvailableFeatures(addedCapabilities, removedCapabilities);
+
+        // Verify that capability changes is notified
+        MmTelFeature.MmTelCapabilities expectedCapabilities = new MmTelFeature.MmTelCapabilities(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE);
+        verify(mMockFeatureCapabilityListener, times(2)).onFeatureCapabilityChanged(
+                eq(expectedCapabilities));
+    }
+
+    @Test
+    public void testNetWatcherListenerOnDataNetworkTypeChanged_updateFeatureCapabilities() {
+        int features = (IAosRegistrationListener.FeatureTagMask.MMTEL
+                | IAosRegistrationListener.FeatureTagMask.VIDEO
+                | IAosRegistrationListener.FeatureTagMask.SMSIP);
+        mAosRegListener.notifyRegistered(IAosRegistrationListener.RegistrationType.NORMAL,
+                IAosRegistrationListener.NetworkType.LTE,
+                features, new ArraySet<String>());
+        when(mMockUt.isUtAvailable()).thenReturn(false);
+
+        ArgumentCaptor<IDcNetWatcher.Listener> listenerCaptor =
+                ArgumentCaptor.forClass(IDcNetWatcher.Listener.class);
+        verify(mMockDcNetWatcher).addListener(listenerCaptor.capture());
+        IDcNetWatcher.Listener listener = listenerCaptor.getValue();
+        assertNotNull(listener);
+        listener.onDataNetworkTypeChanged();
+        processAllMessages();
+
+        int capabilities = MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE
+                | MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO
+                | MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_SMS;
+        int removeCapabilities = MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_UT;
+        mMmTelCapabilities.addCapabilities(capabilities);
+        mMmTelCapabilities.removeCapabilities(removeCapabilities);
+        verify(mMockFeatureCapabilityListener, times(2)).onFeatureCapabilityChanged(
+                eq(mMmTelCapabilities));
+    }
+
     private class FakeImsRegistrationTracker extends ImsRegistrationTracker {
         FakeImsRegistrationTracker(IContext context, ImsRegistrationImpl regImpl) {
             super(context, regImpl);
@@ -193,6 +259,12 @@ public class ImsFeatureManagerTest {
         @Override
         protected IAosRegistration getIAosRegistration(int slotId) {
             return mAosReg;
+        }
+    }
+
+    private void processAllMessages() {
+        while (!mTestableLooper.getLooper().getQueue().isIdle()) {
+            mTestableLooper.processAllMessages();
         }
     }
 }

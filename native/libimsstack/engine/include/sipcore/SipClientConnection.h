@@ -17,6 +17,7 @@
 #define SIP_CLIENT_CONNECTION_H_
 
 #include "Credential.h"
+#include "ITimer.h"
 
 #include "ISipClientTransactionStateListener.h"
 #include "ISipClientTransmissionListener.h"
@@ -25,7 +26,6 @@
 #include "SipConnection.h"
 
 class IOnSipClientConnectionListener;
-class ISipAckPackage;
 class ISipGenericChallenge;
 class SipAuHelper;
 class SipClientTransmissionProxy;
@@ -34,13 +34,14 @@ class SipConnectionNotifier;
 class SipClientConnection :
         public SipConnection,
         public ISipClientTransactionStateListener,
-        public ISipClientTransmissionListener
+        public ISipClientTransmissionListener,
+        public ITimerListener
 {
 public:
     SipClientConnection();
     explicit SipClientConnection(IN const AString& strTargetUri);
     explicit SipClientConnection(IN SipClientTransactionState* pCtState);
-    virtual ~SipClientConnection();
+    ~SipClientConnection() override;
 
     SipClientConnection(IN const SipClientConnection&) = delete;
     SipClientConnection& operator=(IN const SipClientConnection&) = delete;
@@ -63,12 +64,13 @@ public:
     const ByteArray& GetContent() const override;
     IMS_RESULT SetContent(IN const ByteArray& objContent) override;
     IMS_SINT32 GetHeaderCount(IN const AString& strName) const override;
+    SipProfile* GetSipProfile() const override;
     void SetSipProfile(IN SipProfile* pProfile) override;
 
     // ISipClientConnection interface
     IMS_RESULT InitAck();
     SipClientConnection* InitCancel();
-    IMS_RESULT InitRequest(IN const AString& strMethod, IN SipConnectionNotifier* pScn);
+    IMS_RESULT InitRequest(IN const AString& strMethod, IN const SipConnectionNotifier* pScn);
     IMS_RESULT Receive(IN IMS_SLONG nTimeout = 0);
     IMS_RESULT SetCredentials(IN ImsList<Credential>& objCredentials);
     IMS_RESULT SetCredentials(IN const Credential& objCredential);
@@ -78,7 +80,6 @@ public:
     }
     IMS_RESULT SetRequestUri(IN const AString& strUri);
     ISipGenericChallenge* GetAuthenticationChallenge(IN IMS_SINT32 nIndex = 0) const;
-    ISipAckPackage* GrabAck();
     IMS_RESULT InitResubmissionRequest();
     void RemoveAllChallenges();
     void RemoveAllCredentials();
@@ -88,6 +89,7 @@ public:
     void SetTransportTuple(IN const IpAddress& objIp, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
             IN IMS_SINT32 nPortFc = Sip::PORT_UNSPECIFIED,
             IN IMS_SINT32 nTransportExt = Sip::TRANSPORT_EXT_ANY);
+    void RetransmitAck();
 
     IMS_RESULT InitDialogRequest(IN const SipMethod& objMethod, IN SipDialogEx* pDialogEx);
     IMS_RESULT SendWithCredentials();
@@ -100,7 +102,7 @@ private:
     void ClientTransactionState_ForkedResponseReceived(
             IN SipClientTransactionState* pCtState) override;
     void ClientTransactionState_ResponseReceived(IN ::SipMessage* pSipMsg) override;
-
+    void Transport_NotifyError(IN IMS_SINT32 nCode, IN const AString& strMessage) override;
     // SIP_TRANSPORT_ERROR_REPORT_ON_TXN
     IMS_BOOL IsTransportErrorReportRequired(
             IN IMS_SINT32 nCode, IN const AString& strMessage) const override;
@@ -109,8 +111,13 @@ private:
     void ClientTransmission_NotifyError(IN IMS_SINT32 nCode, IN const AString& strMessage) override;
     void ClientTransmission_TransmissionCompleted() override;
 
+    // ITimerListener interface
+    void Timer_TimerExpired(IN ITimer* piTimer) override;
+    void StartTcpConnectionMonitoringTimer();
+    void StopTcpConnectionMonitoringTimer();
     void SetState(IN IMS_SINT32 nState);
 
+    static IMS_BOOL IsTransportErrorCode104(IN const AString& strMessage);
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
 public:
@@ -145,6 +152,9 @@ private:
     IOnSipClientConnectionListener* m_piListener;
     // UDP_FALLBACK
     SipClientTransmissionProxy* m_pTransmissionProxy;
+    // A timer to handle an exceptional condition between sending SIP request from UE and
+    // closing TCP connection from network.
+    ITimer* m_piTcpConnectionMonitoringTimer;
 };
 
 #endif

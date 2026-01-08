@@ -35,7 +35,7 @@ class TestCoreBase : public ::testing::Test
 {
 public:
     TestCoreBase();
-    virtual ~TestCoreBase();
+    ~TestCoreBase() override;
 
 public:
     virtual void SetUpClientConnection(IN IMS_BOOL bMidDialog = IMS_FALSE);
@@ -43,6 +43,7 @@ public:
     virtual void SetUpServerConnection();
     virtual void TearDownServerConnection();
     virtual void VerifyAndClear();
+    virtual void SetUpDialog(IN IMS_SINT32 nState);
 
     void InitMethod(IN_OUT ServiceMethod* pMethod, IN IMS_BOOL bOriginated = IMS_TRUE);
     inline MockISipClientConnection& GetScc() { return m_objScc; }

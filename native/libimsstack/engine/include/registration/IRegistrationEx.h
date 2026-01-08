@@ -26,7 +26,7 @@ class RegStateTracker;
 class IRegistrationEx : public IRegistration, public ISipConnectionNotifierErrorListener
 {
 protected:
-    virtual ~IRegistrationEx() = default;
+    ~IRegistrationEx() override = default;
 
 public:
     /**
@@ -84,6 +84,13 @@ public:
      * @note REG_RESTORATION_FOR_ACTIVE_BINDING
      */
     virtual IMS_BOOL IsActiveBindingsRestorationEnabled() const = 0;
+
+    /**
+     * @brief Checks if this registration is for emergency or not.
+     *
+     * @return true if this registration is for emergency, false otherwise.
+     */
+    virtual IMS_BOOL IsEmergencyRegistration() const = 0;
 
 public:
     /// Update states for registration binding

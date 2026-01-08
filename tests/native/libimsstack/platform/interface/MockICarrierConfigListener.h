@@ -23,8 +23,8 @@
 class MockICarrierConfigListener : public ICarrierConfigListener
 {
 public:
-    inline MockICarrierConfigListener() = default;
-    inline virtual ~MockICarrierConfigListener() = default;
+    MockICarrierConfigListener() = default;
+    ~MockICarrierConfigListener() override = default;
 
     MOCK_METHOD(void, CarrierConfig_NotifyConfigChanged, (IN IMS_SINT32), (override));
 };

@@ -16,14 +16,12 @@
 #ifndef SDP_DESCRIPTION_H_
 #define SDP_DESCRIPTION_H_
 
-#include "AStringArray.h"
-
 #include "Sdp.h"
 #include "SdpAttribute.h"
 #include "SdpBandwidth.h"
-#include "SdpConnection.h"
-#include "SdpEncryptionKey.h"
-#include "SdpInformation.h"
+
+class SdpEncryptionKey;
+class SdpInformation;
 
 class SdpDescription
 {

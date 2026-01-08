@@ -22,7 +22,7 @@ class AosAppContext : public IAosAppContext
 {
 public:
     explicit AosAppContext(IN AosStaticProfile* pProfile);
-    virtual ~AosAppContext();
+    ~AosAppContext() override;
 
 private:
     AosAppContext(IN const AosAppContext& objRHS);

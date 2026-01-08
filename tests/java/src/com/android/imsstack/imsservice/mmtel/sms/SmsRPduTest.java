@@ -19,7 +19,7 @@ package com.android.imsstack.imsservice.mmtel.sms;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import com.android.internal.util.HexDump;
+import com.android.imsstack.util.ImsUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -46,29 +46,29 @@ public class SmsRPduTest {
     private String mDestinationAddress = "07919130079229F0";
     private String mOrigAddr = null;
     private int mCause = 0;
-    private byte[] mUserData = HexDump.hexStringToByteArray("21110A81785634121000"
+    private byte[] mUserData = ImsUtils.hexStringToBytes("21110A81785634121000"
                                                                 + "000666B2996C2603");
-    private byte[] mMoExpectedRpData = HexDump.hexStringToByteArray("00010007919130079229F0"
+    private byte[] mMoExpectedRpData = ImsUtils.hexStringToBytes("00010007919130079229F0"
                                                         + "1221110A81785634121000000666B2996C2603");
-    private byte[] mMoExpectedRpAck = HexDump.hexStringToByteArray("0201");
-    private byte[] mMoExpectedRpError = HexDump.hexStringToByteArray("0401016f");
-    private byte[] mMtRpData = HexDump.hexStringToByteArray("010107919130079229F000122111"
+    private byte[] mMoExpectedRpAck = ImsUtils.hexStringToBytes("0201");
+    private byte[] mMoExpectedRpError = ImsUtils.hexStringToBytes("0401016f");
+    private byte[] mMtRpData = ImsUtils.hexStringToBytes("010107919130079229F000122111"
                                                             + "0A81785634121000000666B2996C2603");
-    private byte[] mMtRpAck = HexDump.hexStringToByteArray("0301");
-    private byte[] mMtRpError = HexDump.hexStringToByteArray("0501016f");
-    private byte[] mMtRpAckWithRpUserData = HexDump.hexStringToByteArray("0301410A01"
+    private byte[] mMtRpAck = ImsUtils.hexStringToBytes("0301");
+    private byte[] mMtRpError = ImsUtils.hexStringToBytes("0501016f");
+    private byte[] mMtRpAckWithRpUserData = ImsUtils.hexStringToBytes("0301410A01"
                                                                         + "C20022905002058322");
-    private byte[] mMtRpErrorWithRpUserData = HexDump.hexStringToByteArray("0509016F410A"
+    private byte[] mMtRpErrorWithRpUserData = ImsUtils.hexStringToBytes("0509016F410A"
                                                                         + "01C20022905002058322");
-    private byte[] mMtRpErrorWithDiagnostics = HexDump.hexStringToByteArray("0509036F6F6F"
+    private byte[] mMtRpErrorWithDiagnostics = ImsUtils.hexStringToBytes("0509036F6F6F"
                                                                             + "410A01C200229"
                                                                             + "05002058322");
-    private byte[] mMtRpAckWithoutIEI = HexDump.hexStringToByteArray("03010A01"
+    private byte[] mMtRpAckWithoutIEI = ImsUtils.hexStringToBytes("03010A01"
                                                                     + "C20022905002058322");
-    private byte[] mMtRpUserData = HexDump.hexStringToByteArray("01C20022905002058322");
-    private byte[] mMoExpectedRpSmma = HexDump.hexStringToByteArray("0601");
-    private byte[] mMoExpectedRpAckWithUserData = HexDump.hexStringToByteArray("020141020000");
-    private byte[] mUserDataForRPAck = HexDump.hexStringToByteArray("0000");
+    private byte[] mMtRpUserData = ImsUtils.hexStringToBytes("01C20022905002058322");
+    private byte[] mMoExpectedRpSmma = ImsUtils.hexStringToBytes("0601");
+    private byte[] mMoExpectedRpAckWithUserData = ImsUtils.hexStringToBytes("020141020000");
+    private byte[] mUserDataForRPAck = ImsUtils.hexStringToBytes("0000");
 
     @Before
     public void setUp() throws Exception {

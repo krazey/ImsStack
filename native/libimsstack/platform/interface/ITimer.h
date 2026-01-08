@@ -42,7 +42,7 @@ public:
      *                   to receive notification of the timer expiration.
      * @return A timer id to identify this object.
      */
-    virtual IMS_UINTP SetTimer(IN IMS_UINT32 nDuration, IN ITimerListener* piListener) = 0;
+    virtual IMS_UINTP SetTimer(IN IMS_SINT64 nDuration, IN ITimerListener* piListener) = 0;
 
     /**
      * @brief Stops the running timer if it is not expired.

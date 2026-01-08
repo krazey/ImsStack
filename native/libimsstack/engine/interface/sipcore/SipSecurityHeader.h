@@ -175,6 +175,14 @@ public:
     }
 
     /**
+     * @brief Checks if the security mechanisms are matched.
+     *
+     * @return If the security mechanisms are matched, returns IMS_TRUE.
+     *         Otherwise, returns IMS_FALSE.
+     */
+    IMS_BOOL IsSecurityMechanismMatched(IN const SipSecurityHeader& other) const;
+
+    /**
      * @brief Sets "q" parameter value.
      *
      * @param strPreference "q" parameter value to be set
@@ -252,10 +260,8 @@ public:
      *
      * @param strName The extension parameter name
      * @param strValue The extension parameter value
-     * @return If the parameter is successfully set, returns IMS_TRUE.
-     *         Otherwise, returns IMS_FALSE.
      */
-    IMS_BOOL SetExtensionParameter(IN const AString& strName, IN const AString& strValue);
+    void SetExtensionParameter(IN const AString& strName, IN const AString& strValue);
 
     /**
      * @brief Sets the unknown parameter.
@@ -266,11 +272,8 @@ public:
      *              #SEC_P_MODE\n
      *              #SEC_P_EALG
      * @param strValue The unknown parameter value
-     * @return If the parameter is successfully set, returns IMS_TRUE.
-     *         Otherwise, returns IMS_FALSE.
      */
-    IMS_BOOL SetUnknownParameterValue(
-            IN IMS_SINT32 nName /*SEC_P_XXX*/, IN const AString& strValue);
+    void SetUnknownParameterValue(IN IMS_SINT32 nName /*SEC_P_XXX*/, IN const AString& strValue);
 
     /**
      * @brief Returns the string representation of SIP security header.
@@ -284,7 +287,7 @@ public:
      *
      * @return The newly created SipSecurityHeader.
      */
-    static SipSecurityHeader* FromSipHeader(IN ISipHeader* piHeader);
+    static SipSecurityHeader* FromSipHeader(IN const ISipHeader* piHeader);
 
 public:
     /// Pre-defined parameters\n
@@ -348,7 +351,6 @@ public:
         MECHANISM_IPSEC_IKE,
         MECHANISM_IPSEC_MAN,
         MECHANISM_IPSEC_3GPP
-        // FIXME: security mechanism for media plane - sdes-srtp; mediasec="sdes-srtp"
     };
 
     /// To check if those parameters are present or not

@@ -16,6 +16,7 @@
 
 #include "IMediaSession.h"
 #include "ISession.h"
+#include "MediaDef.h"
 #include "ServiceTrace.h"
 #include "media/MtcMediaProfileManager.h"
 
@@ -66,7 +67,7 @@ void MtcMediaProfileManager::CreateMediaProfile(IN const ISession* piSession, IN
     {
         for (IMS_UINT32 index = 0; index < m_objMediaProfiles.GetSize(); index++)
         {
-            MediaProfile* pProfile = m_objMediaProfiles.GetValueAt(index);
+            const MediaProfile* pProfile = m_objMediaProfiles.GetValueAt(index);
 
             if (pProfile->bForked == IMS_FALSE)
             {
@@ -80,7 +81,7 @@ void MtcMediaProfileManager::CreateMediaProfile(IN const ISession* piSession, IN
             IMS_TRACE_D("CreateMediaProfile : the call has %d media profiles.",
                     m_objMediaProfiles.GetSize(), 0, 0);
 
-            MediaProfile* pProfile = m_objMediaProfiles.GetValueAt(0);
+            const MediaProfile* pProfile = m_objMediaProfiles.GetValueAt(0);
             if (pProfile)
             {
                 nParamId = pProfile->nNegoId;
@@ -108,7 +109,10 @@ void MtcMediaProfileManager::DestroyMediaProfile(
         return;
     }
 
-    piMediaSession->DestroyProfile(GetNegoId(piSession));
+    if (piMediaSession)
+    {
+        piMediaSession->DestroyProfile(GetNegoId(piSession));
+    }
 
     MediaProfile* pProfile = m_objMediaProfiles.GetValue(piSession);
     if (pProfile)
@@ -122,7 +126,7 @@ void MtcMediaProfileManager::DestroyMediaProfile(
 PUBLIC
 void MtcMediaProfileManager::DestroyAllMediaProfiles(IN IMediaSession* piMediaSession)
 {
-    for (IMS_UINT32 i = m_objMediaProfiles.GetSize(); i > 0; i--)
+    for (IMS_UINT32 i = static_cast<IMS_SINT32>(m_objMediaProfiles.GetSize()); i > 0; i--)
     {
         const ISession* piSession = m_objMediaProfiles.GetKeyAt(i - 1);
         DestroyMediaProfile(piSession, piMediaSession);
@@ -136,7 +140,7 @@ IMS_UINTP MtcMediaProfileManager::GetNegoId(IN const ISession* piSession) const
 
     if (!pProfile)
     {
-        return IMS_NULL;
+        return UNDEFINED_NEGO_ID;
     }
 
     return pProfile->nNegoId;
@@ -179,6 +183,19 @@ IMS_BOOL MtcMediaProfileManager::IsConfirmed(IN const ISession* piSession) const
     }
 
     return pProfile->bConfirmed;
+}
+
+PUBLIC
+IMS_BOOL MtcMediaProfileManager::IsForked(IN const ISession* piSession) const
+{
+    const MediaProfile* pProfile = GetMediaProfile(piSession);
+
+    if (!pProfile)
+    {
+        return IMS_FALSE;
+    }
+
+    return pProfile->bForked;
 }
 
 PUBLIC

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,147 +20,181 @@
 #include "AString.h"
 #include "config/MediaConfiguration.h"
 
+/**
+ * @class AudioConfiguration
+ * @brief Manages audio-specific media configurations.
+ * @details This class holds all configuration parameters related to audio streams,
+ * such as codecs, RTP/RTCP settings, bandwidth, and jitter buffer parameters.
+ */
 class AudioConfiguration : public MediaConfiguration
 {
 public:
     /**
-     * @brief Construct a new audio configuration
+     * @brief Constructs a new AudioConfiguration object.
      *
-     * @param eSessionType the Media type
+     * @param eSessionType The media content type, defaulting to MEDIA_TYPE_AUDIO.
      */
     explicit AudioConfiguration(MEDIA_CONTENT_TYPE eSessionType = MEDIA_TYPE_AUDIO);
+
     /**
-     * @brief Destroy the Audio Configuration
-     *
+     * @brief Destroys the AudioConfiguration object.
      */
-    virtual ~AudioConfiguration();
+    ~AudioConfiguration() override;
+
     /**
-     * @brief Read the carrier configuration items
+     * @brief Initializes the audio configuration by reading carrier-specific settings.
      *
-     * @param piCc configuration
-     * @return IMS_BOOL Return true if the create function is executed without error
-     * Return false if the create function is failed
+     * @param piCc A pointer to the carrier configuration interface.
+     * @return IMS_TRUE on success, IMS_FALSE on failure.
      */
-    IMS_BOOL Create(IN ICarrierConfig* piCc) override;
+    virtual IMS_BOOL Create(IN ICarrierConfig* piCc) override;
+
     /**
-     * @brief Update the carrier configuration items
+     * @brief Updates the audio configuration with new carrier-specific settings.
      *
-     * @param piCc configuration
-     * @return IMS_BOOL Return true if the create function is executed without error
-     * Return false if the create function is failed
+     * @param piCc A pointer to the carrier configuration interface.
+     * @return IMS_TRUE on success, IMS_FALSE on failure.
      */
-    IMS_BOOL Update(IN ICarrierConfig* piCc) override;
+    virtual IMS_BOOL Update(IN ICarrierConfig* piCc) override;
+
     /**
-     * @brief Get whether EVS codec is supported
+     * @brief Checks if the EVS (Enhanced Voice Services) codec is supported.
      *
-     * @return IMS_BOOL Return true if evs is supported
-     * Return false if evs is not supported
+     * @return IMS_TRUE if EVS is supported, otherwise IMS_FALSE.
      */
-    IMS_BOOL IsEvsSupported() const;
+    virtual IMS_BOOL IsEvsSupported() const;
+
     /**
-     * @brief Get the ptime (recommended length of time in milliseconds represented by the media in
-     * a packet)
+     * @brief Gets the packet time (ptime), the recommended duration of media in a single packet.
      *
-     * @return IMS_SINT32 Return ptime
+     * @return The ptime value in milliseconds.
      */
-    IMS_SINT32 GetPtime() const;
+    virtual IMS_SINT32 GetPtime() const;
+
     /**
-     * @brief Get the maxptime (maximum amount of media that can be encapsulated in each packet)
+     * @brief Gets the maximum packet time (maxptime), the maximum duration of media that can be
+     * encapsulated in a packet.
      *
-     * @return IMS_SINT32 Return maxptime
+     * @return The maxptime value in milliseconds.
      */
-    IMS_SINT32 GetMaxPtime() const;
+    virtual IMS_SINT32 GetMaxPtime() const;
+
     /**
-     * @brief Get the maxredundancy (The maximum duration in milliseconds between the primary and
-     * redundant transmission)
+     * @brief Gets the maximum duration in milliseconds for redundant audio data.
      *
-     * @return IMS_SINT32 Return max-red
+     * @return The maximum redundancy value in milliseconds.
      */
-    IMS_SINT32 GetMaxRed() const;
+    virtual IMS_SINT32 GetMaxRed() const;
+
     /**
-     * @brief Get the bandwidthnegooption
+     * @brief Gets the bandwidth negotiation option for audio.
      *
-     * @return IMS_BOOL Return true if the audio bandwidth nego option is enabled
-     * Return false if the audio bandwidth nego option is disabled
+     * @return IMS_TRUE to use the remote party's bandwidth values, IMS_FALSE to use local values.
      */
-    IMS_BOOL GetBandwidthNegoOption() const;
+    virtual IMS_BOOL GetBandwidthNegoOption() const;
+
     /**
-     * @brief Get the dscp (Differentiated Services Code Point) for rtp
+     * @brief Gets the Differentiated Services Code Point (DSCP) value for audio RTP packets.
      *
-     * @return IMS_SINT32 Return dscp value
+     * @return The DSCP value.
      */
-    IMS_SINT32 GetRtpDscp() const;
+    virtual IMS_SINT32 GetRtpDscp() const;
+
     /**
-     * @brief Get the min jitter buffer size
+     * @brief Gets the minimum size of the jitter buffer.
      *
-     * @return IMS_SINT32 min jitterbuffer size
+     * @return The minimum jitter buffer size in milliseconds.
      */
-    IMS_SINT32 GetJitterBufferMinSize() const;
+    virtual IMS_SINT32 GetJitterBufferMinSize() const;
+
     /**
-     * @brief Get the max jitter buffer size
+     * @brief Gets the maximum size of the jitter buffer.
      *
-     * @return IMS_SINT32 Return max jitterbuffer size
+     * @return The maximum jitter buffer size in milliseconds.
      */
-    IMS_SINT32 GetJitterBufferMaxSize() const;
+    virtual IMS_SINT32 GetJitterBufferMaxSize() const;
+
     /**
-     * @brief Get the adjust time for jitter buffer
+     * @brief Gets the adjustment time for the jitter buffer.
      *
-     * @return IMS_SINT32 Return adjust time for jitter buffer
+     * @return The jitter buffer adjustment time in milliseconds.
      */
-    IMS_SINT32 GetJitterBufferAdjustTime() const;
+    virtual IMS_SINT32 GetJitterBufferAdjustTime() const;
+
     /**
-     * @brief Get the jitterbuffer size change unit
+     * @brief Gets the step size for jitter buffer adjustments.
      *
-     * @return IMS_SINT32 Return jitterbuffer size change unit
+     * @return The jitter buffer step size in milliseconds.
      */
-    IMS_SINT32 GetJitterBufferStepSize() const;
+    virtual IMS_SINT32 GetJitterBufferStepSize() const;
+
     /**
-     * @brief Get whether rtcp-xr feature is enabled
+     * @brief Checks if RTCP Extended Reports (RTCP-XR) are enabled.
      *
-     * @return IMS_BOOL Return true if rtcp-xr is enabled
-     * Return false if rtcp-xr is disabled
+     * @return IMS_TRUE if RTCP-XR is enabled, otherwise IMS_FALSE.
      */
-    IMS_BOOL IsRtcpXrEnabled() const;
+    virtual IMS_BOOL IsRtcpXrEnabled() const;
+
     /**
-     * @brief Get whether rtcp-xr statistics feature is enabled
+     * @brief Checks if RTCP-XR statistics reporting is enabled.
      *
-     * @return IMS_BOOL Return true if rtcp-xr statistics is enabled
-     * Return false if rtcp-xr statistics is disabled
+     * @return IMS_TRUE if RTCP-XR statistics are enabled, otherwise IMS_FALSE.
      */
-    IMS_BOOL IsRtcpXrStatisticsEnabled() const;
+    virtual IMS_BOOL IsRtcpXrStatisticsEnabled() const;
+
     /**
-     * @brief Get whether rtcp-xr voip feature is enabled
+     * @brief Checks if RTCP-XR VoIP metrics reporting is enabled.
      *
-     * @return IMS_BOOL Return true if rtcp-xr voip is enabled
-     * Return false if rtcp-xr voip is disabled
+     * @return IMS_TRUE if RTCP-XR VoIP metrics are enabled, otherwise IMS_FALSE.
      */
-    IMS_BOOL IsRtcpXrVoipEnabled() const;
+    virtual IMS_BOOL IsRtcpXrVoipEnabled() const;
+
     /**
-     * @brief Get whether rtcp-xr plr feature is enabled
+     * @brief Checks if RTCP-XR Packet Loss RLE (Run Length Encoding) is enabled.
      *
-     * @return IMS_BOOL Return true if rtcp-xr plr is enabled
-     * Return false if rtcp-xr plr is disabled
+     * @return IMS_TRUE if Packet Loss RLE is enabled, otherwise IMS_FALSE.
      */
-    IMS_BOOL IsRtcpXrPlrEnabled() const;
+    virtual IMS_BOOL IsRtcpXrPlrEnabled() const;
+
     /**
-     * @brief Get whether rtcp-xr pdr feature is enabled
+     * @brief Checks if RTCP-XR Packet Duplicate RLE (Run Length Encoding) is enabled.
      *
-     * @return IMS_BOOL Return true if rtcp-xr pdr is enabled
-     * Return false if rtcp-xr pdr is disabled
+     * @return IMS_TRUE if Packet Duplicate RLE is enabled, otherwise IMS_FALSE.
      */
-    IMS_BOOL IsRtcpXrPdrEnabled() const;
+    virtual IMS_BOOL IsRtcpXrPdrEnabled() const;
+
     /**
-     * @brief Get dtmf playing duration in milliseconds unit
+     * @brief Gets the duration for playing a DTMF (Dual-Tone Multi-Frequency) tone.
      *
-     * @return IMS_SINT32 Return dtmf duration value
+     * @return The DTMF duration in milliseconds.
      */
-    IMS_SINT32 GetDTMFDuration() const;
+    virtual IMS_SINT32 GetDtmfDuration() const;
+
     /**
-     * @brief Get the audio candidate attribute
+     * @brief Gets the list of ICE (Interactive Connectivity Establishment) candidate attributes for
+     * audio.
      *
-     * @return const ImsVector<AString>& Return audio-candidate-attribute
+     * @return A vector of strings representing the audio candidate attributes.
      */
-    const ImsVector<AString>& GetAudioCandidateAttribute() const;
+    virtual const ImsVector<AString>& GetAudioCandidateAttribute() const;
+
+    /**
+     * @brief Checks if a given reason is configured to trigger call termination upon media
+     * inactivity.
+     *
+     * @param nReason The inactivity reason to check. See {@link MEDIA_INACTIVITY_CALL_END_REASON}.
+     * @return IMS_TRUE if the reason should end the call, otherwise IMS_FALSE.
+     */
+    virtual IMS_BOOL IsAudioInactivityCallEndReason(IN IMS_SINT32 nReason) const;
+
+    /**
+     * @brief Determines whether AMR codec payload formats BE/OA should be treated as relaxed
+     matching comparisons during codec negotiation.
+     *
+     * @return IMS_TRUE if the internal asset is set to TRUE to ignore the differences in AMR codec
+     * payload formats (BE/OA) and perform codec negotiation, otherwise IMS_FALSE
+     */
+    virtual IMS_BOOL IsAmrPayloadFormatRelaxedMatching() const;
 
 public:
     enum
@@ -180,7 +214,7 @@ public:
     static const IMS_SINT32 DEFAULT_PTIME = 20;
     static const IMS_SINT32 DEFAULT_MAX_PTIME = 240;
     static const IMS_SINT32 DEFAULT_MAX_RED = DEFAULT_MAX_PTIME - DEFAULT_PTIME;
-    static const IMS_BOOL DEFAULT_BW_NEGO_OPTION = MediaConfiguration::BW_OPTION_SOURCE_VALUE;
+    static const IMS_BOOL DEFAULT_BW_NEGO_OPTION = MediaConfiguration::BW_OPTION_LOCAL_VALUE;
     static const IMS_SINT32 DEFAULT_AUDIO_DSCP = 46;
     static const IMS_SINT32 DEFAULT_JITTER_MIN = 0;
     static const IMS_SINT32 DEFAULT_JITTER_MAX = 0;
@@ -198,23 +232,44 @@ protected:
     void ToDebugString() const override;
 
 private:
+    /** Indicates whether the EVS codec is supported. */
     IMS_BOOL m_bEvsSupported;
+    /** The preferred packetization time (ptime) for audio packets in milliseconds. */
     IMS_SINT32 m_nAudioPtime;
+    /** The maximum allowed packetization time (maxptime) for audio packets in milliseconds. */
     IMS_SINT32 m_nAudioMaxPtime;
+    /** The maximum duration for redundant audio data in milliseconds. */
     IMS_SINT32 m_nAudioMaxRed;
+    /** The bandwidth negotiation option for audio. */
     IMS_BOOL m_bAudioBwNegoOptionEnabled;
+    /** The DSCP value for audio RTP packets. */
     IMS_SINT32 m_nAudioRtpDscp;
+    /** The minimum size of the jitter buffer in milliseconds. */
     IMS_SINT32 m_nJitterBufferMinSize;
+    /** The maximum size of the jitter buffer in milliseconds. */
     IMS_SINT32 m_nJitterBufferMaxSize;
+    /** The adjustment time for the jitter buffer in milliseconds. */
     IMS_SINT32 m_nJitterBufferAdjustTime;
+    /** The step size for jitter buffer adjustments in milliseconds. */
     IMS_SINT32 m_nJitterBufferStepSize;
-    IMS_BOOL m_bAudioRtcpxrEnabled;
-    IMS_BOOL m_bAudioRtcpxrStatisticsEnabled;
-    IMS_BOOL m_bAudioRtcpxrVoipMetricsEnabled;
-    IMS_BOOL m_bAudioRtcpxrPacketLossRleEnabled;
-    IMS_BOOL m_bAudioRtcpxrPacketDuplicateRleEnabled;
+    /** Indicates whether RTCP-XR is enabled for audio. */
+    IMS_BOOL m_bAudioRtcpXrEnabled;
+    /** Indicates whether RTCP-XR statistics reporting is enabled. */
+    IMS_BOOL m_bAudioRtcpXrStatisticsEnabled;
+    /** Indicates whether RTCP-XR VoIP metrics reporting is enabled. */
+    IMS_BOOL m_bAudioRtcpXrVoipMetricsEnabled;
+    /** Indicates whether RTCP-XR Packet Loss RLE reporting is enabled. */
+    IMS_BOOL m_bAudioRtcpXrPacketLossRleEnabled;
+    /** Indicates whether RTCP-XR Packet Duplicate RLE reporting is enabled. */
+    IMS_BOOL m_bAudioRtcpXrPacketDuplicateRleEnabled;
+    /** Indicates whether to treat amr codec payload format BE/OA as preferred */
+    IMS_BOOL m_bAmrPayloadFormatRelaxedMatching;
+    /** The duration for playing a DTMF tone in milliseconds. */
     IMS_SINT32 m_nDtmfDuration;
+    /** A list of ICE candidate attributes for audio. */
     ImsVector<AString> m_objAudioCandidateAttribute;
+    /** A list of reasons that trigger call termination upon media inactivity. */
+    ImsVector<IMS_SINT32> m_objAudioInactivityCallEndReasons;
 };
 
 #endif

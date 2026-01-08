@@ -20,11 +20,13 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.os.Looper;
+import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsStreamMediaProfile;
 
 import com.android.imsstack.ImsStackTest;
+import com.android.imsstack.base.AppContext;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.NativeStateInterface;
@@ -45,7 +47,6 @@ import com.android.imsstack.imsservice.mmtel.base.ImsApp;
 import com.android.imsstack.imsservice.mmtel.internal.WfcSettingTracker;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
-import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -257,7 +258,7 @@ public class ImsCallContextTest extends ImsStackTest {
         Assert.assertFalse(mImsCallContext.isLocationRequiredForCall());
 
         when(mMockCarrierConfig
-            .getInt(CarrierConfig.Assets.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
+            .getInt(CarrierConfig.Ims.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
                 .thenReturn(FLAG_LOCATION_REQUIRED);
         Assert.assertTrue(mImsCallContext.isLocationRequiredForCall());
     }
@@ -300,7 +301,7 @@ public class ImsCallContextTest extends ImsStackTest {
         Assert.assertNull(mImsCallContext.getCallLocationPolicy());
 
         when(mMockCarrierConfig
-            .getInt(CarrierConfig.Assets.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
+            .getInt(CarrierConfig.Ims.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
                 .thenReturn(FLAG_LOCATION_REQUIRED);
         Assert.assertNotNull(mImsCallContext.getCallLocationPolicy());
     }
@@ -329,7 +330,11 @@ public class ImsCallContextTest extends ImsStackTest {
                     ICallContext.MEDIA_AUDIO));
 
         int[] intArray = {0, 1};
-        when(mMockCarrierConfig.getIntArray(
+        PersistableBundle audioCodecCapaPayloadBundle = Mockito.mock(PersistableBundle.class);
+        when(mMockCarrierConfig.getBundle(
+                CarrierConfigManager.ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE))
+                .thenReturn(audioCodecCapaPayloadBundle);
+        when(audioCodecCapaPayloadBundle.getIntArray(
                 CarrierConfigManager.ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY))
                 .thenReturn(intArray);
         when(mMockDcNetWatcher.is4G()).thenReturn(true);

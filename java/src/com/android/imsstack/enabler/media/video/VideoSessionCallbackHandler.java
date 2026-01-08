@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.imsmedia.ImsMediaSession;
+import android.telephony.imsmedia.RtpReceptionStats;
 import android.telephony.imsmedia.VideoConfig;
 
 import com.android.imsstack.enabler.mtc.IMtcMediaInterface;
@@ -35,7 +36,7 @@ public class VideoSessionCallbackHandler {
 
     public VideoSessionCallbackHandler(@NonNull final IMtcMediaInterface mtcMediaInterface) {
         mMtcMediaInterface = mtcMediaInterface;
-        ImsLog.v("Constructor - Exit");
+        ImsLog.d("Constructor - Exit");
     }
 
     private IMtcMediaInterface getMtcMediaInterface() {
@@ -48,7 +49,7 @@ public class VideoSessionCallbackHandler {
      * @param result result of the open session request
      */
     public void openSessionResponse(@ImsMediaSession.SessionOperationResult int result) {
-        ImsLog.d("openSession Result=" + result);
+        ImsLog.d("openSessionResponse Result=" + result);
 
         Parcel parcel = Parcel.obtain();
 
@@ -69,7 +70,7 @@ public class VideoSessionCallbackHandler {
      * @param result The result of modify session
      */
     public void modifySessionResponse(VideoConfig videoConfig, int result) {
-        ImsLog.v("modifySessionResponse");
+        ImsLog.d("modifySessionResponse");
 
         Parcel parcel = Parcel.obtain();
 
@@ -87,7 +88,7 @@ public class VideoSessionCallbackHandler {
      * @param videoConfig the remote config where media packet is received
      */
     public void firstMediaPacketReceived(VideoConfig videoConfig) {
-        ImsLog.v("firstMediaPacketReceived");
+        ImsLog.d("firstMediaPacketReceived");
 
         Parcel parcel = Parcel.obtain();
 
@@ -105,7 +106,7 @@ public class VideoSessionCallbackHandler {
      * @param packetType either RTP or RTCP
      */
     public void onNotifyMediaInactivity(int packetType) {
-        ImsLog.v("onNotifyMediaInactivity");
+        ImsLog.d("onNotifyMediaInactivity");
 
         Parcel parcel = Parcel.obtain();
 
@@ -123,7 +124,7 @@ public class VideoSessionCallbackHandler {
      * @param bitrate The bitrate of sending video packets in bps unit
      */
     public void onNotifyBitrate(int bitrate) {
-        ImsLog.v("onNotifyBitrate");
+        ImsLog.d("onNotifyBitrate");
 
         Parcel parcel = Parcel.obtain();
 
@@ -140,7 +141,7 @@ public class VideoSessionCallbackHandler {
      * @param bytes bytes of send and received rtp video data.
      */
     public void onNotifyVideoDataUsage(long bytes) {
-        ImsLog.v("onNotifyVideoDataUsage: size=" + bytes);
+        ImsLog.d("onNotifyVideoDataUsage: size=" + bytes);
         // TODO: send it to video provider
     }
 
@@ -152,7 +153,7 @@ public class VideoSessionCallbackHandler {
      * @param result QoS connection result
      */
     public void onNotifyQosInfo(@NonNull String remoteAddress, int remotePort, boolean result) {
-        ImsLog.v("onNotifyQosInfo remoteAddress= " + remoteAddress + " remotePort= " + remotePort
+        ImsLog.d("onNotifyQosInfo remoteAddress= " + remoteAddress + " remotePort= " + remotePort
                 + " result= " + result);
 
         Parcel parcel = Parcel.obtain();
@@ -164,5 +165,16 @@ public class VideoSessionCallbackHandler {
         parcel.writeBoolean(result);
 
         getMtcMediaInterface().sendRequest(parcel);
+    }
+
+    /**
+     * Handles the notification of the rtp reception stats
+     *
+     * @param stats The object of the RtpReceptionStats
+     */
+    public void onNotifyRtpReceptionStats(final RtpReceptionStats stats) {
+        ImsLog.d("onNotifyRtpReceptionStats: stats= " + stats);
+
+        getMtcMediaInterface().onNotifyRtpReceptionStats(ImsMediaSession.SESSION_TYPE_VIDEO, stats);
     }
 }

@@ -15,16 +15,17 @@
  */
 
 #include "CarrierConfig.h"
+#include "MockISession.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcSession.h"
-#include "call/UpdatingInfo.h"
 #include "call/block/CallTypeBlockRule.h"
 #include "call/block/MockIMtcBlockRule.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/MockISession.h"
+#include "media/MockIMtcMediaManager.h"
 #include "utility/MockIMessageUtils.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -38,43 +39,50 @@ class CallTypeBlockRuleTest : public ::testing::Test
 {
 public:
     MockIMtcCallContext objContext;
+    // cppcheck-suppress unusedStructMember
     MockIMtcBlockRuleCheckListener objListener;
     CallInfo objCallInfo;
+    ImsList<IMtcCall*> lstCalls;
     ImsList<IMtcCall*> lstOtherCalls;
-    MockIMtcConfigurationManager* pConfigurationManager;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
     MockIMessageUtils objMessageUtils;
+    MockIMtcMediaManager objMediaManager;
     MockIMtcSession objMtcSession;
-    UpdatingInfo* pUpdatingInfo;
     MockISession objSession;
     MockIMtcCall objMtcCall;
+    MockIMtcCallManager objCallManager;
 
 protected:
     virtual void SetUp() override
     {
-        pConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
-        pUpdatingInfo = new UpdatingInfo(objContext);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
 
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+        ON_CALL(objContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
         ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
-        ON_CALL(objContext, GetUpdatingInfo).WillByDefault(ReturnRef(*pUpdatingInfo));
         ON_CALL(objContext, GetCall).WillByDefault(ReturnRef(objMtcCall));
+        ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
+
         ON_CALL(objMtcSession, GetISession()).WillByDefault(ReturnRef(objSession));
     }
 
     virtual void TearDown() override
     {
         delete pConfigurationProxy;
-        delete pUpdatingInfo;
 
         for (IMS_UINT32 nIndex = 0; nIndex < lstOtherCalls.GetSize(); nIndex++)
         {
             delete lstOtherCalls.GetAt(nIndex);
         }
         lstOtherCalls.Clear();
+
+        for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
+        {
+            delete lstCalls.GetAt(nIndex);
+        }
+        lstCalls.Clear();
     }
 
     MockIMtcCall* CreateMockIMtcCall(CallType eCallType)
@@ -85,52 +93,15 @@ protected:
 
         return pCall;
     }
-
-    CallTypeBlockRule GetRuleByTargetCallType(IN CallType eTargetCallType)
-    {
-        ON_CALL(objMessageUtils, GetCallTypeFromSdp(_, _, _, _))
-                .WillByDefault(Return(eTargetCallType));
-        ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(eTargetCallType));
-        pUpdatingInfo->SetTargetCallType(eTargetCallType);
-        return CallTypeBlockRule(objContext);
-    }
 };
 
 TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForVideoRttIfNotAllowed)
 {
-    ON_CALL(*pConfigurationManager, GetPolicyForTextWithVideo)
-            .WillByDefault(Return(CarrierConfig::ImsVt::TEXT_VIDEO_NOT_ALLOWED));
-
-    CallTypeBlockRule objBlockRule(GetRuleByTargetCallType(CallType::VIDEO_RTT));
-
-    {
-        ON_CALL(objMtcCall, GetState).WillByDefault(Return(IMtcCall::State::ESTABLISHED));
-        Result objResult = objBlockRule.Check(objListener);
-
-        EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
-        EXPECT_EQ(CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_BY_CALL_TYPE),
-                objResult.objReason);
-    }
-    {
-        ON_CALL(objMtcCall, GetState).WillByDefault(Return(IMtcCall::State::IDLE));
-        Result objResult = objBlockRule.Check(objListener);
-
-        EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
-        EXPECT_EQ(CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_BY_CALL_TYPE),
-                objResult.objReason);
-    }
-}
-
-TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedVideoPortZeroAndTextIfConfigIsNotAllowed)
-{
-    ON_CALL(objMtcCall, GetState).WillByDefault(Return(IMtcCall::State::ESTABLISHED));
-    ON_CALL(*pConfigurationManager, GetPolicyForTextWithVideo)
-            .WillByDefault(Return(CarrierConfig::ImsVt::TEXT_VIDEO_NOT_ALLOWED));
-
-    CallTypeBlockRule objBlockRule(GetRuleByTargetCallType(CallType::VIDEO_RTT));
-
-    // video port = 0
-    pUpdatingInfo->SetTargetCallType(CallType::RTT);
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
+            .WillByDefault(Return(ConfigVt::TEXT_VIDEO_NOT_ALLOWED));
+    ON_CALL(objMessageUtils, GetCallTypeFromSdp(_, _, _, _))
+            .WillByDefault(Return(CallType::VIDEO_RTT));
+    CallTypeBlockRule objBlockRule(objContext, CallType::VIDEO_RTT);
 
     Result objResult = objBlockRule.Check(objListener);
 
@@ -139,18 +110,106 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedVideoPortZeroAndTextIfConfigIsN
             objResult.objReason);
 }
 
+TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedTextPortZeroAndVideoIfConfigIsNotAllowed)
+{
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
+            .WillByDefault(Return(ConfigVt::TEXT_VIDEO_NOT_ALLOWED));
+
+    ON_CALL(objMessageUtils, GetRemotePortFromSdp(&objSession, SdpMedia::TYPE_VIDEO))
+            .WillByDefault(Return(12345));
+    ON_CALL(objMessageUtils, GetRemotePortFromSdp(&objSession, SdpMedia::TYPE_TEXT))
+            .WillByDefault(Return(0));
+    CallTypeBlockRule objBlockRule(objContext, CallType::VT);
+
+    Result objResult = objBlockRule.Check(objListener);
+
+    EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
+    EXPECT_EQ(CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_BY_CALL_TYPE),
+            objResult.objReason);
+}
+
+TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedVideoPortZeroAndTextIfConfigIsNotAllowed)
+{
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
+            .WillByDefault(Return(ConfigVt::TEXT_VIDEO_NOT_ALLOWED));
+
+    ON_CALL(objMessageUtils, GetRemotePortFromSdp(&objSession, SdpMedia::TYPE_VIDEO))
+            .WillByDefault(Return(0));
+    ON_CALL(objMessageUtils, GetRemotePortFromSdp(&objSession, SdpMedia::TYPE_TEXT))
+            .WillByDefault(Return(12346));
+    CallTypeBlockRule objBlockRule(objContext, CallType::RTT);
+
+    Result objResult = objBlockRule.Check(objListener);
+
+    EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
+    EXPECT_EQ(CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_BY_CALL_TYPE),
+            objResult.objReason);
+}
+
+TEST_F(CallTypeBlockRuleTest, CheckReturnsUnBlockedVideoTextPortZeroIfConfigIsNotAllowed)
+{
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
+            .WillByDefault(Return(ConfigVt::TEXT_VIDEO_NOT_ALLOWED));
+
+    ON_CALL(objMessageUtils, GetRemotePortFromSdp(&objSession, SdpMedia::TYPE_VIDEO))
+            .WillByDefault(Return(0));
+    ON_CALL(objMessageUtils, GetRemotePortFromSdp(&objSession, SdpMedia::TYPE_TEXT))
+            .WillByDefault(Return(0));
+
+    CallTypeBlockRule objBlockRuleForVoip(objContext, CallType::VOIP);
+    Result objResultForVoip = objBlockRuleForVoip.Check(objListener);
+    EXPECT_EQ(Result::Status::UNBLOCKED, objResultForVoip.eStatus);
+
+    CallTypeBlockRule objBlockRuleForVt(objContext, CallType::VT);
+    Result objResultForVt = objBlockRuleForVt.Check(objListener);
+    EXPECT_EQ(Result::Status::UNBLOCKED, objResultForVt.eStatus);
+
+    CallTypeBlockRule objBlockRuleForRtt(objContext, CallType::RTT);
+    Result objResultForRtt = objBlockRuleForRtt.Check(objListener);
+    EXPECT_EQ(Result::Status::UNBLOCKED, objResultForRtt.eStatus);
+}
+
+TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedVideoAndTextIfConfigIsNotAllowed)
+{
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
+            .WillByDefault(Return(ConfigVt::TEXT_VIDEO_NOT_ALLOWED));
+
+    ON_CALL(objMessageUtils, GetRemotePortFromSdp(&objSession, SdpMedia::TYPE_VIDEO))
+            .WillByDefault(Return(12345));
+    ON_CALL(objMessageUtils, GetRemotePortFromSdp(&objSession, SdpMedia::TYPE_TEXT))
+            .WillByDefault(Return(12346));
+
+    CallTypeBlockRule objBlockRuleForVoip(objContext, CallType::VOIP);
+    Result objResultForVoip = objBlockRuleForVoip.Check(objListener);
+    EXPECT_EQ(Result::Status::BLOCKED, objResultForVoip.eStatus);
+    EXPECT_EQ(CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_BY_CALL_TYPE),
+            objResultForVoip.objReason);
+
+    CallTypeBlockRule objBlockRuleForVt(objContext, CallType::VT);
+    Result objResultForVt = objBlockRuleForVt.Check(objListener);
+    EXPECT_EQ(Result::Status::BLOCKED, objResultForVt.eStatus);
+    EXPECT_EQ(CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_BY_CALL_TYPE),
+            objResultForVt.objReason);
+
+    CallTypeBlockRule objBlockRuleForRtt(objContext, CallType::RTT);
+    Result objResultForRtt = objBlockRuleForRtt.Check(objListener);
+    EXPECT_EQ(Result::Status::BLOCKED, objResultForRtt.eStatus);
+    EXPECT_EQ(CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_BY_CALL_TYPE),
+            objResultForRtt.objReason);
+}
+
 TEST_F(CallTypeBlockRuleTest, CheckReturnsUnblockedVideoPortZeroAndTextIfConfigIsNotAllowedIfActive)
 {
-    ON_CALL(objMtcCall, GetState).WillByDefault(Return(IMtcCall::State::ESTABLISHED));
-    ON_CALL(*pConfigurationManager, GetPolicyForTextWithVideo)
-            .WillByDefault(Return(CarrierConfig::ImsVt::TEXT_VIDEO_NOT_ALLOWED_IF_ACTIVE));
-    ON_CALL(*pConfigurationManager, IsAllowMultipleCallIncludingVideoCall)
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
+            .WillByDefault(Return(ConfigVt::TEXT_VIDEO_NOT_ALLOWED_IF_ACTIVE));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL))
             .WillByDefault(Return(IMS_TRUE));
 
-    CallTypeBlockRule objBlockRule(GetRuleByTargetCallType(CallType::VIDEO_RTT));
-
     // video port = 0
-    pUpdatingInfo->SetTargetCallType(CallType::RTT);
+    ON_CALL(objMessageUtils, GetCallTypeFromSdp(_, _, _, _))
+            .WillByDefault(Return(CallType::VIDEO_RTT));
+    CallTypeBlockRule objBlockRule(objContext, CallType::RTT);
 
     Result objResult = objBlockRule.Check(objListener);
 
@@ -159,46 +218,48 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsUnblockedVideoPortZeroAndTextIfConfigI
 
 TEST_F(CallTypeBlockRuleTest, CheckReturnsUnblockedIfAllowed)
 {
-    ON_CALL(*pConfigurationManager, GetPolicyForTextWithVideo)
-            .WillByDefault(Return(CarrierConfig::ImsVt::TEXT_VIDEO_ALLOWED));
-    ON_CALL(*pConfigurationManager, IsAllowMultipleCallIncludingVideoCall)
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
+            .WillByDefault(Return(ConfigVt::TEXT_VIDEO_ALLOWED));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL))
             .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(objContext, GetOtherCalls).Times(0);
 
-    CallTypeBlockRule objBlockRuleForVoip(GetRuleByTargetCallType(CallType::VOIP));
+    CallTypeBlockRule objBlockRuleForVoip(objContext, CallType::VOIP);
     EXPECT_EQ(Result::Status::UNBLOCKED, objBlockRuleForVoip.Check(objListener).eStatus);
 
-    CallTypeBlockRule objBlockRuleForVt(GetRuleByTargetCallType(CallType::VT));
+    CallTypeBlockRule objBlockRuleForVt(objContext, CallType::VT);
     EXPECT_EQ(Result::Status::UNBLOCKED, objBlockRuleForVt.Check(objListener).eStatus);
 
-    CallTypeBlockRule objBlockRuleForRtt(GetRuleByTargetCallType(CallType::RTT));
+    CallTypeBlockRule objBlockRuleForRtt(objContext, CallType::RTT);
     EXPECT_EQ(Result::Status::UNBLOCKED, objBlockRuleForRtt.Check(objListener).eStatus);
 
-    CallTypeBlockRule objBlockRuleForVideoRtt(GetRuleByTargetCallType(CallType::VIDEO_RTT));
+    CallTypeBlockRule objBlockRuleForVideoRtt(objContext, CallType::VIDEO_RTT);
     EXPECT_EQ(Result::Status::UNBLOCKED, objBlockRuleForVideoRtt.Check(objListener).eStatus);
 }
 
 TEST_F(CallTypeBlockRuleTest, CheckReturnsUnblockedIfNoOtherCallExists)
 {
-    ON_CALL(*pConfigurationManager, GetPolicyForTextWithVideo)
-            .WillByDefault(Return(CarrierConfig::ImsVt::TEXT_VIDEO_ALLOWED));
-    ON_CALL(*pConfigurationManager, IsAllowMultipleCallIncludingVideoCall)
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
+            .WillByDefault(Return(ConfigVt::TEXT_VIDEO_ALLOWED));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
     // no other call
     ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    CallTypeBlockRule objBlockRuleForVoip(GetRuleByTargetCallType(CallType::VOIP));
+    CallTypeBlockRule objBlockRuleForVoip(objContext, CallType::VOIP);
     EXPECT_EQ(Result::Status::UNBLOCKED, objBlockRuleForVoip.Check(objListener).eStatus);
 
-    CallTypeBlockRule objBlockRuleForVt(GetRuleByTargetCallType(CallType::VT));
+    CallTypeBlockRule objBlockRuleForVt(objContext, CallType::VT);
     EXPECT_EQ(Result::Status::UNBLOCKED, objBlockRuleForVt.Check(objListener).eStatus);
 
-    CallTypeBlockRule objBlockRuleForRtt(GetRuleByTargetCallType(CallType::RTT));
+    CallTypeBlockRule objBlockRuleForRtt(objContext, CallType::RTT);
     EXPECT_EQ(Result::Status::UNBLOCKED, objBlockRuleForRtt.Check(objListener).eStatus);
 
-    CallTypeBlockRule objBlockRuleForVideoRtt(GetRuleByTargetCallType(CallType::VIDEO_RTT));
+    CallTypeBlockRule objBlockRuleForVideoRtt(objContext, CallType::VIDEO_RTT);
     EXPECT_EQ(Result::Status::UNBLOCKED, objBlockRuleForVideoRtt.Check(objListener).eStatus);
 }
 
@@ -207,21 +268,21 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForVideoCallIfVoipExists)
     lstOtherCalls.Append(CreateMockIMtcCall(CallType::VOIP));
     ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(*pConfigurationManager, GetPolicyForTextWithVideo)
-            .WillByDefault(Return(CarrierConfig::ImsVt::TEXT_VIDEO_ALLOWED));
-    ON_CALL(*pConfigurationManager, IsAllowMultipleCallIncludingVideoCall)
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
+            .WillByDefault(Return(ConfigVt::TEXT_VIDEO_ALLOWED));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
-    ON_CALL(objMtcCall, GetState).WillByDefault(Return(IMtcCall::State::ESTABLISHED));
     {
         objCallInfo.ePeerType = PeerType::MO;
 
-        CallTypeBlockRule objBlockRuleForVt(GetRuleByTargetCallType(CallType::VT));
+        CallTypeBlockRule objBlockRuleForVt(objContext, CallType::VT);
         Result objResultForVt = objBlockRuleForVt.Check(objListener);
         EXPECT_EQ(Result::Status::BLOCKED, objResultForVt.eStatus);
         EXPECT_EQ(CallReasonInfo(CODE_LOCAL_CALL_EXCEEDED), objResultForVt.objReason);
 
-        CallTypeBlockRule objBlockRuleForVideoRtt(GetRuleByTargetCallType(CallType::VIDEO_RTT));
+        CallTypeBlockRule objBlockRuleForVideoRtt(objContext, CallType::VIDEO_RTT);
         Result objResultForVideoRtt = objBlockRuleForVideoRtt.Check(objListener);
         EXPECT_EQ(Result::Status::BLOCKED, objResultForVideoRtt.eStatus);
         EXPECT_EQ(CallReasonInfo(CODE_LOCAL_CALL_EXCEEDED), objResultForVideoRtt.objReason);
@@ -229,12 +290,12 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForVideoCallIfVoipExists)
     {
         objCallInfo.ePeerType = PeerType::MT;
 
-        CallTypeBlockRule objBlockRuleForVt(GetRuleByTargetCallType(CallType::VT));
+        CallTypeBlockRule objBlockRuleForVt(objContext, CallType::VT);
         Result objResultForVt = objBlockRuleForVt.Check(objListener);
         EXPECT_EQ(Result::Status::BLOCKED, objResultForVt.eStatus);
         EXPECT_EQ(CallReasonInfo(CODE_REJECT_MAX_CALL_LIMIT_REACHED), objResultForVt.objReason);
 
-        CallTypeBlockRule objBlockRuleForVideoRtt(GetRuleByTargetCallType(CallType::VIDEO_RTT));
+        CallTypeBlockRule objBlockRuleForVideoRtt(objContext, CallType::VIDEO_RTT);
         Result objResultForVideoRtt = objBlockRuleForVideoRtt.Check(objListener);
         EXPECT_EQ(Result::Status::BLOCKED, objResultForVideoRtt.eStatus);
         EXPECT_EQ(
@@ -247,23 +308,15 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsUnblockedForVoipCallIfVoipExists)
     lstOtherCalls.Append(CreateMockIMtcCall(CallType::VOIP));
     ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(*pConfigurationManager, GetPolicyForTextWithVideo)
-            .WillByDefault(Return(CarrierConfig::ImsVt::TEXT_VIDEO_ALLOWED));
-    ON_CALL(*pConfigurationManager, IsAllowMultipleCallIncludingVideoCall)
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
+            .WillByDefault(Return(ConfigVt::TEXT_VIDEO_ALLOWED));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
-    {
-        ON_CALL(objMtcCall, GetState).WillByDefault(Return(IMtcCall::State::IDLE));
-        CallTypeBlockRule objBlockRuleForVt(GetRuleByTargetCallType(CallType::VOIP));
-        Result objResultForVt = objBlockRuleForVt.Check(objListener);
-        EXPECT_EQ(Result::Status::UNBLOCKED, objResultForVt.eStatus);
-    }
-    {
-        ON_CALL(objMtcCall, GetState).WillByDefault(Return(IMtcCall::State::ESTABLISHED));
-        CallTypeBlockRule objBlockRuleForVt(GetRuleByTargetCallType(CallType::VOIP));
-        Result objResultForVt = objBlockRuleForVt.Check(objListener);
-        EXPECT_EQ(Result::Status::UNBLOCKED, objResultForVt.eStatus);
-    }
+    CallTypeBlockRule objBlockRuleForVt(objContext, CallType::VOIP);
+    Result objResultForVt = objBlockRuleForVt.Check(objListener);
+    EXPECT_EQ(Result::Status::UNBLOCKED, objResultForVt.eStatus);
 }
 
 TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForVoipIfVtExists)
@@ -271,15 +324,16 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForVoipIfVtExists)
     lstOtherCalls.Append(CreateMockIMtcCall(CallType::VT));
     ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(*pConfigurationManager, GetPolicyForTextWithVideo)
-            .WillByDefault(Return(CarrierConfig::ImsVt::TEXT_VIDEO_ALLOWED));
-    ON_CALL(*pConfigurationManager, IsAllowMultipleCallIncludingVideoCall)
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
+            .WillByDefault(Return(ConfigVt::TEXT_VIDEO_ALLOWED));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
     {
         objCallInfo.ePeerType = PeerType::MO;
 
-        CallTypeBlockRule objBlockRule(GetRuleByTargetCallType(CallType::VOIP));
+        CallTypeBlockRule objBlockRule(objContext, CallType::VOIP);
         Result objResultForVt = objBlockRule.Check(objListener);
         EXPECT_EQ(Result::Status::BLOCKED, objResultForVt.eStatus);
         EXPECT_EQ(CallReasonInfo(CODE_LOCAL_CALL_EXCEEDED), objResultForVt.objReason);
@@ -287,7 +341,7 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForVoipIfVtExists)
     {
         objCallInfo.ePeerType = PeerType::MT;
 
-        CallTypeBlockRule objBlockRule(GetRuleByTargetCallType(CallType::VOIP));
+        CallTypeBlockRule objBlockRule(objContext, CallType::VOIP);
         Result objResultForVt = objBlockRule.Check(objListener);
         EXPECT_EQ(Result::Status::BLOCKED, objResultForVt.eStatus);
         EXPECT_EQ(CallReasonInfo(CODE_REJECT_MAX_CALL_LIMIT_REACHED), objResultForVt.objReason);
@@ -299,15 +353,16 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForVoipIfVideoRttExists)
     lstOtherCalls.Append(CreateMockIMtcCall(CallType::VIDEO_RTT));
     ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(*pConfigurationManager, GetPolicyForTextWithVideo)
-            .WillByDefault(Return(CarrierConfig::ImsVt::TEXT_VIDEO_ALLOWED));
-    ON_CALL(*pConfigurationManager, IsAllowMultipleCallIncludingVideoCall)
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT))
+            .WillByDefault(Return(ConfigVt::TEXT_VIDEO_ALLOWED));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
     {
         objCallInfo.ePeerType = PeerType::MO;
 
-        CallTypeBlockRule objBlockRule(GetRuleByTargetCallType(CallType::VOIP));
+        CallTypeBlockRule objBlockRule(objContext, CallType::VOIP);
         Result objResultForVt = objBlockRule.Check(objListener);
         EXPECT_EQ(Result::Status::BLOCKED, objResultForVt.eStatus);
         EXPECT_EQ(CallReasonInfo(CODE_LOCAL_CALL_EXCEEDED), objResultForVt.objReason);
@@ -315,9 +370,21 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForVoipIfVideoRttExists)
     {
         objCallInfo.ePeerType = PeerType::MT;
 
-        CallTypeBlockRule objBlockRule(GetRuleByTargetCallType(CallType::VOIP));
+        CallTypeBlockRule objBlockRule(objContext, CallType::VOIP);
         Result objResultForVt = objBlockRule.Check(objListener);
         EXPECT_EQ(Result::Status::BLOCKED, objResultForVt.eStatus);
         EXPECT_EQ(CallReasonInfo(CODE_REJECT_MAX_CALL_LIMIT_REACHED), objResultForVt.objReason);
     }
+}
+
+TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForConferenceDuringRtt)
+{
+    lstCalls.Append(CreateMockIMtcCall(CallType::RTT));
+    ON_CALL(objCallManager, GetCalls).WillByDefault(Return(lstCalls));
+    objCallInfo.bConference = IMS_TRUE;
+
+    CallTypeBlockRule objBlockRule(objContext, CallType::VOIP);
+    Result objResult = objBlockRule.Check(objListener);
+    EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
+    EXPECT_EQ(CallReasonInfo(CODE_LOCAL_CALL_BUSY, EXTRA_CODE_RTT_ON), objResult.objReason);
 }

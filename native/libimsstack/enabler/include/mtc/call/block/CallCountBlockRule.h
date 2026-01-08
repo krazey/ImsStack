@@ -29,7 +29,7 @@ class CallCountBlockRule final : public IMtcBlockRule
 {
 public:
     explicit CallCountBlockRule(IN IMtcCallContext& objContext);
-    virtual ~CallCountBlockRule();
+    virtual ~CallCountBlockRule() override;
     CallCountBlockRule(IN const CallCountBlockRule&) = delete;
     CallCountBlockRule& operator=(IN const CallCountBlockRule&) = delete;
 

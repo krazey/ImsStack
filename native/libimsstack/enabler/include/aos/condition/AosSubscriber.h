@@ -26,16 +26,23 @@ class AosSubscriber : public IAosSubscriber, public IAosSubscriberManagerListene
 {
 public:
     explicit AosSubscriber(IN IAosAppContext* piAppContext);
-    virtual ~AosSubscriber();
+    ~AosSubscriber() override;
 
     // IAosSubscriber
     IMS_BOOL IsReady() const override;
+    IMS_BOOL IsIsim() const override;
+    IMS_BOOL IsUsim() const override;
     void SetListener(IN IAosSubscriberListener* piListener) override;
     const AStringArray& GetConfiguredImpus() const override;
     const AStringArray& GetFakeImpus() const override;
     const ISubscriberConfig* GetSubscriberConfig(IN IMS_SINT32 nType = NORMAL) const override;
 
-private:
+    void CreateTemporaryPublicUserIdForGiba() override;
+    void ClearTemporaryPublicUserIdForGiba() override;
+    IMS_BOOL HasValidTemporaryPublicUserIdForGiba() const override;
+    const AString& GetTemporaryPublicUserIdForGiba() const override;
+
+protected:
     // IAosSubscriber
     IMS_BOOL Init() override;
     IMS_BOOL CleanUp() override;
@@ -44,18 +51,15 @@ private:
     // IAosSubscriberManagerListener
     void AosSubscriberManager_NotifyState(IN IMS_UINT32 nState) override;
 
-private:
+protected:
     IAosAppContext* m_piAppContext;
     IAosSubscriberManager* m_piSubscriberManager;
     IMS_SINT32 m_nSlotId;
     IAosSubscriberListener* m_piListener;
-
     AosRegistrationType m_eRegType;
+    AString m_strTempPuidForGiba;
 
     AString m_strTag;
-
-private:
-    friend class AosSubscriberTest;
 };
 
 #endif  // AOS_SUBSCRIBER_H_

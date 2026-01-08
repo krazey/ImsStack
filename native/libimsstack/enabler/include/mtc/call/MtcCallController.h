@@ -18,19 +18,20 @@
 #define MTC_CALL_CONTROLLER_H_
 
 #include "IMtcCallController.h"
-#include "IMtcService.h"
 #include "ImsList.h"
-#include "ImsMap.h"
 #include "ImsTypeDef.h"
-#include "IuMtcCall.h"
-#include "IuMtcService.h"
 #include "call/IMtcCall.h"
+#include "call/termination/IByeTransactionHandlerListener.h"
+#include <functional>
 
 class IMtcCallManager;
 class IMtcContext;
+class IMtcService;
 class ISession;
 class ISilentRedialHelper;
+class ByeTransactionHandler;
 class SilentRedialHelper;
+enum class ServiceType;
 enum class KeyType;
 struct ConfUser;
 union Key;
@@ -39,22 +40,23 @@ union Key;
  * Provides operations to manipulate calls. Each operation could be failed or not handled if the
  * current status is not applicable or some other reasons.
  */
-class MtcCallController final : public IMtcCallController
+class MtcCallController final : public IMtcCallController, public IByeTransactionHandlerListener
 {
 public:
     explicit MtcCallController(IN IMtcContext& objContext);
-    virtual ~MtcCallController();
+    virtual ~MtcCallController() override;
     MtcCallController(IN const MtcCallController&) = delete;
     MtcCallController& operator=(IN const MtcCallController&) = delete;
 
     inline void NotifyJniEnablerSet() override {}
 
-    CallKey Open(IN ServiceType eServiceType, IN CallInfo& objCallInfo) override;
+    CallKey Open(IN ServiceType eServiceType, IN CallInfo& objCallInfo,
+            IN const AString& strLogTag) override;
     void Attach(IN CallKey nCallKey) override;
+    void Detach(IN CallKey nCallKey) override;
     void HandleIncoming(IN IMtcService* pService, IN ISession* piSession) override;
     void Start(IN CallKey nCallKey, IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
+            IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices) override;
     void HandleUserAlert(IN CallKey nCallKey) override;
     void Accept(IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
     void Reject(IN CallKey nCallKey, IN const CallReasonInfo& objReason) override;
@@ -70,28 +72,28 @@ public:
             IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
     void RejectUpdate(IN CallKey nCallKey, IN const CallReasonInfo& objReason) override;
     void SendUssd(IN CallKey nCallKey, IN const AString& strUssd) override;
-
-    /*
-    void StartGroupCall(IN CallKey nCallKey, IN IMS_UINT32 nCmd, IN ImsList<ConfUser*>& objUsers,
-            IN CallInfo& objCallInfo, IN MediaInfo& objMediaInfo,
-            IN ImsMap<SuppType, SuppService*>& objSuppServices);
-    */
-
     void MergeToConference(IN CallKey nCallKey, IN ImsList<ConfUser*>& objUsers) override;
     void AddToConference(IN CallKey nCallKey, IN ImsList<ConfUser*>& objUsers) override;
     void RemoveFromConference(IN CallKey nCallKey, IN ImsList<ConfUser*>& objUsers) override;
-
-    // TODO: Consider ECT, SRVCC
     void Transfer(IN CallKey nCallKey, IN const AString& strTarget) override;
+    void HandleByeTransaction(
+            IN CallKey nCallKey, IN std::function<void(ISession&)> objOperation) override;
+
+    // IByeTransactionHandlerListener
+    void OnByeTransactionCompleted(IN ByeTransactionHandler* pHandler) override;
 
     ISilentRedialHelper& GetRedialHelper(
             IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason) override;
+    const ISilentRedialHelper* GetActiveRedialHelper() const override;
     void ReleaseRedialHelper() override;
 
 private:
+    void ClearByeTransactionHandlers(IN IMS_BOOL bRemoveListener);
+
     IMtcContext& m_objContext;
     IMtcCallManager& m_objCallManager;
     SilentRedialHelper* m_pRedialHelper;
+    ImsList<ByeTransactionHandler*> m_lstByeHandlers;
 };
 
 #endif

@@ -15,9 +15,18 @@
  */
 
 #include "CallReasonInfo.h"
+#include "IReference.h"
+#include "ISipHeader.h"
+#include "ISipMessageBodyPart.h"
 #include "ImsList.h"
+#include "MockIMessage.h"
+#include "MockIMessageBodyPart.h"
 #include "MockIMtcContext.h"
-#include "TextParser.h"
+#include "MockISession.h"
+#include "MockISipMessage.h"
+#include "MockISipMessageBodyPart.h"
+#include "SdpMedia.h"
+#include "SipHeaderName.h"
 #include "call/IMtcCall.h"
 #include "call/MockCallConnectionIdManager.h"
 #include "call/MockIMtcCall.h"
@@ -25,20 +34,12 @@
 #include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcSession.h"
 #include "conferencecall/ConferenceDef.h"
-#include "core/IReference.h"
-#include "core/MockIMessage.h"
-#include "core/MockIMessageBodyPart.h"
-#include "core/MockISession.h"
-#include "core/media/IMedia.h"
-#include "core/media/MockIMedia.h"
-#include "core/media/MockIMediaDescriptor.h"
+#include "configuration/MockMtcConfigurationProxy.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "helper/MockICallStateProxy.h"
-#include "sdp/SdpMedia.h"
-#include "sipcore/ISipHeader.h"
-#include "sipcore/ISipMessageBodyPart.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/MockISipMessageBodyPart.h"
-#include "sipcore/SipHeaderName.h"
+#include "media/IMedia.h"
+#include "media/MockIMedia.h"
+#include "media/MockIMediaDescriptor.h"
 #include "utility/MessageUtil.h"
 #include "utility/MessageUtils.h"
 #include <gtest/gtest.h>
@@ -81,10 +82,20 @@ static const IMS_CHAR IMS_3GPP_XML[] = {
 class MessageUtilsTest : public ::testing::Test
 {
 public:
+    inline MessageUtilsTest() :
+            piMessage(IMS_NULL),
+            piSipMessage(IMS_NULL),
+            piSession(IMS_NULL),
+            objMessageUtils(objContext)
+    {
+    }
+
     MockIMessage* piMessage;
     MockISipMessage* piSipMessage;
     MockISession* piSession;
     ImsList<IMessage*> objMessages;
+    MockIMtcContext objContext;
+    MockMtcConfigurationProxy objConfigurationProxy;
     MessageUtils objMessageUtils;
 
 protected:
@@ -93,6 +104,8 @@ protected:
         piMessage = new MockIMessage();
         piSipMessage = new MockISipMessage();
         piSession = new MockISession();
+
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
 
         ON_CALL(*piSession, GetNextRequest).WillByDefault(Return(piMessage));
         ON_CALL(*piSession, GetNextResponse).WillByDefault(Return(piMessage));
@@ -115,9 +128,13 @@ public:
         ON_CALL(*piSession, GetPreviousRequest(eServiceMethod)).WillByDefault(Return(piMessage));
     }
 
-    void SetUpPreviousResponses(IN IMS_SINT32 eServiceMethod = IMessage::SESSION_START)
+    void SetUpPreviousResponses(IN IMS_SINT32 eServiceMethod = IMessage::SESSION_START,
+            IN IMS_BOOL bIsEmpty = IMS_FALSE)
     {
-        objMessages.Append(piMessage);
+        if (!bIsEmpty)
+        {
+            objMessages.Append(piMessage);
+        }
         ON_CALL(*piSession, GetPreviousResponses(eServiceMethod))
                 .WillByDefault(Return(objMessages));
     }
@@ -136,6 +153,9 @@ public:
 
 TEST_F(MessageUtilsTest, GetPreviousResponse)
 {
+    EXPECT_TRUE(objMessageUtils.GetPreviousResponse(IMS_NULL, ANY_METHOD) == IMS_NULL);
+
+    SetUpPreviousResponses(ANY_METHOD, IMS_TRUE);
     EXPECT_TRUE(objMessageUtils.GetPreviousResponse(IMS_NULL, ANY_METHOD) == IMS_NULL);
 
     SetUpPreviousResponses();
@@ -367,37 +387,23 @@ TEST_F(MessageUtilsTest, GetParameterValue)
 
 TEST_F(MessageUtilsTest, GetParameterValueFromUnknownHeaderBody)
 {
-    // TODO: how to test
-    /*
     AString strParameterValue;
     AString strAnyParamName = "namewithvalue";
     ImsList<AString> objHeaders;
     objHeaders.Append("anyReaonHeader;nameonly;namewithvalue=value");
-    AString strUnknownHeaderName(SipHeaderName::REASON);
+    AString strUnknownHeaderName("unknown");
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::UNKNOWN, strUnknownHeaderName))
             .WillByDefault(Return(objHeaders));
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::UNKNOWN, AString::ConstNull()))
+            .WillByDefault(Return(ImsList<AString>()));
 
-    strParameterValue = objMessageUtils.GetParameterValue(piMessage, strAnyParamName,
-            ISipHeader::UNKNOWN, SipHeaderName::REASON);
+    strParameterValue =
+            objMessageUtils.GetParameterValue(piMessage, strAnyParamName, ISipHeader::UNKNOWN);
+    EXPECT_EQ(strParameterValue, AString::ConstNull());
+
+    strParameterValue = objMessageUtils.GetParameterValue(
+            piMessage, strAnyParamName, ISipHeader::UNKNOWN, strUnknownHeaderName);
     EXPECT_STREQ(strParameterValue.GetStr(), "value");
-    */
-}
-
-TEST_F(MessageUtilsTest, GetUserParts)
-{
-    ImsList<AString> objHeaders;
-    objHeaders.Append("<sip:anyname1;userparam@ims.google.com>;anyheaderparam");
-    objHeaders.Append("<tel:12345;anyuriparam>;anyparam");
-    ON_CALL(*piSipMessage, GetHeaders(ANY_HEADER, _)).WillByDefault(Return(objHeaders));
-
-    ImsList<AString> objUserParts = objMessageUtils.GetUserParts(piMessage, ANY_HEADER);
-    EXPECT_EQ(objUserParts.GetSize(), 2);
-    EXPECT_STREQ(objUserParts.GetAt(0).GetStr(), "anyname1");
-    EXPECT_STREQ(objUserParts.GetAt(1).GetStr(), "12345");
-
-    ON_CALL(*piMessage, GetMessage).WillByDefault(Return(nullptr));
-    objUserParts = objMessageUtils.GetUserParts(piMessage, ANY_HEADER);
-    EXPECT_EQ(objUserParts.GetSize(), 0);
 }
 
 TEST_F(MessageUtilsTest, GetUserPart)
@@ -405,6 +411,7 @@ TEST_F(MessageUtilsTest, GetUserPart)
     AString strUserPart;
     ImsList<AString> objHeaders;
     objHeaders.Append("<sip:anyname1;userparam@ims.google.com>;anyheaderparam");
+    objHeaders.Append("<tel:12345;anyuriparam>;anyparam");
     ON_CALL(*piSipMessage, GetHeaders(ANY_HEADER, _)).WillByDefault(Return(objHeaders));
 
     strUserPart = objMessageUtils.GetUserPart(piMessage, ANY_HEADER);
@@ -412,6 +419,25 @@ TEST_F(MessageUtilsTest, GetUserPart)
 
     ON_CALL(*piMessage, GetMessage).WillByDefault(Return(nullptr));
     strUserPart = objMessageUtils.GetUserPart(piMessage, ANY_HEADER);
+    EXPECT_STREQ(strUserPart.GetStr(), "");
+}
+
+TEST_F(MessageUtilsTest, GetUserPartWithUri)
+{
+    AString strUri = "<sip:anyname1;userparam@ims.google.com>;anyheaderparam";
+    AString strUserPart = objMessageUtils.GetUserPart(strUri);
+    EXPECT_STREQ(strUserPart.GetStr(), "anyname1");
+
+    strUri = "<tel:12345;anyuriparam>;anyparam";
+    strUserPart = objMessageUtils.GetUserPart(strUri);
+    EXPECT_STREQ(strUserPart.GetStr(), "12345");
+
+    strUri = "invalid";
+    strUserPart = objMessageUtils.GetUserPart(strUri);
+    EXPECT_STREQ(strUserPart.GetStr(), "");
+
+    strUri = "";
+    strUserPart = objMessageUtils.GetUserPart(strUri);
     EXPECT_STREQ(strUserPart.GetStr(), "");
 }
 
@@ -448,29 +474,12 @@ TEST_F(MessageUtilsTest, GetUserId)
     EXPECT_STREQ(strUserId.GetStr(), "");
 }
 
-TEST_F(MessageUtilsTest, GetDisplayNames)
-{
-    ImsList<AString> objDisplayNames;
-    ImsList<AString> objHeaders;
-    objHeaders.Append("\"any display name1\" <sip:anyname1@ims.google.com>");
-    objHeaders.Append("\"any display name2\" <tel:12345>");
-    ON_CALL(*piSipMessage, GetHeaders(ANY_HEADER, _)).WillByDefault(Return(objHeaders));
-
-    objDisplayNames = objMessageUtils.GetDisplayNames(piMessage, ANY_HEADER);
-    EXPECT_EQ(objDisplayNames.GetSize(), 2);
-    EXPECT_STREQ(objDisplayNames.GetAt(0).GetStr(), "any display name1");
-    EXPECT_STREQ(objDisplayNames.GetAt(1).GetStr(), "any display name2");
-
-    ON_CALL(*piMessage, GetMessage).WillByDefault(Return(nullptr));
-    objDisplayNames = objMessageUtils.GetDisplayNames(piMessage, ANY_HEADER);
-    EXPECT_EQ(objDisplayNames.GetSize(), 0);
-}
-
 TEST_F(MessageUtilsTest, GetDisplayName)
 {
     AString strDisplayName;
     ImsList<AString> objHeaders;
     objHeaders.Append("\"any display name\" <sip:anyname1@ims.google.com>");
+    objHeaders.Append("\"any display name2\" <tel:12345>");
     ON_CALL(*piSipMessage, GetHeaders(ANY_HEADER, _)).WillByDefault(Return(objHeaders));
 
     strDisplayName = objMessageUtils.GetDisplayName(piMessage, ANY_HEADER);
@@ -479,6 +488,27 @@ TEST_F(MessageUtilsTest, GetDisplayName)
     ON_CALL(*piMessage, GetMessage).WillByDefault(Return(nullptr));
     strDisplayName = objMessageUtils.GetDisplayName(piMessage, ANY_HEADER);
     EXPECT_STREQ(strDisplayName.GetStr(), "");
+}
+
+TEST_F(MessageUtilsTest, GetDisplayNameWithPercentEncodedValueReturnsDecodedValue)
+{
+    AString strDisplayName;
+    ImsList<AString> objHeaders;
+    objHeaders.Append("\"Alphanumeric%2001\" <sip:anyname1@ims.google.com>");
+    ON_CALL(*piSipMessage, GetHeaders(ANY_HEADER, _)).WillByDefault(Return(objHeaders));
+
+    strDisplayName = objMessageUtils.GetDisplayName(piMessage, ANY_HEADER);
+    EXPECT_STREQ(strDisplayName.GetStr(), "Alphanumeric 01");
+}
+
+TEST_F(MessageUtilsTest, GetDisplayNameReturnsNullIfNoHeader)
+{
+    ImsList<AString> objHeaders;
+    ON_CALL(*piSipMessage, GetHeaders(_, _)).WillByDefault(Return(objHeaders));
+
+    EXPECT_STREQ("", objMessageUtils.GetDisplayName(piMessage, ANY_HEADER).GetStr());
+    EXPECT_STREQ("",
+            objMessageUtils.GetDisplayName(piMessage, ISipHeader::P_ASSERTED_IDENTITY).GetStr());
 }
 
 TEST_F(MessageUtilsTest, GetHosts)
@@ -492,7 +522,7 @@ TEST_F(MessageUtilsTest, GetHosts)
     objHosts = objMessageUtils.GetHosts(piMessage, ANY_HEADER);
     EXPECT_EQ(objHosts.GetSize(), 2);
     EXPECT_STREQ(objHosts.GetAt(0).GetStr(), "ims.google.com");
-    EXPECT_STREQ(objHosts.GetAt(1).GetStr(), "12345");  // TODO: check
+    EXPECT_STREQ(objHosts.GetAt(1).GetStr(), "12345");
 
     ON_CALL(*piMessage, GetMessage).WillByDefault(Return(nullptr));
     objHosts = objMessageUtils.GetHosts(piMessage, ANY_HEADER);
@@ -579,7 +609,7 @@ TEST_F(MessageUtilsTest, GetSosTypeFromServiceUrn)
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(objHeaders));
     EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
-            EXTRA_CODE_EMERGENCYSERVICE_INVALID);
+            EXTRA_CODE_EMERGENCYSERVICE_GENERIC);
 
     objHeaders.Append("<urn:service:sos>");
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
@@ -587,29 +617,23 @@ TEST_F(MessageUtilsTest, GetSosTypeFromServiceUrn)
     EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
             EXTRA_CODE_EMERGENCYSERVICE_GENERIC);
 
+    objHeaders.SetAt("<urn:service:sos.police>", 0);
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(objHeaders));
+    EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
+            EXTRA_CODE_EMERGENCYSERVICE_POLICE);
+
     objHeaders.SetAt("<urn:service:sos.ambulance>", 0);
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(objHeaders));
     EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
             EXTRA_CODE_EMERGENCYSERVICE_AMBULANCE);
 
-    objHeaders.SetAt("<urn:service:sos.animal-control>", 0);
-    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
-            .WillByDefault(Return(objHeaders));
-    EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
-            EXTRA_CODE_EMERGENCYSERVICE_ANIMAL_CONTROL);
-
     objHeaders.SetAt("<urn:service:sos.fire>", 0);
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(objHeaders));
     EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
             EXTRA_CODE_EMERGENCYSERVICE_FIRE);
-
-    objHeaders.SetAt("<urn:service:sos.gas>", 0);
-    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
-            .WillByDefault(Return(objHeaders));
-    EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
-            EXTRA_CODE_EMERGENCYSERVICE_GAS);
 
     objHeaders.SetAt("<urn:service:sos.marine>", 0);
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
@@ -623,53 +647,59 @@ TEST_F(MessageUtilsTest, GetSosTypeFromServiceUrn)
     EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
             EXTRA_CODE_EMERGENCYSERVICE_MOUNTAIN);
 
-    objHeaders.SetAt("<urn:service:sos.physician>", 0);
+    objHeaders.SetAt("<urn:service:sos.ecall.manual>", 0);
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(objHeaders));
     EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
-            EXTRA_CODE_EMERGENCYSERVICE_PHYSICIAN);
+            EXTRA_CODE_EMERGENCYSERVICE_MIEC);
 
-    objHeaders.SetAt("<urn:service:sos.poison>", 0);
+    objHeaders.SetAt("<urn:service:sos.ecall.automatic>", 0);
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(objHeaders));
     EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
-            EXTRA_CODE_EMERGENCYSERVICE_POISON);
-
-    objHeaders.SetAt("<urn:service:sos.police>", 0);
-    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
-            .WillByDefault(Return(objHeaders));
-    EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
-            EXTRA_CODE_EMERGENCYSERVICE_POLICE);
+            EXTRA_CODE_EMERGENCYSERVICE_AIEC);
 
     objHeaders.SetAt("<urn:service:sos.country-specific>", 0);
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(objHeaders));
     EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
+            EXTRA_CODE_EMERGENCYSERVICE_INVALID);
+
+    objHeaders.SetAt("<urn:service:sos.country-specific.xy.567>", 0);
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(objHeaders));
+    EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
             EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC);
+
+    objHeaders.SetAt("<urn:service:sos.gas>", 0);
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(objHeaders));
+    EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
+            EXTRA_CODE_EMERGENCYSERVICE_UNSPECIFIED);
 
     objHeaders.SetAt("<urn:nonserviceurn>", 0);
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(objHeaders));
     EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
-            EXTRA_CODE_EMERGENCYSERVICE_INVALID);
+            EXTRA_CODE_EMERGENCYSERVICE_GENERIC);
 
     objHeaders.SetAt("<urn:service:>", 0);
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(objHeaders));
     EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
-            EXTRA_CODE_EMERGENCYSERVICE_INVALID);
+            EXTRA_CODE_EMERGENCYSERVICE_GENERIC);
 
     objHeaders.Clear();
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(objHeaders));
     EXPECT_EQ(objMessageUtils.GetSosTypeFromServiceUrn(piMessage, ISipHeader::CONTACT_NORMAL),
-            EXTRA_CODE_EMERGENCYSERVICE_INVALID);
+            EXTRA_CODE_EMERGENCYSERVICE_GENERIC);
 }
 
 TEST_F(MessageUtilsTest, GetCauseFromReasonHeader)
 {
     ImsList<AString> objHeaders;
-    objHeaders.Append("Reason: SIP;cause=603;text=\"any resason\"");
+    objHeaders.Append("SIP;cause=603;text=\"any resason\"");
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::REASON, _)).WillByDefault(Return(objHeaders));
 
     EXPECT_EQ(objMessageUtils.GetCauseFromReasonHeader(piMessage), 603);
@@ -682,17 +712,33 @@ TEST_F(MessageUtilsTest, GetCauseAndTextFromReasonHeader)
 {
     ReasonHeaderValue objValue;
     ImsList<AString> objHeaders;
-    objHeaders.Append("Reason: SIP;cause=603;text=\"any resason\"");
+    objHeaders.Append("SIP;cause=603;text=\"any resason\"");
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::REASON, _)).WillByDefault(Return(objHeaders));
 
     objValue = objMessageUtils.GetCauseAndTextFromReasonHeader(piMessage);
     EXPECT_EQ(objValue.nCause, 603);
     EXPECT_STREQ(objValue.strText.GetStr(), "\"any resason\"");
+    EXPECT_STREQ(objValue.strProtocol.GetStr(), "SIP");
 
     ON_CALL(*piMessage, GetMessage).WillByDefault(Return(nullptr));
     objValue = objMessageUtils.GetCauseAndTextFromReasonHeader(piMessage);
     EXPECT_EQ(objValue.nCause, -1);
     EXPECT_STREQ(objValue.strText.GetStr(), "");
+    EXPECT_STREQ(objValue.strProtocol.GetStr(), "");
+}
+
+TEST_F(MessageUtilsTest, GetPrioritizedReasonHeader)
+{
+    ReasonHeaderValue objResult;
+    ImsList<AString> objHeaders;
+    objHeaders.Append("SIP;cause=603;text=\"any resason\"");
+    objHeaders.Append("Q.850;cause=19;text=\"no answer\"");
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::REASON, _)).WillByDefault(Return(objHeaders));
+    objResult = objMessageUtils.GetPrioritizedReasonHeader(
+            piMessage, {"SIP", "Q.850", AString::ConstNull()});
+    EXPECT_EQ(objResult.nCause, 603);
+    EXPECT_STREQ(objResult.strText.GetStr(), "\"any resason\"");
+    EXPECT_STREQ(objResult.strProtocol.GetStr(), "SIP");
 }
 
 TEST_F(MessageUtilsTest, GetIms3gppFromBody)
@@ -940,20 +986,21 @@ TEST_F(MessageUtilsTest, ContainsValue)
     EXPECT_FALSE(objMessageUtils.ContainsValue(piMessage, strValue, ANY_HEADER));
 }
 
-TEST_F(MessageUtilsTest, HasValue)
+TEST_F(MessageUtilsTest, ContainsValueIgnoreCase)
 {
     AString strValue = "anyValue";
+    AString strUppercasedValue = strValue.MakeUpper();
     ImsList<AString> objHeaders;
-    objHeaders.Append(strValue);
+    objHeaders.Append(strUppercasedValue);
     objHeaders.Append("anotherValue");
     ON_CALL(*piSipMessage, GetHeaders(ANY_HEADER, _)).WillByDefault(Return(objHeaders));
 
-    EXPECT_TRUE(objMessageUtils.HasValue(piMessage, strValue, ANY_HEADER));
+    EXPECT_TRUE(objMessageUtils.ContainsValueIgnoreCase(piMessage, strValue, ANY_HEADER));
 
     objHeaders.Clear();
     ON_CALL(*piSipMessage, GetHeaders(ANY_HEADER, _)).WillByDefault(Return(objHeaders));
 
-    EXPECT_FALSE(objMessageUtils.HasValue(piMessage, strValue, ANY_HEADER));
+    EXPECT_FALSE(objMessageUtils.ContainsValueIgnoreCase(piMessage, strValue, ANY_HEADER));
 }
 
 TEST_F(MessageUtilsTest, IsHeaderPresent)
@@ -1003,6 +1050,76 @@ TEST_F(MessageUtilsTest, ContainsAddressInPaid)
     EXPECT_FALSE(objMessageUtils.ContainsAddressInPaid(piMessage, strAddress));
 }
 
+TEST_F(MessageUtilsTest, GetPaiReturnsNullIfNoHeader)
+{
+    ImsList<AString> objHeaders;
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::P_ASSERTED_IDENTITY, _))
+            .WillByDefault(Return(objHeaders));
+
+    EXPECT_STREQ("", objMessageUtils.GetPai(*piMessage).GetStr());
+}
+
+TEST_F(MessageUtilsTest, GetPaiWithTopmostPreferredConfiguration)
+{
+    ON_CALL(objConfigurationProxy,
+            GetInt(ConfigVoice::KEY_POLICY_FOR_MULTIPLE_P_ASSERTED_IDENTITY_HEADERS_INT))
+            .WillByDefault(Return(ConfigVoice::PAI_POLICY_PREFER_TOPMOST));
+
+    ImsList<AString> objHeaders;
+    objHeaders.Append("<tel:12345;anyuriparam>;anyparam");
+    objHeaders.Append("<sip:anyname1;userparam@ims.google.com>;anyheaderparam");
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::P_ASSERTED_IDENTITY, _))
+            .WillByDefault(Return(objHeaders));
+
+    EXPECT_STREQ("<tel:12345;anyuriparam>;anyparam", objMessageUtils.GetPai(*piMessage).GetStr());
+}
+
+TEST_F(MessageUtilsTest, GetPaiWithSipPreferredConfigurationReturnsSipUri)
+{
+    ON_CALL(objConfigurationProxy,
+            GetInt(ConfigVoice::KEY_POLICY_FOR_MULTIPLE_P_ASSERTED_IDENTITY_HEADERS_INT))
+            .WillByDefault(Return(ConfigVoice::PAI_POLICY_PREFER_SIP_URI));
+
+    ImsList<AString> objHeaders;
+    objHeaders.Append("<tel:12345;anyuriparam>;anyparam");
+    objHeaders.Append("<sip:anyname1;userparam@ims.google.com>;anyheaderparam");
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::P_ASSERTED_IDENTITY, _))
+            .WillByDefault(Return(objHeaders));
+
+    EXPECT_STREQ("<sip:anyname1;userparam@ims.google.com>;anyheaderparam",
+            objMessageUtils.GetPai(*piMessage).GetStr());
+}
+
+TEST_F(MessageUtilsTest, GetPaiWithSipPreferredConfigurationReturnsSipsUri)
+{
+    ON_CALL(objConfigurationProxy,
+            GetInt(ConfigVoice::KEY_POLICY_FOR_MULTIPLE_P_ASSERTED_IDENTITY_HEADERS_INT))
+            .WillByDefault(Return(ConfigVoice::PAI_POLICY_PREFER_SIP_URI));
+
+    ImsList<AString> objHeaders;
+    objHeaders.Append("<tel:12345;anyuriparam>;anyparam");
+    objHeaders.Append("<sips:anyname1;userparam@ims.google.com>;anyheaderparam");
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::P_ASSERTED_IDENTITY, _))
+            .WillByDefault(Return(objHeaders));
+
+    EXPECT_STREQ("<sips:anyname1;userparam@ims.google.com>;anyheaderparam",
+            objMessageUtils.GetPai(*piMessage).GetStr());
+}
+
+TEST_F(MessageUtilsTest, GetPaiWithSipPreferredConfigurationReturnsNullIfNotFound)
+{
+    ON_CALL(objConfigurationProxy,
+            GetInt(ConfigVoice::KEY_POLICY_FOR_MULTIPLE_P_ASSERTED_IDENTITY_HEADERS_INT))
+            .WillByDefault(Return(ConfigVoice::PAI_POLICY_PREFER_SIP_URI));
+
+    ImsList<AString> objHeaders;
+    objHeaders.Append("<tel:12345;anyuriparam>;anyparam");
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::P_ASSERTED_IDENTITY, _))
+            .WillByDefault(Return(objHeaders));
+
+    EXPECT_STREQ("", objMessageUtils.GetPai(*piMessage).GetStr());
+}
+
 TEST_F(MessageUtilsTest, SetHeader)
 {
     AString strValue = "anyValue";
@@ -1040,12 +1157,11 @@ TEST_F(MessageUtilsTest, GenerateContentId)
 
     AString strEmptyHost;
     strContentId = objMessageUtils.GenerateContentId(strEmptyHost);
-    // TODO: how to check
+    EXPECT_FALSE(strContentId.Contains(strHost));
 }
 
 TEST_F(MessageUtilsTest, SetResourceListWithoutDialogId)
 {
-    MockIMtcContext objContext;
     ImsList<ConfUser*> lstConfUser;
     ConfUser objUser1;
     objUser1.strTarget = "sip:user1Target";
@@ -1061,15 +1177,11 @@ TEST_F(MessageUtilsTest, SetResourceListWithoutDialogId)
     lstConfUser.Append(&objUser2);
     lstConfUser.Append(&objUser3);
 
-    const AString strAnyContentId("any content id");
-
-    EXPECT_EQ(objMessageUtils.SetResourceList(
-                      IMS_NULL, objContext, strAnyContentId, lstConfUser, IMS_FALSE, IMS_TRUE),
+    EXPECT_EQ(objMessageUtils.SetResourceList(IMS_NULL, lstConfUser, IMS_FALSE, IMS_TRUE),
             IMS_FAILURE);
 
     ON_CALL(*piMessage, CreateBodyPart).WillByDefault(Return(nullptr));
-    EXPECT_EQ(objMessageUtils.SetResourceList(
-                      piMessage, objContext, strAnyContentId, lstConfUser, IMS_FALSE, IMS_TRUE),
+    EXPECT_EQ(objMessageUtils.SetResourceList(piMessage, lstConfUser, IMS_FALSE, IMS_TRUE),
             IMS_FAILURE);
 
     MockIMessageBodyPart objMessageBodyPart;
@@ -1085,7 +1197,6 @@ TEST_F(MessageUtilsTest, SetResourceListWithoutDialogId)
     EXPECT_CALL(objMessageBodyPart, SetHeader(strContentType, strResourceList));
     EXPECT_CALL(objMessageBodyPart, SetHeader(strDisposition, strRecipientList));
     EXPECT_CALL(objMessageBodyPart, SetHeader(strLength, _));
-    EXPECT_CALL(objMessageBodyPart, SetHeader(strContentId, strAnyContentId));
 
     ImsList<AString> objResourceList;
     objResourceList.Append("entry uri=\"sip:user1Target\" cp:copyControl=\"to\"");
@@ -1094,15 +1205,13 @@ TEST_F(MessageUtilsTest, SetResourceListWithoutDialogId)
             "entry uri=\"sip:user3Target\" cp:copyControl=\"bcc\" cp:anonymize=\"true\"");
     EXPECT_CALL(objMessageBodyPart, SetContent(IsEqualResourceList(objResourceList)));
 
-    EXPECT_EQ(objMessageUtils.SetResourceList(
-                      piMessage, objContext, strAnyContentId, lstConfUser, IMS_FALSE, IMS_TRUE),
+    EXPECT_EQ(objMessageUtils.SetResourceList(piMessage, lstConfUser, IMS_FALSE, IMS_TRUE),
             IMS_SUCCESS);
 }
 
 TEST_F(MessageUtilsTest, SetResourceListWithDialogId)
 {
     // Sets up to get a ISession using a ConfUser#nCallConnectionId
-    MockIMtcContext objContext;
     MockICallStateProxy objStateProxy;
     ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objStateProxy));
     MockCallConnectionIdManager objIdManager(objContext);
@@ -1131,7 +1240,6 @@ TEST_F(MessageUtilsTest, SetResourceListWithDialogId)
     objUser1.nConnectionId = 1;
     lstConfUser.Append(&objUser1);
 
-    // TODO:
     // GetRemoteUri
     ImsList<AString> objAddresses;
     ON_CALL(*piSession, GetRemoteUserId).WillByDefault(Return(objAddresses));
@@ -1167,14 +1275,11 @@ TEST_F(MessageUtilsTest, SetResourceListWithDialogId)
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::SESSION_ID, _))
             .WillByDefault(Return(objSessionIdHeaders));
 
-    AString strEmptyContentId;
-    EXPECT_EQ(objMessageUtils.SetResourceList(
-                      IMS_NULL, objContext, strEmptyContentId, lstConfUser, IMS_TRUE, IMS_TRUE),
+    EXPECT_EQ(objMessageUtils.SetResourceList(IMS_NULL, lstConfUser, IMS_TRUE, IMS_TRUE),
             IMS_FAILURE);
 
     ON_CALL(*piMessage, CreateBodyPart).WillByDefault(Return(nullptr));
-    EXPECT_EQ(objMessageUtils.SetResourceList(
-                      piMessage, objContext, strEmptyContentId, lstConfUser, IMS_TRUE, IMS_TRUE),
+    EXPECT_EQ(objMessageUtils.SetResourceList(piMessage, lstConfUser, IMS_TRUE, IMS_TRUE),
             IMS_FAILURE);
 
     MockIMessageBodyPart objMessageBodyPart;
@@ -1190,43 +1295,56 @@ TEST_F(MessageUtilsTest, SetResourceListWithDialogId)
 
     EXPECT_CALL(objMessageBodyPart, SetContent(IsEqualResourceList(objResourceList)));
 
-    EXPECT_EQ(objMessageUtils.SetResourceList(
-                      piMessage, objContext, strEmptyContentId, lstConfUser, IMS_TRUE, IMS_TRUE),
+    EXPECT_EQ(objMessageUtils.SetResourceList(piMessage, lstConfUser, IMS_TRUE, IMS_TRUE),
             IMS_SUCCESS);
 }
 
-TEST_F(MessageUtilsTest, IsVideoFeatureIncluded)
+TEST_F(MessageUtilsTest, IsMediaFeaturesIncludedReturnsNulloptIfNoContactHeader)
 {
-    AString strHeader;
     ImsList<AString> objHeaders;
-    objHeaders.Append(
-            "<sip:anyUri>;video;+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\"");
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(objHeaders));
 
-    EXPECT_TRUE(objMessageUtils.IsVideoFeatureIncluded(piMessage));
-
-    objHeaders.SetAt("<sip:anyUri>", 0);
-    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
-            .WillByDefault(Return(objHeaders));
-    EXPECT_FALSE(objMessageUtils.IsVideoFeatureIncluded(piMessage));
+    EXPECT_EQ(std::nullopt, objMessageUtils.IsMmtelFeatureIncluded(piMessage));
+    EXPECT_EQ(std::nullopt, objMessageUtils.IsVideoFeatureIncluded(piMessage));
+    EXPECT_EQ(std::nullopt, objMessageUtils.IsTextFeatureIncluded(piMessage));
 }
 
-TEST_F(MessageUtilsTest, IsTextFeatureIncluded)
+TEST_F(MessageUtilsTest, IsMmtelFeatureIncludedReturnsFalseIfNoMmtelTag)
 {
     AString strHeader;
     ImsList<AString> objHeaders;
-    objHeaders.Append(
-            "<sip:anyUri>;text;+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\"");
+    objHeaders.Append("<sip:anyUri>");
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(objHeaders));
 
-    EXPECT_TRUE(objMessageUtils.IsTextFeatureIncluded(piMessage));
+    EXPECT_EQ(IMS_FALSE, objMessageUtils.IsMmtelFeatureIncluded(piMessage));
+}
 
-    objHeaders.SetAt("<sip:anyUri>", 0);
+TEST_F(MessageUtilsTest, IsVideoTextFeatureIncludedReturnsNulloptIfNoMmtelTag)
+{
+    AString strHeader;
+    ImsList<AString> objHeaders;
+    objHeaders.Append("<sip:anyUri>;video;text");
     ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(objHeaders));
-    EXPECT_FALSE(objMessageUtils.IsTextFeatureIncluded(piMessage));
+
+    EXPECT_EQ(std::nullopt, objMessageUtils.IsVideoFeatureIncluded(piMessage));
+    EXPECT_EQ(std::nullopt, objMessageUtils.IsTextFeatureIncluded(piMessage));
+}
+
+TEST_F(MessageUtilsTest, IsMediaFeaturesIncludedReturnsTrueIfHasTag)
+{
+    AString strHeader;
+    ImsList<AString> objHeaders;
+    objHeaders.Append("<sip:anyUri>;video;text;+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims."
+                      "icsi.mmtel\"");
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(objHeaders));
+
+    EXPECT_EQ(IMS_TRUE, objMessageUtils.IsMmtelFeatureIncluded(piMessage));
+    EXPECT_EQ(IMS_TRUE, objMessageUtils.IsVideoFeatureIncluded(piMessage));
+    EXPECT_EQ(IMS_TRUE, objMessageUtils.IsTextFeatureIncluded(piMessage));
 }
 
 TEST_F(MessageUtilsTest, GetCallTypeReturnsUnknownIfNoSdp)
@@ -1418,7 +1536,7 @@ TEST_F(MessageUtilsTest, GetCallTypeReturnsVideoRtt)
     EXPECT_EQ(objMessageUtils.GetCallType(piMessage, piSession, IMS_FALSE), CallType::VIDEO_RTT);
 }
 
-TEST_F(MessageUtilsTest, GetCallTypeFromSdpWithNegoSdpIsTrue)
+TEST_F(MessageUtilsTest, GetCallTypeFromSdpWithActiveMediaOnly)
 {
     // bNegoSdp=false case is done by GetCallType
     MockISipMessageBodyPart objBodyPart;
@@ -1458,6 +1576,91 @@ TEST_F(MessageUtilsTest, GetCallTypeFromSdpWithNegoSdpIsTrue)
     ON_CALL(*piSession, GetMedia).WillByDefault(Return(lstIMedia));
     EXPECT_EQ(objMessageUtils.GetCallTypeFromSdp(piSession, IMS_TRUE, IMS_FALSE, IMS_FALSE),
             CallType::VOIP);
+}
+
+TEST_F(MessageUtilsTest, GetRemotePortFromSdpReturnsCorrectPort)
+{
+    ImsList<IMedia*> lstIMedia;
+
+    // Setup Audio Media
+    MockIMedia objAudioMedia;
+    lstIMedia.Append(&objAudioMedia);
+    MockIMediaDescriptor objAudioMediaDescriptor;
+    ON_CALL(objAudioMedia, GetMediaDescriptor).WillByDefault(Return(&objAudioMediaDescriptor));
+
+    SdpMedia objAudioSdpMedia;
+    objAudioSdpMedia.SetType(SdpMedia::TYPE_AUDIO);
+    objAudioSdpMedia.SetPort(12345);
+    // Use GetMediaDescriptionEx to simulate Remote SDP
+    ON_CALL(objAudioMediaDescriptor, GetMediaDescriptionEx)
+            .WillByDefault(Return(&objAudioSdpMedia));
+
+    // Setup Video Media
+    MockIMedia objVideoMedia;
+    lstIMedia.Append(&objVideoMedia);
+    MockIMediaDescriptor objVideoMediaDescriptor;
+    ON_CALL(objVideoMedia, GetMediaDescriptor).WillByDefault(Return(&objVideoMediaDescriptor));
+
+    SdpMedia objVideoSdpMedia;
+    objVideoSdpMedia.SetType(SdpMedia::TYPE_VIDEO);
+    objVideoSdpMedia.SetPort(54321);
+    ON_CALL(objVideoMediaDescriptor, GetMediaDescriptionEx)
+            .WillByDefault(Return(&objVideoSdpMedia));
+
+    ON_CALL(*piSession, GetMedia).WillByDefault(Return(lstIMedia));
+
+    EXPECT_EQ(objMessageUtils.GetRemotePortFromSdp(piSession, SdpMedia::TYPE_AUDIO), 12345);
+
+    EXPECT_EQ(objMessageUtils.GetRemotePortFromSdp(piSession, SdpMedia::TYPE_VIDEO), 54321);
+}
+
+TEST_F(MessageUtilsTest, GetRemotePortFromSdpHandlesModifiedState)
+{
+    ImsList<IMedia*> lstIMedia;
+    MockIMedia objMedia;
+    lstIMedia.Append(&objMedia);
+
+    // UPDATE_MODIFIED state
+    ON_CALL(objMedia, GetUpdateState).WillByDefault(Return(IMedia::UPDATE_MODIFIED));
+
+    // Setup Proposal Media
+    MockIMedia objProposalMedia;
+    ON_CALL(objMedia, GetProposal).WillByDefault(Return(&objProposalMedia));
+
+    MockIMediaDescriptor objProposalDescriptor;
+    ON_CALL(objProposalMedia, GetMediaDescriptor).WillByDefault(Return(&objProposalDescriptor));
+
+    SdpMedia objSdpMedia;
+    objSdpMedia.SetType(SdpMedia::TYPE_AUDIO);
+    objSdpMedia.SetPort(12345);
+    ON_CALL(objProposalDescriptor, GetMediaDescriptionEx).WillByDefault(Return(&objSdpMedia));
+
+    ON_CALL(*piSession, GetMedia).WillByDefault(Return(lstIMedia));
+
+    EXPECT_EQ(objMessageUtils.GetRemotePortFromSdp(piSession, SdpMedia::TYPE_AUDIO), 12345);
+}
+
+TEST_F(MessageUtilsTest, GetRemotePortFromSdpReturnsZeroIfNotFound)
+{
+    ImsList<IMedia*> lstIMedia;
+
+    // Setup Media with Port 0
+    MockIMedia objMedia;
+    lstIMedia.Append(&objMedia);
+    MockIMediaDescriptor objDescriptor;
+    ON_CALL(objMedia, GetMediaDescriptor).WillByDefault(Return(&objDescriptor));
+
+    SdpMedia objSdpMedia;
+    objSdpMedia.SetType(SdpMedia::TYPE_AUDIO);
+    objSdpMedia.SetPort(0);
+    ON_CALL(objDescriptor, GetMediaDescriptionEx).WillByDefault(Return(&objSdpMedia));
+
+    ON_CALL(*piSession, GetMedia).WillByDefault(Return(lstIMedia));
+
+    EXPECT_EQ(objMessageUtils.GetRemotePortFromSdp(piSession, SdpMedia::TYPE_AUDIO), 0);
+
+    // Verify returns -1 for non-existent media type
+    EXPECT_EQ(objMessageUtils.GetRemotePortFromSdp(piSession, SdpMedia::TYPE_VIDEO), -1);
 }
 
 TEST_F(MessageUtilsTest, IsResponseExist)

@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
+#include "AStringBuffer.h"
 #include "IMessage.h"
 #include "ISession.h"
 #include "ISipClientConnection.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
+#include "ISipMessageBodyPart.h"
 #include "ISipServerConnection.h"
 #include "ImsList.h"
 #include "ServiceTrace.h"
 #include "SipHeaderName.h"
 #include "SipMethod.h"
+#include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
 #include "ussi/UssiConstants.h"
@@ -52,7 +55,7 @@ PUBLIC VIRTUAL UssiController::~UssiController()
 }
 
 PUBLIC GLOBAL IMS_BOOL UssiController::IsNetworkInitiatedUssi(
-        IN IMessageUtils& objMessageUtils, IN IMessage* piMessage)
+        IN IMessageUtils& objMessageUtils, IN const IMessage* piMessage)
 {
     IMS_BOOL bResult = IMS_TRUE;
 
@@ -73,13 +76,11 @@ PUBLIC GLOBAL IMS_BOOL UssiController::IsNetworkInitiatedUssi(
 }
 
 PUBLIC
-IMS_BOOL UssiController::HasValidXmlBodyForNetworkInitiatedUssi(IN IMessage* piMessage)
+IMS_BOOL UssiController::HasValidXmlBodyForNetworkInitiatedUssi(IN const IMessage* piMessage)
 {
     IMS_BOOL bResult = IMS_FALSE;
-    IMS_TRACE_D("HasValidXmlBodyForNetworkInitiatedUssi : %s", _TRACE_B_(bResult), 0, 0);
     if (piMessage)
     {
-        IMS_TRACE_D("HasValidXmlBodyForNetworkInitiatedUssi : %s", _TRACE_B_(bResult), 0, 0);
         std::unique_ptr<UssiData> pParsedData =
                 std::unique_ptr<UssiData>(GetParsedUssiData(piMessage->GetMessage()));
 
@@ -94,7 +95,7 @@ IMS_BOOL UssiController::HasValidXmlBodyForNetworkInitiatedUssi(IN IMessage* piM
 }
 
 PUBLIC
-IMS_BOOL UssiController::IsByeForUssi(IN IMessage* piMessage)
+IMS_BOOL UssiController::IsByeForUssi(IN const IMessage* piMessage)
 {
     IMS_BOOL bResult = IMS_FALSE;
     if (m_objContext.GetMessageUtils().ContainsValue(
@@ -108,13 +109,13 @@ IMS_BOOL UssiController::IsByeForUssi(IN IMessage* piMessage)
 }
 
 PUBLIC
-IMS_BOOL UssiController::IsUssiInfoReceived(IN ISipServerConnection* piSipServerConnection)
+IMS_BOOL UssiController::IsUssiInfoReceived(IN const ISipServerConnection* piSipServerConnection)
 {
     IMS_BOOL bResult = IMS_FALSE;
 
     if (piSipServerConnection)
     {
-        ISipMessage* piSipMessage = piSipServerConnection->GetMessage();
+        const ISipMessage* piSipMessage = piSipServerConnection->GetMessage();
         if (piSipMessage)
         {
             ImsList<AString> lstHeaders = piSipMessage->GetHeaders(ISipHeader::INFO_PACKAGE);
@@ -134,7 +135,7 @@ IMS_BOOL UssiController::IsUssiInfoReceived(IN ISipServerConnection* piSipServer
 }
 
 PUBLIC
-IMS_BOOL UssiController::HasXmlBodyInInfo(IN ISipServerConnection* piSipServerConnection)
+IMS_BOOL UssiController::HasXmlBodyInInfo(IN const ISipServerConnection* piSipServerConnection)
 {
     IMS_BOOL bResult = IMS_FALSE;
     if (piSipServerConnection)
@@ -152,8 +153,8 @@ IMS_BOOL UssiController::HasXmlBodyInInfo(IN ISipServerConnection* piSipServerCo
 }
 
 PUBLIC
-UssiResult UssiController::ParseUssiBodyAndCheckResult(
-        IN ISipMessage* piSipMessage, IN IMS_SINT32 nReceivedMethod)
+UssiResult UssiController::HandleUssiBody(
+        IN const ISipMessage* piSipMessage, IN IMS_SINT32 nReceivedMethod)
 {
     UssiResult objResult(UssiNextAction::NOTHING, UssiError::CODE_NONE);
     std::unique_ptr<UssiData> pParsedData =
@@ -161,11 +162,11 @@ UssiResult UssiController::ParseUssiBodyAndCheckResult(
 
     if (!pParsedData)
     {
-        IMS_TRACE_D("ParseUssiBodyAndCheckResult : there's no xml body.", 0, 0, 0);
+        IMS_TRACE_D("HandleUssiBody : there's no xml body.", 0, 0, 0);
         return objResult;
     }
 
-    IMS_TRACE_D("ParseUssiBodyAndCheckResult : Method[%d] received.", nReceivedMethod, 0, 0);
+    IMS_TRACE_D("HandleUssiBody : Method[%d] received.", nReceivedMethod, 0, 0);
     UssiModeType eReceivedType = pParsedData->GetAnyExtension().GetUssiModeType();
 
     if (nReceivedMethod == SipMethod::BYE)
@@ -186,7 +187,7 @@ UssiResult UssiController::ParseUssiBodyAndCheckResult(
     }
     else if (nReceivedMethod == SipMethod::INFO && IsUeInitiated())
     {
-        // if UE receives INFo request during UE initiated ussi.
+        // if UE receives INFO request during UE initiated ussi.
         eReceivedType = UssiModeType::REQUEST;
     }
     else if (!IsUeInitiated() && eReceivedType == UssiModeType::NOTIFY)
@@ -203,8 +204,8 @@ UssiResult UssiController::ParseUssiBodyAndCheckResult(
     SetUssiModeTypeForNetworkInitiated(eReceivedType);
     SetLastResult(objResult);
 
-    IMS_TRACE_D("ParseUssiBodyAndCheckResult : action[%d] error-code[%d] ussd mode[%d]",
-            m_objLastResult.eAction, m_objLastResult.eErrorCode, m_eUssiModeType);
+    IMS_TRACE_D("HandleUssiBody : action[%d] error-code[%d] ussd mode[%d]", m_objLastResult.eAction,
+            m_objLastResult.eErrorCode, m_eUssiModeType);
 
     return objResult;
 }
@@ -421,7 +422,7 @@ IMS_RESULT UssiController::FormBodyForInfo(
 }
 
 PRIVATE
-UssiData* UssiController::GetParsedUssiData(IN ISipMessage* piSipMessage) const
+UssiData* UssiController::GetParsedUssiData(IN const ISipMessage* piSipMessage) const
 {
     IMS_TRACE_D("GetParsedUssiData", 0, 0, 0);
     if (!piSipMessage)
@@ -439,7 +440,7 @@ UssiData* UssiController::GetParsedUssiData(IN ISipMessage* piSipMessage) const
 
     for (IMS_UINT32 i = 0; i < objBodyParts.GetSize(); i++)
     {
-        ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(i);
+        const ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(i);
         if (piBodyPart != IMS_NULL)
         {
             const ByteArray& objUssiBody = piBodyPart->GetContent();

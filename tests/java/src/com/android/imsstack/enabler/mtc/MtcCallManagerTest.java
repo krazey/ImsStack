@@ -33,12 +33,12 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.ImsStackTest;
+import com.android.imsstack.base.AppContext;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.internal.enabler.ImsStateStore;
-import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.MessageExecutor;
 
 import org.junit.After;
@@ -113,9 +113,9 @@ public class MtcCallManagerTest extends ImsStackTest {
         doReturn(Looper.myLooper()).when(mMockContext).getMainLooper();
         doReturn(sst).when(mMockBaseContext).getServiceStateTracker();
         doReturn(false).when(mMockCarrierConfig).getBoolean(
-                CarrierConfig.Assets.KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL);
+                CarrierConfig.ImsEmergency.KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL);
         doReturn(true).when(mMockCarrierConfig).getBoolean(
-                CarrierConfig.Assets.KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL);
+                CarrierConfig.ImsEmergency.KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL);
 
         mTestMtcCallManager.init();
 
@@ -129,9 +129,9 @@ public class MtcCallManagerTest extends ImsStackTest {
         doReturn(Looper.myLooper()).when(mMockContext).getMainLooper();
         doReturn(sst).when(mMockBaseContext).getServiceStateTracker();
         doReturn(false).when(mMockCarrierConfig).getBoolean(
-                CarrierConfig.Assets.KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL);
+                CarrierConfig.ImsEmergency.KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL);
         doReturn(true).when(mMockCarrierConfig).getBoolean(
-                CarrierConfig.Assets.KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL);
+                CarrierConfig.ImsEmergency.KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL);
 
         mTestMtcCallManager.init();
         mTestMtcCallManager.addListener(mMockCallStateListener);
@@ -171,6 +171,22 @@ public class MtcCallManagerTest extends ImsStackTest {
         assertFalse(mTestMtcCallManager.hasEstablishedCall());
 
         mTestMtcCallManager.attachCall(mMockMtcCall);
+
+        assertTrue(mTestMtcCallManager.hasCall());
+        assertFalse(mTestMtcCallManager.hasEstablishedCall());
+
+        mTestMtcCallManager.getCallTracker().updateCallState(
+                null, CallTracker.CALL_EVENT_ESTABLISHED, null);
+
+        assertTrue(mTestMtcCallManager.hasCall());
+        assertFalse(mTestMtcCallManager.hasEstablishedCall());
+
+        mTestMtcCallManager.getCallTracker().updateCallState(
+                mTestMtcCallManager, CallTracker.CALL_EVENT_ESTABLISHED, null);
+
+        assertTrue(mTestMtcCallManager.hasCall());
+        assertFalse(mTestMtcCallManager.hasEstablishedCall());
+
         mTestMtcCallManager.getCallTracker().updateCallState(
                 mMockMtcCall, CallTracker.CALL_EVENT_ESTABLISHED, null);
 
@@ -180,6 +196,15 @@ public class MtcCallManagerTest extends ImsStackTest {
 
     @Test
     public void testAttachCall() {
+        mTestMtcCallManager.attachCall(null);
+
+        assertNull(mTestMtcCallManager.getCall(mNativeCallId));
+
+        mTestMtcCallManager.attachCall(mMockMtcCall);
+        processAllMessages();
+
+        verify(mMockCallStateListener, times(0)).onCallCreated(eq(mMockMtcCall));
+
         mTestMtcCallManager.addListener(mMockCallStateListener);
         mTestMtcCallManager.attachCall(mMockMtcCall);
         processAllMessages();
@@ -190,6 +215,9 @@ public class MtcCallManagerTest extends ImsStackTest {
 
     @Test
     public void testAttachPreIncomingCall() {
+        mTestMtcCallManager.attachPreIncomingCall(null);
+        assertNull(mTestMtcCallManager.getPendingCall(mNativeCallId));
+
         mTestMtcCallManager.addListener(mMockCallStateListener);
         mTestMtcCallManager.attachPreIncomingCall(mMockMtcCall);
         processAllMessages();
@@ -222,11 +250,10 @@ public class MtcCallManagerTest extends ImsStackTest {
     }
 
     @Test
-    public void testGetVacantCallIndex() {
-        doReturn(1).when(mMockMtcCall).getCallIndex();
-        mTestMtcCallManager.attachCall(mMockMtcCall);
+    public void testGetNextCallIndex() {
+        int currentIndex =  mTestMtcCallManager.getNextCallIndex();
 
-        assertEquals(2, mTestMtcCallManager.getVacantCallIndex());
+        assertEquals(currentIndex + 1, mTestMtcCallManager.getNextCallIndex());
     }
 
     @Test
@@ -251,8 +278,14 @@ public class MtcCallManagerTest extends ImsStackTest {
 
     @Test
     public void testMtcCallTrackerCallEstablishing() {
-        mTestMtcCallManager.addListener(mMockCallStateListener);
         mTestMtcCallManager.attachCall(mMockMtcCall);
+        mTestMtcCallManager.getCallTracker().updateCallState(
+                mMockMtcCall, CallTracker.CALL_EVENT_ESTABLISHING, null);
+        processAllMessages();
+
+        verify(mMockCallStateListener, times(0)).onCallEstablishing(eq(mMockMtcCall));
+
+        mTestMtcCallManager.addListener(mMockCallStateListener);
         mTestMtcCallManager.getCallTracker().updateCallState(
                 mMockMtcCall, CallTracker.CALL_EVENT_ESTABLISHING, null);
         processAllMessages();
@@ -263,8 +296,13 @@ public class MtcCallManagerTest extends ImsStackTest {
 
     @Test
     public void testMtcCallTrackerCallRinging() {
+        mTestMtcCallManager.getCallTracker().updateCallState(
+                mMockMtcCall, CallTracker.CALL_EVENT_RINGING, null);
+        processAllMessages();
+
+        verify(mMockCallStateListener, times(0)).onCallRinging(eq(mMockMtcCall));
+
         mTestMtcCallManager.addListener(mMockCallStateListener);
-        mTestMtcCallManager.attachCall(mMockMtcCall);
         mTestMtcCallManager.getCallTracker().updateCallState(
                 mMockMtcCall, CallTracker.CALL_EVENT_RINGING, null);
         processAllMessages();
@@ -275,8 +313,15 @@ public class MtcCallManagerTest extends ImsStackTest {
 
     @Test
     public void testMtcCallTrackerCallAccept() {
-        mTestMtcCallManager.addListener(mMockCallStateListener);
         mTestMtcCallManager.attachCall(mMockMtcCall);
+
+        mTestMtcCallManager.getCallTracker().updateCallState(
+                mMockMtcCall, CallTracker.CALL_EVENT_ACCEPT, null);
+        processAllMessages();
+
+        verify(mMockCallStateListener, times(0)).onCallAccepted(eq(mMockMtcCall));
+
+        mTestMtcCallManager.addListener(mMockCallStateListener);
         mTestMtcCallManager.getCallTracker().updateCallState(
                 mMockMtcCall, CallTracker.CALL_EVENT_ACCEPT, null);
         processAllMessages();
@@ -299,6 +344,12 @@ public class MtcCallManagerTest extends ImsStackTest {
 
     @Test
     public void testMtcCallTrackerCallUpdated() {
+        mTestMtcCallManager.getCallTracker().updateCallState(
+                mMockMtcCall, CallTracker.CALL_EVENT_UPDATED, null);
+        processAllMessages();
+
+        verify(mMockCallStateListener, times(0)).onCallUpdated(eq(mMockMtcCall));
+
         mTestMtcCallManager.addListener(mMockCallStateListener);
         mTestMtcCallManager.attachCall(mMockMtcCall);
         mTestMtcCallManager.getCallTracker().updateCallState(
@@ -311,8 +362,13 @@ public class MtcCallManagerTest extends ImsStackTest {
 
     @Test
     public void testMtcCallTrackerCallTerminating() {
+        mTestMtcCallManager.getCallTracker().updateCallState(
+                mMockMtcCall, CallTracker.CALL_EVENT_TERMINATING, null);
+        processAllMessages();
+
+        verify(mMockCallStateListener, times(0)).onCallTerminating(eq(mMockMtcCall));
+
         mTestMtcCallManager.addListener(mMockCallStateListener);
-        mTestMtcCallManager.attachCall(mMockMtcCall);
         mTestMtcCallManager.getCallTracker().updateCallState(
                 mMockMtcCall, CallTracker.CALL_EVENT_TERMINATING, null);
         processAllMessages();
@@ -323,8 +379,14 @@ public class MtcCallManagerTest extends ImsStackTest {
 
     @Test
     public void testMtcCallTrackerCallTerminated() {
-        mTestMtcCallManager.addListener(mMockCallStateListener);
         mTestMtcCallManager.attachCall(mMockMtcCall);
+        mTestMtcCallManager.getCallTracker().updateCallState(
+                mMockMtcCall, CallTracker.CALL_EVENT_TERMINATED, null);
+        processAllMessages();
+
+        verify(mMockCallStateListener, times(0)).onCallTerminated(eq(mMockMtcCall));
+
+        mTestMtcCallManager.addListener(mMockCallStateListener);
         mTestMtcCallManager.getCallTracker().updateCallState(
                 mMockMtcCall, CallTracker.CALL_EVENT_TERMINATED, null);
         processAllMessages();
@@ -351,7 +413,18 @@ public class MtcCallManagerTest extends ImsStackTest {
 
     @Test
     public void testMtcCallTrackerCallDestroy() {
+        mTestMtcCallManager.getCallTracker().updateCallState(
+                mMockMtcCall, CallTracker.CALL_EVENT_DESTROY, null);
+        processAllMessages();
+
+        verify(mMockCallStateListener, times(0)).onCallDestroyed(eq(mMockMtcCall));
+
         mTestMtcCallManager.addListener(mMockCallStateListener);
+        mTestMtcCallManager.getCallTracker().updateCallState(
+                mMockMtcCall, CallTracker.CALL_EVENT_DESTROY, null);
+
+        verify(mMockCallStateListener, times(0)).onCallDestroyed(eq(mMockMtcCall));
+
         mTestMtcCallManager.attachCall(mMockMtcCall);
         mTestMtcCallManager.getCallTracker().updateCallState(
                 mMockMtcCall, CallTracker.CALL_EVENT_DESTROY, null);
@@ -382,6 +455,12 @@ public class MtcCallManagerTest extends ImsStackTest {
     @Test
     public void testMtcCallTrackerCallIncomingReceived() {
         doReturn(false).when(mMockMtcCall).isOnPreIncoming();
+        mTestMtcCallManager.attachPreIncomingCall(mMockMtcCall);
+        mTestMtcCallManager.getCallTracker().updateCallState(
+                mMockMtcCall, CallTracker.CALL_EVENT_INCOMING_RECEIVED, null);
+        processAllMessages();
+
+        verify(mMockCallStateListener, times(0)).onCallCreated(eq(mMockMtcCall));
 
         mTestMtcCallManager.addListener(mMockCallStateListener);
         mTestMtcCallManager.attachPreIncomingCall(mMockMtcCall);

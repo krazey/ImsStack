@@ -16,7 +16,7 @@
 #include "transport/SipTransportInfo.h"
 
 SipTransportInfo::SipTransportInfo(
-        SipTransportParameter* pTranspParam, SipTransportBuffer* pTransSipBuffer) :
+        const SipTransportParameter* pTranspParam, SipTransportBuffer* pTransSipBuffer) :
         m_cNumTimeReqSent(SIP_ZERO),
         m_pActualDestParam(SIP_NULL),
         m_pTranspParam(SIP_NULL),
@@ -51,19 +51,13 @@ SipTransportInfo::~SipTransportInfo()
 
     if (m_pSentSipMsg != SIP_NULL)
     {
-        delete m_pSentSipMsg;
+        m_pSentSipMsg->SipDelete();
     }
 }
 
 SipTransportParameter* SipTransportInfo::GetMsgSentTranspParam()
 {
     return m_pActualDestParam;
-}
-
-SIP_BOOL SipTransportInfo::SetMsgSentTranspParam(SipTransportParameter* pTranspParam)
-{
-    m_pActualDestParam = pTranspParam;
-    return SIP_TRUE;
 }
 
 SipTransportBuffer* SipTransportInfo::GetTranspSipBuffer()

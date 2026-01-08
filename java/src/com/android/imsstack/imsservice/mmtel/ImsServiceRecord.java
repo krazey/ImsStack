@@ -18,10 +18,12 @@ package com.android.imsstack.imsservice.mmtel;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+
 import com.android.imsstack.imsservice.base.ImsContext;
-import com.android.imsstack.imsservice.sipcontroller.ImsSipTransport;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.imsstack.util.MessageExecutor;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -39,9 +41,6 @@ public class ImsServiceRecord {
     private ImsCallApp mCallApp = null;
     private boolean mServiceUp = false;
     private ImsServiceRegistry mImsServiceRegistry;
-
-    //This is an implementation of SipTransport required for single registration support.
-    private ImsSipTransport mSipTransport = null;
     private MessageExecutor mExecutor = null;
     private int mSlotId = -1;
 
@@ -131,21 +130,6 @@ public class ImsServiceRecord {
         }
     }
 
-    /**
-     * Get the sip transport implementation
-     * @return sip transport implementation object
-     */
-    public ImsSipTransport getSipTransport() {
-        logi("getSipTransport :: slotid =" + mSlotId);
-
-        synchronized (mLock) {
-            if (mSipTransport == null) {
-                 mSipTransport = ImsSipTransport.createImsSipTransport(mSlotId,
-                        mContext.getContext(), mExecutor, getRegistration());
-            }
-            return mSipTransport;
-        }
-    }
     public ImsRegistrationImpl getRegistration() {
         logi("getRegistration :: slotid =" + mSlotId);
         synchronized (mLock) {
@@ -201,6 +185,19 @@ public class ImsServiceRecord {
 
     public void enableIms() {
         mImsServiceRegistry.setImsEnabled(true);
+    }
+
+    /**
+     * Dump this instance into a readable format for dumpsys usage.
+     */
+    public void dump(@NonNull IndentingPrintWriter pw) {
+        if (mRegTracker != null) {
+            mRegTracker.dump(pw);
+        }
+
+        if (mCallApp != null) {
+            mCallApp.dump(pw);
+        }
     }
 
     private static void log(String s) {

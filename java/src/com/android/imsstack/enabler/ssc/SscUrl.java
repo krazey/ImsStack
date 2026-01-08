@@ -68,16 +68,16 @@ public class SscUrl {
             queryUri += URI_NODE_SELECTOR_SEPARATOR
                     + "/" + SscXmlFormat.getSsElement(slotId, SscXmlFormat.SIMSERVS)
                     + "/" + SscXmlFormat.getSsElement(slotId, data.getSsType().getSsName());
-        }
 
-        if (SscXmlFormat.isNamespaceSsSupported(slotId)
-                || SscXmlFormat.isNamespaceCpSupported(slotId)) {
-            queryUri += "?";
-            if (SscXmlFormat.isNamespaceSsSupported(slotId)) {
-                queryUri += SscXmlFormat.NS_SS_URI;
-            }
-            if (SscXmlFormat.isNamespaceCpSupported(slotId)) {
-                queryUri += SscXmlFormat.NS_CP_URI;
+            if (SscXmlFormat.isNamespaceSsSupported(slotId)
+                    || SscXmlFormat.isNamespaceCpSupported(slotId)) {
+                queryUri += "?";
+                if (SscXmlFormat.isNamespaceSsSupported(slotId)) {
+                    queryUri += SscXmlFormat.NS_SS_URI;
+                }
+                if (SscXmlFormat.isNamespaceCpSupported(slotId)) {
+                    queryUri += SscXmlFormat.NS_CP_URI;
+                }
             }
         }
 

@@ -29,7 +29,7 @@ class RegInfo : public IRegInfo
 {
 public:
     RegInfo();
-    virtual ~RegInfo();
+    ~RegInfo() override;
 
 public:
     // IRegInfo interface
@@ -39,7 +39,7 @@ public:
 
     void AddListener(IN IRegInfoListener* piListener);
     void RemoveListener(IN const IRegInfoListener* piListener);
-    IMS_BOOL Update(IN IDocument* piDocument);
+    IMS_BOOL Update(IN const IDocument* piDocument);
 
     void DisplayRegInfo();
 

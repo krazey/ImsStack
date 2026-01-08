@@ -1,0 +1,100 @@
+/*
+ * Copyright (C) 2024 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.android.imsstack.its.tests.call;
+
+import android.annotation.NonNull;
+import android.os.PersistableBundle;
+import android.telephony.CarrierConfigManager;
+
+import com.android.imsstack.its.imsservice.mmtel.ImsMmTelFeatureWrapper;
+import com.android.imsstack.its.servercontrol.ControlConnection;
+import com.android.imsstack.its.servercontrol.ServerFailureHandler;
+import com.android.imsstack.its.tests.ImsStackTestBase;
+import com.android.imsstack.its.tests.registration.RegistrationHelper;
+import com.android.imsstack.its.tests.registration.RegistrationInfo;
+import com.android.imsstack.its.util.SingleLatch;
+
+public class CallTestBase extends ImsStackTestBase {
+    protected final SingleLatch mEventLatch = new SingleLatch(CallTestBase.class.getSimpleName());
+
+    @NonNull protected ControlConnection mServerControlConnection = null;
+    @NonNull protected RegistrationHelper mRegistrationHelper = null;
+    @NonNull protected ImsMmTelFeatureWrapper mMmTelFeature = null;
+
+    @NonNull protected PersistableBundle mConfig = null;
+
+    /**
+     * Sets up the test environment before each test.
+     *
+     * @throws Exception if an error occurs during setup.
+     */
+    public void setUpCallTest() throws Exception {
+        mConfig = new PersistableBundle();
+        setDefaultConfig();
+        mRegistrationHelper = new RegistrationHelper();
+    }
+
+    /**
+     * Tears down the test environment after each test.
+     *
+     * @throws Exception if an error occurs during teardown.
+     */
+    public void tearDownCallTest() throws Exception {
+    }
+
+    protected void createControlConnection(ServerFailureHandler serverFailureHandler) {
+        mServerControlConnection =
+                new ControlConnection(serverFailureHandler, getPcscfAddresses().get(0));
+    }
+
+    protected void performRegistration() {
+        mRegistrationHelper.performRegistration(this,
+                new RegistrationInfo.Builder().withDefaultConfig().addConfig(mConfig).build());
+
+        // Add delay between registration and call.
+        SingleLatch.delay(SingleLatch.SHORT_SLEEP_MS);
+    }
+
+    protected void performRegistration(int regTech) {
+        mRegistrationHelper.performRegistration(this,
+                new RegistrationInfo.Builder()
+                        .setExpectedRegTech(regTech)
+                        .addConfig(mConfig).build());
+
+        // Add delay between registration and call.
+        SingleLatch.delay(SingleLatch.SHORT_SLEEP_MS);
+    }
+
+    // TODO: Move into CallTestUtilities / CallTestConfigManager.
+    protected void turnOffQosAndPrecondition() {
+        mConfig.putBoolean(CarrierConfigManager.ImsVoice.KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL,
+                false);
+        mConfig.putBoolean(CarrierConfigManager.ImsVt.KEY_VIDEO_QOS_PRECONDITION_SUPPORTED_BOOL,
+                false);
+        mConfig.putBoolean(CarrierConfigManager.ImsRtt.KEY_TEXT_QOS_PRECONDITION_SUPPORTED_BOOL,
+                false);
+        mConfig.putBoolean(
+                CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_QOS_PRECONDITION_SUPPORTED_BOOL,
+                false);
+        mConfig.putBoolean(CarrierConfigManager.ImsVoice.KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL,
+                true);
+    }
+
+    private void setDefaultConfig() {
+        // Enforce TCP for test robustness.
+        mConfig.putInt(CarrierConfigManager.Ims.KEY_SIP_PREFERRED_TRANSPORT_INT, 1);
+    }
+}

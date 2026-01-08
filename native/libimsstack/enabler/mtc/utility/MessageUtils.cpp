@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "AString.h"
 #include "AStringBuffer.h"
 #include "CallReasonInfo.h"
 #include "Const3GPP.h"
@@ -23,6 +24,7 @@
 #include "ISession.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
+#include "ISipMessageBodyPart.h"
 #include "Ims3gpp.h"
 #include "ServiceSystemTime.h"
 #include "ServiceTrace.h"
@@ -39,6 +41,7 @@
 #include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
 #include "conferencecall/ConferenceDef.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "media/IMedia.h"
 #include "utility/MessageUtil.h"
 #include "utility/MessageUtils.h"
@@ -46,7 +49,11 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-PUBLIC MessageUtils::MessageUtils() {}
+PUBLIC MessageUtils::MessageUtils(IN IMtcContext& objContext) :
+        m_objContext(objContext)
+{
+}
+
 PUBLIC VIRTUAL MessageUtils::~MessageUtils() {}
 
 PUBLIC IMessage* MessageUtils::GetPreviousResponse(IN const ISession* piSession,
@@ -60,12 +67,17 @@ PUBLIC IMessage* MessageUtils::GetPreviousResponse(IN const ISession* piSession,
     ImsList<IMessage*> lstResponses = piSession->GetPreviousResponses(eServiceMethod);
     IMS_UINT32 nResponseSize = lstResponses.GetSize();
 
-    if (nResponseIndex < 0)
+    if (nResponseSize == 0)
     {
-        nResponseIndex = nResponseSize - 1;
+        return IMS_NULL;
     }
 
-    if ((IMS_UINT32)(nResponseIndex) >= nResponseSize)
+    if (nResponseIndex < 0)
+    {
+        nResponseIndex = static_cast<IMS_SINT32>(nResponseSize - 1);
+    }
+
+    if (static_cast<IMS_UINT32>(nResponseIndex) >= nResponseSize)
     {
         return IMS_NULL;
     }
@@ -92,7 +104,8 @@ PUBLIC IMessage* MessageUtils::GetRemotePreviousMessage(IN ISession* piSession,
 PUBLIC IMS_SINT32 MessageUtils::GetResponseStatusCode(
         IN ISession* piSession, IN IMS_SINT32 eServiceMethod, IN IMS_SINT32 nResponseIndex /*= -1*/)
 {
-    IMessage* piPreviousMessage = GetPreviousResponse(piSession, eServiceMethod, nResponseIndex);
+    const IMessage* piPreviousMessage =
+            GetPreviousResponse(piSession, eServiceMethod, nResponseIndex);
     if (piPreviousMessage == IMS_NULL)
     {
         return SipStatusCode::SC_INVALID;
@@ -113,7 +126,7 @@ PUBLIC ImsList<AString> MessageUtils::GetRemoteUris(IN ISession* piSession, IN P
     ImsList<AString> lstAddresses = piSession->GetRemoteUserId();
     if (lstAddresses.IsEmpty())
     {
-        IMessage* piPreviousMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
+        const IMessage* piPreviousMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
         if (piPreviousMessage == IMS_NULL)
         {
             return lstUris;
@@ -177,7 +190,7 @@ PUBLIC AString MessageUtils::GetSessionId(IN ISession* piSession)
 PUBLIC ImsList<AString> MessageUtils::GetHeaders(IN const IMessage* piMessage,
         IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
-    ISipMessage* piSipMessage = GetSipMessage(piMessage);
+    const ISipMessage* piSipMessage = GetSipMessage(piMessage);
     if (piSipMessage == IMS_NULL)
     {
         return ImsList<AString>();
@@ -274,7 +287,10 @@ PUBLIC AString MessageUtils::GetParameterValue(IN const IMessage* piMessage,
     for (IMS_UINT32 i = 0; i < lstHeaders.GetSize(); i++)
     {
         AString strValue;
-        ISipHeader* piSipHeader = SipParsingHelper::CreateHeader(eHeaderType, lstHeaders.GetAt(i));
+        ISipHeader* piSipHeader = eHeaderType == ISipHeader::UNKNOWN
+                ? SipParsingHelper::CreateHeader(strHeaderName, lstHeaders.GetAt(i))
+                : SipParsingHelper::CreateHeader(eHeaderType, lstHeaders.GetAt(i));
+
         if (piSipHeader == IMS_NULL)
         {
             continue;
@@ -305,53 +321,45 @@ PUBLIC AString MessageUtils::GetParameterValue(IN const IMessage* piMessage,
     return AString::ConstNull();
 }
 
-PUBLIC ImsList<AString> MessageUtils::GetUserParts(IN const IMessage* piMessage,
-        IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
-{
-    ImsList<AString> lstUserParts;
-
-    ImsList<SipAddress> lstAddresses;
-    if (GetAddresses(piMessage, eHeaderType, lstAddresses, strHeaderName) == IMS_FAILURE)
-    {
-        return lstUserParts;
-    }
-
-    for (IMS_UINT32 i = 0; i < lstAddresses.GetSize(); i++)
-    {
-        const SipAddress& objSipAddress = lstAddresses.GetAt(i);
-
-        AString strUserPart;
-        if (objSipAddress.IsSchemeTel())
-        {
-            strUserPart = objSipAddress.GetHost();
-        }
-        else
-        {
-            const SipAddress::UserInfoPart* pUserInfoPart = objSipAddress.GetUserInfoPart();
-            if (pUserInfoPart == IMS_NULL)
-            {
-                continue;
-            }
-            strUserPart = pUserInfoPart->GetUser();
-        }
-
-        lstUserParts.Append(strUserPart);
-    }
-
-    return lstUserParts;
-}
-
 PUBLIC AString MessageUtils::GetUserPart(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
         IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
-    ImsList<AString> lstUserParts = GetUserParts(piMessage, eHeaderType, strHeaderName);
-
-    for (IMS_UINT32 i = 0; i < lstUserParts.GetSize(); i++)
+    if (eHeaderType == ISipHeader::P_ASSERTED_IDENTITY)
     {
-        AString strUserPart = lstUserParts.GetAt(i);
+        return GetUserPart(GetPai(*piMessage));
+    }
+
+    ImsList<AString> lstHeaders = GetHeaders(piMessage, eHeaderType, strHeaderName);
+    for (IMS_UINT32 i = 0; i < lstHeaders.GetSize(); i++)
+    {
+        AString strUserPart = GetUserPart(lstHeaders.GetAt(i));
         if (strUserPart.GetLength() > 0)
         {
             return strUserPart;
+        }
+    }
+
+    return AString::ConstNull();
+}
+
+PUBLIC AString MessageUtils::GetUserPart(IN const AString& strUri)
+{
+    SipAddress objSipAddress;
+    if (!objSipAddress.Create(strUri))
+    {
+        return AString::ConstNull();
+    }
+
+    if (objSipAddress.IsSchemeTel())
+    {
+        return objSipAddress.GetHost();
+    }
+    else
+    {
+        const SipAddress::UserInfoPart* pUserInfoPart = objSipAddress.GetUserInfoPart();
+        if (pUserInfoPart != IMS_NULL)
+        {
+            return pUserInfoPart->GetUser();
         }
     }
 
@@ -375,16 +383,9 @@ PUBLIC ImsList<AString> MessageUtils::GetUserIds(IN IMessage* piMessage, IN IMS_
         AString strUserPart;
         if (objSipAddress.IsSchemeSip())
         {
-            // TODO, Contains / GetIndexOf
-            if (objSipAddress.GetUser().Contains(TextParser::CHAR_SEMICOLON))
-            {
-                strUserPart = objSipAddress.GetUser().GetSubStr(
-                        0, objSipAddress.GetUser().GetIndexOf(TextParser::CHAR_SEMICOLON));
-            }
-            else
-            {
-                strUserPart = objSipAddress.GetUser();
-            }
+            IMS_SINT32 nSemicolonIndex =
+                    objSipAddress.GetUser().GetIndexOf(TextParser::CHAR_SEMICOLON);
+            strUserPart = objSipAddress.GetUser().GetSubStr(0, nSemicolonIndex);
         }
         else if (objSipAddress.IsSchemeTel())
         {
@@ -418,44 +419,24 @@ PUBLIC AString MessageUtils::GetUserId(IN IMessage* piMessage, IN IMS_SINT32 eHe
     return AString::ConstNull();
 }
 
-PUBLIC ImsList<AString> MessageUtils::GetDisplayNames(IN IMessage* piMessage,
-        IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
-{
-    ImsList<SipAddress> lstAddresses;
-    if (GetAddresses(piMessage, eHeaderType, lstAddresses, strHeaderName) == IMS_FAILURE)
-    {
-        return ImsList<AString>();
-    }
-
-    ImsList<AString> lstDisplayNames;
-    for (IMS_UINT32 i = 0; i < lstAddresses.GetSize(); i++)
-    {
-        const SipAddress& objSipAddress = lstAddresses.GetAt(i);
-
-        lstDisplayNames.Append(objSipAddress.GetDisplayName());
-    }
-
-    return lstDisplayNames;
-}
-
 PUBLIC AString MessageUtils::GetDisplayName(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
         IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
-    ImsList<AString> lstDisplayNames = GetDisplayNames(piMessage, eHeaderType, strHeaderName);
-    if (lstDisplayNames.IsEmpty())
+    if (eHeaderType == ISipHeader::P_ASSERTED_IDENTITY)
     {
-        return AString::ConstNull();
+        SipAddress objAddress(GetPai(*piMessage));
+        return TextParser::DoPercentDecoding(objAddress.GetDisplayName());
     }
 
-    for (IMS_UINT32 i = 0; i < lstDisplayNames.GetSize(); i++)
+    ImsList<AString> lstHeaders = GetHeaders(piMessage, eHeaderType, strHeaderName);
+    for (IMS_UINT32 i = 0; i < lstHeaders.GetSize(); i++)
     {
-        AString strDisplayName = lstDisplayNames.GetAt(i);
+        AString strDisplayName = SipAddress(lstHeaders.GetAt(i)).GetDisplayName();
         if (strDisplayName.GetLength() > 0)
         {
-            return strDisplayName;
+            return TextParser::DoPercentDecoding(strDisplayName);
         }
     }
-
     return AString::ConstNull();
 }
 
@@ -504,6 +485,11 @@ PUBLIC AString MessageUtils::GetParameterValueFromUri(IN IMessage* piMessage,
         IN const AString& strParameterName, IN IMS_SINT32 eHeaderType,
         IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
+    if (eHeaderType == ISipHeader::P_ASSERTED_IDENTITY)
+    {
+        return GetParameterValueFromUri(SipAddress(GetPai(*piMessage)), strParameterName);
+    }
+
     ImsList<SipAddress> lstAddresses;
     if (GetAddresses(piMessage, eHeaderType, lstAddresses, strHeaderName) == IMS_FAILURE)
     {
@@ -513,45 +499,46 @@ PUBLIC AString MessageUtils::GetParameterValueFromUri(IN IMessage* piMessage,
     for (IMS_UINT32 i = 0; i < lstAddresses.GetSize(); i++)
     {
         const SipAddress& objSipAddress = lstAddresses.GetAt(i);
-        AString strValue;
-
-        if (objSipAddress.IsSchemeSip() || objSipAddress.IsSchemeSips())
+        AString strParameterValue = GetParameterValueFromUri(objSipAddress, strParameterName);
+        if (strParameterValue.GetLength() > 0)
         {
-            const SipAddress::UserInfoPart* pUserInfoPart = objSipAddress.GetUserInfoPart();
-            if (pUserInfoPart == IMS_NULL)
-            {
-                continue;
-            }
-
-            const SipParameter* pParameter = pUserInfoPart->GetParameter(strParameterName);
-            if (pParameter != IMS_NULL)
-            {
-                strValue = pParameter->GetValue();
-            }
-
-            if (strValue.GetLength() > 0)
-            {
-                return strValue;
-            }
-        }
-
-        const SipParameter* pParameter = objSipAddress.GetParameter(strParameterName);
-        if (pParameter != IMS_NULL)
-        {
-            strValue = pParameter->GetValue();
-        }
-
-        if (strValue.GetLength() > 0)
-        {
-            return strValue;
+            return strParameterValue;
         }
     }
 
     return AString::ConstNull();
 }
 
-PUBLIC ImsList<AString> MessageUtils::GetUris(IN IMessage* piMessage, IN IMS_BOOL bWithParameters,
-        IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
+PUBLIC AString MessageUtils::GetParameterValueFromUri(
+        IN const SipAddress& objAddress, IN const AString& strParameterName)
+{
+    if (objAddress.IsSchemeSip() || objAddress.IsSchemeSips())
+    {
+        const SipAddress::UserInfoPart* pUserInfoPart = objAddress.GetUserInfoPart();
+        if (pUserInfoPart == IMS_NULL)
+        {
+            return AString::ConstNull();
+        }
+
+        const SipParameter* pParameter = pUserInfoPart->GetParameter(strParameterName);
+        if (pParameter != IMS_NULL && pParameter->GetValue().GetLength() > 0)
+        {
+            return pParameter->GetValue();
+        }
+    }
+
+    const SipParameter* pParameter = objAddress.GetParameter(strParameterName);
+    if (pParameter != IMS_NULL && pParameter->GetValue().GetLength() > 0)
+    {
+        return pParameter->GetValue();
+    }
+
+    return AString::ConstNull();
+}
+
+PUBLIC ImsList<AString> MessageUtils::GetUris(IN const IMessage* piMessage,
+        IN IMS_BOOL bWithParameters, IN IMS_SINT32 eHeaderType,
+        IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     ImsList<SipAddress> lstAddresses;
     if (GetAddresses(piMessage, eHeaderType, lstAddresses, strHeaderName) == IMS_FAILURE)
@@ -577,7 +564,7 @@ PUBLIC ImsList<AString> MessageUtils::GetUris(IN IMessage* piMessage, IN IMS_BOO
     return lstUris;
 }
 
-PUBLIC AString MessageUtils::GetUri(IN IMessage* piMessage, IN IMS_BOOL bWithParameters,
+PUBLIC AString MessageUtils::GetUri(IN const IMessage* piMessage, IN IMS_BOOL bWithParameters,
         IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     ImsList<AString> lstUris = GetUris(piMessage, bWithParameters, eHeaderType, strHeaderName);
@@ -605,7 +592,9 @@ PUBLIC IMS_SINT32 MessageUtils::GetSosTypeFromServiceUrn(IN const IMessage* piMe
     if (GetUrnValue(piMessage, MessageUtil::STR_SERVICE, eHeaderType, strValue, strHeaderName) ==
             IMS_FAILURE)
     {
-        return EXTRA_CODE_EMERGENCYSERVICE_INVALID;
+        // b/236411658 case seems to be controlled by APDS, not IMS Stack so we might be able to
+        // use GENERIC urn if there is no Contact header without any configuration.
+        return EXTRA_CODE_EMERGENCYSERVICE_GENERIC;
     }
 
     if (!strValue.StartsWith(MessageUtil::STR_SOS))
@@ -617,48 +606,44 @@ PUBLIC IMS_SINT32 MessageUtils::GetSosTypeFromServiceUrn(IN const IMessage* piMe
     {
         return EXTRA_CODE_EMERGENCYSERVICE_GENERIC;
     }
+    else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_AIEC))
+    {
+        return EXTRA_CODE_EMERGENCYSERVICE_AIEC;
+    }
     else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_AMBULANCE))
     {
         return EXTRA_CODE_EMERGENCYSERVICE_AMBULANCE;
-    }
-    else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_ANIMAL_CONTROL))
-    {
-        return EXTRA_CODE_EMERGENCYSERVICE_ANIMAL_CONTROL;
     }
     else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_FIRE))
     {
         return EXTRA_CODE_EMERGENCYSERVICE_FIRE;
     }
-    else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_GAS))
-    {
-        return EXTRA_CODE_EMERGENCYSERVICE_GAS;
-    }
     else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_MARINE))
     {
         return EXTRA_CODE_EMERGENCYSERVICE_MARINE;
+    }
+    else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_MIEC))
+    {
+        return EXTRA_CODE_EMERGENCYSERVICE_MIEC;
     }
     else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_MOUNTAIN))
     {
         return EXTRA_CODE_EMERGENCYSERVICE_MOUNTAIN;
     }
-    else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_PHYSICIAN))
-    {
-        return EXTRA_CODE_EMERGENCYSERVICE_PHYSICIAN;
-    }
-    else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_POISON))
-    {
-        return EXTRA_CODE_EMERGENCYSERVICE_POISON;
-    }
     else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_POLICE))
     {
         return EXTRA_CODE_EMERGENCYSERVICE_POLICE;
+    }
+    else if (strValue.EqualsIgnoreCase(MessageUtil::STR_SOS_COUNTRY_SPECIFIC))
+    {
+        return EXTRA_CODE_EMERGENCYSERVICE_INVALID;
     }
     else if (strValue.MakeLower().Contains(MessageUtil::STR_SOS_COUNTRY_SPECIFIC))
     {
         return EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC;
     }
 
-    return EXTRA_CODE_EMERGENCYSERVICE_INVALID;
+    return EXTRA_CODE_EMERGENCYSERVICE_UNSPECIFIED;
 }
 
 PUBLIC IMS_SINT32 MessageUtils::GetCauseFromReasonHeader(
@@ -689,15 +674,15 @@ PUBLIC ReasonHeaderValue MessageUtils::GetCauseAndTextFromReasonHeader(
         {
             continue;
         }
-        objValue.nCause = nCause;
-        objValue.strText = strText;
 
         if ((strProtocol.GetLength() > 0) && (!strProtocol.EqualsIgnoreCase(strReceivedProtocol)))
         {
-            objValue.nCause = -1;
-            objValue.strText = AString::ConstNull();
             continue;
         }
+
+        objValue.nCause = nCause;
+        objValue.strText = strText;
+        objValue.strProtocol = strReceivedProtocol;
 
         return objValue;
     }
@@ -705,10 +690,39 @@ PUBLIC ReasonHeaderValue MessageUtils::GetCauseAndTextFromReasonHeader(
     return objValue;
 }
 
+PUBLIC ReasonHeaderValue MessageUtils::GetPrioritizedReasonHeader(IN const IMessage* piMessage,
+        IN const std::initializer_list<AString>& lstPrioritizedProtocols)
+{
+    ReasonHeaderValue objResaultValue;
+    if (!piMessage)
+    {
+        return objResaultValue;
+    }
+
+    for (const auto& strProtocol : lstPrioritizedProtocols)
+    {
+        IMS_TRACE_D("GetPrioritizedReasonHeader: Trying protocol [%s]",
+                strProtocol.GetStr() ? strProtocol.GetStr() : "any", 0, 0);
+
+        ReasonHeaderValue objValue = GetCauseAndTextFromReasonHeader(piMessage, strProtocol);
+
+        if (objValue.nCause != -1 || objValue.strText.GetLength() > 0)
+        {
+            objResaultValue.nCause = objValue.nCause;
+            objResaultValue.strText = objValue.strText;
+            objResaultValue.strProtocol = objValue.strProtocol;
+
+            return objResaultValue;
+        }
+    }
+    IMS_TRACE_D("GetPrioritizedReasonHeader: No matching Reason Header found.", 0, 0, 0);
+    return objResaultValue;
+}
+
 PUBLIC Ims3gpp& MessageUtils::GetIms3gppFromBody(
         IN const IMessage* piMessage, OUT Ims3gpp& objIms3gpp)
 {
-    ISipMessage* piSipMessage = GetSipMessage(piMessage);
+    const ISipMessage* piSipMessage = GetSipMessage(piMessage);
     if (piSipMessage == IMS_NULL)
     {
         return objIms3gpp;
@@ -717,7 +731,7 @@ PUBLIC Ims3gpp& MessageUtils::GetIms3gppFromBody(
     ImsList<ISipMessageBodyPart*> lstBodyParts = piSipMessage->GetBodyParts();
     for (IMS_UINT32 i = 0; i < lstBodyParts.GetSize(); i++)
     {
-        ISipMessageBodyPart* piBodyPart = lstBodyParts.GetAt(i);
+        const ISipMessageBodyPart* piBodyPart = lstBodyParts.GetAt(i);
         if (piBodyPart == IMS_NULL)
         {
             continue;
@@ -747,7 +761,7 @@ PUBLIC Ims3gpp& MessageUtils::GetIms3gppFromBody(
 PUBLIC Ims3gppData MessageUtils::GetIms3gppData(IN const IMessage* piMessage)
 {
     Ims3gppData objIms3gppData;
-    ISipMessage* piSipMessage = GetSipMessage(piMessage);
+    const ISipMessage* piSipMessage = GetSipMessage(piMessage);
     if (piSipMessage == IMS_NULL)
     {
         return objIms3gppData;
@@ -756,7 +770,7 @@ PUBLIC Ims3gppData MessageUtils::GetIms3gppData(IN const IMessage* piMessage)
     ImsList<ISipMessageBodyPart*> lstBodyParts = piSipMessage->GetBodyParts();
     for (IMS_UINT32 i = 0; i < lstBodyParts.GetSize(); i++)
     {
-        ISipMessageBodyPart* piBodyPart = lstBodyParts.GetAt(i);
+        const ISipMessageBodyPart* piBodyPart = lstBodyParts.GetAt(i);
         if (piBodyPart == IMS_NULL)
         {
             continue;
@@ -794,7 +808,7 @@ PUBLIC IMS_SINT32 MessageUtils::GetStatusCodeInNotify(IN IMessage* piMessage)
         return SipStatusCode::SC_INVALID;
     }
 
-    ISipMessage* piSipMessage = GetSipMessage(piMessage);
+    const ISipMessage* piSipMessage = GetSipMessage(piMessage);
     if (piSipMessage == IMS_NULL)
     {
         return SipStatusCode::SC_INVALID;
@@ -804,14 +818,14 @@ PUBLIC IMS_SINT32 MessageUtils::GetStatusCodeInNotify(IN IMessage* piMessage)
     ImsList<ISipMessageBodyPart*> lstBodyParts = piSipMessage->GetBodyParts();
     for (IMS_UINT32 i = 0; i < lstBodyParts.GetSize(); i++)
     {
-        ISipMessageBodyPart* piBodyPart = lstBodyParts.GetAt(i);
+        const ISipMessageBodyPart* piBodyPart = lstBodyParts.GetAt(i);
         if (piBodyPart == IMS_NULL)
         {
             continue;
         }
 
         ByteArray objContent = piBodyPart->GetContent();
-        // TODO: remove or check necessity
+        // To cover RJIL network issue: b/247729585
         objContent.Append(TextParser::CHAR_CR);
         objContent.Append(TextParser::CHAR_LF);
 
@@ -830,7 +844,7 @@ PUBLIC IMS_SINT32 MessageUtils::GetStatusCodeInNotify(IN IMessage* piMessage)
 
 PUBLIC IMS_BOOL MessageUtils::HasSdp(IN const IMessage* piMessage)
 {
-    ISipMessage* piSipMessage = GetSipMessage(piMessage);
+    const ISipMessage* piSipMessage = GetSipMessage(piMessage);
     if (piSipMessage == IMS_NULL)
     {
         return IMS_FALSE;
@@ -912,9 +926,9 @@ PUBLIC IMS_BOOL MessageUtils::IsInitialEmergencyRegistrationRequired(IN const IM
     return IMS_FALSE;
 }
 
-// TODO: remove either ContainsValue or HasValue
-PUBLIC IMS_BOOL MessageUtils::ContainsValue(IN IMessage* piMessage, IN const AString& strValue,
-        IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
+PUBLIC IMS_BOOL MessageUtils::ContainsValue(IN const IMessage* piMessage,
+        IN const AString& strValue, IN IMS_SINT32 eHeaderType,
+        IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     ImsList<AString> lstHeaders = GetHeaders(piMessage, eHeaderType, strHeaderName);
     if (lstHeaders.IsEmpty())
@@ -933,8 +947,9 @@ PUBLIC IMS_BOOL MessageUtils::ContainsValue(IN IMessage* piMessage, IN const ASt
     return IMS_FALSE;
 }
 
-PUBLIC IMS_BOOL MessageUtils::HasValue(IN const IMessage* piMessage, IN const AString& strValue,
-        IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
+PUBLIC IMS_BOOL MessageUtils::ContainsValueIgnoreCase(IN const IMessage* piMessage,
+        IN const AString& strValue, IN IMS_SINT32 eHeaderType,
+        IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     ImsList<AString> lstHeaders = GetHeaders(piMessage, eHeaderType, strHeaderName);
     if (lstHeaders.IsEmpty())
@@ -942,9 +957,10 @@ PUBLIC IMS_BOOL MessageUtils::HasValue(IN const IMessage* piMessage, IN const AS
         return IMS_FALSE;
     }
 
+    AString strLowercased = strValue.MakeLower();
     for (IMS_UINT32 i = 0; i < lstHeaders.GetSize(); i++)
     {
-        if (lstHeaders.GetAt(i).Equals(strValue))
+        if (lstHeaders.GetAt(i).MakeLower().Contains(strLowercased))
         {
             return IMS_TRUE;
         }
@@ -956,7 +972,7 @@ PUBLIC IMS_BOOL MessageUtils::HasValue(IN const IMessage* piMessage, IN const AS
 PUBLIC IMS_BOOL MessageUtils::IsHeaderPresent(IN const IMessage* piMessage,
         IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
-    ISipMessage* piSipMessage = GetSipMessage(piMessage);
+    const ISipMessage* piSipMessage = GetSipMessage(piMessage);
     if (piSipMessage == IMS_NULL)
     {
         return IMS_FALSE;
@@ -976,8 +992,6 @@ PUBLIC IMS_BOOL MessageUtils::ContainsTag(IN const AString& strHeader, IN const 
     {
         return IMS_TRUE;
     }
-
-    // TODO, Decode if escaped string.
 
     return IMS_FALSE;
 }
@@ -1017,6 +1031,34 @@ PUBLIC IMS_BOOL MessageUtils::ContainsAddressInPaid(
     return objAddress.Equals(objAddressInHeader);
 }
 
+PUBLIC AString MessageUtils::GetPai(IN const IMessage& objMessage)
+{
+    const ImsList<AString> lstHeaders = GetHeaders(&objMessage, ISipHeader::P_ASSERTED_IDENTITY);
+    if (lstHeaders.IsEmpty())
+    {
+        return AString::ConstNull();
+    }
+
+    if (m_objContext.GetConfigurationProxy().GetInt(
+                ConfigVoice::KEY_POLICY_FOR_MULTIPLE_P_ASSERTED_IDENTITY_HEADERS_INT) ==
+            ConfigVoice::PAI_POLICY_PREFER_SIP_URI)
+    {
+        for (IMS_UINT32 i = 0; i < lstHeaders.GetSize(); i++)
+        {
+            const AString& strHeader = lstHeaders.GetAt(i);
+            SipAddress objSipAddress;
+            if (objSipAddress.Create(strHeader) &&
+                    (objSipAddress.IsSchemeSip() || objSipAddress.IsSchemeSips()))
+            {
+                return strHeader;
+            }
+        }
+        return AString::ConstNull();
+    }
+
+    return lstHeaders.GetAt(0);
+}
+
 PUBLIC IMS_RESULT MessageUtils::SetHeader(IN IMessage* piMessage, IN const AString& strValue,
         IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
@@ -1033,7 +1075,7 @@ PUBLIC IMS_RESULT MessageUtils::AddValueIfNotExists(IN IMessage* piMessage,
         IN const AString& strValue, IN IMS_SINT32 eHeaderType,
         IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
-    if (HasValue(piMessage, strValue, eHeaderType, strHeaderName) == IMS_TRUE)
+    if (ContainsValue(piMessage, strValue, eHeaderType, strHeaderName))
     {
         return IMS_SUCCESS;
     }
@@ -1066,19 +1108,18 @@ PUBLIC AString MessageUtils::GenerateContentId(IN const AString& strHost)
 }
 
 PUBLIC IMS_RESULT MessageUtils::SetResourceList(IN_OUT IMessage* piMessage,
-        IN IMtcContext& objContext, IN const AString& strContentId,
         IN const ImsList<ConfUser*>& lstConfUser, IN IMS_BOOL bWithDialogId, IN IMS_BOOL bMultiPart)
 {
     ImsList<std::tuple<AString, AString, AString>> objEntries;
     for (IMS_UINT32 i = 0; i < lstConfUser.GetSize(); i++)
     {
-        ConfUser* pConfUser = lstConfUser.GetAt(i);
+        const ConfUser* pConfUser = lstConfUser.GetAt(i);
         if (pConfUser == IMS_NULL)
         {
             continue;
         }
 
-        AString strEntry = CreateEntryUri(objContext, *pConfUser, bWithDialogId);
+        AString strEntry = CreateEntryUri(*pConfUser, bWithDialogId);
 
         AString strCc;
         switch (pConfUser->eCcType)
@@ -1097,44 +1138,58 @@ PUBLIC IMS_RESULT MessageUtils::SetResourceList(IN_OUT IMessage* piMessage,
         AString strAnonymize;
         if (pConfUser->bAnonymize)
         {
-            // TODO: Check if no need to set false.
             strAnonymize = "true";
         }
 
         objEntries.Append(std::make_tuple(strEntry, strCc, strAnonymize));
     }
 
-    return SetResourceListWithHeaders(
-            piMessage, strContentId, bMultiPart, CreateResourceListXml(objEntries));
+    return SetResourceListWithHeaders(piMessage, bMultiPart, CreateResourceListXml(objEntries));
 }
 
-PUBLIC IMS_BOOL MessageUtils::IsVideoFeatureIncluded(IN const IMessage* piMessage)
+PUBLIC std::optional<IMS_BOOL> MessageUtils::IsMmtelFeatureIncluded(IN const IMessage* piMessage)
 {
     AString strContact = GetHeader(piMessage, ISipHeader::CONTACT_NORMAL);
-    return ContainsTag(strContact, MessageUtil::STR_VIDEO) &&
-            ContainsTag(strContact, AString(Const3GPP::ICSI_MMTEL).Replace(":", "%3A"));
+    if (strContact.GetLength() <= 0)
+    {
+        return std::nullopt;
+    }
+    return ContainsTag(
+            strContact, AString(Const3GPP::ICSI_MMTEL).Replace(TextParser::CHAR_COLON, "%3A"));
 }
 
-PUBLIC IMS_BOOL MessageUtils::IsTextFeatureIncluded(IN const IMessage* piMessage)
+PUBLIC std::optional<IMS_BOOL> MessageUtils::IsVideoFeatureIncluded(IN const IMessage* piMessage)
 {
+    if (!IsMmtelFeatureIncluded(piMessage).value_or(IMS_FALSE))
+    {
+        return std::nullopt;
+    }
     AString strContact = GetHeader(piMessage, ISipHeader::CONTACT_NORMAL);
-    return ContainsTag(strContact, MessageUtil::STR_TEXT) &&
-            ContainsTag(strContact, AString(Const3GPP::ICSI_MMTEL).Replace(":", "%3A"));
+    return ContainsTag(strContact, MessageUtil::STR_VIDEO);
+}
+
+PUBLIC std::optional<IMS_BOOL> MessageUtils::IsTextFeatureIncluded(IN const IMessage* piMessage)
+{
+    if (!IsMmtelFeatureIncluded(piMessage).value_or(IMS_FALSE))
+    {
+        return std::nullopt;
+    }
+    AString strContact = GetHeader(piMessage, ISipHeader::CONTACT_NORMAL);
+    return ContainsTag(strContact, MessageUtil::STR_TEXT);
 }
 
 PUBLIC CallType MessageUtils::GetCallType(
-        IN const IMessage* piMessage, IN ISession* piSession, IN IMS_BOOL bPeerView)
+        IN const IMessage* piMessage, IN ISession* piSession, IN IMS_BOOL bCheckRemote)
 {
     if (HasSdp(piMessage))
     {
-        return GetCallTypeFromSdp(piSession, IMS_FALSE, bPeerView);
+        return GetCallTypeFromSdp(piSession, IMS_FALSE, bCheckRemote);
     }
     return CallType::UNKNOWN;
-    // return CheckSessionTypeByAcceptContact(piMessage, piSession); // TODO: operator specific
 }
 
-PUBLIC CallType MessageUtils::GetCallTypeFromSdp(IN ISession* piSession, IN IMS_BOOL bNegoSdp,
-        IN IMS_BOOL bPeerView, IN IMS_BOOL bCheckPort /*= IMS_TRUE*/)
+PUBLIC CallType MessageUtils::GetCallTypeFromSdp(IN ISession* piSession,
+        IN IMS_BOOL bActiveMediaOnly, IN IMS_BOOL bCheckRemote, IN IMS_BOOL bIgnorePort0)
 {
     IMS_BOOL bAudio = IMS_FALSE;
     IMS_BOOL bVideo = IMS_FALSE;
@@ -1149,9 +1204,9 @@ PUBLIC CallType MessageUtils::GetCallTypeFromSdp(IN ISession* piSession, IN IMS_
     ImsList<IMedia*> lstIMedia = piSession->GetMedia();
     for (IMS_UINT32 nIndex = 0; nIndex < lstIMedia.GetSize(); nIndex++)
     {
-        IMedia* piMedia = lstIMedia.GetAt(nIndex);
-        IMediaDescriptor* pDescriptor = IMS_NULL;
-        if (bPeerView)
+        const IMedia* piMedia = lstIMedia.GetAt(nIndex);
+        const IMediaDescriptor* pDescriptor = IMS_NULL;
+        if (bCheckRemote)
         {
             if (piMedia->GetUpdateState() == IMedia::UPDATE_MODIFIED)
             {
@@ -1172,7 +1227,7 @@ PUBLIC CallType MessageUtils::GetCallTypeFromSdp(IN ISession* piSession, IN IMS_
         }
 
         const SdpMedia* pSdpMedia = IMS_NULL;
-        if (bPeerView)
+        if (bCheckRemote)
         {
             pSdpMedia = pDescriptor->GetMediaDescriptionEx();
         }
@@ -1185,7 +1240,7 @@ PUBLIC CallType MessageUtils::GetCallTypeFromSdp(IN ISession* piSession, IN IMS_
             continue;
         }
 
-        if (bCheckPort && pSdpMedia->GetPort() == 0)
+        if (bIgnorePort0 && pSdpMedia->GetPort() == 0)
         {
             continue;
         }
@@ -1197,7 +1252,7 @@ PUBLIC CallType MessageUtils::GetCallTypeFromSdp(IN ISession* piSession, IN IMS_
         else if (pSdpMedia->GetType() == SdpMedia::TYPE_VIDEO)
         {
             IMS_TRACE_D("GetCallTypeFromSdp : media state [%d]", piMedia->GetState(), 0, 0);
-            if (!bNegoSdp || piMedia->GetState() != IMedia::STATE_DELETED)
+            if (!bActiveMediaOnly || piMedia->GetState() != IMedia::STATE_DELETED)
             {
                 bVideo = IMS_TRUE;
             }
@@ -1205,7 +1260,7 @@ PUBLIC CallType MessageUtils::GetCallTypeFromSdp(IN ISession* piSession, IN IMS_
         else if (pSdpMedia->GetType() == SdpMedia::TYPE_TEXT)
         {
             IMS_TRACE_D("GetCallTypeFromSdp : media state [%d]", piMedia->GetState(), 0, 0);
-            if (!bNegoSdp || piMedia->GetState() != IMedia::STATE_DELETED)
+            if (!bActiveMediaOnly || piMedia->GetState() != IMedia::STATE_DELETED)
             {
                 bText = IMS_TRUE;
             }
@@ -1232,6 +1287,64 @@ PUBLIC CallType MessageUtils::GetCallTypeFromSdp(IN ISession* piSession, IN IMS_
         return CallType::RTT;
     }
     return CallType::VOIP;
+}
+
+PUBLIC IMS_SINT32 MessageUtils::GetRemotePortFromSdp(
+        IN ISession* piSession, IN IMS_SINT32 eMediaType)
+{
+    if (piSession == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "GetRemotePortFromSdp : piSession is NULL", 0, 0, 0);
+        return -1;
+    }
+
+    ImsList<IMedia*> lstIMedia = piSession->GetMedia();
+    for (IMS_UINT32 nIndex = 0; nIndex < lstIMedia.GetSize(); nIndex++)
+    {
+        const IMedia* piMedia = lstIMedia.GetAt(nIndex);
+        if (piMedia == IMS_NULL)
+        {
+            continue;
+        }
+        const IMediaDescriptor* pDescriptor = IMS_NULL;
+
+        // Check if the media state is modified to get the correct remote descriptor
+        if (piMedia->GetUpdateState() == IMedia::UPDATE_MODIFIED)
+        {
+            // Use the proposal descriptor for modified state
+            const IMedia* pIMediaProposal = piMedia->GetProposal();
+            if (pIMediaProposal != IMS_NULL)
+            {
+                pDescriptor = pIMediaProposal->GetMediaDescriptor();
+            }
+        }
+        else
+        {
+            pDescriptor = piMedia->GetMediaDescriptor();
+        }
+
+        if (pDescriptor == IMS_NULL)
+        {
+            continue;
+        }
+
+        // GetMediaDescriptionEx() retrieves the remote SDP media description
+        const SdpMedia* pSdpMedia = pDescriptor->GetMediaDescriptionEx();
+        if (pSdpMedia == IMS_NULL)
+        {
+            continue;
+        }
+
+        if (pSdpMedia->GetType() == eMediaType)
+        {
+            IMS_SINT32 nPort = pSdpMedia->GetPort();
+
+            IMS_TRACE_D("GetRemotePortFromSdp : type[%d] port[%d]", eMediaType, nPort, 0);
+            return nPort;
+        }
+    }
+
+    return -1;
 }
 
 PUBLIC IMS_BOOL MessageUtils::IsResponseExist(IN ISession* piSession, IN IMS_SINT32 nStatusCode)
@@ -1308,7 +1421,6 @@ PRIVATE void MessageUtils::GetParameterValueFromUnknownHeaderBody(
 {
     strValue = AString::ConstNull();
 
-    // TODO, need to verify
     ImsList<AString> lstParameters = strBody.Split(TextParser::CHAR_SEMICOLON);
     for (IMS_UINT32 i = 0; i < lstParameters.GetSize(); i++)
     {
@@ -1363,8 +1475,8 @@ PRIVATE IMS_RESULT MessageUtils::GetUrnValue(IN const IMessage* piMessage, IN co
     return IMS_SUCCESS;
 }
 
-PRIVATE IMS_RESULT MessageUtils::SetResourceListWithHeaders(IN_OUT IMessage* piMessage,
-        IN const AString& strContentId, IN IMS_BOOL bMultiPart, IN const AString& strXml)
+PRIVATE IMS_RESULT MessageUtils::SetResourceListWithHeaders(
+        IN_OUT IMessage* piMessage, IN IMS_BOOL bMultiPart, IN const AString& strXml)
 {
     if (piMessage == IMS_NULL)
     {
@@ -1387,18 +1499,6 @@ PRIVATE IMS_RESULT MessageUtils::SetResourceListWithHeaders(IN_OUT IMessage* piM
         AString strContentLength;
         strContentLength.SetNumber(strXml.GetLength());
         piBodyPart->SetHeader(SipHeaderName::CONTENT_LENGTH, strContentLength);
-
-        // TODO: Need to check the requirement of Content-ID
-        if (strContentId.GetLength() < 1)
-        {
-            AString strHost = GetHost(piMessage, ISipHeader::CONTACT_NORMAL);
-            AString strGeneratedContentId = GenerateContentId(strHost);
-            piBodyPart->SetHeader(MessageUtil::STR_CONTENT_ID, strGeneratedContentId);
-        }
-        else
-        {
-            piBodyPart->SetHeader(MessageUtil::STR_CONTENT_ID, strContentId);
-        }
     }
 
     return piBodyPart->SetContent(ByteArray(strXml));
@@ -1407,7 +1507,6 @@ PRIVATE IMS_RESULT MessageUtils::SetResourceListWithHeaders(IN_OUT IMessage* piM
 PRIVATE AString MessageUtils::CreateResourceListXml(
         IN const ImsList<std::tuple<AString, AString, AString>>& objEntries)
 {
-    // TODO: use IXmlStreamWriter
     AStringBuffer objXml("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     objXml += "<resource-lists xmlns=\"urn:ietf:params:xml:ns:resource-lists\"";
     objXml += " xmlns:cp=\"urn:ietf:params:xml:ns:copyControl\">\n";
@@ -1428,7 +1527,6 @@ PRIVATE AString MessageUtils::CreateResourceListXml(
 
         if (std::get<2>(objEntries.GetAt(i)).GetLength() > 0)
         {
-            // TODO: Not need to add false?
             objXml += " cp:anonymize=\"true\"";
         }
 
@@ -1441,8 +1539,7 @@ PRIVATE AString MessageUtils::CreateResourceListXml(
     return objXml.GetString();
 }
 
-PRIVATE AString MessageUtils::CreateEntryUri(
-        IN IMtcContext& objContext, IN const ConfUser& objUser, IN IMS_BOOL bWithDialogId)
+PRIVATE AString MessageUtils::CreateEntryUri(IN const ConfUser& objUser, IN IMS_BOOL bWithDialogId)
 {
     if (!bWithDialogId)
     {
@@ -1457,7 +1554,7 @@ PRIVATE AString MessageUtils::CreateEntryUri(
     // <entry uri="B?Call-ID=1a&amp;From=A%3Btag%3Da1&amp;To=B%3Btag%3Db&amp;Session-ID=1"
     // cp:copyControl="to"/>
 
-    CallKey nKey = objContext.GetCallConnectionIdManager().GetCallKey(objUser.nConnectionId);
+    CallKey nKey = m_objContext.GetCallConnectionIdManager().GetCallKey(objUser.nConnectionId);
     if (nKey == 0)
     {
         IMS_TRACE_E(0, "No call exists.", 0, 0, 0);
@@ -1465,7 +1562,7 @@ PRIVATE AString MessageUtils::CreateEntryUri(
     }
 
     IMtcCallContext& objCallContext =
-            objContext.GetCallManager().GetCallByCallKey(nKey)->GetCallContext();
+            m_objContext.GetCallManager().GetCallByCallKey(nKey)->GetCallContext();
     ISession& objSession = objCallContext.GetSession()->GetISession();
 
     // To get a dialog ID, a confirmed dialog message is needed.
@@ -1476,7 +1573,6 @@ PRIVATE AString MessageUtils::CreateEntryUri(
     }
 
     AString strRemoteUri = GetRemoteUri(&objSession, objCallContext.GetCallInfo().ePeerType);
-    // TODO: tel URI case will be covered after refactorying UriFormatter.
     SipAddress objSipAddress;
     if (!objSipAddress.Create(strRemoteUri))
     {
@@ -1488,8 +1584,6 @@ PRIVATE AString MessageUtils::CreateEntryUri(
     // SIP URI + "?" + Call-ID
     AString strEntryUri(objSipAddress.ToString());
 
-    // TODO: According to the previous implementation, From is local and To is remote.
-    // Need to find requirement and leave a comment.
     AString strFromPart;
     AString strToPart;
     if (objCallContext.GetCallInfo().ePeerType == PeerType::MO)

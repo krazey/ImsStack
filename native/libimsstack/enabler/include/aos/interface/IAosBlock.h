@@ -19,6 +19,7 @@
 #include "ImsTypeDef.h"
 
 class IAosBlockListener;
+class IAosBlockSilentListener;
 
 /// Block reason of IMS Service
 typedef enum
@@ -29,6 +30,8 @@ typedef enum
     BLOCK_AC_INCOMPLETED = BLOCK_START,
     /// authentication is failed
     BLOCK_AUTHENTICATION_FAILED,
+    /// USIM authentication is failed
+    BLOCK_USIM_AUTHENTICATION_FAILED,
     /// aos boot-up hasn't been done yet.
     BLOCK_AOS_INCOMPLETED,
     /// cs call is active. ims may need to be de-registered while cs calling.
@@ -55,8 +58,10 @@ typedef enum
     BLOCK_IMS_SERVICE_DISABLED,
     /// EPS fallback is started. registration is holding until LTE is attached.
     BLOCK_EPS_FALLBACK_STARTED,
+    /// Can not obtain valid P-CSCF address.
+    BLOCK_INVALID_CONNECTION,
     /// End common Block reason
-    BLOCK_END = BLOCK_EPS_FALLBACK_STARTED,
+    BLOCK_END = BLOCK_INVALID_CONNECTION,
 
     /// Start cellular Block reason
     BLOCK_CELLULAR_START,
@@ -66,12 +71,12 @@ typedef enum
     BLOCK_CELLULAR_NO_NETWORK,
     /// Current data network is not valid for ims services.
     BLOCK_CELLULAR_OUT_OF_SERVICE,
+    /// The current RAT was blocked because registration failed for all P-CSCFs.
+    BLOCK_CELLULAR_RAT_BLOCK,
     /// a roming network. volte may be not allowed in roaming area.
     BLOCK_CELLULAR_ROAMING,
-    /// IMS voice over PS Session Supported Indication is not configured during N/W attach.
-    BLOCK_CELLULAR_VOPS_OFF,
     /// End cellular Block reason
-    BLOCK_CELLULAR_END = BLOCK_CELLULAR_VOPS_OFF,
+    BLOCK_CELLULAR_END = BLOCK_CELLULAR_ROAMING,
 
     /// Start wifi Block reason
     BLOCK_WIFI_START,
@@ -83,6 +88,8 @@ typedef enum
     BLOCK_WIFI_AIRPLANE_MODE_ON,
     /// wifi is not connected.
     BLOCK_WIFI_NO_WIFI,
+    /// The registration is blocked when registration failed repeatedly in wifi.
+    BLOCK_WIFI_REG_FORBIDDEN,
     /// wifi service is blocked temporarily
     BLOCK_WIFI_TEMPORARILY_BLOCKED,
     /// End wifi Block reason
@@ -128,6 +135,26 @@ public:
     virtual void RemoveListener(IN IAosBlockListener* piListener) = 0;
 
     /**
+     * @brief Sets an IAosBlockSilentListener to be notified of silent block reason updates.
+     *
+     * This method registers a listener that will be invoked when the block reason is changed
+     * with the option to suppress block reason change notifications.
+     *
+     * @param piListener The listener to be added.
+     */
+    virtual void SetSilentListener(IN IAosBlockSilentListener* piListener) = 0;
+
+    /**
+     * @brief Removes an IAosBlockSilentListener.
+     *
+     * This method unregisters a previously registered listener, so it will no longer receive
+     * notifications about silent block reason updates.
+     *
+     * @param piListener The listener to be removed.
+     */
+    virtual void RemoveSilentListener(IN IAosBlockSilentListener* piListener) = 0;
+
+    /**
      * @brief
      *
      * @param
@@ -149,9 +176,21 @@ public:
     virtual void ClearAllBlockReasons() = 0;
 
     /**
-     * @brief
+     * @brief Retrieves a formatted string listing all currently active block reasons.
      *
-     * @param
+     * This method iterates through all block categories (Common, Cellular, and WiFi)
+     * and appends the string representation of every enabled block reason to the output.
+     * This is primarily used by the diagnostic reporter to capture the current blocking state.
+     *
+     * @param strOutLog [OUT] The string buffer to populate with the formatted block info.
+     * Format Example: "Common(1):[AOS_INCOMPLETED] Cellular(0): WiFi(0):"
+     */
+    virtual void GetBlockReasonsString(OUT AString& strOutLog) = 0;
+
+    /**
+     * @brief Prints the currently active block reasons to the native trace log.
+     *
+     * @return IMS_TRUE if successful.
      */
     virtual IMS_BOOL PrintBlockReasons() = 0;
 
@@ -177,12 +216,5 @@ public:
      * @param
      */
     virtual IMS_BOOL IsCleared(IN SERVICE_TYPE eType = SERVICE_CELLULAR) = 0;
-
-    /**
-     * @brief
-     *
-     * @param
-     */
-    static const IMS_CHAR* BlockReasonToString(IN IMS_UINT32 nReason);
 };
 #endif  // INTERFACE_AOS_BLOCK_H_

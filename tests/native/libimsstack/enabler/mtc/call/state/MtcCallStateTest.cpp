@@ -15,40 +15,43 @@
  */
 
 #include "IIpcan.h"
+#include "IReference.h"
+#include "ISipClientConnection.h"
+#include "ISipConnection.h"
+#include "ISipServerConnection.h"
 #include "ImsList.h"
-#include "ImsMap.h"
 #include "MediaDef.h"
 #include "MockIMtcService.h"
+#include "MockISession.h"
+#include "MockISipClientConnection.h"
+#include "MockISipServerConnection.h"
 #include "MtcDef.h"
+#include "PlatformContext.h"
+#include "TestPhoneInfoService.h"
 #include "aos/ImsAosReason.h"
 #include "call/IMtcCall.h"
 #include "call/MockEpsFallbackTrigger.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
+#include "call/MockIMtcUiNotifier.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/state/IMtcCallState.h"
 #include "call/state/MtcCallState.h"
 #include "conferencecall/ConferenceDef.h"
-#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "core/IReference.h"
-#include "core/MockISession.h"
 #include "helper/IMtcAosStateListener.h"
 #include "helper/ISrvccStateListener.h"
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
-#include "sipcore/ISipClientConnection.h"
-#include "sipcore/ISipConnection.h"
-#include "sipcore/ISipServerConnection.h"
-#include "sipcore/MockISipClientConnection.h"
-#include "sipcore/MockISipServerConnection.h"
 #include <gtest/gtest.h>
 
 LOCAL CallStateName INITIAL_CALL_STATE = CallStateName::IDLE;
 LOCAL CallType ANY_CALL_TYPE = CallType::VOIP;
 
 using ::testing::_;
+using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -59,10 +62,11 @@ public:
     MockIMtcCallContext objContext;
     MockIMtcService objService;
     MockISession objISession;
-    MockIMtcConfigurationManager* pConfigurationManager;
     MockIMtcMediaManager objMediaManager;
     MockEpsFallbackTrigger* pEpsFbTrigger;
-    MtcConfigurationProxy* pConfigurationProxy;
+    MockMtcConfigurationProxy* pConfigurationProxy;
+    MockIMtcUiNotifier objUiNotifier;
+    TestPhoneInfoService objPhoneInfoService;
     MediaInfo objMediaInfo;
     CallReasonInfo* pReason;
 
@@ -74,11 +78,15 @@ protected:
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
         ON_CALL(objContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
         ON_CALL(objContext, GetEpsFallbackTrigger).WillByDefault(ReturnRef(*pEpsFbTrigger));
-        ON_CALL(objMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objMediaInfo));
+        ON_CALL(objContext, GetUiNotifier).WillByDefault(ReturnRef(objUiNotifier));
+        ON_CALL(objMediaManager, GetMediaInfo(Ref(objISession)))
+                .WillByDefault(ReturnRef(objMediaInfo));
 
-        pConfigurationManager = new MockIMtcConfigurationManager();
-        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
+
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_PHONE_INFO, &objPhoneInfoService);
 
         pReason = new CallReasonInfo(CODE_UNSPECIFIED);
         pState = new MtcCallState(INITIAL_CALL_STATE, objContext);
@@ -90,6 +98,8 @@ protected:
         delete pConfigurationProxy;
         delete pReason;
         delete pState;
+
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
     }
 };
 
@@ -107,14 +117,14 @@ TEST_F(MtcCallStateTest, OnExitDoesNothing)
 
 TEST_F(MtcCallStateTest, StartDoesNothing)
 {
-    ImsMap<SuppType, SuppService*> objSuppServices;
+    ImsList<SuppService*> objSuppServices;
     EXPECT_EQ(INITIAL_CALL_STATE,
             pState->Start(ANY_CALL_TYPE, "anyTarget", objMediaInfo, objSuppServices));
 }
 
 TEST_F(MtcCallStateTest, StartConference1DoesNothing)
 {
-    ImsMap<SuppType, SuppService*> objSuppServices;
+    ImsList<SuppService*> objSuppServices;
     ImsList<ConfUser*> lstUsers;
     EXPECT_EQ(INITIAL_CALL_STATE,
             pState->StartConference(
@@ -472,10 +482,27 @@ TEST_F(MtcCallStateTest, OnMediaFailedDoesNothing)
     EXPECT_EQ(INITIAL_CALL_STATE, pState->OnMediaFailed(*pReason));
 }
 
-TEST_F(MtcCallStateTest, OnSrvccStateUpdatedDoesNothingIfNotFailedOrCanceled)
+TEST_F(MtcCallStateTest, OnSrvccStateUpdatedDoesNothingIfIdleOrStarted)
 {
+    ImsList<IMtcSession*> objSessions;
+    ON_CALL(objContext, GetSessions).WillByDefault(ReturnRef(objSessions));
+
     EXPECT_EQ(INITIAL_CALL_STATE, pState->OnSrvccStateUpdated(SrvccState::IDLE));
     EXPECT_EQ(INITIAL_CALL_STATE, pState->OnSrvccStateUpdated(SrvccState::STARTED));
+}
+
+TEST_F(MtcCallStateTest, OnSrvccStateUpdatedSetsSessionTerminatedIfSucceeded)
+{
+    MockIMtcSession objMtcSession1;
+    MockIMtcSession objMtcSession2;
+    ImsList<IMtcSession*> objSessions;
+    objSessions.Append(&objMtcSession1);
+    objSessions.Append(&objMtcSession2);
+    ON_CALL(objContext, GetSessions).WillByDefault(ReturnRef(objSessions));
+
+    EXPECT_CALL(objMtcSession1, SetSessionTerminatedOrStartFailed);
+    EXPECT_CALL(objMtcSession2, SetSessionTerminatedOrStartFailed);
+
     EXPECT_EQ(INITIAL_CALL_STATE, pState->OnSrvccStateUpdated(SrvccState::SUCCEEDED));
 }
 
@@ -484,7 +511,7 @@ TEST_F(MtcCallStateTest, OnSrvccStateUpdateSendEarlyUpdateIfFailedOrCanceled)
     MockIMtcSession objMtcSession;
     ImsList<IMtcSession*> objSessions;
     objSessions.Append(&objMtcSession);
-    ON_CALL(objContext, GetSessions()).WillByDefault(ReturnRef(objSessions));
+    ON_CALL(objContext, GetSessions).WillByDefault(ReturnRef(objSessions));
     ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objISession));
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
@@ -500,7 +527,7 @@ TEST_F(MtcCallStateTest, OnSrvccStateUpdateDoesNothingIfFailedOrCanceledButNegoS
     MockIMtcSession objMtcSession;
     ImsList<IMtcSession*> objSessions;
     objSessions.Append(&objMtcSession);
-    ON_CALL(objContext, GetSessions()).WillByDefault(ReturnRef(objSessions));
+    ON_CALL(objContext, GetSessions).WillByDefault(ReturnRef(objSessions));
     ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objISession));
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_IDLE));
@@ -514,89 +541,79 @@ TEST_F(MtcCallStateTest, OnSrvccStateUpdateDoesNothingIfFailedOrCanceledButNegoS
 TEST_F(MtcCallStateTest, OnAosConnectedDoesNothing)
 {
     IMS_UINT32 nAnyAosReason = 1;
-
-    MockIMtcPreconditionManager objPreconditionManager;
-    ON_CALL(objContext, GetPreconditionManager).WillByDefault(ReturnRef(objPreconditionManager));
-    EXPECT_CALL(objPreconditionManager, HandleQosOnIpcanChanged).Times(1);
-
-    EXPECT_EQ(INITIAL_CALL_STATE, pState->OnAosStateChanged(MtcAosState::CONNECTED, nAnyAosReason));
+    IMS_SINT32 nAnyDataFailureReason = 1;
+    EXPECT_EQ(INITIAL_CALL_STATE,
+            pState->OnAosStateChanged(
+                    MtcAosState::CONNECTED, nAnyAosReason, nAnyDataFailureReason));
 }
 
 TEST_F(MtcCallStateTest, OnAosSuspendedDoesNothing)
 {
     IMS_UINT32 nAnyAosReason = 1;
-    EXPECT_EQ(INITIAL_CALL_STATE, pState->OnAosStateChanged(MtcAosState::SUSPENDED, nAnyAosReason));
+    IMS_SINT32 nAnyDataFailureReason = 1;
+    EXPECT_EQ(INITIAL_CALL_STATE,
+            pState->OnAosStateChanged(
+                    MtcAosState::SUSPENDED, nAnyAosReason, nAnyDataFailureReason));
 }
 
 TEST_F(MtcCallStateTest, OnAosDisconnectedDoesNothingIfSrvccStarted)
 {
-    IMS_UINT32 nAnyAosReason = 1;
+    IMS_UINT32 nAnyAosReason = ImsAosReason::NOT_SPECIFIED;
+    IMS_SINT32 nAnyDataFailureReason = 0;
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::STARTED));
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(*pConfigurationManager,
-            IsRegistrationDisconnectReasonToTerminateOngoingCall(nAnyAosReason))
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pEpsFbTrigger, IsWaitingRegistration).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->OnAosStateChanged(MtcAosState::DISCONNECTING, nAnyAosReason));
+            pState->OnAosStateChanged(
+                    MtcAosState::DISCONNECTING, nAnyAosReason, nAnyDataFailureReason));
     EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->OnAosStateChanged(MtcAosState::DISCONNECTED, nAnyAosReason));
+            pState->OnAosStateChanged(
+                    MtcAosState::DISCONNECTED, nAnyAosReason, nAnyDataFailureReason));
 }
 
 TEST_F(MtcCallStateTest, OnAosDisconnectedDoesNothingIfEpsFallbackOngoing)
 {
-    IMS_UINT32 nAnyAosReason = 1;
+    IMS_UINT32 nAnyAosReason = ImsAosReason::NOT_SPECIFIED;
+    IMS_SINT32 nAnyDataFailureReason = 0;
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
-    ON_CALL(*pConfigurationManager,
-            IsRegistrationDisconnectReasonToTerminateOngoingCall(nAnyAosReason))
-            .WillByDefault(Return(IMS_TRUE));
 
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pEpsFbTrigger, IsWaitingRegistration).WillByDefault(Return(IMS_TRUE));
     EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->OnAosStateChanged(MtcAosState::DISCONNECTING, nAnyAosReason));
+            pState->OnAosStateChanged(
+                    MtcAosState::DISCONNECTING, nAnyAosReason, nAnyDataFailureReason));
     EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->OnAosStateChanged(MtcAosState::DISCONNECTED, nAnyAosReason));
-
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_TRUE));
-    EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->OnAosStateChanged(MtcAosState::DISCONNECTING, nAnyAosReason));
-    EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->OnAosStateChanged(MtcAosState::DISCONNECTED, nAnyAosReason));
+            pState->OnAosStateChanged(
+                    MtcAosState::DISCONNECTED, nAnyAosReason, nAnyDataFailureReason));
 }
 
 TEST_F(MtcCallStateTest, OnAosDisconnectedDoesNothingIfDisconnectReasonIsNotTerminatesCalls)
 {
     IMS_UINT32 nAnyAosReason = ImsAosReason::NOT_SPECIFIED;
+    IMS_SINT32 nAnyDataFailureReason = 0;
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(*pConfigurationManager,
-            IsRegistrationDisconnectReasonToTerminateOngoingCall(nAnyAosReason))
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pEpsFbTrigger, IsWaitingRegistration).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->OnAosStateChanged(MtcAosState::DISCONNECTING, nAnyAosReason));
+            pState->OnAosStateChanged(
+                    MtcAosState::DISCONNECTING, nAnyAosReason, nAnyDataFailureReason));
     EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->OnAosStateChanged(MtcAosState::DISCONNECTED, nAnyAosReason));
+            pState->OnAosStateChanged(
+                    MtcAosState::DISCONNECTED, nAnyAosReason, nAnyDataFailureReason));
 }
 
 TEST_F(MtcCallStateTest, OnAosDisconnectedDoesNothingIfDisconnectReasonIsTerminatesCalls)
 {
     IMS_UINT32 nAnyAosReason = ImsAosReason::NOT_SPECIFIED;
+    IMS_SINT32 nAnyDataFailureReason = 0;
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(*pEpsFbTrigger, IsWaitingEpsFallbackForNoTrigger).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(*pConfigurationManager,
-            IsRegistrationDisconnectReasonToTerminateOngoingCall(nAnyAosReason))
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pEpsFbTrigger, IsWaitingRegistration).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->OnAosStateChanged(MtcAosState::DISCONNECTING, nAnyAosReason));
+            pState->OnAosStateChanged(
+                    MtcAosState::DISCONNECTING, nAnyAosReason, nAnyDataFailureReason));
     EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->OnAosStateChanged(MtcAosState::DISCONNECTED, nAnyAosReason));
+            pState->OnAosStateChanged(
+                    MtcAosState::DISCONNECTED, nAnyAosReason, nAnyDataFailureReason));
 }
 
 TEST_F(MtcCallStateTest, OnIpcanChangedDoesNothing)
@@ -604,4 +621,31 @@ TEST_F(MtcCallStateTest, OnIpcanChangedDoesNothing)
     EXPECT_EQ(INITIAL_CALL_STATE, pState->OnIpcanChanged(IIpcan::CATEGORY_MOBILE));
     EXPECT_EQ(INITIAL_CALL_STATE, pState->OnIpcanChanged(IIpcan::CATEGORY_WLAN));
     EXPECT_EQ(INITIAL_CALL_STATE, pState->OnIpcanChanged(IIpcan::CATEGORY_ANY));
+}
+
+TEST_F(MtcCallStateTest, OnRatChangedDoesNothingIfTransitionIsSupported)
+{
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), IsImsServiceContinuitySupported(_, _))
+            .WillByDefault(Return(IMS_TRUE));
+
+    const IMS_SINT32 eAnyRat = INetworkWatcher::RADIOTECH_TYPE_UNKNOWN;
+    EXPECT_EQ(INITIAL_CALL_STATE, pState->OnRatChanged(eAnyRat, eAnyRat));
+}
+
+TEST_F(MtcCallStateTest, OnRatChangedTerminatesCallIfTransitionIsNotSupported)
+{
+    MockIMtcSession objSession;
+    ON_CALL(objContext, GetSession()).WillByDefault(Return(&objSession));
+    EXPECT_CALL(objSession, Terminate(IMS_TRUE, CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE)));
+    EXPECT_CALL(objUiNotifier, SendTerminated(CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE)));
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), IsImsServiceContinuitySupported(_, _))
+            .WillByDefault(Return(IMS_FALSE));
+
+    const IMS_SINT32 eAnyRat = INetworkWatcher::RADIOTECH_TYPE_UNKNOWN;
+    EXPECT_EQ(CallStateName::TERMINATING, pState->OnRatChanged(eAnyRat, eAnyRat));
+}
+
+TEST_F(MtcCallStateTest, OnConnectionFailedDoesNothing)
+{
+    EXPECT_EQ(INITIAL_CALL_STATE, pState->OnConnectionFailed(1, 2));
 }

@@ -17,10 +17,10 @@
 #include "IIpcan.h"
 #include "IMtcContext.h"
 #include "ImsAosParameter.h"
+#include "ImsAosReason.h"
 #include "MockIJniMtcServiceThread.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
-#include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MockMtcConfigurationProxy.h"
 #include "helper/IMtcAosStateListener.h"
 #include "helper/MockIMtcAosStateListener.h"
@@ -43,9 +43,7 @@ class MtcAosEventHandlerTest : public ::testing::Test
 public:
     MtcAosEventHandler* pEventHandler;
 
-    MockIMtcContext objContext;
     MockIMtcService objMtcService;
-    MockIMtcConfigurationManager* pConfigManager;
     MockMtcConfigurationProxy* pConfigProxy;
     MockIJniMtcServiceThread objJniThread;
 
@@ -54,8 +52,7 @@ protected:
     {
         ON_CALL(objMtcService, GetJniServiceThread).WillByDefault(Return(&objJniThread));
 
-        pConfigManager = new MockIMtcConfigurationManager();
-        pConfigProxy = new MockMtcConfigurationProxy(pConfigManager);
+        pConfigProxy = new MockMtcConfigurationProxy();
         pEventHandler = new MtcAosEventHandler(objMtcService, *pConfigProxy);
     }
 
@@ -70,14 +67,13 @@ TEST_F(MtcAosEventHandlerTest, OnConnectedNotifiesJni)
 {
     EXPECT_CALL(objJniThread, OnServiceChanged(IuMtcService::ServiceState::SERVICE_UC, 0));
     EXPECT_CALL(*pConfigProxy, OnRegistrationRefreshed).Times(3);
-    pEventHandler->OnConnected(ImsAosFeature::MMTEL + ImsAosFeature::VIDEO + ImsAosFeature::TEXT,
-            IIpcan::CATEGORY_MOBILE);
+    pEventHandler->OnConnected(ImsAosFeature::MMTEL + ImsAosFeature::VIDEO + ImsAosFeature::TEXT);
 
     EXPECT_CALL(objJniThread, OnServiceChanged(IuMtcService::ServiceState::SERVICE_VOIP, 0));
-    pEventHandler->OnConnected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
+    pEventHandler->OnConnected(ImsAosFeature::MMTEL);
 
     EXPECT_CALL(objJniThread, OnServiceChanged(IuMtcService::ServiceState::SERVICE_VT, 0));
-    pEventHandler->OnConnected(ImsAosFeature::VIDEO, IIpcan::CATEGORY_MOBILE);
+    pEventHandler->OnConnected(ImsAosFeature::VIDEO);
 }
 
 TEST_F(MtcAosEventHandlerTest, OnConnectedNotifiesListenersAndNotNotifyAfterRemoveListener)
@@ -90,36 +86,22 @@ TEST_F(MtcAosEventHandlerTest, OnConnectedNotifiesListenersAndNotNotifyAfterRemo
 
     IMS_UINT32 nFeatures = ImsAosFeature::MMTEL + ImsAosFeature::VIDEO;
     EXPECT_CALL(objListener1,
-            OnAosStateChanged(
-                    IsEqualMtcService(&objMtcService), MtcAosState::CONNECTED, ImsAosReason::NONE))
+            OnAosStateChanged(IsEqualMtcService(&objMtcService), MtcAosState::CONNECTED,
+                    ImsAosReason::NONE, 0))
             .Times(1);
     EXPECT_CALL(objListener2,
-            OnAosStateChanged(
-                    IsEqualMtcService(&objMtcService), MtcAosState::CONNECTED, ImsAosReason::NONE))
+            OnAosStateChanged(IsEqualMtcService(&objMtcService), MtcAosState::CONNECTED,
+                    ImsAosReason::NONE, 0))
             .Times(1);
-    pEventHandler->OnConnected(nFeatures, IIpcan::CATEGORY_MOBILE);
+    pEventHandler->OnConnected(nFeatures);
 
     pEventHandler->RemoveListener(&objListener1);
     pEventHandler->RemoveListener(&objListener2);
     pEventHandler->RemoveListener(&objListener2);  // to check not matching case
 
-    EXPECT_CALL(objListener1, OnAosStateChanged(_, _, _)).Times(0);
-    EXPECT_CALL(objListener2, OnAosStateChanged(_, _, _)).Times(0);
-    pEventHandler->OnConnected(nFeatures, IIpcan::CATEGORY_MOBILE);
-}
-
-TEST_F(MtcAosEventHandlerTest, OnConnectedWithDifferentIpcanNotifiesListener)
-{
-    MockIMtcAosStateListener objListener;
-    pEventHandler->AddListener(&objListener);
-
-    IMS_UINT32 nFeatures = ImsAosFeature::MMTEL + ImsAosFeature::VIDEO;
-    pEventHandler->OnConnected(nFeatures, IIpcan::CATEGORY_MOBILE);
-
-    EXPECT_CALL(
-            objListener, OnIpcanChanged(IsEqualMtcService(&objMtcService), IIpcan::CATEGORY_WLAN))
-            .Times(1);
-    pEventHandler->OnConnected(nFeatures, IIpcan::CATEGORY_WLAN);
+    EXPECT_CALL(objListener1, OnAosStateChanged(_, _, _, _)).Times(0);
+    EXPECT_CALL(objListener2, OnAosStateChanged(_, _, _, _)).Times(0);
+    pEventHandler->OnConnected(nFeatures);
 }
 
 TEST_F(MtcAosEventHandlerTest, OnDisconnectedNotifiesJni)
@@ -128,12 +110,13 @@ TEST_F(MtcAosEventHandlerTest, OnDisconnectedNotifiesJni)
     pEventHandler->AddListener(&objListener);
 
     IMS_UINT32 nAnyReason = 1;
+    IMS_SINT32 nAnyDataFailureReason = 1;
     EXPECT_CALL(objJniThread, OnServiceChanged(IuMtcService::ServiceState::SERVICE_NONE, 0));
     EXPECT_CALL(objListener,
-            OnAosStateChanged(
-                    IsEqualMtcService(&objMtcService), MtcAosState::DISCONNECTED, nAnyReason));
+            OnAosStateChanged(IsEqualMtcService(&objMtcService), MtcAosState::DISCONNECTED,
+                    nAnyReason, nAnyDataFailureReason));
 
-    pEventHandler->OnDisconnected(nAnyReason);
+    pEventHandler->OnDisconnected(nAnyReason, nAnyDataFailureReason);
 }
 
 TEST_F(MtcAosEventHandlerTest, OnDisconnectingNotifiesListenerOnly)
@@ -145,7 +128,7 @@ TEST_F(MtcAosEventHandlerTest, OnDisconnectingNotifiesListenerOnly)
     EXPECT_CALL(objJniThread, OnServiceChanged(_, _)).Times(0);
     EXPECT_CALL(objListener,
             OnAosStateChanged(
-                    IsEqualMtcService(&objMtcService), MtcAosState::DISCONNECTING, nAnyReason));
+                    IsEqualMtcService(&objMtcService), MtcAosState::DISCONNECTING, nAnyReason, 0));
 
     pEventHandler->OnDisconnecting(nAnyReason);
 }
@@ -159,7 +142,7 @@ TEST_F(MtcAosEventHandlerTest, OnSuspendedNotifiesListenerOnly)
     EXPECT_CALL(objJniThread, OnServiceChanged(_, _)).Times(0);
     EXPECT_CALL(objListener,
             OnAosStateChanged(
-                    IsEqualMtcService(&objMtcService), MtcAosState::SUSPENDED, nAnyReason));
+                    IsEqualMtcService(&objMtcService), MtcAosState::SUSPENDED, nAnyReason, 0));
 
     pEventHandler->OnSuspended(nAnyReason);
 }
@@ -171,8 +154,8 @@ TEST_F(MtcAosEventHandlerTest, OnResumedNotifiesListenerOnly)
 
     EXPECT_CALL(objJniThread, OnServiceChanged(_, _)).Times(0);
     EXPECT_CALL(objListener,
-            OnAosStateChanged(
-                    IsEqualMtcService(&objMtcService), MtcAosState::CONNECTED, ImsAosReason::NONE));
+            OnAosStateChanged(IsEqualMtcService(&objMtcService), MtcAosState::CONNECTED,
+                    ImsAosReason::NONE, 0));
 
     pEventHandler->OnResumed();
 }
@@ -183,18 +166,18 @@ TEST_F(MtcAosEventHandlerTest, OnServiceConnectedDoesNothing)
     pEventHandler->AddListener(&objListener);
 
     EXPECT_CALL(objJniThread, OnServiceChanged(_, _)).Times(0);
-    EXPECT_CALL(objListener, OnAosStateChanged(_, _, _)).Times(0);
+    EXPECT_CALL(objListener, OnAosStateChanged(_, _, _, _)).Times(0);
 
     pEventHandler->OnServiceConnected(1, 1);
 }
 
-TEST_F(MtcAosEventHandlerTest, OnEventNotifyDoesNothing)
+TEST_F(MtcAosEventHandlerTest, OnEventNotifyNotifiesListener)
 {
     MockIMtcAosStateListener objListener;
     pEventHandler->AddListener(&objListener);
 
-    EXPECT_CALL(objJniThread, OnServiceChanged(_, _)).Times(0);
-    EXPECT_CALL(objListener, OnAosStateChanged(_, _, _)).Times(0);
+    EXPECT_CALL(objListener, OnAosStateChanged(_, _, _, _)).Times(0);
+    EXPECT_CALL(objListener, OnEventNotify(_, _)).Times(1);
 
     pEventHandler->OnEventNotify(1, 1);
 }

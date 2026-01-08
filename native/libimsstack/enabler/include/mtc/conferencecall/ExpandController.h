@@ -17,7 +17,6 @@
 #ifndef EXPAND_CONTROLLER_H_
 #define EXPAND_CONTROLLER_H_
 
-#include "ImsList.h"
 #include "conferencecall/ConferenceController.h"
 
 class IMtcCallContext;
@@ -26,13 +25,15 @@ class SuppService;
 struct CallInfo;
 struct CallStartOperationParams;
 struct ConfUser;
+template <class T>
+class ImsList;
 
-class ExpandController final : public ConferenceController
+class ExpandController : public ConferenceController
 {
 public:
     explicit ExpandController(IN CallKey nConfCallKey, IMtcContext& objContext,
             IN CallConnectionIdManager& objConnectionIdManager, IN ConferenceFactory& objFactory);
-    virtual ~ExpandController();
+    virtual ~ExpandController() override;
     ExpandController(IN const ExpandController&) = delete;
     ExpandController& operator=(IN const ExpandController&) = delete;
 

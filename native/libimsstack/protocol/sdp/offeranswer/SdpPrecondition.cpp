@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 #include "AStringBuffer.h"
-#include "ServiceMemory.h"
 #include "ServiceTrace.h"
+#include "TextParser.h"
 
 #include "Sdp.h"
 #include "SdpAttribute.h"

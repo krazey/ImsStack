@@ -29,8 +29,8 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.ImsStackTest;
-import com.android.imsstack.util.AppContext;
-import com.android.imsstack.util.MSimUtils;
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.MSimUtils;
 
 import org.junit.After;
 import org.junit.Before;

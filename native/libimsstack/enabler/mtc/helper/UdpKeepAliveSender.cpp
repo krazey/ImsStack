@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-#include "IImsAosInfo.h"
+#include "CarrierConfig.h"
 #include "IMtcService.h"
+#include "ISipKeepAliveHelper.h"
 #include "ImsTypeDef.h"
+#include "IpAddress.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
@@ -24,25 +26,22 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/IMtcAosConnector.h"
 #include "helper/UdpKeepAliveSender.h"
-#include "sipcore/ISipKeepAliveHelper.h"
-#include "sipcore/SipFactory.h"
-#include "util/IpAddress.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-UdpKeepAliveSender::UdpKeepAliveSender(IN IMtcCallContext& objContext) :
-        m_objContext(objContext),
-        m_piTimer(IMS_NULL),
-        m_pKeepAliveHelper(SipFactory::CreateKeepAliveHelper(objContext.GetSlotId()))
+UdpKeepAliveSender::UdpKeepAliveSender(
+        IN ISipKeepAliveHelper* pKeepAliveHelper, IN IMtcCallContext& objContext) :
+        m_pKeepAliveHelper(pKeepAliveHelper),
+        m_nIntervalInMillis(objContext.GetConfigurationProxy().GetInt(
+                ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT)),
+        m_piTimer(IMS_NULL)
 {
-    IMS_TRACE_D("+UdpKeepAliveSender[%d]", m_objContext.GetCallKey(), 0, 0);
-    SetTransportInfo();
+    SetTransportInfo(objContext.GetService().GetAosConnector());
 }
 
 PUBLIC VIRTUAL UdpKeepAliveSender::~UdpKeepAliveSender()
 {
-    IMS_TRACE_D("~UdpKeepAliveSender[%d]", m_objContext.GetCallKey(), 0, 0);
     StopTimer();
 
     m_pKeepAliveHelper->Destroy();
@@ -51,7 +50,7 @@ PUBLIC VIRTUAL UdpKeepAliveSender::~UdpKeepAliveSender()
 PUBLIC GLOBAL IMS_BOOL UdpKeepAliveSender::IsRequired(
         IN const MtcConfigurationProxy& objConfigProxy)
 {
-    return objConfigProxy.GetInt(Feature::SEND_UDP_KEEP_ALIVE_INTERVAL_TIME) > 0;
+    return objConfigProxy.GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT) > 0;
 }
 
 PUBLIC VIRTUAL void UdpKeepAliveSender::Timer_TimerExpired(IN ITimer* piTimer)
@@ -82,9 +81,7 @@ void UdpKeepAliveSender::Start()
         m_piTimer = TimerService::GetTimerService()->CreateTimer();
     }
 
-    m_piTimer->SetTimer(
-            m_objContext.GetConfigurationProxy().GetInt(Feature::SEND_UDP_KEEP_ALIVE_INTERVAL_TIME),
-            this);
+    m_piTimer->SetTimer(m_nIntervalInMillis, this);
 }
 
 PUBLIC
@@ -95,14 +92,13 @@ void UdpKeepAliveSender::Stop()
 }
 
 PRIVATE
-void UdpKeepAliveSender::SetTransportInfo()
+void UdpKeepAliveSender::SetTransportInfo(IN const IMtcAosConnector* pAosConnector)
 {
-    IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
     if (pAosConnector == IMS_NULL)
     {
-        // no exception handling.
         return;
     }
+
     m_pKeepAliveHelper->SetTransportTupleS(
             IpAddress(pAosConnector->GetLocalAddress()), pAosConnector->GetLocalPort());
     m_pKeepAliveHelper->SetTransportTupleD(
@@ -115,14 +111,12 @@ void UdpKeepAliveSender::SendDummyPacket()
     const IMS_BYTE objDoubleCrlf[] = {0x0d, 0x0a, 0x0d, 0x0a};
     const ByteArray objPacket(objDoubleCrlf, 4);
 
-    // no exception handling.
     m_pKeepAliveHelper->SendPacket(objPacket);
 }
 
 PRIVATE
 void UdpKeepAliveSender::StopTimer()
 {
-    IMS_TRACE_D("StopTimer", 0, 0, 0);
     if (m_piTimer == IMS_NULL)
     {
         return;

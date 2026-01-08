@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "AStringBuffer.h"
 #include "MtcDef.h"
 #include "ServiceTrace.h"
 #include "TextParser.h"
@@ -29,22 +30,22 @@ PUBLIC GLOBAL void UssiDataCreator::GetXmlBody(IN const AString& strUssdString,
         OUT AStringBuffer& objXml, IN UssiModeType eUssiModeType /*= UssiModeType::NONE*/,
         IN UssiError eErrorCode /*= UssiError::CODE_NONE*/)
 {
-    if (strUssdString.GetLength() <= 0)
-    {
-        return;
-    }
     objXml.Append(UssiConstants::XML_PROCESSING_INSTRUCTION);
     objXml.Append(TextParser::CHAR_LF);
 
     objXml.Append(CreateStartElement(UssiConstants::ELEMENT_USSD_DATA));
     objXml.Append(TextParser::CHAR_HTAB);
 
-    objXml.Append(
-            CreateAttribute(UssiConstants::ELEMENT_LANGUAGE, UssiConstants::ELEMENT_LANGUAGE_EN));
+    if (strUssdString.GetLength() > 0)
+    {
+        // language
+        objXml.Append(CreateAttribute(
+                UssiConstants::ELEMENT_LANGUAGE, UssiConstants::ELEMENT_LANGUAGE_EN));
 
-    // ussd-string
-    objXml.Append(TextParser::CHAR_HTAB);
-    objXml.Append(CreateAttribute(UssiConstants::ELEMENT_USSD_STRING, strUssdString));
+        // ussd-string
+        objXml.Append(TextParser::CHAR_HTAB);
+        objXml.Append(CreateAttribute(UssiConstants::ELEMENT_USSD_STRING, strUssdString));
+    }
 
     // error-code
     AString strErrorCode;

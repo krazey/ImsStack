@@ -16,8 +16,9 @@
 #ifndef ATTR_IMPL_H_
 #define ATTR_IMPL_H_
 
+#include "libxml/tree.h"
+
 #include "IAttr.h"
-#include "XmlApiTree.h"
 
 class Attr;
 class IDocument;
@@ -27,7 +28,7 @@ class AttrImpl : public IAttr
 {
 public:
     AttrImpl(IN xmlAttrPtr pstAttr, IN IElement* piOwnerElement);
-    virtual ~AttrImpl();
+    ~AttrImpl() override;
 
     AttrImpl(IN const AttrImpl&) = delete;
     AttrImpl& operator=(IN const AttrImpl&) = delete;

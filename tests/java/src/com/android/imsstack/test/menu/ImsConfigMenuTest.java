@@ -16,17 +16,17 @@
 
 package com.android.imsstack.test.menu;
 
+import static com.android.imsstack.base.TestAppContext.SLOT0;
+import static com.android.imsstack.base.TestAppContext.SLOT1;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
 
 import android.app.Instrumentation;
-import android.content.Context;
 import android.content.Intent;
 import android.preference.Preference;
-import android.telephony.TelephonyManager;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
@@ -34,10 +34,9 @@ import androidx.test.filters.LargeTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.imsstack.ContextFixture;
+import com.android.imsstack.base.DeviceConfig;
+import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.core.carrier.CarrierInfo;
-import com.android.imsstack.util.AppContext;
-import com.android.imsstack.util.MSimUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -48,34 +47,23 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class ImsConfigMenuTest {
-    private static final int MAX_MODEM_COUNT = 2;
-
     private Instrumentation mInstrumentation;
-    private ContextFixture mContextFixture;
     private ImsConfigMenu mImsConfigMenu;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
-
-        mContextFixture = new ContextFixture();
-        Context context = mContextFixture.getTestDouble();
-        AppContext.init(context);
-        TelephonyManager tm = context.getSystemService(TelephonyManager.class);
-        when(tm.getActiveModemCount()).thenReturn(MAX_MODEM_COUNT);
-        when(tm.getSupportedModemCount()).thenReturn(MAX_MODEM_COUNT);
-
+        DeviceConfig.setSimCount(2, 2);
         CarrierInfo.clear();
     }
 
     @After
     public void tearDown() throws Exception {
         mImsConfigMenu = null;
-        mContextFixture = null;
         mInstrumentation = null;
         CarrierInfo.clear();
-        AppContext.deinit();
+        DeviceConfig.setSimCount(1, 1);
     }
 
     @Test
@@ -90,36 +78,36 @@ public class ImsConfigMenuTest {
 
         Preference menu;
         // SIM1
-        final int slot0 = 0;
+        final int positionSim1 = 2;
         mInstrumentation.runOnMainSync(() -> {
-            listener.onItemClick(listView, listView, slot0, 1L);
+            listener.onItemClick(listView, listView, positionSim1, 1L);
         });
 
         menu = mImsConfigMenu.findPreference(ImsConfigMenu.CARRIER_CONFIG_MENU);
 
         assertNotNull(menu);
-        assertEquals(slot0, menu.getIntent().getIntExtra(MSimUtils.EXTRA_KEY_SLOT_ID, -1));
+        assertEquals(SLOT0, menu.getIntent().getIntExtra(MSimUtils.EXTRA_KEY_SLOT_ID, -1));
 
         menu = mImsConfigMenu.findPreference(ImsConfigMenu.TEST_CONFIG_MENU);
 
         assertNotNull(menu);
-        assertEquals(slot0, menu.getIntent().getIntExtra(MSimUtils.EXTRA_KEY_SLOT_ID, -1));
+        assertEquals(SLOT0, menu.getIntent().getIntExtra(MSimUtils.EXTRA_KEY_SLOT_ID, -1));
 
         // SIM2
-        final int slot1 = 1;
+        final int positionSim2 = 3;
         mInstrumentation.runOnMainSync(() -> {
-            listener.onItemClick(listView, listView, slot1, 1L);
+            listener.onItemClick(listView, listView, positionSim2, 1L);
         });
 
         menu = mImsConfigMenu.findPreference(ImsConfigMenu.CARRIER_CONFIG_MENU);
 
         assertNotNull(menu);
-        assertEquals(slot1, menu.getIntent().getIntExtra(MSimUtils.EXTRA_KEY_SLOT_ID, -1));
+        assertEquals(SLOT1, menu.getIntent().getIntExtra(MSimUtils.EXTRA_KEY_SLOT_ID, -1));
 
         menu = mImsConfigMenu.findPreference(ImsConfigMenu.TEST_CONFIG_MENU);
 
         assertNotNull(menu);
-        assertEquals(slot1, menu.getIntent().getIntExtra(MSimUtils.EXTRA_KEY_SLOT_ID, -1));
+        assertEquals(SLOT1, menu.getIntent().getIntExtra(MSimUtils.EXTRA_KEY_SLOT_ID, -1));
     }
 
     @Test

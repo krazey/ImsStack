@@ -21,7 +21,7 @@
 #include "ServiceTrace.h"
 #include "config/UceAssetItems.h"
 
-__IMS_TRACE_TAG_USER_DECL__("CONF");
+__IMS_TRACE_TAG_UCE__;
 
 PUBLIC
 UceConfig::UceConfig() :
@@ -68,7 +68,7 @@ AString UceConfig::GetAStringValue(IN KEY_UCE_STRING eKey, IN IMS_SINT32 nSimSlo
         return strRet;
     }
 
-    UceAssetItems* objUceAssetItems = m_objAssetMap.GetValue(nSimSlot);
+    const UceAssetItems* objUceAssetItems = m_objAssetMap.GetValue(nSimSlot);
     switch (eKey)
     {
         case KEY_RLS_URI:
@@ -88,7 +88,7 @@ IMS_UINT32 UceConfig::GetIntValue(IN KEY_UCE_INT eKey, IN IMS_SINT32 nSimSlot)
         return nRet;
     }
 
-    UceAssetItems* objUceAssetItems = m_objAssetMap.GetValue(nSimSlot);
+    const UceAssetItems* objUceAssetItems = m_objAssetMap.GetValue(nSimSlot);
     switch (eKey)
     {
         case KEY_EXPIRE_VALUE_PUBLISH:
@@ -132,7 +132,7 @@ IMS_BOOL UceConfig::GetBoolValue(IN KEY_UCE_BOOL eKey, IN IMS_SINT32 nSimSlot)
         return bRet;
     }
 
-    UceAssetItems* objUceAssetItems = m_objAssetMap.GetValue(nSimSlot);
+    const UceAssetItems* objUceAssetItems = m_objAssetMap.GetValue(nSimSlot);
     switch (eKey)
     {
         case KEY_SUBSCRIBE_INDEPENDENT_OF_PUBLISH:
@@ -182,7 +182,7 @@ IMS_UINT32 UceConfig::GetPublishRetryType(IN IMS_SINT32 nResponseCode, IN IMS_SI
     }
     IMS_TRACE_D("GetPublishRetryType:simSlot[%d], respoonseCode[%d]", nSimSlot, nResponseCode, 0);
 
-    UceAssetItems* objUceAssetItems = m_objAssetMap.GetValue(nSimSlot);
+    const UceAssetItems* objUceAssetItems = m_objAssetMap.GetValue(nSimSlot);
     ImsVector<IMS_SINT32> temporary = objUceAssetItems->m_objImmediatelyRetryPublishResponse;
     if (!temporary.IsEmpty())
     {
@@ -231,7 +231,7 @@ IMS_BOOL UceConfig::IsImsRegistrationRequired(
     {
         return IMS_FALSE;
     }
-    UceAssetItems* objUceAssetItems = m_objAssetMap.GetValue(nSimSlot);
+    const UceAssetItems* objUceAssetItems = m_objAssetMap.GetValue(nSimSlot);
 
     ImsVector<IMS_SINT32> temporary;
     if (isPublish)
@@ -272,7 +272,7 @@ void UceConfig::SetConfig(IN IMS_SINT32 nSimSlot, IN UceAssetItems* pAssetItems)
 
 PUBLIC VIRTUAL void UceConfig::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
 {
-    ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(nSlotId);
+    const ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(nSlotId);
     Update(piCc, nSlotId);
 }
 
@@ -319,7 +319,7 @@ const IMS_CHAR* UceConfig::GetKeyString(IN KEY_UCE_INT eKey)
     return pszIntKey[eKey];
 }
 
-void UceConfig::Update(IN ICarrierConfig* piCc, IN IMS_SINT32 nSimSlot)
+void UceConfig::Update(IN const ICarrierConfig* piCc, IN IMS_SINT32 nSimSlot)
 {
     UceAssetItems* objNew = new UceAssetItems();
     objNew->m_nExpireValuePublish =

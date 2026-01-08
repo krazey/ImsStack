@@ -16,6 +16,9 @@
 
 package com.android.imsstack;
 
+import static com.android.imsstack.base.TestAppContext.SLOT0;
+import static com.android.imsstack.base.TestAppContext.SUB_ID_1;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -30,13 +33,16 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.XmlResourceParser;
 import android.os.Looper;
-import android.provider.Settings;
-import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
-import android.test.mock.MockContentResolver;
-import android.test.suitebuilder.annotation.SmallTest;
 
+import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
+
+import com.android.imsstack.base.ContentProviderProxy.SettingsProxy;
+import com.android.imsstack.base.TelephonyManagerProxy;
+import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigAgent;
 import com.android.imsstack.core.agents.ConfigInterface;
@@ -45,10 +51,7 @@ import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.internal.ImsStackRegistry;
 import com.android.imsstack.jni.JniIms;
 import com.android.imsstack.jni.JniImsProxy;
-import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
-import com.android.imsstack.util.AppContext;
-import com.android.internal.util.test.FakeSettingsProvider;
 
 import org.junit.After;
 import org.junit.Before;
@@ -61,16 +64,14 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class ServiceLoaderTest {
-    private static final int SLOT0 = 0;
-    private static final int[] SUB_ID = { 1 };
-
     @Mock private SharedPreferences mSp;
+    @Mock private SettingsProxy mSettingsProxy;
     @Mock private JniIms mJniIms;
-    @Mock private ISystem mSystem;
     @Mock private SystemInterface mSystemInterface;
 
+    private XmlResourceParser mCarrierConfigOverrideParser;
     private ContextFixture mContextFixture;
-    private FakeSettingsProvider mSettingsProvider;
+    private TestAppContext mTestAppContext;
     private ServiceLoader mServiceLoader;
 
     @Before
@@ -82,24 +83,28 @@ public class ServiceLoaderTest {
         }
 
         mContextFixture = new ContextFixture();
-        Context context = mContextFixture.getTestDouble();
-        TelephonyManager tm = context.getSystemService(TelephonyManager.class);
-        when(tm.getActiveModemCount()).thenReturn(1);
-        when(tm.getSupportedModemCount()).thenReturn(1);
-        when(tm.getSimApplicationState()).thenReturn(TelephonyManager.SIM_STATE_ABSENT);
-        when(tm.getHalVersion(TelephonyManager.HAL_SERVICE_IMS)).thenReturn(
-                TelephonyManager.HAL_VERSION_UNSUPPORTED);
-        SubscriptionManager sm = context.getSystemService(SubscriptionManager.class);
-        when(sm.getSubscriptionIds(eq(SLOT0))).thenReturn(SUB_ID);
-        mSettingsProvider = new FakeSettingsProvider();
-        ((MockContentResolver) context.getContentResolver()).addProvider(
-                Settings.AUTHORITY, mSettingsProvider);
-        setUpSharedPreferences(context);
+        mTestAppContext = new TestAppContext(mContextFixture.getTestDouble());
+        mTestAppContext.setUp();
 
-        AppContext.init(context);
+        mCarrierConfigOverrideParser = InstrumentationRegistry.getInstrumentation().getContext()
+                .getResources().getXml(R.xml.carrier_config_override);
+        when(mTestAppContext.getContext().getResources().getXml(eq(R.xml.carrier_config_override)))
+                .thenReturn(mCarrierConfigOverrideParser);
+        doReturn(new String[0]).when(mTestAppContext.getContext()).fileList();
+
+        when(mTestAppContext.getContentProviderProxy().getGlobalSettings())
+                .thenReturn(mSettingsProxy);
+        when(mTestAppContext.getContentProviderProxy().getSecureSettings())
+                .thenReturn(mSettingsProxy);
+        when(mTestAppContext.getContentProviderProxy().getSystemSettings())
+                .thenReturn(mSettingsProxy);
+        TelephonyManagerProxy tmp =
+                mTestAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
+        when(tmp.getSimApplicationState()).thenReturn(TelephonyManager.SIM_STATE_ABSENT);
+        setUpSharedPreferences(mTestAppContext.getContext());
+
         JniImsProxy.setJniIms(mJniIms);
         ImsStackRegistry.setImsServiceState(SLOT0, false);
-        when(mSystemInterface.getSystem(eq(SLOT0))).thenReturn(mSystem);
         SystemInterface.setSystemInterface(mSystemInterface);
 
         mServiceLoader = new ServiceLoader();
@@ -107,17 +112,17 @@ public class ServiceLoaderTest {
 
     @After
     public void tearDown() throws Exception {
+        mCarrierConfigOverrideParser = null;
         mSp = null;
-        mSettingsProvider = null;
         mServiceLoader = null;
-        mContextFixture = null;
-        FakeSettingsProvider.clearSettingsProvider();
         ImsStackRegistry.setImsServiceState(SLOT0, false);
         SystemInterface.setSystemInterface(null);
         JniImsProxy.setJniIms(null);
         DcFactory.clear(SLOT0);
         AgentFactory.getInstance().clear();
-        AppContext.deinit();
+        mContextFixture = null;
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
     }
 
     @Test
@@ -175,14 +180,12 @@ public class ServiceLoaderTest {
         AgentFactory.getInstance().setAgent(ConfigInterface.class, configAgent, SLOT0);
         ServiceLoader.updateCarrierConfig(SLOT0);
 
-        verify(configAgent).updateCarrierConfig(eq(SUB_ID[0]), any(SimCarrierId.class));
-        verify(mSystem).notifyConfigurationChanged(anyInt());
+        verify(configAgent).updateCarrierConfig(eq(SUB_ID_1), any(SimCarrierId.class));
 
         AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT0);
         ServiceLoader.updateCarrierConfig(SLOT0);
 
         verifyNoMoreInteractions(configAgent);
-        verifyNoMoreInteractions(mSystem);
     }
 
     private void setUpSharedPreferences(Context context) {

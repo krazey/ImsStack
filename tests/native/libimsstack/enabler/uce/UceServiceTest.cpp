@@ -34,7 +34,7 @@
 using ::testing::_;
 using ::testing::Return;
 
-__IMS_TRACE_TAG_USER_DECL__("UCE");
+__IMS_TRACE_TAG_UCE__;
 
 class TestUceService : public UceService
 {
@@ -51,7 +51,7 @@ public:
             UceService(piCoreService)
     {
     }
-    virtual ~TestUceService() {}
+    virtual ~TestUceService() override {}
 
     void resetManager()
     {

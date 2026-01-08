@@ -16,8 +16,9 @@
 #ifndef TEXT_IMPL_H_
 #define TEXT_IMPL_H_
 
+#include "libxml/tree.h"
+
 #include "IText.h"
-#include "XmlApiTree.h"
 
 class INode;
 class Text;
@@ -27,7 +28,7 @@ class TextImpl : public IText
 public:
     TextImpl();
     explicit TextImpl(IN xmlNodePtr pstNode);
-    virtual ~TextImpl();
+    ~TextImpl() override;
 
     TextImpl(IN const TextImpl&) = delete;
     TextImpl& operator=(IN const TextImpl&) = delete;

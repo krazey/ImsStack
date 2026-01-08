@@ -16,34 +16,67 @@
 #include <gtest/gtest.h>
 
 #include "ImsUuid.h"
+#include "PlatformContext.h"
+#include "TestUtilService.h"
+
+using ::testing::_;
+using ::testing::Invoke;
+using ::testing::Unused;
 
 namespace android
 {
 
 class ImsUuidTest : public ::testing::Test
 {
-protected:
-    virtual void SetUp() override {}
+public:
+    inline ImsUuidTest() :
+            m_strUuid("7d444840-9dc0-11d1-b245-5ffdce74fad2")
+    {
+    }
 
-    virtual void TearDown() override {}
+protected:
+    TestUtilService m_objUtilService;
+    AString m_strUuid;
+
+protected:
+    virtual void SetUp() override
+    {
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_UTIL, &m_objUtilService);
+
+        ON_CALL(m_objUtilService.GetMockSystemUtil(), GetUuid)
+                .WillByDefault(Invoke(
+                        [&](Unused, AString& strUuid, Unused)
+                        {
+                            strUuid = m_strUuid;
+                        }));
+    }
+
+    virtual void TearDown() override
+    {
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_UTIL, IMS_NULL);
+    }
 };
 
 TEST_F(ImsUuidTest, GetUuid)
 {
-    AString strUuid = ImsUuid::GetUuid(ImsUuid::VERSION_1, "358793370043844");
-    ASSERT_FALSE(strUuid.IsEmpty());
+    AString strUuid = ImsUuid::GetUuid(ImsUuid::VERSION_1);
+    EXPECT_EQ(strUuid, m_strUuid);
 
-    strUuid = ImsUuid::GetUuid(ImsUuid::VERSION_2);
-    ASSERT_TRUE(strUuid.IsEmpty());
+    strUuid = ImsUuid::GetUuid(ImsUuid::VERSION_3, "device-id");
+    EXPECT_EQ(strUuid, m_strUuid);
 
-    strUuid = ImsUuid::GetUuid(ImsUuid::VERSION_3, "Deviceid");
-    ASSERT_FALSE(strUuid.IsEmpty());
+    strUuid = ImsUuid::GetUuid(ImsUuid::VERSION_4);
+    EXPECT_EQ(strUuid, m_strUuid);
 
-    strUuid = ImsUuid::GetUuid(ImsUuid::VERSION_4, "imei");
-    ASSERT_FALSE(strUuid.IsEmpty());
+    strUuid = ImsUuid::GetUuid(2);
+    EXPECT_TRUE(strUuid.IsNull());
 
-    strUuid = ImsUuid::GetUuid(ImsUuid::VERSION_5, "358793370043844");
-    ASSERT_FALSE(strUuid.IsEmpty());
+    strUuid = ImsUuid::GetUuid(3, AString::ConstNull());
+    EXPECT_TRUE(strUuid.IsNull());
+
+    strUuid = ImsUuid::GetUuid(3, AString::ConstEmpty());
+    EXPECT_TRUE(strUuid.IsNull());
 }
 
 }  // namespace android

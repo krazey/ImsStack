@@ -49,11 +49,13 @@ public:
             m_nTimerValueT2(NOT_PROVISIONED),
             m_strTagPrefix(AString::ConstNull()),
             m_strUaString(AString::ConstNull()),
+            m_nHideMacInPaniHeader(NOT_PROVISIONED),
             m_nRegExpires(NOT_PROVISIONED),
             m_objRegAllowMethods(AStringArray::ConstNull()),
             m_strRegUaString(AString::ConstNull()),
             m_nRegSubscription(NOT_PROVISIONED),
             m_nRegSubExpires(NOT_PROVISIONED),
+            m_bForEmergency(IMS_FALSE),
             m_nConfigValue(0)
     {
     }
@@ -69,15 +71,17 @@ public:
             m_nTimerValueT2(other.m_nTimerValueT2),
             m_strTagPrefix(other.m_strTagPrefix),
             m_strUaString(other.m_strUaString),
+            m_nHideMacInPaniHeader(other.m_nHideMacInPaniHeader),
             m_nRegExpires(other.m_nRegExpires),
             m_objRegAllowMethods(other.m_objRegAllowMethods),
             m_strRegUaString(other.m_strRegUaString),
             m_nRegSubscription(other.m_nRegSubscription),
             m_nRegSubExpires(other.m_nRegSubExpires),
+            m_bForEmergency(other.m_bForEmergency),
             m_nConfigValue(other.m_nConfigValue)
     {
     }
-    inline virtual ~SipProfile() {}
+    ~SipProfile() override = default;
 
 public:
     SipProfile& operator=(IN const SipProfile&) = delete;
@@ -88,6 +92,7 @@ public:
      *
      * @return The type of device id(+sip.instance).\n
      *         #ISipConfig#DEVICE_ID_GSMA_IMEI\n
+     *         #ISipConfig#DEVICE_ID_GSMA_IMEISV\n
      *         #ISipConfig#DEVICE_ID_UUID_IMEI_MD5\n
      *         #ISipConfig#DEVICE_ID_UUID_IMEI_SHA1\n
      *         #ISipConfig#DEVICE_ID_UUID_IMEI_NAMED_V3\n
@@ -120,7 +125,6 @@ public:
      *         #ISipConfig#SIP_FEATURE_CAPS_GRUU\n
      *         #ISipConfig#SIP_FEATURE_CAPS_RPORT\n
      *         #ISipConfig#SIP_FEATURE_CAPS_KEEP\n
-     *         #ISipConfig#SIP_FEATURE_CAPS_MULTIPLE_REG\n
      *         #ISipConfig#SIP_FEATURE_CAPS_TRUST_DOMAIN\n
      *         #ISipConfig#SIP_FEATURE_CAPS_UDP_FALLBACK\n
      *         #ISipConfig#SIP_FEATURE_CAPS_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR\n
@@ -128,7 +132,6 @@ public:
      *         #ISipConfig#SIP_FEATURE_CAPS_SESSION_TIMER_UPDATE_REQUIRED_BY_REINVITE\n
      *         #ISipConfig#SIP_FEATURE_CAPS_SIP_INSTANCE_PARAM_REQUIRED_IN_CONTACT_FOR_NON_REGISTER_REQUEST\n
      *         #ISipConfig#SIP_FEATURE_CAPS_SUPPORT_SESSION_ID_HEADER\n
-     *         #ISipConfig#SIP_FEATURE_CAPS_HIDE_MAC_ADDRESS_IN_PANI_HEADER\n
      *         #ISipConfig#SIP_FEATURE_CAPS_LOCAL_TIMEZONE_PARAM_IN_PANI_HEADER\n
      *         #ISipConfig#SIP_FEATURE_CAPS_PANI_HEADER_IN_INITIAL_REG\n
      *         #ISipConfig#SIP_FEATURE_CAPS_PPI_HEADER_IN_REG_SUB\n
@@ -197,6 +200,17 @@ public:
     inline const AStringArray& GetRegAllowMethods() const { return m_objRegAllowMethods; }
 
     /**
+     * @brief Gets the policy whether MAC address should be hidden in PANI header on Wi-Fi.
+     *
+     * @return The policy that specifies whether hiding MAC address in PANI header is allowed or not
+     *         Possible values are:
+     *         #ISipConfig#SHOW_MAC_IN_PANI\n
+     *         #ISipConfig#HIDE_MAC_IN_PANI\n
+     *         #ISipConfig#HIDE_MAC_IN_PANI_EXCEPT_N11_AND_ECALL
+     */
+    inline IMS_SINT32 GetHideMacInPaniHeaderPolicy() const { return m_nHideMacInPaniHeader; }
+
+    /**
      * @brief Gets the expires value for IMS registration.
      *
      * @return The expires value for IMS registration.
@@ -229,6 +243,7 @@ public:
      *
      * @param nDeviceId The type of device id\n
      *                  #ISipConfig#DEVICE_ID_GSMA_IMEI\n
+     *                  #ISipConfig#DEVICE_ID_GSMA_IMEISV\n
      *                  #ISipConfig#DEVICE_ID_UUID_IMEI_MD5\n
      *                  #ISipConfig#DEVICE_ID_UUID_IMEI_SHA1\n
      *                  #ISipConfig#DEVICE_ID_UUID_IMEI_NAMED_V3\n
@@ -264,7 +279,6 @@ public:
      *         #ISipConfig#SIP_FEATURE_CAPS_GRUU\n
      *         #ISipConfig#SIP_FEATURE_CAPS_RPORT\n
      *         #ISipConfig#SIP_FEATURE_CAPS_KEEP\n
-     *         #ISipConfig#SIP_FEATURE_CAPS_MULTIPLE_REG\n
      *         #ISipConfig#SIP_FEATURE_CAPS_TRUST_DOMAIN\n
      *         #ISipConfig#SIP_FEATURE_CAPS_UDP_FALLBACK\n
      *         #ISipConfig#SIP_FEATURE_CAPS_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR\n
@@ -272,7 +286,6 @@ public:
      *         #ISipConfig#SIP_FEATURE_CAPS_SESSION_TIMER_UPDATE_REQUIRED_BY_REINVITE\n
      *         #ISipConfig#SIP_FEATURE_CAPS_SIP_INSTANCE_PARAM_REQUIRED_IN_CONTACT_FOR_NON_REGISTER_REQUEST\n
      *         #ISipConfig#SIP_FEATURE_CAPS_SUPPORT_SESSION_ID_HEADER\n
-     *         #ISipConfig#SIP_FEATURE_CAPS_HIDE_MAC_ADDRESS_IN_PANI_HEADER\n
      *         #ISipConfig#SIP_FEATURE_CAPS_LOCAL_TIMEZONE_PARAM_IN_PANI_HEADER\n
      *         #ISipConfig#SIP_FEATURE_CAPS_PANI_HEADER_IN_INITIAL_REG\n
      *         #ISipConfig#SIP_FEATURE_CAPS_PPI_HEADER_IN_REG_SUB\n
@@ -347,6 +360,17 @@ public:
     inline void SetRegAllowMethods(IN const AStringArray& objAllowMethods)
     {
         m_objRegAllowMethods = objAllowMethods;
+    }
+
+    /**
+     * @brief Sets the policy whether MAC address should be hidden in PANI header on Wi-Fi.
+     *
+     * @param nPolicy The policy that specifies whether hiding MAC address in PANI header
+     *                is allowed or not.
+     */
+    inline void SetHideMacInPaniHeaderPolicy(IN IMS_SINT32 nPolicy)
+    {
+        m_nHideMacInPaniHeader = nPolicy;
     }
 
     /**
@@ -473,16 +497,6 @@ public:
     inline IMS_BOOL IsKeepAliveConfigured() const
     {
         return HasFeature(ISipConfig::SIP_FEATURE_CAPS_KEEP);
-    }
-
-    /**
-     * @brief Checks if the multiple registration ("reg-id" parameter) is configured or not.
-     *
-     * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
-     */
-    inline IMS_BOOL IsMultipleRegConfigured() const
-    {
-        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_MULTIPLE_REG);
     }
 
     /**
@@ -650,6 +664,21 @@ public:
     }
 
     /**
+     * @brief Checks if the transport parameter with "udp" should not be evaluated
+     *        when forming the outgoing request from SIP routing address URI.
+     *
+     * If it's a false, the transport parameter will be used to determine the transport protocol
+     * while sending an SIP request.
+     *
+     * @return IMS_TRUE if the transport parameter with "udp" is ignored, IMS_FALSE otherwise.
+     */
+    inline IMS_BOOL IsUdpTransportParameterIgnoredForOutgoingRequest() const
+    {
+        return HasFeature(
+                ISipConfig::SIP_FEATURE_CAPS_IGNORE_UDP_TRANSPORT_PARAMETER_FOR_OUTGOING_REQUEST);
+    }
+
+    /**
      * @brief Checks if the Session-Id header is supported or not.
      *
      * @return IMS_TRUE if it's supported, IMS_FALSE otherwise.
@@ -657,16 +686,6 @@ public:
     inline IMS_BOOL IsSessionIdHeaderSupported() const
     {
         return HasFeature(ISipConfig::SIP_FEATURE_CAPS_SUPPORT_SESSION_ID_HEADER);
-    }
-
-    /**
-     * @brief Checks if the MAC address should be hidden in PANI header on Wi-Fi.
-     *
-     * @return IMS_TRUE if it's required, IMS_FALSE otherwise.
-     */
-    inline IMS_BOOL IsMacAddressHiddenInPaniHeader() const
-    {
-        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_HIDE_MAC_ADDRESS_IN_PANI_HEADER);
     }
 
     /**
@@ -711,6 +730,28 @@ public:
     inline void SetConfiguration(IN IMS_SINT32 nValue) { m_nConfigValue = nValue; }
     // }
 
+    /**
+     * @brief Checks if this profile is for emergency service or not.
+     *
+     * @return IMS_TRUE if this profile is for emergency service, IMS_FALSE otherwise.
+     */
+    inline IMS_BOOL IsForEmergency() const { return m_bForEmergency; }
+
+    /**
+     * @brief Creates a new SipProfile with the specified SipProfile and emergency flag.
+     *
+     * @param pProfile The original profile for creation
+     * @param bForEmergency Flag specifying whether this profile is for emergency service or not
+     * @return A new SipProfile instance.
+     */
+    inline static SipProfile* Create(IN const SipProfile* pProfile, IN IMS_BOOL bForEmergency)
+    {
+        SipProfile* pNewProfile =
+                (pProfile != IMS_NULL) ? new SipProfile(*pProfile) : new SipProfile();
+        pNewProfile->m_bForEmergency = bForEmergency;
+        return pNewProfile;
+    }
+
 private:
     inline IMS_BOOL HasFeature(IN IMS_SINT32 nSipFeature) const
     {
@@ -747,7 +788,8 @@ private:
     AString m_strTagPrefix;
     // UA string : sw_version + service_version
     AString m_strUaString;
-
+    // Policy that specifies whether hiding MAC address in PANI header is allowed or not.
+    IMS_SINT32 m_nHideMacInPaniHeader;
     // Expires for Registration
     IMS_SINT32 m_nRegExpires;
     // SIP methods which sets in Allow header in Registration
@@ -758,6 +800,8 @@ private:
     IMS_SINT32 m_nRegSubscription;
     // Expires for Reg-Subscription
     IMS_SINT32 m_nRegSubExpires;
+    // Flag specifying whether this is for emergency service or not.
+    IMS_BOOL m_bForEmergency;
 
     // Runtime configuration
     IMS_SINT32 m_nConfigValue;

@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
 #include "IMessage.h"
+#include "INetworkWatcher.h"
 #include "ISipClientConnection.h"
 #include "ISipConnection.h"
+#include "ISipMessage.h"
 #include "ISipServerConnection.h"
 #include "ImsAosReason.h"
+#include "ImsList.h"
 #include "IuMtcCall.h"
 #include "IuMtcService.h"
+#include "MediaDef.h"
 #include "MtcDef.h"
+#include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "call/EpsFallbackTrigger.h"
@@ -35,6 +41,7 @@
 #include "call/state/MtcCallState.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "configuration/MtcConfigurationResolver.h"
 #include "emergency/CurrentLocationDiscoveryController.h"
 #include "helper/IMtcAosConnector.h"
 #include "helper/ISrvccStateListener.h"
@@ -72,7 +79,7 @@ PUBLIC VIRTUAL CallStateName MtcCallState::HandleIncoming(IN ISession* /* piSess
 
 PUBLIC VIRTUAL CallStateName MtcCallState::Start(IN CallType /* eCallType */,
         IN const AString& /* strTarget */, IN MediaInfo& /* pMediaInfo */,
-        IN const ImsMap<SuppType, SuppService*>& /* lstSuppServices */)
+        IN const ImsList<SuppService*>& /* lstSuppServices */)
 {
     return GetStateName();
 }
@@ -143,7 +150,7 @@ PUBLIC VIRTUAL CallStateName MtcCallState::Terminate(IN const CallReasonInfo& /*
 
 PUBLIC VIRTUAL CallStateName MtcCallState::StartConference(IN CallType /* eCallType */,
         IN const AString&, IN MediaInfo& /* pMediaInfo */,
-        IN const ImsMap<SuppType, SuppService*>& /* lstSuppServices */,
+        IN const ImsList<SuppService*>& /* lstSuppServices */,
         IN const ImsList<ConfUser*>& /* lstUsers */)
 {
     return GetStateName();
@@ -250,6 +257,11 @@ PUBLIC VIRTUAL CallStateName MtcCallState::SessionUpdateReceived(IN ISession* /*
     return GetStateName();
 }
 
+PUBLIC VIRTUAL CallStateName MtcCallState::SessionCanceledOnAccepted(IN ISession* /* piSession */)
+{
+    return GetStateName();
+}
+
 PUBLIC VIRTUAL CallStateName MtcCallState::SessionCancelDelivered(IN ISession* /* piSession */)
 {
     return GetStateName();
@@ -318,8 +330,6 @@ PUBLIC VIRTUAL CallStateName MtcCallState::SessionRprReceived(
 PUBLIC VIRTUAL CallStateName MtcCallState::SessionTransactionReceived(
         IN ISession* /* piSession */, IN ISipServerConnection* piSipServerConnection)
 {
-    IMS_TRACE_I("SessionTransactionReceived", 0, 0, 0);
-
     if (CurrentLocationDiscoveryController::IsCurrentLocationDiscoveryInfoReceived(
             *piSipServerConnection))
     {
@@ -401,27 +411,23 @@ PUBLIC VIRTUAL CallStateName MtcCallState::ClientConnection_NotifyResponse(
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName MtcCallState::Error_NotifyError(
-        IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage)
+PUBLIC VIRTUAL CallStateName MtcCallState::Error_NotifyError(IN ISipConnection* piSc,
+        IN [[maybe_unused]] IMS_SINT32 nCode, IN [[maybe_unused]] const AString& strMessage)
 {
-    IMS_TRACE_D("Error_NotifyError : Code[%d] Message[%s]", nCode, strMessage.GetStr(), 0);
     piSc->Close();
 
     return GetStateName();
 }
 
 PUBLIC VIRTUAL CallStateName MtcCallState::OnReceivingMediaDataStarted(
-        IN IMS_UINT32 /*eMediaType*/, IN IMS_UINT32 /*eProtocolType*/)
+        IN [[maybe_unused]] IMS_UINT32 eMediaType, IN [[maybe_unused]] IMS_UINT32 eProtocolType)
 {
     return GetStateName();
 }
 
 PUBLIC VIRTUAL CallStateName MtcCallState::OnReceivingMediaDataFailed(
-        IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType)
+        IN [[maybe_unused]] IMS_UINT32 eMediaType, IN [[maybe_unused]] IMS_UINT32 eProtocolType)
 {
-    IMS_TRACE_I(
-            "OnReceivingMediaDataFailed : Media[%d] Protocol[%d]", eMediaType, eProtocolType, 0);
-
     return GetStateName();
 }
 
@@ -456,6 +462,11 @@ PUBLIC VIRTUAL CallStateName MtcCallState::OnSrvccStateUpdated(IN SrvccState eSt
             return HandleSrvccStarted();
         case SrvccState::SUCCEEDED:
         {
+            const ImsList<IMtcSession*>& objMtcSessions = m_objContext.GetSessions();
+            for (IMS_UINT32 i = 0; i < objMtcSessions.GetSize(); i++)
+            {
+                objMtcSessions.GetAt(i)->SetSessionTerminatedOrStartFailed();
+            }
             const CallReasonInfo objReason(CODE_LOCAL_CALL_VCC_ON_PROGRESSING);
             return Terminate(objReason);
         }
@@ -467,24 +478,62 @@ PUBLIC VIRTUAL CallStateName MtcCallState::OnSrvccStateUpdated(IN SrvccState eSt
 }
 
 PUBLIC VIRTUAL CallStateName MtcCallState::OnAosStateChanged(
-        IN MtcAosState eState, IN IMS_UINT32 eAosReason)
+        IN MtcAosState eState, IN IMS_UINT32 eAosReason, IN IMS_SINT32 nDataFailureReason)
 {
-    IMS_TRACE_I("OnAosStateChanged state[%d]", eState, 0, 0);
     switch (eState)
     {
         case MtcAosState::CONNECTED:
             return HandleAosConnected();
         case MtcAosState::DISCONNECTED:
         case MtcAosState::DISCONNECTING:
-            return HandleAosDisconnected(eAosReason);
+            return HandleAosDisconnected(eAosReason, nDataFailureReason);
         default:  // case MtcAosState::SUSPENDED:
             return GetStateName();
     }
 }
 
-PUBLIC VIRTUAL CallStateName MtcCallState::OnIpcanChanged(IN IMS_UINT32 /*eIpcan*/)
+PUBLIC VIRTUAL CallStateName MtcCallState::OnIpcanChanged(IN [[maybe_unused]] IMS_UINT32 eIpcan)
 {
     return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::OnRatChanged(
+        IN IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType)
+{
+    if (!PhoneInfoService::GetPhoneInfoService()
+                    ->GetNetworkWatcher(m_objContext.GetSlotId())
+                    ->IsImsServiceContinuitySupported(eOldRatType, eRatType))
+    {
+        IMS_TRACE_I("IMS service continuity is not supported", 0, 0, 0);
+        const CallReasonInfo objReason(CODE_LOCAL_NETWORK_NO_SERVICE);
+        HandleTerminate(objReason);
+        m_objContext.GetUiNotifier().SendTerminated(objReason);
+        return CallStateName::TERMINATING;
+    }
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::OnConnectionFailed(IN
+        [[maybe_unused]] IMS_UINT32 nFailureReason,
+        IN [[maybe_unused]] IMS_UINT32 nWaitTimeMillis)
+{
+    return GetStateName();
+}
+
+PROTECTED
+CallStateName MtcCallState::OnReadyToAlert()
+{
+    if (!IsPrackRequiredForAlert())
+    {
+        m_objContext.GetUiNotifier().SendIncomingCallReceived();
+        return CallStateName::ALERTING;
+    }
+
+    if (m_objContext.GetSession()->SendProvisionalResponse(IMS_TRUE, IMS_TRUE) == IMS_FAILURE)
+    {
+        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
+    }
+    return CallStateName::INCOMING;
 }
 
 PROTECTED VIRTUAL CallStateName MtcCallState::SendUpdateBySrvcc(IN UpdateType eType)
@@ -501,34 +550,78 @@ PROTECTED VIRTUAL CallStateName MtcCallState::SendUpdateBySrvcc(IN UpdateType eT
 PROTECTED
 CallStateName MtcCallState::HandleAosConnected()
 {
-    IMS_TRACE_I("HandleAosConnected", 0, 0, 0);
-    m_objContext.GetPreconditionManager().HandleQosOnIpcanChanged();
     return GetStateName();
 }
 
 PROTECTED
-CallStateName MtcCallState::HandleAosDisconnected(IN IMS_UINT32 eAosReason)
+CallStateName MtcCallState::HandleAosDisconnected(
+        IN IMS_UINT32 eAosReason, IN IMS_SINT32 nDataFailureReason)
 {
+    if (eAosReason == ImsAosReason::REG_ALL_PCSCF_FAILED)
+    {
+        return HandleAosDisconnectedByAllPcscfFailed();
+    }
+
+    if (eAosReason == ImsAosReason::REG_NEW_REQUIRED)
+    {
+        // AoS will trigger a new registration to continue the call.
+        return GetStateName();
+    }
+
     if (m_objContext.GetService().GetSrvccState() == SrvccState::STARTED)
     {
-        IMS_TRACE_I("HandleAosDisconnected ignore during srvcc", 0, 0, 0);
+        IMS_TRACE_I("HandleAosDisconnected : Ignore during SRVCC", 0, 0, 0);
         return GetStateName();
     }
 
-    if (m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoResponse() ||
-            m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoTrigger())
+    if (m_objContext.GetEpsFallbackTrigger().IsWaitingRegistration())
     {
-        IMS_TRACE_I("HandleAosDisconnected ignore during EPS Fallback", 0, 0, 0);
+        IMS_TRACE_I("HandleAosDisconnected : Ignore during EPS fallback", 0, 0, 0);
         return GetStateName();
     }
 
-    if (m_objContext.GetConfigurationProxy().Is(
-                Feature::REGISTRATION_DISCONNECT_REASON_TO_TERMINATE_ONGOING_CALL, eAosReason))
+    return Terminate(GetCallReasonInfoByAosDisconnection(eAosReason, nDataFailureReason));
+}
+
+PROTECTED
+const CallReasonInfo MtcCallState::GetCallReasonInfoByAosDisconnection(
+        IN IMS_UINT32 nAosReason, IN IMS_SINT32 nDataFailureReason) const
+{
+    switch (nAosReason)
     {
-        const CallReasonInfo objReason(GetCallReasonByAosReason(eAosReason));
-        return Terminate(objReason);
+        case ImsAosReason::POWER_OFF:
+            return CallReasonInfo(CODE_LOCAL_POWER_OFF);
+        case ImsAosReason::AIRPLANE_MODE:
+            if (m_objContext.GetService().IsCrossSimConnected())
+            {
+                return CallReasonInfo(CODE_OEM_CAUSE_3);
+            }
+            return m_objContext.GetService().GetLastConnectedRatType() ==
+                            INetworkWatcher::RADIOTECH_TYPE_IWLAN
+                    ? CallReasonInfo(CODE_WIFI_LOST)
+                    : CallReasonInfo(CODE_RADIO_OFF);
+        case ImsAosReason::WIFI_OFF:
+            return CallReasonInfo(CODE_WIFI_LOST);
+        case ImsAosReason::SERVICE_POLICY:
+        case ImsAosReason::REG_TERMINATING:
+            return CallReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE);
+        case ImsAosReason::DATA_DISCONNECTED:
+            return CallReasonInfo(CODE_NETWORK_DETACH, nDataFailureReason);
+        case ImsAosReason::DATA_PERMANENTLY_FAILED:
+        case ImsAosReason::NETWORK_ATTACH_REJECTED:
+            return CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE);
+        case ImsAosReason::REG_TERMINATED:
+        case ImsAosReason::REG_NEW_REQUIRED:
+            return CallReasonInfo(CODE_LOCAL_NOT_REGISTERED);
+        case ImsAosReason::SUSPEND_OUT_OF_SERVICE:
+            return CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE);
+        case ImsAosReason::SUSPEND_NO_RAT_COVERAGE:
+            return CallReasonInfo(CODE_LOCAL_NETWORK_NO_LTE_COVERAGE);
+        case ImsAosReason::IP_CHANGED:
+            return CallReasonInfo(CODE_LOCAL_NETWORK_IP_CHANGED);
+        default:  // NOT_SPECIFIED
+            return CallReasonInfo(CODE_LOCAL_NOT_REGISTERED);
     }
-    return GetStateName();
 }
 
 PROTECTED
@@ -570,71 +663,67 @@ void MtcCallState::NotifyHoldResumeState()
 PROTECTED
 ISession* MtcCallState::GetISession()
 {
-    return &m_objContext.GetSession()->GetISession();
+    IMtcSession* piMtcSession = m_objContext.GetSession();
+    return piMtcSession ? &piMtcSession->GetISession() : IMS_NULL;
 }
 
 PROTECTED
-void MtcCallState::InitMediaSession()
+void MtcCallState::InitMediaSession(IN const MediaInfo& objMediaInfo)
 {
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
 
     objMediaManager.CreateMediaSession();
-
-    objMediaManager.CreateMediaProfile(
-            &m_objContext.GetSession()->GetISession(), IMS_FALSE, IMS_TRUE);
-    objMediaManager.SetConferenceCall(m_objContext.GetCallInfo().bConference);
-
-    if (objMediaManager.GetMediaInfo().eVideoQuality == VIDEO_QUALITY_NOTUSED)
+    ISession& objISession = m_objContext.GetSession()->GetISession();
+    objMediaManager.SetMediaInfo(objISession, objMediaInfo);
+    objMediaManager.CreateMediaProfile(&objISession, IMS_FALSE, IMS_TRUE);
+    if (m_objContext.GetCallInfo().bConference)
     {
-        // TODO: This will be verified and can be changed when Media Interface is ready.
+        objMediaManager.SetConferenceCall();
+    }
+
+    if (objMediaManager.GetMediaInfo(objISession).eVideoQuality == VIDEO_QUALITY_NOTUSED)
+    {
         // Assumes VIDEO_QUALITY_NOTUSED used only in case of Call Pull
-        objMediaManager.SetRtpPort(&m_objContext.GetSession()->GetISession(), MEDIATYPE_VIDEO, 0);
+        objMediaManager.SetRtpPort(&objISession, MEDIATYPE_VIDEO, 0);
     }
 }
 
 PROTECTED
-IMS_SINT32 MtcCallState::OnSdpReceived(IN ISession* piSession, IN IMessage* piMessage)
+const CallReasonInfo MtcCallState::HandleReceivedSdp(
+        IN ISession* piSession, IN const IMessage* piMessage) const
 {
     if (m_objContext.GetMessageUtils().HasSdp(piMessage) == IMS_FALSE)
     {
-        IMS_TRACE_D("OnSdpReceived - No SDP received.", 0, 0, 0);
+        IMS_TRACE_D("HandleReceivedSdp - No SDP received.", 0, 0, 0);
         if (IsAnswerMandatory(piSession, piMessage))
         {
             IMS_TRACE_E(0, "Answer must be included.", 0, 0, 0);
-            return CODE_MEDIA_NOT_ACCEPTABLE;
+            return CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE);
         }
-        return CODE_NONE;
+        return CallReasonInfo(CODE_NONE);
     }
 
     if (IsNeedToIgnore(piSession, piMessage) == IMS_TRUE)
     {
-        return CODE_NONE;
+        return CallReasonInfo(CODE_NONE);
     }
 
     if (IsInvalidOfferAnswer(piSession, piMessage) == IMS_TRUE)
     {
-        return CODE_MEDIA_NOT_ACCEPTABLE;
+        return CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE);
     }
 
-    if (m_objContext.GetMediaManager().NegotiateSdp(piSession) != NegotiationResult::NO_ERROR)
+    SdpNegotiationResult objNegoResult = m_objContext.GetMediaManager().NegotiateSdp(piSession);
+    if (objNegoResult.eResult != MEDIA_NEGO_NO_ERROR)
     {
-        IMS_TRACE_D("OnSdpReceived - Nego SDP Failed", 0, 0, 0);
-        // TODO: return fail reason? IMS_RESULT? it's always NEGOFAIL?
-        return CODE_MEDIA_NOT_ACCEPTABLE;
+        IMS_TRACE_D("HandleReceivedSdp - Nego SDP Failed", 0, 0, 0);
+        return GetReasonByNegotiationResult(objNegoResult.eResult);
     }
 
-    m_objContext.GetPreconditionManager().OnSdpReceived(piSession, piMessage);
+    m_objContext.GetPreconditionManager().OnSdpReceived(piSession);
 
-    IMS_TRACE_D("OnSdpReceived - Nego Done", 0, 0, 0);
-    return CODE_NONE;
-}
-
-PROTECTED
-void MtcCallState::RunMedia(IN ISession* piSession, IN IMessage* piMessage)
-{
-    IMS_BOOL bEarly =
-            !m_objContext.GetMessageUtils().IsResponseExist(piSession, SipStatusCode::SC_200);
-    m_objContext.GetMediaManager().Run(piSession, piMessage, bEarly);
+    IMS_TRACE_D("HandleReceivedSdp - Nego Done", 0, 0, 0);
+    return CallReasonInfo(CODE_NONE);
 }
 
 PROTECTED
@@ -659,7 +748,7 @@ PROTECTED
 CallStateName MtcCallState::RejectIncomingAndToTerminating(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_D("RejectIncomingAndToTerminating", 0, 0, 0);
-    if (objReason.nCode == CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED ||  // TODO: remove?
+    if (objReason.nCode == CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED ||
             objReason.nCode == CODE_REJECT_QOS_FAILURE)
     {
         m_objContext.GetPreconditionManager().FormPreconditionSdp(
@@ -688,55 +777,64 @@ void MtcCallState::SendIncomingUpdateToUi(IN CallType eCallType)
     m_objContext.GetUpdatingInfo().SetAlerted();
     m_objContext.GetUiNotifier().SendIncomingUpdate(eCallType);
     m_objContext.GetTimer().Start(TIMER_CONVERT_USER_RESPONSE,
-            m_objContext.GetConfigurationProxy().GetInt(Feature::CONVERT_USER_RESPONSE_TIMER));
-}
-
-PROTECTED
-IMS_BOOL MtcCallState::IsRprSupported() const
-{
-    return m_objContext.GetSession()->GetExtensionSet().IsAvailableOnBoth(
-            MtcExtensionSet::OPTION_TAG_RPR);
+            m_objContext.GetConfigurationProxy().GetInt(
+                    ConfigVt::KEY_CONVERT_USER_RESPONSE_TIMER_MILLIS_INT));
 }
 
 PROTECTED
 IMS_BOOL MtcCallState::IsNeedToIgnore(IN ISession* piSession, IN const IMessage* piMessage) const
 {
-    if (IsPreviewOfAnswer(piSession, piMessage))
-    {
-        return IMS_TRUE;
-    }
+    const NegotiationState eState = m_objContext.GetMediaManager().GetNegotiationState(piSession);
+    const SipMethod& eMethod = piMessage->GetMethod();
 
-    NegotiationState eState = m_objContext.GetMediaManager().GetNegotiationState(piSession);
-    if (eState != NegotiationState::STATE_NEGOTIATED)
-    {
-        return IMS_FALSE;
-    }
-
-    if (piMessage->GetMethod().Equals(SipMethod::INVITE))
+    if (eMethod.Equals(SipMethod::INVITE))
     {
         if (piMessage->GetMessage()->GetType() == ISipMessage::TYPE_RESPONSE)
         {
-            IMS_SINT32 nConfig = piSession->GetConfiguration();
-            if ((nConfig & ISession::CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE) !=
-                    ISession::CONFIG_NONE)
+            if (eState == NegotiationState::STATE_NEGOTIATED)
             {
-                IMS_TRACE_I("IsNeedToIgnore - Ignore a subsequent OFFER in a response", 0, 0, 0);
-                return IMS_TRUE;
+                // RFC 6337. 3.1.1.INVITE Request with SDP, UAC behavior 2.
+                // in case of the UE is in preview mode, need to handle subsequent sdp.
+                return !m_objContext.GetMediaManager().IsPreviewMode(piSession);
             }
-
-            IMS_TRACE_I("IsNeedToIgnore - Handle a subsequent OFFER in a response", 0, 0, 0);
-            return IMS_FALSE;
+            else
+            {
+                // For non-RPRs, should not ignore SDP if preview mode is allowed.
+                if (SipStatusCode::IsProvisional(piMessage->GetStatusCode()) &&
+                        !piMessage->GetMessage()->IsMessageRpr())
+                {
+                    return !IsSdpPreviewModeAllowedByPolicy();
+                }
+            }
+        }
+    }
+    else if (eMethod.Equals(SipMethod::ACK))
+    {
+        if (eState == NegotiationState::STATE_NEGOTIATED)
+        {
+            IMS_TRACE_I("IsNeedToIgnore - Offer is included in ACK", 0, 0, 0);
+            return IMS_TRUE;
         }
     }
 
-    if (piMessage->GetMethod().Equals(SipMethod::ACK))
-    {
-        // TODO: isn't this invalid so need to terminate the call drop?
-        IMS_TRACE_I("IsNeedToIgnore - Offer is included in ACK", 0, 0, 0);
-        return IMS_TRUE;
-    }
-
     return IMS_FALSE;
+}
+
+PROTECTED
+IMS_BOOL MtcCallState::IsSdpPreviewModeAllowedByPolicy() const
+{
+    switch (m_objContext.GetConfigurationProxy().GetInt(
+            ConfigVoice::KEY_POLICY_FOR_SDP_PREVIEW_MODE_INT))
+    {
+        case ConfigVoice::SDP_PREVIEW_MODE_DISABLED:
+            return IMS_FALSE;
+        case ConfigVoice::SDP_PREVIEW_MODE_FOR_NORMAL_CALL_ONLY:
+            return !m_objContext.GetCallInfo().IsEmergency();
+        case ConfigVoice::SDP_PREVIEW_MODE_FOR_EMERGENCY_CALL_ONLY:
+            return m_objContext.GetCallInfo().IsEmergency();
+        default:  // ConfigVoice::SDP_PREVIEW_MODE_FOR_ALL_CALLS:
+            return IMS_TRUE;
+    }
 }
 
 PROTECTED
@@ -767,37 +865,11 @@ IMS_BOOL MtcCallState::IsInvalidOfferAnswer(
 }
 
 PROTECTED
-IMS_BOOL MtcCallState::IsPreviewOfAnswer(IN ISession* piSession, IN const IMessage* piMessage)
-{
-    if (piSession->IsSdpNegotiationAllowedForNonRpr())
-    {
-        return IMS_FALSE;
-    }
-
-    if (piMessage->GetMethod().Equals(SipMethod::INVITE) == IMS_FALSE)
-    {
-        return IMS_FALSE;
-    }
-
-    if (SipStatusCode::IsProvisional(piMessage->GetStatusCode()) == IMS_FALSE)
-    {
-        return IMS_FALSE;
-    }
-
-    if (piMessage->GetMessage()->IsMessageRpr())
-    {
-        return IMS_FALSE;
-    }
-
-    IMS_TRACE_I("IsPreviewOfAnswer it's a preview. wait the real Answer", 0, 0, 0);
-    return IMS_TRUE;
-}
-
-PROTECTED
 IMS_BOOL MtcCallState::IsAnswerMandatory(IN ISession* piSession, IN const IMessage* piMessage) const
 {
     if (m_objContext.GetMediaManager().GetNegotiationState(piSession) !=
-            NegotiationState::STATE_OFFER_SENT)
+                    NegotiationState::STATE_OFFER_SENT &&
+            !m_objContext.GetMediaManager().IsPreviewMode(piSession))
     {
         return IMS_FALSE;
     }
@@ -825,7 +897,15 @@ IMS_BOOL MtcCallState::IsAnswerMandatory(IN ISession* piSession, IN const IMessa
     if (eMethod.Equals(SipMethod::PRACK))
     {
         // RFC 6337. Table 1. Case 4, 5
-        return IMS_TRUE;
+        const IMessage& objPrackMessage = *piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
+        if (objPrackMessage.GetState() == IMessage::STATE_SENT)
+        {
+            return m_objContext.GetMessageUtils().HasSdp(&objPrackMessage);
+        }
+        else
+        {
+            return IMS_TRUE;
+        }
     }
 
     if (eMethod.Equals(SipMethod::UPDATE))
@@ -859,33 +939,50 @@ void MtcCallState::StopTimer(IN IMS_UINT32 nType) const
 PROTECTED
 IMS_SINT32 MtcCallState::GetTimeInMilliseconds(IN IMS_UINT32 nType) const
 {
-    IMS_BOOL bNormal = !m_objContext.GetCallInfo().bEmergency;
-    Feature eFeature = Feature::UNKNOWN;
+    IMS_BOOL bNormal = !m_objContext.GetCallInfo().IsEmergency();
+    const IMS_CHAR* pszKey;
     switch (nType)
     {
-        case TIMER_MO_100_WAIT:
-            eFeature = bNormal ? Feature::MO_CALL_REQUEST_TIMEOUT : Feature::EMERGENCY_T_CALL_TIMER;
-            break;
         case TIMER_MO_18X_WAIT:
-            eFeature = bNormal ? Feature::TIMER_18X : Feature::EMERGENCY_18X_TIMER;
+            if (bNormal)
+            {
+                pszKey = ConfigVoice::KEY_18X_TIMER_MILLIS_INT;
+            }
+            else
+            {
+                pszKey = m_objContext.GetService().IsWlanIpCanType()
+                        ? ConfigEmergency::KEY_WIFI_EMERGENCY_18X_TIMER_MILLIS_INT
+                        : ConfigEmergency::KEY_EMERGENCY_18X_TIMER_MILLIS_INT;
+            }
             break;
+        case TIMER_MO_CALL_INITIATION_TO_18X_WAIT:
+            return MtcConfigurationResolver::GetCallInitiationTo18xTimer(
+                    m_objContext.GetConfigurationProxy(),
+                    m_objContext.GetService().IsWlanIpCanType());
         case TIMER_MO_NOANSWER:
-            eFeature = bNormal ? Feature::RINGBACK_TIMER : Feature::EMERGENCY_RINGBACK_TIMER;
+            pszKey = bNormal ? ConfigVoice::KEY_RINGBACK_TIMER_MILLIS_INT
+                             : ConfigEmergency::KEY_EMERGENCY_RINGBACK_TIMER_MILLIS_INT;
+            break;
+        case TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON:
+            pszKey = ConfigVoice::KEY_USER_CANCEL_REASON_AFTER_RESPONSE_TIMEOUT_TIMER_MILLIS_INT;
             break;
         case TIMER_MT_ALERTING:
-            eFeature = Feature::RINGING_TIMER;
+            pszKey = ConfigVoice::KEY_RINGING_TIMER_MILLIS_INT;
+            break;
+        case TIMER_MT_PRACK_WAIT:
+            pszKey = ConfigVoice::KEY_PRACK_WAIT_TIMER_MILLIS_INT;
             break;
         case TIMER_CONVERT_USER_RESPONSE:
-            eFeature = Feature::CONVERT_USER_RESPONSE_TIMER;
+            pszKey = ConfigVt::KEY_CONVERT_USER_RESPONSE_TIMER_MILLIS_INT;
             break;
         case TIMER_CONVERT_REMOTE_RESPONSE:
-            eFeature = Feature::CONVERT_REMOTE_RESPONSE_TIMER;
+            pszKey = ConfigVt::KEY_CONVERT_REMOTE_RESPONSE_TIMER_MILLIS_INT;
             break;
         default:
             return -1;
     }
 
-    return m_objContext.GetConfigurationProxy().GetInt(eFeature);
+    return m_objContext.GetConfigurationProxy().GetInt(pszKey);
 }
 
 PROTECTED
@@ -931,61 +1028,8 @@ void MtcCallState::SendTransactionResponse(IN ISipServerConnection* piSipServerC
 }
 
 PROTECTED
-IMS_BOOL MtcCallState::IsCallEndNeededByAudioInactivity(
-        IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) const
-{
-    IMS_BOOL bNeedToEnd = IMS_FALSE;
-    if (eMediaType != MEDIATYPE_AUDIO)
-    {
-        return bNeedToEnd;
-    }
-
-    IMS_SINT32 nAdditionalInfo = -1;
-    if (m_objContext.GetMediaManager().IsOnHold())
-    {
-        if (eProtocolType == MEDIA_PROTOCOL_RTCP)
-        {
-            nAdditionalInfo = CarrierConfig::Ims::RTCP_INACTIVITY_ON_HOLD;
-        }
-    }
-    else
-    {
-        if (m_objContext.GetService().IsEmergency())
-        {
-            if (eProtocolType == MEDIA_PROTOCOL_RTP)
-            {
-                nAdditionalInfo = CarrierConfig::Ims::E911_RTP_INACTIVITY_ON_CONNECTED;
-            }
-            else if (eProtocolType == MEDIA_PROTOCOL_RTCP)
-            {
-                nAdditionalInfo = CarrierConfig::Ims::E911_RTCP_INACTIVITY_ON_CONNECTED;
-            }
-        }
-        else
-        {
-            if (eProtocolType == MEDIA_PROTOCOL_RTP)
-            {
-                nAdditionalInfo = CarrierConfig::Ims::RTP_INACTIVITY_ON_CONNECTED;
-            }
-            else if (eProtocolType == MEDIA_PROTOCOL_RTCP)
-            {
-                nAdditionalInfo = CarrierConfig::Ims::RTCP_INACTIVITY_ON_CONNECTED;
-            }
-        }
-    }
-
-    bNeedToEnd = (nAdditionalInfo < 0)
-            ? IMS_FALSE
-            : m_objContext.GetConfigurationProxy().Is(
-                      Feature::AUDIO_INACTIVITY_CALL_END_REASON, nAdditionalInfo);
-    IMS_TRACE_D("IsCallEndNeededByAudioInactivity : %s", _TRACE_B_(bNeedToEnd), 0, 0);
-
-    return bNeedToEnd;
-}
-
-PROTECTED
-CallReasonInfo MtcCallState::GetAudioInactivityReasonOnTermination(
-        IN const CallReasonInfo& objReason)
+const CallReasonInfo MtcCallState::GetAudioInactivityReasonOnTermination(
+        IN const CallReasonInfo& objReason) const
 {
     if (objReason.nCode != CODE_USER_TERMINATED)
     {
@@ -1003,6 +1047,18 @@ CallReasonInfo MtcCallState::GetAudioInactivityReasonOnTermination(
 }
 
 PROTECTED
+const CallReasonInfo MtcCallState::GetAudioInactivityReasonOnMediaDataFailed() const
+{
+    if (m_objContext.GetService().IsWlanIpCanType() &&
+            m_objContext.GetConfigurationProxy().GetBoolean(
+                    ConfigWfc::KEY_OVERRIDE_MEDIA_INACTIVITY_TO_WIFI_LOST_BOOL))
+    {
+        return CallReasonInfo(CODE_WIFI_LOST);
+    }
+    return CallReasonInfo(CODE_MEDIA_NO_DATA);
+}
+
+PROTECTED
 IMS_BOOL MtcCallState::IsNeedToIgnoreStartFailure() const
 {
     if (m_objContext.GetService().GetSrvccState() != SrvccState::STARTED)
@@ -1010,7 +1066,7 @@ IMS_BOOL MtcCallState::IsNeedToIgnoreStartFailure() const
         return IMS_FALSE;
     }
 
-    IMtcAosConnector* pConnector = m_objContext.GetService().GetAosConnector();
+    const IMtcAosConnector* pConnector = m_objContext.GetService().GetAosConnector();
     if (pConnector == IMS_NULL || pConnector->IsImsConnected() == IMS_TRUE)
     {
         IMS_TRACE_D("IsNeedToIgnoreStartFailure invoked by remote so terminate", 0, 0, 0);
@@ -1023,10 +1079,9 @@ IMS_BOOL MtcCallState::IsNeedToIgnoreStartFailure() const
 }
 
 PROTECTED
-void MtcCallState::StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) const
+void MtcCallState::StartEpsFallbackWatchdogIfNeeded(IN const IMessage& objMessage) const
 {
-    if (objMessage.GetStatusCode() != SipStatusCode::SC_183 &&
-            objMessage.GetStatusCode() != SipStatusCode::SC_200)
+    if (!Is18x(objMessage.GetStatusCode()) && objMessage.GetStatusCode() != SipStatusCode::SC_200)
     {
         return;
     }
@@ -1036,12 +1091,7 @@ void MtcCallState::StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) con
         return;
     }
 
-    if (EpsFallbackTrigger::IsRequired(m_objContext.GetConfigurationProxy()) == IMS_FALSE)
-    {
-        return;
-    }
-
-    if (m_objContext.GetService().IsNr() == IMS_FALSE)
+    if (!EpsFallbackTrigger::ShouldTriggerByWatchdogTimer(m_objContext))
     {
         return;
     }
@@ -1050,39 +1100,57 @@ void MtcCallState::StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) con
 }
 
 PROTECTED
-IMS_SINT32 MtcCallState::GetCallReasonByAosReason(IN IMS_UINT32 nAosReason)
+const CallReasonInfo MtcCallState::GetReasonByNegotiationResult(IN MediaNegoResult eNegoResult)
 {
-    switch (nAosReason)
+    switch (eNegoResult)
     {
-        case ImsAosReason::OUT_OF_SERVICE:
-            return CODE_LOCAL_NETWORK_NO_SERVICE;
-        case ImsAosReason::POWER_OFF:
-            return CODE_LOCAL_POWER_OFF;
-        case ImsAosReason::NO_RAT_COVERAGE:
-            return CODE_LOCAL_NETWORK_NO_LTE_COVERAGE;
-        case ImsAosReason::SERVICE_POLICY:
-        case ImsAosReason::SERVICE_BLOCKED:
-        case ImsAosReason::REG_TERMINATING:
-            return CODE_LOCAL_SERVICE_UNAVAILABLE;
-        case ImsAosReason::DATA_DISCONNECTED:
-            return CODE_LOCAL_NETWORK_NO_SERVICE;
-        case ImsAosReason::REG_TERMINATED:
-        case ImsAosReason::REG_NEW_REQUIRED:
-            return CODE_LOCAL_NOT_REGISTERED;
-        case ImsAosReason::SUSPEND_OUT_OF_SERVICE:
-            return CODE_LOCAL_NETWORK_NO_SERVICE;
-        case ImsAosReason::SUSPEND_NO_RAT_COVERAGE:
-            return CODE_LOCAL_NETWORK_NO_LTE_COVERAGE;
-        default:  // NOT_SPECIFIED
-            return CODE_LOCAL_NOT_REGISTERED;
+        case MEDIA_NEGO_NO_ERROR:
+            return CallReasonInfo(CODE_NONE);
+        case MEDIA_NEGO_ERROR_INVALID_DESCRIPTOR:
+        case MEDIA_NEGO_ERROR_IP_MISMATCH:
+            return CallReasonInfo(CODE_REJECT_UNSUPPORTED_SDP_HEADERS, eNegoResult);
+        default:
+            return CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE, eNegoResult);
     }
 }
 
 PROTECTED
 IMS_BOOL MtcCallState::IsNeedToSendLocalResourceConfirmation(IN ISession* piSession) const
 {
-    IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
+    const IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
 
     return objPreconditionManager.IsLocalResourceConfirmationRequired(piSession) &&
             objPreconditionManager.IsAvailableToSendLocalResourceConfirmation(piSession);
+}
+
+PROTECTED
+IMS_BOOL MtcCallState::IsRprRequired() const
+{
+    if (!m_objContext.GetSession()->GetExtensionSet().IsAvailableOnBoth(
+                MtcExtensionSet::OPTION_TAG_RPR))
+    {
+        return IMS_FALSE;
+    }
+
+    if (m_objContext.GetSession()->GetExtensionSet().IsRequiredOnRemote(
+                MtcExtensionSet::OPTION_TAG_RPR))
+    {
+        return IMS_TRUE;
+    }
+
+    if (m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigVoice::KEY_PRACK_SUPPORTED_FOR_18X_BOOL))
+    {
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
+PROTECTED
+IMS_BOOL MtcCallState::IsPrackRequiredForAlert() const
+{
+    return m_objContext.GetConfigurationProxy().GetBoolean(
+                   ConfigVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL) &&
+            IsRprRequired();
 }

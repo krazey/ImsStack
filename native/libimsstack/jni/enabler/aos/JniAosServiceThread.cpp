@@ -37,13 +37,14 @@ PUBLIC VIRTUAL JniAosServiceThread::~JniAosServiceThread()
 }
 
 PUBLIC
-IMS_BOOL JniAosServiceThread::NotifyRegistered(IN IMS_SINT32 nNetworkType,
+IMS_BOOL JniAosServiceThread::NotifyRegistered(IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType,
         IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags)
 {
     IMS_TRACE_D("NotifyRegistered", 0, 0, 0);
 
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::N2J_NOTIFY_REGISTERED);
+    objParcel.writeInt32(nRegType);
     objParcel.writeInt32(nNetworkType);
     objParcel.writeInt32(nFeatureTagBits);
 
@@ -59,13 +60,14 @@ IMS_BOOL JniAosServiceThread::NotifyRegistered(IN IMS_SINT32 nNetworkType,
 }
 
 PUBLIC
-IMS_BOOL JniAosServiceThread::NotifyRegistering(IN IMS_SINT32 nNetworkType,
+IMS_BOOL JniAosServiceThread::NotifyRegistering(IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType,
         IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags)
 {
     IMS_TRACE_D("NotifyRegistering", 0, 0, 0);
 
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::N2J_NOTIFY_REGISTERING);
+    objParcel.writeInt32(nRegType);
     objParcel.writeInt32(nNetworkType);
     objParcel.writeInt32(nFeatureTagBits);
 
@@ -81,28 +83,44 @@ IMS_BOOL JniAosServiceThread::NotifyRegistering(IN IMS_SINT32 nNetworkType,
 }
 
 PUBLIC
-IMS_BOOL JniAosServiceThread::NotifyDeregistered(IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nReason)
+IMS_BOOL JniAosServiceThread::NotifyDeregistered(IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType,
+        IN IMS_SINT32 nReason, IN IMS_SINT32 nDataFailureReason)
 {
     IMS_TRACE_D("NotifyDeregistered", 0, 0, 0);
 
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::N2J_NOTIFY_DEREGISTERED);
+    objParcel.writeInt32(nRegType);
     objParcel.writeInt32(nNetworkType);
     objParcel.writeInt32(nReason);
+    objParcel.writeInt32(nDataFailureReason);
+
+    return SendData2Java(objParcel);
+}
+
+PUBLIC
+IMS_BOOL JniAosServiceThread::NotifyDeregistering(IN IMS_SINT32 nRegType)
+{
+    IMS_TRACE_D("NotifyDeregistering", 0, 0, 0);
+
+    Parcel objParcel;
+    objParcel.writeInt32(IIAosService::N2J_NOTIFY_DEREGISTERING);
+    objParcel.writeInt32(nRegType);
 
     return SendData2Java(objParcel);
 }
 
 PUBLIC
 IMS_BOOL JniAosServiceThread::NotifyTechnologyChangeFailed(
-        IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nCauseCode)
+        IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nReason)
 {
     IMS_TRACE_D("NotifyTechnologyChangeFailed", 0, 0, 0);
 
     Parcel objParcel;
     objParcel.writeInt32(IIAosService::N2J_NOTIFY_TECHNOLOGY_CHANGE_FAILED);
+    objParcel.writeInt32(nRegType);
     objParcel.writeInt32(nNetworkType);
-    objParcel.writeInt32(nCauseCode);
+    objParcel.writeInt32(nReason);
 
     return SendData2Java(objParcel);
 }
@@ -175,13 +193,29 @@ IMS_BOOL JniAosServiceThread::NotifyAosIsimState(IN IMS_UINT32 nState)
 }
 
 PUBLIC
-IMS_BOOL JniAosServiceThread::RequestPhoneNumberRetry(IN IMS_UINT32 nState)
+IMS_BOOL JniAosServiceThread::NotifyImsFeatureChanged(
+        IN IMS_SINT32 nRegType, IN IMS_SINT32 nNetworkType, IN IMS_UINT32 nFeatureTagBits)
 {
-    IMS_TRACE_D("RequestPhoneNumberRetry", 0, 0, 0);
+    IMS_TRACE_D("NotifyImsFeatureChanged", 0, 0, 0);
 
     Parcel objParcel;
-    objParcel.writeInt32(IIAosService::N2J_REQUEST_PHONE_NUMBER_RETRY);
-    objParcel.writeInt32(nState);
+    objParcel.writeInt32(IIAosService::N2J_NOTIFY_IMS_FEATURE_CHANGED);
+    objParcel.writeInt32(nRegType);
+    objParcel.writeInt32(nNetworkType);
+    objParcel.writeInt32(nFeatureTagBits);
+
+    return SendData2Java(objParcel);
+}
+
+PUBLIC
+IMS_BOOL JniAosServiceThread::NotifyTrace(IN IMS_SINT32 nRegType, IN const AString& strLog)
+{
+    IMS_TRACE_D("NotifyTrace", 0, 0, 0);
+
+    Parcel objParcel;
+    objParcel.writeInt32(IIAosService::N2J_NOTIFY_TRACE);
+    objParcel.writeInt32(nRegType);
+    objParcel.writeString16(String16(strLog.GetStr()));
 
     return SendData2Java(objParcel);
 }

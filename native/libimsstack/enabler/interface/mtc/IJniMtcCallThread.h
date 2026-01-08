@@ -17,20 +17,20 @@
 #define INTERFACE_JNI_MTC_CALL_THREAD_H_
 
 #include "IJniEnablerThread.h"
-#include "ImsList.h"
-#include "ImsMap.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 
+class SuppService;
+enum class OipType;
 struct CallReasonInfo;
 struct ConfUser;
 struct JniCallInfo;
+struct MediaInfo;
+template <class T>
+class ImsList;
 
 class IJniMtcCallThread : public IJniEnablerThread
 {
 public:
-    virtual ~IJniMtcCallThread() {}
-
     /**
      * @brief Notifies
      *
@@ -39,7 +39,7 @@ public:
      * @param objSuppServices
      */
     virtual void OnStarted(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies
@@ -49,6 +49,18 @@ public:
     virtual void OnStartFailed(IN const CallReasonInfo& objReason) = 0;
 
     /**
+     * @brief Notifies that the call setup is initiating.
+     *
+     * This method is called after sending an INVITE request, indicating that the call setup process
+     * has started but not yet progressed to ringing or connected state.
+     *
+     * @param objCallInfo The call information.
+     * @param objMediaInfo The media information related to the call.
+     */
+    virtual void OnInitiating(
+            IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo) = 0;
+
+    /**
      * @brief Notifies
      *
      * @param objCallInfo
@@ -56,7 +68,7 @@ public:
      * @param objSuppServices
      */
     virtual void OnProgressing(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies
@@ -66,7 +78,7 @@ public:
      * @param objSuppServices
      */
     virtual void OnHeld(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies
@@ -83,7 +95,7 @@ public:
      * @param objSuppServices
      */
     virtual void OnResumed(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies
@@ -100,7 +112,7 @@ public:
      * @param objSuppServices
      */
     virtual void OnHeldBy(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies
@@ -110,7 +122,7 @@ public:
      * @param objSuppServices
      */
     virtual void OnResumedBy(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies
@@ -127,8 +139,7 @@ public:
      * @param objSuppServices
      */
     virtual void OnIncomingResume(IN const JniCallInfo& objCallInfo,
-            IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN const MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies
@@ -138,8 +149,7 @@ public:
      * @param objSuppServices
      */
     virtual void OnIncomingUpdate(IN const JniCallInfo& objCallInfo,
-            IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN const MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies
@@ -149,7 +159,7 @@ public:
      * @param objSuppServices
      */
     virtual void OnUpdated(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies
@@ -166,7 +176,7 @@ public:
      * @param objSuppServices
      */
     virtual void OnUpdatedBy(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies
@@ -177,7 +187,7 @@ public:
      * @param objUsers
      */
     virtual void OnMerged(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+            IN const ImsList<SuppService*>& objSuppServices,
             IN const ImsList<ConfUser*>& objUsers) = 0;
 
     /**
@@ -245,16 +255,15 @@ public:
      * @brief Notifies there is an incoming call that needs to be processed.
      *
      * @param nCallKey
-     * @param objCallInfo
-     * @param objMediaInfo
-     * @param objSuppServices
-     * @param eOipType
-     * @param strRemoteNumber
+     * @param objCallInfo The call information.
+     * @param objMediaInfo The media information related to the call.
+     * @param objSuppServices The supplementary services information related to the call.
+     * @param eOipType The OIP type to determine whether show a caller identification or not.
+     * @param strRemoteNumber The number of a caller.
      */
     virtual void OnIncomingCallReceived(IN IMS_UINTP nCallKey, IN const JniCallInfo& objCallInfo,
-            IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices, IN OipType eOipType,
-            IN const AString& strRemoteNumber) = 0;
+            IN const MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices,
+            IN OipType eOipType, IN const AString& strRemoteNumber) = 0;
 
     /**
      * @brief Notifies
@@ -266,6 +275,13 @@ public:
      */
     virtual void OnInformationNotificationReceived(IN IMS_UINT32 eType, IN const AString strValue,
             IN IMS_SINT32 nValue, IN IMS_BOOL bValue) = 0;
+
+    /**
+     * @brief Notifies the call information has changed.
+     *
+     * @param objCallInfo The changed call information.
+     */
+    virtual void OnCallInfoChanged(IN const JniCallInfo& objCallInfo) = 0;
 };
 
 #endif

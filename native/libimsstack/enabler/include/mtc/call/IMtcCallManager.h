@@ -17,11 +17,11 @@
 #ifndef INTERFACE_MTC_CALL_MANAGER_H_
 #define INTERFACE_MTC_CALL_MANAGER_H_
 
-#include "IMtcService.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "call/IMtcCall.h"
+
+enum class ServiceType;
 
 // Holds `IMtcCall` objects and provides methods to create, delete and find them.
 class IMtcCallManager
@@ -31,16 +31,24 @@ public:
 
     virtual ~IMtcCallManager(){};
 
-    // Creates a new call and starts to manage it. Returns the created call.
+    /**
+     * @brief Creates a new call and starts to manage it.
+     *
+     * @param eServiceType The service type for the call.
+     * @param objCallInfo The initial information for the call.
+     * @param strLogTag A log tag for to call.
+     * @return The created call object. Returns a null call object if creation fails.
+     */
+    virtual IMtcCall* CreateCall(
+            IN ServiceType eServiceType, IN CallInfo& objCallInfo, IN const AString& strLogTag) = 0;
 
     /**
-     * @brief Creates
+     * @brief Removes the call matching the given call key. Does nothing if the call doesn't exist.
+     * Mtc must guarantee that the target MtcCall is in TERMINATING state when it's removed.
      *
-     * @param eServiceType
-     * @param objCallInfo
-     * @return
+     * @param nCallKey Key of the MtcCall to be removed.
      */
-    virtual IMtcCall* CreateCall(IN ServiceType eServiceType, IN CallInfo& objCallInfo) = 0;
+    virtual void RemoveCall(IN CallKey nCallKey) = 0;
 
     // Returns a call matching the given call key.
     // Returns new `UnknownCall` instance if the call doesn't exist.
@@ -116,6 +124,15 @@ public:
      * @return
      */
     virtual ImsList<IMtcCall*> GetCallsByState(IN State eState) = 0;
+
+    // Returns a next call index.
+
+    /**
+     * @brief Gets the next available call index.
+     *        The index cycles from 1 to a predefined maximum value.
+     * @return A next call index.
+     */
+    virtual IMS_UINT32 GetNextCallIndex() = 0;
 };
 
 #endif

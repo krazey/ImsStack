@@ -19,14 +19,13 @@
 
 #include <gmock/gmock.h>
 
-#include "ImsList.h"
 #include "IIpSecPolicy.h"
 
 class MockIIpSecPolicy : public IIpSecPolicy
 {
 public:
-    inline MockIIpSecPolicy() {}
-    inline virtual ~MockIIpSecPolicy() {}
+    MockIIpSecPolicy() = default;
+    ~MockIIpSecPolicy() override = default;
 
     MOCK_METHOD(IMS_SINT32, GetId, (), (const, override));
     MOCK_METHOD(IIpSecSp*, CreateSp, (), (override));

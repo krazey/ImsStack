@@ -16,6 +16,7 @@
 #ifndef CALL_CONTROL_HELPER_H_
 #define CALL_CONTROL_HELPER_H_
 
+#include "AString.h"
 #include "ImsMap.h"
 
 class ISipDialog;
@@ -26,21 +27,23 @@ class Replaces;
  */
 class CallControlHelper
 {
-private:
+public:
     CallControlHelper();
-    ~CallControlHelper();
+    virtual ~CallControlHelper();
+
+    CallControlHelper(IN const CallControlHelper&) = delete;
+    CallControlHelper& operator=(IN const CallControlHelper&) = delete;
 
 public:
-    IMS_BOOL AddSession(IN const AString& strSessionId, IN Replaces* pReplaces);
+    void AddSession(IN const AString& strSessionId, IN Replaces* pReplaces);
     inline IMS_UINT32 GetSessionCount() const { return m_objSessions.GetSize(); }
     void RemoveSession(IN const AString& strSessionId);
 
     Replaces* GetReplacesFromSessionId(IN const AString& strSessionId);
     const AString& GetSessionIdFromReplaces(IN const Replaces* pReplaces);
+    const AString CreateSessionId();
 
-    static Replaces* CreateReplaces(IN IMS_BOOL bMo, IN ISipDialog* piDialog);
-    static const AString CreateSessionId();
-    static CallControlHelper* GetInstance();
+    static Replaces* CreateReplaces(IN const ISipDialog* piDialog, IN IMS_BOOL bMo);
 
 private:
     IMS_UINT32 m_nGlobalSessionId;

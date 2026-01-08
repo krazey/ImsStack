@@ -18,6 +18,7 @@ package com.android.imsstack.core.agents.dcm;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.telephony.AccessNetworkConstants;
+import android.telephony.CellIdentity;
 import android.telephony.CellIdentityGsm;
 import android.telephony.CellIdentityLte;
 import android.telephony.CellIdentityNr;
@@ -29,16 +30,19 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.SparseArray;
 
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.ImsPrivateProperties;
+import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
-import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.Log;
-import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * This implements the utility interfaces that are related to the data network.
@@ -75,7 +79,7 @@ public class DcUtils implements IDcUtils {
     public void cleanup() {
     }
 
-     /**
+    /**
      * Returns the access network information that the device is currently attached.
      *
      * @param defaultNetworkType A default network type that requests the access network information
@@ -83,12 +87,10 @@ public class DcUtils implements IDcUtils {
      */
     @Override
     public IDcUtils.AccessNetworkInfo getAccessNetworkInfo(int defaultNetworkType) {
-        /**
-         * GET_ACCESS_NETWORK_INFO
-         * eHRPD: Sector ID/Subnet Length/Carrier ID(optional)
-         * GERAN/UTRAN: MCC/MNC/Cell Identity/LAC
-         * EUTRAN/NGRAN: MCC/MNC/Cell Identity/TAC/Duplex Mode
-         */
+        // GET_ACCESS_NETWORK_INFO
+        //     eHRPD: Sector ID/Subnet Length/Carrier ID(optional)
+        //     GERAN/UTRAN: MCC/MNC/Cell Identity/LAC
+        //     EUTRAN/NGRAN: MCC/MNC/Cell Identity/TAC/Duplex Mode
         String[] ani = null;
         ServiceState ss = getServiceState();
         NetworkRegistrationInfo nri = getNetworkRegistrationInfo(ss);
@@ -97,9 +99,9 @@ public class DcUtils implements IDcUtils {
                 : TelephonyManager.NETWORK_TYPE_UNKNOWN;
 
         if (networkType == TelephonyManager.NETWORK_TYPE_UNKNOWN) {
-            // when no uicc is inserted, network type is not correctly reported from modem.
-            // the only case we care is making 911 call with no uicc.
-            // if 911 call is over ims, then UE must be in lte network.
+            // When no UICC is inserted, network type is not correctly reported from modem.
+            // the only case we care is making 911 call with no UICC.
+            // if 911 call is over IMS, then UE must be in lte network.
             networkType = (defaultNetworkType > 0)
                     ? defaultNetworkType : TelephonyManager.NETWORK_TYPE_LTE;
         }
@@ -141,19 +143,38 @@ public class DcUtils implements IDcUtils {
         return new IDcUtils.AccessNetworkInfo(networkType, ani);
     }
 
+    @Override
+    @NonNull
+    public String getAccessNetworkPlmn() {
+        NetworkRegistrationInfo nri = getNetworkRegistrationInfo(getServiceState());
+        CellIdentity ci = (nri != null) ? nri.getCellIdentity() : null;
+
+        final String plmn = switch (ci) {
+            case CellIdentityGsm gsm -> gsm.getMobileNetworkOperator();
+            case CellIdentityWcdma wcdma -> wcdma.getMobileNetworkOperator();
+            case CellIdentityLte lte -> lte.getMobileNetworkOperator();
+            case CellIdentityNr nr -> {
+                if (TextUtils.isEmpty(nr.getMccString()) || TextUtils.isEmpty(nr.getMncString())) {
+                    yield "";
+                }
+                yield nr.getMccString() + nr.getMncString();
+            }
+            case null, default -> "";
+        };
+
+        return plmn != null ? plmn : "";
+    }
+
     /**
-    * isMobileDataEnabled
-    *
-    * @param
-    * @return
-    *
-    *         false: Disable
-    *         true: Enable
-    */
+     * Checks whether the mobile data setting is enabled or not.
+     *
+     * @return {@code true} if the mobile data setting is enabled, {@code false} otherwise.
+     */
     @Override
     public boolean isMobileDataEnabled() {
-        TelephonyManager tm = AppContext.getTelephonyManager(MSimUtils.getSubId(mSlotId));
-        return (tm != null) ? tm.isDataEnabled() : false;
+        TelephonyManagerProxy tmp =
+                AppContext.getTelephonyManagerProxy(MSimUtils.getSubId(mSlotId));
+        return tmp.isDataEnabled();
     }
 
     @Override
@@ -163,14 +184,9 @@ public class DcUtils implements IDcUtils {
 
     @VisibleForTesting
     protected ServiceState getServiceState() {
-        final TelephonyManager tm;
-        if (MSimUtils.isMultiSimEnabled()) {
-            tm = AppContext.getTelephonyManager(MSimUtils.getSubId(mSlotId));
-        } else {
-            tm = AppContext.getTelephonyManager();
-        }
-
-        return (tm != null) ? tm.getServiceState() : null;
+        final TelephonyManagerProxy tmp =
+                AppContext.getInstance().getSystemServiceProxy(TelephonyManagerProxy.class);
+        return tmp.getServiceState(mSlotId);
     }
 
     @VisibleForTesting
@@ -259,6 +275,30 @@ public class DcUtils implements IDcUtils {
         }
 
         return null;
+    }
+
+    /**
+     * Returns the duplex mode of EUTRAN.
+     *
+     * <p>See 3GPP 36.101 Table 5.5-1 E-UTRA operating bands for calculation.
+     *
+     * @param ci The cell-identity of EUTRAN.
+     * @return The duplex mode of the given CellIdentity.
+     */
+    public static int getDuplexModeForLte(@NonNull CellIdentityLte ci) {
+        int earfcn = ci.getEarfcn();
+        if (earfcn == CellInfo.UNAVAILABLE) {
+            return ServiceState.DUPLEX_MODE_UNKNOWN;
+        }
+
+        Set<Integer> cellBands = Arrays.stream(ci.getBands()).boxed().collect(Collectors.toSet());
+
+        return Arrays.stream(EutranBandArfcnFrequency.values())
+                .filter(eutranBand -> cellBands.contains(eutranBand.getBand()))
+                .filter(eutranBand -> eutranBand.isEarfcnInRange(earfcn))
+                .findFirst()
+                .map(EutranBandArfcnFrequency::getDuplexMode)
+                .orElse(ServiceState.DUPLEX_MODE_UNKNOWN);
     }
 
     /**

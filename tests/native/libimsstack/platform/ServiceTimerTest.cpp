@@ -16,6 +16,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "ImsMessage.h"
+#include "ImsMessageDef.h"
 #include "ImsMutex.h"
 #include "ImsTimer.h"
 #include "MockIOsFactory.h"
@@ -32,8 +34,8 @@ namespace android
 class TestImsMutex : public ImsMutex
 {
 public:
-    inline TestImsMutex() {}
-    inline virtual ~TestImsMutex() {}
+    TestImsMutex() = default;
+    ~TestImsMutex() override = default;
 
 public:
     void Lock() override {}
@@ -48,12 +50,12 @@ public:
     {
     }
 
-    inline ~TestImsTimer() {}
+    ~TestImsTimer() override = default;
 
 public:
     IMS_BOOL Equals(IN const ITimer* /*piTimer*/) const override { return IMS_TRUE; }
 
-    IMS_UINTP SetTimer(IN IMS_UINT32 /*nDuration*/, IN ITimerListener* /*piListener*/) override
+    IMS_UINTP SetTimer(IN IMS_SINT64 /*nDuration*/, IN ITimerListener* /*piListener*/) override
     {
         return reinterpret_cast<IMS_UINTP>(this);
     }
@@ -124,7 +126,7 @@ TEST_F(TimerServiceTest, CreateTimer)
 
     EXPECT_CALL(m_objMockIOsFactory, CreateTimer()).Times(1).WillOnce(Return(m_pTestImsTimer));
 
-    ImsTimer* pImsTimer = static_cast<ImsTimer*>(pTimerService->CreateTimer());
+    const ImsTimer* pImsTimer = static_cast<ImsTimer*>(pTimerService->CreateTimer());
 
     ASSERT_TRUE(pImsTimer != IMS_NULL);
 
@@ -154,7 +156,7 @@ TEST_F(TimerServiceTest, DispatchServiceMessage)
 
     EXPECT_CALL(m_objMockIOsFactory, CreateTimer()).Times(1).WillOnce(Return(m_pTestImsTimer));
 
-    ITimer* pITimer = pTimerService->CreateTimer();
+    const ITimer* pITimer = pTimerService->CreateTimer();
 
     ASSERT_TRUE(pITimer != IMS_NULL);
 

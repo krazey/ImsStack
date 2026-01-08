@@ -18,41 +18,13 @@
 
 #include <gmock/gmock.h>
 
-#include "IEventReceiver.h"
-#include "IEventSender.h"
-#include "IFile.h"
-#include "IIpcan.h"
-#include "INetworkIpSec.h"
-#include "INetworkWatcher.h"
 #include "IOsFactory.h"
-#include "IPhoneInfoCall.h"
-#include "IPhoneInfoDevice.h"
-#include "IPhoneInfoLocation.h"
-#include "IPhoneInfoPower.h"
-#include "IPhoneInfoSubscriber.h"
-#include "ISystemProperty.h"
-#include "ISystemTime.h"
-#include "ISystemUtil.h"
-#include "IWifiWatcher.h"
-#include "IZLib.h"
-#include "ImsCarrierConfig.h"
-#include "ImsFdSet.h"
-#include "ImsFile.h"
-#include "ImsIsim.h"
-#include "ImsMutex.h"
-#include "ImsNetworkConnection.h"
-#include "ImsSocket.h"
-#include "ImsThread.h"
-#include "ImsTimer.h"
-#include "ImsTrace.h"
-#include "ImsUsim.h"
-#include "SslCertificate.h"
 
 class MockIOsFactory : public IOsFactory
 {
 public:
-    inline MockIOsFactory() {}
-    inline virtual ~MockIOsFactory() {}
+    MockIOsFactory() = default;
+    ~MockIOsFactory() override = default;
 
     MOCK_METHOD(void, Destroy, (), (override));
     MOCK_METHOD(ImsTrace*, CreateTrace, (), (override));

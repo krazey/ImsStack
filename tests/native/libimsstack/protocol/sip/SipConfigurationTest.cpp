@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
+
 #include "SipConfiguration.h"
 
 namespace android
@@ -36,7 +37,7 @@ TEST_F(SipConfigurationTest, SipConfigurationSetGetTest)
     /* Default values check */
     EXPECT_EQ(SIP_FALSE, pConfiguration->IsPANIHeaderReqdForACK());
 
-    unsigned int nOptions = pConfiguration->GetStackSettings();
+    SIP_UINT32 nOptions = pConfiguration->GetStackSettings();
     EXPECT_EQ(0, nOptions & SipConfiguration::MSG_OPT_ENCODE_MULTI_LINE);
     EXPECT_EQ(0, nOptions & SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM);
     EXPECT_EQ(0, nOptions & SipConfiguration::MSG_OPT_DECODE_STRICT);

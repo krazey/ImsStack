@@ -16,6 +16,7 @@
 
 package com.android.imsstack.enabler.mtc;
 
+import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -53,6 +54,9 @@ public class MtcCall extends Call implements ConferenceTracker {
     // For RTT call
     public static final int FLAG_RTT = 0x00000020;
 
+    // @ delimiter and host part for anonymous URI
+    private static final String ANONYMOUS_HOST = "@anonymous.invalid";
+
     /**
      * Listener interface for call operations via proxy
      */
@@ -75,8 +79,15 @@ public class MtcCall extends Call implements ConferenceTracker {
             // no-op
         }
 
-        public void onCallInitiating(MtcCall call,
-                CallInfo callInfo, MediaInfo mediaInfo) {
+        /**
+         * Called when the call is initiating.
+         *
+         * @param call The {@link MtcCall} object.
+         * @param callInfo The {@link CallInfo} of the call.
+         * @param mediaInfo The {@link MediaInfo} of the call.
+         */
+        public void onCallInitiating(MtcCall call, CallInfo callInfo, MediaInfo mediaInfo) {
+            // no-op
         }
 
         public void onCallProgressing(MtcCall call,
@@ -186,6 +197,13 @@ public class MtcCall extends Call implements ConferenceTracker {
             // no-op
         }
 
+        /**
+         * called when network is changed.
+         */
+        public void onCallInfoChanged(MtcCall call, CallInfo callInfo) {
+            // no-op
+        }
+
         public void onCallTransferred(MtcCall call) {
             // no-op
         }
@@ -268,12 +286,57 @@ public class MtcCall extends Call implements ConferenceTracker {
                 Set<RtpHeaderExtension> extensions) {
             // no-op
         }
+
+        /**
+        * Trigger Anbr query to discuss with the network whether the current media bitrate
+        * can be changed after receiving cmr.
+        *
+        * @param call the object of this {@code MtcCall}
+        * @param mediaType is used to identify media stream such as audio or video.
+        * @param direction of this packet stream (e.g. uplink or downlink).
+        * @param bitsPerSecond This value is the bitrate requested by the other party UE
+        *        through RTP CMR, RTCPAPP or TMMBR, and ImsStack converts this value
+        *        to the MAC bitrate (defined in TS36.321, range: 0 ~ 8000 kbit/s).
+        */
+        public void onTriggerAnbrQueryReceived(MtcCall call, int mediaType, int direction,
+                int bitsPerSecond) {
+            // no-op
+        }
+
+        /**
+         * A notification is sent when an incoming audio dtmf is received.
+         * @param call the object of this {@code MtcCall}
+         * @param numDtmfDigit Incoming audio dtmf digit
+         */
+        public void onNotifyIncomingDtmfReceived(MtcCall call, int numDtmfDigit) {
+            // no-op
+        }
+    }
+
+    /**
+     * A listener interface for handling emergency call failures.
+     *
+     * This listener is designed to be implemented by a module
+     * that needs to react to a specific type of emergency call failure,
+     * such as when an already-opened service unexpectedly closes.
+     */
+    public interface IEmergencyCallFailureListener {
+        /**
+         * Called when an emergency call fails because the already-opened service was closed.
+         *
+         * This method signals to the listener that the failure was due to a loss of a
+         * pre-existing emergency registration. Upon this event, the listener is expected
+         * to perform a recovery action, such as re-opening the emergency service and
+         * initiating a retry.
+         * @return true if the service reopen process was started successfully, false otherwise.
+         */
+        boolean onEmergencyCallFailedByAlreadyOpenedServiceClosed();
     }
 
     /**
      * Listener interface for audio session callback
      */
-    private class AudioSessionListener extends MtcMediaSession.AudioListener {
+    protected class AudioSessionListener extends MtcMediaSession.AudioListener {
         @Override
         public void onAudioSessionOpened() {
             Message.obtain(mHandler, MSG_AUDIO_SESSION_OPENED).sendToTarget();
@@ -293,12 +356,23 @@ public class MtcCall extends Call implements ConferenceTracker {
         public void onRtpHeaderExtensionsReceived(Set<RtpHeaderExtension> extensions) {
             Message.obtain(mHandler, MSG_AUDIO_RTP_EXTENSION_RECEIVED, extensions).sendToTarget();
         }
+
+        @Override
+        public void onTriggerAnbrQueryReceived(int mediaType, int direction, int bitsPerSecond) {
+            Message.obtain(mHandler, MSG_AUDIO_TRIGGER_ANBR_QUERY_RECEIVED, mediaType, direction,
+                    bitsPerSecond).sendToTarget();
+        }
+
+        @Override
+        public void onNotifyIncomingDtmfReceived(int dtmfDigit) {
+            Message.obtain(mHandler, MSG_AUDIO_INCOMING_DTMF_RECEIVED, dtmfDigit).sendToTarget();
+        }
     }
 
     /**
      * Listener interface for RTT call
      */
-    private class TextSessionListener extends MtcMediaSession.TextListener {
+    protected class TextSessionListener extends MtcMediaSession.TextListener {
         @Override
         public void onRttMessageReceived(MtcMediaSession session, String data) {
             log("onRttMessageReceived");
@@ -307,7 +381,7 @@ public class MtcCall extends Call implements ConferenceTracker {
                 return;
             }
 
-            if (mListener == null) {
+            if (!hasListener()) {
                 log("onRttMessageReceived :: Listener is null");
                 return;
             }
@@ -323,7 +397,7 @@ public class MtcCall extends Call implements ConferenceTracker {
                 return;
             }
 
-            if (mListener == null) {
+            if (!hasListener()) {
                 log("onRttAudioIndication :: Listener is null");
                 return;
             }
@@ -341,7 +415,7 @@ public class MtcCall extends Call implements ConferenceTracker {
      * Internal messages
      * Requests from application : 101 ~
      * Requests from native : 201 ~
-     * Requests from MtcCall : 301 ~
+     * Requests from MediaEnabler : 301 ~
      */
     /** Args: Parcel */
     private static final int MSG_SEND_REQUEST = 101;
@@ -358,22 +432,24 @@ public class MtcCall extends Call implements ConferenceTracker {
     private static final int MSG_CALL_HOLD_FAILED = 204;
     private static final int MSG_CALL_RESUME_FAILED = 205;
     private static final int MSG_CALL_TERMINATED = 206;
-    /** Args: None */
-    private static final int MSG_CALL_INITIATING = 301;
 
-    private static final int MSG_AUDIO_SESSION_OPENED = 401;
-    private static final int MSG_AUDIO_SESSION_CLOSED = 402;
-    private static final int MSG_AUDIO_QUALITY_CHANGED = 403;
-    private static final int MSG_AUDIO_RTP_EXTENSION_RECEIVED = 404;
+    /** From MediaEnabler */
+    private static final int MSG_AUDIO_SESSION_OPENED = 301;
+    private static final int MSG_AUDIO_SESSION_CLOSED = 302;
+    private static final int MSG_AUDIO_QUALITY_CHANGED = 303;
+    private static final int MSG_AUDIO_RTP_EXTENSION_RECEIVED = 304;
+    private static final int MSG_AUDIO_TRIGGER_ANBR_QUERY_RECEIVED = 305;
+    private static final int MSG_AUDIO_INCOMING_DTMF_RECEIVED = 306;
 
     private final MessageHandler mHandler;
     private final JNIImsListenerProxy mNativeListener = new JNIImsListenerProxy();
     private final CallTracker mCT;
     private final MtcConference mConference;
-    private final MtcMediaSession mMediaSession;
+    protected MtcMediaSession mMediaSession;
     private MtcCall.Listener mListener = null;
-    private MtcCall.AudioSessionListener mAudioListener = null;
-    private MtcCall.TextSessionListener mTextListener = null;
+    private MtcCall.IEmergencyCallFailureListener mEmergencyCallFailureListener = null;
+    protected MtcCall.AudioSessionListener mAudioListener = null;
+    protected MtcCall.TextSessionListener mTextListener = null;
     private MtcCallInfo mCallInfo = null;
     private MediaInfo mMediaInfo = null;
     private CallReasonInfo mTerminationReason = null;
@@ -381,6 +457,7 @@ public class MtcCall extends Call implements ConferenceTracker {
     /** It will be controlled when audio is in sendrecv & video direction is only changed */
     private int mVideoState = ONE_WAY_VIDEO_NONE;
     private MtcJniProxy mMtcJniProxy;
+    private boolean mUsingAlreadyOpenedEmergencyService = false;
 
     boolean mJniCreated;
 
@@ -425,29 +502,14 @@ public class MtcCall extends Call implements ConferenceTracker {
                     getCallType(),
                     isConference());
 
-        mMediaInfo = new MediaInfo(
-                    MediaInfo.AUDIO_QUALITY_AMR_WB,
-                    MediaInfo.VIDEO_QUALITY_NONE,
-                    MediaInfo.DIRECTION_SEND_RECEIVE,
-                    MediaInfo.DIRECTION_INVALID,
-                    MediaInfo.DIRECTION_INVALID,
-                    MediaInfo.GTTMODE_INVALID);
-
         mConference = new MtcConference(mContext.getCallLooper(), this, this);
-        mMediaSession = new MtcMediaSession(mContext, this);
-
-        mAudioListener = new AudioSessionListener();
-        mMediaSession.setAudioListener(mAudioListener);
-
-        if (CallFeature.isRttSupported(mContext.getSlotId())) {
-            mTextListener = new TextSessionListener();
-            mMediaSession.setTextListener(mTextListener);
-        }
 
         // ConferenceInfo: to manage the participants in the conference call
         if (isConference()) {
             ConferenceInfoHelper.createConferenceInfo(getCallId());
         }
+
+        initMedia();
 
         logi(toString());
     }
@@ -478,6 +540,11 @@ public class MtcCall extends Call implements ConferenceTracker {
     @VisibleForTesting
     MtcMediaSession.TextListener getTextListener() {
         return mTextListener;
+    }
+
+    @VisibleForTesting
+    boolean hasListener() {
+        return mListener != null;
     }
 
     @Override
@@ -558,7 +625,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
         sendRequest(parcel);
 
-        if (immediateCallback && (mListener != null)) {
+        if (immediateCallback && hasListener()) {
             CallReasonInfo callReasonInfo = new CallReasonInfo(
                     CallReasonInfo.CODE_USER_TERMINATED, 0, "");
 
@@ -575,8 +642,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         sb.append("[ MtcCall: id=");
         sb.append(Long.toHexString(getNativeCallId()));
         sb.append(", state=");
-        sb.append(callStateToString(getCallState()));
-        sb.append(", index=");
         sb.append(getCallIndex());
         sb.append(", connectionid=");
         sb.append(getCallConnectionId() + "");
@@ -604,17 +669,17 @@ public class MtcCall extends Call implements ConferenceTracker {
             sb.append(", { mediaInfo=null }");
         } else {
             sb.append(", { AQ=");
-            sb.append(mMediaInfo.AQuality);
+            sb.append(mMediaInfo.audioQuality);
             sb.append(", AD=");
-            sb.append(mMediaInfo.ADir);
+            sb.append(mMediaInfo.audioDir);
             sb.append(", VQ=");
-            sb.append(mMediaInfo.VQuality);
+            sb.append(mMediaInfo.videoQuality);
             sb.append(", VD=");
-            sb.append(mMediaInfo.VDir);
+            sb.append(mMediaInfo.videoDir);
             sb.append(", TD=");
-            sb.append(mMediaInfo.TDir);
+            sb.append(mMediaInfo.textDir);
             sb.append(", GTT=");
-            sb.append(mMediaInfo.GTTMode);
+            sb.append(mMediaInfo.gttMode);
             sb.append(" }");
         }
 
@@ -781,7 +846,6 @@ public class MtcCall extends Call implements ConferenceTracker {
 
         setCallType(MtcCallInfo.getCallType(incomingCall.callInfo));
 
-        // FIXME: is this required?
         updateCallParameters(incomingCall.callInfo,
                 incomingCall.mediaInfo, incomingCall.suppInfo);
         updateCallExtraForEmergency(incomingCall.callInfo);
@@ -806,28 +870,28 @@ public class MtcCall extends Call implements ConferenceTracker {
         logi("setListener :: " + ((listener != null) ? getCallId() : "(null)"));
 
         mListener = listener;
+    }
 
-        if ((mListener != null) && isTerminated()) {
-            if (!isOnceInCall()) {
-                notifyStartFailed();
-            } else {
-                Message.obtain(mHandler, MSG_CALL_TERMINATED,
-                        getOrCreateTerminationReason()).sendToTarget();
-            }
-        }
+    /**
+     * Sets the listener to be notified when an emergency call fails.
+     */
+    public void setEmergencyCallFailureListener(
+            @Nullable MtcCall.IEmergencyCallFailureListener listener) {
+        mEmergencyCallFailureListener = listener;
     }
 
     /**
      * Creates an outgoing call before it starts.
      */
-    public void open(int serviceType, boolean emergency, boolean offline,
-            boolean ussi) {
+    public void open(int serviceType, int emergencyType, boolean offline, boolean ussi,
+            boolean usingAlreadyOpenedEmergencyService) {
+        mUsingAlreadyOpenedEmergencyService = usingAlreadyOpenedEmergencyService;
         Parcel parcel = Parcel.obtain();
 
         parcel.writeInt(IUMtcCall.OPEN);
         parcel.writeInt(serviceType);
         parcel.writeInt(getCallType());
-        parcel.writeInt(emergency ? 1 : 0);
+        parcel.writeInt(emergencyType);
         parcel.writeInt(offline ? 1 : 0);
         parcel.writeInt(ussi ? 1 : 0);
 
@@ -858,8 +922,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         mediaInfo.writeToParcel(parcel, 1);
         suppInfo.writeToParcel(parcel, 1);
 
-        parcel.writeString(getLogTag());
-
         // Update the call/media info.
         mCallInfo.setCallType(callType);
         MtcCallUtils.copyMediaInfo(mediaInfo, mMediaInfo);
@@ -876,8 +938,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
 
         mCT.updateCallState(this, CallTracker.CALL_EVENT_ESTABLISHING, null);
-
-        notifyInitiating();
     }
 
     public void startConference(int callType, UsersInfo usersInfo,
@@ -919,8 +979,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         sendRequest(parcel);
 
         mCT.updateCallState(this, CallTracker.CALL_EVENT_ESTABLISHING, null);
-
-        notifyInitiating();
     }
 
     /**
@@ -945,7 +1003,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         Parcel parcel = Parcel.obtain();
 
         parcel.writeInt(IUMtcCall.USER_ALERT);
-        parcel.writeString(getLogTag());
 
         sendRequest(parcel);
 
@@ -997,8 +1054,6 @@ public class MtcCall extends Call implements ConferenceTracker {
                 setUpdateState(UPDATE_STATE_ACCEPTED);
             }
         }
-
-        parcel.writeString(getLogTag());
 
         sendRequest(parcel);
 
@@ -1200,6 +1255,23 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
     }
 
+    /**
+     * Deliver the bitrate for the indicated media type, direction and bitrate to the upper layer.
+     *
+     * @param mediaType MediaType is used to identify media stream such as audio or video.
+     * @param direction Direction of this packet stream (e.g. uplink or downlink).
+     * @param bitsPerSecond This value is the bitrate received from the NW through the Recommended
+     *        bitrate MAC Control Element message and ImsStack converts this value from MAC bitrate
+     *        to audio/video codec bitrate (defined in TS26.114).
+     */
+    public void notifyAnbr(int mediaType, int direction, int bitsPerSecond) {
+        logi("notifyAnbr - call mediaSession");
+
+        if (mMediaSession != null) {
+            mMediaSession.notifyAnbr(mediaType, direction, bitsPerSecond);
+        }
+    }
+
     public void sendUssd(String ussdMessage) {
         log("sendUssd :: ussdMessage=" + ussdMessage);
 
@@ -1216,7 +1288,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
         if (TextUtils.isEmpty(confUid)) {
             anonymousId = ConferenceInfoHelper.getAnonymousId();
-            confUid = ANONYMOUS + anonymousId;
+            confUid = ANONYMOUS + anonymousId + ANONYMOUS_HOST;
         } else {
             // Do percent-encoding if remote end's number contains '#'
             confUid = confUid.replace("#", "%23");
@@ -1244,7 +1316,6 @@ public class MtcCall extends Call implements ConferenceTracker {
     }
 
     public MtcMediaSession getMediaSession() {
-        // FIXME: define the media session
         return mMediaSession;
     }
 
@@ -1273,6 +1344,24 @@ public class MtcCall extends Call implements ConferenceTracker {
         return false;
     }
 
+    protected void initMedia() {
+        mMediaInfo = new MediaInfo(
+                MediaInfo.AUDIO_QUALITY_AMR_WB,
+                MediaInfo.VIDEO_QUALITY_NONE,
+                MediaInfo.DIRECTION_SEND_RECEIVE,
+                MediaInfo.DIRECTION_INVALID,
+                MediaInfo.DIRECTION_INVALID,
+                MediaInfo.GTTMODE_INVALID);
+
+        mMediaSession = new MtcMediaSession(mContext, this);
+
+        mAudioListener = new AudioSessionListener();
+        mMediaSession.setAudioListener(mAudioListener);
+
+        mTextListener = new TextSessionListener();
+        mMediaSession.setTextListener(mTextListener);
+    }
+
     protected MtcCall createAndSetMtcCallForConference(
             long jniConfCallId, CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo) {
         MtcCall confCall = new MtcCall(mContext, mCT, isEmergencyCall()
@@ -1282,7 +1371,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         confCall.setAdhocGroup();
         confCall.setCallType(getCallType());
         confCall.setCallState(CallTracker.CALL_STATE_OFFHOOK);
-        // FIXME: Is it a correct information for the new call?
         confCall.updateCallParameters(callInfo, mediaInfo, suppInfo);
 
         return confCall;
@@ -1294,7 +1382,6 @@ public class MtcCall extends Call implements ConferenceTracker {
                     getCallType() + " >> " + callType);
             setCallType(callType);
 
-            // FIXME: how to restore the conversation state?
             clearHoldState();
             return true;
         }
@@ -1317,15 +1404,6 @@ public class MtcCall extends Call implements ConferenceTracker {
     private CallReasonInfo getOrCreateTerminationReason() {
         return (mTerminationReason != null) ? new CallReasonInfo(mTerminationReason) :
                 new CallReasonInfo(CallReasonInfo.CODE_USER_TERMINATED_BY_REMOTE, 0, "");
-    }
-
-    private void notifyInitiating() {
-        if (!isCallValid()) {
-            loge("Call is already closed");
-            return;
-        }
-
-        Message.obtain(mHandler, MSG_CALL_INITIATING).sendToTarget();
     }
 
     private void notifyStartFailed() {
@@ -1483,21 +1561,21 @@ public class MtcCall extends Call implements ConferenceTracker {
     private void updateCallExtraFromSuppInfo(SuppInfo si) {
         removeAllCallExtrasFromSuppInfo();
 
-        for (SuppInfo.SuppService ss : si.objSuppService) {
+        for (SuppServiceUtils.SuppService ss : si.getServices()) {
             if (MtcCallUtils.isSuppInfoBoolean(ss.type)) {
-                String key = SuppInfoUtils.getKey(ss.type);
+                String key = SuppServiceUtils.getKey(ss.type);
 
                 if (key != null) {
                     setCallExtraBoolean(key, ss.boolValue);
                 }
             } else if (MtcCallUtils.isSuppInfoInt(ss.type)) {
-                String key = SuppInfoUtils.getKey(ss.type);
+                String key = SuppServiceUtils.getKey(ss.type);
 
                 if (key != null) {
                     setCallExtraInt(key, ss.intValue);
                 }
             } else if (MtcCallUtils.isSuppInfoString(ss.type)) {
-                String key = SuppInfoUtils.getKey(ss.type);
+                String key = SuppServiceUtils.getKey(ss.type);
 
                 if (key != null) {
                     setCallExtra(key, ss.strValue);
@@ -1546,6 +1624,41 @@ public class MtcCall extends Call implements ConferenceTracker {
         parcelText.setDataPosition(0);
         mMediaSession.onMessage(parcelText);
         parcelText.recycle();
+    }
+
+    private CallReasonInfo updateCallReasonInfoOnInvalidCallKey(
+            final CallReasonInfo callReasonInfo) {
+        if (callReasonInfo.mCode != CallReasonInfo.CODE_LOCAL_INTERNAL_ERROR) {
+            return callReasonInfo;
+        }
+        if (callReasonInfo.mExtraCode
+                != CallReasonInfo.EXTRA_CODE_INTERNAL_ERROR_INVALID_CALL_KEY) {
+            return callReasonInfo;
+        }
+        return new CallReasonInfo(CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED,
+                isEmergencyCall() ? CallReasonInfo.EXTRA_CODE_CALL_RETRY_EMERGENCY
+                : CallReasonInfo.EXTRA_CODE_CALL_RETRY_SILENT_REDIAL, "");
+    }
+
+    private boolean isCallFailedByAlreadyOpenedServiceClosed(
+            final CallReasonInfo callReasonInfo) {
+        if (!mUsingAlreadyOpenedEmergencyService) {
+            return false;
+        }
+
+        if (callReasonInfo.mCode == CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED
+                && CallReasonInfo.EXTRA_MESSAGE_AOS_DISCONNECTED.equals(
+                        callReasonInfo.mExtraMessage)) {
+            return true;
+        }
+
+        if (callReasonInfo.mCode == CallReasonInfo.CODE_LOCAL_INTERNAL_ERROR
+                && callReasonInfo.mExtraCode
+                        == CallReasonInfo.EXTRA_CODE_INTERNAL_ERROR_INVALID_CALL_KEY) {
+            return true;
+        }
+
+        return false;
     }
 
     private static void closeInternal(final MtcCall call) {
@@ -1655,10 +1768,6 @@ public class MtcCall extends Call implements ConferenceTracker {
             }
 
             switch (msg.what) {
-                case MSG_CALL_INITIATING: {
-                    listener.onCallInitiating(MtcCall.this, getCallInfo(), getMediaInfo());
-                    break;
-                }
                 case MSG_CALL_START_FAILED: {
                     listener.onCallStartFailed(MtcCall.this, (CallReasonInfo) msg.obj);
                     break;
@@ -1694,6 +1803,15 @@ public class MtcCall extends Call implements ConferenceTracker {
                 case MSG_AUDIO_RTP_EXTENSION_RECEIVED: {
                     listener.onCallRtpHeaderExtensionsReceived(
                             MtcCall.this, (Set<RtpHeaderExtension>) msg.obj);
+                    break;
+                }
+                case MSG_AUDIO_TRIGGER_ANBR_QUERY_RECEIVED: {
+                    listener.onTriggerAnbrQueryReceived(MtcCall.this, msg.arg1, msg.arg2,
+                            (int) msg.obj);
+                    break;
+                }
+                case MSG_AUDIO_INCOMING_DTMF_RECEIVED: {
+                    listener.onNotifyIncomingDtmfReceived(MtcCall.this, (int) msg.obj);
                     break;
                 }
                 default:
@@ -1739,7 +1857,7 @@ public class MtcCall extends Call implements ConferenceTracker {
             }
 
             // Checks if the listener is alive
-            if ((mListener == null) && isTerminated()) {
+            if ((!hasListener()) && isTerminated()) {
                 loge("Listener is null & terminated");
                 handleStartFailedOrTerminated(msg, parcel);
                 return;
@@ -1749,6 +1867,13 @@ public class MtcCall extends Call implements ConferenceTracker {
             }
 
             switch (msg) {
+                case IUMtcCall.INITIATING: {
+                    CallInfo callInfo = new CallInfo(parcel);
+                    MediaInfo mediaInfo = new MediaInfo(parcel);
+
+                    onInitiating(callInfo, mediaInfo);
+                    break;
+                }
                 case IUMtcCall.PROGRESSING: {
                     CallInfo callInfo = new CallInfo(parcel);
                     MediaInfo mediaInfo = new MediaInfo(parcel);
@@ -1863,6 +1988,11 @@ public class MtcCall extends Call implements ConferenceTracker {
                     onIncomingCallReceived(new IncomingMtcCall(parcel));
                     break;
                 }
+                case IUMtcCall.CALL_INFO_CHANGED: {
+                    CallInfo callInfo = new CallInfo(parcel);
+                    onCallInfoChanged(callInfo);
+                    break;
+                }
                 case IUMtcCall.ECT_COMPLETED: {
                     int result = parcel.readInt();
                     CallReasonInfo callReasonInfo = (result == 0)
@@ -1896,10 +2026,6 @@ public class MtcCall extends Call implements ConferenceTracker {
                     boolean boolValue = (parcel.readInt() == 1);
 
                     onNotifyInfo(type, strValue, intValue, boolValue);
-                    break;
-                }
-                case IUMtcCall.CODEC_INFO_UPDATED: {
-                    // TODO: needs to be deleted
                     break;
                 }
                 default:
@@ -1938,6 +2064,14 @@ public class MtcCall extends Call implements ConferenceTracker {
             closeInternal(MtcCall.this);
         }
 
+        private void onInitiating(CallInfo callInfo, MediaInfo mediaInfo) {
+            logi("INITIATING");
+
+            if (hasListener()) {
+                mListener.onCallInitiating(MtcCall.this, callInfo, mediaInfo);
+            }
+        }
+
         private void onProgressing(CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo) {
             logi("PROGRESSING :: " + MtcCallUtils.toString(callInfo)
                     + ", " + MtcCallUtils.toString(mediaInfo)
@@ -1948,7 +2082,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             setCallState(CallTracker.CALL_STATE_RINGBACK);
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallProgressing(
                         MtcCall.this, callInfo, mediaInfo, suppInfo);
             }
@@ -1977,7 +2111,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             mCT.updateCallState(MtcCall.this, CallTracker.CALL_EVENT_ESTABLISHED, null);
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallStarted(
                         MtcCall.this, callInfo, mediaInfo, suppInfo);
             }
@@ -1992,6 +2126,20 @@ public class MtcCall extends Call implements ConferenceTracker {
         private void onStartFailed(CallReasonInfo callReasonInfo) {
             logi("START_FAILED :: " + MtcCallUtils.toString(callReasonInfo));
 
+            if (isCallFailedByAlreadyOpenedServiceClosed(callReasonInfo)) {
+                if (mEmergencyCallFailureListener != null && mEmergencyCallFailureListener
+                        .onEmergencyCallFailedByAlreadyOpenedServiceClosed()) {
+                    mUsingAlreadyOpenedEmergencyService = false;
+                    Message.obtain(mHandler, MSG_CLEAR_INTERFACE,
+                            Long.valueOf(getNativeCallId())).sendToTarget();
+                    updateNativeCallObject(0);
+                    mJniCreated = false;
+                    return;
+                }
+            }
+
+            callReasonInfo = updateCallReasonInfoOnInvalidCallKey(callReasonInfo);
+
             setCallState(CallTracker.CALL_STATE_IDLE);
 
             if (MtcCallUtils.isCallTerminatedByCSRetry(callReasonInfo.mCode)) {
@@ -2005,7 +2153,7 @@ public class MtcCall extends Call implements ConferenceTracker {
                 mCT.updateCallState(MtcCall.this, CallTracker.CALL_EVENT_TERMINATED, null);
             }
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallStartFailed(MtcCall.this, callReasonInfo);
             }
         }
@@ -2022,7 +2170,7 @@ public class MtcCall extends Call implements ConferenceTracker {
             mCT.updateCallState(MtcCall.this, CallTracker.CALL_EVENT_TERMINATED, null);
 
             // SYNC_WITH_MEDIA_CLOSE
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallTerminated(MtcCall.this, callReasonInfo);
             }
         }
@@ -2039,7 +2187,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             mCT.updateCallState(MtcCall.this, CallTracker.CALL_EVENT_UPDATED, null);
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallHeld(
                         MtcCall.this, callInfo, mediaInfo, suppInfo);
             }
@@ -2048,7 +2196,7 @@ public class MtcCall extends Call implements ConferenceTracker {
         private void onHoldFailed(CallReasonInfo callReasonInfo) {
             logi("HOLD_FAILED :: " + MtcCallUtils.toString(callReasonInfo));
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallHoldFailed(MtcCall.this, callReasonInfo);
             }
         }
@@ -2065,7 +2213,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             mCT.updateCallState(MtcCall.this, CallTracker.CALL_EVENT_UPDATED, null);
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallHoldReceived(
                         MtcCall.this, callInfo, mediaInfo, suppInfo);
             }
@@ -2089,7 +2237,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             mCT.updateCallState(MtcCall.this, CallTracker.CALL_EVENT_UPDATED, null);
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallResumed(
                         MtcCall.this, callInfo, mediaInfo, suppInfo);
             }
@@ -2098,7 +2246,7 @@ public class MtcCall extends Call implements ConferenceTracker {
         private void onResumeFailed(CallReasonInfo callReasonInfo) {
             logi("RESUME_FAILED :: " + MtcCallUtils.toString(callReasonInfo));
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallResumeFailed(MtcCall.this, callReasonInfo);
             }
         }
@@ -2115,7 +2263,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             mCT.updateCallState(MtcCall.this, CallTracker.CALL_EVENT_UPDATED, null);
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallResumeReceived(
                         MtcCall.this, callInfo, mediaInfo, suppInfo);
             }
@@ -2135,7 +2283,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             mCT.updateCallState(MtcCall.this, CallTracker.CALL_EVENT_UPDATED, null);
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallAutoUpdated(
                         MtcCall.this, callInfo, mediaInfo, suppInfo);
             }
@@ -2187,7 +2335,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             mCT.updateCallState(MtcCall.this, CallTracker.CALL_EVENT_UPDATED, null);
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallUpdated(
                         MtcCall.this, callInfo, mediaInfo, suppInfo);
             }
@@ -2202,7 +2350,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             setUpdateState(UPDATE_STATE_IDLE);
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallUpdateFailed(MtcCall.this, callReasonInfo);
             }
         }
@@ -2221,7 +2369,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             setUpdateState(UPDATE_STATE_RECEIVED);
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallUpdateReceived(
                         MtcCall.this, callInfo, mediaInfo, suppInfo);
             }
@@ -2235,7 +2383,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             setUpdateState(UPDATE_STATE_RESUME_RECEIVED);
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallUpdateResumeReceived(
                         MtcCall.this, callInfo, mediaInfo, suppInfo);
             }
@@ -2250,15 +2398,21 @@ public class MtcCall extends Call implements ConferenceTracker {
             mCT.updateCallState(
                     MtcCall.this, CallTracker.CALL_EVENT_INCOMING_RECEIVED, null);
 
-            if (mListener != null) {
+            if (hasListener()) {
                 mListener.onCallIncomingReceived(MtcCall.this, incomingCall);
+            }
+        }
+
+        private void onCallInfoChanged(CallInfo callInfo) {
+            if (hasListener()) {
+                mListener.onCallInfoChanged(MtcCall.this, callInfo);
             }
         }
 
         private void onEctCompleted(int result, CallReasonInfo callReasonInfo) {
             logi("ECT_COMPLETED :: result=" + result);
 
-            if (mListener == null) {
+            if (!hasListener()) {
                 return;
             }
 
@@ -2276,8 +2430,7 @@ public class MtcCall extends Call implements ConferenceTracker {
                     + ", " + MtcCallUtils.toString(mediaInfo)
                     + ", " + MtcCallUtils.toString(suppInfo));
 
-            if (mListener == null) {
-                // FIXME: close Mtc call if present
+            if (!hasListener()) {
                 return;
             }
 
@@ -2291,7 +2444,6 @@ public class MtcCall extends Call implements ConferenceTracker {
                 newCall.updateNativeCallObject(newNativeCallId);
                 newCall.setCallType(MtcCallInfo.getCallType(callInfo));
                 newCall.setCallState(CallTracker.CALL_STATE_OFFHOOK);
-                // FIXME: Is it a correct information for the new call?
                 newCall.updateCallParameters(callInfo, mediaInfo, suppInfo);
                 mCT.updateCallState(newCall, CallTracker.CALL_EVENT_CREATE, null);
             }
@@ -2299,15 +2451,13 @@ public class MtcCall extends Call implements ConferenceTracker {
             if (typeForReplacedBy == IUMtcCall.REPLACED_BY_TYPE_ECT) {
                 mListener.onCallTransferReceived(MtcCall.this, newCall, callInfo, mediaInfo,
                         suppInfo);
-            } else {
-                // FIXME: close new Mtc call ?
             }
         }
 
         private void onCallPushCompleted(int result, CallReasonInfo callReasonInfo) {
             logi("CALL_PUSH_COMPLETED :: result=" + result);
 
-            if (mListener == null) {
+            if (!hasListener()) {
                 return;
             }
 
@@ -2325,7 +2475,7 @@ public class MtcCall extends Call implements ConferenceTracker {
             if (MtcCallUtils.isInfoTypeForMediaSession(type)) {
                 mMediaSession.notifyMediaInfoChanged(type, intValue, strValue);
             } else {
-                if (mListener != null) {
+                if (hasListener()) {
                     mListener.onCallInfoUpdated(
                             MtcCall.this, type, strValue, intValue, boolValue);
                 }
@@ -2388,29 +2538,21 @@ public class MtcCall extends Call implements ConferenceTracker {
     // MTC_CONFERENCE_WRAPPER }
 
     static {
-        SuppInfoUtils.addKey(SuppInfo.TYPE_MMC, EXTRA_MMC);
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_MMC, SuppInfoUtils.TYPE_BOOLEAN);
-        SuppInfoUtils.addKey(SuppInfo.TYPE_GTT, EXTRA_GTT);
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_GTT, SuppInfoUtils.TYPE_BOOLEAN);
-        SuppInfoUtils.addKey(SuppInfo.TYPE_VM, EXTRA_VMS);
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_VM, SuppInfoUtils.TYPE_BOOLEAN);
+        SuppServiceUtils.addKey(SuppInfo.SUPP_TYPE_CDIV_CAUSE, EXTRA_CDIV_CAUSE);
+        SuppServiceUtils.addValueType(SuppInfo.SUPP_TYPE_CDIV_CAUSE, SuppServiceUtils.TYPE_INT);
 
-        SuppInfoUtils.addKey(SuppInfo.TYPE_CDIV_CAUSE, EXTRA_CDIV_CAUSE);
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_CDIV_CAUSE, SuppInfoUtils.TYPE_INT);
-
-        SuppInfoUtils.addKey(SuppInfo.TYPE_CNAP, EXTRA_CNA);
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_CNAP, SuppInfoUtils.TYPE_STRING);
-        SuppInfoUtils.addKey(SuppInfo.TYPE_CDIV_HISTORY, EXTRA_CDIV_HISTORY);
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_CDIV_HISTORY, SuppInfoUtils.TYPE_STRING);
+        SuppServiceUtils.addKey(SuppInfo.SUPP_TYPE_CNAP, EXTRA_CNA);
+        SuppServiceUtils.addValueType(SuppInfo.SUPP_TYPE_CNAP, SuppServiceUtils.TYPE_STRING);
+        SuppServiceUtils.addKey(SuppInfo.SUPP_TYPE_CDIV_HISTORY, EXTRA_CDIV_HISTORY);
+        SuppServiceUtils.addValueType(
+                SuppInfo.SUPP_TYPE_CDIV_HISTORY, SuppServiceUtils.TYPE_STRING);
 
         // The below things are not managed for extra call information
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_CW, SuppInfoUtils.TYPE_BOOLEAN);
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_ANSWERHOLD, SuppInfoUtils.TYPE_BOOLEAN);
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_ENFORCE_LT, SuppInfoUtils.TYPE_BOOLEAN);
+        SuppServiceUtils.addValueType(SuppInfo.SUPP_TYPE_CW, SuppServiceUtils.TYPE_BOOLEAN);
+        SuppServiceUtils.addValueType(SuppInfo.SUPP_TYPE_ENFORCE_LT, SuppServiceUtils.TYPE_BOOLEAN);
 
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_CALLERID, SuppInfoUtils.TYPE_INT);
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_CALLING_NUM_VERIFICATION, SuppInfoUtils.TYPE_INT);
-
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_DUALNUMBER, SuppInfoUtils.TYPE_STRING);
+        SuppServiceUtils.addValueType(SuppInfo.SUPP_TYPE_CALLERID, SuppServiceUtils.TYPE_INT);
+        SuppServiceUtils.addValueType(
+                SuppInfo.SUPP_TYPE_CALLING_NUM_VERIFICATION, SuppServiceUtils.TYPE_INT);
     }
 }

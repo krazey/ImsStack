@@ -16,6 +16,8 @@
 #ifndef SDP_BANDWIDTH_H_
 #define SDP_BANDWIDTH_H_
 
+#include "AString.h"
+
 #include "SdpLine.h"
 
 class SdpBandwidth : public SdpLine
@@ -23,7 +25,7 @@ class SdpBandwidth : public SdpLine
 public:
     SdpBandwidth();
     SdpBandwidth(IN const SdpBandwidth& other);
-    virtual ~SdpBandwidth();
+    ~SdpBandwidth() override;
 
 public:
     SdpBandwidth& operator=(IN const SdpBandwidth& other);

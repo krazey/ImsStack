@@ -18,33 +18,6 @@
 #define INTERFACE_MTC_EMERGENCY_SERVICE_MANAGER_H_
 
 #include "ImsTypeDef.h"
-#include "IuMtcService.h"
-
-using EmergencyCallRoutingPdn = IuMtcService::EmergencyCallRoutingPdn;
-
-/**
- * This class controls the emergency service before starting emergency calls for various PDN types.
- * And notifies the service state to the Java layer.
- */
-class IMtcEmergencyServiceManager
-{
-public:
-    virtual ~IMtcEmergencyServiceManager(){};
-
-    /**
-     * Starts the process for an emergency service opening using the given PDN type.
-     *
-     * @param ePdn PDN type to routing emergency call.
-     */
-    virtual void StartOpen(IN EmergencyCallRoutingPdn ePdn) = 0;
-
-    /**
-     * Stops the ongoing process and releases the resources.
-     *
-     * @param bClose Close the emergency service if true.
-     */
-    virtual void StopOpen(IN IMS_BOOL bClose) = 0;
-};
 
 /**
  * Controls emergency service per the device state.
@@ -52,7 +25,15 @@ public:
 class IEmergencyServiceController
 {
 public:
-    virtual ~IEmergencyServiceController(){};
+    enum class State
+    {
+        IDLE,
+        OPENING,
+        OPENED,
+        CLOSED,
+    };
+
+    virtual ~IEmergencyServiceController() {};
 
     /**
      * Triggers an emergency service start.
@@ -65,11 +46,50 @@ public:
     virtual void Close() = 0;
 
     /**
-     * Returns PDN type of the controller using.
+     * Returns service type of the controller using.
      *
-     * @return EmergencyCallRoutingPdn PDN type.
+     * @return ServiceType Service type.
      */
-    virtual EmergencyCallRoutingPdn GetRoutingPdnType() const = 0;
+    virtual ServiceType GetServiceType() const = 0;
+
+    /**
+     * Gets current emergency service status.
+     *
+     * @return Current status.
+     */
+    virtual State GetState() const = 0;
+};
+
+/**
+ * This class controls the emergency service before starting emergency calls for various service
+ * types.
+ * And notifies the service state to the Java layer.
+ */
+class IMtcEmergencyServiceManager
+{
+public:
+    virtual ~IMtcEmergencyServiceManager() {};
+
+    /**
+     * Starts the process for an emergency service opening using the given service type.
+     *
+     * @param eServiceType Service type to open.
+     */
+    virtual void StartOpen(IN ServiceType eServiceType) = 0;
+
+    /**
+     * Stops the ongoing process and releases the resources.
+     *
+     * @param bClose Close the emergency service if true.
+     */
+    virtual void StopOpen(IN IMS_BOOL bClose) = 0;
+
+    /**
+     * Gets current emergency service status.
+     *
+     * @return Current status. {@code IDLE} if there's no service opened or service is unavailable.
+     */
+    virtual IEmergencyServiceController::State GetState() const = 0;
 };
 
 #endif

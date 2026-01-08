@@ -37,7 +37,7 @@ public final class MtcCallInfo {
     public void copyFrom(CallInfo ci) {
         mCallInfo.serviceType = ci.serviceType;
         mCallInfo.callType = ci.callType;
-        mCallInfo.emergency = ci.emergency;
+        mCallInfo.emergencyType = ci.emergencyType;
         mCallInfo.offline = ci.offline;
         mCallInfo.ussi = ci.ussi;
         mCallInfo.isConf = ci.isConf;
@@ -59,8 +59,8 @@ public final class MtcCallInfo {
         return getCallType(mCallInfo);
     }
 
-    public boolean isEmergency() {
-        return isEmergency(mCallInfo);
+    public int getEmergencyType() {
+        return getEmergencyType(mCallInfo);
     }
 
     public boolean isOffline() {
@@ -99,8 +99,13 @@ public final class MtcCallInfo {
         setCallType(mCallInfo, callType);
     }
 
-    public void setEmergency(boolean enabled) {
-        setEmergency(mCallInfo, enabled);
+    /**
+     * Set emergency type.
+     *
+     * @param emergencyType emergency type
+     */
+    public void setEmergencyType(int emergencyType) {
+        setEmergencyType(mCallInfo, emergencyType);
     }
 
     public void setOffline(boolean enabled) {
@@ -134,7 +139,7 @@ public final class MtcCallInfo {
     public static void copy(CallInfo src, CallInfo dest) {
         dest.serviceType = src.serviceType;
         dest.callType = src.callType;
-        dest.emergency = src.emergency;
+        dest.emergencyType = src.emergencyType;
         dest.offline = src.offline;
         dest.ussi = src.ussi;
         dest.isConf = src.isConf;
@@ -152,8 +157,24 @@ public final class MtcCallInfo {
         return ci.callType;
     }
 
-    public static boolean isEmergency(CallInfo ci) {
-        return ci.emergency;
+    /**
+     * Get emergency type from given {@code CallInfo}.
+     *
+     * @param ci call info
+     * @return emergency type
+     */
+    public static int getEmergencyType(CallInfo ci) {
+        return ci.emergencyType;
+    }
+
+    /**
+     * Returns the radio access technology type for the given call.
+     *
+     * @param ci The {@link CallInfo} object to get.
+     * @return The radio access technology type.
+     */
+    public static int getRatType(CallInfo ci) {
+        return ci.ratType;
     }
 
     public static boolean isOffline(CallInfo ci) {
@@ -184,6 +205,19 @@ public final class MtcCallInfo {
         return ci.videoCapable;
     }
 
+    /**
+     * Checks if the call is a cross-SIM call.
+     *
+     * A cross-SIM call is one where the data connection of one SIM is used to facilitate
+     * a call (e.g., VoLTE or VoWiFi) on another SIM.
+     *
+     * @param ci The {@link CallInfo} object to check.
+     * @return {@code true} if the call is a cross-SIM call, {@code false} otherwise.
+     */
+    public static boolean isCrossSim(CallInfo ci) {
+        return ci.crossSim;
+    }
+
     public static void setServiceType(CallInfo ci, int serviceType) {
         ci.serviceType = serviceType;
     }
@@ -192,8 +226,14 @@ public final class MtcCallInfo {
         ci.callType = callType;
     }
 
-    public static void setEmergency(CallInfo ci, boolean enabled) {
-        ci.emergency = enabled;
+    /**
+     * Set emergency type to given {@code CallInfo}.
+     *
+     * @param ci call info
+     * @param emergencyType emergency type
+     */
+    public static void setEmergencyType(CallInfo ci, int emergencyType) {
+        ci.emergencyType = emergencyType;
     }
 
     public static void setOffline(CallInfo ci, boolean enabled) {
@@ -222,5 +262,25 @@ public final class MtcCallInfo {
 
     public static void setVideoCapable(CallInfo ci, boolean enabled) {
         ci.videoCapable = enabled;
+    }
+
+    /**
+     * Sets whether the call is a cross-SIM call.
+     *
+     * @param ci The {@link CallInfo} object to modify.
+     * @param enabled {@code true} to mark the call as a cross-SIM call, {@code false} otherwise.
+     */
+    public static void setCrossSim(CallInfo ci, boolean enabled) {
+        ci.crossSim = enabled;
+    }
+
+    /**
+     * Sets the radio access technology (RAT) type for the call.
+     *
+     * @param ci The {@link CallInfo} object to modify.
+     * @param ratType The radio access technology type.
+     */
+    public static void setRatType(CallInfo ci, int ratType) {
+        ci.ratType = ratType;
     }
 }

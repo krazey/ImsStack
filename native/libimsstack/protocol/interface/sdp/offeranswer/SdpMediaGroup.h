@@ -16,7 +16,9 @@
 #ifndef SDP_MEDIA_GROUP_H_
 #define SDP_MEDIA_GROUP_H_
 
-#include "offeranswer/SdpMediaParameter.h"
+#include "AStringArray.h"
+
+class SdpMediaParameter;
 
 class SdpMediaGroup
 {

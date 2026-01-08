@@ -15,6 +15,7 @@
  */
 
 #include "AString.h"
+#include "CarrierConfig.h"
 #include "ICoreService.h"
 #include "IFeatureCaps.h"
 #include "IMessage.h"
@@ -40,7 +41,9 @@
 #include "conferencecall/ConferenceFactory.h"
 #include "conferencecall/ConferenceInfoUpdater.h"
 #include "conferencecall/ConferenceSubscription.h"
+#include "conferencecall/IConferenceSubscriptionListener.h"
 #include "configuration/ConfigDef.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SubscriptionInterfaceHolder.h"
 #include "utility/IMessageUtils.h"
@@ -90,8 +93,6 @@ PUBLIC VIRTUAL void ConferenceSubscription::SubscriptionStarted(IN ISubscription
     (void)piSubscription;
     IMS_TRACE_I("SubscriptionStarted", 0, 0, 0);
 
-    // TODO: THIS CAN BE CALLED EVEN UN-SUBSCRIBE IS SUCCEEDED
-
     if (GetState() == SubscriptionState::SUBSCRIBING)
     {
         SetState(SubscriptionState::ACTIVE);
@@ -99,7 +100,9 @@ PUBLIC VIRTUAL void ConferenceSubscription::SubscriptionStarted(IN ISubscription
 
         if (m_nDialogType == CONF_SUBSCRIPTION_DIALOG_TYPE_FALLBACK)
         {
-            // TODO: update DB cache. fallback should be maintained within Registration.
+            m_objContext.GetConfigurationProxy().PutCache(
+                    ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT,
+                    ConfigVoice::CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG);
         }
     }
     else if (GetState() == SubscriptionState::UNSUBSCRIBING)
@@ -112,7 +115,9 @@ PUBLIC VIRTUAL void ConferenceSubscription::SubscriptionStarted(IN ISubscription
 PUBLIC VIRTUAL void ConferenceSubscription::SubscriptionStartFailed(
         IN ISubscription* piSubscription)
 {
-    IMessage* piMessage = piSubscription->GetPreviousResponse(IMessage::SUBSCRIPTION_SUBSCRIBE);
+    IMS_TRACE_I("SubscriptionStartFailed", 0, 0, 0);
+    const IMessage* piMessage =
+            piSubscription->GetPreviousResponse(IMessage::SUBSCRIPTION_SUBSCRIBE);
 
     if (piMessage == IMS_NULL)
     {
@@ -141,7 +146,6 @@ PUBLIC VIRTUAL void ConferenceSubscription::SubscriptionStartFailed(
             }
             break;
         default:
-            // TODO: Other responses
             break;
     }
 
@@ -163,7 +167,7 @@ IMS_RESULT ConferenceSubscription::Subscribe(IN const AString& strTo)
     IMS_TRACE_I("Subscribe : (%s)",
             m_nDialogType == CONF_SUBSCRIPTION_DIALOG_TYPE_OUT ? "OUT" : "IN", 0, 0);
 
-    if (m_piSubscription == IMS_NULL)  // TODO: is this required?
+    if (m_piSubscription == IMS_NULL)
     {
         m_strTo = strTo;
         CreateSubscription();
@@ -296,8 +300,6 @@ void ConferenceSubscription::SetHeaders()
 
     piSipMessage->AddHeader(ISipHeader::ACCEPT, ConferenceConst::APPLICATION_CONFERENCEINFO);
 
-    // TODO: messageformatter.
-    // TODO: null check?
     IFeatureCaps* piFeatureCaps =
             m_objContext.GetServiceByType(ServiceType::NORMAL)->GetICoreService()->GetFeatureCaps();
     if (piFeatureCaps != IMS_NULL)
@@ -316,14 +318,13 @@ void ConferenceSubscription::SetHeaders()
 }
 
 PRIVATE
-void ConferenceSubscription::UpdateConferenceInfo(IN IMessage* piNotify)
+void ConferenceSubscription::UpdateConferenceInfo(IN const IMessage* piNotify)
 {
     IMS_TRACE_I("UpdateConferenceInfo", 0, 0, 0);
     AString strSubState =
             m_objContext.GetMessageUtils().GetHeaderValue(piNotify, ISipHeader::SUBSCRIPTION_STATE);
     if (strSubState.Equals("terminated"))
     {
-        // TODO: needed? static final const value.
         return;
     }
 
@@ -338,7 +339,7 @@ void ConferenceSubscription::UpdateConferenceInfo(IN IMessage* piNotify)
     AString strEventPackage;
     for (IMS_UINT32 nIndex = 0; nIndex < objBodyParts.GetSize(); nIndex++)
     {
-        IMessageBodyPart* piBodyPart = objBodyParts.GetAt(nIndex);
+        const IMessageBodyPart* piBodyPart = objBodyParts.GetAt(nIndex);
         if (piBodyPart != IMS_NULL)
         {
             const ByteArray& objEventPackage = piBodyPart->GetContent();
@@ -353,7 +354,6 @@ void ConferenceSubscription::UpdateConferenceInfo(IN IMessage* piNotify)
         return;
     }
 
-    // TODO: only one updater?
     ConferenceInfoUpdater* pInfoUpdater = m_objFactory.CreateInfoUpdater();
     IMS_UINT32 nResult = pInfoUpdater->Update(&m_objList, strEventPackage);
 
@@ -371,19 +371,17 @@ void ConferenceSubscription::HandleUpdateResult(IN IMS_UINT32 nResult)
         case ConferenceInfoUpdater::RESULT_NOTHING_UPDATED:
             Notify();
             break;
-        case ConferenceInfoUpdater::RESULT_MALFORMED_XML:
-            // stop subscription
-            break;
         case ConferenceInfoUpdater::RESULT_INVALID_VERSION:
             // re-send Subscription
             ReSubscribe();
             break;
+        case ConferenceInfoUpdater::RESULT_MALFORMED_XML:
+            // stop subscription
         case ConferenceInfoUpdater::RESULT_INFO_DELETED:
             // terminate conference call?
             // or stop Subscription?
-        case ConferenceInfoUpdater::RESULT_AMBIGUOUS:
+        default:  // ConferenceInfoUpdater::RESULT_AMBIGUOUS:
             // re-sned Subscription
-        default:
             break;
     }
 }
@@ -417,7 +415,7 @@ IMS_BOOL ConferenceSubscription::OnReceiving403(IN ISubscription* piSubscription
 }
 
 PRIVATE
-IMS_BOOL ConferenceSubscription::OnReceiving423(IN ISubscription* piSubscription)
+IMS_BOOL ConferenceSubscription::OnReceiving423(IN const ISubscription* piSubscription)
 {
     IMS_SINT32 nExpires = m_objContext.GetMessageUtils().GetHeaderValueInt(
             piSubscription->GetPreviousResponse(IMessage::SUBSCRIPTION_SUBSCRIBE),

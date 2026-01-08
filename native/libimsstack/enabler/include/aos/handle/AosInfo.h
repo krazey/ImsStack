@@ -25,9 +25,9 @@ class AosInfo : public IImsAosInfo
 {
 public:
     explicit AosInfo(IN IAosAppContext* piContext);
-    virtual ~AosInfo();
+    ~AosInfo() override;
 
-private:
+protected:
     // IImsAosInfo
     AString GetAssociatedUri() override;
     IMS_SINT32 GetConnectionType() override;
@@ -44,10 +44,11 @@ private:
     IMS_UINT32 GetRegistrationMode() override;
     AString GetSupportedHeaderValue() override;
     AString GetServiceRouteHeaderValue() override;
+    IMS_BOOL IsCrossSimConnected() override;
     void NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized) override;
-    void NotifyScbmState(IN IMS_UINT32 nState) override;
     void NotifyPublishState(IN IMS_BOOL bIsStarted) override;
-    void NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized) override;
+    void NotifyEmergencySmsState(
+            IN IMS_BOOL bIsInitialized, IN EmergencyServicePdn ePdnType) override;
     void NotifyEpsfbCallState(IN IMS_UINT32 nState) override;
 
     IMS_BOOL IsForbiddenBlock();

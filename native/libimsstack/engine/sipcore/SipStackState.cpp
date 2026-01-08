@@ -15,6 +15,7 @@
  */
 #include "ServiceMemory.h"
 #include "ServiceMutex.h"
+#include "ServiceTrace.h"
 
 #include "private/SipConfigV.h"
 
@@ -26,7 +27,7 @@
 #include "SipStackTransaction.h"
 #include "SipTxnContextData.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PRIVATE
 SipStackState::SipStackState() :
@@ -109,7 +110,7 @@ IMS_BOOL SipStackState::AbortTransaction(IN ::SipTxnKey* pKey, IN SipTransaction
             pTxnContextData->SetTxnState(pTxnState);
         }
 
-        pTxnContext->pTxnContextData = reinterpret_cast<SIP_VOID*>(pTxnContextData);
+        pTxnContext->m_pTxnContextData = reinterpret_cast<SIP_VOID*>(pTxnContextData);
     }
 
     // Release the stack transaction structure & stop retransmissions.
@@ -129,7 +130,7 @@ IMS_BOOL SipStackState::FetchTransaction(
         IN ::SipTxnKey* pKey, IN IMS_SINT32 nOption, OUT ::SipTxnKey*& pOutKey, OUT SipTxn*& pTxn)
 {
     LockGuard objLock(m_piLock);
-    SipStackTransaction* pTransaction = FindTransaction(pKey);
+    const SipStackTransaction* pTransaction = FindTransaction(pKey);
 
     if (pTransaction == IMS_NULL)
     {
@@ -243,12 +244,7 @@ IMS_BOOL SipStackState::AddTransaction(IN ::SipTxnKey* pKey, IN SipTxn* pTxn)
         return IMS_FALSE;
     }
 
-    if (!m_objTxnAggregate.Add(nKey, objTransactions))
-    {
-        delete pTransaction;
-        return IMS_FALSE;
-    }
-
+    m_objTxnAggregate.Add(nKey, objTransactions);
     return IMS_TRUE;
 }
 
@@ -307,7 +303,7 @@ SipStackTransaction* SipStackState::RemoveTransaction(IN ::SipTxnKey* pKey, IN I
             // Matched transaction found ...
             if (nOption == TXN_REMOVE)
             {
-                IMS_TRACE_D("REMOVE TRANSACTION - S (%d)\r\n", GetTransactionCount(), 0, 0);
+                IMS_TRACE_D("REMOVE TRANSACTION - S (%d)", GetTransactionCount(), 0, 0);
 
                 objTransactions.RemoveAt(i);
 
@@ -320,7 +316,7 @@ SipStackTransaction* SipStackState::RemoveTransaction(IN ::SipTxnKey* pKey, IN I
                 // DEBUG ...
                 SipStack::DisplayTxnKey(pTransaction->GetKey());
 
-                IMS_TRACE_D("REMOVE TRANSACTION - E (%d)\r\n", GetTransactionCount(), 0, 0);
+                IMS_TRACE_D("REMOVE TRANSACTION - E (%d)", GetTransactionCount(), 0, 0);
             }
 
             return pTransaction;

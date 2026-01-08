@@ -92,7 +92,7 @@ PUBLIC
 void* ImsHashMap::GetValueAt(IN void* pvKey)
 {
     IMS_UINT32 nBucket;
-    Element* pElement = GetElementAt(pvKey, nBucket);
+    const Element* pElement = GetElementAt(pvKey, nBucket);
 
     if (pElement == IMS_NULL)
     {

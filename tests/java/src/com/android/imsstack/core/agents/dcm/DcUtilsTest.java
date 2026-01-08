@@ -18,11 +18,11 @@ package com.android.imsstack.core.agents.dcm;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,11 +37,12 @@ import android.telephony.CellInfo;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
-import android.test.suitebuilder.annotation.SmallTest;
 
-import com.android.imsstack.ImsStackTest;
+import androidx.test.filters.SmallTest;
+
+import com.android.imsstack.base.TelephonyManagerProxy;
+import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
-import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
 import org.junit.Before;
@@ -49,43 +50,51 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
 
 @RunWith(JUnit4.class)
-public class DcUtilsTest extends ImsStackTest {
-    private static final int SLOT_ID = 0;
+public class DcUtilsTest {
+    @Mock private ServiceState mServiceState;
+    @Mock private SharedPreferences mSp;
 
-    @Mock SharedPreferences mSp;
-    DcUtils mDcUtils;
+    private TestAppContext mTestAppContext;
+    private TelephonyManagerProxy mTelephonyManagerProxy;
+    private DcUtils mDcUtils;
 
     @Before
     public void setUp() throws Exception {
-        super.setUp(getClass().getSimpleName());
+        MockitoAnnotations.initMocks(this);
 
-        when(mTelephonyManager.getServiceState()).thenReturn(mServiceState);
+        mTestAppContext = new TestAppContext();
+        mTestAppContext.setUp();
 
-        AppContext.init(mContext);
+        mTelephonyManagerProxy = mTestAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
+        when(mTelephonyManagerProxy.getServiceState(anyInt())).thenReturn(mServiceState);
 
-        mDcUtils = new DcUtils(SLOT_ID);
-        mDcUtils.init(mContext);
+        mDcUtils = new DcUtils(TestAppContext.SLOT0);
+        mDcUtils.init(mTestAppContext.getContext());
     }
 
     @After
     public void tearDown() throws Exception {
-        AppContext.deinit();
         if (mDcUtils != null) {
             mDcUtils.cleanup();
             mDcUtils = null;
         }
 
-        super.tearDown();
+        mServiceState = null;
+        mSp = null;
+        mTelephonyManagerProxy = null;
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
     }
 
     @Test
     @SmallTest
     public void getAccessNetworkInfo_serviceStateNull() {
-        when(mContext.getSystemService(TelephonyManager.class)).thenReturn(null);
+        when(mTelephonyManagerProxy.getServiceState(anyInt())).thenReturn(null);
 
         IDcUtils.AccessNetworkInfo ani =
                 mDcUtils.getAccessNetworkInfo(TelephonyManager.NETWORK_TYPE_LTE);
@@ -107,7 +116,8 @@ public class DcUtilsTest extends ImsStackTest {
             ServiceState.DUPLEX_MODE_TDD
         };
 
-        doReturn(mSp).when(mContext).getSharedPreferences(anyString(), anyInt());
+        doReturn(mSp).when(mTestAppContext.getContext())
+                .getSharedPreferences(anyString(), anyInt());
 
         for (int i = 0; i < testNetworkTypes.length; ++i) {
             NetworkRegistrationInfo nri = createNetworkRegistrationInfo(testNetworkTypes[i]);
@@ -155,7 +165,8 @@ public class DcUtilsTest extends ImsStackTest {
         NetworkRegistrationInfo nri = createNetworkRegistrationInfo(testNetworkType);
 
         when(mServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(nri);
-        doReturn(mSp).when(mContext).getSharedPreferences(anyString(), anyInt());
+        doReturn(mSp).when(mTestAppContext.getContext())
+                .getSharedPreferences(anyString(), anyInt());
 
         IDcUtils.AccessNetworkInfo ani = mDcUtils.getAccessNetworkInfo(testNetworkType);
 
@@ -223,16 +234,130 @@ public class DcUtilsTest extends ImsStackTest {
 
     @Test
     @SmallTest
+    public void getAccessNetworkPlmn_serviceStateNull() {
+        when(mTelephonyManagerProxy.getServiceState(anyInt())).thenReturn(null);
+
+        String plmn = mDcUtils.getAccessNetworkPlmn();
+
+        assertTrue(plmn.isEmpty());
+    }
+
+    @Test
+    @SmallTest
+    public void getAccessNetworkPlmn_networkRegistrationInfoNull() {
+        when(mServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(null);
+
+        String plmn = mDcUtils.getAccessNetworkPlmn();
+
+        assertTrue(plmn.isEmpty());
+    }
+
+    @Test
+    @SmallTest
+    public void getAccessNetworkPlmn_cellIdentityNull() {
+        NetworkRegistrationInfo nri = new NetworkRegistrationInfo.Builder()
+                .setDomain(NetworkRegistrationInfo.DOMAIN_PS)
+                .setTransportType(AccessNetworkConstants.TRANSPORT_TYPE_WWAN)
+                .setAccessNetworkTechnology(TelephonyManager.NETWORK_TYPE_LTE)
+                .setCellIdentity(null).build();
+        when(mServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(nri);
+
+        String plmn = mDcUtils.getAccessNetworkPlmn();
+
+        assertTrue(plmn.isEmpty());
+    }
+
+    @Test
+    @SmallTest
+    public void getAccessNetworkPlmn_gsm() {
+        NetworkRegistrationInfo nri =
+                createNetworkRegistrationInfo(TelephonyManager.NETWORK_TYPE_GPRS);
+        when(mServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(nri);
+
+        String plmn = mDcUtils.getAccessNetworkPlmn();
+
+        assertEquals("00101", plmn);
+    }
+
+    @Test
+    @SmallTest
+    public void getAccessNetworkPlmn_wcdma() {
+        NetworkRegistrationInfo nri =
+                createNetworkRegistrationInfo(TelephonyManager.NETWORK_TYPE_UMTS);
+        when(mServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(nri);
+
+        String plmn = mDcUtils.getAccessNetworkPlmn();
+
+        assertEquals("00102", plmn);
+    }
+
+    @Test
+    @SmallTest
+    public void getAccessNetworkPlmn_lte() {
+        NetworkRegistrationInfo nri =
+                createNetworkRegistrationInfo(TelephonyManager.NETWORK_TYPE_LTE);
+        when(mServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(nri);
+
+        String plmn = mDcUtils.getAccessNetworkPlmn();
+
+        assertEquals("00103", plmn);
+    }
+
+    @Test
+    @SmallTest
+    public void getAccessNetworkPlmn_nr() {
+        NetworkRegistrationInfo nri =
+                createNetworkRegistrationInfo(TelephonyManager.NETWORK_TYPE_NR);
+        when(mServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(nri);
+
+        String plmn = mDcUtils.getAccessNetworkPlmn();
+
+        assertEquals("00104", plmn);
+    }
+
+    @Test
+    @SmallTest
+    public void getAccessNetworkPlmn_nrMccNull() {
+        NetworkRegistrationInfo nri = new NetworkRegistrationInfo.Builder()
+                .setDomain(NetworkRegistrationInfo.DOMAIN_PS)
+                .setTransportType(AccessNetworkConstants.TRANSPORT_TYPE_WWAN)
+                .setAccessNetworkTechnology(TelephonyManager.NETWORK_TYPE_NR)
+                .setCellIdentity(
+                        new CellIdentityNr(20, 0x333333, 633693, new int[] {1, 78},
+                                null, "04", 0x555555555L, "Test-SIM", "Test",
+                                Collections.emptyList()))
+                .build();
+        when(mServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(nri);
+
+        String plmn = mDcUtils.getAccessNetworkPlmn();
+
+        assertTrue(plmn.isEmpty());
+    }
+
+    @Test
+    @SmallTest
+    public void getAccessNetworkPlmn_nrMncNull() {
+        NetworkRegistrationInfo nri = new NetworkRegistrationInfo.Builder()
+                .setDomain(NetworkRegistrationInfo.DOMAIN_PS)
+                .setTransportType(AccessNetworkConstants.TRANSPORT_TYPE_WWAN)
+                .setAccessNetworkTechnology(TelephonyManager.NETWORK_TYPE_NR)
+                .setCellIdentity(
+                        new CellIdentityNr(20, 0x333333, 633693, new int[] {1, 78},
+                                "001", null, 0x555555555L, "Test-SIM", "Test",
+                                Collections.emptyList()))
+                .build();
+        when(mServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(nri);
+
+        String plmn = mDcUtils.getAccessNetworkPlmn();
+
+        assertTrue(plmn.isEmpty());
+    }
+
+    @Test
+    @SmallTest
     public void isMobileDataEnabled() {
-        when(mTelephonyManager.createForSubscriptionId(anyInt())).thenReturn(null);
-        assertEquals(false, mDcUtils.isMobileDataEnabled());
-
-        when(mTelephonyManager.createForSubscriptionId(anyInt())).thenReturn(mTelephonyManager);
-        when(mTelephonyManager.isDataEnabled()).thenReturn(false);
-        assertEquals(false, mDcUtils.isMobileDataEnabled());
-
-        when(mTelephonyManager.isDataEnabled()).thenReturn(true);
-        assertEquals(true, mDcUtils.isMobileDataEnabled());
+        mDcUtils.isMobileDataEnabled();
+        verify(mTelephonyManagerProxy).isDataEnabled();
     }
 
     @Test
@@ -244,32 +369,9 @@ public class DcUtilsTest extends ImsStackTest {
 
     @Test
     @SmallTest
-    public void getServiceState_telephonyManagerIsNull() {
-        when(mContext.getSystemService(TelephonyManager.class)).thenReturn(null);
-
+    public void testGetServiceState() {
         ServiceState ss = mDcUtils.getServiceState();
 
-        assertNull(ss);
-    }
-
-    @Test
-    @SmallTest
-    public void getServiceState_singleSim() {
-        ServiceState ss = mDcUtils.getServiceState();
-
-        verify(mTelephonyManager, never()).createForSubscriptionId(anyInt());
-        assertEquals(mServiceState, ss);
-    }
-
-    @Test
-    @SmallTest
-    public void getServiceState_multiSim() {
-        when(mTelephonyManager.getActiveModemCount()).thenReturn(2);
-        when(mTelephonyManager.getSupportedModemCount()).thenReturn(2);
-
-        ServiceState ss = mDcUtils.getServiceState();
-
-        verify(mTelephonyManager).createForSubscriptionId(anyInt());
         assertEquals(mServiceState, ss);
     }
 
@@ -363,7 +465,8 @@ public class DcUtilsTest extends ImsStackTest {
         mDcUtils.storeAccessNetworkInfoToCache(TelephonyManager.NETWORK_TYPE_NR,
                 new String[] {"310"});
 
-        doReturn(mSp).when(mContext).getSharedPreferences(anyString(), anyInt());
+        doReturn(mSp).when(mTestAppContext.getContext())
+                .getSharedPreferences(anyString(), anyInt());
 
         String[] networks = mDcUtils.getAccessNetworkInfoForNr(nri);
 
@@ -374,7 +477,8 @@ public class DcUtilsTest extends ImsStackTest {
     @Test
     @SmallTest
     public void getAccessNetworkInfoForNr_nrAccessNetworkInfo() {
-        doReturn(mSp).when(mContext).getSharedPreferences(anyString(), anyInt());
+        doReturn(mSp).when(mTestAppContext.getContext())
+                .getSharedPreferences(anyString(), anyInt());
 
         NetworkRegistrationInfo nri = createNetworkRegistrationInfo(
                 TelephonyManager.NETWORK_TYPE_NR);
@@ -471,6 +575,42 @@ public class DcUtilsTest extends ImsStackTest {
         assertEquals("", networks[DcUtils.ANI_INDEX_MODE]);
     }
 
+    @Test
+    @SmallTest
+    public void getDuplexModeForLte_cellInfoIsUnavailable() {
+        CellIdentityLte ci = new CellIdentityLte(0x1111111, 13, 0x2222,
+                CellInfo.UNAVAILABLE, new int[] {}, 0, null, "01",
+                "Test-SIM", "Test", Collections.emptyList(), null);
+
+        int duplexMode = mDcUtils.getDuplexModeForLte(ci);
+
+        assertEquals(ServiceState.DUPLEX_MODE_UNKNOWN, duplexMode);
+    }
+
+    @Test
+    @SmallTest
+    public void getDuplexModeForLte_foundMatchingDuplexMode() {
+        CellIdentityLte ci = new CellIdentityLte(0x1111111, 13, 0x2222, 70596,
+                new int[] {AccessNetworkConstants.EutranBand.BAND_88}, 0, null,
+                "01", "Test-SIM", "Test", Collections.emptyList(), null);
+
+        int duplexMode = mDcUtils.getDuplexModeForLte(ci);
+
+        assertEquals(ServiceState.DUPLEX_MODE_FDD, duplexMode);
+    }
+
+    @Test
+    @SmallTest
+    public void getDuplexModeForLte_notFoundMatchingDuplexMode() {
+        CellIdentityLte ci = new CellIdentityLte(0x1111111, 13, 0x2222, 70700,
+                new int[] {AccessNetworkConstants.EutranBand.BAND_88}, 0, null,
+                "01", "Test-SIM", "Test", Collections.emptyList(), null);
+
+        int duplexMode = mDcUtils.getDuplexModeForLte(ci);
+
+        assertEquals(ServiceState.DUPLEX_MODE_UNKNOWN, duplexMode);
+    }
+
     private NetworkRegistrationInfo createNetworkRegistrationInfo(int networkType) {
         return new NetworkRegistrationInfo.Builder()
                 .setDomain(NetworkRegistrationInfo.DOMAIN_PS)
@@ -500,17 +640,17 @@ public class DcUtilsTest extends ImsStackTest {
         switch (networkType) {
             case TelephonyManager.NETWORK_TYPE_LTE:
                 return new CellIdentityLte(0x1111111, 13, 0x2222, 0, new int[] {}, 0,
-                        "001", "01", "Test-SIM", "Test", Collections.emptyList(), null);
+                        "001", "03", "Test-SIM", "Test", Collections.emptyList(), null);
             case TelephonyManager.NETWORK_TYPE_NR:
                 return new CellIdentityNr(20, 0x333333, 633693, new int[] {1, 78},
-                        "001", "01", 0x555555555L, "Test-SIM", "Test", Collections.emptyList());
+                        "001", "04", 0x555555555L, "Test-SIM", "Test", Collections.emptyList());
             case TelephonyManager.NETWORK_TYPE_UMTS: // FALL-THROUGH
             case TelephonyManager.NETWORK_TYPE_HSDPA: // FALL-THROUGH
             case TelephonyManager.NETWORK_TYPE_HSUPA: // FALL-THROUGH
             case TelephonyManager.NETWORK_TYPE_HSPA: // FALL-THROUGH
             case TelephonyManager.NETWORK_TYPE_HSPAP:
                 return new CellIdentityWcdma(0x6666, 0x7777777, 3, 0,
-                        "001", "01", "Test-SIM", "Test", Collections.emptyList(), null);
+                        "001", "02", "Test-SIM", "Test", Collections.emptyList(), null);
             case TelephonyManager.NETWORK_TYPE_GPRS: // FALL-THROUGH
             case TelephonyManager.NETWORK_TYPE_EDGE:
                 return new CellIdentityGsm(0x8888, 0x9999, 0, 1,

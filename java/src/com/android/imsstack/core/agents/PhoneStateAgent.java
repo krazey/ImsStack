@@ -35,17 +35,22 @@ import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.util.SparseArray;
 
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.agents.internal.PhoneStateEvents;
 import com.android.imsstack.core.agents.internal.PhoneStateNotifier;
-import com.android.imsstack.util.AppContext;
+import com.android.imsstack.system.ISystem;
+import com.android.imsstack.system.ImsEventDef;
+import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A class for providing an interface to monitor the phone state (call sate, service state, ...).
@@ -62,7 +67,11 @@ public class PhoneStateAgent implements PhoneStateInterface,
     private ServiceState mServiceState;
     private BarringInfo mBarringInfo;
     private int mCallState = TelephonyManager.CALL_STATE_IDLE;
+    private int mCsCallState = TelephonyManager.CALL_STATE_IDLE;
+    private final AtomicInteger mImsCallState = new AtomicInteger(TelephonyManager.CALL_STATE_IDLE);
     private int mCellularDataNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+    private int mCsNetworkRegistrationState =
+            NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
 
     public PhoneStateAgent(int slotId) {
         mSlotId = slotId;
@@ -102,6 +111,15 @@ public class PhoneStateAgent implements PhoneStateInterface,
             mPhoneStateListener.dispose();
             mPhoneStateListener = null;
         }
+
+        mServiceState = null;
+        mBarringInfo = null;
+        mCsCallState = TelephonyManager.CALL_STATE_IDLE;
+        mImsCallState.set(TelephonyManager.CALL_STATE_IDLE);
+        mCellularDataNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+        mCsNetworkRegistrationState =
+                NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
+
     }
 
     @Override
@@ -143,6 +161,42 @@ public class PhoneStateAgent implements PhoneStateInterface,
     }
 
     @Override
+    public @NetworkRegistrationInfo.RegistrationState int getCsNetworkRegistrationState() {
+        return mCsNetworkRegistrationState;
+    }
+
+    @Override
+    public @CallState int getCsCallState() {
+        return mCsCallState;
+    }
+
+    @Override
+    public @CallState int getImsCallState() {
+        return mImsCallState.get();
+    }
+
+    @Override
+    public void setImsCallState(@CallState int state) {
+        if (mImsCallState.get() != state) {
+            ImsLog.i(this, mSlotId, "IMS call state: "
+                    + TelephonyInterface.callStateToString(mImsCallState.get()) + " -> "
+                    + TelephonyInterface.callStateToString(state));
+            mImsCallState.set(state);
+
+            // If the telephony call state is set incorrectly for CS,
+            // it should be corrected by the IMS call state.
+            //
+            // For example, when a call is initiated in ECBM, Telephony framework will exit
+            // emergency mode and initiate the call.
+            // At this time, even if the call state change is delivered via TelephonyCallback,
+            // the dial request will be delayed until the emergency mode is successfully exited.
+            if (state != TelephonyManager.CALL_STATE_IDLE) {
+                updateCsCallState(TelephonyManager.CALL_STATE_IDLE);
+            }
+        }
+    }
+
+    @Override
     public void onPhoneStateEventChanged(IPhoneStateNotifier notifier,
             int events, int newEvents) {
         if (!mPhoneStateNotifiers.contains((PhoneStateNotifier) notifier)) {
@@ -160,6 +214,36 @@ public class PhoneStateAgent implements PhoneStateInterface,
     @VisibleForTesting
     public PhoneStateEvents getPhoneStateEvents() {
         return mEvents;
+    }
+
+    private void updateCsCallState(@CallState int state) {
+        if (mImsCallState.get() != TelephonyManager.CALL_STATE_IDLE) {
+            if (mCsCallState == TelephonyManager.CALL_STATE_IDLE) {
+                return;
+            }
+            // Update CS call state to CALL_STATE_IDLE
+            // because IMS call is in progress or active.
+            state = TelephonyManager.CALL_STATE_IDLE;
+        }
+
+        if (state != TelephonyManager.CALL_STATE_IDLE
+                && !MSimUtils.isValidSubId(mPhoneStateListener.getSubId())
+                && !AgentUtils.isAllSimAbsent()) {
+            // Ignore the current call state change event
+            // because this call state is changed from the other slot.
+            return;
+        }
+
+        if (mCsCallState != state) {
+            ImsLog.i(this, mSlotId, "CS call state: "
+                    + TelephonyInterface.callStateToString(mCsCallState) + " -> "
+                    + TelephonyInterface.callStateToString(state));
+            mCsCallState = state;
+            ISystem system = SystemInterface.getInstance().getSystem(mSlotId);
+            if (system != null) {
+                system.notifyEvent(ImsEventDef.IMS_EVENT_CSCALL_STATE, mCsCallState, 0);
+            }
+        }
     }
 
     private void notifyCallState(@CallState int state) {
@@ -237,7 +321,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
     private void listenForPhoneStateEventChanged() {
         synchronized (mLock) {
             if (mPhoneStateListener != null) {
-                ImsLog.i(mSlotId, "listenForPhoneStateEventChanged: subId="
+                ImsLog.i(this, mSlotId, "listenForPhoneStateEventChanged: subId="
                         + mPhoneStateListener.getSubId());
                 mPhoneStateListener.registerCallbacks(mEvents.getEvents());
             }
@@ -256,11 +340,11 @@ public class PhoneStateAgent implements PhoneStateInterface,
 
             if (subId == mPhoneStateListener.getSubId()) {
                 // no-op
-                ImsLog.w(mSlotId, "Subscription is not changed; subId=" + subId);
+                ImsLog.w(this, mSlotId, "Subscription is not changed; subId=" + subId);
                 return;
             }
 
-            ImsLog.i(mSlotId, "handleSimStateChanged: subId=" + subId);
+            ImsLog.i(this, mSlotId, "handleSimStateChanged: subId=" + subId);
             mPhoneStateListener.unregisterCallbacks();
             mPhoneStateListener.dispose();
 
@@ -278,12 +362,12 @@ public class PhoneStateAgent implements PhoneStateInterface,
         }
     }
 
-    private TelephonyManager getTelephonyManager(int subId) {
+    private static TelephonyManagerProxy getTelephonyManagerProxy(int subId) {
         if (!MSimUtils.isValidSubId(subId)) {
-            return AppContext.getTelephonyManager();
+            return AppContext.getInstance().getSystemServiceProxy(TelephonyManagerProxy.class);
         }
 
-        return AppContext.getTelephonyManager(subId);
+        return AppContext.getTelephonyManagerProxy(subId);
     }
 
     private static int getDataAccessNetworkTechnology(ServiceState ss) {
@@ -312,7 +396,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
         final NetworkRegistrationInfo wwanRegInfo = ss.getNetworkRegistrationInfo(
                 NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
 
-        return (wwanRegInfo != null) ? wwanRegInfo.getRegistrationState() :
+        return (wwanRegInfo != null) ? wwanRegInfo.getNetworkRegistrationState() :
                 NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
     }
 
@@ -336,7 +420,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
         PhoneStateListener(int subId) {
             super(AppContext.getInstance().getMainLooper());
             mSubId = subId;
-            ImsLog.i(mSlotId, "PhoneStateListener: subId=" + subId);
+            ImsLog.i(this, mSlotId, "PhoneStateListener: subId=" + subId);
 
             mTelephonyCallbacks.put(ImsPhoneStateListener.LISTEN_SERVICE_STATE,
                     new ServiceStateListener());
@@ -364,6 +448,8 @@ public class PhoneStateAgent implements PhoneStateInterface,
             mBarringInfo = null;
             mCallState = TelephonyManager.CALL_STATE_IDLE;
             mCellularDataNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+            mCsNetworkRegistrationState =
+                    NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
         }
 
         public int getSubId() {
@@ -371,40 +457,32 @@ public class PhoneStateAgent implements PhoneStateInterface,
         }
 
         public void registerCallbacks(int events) {
-            TelephonyManager tm = getTelephonyManager(getSubId());
-
-            if (tm == null) {
-                return;
-            }
+            TelephonyManagerProxy tmp = getTelephonyManagerProxy(getSubId());
 
             for (int i = 0; i < mTelephonyCallbacks.size(); ++i) {
                 int event = mTelephonyCallbacks.keyAt(i);
                 TelephonyCallback callback = mRegisteredTelephonyCallbacks.get(event);
 
                 if (callback != null) {
-                    tm.unregisterTelephonyCallback(callback);
+                    tmp.unregisterTelephonyCallback(callback);
                     mRegisteredTelephonyCallbacks.remove(event);
                 }
 
                 if (PhoneStateEvents.isEventSet(events, event)) {
                     callback = mTelephonyCallbacks.valueAt(i);
                     mRegisteredTelephonyCallbacks.put(event, callback);
-                    tm.registerTelephonyCallback(this::post, callback);
+                    tmp.registerTelephonyCallback(this::post, callback);
                 }
             }
         }
 
         public void unregisterCallbacks() {
-            TelephonyManager tm = getTelephonyManager(getSubId());
-
-            if (tm == null) {
-                return;
-            }
+            TelephonyManagerProxy tmp = getTelephonyManagerProxy(getSubId());
 
             for (int i = 0; i < mRegisteredTelephonyCallbacks.size(); ++i) {
                 TelephonyCallback callback = mRegisteredTelephonyCallbacks.valueAt(i);
                 if (callback != null) {
-                    tm.unregisterTelephonyCallback(callback);
+                    tmp.unregisterTelephonyCallback(callback);
                 }
             }
 
@@ -415,7 +493,13 @@ public class PhoneStateAgent implements PhoneStateInterface,
                 TelephonyCallback.CallStateListener {
             @Override
             public void onCallStateChanged(@CallState int state) {
-                ImsLog.i(mSlotId, "onCallStateChanged: state=" + state);
+                ImsLog.i(this, mSlotId, "onCallStateChanged: "
+                        + TelephonyInterface.callStateToString(mCallState) + " -> "
+                        + TelephonyInterface.callStateToString(state));
+                if (mCallState != state && state == TelephonyManager.CALL_STATE_IDLE) {
+                    setImsCallState(state);
+                }
+                updateCsCallState(state);
                 // Store the most recent call state
                 mCallState = state;
                 notifyCallState(state);
@@ -427,7 +511,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
             @Override
             public void onCellInfoChanged(@NonNull List<CellInfo> cellInfo) {
                 if (ImsLog.isDebuggable()) {
-                    ImsLog.i(mSlotId, "onCellInfoChanged");
+                    ImsLog.i(this, mSlotId, "onCellInfoChanged");
                 }
                 notifyCellInfo(cellInfo);
             }
@@ -438,7 +522,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
             @Override
             public void onPreciseCallStateChanged(@NonNull PreciseCallState callState) {
                 if (ImsLog.isDebuggable()) {
-                    ImsLog.i(mSlotId, "onPreciseCallStateChanged: cs=" + callState);
+                    ImsLog.i(this, mSlotId, "onPreciseCallStateChanged: cs=" + callState);
                 }
                 notifyPreciseCallState(callState);
             }
@@ -448,13 +532,14 @@ public class PhoneStateAgent implements PhoneStateInterface,
                 TelephonyCallback.ServiceStateListener {
             @Override
             public void onServiceStateChanged(@NonNull ServiceState serviceState) {
-                ImsLog.i(mSlotId, "onServiceStateChanged: ss=" + serviceState
+                ImsLog.i(this, mSlotId, "onServiceStateChanged: ss=" + serviceState
                         + ", changed(operator|roaming|data_rat|data_reg|voice_rat|voice_reg)="
                         + Integer.toHexString(getChangedStates(mServiceState, serviceState)));
 
                 // Store the most recent service state
                 mServiceState = serviceState;
                 updateCellularDataNetworkType(serviceState);
+                updateCsNetworkRegistrationState(serviceState);
                 notifyServiceState(serviceState);
             }
         }
@@ -464,7 +549,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
             @Override
             public void onSignalStrengthsChanged(@NonNull SignalStrength signalStrength) {
                 if (ImsLog.isDebuggable()) {
-                    ImsLog.i(mSlotId, "onSignalStrengthsChanged: ss=" + signalStrength);
+                    ImsLog.i(this, mSlotId, "onSignalStrengthsChanged: ss=" + signalStrength);
                 }
                 notifySignalStrengths(signalStrength);
             }
@@ -474,7 +559,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
                 TelephonyCallback.SrvccStateListener {
             @Override
             public void onSrvccStateChanged(@SrvccState int state) {
-                ImsLog.i(mSlotId, "onSrvccStateChanged: state=" + state);
+                ImsLog.i(this, mSlotId, "onSrvccStateChanged: state=" + state);
                 notifySrvccState(state);
             }
         }
@@ -485,7 +570,7 @@ public class PhoneStateAgent implements PhoneStateInterface,
             public void onPreciseDataConnectionStateChanged(
                     @NonNull PreciseDataConnectionState dataConnectionState) {
                 if (ImsLog.isDebuggable()) {
-                    ImsLog.i(mSlotId, "onPreciseDataConnectionStateChanged: dcs="
+                    ImsLog.i(this, mSlotId, "onPreciseDataConnectionStateChanged: dcs="
                             + dataConnectionState);
                 }
                 notifyPreciseDataConnectionState(dataConnectionState);
@@ -537,20 +622,23 @@ public class PhoneStateAgent implements PhoneStateInterface,
         }
 
         private void updateCellularDataNetworkType(ServiceState serviceState) {
-            TelephonyManager tm = getTelephonyManager(getSubId());
-            int dataNetworkType = (tm != null)
-                    ? tm.getDataNetworkType()
+            NetworkRegistrationInfo nri = serviceState.getNetworkRegistrationInfo(
+                    NetworkRegistrationInfo.DOMAIN_PS,
+                    AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+
+            mCellularDataNetworkType = (nri != null)
+                    ? nri.getAccessNetworkTechnology()
                     : TelephonyManager.NETWORK_TYPE_UNKNOWN;
+        }
 
-            if (dataNetworkType == TelephonyManager.NETWORK_TYPE_IWLAN) {
-                NetworkRegistrationInfo nri = serviceState.getNetworkRegistrationInfo(
-                        NetworkRegistrationInfo.DOMAIN_PS,
-                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+        private void updateCsNetworkRegistrationState(ServiceState serviceState) {
+            final NetworkRegistrationInfo nri =
+                    serviceState.getNetworkRegistrationInfo(
+                            NetworkRegistrationInfo.DOMAIN_CS,
+                            AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
 
-                mCellularDataNetworkType = (nri == null || !nri.isNetworkRegistered())
-                        ? TelephonyManager.NETWORK_TYPE_UNKNOWN
-                        : nri.getAccessNetworkTechnology();
-            }
+            mCsNetworkRegistrationState = (nri != null) ? nri.getNetworkRegistrationState()
+                    : NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
         }
     }
 }

@@ -15,7 +15,8 @@
  */
 
 #include "AString.h"
-#include "Configuration.h"
+#include "Engine.h"
+#include "IImsPrivateProperty.h"
 #include "IMtcService.h"
 #include "ImsServiceConfig.h"
 #include "JniEnablerConnector.h"
@@ -30,8 +31,9 @@
 #include "call/CallConnectionIdManager.h"
 #include "call/MtcCallController.h"
 #include "call/MtcCallManager.h"
+#include "call/RttAutoUpgrader.h"
 #include "conferencecall/ConferenceManager.h"
-#include "configuration/MtcConfigurationManager.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "dialingplan/MtcDialingPlan.h"
 #include "dialogevent/MultiEndpointFactory.h"
 #include "dialogevent/MultiEndpointManager.h"
@@ -39,10 +41,12 @@
 #include "emergency/MtcEmergencyServiceManager.h"
 #include "helper/CallStateProxy.h"
 #include "helper/LastComeFirstServedHelper.h"
-#include "helper/OperationAsyncRunner.h"
+#include "helper/MtcTimerWrapper.h"
+#include "helper/OperationAsyncRunnerManager.h"
 #include "helper/PassiveTimerHolder.h"
 #include "utility/MessageUtils.h"
 #include <functional>
+#include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -52,10 +56,10 @@ PUBLIC
 MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
         ImsApp(MTC_APP_NAME),
         m_nSlotId(nSlotId),
-        m_objConfigurationProxy(MtcConfigurationProxy(new MtcConfigurationManager())),
+        m_objConfigurationProxy(MtcConfigurationProxy()),
+        m_objOperationAsyncRunnerManager(nSlotId),
         m_lstServices(ImsList<IMtcService*>()),
-        m_objDialingPlan(MtcDialingPlan(
-                *this, *PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(nSlotId))),
+        m_objDialingPlan(MtcDialingPlan()),
         m_objCallManager(MtcCallManager(*this)),
         m_objCallController(MtcCallController(*this)),
         m_objCallStateProxy(CallStateProxy(m_objCallManager)),
@@ -64,20 +68,22 @@ MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
         m_objConferenceManager(ConferenceManager(*this)),
         m_pEctManager(nullptr),
         m_pEmergencyServiceManager(nullptr),
-        m_objMessageUtils(MessageUtils()),
+        m_objMessageUtils(*this),
         m_objPassiveTimerHolder(PassiveTimerHolder()),
         m_pMultiEndpointManager(nullptr),
         m_objMtcRadioChecker(*this),
         m_pLastComeFirstServedHelper(nullptr),
         m_objCallConnectionIdManager(CallConnectionIdManager(*this)),
+        m_objLocationRefresher(MtcLocationRefresher(
+                *PhoneInfoService::GetPhoneInfoService()->GetLocationInfo(nSlotId))),
+        m_pRttAutoUpgrader(nullptr),
         m_bWifiTestMode(IMS_FALSE)
 {
     IMS_TRACE_I("+MtcApp [slot_%d]", nSlotId, 0, 0);
     m_bWifiTestMode = (UtilService::GetUtilService()->GetPrivateProperty()->GetPersistentInt(
                                ImsPrivateProperties::Persistent::KEY_WIFI_TEST, 0) == 1);
     MtcContextRepository::GetInstance()->AddContext(nSlotId, this);
-    Configuration::GetInstance()->SetAppConfig(
-            ImsServiceConfig::GetAppName(ImsAppId::MTC), nSlotId);
+    Engine::GetConfiguration()->SetAppConfig(ImsServiceConfig::GetAppName(ImsAppId::MTC), nSlotId);
 }
 
 PUBLIC VIRTUAL MtcApp::~MtcApp()
@@ -91,7 +97,6 @@ PUBLIC VIRTUAL void MtcApp::Start()
 {
     IMS_TRACE_I("Start", 0, 0, 0);
 
-    InitConfiguration();
     CreateServices();
     InitCallManager();
     m_objMtcRadioChecker.Init();
@@ -99,8 +104,6 @@ PUBLIC VIRTUAL void MtcApp::Start()
 
     if (MultiEndpointManager::IsRequired(GetConfigurationProxy()))
     {
-        // TODO: depends on which configuration to be checked, MultiEndpointManager can be created
-        // regardless of configuration value.
         m_pMultiEndpointManager = std::make_unique<MultiEndpointManager>(
                 *this, std::make_unique<MultiEndpointFactory>());
     }
@@ -109,8 +112,8 @@ PUBLIC VIRTUAL void MtcApp::Start()
 PUBLIC VIRTUAL void MtcApp::Stop()
 {
     IMS_TRACE_I("Stop", 0, 0, 0);
-    DestroyServices();
     m_objCallManager.DeInit();
+    DestroyServices();
     m_objPassiveTimerHolder.SetNormalService(IMS_NULL);
 }
 
@@ -135,7 +138,7 @@ PUBLIC VIRTUAL IMtcAosConnector* MtcApp::GetAosConnector(IN ServiceType eService
 {
     for (IMS_UINT32 i = 0; i < m_lstServices.GetSize(); i++)
     {
-        IMtcService* piService = m_lstServices.GetAt(i);
+        const IMtcService* piService = m_lstServices.GetAt(i);
 
         if (eServiceType == piService->GetServiceType())
         {
@@ -166,14 +169,15 @@ PUBLIC VIRTUAL IMtcEmergencyServiceManager& MtcApp::GetEmergencyServiceManager()
     return *m_pEmergencyServiceManager.get();
 }
 
-PUBLIC VIRTUAL OperationAsyncRunner* MtcApp::GetAsyncRunner(IN std::function<void()> objOperation)
+PUBLIC VIRTUAL void MtcApp::RunAsyncOperation(
+        IN void* pOwner, IN std::function<void()> objOperation)
 {
-    if (objOperation == nullptr)
-    {
-        return IMS_NULL;
-    }
-    // object is deleted by itself
-    return new OperationAsyncRunner(m_nSlotId, objOperation);
+    m_objOperationAsyncRunnerManager.Run(pOwner, objOperation);
+}
+
+PUBLIC VIRTUAL std::unique_ptr<MtcTimerWrapper> MtcApp::CreateTimer()
+{
+    return std::make_unique<MtcTimerWrapper>();
 }
 
 PUBLIC VIRTUAL ILastComeFirstServedHelper& MtcApp::GetLastComeFirstServedHelper()
@@ -186,9 +190,20 @@ PUBLIC VIRTUAL ILastComeFirstServedHelper& MtcApp::GetLastComeFirstServedHelper(
     return *m_pLastComeFirstServedHelper.get();
 }
 
-PROTECTED VIRTUAL void MtcApp::InitConfiguration()
+PUBLIC VIRTUAL void MtcApp::CreateRttAutoUpgrader()
 {
-    m_objConfigurationProxy.Init();
+    if (m_pRttAutoUpgrader == nullptr)
+    {
+        m_pRttAutoUpgrader = std::make_unique<RttAutoUpgrader>(*this);
+    }
+}
+
+PUBLIC VIRTUAL void MtcApp::DestroyRttAutoUpgrader()
+{
+    if (m_pRttAutoUpgrader)
+    {
+        m_pRttAutoUpgrader.reset();
+    }
 }
 
 PROTECTED VIRTUAL void MtcApp::CreateServices()
@@ -208,9 +223,10 @@ PROTECTED VIRTUAL void MtcApp::InitCallManager()
 
 PROTECTED VIRTUAL void MtcApp::DestroyServices()
 {
-    for (IMS_UINT32 i = 0; i < m_lstServices.GetSize(); i++)
+    for (IMS_SINT32 i = static_cast<IMS_SINT32>(m_lstServices.GetSize()) - 1; i >= 0; i--)
     {
-        delete m_lstServices.GetAt(i);
+        IMtcService* pCurrentService = m_lstServices.GetAt(i);
+        m_lstServices.RemoveAt(i);
+        delete pCurrentService;
     }
-    m_lstServices.Clear();
 }

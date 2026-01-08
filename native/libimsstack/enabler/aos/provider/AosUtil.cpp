@@ -13,27 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "IImsPrivateProperty.h"
+#include "INetworkWatcher.h"
+#include "IPhoneInfoLocation.h"
 #include "ServiceTrace.h"
 #include "ServiceTimer.h"
 #include "ServiceSystemTime.h"
 #include "ServiceUtil.h"
 #include "ServicePhoneInfo.h"
-#include "Configuration.h"
+#include "CarrierConfig.h"
+#include "ISipConfigV.h"
+#include "Engine.h"
 #include "IConfigurable.h"
+#include "IConfiguration.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
+#include "ISipMessageBodyPart.h"
 #include "IRegistration.h"
 #include "ISipRtConfigHelper.h"
 #include "SipFactory.h"
+#include "SipStatusCode.h"
 #include "Ims3gpp.h"
 #include "TextParser.h"
 #include "Sip.h"
 #include "SipParameter.h"
 #include "SipParsingHelper.h"
+#include "IAosService.h"
 #include "provider/AosUtil.h"
 #include "provider/AosString.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 PUBLIC
 AosUtil::AosUtil() :
@@ -155,7 +164,7 @@ IMS_SINT32 AosUtil::GetMinExpiresValue(IN const ISipMessage* piSipMsg)
 }
 
 PUBLIC
-IMS_BOOL AosUtil::IsInitialRegistrationRequired(IN ISipMessage* piSipMsg)
+IMS_BOOL AosUtil::IsInitialRegistrationRequired(IN const ISipMessage* piSipMsg)
 {
     IMS_BOOL bInitialRegistration = IMS_FALSE;
 
@@ -164,7 +173,7 @@ IMS_BOOL AosUtil::IsInitialRegistrationRequired(IN ISipMessage* piSipMsg)
         ImsList<ISipMessageBodyPart*> objBodyParts = piSipMsg->GetBodyParts();
         if (!objBodyParts.IsEmpty())
         {
-            ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(0);
+            const ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(0);
             if (piBodyPart != IMS_NULL)
             {
                 AString strContentTypeHdr =
@@ -192,6 +201,49 @@ IMS_BOOL AosUtil::IsInitialRegistrationRequired(IN ISipMessage* piSipMsg)
     }
 
     return bInitialRegistration;
+}
+
+PUBLIC
+IMS_BOOL AosUtil::IsAnonymousECallActionPresent(IN const ISipMessage* piSipMsg)
+{
+    if (piSipMsg == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    ImsList<ISipMessageBodyPart*> objBodyParts = piSipMsg->GetBodyParts();
+    if (objBodyParts.IsEmpty())
+    {
+        return IMS_FALSE;
+    }
+
+    const ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(0);
+    if (piBodyPart == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    AString strContentTypeHdr = piBodyPart->GetHeader(ISipMessageBodyPart::CONTENT_TYPE);
+    AString strType, strSubType;
+    TextParser::ParseMediaType(strContentTypeHdr, strType, strSubType);
+
+    if (strType.EqualsIgnoreCase(AosString::STR_APPLICATION) &&
+            strSubType.EqualsIgnoreCase(AosString::STR_3GPP_IMS_XML))
+    {
+        auto pIms3gpp = new Ims3gpp();
+        if (pIms3gpp->Parse(piBodyPart->GetContent().ToString()))
+        {
+            IMS_SINT32 nAction = pIms3gpp->GetAlternativeService().GetAction();
+            if (nAction == Ims3gpp::AlternativeService::ACTION_ANONYMOUS_EMERGENCYCALL)
+            {
+                delete pIms3gpp;
+                return IMS_TRUE;
+            }
+        }
+        delete pIms3gpp;
+    }
+
+    return IMS_FALSE;
 }
 
 PUBLIC
@@ -258,7 +310,7 @@ IMS_BOOL AosUtil::IsParameterIncluded(IN const ISipMessage* piSipMsg, IN IMS_SIN
 PUBLIC
 IMS_SINT32 AosUtil::GetLocalPort(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 {
-    const ISipConfig* piConfig = Configuration::GetInstance()->GetSipConfig(nSlotId);
+    const ISipConfig* piConfig = Engine::GetConfiguration()->GetSipConfig(nSlotId);
     IMS_SINT32 nPort = -1;
 
     if (piConfig != IMS_NULL)
@@ -481,6 +533,39 @@ IMS_BOOL AosUtil::IsElementExistInList(
 }
 
 PUBLIC
+IMS_BOOL AosUtil::IsErrorCodeExisted(
+        IN const ImsVector<IMS_SINT32>& objErrorCode, IN IMS_SINT32 nCode) const
+{
+    // Excluding codes expressed as negative values
+    if (nCode > 0 && objErrorCode.Contains(-nCode))
+    {
+        return IMS_FALSE;
+    }
+
+    for (IMS_UINT32 i = 0; i < objErrorCode.GetSize(); i++)
+    {
+        // Checking code match
+        IMS_SINT32 nErrorCode = objErrorCode.GetAt(i);
+        if (nCode == nErrorCode)
+        {
+            return IMS_TRUE;
+        }
+
+        // Checking wild card and group codes match
+        if (SipStatusCode::IsFinalFailure(nCode))
+        {
+            if (nErrorCode == CarrierConfig::Ims::REG_ERROR_CODE_ALL_RESP ||
+                    nErrorCode == (nCode / 100))
+            {
+                return IMS_TRUE;
+            }
+        }
+    }
+
+    return IMS_FALSE;
+}
+
+PUBLIC
 IMS_UINT32 AosUtil::Pow(IN IMS_UINT32 nArg1, IN IMS_UINT32 nArg2)
 {
     IMS_UINT32 nResult = 1;
@@ -581,7 +666,7 @@ IMS_BOOL AosUtil::UpdateFeatureTagOptions(IN IMS_UINT32 nUpdatedFeatureTags,
     }
     else
     {
-        piSipConfigV = Configuration::GetInstance()->GetSipConfig(nSlotId)->GetSipConfigV();
+        piSipConfigV = Engine::GetConfiguration()->GetSipConfig(nSlotId)->GetSipConfigV();
     }
 
     if (piSipConfigV != IMS_NULL)
@@ -655,7 +740,7 @@ IMS_BOOL AosUtil::IsWifiTest() const
 PUBLIC
 IMS_BOOL AosUtil::IsDifferentCountry(IN AString strSimCountry, IN IMS_SINT32 nSlotId) const
 {
-    ILocationProperties* piLocation =
+    const ILocationProperties* piLocation =
             PhoneInfoService::GetPhoneInfoService()
                     ->GetLocationInfo(nSlotId)
                     ->GetLocationProperties(ILocationInfo::LOCATION_POSITION_N_COUNTRY);
@@ -672,7 +757,60 @@ IMS_BOOL AosUtil::IsDifferentCountry(IN AString strSimCountry, IN IMS_SINT32 nSl
 }
 
 PUBLIC
+AosNetworkType AosUtil::GetAosNetworkType(IN IMS_UINT32 nNetworkType) const
+{
+    switch (nNetworkType)
+    {
+        case NW_REPORT_RADIO_WLAN:
+            return AosNetworkType::IWLAN;
+        case NW_REPORT_RADIO_LTE:
+            return AosNetworkType::LTE;
+        case NW_REPORT_RADIO_NR:
+            return AosNetworkType::NR;
+        case NW_REPORT_RADIO_WCDMA:  // FALL-THROUGH
+        case NW_REPORT_RADIO_HSPA:
+            return AosNetworkType::UTRAN;
+
+        default:
+            return AosNetworkType::NONE;
+    }
+}
+
+PUBLIC
+void AosUtil::GetUserInfo(IN const AString& strSipAddress, OUT AString& strUserInfo)
+{
+    strUserInfo = AString::ConstNull();
+    if (strSipAddress.GetLength() == 0)
+    {
+        return;
+    }
+
+    SipAddress objSipAddress;
+    if (!objSipAddress.Create(strSipAddress))
+    {
+        return;
+    }
+
+    if (objSipAddress.IsSchemeSip() || objSipAddress.IsSchemeSips())
+    {
+        strUserInfo = objSipAddress.GetUser();
+    }
+    else if (objSipAddress.IsSchemeTel())
+    {
+        strUserInfo = objSipAddress.GetHost();
+    }
+
+    IMS_TRACE_D("GetUserInfo :: %s", strUserInfo.GetStr(), 0, 0);
+}
+
+PUBLIC
 void AosUtil::SetISipConfigV(IN ISipConfigV* piSipConfigV)
 {
     m_piSipConfigV = piSipConfigV;
+}
+
+PUBLIC
+void AosUtil::SetWifiTest(IN IMS_BOOL bEnabled)
+{
+    m_bIsWifiTest = bEnabled;
 }

@@ -16,6 +16,7 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
+#include "SdpInformation.h"
 #include "offeranswer/SdpMediaFormat.h"
 #include "offeranswer/SdpMediaParameter.h"
 #include "offeranswer/SdpPrecondition.h"

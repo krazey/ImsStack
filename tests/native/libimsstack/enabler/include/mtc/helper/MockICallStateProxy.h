@@ -27,14 +27,14 @@ class IMtcCallStateListener;
 class MockICallStateProxy : public ICallStateProxy
 {
 public:
-    virtual ~MockICallStateProxy() {}
-
     MOCK_METHOD(void, AddListener, (IN IMtcCallStateListener* pListener), (override));
     MOCK_METHOD(void, RemoveListener, (IN IMtcCallStateListener* pListener), (override));
     MOCK_METHOD(void, UpdateCallState,
             (IN CallKey nCallkey, IN IMtcCall::State eState, IN CallType eCallType,
                     IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason),
             (override));
+    MOCK_METHOD(void, NotifyCallSessionReleased,
+            (IN CallKey nCallkey, IN IMS_BOOL bEmergency, IN IMS_BOOL bEstablished), (override));
 };
 
 #endif

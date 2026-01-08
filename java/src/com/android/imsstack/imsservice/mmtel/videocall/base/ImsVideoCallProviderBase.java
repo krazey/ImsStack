@@ -22,26 +22,31 @@ import android.telephony.ims.ImsStreamMediaProfile;
 import android.telephony.ims.ImsVideoCallProvider;
 import android.view.Surface;
 
+import androidx.annotation.NonNull;
+
 import com.android.imsstack.enabler.mtc.MtcMediaSession;
 import com.android.imsstack.imsservice.mmtel.call.IVideoCallSession;
 import com.android.imsstack.imsservice.mmtel.util.VideoDimension;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.concurrent.Executor;
 
 public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         implements IVideoCallSession.EventListener {
-    protected static final int CAMERA_ID_NONE = -1;
-
-    protected static final int CALL_STATE_IDLE = 0;
+    public static final int CALL_STATE_IDLE = 0;
     // Originating call is started
-    protected static final int CALL_STATE_INITIATING = 1;
+    public static final int CALL_STATE_INITIATING = 1;
     // Incoming call is notified to framework and user alert will be done soon.
-    protected static final int CALL_STATE_ALERTING = 2;
+    public static final int CALL_STATE_ALERTING = 2;
     // Call establishment is completed
-    protected static final int CALL_STATE_ESTABLISHED = 3;
+    public static final int CALL_STATE_ESTABLISHED = 3;
     // Call is terminated
-    protected static final int CALL_STATE_TERMINATED = 4;
+    public static final int CALL_STATE_TERMINATED = 4;
     // Video call upgrade request is in progress
-    protected static final int CALL_STATE_VIDEO_UPGRADE_REQUESTED = 5;
+    public static final int CALL_STATE_VIDEO_UPGRADE_REQUESTED = 5;
+
+    protected static final int CAMERA_ID_NONE = -1;
 
     /*
      * Display type for video call
@@ -56,34 +61,81 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
     protected final static int DISPLAY_SIZE_NORMAL = 0;
     protected final static int DISPLAY_SIZE_FULL = 1;
 
-    private final IVideoCallSession mCallSession;
+    protected final IVideoCallSession mCallSession;
     private MtcMediaSessionListenerProxy mListenerProxy = new MtcMediaSessionListenerProxy();
     private VideoDimension mVideoDimension = null;
     private int mCallState = CALL_STATE_IDLE;
     protected MtcMediaSession mMediaSession = null;
 
-    public ImsVideoCallProviderBase(IVideoCallSession callSession,
+    protected final Executor mExecutor;
+
+    public ImsVideoCallProviderBase(@NonNull IVideoCallSession callSession,
             MtcMediaSession mediaSession) {
         mCallSession = callSession;
         mMediaSession = mediaSession;
+        mExecutor = mCallSession.getCallContext().getExecutor();
 
         if (mediaSession != null) {
             mediaSession.setVideoListener(mListenerProxy);
         }
 
-        if (callSession != null) {
-            callSession.setVideoCallProvider(this);
-            callSession.setEventListener(this);
-        }
+        callSession.setVideoCallProvider(this);
+        callSession.setEventListener(this);
     }
 
     @Override
-    public void onSetCamera(String cameraId) {
-        // no op
+    public final void onSetCamera(String cameraId) {
+        mExecutor.execute(() -> setCamera(cameraId));
     }
 
     @Override
-    public void onSetPreviewSurface(Surface surface) {
+    public final void onSetPreviewSurface(Surface surface) {
+        mExecutor.execute(() -> setPreviewSurface(surface));
+    }
+
+    @Override
+    public final void onSetDisplaySurface(Surface surface) {
+        mExecutor.execute(() -> setDisplaySurface(surface));
+    }
+
+    @Override
+    public final void onSetDeviceOrientation(int rotation) {
+        mExecutor.execute(() -> setDeviceOrientation(rotation));
+    }
+
+    @Override
+    public final void onSetZoom(float value) {
+        mExecutor.execute(() -> setZoom(value));
+    }
+
+    @Override
+    public final void onSendSessionModifyRequest(VideoProfile from, VideoProfile to) {
+        mExecutor.execute(() -> sendSessionModifyRequest(from, to));
+    }
+
+    @Override
+    public final void onSendSessionModifyResponse(VideoProfile responseProfile) {
+        mExecutor.execute(() -> sendSessionModifyResponse(responseProfile));
+    }
+
+    @Override
+    public final void onRequestCameraCapabilities() {
+        mExecutor.execute(() -> requestCameraCapabilities());
+    }
+
+    @Override
+    public final void onRequestCallDataUsage() {
+        mExecutor.execute(() -> requestCallDataUsage());
+    }
+
+    @Override
+    public final void onSetPauseImage(Uri uri) {
+        mExecutor.execute(() -> setPauseImage(uri));
+    }
+
+    protected void setCamera(String cameraId) {}
+
+    protected void setPreviewSurface(Surface surface) {
         if (mMediaSession == null) {
             // Exception handling
             return;
@@ -92,8 +144,7 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         mMediaSession.setPreviewSurface(surface);
     }
 
-    @Override
-    public void onSetDisplaySurface(Surface surface) {
+    protected void setDisplaySurface(Surface surface) {
         if (mMediaSession == null) {
             // Exception handling
             return;
@@ -102,55 +153,39 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         mMediaSession.setDisplaySurface(surface);
     }
 
-    @Override
-    public void onSetDeviceOrientation(int rotation) {
+    protected void setDeviceOrientation(int rotation) {
         if (mMediaSession == null) {
             return;
         }
 
-        logi("onSetDeviceOrientation :: rotation=" + rotation);
+        logi("setDeviceOrientation :: rotation=" + rotation);
 
         mMediaSession.setDeviceOrientation(getQuartile(rotation));
     }
 
-    @Override
-    public void onSetZoom(float value) {
+    protected void setZoom(float value) {
         if (mMediaSession == null) {
             return;
         }
 
-        // FIXME: Do we need to handle the float?
         Float f = Float.valueOf(value);
 
         mMediaSession.setCameraZoom(f.intValue());
     }
 
-    @Override
-    public void onSendSessionModifyRequest(VideoProfile fromProfile, VideoProfile toProfile) {
-        if (mCallSession == null) {
-            return;
-        }
-
+    protected void sendSessionModifyRequest(
+            VideoProfile fromProfile, VideoProfile toProfile) {
         mCallSession.sendSessionModifyRequest(fromProfile, toProfile);
     }
 
-    @Override
-    public void onSendSessionModifyResponse(VideoProfile responseProfile) {
-        if (mCallSession == null) {
-            return;
-        }
-
+    protected void sendSessionModifyResponse(VideoProfile responseProfile) {
         mCallSession.sendSessionModifyResponse(responseProfile);
     }
 
-    @Override
-    public void onRequestCameraCapabilities() {
-        //no op
-    }
+    protected void requestCameraCapabilities() {}
 
-    @Override
-    public void onRequestCallDataUsage() {
-        log("onRequestCallDataUsage");
+    protected void requestCallDataUsage() {
+        log("requestCallDataUsage");
 
         if (mMediaSession == null) {
             return;
@@ -159,10 +194,7 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         mMediaSession.requestCallDataUsage();
     }
 
-    @Override
-    public void onSetPauseImage(Uri uri) {
-        // TODO : add implementation
-    }
+    protected void setPauseImage(Uri uri) {}
 
     @Override
     public void onCallEvent(int event) {
@@ -189,14 +221,17 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
     }
 
     public void close() {
-        if (mCallSession != null) {
-            mCallSession.setEventListener(null);
-        }
+        mCallSession.setEventListener(null);
 
         if (mMediaSession != null) {
             mMediaSession.setVideoListener(null);
             mMediaSession = null;
         }
+    }
+
+    @VisibleForTesting
+    public int getCallState() {
+        return mCallState;
     }
 
     protected final MtcMediaSession getMediaSession() {
@@ -205,10 +240,6 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
 
     protected final IVideoCallSession getVideoCallSession() {
         return mCallSession;
-    }
-
-    protected int getCallState() {
-        return mCallState;
     }
 
     protected void setCallState(int state) {
@@ -278,8 +309,7 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
 
     protected void updateReversedPeerDimensionFromMediaProfile(int orientation,
             boolean enforceUpdate) {
-        ImsStreamMediaProfile mediaProfile =
-                (mCallSession != null) ? mCallSession.getStreamMediaProfile() : null;
+        ImsStreamMediaProfile mediaProfile = mCallSession.getStreamMediaProfile();
 
         if (mediaProfile != null) {
             VideoDimension videoDimension = null;
@@ -394,5 +424,5 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
                 final int width, final int height) {
             handleMediaSessionPeerDimensionsChanged(width, height);
         }
-    };
+    }
 }

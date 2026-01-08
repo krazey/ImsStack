@@ -36,7 +36,7 @@ public:
     TextConfiguration* m_pConfig;
     FakeIMediaSessionListener m_objFakeListener;
     MockIMediaSessionListener m_objListener;
-    MockTextNego* m_pTextNego;
+    std::shared_ptr<MockTextNego> m_pTextNego;
 
     MockICarrierConfig* m_pMockICarrierConfig;
     MockICarrierConfig* m_pTextPayloads;
@@ -60,7 +60,7 @@ protected:
                 .WillByDefault(Return(m_pTextPayloads));
 
         m_pConfig->Create(m_pMockICarrierConfig);
-        m_pTextNego = new MockTextNego(DEFAULT_SLOT_ID);
+        m_pTextNego = std::make_shared<MockTextNego>(DEFAULT_SLOT_ID);
 
         m_objListener.SetDelegate(&m_objFakeListener);
         m_objListener.DelegateToFake();
@@ -68,13 +68,12 @@ protected:
         m_pLocalProfile = new TextProfile();
         TextProfile::Payload* pLocalT140Payload = new TextProfile::Payload();
         pLocalT140Payload->SetRtpMap(99, "t140", 1000);
-        m_pLocalProfile->lstPayload.Append(pLocalT140Payload);
+        m_pLocalProfile->AddPayload(pLocalT140Payload);
 
         TextProfile::Payload* pLocalRedPayload = new TextProfile::Payload();
         pLocalRedPayload->SetRtpMap(100, "red", 1000);
-        TextProfile::RedFmtp* pLocalRedFmtp = new TextProfile::RedFmtp(3, 99);
-        pLocalRedPayload->pFmtp = reinterpret_cast<void*>(pLocalRedFmtp);
-        m_pLocalProfile->lstPayload.Append(pLocalRedPayload);
+        pLocalRedPayload->SetFmtp(std::make_shared<TextProfile::RedFmtp>(3, 99));
+        m_pLocalProfile->AddPayload(pLocalRedPayload);
 
         m_pPeerProfile = new TextProfile(*m_pLocalProfile);
         m_pNegoProfile = new TextProfile(*m_pLocalProfile);
@@ -90,18 +89,19 @@ protected:
     virtual void TearDown() override
     {
         delete m_pController;
-        delete m_pTextNego;
+        delete m_pConfig;
+        delete m_pMockICarrierConfig;
+        delete m_pTextPayloads;
         delete m_pLocalProfile;
         delete m_pPeerProfile;
         delete m_pNegoProfile;
-        delete m_pMockICarrierConfig;
-        delete m_pTextPayloads;
     }
 };
 
 TEST_F(TextControllerTest, testCreateSessionFail)
 {
     EXPECT_EQ(m_pController->CreateSession(nullptr, nullptr), IMS_FALSE);
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, nullptr), IMS_FALSE);
 }
 
 TEST_F(TextControllerTest, testUpdateLocalAddressFail)
@@ -109,14 +109,83 @@ TEST_F(TextControllerTest, testUpdateLocalAddressFail)
     EXPECT_EQ(m_pController->UpdateLocalAddress(nullptr), IMS_FALSE);
 }
 
-TEST_F(TextControllerTest, testOpenSessionFail)
+TEST_F(TextControllerTest, testOpenSessionNoSessionFail)
 {
+    EXPECT_EQ(m_pController->OpenSession(), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testOpenSessionNoLocalAddressFail)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    // OpenSession without calling UpdateLocalAddress first
+    EXPECT_EQ(m_pController->OpenSession(), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testUpdateRtpConfigNullNegoFail)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pTextNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateRtpConfig(nullptr), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testCloseSessionWithSessionCreated)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
+}
+
+TEST_F(TextControllerTest, testOpenSessionMultipleTimes)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pTextNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
     EXPECT_EQ(m_pController->OpenSession(), IMS_FALSE);
 }
 
 TEST_F(TextControllerTest, testCloseSessionFail)
 {
     EXPECT_EQ(m_pController->CloseSession(), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testUpdateRtpConfigWithNoSession)
+{
+    EXPECT_EQ(m_pController->UpdateRtpConfig(m_pTextNego), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testApplyQualityThresholdWithNoSession)
+{
+    EXPECT_EQ(m_pController->ApplyQualityThreshold(), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testUpdateSessionWithNoSession)
+{
+    EXPECT_EQ(m_pController->UpdateSession(), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testUpdateSessionBeforeOpenSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateSession(), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testUpdateRtpConfigBeforeOpenSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateRtpConfig(m_pTextNego), IMS_TRUE);
+}
+
+TEST_F(TextControllerTest, testApplyQualityThresholdBeforeOpenSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->ApplyQualityThreshold(), IMS_TRUE);
+}
+
+TEST_F(TextControllerTest, testCloseSessionAfterOpenSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pTextNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
 }
 
 TEST_F(TextControllerTest, testModifySession)
@@ -126,14 +195,81 @@ TEST_F(TextControllerTest, testModifySession)
     EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
 
     EXPECT_EQ(m_pController->UpdateRtpConfig(m_pTextNego), IMS_TRUE);
-    EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pTextNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->ApplyQualityThreshold(), IMS_TRUE);
     EXPECT_EQ(m_pController->UpdateSession(), IMS_TRUE);
 }
 
-TEST_F(TextControllerTest, testUpdateQualityThreshold)
+TEST_F(TextControllerTest, testUpdateSessionBeforeUpdateRtpConfig)
 {
     EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pTextNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateSession(), IMS_FALSE);
+}
 
-    EXPECT_EQ(m_pController->UpdateQualityThreshold(nullptr), IMS_FALSE);
-    EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pTextNego), IMS_TRUE);
+TEST_F(TextControllerTest, testUpdateSessionAfterCloseSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pTextNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateSession(), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testUpdateRtpConfigAfterCloseSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pTextNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateRtpConfig(m_pTextNego), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testApplyQualityThresholdAfterCloseSession)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pTextNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
+    EXPECT_EQ(m_pController->ApplyQualityThreshold(), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testIsSessionOpened)
+{
+    // Initial state: No session
+    EXPECT_EQ(m_pController->IsSessionOpened(), IMS_FALSE);
+
+    // Create session
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    // Session created but not opened (state is STATE_NONE)
+    EXPECT_EQ(m_pController->IsSessionOpened(), IMS_FALSE);
+
+    // Open session
+    EXPECT_EQ(m_pController->UpdateLocalAddress(m_pTextNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_TRUE);
+    // Session is now open (state is STATE_IDLE or higher)
+    EXPECT_EQ(m_pController->IsSessionOpened(), IMS_TRUE);
+
+    // Close session
+    EXPECT_EQ(m_pController->CloseSession(), IMS_TRUE);
+    // Session is closed (state is STATE_NONE)
+    EXPECT_EQ(m_pController->IsSessionOpened(), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testUpdateAccessNetworkNoSession)
+{
+    EXPECT_EQ(m_pController->UpdateAccessNetwork(1), IMS_FALSE);
+}
+
+TEST_F(TextControllerTest, testUpdateAccessNetworkSuccess)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateAccessNetwork(1), IMS_TRUE);
+}
+
+TEST_F(TextControllerTest, testUpdateSessionNoRtpConfigFail)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->OpenSession(), IMS_FALSE);
+    EXPECT_EQ(m_pController->UpdateSession(), IMS_FALSE);
 }

@@ -37,7 +37,7 @@ class SipProfile;
 class IService : public IConnection
 {
 protected:
-    virtual ~IService() = default;
+    ~IService() override = default;
 
 public:
     /**

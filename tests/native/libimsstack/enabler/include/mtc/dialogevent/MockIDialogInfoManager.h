@@ -17,18 +17,19 @@
 #ifndef MOCK_I_DIALOG_INFO_MANAGER_H_
 #define MOCK_I_DIALOG_INFO_MANAGER_H_
 
-#include "ImsList.h"
+#include "AString.h"
 #include "ImsTypeDef.h"
 #include "dialogevent/DialogInfo.h"
 #include "dialogevent/IDialogInfoManager.h"
 #include <gmock/gmock.h>
 
-class AString;
+template <class T>
+class ImsList;
 
 class MockIDialogInfoManager : public IDialogInfoManager
 {
 public:
-    virtual ~MockIDialogInfoManager() {}
+    virtual ~MockIDialogInfoManager() override {}
 
     MOCK_METHOD(IMS_RESULT, Update, (IN const AString&), (override));
     MOCK_METHOD(const ImsList<Dialog*>&, GetDialogs, (), (const, override));

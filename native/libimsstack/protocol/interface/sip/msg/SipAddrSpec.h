@@ -16,18 +16,18 @@
 #ifndef __SIP_ADDR_SPEC_H__
 #define __SIP_ADDR_SPEC_H__
 
-#include "AStringBuffer.h"
-
 #include "SipDatatypes.h"
 #include "SipRefBase.h"
-#include "msg/SipParameters.h"
 #include "msg/IParameterComponent.h"
+#include "msg/SipParameters.h"
+
+class AStringBuffer;
 
 class SipUri : public SipRefBase, public IParameterComponent
 {
 public:
     /*Enumeration for URI Scheme*/
-    enum
+    enum UriType
     {
         SCHEME_INVALID = SIP_INVALID,
         SCHEME_SIP,
@@ -43,31 +43,27 @@ private:
     SIP_CHAR* m_pszHost;
     SIP_UINT16 m_nPort;
     SIP_INT32 m_eHostType;
-    SipParameterList* m_pUriParamList;
+    SipParameters* m_pUriParams;
     // for storing each header in
     // "?"   header   *( "&"   header )
     // each node consists of a SipNameValue obj for one header
-    SipParameterList* m_pUriHdrParamList;
+    SipParameters* m_pUriHdrParams;
 
-    SIP_BOOL DecUserInfo(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
+    SIP_BOOL DecodeUserInfo(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
-    SIP_BOOL DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
+    SIP_BOOL DecodeHostPort(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
+
+    ~SipUri() override;
 
 public:
-    /*constructor*/
     SipUri();
     SipUri(const SipUri& objSipUri);
-    /*destructor*/
-    ~SipUri();
 
     SIP_BOOL IsValidComponent(const SIP_CHAR* pszComponent) const override;
 
-    SIP_BOOL DecodeSipUri(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+    SIP_VOID SetUser(const SIP_CHAR* pszUser);
 
-    /*Set Methods*/
-    SIP_BOOL SetUser(const SIP_CHAR* pszUser);
-
-    SIP_BOOL SetPassword(const SIP_CHAR* pszPass);
+    SIP_VOID SetPassword(const SIP_CHAR* pszPass);
 
     /*Get methods*/
     inline const SIP_CHAR* GetUser() const { return m_pszUser; }
@@ -78,24 +74,43 @@ public:
 
     inline SIP_UINT16 GetPort() const { return m_nPort; }
 
-    SipParameterList* GetUriParamList();
+    inline SipNameValue* GetUriParam(SIP_UINT32 nPos)
+    {
+        return (m_pUriParams != SIP_NULL) ? m_pUriParams->GetParam(nPos) : SIP_NULL;
+    }
+
+    inline SIP_CHAR* GetUriParamValue(const SIP_CHAR* pszName, SIP_UINT32 nPos = SIP_ZERO) const
+    {
+        return m_pUriParams->GetParamValue(pszName, nPos);
+    }
 
     inline SIP_UINT32 GetUriParamCount() const
     {
-        return (m_pUriParamList != SIP_NULL) ? m_pUriParamList->GetCount() : SIP_ZERO;
+        return (m_pUriParams != SIP_NULL) ? m_pUriParams->GetParamCount() : SIP_ZERO;
     }
-    SipParameterList* GetHdrParamList();
+    inline SipNameValue* GetHdrParam(SIP_UINT32 nPos) const
+    {
+        return (m_pUriHdrParams != SIP_NULL) ? m_pUriHdrParams->GetParam(nPos) : SIP_NULL;
+    }
 
     inline SIP_UINT32 GetHdrParamCount() const
     {
-        return (m_pUriHdrParamList != SIP_NULL) ? m_pUriHdrParamList->GetCount() : SIP_ZERO;
+        return (m_pUriHdrParams != SIP_NULL) ? m_pUriHdrParams->GetParamCount() : SIP_ZERO;
+    }
+
+    inline SIP_VOID RemoveHdrParam(const SIP_CHAR* pszName)
+    {
+        if (m_pUriHdrParams != SIP_NULL)
+        {
+            m_pUriHdrParams->RemoveParam(pszName);
+        }
     }
 
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const;
-    SIP_BOOL EncodeSipUri(SIP_CHAR** ppCurrPos);
-    SIP_BOOL DecodeSipUri(SIP_CHAR** ppCurrPos);
+    SIP_BOOL Encode(SIP_CHAR** ppCurrPos);
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 
-    SIP_BOOL RemoveHdrParam(const SIP_CHAR* pszName);
+    static const SIP_CHAR* GetSchemeString(UriType eUriType);
 };
 
 class SipAddrSpec : public SipRefBase
@@ -111,7 +126,7 @@ public:
     };
 
 private:
-    SIP_INT32 m_eUriType;
+    SipUri::UriType m_eUriType;
 
 protected:
     SipUri* m_pSipUri;
@@ -121,21 +136,17 @@ public:
     SipAddrSpec();
 
     SipAddrSpec(const SipAddrSpec& objAddressSpec);
-    ~SipAddrSpec();
 
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const;
+    SIP_BOOL Encode(SIP_CHAR** ppCurrPos) const;
 
-    /*Function for encoding*/
-    SIP_BOOL EncodeAddrSpec(SIP_CHAR** ppCurrPos) const;
-
-    /*Function for decoding*/
-    SIP_BOOL DecodeAddrSpec(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
     /*function for getting the header type*/
-    inline SIP_INT32 GetUriScheme() const { return m_eUriType; }
+    inline SipUri::UriType GetUriScheme() const { return m_eUriType; }
 
     SipUri* GetSipUri();
 
-    SIP_BOOL SetAbsUri(const SIP_CHAR* pszSipUri);
+    SIP_VOID SetAbsUri(const SIP_CHAR* pszSipUri);
 
     inline const SIP_CHAR* GetAbsUri() const { return m_pszAbsUri; }
 
@@ -143,6 +154,9 @@ public:
 
     /* Get methods as reference */
     inline const SipUri* GetSipUriAsRef() const { return m_pSipUri; }
+
+private:
+    ~SipAddrSpec() override;
 };
 
 class SipNameAddr : public SipRefBase
@@ -154,21 +168,22 @@ public:
 public:
     SipNameAddr();
     SipNameAddr(const SipNameAddr& objNameAddr);
-    virtual ~SipNameAddr();
 
     SIP_BOOL SetAddrSpec(SipAddrSpec* pSipAddrSpec);
 
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const;
-    SIP_BOOL EncodeNameAddr(SIP_CHAR** ppCurrPos);
+    SIP_BOOL Encode(SIP_CHAR** ppCurrPos);
 
-    /*Function for decoding*/
-    SIP_BOOL DecodeNameAddr(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
     SipAddrSpec* GetAddrSpec();
 
-    SIP_BOOL SetDisplayName(const SIP_CHAR* pszDisplayName);
+    SIP_VOID SetDisplayName(const SIP_CHAR* pszDisplayName);
 
     inline const SIP_CHAR* GetDisplayName() const { return m_pszDispName; }
+
+private:
+    ~SipNameAddr() override;
 };
 
 #endif  //__SIP_ADDR_SPEC_H__

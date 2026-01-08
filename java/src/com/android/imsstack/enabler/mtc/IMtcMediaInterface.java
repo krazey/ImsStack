@@ -21,6 +21,7 @@ import android.telephony.CallQuality;
 import android.telephony.ims.MediaThreshold;
 import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.imsmedia.MediaQualityStatus;
+import android.telephony.imsmedia.RtpReceptionStats;
 
 import com.android.imsstack.enabler.media.IMediaListener;
 
@@ -74,6 +75,13 @@ public interface IMtcMediaInterface {
     void videoSessionOpened();
 
     /**
+     * Notified when the audio session got the notification of the rtp reception stats
+     * @param type The media session type
+     * @param stats The rtp reception stats for the av sync
+     */
+    void onNotifyRtpReceptionStats(int type, RtpReceptionStats stats);
+
+    /**
      * Get the media threshold information for specific session type
      * @param mediaSessionType media session type for this Threshold info.
      * @return MediaThreshold media threshold information
@@ -89,4 +97,19 @@ public interface IMtcMediaInterface {
     void mediaQualityStatusChanged(int mediaSessionType, int accessNetwork,
             MediaQualityStatus mediaQualityStatus);
 
+    /**
+     * Trigger Anbr query to discuss with the network whether the current media bitrate
+     * can be changed after receiving cmr.
+     * @param mediaType is used to identify media stream such as audio or video.
+     * @param direction  of this packet stream (e.g. uplink or downlink).
+     * @param bitsPerSecond This value is the bitrate requested by the other party UE.
+     */
+    void triggerAnbrQuery(int mediaType, int direction, int bitsPerSecond);
+
+    /**
+     * A notification is sent when an incoming audio dtmf is received.
+     * @param dtmfDigit Received incoming dtmf digit
+     * @param durationMs Dtmf tone playback time
+     */
+    void onNotifyIncomingDtmfReceived(int dtmfDigit, int durationMs);
 }

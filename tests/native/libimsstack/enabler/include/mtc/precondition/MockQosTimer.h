@@ -17,14 +17,12 @@
 #ifndef MOCK_QOS_TIMER_H_
 #define MOCK_QOS_TIMER_H_
 
-#include "ImsMap.h"
 #include "ImsTypeDef.h"
-#include "ServiceTimer.h"
-#include "precondition/IQosTimerListener.h"
+#include "precondition/QosDef.h"
 #include "precondition/QosTimer.h"
 #include <gmock/gmock.h>
 
-enum class QosTimerType;
+class IQosTimerListener;
 
 class MockQosTimer : public QosTimer
 {
@@ -33,7 +31,7 @@ public:
             QosTimer(pListener)
     {
     }
-    ~MockQosTimer() {}
+    ~MockQosTimer() override {}
 
     MOCK_METHOD(void, Timer_TimerExpired, (IN ITimer * piExpiredTimer), (override));
     MOCK_METHOD(void, StartQosTimer, (IN QosTimerType eType, IN IMS_SINT32 nDuration), (override));

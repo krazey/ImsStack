@@ -16,7 +16,10 @@
 #ifndef INTERFACE_IPSEC_SA_H_
 #define INTERFACE_IPSEC_SA_H_
 
-#include "IpAddress.h"
+#include "ImsTypeDef.h"
+
+class ByteArray;
+class IpAddress;
 
 class IIpSecSa
 {

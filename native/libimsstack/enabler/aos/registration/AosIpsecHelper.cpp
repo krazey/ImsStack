@@ -30,7 +30,7 @@
 #include "provider/AosUtil.h"
 #include "registration/AosIpsecHelper.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 #define REGID m_strTag.GetStr()
 
@@ -59,9 +59,12 @@ PUBLIC VIRTUAL AosIpsecHelper::~AosIpsecHelper()
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosIpsecHelper = %" PFLS_u "/%" PFLS_x, REGID,
             sizeof(AosIpsecHelper), this);
 
-    // Set Socket Operation related to IPSEC
-    AosUtil::GetInstance()->SetSocketOptionLinger(-1, m_piContext->GetSlotId());
-    AosUtil::GetInstance()->SetSocketOptionShutDown(2 /*both*/, m_piContext->GetSlotId());
+    if (m_piContext != IMS_NULL)
+    {
+        // Set Socket Operation related to IPSEC
+        AosUtil::GetInstance()->SetSocketOptionLinger(-1, m_piContext->GetSlotId());
+        AosUtil::GetInstance()->SetSocketOptionShutDown(2 /*both*/, m_piContext->GetSlotId());
+    }
 
     if (m_pUeIpsecInfo != IMS_NULL)
     {
@@ -353,11 +356,8 @@ PUBLIC VIRTUAL IMS_BOOL AosIpsecHelper::ProcessRegUpdated()
         A_IMS_TRACE_I(REGID, "don't received 401 challenge, so keep current SA", 0, 0, 0);
 
         // delete New SA
-        if (m_pNewIpsec != IMS_NULL)
-        {
-            delete m_pNewIpsec;
-            m_pNewIpsec = IMS_NULL;
-        }
+        delete m_pNewIpsec;
+        m_pNewIpsec = IMS_NULL;
 
         // update lifetime
         m_pCurrIpsec->ManagePolicyLifetime(
@@ -425,14 +425,59 @@ PROTECTED VIRTUAL void AosIpsecHelper::SetSecurityServerPortInRegistration()
     }
 }
 
+PROTECTED VIRTUAL IMS_UINT32 AosIpsecHelper::FindAvailableUePort(
+        IN UePortType ePortType, OUT IMS_UINT32& nUePort)
+{
+    IMS_UINT32 nLowerPort = 0;
+    IMS_UINT32 nUpperPort = 0;
+
+    if (ePortType == UePortType::CLIENT_PORT)
+    {
+        ImsVector<IMS_SINT32>& objPortRange =
+                GET_N_CONFIG(m_piContext->GetSlotId())->GetIpsecUeClientPortRange();
+        if (objPortRange.GetSize() >= 2)
+        {
+            nLowerPort = objPortRange.GetAt(0);
+            nUpperPort = objPortRange.GetAt(1);
+        }
+        else
+        {
+            A_IMS_TRACE_I(REGID, "Client port range not in config, using defaults", 0, 0, 0);
+            nLowerPort = AosIpsec::UE_PORT_LOWER;
+            nUpperPort = AosIpsec::UE_PORT_UPPER;
+        }
+    }
+    else  // UePortType::SERVER_PORT
+    {
+        ImsVector<IMS_SINT32>& objPortRange =
+                GET_N_CONFIG(m_piContext->GetSlotId())->GetIpsecUeServerPortRange();
+        if (objPortRange.GetSize() >= 2)
+        {
+            nLowerPort = objPortRange.GetAt(0);
+            nUpperPort = objPortRange.GetAt(1);
+        }
+        else
+        {
+            A_IMS_TRACE_I(REGID, "Server port range not in config, using default logic", 0, 0, 0);
+            nLowerPort = AosIpsec::UE_PORT_LOWER + AosIpsec::PORTS_INTERVAL;
+            nUpperPort = AosIpsec::UE_PORT_UPPER + AosIpsec::PORTS_INTERVAL;
+        }
+    }
+
+    return GetValidUePort(nLowerPort, nUpperPort, nUePort);
+}
+
 PROTECTED VIRTUAL void AosIpsecHelper::SetUePortnSpi(IN IMS_BOOL bInitial)
 {
-    m_pUeIpsecInfo->nPortC = GetValidUePort();
+    static IMS_UINT32 nLastClientPort = 0;
+    static IMS_UINT32 nLastServerPort = 0;
+
+    m_pUeIpsecInfo->nPortC = FindAvailableUePort(UePortType::CLIENT_PORT, nLastClientPort);
 
     // ONLY create PortS in initial registration
     if (bInitial)
     {
-        m_pUeIpsecInfo->nPortS = m_pUeIpsecInfo->nPortC + IPSEC_PORT_INTERVAL;
+        m_pUeIpsecInfo->nPortS = FindAvailableUePort(UePortType::SERVER_PORT, nLastServerPort);
     }
 
     m_pUeIpsecInfo->nSpiC = m_pNewIpsec->CreateUeSpi();
@@ -474,9 +519,11 @@ PROTECTED VIRTUAL IMS_BOOL AosIpsecHelper::SetSecurityClientHeader()
 
             m_pNewIpsec->MakeSecurityClientH(objSecurityClientH);
 
-            objSecurityClientH.SetAlgorithm(objAuthenticationAlgs.GetAt(nIAlgIdx));
+            objSecurityClientH.SetAlgorithm(m_pNewIpsec->GetAuthAlgoForSecurityHeader(
+                    objAuthenticationAlgs.GetAt(nIAlgIdx)));
 
-            objSecurityClientH.SetEncryptionAlgorithm(objEncryptionAlgs.GetAt(nEAlgIdx));
+            objSecurityClientH.SetEncryptionAlgorithm(
+                    m_pNewIpsec->GetEncrAlgoForSecurityHeader(objEncryptionAlgs.GetAt(nEAlgIdx)));
 
             m_piRegParameter->AddSecurityClient(objSecurityClientH);
         }
@@ -649,25 +696,42 @@ void AosIpsecHelper::CloseSecureTCPSocket(IN AosIpsec* pIpsec)
 }
 
 PRIVATE
-IMS_UINT32 AosIpsecHelper::GetValidUePort()
+IMS_UINT32 AosIpsecHelper::GetValidUePort(
+        IN IMS_UINT32 nLowerPort, IN IMS_UINT32 nUpperPort, OUT IMS_UINT32& nUePort)
 {
-    const IMS_UINT32 MAX_COUNT = 20;
+    if (nLowerPort >= nUpperPort)
+    {
+        A_IMS_TRACE_D(REGID, "Invalid port range [%u, %u)", nLowerPort, nUpperPort, 0);
+        return 0;
+    }
+
+    if (nUePort < nLowerPort - 1 || nUePort >= nUpperPort)
+    {
+        nUePort = nLowerPort - 1;
+    }
+
+    IMS_UINT32 nRangeSize = nUpperPort - nLowerPort;
+    IMS_UINT32 nMaxCount =
+            (nRangeSize < IPSEC_PORT_RANGE_MAX_COUNT) ? nRangeSize : IPSEC_PORT_RANGE_MAX_COUNT;
     const IpAddress& objUeIPA = m_piRegContact->GetIpAddress();
     NetworkService* pNetworkService = NetworkService::GetNetworkService();
-    IMS_UINT32 nUePort = m_pNewIpsec->CreateUePort();
 
-    for (IMS_UINT32 i = 0; i < MAX_COUNT; i++)
+    for (IMS_UINT32 i = 0; i < nMaxCount; i++)
     {
+        nUePort++;
+        if (nUePort >= nUpperPort)
+        {
+            nUePort = nLowerPort;
+        }
+
         if (pNetworkService->CheckIpAndPortAvailability(objUeIPA, nUePort, ISocket::TYPE_STREAM) &&
                 pNetworkService->CheckIpAndPortAvailability(objUeIPA, nUePort, ISocket::TYPE_DGRAM))
         {
             return nUePort;
         }
-
-        nUePort = m_pNewIpsec->CreateUePort();
     }
 
-    IMS_TRACE_E(0, "there is no valid UE port :: last UE port(%d)", nUePort, 0, 0);
+    A_IMS_TRACE_D(REGID, "No valid UE port in range [%u, %u)", nLowerPort, nUpperPort, 0);
     return nUePort;
 }
 

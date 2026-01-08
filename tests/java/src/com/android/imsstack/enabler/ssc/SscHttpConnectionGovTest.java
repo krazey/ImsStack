@@ -23,9 +23,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.telephony.CarrierConfigManager;
-import android.test.suitebuilder.annotation.SmallTest;
 
-import com.android.imsstack.core.agents.ConfigAgent;
+import androidx.test.filters.SmallTest;
+
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.config.CarrierConfig;
 
@@ -38,24 +39,26 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.HashMap;
+import java.util.Map;
 
 @RunWith(JUnit4.class)
 public class SscHttpConnectionGovTest {
     private static final int SLOT_0 = 0;
+    private static final int DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS = 30 * 1000;
 
     ISscHttpConnectionGov mSscHttConnectionGov;
 
     @Mock private CarrierConfig mMockCarrierConfig;
-    @Mock private ConfigAgent mMockConfigAgent;
+    @Mock private ConfigInterface mMockConfigInterface;
     @Mock private SscHttpConnection mMockSscHttpConnection;
-    @Mock private HashMap<Integer, ISscHttpConnection> mMockSscHttpConnections;
+    @Mock private Map<Integer, ISscHttpConnection> mMockSscHttpConnections;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        SscConfig.setConfigInterface(SLOT_0, mMockConfigInterface);
 
         mSscHttConnectionGov = SscHttpConnectionGov.getInstance();
         replaceInstance(SscHttpConnectionGov.class, "sSscHttpConnections", null,
@@ -134,10 +137,11 @@ public class SscHttpConnectionGovTest {
         when(mMockSscHttpConnections.get(SLOT_0)).thenReturn(mMockSscHttpConnection);
 
         mSscHttConnectionGov.sendRequest(SLOT_0, ISscHttpConnection.HTTP_REQUEST_GET, requestUri,
-                xui, null);
+                xui, null, DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         verify(mMockSscHttpConnection)
-                .sendRequest(ISscHttpConnection.HTTP_REQUEST_GET, requestUri, xui, null);
+                .sendRequest(ISscHttpConnection.HTTP_REQUEST_GET, requestUri, xui, null,
+                        DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
     }
 
     @Test
@@ -148,10 +152,11 @@ public class SscHttpConnectionGovTest {
         when(mMockSscHttpConnections.get(SLOT_0)).thenReturn(null);
 
         mSscHttConnectionGov.sendRequest(SLOT_0, ISscHttpConnection.HTTP_REQUEST_GET, requestUri,
-                xui, null);
+                xui, null, DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
 
         verify(mMockSscHttpConnection, never())
-                .sendRequest(ISscHttpConnection.HTTP_REQUEST_GET, requestUri, xui, null);
+                .sendRequest(ISscHttpConnection.HTTP_REQUEST_GET, requestUri, xui, null,
+                        DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS);
     }
 
     @Test

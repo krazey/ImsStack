@@ -16,9 +16,10 @@
 #ifndef INTERFACE_SOCKET_H_
 #define INTERFACE_SOCKET_H_
 
-#include "IpAddress.h"
+#include "ImsTypeDef.h"
 
 class ISocketListener;
+class IpAddress;
 
 class ISocket
 {
@@ -162,6 +163,8 @@ public:
     virtual IMS_SINT32 GetOption(IN IMS_SINT32 nOption) = 0;
 
     virtual IMS_BOOL SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue) = 0;
+
+    virtual IMS_BOOL IsClosedOrBeingClosed() const = 0;
 };
 
 class ISocketListener

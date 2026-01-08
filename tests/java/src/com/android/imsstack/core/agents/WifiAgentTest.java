@@ -32,7 +32,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
@@ -45,19 +44,21 @@ import android.net.NetworkRequest;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
-import com.android.imsstack.ContextFixture;
+import androidx.test.filters.SmallTest;
+
+import com.android.imsstack.base.BroadcastReceiverProxy;
+import com.android.imsstack.base.SystemServiceProxy.ConnectivityManagerProxy;
+import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.agents.dcmif.EIpVersion;
 import com.android.imsstack.system.SystemInterface;
-import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -66,10 +67,10 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-@RunWith(JUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class WifiAgentTest {
     private static final int TEST_NETWORK_ID = 100;
     private static final String TEST_IFACE_NAME = "test_wlan0";
@@ -80,20 +81,22 @@ public class WifiAgentTest {
     private static final LinkAddress TEST_LINK_ADDRV6 =
             new LinkAddress(TEST_ADDRV6 + "/64");
     private static final String TEST_HOST_NAME = "ims.com";
-    private static final String TEST_SSID = "TestSsid1";
-    private static final String TEST_BSSID = "01:02:03:04:05:06";
+    private static final String TEST_SS_ID = "TestSsid1";
+    private static final String TEST_BSS_ID = "01:02:03:04:05:06";
+    private static final String TEST_MAC_ADDRESS = "82:11:22:33:44:55";
 
-    @Mock Network mNetwork;
-    @Mock SystemInterface mSystemInterface;
-    @Mock WifiInterface.Listener mWifiListener;
+    @Mock private Network mNetwork;
+    @Mock private NetworkCapabilities mNetworkCapabilities;
+    @Mock private WifiInfo mWifiInfo;
+    @Mock private SystemInterface mSystemInterface;
+    @Mock private WifiInterface.Listener mWifiListener;
     // Mock objects
-    private ConnectivityManager mConnectivityManager;
+    private BroadcastReceiverProxy mBroadcastReceiverProxy;
+    private ConnectivityManagerProxy mConnectivityManagerProxy;
 
     private final LinkProperties mLinkProperties;
-    private final NetworkCapabilities mNetworkCapabilities;
     private final List<InetAddress> mHostAddrs;
-    private ContextFixture mContextFixture;
-    private Context mContext;
+    private TestAppContext mTestAppContext;
     private TestableLooper mTestableLooper;
     private WifiAgent mWifiAgent;
 
@@ -102,14 +105,6 @@ public class WifiAgentTest {
         mLinkProperties.setInterfaceName(TEST_IFACE_NAME);
         mLinkProperties.setMtu(TEST_MTU);
         mLinkProperties.setLinkAddresses(List.of(TEST_LINK_ADDRV6, TEST_LINK_ADDRV4));
-
-        WifiInfo wifiInfo = new WifiInfo.Builder()
-                .setSsid(TEST_SSID.getBytes(StandardCharsets.UTF_8))
-                .setBssid(TEST_BSSID)
-                .build();
-        mNetworkCapabilities = new NetworkCapabilities.Builder()
-                .setTransportInfo(wifiInfo)
-                .build();
 
         mHostAddrs = List.of(
                 InetAddresses.parseNumericAddress(TEST_ADDRV6),
@@ -120,19 +115,25 @@ public class WifiAgentTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mContextFixture = new ContextFixture();
-        mContext = mContextFixture.getTestDouble();
-        AppContext.init(mContext);
-        mConnectivityManager = mContext.getSystemService(ConnectivityManager.class);
+        mTestableLooper = TestableLooper.get(this);
+        mTestAppContext = new TestAppContext();
+        mTestAppContext.setUpWithLooper(mTestableLooper.getLooper());
+
+        mBroadcastReceiverProxy = mTestAppContext.getBroadcastReceiverProxy();
+        mConnectivityManagerProxy =
+                mTestAppContext.getSystemServiceProxy(ConnectivityManagerProxy.class);
         SystemInterface.setSystemInterface(mSystemInterface);
-        mTestableLooper = new TestableLooper(AppContext.getInstance().getMainLooper());
 
         when(mNetwork.getNetId()).thenReturn(TEST_NETWORK_ID);
         when(mNetwork.getAllByName(eq(TEST_HOST_NAME)))
                 .thenReturn(mHostAddrs.toArray(new InetAddress[0]));
+        when(mWifiInfo.getSSID()).thenReturn(TEST_SS_ID);
+        when(mWifiInfo.getBSSID()).thenReturn(TEST_BSS_ID);
+        when(mWifiInfo.getMacAddress()).thenReturn(TEST_MAC_ADDRESS);
+        when(mNetworkCapabilities.getTransportInfo()).thenReturn(mWifiInfo);
 
         mWifiAgent = new WifiAgent();
-        mWifiAgent.init(mContext);
+        mWifiAgent.init(mTestAppContext.getContext());
         mWifiAgent.addListener(mWifiListener);
     }
 
@@ -144,19 +145,15 @@ public class WifiAgentTest {
             mWifiAgent = null;
         }
 
-        if (mTestableLooper != null) {
-            mTestableLooper.destroy();
-            mTestableLooper = null;
-        }
-
         SystemInterface.setSystemInterface(null);
         mSystemInterface = null;
         mWifiListener = null;
         mNetwork = null;
-
-        AppContext.deinit();
-        mContext = null;
-        mContextFixture = null;
+        mBroadcastReceiverProxy = null;
+        mConnectivityManagerProxy = null;
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
+        mTestableLooper = null;
     }
 
     @Test
@@ -164,15 +161,15 @@ public class WifiAgentTest {
     public void testInit() {
         ArgumentCaptor<IntentFilter> intentFilterCaptor =
                 ArgumentCaptor.forClass(IntentFilter.class);
-        verify(mContext).registerReceiver(any(BroadcastReceiver.class),
-                intentFilterCaptor.capture(), any(), any(Handler.class), anyInt());
+        verify(mBroadcastReceiverProxy).registerReceiver(any(BroadcastReceiver.class),
+                intentFilterCaptor.capture(), any(Handler.class));
         IntentFilter intentFilter = intentFilterCaptor.getValue();
         assertNotNull(intentFilter);
         assertTrue(intentFilter.hasAction(WifiManager.WIFI_STATE_CHANGED_ACTION));
 
         ArgumentCaptor<NetworkRequest> networkRequestCaptor =
                 ArgumentCaptor.forClass(NetworkRequest.class);
-        verify(mConnectivityManager).registerNetworkCallback(networkRequestCaptor.capture(),
+        verify(mConnectivityManagerProxy).registerNetworkCallback(networkRequestCaptor.capture(),
                 any(ConnectivityManager.NetworkCallback.class), any(Handler.class));
         NetworkRequest networkRequest = networkRequestCaptor.getValue();
         assertNotNull(networkRequest);
@@ -184,9 +181,9 @@ public class WifiAgentTest {
     public void testCleanup() {
         mWifiAgent.cleanup();
 
-        verify(mConnectivityManager).unregisterNetworkCallback(
+        verify(mConnectivityManagerProxy).unregisterNetworkCallback(
                 any(ConnectivityManager.NetworkCallback.class));
-        verify(mContext).unregisterReceiver(any(BroadcastReceiver.class));
+        verify(mBroadcastReceiverProxy).unregisterReceiver(any(BroadcastReceiver.class));
     }
 
     @Test
@@ -197,11 +194,13 @@ public class WifiAgentTest {
         BroadcastReceiver receiver = getBroadcastReceiver();
         assertNotNull(receiver);
 
-        receiver.onReceive(mContext, createWifiStateChangedIntent(WifiManager.WIFI_STATE_ENABLED));
+        receiver.onReceive(mTestAppContext.getContext(),
+                createWifiStateChangedIntent(WifiManager.WIFI_STATE_ENABLED));
 
         assertTrue(mWifiAgent.isWifiEnabled());
 
-        receiver.onReceive(mContext, createWifiStateChangedIntent(WifiManager.WIFI_STATE_DISABLED));
+        receiver.onReceive(mTestAppContext.getContext(),
+                createWifiStateChangedIntent(WifiManager.WIFI_STATE_DISABLED));
 
         assertFalse(mWifiAgent.isWifiEnabled());
         // 2 times: enabled, disabled
@@ -209,7 +208,8 @@ public class WifiAgentTest {
         verify(mSystemInterface, never()).notifyWifiStateChanged(anyInt());
 
         mWifiAgent.removeListener(mWifiListener);
-        receiver.onReceive(mContext, createWifiStateChangedIntent(WifiManager.WIFI_STATE_ENABLED));
+        receiver.onReceive(mTestAppContext.getContext(),
+                createWifiStateChangedIntent(WifiManager.WIFI_STATE_ENABLED));
 
         assertTrue(mWifiAgent.isWifiEnabled());
         verifyNoMoreInteractions(mWifiListener);
@@ -226,12 +226,14 @@ public class WifiAgentTest {
         BroadcastReceiver receiver = getBroadcastReceiver();
         assertNotNull(receiver);
 
-        receiver.onReceive(mContext, createWifiStateChangedIntent(WifiManager.WIFI_STATE_ENABLED));
+        receiver.onReceive(mTestAppContext.getContext(),
+                createWifiStateChangedIntent(WifiManager.WIFI_STATE_ENABLED));
 
         assertTrue(mWifiAgent.isWifiEnabled());
         verify(mSystemInterface).notifyWifiStateChanged(eq(WifiInterface.STATE_ENABLED));
 
-        receiver.onReceive(mContext, createWifiStateChangedIntent(WifiManager.WIFI_STATE_DISABLED));
+        receiver.onReceive(mTestAppContext.getContext(),
+                createWifiStateChangedIntent(WifiManager.WIFI_STATE_DISABLED));
 
         assertFalse(mWifiAgent.isWifiEnabled());
         // 2 times: enabled, disabled
@@ -467,7 +469,7 @@ public class WifiAgentTest {
         networkCallback.onCapabilitiesChanged(mNetwork, mNetworkCapabilities);
         networkCallback.onLinkPropertiesChanged(mNetwork, mLinkProperties);
 
-        assertEquals(TEST_BSSID, mWifiAgent.getBssId());
+        assertEquals(TEST_BSS_ID, mWifiAgent.getBssId());
 
         networkCallback.onLost(mNetwork);
 
@@ -485,11 +487,32 @@ public class WifiAgentTest {
         networkCallback.onCapabilitiesChanged(mNetwork, mNetworkCapabilities);
         networkCallback.onLinkPropertiesChanged(mNetwork, mLinkProperties);
 
-        assertEquals(TEST_SSID, mWifiAgent.getSsId());
+        assertEquals(TEST_SS_ID, mWifiAgent.getSsId());
 
         networkCallback.onLost(mNetwork);
 
         assertNull(mWifiAgent.getSsId());
+    }
+
+    @Test
+    @SmallTest
+    public void testGetMacAddress() {
+        assertNull(mWifiAgent.getMacAddress());
+
+        ConnectivityManager.NetworkCallback networkCallback = getNetworkCallback();
+        assertNotNull(networkCallback);
+
+        networkCallback.onCapabilitiesChanged(mNetwork, mNetworkCapabilities);
+        networkCallback.onLinkPropertiesChanged(mNetwork, mLinkProperties);
+
+        assertEquals(TEST_MAC_ADDRESS, mWifiAgent.getMacAddress());
+
+        when(mWifiInfo.getMacAddress()).thenReturn(WifiInfo.DEFAULT_MAC_ADDRESS);
+        assertNull(mWifiAgent.getMacAddress());
+
+        networkCallback.onLost(mNetwork);
+
+        assertNull(mWifiAgent.getMacAddress());
     }
 
     @Test
@@ -526,15 +549,15 @@ public class WifiAgentTest {
     private BroadcastReceiver getBroadcastReceiver() {
         ArgumentCaptor<BroadcastReceiver> receiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
-        verify(mContext).registerReceiver(receiverCaptor.capture(),
-                any(IntentFilter.class), any(), any(Handler.class), anyInt());
+        verify(mBroadcastReceiverProxy).registerReceiver(receiverCaptor.capture(),
+                any(IntentFilter.class), any(Handler.class));
         return receiverCaptor.getValue();
     }
 
     private ConnectivityManager.NetworkCallback getNetworkCallback() {
         ArgumentCaptor<ConnectivityManager.NetworkCallback> networkCallbackCaptor =
                 ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
-        verify(mConnectivityManager).registerNetworkCallback(any(NetworkRequest.class),
+        verify(mConnectivityManagerProxy).registerNetworkCallback(any(NetworkRequest.class),
                 networkCallbackCaptor.capture(), any(Handler.class));
         return networkCallbackCaptor.getValue();
     }

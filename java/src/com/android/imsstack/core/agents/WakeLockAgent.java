@@ -18,7 +18,7 @@ package com.android.imsstack.core.agents;
 import android.content.Context;
 import android.os.PowerManager;
 
-import com.android.imsstack.util.AppContext;
+import com.android.imsstack.base.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -75,7 +75,7 @@ public class WakeLockAgent implements WakeLockInterface {
 
         PowerManager.WakeLock wakeLock = getWakeLock();
 
-        ImsLog.i("WakeLock#" + tag + ": " + timeoutMillis);
+        ImsLog.i(this, "WakeLock#" + tag + ": " + timeoutMillis);
 
         wakeLock.acquire(timeoutMillis);
     }

@@ -16,9 +16,7 @@
 #ifndef PROTOCOL_PERMISSION_H_
 #define PROTOCOL_PERMISSION_H_
 
-#include "AString.h"
-
-class Protocol;
+#include "Protocol.h"
 
 class ProtocolPermission
 {
@@ -27,6 +25,8 @@ private:
 
 public:
     static Protocol* Lookup(IN const AString& strName);
+    static void RegisterProtocol(IN const AString& strName, IN Protocol* pProtocol);
+    static void UnregisterAllProtocols();
 };
 
 #endif

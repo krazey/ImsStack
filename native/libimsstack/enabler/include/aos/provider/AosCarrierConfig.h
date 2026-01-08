@@ -30,20 +30,22 @@ public:
             bCarrierVtAvailable(IMS_FALSE),
             bCarrierWfcImsAvailable(IMS_FALSE),
             bRttSupported(IMS_FALSE),
+            bRttSupportedWhileRoaming(IMS_FALSE),
             bCarrierCrossSimImsAvailable(IMS_FALSE),
             bCarrierVolteTtySupported(IMS_FALSE),
             bImsSingleRegistrationRequired(IMS_FALSE),
             bKeepPdnUpInNoVops(IMS_FALSE),
-            bSipOverIpsecEnabled(IMS_FALSE)  // default - IMS_TRUE
-            ,
+            bSipOverIpsecEnabled(IMS_FALSE),  // default - IMS_TRUE
             bRegistrationEventPackageSupported(IMS_TRUE),
             bCarrierVolteRoamingAvailable(IMS_TRUE),
             bSmsOverImsSupported(IMS_TRUE),
             bEmergencyCallbackModeSupported(IMS_FALSE),
+            bNetworkInitiatedUssdOverImsSupported(IMS_TRUE),
+            bTcpRequiredForReg(IMS_FALSE),
             bUnsubscribeRegistrationEventPackage(IMS_FALSE),
-            bReleaseEmergencyPdnWithEmergencyCallEnd(IMS_FALSE),
             bSupportLimitedAdminSmsMode(IMS_FALSE),
             nCarrierUssdMethod(CarrierConfig::USSD_OVER_CS_PREFERRED),
+            nSipTimerT1Millis(2000),
             nSipServerPortNumber(5060),
             nSipPreferredTransport(CarrierConfig::Ims::PREFERRED_TRANSPORT_DYNAMIC_UDP_TCP),
             nIpv4SipMtuSizeCellular(1500),
@@ -58,8 +60,10 @@ public:
             nPreferredImsDscp(CarrierConfig::Ims::PREFERRED_DSCP_NONE),
             nRegistrationPreferredAccesstypeFeatureTag(
                     CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED),
+            nIpcanReleaseEmergencyPdnUponEmergencyCallEnd(CarrierConfig::ImsEmergency::IPCAN_NONE),
             nPreferredEmergencyRegistration(
                     CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK),
+            nWaitTimeMillisForReleaseEPdnAfterECallEnd(0),
             nRegistrationPrivateHeader(0),
             objCarrierNrAvailabilities(ImsVector<IMS_SINT32>()),
             objPcscfDiscoveryMethod(ImsVector<IMS_SINT32>()),
@@ -89,6 +93,7 @@ public:
     IMS_BOOL bCarrierVtAvailable;
     IMS_BOOL bCarrierWfcImsAvailable;
     IMS_BOOL bRttSupported;
+    IMS_BOOL bRttSupportedWhileRoaming;
     IMS_BOOL bCarrierCrossSimImsAvailable;
     IMS_BOOL bCarrierVolteTtySupported;
     /// aosp_carrier_config - ims.
@@ -102,17 +107,19 @@ public:
     IMS_BOOL bSmsOverImsSupported;
     /// aosp_carrier_config - imsemergency.
     IMS_BOOL bEmergencyCallbackModeSupported;
+    /// aosp_carrier_config - imsss.
+    IMS_BOOL bNetworkInitiatedUssdOverImsSupported;
 
     /// carrier_config - ims
+    IMS_BOOL bTcpRequiredForReg;
     IMS_BOOL bUnsubscribeRegistrationEventPackage;
-    /// carrier_config - imsemergency.
-    IMS_BOOL bReleaseEmergencyPdnWithEmergencyCallEnd;
     /// carrier_config - imssms.
     IMS_BOOL bSupportLimitedAdminSmsMode;
 
     /// aosp_carrier_config - no prefix
     IMS_SINT32 nCarrierUssdMethod;
     /// aosp_carrier_config - ims.
+    IMS_SINT32 nSipTimerT1Millis;
     IMS_SINT32 nSipServerPortNumber;
     IMS_SINT32 nSipPreferredTransport;
     IMS_SINT32 nIpv4SipMtuSizeCellular;
@@ -130,7 +137,9 @@ public:
     IMS_SINT32 nPreferredImsDscp;
     IMS_SINT32 nRegistrationPreferredAccesstypeFeatureTag;
     /// carrier_config - imsemergency.
+    IMS_SINT32 nIpcanReleaseEmergencyPdnUponEmergencyCallEnd;
     IMS_SINT32 nPreferredEmergencyRegistration;
+    IMS_SINT32 nWaitTimeMillisForReleaseEPdnAfterECallEnd;
     /// carrier_config - imswfc.
     IMS_SINT32 nRegistrationPrivateHeader;
 

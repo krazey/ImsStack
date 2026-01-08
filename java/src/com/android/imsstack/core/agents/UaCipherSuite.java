@@ -40,7 +40,7 @@ public class UaCipherSuite {
             return mUaSecurityProtocolIds.get(securityProtocol);
         }
 
-        ImsLog.e("not supported cipher suite : " + securityProtocol);
+        ImsLog.e(this, "Unsupported cipher suite: " + securityProtocol);
         return mUaSecurityProtocolIds.get("TLS_NULL_WITH_NULL_NULL");
     }
 

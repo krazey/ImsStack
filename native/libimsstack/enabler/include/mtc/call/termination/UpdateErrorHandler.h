@@ -20,9 +20,11 @@
 #include "CallReasonInfo.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
+#include <unordered_map>
 
 class IMessage;
 class IMtcCallContext;
+class SipMethod;
 
 /*
  * It handles error responses when `ISessionListener::SessionUpdateFailed` occurs after the call
@@ -43,14 +45,23 @@ public:
      * @return See `CallReasonInfo.h` for the possible values.
      */
     CallReasonInfo Handle(IN const IMessage* piMessage) const;
+
+    CallReasonInfo HandleTerminate(IN const IMessage& objMessage) const;
+    CallReasonInfo HandleRetry(IN const IMessage& objMessage) const;
+    CallReasonInfo HandleBlockCallByTimer(IN const IMessage& objMessage) const;
+    CallReasonInfo HandleGlareCondition(IN const IMessage& objMessage) const;
+
     static IMS_UINT32 GetGlareTimeMillisecond(IN PeerType ePeerType);
 
 private:
-    CallReasonInfo GetCallReasonInfoForResponse(IN const IMessage& objMessage) const;
-    static CallReasonInfo GetCallReasonInfoFor3xxResponse(IN const IMessage& objMessage);
-    CallReasonInfo GetCallReasonInfoFor4xxResponse(IN const IMessage& objMessage) const;
-    static CallReasonInfo GetCallReasonInfoFor5xxResponse(IN const IMessage& objMessage);
-    static CallReasonInfo GetCallReasonInfoFor6xxResponse(IN const IMessage& objMessage);
+    void RegisterFor503(IN IMS_SINT32 nRetryAfter) const;
+    IMS_BOOL IsRegisterWithNextPcscfRequiredFor503(
+            IN IMS_SINT32 nRetryAfter, IN const SipMethod& objMethod) const;
+    CallReasonInfo GetDefaultCallReasonInfo(IN const IMessage& objMessage) const;
+    IMS_SINT32 GetDefaultExtraCode(IN const IMessage& objMessage) const;
+
+    typedef CallReasonInfo (UpdateErrorHandler::*ActionFunc)(IN const IMessage&) const;
+    static const std::unordered_map<IMS_SINT32, ActionFunc> objActionFuncMap;
 
     IMtcCallContext& m_objContext;
 };

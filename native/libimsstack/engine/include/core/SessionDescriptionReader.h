@@ -27,7 +27,7 @@ public:
             m_objSsd(objSsd)
     {
     }
-    virtual ~SessionDescriptionReader() = default;
+    ~SessionDescriptionReader() override = default;
 
     SessionDescriptionReader(IN const SessionDescriptionReader&) = delete;
     SessionDescriptionReader& operator=(IN const SessionDescriptionReader&) = delete;

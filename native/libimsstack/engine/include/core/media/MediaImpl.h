@@ -23,8 +23,8 @@ class Media;
 class MediaImpl
 {
 public:
-    inline MediaImpl() {}
-    inline virtual ~MediaImpl() {}
+    MediaImpl() = default;
+    virtual ~MediaImpl() = default;
 
 public:
     virtual IMS_BOOL Equals(IN const IMedia* piMedia) const = 0;

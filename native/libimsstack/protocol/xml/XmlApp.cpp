@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "DocumentBuilder.h"
 #include "DomDocumentBuilderFactory.h"
+#include "IDocument.h"
 #include "IXmlTransactionProvider.h"
 #include "ServiceMemory.h"
 #include "ServiceMessage.h"
@@ -63,7 +65,7 @@ IMS_RESULT XmlApp::Parse(IN XmlTransaction* pTransaction)
         return IMS_FAILURE;
     }
 
-    IXmlRequest* piRequest = pTransaction->GetRequest();
+    const IXmlRequest* piRequest = pTransaction->GetRequest();
 
     if (piRequest == IMS_NULL)
     {

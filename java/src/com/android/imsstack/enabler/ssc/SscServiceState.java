@@ -33,8 +33,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.telephony.TelephonyCallback;
-import android.telephony.TelephonyManager;
 
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.MSimUtils;
+import com.android.imsstack.base.SystemServiceProxy.ConnectivityManagerProxy;
+import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.Sim;
@@ -49,9 +52,7 @@ import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.RegistrationState;
 import com.android.imsstack.imsservice.mmtel.ut.UtFactory;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface;
-import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.List;
@@ -68,7 +69,7 @@ public class SscServiceState {
     @VisibleForTesting
     protected static final int EVENT_DATA_SERVICE_STATE_CHANGED = 2001;
     @VisibleForTesting
-    protected static final int EVENT_DATA_RAT_CHANGED = 2002;
+    protected static final int EVENT_DATA_NETWORK_TYPE_CHANGED = 2002;
     @VisibleForTesting
     protected static final int EVENT_DATA_ROAMING_STATE_CHANGED = 2003;
     @VisibleForTesting
@@ -83,6 +84,8 @@ public class SscServiceState {
     @VisibleForTesting
     final SscCarrierConfigListener mCarrierConfigListener;
     final SscTimerListener mTimerListener;
+    @VisibleForTesting
+    final IDcNetWatcher.Listener mNetWatcherListener;
     @VisibleForTesting
     SscWifiListener mWifiListener;
     @VisibleForTesting
@@ -109,6 +112,7 @@ public class SscServiceState {
         mSimStateListener = new SscSimStateListener();
         mCarrierConfigListener = new SscCarrierConfigListener();
         mTimerListener = new SscTimerListener();
+        mNetWatcherListener = new NetWatcherListener();
     }
 
     protected void init() {
@@ -116,10 +120,7 @@ public class SscServiceState {
 
         IDcNetWatcher dnw = getDcNetWatcher();
         if (dnw != null) {
-            dnw.registerForAirplaneModeChanged(mHandler, EVENT_AIRPLANE_MODE_CHANGED, null);
-            dnw.registerForDataServiceStateChanged(mHandler, EVENT_DATA_SERVICE_STATE_CHANGED,
-                    null);
-            dnw.registerForRatChanged(mHandler, EVENT_DATA_RAT_CHANGED, null);
+            dnw.addListener(mNetWatcherListener);
         }
 
         SimInterface sim = getSimInterface();
@@ -135,7 +136,6 @@ public class SscServiceState {
 
         // register listeners related to carrier configuration
         registerWifiConnectionStateChangedEvent();
-        registerMobileDataRoamingStateEvent();
         registerImsRegistrationStateListener();
         registerMobileDataStateListener(mSubId);
         registerCrossSimDataStateListener();
@@ -147,13 +147,16 @@ public class SscServiceState {
     protected void deInit() {
         ImsLog.d(mSlotId, "");
 
+        if (mHandler.hasMessagesOrCallbacks()) {
+            ImsLog.w(mSlotId, "removeMessages");
+            mHandler.removeCallbacksAndMessages(null);
+        }
+
         resetAllUtStatus();
 
         IDcNetWatcher dnw = getDcNetWatcher();
         if (dnw != null) {
-            dnw.unregisterForAirplaneModeChanged(mHandler);
-            dnw.unregisterForDataServiceStateChanged(mHandler);
-            dnw.unregisterForRatChanged(mHandler);
+            dnw.removeListener(mNetWatcherListener);
         }
 
         SimInterface sim = getSimInterface();
@@ -168,7 +171,6 @@ public class SscServiceState {
 
         // unregister listeners related to carrier configuration
         unregisterWifiConnectionStateChangedEvent();
-        unregisterMobileDataRoamingStateEvent();
         unregisterImsRegistrationStateListener();
         unregisterMobileDataStateListener(mSubId);
         unregisterCrossSimDataStateListener();
@@ -281,6 +283,7 @@ public class SscServiceState {
         ISscAuthAgent authAgent = SscAuthAgent.getInstance(mSlotId);
         authAgent.setIsCredentialInfoUpdated(false);
         authAgent.setETag("");
+        authAgent.setLastSuccessfulGbaMode(SscConfig.GBA_NONE);
 
         stopUtBlockTimer();
     }
@@ -517,24 +520,6 @@ public class SscServiceState {
         }
     }
 
-    private void registerMobileDataRoamingStateEvent() {
-        if (SscConfig.isUtSupportedWhenRoaming(mSlotId)) {
-            return;
-        }
-
-        IDcNetWatcher dnw = getDcNetWatcher();
-        if (dnw != null) {
-            dnw.registerForRoamingStateChanged(mHandler, EVENT_DATA_ROAMING_STATE_CHANGED, null);
-        }
-    }
-
-    private void unregisterMobileDataRoamingStateEvent() {
-        IDcNetWatcher dnw = getDcNetWatcher();
-        if (dnw != null) {
-            dnw.unregisterForRoamingStateChanged(mHandler);
-        }
-    }
-
     private void registerImsRegistrationStateListener() {
         if (!SscConfig.isImsRegistrationRequired(mSlotId)) {
             return;
@@ -567,12 +552,10 @@ public class SscServiceState {
         }
 
         if (subId != MSimUtils.INVALID_SUB_ID) {
-            TelephonyManager tm = AppContext.getTelephonyManager(subId);
-            if (tm != null) {
-                mMobileDataStateListener = new SscMobileDataStateListener();
-                tm.registerTelephonyCallback(AppContext.getInstance().getMainExecutor(),
-                        mMobileDataStateListener);
-            }
+            TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(subId);
+            mMobileDataStateListener = new SscMobileDataStateListener();
+            tmp.registerTelephonyCallback(AppContext.getInstance().getMainExecutor(),
+                    mMobileDataStateListener);
         }
     }
 
@@ -582,11 +565,9 @@ public class SscServiceState {
         }
 
         if (subId != MSimUtils.INVALID_SUB_ID) {
-            TelephonyManager tm = AppContext.getTelephonyManager(subId);
-            if (tm != null) {
-                tm.unregisterTelephonyCallback(mMobileDataStateListener);
-                mMobileDataStateListener = null;
-            }
+            TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(subId);
+            tmp.unregisterTelephonyCallback(mMobileDataStateListener);
+            mMobileDataStateListener = null;
         }
     }
 
@@ -595,15 +576,13 @@ public class SscServiceState {
             return;
         }
 
-        ConnectivityManager cm =
-                AppContext.getInstance().getSystemService(ConnectivityManager.class);
-        if (cm != null) {
-            try {
-                mCrossSimDataStateListener = new SscCrossSimDataStateListener();
-                cm.registerDefaultNetworkCallback(mCrossSimDataStateListener);
-            } catch (Exception e) {
-                ImsLog.e(mSlotId, e.toString());
-            }
+        ConnectivityManagerProxy cmp =
+                AppContext.getInstance().getSystemServiceProxy(ConnectivityManagerProxy.class);
+        try {
+            mCrossSimDataStateListener = new SscCrossSimDataStateListener();
+            cmp.registerSystemDefaultNetworkCallback(mCrossSimDataStateListener, mHandler);
+        } catch (Exception e) {
+            ImsLog.e(mSlotId, e.toString());
         }
     }
 
@@ -612,15 +591,13 @@ public class SscServiceState {
             return;
         }
 
-        ConnectivityManager cm =
-                AppContext.getInstance().getSystemService(ConnectivityManager.class);
-        if (cm != null) {
-            try {
-                cm.unregisterNetworkCallback(mCrossSimDataStateListener);
-                mCrossSimDataStateListener = null;
-            } catch (Exception e) {
-                ImsLog.e(mSlotId, e.toString());
-            }
+        ConnectivityManagerProxy cmp =
+                AppContext.getInstance().getSystemServiceProxy(ConnectivityManagerProxy.class);
+        try {
+            cmp.unregisterNetworkCallback(mCrossSimDataStateListener);
+            mCrossSimDataStateListener = null;
+        } catch (Exception e) {
+            ImsLog.e(mSlotId, e.toString());
         }
     }
 
@@ -635,6 +612,18 @@ public class SscServiceState {
 
         mSubId = subId;
         registerMobileDataStateListener(mSubId);
+    }
+
+    private void handleAirplaneModeChanged() {
+        IDcNetWatcher dnw = getDcNetWatcher();
+        if (dnw != null && dnw.isAirplaneMode()) {
+            // Reset permanent block reasons and PDN dependent block reasons.
+            resetUtBlockReason(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM);
+            resetUtBlockReason(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP);
+            resetUtBlockReason(SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM);
+
+            handleUtFeatureCapabilityChanged();
+        }
     }
 
     /**
@@ -684,7 +673,7 @@ public class SscServiceState {
                     handleAirplaneModeChanged();
                     break;
                 case EVENT_DATA_SERVICE_STATE_CHANGED: // FALL-THROUGH
-                case EVENT_DATA_RAT_CHANGED: // FALL-THROUGH
+                case EVENT_DATA_NETWORK_TYPE_CHANGED: // FALL-THROUGH
                 case EVENT_DATA_ROAMING_STATE_CHANGED: // FALL-THROUGH
                 case EVENT_CROSS_SIM_DATA_STATE_CHANGED:
                     handleUtFeatureCapabilityChanged();
@@ -692,20 +681,6 @@ public class SscServiceState {
                 default:
                     ImsLog.e(mSlotId, "Invalid Message");
                     break;
-            }
-        }
-
-        private void handleAirplaneModeChanged() {
-            IDcNetWatcher dnw = getDcNetWatcher();
-            if (dnw != null) {
-                if (dnw.isAirplaneMode()) {
-                    // Reset permanent block reasons and PDN dependent block reasons.
-                    resetUtBlockReason(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM);
-                    resetUtBlockReason(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP);
-                    resetUtBlockReason(SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM);
-
-                    handleUtFeatureCapabilityChanged();
-                }
             }
         }
     }
@@ -754,13 +729,11 @@ public class SscServiceState {
             ImsLog.d(mSlotId, "slotId : " + slotId + ", subId : " + subId);
 
             unregisterWifiConnectionStateChangedEvent();
-            unregisterMobileDataRoamingStateEvent();
             unregisterImsRegistrationStateListener();
             unregisterMobileDataStateListener(mSubId);
             unregisterCrossSimDataStateListener();
 
             registerWifiConnectionStateChangedEvent();
-            registerMobileDataRoamingStateEvent();
             registerImsRegistrationStateListener();
             registerMobileDataStateListener(mSubId);
             registerCrossSimDataStateListener();
@@ -786,9 +759,14 @@ public class SscServiceState {
         }
 
         @Override
-        public void notifyRegistered(int networkType, int featureTagBits,
+        public void notifyRegistered(@RegistrationType.RegistrationTypeDef int regType,
+                NetworkType networkType, @FeatureTagMask.FeatureTagMaskDef int featureTagBits,
                 java.util.Set<String> featureTags) {
-            ImsLog.d(mSlotId, "Registered : network = " + networkType);
+            if (regType != RegistrationType.NORMAL) {
+                return;
+            }
+
+            ImsLog.d(mSlotId, "Registered : network = " + networkType.toString());
 
             if (!mImsRegistrationState) {
                 mImsRegistrationState = true;
@@ -797,14 +775,25 @@ public class SscServiceState {
         }
 
         @Override
-        public void notifyRegistering(int networkType, int featureTagBits,
+        public void notifyRegistering(@RegistrationType.RegistrationTypeDef int regType,
+                NetworkType networkType, @FeatureTagMask.FeatureTagMaskDef int featureTagBits,
                 java.util.Set<String> featureTags) {
+            if (regType != RegistrationType.NORMAL) {
+                return;
+            }
+
             // do nothing
         }
 
         @Override
-        public void notifyDeregistered(int networkType, int reason, String message) {
-            ImsLog.d(mSlotId, "Deregistered : reason = " + reason);
+        public void notifyDeregistered(
+                @RegistrationType.RegistrationTypeDef int regType, NetworkType networkType,
+                ReasonCode reason, String message, int dataFailCause) {
+            if (regType != RegistrationType.NORMAL) {
+                return;
+            }
+
+            ImsLog.d(mSlotId, "Deregistered : reason = " + reason.toString());
 
             if (mImsRegistrationState) {
                 mImsRegistrationState = false;
@@ -813,7 +802,18 @@ public class SscServiceState {
         }
 
         @Override
-        public void notifyTechnologyChangeFailed(int networkType, int causeCode, String message) {
+        public void notifyDeregistering(@RegistrationType.RegistrationTypeDef int regType) {
+            // Do nothing.
+        }
+
+        @Override
+        public void notifyTechnologyChangeFailed(
+                @RegistrationType.RegistrationTypeDef int regType, NetworkType networkType,
+                ReasonCode reason, String message) {
+            if (regType != RegistrationType.NORMAL) {
+                return;
+            }
+
             // do nothing
         }
 
@@ -823,7 +823,8 @@ public class SscServiceState {
         }
 
         @Override
-        public void notifyCapabilitiesUpdateFailed(int capabilities, int networkType, int reason) {
+        public void notifyCapabilitiesUpdateFailed(@Capability.CapabilityMask int capabilities,
+                NetworkType networkType, @CapabilityReason.CapabilityReasonDef int reason) {
             // do nothing
         }
 
@@ -833,8 +834,14 @@ public class SscServiceState {
         }
 
         @Override
-        public void notifyRegEventStateChanged(int statusCode, @NonNull Set<Uri> impus){
+        public void notifyRegEventStateChanged(int statusCode, @NonNull Set<Uri> impus) {
             // do nothing
+        }
+
+        @Override
+        public void notifyImsFeatureChanged(@RegistrationType.RegistrationTypeDef int regType,
+                NetworkType networkType, @FeatureTagMask.FeatureTagMaskDef int featureTagBits) {
+            // do nothing.
         }
 
         public boolean getImsRegistrationState() {
@@ -880,6 +887,7 @@ public class SscServiceState {
             ImsLog.d(mSlotId, "Cross SIM data not available : " + network);
 
             mCrossSimDataAvailable = false;
+            // TODO: call handleUtFeatureCapabilityChanged here.
             mHandler.sendEmptyMessage(EVENT_CROSS_SIM_DATA_STATE_CHANGED);
         }
 
@@ -893,6 +901,7 @@ public class SscServiceState {
             ImsLog.d(mSlotId, "network = " + network + ", capabilities = " + capabilities);
 
             mCrossSimDataAvailable = isAvailable;
+            // TODO: call handleUtFeatureCapabilityChanged here.
             mHandler.sendEmptyMessage(EVENT_CROSS_SIM_DATA_STATE_CHANGED);
         }
 
@@ -917,6 +926,31 @@ public class SscServiceState {
 
         public boolean getCrossSimDataState() {
             return mCrossSimDataAvailable;
+        }
+    }
+
+    private final class NetWatcherListener implements IDcNetWatcher.Listener {
+        @Override
+        public void onDataServiceStateChanged(int state) {
+            mHandler.sendEmptyMessage(EVENT_DATA_SERVICE_STATE_CHANGED);
+        }
+
+        @Override
+        public void onDataNetworkTypeChanged() {
+            mHandler.sendEmptyMessage(EVENT_DATA_NETWORK_TYPE_CHANGED);
+        }
+
+        @Override
+        public void onRoamingStateChanged(boolean roaming) {
+            if (SscConfig.isUtSupportedWhenRoaming(mSlotId)) {
+                return;
+            }
+            mHandler.sendEmptyMessage(EVENT_DATA_ROAMING_STATE_CHANGED);
+        }
+
+        @Override
+        public void onAirplaneModeChanged(boolean airplaneMode) {
+            mHandler.sendEmptyMessage(EVENT_AIRPLANE_MODE_CHANGED);
         }
     }
 

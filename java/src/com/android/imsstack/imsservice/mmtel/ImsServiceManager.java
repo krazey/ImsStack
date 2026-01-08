@@ -18,6 +18,9 @@ package com.android.imsstack.imsservice.mmtel;
 import android.content.Context;
 import android.text.TextUtils;
 
+import com.android.imsstack.base.DeviceConfig;
+import com.android.imsstack.base.ImsPrivateProperties;
+import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
@@ -28,10 +31,7 @@ import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 import com.android.imsstack.internal.ImsStackRegistry;
-import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsPrivateProperties;
-import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.MessageExecutor;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ImsServiceManager {
-    private static ImsServiceManager sServiceManager;
+    private static ImsServiceManager sServiceManager = null;
     private final Context mContext;
     private final MessageExecutor mExecutor;
     protected final ImsServiceListener mImsServiceListener;
@@ -61,7 +61,7 @@ public class ImsServiceManager {
         mContext = context;
         mExecutor = executor;
 
-        int supportedSimCount = MSimUtils.getSupportedSimCount();
+        int supportedSimCount = DeviceConfig.getSupportedSimCount();
 
         mOperator = new String[supportedSimCount];
         mCountry = new String[supportedSimCount];
@@ -137,10 +137,6 @@ public class ImsServiceManager {
             callAppCreated = true;
         } else {
             logi("createCallApp :: app is already opened");
-
-            // FIXME: P-GII
-            //callApp.getCallManager().setPendingIntentForIncomingRequest(incomingCallIntent);
-            //callApp.setRegistrationListener(listener);
         }
 
         // Bind ImsCallApp and other required modules
@@ -158,7 +154,6 @@ public class ImsServiceManager {
 
         setCallAppForServiceRecord(callApp.getPhoneId(), null);
 
-        // FIXME: according to the "flags", do any proper operationis...
         callApp.close();
 
         removeCallApp(phoneId);
@@ -188,7 +183,7 @@ public class ImsServiceManager {
 
     public ImsCallApp getCallAppByPhoneId(int phoneId) {
         if (getDefaultPhoneId() != phoneId) {
-            if (MSimUtils.isMultiSimEnabled() && !isMultiImsEnabled()) {
+            if (DeviceConfig.isMultiSimEnabled() && !isMultiImsEnabled()) {
                 return null;
             }
         }
@@ -206,7 +201,6 @@ public class ImsServiceManager {
     }
 
     public int getDefaultPhoneId() {
-        // FIXME: we need to consider the case of multi-sim & multi-volte.
         return mDefaultPhoneId;
     }
 
@@ -296,7 +290,7 @@ public class ImsServiceManager {
     }
 
     private void createServiceRecords() {
-        int supportedSimCount = MSimUtils.getSupportedSimCount();
+        int supportedSimCount = DeviceConfig.getSupportedSimCount();
 
         for (int i = 0; i < supportedSimCount; ++i) {
             mServiceRecords.put(i, new ImsServiceRecord(mContext, mExecutor, i));
@@ -333,7 +327,7 @@ public class ImsServiceManager {
         }
 
         // As default, first one will be selected
-        if (!MSimUtils.isMultiSimEnabled()) {
+        if (!DeviceConfig.isMultiSimEnabled()) {
             return mServiceRecords.get(MSimUtils.DEFAULT_PHONE_ID);
         }
 
@@ -388,7 +382,7 @@ public class ImsServiceManager {
             }
 
             // reset old mOperator value for non DSDV SIM-hotswap case
-            if (MSimUtils.isMultiSimEnabled()) {
+            if (DeviceConfig.isMultiSimEnabled()) {
                 mOperator[oldPhoneId] = null;
             }
 
@@ -413,7 +407,7 @@ public class ImsServiceManager {
 
     // Operator changed by hotswap
     private void checkOperatorAndRebindCallApp(int phoneId) {
-        if (phoneId < MSimUtils.DEFAULT_PHONE_ID || phoneId >= MSimUtils.getActiveSimCount()) {
+        if (phoneId < MSimUtils.DEFAULT_PHONE_ID || phoneId >= DeviceConfig.getActiveSimCount()) {
             return;
         }
 
@@ -498,7 +492,6 @@ public class ImsServiceManager {
         }
 
         // VOLTE_EMERGENCY_CALLING
-        // FIXME: Dual VoLTE
         if (serviceFeatures == 0) {
             logi("NonVoLteSim: VoLTE is enabled for IMS e-call");
             serviceFeatures |= FeatureConfig.FEATURE_S_VOLTE;
@@ -606,16 +599,15 @@ public class ImsServiceManager {
         public void onImsServiceStopped(int slotId) {
             logi("onImsServiceStopped: slotId=" + slotId);
 
-            if (slotId < MSimUtils.DEFAULT_PHONE_ID || slotId >= MSimUtils.getSupportedSimCount()) {
+            if (slotId < MSimUtils.DEFAULT_PHONE_ID
+                    || slotId >= DeviceConfig.getSupportedSimCount()) {
                 return;
             }
 
-            if (ImsConstants.USE_CARRIER_CONFIG) {
-                // Non-VoLte SIM
-                if (getVoLteServiceFeaturesFromPlatformConfig(slotId) == 0) {
-                    logi("No VoLte services");
-                    mVoLteServiceFeatures[slotId] = 0;
-                }
+            // Non-VoLte SIM
+            if (getVoLteServiceFeaturesFromPlatformConfig(slotId) == 0) {
+                logi("No VoLte services");
+                mVoLteServiceFeatures[slotId] = 0;
             }
         }
     }

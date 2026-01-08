@@ -17,149 +17,265 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "../../interface/aos/MockIAosService.h"
+
 #include "interface/MockIAosAppContext.h"
 #include "interface/MockIAosConditionListener.h"
 
 #include "interface/IAosAppContext.h"
 #include "interface/IAosBlock.h"
-#include "interface/IAosConditionListener.h"
-#include "condition/AosBlock.h"
 #include "condition/AosECondition.h"
-#include "provider/AosStaticProfile.h"
+#include "provider/AosProvider.h"
+
+#include "interface/MockIAosBlock.h"
 
 using ::testing::_;
-using ::testing::AnyNumber;
+using ::testing::An;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnNull;
 using ::testing::ReturnRef;
 
-class AosEConditionTest : public ::testing::Test {
+const IMS_SINT32 SLOT_ID = 0;
+const AString PROFILE_ID = AString("test");
+
+#define DECLARE_USING(Base)                           \
+    using Base::AddAosServiceListener;                \
+    using Base::RemoveAosServiceListener;             \
+    using Base::Block_Changed;                        \
+    using Base::ServicePhone_AosStart;                \
+    using Base::ServicePhone_LocationInfoChanged;     \
+    using Base::ServicePhone_PhoneNumberStateChanged; \
+    using Base::ServicePhone_PlmnChanged;             \
+    using Base::ServicePhone_PowerOff;                \
+    using Base::ServicePhone_AllowedNetworkTypesChanged;
+
+class TestAosECondition : public AosECondition
+{
 public:
-    AosECondition* m_pAosECondition;
-    AosBlock* m_pAosBlock;
+    DECLARE_USING(AosECondition)
 
-protected:
-    virtual void SetUp() override {
-        MockIAosAppContext objMockIAosAppContext;
-
-        EXPECT_CALL(objMockIAosAppContext, GetSlotId())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(0));
-
-        const AString strValue = AString("test");
-        EXPECT_CALL(objMockIAosAppContext, GetProfileId())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(strValue));
-
-        EXPECT_CALL(objMockIAosAppContext, GetConnection())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnNull());
-
-        m_pAosECondition = new AosECondition(static_cast<IAosAppContext*>(&objMockIAosAppContext));
-        ASSERT_TRUE(m_pAosECondition != nullptr);
-
-        m_pAosBlock = new AosBlock(static_cast<IAosAppContext*>(&objMockIAosAppContext));
-        ASSERT_TRUE(m_pAosBlock != nullptr);
-
-        IAosBlock* piAosBlock = static_cast<IAosBlock*>(m_pAosBlock);
-        SetAosBlock(piAosBlock);
-    }
-
-    virtual void TearDown() override {
-        if (m_pAosBlock)
-        {
-            delete m_pAosBlock;
-        }
-        if (m_pAosECondition)
-        {
-            delete m_pAosECondition;
-        }
-    }
-
-    void SetAosBlock(IN IAosBlock* piBlock) { m_pAosECondition->m_piBlock = piBlock; }
-
-    IMS_BOOL AddAosServiceListener() { return m_pAosECondition->AddAosServiceListener(); }
-
-    IMS_BOOL RemoveAosServiceListener() { return m_pAosECondition->RemoveAosServiceListener(); }
-
-    void Block_Changed(IN IMS_UINT32 nType, IN IMS_UINT32 nParam)
+    inline explicit TestAosECondition(IN IAosAppContext* piAppContext) :
+            AosECondition(piAppContext)
     {
-        m_pAosECondition->Block_Changed(nType, nParam);
     }
 
-    void ServicePhone_AosStart() { m_pAosECondition->ServicePhone_AosStart(); }
+    inline void SetAosBlock(IN IAosBlock* piBlock) { m_piBlock = piBlock; }
 };
 
-TEST_F(AosEConditionTest, IsReady) {
-    EXPECT_TRUE(m_pAosECondition->IsReady());
+class AosEConditionTest : public ::testing::Test {
+public:
+    AosEConditionTest() :
+            m_pAosECondition(IMS_NULL),
+            m_piAosService(IMS_NULL)
+    {
+    }
 
+    TestAosECondition* m_pAosECondition;
+
+    IAosService* m_piAosService;
+
+    NiceMock<MockIAosAppContext> m_objMockIAosAppContext;
+    NiceMock<MockIAosService> m_objMockIAosService;
+    NiceMock<MockIAosBlock> m_objMockIAosBlock;
+
+protected:
+    void SetUp() override
+    {
+        ReplaceOriginWithMock();
+
+        ON_CALL(m_objMockIAosAppContext, GetSlotId()).WillByDefault(Return(SLOT_ID));
+        ON_CALL(m_objMockIAosAppContext, GetProfileId()).WillByDefault(ReturnRef(PROFILE_ID));
+        ON_CALL(m_objMockIAosAppContext, GetConnection()).WillByDefault(ReturnNull());
+
+        m_pAosECondition = new TestAosECondition(&m_objMockIAosAppContext);
+        ASSERT_TRUE(m_pAosECondition != nullptr);
+
+        m_pAosECondition->SetAosBlock(&m_objMockIAosBlock);
+    }
+
+    void TearDown() override
+    {
+        RestoreOriginInstance();
+
+        delete m_pAosECondition;
+    }
+
+    void ReplaceOriginWithMock()
+    {
+        m_piAosService = AosProvider::GetInstance()->GetService();
+
+        AosProvider::GetInstance()->SetService(&m_objMockIAosService);
+    }
+
+    void RestoreOriginInstance() const { AosProvider::GetInstance()->SetService(m_piAosService); }
+};
+
+TEST_F(AosEConditionTest, ReturnsFalseWhenIsNotReady)
+{
+    // GIVEN
     m_pAosECondition->SetBlock(BLOCK_AC_INCOMPLETED);
-    EXPECT_FALSE(m_pAosECondition->IsReady());
     m_pAosECondition->SetBlock(BLOCK_AUTHENTICATION_FAILED);
-    EXPECT_FALSE(m_pAosECondition->IsReady());
     m_pAosECondition->SetBlock(BLOCK_AOS_INCOMPLETED);
-    EXPECT_FALSE(m_pAosECondition->IsReady());
 
     m_pAosECondition->SetBlock(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
-    EXPECT_FALSE(m_pAosECondition->IsReady());
     m_pAosECondition->SetBlock(BLOCK_CELLULAR_NO_NETWORK);
-    EXPECT_FALSE(m_pAosECondition->IsReady());
     m_pAosECondition->SetBlock(BLOCK_CELLULAR_OUT_OF_SERVICE);
-    EXPECT_FALSE(m_pAosECondition->IsReady());
 
     m_pAosECondition->SetBlock(BLOCK_WIFI_BAD_CONNECTION);
-    EXPECT_FALSE(m_pAosECondition->IsReady());
     m_pAosECondition->SetBlock(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
-    EXPECT_FALSE(m_pAosECondition->IsReady());
     m_pAosECondition->SetBlock(BLOCK_WIFI_AIRPLANE_MODE_ON);
-    EXPECT_FALSE(m_pAosECondition->IsReady());
 
-    m_pAosECondition->ResetBlock(BLOCK_AC_INCOMPLETED);
-    EXPECT_FALSE(m_pAosECondition->IsReady());
-    m_pAosECondition->ResetBlock(BLOCK_AUTHENTICATION_FAILED);
-    EXPECT_FALSE(m_pAosECondition->IsReady());
-    m_pAosECondition->ResetBlock(BLOCK_AOS_INCOMPLETED);
-    EXPECT_FALSE(m_pAosECondition->IsReady());
+    // WHEN
+    IMS_BOOL bResult = m_pAosECondition->IsReady();
 
-    m_pAosECondition->ResetBlock(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
-    EXPECT_FALSE(m_pAosECondition->IsReady());
-    m_pAosECondition->ResetBlock(BLOCK_CELLULAR_NO_NETWORK);
-    EXPECT_FALSE(m_pAosECondition->IsReady());
-    m_pAosECondition->ResetBlock(BLOCK_CELLULAR_OUT_OF_SERVICE);
-    EXPECT_TRUE(m_pAosECondition->IsReady());
-
-    ImsList<IMS_UINT32> objReason;
-    m_pAosBlock->GetBlockReasons(objReason, SERVICE_WHOLE);
-    EXPECT_EQ(objReason.GetSize(), 3);
-
-    EXPECT_TRUE(m_pAosECondition->IsReady());
+    // THEN
+    EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosEConditionTest, AddAosServiceListener_ServiceNull)
+TEST_F(AosEConditionTest, ReturnsTrueWhenIsReady)
 {
-    EXPECT_FALSE(AddAosServiceListener());
+    // GIVEN
+    ON_CALL(m_objMockIAosBlock, IsCleared(_)).WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosECondition->IsReady();
+
+    // THEN
+    EXPECT_TRUE(bResult);
 }
 
-TEST_F(AosEConditionTest, RemoveAosServiceListener_ServiceNull)
+TEST_F(AosEConditionTest, SucceedsAddAosServiceListener)
 {
-    EXPECT_FALSE(RemoveAosServiceListener());
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosService, AddListener(An<IAosServicePhoneListener*>()));
+
+    // WHEN
+    m_pAosECondition->AddAosServiceListener();
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(AosEConditionTest, Block_Changed)
+TEST_F(AosEConditionTest, FailsAddAosServiceListenerWhenAosServiceIsNull)
 {
+    // GIVEN
+    AosProvider::GetInstance()->SetService(IMS_NULL);
+
+    EXPECT_CALL(m_objMockIAosService, AddListener(An<IAosServicePhoneListener*>())).Times(0);
+
+    // WHEN
+    m_pAosECondition->AddAosServiceListener();
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosEConditionTest, SucceedsRemoveAosServiceListener)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosService, RemoveListener(An<IAosServicePhoneListener*>()));
+
+    // WHEN
+    m_pAosECondition->RemoveAosServiceListener();
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosEConditionTest, FailsRemoveAosServiceListenerWhenAosServiceIsNull)
+{
+    // GIVEN
+    AosProvider::GetInstance()->SetService(IMS_NULL);
+
+    EXPECT_CALL(m_objMockIAosService, RemoveListener(An<IAosServicePhoneListener*>())).Times(0);
+
+    // WHEN
+    m_pAosECondition->RemoveAosServiceListener();
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosEConditionTest, InvokeConditionChangedWhenBlockChanged)
+{
+    // GIVEN
     MockIAosConditionListener objMockIAosConditionListener;
-    EXPECT_CALL(objMockIAosConditionListener, Condition_Changed(_)).Times(1);
+    EXPECT_CALL(objMockIAosConditionListener, Condition_Changed(_));
 
-    m_pAosECondition->SetListener(
-            static_cast<IAosConditionListener*>(&objMockIAosConditionListener));
-    Block_Changed(1, 1);
+    m_pAosECondition->SetListener(&objMockIAosConditionListener);
+
+    // WHEN
+    m_pAosECondition->Block_Changed(1, 1);
+
+    // THEN : GIVEN conditions should be met.
 }
 
-TEST_F(AosEConditionTest, ServicePhone_AosStart)
+TEST_F(AosEConditionTest, ResetBlockWhenServicePhoneAosStart)
 {
-    m_pAosBlock->SetBlockReason(BLOCK_AOS_INCOMPLETED);
-    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_AOS_INCOMPLETED));
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_AOS_INCOMPLETED, _));
 
-    ServicePhone_AosStart();
-    EXPECT_FALSE(m_pAosBlock->IsReasonBlocked(BLOCK_AOS_INCOMPLETED));
+    // WHEN
+    m_pAosECondition->ServicePhone_AosStart();
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosEConditionTest, ShouldNotDoAnythingWhenLocationInfoChanged)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
+
+    // WHEN
+    m_pAosECondition->ServicePhone_LocationInfoChanged(LocationInfo::CHANGED);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosEConditionTest, ShouldNotDoAnythingWhenPhoneNumberStateChanged)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
+
+    // WHEN
+    m_pAosECondition->ServicePhone_PhoneNumberStateChanged(
+            IMS_FALSE, PhoneNumberState::RETRY_SUCCESS);
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosEConditionTest, ShouldNotDoAnythingWhenPlmnChanged)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
+
+    // WHEN
+    m_pAosECondition->ServicePhone_PlmnChanged(AString("TEST_PLMN"));
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosEConditionTest, ShouldNotDoAnythingWhenPowerOff)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
+
+    // WHEN
+    m_pAosECondition->ServicePhone_PowerOff();
+
+    // THEN: The GIVEN condition should be met.
+}
+
+TEST_F(AosEConditionTest, ShouldNotDoAnythingWhenAllowedNetworkTypesChanged)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(0);
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
+
+    // WHEN
+    m_pAosECondition->ServicePhone_AllowedNetworkTypesChanged(0);
+
+    // THEN: The GIVEN condition should be met.
 }

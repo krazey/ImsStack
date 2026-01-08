@@ -13,32 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "INetworkWatcher.h"
+#include "IWifiWatcher.h"
 #include "ServiceTrace.h"
 #include "ServicePhoneInfo.h"
 #include "ImsEventDef.h"
 #include "CarrierConfig.h"
 #include "ImsAosParameter.h"
-#include "AoSAppRequestType.h"
+#include "AosAppRequestType.h"
 #include "AosReason.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosCallTracker.h"
 #include "interface/IAosConnection.h"
+#include "interface/IAosHandle.h"
 #include "interface/IAosNConfiguration.h"
+#include "interface/IAosNetTracker.h"
 #include "interface/IAosRegistration.h"
 #include "interface/IAosRegStateManager.h"
 #include "condition/AosCondition.h"
 #include "connection/AosConnector.h"
 #include "provider/AosProvider.h"
 #include "provider/AosLog.h"
+#include "provider/AosUtil.h"
 #include "app/AosEApplication.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
+__IMS_TRACE_TAG_AOS__;
 
 #define APPID m_strTag.GetStr()
 
 PUBLIC
 AosEApplication::AosEApplication(IN IAosAppContext* piAppContext, IN AString& strAppId) :
-        AosApplication(piAppContext, strAppId)
+        AosApplication(piAppContext, strAppId),
+        m_bKeepEPdnWhenNoPcscf(IMS_FALSE),
+        m_bRegBlockInCbm(IMS_FALSE)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosEApplication = %" PFLS_u "/%" PFLS_x, APPID,
             sizeof(AosEApplication), this);
@@ -60,9 +67,15 @@ PUBLIC VIRTUAL IMS_BOOL AosEApplication::RequestCmd(
     switch (nCmdType)
     {
         case ImsAosControl::REGISTER_START:
+            InitEmergencyVariable();
             if (IsNotReady())
             {
                 return IMS_FALSE;
+            }
+
+            if (MaybeRedialOverCrossStack())
+            {
+                return IMS_TRUE;
             }
 
             PostMessage(MSG_REG_START, nReason, 0);
@@ -73,22 +86,20 @@ PUBLIC VIRTUAL IMS_BOOL AosEApplication::RequestCmd(
             break;
 
         case ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF:
-            if (m_piContext->GetConnection()->GetState() == IAosConnection::STATE_ACTIVE)
-            {
-                A_IMS_TRACE_D(APPID, "PDN is connected, do fake registration", 0, 0, 0);
-                m_piRegistration->RequestCmd(IAosRegistration::CMD_FAKE_MODE,
-                        IAosRegistration::REASON_FAKE_MODE_NEXT_PCSCF);
-            }
-            else
-            {
-                A_IMS_TRACE_D(APPID, "PDN is not connected", 0, 0, 0);
-                ProcessCleanAll(AosReason::DATA_DISCONNECTED);
-            }
+            ProcessFakeRegRequest(IAosRegistration::REASON_FAKE_MODE_NEXT_PCSCF);
             break;
 
-        case ImsAosControl::RETRY_COUNT_INCREASE:  // FALL-THROUGH
-        case ImsAosControl::RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION:
-            AosApplication::RequestCmd(nCmdType);
+        case ImsAosControl::E_REGISTER_FAKE_WITH_SAME_PCSCF:
+            ProcessFakeRegRequest(IAosRegistration::REASON_FAKE_MODE_SAME_PCSCF);
+            break;
+
+        case CMD_ECALL_INIT:  // FALL-THROUGH
+        case CMD_ESMS_INIT:
+            SetRegBlockInCbm(IMS_FALSE);
+            break;
+
+        case ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY:
+            PostMessage(MSG_SCSCF_RESTORATION, 0, nReason);
             break;
 
         default:
@@ -105,6 +116,159 @@ PUBLIC VIRTUAL void AosEApplication::GetProperty(
     strValue = AString::ConstNull();
 }
 
+PROTECTED void AosEApplication::InitEmergencyVariable()
+{
+    SetKeepEPdnWhenNoPcscf(IMS_FALSE);
+    SetRegBlockInCbm(IMS_FALSE);
+}
+
+PROTECTED void AosEApplication::SetKeepEPdnWhenNoPcscf(IN IMS_BOOL bEnable)
+{
+    m_bKeepEPdnWhenNoPcscf = bEnable;
+}
+
+PROTECTED void AosEApplication::SetRegBlockInCbm(IN IMS_BOOL bBlock)
+{
+    m_bRegBlockInCbm = bBlock;
+}
+
+PROTECTED void AosEApplication::ProcessFakeRegRequest(IN IMS_UINT32 nReason)
+{
+    if (m_piContext->GetConnection()->GetState() == IAosConnection::STATE_ACTIVE)
+    {
+        A_IMS_TRACE_D(APPID, "PDN is connected, do fake registration", 0, 0, 0);
+        m_piRegistration->RequestCmd(IAosRegistration::CMD_FAKE_MODE, nReason);
+    }
+    else
+    {
+        A_IMS_TRACE_D(APPID, "PDN is not connected", 0, 0, 0);
+        ProcessCleanAll(AosReason::DATA_DISCONNECTED);
+    }
+}
+
+PROTECTED IMS_BOOL AosEApplication::IsKeepEPdnWhenNoPcscf() const
+{
+    return m_bKeepEPdnWhenNoPcscf;
+}
+
+PROTECTED IMS_BOOL AosEApplication::IsRegBlockInCbm() const
+{
+    return m_bRegBlockInCbm;
+}
+
+PROTECTED IMS_BOOL AosEApplication::IsReleaseEmergencyPdnUponEmergencyCallEnd()
+{
+    if (GET_N_CONFIG(m_nSlotId)->IsKeepEPdnUponPcscfUnavailable() && IsKeepEPdnWhenNoPcscf())
+    {
+        A_IMS_TRACE_I(APPID, "Keep EPDN: Wait until data disconnected", 0, 0, 0);
+        SetKeepEPdnWhenNoPcscf(IMS_FALSE);
+        return IMS_FALSE;
+    }
+
+    IAosNetTracker* piNetTracker = m_piContext->GetNetTracker();
+    if (GET_N_CONFIG(m_nSlotId)->IsReleaseEPdnUponECallEndIfEAttach() &&
+            piNetTracker->IsEmergencyAttach())
+    {
+        A_IMS_TRACE_D(APPID, "Release EPDN: Emergency Attach", 0, 0, 0);
+        return IMS_TRUE;
+    }
+
+    // FAKE MODE
+    if (m_piRegistration->GetMode() == IAosRegistration::MODE_FAKE)
+    {
+        if (GET_N_CONFIG(m_nSlotId)->IsReleaseEPdnUponECallEndInFakeMode())
+        {
+            A_IMS_TRACE_D(APPID, "Release EPDN: Fake Mode", 0, 0, 0);
+            return IMS_TRUE;
+        }
+
+        // Checks if the fake mode was caused by BLOCK_SUBSCRIBER_INCOMPLETED. If the fake mode was
+        // caused by SIP error responses for EIMS registration, then it should follow the carrier's
+        // configuration instead of handling EPDN based on the PLMN the UE is currently attached to.
+        if (m_piContext->GetBlock()->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED))
+        {
+            const ImsVector<AString> plmns =
+                    GET_N_CONFIG(m_nSlotId)->GetPlmnsReleaseEPdnUponECallEndInFakeMode();
+            if (piNetTracker != IMS_NULL && plmns.Contains(piNetTracker->GetMobileNetworkPlmn()))
+            {
+                A_IMS_TRACE_D(APPID, "Release EPDN: Fake Mode (Blocked & PLMN Matched)", 0, 0, 0);
+                return IMS_TRUE;
+            }
+        }
+    }
+
+    // IPCAN
+    const IMS_UINT32 nIpcan =
+            GET_N_CONFIG(m_nSlotId)->GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd();
+    IMS_BOOL bShouldRelease = IMS_FALSE;
+
+    switch (nIpcan)
+    {
+        case CarrierConfig::ImsEmergency::IPCAN_CELLULAR:
+            bShouldRelease = !m_bEpdgEnabled;
+            break;
+
+        case CarrierConfig::ImsEmergency::IPCAN_WLAN:
+            bShouldRelease = m_bEpdgEnabled;
+            break;
+
+        case CarrierConfig::ImsEmergency::IPCAN_ALL:
+            bShouldRelease = IMS_TRUE;
+            break;
+
+        default:
+            bShouldRelease = IMS_FALSE;
+            break;
+    }
+
+    if (bShouldRelease)
+    {
+        A_IMS_TRACE_D(APPID, "Release EPDN: IPCAN Check (IPCAN:%d, EpdgEnabled:%d)", nIpcan,
+                m_bEpdgEnabled, 0);
+    }
+
+    return bShouldRelease;
+}
+
+PROTECTED IMS_BOOL AosEApplication::MaybeRedialOverCrossStack()
+{
+    const ImsVector<IMS_SINT32>& objCauses =
+            GET_N_CONFIG(m_nSlotId)->GetNetworkAttachRejectCausesForCrossStackRedial();
+    if (objCauses.IsEmpty())
+    {
+        return IMS_FALSE;
+    }
+
+    IAosNetTracker* piNetTracker = m_piContext->GetNetTracker();
+    if (piNetTracker == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    const IMS_UINT32 nRejectCause = piNetTracker->GetMobileNetworkRegistrationRejectCause();
+    if (objCauses.Contains(nRejectCause))
+    {
+        A_IMS_TRACE_D(APPID, "Network attach is rejected with cause(%d)", nRejectCause, 0, 0);
+        PostMessage(MSG_REG_STOP, AosReason::NETWORK_ATTACH_REJECTED, 0);
+
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
+PROTECTED void AosEApplication::UpdateReadyState()
+{
+    if (!IsEmergencyBlocked())
+    {
+        SetAppState(STATE_READY);
+    }
+    else
+    {
+        SetAppState(STATE_NOTREADY);
+    }
+}
+
 PROTECTED VIRTUAL void AosEApplication::ClearConnection()
 {
     m_pConnector->Stop();
@@ -112,9 +276,14 @@ PROTECTED VIRTUAL void AosEApplication::ClearConnection()
 
 PROTECTED VIRTUAL void AosEApplication::ProcessCleanAll(IN IMS_UINT32 nReason /* = 0 */)
 {
+    if (m_piNetTracker != IMS_NULL)
+    {
+        m_piNetTracker->RemoveListener(this);
+        m_piNetTracker = IMS_NULL;
+    }
     CleanAll(nReason);
+    UpdateReadyState();
     Report_StateChanged(IMS_FALSE);
-    ProcessStateStart();
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosEApplication::ProcessMessage(IN IMSMSG& objMsg)
@@ -135,8 +304,20 @@ PROTECTED VIRTUAL IMS_BOOL AosEApplication::ProcessMessage(IN IMSMSG& objMsg)
             ProcessDestroy(objMsg);
             break;
 
-        case MSG_RETRY_COUNT_INCREASE:
-            ProcessRegRetryCount(objMsg);
+        case MSG_IPCAN_CHANGED:
+            if (m_bEpdgEnabled && GET_N_CONFIG(m_nSlotId)->IsKeepERegRetryOnWlanRequired())
+            {
+                StopTimer(TIMER_APP_CONNECTED);
+            }
+
+            if (GET_N_CONFIG(m_nSlotId)->IsEmergencyReregSupportedOnIpcanChange())
+            {
+                ProcessIpcanChanged(objMsg);
+            }
+            break;
+
+        case MSG_SCSCF_RESTORATION:
+            ProcessScscfRestoration(objMsg);
             break;
 
         default:
@@ -159,7 +340,7 @@ PROTECTED VIRTUAL void AosEApplication::ProcessRegStart(IN IMSMSG& objMsg)
         return;
     }
 
-    if (GET_N_CONFIG(m_nSlotId)->GetEmergencyRegistrationTimerMillis() >= 0)
+    if (GET_N_CONFIG(m_nSlotId)->GetEmergencyRegistrationTimerMillis() > 0)
     {
         StartTimer(TIMER_APP_CONNECTED,
                 GET_N_CONFIG(m_nSlotId)->GetEmergencyRegistrationTimerMillis());
@@ -167,6 +348,11 @@ PROTECTED VIRTUAL void AosEApplication::ProcessRegStart(IN IMSMSG& objMsg)
 
     if (m_pConnector->IsReady())
     {
+        if (m_bEpdgEnabled && GET_N_CONFIG(m_nSlotId)->IsKeepERegRetryOnWlanRequired())
+        {
+            StopTimer(TIMER_APP_CONNECTED);
+        }
+
         SetAppState(STATE_CONNECTING);
         m_piRegistration->Start();
     }
@@ -174,7 +360,7 @@ PROTECTED VIRTUAL void AosEApplication::ProcessRegStart(IN IMSMSG& objMsg)
     {
         SetAppState(STATE_READY);
 
-        if (nIpcanType == AoSRegType::TYPE_IPCAN_WLAN)
+        if (nIpcanType == AosRegType::TYPE_IPCAN_WLAN)
         {
             A_IMS_TRACE_I(APPID, "ProcessRegStart :: nIpcanType(%d) , emergency over WLAN",
                     nIpcanType, 0, 0);
@@ -204,36 +390,72 @@ PROTECTED VIRTUAL void AosEApplication::ProcessRegStart(IN IMSMSG& objMsg)
     }
 }
 
-PROTECTED VIRTUAL void AosEApplication::ProcessRegStop(IN IMSMSG& /* objMsg */)
+PROTECTED VIRTUAL void AosEApplication::ProcessRegStop(IN IMSMSG& objMsg)
 {
-    CleanAll();
+    IMS_UINT32 nReason = LONG_TO_INT(objMsg.nWparam);
+    CleanAll(nReason);
+    UpdateReadyState();
     Report_StateChanged(IMS_FALSE);
-    ProcessStateStart();
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosEApplication::StateNotReady_Condition(IN IMSMSG& /* objMsg */)
 {
-    if (!IsEmergencyBlocked())
-    {
-        SetAppState(STATE_READY);
-    }
-
+    UpdateReadyState();
     return IMS_TRUE;
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosEApplication::StateReady_Connection(IN IMSMSG& objMsg)
 {
     IMS_UINT32 nType = LONG_TO_INT(objMsg.nWparam);
+    IMS_UINT32 nReason = LONG_TO_INT(objMsg.nLparam);
 
     switch (nType)
     {
         case CONNECTION_ACTIVATED:
-            m_piRegistration->Start();
-            SetAppState(STATE_CONNECTING);
+            if (m_bEpdgEnabled && GET_N_CONFIG(m_nSlotId)->IsKeepERegRetryOnWlanRequired())
+            {
+                StopTimer(TIMER_APP_CONNECTED);
+            }
+            else if (GET_N_CONFIG(m_nSlotId)->IsStopERegTimerOnEpdnConnected() &&
+                    GET_N_CONFIG(m_nSlotId)->GetEmcRegRetryTimerMillis() > 0)
+            {
+                StopTimer(TIMER_APP_CONNECTED);
+            }
+
+            if (!IsRegBlockInCbm())
+            {
+                if (m_piRegistration->IsInCallbackMode())
+                {
+                    SetRegBlockInCbm(IMS_TRUE);
+                }
+                m_piRegistration->Start();
+                SetAppState(STATE_CONNECTING);
+            }
+            else
+            {
+                if (!m_piRegistration->IsInCallbackMode())
+                {
+                    ProcessCleanAll(AosReason::DATA_DISCONNECTED);
+                }
+            }
             break;
 
         case CONNECTION_DEACTIVATED:
-            ProcessCleanAll(AosReason::DATA_DISCONNECTED);
+            if (m_piRegistration->IsInCallbackMode())
+            {
+                m_pConnector->Start();
+            }
+            else
+            {
+                if (nReason == AosConnector::REASON_PERMANENTLY_FAILED)
+                {
+                    ProcessCleanAll(AosReason::DATA_PERMANENTLY_FAILED);
+                }
+                else
+                {
+                    ProcessCleanAll(AosReason::DATA_DISCONNECTED);
+                }
+            }
             break;
 
         default:
@@ -245,11 +467,7 @@ PROTECTED VIRTUAL IMS_BOOL AosEApplication::StateReady_Connection(IN IMSMSG& obj
 
 PROTECTED VIRTUAL IMS_BOOL AosEApplication::StateReady_Condition(IN IMSMSG& /* objMsg */)
 {
-    if (IsEmergencyBlocked())
-    {
-        SetAppState(STATE_NOTREADY);
-    }
-
+    UpdateReadyState();
     return IMS_TRUE;
 }
 
@@ -264,9 +482,17 @@ PROTECTED VIRTUAL void AosEApplication::ProcessRegFailed_StateConnecting(
     ProcessCleanAll(AosReason::REG_FAILURE);
 }
 
-PROTECTED VIRTUAL void AosEApplication::ProcessRegFailed_StateConnected(IN IMS_UINT32 /* nReason */)
+PROTECTED VIRTUAL void AosEApplication::ProcessRegFailed_StateConnected(IN IMS_UINT32 nReason)
 {
-    ProcessCleanAll(AosReason::REG_FAILURE);
+    if (nReason == IAosRegistration::REASON_FAILURE_NO_PCSCF_AVAILABLE)
+    {
+        SetKeepEPdnWhenNoPcscf(IMS_TRUE);
+        ProcessCleanAll(AosReason::DATA_CONNECTION_MAINTAIN);
+    }
+    else
+    {
+        ProcessCleanAll(AosReason::REG_FAILURE);
+    }
 }
 
 PROTECTED VIRTUAL void AosEApplication::ProcessConnectionUpdated_StateDisconnecting(
@@ -277,7 +503,14 @@ PROTECTED VIRTUAL void AosEApplication::ProcessConnectionUpdated_StateDisconnect
 
 PROTECTED VIRTUAL void AosEApplication::ProcessConnectionDeactivated(IN IMS_UINT32 /* nReason */)
 {
-    ProcessCleanAll(AosReason::DATA_DISCONNECTED);
+    if (m_piRegistration->IsInCallbackMode())
+    {
+        ProcessCleanAll(AosReason::DATA_CONNECTION_MAINTAIN);
+    }
+    else
+    {
+        ProcessCleanAll(AosReason::DATA_DISCONNECTED);
+    }
 }
 
 PROTECTED VIRTUAL void AosEApplication::ProcessConnectionUpdated(IN IMS_UINT32 nReason)
@@ -295,7 +528,25 @@ PROTECTED VIRTUAL void AosEApplication::ProcessConnectionUpdated(IN IMS_UINT32 n
     switch (nReason)
     {
         case AosConnector::REASON_IP_CHANGED:
-            ProcessCleanAll(AosReason::IP_CHANGED);
+            if (m_piRegistration->IsInCallbackMode())
+            {
+                ProcessCleanAll(AosReason::DATA_CONNECTION_MAINTAIN);
+                if (!IsRegBlockInCbm())
+                {
+                    SetAppState(STATE_CONNECTING);
+                    m_piRegistration->Start();
+                    SetRegBlockInCbm(IMS_TRUE);
+                    return;
+                }
+            }
+            else
+            {
+                ProcessCleanAll(AosReason::IP_CHANGED);
+            }
+            break;
+
+        case AosConnector::REASON_IPCAN_CAT_CHANGED:
+            PostMessage(MSG_IPCAN_CHANGED, 0, 0);
             break;
 
         default:
@@ -369,8 +620,17 @@ PROTECTED VIRTUAL void AosEApplication::ProcessRegBlockedTimerExpired()
 
     if (!m_pConnector->IsReady())
     {
-        A_IMS_TRACE_I(APPID, "Emergency call fail since normal registration is not done", 0, 0, 0);
-        ProcessCleanAll(AosReason::REG_FAILURE);
+        if (GET_N_CONFIG(m_nSlotId)->IsRegTimerForECallTimeoutAsFailure())
+        {
+            A_IMS_TRACE_I(
+                    APPID, "Emergency call fail since normal registration is not done", 0, 0, 0);
+            ProcessCleanAll(AosReason::REG_FAILURE);
+        }
+        else
+        {
+            A_IMS_TRACE_I(APPID, "E-Call is proceeded even though normal reg is failed", 0, 0, 0);
+            m_pConnector->Start();
+        }
     }
 }
 
@@ -398,7 +658,57 @@ PROTECTED VIRTUAL IMS_BOOL AosEApplication::IsWlanEmergencyBlocked()
 
 PROTECTED VIRTUAL IMS_BOOL AosEApplication::IsRegWaitingRequired()
 {
-    return (GET_N_CONFIG(m_nSlotId)->GetRegTimerForEmcCall() > 0);
+    if (GET_N_CONFIG(m_nSlotId)->GetRegTimerForEmcCall() <= 0)
+    {
+        return IMS_FALSE;
+    }
+
+    if (GET_N_CONFIG(m_nSlotId)->IsRegTimerForECallWithRatCheckEnabled())
+    {
+        if (GET_N_CONFIG(m_nSlotId)->IsWfcImsAvailable() && IsWifiConnected())
+        {
+            return IMS_TRUE;
+        }
+
+        INetworkWatcher* piNw =
+                PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_nSlotId);
+        if (piNw != IMS_NULL)
+        {
+            return m_pUtil->IsSupportedNetworkTypeForCellular(piNw->GetNetRadioTechType());
+        }
+    }
+
+    return IMS_TRUE;
+}
+
+PROTECTED VIRTUAL IMS_BOOL AosEApplication::IsECallConnectedNetworkUnavailable()
+{
+    IMS_BOOL bUnavailable = IMS_FALSE;
+    if (!GET_N_CONFIG(m_nSlotId)->IsReleaseEPdnOfUnavailableNetwork())
+    {
+        A_IMS_TRACE_I(APPID, "Unavailable network check is not necessary", 0, 0, 0);
+        return bUnavailable;
+    }
+
+    if (m_bEpdgEnabled)
+    {
+        bUnavailable = !IsWifiConnected();
+        A_IMS_TRACE_I(APPID, "WiFi is %s", bUnavailable ? "not available" : "available", 0, 0);
+    }
+    else
+    {
+        INetworkWatcher* piNw =
+                PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_nSlotId);
+        if (piNw != IMS_NULL)
+        {
+            if (piNw->GetNetRadioTechType() == NW_REPORT_RADIO_NOSRV)
+            {
+                bUnavailable = IMS_TRUE;
+            }
+        }
+        A_IMS_TRACE_I(APPID, "Cellular is %s", bUnavailable ? "not available" : "available", 0, 0);
+    }
+    return bUnavailable;
 }
 
 PROTECTED VIRTUAL void AosEApplication::ProcessRegStateCheck()
@@ -428,6 +738,7 @@ PROTECTED VIRTUAL void AosEApplication::ProcessRegStateCheck()
 PROTECTED VIRTUAL void AosEApplication::ProcessECallStarted()
 {
     SetImsCall(IMS_TRUE);
+    SetRegBlockInCbm(IMS_FALSE);
 
     if (m_piAppActivatedTimer != IMS_NULL)
     {
@@ -455,20 +766,22 @@ PROTECTED VIRTUAL void AosEApplication::ProcessECallTerminated()
         return;
     }
 
-    if (GET_N_CONFIG(m_nSlotId)->IsEmergencyPdnWithEmergencyCallEndReleased() ||
-            m_piRegistration->GetMode() == IAosRegistration::MODE_FAKE)
+    IMS_SINT32 nDelayTime = IsReleaseEmergencyPdnUponEmergencyCallEnd()
+            ? GET_N_CONFIG(m_nSlotId)->GetSipTimerT1()
+            : GET_N_CONFIG(m_nSlotId)->GetWaitTimeMillisForReleaseEPdnAfterECallEnd();
+    if (nDelayTime > 0)
     {
-        StartTimer(TIMER_APP_TERMINATED, EPDN_RELEASE_DELAY_TIME_MILLIS);
-        return;
+        StartTimer(TIMER_APP_TERMINATED, nDelayTime);
     }
-
-    if (!IsTimerRunning(TIMER_APP_ACTIVATED))
+    else
     {
-        // clean when e-call is terminated over ePDG
-        if (m_piContext->GetConnection()->IsEpdgEnabled())
+        if (IsECallConnectedNetworkUnavailable())
         {
             ProcessCleanAll();
-            return;
+        }
+        else
+        {
+            SetNetTrackerListener();
         }
     }
 }
@@ -512,6 +825,20 @@ PROTECTED VIRTUAL void AosEApplication::Condition_RequestCommand(
     }
 }
 
+PROTECTED VIRTUAL void AosEApplication::Registration_StateChanged(
+        IN IMS_UINT32 nResult, IN IMS_UINT32 nReason /* = 0 */)
+{
+    if (IsEqualOrLessState(STATE_READY) && nResult == IAosRegistration::RESULT_FAILURE)
+    {
+        if (!m_piRegistration->IsInCallbackMode())
+        {
+            ProcessCleanAll(AosReason::DATA_DISCONNECTED);
+        }
+    }
+
+    AosApplication::Registration_StateChanged(nResult, nReason);
+}
+
 PROTECTED VIRTUAL void AosEApplication::CallTracker_StateChanged(
         IN IMS_UINT32 nType, IN CallState eState)
 {
@@ -535,12 +862,31 @@ PROTECTED VIRTUAL void AosEApplication::CallTracker_StateChanged(
     }
 }
 
+PROTECTED VIRTUAL void AosEApplication::CallTracker_ECallSessionReleased(IN IMS_BOOL bEstablished)
+{
+    A_IMS_TRACE_I(APPID, "CallTracker_ECallSessionReleased", 0, 0, 0);
+
+    if (GET_N_CONFIG(m_nSlotId)->IsKeepEPdnUponPcscfUnavailable() && !bEstablished)
+    {
+        A_IMS_TRACE_I(
+                APPID, "do not release emergency pdn if the session is not established", 0, 0, 0);
+        return;
+    }
+
+    SetImsCall(IMS_FALSE);
+
+    if ((IsReleaseEmergencyPdnUponEmergencyCallEnd() || m_piRegistration->IsTerminated()))
+    {
+        ProcessCleanAll();
+    }
+}
+
 PROTECTED VIRTUAL void AosEApplication::NConfiguration_NotifyConfigChanged()
 {
     AosApplication::NConfiguration_NotifyConfigChanged();
 
     IAosRegStateManager* piRsm = AosProvider::GetInstance()->GetRegStateManager(m_nSlotId);
-    if (IsRegWaitingRequired())
+    if (GET_N_CONFIG(m_nSlotId)->GetRegTimerForEmcCall() > 0)
     {
         piRsm->SetListener(this);
     }
@@ -564,11 +910,20 @@ PROTECTED VIRTUAL void AosEApplication::RegStateManager_RegStateChanged(IN IMS_U
     }
 }
 
+PROTECTED VIRTUAL void AosEApplication::NetTracker_StatusChanged()
+{
+    if (m_pConnector->IsReady() && !IsImsCall() && IsECallConnectedNetworkUnavailable())
+    {
+        A_IMS_TRACE_I(APPID, "Network is Unavailable", 0, 0, 0);
+        ProcessCleanAll();
+    }
+}
+
 PROTECTED VIRTUAL void AosEApplication::Init()
 {
     AosApplication::Init();
 
-    if (IsRegWaitingRequired())
+    if (GET_N_CONFIG(m_nSlotId)->GetRegTimerForEmcCall() > 0)
     {
         IAosRegStateManager* piRsm = AosProvider::GetInstance()->GetRegStateManager(m_nSlotId);
         piRsm->SetListener(this);

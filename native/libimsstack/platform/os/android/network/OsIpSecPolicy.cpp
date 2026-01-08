@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ByteArray.h"
 #include "IIpSecPolicyListener.h"
 #include "IIpSecSa.h"
 #include "IIpSecSp.h"
+#include "IpSecSaParameter.h"
 #include "ServiceMemory.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
@@ -23,7 +25,7 @@
 #include "network/OsIpSecSa.h"
 #include "network/OsIpSecSp.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 PUBLIC
 OsIpSecPolicy::OsIpSecPolicy(IN IMS_SINT32 nId) :

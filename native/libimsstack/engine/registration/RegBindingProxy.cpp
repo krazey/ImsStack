@@ -75,7 +75,7 @@ PUBLIC GLOBAL void RegBindingProxy::DestroyBinding(
 }
 
 PUBLIC GLOBAL void RegBindingProxy::DestroyBinding(
-        IN IMS_SINT32 nSlotId, IN IRegistrationEx* piRegEx)
+        IN IMS_SINT32 nSlotId, IN const IRegistrationEx* piRegEx)
 {
     ImsList<IRegBinding*> objRegBindings = ServiceResolver::GetRegBindings(nSlotId);
 
@@ -147,7 +147,8 @@ PUBLIC GLOBAL void RegBindingProxy::UnbindContact(
             strServiceId.GetStr(), nSlotId);
 }
 
-PUBLIC GLOBAL void RegBindingProxy::UnbindContact(IN IMS_SINT32 nSlotId, IN IRegContact* piContact)
+PUBLIC GLOBAL void RegBindingProxy::UnbindContact(
+        IN IMS_SINT32 nSlotId, IN const IRegContact* piContact)
 {
     ImsList<IRegBinding*> objRegBindings = ServiceResolver::GetRegBindings(nSlotId);
 
@@ -170,7 +171,7 @@ PUBLIC GLOBAL void RegBindingProxy::QueryCapability(IN IMS_SINT32 nSlotId,
         IN const AString& strAppId, IN const AString& strServiceId,
         OUT CallerCapability*& pCapability)
 {
-    RegBinding* pRegBinding = DYNAMIC_CAST(
+    const RegBinding* pRegBinding = DYNAMIC_CAST(
             RegBinding*, ServiceResolver::GetRegBinding(nSlotId, strAppId, strServiceId));
 
     if (pRegBinding == IMS_NULL)
@@ -186,7 +187,7 @@ PUBLIC GLOBAL void RegBindingProxy::QueryCapability(IN IMS_SINT32 nSlotId,
 PUBLIC GLOBAL void RegBindingProxy::QueryRegistrationHeaders(IN IMS_SINT32 nSlotId,
         IN const AString& strAppId, IN const AString& strServiceId, OUT AStringArray& objHeaders)
 {
-    RegBinding* pRegBinding = DYNAMIC_CAST(
+    const RegBinding* pRegBinding = DYNAMIC_CAST(
             RegBinding*, ServiceResolver::GetRegBinding(nSlotId, strAppId, strServiceId));
 
     if (pRegBinding == IMS_NULL)

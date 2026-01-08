@@ -16,14 +16,15 @@
 #ifndef OS_IPCAN_H_
 #define OS_IPCAN_H_
 
-#include "AStringArray.h"
 #include "IIpcan.h"
+
+class AStringArray;
 
 class OsIpcan : public IIpcan
 {
 public:
     OsIpcan();
-    virtual ~OsIpcan();
+    ~OsIpcan() override;
 
     OsIpcan(IN const OsIpcan&) = delete;
     OsIpcan& operator=(IN const OsIpcan&) = delete;

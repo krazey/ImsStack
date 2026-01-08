@@ -28,7 +28,7 @@ class EnablerLoader : public IEnablerLoader
 {
 private:
     EnablerLoader();
-    virtual ~EnablerLoader();
+    ~EnablerLoader() override;
 
 public:
     EnablerLoader(IN const EnablerLoader&) = delete;

@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "AString.h"
+
 #include "ConfigMedia.h"
 #include "ConfigMtc.h"
 #include "ConfigMts.h"
-#include "ConfigSipDelegate.h"
 #include "ConfigUce.h"
 #include "StaticConfig.h"
 
@@ -26,7 +27,7 @@ struct ConfigMap
     const IMS_CHAR* pszConfig;
 };
 
-LOCAL const ConfigMap s_objConfigMap[] = {
+static const ConfigMap CONFIG_MAP[] = {
         // Media
         {ConfigMedia::MEDIA_NAME,              ConfigMedia::MEDIA_CONFIG             },
         {ConfigMedia::MEDIA_CAPABILITIES_NAME, ConfigMedia::MEDIA_CAPABILITIES_CONFIG},
@@ -37,18 +38,16 @@ LOCAL const ConfigMap s_objConfigMap[] = {
         // Mts
         {ConfigMts::APP_NAME,                  ConfigMts::APP_CONFIG                 },
         // Uce
-        {ConfigUce::APP_NAME,                  ConfigUce::APP_CONFIG                 },
-        // SipDelegate
-        {ConfigSipDelegate::APP_NAME,          ConfigSipDelegate::APP_CONFIG         }
+        {ConfigUce::APP_NAME,                  ConfigUce::APP_CONFIG                 }
 };
 
 PUBLIC GLOBAL const IMS_CHAR* StaticConfig::GetConfig(IN const AString& strName)
 {
-    IMS_UINT32 nCount = sizeof(s_objConfigMap) / sizeof(s_objConfigMap[0]);
+    IMS_UINT32 nCount = sizeof(CONFIG_MAP) / sizeof(CONFIG_MAP[0]);
 
     for (IMS_UINT32 i = 0; i < nCount; i++)
     {
-        const ConfigMap* pConfigMap = &(s_objConfigMap[i]);
+        const ConfigMap* pConfigMap = &(CONFIG_MAP[i]);
 
         if (strName.Equals(pConfigMap->pszKey))
         {

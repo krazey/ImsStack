@@ -104,7 +104,7 @@ PUBLIC VIRTUAL const AString& XmlStreamWriter::GetString() const
 
 PUBLIC VIRTUAL const AString& XmlStreamWriter::GetPrefix(IN const AString& strUri) const
 {
-    XmlPrefix* pPrefix = GetPrefixInternal(strUri);
+    const XmlPrefix* pPrefix = GetPrefixInternal(strUri);
 
     return (pPrefix != IMS_NULL) ? pPrefix->GetPrefix() : AString::ConstNull();
 }

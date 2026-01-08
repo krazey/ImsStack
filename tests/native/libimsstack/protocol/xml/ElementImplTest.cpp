@@ -15,6 +15,8 @@
  */
 #include <gtest/gtest.h>
 
+#include "AString.h"
+
 #include "ElementImpl.h"
 #include "INodeList.h"
 #include "INamedNodeMap.h"

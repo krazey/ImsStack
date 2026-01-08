@@ -18,6 +18,8 @@
 
 #include "DeviceConfig.h"
 
+#include "IEnablerLoader.h"
+
 #include "NativeCommands.h"
 #include "NativeCommandsHandler.h"
 
@@ -28,7 +30,7 @@ class MockIEnablerLoader : public IEnablerLoader
 {
 public:
     inline MockIEnablerLoader() {}
-    inline virtual ~MockIEnablerLoader() {}
+    ~MockIEnablerLoader() override = default;
 
     MOCK_METHOD(void, StartEnabler, (IN IMS_SINT32 nSlotId), (override));
     MOCK_METHOD(void, StopEnabler, (IN IMS_SINT32 nSlotId), (override));

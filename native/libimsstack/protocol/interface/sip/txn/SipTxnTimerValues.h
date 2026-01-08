@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef _SIP_TXN_TIMER_VALUES_H
-#define _SIP_TXN_TIMER_VALUES_H
+#ifndef __SIP_TXN_TIMER_VALUES_H__
+#define __SIP_TXN_TIMER_VALUES_H__
 
 #include "SipDatatypes.h"
 
@@ -39,6 +39,8 @@ class SipTxnTimerValues
     SIP_UINT32 m_nTimerI_Value;
     SIP_UINT32 m_nTimerJ_Value;
     SIP_UINT32 m_nTimerK_Value;
+    SIP_UINT32 m_nTimerL_Value;
+    SIP_UINT32 m_nTimerM_Value;
 
 public:
     SipTxnTimerValues();
@@ -53,6 +55,7 @@ private:
     SIP_BOOL IsTimerSet(IN SIP_UINT32 nTimerOptions, IN SIP_UINT32 nType);
     SIP_VOID PrintSIPTxnTimerValues() const;
 
+public:
     enum
     {
         TV_T1 = 0x0001,
@@ -68,8 +71,10 @@ private:
         TV_TIMER_I = 0x0400,
         TV_TIMER_J = 0x0800,
         TV_TIMER_K = 0x1000,
-        TV_ALL = 0x1FFF
+        TV_TIMER_L = 0x2000,
+        TV_TIMER_M = 0x4000,
+        TV_ALL = 0x7FFF
     };
 };
 
-#endif
+#endif  //__SIP_TXN_TIMER_VALUES_H__

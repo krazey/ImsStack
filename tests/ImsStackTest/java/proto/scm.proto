@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package com.android.imsstack.its.scm;
+
+option java_package = "com.android.imsstack.its.scm";
+option java_multiple_files = true;
+
+enum Action {
+  ACTION_UNSPECIFIED = 0; // Best practice: default 0 value
+  START = 1;
+  STOP = 2;
+}
+
+message ScmRequest {
+  Action action = 1;
+  int64 number_of_tiss = 2;  // only required for START; STOP would stop all TISS
+}
+
+message TissStatus {
+  int64 index = 1;
+  string ip_address = 2;
+  int64 sip_port = 3;
+  int64 audio_port = 4;
+  int64 video_port = 5;
+  int64 text_port = 6;
+  int64 control_port = 7;
+}
+
+message ScmResponse {
+  repeated TissStatus tiss_status = 1;  // only response when request start
+  string error = 2;                     // response when having error
+}

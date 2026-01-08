@@ -34,18 +34,19 @@ class AosUtil;
 class MockAosConnector : public AosConnector
 {
 public:
-    MockAosConnector(IN IAosAppContext* piAppContext) :
-            AosConnector(piAppContext)
+    MockAosConnector() :
+            AosConnector()
     {
     }
-    ~MockAosConnector() {}
+    ~MockAosConnector() override {}
     MOCK_METHOD(IMS_BOOL, Start, (), (override));
     MOCK_METHOD(void, Stop, (), (override));
     MOCK_METHOD(void, Stop, (IN IMS_SINT32 nDelayTimeSec), (override));
     MOCK_METHOD(void, SetListener, (IN IAosConnectorListener * piListener), (override));
     MOCK_METHOD(IMS_BOOL, IsReady, (), (const, override));
-    MOCK_METHOD(void, SetPdnDeactivationRequired, (IN IMS_BOOL bIsRequired), (override));
-    MOCK_METHOD(IMS_BOOL, IsPdnDeactivationRequired, (), (override));
+    MOCK_METHOD(void, ResetReadyRecovery, (), (override));
+    MOCK_METHOD(IMS_BOOL, IsCrossSimConnected, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, ProcessPendingPcscfChange, (), (override));
     MOCK_METHOD(void, CleanAll, (), (override));
     MOCK_METHOD(IMS_BOOL, ConfigurePcscf, (), (override));
     MOCK_METHOD(void, ProcessIpv6TimerExpired, (), (override));

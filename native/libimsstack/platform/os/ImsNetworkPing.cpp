@@ -15,13 +15,14 @@
  */
 #include "INetworkPingListener.h"
 #include "ImsNetworkPing.h"
+#include "IpAddress.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
 #include "ServiceSystemTime.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
 PUBLIC
 ImsNetworkPing::ImsNetworkPing() :

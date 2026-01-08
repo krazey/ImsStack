@@ -16,23 +16,30 @@
 
 package com.android.imsstack.core.agents.dcm;
 
+import static android.provider.Settings.Global.AIRPLANE_MODE_ON;
+
+import static com.android.imsstack.base.TestAppContext.SLOT0;
+import static com.android.imsstack.base.TestAppContext.SUB_ID_1;
+import static com.android.imsstack.core.agents.dcmif.IDcNetWatcher.REGISTRATION_REJECT_CAUSE_NONE;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
+import android.content.BroadcastReceiver;
 import android.content.Intent;
-import android.os.Handler;
+import android.content.IntentFilter;
 import android.os.Looper;
 import android.os.Message;
-import android.os.RegistrantList;
-import android.provider.Settings;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.CellIdentity;
 import android.telephony.CellIdentityGsm;
@@ -40,17 +47,16 @@ import android.telephony.CellIdentityLte;
 import android.telephony.CellIdentityNr;
 import android.telephony.CellIdentityWcdma;
 import android.telephony.DataSpecificRegistrationInfo;
-import android.telephony.DisconnectCause;
 import android.telephony.LteVopsSupportInfo;
 import android.telephony.NetworkRegistrationInfo;
-import android.telephony.PreciseCallState;
-import android.telephony.PreciseDisconnectCause;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.ImsStackTest;
+import com.android.imsstack.base.ContentProviderProxy.SettingsProxy;
+import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.ImsPhoneStateListener;
@@ -59,10 +65,9 @@ import com.android.imsstack.core.agents.PhoneStateInterface;
 import com.android.imsstack.core.agents.TelephonyInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.agents.dcmif.IDcSettings;
 import com.android.imsstack.core.agents.internal.PhoneStateNotifier;
-import com.android.imsstack.enabler.aos.AosFactory;
-import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.SystemInterface;
@@ -73,30 +78,26 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
+import java.util.List;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class DcNetWatcherTest extends ImsStackTest {
-    private static final int NUM_OF_SLOT = 1;
-    private static final int SLOT_0 = 0;
-
+    private TestAppContext mTestAppContext;
     private DcNetWatcher mDcNetWatcher;
 
+    @Mock SettingsProxy mSettingsProxy;
     @Mock DcSettings mMockDcSetting;
     @Mock ISystem mMockSystem;
-    @Mock IAosInfo mMockAosInfo;
     @Mock PhoneStateInterface mMockPhoneStateInterface;
     @Mock PhoneStateNotifier mMockPhoneStateNotifier;
-    @Mock TelephonyInterface mMockTelephonyInterface;
     @Mock ConfigInterface mMockConfigInterface;
     @Mock SystemInterface mMockSystemInterface;
-    @Mock AosFactory mMockAosFactory;
     @Mock NativeStateInterface mMockNativeStateInterface;
-    @Mock Handler mMockHandler;
+    @Mock IDcNetWatcher.Listener mNetWatherListener;
 
     @Before
     public void setup() throws Exception {
@@ -106,53 +107,56 @@ public class DcNetWatcherTest extends ImsStackTest {
 
         super.setUp(getClass().getSimpleName());
         MockitoAnnotations.initMocks(this);
+        mTestAppContext = new TestAppContext(mContext);
+        mTestAppContext.setUp();
 
-        when(mMockSystemInterface.getSystem(SLOT_0)).thenReturn(mMockSystem);
+        when(mTestAppContext.getContentProviderProxy().getGlobalSettings())
+                .thenReturn(mSettingsProxy);
+
+        when(mMockSystemInterface.getSystem(SLOT0)).thenReturn(mMockSystem);
         replaceInstance(SystemInterface.class, "sSystemInterface", null, mMockSystemInterface);
 
-        when(mMockAosFactory.getAosInfo(SLOT_0)).thenReturn(mMockAosInfo);
-        replaceInstance(AosFactory.class, "sFactory", null, mMockAosFactory);
-
         AgentFactory.getInstance().setAgent(
-                PhoneStateInterface.class, mMockPhoneStateInterface, SLOT_0);
+                PhoneStateInterface.class, mMockPhoneStateInterface, SLOT0);
         AgentFactory.getInstance().setAgent(
-                NativeStateInterface.class, mMockNativeStateInterface, SLOT_0);
+                NativeStateInterface.class, mMockNativeStateInterface, SLOT0);
         AgentFactory.getInstance().setAgent(
-                TelephonyInterface.class, mMockTelephonyInterface, SLOT_0);
-        AgentFactory.getInstance().setAgent(
-                ConfigInterface.class, mMockConfigInterface, SLOT_0);
+                ConfigInterface.class, mMockConfigInterface, SLOT0);
+        DcFactory.setDcAgent(IDcSettings.class, mMockDcSetting, SLOT0);
 
         when(mMockPhoneStateInterface.createNotifier(any(), any(Looper.class)))
                 .thenReturn(mMockPhoneStateNotifier);
-        when(mMockDcSetting.getImsSupportedRats())
-                .thenReturn(new int[] {AccessNetworkConstants.AccessNetworkType.EUTRAN,
-                        AccessNetworkConstants.AccessNetworkType.IWLAN,
-                        AccessNetworkConstants.AccessNetworkType.UTRAN,
-                        AccessNetworkConstants.AccessNetworkType.GERAN});
-        DcFactory.setDcAgent(IDcSettings.class, mMockDcSetting, SLOT_0);
+        when(mMockDcSetting.getImsSupportedAccessNetworks()).thenReturn(Collections.emptyList());
 
-        mDcNetWatcher = new DcNetWatcher(SLOT_0);
+        mDcNetWatcher = new DcNetWatcher(SLOT0);
         mDcNetWatcher.init(mContext);
+        mDcNetWatcher.addListener(mNetWatherListener);
     }
 
     @After
     public void tearDown() throws Exception {
+        mDcNetWatcher.removeListener(mNetWatherListener);
         mDcNetWatcher.cleanup();
-        super.tearDown();
 
-        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, SLOT_0);
-        AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT_0);
-        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT_0);
-        DcFactory.setDcAgent(IDcSettings.class, null, SLOT_0);
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT0);
+        AgentFactory.getInstance().setAgent(TelephonyInterface.class, null, SLOT0);
+        AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT0);
+        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, SLOT0);
+        DcFactory.setDcAgent(IDcSettings.class, null, SLOT0);
+
+        mSettingsProxy = null;
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
+
+        super.tearDown();
     }
 
     @Test
     public void testInit() {
-        verify(mMockDcSetting).getImsSupportedRats();
-        verify(mMockSystemInterface).getSystem(SLOT_0);
-        verify(mMockAosFactory).getAosInfo(SLOT_0);
+        verify(mMockDcSetting).getImsSupportedAccessNetworks();
+        verify(mMockSystemInterface).getSystem(SLOT0);
         verify(mMockNativeStateInterface).addListener(any(NativeStateInterface.Listener.class));
-        verify(mContext).registerReceiver(any(), any(), eq(Context.RECEIVER_EXPORTED));
+        verify(mTestAppContext.getBroadcastReceiverProxy()).registerReceiver(any(), any());
         verify(mMockPhoneStateInterface).createNotifier(any(), any(Looper.class));
         verify(mMockPhoneStateNotifier).setEvents(ImsPhoneStateListener.LISTEN_CALL_STATE
                 | ImsPhoneStateListener.LISTEN_SERVICE_STATE
@@ -168,539 +172,184 @@ public class DcNetWatcherTest extends ImsStackTest {
         verify(mMockConfigInterface).removeListener(any(ConfigInterface.Listener.class));
         verify(mMockPhoneStateInterface).removeNotifier(mMockPhoneStateNotifier);
         verify(mMockPhoneStateNotifier).setListener(null);
-        verify(mContext).unregisterReceiver(any());
+        verify(mTestAppContext.getBroadcastReceiverProxy()).unregisterReceiver(any());
         verify(mMockNativeStateInterface).removeListener(any(NativeStateInterface.Listener.class));
     }
 
     @Test
-    public void testIsRatPolicyAvailable_5G() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_5G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_NR);
-        assertEquals(true, mDcNetWatcher.isRatPolicyAvailable());
+    public void testNotifyDataConnectionState() throws Exception {
+        EApnType apnType = EApnType.IMS;
+        EDataState dataState = EDataState.DATA_STATE_DISCONNECTED;
 
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_4G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_NR);
-        assertEquals(false, mDcNetWatcher.isRatPolicyAvailable());
+        mDcNetWatcher.notifyDataConnectionState(apnType, dataState);
 
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_5G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_LTE);
-        assertEquals(false, mDcNetWatcher.isRatPolicyAvailable());
-    }
-
-    @Test
-    public void testIsRatPolicyAvailable_4G() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_4G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_LTE);
-        assertEquals(true, mDcNetWatcher.isRatPolicyAvailable());
-
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_4G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_NR);
-        assertEquals(false, mDcNetWatcher.isRatPolicyAvailable());
-
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_5G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_LTE);
-        assertEquals(false, mDcNetWatcher.isRatPolicyAvailable());
-    }
-
-    @Test
-    public void testIsRatPolicyAvailable_3G() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_3G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_UMTS);
-        assertEquals(true, mDcNetWatcher.isRatPolicyAvailable());
-
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_3G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_LTE);
-        assertEquals(false, mDcNetWatcher.isRatPolicyAvailable());
-
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_4G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_UMTS);
-        assertEquals(false, mDcNetWatcher.isRatPolicyAvailable());
-    }
-
-    @Test
-    public void testIsRatPolicyAvailable_ehrpd() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_EHRPD);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_EHRPD);
-        assertEquals(true, mDcNetWatcher.isRatPolicyAvailable());
-
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_EHRPD);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_LTE);
-        assertEquals(false, mDcNetWatcher.isRatPolicyAvailable());
-
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_4G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_EHRPD);
-        assertEquals(false, mDcNetWatcher.isRatPolicyAvailable());
-    }
-
-    @Test
-    public void testIsRatPolicyAvailable_2G() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_2G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_GSM);
-        assertEquals(true, mDcNetWatcher.isRatPolicyAvailable());
-
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_2G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_UMTS);
-        assertEquals(false, mDcNetWatcher.isRatPolicyAvailable());
-
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_3G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_GSM);
-        assertEquals(false, mDcNetWatcher.isRatPolicyAvailable());
-    }
-
-    @Test
-    public void testIsRatPolicyAvailable_evdo() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_EVDO);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_EVDO_B);
-        assertEquals(true, mDcNetWatcher.isRatPolicyAvailable());
-
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_EVDO);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_LTE);
-        assertEquals(false, mDcNetWatcher.isRatPolicyAvailable());
-
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_2G);
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_EVDO_A);
-        assertEquals(false, mDcNetWatcher.isRatPolicyAvailable());
-    }
-
-    @Test
-    public void testSetRatFromTelephonyManager() {
-        mDcNetWatcher.setRatFromTelephonyManager(TelephonyManager.NETWORK_TYPE_LTE);
-
-        assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mDcNetWatcher.mRatFromTm);
-    }
-
-    @Test
-    public void testSetVoiceRatFromTelephonyManager() {
-        mDcNetWatcher.setVoiceRatFromTelephonyManager(TelephonyManager.NETWORK_TYPE_LTE);
-
-        assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mDcNetWatcher.mVoiceRatFromTm);
-    }
-
-    @Test
-    public void testNotifyResult() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mStateDataConnectionState", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.notifyResult(EApnType.IMS, EDataState.DATA_STATE_DISCONNECTED);
-
-        verify(mRegistrantList).notifyResult(any());
+        verify(mNetWatherListener).onDataConnectionStateChanged(apnType, dataState);
     }
 
     @Test
     public void testNotifyPdnConnectionFailed() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mPdnConnectionFailedRegistrants", mDcNetWatcher,
-                mRegistrantList);
+        EApnType apnType = EApnType.IMS;
+        int cause = 33;
 
-        mDcNetWatcher.notifyPdnConnectionFailed(EApnType.IMS, 33);
+        mDcNetWatcher.notifyPdnConnectionFailed(apnType, cause);
 
-        verify(mRegistrantList).notifyResult(any());
+        verify(mNetWatherListener).onPdnConnectionFailed(apnType, cause);
     }
 
     @Test
-    public void testAddAndRemoveRegistrantList_dataState() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mStateDataConnectionState", mDcNetWatcher,
-                mRegistrantList);
+    public void testGetAvailableInternalAccessNetworkType_ngran() throws Exception {
+        mDcNetWatcher.mImsSupportedAccessNetworks =
+                List.of(AccessNetworkConstants.AccessNetworkType.NGRAN);
 
-        mDcNetWatcher.registerForDataStateChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForDataStateChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_dataServiceState() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mDataServiceStateChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForDataServiceStateChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForDataServiceStateChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_rat() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForRatChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForRatChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_voiceRat() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mVoiceRatChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForVoiceRatChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForVoiceRatChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_roamingState() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRoamingStateChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForRoamingStateChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForRoamingStateChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_voiceRoamingState() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mVoiceRoamingStateChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForVoiceRoamingStateChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForVoiceRoamingStateChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_airplaneModeChange() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mAirplaneModeChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForAirplaneModeChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForAirplaneModeChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_networkOperatorChange() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mNetworkOperatorChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForNetworkOperatorChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForNetworkOperatorChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_csCallStatusChange() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mCsCallStatusChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForCsCallStatusChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForCsCallStatusChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_preciseCsCallStatusChange() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mPreciseCsCallStatusChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForPreciseCsCallStatusChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForPreciseCsCallStatusChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_vopsChange() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mImsVopsChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForImsVopsChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForImsVopsChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_powerOffChange() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mPowerOffChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForPowerOffChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForPowerOffChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_pdnConnectionFailed() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mPdnConnectionFailedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForPdnConnectionFailed(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForPdnConnectionFailed(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_voiceRoamingTypeChange() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mVoiceRoamingTypeChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForVoiceRoamingTypeChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForVoiceRoamingTypeChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testAddAndRemoveRegistrantList_dataRoamingTypeChange() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mDataRoamingTypeChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        mDcNetWatcher.registerForDataRoamingTypeChanged(mMockHandler, 1000, null);
-        verify(mRegistrantList).add(any());
-
-        mDcNetWatcher.unregisterForDataRoamingTypeChanged(mMockHandler);
-        verify(mRegistrantList).remove(mMockHandler);
-    }
-
-    @Test
-    public void testCheckAndConvertNrRat_5GWhen5GRequired() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_5G);
-
-        Integer rat = (Integer) invokeMethod(mDcNetWatcher, "checkAndConvertNrRat",
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getAvailableInternalAccessNetworkType",
                 new Class[] {int.class}, new Object[] {TelephonyManager.NETWORK_TYPE_NR});
 
-        assertEquals(Integer.valueOf(TelephonyManager.NETWORK_TYPE_NR), rat);
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_NGRAN), accessNetworkType);
     }
 
     @Test
-    public void testCheckAndConvertNrRat_5GWhen5GNotRequired() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_4G);
+    public void testGetAvailableInternalAccessNetworkType_eutran() throws Exception {
+        mDcNetWatcher.mImsSupportedAccessNetworks =
+                List.of(AccessNetworkConstants.AccessNetworkType.EUTRAN);
 
-        Integer rat = (Integer) invokeMethod(mDcNetWatcher, "checkAndConvertNrRat",
-                new Class[] {int.class}, new Object[] {TelephonyManager.NETWORK_TYPE_NR});
-
-        assertEquals(Integer.valueOf(TelephonyManager.NETWORK_TYPE_LTE), rat);
-    }
-
-    @Test
-    public void testCheckAndConvertNrRat_3G() {
-        Integer rat = (Integer) invokeMethod(mDcNetWatcher, "checkAndConvertNrRat",
-                new Class[] {int.class}, new Object[] {TelephonyManager.NETWORK_TYPE_UMTS});
-
-        assertEquals(Integer.valueOf(TelephonyManager.NETWORK_TYPE_UMTS), rat);
-    }
-
-    @Test
-    public void testGetPreferredRadioTechCategory_5G() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_5G);
-
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher, "getPreferredRadioTechCategory",
-                new Class[] {int.class}, new Object[] {TelephonyManager.NETWORK_TYPE_NR});
-
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_5G), radioTech);
-    }
-
-    @Test
-    public void testGetPreferredRadioTechCategory_4G() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_4G);
-
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher, "getPreferredRadioTechCategory",
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getAvailableInternalAccessNetworkType",
                 new Class[] {int.class}, new Object[] {TelephonyManager.NETWORK_TYPE_LTE});
 
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_4G), radioTech);
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_EUTRAN), accessNetworkType);
     }
 
     @Test
-    public void testGetPreferredRadioTechCategory_ehrpd() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_EHRPD);
+    public void testGetAvailableInternalAccessNetworkType_ehrpd() throws Exception {
+        mDcNetWatcher.mImsSupportedAccessNetworks =
+                List.of(AccessNetworkConstants.AccessNetworkType.CDMA2000);
 
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher, "getPreferredRadioTechCategory",
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getAvailableInternalAccessNetworkType",
                 new Class[] {int.class}, new Object[] {TelephonyManager.NETWORK_TYPE_EHRPD});
 
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_EHRPD), radioTech);
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_EHRPD), accessNetworkType);
     }
 
     @Test
-    public void testGetPreferredRadioTechCategory_3G() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_3G);
+    public void testGetAvailableInternalAccessNetworkType_utran() throws Exception {
+        mDcNetWatcher.mImsSupportedAccessNetworks =
+                List.of(AccessNetworkConstants.AccessNetworkType.UTRAN);
 
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher, "getPreferredRadioTechCategory",
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getAvailableInternalAccessNetworkType",
                 new Class[] {int.class}, new Object[] {TelephonyManager.NETWORK_TYPE_HSPA});
 
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_3G), radioTech);
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_UTRAN), accessNetworkType);
     }
 
     @Test
-    public void testGetPreferredRadioTechCategory_2G() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_2G);
+    public void testGetAvailableInternalAccessNetworkType_geran() throws Exception {
+        mDcNetWatcher.mImsSupportedAccessNetworks =
+                List.of(AccessNetworkConstants.AccessNetworkType.GERAN);
 
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher, "getPreferredRadioTechCategory",
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getAvailableInternalAccessNetworkType",
                 new Class[] {int.class}, new Object[] {TelephonyManager.NETWORK_TYPE_EDGE});
 
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_2G), radioTech);
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_GEREAN), accessNetworkType);
     }
 
     @Test
-    public void testGetPreferredRadioTechCategory_evdo() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_EVDO);
+    public void testGetAvailableInternalAccessNetworkType_evdo() throws Exception {
+        mDcNetWatcher.mImsSupportedAccessNetworks =
+                List.of(AccessNetworkConstants.AccessNetworkType.CDMA2000);
 
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher, "getPreferredRadioTechCategory",
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getAvailableInternalAccessNetworkType",
                 new Class[] {int.class}, new Object[] {TelephonyManager.NETWORK_TYPE_EVDO_A});
 
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_EVDO), radioTech);
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_EVDO), accessNetworkType);
     }
 
     @Test
-    public void testGetPreferredRadioTechCategory_1xrtt() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatPolicy", mDcNetWatcher,
-                DcNetWatcher.POLICY_RAT_1XRTT);
+    public void testGetAvailableInternalAccessNetworkType_1xrtt() throws Exception {
+        mDcNetWatcher.mImsSupportedAccessNetworks =
+                List.of(AccessNetworkConstants.AccessNetworkType.CDMA2000);
 
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher, "getPreferredRadioTechCategory",
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getAvailableInternalAccessNetworkType",
                 new Class[] {int.class}, new Object[] {TelephonyManager.NETWORK_TYPE_1xRTT});
 
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_1XRTT), radioTech);
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_1XRTT), accessNetworkType);
     }
 
     @Test
-    public void testGetPreferredRadioTechCategory_none() {
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher, "getPreferredRadioTechCategory",
+    public void testGetAvailableInternalAccessNetworkType_unknown() {
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getAvailableInternalAccessNetworkType",
                 new Class[] {int.class}, new Object[] {0});
 
-        assertEquals(Integer.valueOf(0), radioTech);
+        assertEquals(Integer.valueOf(0), accessNetworkType);
     }
 
     @Test
-    public void testGetRadioTechCategory_5G() {
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher,
-                "getRadioTechCategory", new Class[] {int.class},
+    public void testGetInternalAccessNetworkType_ngran() {
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getInternalAccessNetworkType", new Class[] {int.class},
                 new Object[] {TelephonyManager.NETWORK_TYPE_NR});
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_5G), radioTech);
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_NGRAN), accessNetworkType);
     }
 
     @Test
-    public void testGetRadioTechCategory_4G() {
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher,
-                "getRadioTechCategory", new Class[] {int.class},
+    public void testGetInternalAccessNetworkType_eutran() {
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getInternalAccessNetworkType", new Class[] {int.class},
                 new Object[] {TelephonyManager.NETWORK_TYPE_LTE});
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_4G), radioTech);
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_EUTRAN), accessNetworkType);
     }
 
     @Test
-    public void testGetRadioTechCategory_ehrpd() {
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher,
-                "getRadioTechCategory", new Class[] {int.class},
+    public void testGetInternalAccessNetworkType_ehrpd() {
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getInternalAccessNetworkType", new Class[] {int.class},
                 new Object[] {TelephonyManager.NETWORK_TYPE_EHRPD});
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_EHRPD), radioTech);
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_EHRPD), accessNetworkType);
     }
 
     @Test
-    public void testGetRadioTechCategory_3G() {
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher,
-                "getRadioTechCategory", new Class[] {int.class},
-                new Object[] {TelephonyManager.NETWORK_TYPE_HSPAP});
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_3G), radioTech);
+    public void testGetInternalAccessNetworkType_utran() {
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getInternalAccessNetworkType", new Class[] {int.class},
+                new Object[] {TelephonyManager.NETWORK_TYPE_UMTS});
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_UTRAN), accessNetworkType);
     }
 
     @Test
-    public void testGetRadioTechCategory_2G() {
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher,
-                "getRadioTechCategory", new Class[] {int.class},
+    public void testGetInternalAccessNetworkType_geran() {
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getInternalAccessNetworkType", new Class[] {int.class},
                 new Object[] {TelephonyManager.NETWORK_TYPE_GPRS});
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_2G), radioTech);
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_GEREAN), accessNetworkType);
     }
 
     @Test
-    public void testGetRadioTechCategory_evdo() {
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher,
-                "getRadioTechCategory", new Class[] {int.class},
-                new Object[] {TelephonyManager.NETWORK_TYPE_EVDO_B});
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_EVDO), radioTech);
+    public void testGetInternalAccessNetworkType_evdo() {
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getInternalAccessNetworkType", new Class[] {int.class},
+                new Object[] {TelephonyManager.NETWORK_TYPE_EVDO_0});
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_EVDO), accessNetworkType);
     }
 
     @Test
-    public void testGetRadioTechCategory_1xrtt() {
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher,
-                "getRadioTechCategory", new Class[] {int.class},
+    public void testGetInternalAccessNetworkType_1xrtt() {
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getInternalAccessNetworkType", new Class[] {int.class},
                 new Object[] {TelephonyManager.NETWORK_TYPE_CDMA});
-        assertEquals(Integer.valueOf(DcNetWatcher.RAT_1XRTT), radioTech);
+        assertEquals(Integer.valueOf(IDcNetWatcher.AN_1XRTT), accessNetworkType);
     }
 
     @Test
-    public void testGetRadioTechCategory_none() {
-        Integer radioTech = (Integer) invokeMethod(mDcNetWatcher,
-                "getRadioTechCategory", new Class[] {int.class}, new Object[] {0});
-        assertEquals(Integer.valueOf(0), radioTech);
-    }
-
-    @Test
-    public void testIsEmergencyOnlyForVonr() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mNrRegistrationInfo", mDcNetWatcher,
-                ImsEventDef.IMS_NR_INFO_EMERGENCY_REGISTRATION);
-        assertEquals(true, invokeMethod(mDcNetWatcher, "isEmergencyOnlyForVonr",
-                new Class[] {}, new Object[] {}));
-
-        replaceInstance(DcNetWatcher.class, "mNrRegistrationInfo", mDcNetWatcher,
-                ImsEventDef.IMS_NR_INFO_UNKNOWN);
-        assertEquals(false, invokeMethod(mDcNetWatcher, "isEmergencyOnlyForVonr",
-                new Class[] {}, new Object[] {}));
+    public void testGetInternalAccessNetworkType_unknown() {
+        Integer accessNetworkType = (Integer) invokeMethod(mDcNetWatcher,
+                "getInternalAccessNetworkType", new Class[] {int.class}, new Object[] {0});
+        assertEquals(Integer.valueOf(0), accessNetworkType);
     }
 
     @Test
@@ -721,8 +370,6 @@ public class DcNetWatcherTest extends ImsStackTest {
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
                 NetworkRegistrationInfo.REGISTRATION_STATE_HOME,
                 TelephonyManager.NETWORK_TYPE_LTE, false);
-        replaceInstance(DcNetWatcher.class, "mNetworkOperatorChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
         when(mServiceState.getState()).thenReturn(ServiceState.STATE_IN_SERVICE);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WLAN)).thenReturn(null);
@@ -733,9 +380,8 @@ public class DcNetWatcherTest extends ImsStackTest {
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        verify(mRegistrantList).notifyResult("45000");
-        verify(mMockAosInfo).notifyPlmnChanged();
-        assertEquals("45000", mDcNetWatcher.getOperatorNumeric());
+        verify(mNetWatherListener).onNetworkOperatorChanged("45000");
+        assertEquals("45000", mDcNetWatcher.getNetworkOperator());
     }
 
     @Test
@@ -748,8 +394,6 @@ public class DcNetWatcherTest extends ImsStackTest {
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
                 NetworkRegistrationInfo.REGISTRATION_STATE_HOME,
                 TelephonyManager.NETWORK_TYPE_LTE, false);
-        replaceInstance(DcNetWatcher.class, "mDataServiceStateChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
         when(mServiceState.getState()).thenReturn(ServiceState.STATE_IN_SERVICE);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WLAN)).thenReturn(iwlanInfo);
@@ -759,9 +403,10 @@ public class DcNetWatcherTest extends ImsStackTest {
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        verify(mRegistrantList).notifyResult(ServiceState.STATE_IN_SERVICE);
+        verify(mNetWatherListener).onDataServiceStateChanged(ServiceState.STATE_IN_SERVICE);
         verify(mMockSystem).notifyServiceStateChanged(ServiceState.STATE_IN_SERVICE);
         assertEquals(ServiceState.STATE_IN_SERVICE, mDcNetWatcher.getDataServiceState());
+        assertEquals(ServiceState.STATE_IN_SERVICE, mDcNetWatcher.getCellularDataServiceState());
     }
 
     @Test
@@ -775,8 +420,6 @@ public class DcNetWatcherTest extends ImsStackTest {
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
                 NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING,
                 TelephonyManager.NETWORK_TYPE_LTE, false);
-        replaceInstance(DcNetWatcher.class, "mDataServiceStateChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
         when(mServiceState.getState()).thenReturn(ServiceState.STATE_IN_SERVICE);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WLAN)).thenReturn(iwlanInfo);
@@ -786,9 +429,11 @@ public class DcNetWatcherTest extends ImsStackTest {
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        verify(mRegistrantList).notifyResult(ServiceState.STATE_IN_SERVICE);
+        verify(mNetWatherListener).onDataServiceStateChanged(ServiceState.STATE_IN_SERVICE);
         verify(mMockSystem).notifyServiceStateChanged(ServiceState.STATE_IN_SERVICE);
         assertEquals(ServiceState.STATE_IN_SERVICE, mDcNetWatcher.getDataServiceState());
+        assertEquals(ServiceState.STATE_OUT_OF_SERVICE,
+                mDcNetWatcher.getCellularDataServiceState());
     }
 
     @Test
@@ -802,8 +447,6 @@ public class DcNetWatcherTest extends ImsStackTest {
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
                 NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING,
                 TelephonyManager.NETWORK_TYPE_LTE, true);
-        replaceInstance(DcNetWatcher.class, "mDataServiceStateChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
         when(mServiceState.getState()).thenReturn(ServiceState.STATE_EMERGENCY_ONLY);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WLAN)).thenReturn(iwlanInfo);
@@ -813,16 +456,16 @@ public class DcNetWatcherTest extends ImsStackTest {
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        verify(mRegistrantList).notifyResult(ServiceState.STATE_EMERGENCY_ONLY);
+        verify(mNetWatherListener).onDataServiceStateChanged(ServiceState.STATE_EMERGENCY_ONLY);
         verify(mMockSystem).notifyServiceStateChanged(ServiceState.STATE_EMERGENCY_ONLY);
         assertEquals(ServiceState.STATE_EMERGENCY_ONLY, mDcNetWatcher.getDataServiceState());
+        assertEquals(ServiceState.STATE_EMERGENCY_ONLY,
+                mDcNetWatcher.getCellularDataServiceState());
     }
 
     @Test
     public void testOnServiceStateChanged_handleDataServiceStateChangedWithPowerOff()
             throws Exception {
-        replaceInstance(DcNetWatcher.class, "mDataServiceStateChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
         when(mServiceState.getState()).thenReturn(ServiceState.STATE_POWER_OFF);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WLAN)).thenReturn(null);
@@ -832,42 +475,43 @@ public class DcNetWatcherTest extends ImsStackTest {
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        verify(mRegistrantList).notifyResult(ServiceState.STATE_POWER_OFF);
+        verify(mNetWatherListener).onDataServiceStateChanged(ServiceState.STATE_POWER_OFF);
         verify(mMockSystem).notifyServiceStateChanged(ServiceState.STATE_POWER_OFF);
         assertEquals(ServiceState.STATE_POWER_OFF, mDcNetWatcher.getDataServiceState());
+        assertEquals(ServiceState.STATE_POWER_OFF, mDcNetWatcher.getCellularDataServiceState());
     }
 
     @Test
-    public void testOnServiceStateChanged_handleRadioTechChangedWithLte() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRatChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-        when(mMockTelephonyInterface.getNetworkType())
-                .thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
-
-        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
-                new Class[] {ServiceState.class}, new Object[] {mServiceState});
-
-        verify(mRegistrantList).notifyResult(DcNetWatcher.RAT_4G);
-        verify(mMockSystem).notifyNetworkTypeChanged(DcNetWatcher.RAT_4G);
-        assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mDcNetWatcher.getNetworkType());
-    }
-
-    @Test
-    public void testOnServiceStateChanged_handleVoiceRadioTechChangedWithLte() throws Exception {
+    public void testOnServiceStateChanged_handleNetworkTypeChangeWithLte() throws Exception {
         NetworkRegistrationInfo wwanInfo = createNetworkRegistrationInfo(
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
                 NetworkRegistrationInfo.REGISTRATION_STATE_HOME,
                 TelephonyManager.NETWORK_TYPE_LTE, false);
-        replaceInstance(DcNetWatcher.class, "mVoiceRatChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
+        when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
+
+        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
+                new Class[] {ServiceState.class}, new Object[] {mServiceState});
+
+        verify(mNetWatherListener).onDataNetworkTypeChanged();
+        verify(mMockSystem).notifyNetworkTypeChanged(IDcNetWatcher.AN_EUTRAN);
+        assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mDcNetWatcher.getNetworkType());
+    }
+
+    @Test
+    public void testOnServiceStateChanged_handleVoiceNetworkTypeChangeWithLte() throws Exception {
+        NetworkRegistrationInfo wwanInfo = createNetworkRegistrationInfo(
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
+                NetworkRegistrationInfo.REGISTRATION_STATE_HOME,
+                TelephonyManager.NETWORK_TYPE_LTE, false);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_CS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
 
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        verify(mRegistrantList).notifyResult(DcNetWatcher.RAT_4G);
-        verify(mMockSystem).notifyVoiceNetworkTypeChanged(DcNetWatcher.RAT_4G);
+        verify(mNetWatherListener).onVoiceNetworkTypeChanged();
+        verify(mMockSystem).notifyVoiceNetworkTypeChanged(IDcNetWatcher.AN_EUTRAN);
         assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mDcNetWatcher.getVoiceNetworkType());
     }
 
@@ -877,11 +521,6 @@ public class DcNetWatcherTest extends ImsStackTest {
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
                 NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING,
                 TelephonyManager.NETWORK_TYPE_LTE, false);
-        RegistrantList tempRegistrantList = Mockito.mock(RegistrantList.class);
-        replaceInstance(DcNetWatcher.class, "mRoamingStateChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-        replaceInstance(DcNetWatcher.class, "mVoiceRoamingStateChangedRegistrants", mDcNetWatcher,
-                tempRegistrantList);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_CS,
@@ -891,17 +530,38 @@ public class DcNetWatcherTest extends ImsStackTest {
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        verify(mRegistrantList).notifyResult(true);
-        verify(tempRegistrantList).notifyResult(true);
+        verify(mNetWatherListener).onRoamingStateChanged(true);
         verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_ROAMING_STATE,
                 ImsEventDef.IMS_ROAMING_STATE_ON, ImsEventDef.IMS_ROAMING_STATE_ON);
-        assertEquals(true, mDcNetWatcher.isRoaming());
-        assertEquals(true, mDcNetWatcher.isVoiceRoaming());
-        assertEquals(true, mDcNetWatcher.isDataNetworkRoaming());
+        assertTrue(mDcNetWatcher.isRoaming());
+        assertTrue(mDcNetWatcher.isVoiceRoaming());
+        assertTrue(mDcNetWatcher.isDataNetworkRoaming());
     }
 
     @Test
     public void testOnServiceStateChanged_handleImsNetworkFeatureWithLte() throws Exception {
+        NetworkRegistrationInfo wwanInfo = createNetworkRegistrationInfo(
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
+                NetworkRegistrationInfo.REGISTRATION_STATE_HOME,
+                TelephonyManager.NETWORK_TYPE_LTE, false);
+        DataSpecificRegistrationInfo dsrInfo =
+                new DataSpecificRegistrationInfo(2, false, true, true, null);
+        replaceInstance(DataSpecificRegistrationInfo.class, "mLteAttachResultType", dsrInfo,
+                DataSpecificRegistrationInfo.LTE_ATTACH_TYPE_EPS_ONLY);
+        replaceInstance(NetworkRegistrationInfo.class, "mDataSpecificInfo", wwanInfo, dsrInfo);
+        when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
+
+        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
+                new Class[] {ServiceState.class}, new Object[] {mServiceState});
+
+        verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_LTE_INFO,
+                ImsEventDef.IMS_LTE_INFO_EPS_ONLY_ATTACHED,
+                ImsEventDef.IMS_LTE_INFO_EXTRA_NONE);
+    }
+
+    @Test
+    public void testOnServiceStateChanged_handleImsNetworkFeature_VopsChanged() throws Exception {
         NetworkRegistrationInfo wwanInfo = createNetworkRegistrationInfo(
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
                 NetworkRegistrationInfo.REGISTRATION_STATE_HOME,
@@ -911,25 +571,103 @@ public class DcNetWatcherTest extends ImsStackTest {
         DataSpecificRegistrationInfo dsrInfo =
                 new DataSpecificRegistrationInfo(2, false, true, true, vsi);
         replaceInstance(NetworkRegistrationInfo.class, "mDataSpecificInfo", wwanInfo, dsrInfo);
-        replaceInstance(DcNetWatcher.class, "mImsVopsChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-        replaceInstance(DcNetWatcher.class, "mImsVops", mDcNetWatcher, true);
-        when(mMockTelephonyInterface.getNetworkType())
-                .thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
+        replaceInstance(DcNetWatcher.class, "mImsVopsState", mDcNetWatcher,
+                ImsEventDef.IMS_VOICE_OVER_PS_SUPPORTED);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
         when(mServiceState.getDuplexMode()).thenReturn(ServiceState.DUPLEX_MODE_FDD);
-        when(mMockDcSetting.isVopsRequired()).thenReturn(true);
+        when(mServiceState.getOperatorNumeric()).thenReturn("123456");
+        when(mMockDcSetting.isVopsIgnored()).thenReturn(false);
 
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        verify(mRegistrantList).notifyResult(false);
         verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_IMS_VOICE_OVER_PS_STATE,
                 ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED, 0);
-        assertEquals(ServiceState.DUPLEX_MODE_FDD, mDcNetWatcher.getLteDuplexMode());
-        assertEquals(true, mDcNetWatcher.isEmergencyServiceSupported());
-        assertEquals(false, mDcNetWatcher.isVops());
+        verify(mNetWatherListener).onVopsStateChanged(ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED,
+                "123456");
+        assertTrue(mDcNetWatcher.isEmergencyServiceSupported());
+        assertFalse(mDcNetWatcher.isVopsSupported());
+    }
+
+    @Test
+    public void testOnServiceStateChanged_handleImsNetworkFeature_VopsTrueIfNetWorkNotRegistered()
+            throws Exception {
+        NetworkRegistrationInfo wwanInfo = createNetworkRegistrationInfo(
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
+                NetworkRegistrationInfo.REGISTRATION_STATE_EMERGENCY,
+                TelephonyManager.NETWORK_TYPE_LTE, false);
+        LteVopsSupportInfo vsi = new LteVopsSupportInfo(LteVopsSupportInfo.LTE_STATUS_NOT_SUPPORTED,
+                LteVopsSupportInfo.LTE_STATUS_SUPPORTED);
+        DataSpecificRegistrationInfo dsrInfo =
+                new DataSpecificRegistrationInfo(2, false, true, true, vsi);
+        replaceInstance(NetworkRegistrationInfo.class, "mDataSpecificInfo", wwanInfo, dsrInfo);
+        replaceInstance(DcNetWatcher.class, "mImsVopsState", mDcNetWatcher,
+                ImsEventDef.IMS_VOICE_OVER_PS_SUPPORTED);
+        when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
+        when(mServiceState.getDuplexMode()).thenReturn(ServiceState.DUPLEX_MODE_FDD);
+        when(mServiceState.getOperatorNumeric()).thenReturn("123456");
+        when(mMockDcSetting.isVopsIgnored()).thenReturn(false);
+
+        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
+                new Class[] {ServiceState.class}, new Object[] {mServiceState});
+
+        verify(mMockSystem, never())
+                .notifyEvent(eq(ImsEventDef.IMS_EVENT_IMS_VOICE_OVER_PS_STATE), anyInt(), eq(0));
+        verify(mNetWatherListener, never()).onVopsStateChanged(anyInt(), anyString());
+        assertTrue(mDcNetWatcher.isVopsSupported());
+    }
+
+    @Test
+    public void testOnServiceStateChanged_handleImsNetworkFeature_VopsTrueOnNon4G5G()
+            throws Exception {
+        NetworkRegistrationInfo wwanInfo = createNetworkRegistrationInfo(
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
+                NetworkRegistrationInfo.REGISTRATION_STATE_HOME,
+                TelephonyManager.NETWORK_TYPE_UMTS, false);
+        DataSpecificRegistrationInfo dsrInfo =
+                new DataSpecificRegistrationInfo(2, false, true, true, null);
+        replaceInstance(NetworkRegistrationInfo.class, "mDataSpecificInfo", wwanInfo, dsrInfo);
+        replaceInstance(DcNetWatcher.class, "mImsVopsState", mDcNetWatcher,
+                ImsEventDef.IMS_VOICE_OVER_PS_SUPPORTED);
+        when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
+
+        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
+                new Class[] {ServiceState.class}, new Object[] {mServiceState});
+
+        verify(mMockSystem, never())
+                .notifyEvent(eq(ImsEventDef.IMS_EVENT_IMS_VOICE_OVER_PS_STATE), anyInt(), eq(0));
+        verify(mNetWatherListener, never()).onVopsStateChanged(anyInt(), anyString());
+        assertTrue(mDcNetWatcher.isVopsSupported());
+    }
+
+    @Test
+    public void testOnServiceStateChanged_handleImsNetworkFeature_PlmnChanged() throws Exception {
+        NetworkRegistrationInfo wwanInfo = createNetworkRegistrationInfo(
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
+                NetworkRegistrationInfo.REGISTRATION_STATE_HOME,
+                TelephonyManager.NETWORK_TYPE_LTE, false);
+        LteVopsSupportInfo vsi = new LteVopsSupportInfo(LteVopsSupportInfo.LTE_STATUS_NOT_SUPPORTED,
+                LteVopsSupportInfo.LTE_STATUS_SUPPORTED);
+        DataSpecificRegistrationInfo dsrInfo =
+                new DataSpecificRegistrationInfo(2, false, true, true, vsi);
+        replaceInstance(NetworkRegistrationInfo.class, "mDataSpecificInfo", wwanInfo, dsrInfo);
+        replaceInstance(DcNetWatcher.class, "mImsVopsState", mDcNetWatcher,
+                ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+        replaceInstance(DcNetWatcher.class, "mImsVopsPlmn", mDcNetWatcher, "111111");
+        when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
+        when(mServiceState.getDuplexMode()).thenReturn(ServiceState.DUPLEX_MODE_FDD);
+        when(mServiceState.getOperatorNumeric()).thenReturn("222222");
+        when(mMockDcSetting.isVopsIgnored()).thenReturn(false);
+
+        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
+                new Class[] {ServiceState.class}, new Object[] {mServiceState});
+        verify(mNetWatherListener).onVopsStateChanged(ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED,
+                "222222");
+        assertFalse(mDcNetWatcher.isVopsSupported());
     }
 
     @Test
@@ -938,15 +676,12 @@ public class DcNetWatcherTest extends ImsStackTest {
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
                 NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING,
                 TelephonyManager.NETWORK_TYPE_LTE, false);
-        replaceInstance(DcNetWatcher.class, "mVoiceRoamingTypeChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_CS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
 
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        verify(mRegistrantList).notifyResult(ServiceState.ROAMING_TYPE_UNKNOWN);
         assertEquals(ServiceState.ROAMING_TYPE_UNKNOWN, mDcNetWatcher.getVoiceRoamingType());
     }
 
@@ -956,213 +691,140 @@ public class DcNetWatcherTest extends ImsStackTest {
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
                 NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING,
                 TelephonyManager.NETWORK_TYPE_LTE, false);
-        replaceInstance(DcNetWatcher.class, "mDataRoamingTypeChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
         when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
                 AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
 
         invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
                 new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        verify(mRegistrantList).notifyResult(ServiceState.ROAMING_TYPE_UNKNOWN);
         assertEquals(ServiceState.ROAMING_TYPE_UNKNOWN, mDcNetWatcher.getDataRoamingType());
     }
 
     @Test
-    public void testOnCallStateChanged_psCallStateChanged() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mCsCallStatusChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-        when(mMockTelephonyInterface.getCsCallState()).thenReturn(TelephonyManager.CALL_STATE_IDLE);
+    public void testOnServiceStateChanged_handleNetworkRegistrationStateChanged() throws Exception {
+        NetworkRegistrationInfo wwanInfo = createNetworkRegistrationInfo(
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
+                NetworkRegistrationInfo.REGISTRATION_STATE_EMERGENCY,
+                TelephonyManager.NETWORK_TYPE_LTE, false);
+        when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo);
 
-        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onCallStateChanged",
-                new Class[] {int.class}, new Object[] {TelephonyManager.CALL_STATE_OFFHOOK});
+        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
+                new Class[] {ServiceState.class}, new Object[] {mServiceState});
 
-        verify(mRegistrantList, never()).notifyResult(anyInt());
-        verify(mMockSystem, never()).notifyVoiceCallStateChanged(anyInt());
-        verify(mMockSystem, never()).notifyEvent(ImsEventDef.IMS_EVENT_CSCALL_STATE,
-                TelephonyManager.CALL_STATE_OFFHOOK, 0);
-        assertEquals(TelephonyManager.CALL_STATE_IDLE, mDcNetWatcher.getCallState());
+        verify(mNetWatherListener).onNetworkRegistrationStateChanged(
+                NetworkRegistrationInfo.REGISTRATION_STATE_EMERGENCY);
+
+        assertTrue(mDcNetWatcher.isEmergencyOnly());
     }
 
     @Test
-    public void testOnCallStateChanged_csCallStateChangedOffhookToIdle() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mCsCallStatusChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-        when(mMockTelephonyInterface.getCsCallState())
-                .thenReturn(TelephonyManager.CALL_STATE_OFFHOOK)
-                .thenReturn(TelephonyManager.CALL_STATE_IDLE);
-
-        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onCallStateChanged",
-                new Class[] {int.class}, new Object[] {TelephonyManager.CALL_STATE_OFFHOOK});
-
-        verify(mRegistrantList).notifyResult(TelephonyManager.CALL_STATE_OFFHOOK);
-        verify(mMockSystem).notifyVoiceCallStateChanged(TelephonyManager.CALL_STATE_OFFHOOK);
-        verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_CSCALL_STATE,
-                TelephonyManager.CALL_STATE_OFFHOOK, 0);
-        assertEquals(TelephonyManager.CALL_STATE_OFFHOOK, mDcNetWatcher.getCallState());
-
-        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onCallStateChanged",
-                new Class[] {int.class}, new Object[] {TelephonyManager.CALL_STATE_OFFHOOK});
-
-        verify(mRegistrantList).notifyResult(TelephonyManager.CALL_STATE_IDLE);
-        verify(mMockSystem).notifyVoiceCallStateChanged(TelephonyManager.CALL_STATE_IDLE);
-        verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_CSCALL_STATE,
-                TelephonyManager.CALL_STATE_IDLE, 0);
-        assertEquals(TelephonyManager.CALL_STATE_IDLE, mDcNetWatcher.getCallState());
-    }
-
-    @Test
-    public void testOnPreciseCallStateChanged_resetPreciseCallStateWhenCsCallStateIdle()
+    public void testOnServiceStateChanged_handleNetworkRegistrationStateAndRejectCauseChanged()
             throws Exception {
-        replaceInstance(DcNetWatcher.class, "mPreciseCallState", mDcNetWatcher,
-                PreciseCallState.PRECISE_CALL_STATE_ACTIVE);
-        replaceInstance(DcNetWatcher.class, "mPreciseCsCallStatusChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
+        int rejectCause = 3;
+        NetworkRegistrationInfo wwanInfo1 = createNetworkRegistrationInfo(
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
+                NetworkRegistrationInfo.REGISTRATION_STATE_DENIED,
+                TelephonyManager.NETWORK_TYPE_LTE, false, rejectCause);
+        NetworkRegistrationInfo wwanInfo2 = createNetworkRegistrationInfo(
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
+                NetworkRegistrationInfo.REGISTRATION_STATE_EMERGENCY,
+                TelephonyManager.NETWORK_TYPE_LTE, false, REGISTRATION_REJECT_CAUSE_NONE);
+        NetworkRegistrationInfo wwanInfo3 = createNetworkRegistrationInfo(
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
+                NetworkRegistrationInfo.REGISTRATION_STATE_HOME,
+                TelephonyManager.NETWORK_TYPE_LTE, false, REGISTRATION_REJECT_CAUSE_NONE);
 
-        assertEquals(PreciseCallState.PRECISE_CALL_STATE_ACTIVE,
-                mDcNetWatcher.getPreciseCallState());
+        // Initially, no reject cause.
+        assertEquals(REGISTRATION_REJECT_CAUSE_NONE,
+                mDcNetWatcher.getNetworkRegistrationRejectCause());
 
-        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onPreciseCallStateChanged",
-                new Class[] {PreciseCallState.class}, new Object[] {null});
+        // REGISTRATION_STATE_DENIED, update reject cause.
+        when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo1);
+        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
+                new Class[] {ServiceState.class}, new Object[] {mServiceState});
+        assertEquals(rejectCause, mDcNetWatcher.getNetworkRegistrationRejectCause());
 
-        verify(mRegistrantList).notifyResult(PreciseCallState.PRECISE_CALL_STATE_IDLE);
-        verify(mMockAosInfo).notifyPreciseCallState(PreciseCallState.PRECISE_CALL_STATE_IDLE);
-        assertEquals(PreciseCallState.PRECISE_CALL_STATE_IDLE, mDcNetWatcher.getPreciseCallState());
+        // REGISTRATION_STATE_EMERGENCY, keep previous reject cause.
+        when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo2);
+        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
+                new Class[] {ServiceState.class}, new Object[] {mServiceState});
+        assertEquals(rejectCause, mDcNetWatcher.getNetworkRegistrationRejectCause());
+
+        // REGISTRATION_STATE_HOME, reset reject cause.
+        when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo3);
+        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
+                new Class[] {ServiceState.class}, new Object[] {mServiceState});
+        assertEquals(REGISTRATION_REJECT_CAUSE_NONE,
+                mDcNetWatcher.getNetworkRegistrationRejectCause());
     }
 
     @Test
-    public void testOnPreciseCallStateChanged_withBackgroundCall() throws Exception {
-        PreciseCallState preciseCallState = new PreciseCallState(
-                PreciseCallState.PRECISE_CALL_STATE_NOT_VALID,
-                PreciseCallState.PRECISE_CALL_STATE_IDLE,
-                PreciseCallState.PRECISE_CALL_STATE_ACTIVE,
-                DisconnectCause.NOT_VALID,
-                PreciseDisconnectCause.NOT_VALID);
-        replaceInstance(DcNetWatcher.class, "mCallState", mDcNetWatcher,
-                TelephonyManager.CALL_STATE_OFFHOOK);
-        replaceInstance(DcNetWatcher.class, "mPreciseCsCallStatusChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
+    public void testOnServiceStateChanged_clearNetworkRegistrationRejectCause()
+            throws Exception {
+        int rejectCause = 3;
+        NetworkRegistrationInfo wwanInfo1 = createNetworkRegistrationInfo(
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
+                NetworkRegistrationInfo.REGISTRATION_STATE_DENIED,
+                TelephonyManager.NETWORK_TYPE_LTE, false, rejectCause);
 
-        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onPreciseCallStateChanged",
-                new Class[] {PreciseCallState.class}, new Object[] {preciseCallState});
+        // Update reject cause.
+        when(mServiceState.getNetworkRegistrationInfo(NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN)).thenReturn(wwanInfo1);
+        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onServiceStateChanged",
+                new Class[] {ServiceState.class}, new Object[] {mServiceState});
+        assertEquals(rejectCause, mDcNetWatcher.getNetworkRegistrationRejectCause());
 
-        verify(mRegistrantList).notifyResult(PreciseCallState.PRECISE_CALL_STATE_ACTIVE);
-        verify(mMockAosInfo).notifyPreciseCallState(PreciseCallState.PRECISE_CALL_STATE_ACTIVE);
-        assertEquals(PreciseCallState.PRECISE_CALL_STATE_ACTIVE,
-                mDcNetWatcher.getPreciseCallState());
-    }
+        // Clear reject cause.
+        mDcNetWatcher.clearNetworkRegistrationRejectCause();
 
-    @Test
-    public void testOnPreciseCallStateChanged_withForegroundCall() throws Exception {
-        PreciseCallState preciseCallState = new PreciseCallState(
-                PreciseCallState.PRECISE_CALL_STATE_NOT_VALID,
-                PreciseCallState.PRECISE_CALL_STATE_ACTIVE,
-                PreciseCallState.PRECISE_CALL_STATE_IDLE,
-                DisconnectCause.NOT_VALID,
-                PreciseDisconnectCause.NOT_VALID);
-        replaceInstance(DcNetWatcher.class, "mCallState", mDcNetWatcher,
-                TelephonyManager.CALL_STATE_OFFHOOK);
-        replaceInstance(DcNetWatcher.class, "mPreciseCsCallStatusChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        invokeMethod(mDcNetWatcher.mPhoneStateListener, "onPreciseCallStateChanged",
-                new Class[] {PreciseCallState.class}, new Object[] {preciseCallState});
-
-        verify(mRegistrantList).notifyResult(PreciseCallState.PRECISE_CALL_STATE_ACTIVE);
-        verify(mMockAosInfo).notifyPreciseCallState(PreciseCallState.PRECISE_CALL_STATE_ACTIVE);
-        assertEquals(PreciseCallState.PRECISE_CALL_STATE_ACTIVE,
-                mDcNetWatcher.getPreciseCallState());
+        assertEquals(REGISTRATION_REJECT_CAUSE_NONE,
+                mDcNetWatcher.getNetworkRegistrationRejectCause());
     }
 
     @Test
     public void testDcNetWatcherHandler_handleAirplaneModeChangedWhenOn() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mAirplaneModeChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, 1);
+        when(mSettingsProxy.getInt(AIRPLANE_MODE_ON, -1)).thenReturn(1);
 
         Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED).putExtra("state", true);
         Message.obtain(mDcNetWatcher.mDcNetWatcherHandler, DcNetWatcher.EVENT_AIRPLANE_MODE_CHANGED,
                 intent).sendToTarget();
         processAllMessages();
 
-        verify(mMockAosInfo).notifyAirplaneSetting(true);
         verify(mMockSystem).notifyAirplaneModeChanged(1);
-        verify(mRegistrantList).notifyResult(true);
-        assertEquals(true, mDcNetWatcher.isAirplaneMode());
+        verify(mNetWatherListener).onAirplaneModeChanged(true);
+        assertTrue(mDcNetWatcher.isAirplaneMode());
     }
 
     @Test
-    public void testDcNetWatcherHandler_handleAirplaneModeChangedWhenStateIsdifferentFromSetting()
+    public void testDcNetWatcherHandler_handleAirplaneModeChangedWhenStateIsDifferentFromSetting()
             throws Exception {
-        replaceInstance(DcNetWatcher.class, "mAirplaneModeChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, -1);
+        when(mSettingsProxy.getInt(AIRPLANE_MODE_ON, -1)).thenReturn(-1);
 
         Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED).putExtra("state", true);
         Message.obtain(mDcNetWatcher.mDcNetWatcherHandler, DcNetWatcher.EVENT_AIRPLANE_MODE_CHANGED,
                 intent).sendToTarget();
         processAllMessages();
 
-        verify(mMockAosInfo, never()).notifyAirplaneSetting(anyBoolean());
         verify(mMockSystem, never()).notifyAirplaneModeChanged(anyInt());
-        verify(mRegistrantList, never()).notifyResult(anyInt());
-        assertEquals(false, mDcNetWatcher.isAirplaneMode());
-    }
-
-    @Test
-    public void testDcNetWatcherHandler_handleVolteLteStateInfo() {
-        Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        Message.obtain(mDcNetWatcher.mDcNetWatcherHandler, DcNetWatcher.EVENT_VOLTE_LTE_STATE_INFO,
-                intent).sendToTarget();
-        processAllMessages();
-
-        // TODO : no actual implementations so far
-    }
-
-    @Test
-    public void testDcNetWatcherHandler_handleNrRegistrationInfoWhenInvalidInfo() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mDataServiceStateChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        Message.obtain(mDcNetWatcher.mDcNetWatcherHandler, DcNetWatcher.EVENT_NR_REGISTRATION_INFO,
-                ImsEventDef.IMS_NR_INFO_UNKNOWN, 0).sendToTarget();
-        processAllMessages();
-
-        verify(mRegistrantList, never()).notifyResult(anyInt());
-        verify(mMockSystem, never()).notifyEvent(ImsEventDef.IMS_EVENT_NR_INFO,
-                ImsEventDef.IMS_NR_INFO_UNKNOWN, 0);
-    }
-
-    @Test
-    public void testDcNetWatcherHandler_handleNrRegistrationInfoWhenEmergency() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mDataServiceState", mDcNetWatcher,
-                ServiceState.STATE_IN_SERVICE);
-        replaceInstance(DcNetWatcher.class, "mDataServiceStateChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-
-        Message.obtain(mDcNetWatcher.mDcNetWatcherHandler, DcNetWatcher.EVENT_NR_REGISTRATION_INFO,
-                ImsEventDef.IMS_NR_INFO_EMERGENCY_REGISTRATION, 0).sendToTarget();
-        processAllMessages();
-
-        verify(mRegistrantList).notifyResult(ServiceState.STATE_IN_SERVICE);
-        verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_NR_INFO,
-                ImsEventDef.IMS_NR_INFO_EMERGENCY_REGISTRATION, 0);
-        assertEquals(ImsEventDef.IMS_NR_INFO_EMERGENCY_REGISTRATION,
-                mDcNetWatcher.getNrRegistrationInfo());
+        verify(mNetWatherListener, never()).onAirplaneModeChanged(anyBoolean());
+        assertFalse(mDcNetWatcher.isAirplaneMode());
     }
 
     @Test
     public void testOnCarrierConfigChanged() throws Exception {
-        int subId = 1;
         ArgumentCaptor<ConfigInterface.Listener> listenerCaptor =
                 ArgumentCaptor.forClass(ConfigInterface.Listener.class);
         verify(mMockConfigInterface).addListener(listenerCaptor.capture());
 
         ConfigInterface.Listener listener = listenerCaptor.getValue();
-        listener.onCarrierConfigChanged(SLOT_0, subId);
+        listener.onCarrierConfigChanged(SLOT0, SUB_ID_1);
 
         // Called once in init() and again in onCarrierConfigChanged().
-        verify(mMockDcSetting, times(2)).getImsSupportedRats();
+        verify(mMockDcSetting, times(2)).getImsSupportedAccessNetworks();
     }
 
     @Test
@@ -1180,7 +842,7 @@ public class DcNetWatcherTest extends ImsStackTest {
         NativeStateInterface.Listener listener = listenerCaptor.getValue();
         listener.onNativeServiceReady();
 
-        verify(mMockAosInfo).notifyAirplaneSetting(true);
+        verify(mNetWatherListener).onAirplaneModeChanged(true);
         verify(mMockSystem).notifyAirplaneModeChanged(1);
         verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_ROAMING_STATE,
                 ImsEventDef.IMS_ROAMING_STATE_OFF, ImsEventDef.IMS_ROAMING_STATE_ON);
@@ -1193,111 +855,108 @@ public class DcNetWatcherTest extends ImsStackTest {
 
     @Test
     public void testOnReceive() {
+        ArgumentCaptor<BroadcastReceiver> captor = ArgumentCaptor.forClass(BroadcastReceiver.class);
+        verify(mTestAppContext.getBroadcastReceiverProxy())
+                .registerReceiver(captor.capture(), any(IntentFilter.class));
+        BroadcastReceiver receiver = captor.getValue();
         Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        mContext.sendBroadcast(intent);
+        receiver.onReceive(mTestAppContext.getContext(), intent);
 
-        assertEquals(true, mDcNetWatcher.mDcNetWatcherHandler.hasMessages(
+        assertTrue(mDcNetWatcher.mDcNetWatcherHandler.hasMessages(
                 DcNetWatcher.EVENT_AIRPLANE_MODE_CHANGED));
     }
 
-    /*
-     * The following test functions are intended to test functions that are not currently in use or
-     * don't have actual implementations.
-     */
     @Test
-    public void testGetMocnPlmnInfo() {
-        assertEquals(0, mDcNetWatcher.getMocnPlmnInfo());
-        // TODO : no actual implementations so far
+    public void testIsEmergencyOnly() throws Exception {
+        replaceInstance(DcNetWatcher.class, "mNetworkRegistrationState",
+                mDcNetWatcher, NetworkRegistrationInfo.REGISTRATION_STATE_HOME);
+        assertFalse(mDcNetWatcher.isEmergencyOnly());
+
+        replaceInstance(DcNetWatcher.class, "mNetworkRegistrationState",
+                mDcNetWatcher, NetworkRegistrationInfo.REGISTRATION_STATE_EMERGENCY);
+        assertTrue(mDcNetWatcher.isEmergencyOnly());
     }
 
     @Test
-    public void testIsLteEmergencyOnly() {
-        assertEquals(false, mDcNetWatcher.isLteEmergencyOnly());
-        // TODO : no actual implementations so far
+    public void testIs3G() throws Exception {
+        replaceInstance(DcNetWatcher.class, "mNetworkType", mDcNetWatcher,
+                TelephonyManager.NETWORK_TYPE_UMTS);
+
+        assertTrue(mDcNetWatcher.is3G());
     }
 
     @Test
-    public void testIs1xRtt() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_CDMA);
-
-        assertEquals(true, mDcNetWatcher.is1xRtt());
-    }
-
-    @Test
-    public void testIsVoiceRat4G() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mVoiceRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_UNKNOWN);
-        assertEquals(false, mDcNetWatcher.isVoiceRat4G());
-
-        replaceInstance(DcNetWatcher.class, "mVoiceRat", mDcNetWatcher,
+    public void testIs4G() throws Exception {
+        replaceInstance(DcNetWatcher.class, "mNetworkType", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_LTE);
-        assertEquals(true, mDcNetWatcher.isVoiceRat4G());
+
+        assertTrue(mDcNetWatcher.is4G());
     }
 
     @Test
-    public void testIsVoiceRat5G() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mVoiceRat", mDcNetWatcher,
-                TelephonyManager.NETWORK_TYPE_UNKNOWN);
-        assertEquals(false, mDcNetWatcher.isVoiceRat5G());
-
-        replaceInstance(DcNetWatcher.class, "mVoiceRat", mDcNetWatcher,
+    public void testIs5G() throws Exception {
+        replaceInstance(DcNetWatcher.class, "mNetworkType", mDcNetWatcher,
                 TelephonyManager.NETWORK_TYPE_NR);
-        assertEquals(true, mDcNetWatcher.isVoiceRat5G());
+
+        assertTrue(mDcNetWatcher.is5G());
     }
 
     @Test
-    public void testSetDoingOffRadio() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mPowerOffChangedRegistrants", mDcNetWatcher,
-                mRegistrantList);
-        mDcNetWatcher.registerForPowerOffChanged(mMockHandler, 1000, null);
-
-        mDcNetWatcher.setDoingOffRadio(true);
-
-        verify(mRegistrantList).notifyResult(true);
-        assertEquals(true, mDcNetWatcher.isDoingOffRadio());
+    public void testIsVopsSupported_VopsSupported() throws Exception {
+        replaceInstance(DcNetWatcher.class, "mImsVopsState", mDcNetWatcher,
+                ImsEventDef.IMS_VOICE_OVER_PS_SUPPORTED);
+        assertTrue(mDcNetWatcher.isVopsSupported());
     }
 
     @Test
-    public void testSetNrRegistrationInfo() {
-        mDcNetWatcher.setNrRegistrationInfo(ImsEventDef.IMS_NR_INFO_UNKNOWN, 0);
+    public void testIsVopsSupported_VopsInvalid() throws Exception {
+        replaceInstance(DcNetWatcher.class, "mImsVopsState", mDcNetWatcher,
+                ImsEventDef.IMS_VOICE_OVER_PS_INVALID);
+        assertTrue(mDcNetWatcher.isVopsSupported());
+    }
 
-        assertEquals(true, mDcNetWatcher.mDcNetWatcherHandler.hasMessages(
-                DcNetWatcher.EVENT_NR_REGISTRATION_INFO));
+    @Test
+    public void testIsVopsSupported_VopsNotSupported() throws Exception {
+        replaceInstance(DcNetWatcher.class, "mImsVopsState", mDcNetWatcher,
+                ImsEventDef.IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+        assertFalse(mDcNetWatcher.isVopsSupported());
     }
 
     private NetworkRegistrationInfo createNetworkRegistrationInfo(int transportType,
             int registrationState, int networkType, boolean isEmergencyOnly) {
+        return createNetworkRegistrationInfo(transportType, registrationState, networkType,
+                isEmergencyOnly, REGISTRATION_REJECT_CAUSE_NONE);
+    }
+
+    private NetworkRegistrationInfo createNetworkRegistrationInfo(int transportType,
+            int registrationState, int networkType, boolean isEmergencyOnly, int rejectCause) {
         return new NetworkRegistrationInfo.Builder()
                 .setTransportType(transportType)
                 .setRegistrationState(registrationState)
                 .setAccessNetworkTechnology(networkType)
                 .setCellIdentity(createCellIdentity(networkType))
                 .setEmergencyOnly(isEmergencyOnly)
+                .setRejectCause(rejectCause)
                 .build();
     }
 
     private CellIdentity createCellIdentity(int networkType) {
-        switch (networkType) {
-            case TelephonyManager.NETWORK_TYPE_LTE:
-                return new CellIdentityLte(0x1111111, 13, 0x2222, 0, new int[] {}, 0, "001", "01",
-                        "Test-SIM", "Test", Collections.emptyList(), null);
-            case TelephonyManager.NETWORK_TYPE_NR:
-                return new CellIdentityNr(20, 0x333333, 2, new int[] {}, "001", "01", 0x555555555L,
-                        "Test-SIM", "Test", Collections.emptyList());
-            case TelephonyManager.NETWORK_TYPE_UMTS:
-            case TelephonyManager.NETWORK_TYPE_HSDPA:
-            case TelephonyManager.NETWORK_TYPE_HSUPA:
-            case TelephonyManager.NETWORK_TYPE_HSPA:
-            case TelephonyManager.NETWORK_TYPE_HSPAP:
-                return new CellIdentityWcdma(0x6666, 0x7777777, 3, 0, "001", "01", "Test-SIM",
-                        "Test", Collections.emptyList(), null);
-            case TelephonyManager.NETWORK_TYPE_GPRS:
-            case TelephonyManager.NETWORK_TYPE_EDGE:
-                return new CellIdentityGsm(0x8888, 0x9999, 0, 1, "001", "01", "Test-SIM", "Test",
-                        Collections.emptyList());
-            default:
-                return null;
-        }
+        return switch (networkType) {
+            case TelephonyManager.NETWORK_TYPE_LTE -> new CellIdentityLte(0x1111111, 13, 0x2222, 0,
+                    new int[]{}, 0, "001", "01",
+                    "Test-SIM", "Test", Collections.emptyList(), null);
+            case TelephonyManager.NETWORK_TYPE_NR -> new CellIdentityNr(20, 0x333333, 2,
+                    new int[]{}, "001", "01", 0x555555555L,
+                    "Test-SIM", "Test", Collections.emptyList());
+            case TelephonyManager.NETWORK_TYPE_UMTS, TelephonyManager.NETWORK_TYPE_HSDPA,
+                    TelephonyManager.NETWORK_TYPE_HSUPA, TelephonyManager.NETWORK_TYPE_HSPA,
+                    TelephonyManager.NETWORK_TYPE_HSPAP ->
+                    new CellIdentityWcdma(0x6666, 0x7777777, 3, 0, "001", "01", "Test-SIM",
+                            "Test", Collections.emptyList(), null);
+            case TelephonyManager.NETWORK_TYPE_GPRS, TelephonyManager.NETWORK_TYPE_EDGE ->
+                    new CellIdentityGsm(0x8888, 0x9999, 0, 1, "001", "01", "Test-SIM", "Test",
+                            Collections.emptyList());
+            default -> null;
+        };
     }
 }

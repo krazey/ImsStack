@@ -39,8 +39,9 @@ class AosSubscription :
 public:
     AosSubscription(IN IAosAppContext* piContext, IN IRegSubscription* piRegSubscription,
             IN const AString& strAoR, IN const SipAddress& objContactAddress);
+    inline explicit AosSubscription(){};
 
-    virtual ~AosSubscription();
+    ~AosSubscription() override;
 
     virtual void Initialize();
 
@@ -55,12 +56,13 @@ public:
 
 protected:
     void ClearThrottlingCount();
+    void ClearSubConsecutiveRetryCnt();
 
     IMS_BOOL IsSubTrying() const;
     IMS_BOOL IsTerminated() const;
 
-    void ReportState(
-            IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand = 0, IN IMS_BOOL bAwt = IMS_FALSE);
+    void ReportState(IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand, IN IMS_BOOL bAwt = IMS_FALSE,
+            IN IMS_SINT32 nRetryAfter = 0);
     void ReportNotifyEvent(IN IMS_SINT32 nEvent, IN IMS_SINT32 nRetryAfter = 0);
 
     void SetState(IN IMS_UINT32 nState);
@@ -80,10 +82,9 @@ protected:
 
     virtual IMS_BOOL SendSubscribe();
     virtual IMS_BOOL ProcessFailureResponse_423(IN IMS_BOOL bIsRefreshed);
+    virtual IMS_BOOL ProcessFailureResponse_503(IN IMS_BOOL bIsRefreshed);
     virtual IMS_BOOL ProcessFailureResponse_504(IN IMS_BOOL bIsRefreshed);
-
-public:
-    virtual IMS_BOOL IsRetryActionDueToRetrycounter(IN IMS_BOOL bIsRefreshed);
+    virtual IMS_BOOL IsRetryActionDueToRetryCounter(IN IMS_BOOL bIsRefreshed);
     virtual IMS_BOOL IsSubscriptionTerminated(IN IMS_SINT32 nStatusCode);
     virtual IMS_BOOL IsInitialRegistrationRequired(
             IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed);
@@ -92,15 +93,15 @@ public:
     virtual IMS_BOOL IsInitialRegistrationRequiredInWifi(
             IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed);
     virtual IMS_BOOL IsResubscriptionStopped(IN IMS_SINT32 nStatusCode);
-    virtual IMS_BOOL ProcessFailed_StatusCode(IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed);
-
     virtual IMS_BOOL IsRegRequiredByNotify(IN IMS_UINT32 nFeature);
     virtual IMS_BOOL IsRegAfterWaitRequiredByNotify(IN IMS_UINT32 nFeature);
     virtual IMS_BOOL IsWfcErrorMessageSupportedWithStateChecked(IN IMS_SINT32 nError);
+    virtual IMS_BOOL ProcessFailed_StatusCode(IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed);
 
-protected:
-    virtual void SetRequestCommand(IN IMS_BOOL bIsRefreshed, IN IMS_SINT32 nCommand);
-    virtual void RequestCommand(IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand);
+    virtual void SetRequestCommand(
+            IN IMS_BOOL bIsRefreshed, IN IMS_SINT32 nCommand, IN IMS_SINT32 nRetryAfter = 0);
+    virtual void RequestCommand(
+            IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand, IN IMS_SINT32 nRetryAfter = 0);
 
     virtual void ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode);
     virtual void ProcessStartFailed_Others(IN IMS_SINT32 nReason);
@@ -184,30 +185,38 @@ public:
         CMD_NONE = 0,
         CMD_REG_REQUIRED,
         CMD_REG_REQUIRED_WITH_NEXT_PCSCF,
-        CMD_REG_REQUIRED_WITH_SUB_403_MSG,
-        CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG,
+        CMD_REG_REQUIRED_WITH_SCSCF_RESTORATION,
+        CMD_REG_REQUIRED_WITH_SUB_403_MSG_IN_WIFI,
+        CMD_REG_REQUIRED_WITH_NOTIFY_TERMINATED_MSG_IN_WIFI,
         CMD_REG_TERMINATED,
         CMD_SUB_REQUIRED,
-        CMD_SUB_TERMINATED
+        CMD_SUB_TERMINATED,
+        CMD_RESET_SUB_RETRY_CNT_FOR_WIFI
     };
 
 protected:
     IRegSubscription* m_piRegSubscription;
-
     IAosAppContext* m_piContext;
+
+    /// this is used when running refresh timer
     ITimer* m_piRetryTimer;
 
+    /// throttling count for calculating  retry timer
     IMS_UINT32 m_nThrottlingCount;
 
-    // for matching reg info contact
+    /// for matching reg info contact
     SipAddress m_objContactAddress;
 
     AString m_strTag;
 
-    // public user identity for getting reg info
+    /// public user identity for getting reg info
     AString m_strAor;
-    // state of AoR of NOTIFY
+    /// state of AoR of NOTIFY
     IMS_SINT32 m_nAorState;
+
+    /// retry count for requesting another procedure
+    IMS_UINT32 m_nRetryCountSubTerminated;
+    IMS_UINT32 m_nRetryCountRegRequired;
 
 private:
     IAosSubscriptionListener* m_piListener;
@@ -217,16 +226,10 @@ private:
     IMS_BOOL m_bIsRadioWaiting;
     IMS_BOOL m_bIsTrafficPriorityBlocked;
 
-    IMS_UINT32 m_nRetryCountSubTerminated;
-    IMS_UINT32 m_nRetryCountRegRequired;
-
     static const IMS_UINT32 RETRY_DEFAULT_WAIT_TIME = 30;
     static const IMS_UINT32 REFRESH_POLICY_CRITERIA_INTERVAL_FOR_RETRY = 1200;
     static const IMS_UINT32 REFRESH_POLICY_RATIO_VALUE_BELOW_THE_CRITERIA = 50;
     static const IMS_UINT32 REFRESH_POLICY_INTERVAL_VALUE_ABOVE_THE_CRITERIA = 600;
-
-private:
-    friend class AosSubscriptionTest;
 };
 
 #endif  // AOS_SUBSCRIPTION_H_

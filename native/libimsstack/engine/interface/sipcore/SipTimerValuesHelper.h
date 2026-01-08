@@ -16,7 +16,8 @@
 #ifndef SIP_TIMER_VALUES_HELPER_H_
 #define SIP_TIMER_VALUES_HELPER_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
+
 #include "SipTimerValues.h"
 
 class SipProfile;

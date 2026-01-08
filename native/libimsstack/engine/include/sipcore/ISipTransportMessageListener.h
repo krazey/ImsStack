@@ -16,7 +16,11 @@
 #ifndef INTERFACE_SIP_TRANSPORT_MESSAGE_LISTENER_H_
 #define INTERFACE_SIP_TRANSPORT_MESSAGE_LISTENER_H_
 
-#include "SipTransportAddress.h"
+#include "ImsTypeDef.h"
+
+class ByteArray;
+
+class SipTransportAddress;
 
 class ISipTransportMessageListener
 {

@@ -37,7 +37,7 @@ class IReferenceListener;
 class IReference : public IServiceMethod
 {
 protected:
-    virtual ~IReference() = default;
+    ~IReference() override = default;
 
 public:
     /**

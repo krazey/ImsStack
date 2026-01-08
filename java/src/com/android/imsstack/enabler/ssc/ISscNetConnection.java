@@ -48,9 +48,11 @@ public interface ISscNetConnection {
     /**
      * Request network connnection
      *
+     * @param timeoutMs The timer to wait for connection.
+     *
      * @return true if connection is requested, otherwise false
      */
-    boolean connect();
+    boolean connect(long timeoutMs);
 
     /**
      * Returns network type of APN used for XCAP operation

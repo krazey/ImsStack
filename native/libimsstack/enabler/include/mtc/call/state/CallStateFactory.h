@@ -18,7 +18,6 @@
 #define CALL_STATE_FACTORY_H_
 
 #include "ImsTypeDef.h"
-#include "call/MtcCall.h"
 #include "call/state/IMtcCallState.h"
 #include "call/state/MtcCallStateMachine.h"
 
@@ -28,7 +27,7 @@ class CallStateFactory final : public IMtcCallStateFactory
 {
 public:
     explicit CallStateFactory();
-    virtual ~CallStateFactory();
+    virtual ~CallStateFactory() override;
     CallStateFactory(IN const CallStateFactory&) = delete;
     CallStateFactory& operator=(IN const CallStateFactory&) = delete;
 

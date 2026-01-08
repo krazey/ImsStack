@@ -27,7 +27,7 @@ class SessionRefreshHelper : public RefreshHelper
 {
 public:
     SessionRefreshHelper(IN Service* pService, IN IRefreshable* piRefreshable);
-    virtual ~SessionRefreshHelper();
+    ~SessionRefreshHelper() override;
 
 public:
     IMS_BOOL AddSpecificHeader(IN ISipConnection* piSc) override;
@@ -35,16 +35,11 @@ public:
     IMS_RESULT UpdateOnMessageReceived(IN const ISipConnection* piSc) override;
     IMS_RESULT UpdateOnMessageSent(IN const ISipConnection* piSc) override;
 
-    IMS_BOOL AddSpecificHeaderWithoutParameterChange(IN ISipConnection* piSc);
+    IMS_BOOL AddSpecificHeaderWithoutParameterChange(IN const ISipConnection* piSc);
     IMS_BOOL AddSpecificHeaderOnEarlyUpdate(
             IN ISipConnection* piSc, IN IMS_BOOL bTimerOptionSupported);
     IMS_SINT32 GetRefreshMethod() const;
-    IMS_BOOL IsSessionTimerSupported(IN const ISipConnection* piSc, IN IMS_BOOL bSent,
-            IN IMS_BOOL bCheckSePresentity = IMS_TRUE);
-    inline IMS_BOOL IsSessionTimerSupportedBySessionExpires() const
-    {
-        return ((m_nSipHeaders & SipConfigV::SESSION_HEADER_CHECK_SESSION_EXPIRES) != 0);
-    }
+    IMS_BOOL IsSessionTimerSupported(IN const ISipConnection* piSc, IN IMS_BOOL bSent);
     void StopSessionTimer(IN const ISipConnection* piSc);
     void UpdateTimerOptionOnRequestReceived(IN const ISipConnection* piSc);
 
@@ -93,6 +88,10 @@ private:
         return IsTimerSupportedOnRemoteEnd(TIMER_SUPPORTED_ON_INITIAL_INVITE) ||
                 IsTimerSupportedOnRemoteEnd(TIMER_SUPPORTED_ON_SESSION_UPDATE);
     }
+    inline IMS_BOOL IsSessionTimerTurnOffAllowed() const
+    {
+        return ((m_nSipHeaders & SipConfigV::SESSION_HEADER_SESSION_TIMER_TURN_OFF_ALLOWED) != 0);
+    }
     void NegotiateRefresher(IN IMS_BOOL bTimerOptionSupported);
     void UpdateProperties(IN const ISipConnection* piSc, IN IMS_BOOL bTimerOptionSupported,
             IN IMS_BOOL bSent = IMS_FALSE);
@@ -124,7 +123,7 @@ private:
     void SetSessionRefreshParameters(IN IMS_SINT32 nRefresher, IN IMS_SINT32 nRefreshRequest,
             IN IMS_SINT32 nMinSe, IN IMS_SINT32 nSessionTimerDuration,
             IN IMS_SINT32 nLocalSessionTimerDuration);
-    static IMS_BOOL IsUpdateMethodSupported(IN const ISipMessage* piSipMsg);
+    IMS_BOOL IsUpdateMethodSupported(IN const ISipMessage* piSipMsg);
 
 public:
     enum

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,26 +17,14 @@
 #ifndef MEDIA_RESOURCE_MANAGER_H_
 #define MEDIA_RESOURCE_MANAGER_H_
 
-#include "MediaDef.h"
-#include "IMediaNetworkConnectionListener.h"
+#include "ImsList.h"
 
 class MediaConfiguration;
-class MediaNetworkConnectionWatcher;
 
-class MediaResourceManager : public IMediaNetworkConnectionListener
+class MediaResourceManager
 {
 public:
-    enum
-    {
-        /** The internet pdn type */
-        PDN_INTERNET = 0,
-        /** The IMS pdn type */
-        PDN_IMS,
-        /** The emergency pdn type */
-        PDN_EMERGENCY,
-    };  // PDN Type
-
-    explicit MediaResourceManager(IN IMS_SINT32 nSlotId = 0);
+    explicit MediaResourceManager();
     virtual ~MediaResourceManager();
 
     /**
@@ -64,31 +52,8 @@ public:
      */
     virtual IMS_BOOL ReleaseRtpPort(IN IMS_UINT32 nPort);
 
-    /**
-     * @brief Update pdn type and register network connection watcher to get the connection change
-     *
-     * @param nPDNType The pdn type to change
-     * @param objIpAddress The local ip address
-     */
-    virtual IMS_BOOL UpdatePdn(IN IMS_SINT32 nPDNType, IN const IpAddress& objIpAddress);
-
-    /** Get the current network type connected */
-    IMS_SINT32 GetNetworkType();
-
-    /** Get the mtu size */
-    IMS_SINT32 GetMtu();
-    /* IMediaNetworkConnectionListener Interface Impl */
-    void OnNetworkConnectionChanged(IN const IMS_UINT32 nRatType) override;
-    void OnMediaMtuChanged(IN const IMS_UINT32 nMtu) override;
-
-private:
-    IMS_SINT32 m_nSlotId;
-    IMS_SINT32 m_nPdnType;
-    IMS_BOOL m_bIsIpv6;
-    IMS_SINT32 m_nNetworkType;
-    IMS_SINT32 m_nMtu;
+protected:
     ImsList<IMS_UINT32> m_lstUsedRtpPort;
-    MediaNetworkConnectionWatcher* m_pNetworkConnectionWatcher;
 };
 
 #endif

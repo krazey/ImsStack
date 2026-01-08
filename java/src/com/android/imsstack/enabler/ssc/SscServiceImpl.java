@@ -28,6 +28,9 @@ import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsSsInfo;
 import android.text.TextUtils;
 
+import com.android.imsstack.base.ImsPrivateProperties;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.PhoneStateInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.enabler.ssc.data.CbServiceData;
 import com.android.imsstack.enabler.ssc.data.CbServiceQueryData;
@@ -54,17 +57,41 @@ import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MessageExecutor;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * Implementation of IUtInterface class that provides query and update APIs for supplementary
- * service configuration over Ut reference point using XCAP
+ * service configuration over Ut reference point using XCAP.
  */
 public class SscServiceImpl implements IUtInterface {
     private static final int EVENT_UT_TRANSACTION_STARTED = 1001;
     private static final int REQUEST_TYPE_QUERY = 0;
     private static final int REQUEST_TYPE_UPDATE = 1;
+
+
+    // Call Waiting and Call Forwarding services are not supported as TB within IMS.
+    private static final List<Integer> TERMINAL_BASED_SERVICE_LIST = List.of(
+            SscConfig.SERVICE_TYPE_BAOC,
+            SscConfig.SERVICE_TYPE_BOIC,
+            SscConfig.SERVICE_TYPE_BOIC_EXHC,
+            SscConfig.SERVICE_TYPE_BAIC,
+            SscConfig.SERVICE_TYPE_BIC_ROAM,
+            SscConfig.SERVICE_TYPE_ACR,
+            SscConfig.SERVICE_TYPE_OIP,
+            SscConfig.SERVICE_TYPE_OIR,
+            SscConfig.SERVICE_TYPE_TIP,
+            SscConfig.SERVICE_TYPE_TIR
+    );
+
+    private static final List<Integer> SERVICE_CLASS_LIST = List.of(
+            SscServiceClassUtil.SERVICE_CLASS_VOICE,
+            SscServiceClassUtil.SERVICE_CLASS_VIDEO
+    );
 
     private final int mSlotId;
     private final ConcurrentLinkedDeque<SscRequestData> mSscRequestQueue;
@@ -72,6 +99,7 @@ public class SscServiceImpl implements IUtInterface {
     private Context mContext = null;
     private IUtListener mUtListener = null;
     private IUtServiceStateListener mUtServiceStateListener = null;
+    private SscPreferenceHelper mSscPreferenceHelper = null;
     private SscTransactionFactory mSscTransactionFactory = null;
     private SscTransaction mSscTransaction = null;
 
@@ -79,14 +107,26 @@ public class SscServiceImpl implements IUtInterface {
     private SscRequestHandler mSscRequestHandler = null;
     private SscCallbackHandler mSscCallbackHandler = null;
 
+    @VisibleForTesting
+    final Set<TerminalBasedSupplementaryServiceConfigurationChangeListener>
+            mTbSscChangeListeners = new CopyOnWriteArraySet<>();
+
     public SscServiceImpl(int slotId) {
         mSlotId = slotId;
         mSscRequestQueue = new ConcurrentLinkedDeque<SscRequestData>();
+        setSscPreferenceHelper(new SscPreferenceHelper(mSlotId));
         setSscTransactionFactory(new SscTransactionFactory());
     }
 
     @Override
     public boolean isUtAvailable() {
+        if (SscConfig.isUtSupported(mSlotId)) {
+            if (isTbSsEnabled()  || !SscConfig.isCsfbSupported(mSlotId)) {
+                ImsLog.d(mSlotId, "Always available");
+                return true;
+            }
+        }
+
         return SscServiceStateAgent.getInstance().isUtAvailable(mSlotId);
     }
 
@@ -160,10 +200,16 @@ public class SscServiceImpl implements IUtInterface {
 
     private void initConnections() {
         ISscNetConnectionGov netConnGov = SscNetConnectionGov.getInstance();
-        netConnGov.init(mSlotId, EApnType.XCAP);
-
         ISscHttpConnectionGov httpConnectionGov = SscHttpConnectionGov.getInstance();
-        httpConnectionGov.open(mSlotId, EApnType.XCAP);
+
+        EApnType apnType = EApnType.XCAP;
+        if (ImsPrivateProperties.Persistent.getInt(
+                ImsPrivateProperties.Persistent.KEY_WIFI_TEST, mSlotId) == 1) {
+            apnType = EApnType.WIFI;
+        }
+
+        netConnGov.init(mSlotId, apnType);
+        httpConnectionGov.open(mSlotId, apnType);
     }
 
     private void clearConnections() {
@@ -175,9 +221,12 @@ public class SscServiceImpl implements IUtInterface {
     }
 
     private void handleInvalidRequest(int tId, int requestType) {
+        sendErrorResponse(tId, requestType, ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED);
+    }
+
+    private void sendErrorResponse(int tId, int requestType, int errorReason) {
         if (mUtListener != null) {
-            ImsReasonInfo ri = new ImsReasonInfo(ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED,
-                    ImsReasonInfo.CODE_UNSPECIFIED, null);
+            ImsReasonInfo ri = new ImsReasonInfo(errorReason, ImsReasonInfo.CODE_UNSPECIFIED, null);
             if (requestType == REQUEST_TYPE_QUERY) {
                 postAndRunTask(() -> mUtListener.utConfigurationQueryFailed(tId, ri));
             } else if (requestType == REQUEST_TYPE_UPDATE) {
@@ -191,6 +240,11 @@ public class SscServiceImpl implements IUtInterface {
             MessageExecutor messageExecutor = new MessageExecutor(mSscCallbackHandler.getLooper());
             messageExecutor.execute(task);
         }
+    }
+
+    @VisibleForTesting
+    protected void setSscPreferenceHelper(SscPreferenceHelper preferenceHelper) {
+        mSscPreferenceHelper = preferenceHelper;
     }
 
     @VisibleForTesting
@@ -210,7 +264,7 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public void queryCallBarring(int tId, int condition) {
-        queryCallBarringForServiceClass(tId, condition, SscServiceClassUtil.SERVICE_CLASS_NONE);
+        queryCallBarringForServiceClass(tId, condition, SscServiceClassUtil.SERVICE_CLASS_VOICE);
     }
 
     @Override
@@ -223,6 +277,15 @@ public class SscServiceImpl implements IUtInterface {
         } else {
             // SscConstant.CONDITION_BAIC, SscConstant.CONDITION_BIC_WR, SscConstant.CONDITION_ACR
             ssType = ESsType.ICB;
+        }
+
+        serviceClass = (serviceClass == SscServiceClassUtil.SERVICE_CLASS_NONE)
+                ? SscServiceClassUtil.SERVICE_CLASS_VOICE : serviceClass;
+
+        if (isTerminalBasedService(ssType, condition)) {
+            ImsLog.d(mSlotId, "TB request");
+            handleQueryCallBarringTb(tId, condition, serviceClass);
+            return;
         }
 
         if (!isServerBasedService(ssType, condition)) {
@@ -247,7 +310,7 @@ public class SscServiceImpl implements IUtInterface {
     @Override
     public void queryCallForward(int tId, int condition, String number) {
         queryCallForwardForServiceClass(tId, condition, number,
-                SscServiceClassUtil.SERVICE_CLASS_NONE);
+                SscServiceClassUtil.SERVICE_CLASS_VOICE);
     }
 
     //@Override
@@ -303,6 +366,12 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public void queryCLIR(int tId) {
+        if (isTerminalBasedService(ESsType.OIR, SscConstant.CONDITION_INVALID)) {
+            ImsLog.d(mSlotId, "TB request");
+            handleQueryClirTb(tId);
+            return;
+        }
+
         if (!isServerBasedService(ESsType.OIR, SscConstant.CONDITION_INVALID)) {
             ImsLog.e(mSlotId, "Invalid service request");
             handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
@@ -324,6 +393,12 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public void queryCLIP(int tId) {
+        if (isTerminalBasedService(ESsType.OIP, SscConstant.CONDITION_INVALID)) {
+            ImsLog.d(mSlotId, "TB request");
+            handleQueryClipTb(tId);
+            return;
+        }
+
         if (!isServerBasedService(ESsType.OIP, SscConstant.CONDITION_INVALID)) {
             ImsLog.e(mSlotId, "Invalid service request");
             handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
@@ -345,6 +420,12 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public void queryCOLR(int tId) {
+        if (isTerminalBasedService(ESsType.TIR, SscConstant.CONDITION_INVALID)) {
+            ImsLog.d(mSlotId, "TB request");
+            handleQueryColrTb(tId);
+            return;
+        }
+
         if (!isServerBasedService(ESsType.TIR, SscConstant.CONDITION_INVALID)) {
             ImsLog.e(mSlotId, "Invalid service request");
             handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
@@ -366,6 +447,12 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public void queryCOLP(int tId) {
+        if (isTerminalBasedService(ESsType.TIP, SscConstant.CONDITION_INVALID)) {
+            ImsLog.d(mSlotId, "TB request");
+            handleQueryColpTb(tId);
+            return;
+        }
+
         if (!isServerBasedService(ESsType.TIP, SscConstant.CONDITION_INVALID)) {
             ImsLog.e(mSlotId, "Invalid service request");
             handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
@@ -388,7 +475,7 @@ public class SscServiceImpl implements IUtInterface {
     @Override
     public void updateCallBarring(int tId, int condition, int action, String[] barringList) {
         updateCallBarringWithPassword(tId, condition, action, barringList,
-                SscServiceClassUtil.SERVICE_CLASS_NONE, null);
+                SscServiceClassUtil.SERVICE_CLASS_VOICE, null);
     }
 
     @Override
@@ -408,6 +495,15 @@ public class SscServiceImpl implements IUtInterface {
         } else {
             // SscConstant.CONDITION_BAIC, SscConstant.CONDITION_BIC_WR, SscConstant.CONDITION_ACR
             ssType = ESsType.ICB;
+        }
+
+        serviceClass = (serviceClass == SscServiceClassUtil.SERVICE_CLASS_NONE)
+                ? SscServiceClassUtil.SERVICE_CLASS_VOICE : serviceClass;
+
+        if (isTerminalBasedService(ssType, condition)) {
+            ImsLog.d(mSlotId, "TB request");
+            handleUpdateCallBarringTb(tId, condition, serviceClass, action);
+            return;
         }
 
         if (!isServerBasedService(ssType, condition)) {
@@ -447,9 +543,8 @@ public class SscServiceImpl implements IUtInterface {
 
         if (action == SscConstant.ACTION_ERASURE) {
             if (!SscConfig.isCfActionErasureSupported(mSlotId)) {
-                ImsLog.e(mSlotId, "isCfActionErasureSupported is false");
-                handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
-                return;
+                ImsLog.d(mSlotId, "isCfActionErasureSupported is false");
+                action = SscConstant.ACTION_DEACTIVATION;
             }
         }
 
@@ -479,6 +574,12 @@ public class SscServiceImpl implements IUtInterface {
                 ImsLog.e(mSlotId, "Invalid timer : " + timeSeconds);
                 handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
                 return;
+            }
+
+            if (SscConfig.getCfnrTimerUpdateMethod(mSlotId)
+                    == SscConfig.CFNR_TIMER_UPDATE_METHOD_NOT_SUPPORT) {
+                ImsLog.d(mSlotId, "CFNR Timer is not supported");
+                timeSeconds = 0;
             }
         }
 
@@ -535,9 +636,21 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public void updateCLIR(int tId, int clirMode) {
+        if (isTerminalBasedService(ESsType.OIR, SscConstant.CONDITION_INVALID)) {
+            ImsLog.d(mSlotId, "TB request");
+            handleUpdateClirTb(tId, clirMode);
+            return;
+        }
+
         if (!isServerBasedService(ESsType.OIR, SscConstant.CONDITION_INVALID)) {
             ImsLog.e(mSlotId, "Invalid service request");
             handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+            return;
+        }
+
+        if (clirMode == SscConstant.OIR_DEFAULT && SscConfig.isLocalUpdateRequiredForOir(mSlotId)) {
+            ImsLog.d(mSlotId, "update Network Default OIR, but no request to network");
+            handleUpdateClirTb(tId, clirMode);
             return;
         }
 
@@ -556,6 +669,12 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public void updateCLIP(int tId, boolean enable) {
+        if (isTerminalBasedService(ESsType.OIP, SscConstant.CONDITION_INVALID)) {
+            ImsLog.d(mSlotId, "TB request");
+            handleUpdateClipTb(tId, enable);
+            return;
+        }
+
         if (!isServerBasedService(ESsType.OIP, SscConstant.CONDITION_INVALID)) {
             ImsLog.e(mSlotId, "Invalid service request");
             handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
@@ -577,6 +696,12 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public void updateCOLR(int tId, int presentation) {
+        if (isTerminalBasedService(ESsType.TIR, SscConstant.CONDITION_INVALID)) {
+            ImsLog.d(mSlotId, "TB request");
+            handleUpdateColrTb(tId, presentation);
+            return;
+        }
+
         if (!isServerBasedService(ESsType.TIR, SscConstant.CONDITION_INVALID)) {
             ImsLog.e(mSlotId, "Invalid service request");
             handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
@@ -598,6 +723,12 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public void updateCOLP(int tId, boolean enable) {
+        if (isTerminalBasedService(ESsType.TIP, SscConstant.CONDITION_INVALID)) {
+            ImsLog.d(mSlotId, "TB request");
+            handleUpdateColpTb(tId, enable);
+            return;
+        }
+
         if (!isServerBasedService(ESsType.TIP, SscConstant.CONDITION_INVALID)) {
             ImsLog.e(mSlotId, "Invalid service request");
             handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
@@ -615,6 +746,86 @@ public class SscServiceImpl implements IUtInterface {
                 SscConstant.EVENT_SSC_UPDATE_TIP, tId, (enable ? 1 : 0)));
 
         addRequestToQueue(requestData);
+    }
+
+    @Override
+    public void addTbSscChangeListener(
+            TerminalBasedSupplementaryServiceConfigurationChangeListener listener) {
+        mTbSscChangeListeners.add(listener);
+
+        postAndRunTask(() -> notifyTbSscStatus(listener));
+    }
+
+    @Override
+    public void removeTbSscChangeListener(
+            TerminalBasedSupplementaryServiceConfigurationChangeListener listener) {
+        mTbSscChangeListeners.remove(listener);
+    }
+
+    private void notifyTbSscStatus(
+            TerminalBasedSupplementaryServiceConfigurationChangeListener listener) {
+        List<SupplementaryServiceConfiguration> sscList = new ArrayList<>();
+
+        for (int service : TERMINAL_BASED_SERVICE_LIST) {
+            if (!SscConfig.isTerminalBasedService(mSlotId, service)) {
+                continue;
+            }
+
+            switch (service) {
+                case SscConfig.SERVICE_TYPE_BAOC:
+                case SscConfig.SERVICE_TYPE_BOIC:
+                case SscConfig.SERVICE_TYPE_BOIC_EXHC:
+                case SscConfig.SERVICE_TYPE_BAIC:
+                case SscConfig.SERVICE_TYPE_BIC_ROAM:
+                case SscConfig.SERVICE_TYPE_ACR: {
+                    int condition = SscUtils.getConditionFromSsType(service);
+                    for (int serviceClass : SERVICE_CLASS_LIST) {
+                        int status = mSscPreferenceHelper.queryCb(condition, serviceClass);
+                        if (status != SscConstant.STATUS_NOT_REGISTERED) {
+                            sscList.add(new CbData(condition, serviceClass, status));
+                        }
+                    }
+                    break;
+                }
+                case SscConfig.SERVICE_TYPE_OIP: {
+                    int status = mSscPreferenceHelper.queryOip();
+                    if (status != SscConstant.STATUS_NOT_REGISTERED) {
+                        sscList.add(new OipData(status));
+                    }
+                    break;
+                }
+                case SscConfig.SERVICE_TYPE_OIR: {
+                    int mode = mSscPreferenceHelper.queryOir();
+                    if (mode != SscConstant.STATUS_NOT_REGISTERED) {
+                        sscList.add(new OirData(mode == SscConstant.OIR_INVOCATION
+                                ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE));
+                    }
+                    break;
+                }
+                case SscConfig.SERVICE_TYPE_TIP: {
+                    int status = mSscPreferenceHelper.queryTip();
+                    if (status != SscConstant.STATUS_NOT_REGISTERED) {
+                        sscList.add(new TipData(status));
+                    }
+                    break;
+                }
+                case SscConfig.SERVICE_TYPE_TIR: {
+                    int provisionStatus = mSscPreferenceHelper.queryTir();
+                    if (provisionStatus != SscConstant.STATUS_NOT_REGISTERED) {
+                        sscList.add(new TirData(provisionStatus == SscConstant.TIR_PROVISIONED
+                                ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE));
+                    }
+                    break;
+                }
+                default:
+                    ImsLog.e(mSlotId, "Invalid service type : " + service);
+                    break;
+            }
+        }
+
+        if (!sscList.isEmpty()) {
+            listener.onSupplementaryServiceConfigurationChanged(sscList);
+        }
     }
 
     private void startTransaction(SscData data) {
@@ -646,7 +857,7 @@ public class SscServiceImpl implements IUtInterface {
             return;
         }
 
-        if (!isUtAvailable()) {
+        if (!SscServiceStateAgent.getInstance().isUtAvailable(mSlotId)) {
             ImsLog.w(mSlotId, "Clear pending data due to Ut is not available");
             postFailResponseMessage(sscData);
         } else if (sscData.getSsType() != ESsType.NONE
@@ -724,6 +935,227 @@ public class SscServiceImpl implements IUtInterface {
         }
     }
 
+    private void handleQueryCallBarringTb(int tId, int condition, int serviceClass) {
+        if (mUtListener == null) {
+            return;
+        }
+
+        int status = mSscPreferenceHelper.queryCb(condition, serviceClass);
+        if (status == SscConstant.STATUS_NOT_REGISTERED) {
+            status = SscConstant.STATUS_DISABLE;
+        }
+
+        ImsSsInfo[] cbInfo = new ImsSsInfo[1];
+        cbInfo[0] = new ImsSsInfo.Builder(status).build();
+
+        postAndRunTask(() -> mUtListener.utConfigurationCallBarringQueried(tId, cbInfo));
+    }
+
+    private void handleQueryClirTb(int tId) {
+        if (mUtListener == null) {
+            return;
+        }
+
+        int oirMode = mSscPreferenceHelper.queryOir();
+        if (oirMode == SscConstant.STATUS_NOT_REGISTERED) {
+            oirMode = SscConstant.OIR_DEFAULT;
+        }
+
+        if (oirMode == SscConstant.OIR_DEFAULT
+                && SscConfig.isNetworkQueryForTbOirNetworkDefault(mSlotId)) {
+            SscRequestData requestData = new SscRequestData(tId);
+
+            if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
+                requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
+                        SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
+            }
+
+            requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.OIR,
+                    SscConstant.EVENT_SSC_QUERY_OIR_TB_NETWORK_DEFAULT, tId, -1));
+
+            addRequestToQueue(requestData);
+            return;
+        }
+
+        int outgoingState = oirMode; // 3GPP 27.007 7.7 n
+        int provisionStatus = switch (oirMode) { // 3GPP 27.007 7.7 m
+            case SscConstant.OIR_DEFAULT -> SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_ALLOWED;
+            case SscConstant.OIR_INVOCATION ->
+                    SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_RESTRICTED;
+            case SscConstant.OIR_SUPPRESSION -> SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_ALLOWED;
+            default -> SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_ALLOWED;
+        };
+
+        int state = (provisionStatus == SscConstant.OIR_TEMPORARY_MODE_PRESENTATION_RESTRICTED)
+                ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
+
+        postAndRunTask(() -> mUtListener.lineIdentificationSupplementaryServiceResponse(tId,
+                new ImsSsInfo.Builder(state).setClirInterrogationStatus(provisionStatus)
+                .setClirOutgoingState(outgoingState).build()));
+    }
+
+    private void handleQueryClipTb(int tId) {
+        if (mUtListener == null) {
+            return;
+        }
+
+        int status = mSscPreferenceHelper.queryOip();
+        final int finalStatus = (status == SscConstant.STATUS_NOT_REGISTERED)
+                ? SscConstant.STATUS_DISABLE : status;
+
+        postAndRunTask(() -> mUtListener.lineIdentificationSupplementaryServiceResponse(tId,
+                new ImsSsInfo.Builder(finalStatus).build()));
+    }
+
+    private void handleQueryColrTb(int tId) {
+        if (mUtListener == null) {
+            return;
+        }
+
+        int provisionStatus = mSscPreferenceHelper.queryTir();
+        final int finalProvisionStatus = (provisionStatus == SscConstant.STATUS_NOT_REGISTERED)
+                ? SscConstant.TIR_NOT_PROVISIONED : provisionStatus;
+        int status = (finalProvisionStatus == SscConstant.TIR_PROVISIONED)
+                ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
+
+        postAndRunTask(() -> mUtListener.lineIdentificationSupplementaryServiceResponse(tId,
+                new ImsSsInfo.Builder(status).setProvisionStatus(finalProvisionStatus).build()));
+    }
+
+    private void handleQueryColpTb(int tId) {
+        if (mUtListener == null) {
+            return;
+        }
+
+        int status = mSscPreferenceHelper.queryTip();
+        final int finalStatus = (status == SscConstant.STATUS_NOT_REGISTERED)
+                ? SscConstant.STATUS_DISABLE : status;
+
+        postAndRunTask(() -> mUtListener.lineIdentificationSupplementaryServiceResponse(tId,
+                new ImsSsInfo.Builder(finalStatus).build()));
+    }
+
+    private void handleUpdateCallBarringTb(int tId, int condition, int serviceClass, int action) {
+        if (mUtListener == null) {
+            return;
+        }
+
+        int status = (action == SscConstant.ACTION_ACTIVATION
+                || action == SscConstant.ACTION_REGISTRATION)
+                ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
+
+        boolean result = mSscPreferenceHelper.updateCb(condition, serviceClass, status);
+        if (result) {
+            postAndRunTask(() -> {
+                mUtListener.utConfigurationUpdated(tId);
+                notifyTbSscChanged(
+                        Collections.singletonList(new CbData(condition, serviceClass, status)));
+            });
+        } else {
+            ImsLog.w(mSlotId, "ImsReasonInfo.CODE_LOCAL_INTERNAL_ERROR");
+            sendErrorResponse(tId, REQUEST_TYPE_UPDATE, ImsReasonInfo.CODE_LOCAL_INTERNAL_ERROR);
+        }
+    }
+
+    private void handleUpdateClirTb(int tId, int clirMode) {
+        if (mUtListener == null) {
+            return;
+        }
+
+        boolean result = mSscPreferenceHelper.updateOir(clirMode);
+        if (result) {
+            if (SscConfig.isSyncWithCsForTbSs(mSlotId)) {
+                // Invokes utConfigurationUpdateFailed() with CODE_LOCAL_CALL_CS_RETRY_REQUIRED
+                // to trigger CSFB, then the modem will handle the request as well. It should
+                // always be handled successfully in the modem side because it's a terminal-based
+                // service request. The CSFB will be requested only when UE is in the CS voice
+                // available network, or the Telephony will sync the state when UE camps in the CS
+                // voice available network later.
+                if (isCsVoiceNetworkRegistered()) {
+                    ImsLog.d(mSlotId, "Sync CLIR");
+                    ImsReasonInfo ri = new ImsReasonInfo(
+                            ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED,
+                            ImsReasonInfo.CODE_UNSPECIFIED, null);
+                    postAndRunTask(() -> mUtListener.utConfigurationUpdateFailed(tId, ri));
+                } else {
+                    postAndRunTask(() -> mUtListener.utConfigurationUpdated(tId));
+                }
+            } else {
+                postAndRunTask(() -> mUtListener.utConfigurationUpdated(tId));
+            }
+
+            int status = (clirMode == SscConstant.OIR_INVOCATION)
+                    ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
+            postAndRunTask(() ->
+                    notifyTbSscChanged(Collections.singletonList(new OirData(status))));
+        } else {
+            ImsLog.w(mSlotId, "ImsReasonInfo.CODE_LOCAL_INTERNAL_ERROR");
+            sendErrorResponse(tId, REQUEST_TYPE_UPDATE, ImsReasonInfo.CODE_LOCAL_INTERNAL_ERROR);
+        }
+    }
+
+    private void handleUpdateClipTb(int tId, boolean enable) {
+        if (mUtListener == null) {
+            return;
+        }
+
+        int status = (enable) ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
+        boolean result = mSscPreferenceHelper.updateOip(status);
+        if (result) {
+            postAndRunTask(() -> {
+                mUtListener.utConfigurationUpdated(tId);
+                notifyTbSscChanged(Collections.singletonList(new OipData(status)));
+            });
+        } else {
+            ImsLog.w(mSlotId, "ImsReasonInfo.CODE_LOCAL_INTERNAL_ERROR");
+            sendErrorResponse(tId, REQUEST_TYPE_UPDATE, ImsReasonInfo.CODE_LOCAL_INTERNAL_ERROR);
+        }
+    }
+
+    private void handleUpdateColrTb(int tId, int presentation) {
+        if (mUtListener == null) {
+            return;
+        }
+
+        boolean result = mSscPreferenceHelper.updateTir(presentation);
+        if (result) {
+            int status = (presentation == SscConstant.TIR_PROVISIONED)
+                    ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
+            postAndRunTask(() -> {
+                mUtListener.utConfigurationUpdated(tId);
+                notifyTbSscChanged(Collections.singletonList(new TirData(status)));
+            });
+        } else {
+            ImsLog.w(mSlotId, "ImsReasonInfo.CODE_LOCAL_INTERNAL_ERROR");
+            sendErrorResponse(tId, REQUEST_TYPE_UPDATE, ImsReasonInfo.CODE_LOCAL_INTERNAL_ERROR);
+        }
+    }
+
+    private void handleUpdateColpTb(int tId, boolean enable) {
+        if (mUtListener == null) {
+            return;
+        }
+
+        int status = (enable) ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
+        boolean result = mSscPreferenceHelper.updateTip(status);
+        if (result) {
+            postAndRunTask(() -> {
+                mUtListener.utConfigurationUpdated(tId);
+                notifyTbSscChanged(Collections.singletonList(new TipData(status)));
+            });
+        } else {
+            ImsLog.w(mSlotId, "ImsReasonInfo.CODE_LOCAL_INTERNAL_ERROR");
+            sendErrorResponse(tId, REQUEST_TYPE_UPDATE, ImsReasonInfo.CODE_LOCAL_INTERNAL_ERROR);
+        }
+    }
+
+    private void notifyTbSscChanged(List<SupplementaryServiceConfiguration> data) {
+        for (TerminalBasedSupplementaryServiceConfigurationChangeListener l :
+                mTbSscChangeListeners) {
+            l.onSupplementaryServiceConfigurationChanged(data);
+        }
+    }
+
     private boolean isServerBasedService(ESsType ssType, int condition) {
         int carrierConfigServiceType =
                 SscUtils.getSupplementaryServiceTypeForCarrierConfig(ssType, condition);
@@ -732,6 +1164,39 @@ public class SscServiceImpl implements IUtInterface {
         }
 
         return SscConfig.isServerBasedService(mSlotId, carrierConfigServiceType);
+    }
+
+    private boolean isTerminalBasedService(ESsType ssType, int condition) {
+        int carrierConfigServiceType =
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ssType, condition);
+        if (carrierConfigServiceType == SscConfig.SERVICE_TYPE_INVALID) {
+            return false;
+        }
+
+        return SscConfig.isTerminalBasedService(mSlotId, carrierConfigServiceType);
+    }
+
+    private boolean isTbSsEnabled() {
+        int[] terminalBasedServices = SscConfig.getTerminalBasedServices(mSlotId);
+        if (terminalBasedServices == null) {
+            return false;
+        }
+
+        List<Integer> tbSs = java.util.Arrays.stream(terminalBasedServices).boxed().toList();
+
+        return !Collections.disjoint(tbSs, TERMINAL_BASED_SERVICE_LIST);
+    }
+
+    private boolean isCsVoiceNetworkRegistered() {
+        PhoneStateInterface phoneState = AgentFactory.getInstance()
+                .getAgent(PhoneStateInterface.class, mSlotId);
+        if (phoneState == null) {
+            return false;
+        }
+
+        int regState = phoneState.getCsNetworkRegistrationState();
+        return (regState == android.telephony.NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING)
+                || (regState == android.telephony.NetworkRegistrationInfo.REGISTRATION_STATE_HOME);
     }
 
     private final class SscRequestHandler extends Handler {
@@ -806,14 +1271,22 @@ public class SscServiceImpl implements IUtInterface {
                 }
             }
 
+            int eventNum = msg.what;
             if (resultState == SscConstant.REQUEST_SUCCESS) {
+                if (eventNum == SscConstant.EVENT_SSC_UPDATE_OIR
+                        && SscConfig.isLocalUpdateRequiredForOir(mSlotId)) {
+                    OirServiceData oirData = (OirServiceData) requestData.peakSscData();
+                    if (!mSscPreferenceHelper.updateOir(oirData.getState())) {
+                        ImsLog.d(mSlotId, "local update error");
+                    }
+                }
+
                 if (handleAdditionalRequestWhenSuccess(requestData)) {
                     ImsLog.d(mSlotId, "Need to send additional request");
                     return;
                 }
             }
 
-            int eventNum = msg.what;
             if (eventNum == SscConstant.EVENT_SSC_QUERY_DOCUMENT) {
                 if (resultState == SscConstant.REQUEST_FAILURE) {
                     // set actual event requested
@@ -838,7 +1311,10 @@ public class SscServiceImpl implements IUtInterface {
         }
 
         private boolean handlePreconditionFailure(SscRequestData requestData) {
-            if (requestData.getPreconditionFailedCount() > 0) {
+            SscXmlGov.getInstance(mSlotId).clear();
+            SscXmlGov.getInstance(mSlotId).init();
+
+            if (requestData.getPreconditionFailedCount() > 1) {
                 return false;
             }
 
@@ -904,6 +1380,7 @@ public class SscServiceImpl implements IUtInterface {
                     case SscConstant.EVENT_SSC_QUERY_CF:
                     case SscConstant.EVENT_SSC_QUERY_CW:
                     case SscConstant.EVENT_SSC_QUERY_OIR:
+                    case SscConstant.EVENT_SSC_QUERY_OIR_TB_NETWORK_DEFAULT:
                     case SscConstant.EVENT_SSC_QUERY_OIP:
                     case SscConstant.EVENT_SSC_QUERY_TIR:
                     case SscConstant.EVENT_SSC_QUERY_TIP:
@@ -1107,9 +1584,22 @@ public class SscServiceImpl implements IUtInterface {
         private ImsSsInfo createLineIdentificationInfo(SscServiceData data) {
             if (data.getSsType() == ESsType.OIR) {
                 OirServiceData oirData = (OirServiceData)data;
-                return new ImsSsInfo.Builder(oirData.getState())
-                        .setClirInterrogationStatus(oirData.getProvisionStatus()) // m
-                        .setClirOutgoingState(oirData.getOutgoingState()).build(); // n
+                if (data.getEventNumber() == SscConstant.EVENT_SSC_QUERY_OIR_TB_NETWORK_DEFAULT) {
+                    return new ImsSsInfo.Builder(oirData.getState())
+                            .setClirInterrogationStatus(oirData.getProvisionStatus()) // m
+                            .setClirOutgoingState(SscConstant.OIR_DEFAULT).build(); // n
+                } else if (SscConfig.isLocalUpdateRequiredForOir(mSlotId)) {
+                    int oirMode =  mSscPreferenceHelper.queryOir();
+                    int outgoingState = oirMode == SscConstant.OIR_DEFAULT
+                            ? oirMode : oirData.getOutgoingState();
+                    return new ImsSsInfo.Builder(oirData.getState())
+                            .setClirInterrogationStatus(oirData.getProvisionStatus()) // m
+                            .setClirOutgoingState(outgoingState).build(); // n
+                } else {
+                    return new ImsSsInfo.Builder(oirData.getState())
+                            .setClirInterrogationStatus(oirData.getProvisionStatus()) // m
+                            .setClirOutgoingState(oirData.getOutgoingState()).build(); // n
+                }
             } else if (data.getSsType() == ESsType.TIR) {
                 TirServiceData tirData = (TirServiceData)data;
                 return new ImsSsInfo.Builder(tirData.getState())

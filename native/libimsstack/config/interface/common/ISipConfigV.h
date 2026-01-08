@@ -16,7 +16,7 @@
 #ifndef INTERFACE_SIP_CONFIG_V_H_
 #define INTERFACE_SIP_CONFIG_V_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
 
 class IConfigurable;
 

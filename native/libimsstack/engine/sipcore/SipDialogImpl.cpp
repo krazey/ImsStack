@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
+#include "ServiceTrace.h"
 
 #include "SipClientConnection.h"
 #include "SipClientConnectionImpl.h"
 #include "SipDialog.h"
 #include "SipDialogImpl.h"
+#include "SipError.h"
 #include "SipPrivate.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipDialogImpl::SipDialogImpl(IN SipDialog* pDialog) :
@@ -204,7 +206,7 @@ PUBLIC VIRTUAL IMS_BOOL SipDialogImpl::IsSameDialog(IN const ISipConnection* piS
         return IMS_FALSE;
     }
 
-    SipDialogImpl* pDialogImpl = DYNAMIC_CAST(SipDialogImpl*, piSc->GetDialog());
+    const SipDialogImpl* pDialogImpl = DYNAMIC_CAST(SipDialogImpl*, piSc->GetDialog());
 
     if (pDialogImpl == IMS_NULL)
     {

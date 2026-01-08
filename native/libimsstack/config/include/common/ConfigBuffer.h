@@ -26,7 +26,7 @@ public:
             m_strName(strName)
     {
     }
-    inline virtual ~ConfigBuffer() {}
+    ~ConfigBuffer() override = default;
 
     ConfigBuffer(IN const ConfigBuffer&) = delete;
     ConfigBuffer& operator=(IN const ConfigBuffer&) = delete;

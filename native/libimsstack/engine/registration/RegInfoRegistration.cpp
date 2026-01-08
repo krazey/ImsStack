@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ISystemProperty.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
@@ -121,7 +122,7 @@ IMS_BOOL RegInfoRegistration::Equals(IN INode* piNode) const
         return IMS_FALSE;
     }
 
-    INode* piNodeId = piNodeMap->GetNamedItem(RegInfoConst::ATTR_ID);
+    const INode* piNodeId = piNodeMap->GetNamedItem(RegInfoConst::ATTR_ID);
 
     if (piNodeId == IMS_NULL)
     {
@@ -237,11 +238,7 @@ IMS_BOOL RegInfoRegistration::Update(IN INode* piNode)
 
     // "contact" elements
     INode* piNode_Contact = piNode->GetFirstChild();
-
-    if (!SetContacts(piNode_Contact))
-    {
-        return IMS_FALSE;
-    }
+    SetContacts(piNode_Contact);
 
     return IMS_TRUE;
 }
@@ -277,9 +274,9 @@ RegInfoContact* RegInfoRegistration::CheckNCreateContact(IN INode* piNode)
 }
 
 PRIVATE
-IMS_BOOL RegInfoRegistration::SetAor(IN INamedNodeMap* piNodeMap)
+IMS_BOOL RegInfoRegistration::SetAor(IN const INamedNodeMap* piNodeMap)
 {
-    INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_AOR);
+    const INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_AOR);
 
     if (piNode == IMS_NULL)
     {
@@ -298,7 +295,7 @@ IMS_BOOL RegInfoRegistration::SetAor(IN INamedNodeMap* piNodeMap)
 }
 
 PRIVATE
-IMS_BOOL RegInfoRegistration::SetContacts(IN INode* piNode)
+void RegInfoRegistration::SetContacts(IN INode* piNode)
 {
     while (piNode != IMS_NULL)
     {
@@ -311,14 +308,12 @@ IMS_BOOL RegInfoRegistration::SetContacts(IN INode* piNode)
 
         piNode = piNode->GetNextSibling();
     }
-
-    return IMS_TRUE;
 }
 
 PRIVATE
-IMS_BOOL RegInfoRegistration::SetId(IN INamedNodeMap* piNodeMap)
+IMS_BOOL RegInfoRegistration::SetId(IN const INamedNodeMap* piNodeMap)
 {
-    INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_ID);
+    const INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_ID);
 
     if (piNode == IMS_NULL)
     {
@@ -332,9 +327,9 @@ IMS_BOOL RegInfoRegistration::SetId(IN INamedNodeMap* piNodeMap)
 }
 
 PRIVATE
-IMS_BOOL RegInfoRegistration::SetState(IN INamedNodeMap* piNodeMap)
+IMS_BOOL RegInfoRegistration::SetState(IN const INamedNodeMap* piNodeMap)
 {
-    INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_STATE);
+    const INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_STATE);
 
     if (piNode == IMS_NULL)
     {

@@ -13,24 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "Credential.h"
+#include "ImsDigest.h"
 #include "ServiceMemory.h"
 #include "ServiceSystemTime.h"
-#include "ImsDigest.h"
+#include "ServiceTrace.h"
 
+#include "ISipGenericChallenge.h"
 #include "ISipHeader.h"
 #include "SipAuHelper.h"
 #include "SipDebug.h"
 #include "SipPrivate.h"
 #include "SipStack.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 class SipGenericChallenge : public ISipGenericChallenge
 {
 public:
     explicit SipGenericChallenge(IN IMS_SINT32 nType = ISipHeader::WWW_AUTHENTICATE);
     SipGenericChallenge(IN const SipGenericChallenge& other);
-    virtual ~SipGenericChallenge();
+    ~SipGenericChallenge() override;
 
 public:
     SipGenericChallenge& operator=(IN const SipGenericChallenge& other);
@@ -251,7 +254,7 @@ public:
     IMS_BOOL CalculateResponse();
     void Clear();
     IMS_BOOL FormCredentials(IN const SipMethod& objMethod, IN const AString& strUri,
-            IN const AString& strEntityBody, IN_OUT SipGenericResponse& objResponse,
+            IN const AString& strEntityBody, IN const SipGenericResponse& objResponse,
             OUT SipHeaderBase*& pSipHdr);
     ISipGenericChallenge* GetChallenge(IN IMS_SINT32 nIndex) const;
     inline IMS_BOOL IsChallengePresent() const { return !m_objChallenges.IsEmpty(); }
@@ -465,7 +468,7 @@ IMS_BOOL SipAuHelperPrivate::AddHeader(IN_OUT ::SipMessage*& pSipMsg)
 
     for (IMS_UINT32 i = 0; i < m_objResponses.GetSize(); ++i)
     {
-        SipGenericResponse* pResponse = m_objResponses.GetAt(i);
+        const SipGenericResponse* pResponse = m_objResponses.GetAt(i);
 
         if (pResponse == IMS_NULL)
         {
@@ -634,7 +637,7 @@ void SipAuHelperPrivate::Clear()
 PUBLIC
 IMS_BOOL SipAuHelperPrivate::FormCredentials(IN const SipMethod& objMethod,
         IN const AString& strUri, IN const AString& strEntityBody,
-        IN_OUT SipGenericResponse& objResponse, OUT SipHeaderBase*& pSipHdr)
+        IN const SipGenericResponse& objResponse, OUT SipHeaderBase*& pSipHdr)
 {
     if (!SipStack::SetChallengeScheme(objResponse.m_strScheme, pSipHdr))
     {

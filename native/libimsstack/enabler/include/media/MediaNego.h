@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,69 +17,69 @@
 #ifndef MEDIA_NEGO_H_
 #define MEDIA_NEGO_H_
 
+#include <memory>
+
 #include "ImsSlot.h"
 #include "MediaDef.h"
-#include "audio/AudioNego.h"
-#include "video/VideoNego.h"
-#include "text/TextNego.h"
+#include "audio/AudioDef.h"
+#include "text/TextDef.h"
+#include "video/VideoDef.h"
+
+class AudioNego;
+class IMedia;
+class IMediaDescriptor;
+class ISession;
+class MediaEnvironment;
+class SdpMedia;
+class TextNego;
+class VideoNego;
 
 class MediaNego : public ImsSlot
 {
 public:
-    enum MediaNegoResult
-    {
-        /** No error */
-        NO_ERROR = 0,
-        /** error when the descriptor is invalid*/
-        ERROR_INVALID_DESCRIPTOR,
-        /** error when there is no negotiated codec */
-        ERROR_NO_CODEC_MATCHED,
-        /** error when the ip version is not matched between offer and answer */
-        ERROR_IP_MISMATCH,
-        /** error when there is no audio m line in SDP*/
-        ERROR_NO_AUDIO,
-        /** error when there is no video m line in SDP*/
-        ERROR_NO_VIDEO,
-        /** error when there is no text m line in SDP*/
-        ERROR_NO_TEXT,
-    };
-
     explicit MediaNego(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    ~MediaNego();
+    ~MediaNego() override;
 
     /**
      * @brief Creates MediaNego instance with given parameter
      *
      * @param pMediaEnvironment The instance of network connection information
+     * @return IMS_BOOL Return IMS_TRUE when it successes, IMS_FALSE when the arguments is
+     * invalid
      */
-    void CreateProfile(IN MediaEnvironment* pMediaEnvironment);
+    virtual IMS_BOOL CreateProfile(IN std::shared_ptr<MediaEnvironment> pMediaEnvironment);
 
     /**
      * @brief Creates MediaNego object copied from the existing MediaNego instance
      *
      * @param pMediaNego the instance of existing MediaNego
-     * @return IMS_BOOL Return IMS_TRUE whent the forking success, IMS_FALSE when the arguments is
+     * @return IMS_BOOL Return IMS_TRUE when the forking success, IMS_FALSE when the arguments is
      * invalid
      */
-    IMS_BOOL Forking(IN MediaNego* pMediaNego);
+    virtual IMS_BOOL Forking(IN MediaNego* pMediaNego);
 
     /**
-     * @brief Forms SDP with the profile created and send the offer or answer with the given
-     * arguments
+     * @brief Forms an SDP body for an outgoing offer, answer, or re-offer.
      *
-     * @param pSession ISession instance to get the SDP descriptor
-     * @param eMediaType The media type to form, it can be audio/video/text defined in
-     * MEDIA_CONTENT_TYPE
-     * @param nAudioDirection The audio direction to set in the SDP
-     * @param nVideoDirection The video direction to set in the SDP
-     * @param nTextDirection The text direction to set in the SDP
-     * @param bEnforceReofferMode To indicate the SDP should be set using full codec capability
-     * @return IMS_BOOL Returns IMS_TRUE when the form SDP is done successfully and IMS_FALSE when
-     * failed with invalid arguments
+     * This method populates the provided `ISession` object with the necessary SDP media
+     * lines (`m=`) and attributes. It orchestrates the SDP generation for audio, video,
+     * and text by delegating to the respective sub-negotiators (AudioNego, VideoNego,
+     * TextNego). The behavior changes based on the current negotiation state (e.g.,
+     * creating an initial offer, answering a received offer, or generating a re-offer).
+     *
+     * @param pSession [out] The `ISession` object to be populated with the generated SDP.
+     * @param eMediaType A bitmask of `MEDIA_CONTENT_TYPE` specifying which media types to include.
+     * @param eAudioDirection The desired `MEDIA_DIRECTION` for the audio stream.
+     * @param eVideoDirection The desired `MEDIA_DIRECTION` for the video stream.
+     * @param eTextDirection The desired `MEDIA_DIRECTION` for the text stream.
+     * @param bEnforceReofferMode If `IMS_TRUE`, forces the SDP to be generated with the full set of
+     *        local capabilities, which is typically used for re-offers.
+     * @return IMS_BOOL Returns `IMS_TRUE` on success, or `IMS_FALSE` on failure (e.g., invalid
+     *         state or arguments).
      */
-    IMS_BOOL FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType,
-            IN IMS_SINT32 nAudioDirection, IN IMS_SINT32 nVideoDirection,
-            IN IMS_SINT32 nTextDirection, IN IMS_BOOL bEnforceReofferMode);
+    virtual IMS_BOOL FormSdp(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType,
+            IN MEDIA_DIRECTION eAudioDirection, IN MEDIA_DIRECTION eVideoDirection,
+            IN MEDIA_DIRECTION eTextDirection, IN IMS_BOOL bEnforceReofferMode);
 
     /**
      * @brief Get Supported Media Types from SDP
@@ -92,117 +92,162 @@ public:
     /**
      * @brief Create negotiate profile from the SDP received from the network by the given arguments
      *
-     * @param pSession ISession instance to get the SDP descriptor
-     * @param nAudioDirection The audio direction negotiated
-     * @param nVideoDirection The video direction negotiated
-     * @param nTextDirection The text direction negotiated
-     * @param errorReason The error reason when the negotiation is failed
-     * @return IMS_BOOL Returns IMS_TRUE when the negotiation succeed and IMS_FALSE when failed.
-     * MediaNegoResult will be set when negotiation failed
+     * @param pSession The ISession instance containing the SDP to negotiate.
+     * @return SdpNegotiationResult A struct containing the negotiated media types, directions,
+     * and any error that occurred.
      */
-    IMS_BOOL NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32& nAudioDirection,
-            OUT IMS_SINT32& nVideoDirection, OUT IMS_SINT32& nTextDirection,
-            OUT MediaNegoResult& errorReason);
+    virtual SdpNegotiationResult NegotiateSdp(IN ISession* pSession);
 
     /**
-     * @brief Deletes invalid negotiation result and unnecessary Audio/Video/TextNego object
+     * @brief Finalizes the media session state by removing deleted media lines.
      *
-     * @param pSession ISession instance to get the SDP descriptor
+     * This method iterates through the media lines (m-lines) in the provided `ISession`
+     * and removes any that have been marked with `IMedia::STATE_DELETED`. This is a
+     * crucial cleanup step after a session modification (e.g., a re-INVITE) is
+     * confirmed, ensuring that the session object accurately reflects the active media.
+     *
+     * @param pSession The ISession instance whose media lines need to be finalized.
      */
-    void FinalizeSDP(IN ISession* pSession);
+    virtual void FinalizeSdp(IN ISession* pSession);
+
+    /**
+     * @brief Finalizes the session negotiation by cleaning up any stale negotiation models and
+     * setting the final negotiation state based on the outcome.
+     */
+    virtual void FinalizeNegotiation();
 
     /**
      * @brief Set the negotiation state
      *
      * @param eNegoState The state defined in NEGO_STATE
      */
-    void SetNegoState(NEGO_STATE eNegoState) { m_eNegoState = eNegoState; }
+    virtual void SetNegoState(NEGO_STATE eNegoState) { m_eNegoState = eNegoState; }
 
     /**
      * @brief Get the negotiation state
      *
      * @return NEGO_STATE
      */
-    NEGO_STATE GetNegoState() { return m_eNegoState; }
+    virtual NEGO_STATE GetNegoState() { return m_eNegoState; }
 
     /**
      * @brief Set the AudioNego instance
      */
-    void SetAudioNego(AudioNego* pAudioNego) { m_pAudioNego = pAudioNego; }
+    void SetAudioNego(std::shared_ptr<AudioNego> pAudioNego) { m_pAudioNego = pAudioNego; }
 
     /**
      * @brief Get the AudioNego instance
      */
-    AudioNego* GetAudioNego() { return m_pAudioNego; }
+    virtual std::shared_ptr<AudioNego> GetAudioNego() { return m_pAudioNego; }
 
     /**
      * @brief Set the VideoNego instance
      */
-    void SetVideoNego(VideoNego* pVideoNego) { m_pVideoNego = pVideoNego; }
+    void SetVideoNego(std::shared_ptr<VideoNego> pVideoNego) { m_pVideoNego = pVideoNego; }
 
     /**
      * @brief Get the VideoNego instance
      */
-    VideoNego* GetVideoNego() { return m_pVideoNego; }
+    virtual std::shared_ptr<VideoNego> GetVideoNego() { return m_pVideoNego; }
 
     /**
      * @brief Set the TextNego instance
      */
-    void SetTextNego(TextNego* pTextNego) { m_pTextNego = pTextNego; }
+    void SetTextNego(std::shared_ptr<TextNego> pTextNego) { m_pTextNego = pTextNego; }
 
     /**
      * @brief Get the TextNego instance
      */
-    TextNego* GetTextNego() { return m_pTextNego; }
+    virtual std::shared_ptr<TextNego> GetTextNego() { return m_pTextNego; }
 
     /**
      * @brief Get the media session type
      *
      * @return MEDIA_CONTENT_TYPE
      */
-    MEDIA_CONTENT_TYPE GetSessionType() { return m_eSessionType; }
+    virtual MEDIA_CONTENT_TYPE GetSessionType() { return m_eSessionType; }
 
     /**
      * @brief Get the negotiated audio direction
      *
      * @return MEDIA_DIRECTION
      */
-    MEDIA_DIRECTION GetNegotiatedAudioDirection(void);
+    virtual MEDIA_DIRECTION GetNegotiatedAudioDirection(void);
 
     /**
      * @brief Get the negotiated video direction
      *
      * @return MEDIA_DIRECTION
      */
-    MEDIA_DIRECTION GetNegotiatedVideoDirection(void);
+    virtual MEDIA_DIRECTION GetNegotiatedVideoDirection(void);
 
     /**
      * @brief Get the negotiated text direction
      *
      * @return MEDIA_DIRECTION
      */
-    MEDIA_DIRECTION GetNegotiatedTextDirection(void);
+    virtual MEDIA_DIRECTION GetNegotiatedTextDirection(void);
 
     /**
      * @brief Get the negotiated audio codec
      *
      * @return AUDIO_CODEC
      */
-    AUDIO_CODEC GetNegotiatedAudioQuality(void);
+    virtual AUDIO_CODEC GetNegotiatedAudioQuality(void);
 
     /**
      * @brief Get the negotiated video resolution
      *
      * @return VIDEO_RESOLUTION
      */
-    VIDEO_RESOLUTION GetNegotiatedVideoQuality(void);
+    virtual VIDEO_RESOLUTION GetNegotiatedVideoQuality(void);
 
     /**
      * @brief Get the negotiated text resolution
      *
      * @return TEXT_CODEC
      */
-    TEXT_CODEC GetNegotiatedTextQuality(void);
+    virtual TEXT_CODEC GetNegotiatedTextQuality(void);
+
+    /**
+     * @brief Get the negotiated codec bitrate (Kbps)
+     *
+     * @param eMediaType The media type to form, it can be audio/video/text defined in
+     * MEDIA_CONTENT_TYPE
+     * @return IMS_FLOAT Returns the bitrate of the negotiated codec (Kbps)
+     */
+    virtual IMS_FLOAT GetNegotiatedCodecBitrateKbps(IN MEDIA_CONTENT_TYPE eMediaType);
+
+    /**
+     * @brief Get the negotiated codec bandwidth (Khz)
+     *
+     * @param eMediaType The media type to form, it can be audio/video/text defined in
+     * MEDIA_CONTENT_TYPE
+     * @return IMS_FLOAT Returns the bandwidth of the negotiated codec (Khz)
+     */
+    virtual IMS_FLOAT GetNegotiatedCodecBandwidthKhz(IN MEDIA_CONTENT_TYPE eMediaType);
+
+    /**
+     * @brief Get the negotiated codec bitrate range
+     *
+     * @param eMediaType The media type to form, it can be audio/video/text defined in
+     * MEDIA_CONTENT_TYPE
+     * @param nBitrateStart The start of the bitrate range
+     * @param nBitrateEnd The end of the bitrate range
+     */
+    virtual void GetNegotiatedCodecBitrateRange(IN MEDIA_CONTENT_TYPE eMediaType,
+            OUT IMS_FLOAT& nBitrateStart, OUT IMS_FLOAT& nBitrateEnd);
+
+    /**
+     * @brief Get the negotiated codec bandwidth range
+     *
+     * @param eMediaType The media type to form, it can be audio/video/text defined in
+     * MEDIA_CONTENT_TYPE
+     * @param nBandwidthStart The start of the bandwidth range
+     * @param nBandwidthEnd The end of the bandwidth range
+     */
+    virtual void GetNegotiatedCodecBandwidthRange(IN MEDIA_CONTENT_TYPE eMediaType,
+            OUT IMS_FLOAT& nBandwidthStart, OUT IMS_FLOAT& nBandwidthEnd);
 
     /**
      * @brief Get the media descriptor instance
@@ -210,29 +255,51 @@ public:
      * @param pIMedia
      * @return IMediaDescriptor*
      */
-    IMediaDescriptor* GetMediaDescriptor(IN IMedia* pIMedia);
+    virtual IMediaDescriptor* GetMediaDescriptor(IN IMedia* pIMedia);
 
     /**
      * @brief Check this instance is crated from forking
      *
      * @return IMS_BOOL Returns IMS_TRUE when this instance is created from forking
      */
-    IMS_BOOL IsForking();
+    virtual IMS_BOOL IsForking();
+
+    /**
+     * @brief Check if the SDP negotiation is done in preview mode.
+     */
+    virtual IMS_BOOL IsPreviewMode();
+
+    /**
+     * @brief Set the mode is preview.
+     */
+    virtual void SetPreviewMode(IMS_BOOL bIsPreview);
 
 private:
-    ImsList<IMedia*> GetIMediaListFromSession(
+    ImsList<IMedia*> CreateIMediaListFromSession(
             IN ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType);
-    void SetSessionType(IN ISession* pSession);
+    void UpdateMediaTypeToNegotiate(IN ISession* pSession);
     void SetMediaDescriptorAsNotSupported(IN IMediaDescriptor* pDescriptor, IN SdpMedia* pSDPMedia);
+    void UpdateNegoState(IMS_BOOL bFormSdp);
+    void UpdateSessionLevelBandwidth(IN ISession* pSession, IMS_UINT32 nTotalAs);
+    IMS_BOOL ProcessMediaLine(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType,
+            IN MEDIA_DIRECTION eAudioDirection, IN MEDIA_DIRECTION eVideoDirection,
+            IN MEDIA_DIRECTION eTextDirection, IN IMS_BOOL bEnforceReofferMode,
+            OUT IMS_SINT32& nTotalAs, OUT IMediaDescriptor*& pDescriptorForAudio,
+            OUT IMediaDescriptor*& pDescriptorForVideo, OUT IMediaDescriptor*& pDescriptorForText);
+    void UpdateMediaDescriptor(IN ISession* pSession, IN IMediaDescriptor* pDescriptor,
+            IN const SdpMedia* pSDPMedia, OUT IMediaDescriptor*& pNegotiatedAudioDescriptor,
+            OUT IMediaDescriptor*& pNegotiatedVideoDescriptor,
+            OUT IMediaDescriptor*& pNegotiatedTextDescriptor, OUT MEDIA_DIRECTION& eAudioDirection,
+            OUT MEDIA_DIRECTION& eVideoDirection, OUT MEDIA_DIRECTION& eTextDirection);
 
-protected:
     NEGO_STATE m_eNegoState;
-    AudioNego* m_pAudioNego;
-    VideoNego* m_pVideoNego;
-    TextNego* m_pTextNego;
-    MediaEnvironment* m_pMediaEnvironment;
+    std::shared_ptr<AudioNego> m_pAudioNego;
+    std::shared_ptr<VideoNego> m_pVideoNego;
+    std::shared_ptr<TextNego> m_pTextNego;
+    std::shared_ptr<MediaEnvironment> m_pMediaEnvironment;
     MEDIA_CONTENT_TYPE m_eSessionType;
     IMS_BOOL m_bForking;
+    IMS_BOOL m_bPreviewMode;
 };
 
 #endif

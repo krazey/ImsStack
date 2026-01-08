@@ -22,10 +22,11 @@ import com.android.imsstack.util.ImsLog;
 import org.w3c.dom.Document;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class SscHttpConnectionGov implements ISscHttpConnectionGov {
     private static final SscHttpConnectionGov sSscHttpConnectionGov = new SscHttpConnectionGov();
-    private static final HashMap<Integer, ISscHttpConnection> sSscHttpConnections = new HashMap<>();
+    private static final Map<Integer, ISscHttpConnection> sSscHttpConnections = new HashMap<>();
 
     public static ISscHttpConnectionGov getInstance() {
         return sSscHttpConnectionGov;
@@ -58,14 +59,14 @@ public class SscHttpConnectionGov implements ISscHttpConnectionGov {
 
     @Override
     public int sendRequest(int slotId, int requestType, String requestUri, String xui,
-            String body) {
+            String body, int timeoutMs) {
         ISscHttpConnection httpConnection = sSscHttpConnections.get(slotId);
         if (httpConnection == null) {
             ImsLog.e(slotId, "sendRequest()");
             return ISscHttpConnection.HTTP_REQUEST_FAILED_UNSPECIFIED;
         }
 
-        return httpConnection.sendRequest(requestType, requestUri, xui, body);
+        return httpConnection.sendRequest(requestType, requestUri, xui, body, timeoutMs);
     }
 
     @Override

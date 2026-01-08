@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 #include "SipTimerContext.h"
+#include "txn/SipTxnTimerValues.h"
 
 SipTimerContext::SipTimerContext() :
-        pTxnSipTxnTimers(new SipTxnTimerValues()),
-        nTimerOptions(0)
+        m_pTxnSipTxnTimers(new SipTxnTimerValues()),
+        m_nTimerOptions(0)
 {
 }
 
 SipTimerContext::~SipTimerContext()
 {
-    if (pTxnSipTxnTimers != SIP_NULL)
+    if (m_pTxnSipTxnTimers != SIP_NULL)
     {
-        delete pTxnSipTxnTimers;
-        pTxnSipTxnTimers = SIP_NULL;
+        delete m_pTxnSipTxnTimers;
+        m_pTxnSipTxnTimers = SIP_NULL;
     }
 }

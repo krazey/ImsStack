@@ -32,6 +32,7 @@
 #include "SessionEx.h"
 #include "SessionRefreshHelper.h"
 #include "Sip.h"
+#include "SipError.h"
 #include "SipHeaderUtils.h"
 #include "SipParameter.h"
 #include "SipParsingHelper.h"
@@ -92,8 +93,7 @@ IMS_RESULT SessionEx::RespondToEarlyUpdate(
 
     if (pRefreshHelper != IMS_NULL)
     {
-        bTimerOptionSupported = pRefreshHelper->IsSessionTimerSupported(
-                piSsc, pRefreshHelper->IsSessionTimerSupportedBySessionExpires());
+        bTimerOptionSupported = pRefreshHelper->IsSessionTimerSupported(piSsc, IMS_FALSE);
     }
 
     if (CreateResponse(piSsc, nStatusCode, strReason) == IMS_FALSE)
@@ -113,8 +113,9 @@ IMS_RESULT SessionEx::RespondToEarlyUpdate(
         }
         else
         {
-            Message* pMessage = GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
-            ISipMessage* piSipMsg = (pMessage != IMS_NULL) ? pMessage->GetMessage() : IMS_NULL;
+            const Message* pMessage = GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
+            const ISipMessage* piSipMsg =
+                    (pMessage != IMS_NULL) ? pMessage->GetMessage() : IMS_NULL;
 
             bSessionTimerControlRequired = (piSipMsg != IMS_NULL)
                     ? piSipMsg->IsHeaderPresent(ISipHeader::SESSION_EXPIRES)
@@ -164,11 +165,11 @@ IMS_RESULT SessionEx::RespondToEarlyUpdate(
     {
         IMS_BOOL bHasSdpInRequest = IMS_FALSE;
 
-        Message* pMessage = GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
+        const Message* pMessage = GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
 
         if (pMessage != IMS_NULL)
         {
-            ISipMessage* piSipMsgUpdate = pMessage->GetMessage();
+            const ISipMessage* piSipMsgUpdate = pMessage->GetMessage();
 
             if (piSipMsgUpdate->GetSdpBodyPart() != IMS_NULL)
             {
@@ -274,11 +275,11 @@ IMS_RESULT SessionEx::RespondToPrack(
             GetOfferAnswerState() == SdpOaState::STATE_OFFER_CHANGE_RECEIVED)
     {
         IMS_BOOL bHasSdpInRequest = IMS_FALSE;
-        Message* pMessage = GetPreviousRequest(IMessage::SESSION_PRACK);
+        const Message* pMessage = GetPreviousRequest(IMessage::SESSION_PRACK);
 
         if (pMessage != IMS_NULL)
         {
-            ISipMessage* piSipMsgPrack = pMessage->GetMessage();
+            const ISipMessage* piSipMsgPrack = pMessage->GetMessage();
 
             if (piSipMsgPrack->GetSdpBodyPart() != IMS_NULL)
             {
@@ -428,14 +429,14 @@ IMS_RESULT SessionEx::SendPrack()
         bMayIncludeSdp = IMS_TRUE;
 
         // Checks if the early UPDATE is already received when sending PRACK request
-        IMessage* piRequest = GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
-        IMessage* piResponse = GetPreviousResponse(IMessage::SESSION_EARLY_UPDATE);
+        const IMessage* piRequest = GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
+        const IMessage* piResponse = GetPreviousResponse(IMessage::SESSION_EARLY_UPDATE);
 
         if ((piRequest != IMS_NULL) && (piResponse == IMS_NULL))
         {
             if (piRequest->GetState() == IMessage::STATE_RECEIVED)
             {
-                ISipMessage* piSipMsgUpdate = piRequest->GetMessage();
+                const ISipMessage* piSipMsgUpdate = piRequest->GetMessage();
 
                 if (piSipMsgUpdate->GetSdpBodyPart() != IMS_NULL)
                 {
@@ -526,7 +527,7 @@ IMS_RESULT SessionEx::SendRpr(IN IMS_SINT32 nStatusCode,
         nServiceMethod = IMessage::SESSION_UPDATE;
     }
 
-    Message* pMessage = GetPreviousRequest(nServiceMethod);
+    const Message* pMessage = GetPreviousRequest(nServiceMethod);
 
     if (pMessage == IMS_NULL)
     {
@@ -534,7 +535,7 @@ IMS_RESULT SessionEx::SendRpr(IN IMS_SINT32 nStatusCode,
         return IMS_FAILURE;
     }
 
-    ISipMessage* piSipMsg = pMessage->GetMessage();
+    const ISipMessage* piSipMsg = pMessage->GetMessage();
 
     // Do nothing if the handling method is not INVITE
     if (!piSipMsg->GetMethod().Equals(SipMethod::INVITE))
@@ -733,6 +734,29 @@ IMS_RESULT SessionEx::UpdateEarlyMedia()
     return IMS_SUCCESS;
 }
 
+PUBLIC
+void SessionEx::AbortEarlyUpdateTransaction()
+{
+    if (m_nEarlyState != EARLY_STATE_UPDATE_SENT)
+    {
+        return;
+    }
+
+    IMS_TRACE_D("Abort early UPDATE transaction", 0, 0, 0);
+
+    // Restore SDP offer/answer state and media state.
+    RestoreOfferAnswerState();
+    RestoreEx();
+
+    // Clear early update related state.
+    SetEarlyState(EARLY_STATE_IDLE);
+    SetEarlyUpdateNotificationState(IMS_FALSE);
+    SetLastEarlyUpdateCompletedTime(0);
+
+    // Abort SIP transaction.
+    CloseConnection(IMessage::SESSION_EARLY_UPDATE);
+}
+
 PROTECTED VIRTUAL IMS_BOOL SessionEx::DispatchMessage(IN ImsMessage& objMsg)
 {
     switch (objMsg.GetName())
@@ -886,7 +910,6 @@ PROTECTED VIRTUAL void SessionEx::NotifySipError(
         }
         else
         {
-            // FIXME: select a proper status code
             RejectEx(SipStatusCode::SC_580);
         }
         return;
@@ -974,7 +997,7 @@ PROTECTED VIRTUAL IMS_BOOL SessionEx::SendRequestToChallenge(IN ISipClientConnec
 PROTECTED VIRTUAL IMS_BOOL SessionEx::Dialog_NotifyRequest(IN ISipServerConnection* piSsc)
 {
     IMS_SINT32 nSipMethod = piSsc->GetMethod().ToInt();
-    ISipMessage* piSipMsg = piSsc->GetMessage();
+    const ISipMessage* piSipMsg = piSsc->GetMessage();
 
     if (nSipMethod == SipMethod::INVITE)
     {
@@ -1074,14 +1097,15 @@ PROTECTED VIRTUAL Session* SessionEx::CreateSession()
     return pSession;
 }
 
-PROTECTED VIRTUAL IMS_RESULT SessionEx::HandleProvisionalResponse(IN ISipClientConnection* piScc)
+PROTECTED VIRTUAL IMS_RESULT SessionEx::HandleProvisionalResponse(
+        IN ISipClientConnection* piScc, IN IMS_SINT32 nServiceMethod)
 {
-    ISipMessage* piSipMsg = piScc->GetMessage();
+    const ISipMessage* piSipMsg = piScc->GetMessage();
 
     // Check if the message is a reliable provisional response or not
     if (!piSipMsg->IsMessageRpr())
     {
-        return Session::HandleProvisionalResponse(piScc);
+        return Session::HandleProvisionalResponse(piScc, nServiceMethod);
     }
 
     if (!CheckNCreateRprHelper(piSipMsg))
@@ -1119,19 +1143,13 @@ PROTECTED VIRTUAL IMS_RESULT SessionEx::HandleProvisionalResponse(IN ISipClientC
     }
 
     // INDEX_FOR_PROVISIONAL_RESPONSE_MESSAGE
-    ImsList<Message*> objResponses;
+    ImsList<Message*> objResponses = GetPreviousResponses(nServiceMethod);
 
-    if ((GetState() == STATE_ESTABLISHING) || (GetState() == STATE_NEGOTIATING))
+    if (!objResponses.IsEmpty())
     {
-        objResponses = GetPreviousResponses(IMessage::SESSION_START);
+        PostMessage(AMSG_SESSIONEX_RPR_RECEIVED, reinterpret_cast<IMS_UINTP>(pEarlySession),
+                objResponses.GetSize() - 1);
     }
-    else
-    {
-        objResponses = GetPreviousResponses(IMessage::SESSION_UPDATE);
-    }
-
-    PostMessage(AMSG_SESSIONEX_RPR_RECEIVED, reinterpret_cast<IMS_UINTP>(pEarlySession),
-            objResponses.GetSize() - 1);
 
     if (piSipMsg->GetStatusCode() == SipStatusCode::SC_180)
     {
@@ -1156,7 +1174,7 @@ PROTECTED VIRTUAL IMS_RESULT SessionEx::HandleRequestToUpdate(IN ISipServerConne
 
     IMS_SINT32 nStatusCode = SipStatusCode::SC_INVALID;
     IMS_SINT32 nOfferAnswerState = GetOfferAnswerState();
-    ISipMessage* piSipMsg = piSsc->GetMessage();
+    const ISipMessage* piSipMsg = piSsc->GetMessage();
 
     // If we have received an UPDATE request when we have already sent an UPDATE,
     // the received UPDATE should be rejected with 491 Request Pending response.
@@ -1187,7 +1205,7 @@ PROTECTED VIRTUAL IMS_RESULT SessionEx::HandleRequestToUpdate(IN ISipServerConne
         }
         else if (nState == STATE_RENEGOTIATING)
         {
-            IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_UPDATE);
+            const IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_UPDATE);
 
             if (piMessage != IMS_NULL)
             {
@@ -1203,7 +1221,7 @@ PROTECTED VIRTUAL IMS_RESULT SessionEx::HandleRequestToUpdate(IN ISipServerConne
         {
             if ((piSipMsg != IMS_NULL) && (piSipMsg->GetSdpBodyPart() != IMS_NULL))
             {
-                IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_UPDATE);
+                const IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_UPDATE);
 
                 // re-INVITE only case
                 if (piMessage != IMS_NULL)
@@ -1217,6 +1235,13 @@ PROTECTED VIRTUAL IMS_RESULT SessionEx::HandleRequestToUpdate(IN ISipServerConne
                         nStatusCode = SipStatusCode::SC_491;
                     }
                 }
+            }
+        }
+        else if (IsSdpOaInPreviewMode())
+        {
+            if ((piSipMsg != IMS_NULL) && (piSipMsg->GetSdpBodyPart() != IMS_NULL))
+            {
+                nStatusCode = SipStatusCode::SC_491;
             }
         }
     }
@@ -1327,9 +1352,7 @@ PROTECTED VIRTUAL IMS_RESULT SessionEx::HandleRequestToUpdate(IN ISipServerConne
             return IMS_FAILURE;
         }
 
-        AString strWarning("304 \"Media Type Not Available\"");
-        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, strWarning);
-
+        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, WARNING_304);
         (void)AdjustMessage(piSsc->GetMessage(), MESSAGE_CLASS_AUTOMATIC);
 
         if (piSsc->Send() != IMS_SUCCESS)
@@ -1408,7 +1431,7 @@ PROTECTED VIRTUAL IMS_RESULT SessionEx::HandleResponseToUpdate(IN ISipClientConn
     if (SipStatusCode::IsFinalSuccess(nStatusCode))
     {
         // CALLER_PREFERENCE_MANAGER
-        IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
+        const IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
 
         if (piMessage != IMS_NULL)
         {
@@ -1477,14 +1500,14 @@ PROTECTED VIRTUAL IMS_BOOL SessionEx::HasPendingPrack() const
             nServiceMethod = IMessage::SESSION_UPDATE;
         }
 
-        Message* pMessage = GetPreviousResponse(nServiceMethod);
+        const Message* pMessage = GetPreviousResponse(nServiceMethod);
 
         if (pMessage == IMS_NULL)
         {
             return IMS_FALSE;
         }
 
-        ISipMessage* piSipMsg = pMessage->GetMessage();
+        const ISipMessage* piSipMsg = pMessage->GetMessage();
 
         if (!piSipMsg->GetMethod().Equals(SipMethod::INVITE))
         {
@@ -1523,14 +1546,14 @@ IMS_BOOL SessionEx::IsEarlyUpdateInProgress() const
             (nOaState == SdpOaState::STATE_OFFER_CHANGE_RECEIVED))
     {
         // Checks if the early UPDATE is already received when sending PRACK request
-        IMessage* piRequest = GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
-        IMessage* piResponse = GetPreviousResponse(IMessage::SESSION_EARLY_UPDATE);
+        const IMessage* piRequest = GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
+        const IMessage* piResponse = GetPreviousResponse(IMessage::SESSION_EARLY_UPDATE);
 
         if ((piRequest != IMS_NULL) && (piResponse == IMS_NULL))
         {
             if (piRequest->GetState() == IMessage::STATE_RECEIVED)
             {
-                ISipMessage* piSipMsgUpdate = piRequest->GetMessage();
+                const ISipMessage* piSipMsgUpdate = piRequest->GetMessage();
 
                 if (piSipMsgUpdate->GetSdpBodyPart() != IMS_NULL)
                 {
@@ -1622,7 +1645,7 @@ AString SessionEx::AdjustSessionExpiresHeader(
 }
 
 PRIVATE
-IMS_BOOL SessionEx::CheckNCreateRprHelper(IN ISipMessage* piSipMsg)
+IMS_BOOL SessionEx::CheckNCreateRprHelper(IN const ISipMessage* piSipMsg)
 {
     if (m_pRprHelper != IMS_NULL)
     {
@@ -1730,10 +1753,7 @@ void SessionEx::HandleRequestToPrack(IN ISipServerConnection* piSsc)
             return;
         }
 
-        AString strWarning("304 \"Media Type Not Available\"");
-        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, strWarning);
-
-        // SIP_MESSAGE_MEDIATOR
+        (void)piSsc->GetMessage()->SetHeader(ISipHeader::WARNING, WARNING_304);
         (void)AdjustMessage(piSsc->GetMessage(), MESSAGE_CLASS_AUTOMATIC);
 
         if (piSsc->Send() != IMS_SUCCESS)

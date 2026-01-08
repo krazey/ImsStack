@@ -17,8 +17,6 @@
 #ifndef GROUP_CALL_CONTROLLER_H_
 #define GROUP_CALL_CONTROLLER_H_
 
-#include "ImsList.h"
-#include "ImsMap.h"
 #include "conferencecall/ConferenceController.h"
 
 class IMtcCallContext;
@@ -28,13 +26,15 @@ struct CallStartOperationParams;
 struct CallInfo;
 struct ConfUser;
 struct MediaInfo;
+template <class T>
+class ImsList;
 
 class GroupCallController final : public ConferenceController
 {
 public:
     explicit GroupCallController(IN CallKey nConfCallKey, IMtcContext& objContext,
             IN CallConnectionIdManager& objConnectionIdManager, IN ConferenceFactory& objFactory);
-    virtual ~GroupCallController();
+    virtual ~GroupCallController() override;
     GroupCallController(IN const GroupCallController&) = delete;
     GroupCallController& operator=(IN const GroupCallController&) = delete;
 
@@ -43,8 +43,7 @@ public:
 
 protected:
     void ProcessGroupCall(IN ImsList<ConfUser*>& objUsers, IN CallInfo& objCallInfo,
-            IN MediaInfo& objMediaInfo,
-            IN ImsMap<SuppType, SuppService*>& objSuppServices) override;
+            IN MediaInfo& objMediaInfo, IN ImsList<SuppService*>& objSuppServices) override;
     void StartConferenceCall(IN ConferenceOperationQueue::ConferenceOperation* pOperation) override;
     void Recover() override;
 

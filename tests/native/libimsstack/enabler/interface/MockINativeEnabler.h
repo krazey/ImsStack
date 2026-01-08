@@ -24,7 +24,7 @@
 class MockINativeEnabler : public INativeEnabler
 {
 public:
-    inline virtual ~MockINativeEnabler() {}
+    ~MockINativeEnabler() override = default;
 
     MOCK_METHOD(void, NotifyJniEnablerSet, (), (override));
 };

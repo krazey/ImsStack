@@ -16,8 +16,9 @@
 #ifndef IMS_TIMER_H_
 #define IMS_TIMER_H_
 
-#include "IThread.h"
 #include "ITimer.h"
+
+class IThread;
 
 class ImsTimer : public ITimer
 {
@@ -27,7 +28,7 @@ public:
             m_piListener(IMS_NULL)
     {
     }
-    inline virtual ~ImsTimer() {}
+    ~ImsTimer() override = default;
 
 public:
     inline IThread* GetOwner() const { return m_piOwner; }

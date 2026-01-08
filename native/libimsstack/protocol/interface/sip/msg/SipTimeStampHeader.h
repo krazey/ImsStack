@@ -28,38 +28,27 @@ private:
     SIP_CHAR* m_pszDelay;
 
 public:
-    /*constructor*/
     SipTimeStampHeader();
-
-    /*Copy Constructor*/
     SipTimeStampHeader(const SipTimeStampHeader& objHeader);
 
-    /*destructor*/
-    ~SipTimeStampHeader();
-    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
-
-    /*virtual methods*/
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
-    /*Function for encoding of headers*/
-    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
+    SIP_BOOL Encode(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
-    /*Function for decoding of headers*/
-    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
-    /*Sets */
-    SIP_BOOL SetTimeVal(const SIP_CHAR* pszTimeVal);
+    SIP_VOID SetTimeVal(const SIP_CHAR* pszTimeVal);
+    SIP_VOID SetDelay(const SIP_CHAR* pszDelay);
 
-    /*Gets */
     inline const SIP_CHAR* GetTimeVal() const { return m_pszTimeVal; }
-
-    /*Sets */
-    SIP_BOOL SetDelay(const SIP_CHAR* pszDelay);
-
-    /*Gets */
     inline const SIP_CHAR* GetDelay() const { return m_pszDelay; }
     inline SIP_BOOL IsValidHeader() const override
     {
         return (m_pszTimeVal == SIP_NULL) ? SIP_FALSE : SIP_TRUE;
     }
+
+    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
+
+private:
+    ~SipTimeStampHeader() override;
 };
 #endif  //__SIP_TIME_STAMP_HEADER_H__

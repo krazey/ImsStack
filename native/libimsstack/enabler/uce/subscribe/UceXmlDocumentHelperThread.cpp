@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "subscribe/UceXmlDocumentHelperThread.h"
-
 #include "IDocument.h"
 #include "IElement.h"
 #include "INodeList.h"
 #include "ISipHeader.h"
+#include "IThread.h"
 #include "IUce.h"
 #include "IXmlRequest.h"
 #include "IXmlResponse.h"
@@ -34,8 +32,9 @@
 #include "def/UceDef.h"
 #include "subscribe/UceNonCapabilityUser.h"
 #include "subscribe/UceNotifyMessageBody.h"
+#include "subscribe/UceXmlDocumentHelperThread.h"
 
-__IMS_TRACE_TAG_USER_DECL__("UCE");
+__IMS_TRACE_TAG_UCE__;
 
 PUBLIC
 UceXmlDocumentHelperThread::UceXmlDocumentHelperThread(
@@ -162,7 +161,7 @@ PUBLIC VIRTUAL IMS_RESULT UceXmlDocumentHelperThread::XmlTransaction_NotifyParsi
             return eResult;
         }
         AString strRootName(AString::ConstNull());
-        IElement* piRootElement = piDocument->GetDocumentElement();
+        const IElement* piRootElement = piDocument->GetDocumentElement();
         if (piRootElement == IMS_NULL)
         {
             m_pXMLTransactionProvider->DestroyTransaction(piXMLTransaction);
@@ -323,10 +322,6 @@ IMS_RESULT UceXmlDocumentHelperThread::XMLDataTokenization(IN const ByteArray& o
 
 IMS_BOOL UceXmlDocumentHelperThread::StartMessageHandler(const IMSMSG& objMsg)
 {
-    if (!Initialize())
-    {
-        return IMS_FALSE;
-    }
     return OnStart(objMsg);
 }
 
@@ -336,7 +331,7 @@ IMS_BOOL UceXmlDocumentHelperThread::TerminateMessageHandler(const IMSMSG& objMs
     return IMS_TRUE;
 }
 
-IMS_BOOL UceXmlDocumentHelperThread::ReceivedRlmiNotifyMessageHandler(IMSMSG& objMsg)
+IMS_BOOL UceXmlDocumentHelperThread::ReceivedRlmiNotifyMessageHandler(const IMSMSG& objMsg)
 {
     m_pUceNotifyMessageBody = reinterpret_cast<UceNotifyMessageBody*>(objMsg.nLparam);
     if (m_pUceNotifyMessageBody == IMS_NULL)
@@ -437,7 +432,7 @@ IMS_BOOL UceXmlDocumentHelperThread::ReceivedRlmiNotifyMessageHandler(IMSMSG& ob
     return IMS_TRUE;
 }
 
-IMS_BOOL UceXmlDocumentHelperThread::ParsedRlmiXmlMessageHandler(IMSMSG& objMsg)
+IMS_BOOL UceXmlDocumentHelperThread::ParsedRlmiXmlMessageHandler(const IMSMSG& objMsg)
 {
     (void)objMsg;
     IMS_TRACE_D("ParsedRlmiXmlMessageHandler:remain bodyPart`s size[%d]", m_objBodyParts.GetSize(),
@@ -488,7 +483,7 @@ void UceXmlDocumentHelperThread::SendParseCompletedMsg(IMS_SINT32 eXMLInfoType)
     }
 }
 
-IMS_RESULT UceXmlDocumentHelperThread::ParseRLMIList(IN IDocument* piDocument)
+IMS_RESULT UceXmlDocumentHelperThread::ParseRLMIList(IN const IDocument* piDocument)
 {
     if (piDocument == IMS_NULL)
     {
@@ -512,7 +507,7 @@ IMS_RESULT UceXmlDocumentHelperThread::ParseRLMIList(IN IDocument* piDocument)
     /* Parse RLMI List */
     for (IMS_UINT32 i = 0; i < piNodeList->GetLength(); i++)
     {
-        IElement* piElement = IMS_NULL;
+        const IElement* piElement = IMS_NULL;
         AString strURI(AString::ConstNull());
         INodeList* piChildrenNodeList = IMS_NULL;
         // <resource ...>
@@ -537,7 +532,7 @@ IMS_RESULT UceXmlDocumentHelperThread::ParseRLMIList(IN IDocument* piDocument)
             INode* piChildNode = piChildrenNodeList->Item(j);
             if (piChildNode->GetNodeType() == INode::ELEMENT_NODE)
             {
-                IElement* piChildElement = DYNAMIC_CAST(IElement*, piChildNode);
+                const IElement* piChildElement = DYNAMIC_CAST(IElement*, piChildNode);
                 AString temp;
                 // <resource uri=...>
                 //    <instance id=... state=... cid=.../>

@@ -26,6 +26,8 @@ import java.util.Collection;
 
 /** A class for providing the utility method of the configuration XML parser. */
 public final class ConfigXmlUtils {
+    private static final String TAG_PERSISTABLE_BUNDLE = "pbundle_as_map";
+
     /**
      * Parses the XML configuration and returns the structured format as {@link PersistableBundle}.
      *
@@ -144,7 +146,7 @@ public final class ConfigXmlUtils {
         } else if (tagName.equals("string-array")) {
             config.putStringArray(key, readStringArray(parser, "string-array"));
             return;
-        } else if (tagName.equals("pbundle")) {
+        } else if (tagName.equals(TAG_PERSISTABLE_BUNDLE)) {
             config.putPersistableBundle(key, readConfig(parser));
             return;
         } else {

@@ -19,14 +19,13 @@
 
 #include <gmock/gmock.h>
 
-#include "IpAddress.h"
 #include "IIpSecSp.h"
 
 class MockIIpSecSp : public IIpSecSp
 {
 public:
-    inline MockIIpSecSp() {}
-    inline virtual ~MockIIpSecSp() {}
+    MockIIpSecSp() = default;
+    ~MockIIpSecSp() override = default;
 
     MOCK_METHOD(void, SetTransportInfo,
             (IN const IpAddress& objSrcIp, IN IMS_UINT32 nSrcPort, IN const IpAddress& objDstIp,

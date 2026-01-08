@@ -21,6 +21,7 @@
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "JniCallInfo.h"
+#include "JniExternalCall.h"
 #include "JniMtcUtils.h"
 #include "MtcDef.h"
 #include "conferencecall/ConferenceDef.h"
@@ -43,12 +44,17 @@ PUBLIC GLOBAL ServiceType JniMtcUtils::ReadServiceType(IN const android::Parcel&
     return static_cast<ServiceType>(objParcel.readInt32());
 }
 
+PUBLIC GLOBAL EmergencyType JniMtcUtils::ReadEmergencyType(IN const android::Parcel& objParcel)
+{
+    return static_cast<EmergencyType>(objParcel.readInt32());
+}
+
 PUBLIC GLOBAL JniCallInfo JniMtcUtils::ReadCallInfo(IN const Parcel& objParcel)
 {
     JniCallInfo objCallInfo;
 
     objCallInfo.eCallType = ReadCallType(objParcel);
-    objCallInfo.bEmergency = (objParcel.readInt32()) ? IMS_TRUE : IMS_FALSE;
+    objCallInfo.eEmergencyType = ReadEmergencyType(objParcel);
     objCallInfo.bOffline = (objParcel.readInt32()) ? IMS_TRUE : IMS_FALSE;
     objCallInfo.bUssi = (objParcel.readInt32()) ? IMS_TRUE : IMS_FALSE;
 
@@ -68,20 +74,22 @@ PUBLIC GLOBAL MediaInfo& JniMtcUtils::ReadMediaInfo(
     return objMediaInfo;
 }
 
-PUBLIC GLOBAL ImsMap<SuppType, SuppService*> JniMtcUtils::ReadSupplementaryService(
+PUBLIC GLOBAL ImsList<SuppService*> JniMtcUtils::ReadSupplementaryService(
         IN const Parcel& objParcel)
 {
-    ImsMap<SuppType, SuppService*> objSupp;
+    ImsList<SuppService*> objSupp;
 
-    IMS_UINT32 nSuppService = objParcel.readInt32();
-    for (IMS_UINT32 index = 0; index < nSuppService; index++)
+    IMS_UINT32 nServiceSize = objParcel.readInt32();
+    for (IMS_UINT32 index = 0; index < nServiceSize; index++)
     {
         SuppService* pSuppService = new SuppService();
 
-        objSupp.Add(static_cast<SuppType>(objParcel.readInt32()), pSuppService);
+        pSuppService->nType = objParcel.readInt32();
         ConvertString(objParcel.readString16(), pSuppService->strValue);
         pSuppService->nValue = objParcel.readInt32();
         pSuppService->bValue = (objParcel.readInt32()) ? IMS_TRUE : IMS_FALSE;
+
+        objSupp.Append(pSuppService);
     }
 
     return objSupp;
@@ -95,7 +103,7 @@ PUBLIC GLOBAL ImsList<ConfUser*> JniMtcUtils::ReadConferenceParticipants(IN cons
     {
         ConfUser* pUser = new ConfUser();
 
-        pUser->nConnectionId = objParcel.readInt64();  // TODO: how to ... call key!!!!!???
+        pUser->nConnectionId = objParcel.readInt64();
         ConvertString(objParcel.readString16(), pUser->strTarget);
         ConvertString(objParcel.readString16(), pUser->strUserEntity);
         ConvertString(objParcel.readString16(), pUser->strEpEntity);
@@ -116,13 +124,12 @@ PUBLIC GLOBAL void JniMtcUtils::WriteCallInfoToParcel(
 {
     objParcel.writeInt32(static_cast<IMS_SINT32>(objCallInfo.eServiceType));
     objParcel.writeInt32(static_cast<IMS_SINT32>(objCallInfo.eCallType));
-    IMS_SINT32 bEmergency = (objCallInfo.bEmergency) ? 1 : 0;
-    objParcel.writeInt32(bEmergency);
+    objParcel.writeInt32(static_cast<IMS_SINT32>(objCallInfo.eEmergencyType));
     IMS_SINT32 bOffline = (objCallInfo.bOffline) ? 1 : 0;
     objParcel.writeInt32(bOffline);
     IMS_SINT32 bUssi = (objCallInfo.bUssi) ? 1 : 0;
     objParcel.writeInt32(bUssi);
-    IMS_SINT32 bConf = (objCallInfo.bConference) ? 1 : 0;  // nConf? nIsConf?
+    IMS_SINT32 bConf = (objCallInfo.bConference) ? 1 : 0;
     objParcel.writeInt32(bConf);
     IMS_SINT32 bEnabledConf = (objCallInfo.bConferenceEnabled) ? 1 : 0;
     objParcel.writeInt32(bEnabledConf);
@@ -132,6 +139,9 @@ PUBLIC GLOBAL void JniMtcUtils::WriteCallInfoToParcel(
     objParcel.writeInt32(bRttCapable);
     IMS_SINT32 bVideoCapable = (objCallInfo.bVideoCapable) ? 1 : 0;
     objParcel.writeInt32(bVideoCapable);
+    IMS_SINT32 bCrossSim = (objCallInfo.bCrossSim) ? 1 : 0;
+    objParcel.writeInt32(bCrossSim);
+    objParcel.writeInt32(static_cast<IMS_SINT32>(objCallInfo.eRatType));
 }
 
 PUBLIC GLOBAL void JniMtcUtils::WriteMediaInfoToParcel(
@@ -143,10 +153,22 @@ PUBLIC GLOBAL void JniMtcUtils::WriteMediaInfoToParcel(
     objParcel.writeInt32(objMediaInfo.eVideoDirection);
     objParcel.writeInt32(objMediaInfo.eTextDirection);
     objParcel.writeInt32(objMediaInfo.eGttMode);
+    WriteAudioCodecAttributesToParcel(objMediaInfo.objAudioCodecAttributes, objParcel);
+}
+
+PUBLIC GLOBAL void JniMtcUtils::WriteAudioCodecAttributesToParcel(
+        IN const AudioCodecAttributes& objAudioCodecAttrs, IN_OUT Parcel& objParcel)
+{
+    objParcel.writeFloat(objAudioCodecAttrs.nBitrateKbps);
+    objParcel.writeFloat(objAudioCodecAttrs.nBitrateStartKbps);
+    objParcel.writeFloat(objAudioCodecAttrs.nBitrateEndKbps);
+    objParcel.writeFloat(objAudioCodecAttrs.nBandwidthKhz);
+    objParcel.writeFloat(objAudioCodecAttrs.nBandwidthStartKhz);
+    objParcel.writeFloat(objAudioCodecAttrs.nBandwidthEndKhz);
 }
 
 PUBLIC GLOBAL void JniMtcUtils::WriteSuppServicesToParcel(
-        IN const ImsMap<SuppType, SuppService*>& objSuppServices, IN_OUT Parcel& objParcel)
+        IN const ImsList<SuppService*>& objSuppServices, IN_OUT Parcel& objParcel)
 {
     IMS_UINT32 nSuppService = objSuppServices.GetSize();
 
@@ -155,7 +177,7 @@ PUBLIC GLOBAL void JniMtcUtils::WriteSuppServicesToParcel(
     {
         SuppService* pService = objSuppServices.GetValueAt(index);
 
-        objParcel.writeInt32(static_cast<IMS_SINT32>(objSuppServices.GetKeyAt(index)));
+        objParcel.writeInt32(pService->nType);
         objParcel.writeString16(String16(pService->strValue.GetStr()));
         objParcel.writeInt32(pService->nValue);
         objParcel.writeInt32(pService->bValue);
@@ -172,7 +194,7 @@ PUBLIC GLOBAL void JniMtcUtils::WriteConfUsersToParcel(
     {
         ConfUser* pUser = objUsers.GetAt(i);
 
-        objParcel.writeInt64(static_cast<IMS_SINTP>(pUser->nConnectionId));  // TODO: Int32.
+        objParcel.writeInt64(static_cast<IMS_SINTP>(pUser->nConnectionId));
         objParcel.writeString16(android::String16(pUser->strTarget.GetStr()));
         objParcel.writeString16(android::String16(pUser->strUserEntity.GetStr()));
         objParcel.writeString16(android::String16(pUser->strEpEntity.GetStr()));

@@ -13,73 +13,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ServiceMemory.h"
-#include "ServicePhoneInfo.h"
-#include "ServiceTrace.h"
+#include "IPhoneInfoDevice.h"
 #include "ImsMd5.h"
 #include "ImsSha1.h"
 #include "ImsUuid.h"
+#include "ServiceMemory.h"
+#include "ServicePhoneInfo.h"
+#include "ServiceTrace.h"
 
 #include "SipUrnHelper.h"
 
 __IMS_TRACE_TAG_REG__;
 
-// 3GPP 23.003 13.8 clause / draft-allen-dispatch-imei-urn-as-instanceid
-#define __IMS_SIP_IMEI_URN_AS_INSTANCE_ID__
+// 3GPP 23.003 13.8 clause (initial: draft-allen-dispatch-imei-urn-as-instanceid)
+// When an IMEI is available, the instance-id shall take the form of a IMEI URN (see RFC 7254).
+// The format of the instance-id shall take the form "urn:gsma:imei:" where by the imeival shall
+// contain the IMEI encoded as defined in RFC 7254.
+// The optional <sw-version-param> and <imei-version-param> parameters shall not be included
+// in the instance-id.
+// e.g. IMEI: "urn:gsma:imei:00000000-000000-0", IMEISV: urn:gsma:imei:00000000-000000-0;svn=00"
 
-#if defined(__IMS_SIP_IMEI_URN_AS_INSTANCE_ID__)
-PRIVATE GLOBAL const IMS_CHAR SipUrnHelper::IMEI[] = "urn:gsma:imei:00000000-000000-0";
-PRIVATE GLOBAL const IMS_CHAR SipUrnHelper::IMEI_SV[] = "urn:gsma:imei:00000000-000000-0";
-#else
-PRIVATE GLOBAL const IMS_CHAR SipUrnHelper::IMEI[] = "urn:gsma:imei:00000000-000000-0;vers=0";
-PRIVATE GLOBAL const IMS_CHAR SipUrnHelper::IMEI_SV[] = "urn:gsma:imei:00000000-000000-0;svn=00";
-#endif
-
-LOCAL
-IMS_BOOL sipUrnHelper_IsUuidFallbackRequiredWhenNoImei(IN IMS_SINT32 /*nSlotId*/)
-{
-    return IMS_FALSE;
-}
-
-PUBLIC GLOBAL AString SipUrnHelper::GetUrn(
-        IN IMS_SINT32 nSlotId, IN IMS_SINT32 nType, IN IMS_BOOL bSv /*= IMS_TRUE*/)
+PUBLIC GLOBAL AString SipUrnHelper::GetUrn(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nType)
 {
     AStringBuffer objUrn(64);
-    IDeviceInfo* piDeviceInfo = PhoneInfoService::GetPhoneInfoService()->GetDeviceInfo();
-
-    if (piDeviceInfo == IMS_NULL)
-    {
-        if (bSv)
-        {
-            return IMEI_SV;
-        }
-        else
-        {
-            return IMEI;
-        }
-    }
-
+    const IDeviceInfo* piDeviceInfo = PhoneInfoService::GetPhoneInfoService()->GetDeviceInfo();
     AString strImei;
 
-    piDeviceInfo->GetDeviceId(nSlotId, strImei);
+    if (piDeviceInfo != IMS_NULL)
+    {
+        piDeviceInfo->GetDeviceId(nSlotId, strImei);
+    }
 
     if (strImei.GetLength() == 0)
     {
-        // 3GPP - If no IMEI is available, so take the form of a string representation
-        // of a UUID as a URN in RFC 4122.
-        // 4 Name selection should be changed lator
         strImei = "00000000000000";
 
-        if (sipUrnHelper_IsUuidFallbackRequiredWhenNoImei(nSlotId) &&
-                ((nType == GSMA_IMEI) || (nType == UUID_IMEI_MD5) || (nType == UUID_IMEI_SHA1)))
-        {
-            nType = UUID_IMEI_NAMED_V5;
-        }
+        // NOTE: 3GPP - If no IMEI is available, so take the form of a string representation
+        // of a UUID as a URN in RFC 4122.
+        // (Name selection should be changed later - UUID_IMEI_NAMED_V3)
     }
 
     switch (nType)
     {
         case GSMA_IMEI:
+        case GSMA_IMEISV:
         {
             objUrn.Append("urn:gsma:imei:");
 
@@ -98,36 +75,25 @@ PUBLIC GLOBAL AString SipUrnHelper::GetUrn(
             objUrn.Append('-');
             // spare field is always set to zero
             objUrn.Append('0');
-#if !defined(__IMS_SIP_IMEI_URN_AS_INSTANCE_ID__)
-            objUrn.Append(';');
 
-            if (bSv)
+            if (nType == GSMA_IMEISV)
             {
-                AString strSv;
+                AString strSv(2, '0');
+                piDeviceInfo->GetDeviceSoftwareVersion(nSlotId, strSv);
 
-                piDeviceInfo->GetDeviceSoftwareVersion(strSv);
+                for (IMS_SINT32 i = strSv.GetLength(); i < 2; ++i)
+                {
+                    strSv.Prepend("0");
+                }
 
-                objUrn.Append("svn=");
+                if (strSv.GetLength() > 2)
+                {
+                    strSv = strSv.GetSubStr(strSv.GetLength() - 2);
+                }
 
-                if (strSv.GetLength() == 0)
-                {
-                    objUrn.Append("00");
-                }
-                else if (strSv.GetLength() == 1)
-                {
-                    objUrn.Append("0");
-                    objUrn.Append(strSv);
-                }
-                else
-                {
-                    objUrn.Append(strSv);
-                }
+                objUrn.Append(";svn=");
+                objUrn.Append(strSv);
             }
-            else
-            {
-                objUrn.Append("vers=0");
-            }
-#endif
             break;
         }
         case UUID_IMEI_MD5:
@@ -197,24 +163,6 @@ PUBLIC GLOBAL AString SipUrnHelper::GetUrn(
             objUrn.Append(ImsUuid::GetUuid(ImsUuid::VERSION_3, strImei));
             break;
         }
-        case UUID_IMEI_NAMED_V5:
-        {
-            // tac (8) + snr (6)
-            strImei = strImei.GetSubStr(0, 14);
-
-            objUrn.Append("urn:uuid:");
-            objUrn.Append(ImsUuid::GetUuid(ImsUuid::VERSION_5, strImei));
-            break;
-        }
-        case UUID_IMEI_V4:
-        {
-            // tac (8) + snr (6)
-            strImei = strImei.GetSubStr(0, 14);
-
-            objUrn.Append("urn:uuid:");
-            objUrn.Append(ImsUuid::GetUuid(ImsUuid::VERSION_4, strImei));
-            break;
-        }
         default:
             break;
     }
@@ -222,12 +170,20 @@ PUBLIC GLOBAL AString SipUrnHelper::GetUrn(
     return static_cast<const AStringBuffer&>(objUrn).GetString();
 }
 
-PUBLIC GLOBAL AString SipUrnHelper::GetUrn(IN IMS_SINT32 nVersion, IN const AString& strName)
+PUBLIC GLOBAL AString SipUrnHelper::GetUuidUrn(
+        IN IMS_SINT32 nVersion, IN const AString& strName /* = AString::ConstNull()*/)
 {
+    AString strUuid = ImsUuid::GetUuid(nVersion, strName);
+
+    if (strUuid.GetLength() == 0)
+    {
+        return AString::ConstNull();
+    }
+
     AStringBuffer objUrn(64);
 
     objUrn.Append("urn:uuid:");
-    objUrn.Append(ImsUuid::GetUuid(nVersion, strName));
+    objUrn.Append(strUuid);
 
     return static_cast<const AStringBuffer&>(objUrn).GetString();
 }

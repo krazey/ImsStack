@@ -20,13 +20,12 @@
 #include "AString.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "utility/IMessageUtils.h"
+#include <optional>
 #include <gmock/gmock.h>
 
 class IMessage;
-class IMtcContext;
 class Ims3gpp;
 class ISession;
 struct ConfUser;
@@ -34,8 +33,6 @@ struct ConfUser;
 class MockIMessageUtils : public IMessageUtils
 {
 public:
-    ~MockIMessageUtils() {}
-
     MOCK_METHOD(IMessage*, GetPreviousResponse, (IN const ISession*, IN IMS_SINT32, IN IMS_SINT32),
             (override));
     MOCK_METHOD(IMessage*, GetRemotePreviousMessage,
@@ -55,15 +52,12 @@ public:
             (IN const IMessage*, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(AString, GetParameterValue,
             (IN const IMessage*, IN const AString&, IN IMS_SINT32, IN const AString&), (override));
-    MOCK_METHOD(ImsList<AString>, GetUserParts,
-            (IN const IMessage*, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(AString, GetUserPart, (IN const IMessage*, IN IMS_SINT32, IN const AString&),
             (override));
+    MOCK_METHOD(AString, GetUserPart, (IN const AString&), (override));
     MOCK_METHOD(ImsList<AString>, GetUserIds, (IN IMessage*, IN IMS_SINT32, IN const AString&),
             (override));
     MOCK_METHOD(AString, GetUserId, (IN IMessage*, IN IMS_SINT32, IN const AString&), (override));
-    MOCK_METHOD(ImsList<AString>, GetDisplayNames, (IN IMessage*, IN IMS_SINT32, IN const AString&),
-            (override));
     MOCK_METHOD(
             AString, GetDisplayName, (IN IMessage*, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(ImsList<AString>, GetHosts, (IN IMessage*, IN IMS_SINT32, IN const AString&),
@@ -71,16 +65,21 @@ public:
     MOCK_METHOD(AString, GetHost, (IN IMessage*, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(AString, GetParameterValueFromUri,
             (IN IMessage*, IN const AString&, IN IMS_SINT32, IN const AString&), (override));
-    MOCK_METHOD(ImsList<AString>, GetUris,
-            (IN IMessage*, IN IMS_BOOL, IN IMS_SINT32, IN const AString&), (override));
-    MOCK_METHOD(AString, GetUri, (IN IMessage*, IN IMS_BOOL, IN IMS_SINT32, IN const AString&),
+    MOCK_METHOD(AString, GetParameterValueFromUri, (IN const SipAddress&, IN const AString&),
             (override));
+    MOCK_METHOD(ImsList<AString>, GetUris,
+            (IN const IMessage*, IN IMS_BOOL, IN IMS_SINT32, IN const AString&), (override));
+    MOCK_METHOD(AString, GetUri,
+            (IN const IMessage*, IN IMS_BOOL, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(IMS_SINT32, GetSosTypeFromServiceUrn,
             (IN const IMessage*, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(IMS_SINT32, GetCauseFromReasonHeader, (IN const IMessage*, IN const AString&),
             (override));
     MOCK_METHOD(ReasonHeaderValue, GetCauseAndTextFromReasonHeader,
             (IN const IMessage*, IN const AString&), (override));
+    MOCK_METHOD(ReasonHeaderValue, GetPrioritizedReasonHeader,
+            (IN const IMessage*, IN const std::initializer_list<AString>& lstPrioritizedProtocols),
+            (override));
     MOCK_METHOD(Ims3gpp&, GetIms3gppFromBody, (IN const IMessage*, OUT Ims3gpp&), (override));
     MOCK_METHOD(Ims3gppData, GetIms3gppData, (IN const IMessage*), (override));
     MOCK_METHOD(IMS_SINT32, GetStatusCodeInNotify, (IN IMessage*), (override));
@@ -89,28 +88,29 @@ public:
     MOCK_METHOD(IMS_BOOL, IsInitialRegistrationRequired, (IN const IMessage*), (override));
     MOCK_METHOD(IMS_BOOL, IsInitialEmergencyRegistrationRequired, (IN const IMessage*), (override));
     MOCK_METHOD(IMS_BOOL, ContainsValue,
-            (IN IMessage*, IN const AString&, IN IMS_SINT32, IN const AString&), (override));
-    MOCK_METHOD(IMS_BOOL, HasValue,
+            (IN const IMessage*, IN const AString&, IN IMS_SINT32, IN const AString&), (override));
+    MOCK_METHOD(IMS_BOOL, ContainsValueIgnoreCase,
             (IN const IMessage*, IN const AString&, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(IMS_BOOL, IsHeaderPresent, (IN const IMessage*, IN IMS_SINT32, IN const AString&),
             (override));
     MOCK_METHOD(IMS_BOOL, ContainsTag, (IN const AString&, IN const AString&), (override));
     MOCK_METHOD(
             IMS_BOOL, ContainsAddressInPaid, (IN const IMessage*, IN const AString&), (override));
+    MOCK_METHOD(AString, GetPai, (IN const IMessage&), (override));
     MOCK_METHOD(IMS_RESULT, SetHeader,
             (IN IMessage*, IN const AString&, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(IMS_RESULT, AddValueIfNotExists,
             (IN IMessage*, IN const AString&, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(AString, GenerateContentId, (IN const AString&), (override));
     MOCK_METHOD(IMS_RESULT, SetResourceList,
-            (IN_OUT IMessage*, IN IMtcContext&, IN const AString&, IN const ImsList<ConfUser*>&,
-                    IN IMS_BOOL, IN IMS_BOOL),
-            (override));
-    MOCK_METHOD(IMS_BOOL, IsVideoFeatureIncluded, (IN const IMessage*), (override));
-    MOCK_METHOD(IMS_BOOL, IsTextFeatureIncluded, (IN const IMessage*), (override));
+            (IN_OUT IMessage*, IN const ImsList<ConfUser*>&, IN IMS_BOOL, IN IMS_BOOL), (override));
+    MOCK_METHOD(std::optional<IMS_BOOL>, IsMmtelFeatureIncluded, (IN const IMessage*), (override));
+    MOCK_METHOD(std::optional<IMS_BOOL>, IsVideoFeatureIncluded, (IN const IMessage*), (override));
+    MOCK_METHOD(std::optional<IMS_BOOL>, IsTextFeatureIncluded, (IN const IMessage*), (override));
     MOCK_METHOD(CallType, GetCallType, (IN const IMessage*, IN ISession*, IN IMS_BOOL), (override));
     MOCK_METHOD(CallType, GetCallTypeFromSdp, (IN ISession*, IN IMS_BOOL, IN IMS_BOOL, IN IMS_BOOL),
             (override));
+    MOCK_METHOD(IMS_SINT32, GetRemotePortFromSdp, (IN ISession*, IN IMS_SINT32), (override));
     MOCK_METHOD(IMS_BOOL, IsResponseExist, (IN ISession*, IN IMS_SINT32), (override));
     MOCK_METHOD(IMS_UINT32, GetNumberOfPreviousResponses, (IN const ISession*, IN IMS_SINT32),
             (const, override));

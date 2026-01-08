@@ -15,6 +15,9 @@
  */
 package com.android.imsstack.core.agents;
 
+import static com.android.imsstack.base.TestAppContext.SLOT0;
+import static com.android.imsstack.base.TestAppContext.SUB_ID_1;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -25,13 +28,13 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Handler;
+import android.telephony.AccessNetworkConstants;
 import android.telephony.CarrierConfigManager;
 import android.telephony.CellIdentity;
 import android.telephony.CellIdentityGsm;
@@ -45,21 +48,23 @@ import android.telephony.CellInfoNr;
 import android.telephony.CellInfoWcdma;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.filters.SmallTest;
+
 import com.android.imsstack.ContextFixture;
+import com.android.imsstack.base.ImsPrivateProperties;
+import com.android.imsstack.base.TelephonyManagerProxy;
+import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
-import com.android.imsstack.util.AppContext;
-import com.android.imsstack.util.ImsPrivateProperties;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -69,14 +74,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-@RunWith(JUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class CellInfoAgentTest {
-    private static final int SLOT0 = 0;
-    private static final int SUB_ID = 1;
-    private static final long TIMESTAMP = 55004107851687L;
-    private static final long RECENT_TIMESTAMP = 55004907851687L;
+    private static final int CELL_INFO_AGE_EXPIRATION_SEC = 7200;
+    private static final long TIMESTAMP =
+            System.currentTimeMillis() - (CELL_INFO_AGE_EXPIRATION_SEC * 500);
+    private static final long RECENT_TIMESTAMP = TIMESTAMP - (CELL_INFO_AGE_EXPIRATION_SEC * 250);
     private static final String LAST_ANI =
-            "13,2023-05-27T10:25:45Z,1685183145247,001,01,d8237,b112,FDD";
+            "13,2023-05-27T10:25:45Z," + RECENT_TIMESTAMP + ",001,01,d8237,b112,FDD";
 
     @Mock private SharedPreferences mSp;
     @Mock private SharedPreferences.Editor mSpEditor;
@@ -87,7 +93,8 @@ public class CellInfoAgentTest {
 
     private final List<CellInfo> mCellInfos = new ArrayList<>();
     private ContextFixture mContextFixture;
-    private TelephonyManager mTelephonyManager;
+    private TestAppContext mTestAppContext;
+    private TelephonyManagerProxy mTelephonyManagerProxy;
     private TestableLooper mTestableLooper;
     private CellInfoAgent mCellInfoAgent;
     private boolean mInvalidMcc;
@@ -99,27 +106,32 @@ public class CellInfoAgentTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        mTestableLooper = TestableLooper.get(this);
         mContextFixture = new ContextFixture();
-        Context context = mContextFixture.getTestDouble();
-        mTelephonyManager = context.getSystemService(TelephonyManager.class);
-        when(mTelephonyManager.getSupportedModemCount()).thenReturn(1);
-        when(mTelephonyManager.createForSubscriptionId(eq(SUB_ID))).thenReturn(mTelephonyManager);
-        when(context.getSharedPreferences(anyString(), anyInt())).thenReturn(mSp);
+        mTestAppContext = new TestAppContext(mContextFixture.getTestDouble());
+        mTestAppContext.setUpWithLooper(mTestableLooper.getLooper());
+
+        mTelephonyManagerProxy = mTestAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
+
+        when(mTestAppContext.getContext().getSharedPreferences(anyString(), anyInt()))
+                .thenReturn(mSp);
         when(mSp.getString(eq(ImsPrivateProperties.Persistent.KEY_LAST_ACCESS_NETWORK_INFO),
                 anyString())).thenReturn("");
         when(mSp.edit()).thenReturn(mSpEditor);
+        when(mConfigInterface.getCarrierConfig()).thenReturn(mCarrierConfig);
+        when(mCarrierConfig.getInt(
+                eq(CarrierConfig.Ims.KEY_CELLULAR_NETWORK_INFO_CACHE_EXPIRATION_SEC_INT), anyInt()))
+                .thenReturn(CELL_INFO_AGE_EXPIRATION_SEC);
 
-        AppContext.init(context);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mConfigInterface, SLOT0);
-        when(mSimInterface.getSubId()).thenReturn(SUB_ID);
+        when(mSimInterface.getSubId()).thenReturn(SUB_ID_1);
         AgentFactory.getInstance().setAgent(SimInterface.class, mSimInterface, SLOT0);
         when(mDcNetWatcher.getVoiceNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_UNKNOWN);
         when(mDcNetWatcher.getVoiceNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
         DcFactory.setDcAgent(IDcNetWatcher.class, mDcNetWatcher, SLOT0);
-        mTestableLooper = new TestableLooper(AppContext.getInstance().getMainLooper());
 
         mCellInfoAgent = new CellInfoAgent(SLOT0);
-        mCellInfoAgent.init(context);
+        mCellInfoAgent.init(mTestAppContext.getContext());
     }
 
     @After
@@ -130,11 +142,6 @@ public class CellInfoAgentTest {
         }
 
         mCellInfos.clear();
-
-        if (mTestableLooper != null) {
-            mTestableLooper.destroy();
-            mTestableLooper = null;
-        }
 
         mInvalidMcc = false;
         mInvalidMnc = false;
@@ -149,9 +156,11 @@ public class CellInfoAgentTest {
         mDcNetWatcher = null;
         mSpEditor = null;
         mSp = null;
-        mTelephonyManager = null;
+        mTelephonyManagerProxy = null;
+        mTestAppContext.tearDown();
+        mTestAppContext = null;
         mContextFixture = null;
-        AppContext.deinit();
+        mTestableLooper = null;
     }
 
     @Test
@@ -182,13 +191,11 @@ public class CellInfoAgentTest {
         mCellInfoAgent.startTrackingCellInfo();
         mCellInfoAgent.stopTrackingCellInfo();
 
-        verify(mTelephonyManager).registerTelephonyCallback(any(Executor.class),
+        verify(mTelephonyManagerProxy).registerTelephonyCallback(any(Executor.class),
                 any(TelephonyCallback.class));
-        verify(mDcNetWatcher).registerForRatChanged(any(Handler.class), anyInt(), any());
-        verify(mDcNetWatcher).registerForVoiceRatChanged(any(Handler.class), anyInt(), any());
-        verify(mTelephonyManager).unregisterTelephonyCallback(any(TelephonyCallback.class));
-        verify(mDcNetWatcher).unregisterForRatChanged(any(Handler.class));
-        verify(mDcNetWatcher).unregisterForVoiceRatChanged(any(Handler.class));
+        verify(mDcNetWatcher).addListener(any(IDcNetWatcher.Listener.class));
+        verify(mTelephonyManagerProxy).unregisterTelephonyCallback(any(TelephonyCallback.class));
+        verify(mDcNetWatcher).removeListener(any(IDcNetWatcher.Listener.class));
     }
 
     @Test
@@ -197,11 +204,9 @@ public class CellInfoAgentTest {
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT0);
         mCellInfoAgent.startTrackingCellInfo();
 
-        verify(mTelephonyManager, never())
+        verify(mTelephonyManagerProxy, never())
                 .registerTelephonyCallback(any(Executor.class), any(TelephonyCallback.class));
-        verify(mDcNetWatcher, never()).registerForRatChanged(any(Handler.class), anyInt(), any());
-        verify(mDcNetWatcher, never())
-                .registerForVoiceRatChanged(any(Handler.class), anyInt(), any());
+        verify(mDcNetWatcher, never()).addListener(any(IDcNetWatcher.Listener.class));
     }
 
     @Test
@@ -209,10 +214,9 @@ public class CellInfoAgentTest {
     public void testStopTrackingCellInfoWhenNotStarted() {
         mCellInfoAgent.stopTrackingCellInfo();
 
-        verify(mTelephonyManager, never())
+        verify(mTelephonyManagerProxy, never())
                 .unregisterTelephonyCallback(any(TelephonyCallback.class));
-        verify(mDcNetWatcher, never()).unregisterForRatChanged(any(Handler.class));
-        verify(mDcNetWatcher, never()).unregisterForVoiceRatChanged(any(Handler.class));
+        verify(mDcNetWatcher, never()).removeListener(any(IDcNetWatcher.Listener.class));
     }
 
     @Test
@@ -297,7 +301,7 @@ public class CellInfoAgentTest {
 
         ArgumentCaptor<TelephonyManager.CellInfoCallback> captor =
                 ArgumentCaptor.forClass(TelephonyManager.CellInfoCallback.class);
-        verify(mTelephonyManager).requestCellInfoUpdate(any(Executor.class), captor.capture());
+        verify(mTelephonyManagerProxy).requestCellInfoUpdate(any(Executor.class), captor.capture());
 
         TelephonyManager.CellInfoCallback callback =
                 (TelephonyManager.CellInfoCallback) captor.getValue();
@@ -314,8 +318,140 @@ public class CellInfoAgentTest {
         verifyNoMoreInteractions(mSpEditor);
     }
 
+    @Test
+    @SmallTest
+    public void testUpdateAllCellInfoWhenDataNetworkTypeChanged() {
+        setUpAllCellInfo(TelephonyManager.NETWORK_TYPE_LTE, true);
+        mCellInfoAgent.startTrackingCellInfo();
+        ArgumentCaptor<IDcNetWatcher.Listener> captor =
+                ArgumentCaptor.forClass(IDcNetWatcher.Listener.class);
+        verify(mDcNetWatcher).addListener(captor.capture());
+        IDcNetWatcher.Listener listener = captor.getValue();
+        assertNotNull(listener);
+
+        listener.onDataNetworkTypeChanged();
+        processAllMessages();
+
+        verify(mSpEditor, times(2)).putString(
+                eq(ImsPrivateProperties.Persistent.KEY_LAST_ACCESS_NETWORK_INFO), anyString());
+        verify(mSpEditor, times(2)).commit();
+    }
+
+    @Test
+    @SmallTest
+    public void testUpdateAllCellInfoWhenVoiceNetworkTypeChanged() {
+        setUpAllCellInfo(TelephonyManager.NETWORK_TYPE_LTE, true);
+        mCellInfoAgent.startTrackingCellInfo();
+        ArgumentCaptor<IDcNetWatcher.Listener> captor =
+                ArgumentCaptor.forClass(IDcNetWatcher.Listener.class);
+        verify(mDcNetWatcher).addListener(captor.capture());
+        IDcNetWatcher.Listener listener = captor.getValue();
+        assertNotNull(listener);
+
+        listener.onVoiceNetworkTypeChanged();
+        processAllMessages();
+
+        verify(mSpEditor, times(2)).putString(
+                eq(ImsPrivateProperties.Persistent.KEY_LAST_ACCESS_NETWORK_INFO), anyString());
+        verify(mSpEditor, times(2)).commit();
+    }
+
+    @Test
+    @SmallTest
+    public void testGetAccessNetworkInfoWhenCarrierConfigChangedWithUtcOffsetEnabled() {
+        setUpAllCellInfo(TelephonyManager.NETWORK_TYPE_LTE, true);
+        mCellInfoAgent.startTrackingCellInfo();
+        processAllMessages();
+        when(mConfigInterface.getCarrierConfig()).thenReturn(mCarrierConfig);
+        when(mCarrierConfig.getBoolean(
+                eq(CarrierConfig.Ims.KEY_CELLULAR_NETWORK_INFO_UTC_OFFSET_ENABLED_BOOL)))
+                .thenReturn(true);
+
+        ArgumentCaptor<ConfigInterface.Listener> configListenerCaptor =
+                ArgumentCaptor.forClass(ConfigInterface.Listener.class);
+        verify(mConfigInterface).addListener(configListenerCaptor.capture());
+        ConfigInterface.Listener listener = configListenerCaptor.getValue();
+        listener.onCarrierConfigChanged(SLOT0, SUB_ID_1);
+
+        String[] defaultAni = mCellInfoAgent.getAccessNetworkInfo();
+        assertFalse(defaultAni[CellInfoAgent.ANI_INDEX_UTC_TIME_FORMAT].endsWith("Z"));
+    }
+
+    @Test
+    @SmallTest
+    public void testGetAccessNetworkInfoWhenCarrierConfigChangedWithUtcOffsetDisabled() {
+        setUpAllCellInfo(TelephonyManager.NETWORK_TYPE_LTE, true);
+        mCellInfoAgent.startTrackingCellInfo();
+        processAllMessages();
+        when(mConfigInterface.getCarrierConfig()).thenReturn(mCarrierConfig);
+        when(mCarrierConfig.getBoolean(
+                eq(CarrierConfig.Ims.KEY_CELLULAR_NETWORK_INFO_UTC_OFFSET_ENABLED_BOOL)))
+                .thenReturn(false);
+
+        ArgumentCaptor<ConfigInterface.Listener> configListenerCaptor =
+                ArgumentCaptor.forClass(ConfigInterface.Listener.class);
+        verify(mConfigInterface).addListener(configListenerCaptor.capture());
+        ConfigInterface.Listener listener = configListenerCaptor.getValue();
+        listener.onCarrierConfigChanged(SLOT0, SUB_ID_1);
+
+        String[] defaultAni = mCellInfoAgent.getAccessNetworkInfo();
+        assertTrue(defaultAni[CellInfoAgent.ANI_INDEX_UTC_TIME_FORMAT].endsWith("Z"));
+    }
+
+    @Test
+    @SmallTest
+    public void testGetAccessNetworkInfoWithValidCellInfoAgeFromPersistentStorage() {
+        setUpAllCellInfo(TelephonyManager.NETWORK_TYPE_LTE, true);
+        mCellInfoAgent.startTrackingCellInfo();
+        processAllMessages();
+        when(mSp.getString(eq(ImsPrivateProperties.Persistent.KEY_LAST_ACCESS_NETWORK_INFO),
+                anyString())).thenReturn(LAST_ANI);
+
+        String[] defaultAni = mCellInfoAgent.getAccessNetworkInfo(TelephonyManager.NETWORK_TYPE_NR);
+        assertTrue(
+                Integer.parseInt(defaultAni[CellInfoAgent.ANI_INDEX_CELL_INFO_AGE])
+                        < CELL_INFO_AGE_EXPIRATION_SEC);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetAccessNetworkInfoWithInvalidCellInfoAgeFromPersistentStorage() {
+        final long recentTimestamp = TIMESTAMP - (CELL_INFO_AGE_EXPIRATION_SEC * 1000);
+        String lastAni =
+                "13,2023-05-27T10:25:45Z," + recentTimestamp + ",001,01,d8237,b112,FDD";
+        setUpAllCellInfo(TelephonyManager.NETWORK_TYPE_LTE, true);
+        mCellInfoAgent.startTrackingCellInfo();
+        processAllMessages();
+        when(mSp.getString(eq(ImsPrivateProperties.Persistent.KEY_LAST_ACCESS_NETWORK_INFO),
+                anyString())).thenReturn(lastAni);
+
+        String[] defaultAni = mCellInfoAgent.getAccessNetworkInfo(TelephonyManager.NETWORK_TYPE_NR);
+        assertNull(defaultAni);
+    }
+
+    @Test
+    @SmallTest
+    public void testGetAccessNetworkInfoWithInvalidCellInfoAge() {
+        setUpAllCellInfo(TelephonyManager.NETWORK_TYPE_LTE, true);
+        mCellInfoAgent.startTrackingCellInfo();
+        processAllMessages();
+        // set the mCellInfoCacheExpirationDuration so that CellInfo is always invalid
+        when(mCarrierConfig.getInt(
+                eq(CarrierConfig.Ims.KEY_CELLULAR_NETWORK_INFO_CACHE_EXPIRATION_SEC_INT), anyInt()))
+                .thenReturn(-1);
+
+        ArgumentCaptor<ConfigInterface.Listener> configListenerCaptor =
+                ArgumentCaptor.forClass(ConfigInterface.Listener.class);
+        verify(mConfigInterface).addListener(configListenerCaptor.capture());
+        ConfigInterface.Listener listener = configListenerCaptor.getValue();
+        listener.onCarrierConfigChanged(SLOT0, SUB_ID_1);
+
+        String[] defaultAni = mCellInfoAgent.getAccessNetworkInfo();
+        assertNull(defaultAni);
+    }
+
     private void testUpdateAllCellInfoWithInvalidCellIdentity(int networkType) {
-        setUpVoNrEnabled(networkType == TelephonyManager.NETWORK_TYPE_NR);
+        setUpNgranEnabled(networkType == TelephonyManager.NETWORK_TYPE_NR);
         setUpAllCellInfo(networkType, false);
 
         mCellInfoAgent.startTrackingCellInfo();
@@ -327,7 +463,7 @@ public class CellInfoAgentTest {
 
     private void testUpdateAllCellInfoUsingTelephonyCallback(int networkType,
             boolean timeOffsetEnabled) {
-        setUpVoNrEnabled(networkType == TelephonyManager.NETWORK_TYPE_NR);
+        setUpNgranEnabled(networkType == TelephonyManager.NETWORK_TYPE_NR);
         mCellInfoAgent.setTimeOffsetEnabledForUtcTimeFormat(timeOffsetEnabled);
         mCellInfoAgent.startTrackingCellInfo();
         notifyCellInfoChanged(networkType, TelephonyManager.NETWORK_TYPE_UNKNOWN,
@@ -352,7 +488,7 @@ public class CellInfoAgentTest {
 
     private void testUpdateAllCellInfoUsingTelephonyCallback(
             int networkType1, int networkType2, long timestamp1, long timestamp2) {
-        setUpVoNrEnabled((networkType1 == TelephonyManager.NETWORK_TYPE_NR)
+        setUpNgranEnabled((networkType1 == TelephonyManager.NETWORK_TYPE_NR)
                 || (networkType2 == TelephonyManager.NETWORK_TYPE_NR));
 
         mCellInfoAgent.startTrackingCellInfo();
@@ -400,7 +536,7 @@ public class CellInfoAgentTest {
                 mInvalidLacOrTac = false;
             }
         }
-        when(mTelephonyManager.getAllCellInfo()).thenReturn(mCellInfos);
+        when(mTelephonyManagerProxy.getAllCellInfo()).thenReturn(mCellInfos);
     }
 
     private void notifyCellInfoChanged(int networkType1, int networkType2,
@@ -412,18 +548,18 @@ public class CellInfoAgentTest {
             mCellInfos.add(createCellInfo(networkType2, true, timestamp2));
         }
         ArgumentCaptor<TelephonyCallback> captor = ArgumentCaptor.forClass(TelephonyCallback.class);
-        verify(mTelephonyManager).registerTelephonyCallback(any(), captor.capture());
+        verify(mTelephonyManagerProxy).registerTelephonyCallback(any(), captor.capture());
         TelephonyCallback.CellInfoListener cellInfoListener =
                 (TelephonyCallback.CellInfoListener) captor.getValue();
         cellInfoListener.onCellInfoChanged(mCellInfos);
     }
 
-    private void setUpVoNrEnabled(boolean enabled) {
+    private void setUpNgranEnabled(boolean enabled) {
         when(mConfigInterface.getCarrierConfig()).thenReturn(mCarrierConfig);
         when(mCarrierConfig.getIntArray(
-                eq(CarrierConfigManager.KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY)))
+                eq(CarrierConfigManager.Ims.KEY_SUPPORTED_RATS_INT_ARRAY)))
                 .thenReturn(enabled
-                        ? new int[] { CarrierConfigManager.CARRIER_NR_AVAILABILITY_SA }
+                        ? new int[] { AccessNetworkConstants.AccessNetworkType.NGRAN }
                         : null);
     }
 

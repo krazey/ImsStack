@@ -18,18 +18,22 @@ package com.android.imsstack.enabler.ssc;
 
 import android.text.TextUtils;
 
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.SystemUtils;
+import com.android.imsstack.util.ImsUtils;
 
 import java.util.HashMap;
 import java.util.Locale;
 
 public class SscAuthAgent implements ISscAuthAgent {
     public static HashMap<Integer, ISscAuthAgent> sSscAuthAgent = new HashMap<>();
+    private static final String ME_BASED_GBA = "3gpp-bootstrapping@";
 
     private int mSlotId = 0;
     private String mCipherSuite = "";
     private String mETag = "";
+    private int mLastSuccessfulGbaMode = SscConfig.GBA_NONE;
 
     private boolean mIsCredentialInfoUpdated = false;
     private final SscAuthCredentials mSscAuthCredentials;
@@ -61,11 +65,6 @@ public class SscAuthAgent implements ISscAuthAgent {
     }
 
     @Override
-    public String getRealm() {
-        return mSscAuthCredentials.getRealm();
-    }
-
-    @Override
     public void setGbaKeys(String username, String password) {
         mSscAuthCredentials.setUsername(username);
         mSscAuthCredentials.setPassword(password);
@@ -92,18 +91,35 @@ public class SscAuthAgent implements ISscAuthAgent {
     }
 
     @Override
-    public String getNafFqdnFromRealm() {
-        String realm = mSscAuthCredentials.getRealm();
-        if (TextUtils.isEmpty(realm)) {
-            ImsLog.d("realm is invalid");
-            return null;
+    public boolean isCredentialInfoUpdated() {
+        return mIsCredentialInfoUpdated;
+    }
+
+    @Override
+    public void setIsCredentialInfoUpdated(boolean updated) {
+        ImsLog.d(mSlotId, "setIsCredentialInfoUpdated() " + updated);
+        mIsCredentialInfoUpdated = updated;
+
+        if (!mIsCredentialInfoUpdated) {
+            mCipherSuite = "";
+            mSscAuthCredentials.clear();
         }
+    }
 
-        String[] tokens = realm.split("@");
-        String nafFqdn = tokens.length > 1 ? tokens[1] : tokens[0];
+    @Override
+    public String getNafFqdn() {
+        String nafFqdn = SscConfig.getNafFqdn(mSlotId);
+        if (TextUtils.isEmpty(nafFqdn)) {
+            return getNafFqdnFromRealm();
+        } else {
+            ImsLog.d("nafFqdn : "  + nafFqdn);
+            return nafFqdn;
+        }
+    }
 
-        ImsLog.d("nafFqdn : "  + nafFqdn);
-        return nafFqdn;
+    @Override
+    public String getRealm() {
+        return mSscAuthCredentials.getRealm();
     }
 
     @Override
@@ -132,8 +148,17 @@ public class SscAuthAgent implements ISscAuthAgent {
             String[] nameValue = token.split("=");
             if ("realm".equalsIgnoreCase(nameValue[0])) {
                 String temp_realm = nameValue[1].replaceAll("\"", "");
-                String[] realm_send = temp_realm.split(";");
-                mSscAuthCredentials.setRealm(realm_send[0]);
+                String[] realms = temp_realm.split(";");
+                for (String realm : realms) {
+                    if (!TextUtils.isEmpty(realm)
+                            && realm.toLowerCase(Locale.US).startsWith(ME_BASED_GBA)) {
+                        mSscAuthCredentials.setRealm(realm);
+                        break;
+                    }
+                }
+                if (TextUtils.isEmpty(mSscAuthCredentials.getRealm())) {
+                    mSscAuthCredentials.setRealm(realms[0]);
+                }
                 ImsLog.d("nameValue :" + nameValue[0] + "/" + nameValue[1]
                         + ", getRealm() : " + mSscAuthCredentials.getRealm());
             } else if ("nonce".equalsIgnoreCase(nameValue[0])) {
@@ -170,19 +195,65 @@ public class SscAuthAgent implements ISscAuthAgent {
     }
 
     @Override
-    public void setIsCredentialInfoUpdated(boolean updated) {
-        ImsLog.d(mSlotId, "setIsCredentialInfoUpdated() " + updated);
-        mIsCredentialInfoUpdated = updated;
-
-        if (!mIsCredentialInfoUpdated) {
-            mCipherSuite = "";
-            mSscAuthCredentials.clear();
+    public int getGbaMode(int appType) {
+        int gbaMode = SscConfig.getGbaMode(mSlotId);
+        if (gbaMode == SscConfig.GBA_U) {
+            return isGbaValid(appType) ? SscConfig.GBA_U : SscConfig.GBA_ME;
         }
+
+        return gbaMode;
     }
 
     @Override
-    public boolean isCredentialInfoUpdated() {
-        return mIsCredentialInfoUpdated;
+    public int getLastSuccessfulGbaMode() {
+        ImsLog.d("GBA type : " + mLastSuccessfulGbaMode);
+        return mLastSuccessfulGbaMode;
+    }
+
+    @Override
+    public void setLastSuccessfulGbaMode(int gbaMode) {
+        mLastSuccessfulGbaMode = gbaMode;
+    }
+
+    private String getNafFqdnFromRealm() {
+        String realm = mSscAuthCredentials.getRealm();
+        if (TextUtils.isEmpty(realm)) {
+            ImsLog.d("realm is invalid");
+            return null;
+        }
+
+        String[] tokens = realm.split("@");
+        String nafFqdn = tokens.length > 1 ? tokens[1] : tokens[0];
+
+        ImsLog.d("nafFqdn : "  + nafFqdn);
+        return nafFqdn;
+    }
+
+    private boolean isGbaValid(int appType) {
+        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+        if (sim == null) {
+            ImsLog.e("SimInterface is null!!");
+            return false;
+        }
+
+        if (appType == SscConstant.APPTYPE_ISIM) {
+            if (sim.getIsimServiceTable().length == 0) {
+                ImsLog.e("IST is null!!");
+                return true;
+            }
+
+            return sim.isGbaAvailable();
+        } else if (appType == SscConstant.APPTYPE_USIM) {
+            if (sim.getUsimServiceTable().length == 0) {
+                ImsLog.e("UST is null!!");
+                return true;
+            }
+
+            // TODO: It should check if USIM support GBA.
+            return true;
+        }
+
+        return false;
     }
 
     private static class SscAuthCredentials {
@@ -247,14 +318,14 @@ public class SscAuthAgent implements ISscAuthAgent {
             String unqRealm = realm.replace("\"", "");
             String varA1 = unqUsername + ":" + unqRealm + ":" + passwd;
 
-            if ("MD5-sees".equals(algorithm)) {
-                varA1 = SystemUtils.calculateMessageDigest("MD5", varA1);
+            if ("MD5-sess".equalsIgnoreCase(algorithm)) {
+                varA1 = ImsUtils.calculateMessageDigest("MD5", varA1);
                 String unqNonce = nonce.replace("\"", "");
                 String unqCnonce = cnonce.replace("\"", "");
                 varA1 = varA1 + ":" + unqNonce + ":" + unqCnonce;
             }
 
-            String varHA1 = SystemUtils.calculateMessageDigest("MD5", varA1);
+            String varHA1 = ImsUtils.calculateMessageDigest("MD5", varA1);
             ImsLog.d("\nA1 : " + varA1 + "\nHA1 : " + varHA1);
 
             return varHA1;
@@ -263,7 +334,7 @@ public class SscAuthAgent implements ISscAuthAgent {
         private String generateCnonce() {
             String date = "" + System.currentTimeMillis();
 
-            return SystemUtils.calculateMessageDigest("MD5", date);
+            return ImsUtils.calculateMessageDigest("MD5", date);
         }
 
         private String calculateResponse(String varHA1, String nonce, String nc,
@@ -275,15 +346,15 @@ public class SscAuthAgent implements ISscAuthAgent {
 
             String varA2 = method + ":" + digestUri;
 
-            if ("auth-int".equals(qop)) {
+            if ("auth-int".equalsIgnoreCase(qop)) {
                 if (entity == null) {
                     ImsLog.w("entity is null ");
                     entity = "";
                 }
-                varA2 = varA2 + ":" + SystemUtils.calculateMessageDigest("MD5", entity);
+                varA2 = varA2 + ":" + ImsUtils.calculateMessageDigest("MD5", entity);
             }
 
-            String varHA2 = SystemUtils.calculateMessageDigest("MD5", varA2);
+            String varHA2 = ImsUtils.calculateMessageDigest("MD5", varA2);
             ImsLog.d("A2 : " + varA2 + ", HA2 : " + varHA2);
 
             String tmpRsp = null;
@@ -294,7 +365,7 @@ public class SscAuthAgent implements ISscAuthAgent {
                 tmpRsp = varHA1 + ":" + nonce + ":" + varHA2;
             }
 
-            String requestDigest = SystemUtils.calculateMessageDigest("MD5", tmpRsp);
+            String requestDigest = ImsUtils.calculateMessageDigest("MD5", tmpRsp);
             ImsLog.d("temp-response : " + tmpRsp + ", requestDigest : " + requestDigest);
 
             return requestDigest;

@@ -14,18 +14,31 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
 #include "IJniMtcServiceThread.h"
+#include "IMessage.h"
+#include "IMtcCallController.h"
 #include "IMtcContext.h"
 #include "INetworkWatcher.h"
+#include "ISession.h"
 #include "ImsAosParameter.h"
 #include "ImsAosReason.h"
+#include "IuMtcService.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
+#include "SipStatusCode.h"
+#include "call/IMtcCallContext.h"
+#include "call/IMtcCallManager.h"
+#include "call/IMtcSession.h"
+#include "call/MtcCallStringUtils.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "configuration/MtcConfigurationResolver.h"
 #include "emergency/EmergencyServiceController.h"
 #include "helper/ICallStateProxy.h"
 #include "helper/IMtcAosConnector.h"
+#include "helper/IPassiveTimerHolder.h"
+#include "utility/IMessageUtils.h"
 #include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -35,9 +48,10 @@ EmergencyServiceController::EmergencyServiceController(
         IN IMtcEmergencyServiceManager& objServiceManager, IN IMtcContext& objContext) :
         m_objServiceManager(objServiceManager),
         m_objContext(objContext),
-        m_eState(State::IDLE),
+        m_eState(IEmergencyServiceController::State::IDLE),
         m_eEmergencyCallState(IMtcCall::State::IDLE),
-        m_nEmergencyCallKey(IMtcCall::CALL_KEY_INVALID)
+        m_nEmergencyCallKey(IMtcCall::CALL_KEY_INVALID),
+        m_ePendingUnavailableAosReasonForHandover(ImsAosReason::NONE)
 {
     IMS_TRACE_I("+EmergencyServiceController", 0, 0, 0);
 }
@@ -45,45 +59,72 @@ EmergencyServiceController::EmergencyServiceController(
 PUBLIC VIRTUAL EmergencyServiceController::~EmergencyServiceController()
 {
     IMS_TRACE_I("~EmergencyServiceController", 0, 0, 0);
+    m_objContext.ReleaseAsyncOperation(this);
     RemoveListeners();
+    StopWaitForHandoverToRetryOverImsPdnTimer();
 }
 
 PUBLIC VIRTUAL void EmergencyServiceController::Start()
 {
+    IMS_TRACE_I("Start", 0, 0, 0);
+    Start18xWaitingTimer();
+
     switch (m_eState)
     {
-        case State::IDLE:
+        case IEmergencyServiceController::State::IDLE:
             AddListeners();
 
-            ControlAos(ImsAosControl::REGISTER_START);
-            SetState(State::OPENING);
-            Notify(EmergencyServiceState::OPENING);
+            if (!ControlAos(ImsAosControl::REGISTER_START))
+            {
+                m_objContext.RunAsyncOperation(this,
+                        [&]()
+                        {
+                            HandleServiceUnavailable(ImsAosReason::NOT_SPECIFIED);
+                        });
+                break;
+            }
+            SetState(IEmergencyServiceController::State::OPENING);
+            Notify(IuMtcService::EmergencyServiceState::OPENING);
             break;
 
         // Exceptional cases that the Java layer didn’t receive the notification.
-        case State::OPENING:
-            Notify(EmergencyServiceState::OPENING);
+        case IEmergencyServiceController::State::OPENING:
+            Notify(IuMtcService::EmergencyServiceState::OPENING);
             break;
-        case State::OPENED:
-            Notify(EmergencyServiceState::OPENED);
+        case IEmergencyServiceController::State::OPENED:
+            Notify(IuMtcService::EmergencyServiceState::OPENED);
+            break;
+        case IEmergencyServiceController::State::CLOSED:
+            Notify(IuMtcService::EmergencyServiceState::UNAVAILABLE,
+                    EmergencyServiceUnavailableReason::NONE);
             break;
     }
 }
 
 PUBLIC VIRTUAL void EmergencyServiceController::Close()
 {
+    IMS_TRACE_I("Close", 0, 0, 0);
+    Stop18xWaitingTimer();
+    StopWaitForHandoverToRetryOverImsPdnTimer();
+
     ControlAos(ImsAosControl::REGISTER_STOP);
 }
 
 PUBLIC VIRTUAL void EmergencyServiceController::OnAosStateChanged(
-        IN IMtcService& /* objMtcService */, IN MtcAosState eState, IN IMS_UINT32 eAosReason)
+        IN [[maybe_unused]] IMtcService& objMtcService, IN MtcAosState eState,
+        IN IMS_UINT32 eAosReason, IN [[maybe_unused]] IMS_SINT32 nDataFailureReason)
 {
+    IMS_TRACE_I("OnAosStateChanged :: AosState[%s] Reason[%s]",
+            MtcCallStringUtils::ConvertAosState(eState),
+            MtcCallStringUtils::ConvertAosReason(eAosReason), 0);
+
     switch (m_eState)
     {
-        case State::IDLE:
+        case IEmergencyServiceController::State::IDLE:
+        case IEmergencyServiceController::State::CLOSED:
             break;
 
-        case State::OPENING:
+        case IEmergencyServiceController::State::OPENING:
             if (eState == MtcAosState::CONNECTED)
             {
                 HandleServiceOpened();
@@ -94,10 +135,10 @@ PUBLIC VIRTUAL void EmergencyServiceController::OnAosStateChanged(
             }
             break;
 
-        case State::OPENED:
+        case IEmergencyServiceController::State::OPENED:
             if (eState == MtcAosState::DISCONNECTED)
             {
-                Notify(EmergencyServiceState::IDLE, static_cast<IMS_SINT32>(eAosReason));
+                Notify(IuMtcService::EmergencyServiceState::IDLE);
                 Finish();
             }
             break;
@@ -108,53 +149,153 @@ PUBLIC VIRTUAL void EmergencyServiceController::OnCallStateChanged(IN CallKey nC
         IN IMtcCall::State eState, IN Type /* eType */, IN IMS_BOOL bEmergency,
         IN IMS_SINT32 /* nReason */)
 {
-    if (!bEmergency || !IsCurrentEmergencyCall(nCallKey) || m_eState != State::OPENED)
+    if (!bEmergency || !IsCurrentEmergencyCall(nCallKey) ||
+            m_eState != IEmergencyServiceController::State::OPENED)
     {
         return;
     }
 
-    if (IsCallSetupUnsuccessful(eState) &&
-            m_objContext.GetConfigurationProxy().Is(
-                    Feature::RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL))
+    switch (eState)
     {
-        Close();
+        case IMtcCall::State::IDLE:
+            m_nEmergencyCallKey = nCallKey;
+            Start18xWaitingTimer();
+            break;
+
+        case IMtcCall::State::TERMINATING:
+            Stop18xWaitingTimer();
+            break;
+        default:
+            break;
     }
 
-    if (eState == IMtcCall::State::OUTGOING)
-    {
-        m_nEmergencyCallKey = nCallKey;
-    }
-    else if (eState == IMtcCall::State::TERMINATING)
-    {
-        m_nEmergencyCallKey = IMtcCall::CALL_KEY_INVALID;
-    }
     m_eEmergencyCallState = eState;
+}
+
+PUBLIC VIRTUAL void EmergencyServiceController::OnRatChanged(IN
+        [[maybe_unused]] ServiceType eServiceType,
+        IN [[maybe_unused]] IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType)
+{
+    if (eRatType == INetworkWatcher::RADIOTECH_TYPE_IWLAN)
+    {
+        return;
+    }
+
+    if (!m_objContext.GetPassiveTimerHolder().IsActive(
+                IPassiveTimerHolder::Type::WAIT_FOR_HANDOVER_TO_RETRY_OVER_IMS_PDN))
+    {
+        return;
+    }
+
+    IMS_TRACE_I("Normal service is handed over to WWAN", 0, 0, 0);
+    StopWaitForHandoverToRetryOverImsPdnTimer();
+    if (IsNetworkRoaming())
+    {
+        Notify(IuMtcService::EmergencyServiceState::UNAVAILABLE,
+                ConvertToUnavailableReason(m_ePendingUnavailableAosReasonForHandover));
+        Finish();
+    }
+    else
+    {
+        FinishAndRetryOverImsPdn();
+    }
+}
+
+PUBLIC VIRTUAL void EmergencyServiceController::OnCallSessionReleased(
+        IN CallKey nCallKey, IN IMS_BOOL bEmergency, IN IMS_BOOL bEstablished)
+{
+    if (!bEmergency || !IsCurrentEmergencyCall(nCallKey) ||
+            m_eState != IEmergencyServiceController::State::OPENED)
+    {
+        return;
+    }
+
+    m_nEmergencyCallKey = IMtcCall::CALL_KEY_INVALID;
+
+    if (!bEstablished &&
+            m_objContext.GetConfigurationProxy().GetBoolean(
+                    ConfigEmergency::KEY_RELEASE_EMERGENCY_PDN_ON_FAILURE_AFTER_100_BOOL))
+    {
+        IMtcSession* piMtcSession = m_objContext.GetCallManager()
+                                            .GetCallByCallKey(nCallKey)
+                                            ->GetCallContext()
+                                            .GetSession();
+        if (piMtcSession &&
+                m_objContext.GetMessageUtils().IsResponseExist(
+                        &piMtcSession->GetISession(), SipStatusCode::SC_100))
+        {
+            Close();
+        }
+    }
+}
+
+PUBLIC void EmergencyServiceController::OnPassiveTimerExpired(IN IPassiveTimerHolder::Type eType)
+{
+    if (eType == IPassiveTimerHolder::Type::REGISTRATION_TO_18X)
+    {
+        IMS_TRACE_I("Registration ~ 18x timer expires", 0, 0, 0);
+
+        if (m_nEmergencyCallKey == IMtcCall::CALL_KEY_INVALID)
+        {
+            ControlAos(ImsAosControl::REGISTER_STOP);
+        }
+        else
+        {
+            m_objContext.GetCallController().Terminate(m_nEmergencyCallKey,
+                    CallReasonInfo(
+                            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
+        }
+    }
+    else if (eType == IPassiveTimerHolder::Type::WAIT_FOR_HANDOVER_TO_RETRY_OVER_IMS_PDN)
+    {
+        IMS_TRACE_I("Wait for handover to retry over IMS PDN timer expires", 0, 0, 0);
+
+        Notify(IuMtcService::EmergencyServiceState::UNAVAILABLE,
+                ConvertToUnavailableReason(m_ePendingUnavailableAosReasonForHandover));
+        Finish();
+    }
 }
 
 PRIVATE void EmergencyServiceController::HandleServiceOpened()
 {
-    SetState(State::OPENED);
-    Notify(EmergencyServiceState::OPENED);
+    SetState(IEmergencyServiceController::State::OPENED);
+    Notify(IuMtcService::EmergencyServiceState::OPENED);
 }
 
 PRIVATE void EmergencyServiceController::HandleServiceUnavailable(IN IMS_UINT32 eAosReason)
 {
-    SetState(State::IDLE);
+    SetState(IEmergencyServiceController::State::IDLE);
 
-    if (IsRetryOverImsPdnRequired(eAosReason))
+    switch (GetRetryOverImsPdnAction(eAosReason))
     {
-        FinishAndRetryOverImsPdn();
-    }
-    else
-    {
-        Notify(EmergencyServiceState::UNAVAILABLE, eAosReason);
-        Finish();
+        case RetryOverImsPdnAction::RETRY_IMMEDIATELY:
+            FinishAndRetryOverImsPdn();
+            break;
+        case RetryOverImsPdnAction::RETRY_AFTER_HANDOVER:
+            IMS_TRACE_I("Wait for normal service to be handed over to WWAN", 0, 0, 0);
+            m_ePendingUnavailableAosReasonForHandover = eAosReason;
+            StartWaitForHandoverToRetryOverImsPdnTimer();
+            break;
+        default:  // RetryOverImsPdnAction::NO_RETRY
+            Notify(IuMtcService::EmergencyServiceState::UNAVAILABLE,
+                    ConvertToUnavailableReason(eAosReason));
+            Finish();
+            break;
     }
 }
 
 PRIVATE void EmergencyServiceController::AddListeners()
 {
+    m_objContext.GetPassiveTimerHolder().AddListener(
+            IPassiveTimerHolder::Type::REGISTRATION_TO_18X, this);
+
     m_objContext.GetCallStateProxy().AddListener(this);
+
+    IMtcService* pNormalService = m_objContext.GetServiceByType(ServiceType::NORMAL);
+    if (pNormalService)
+    {
+        pNormalService->AddNetworkWatcherListener(this);
+    }
 
     IMtcService* pService = m_objContext.GetServiceByType(ServiceType::EMERGENCY);
     if (pService)
@@ -165,7 +306,18 @@ PRIVATE void EmergencyServiceController::AddListeners()
 
 PRIVATE void EmergencyServiceController::RemoveListeners()
 {
+    m_objContext.GetPassiveTimerHolder().RemoveListener(
+            IPassiveTimerHolder::Type::REGISTRATION_TO_18X, this);
+    m_objContext.GetPassiveTimerHolder().RemoveListener(
+            IPassiveTimerHolder::Type::WAIT_FOR_HANDOVER_TO_RETRY_OVER_IMS_PDN, this);
+
     m_objContext.GetCallStateProxy().RemoveListener(this);
+
+    IMtcService* pNormalService = m_objContext.GetServiceByType(ServiceType::NORMAL);
+    if (pNormalService)
+    {
+        pNormalService->RemoveNetworkWatcherListener(this);
+    }
 
     IMtcService* pService = m_objContext.GetServiceByType(ServiceType::EMERGENCY);
     if (pService)
@@ -175,8 +327,8 @@ PRIVATE void EmergencyServiceController::RemoveListeners()
 }
 
 PRIVATE
-void EmergencyServiceController::Notify(
-        IN EmergencyServiceState eState, IN IMS_SINT32 eReason) const
+void EmergencyServiceController::Notify(IN IuMtcService::EmergencyServiceState eState,
+        IN EmergencyServiceUnavailableReason eReason) const
 {
     IMS_TRACE_D("Notify :: state=%d, reason=%d", eState, eReason, 0);
 
@@ -190,20 +342,23 @@ void EmergencyServiceController::Notify(
     pThread->OnEmergencyServiceChanged(eState, eReason, ServiceType::EMERGENCY);
 }
 
-PRIVATE void EmergencyServiceController::ControlAos(IN IMS_UINT32 nType) const
+PRIVATE IMS_BOOL EmergencyServiceController::ControlAos(IN IMS_UINT32 nType) const
 {
-    IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
+    const IMtcAosConnector* pAosConnector = m_objContext.GetAosConnector(ServiceType::EMERGENCY);
     if (pAosConnector == IMS_NULL)
     {
-        return;
+        return IMS_FALSE;
     }
 
-    pAosConnector->Control(nType);
+    return pAosConnector->Control(nType);
 }
 
 PRIVATE void EmergencyServiceController::Finish()
 {
-    m_objContext.GetAsyncRunner(
+    SetState(IEmergencyServiceController::State::CLOSED);
+    Stop18xWaitingTimer();
+
+    m_objContext.RunAsyncOperation(this,
             [&]()
             {
                 m_objServiceManager.StopOpen(IMS_FALSE);
@@ -212,30 +367,19 @@ PRIVATE void EmergencyServiceController::Finish()
 
 PRIVATE void EmergencyServiceController::FinishAndRetryOverImsPdn()
 {
-    m_objContext.GetAsyncRunner(
+    SetState(IEmergencyServiceController::State::CLOSED);
+    m_objContext.RunAsyncOperation(this,
             [&]()
             {
-                m_objServiceManager.StartOpen(EmergencyCallRoutingPdn::NORMAL);
+                m_objServiceManager.StartOpen(ServiceType::NORMAL);
             });
 }
 
 PRIVATE
-void EmergencyServiceController::SetState(IN State eState)
+void EmergencyServiceController::SetState(IN IEmergencyServiceController::State eState)
 {
     IMS_TRACE_D("SetState :: state[%d]", eState, 0, 0);
     m_eState = eState;
-}
-
-PRIVATE
-IMS_BOOL EmergencyServiceController::IsCallSetupUnsuccessful(IN IMtcCall::State eState) const
-{
-    if (eState != IMtcCall::State::TERMINATING)
-    {
-        return IMS_FALSE;
-    }
-
-    return m_eEmergencyCallState == IMtcCall::State::IDLE ||
-            m_eEmergencyCallState == IMtcCall::State::OUTGOING;
 }
 
 PRIVATE IMS_BOOL EmergencyServiceController::IsCurrentEmergencyCall(IN CallKey nCallKey) const
@@ -244,19 +388,102 @@ PRIVATE IMS_BOOL EmergencyServiceController::IsCurrentEmergencyCall(IN CallKey n
 }
 
 PRIVATE
-IMS_BOOL EmergencyServiceController::IsRetryOverImsPdnRequired(IN IMS_SINT32 eAosReason) const
+EmergencyServiceController::RetryOverImsPdnAction
+EmergencyServiceController::GetRetryOverImsPdnAction(IN IMS_SINT32 eAosReason) const
 {
-    if (!m_objContext.GetConfigurationProxy().Is(Feature::RETRY_EMERGENCY_ON_IMS_PDN_BOOL))
+    if (!m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigEmergency::KEY_RETRY_EMERGENCY_ON_IMS_PDN_BOOL))
     {
-        return IMS_FALSE;
+        return RetryOverImsPdnAction::NO_RETRY;
     }
 
     if (eAosReason != ImsAosReason::DATA_DISCONNECTED)
     {
-        return IMS_FALSE;
+        return RetryOverImsPdnAction::NO_RETRY;
     }
 
+    const IMtcService* pService = m_objContext.GetServiceByType(ServiceType::NORMAL);
+    if (!pService || !pService->IsActive())
+    {
+        return RetryOverImsPdnAction::NO_RETRY;
+    }
+
+    if (pService->IsWlanIpCanType())
+    {
+        return RetryOverImsPdnAction::RETRY_AFTER_HANDOVER;
+    }
+
+    if (IsNetworkRoaming())
+    {
+        return RetryOverImsPdnAction::NO_RETRY;
+    }
+
+    return RetryOverImsPdnAction::RETRY_IMMEDIATELY;
+}
+
+PRIVATE
+IMS_BOOL EmergencyServiceController::IsNetworkRoaming() const
+{
     INetworkWatcher* pNetworkWatcher =
             PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_objContext.GetSlotId());
-    return pNetworkWatcher->GetRoamingState() == 0;
+    return pNetworkWatcher->GetRoamingState() != 0;
+}
+
+PRIVATE
+void EmergencyServiceController::Start18xWaitingTimer()
+{
+    const IMtcService* pService = m_objContext.GetServiceByType(ServiceType::EMERGENCY);
+    if (!pService)
+    {
+        IMS_TRACE_E(0, "IMtcService is null", 0, 0, 0);
+        return;
+    }
+    IMS_SINT32 nTime = MtcConfigurationResolver::GetRegistrationTo18xTimer(
+            m_objContext.GetConfigurationProxy(), pService->IsWlanIpCanType());
+
+    m_objContext.GetPassiveTimerHolder().AddTimer(
+            IPassiveTimerHolder::Type::REGISTRATION_TO_18X, nTime, IMS_FALSE);
+}
+
+PRIVATE
+void EmergencyServiceController::Stop18xWaitingTimer()
+{
+    m_objContext.GetPassiveTimerHolder().RemoveTimer(
+            IPassiveTimerHolder::Type::REGISTRATION_TO_18X);
+}
+
+PRIVATE
+void EmergencyServiceController::StartWaitForHandoverToRetryOverImsPdnTimer()
+{
+    IMS_SINT32 nTime = m_objContext.GetConfigurationProxy().GetInt(
+            ConfigEmergency::KEY_EMERGENCY_REGISTRATION_TIMER_MILLIS_INT);
+
+    m_objContext.GetPassiveTimerHolder().AddTimer(
+            IPassiveTimerHolder::Type::WAIT_FOR_HANDOVER_TO_RETRY_OVER_IMS_PDN, nTime, IMS_FALSE,
+            IMS_TRUE);
+    m_objContext.GetPassiveTimerHolder().AddListener(
+            IPassiveTimerHolder::Type::WAIT_FOR_HANDOVER_TO_RETRY_OVER_IMS_PDN, this);
+}
+
+PRIVATE
+void EmergencyServiceController::StopWaitForHandoverToRetryOverImsPdnTimer()
+{
+    m_objContext.GetPassiveTimerHolder().RemoveTimer(
+            IPassiveTimerHolder::Type::WAIT_FOR_HANDOVER_TO_RETRY_OVER_IMS_PDN);
+}
+
+PRIVATE
+EmergencyServiceUnavailableReason EmergencyServiceController::ConvertToUnavailableReason(
+        IN IMS_UINT32 eAosReason)
+{
+    if (eAosReason == ImsAosReason::DATA_PERMANENTLY_FAILED)
+    {
+        return EmergencyServiceUnavailableReason::DATA_PERMANENTLY_FAILED;
+    }
+    else if (eAosReason == ImsAosReason::NETWORK_ATTACH_REJECTED)
+    {
+        return EmergencyServiceUnavailableReason::NETWORK_ATTACH_REJECTED;
+    }
+
+    return EmergencyServiceUnavailableReason::NONE;
 }

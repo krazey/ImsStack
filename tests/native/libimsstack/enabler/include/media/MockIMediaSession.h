@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,40 +17,33 @@
 #ifndef MOCK_I_MEDIA_SESSION_H_
 #define MOCK_I_MEDIA_SESSION_H_
 
-#include "IMediaSession.h"
-#include "IMediaSessionClientListener.h"
-#include "ISession.h"
-#include "ImsTypeDef.h"
-#include "MediaDef.h"
-#include "MediaEnvironment.h"
-#include "MediaNego.h"
 #include <gmock/gmock.h>
+
+#include "IMediaSession.h"
+#include "MediaDef.h"
 
 class MockIMediaSession : public IMediaSession
 {
 public:
-    virtual ~MockIMediaSession() {}
+    MockIMediaSession() {}
+    virtual ~MockIMediaSession() override {}
     MOCK_METHOD(
-            void, SetMtcListener, (IN IMediaSessionClientListener* pISessionListener), (override));
-    MOCK_METHOD(IMS_BOOL, SetEnvironment, (IN MediaEnvironment* pEnvironment), (override));
+            void, SetMtcListener, (IN IMediaSessionClientListener * pISessionListener), (override));
     MOCK_METHOD(IMS_UINTP, CreateProfile, (IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType),
             (override));
     MOCK_METHOD(IMS_BOOL, DestroyProfile, (IN IMS_UINTP nNegoID), (override));
-    MOCK_METHOD(IMS_BOOL, FormSDP,
+    MOCK_METHOD(IMS_BOOL, FormSdp,
             (IN IMS_UINTP nNegoId, OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType,
-                    IN IMS_SINT32 nAudioDirection, IN IMS_SINT32 nVideoDirection,
-                    IN IMS_SINT32 nTextDirection, IN IMS_BOOL bEnforceReofferMode),
+                    IN MEDIA_DIRECTION eAudioDirection, IN MEDIA_DIRECTION eVideoDirection,
+                    IN MEDIA_DIRECTION eTextDirection, IN IMS_BOOL bEnforceReofferMode),
             (override));
     MOCK_METHOD(MEDIA_CONTENT_TYPE, GetSupportedMediaTypesFromSdp,
             (IN IMS_UINTP nNegoID, IN ISession* pSession), (override));
-    MOCK_METHOD(IMS_BOOL, NegotiateSDP,
-            (IN IMS_UINTP nNegoID, IN ISession* pSession, OUT IMS_SINT32* nAudioDirection,
-                    OUT IMS_SINT32* nVideoDirection, OUT IMS_SINT32* nTextDirection,
-                    OUT MediaNego::MediaNegoResult& errorReason),
+    MOCK_METHOD(SdpNegotiationResult, NegotiateSdp, (IN IMS_UINTP nNegoId, IN ISession* pSession),
             (override));
-    MOCK_METHOD(IMS_BOOL, RequestQos, (IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType),
+    MOCK_METHOD(IMS_BOOL, IsQosAvailable, (IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType),
             (override));
-    MOCK_METHOD(void, FinalizeSDP, (IN IMS_UINTP nNegoID, IN ISession* pSession), (override));
+    MOCK_METHOD(void, FinalizeSdp, (IN IMS_UINTP nNegoID, IN ISession* pSession), (override));
     MOCK_METHOD(IMS_BOOL, Run, (IN IMS_UINTP nNegoID), (override));
     MOCK_METHOD(IMS_BOOL, Terminate, (), (override));
     MOCK_METHOD(NEGO_STATE, GetNegoState, (IN IMS_UINTP nNegoID), (override));
@@ -59,6 +52,12 @@ public:
             (IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type), (override));
     MOCK_METHOD(IMS_SINT32, GetNegotiatedCodecBitrate,
             (IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type), (override));
+    MOCK_METHOD(IMS_FLOAT, GetNegotiatedCodecBitrateKbps, (IN IMS_UINTP), (override));
+    MOCK_METHOD(IMS_FLOAT, GetNegotiatedCodecBandwidthKhz, (IN IMS_UINTP), (override));
+    MOCK_METHOD(void, GetNegotiatedCodecBitrateRange,
+            (IN IMS_UINTP, OUT IMS_FLOAT&, OUT IMS_FLOAT&), (override));
+    MOCK_METHOD(void, GetNegotiatedCodecBandwidthRange,
+            (IN IMS_UINTP, OUT IMS_FLOAT&, OUT IMS_FLOAT&), (override));
     MOCK_METHOD(IMS_SINT32, GetRemotePort, (IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type),
             (override));
     MOCK_METHOD(MEDIA_DIRECTION, GetNegotiatedDirection,
@@ -71,5 +70,8 @@ public:
             (override));
     MOCK_METHOD(IMS_BOOL, NotifySrvccStatus, (IN MEDIA_SRVCC_STATUS nStatus), (override));
     MOCK_METHOD(IMS_BOOL, SendMessage, (IN IMS_SINT32 nMsg, IN IMS_UINTP pParam), (override));
+    MOCK_METHOD(
+            void, SetMediaPemType, (IN IMS_UINTP nNegoId, IN MEDIA_PEM_TYPE ePemType), (override));
+    MOCK_METHOD(IMS_BOOL, IsPreviewMode, (IMS_UINTP nNegoId), (override));
 };
 #endif

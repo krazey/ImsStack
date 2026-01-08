@@ -17,13 +17,15 @@
 #ifndef MOCK_ECT_CONTROLLER_H_
 #define MOCK_ECT_CONTROLLER_H_
 
-#include "AString.h"
-#include "IMtcContext.h"
-#include "ITimer.h"
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "ect/EctController.h"
-#include "ect/EctFactory.h"
 #include <gmock/gmock.h>
+
+class AString;
+class EctFactory;
+class IMtcContext;
+class ITimer;
 
 class MockEctController : public EctController
 {

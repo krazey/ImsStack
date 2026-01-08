@@ -357,6 +357,7 @@ TEST_F(ByteArrayTest, ByteRef)
     ByteArray::ByteRef objByteRef = objBa[nIndex4];
     objByteRef = 0x36;
 
+    EXPECT_EQ((IMS_BYTE)objByteRef, objBa[nIndex4]);
     EXPECT_EQ(objBa, ByteArray(AString("02346")));
 
     ByteArray::ByteRef objByteRef2(objBa, 2);

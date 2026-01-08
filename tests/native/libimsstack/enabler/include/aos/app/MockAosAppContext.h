@@ -28,7 +28,7 @@ public:
             AosAppContext(pProfile)
     {
     }
-    ~MockAosAppContext() { }
+    ~MockAosAppContext() override {}
 
     MOCK_METHOD(IMS_SINT32, GetSlotId, (), (const, override));
     MOCK_METHOD(const AString&, GetProfileId, (), (const, override));

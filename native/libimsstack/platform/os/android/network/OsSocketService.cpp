@@ -18,8 +18,11 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "IOsFactory.h"
+#include "IThreadImpListener.h"
 #include "ImsFdSet.h"
 #include "ImsSocketState.h"
+#include "OsMutex.h"
 #include "OsPthread.h"
 #include "PlatformContext.h"
 #include "ServiceMemory.h"
@@ -28,9 +31,9 @@
 #include "network/OsSocketMsg.h"
 #include "network/OsSocketService.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
-#define IMS_FD_SET ImsFdSet::TYPE_SELECT
+#define IMS_FD_SET ImsFdSet::TYPE_POLL
 
 class SocketFdManager
 {
@@ -481,7 +484,7 @@ class OsSocketThread : public IThreadImpListener
 {
 public:
     explicit OsSocketThread(IN OsSocketService* pService);
-    virtual ~OsSocketThread();
+    ~OsSocketThread() override;
 
     OsSocketThread(IN const OsSocketThread&) = delete;
     OsSocketThread& operator=(IN const OsSocketThread&) = delete;
@@ -490,7 +493,7 @@ public:
     void RunImp() override;
 
     SocketFdManager& GetSocketFdManager();
-    IMS_BOOL StartUp();
+    void StartUp();
     void CleanUp();
 
 private:
@@ -629,7 +632,7 @@ SocketFdManager& OsSocketThread::GetSocketFdManager()
 }
 
 PUBLIC
-IMS_BOOL OsSocketThread::StartUp()
+void OsSocketThread::StartUp()
 {
     // __IMS_SOCKET_EVENT__ {
     m_objFdMngr.CreateControlPipe();
@@ -645,8 +648,6 @@ IMS_BOOL OsSocketThread::StartUp()
         m_pThread->SetImpListener(this);
         m_pThread->Activate();
     }
-
-    return IMS_TRUE;
 }
 
 PUBLIC
@@ -997,11 +998,7 @@ IMS_BOOL OsSocketService::StartService()
         return IMS_FALSE;
     }
 
-    if (!m_pWorkerThread->StartUp())
-    {
-        return IMS_FALSE;
-    }
-
+    m_pWorkerThread->StartUp();
     m_bServiceStarted = IMS_TRUE;
 
     return IMS_TRUE;

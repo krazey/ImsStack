@@ -23,21 +23,31 @@
 #include "ImsTypeDef.h"
 #include "IuMtcCall.h"
 #include "IuMtcService.h"
+#include "JniCallInfo.h"
 #include "JniEnablerConnector.h"
 #include "MtcDef.h"
 #include "ServiceTrace.h"
+#include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
+#include "call/IMtcSession.h"
 #include "call/MtcUiNotifier.h"
 #include "call/ParticipantInfo.h"
 #include "call/UpdatingInfo.h"
 #include "helper/MtcSupplementaryService.h"
 #include "media/IMtcMediaManager.h"
+#include "utility/SuppServiceUtils.h"
+#include <functional>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 MtcUiNotifier::MtcUiNotifier(IN IMtcCallContext& objContext) :
-        m_objContext(objContext)
+        m_objContext(objContext),
+        m_objBlockedNotification(IMS_NULL),
+        m_objBlockingReason(CODE_NONE),
+        m_objLastDispatchedMediaInfo(),
+        m_objLastDispatchedJniCallInfo(),
+        m_objLastDispatchedSuppServices()
 {
 }
 
@@ -56,7 +66,8 @@ void MtcUiNotifier::SendPreIncomingCallReceived()
         return;
     }
 
-    piServiceThread->OnPreIncomingCallReceived(m_objContext.GetCallKey());
+    piServiceThread->OnPreIncomingCallReceived(
+            m_objContext.GetCallKey(), m_objContext.GetCall().GetLogTag());
 }
 
 PUBLIC
@@ -71,7 +82,7 @@ void MtcUiNotifier::SendIncomingCallReceived()
     }
 
     piThread->OnIncomingCallReceived(m_objContext.GetCallKey(), m_objContext.CreateJniCallInfo(),
-            m_objContext.GetMediaManager().GetMediaInfo(),
+            m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession()),
             m_objContext.GetSupplementaryService().GetServices(),
             m_objContext.GetParticipantInfo().GetOipType(),
             m_objContext.GetParticipantInfo().GetRemoteNumber());
@@ -89,11 +100,13 @@ void MtcUiNotifier::SendIncomingCallRejected(IN const CallReasonInfo& objReason)
         return;
     }
 
-    piServiceThread->OnRejectedIncomingCall(m_objContext.CreateJniCallInfo(),
-            m_objContext.GetMediaManager().GetMediaInfo(),
+    piServiceThread->OnRejectedIncomingCall(m_objContext.GetCallKey(),
+            m_objContext.CreateJniCallInfo(),
+            m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession()),
             m_objContext.GetSupplementaryService().GetServices(),
             m_objContext.GetParticipantInfo().GetOipType(),
-            m_objContext.GetParticipantInfo().GetRemoteNumber(), objReason);
+            m_objContext.GetParticipantInfo().GetRemoteNumber(), objReason,
+            m_objContext.GetCall().GetLogTag());
 }
 
 PUBLIC
@@ -108,7 +121,7 @@ void MtcUiNotifier::SendStarted()
     }
 
     piThread->OnStarted(m_objContext.CreateJniCallInfo(),
-            m_objContext.GetMediaManager().GetMediaInfo(),
+            m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession()),
             m_objContext.GetSupplementaryService().GetServices());
 }
 
@@ -117,6 +130,22 @@ void MtcUiNotifier::SendStartFailed(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("SendStartFailed : %s", _TRACE_CR_(objReason), 0, 0);
 
+    if (m_objContext.GetCallInfo().IsEmergency())
+    {
+        m_objBlockingReason = objReason;
+        m_objBlockedNotification = [this]()
+        {
+            IJniMtcCallThread* piThread = GetCallThread();
+            if (piThread == IMS_NULL)
+            {
+                return;
+            }
+            piThread->OnStartFailed(m_objBlockingReason);
+        };
+        IMS_TRACE_I("SendStartFailed blocked", 0, 0, 0);
+        return;
+    }
+
     IJniMtcCallThread* piThread = GetCallThread();
     if (piThread == IMS_NULL)
     {
@@ -124,6 +153,21 @@ void MtcUiNotifier::SendStartFailed(IN const CallReasonInfo& objReason)
     }
 
     piThread->OnStartFailed(objReason);
+}
+
+PUBLIC
+void MtcUiNotifier::SendInitiating()
+{
+    IMS_TRACE_I("SendInitiating", 0, 0, 0);
+
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread == IMS_NULL)
+    {
+        return;
+    }
+
+    piThread->OnInitiating(m_objContext.CreateJniCallInfo(),
+            m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession()));
 }
 
 PUBLIC
@@ -137,14 +181,29 @@ void MtcUiNotifier::SendProgressing()
         return;
     }
 
-    MediaInfo objRefinedMediaInfo = m_objContext.GetMediaManager().GetMediaInfo();
+    MediaInfo objRefinedMediaInfo =
+            m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession());
     if (m_objContext.GetMediaManager().IsLocalTone())
     {
         objRefinedMediaInfo.eAudioDirection = DIRECTION_INACTIVE;
     }
+    JniCallInfo objJniCallInfo = m_objContext.CreateJniCallInfo();
+    const ImsList<SuppService*> objSuppServices =
+            m_objContext.GetSupplementaryService().GetServices();
 
-    piThread->OnProgressing(m_objContext.CreateJniCallInfo(), objRefinedMediaInfo,
-            m_objContext.GetSupplementaryService().GetServices());
+    if (!ShouldNotifyProgressing(objJniCallInfo, objRefinedMediaInfo, objSuppServices))
+    {
+        IMS_TRACE_I("skip SendProgressing - parameters are same", 0, 0, 0);
+        return;
+    }
+
+    m_objLastDispatchedMediaInfo = objRefinedMediaInfo;
+    m_objLastDispatchedJniCallInfo = objJniCallInfo;
+    SuppServiceUtils::DeleteServices(m_objLastDispatchedSuppServices);
+    m_objLastDispatchedSuppServices = SuppServiceUtils::Clone(objSuppServices);
+
+    piThread->OnProgressing(m_objLastDispatchedJniCallInfo, m_objLastDispatchedMediaInfo,
+            m_objLastDispatchedSuppServices);
 }
 
 PUBLIC
@@ -159,7 +218,7 @@ void MtcUiNotifier::SendHeld()
     }
 
     piThread->OnHeld(m_objContext.CreateJniCallInfo(),
-            m_objContext.GetMediaManager().GetMediaInfo(),
+            m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession()),
             m_objContext.GetSupplementaryService().GetServices());
 }
 
@@ -189,7 +248,7 @@ void MtcUiNotifier::SendResumed()
     }
 
     piThread->OnResumed(m_objContext.CreateJniCallInfo(),
-            m_objContext.GetMediaManager().GetMediaInfo(),
+            m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession()),
             m_objContext.GetSupplementaryService().GetServices());
 }
 
@@ -219,7 +278,7 @@ void MtcUiNotifier::SendHeldBy()
     }
 
     piThread->OnHeldBy(m_objContext.CreateJniCallInfo(),
-            m_objContext.GetMediaManager().GetMediaInfo(),
+            m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession()),
             m_objContext.GetSupplementaryService().GetServices());
 }
 
@@ -244,6 +303,22 @@ void MtcUiNotifier::SendTerminated(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("SendTerminated : %s", _TRACE_CR_(objReason), 0, 0);
 
+    if (m_objContext.GetCallInfo().IsEmergency())
+    {
+        m_objBlockingReason = objReason;
+        m_objBlockedNotification = [this]()
+        {
+            IJniMtcCallThread* piThread = GetCallThread();
+            if (piThread == IMS_NULL)
+            {
+                return;
+            }
+            piThread->OnTerminated(m_objBlockingReason);
+        };
+        IMS_TRACE_I("SendTerminated blocked", 0, 0, 0);
+        return;
+    }
+
     IJniMtcCallThread* piThread = GetCallThread();
     if (piThread == IMS_NULL)
     {
@@ -265,7 +340,7 @@ void MtcUiNotifier::SendIncomingResume()
     }
 
     piThread->OnIncomingResume(m_objContext.CreateJniCallInfo(),
-            m_objContext.GetMediaManager().GetMediaInfo(),
+            m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession()),
             m_objContext.GetSupplementaryService().GetServices());
 }
 
@@ -302,7 +377,7 @@ void MtcUiNotifier::SendUpdated()
     }
 
     piThread->OnUpdated(m_objContext.CreateJniCallInfo(),
-            m_objContext.GetMediaManager().GetMediaInfo(),
+            m_objContext.GetUpdatingInfo().GetModifiedMediaInfoWithOriginalAudioDir(),
             m_objContext.GetSupplementaryService().GetServices());
 }
 
@@ -332,7 +407,7 @@ void MtcUiNotifier::SendUpdatedBy()
     }
 
     piThread->OnUpdatedBy(m_objContext.CreateJniCallInfo(),
-            m_objContext.GetMediaManager().GetMediaInfo(),
+            m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetSession()->GetISession()),
             m_objContext.GetSupplementaryService().GetServices());
 }
 
@@ -353,156 +428,9 @@ void MtcUiNotifier::SendNotifyInfo(
 }
 
 PUBLIC
-void MtcUiNotifier::SendExpanded()
-{
-    IMS_TRACE_I("SendExpanded", 0, 0, 0);
-
-    IJniMtcCallThread* piThread = GetCallThread();
-    if (piThread == IMS_NULL)
-    {
-        return;
-    }
-}
-
-PUBLIC
-void MtcUiNotifier::SendExpandFailed(IN const CallReasonInfo& objReason)
-{
-    IMS_TRACE_I("SendExpandFailed : %s", _TRACE_CR_(objReason), 0, 0);
-
-    IJniMtcCallThread* piThread = GetCallThread();
-    if (piThread == IMS_NULL)
-    {
-        return;
-    }
-}
-
-PUBLIC
-void MtcUiNotifier::SendExpandedBy(IN IMS_SINTP /* nReplaceKey */)
-{
-    IMS_TRACE_I("SendExpandedBy", 0, 0, 0);
-
-    IJniMtcCallThread* piThread = GetCallThread();
-    if (piThread == IMS_NULL)
-    {
-        return;
-    }
-}
-
-PUBLIC
-void MtcUiNotifier::SendMerged(IN const ImsList<ConfUser*>& lstConfUser)
-{
-    IMS_TRACE_I("SendMerged : Size[%d]", lstConfUser.GetSize(), 0, 0);
-
-    IJniMtcCallThread* piThread = GetCallThread();
-    if (piThread == IMS_NULL)
-    {
-        return;
-    }
-
-    piThread->OnMerged(m_objContext.CreateJniCallInfo(),
-            m_objContext.GetMediaManager().GetMediaInfo(),
-            m_objContext.GetSupplementaryService().GetServices(), lstConfUser);
-}
-
-PUBLIC
-void MtcUiNotifier::SendMergeFailed(IN const CallReasonInfo& objReason)
-{
-    IMS_TRACE_I("SendMergeFailed : %s", _TRACE_CR_(objReason), 0, 0);
-
-    IJniMtcCallThread* piThread = GetCallThread();
-    if (piThread == IMS_NULL)
-    {
-        return;
-    }
-
-    piThread->OnMergeFailed(objReason);
-}
-
-PUBLIC
-void MtcUiNotifier::SendJoined(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason)
-{
-    IMS_TRACE_I("SendJoined : Result[%d] %s", nResult, _TRACE_CR_(objReason), 0);
-
-    IJniMtcCallThread* piThread = GetCallThread();
-    if (piThread == IMS_NULL)
-    {
-        return;
-    }
-
-    if (nResult == IMS_SUCCESS)
-    {
-        piThread->OnConferenceParticipantAdded();
-    }
-    else
-    {
-        piThread->OnConferenceParticipantAddFailed(objReason);
-    }
-}
-
-PUBLIC
-void MtcUiNotifier::SendDropped(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason)
-{
-    IMS_TRACE_I("SendDropped : Result[%d] %s", nResult, _TRACE_CR_(objReason), 0);
-
-    IJniMtcCallThread* piThread = GetCallThread();
-    if (piThread == IMS_NULL)
-    {
-        return;
-    }
-
-    if (nResult == IMS_SUCCESS)
-    {
-        piThread->OnConferenceParticipantRemoved();
-    }
-    else
-    {
-        piThread->OnConferenceParticipantRemoveFailed(objReason);
-    }
-}
-
-PUBLIC
-void MtcUiNotifier::SendNotifyUsersInfo(IN const ImsList<ConfUser*>& lstConfUser)
-{
-    IMS_TRACE_I("SendNotifyUsersInfo : Size[%d]", lstConfUser.GetSize(), 0, 0);
-
-    IJniMtcCallThread* piThread = GetCallThread();
-    if (piThread == IMS_NULL)
-    {
-        return;
-    }
-
-    piThread->OnConferenceParticipantsInfoChanged(lstConfUser);
-}
-
-PUBLIC
-void MtcUiNotifier::SendNotifyConfInfo(IN const AString& strDisplayText,
-        IN const AString& strSubject, IN IMS_SINT32 nUserCount, IN IMS_UINT32 nMaxUserCount,
-        IN const AString& strHostEntity)
-{
-    IMS_TRACE_D("SendNotifyConfInfo : [%s][%s]", strDisplayText.GetStr(), strSubject.GetStr(), 0);
-    IMS_TRACE_D(
-            "SendNotifyConfInfo : [%d][%d][%s]", nUserCount, nMaxUserCount, strHostEntity.GetStr());
-
-    IJniMtcCallThread* piThread = GetCallThread();
-    if (piThread == IMS_NULL)
-    {
-        return;
-    }
-
-    piThread->OnConferenceInfoChanged(
-            strDisplayText, strSubject, nUserCount, nMaxUserCount, strHostEntity);
-}
-
-PUBLIC
 void MtcUiNotifier::SendReplacedBy(IN IMS_SINTP /* nKey */, IN IMS_UINTP /* nType */)
 {
     IMS_TRACE_I("SendReplacedBy", 0, 0, 0);
-
-    IJniMtcCallThread* piThread = GetCallThread();
-    if (piThread == IMS_NULL)
-    {
-        return;
-    }
 }
 
 PUBLIC
@@ -524,18 +452,40 @@ void MtcUiNotifier::SendCallPushCompleted(
         IN IMS_RESULT /* nResult */, IN const CallReasonInfo& /* objReason */)
 {
     IMS_TRACE_I("SendCallPushCompleted", 0, 0, 0);
+}
+
+PUBLIC VIRTUAL void MtcUiNotifier::SendCallInfoChanged()
+{
+    IMS_TRACE_I("SendCallInfoChanged", 0, 0, 0);
 
     IJniMtcCallThread* piThread = GetCallThread();
     if (piThread == IMS_NULL)
     {
         return;
     }
+
+    piThread->OnCallInfoChanged(m_objContext.CreateJniCallInfo());
+}
+
+PUBLIC VIRTUAL void MtcUiNotifier::OnCallSessionReleased()
+{
+    IMS_TRACE_I("OnCallSessionReleased", 0, 0, 0);
+    if (m_objBlockedNotification)
+    {
+        m_objBlockedNotification();
+        m_objBlockedNotification = nullptr;
+    }
+}
+
+PUBLIC VIRTUAL const CallReasonInfo& MtcUiNotifier::GetBlockingReason() const
+{
+    return m_objBlockingReason;
 }
 
 PRIVATE
 IJniMtcCallThread* MtcUiNotifier::GetCallThread() const
 {
-    IJniEnabler* piJniMtcCall = JniEnablerConnector::GetInstance().GetJniEnabler(
+    const IJniEnabler* piJniMtcCall = JniEnablerConnector::GetInstance().GetJniEnabler(
             m_objContext.GetSlotId(), EnablerType::MTC_CALL, m_objContext.GetCallKey());
     if (piJniMtcCall == IMS_NULL)
     {
@@ -544,4 +494,13 @@ IJniMtcCallThread* MtcUiNotifier::GetCallThread() const
     }
 
     return reinterpret_cast<IJniMtcCallThread*>(piJniMtcCall->GetJniThread());
+}
+
+PRIVATE
+IMS_BOOL MtcUiNotifier::ShouldNotifyProgressing(IN const JniCallInfo& objCallInfo,
+        IN const MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices) const
+{
+    return objCallInfo != m_objLastDispatchedJniCallInfo ||
+            objMediaInfo != m_objLastDispatchedMediaInfo ||
+            !SuppServiceUtils::IsSameSuppServices(objSuppServices, m_objLastDispatchedSuppServices);
 }

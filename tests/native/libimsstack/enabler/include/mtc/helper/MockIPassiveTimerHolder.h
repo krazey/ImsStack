@@ -24,11 +24,16 @@
 class MockIPassiveTimerHolder : public IPassiveTimerHolder
 {
 public:
-    virtual ~MockIPassiveTimerHolder() = default;
+    virtual ~MockIPassiveTimerHolder() override = default;
 
-    MOCK_METHOD(
-            void, AddTimer, (IN IPassiveTimerHolder::Type, IN IMS_UINT32, IN IMS_BOOL), (override));
+    MOCK_METHOD(void, AddTimer,
+            (IN IPassiveTimerHolder::Type, IN IMS_SINT32, IN IMS_BOOL, IN IMS_BOOL), (override));
+    MOCK_METHOD(void, RemoveTimer, (IN IPassiveTimerHolder::Type), (override));
     MOCK_METHOD(IMS_BOOL, IsActive, (IN IPassiveTimerHolder::Type), (const, override));
+    MOCK_METHOD(void, AddListener, (IN IPassiveTimerHolder::Type, IN IPassiveTimerListener*),
+            (override));
+    MOCK_METHOD(void, RemoveListener, (IN IPassiveTimerHolder::Type, IN IPassiveTimerListener*),
+            (override));
 };
 
 #endif

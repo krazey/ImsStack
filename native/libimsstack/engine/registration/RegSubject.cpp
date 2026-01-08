@@ -26,7 +26,7 @@ PUBLIC VIRTUAL void RegSubject::RegisterObserver(IN RegObserver* pObserver)
 {
     for (IMS_UINT32 i = 0; i < m_objObservers.GetSize(); ++i)
     {
-        RegObserver* pTmpObserver = m_objObservers.GetAt(i);
+        const RegObserver* pTmpObserver = m_objObservers.GetAt(i);
 
         if (pObserver == pTmpObserver)
         {
@@ -41,7 +41,7 @@ PUBLIC VIRTUAL void RegSubject::RemoveObserver(IN RegObserver* pObserver)
 {
     for (IMS_UINT32 i = 0; i < m_objObservers.GetSize(); ++i)
     {
-        RegObserver* pTmpObserver = m_objObservers.GetAt(i);
+        const RegObserver* pTmpObserver = m_objObservers.GetAt(i);
 
         if (pObserver == pTmpObserver)
         {

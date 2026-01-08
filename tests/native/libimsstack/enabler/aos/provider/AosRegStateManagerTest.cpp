@@ -29,13 +29,13 @@ public:
     AosRegStateManager* pAosRegStateManager;
 
 protected:
-    virtual void SetUp() override
+    void SetUp() override
     {
         pAosRegStateManager = new AosRegStateManager();
         ASSERT_TRUE(pAosRegStateManager != nullptr);
     }
 
-    virtual void TearDown() override
+    void TearDown() override
     {
         if (pAosRegStateManager)
         {

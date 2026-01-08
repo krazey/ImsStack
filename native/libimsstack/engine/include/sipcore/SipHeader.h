@@ -17,7 +17,8 @@
 #define SIP_HEADER_H_
 
 #include "ISipHeader.h"
-#include "msg/SipHeaderBase.h"
+
+class SipHeaderBase;
 
 class SipParameter;
 
@@ -39,7 +40,7 @@ public:
     explicit SipHeader(IN IMS_SINT32 nType);
     explicit SipHeader(IN const AString& strName);
     explicit SipHeader(IN const SipHeaderBase* pSipHdr);
-    virtual ~SipHeader();
+    ~SipHeader() override;
 
     SipHeader(IN const SipHeader&) = delete;
     // To ignore an assignment operator of object
@@ -51,7 +52,7 @@ public:
     // ISipHeader interface
     ISipHeader* Clone() const override;
     IMS_BOOL Equals(IN const ISipHeader* piHeader) const override;
-    inline const SipAddress* GetSipAddress() const override { return m_pAddress; }
+    inline SipAddress* GetSipAddress() const override { return m_pAddress; }
     AString GetHeaderValue() const override;
     inline const AString& GetName() const override { return m_strName; }
     const SipParameter* GetParameter(IN const AString& strName) const override;

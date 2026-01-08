@@ -18,16 +18,28 @@
 #define TERMINATING_STATE_H_
 
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "call/state/MtcCallState.h"
 
 class TerminatingState : public MtcCallState
 {
 public:
     explicit TerminatingState(IN IMtcCallContext& objContext);
-    virtual ~TerminatingState();
+    virtual ~TerminatingState() override;
     TerminatingState(IN const TerminatingState&) = delete;
     TerminatingState& operator=(IN const TerminatingState&) = delete;
+
+    void OnEnter() override;
+    CallStateName SessionStartFailed(IN ISession* piSession) override;
+    CallStateName SessionTerminated(IN ISession* piSession) override;
+    CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
+    CallStateName OnRatChanged(IN IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType) override;
+
+private:
+    void HandleCallSessionReleased();
+    void NotifyCallSessionReleased();
+    IMS_BOOL ShouldWaitEmergencyCallSessionReleased() const;
+
+    IMS_BOOL m_bSessionReleasedNotified;
 };
 
 #endif

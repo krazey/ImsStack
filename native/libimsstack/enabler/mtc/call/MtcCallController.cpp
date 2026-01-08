@@ -19,36 +19,51 @@
 #include "IMtcService.h"
 #include "ISession.h"
 #include "ISipHeader.h"
+#include "ImsList.h"
 #include "IuMtcService.h"
 #include "MtcDef.h"
+#include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "call/ISilentRedialHelper.h"
 #include "call/MtcCallController.h"
 #include "call/SilentRedialHelper.h"
+#include "call/termination/ByeTransactionHandler.h"
 #include "conferencecall/IConferenceController.h"
 #include "conferencecall/IConferenceManager.h"
+#include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
+#include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include "ect/IEctManager.h"
 #include "helper/OperationAsyncRunner.h"
 #include "ussi/UssiConstants.h"
+#include <functional>
+#include <memory>
+
+__IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 MtcCallController::MtcCallController(IN IMtcContext& objContext) :
         m_objContext(objContext),
         m_objCallManager(objContext.GetCallManager()),
-        m_pRedialHelper(IMS_NULL)
+        m_pRedialHelper(IMS_NULL),
+        m_lstByeHandlers(ImsList<ByeTransactionHandler*>())
 {
+    IMS_TRACE_D("+MtcCallController", 0, 0, 0);
 }
 
 PUBLIC VIRTUAL MtcCallController::~MtcCallController()
 {
+    IMS_TRACE_D("~MtcCallController", 0, 0, 0);
+    m_objContext.ReleaseAsyncOperation(this);
+    ClearByeTransactionHandlers(IMS_FALSE);
     delete m_pRedialHelper;
 }
 
 PUBLIC
-CallKey MtcCallController::Open(IN ServiceType eServiceType, IN CallInfo& objCallInfo)
+CallKey MtcCallController::Open(
+        IN ServiceType eServiceType, IN CallInfo& objCallInfo, IN const AString& strLogTag)
 {
-    return m_objCallManager.CreateCall(eServiceType, objCallInfo)->GetKey();
+    return m_objCallManager.CreateCall(eServiceType, objCallInfo, strLogTag)->GetKey();
 }
 
 PUBLIC
@@ -58,17 +73,32 @@ void MtcCallController::Attach(IN CallKey nCallKey)
 }
 
 PUBLIC
+void MtcCallController::Detach(IN CallKey nCallKey)
+{
+    m_objContext.RunAsyncOperation(this,
+            [&, nCallKey]()
+            {
+                m_objCallManager.RemoveCall(nCallKey);
+            });
+}
+
+PUBLIC
 void MtcCallController::HandleIncoming(IN IMtcService* pService, IN ISession* piSession)
 {
     CallInfo objCallInfo;
-    objCallInfo.bEmergency = pService->IsEmergency();
-    m_objCallManager.CreateCall(pService->GetServiceType(), objCallInfo)->HandleIncoming(piSession);
+    objCallInfo.ePeerType = PeerType::MT;
+    if (pService->IsEmergency())
+    {
+        objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    }
+    m_objCallManager.CreateCall(pService->GetServiceType(), objCallInfo, AString::ConstNull())
+            ->HandleIncoming(piSession);
 }
 
 PUBLIC
 void MtcCallController::Start(IN CallKey nCallKey, IN CallType eCallType,
         IN const AString& strTarget, IN MediaInfo& objMediaInfo,
-        IN const ImsMap<SuppType, SuppService*>& objSuppServices)
+        IN const ImsList<SuppService*>& objSuppServices)
 {
     m_objCallManager.GetCallByCallKey(nCallKey)->Start(
             eCallType, strTarget, objMediaInfo, objSuppServices);
@@ -121,7 +151,7 @@ void MtcCallController::RejectResume(IN CallKey nCallKey, IN const CallReasonInf
 PUBLIC
 void MtcCallController::Terminate(IN CallKey nCallKey, IN const CallReasonInfo& objReason)
 {
-    m_objContext.GetAsyncRunner(
+    m_objContext.RunAsyncOperation(this,
             [&, nCallKey, objReason]()
             {
                 m_objCallManager.GetCallByCallKey(nCallKey)->Terminate(objReason);
@@ -216,6 +246,28 @@ void MtcCallController::Transfer(IN CallKey nCallKey, IN const AString& strTarge
 }
 
 PUBLIC
+void MtcCallController::HandleByeTransaction(
+        IN CallKey nCallKey, IN std::function<void(ISession&)> objOperation)
+{
+    ByeTransactionHandler* pByeTransactionHandler =
+            new ByeTransactionHandler(nCallKey, *this, std::move(objOperation));
+    m_lstByeHandlers.Append(pByeTransactionHandler);
+    m_objContext.GetSipInterfaceFactory().GetISessionHolder().AddListener(pByeTransactionHandler);
+}
+
+PUBLIC
+void MtcCallController::OnByeTransactionCompleted(IN ByeTransactionHandler* pHandler)
+{
+    if (pHandler == IMS_NULL)
+    {
+        return;
+    }
+
+    // Clears all ByeTransactionHandler.
+    ClearByeTransactionHandlers(IMS_TRUE);
+}
+
+PUBLIC
 ISilentRedialHelper& MtcCallController::GetRedialHelper(
         IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason)
 {
@@ -233,8 +285,31 @@ ISilentRedialHelper& MtcCallController::GetRedialHelper(
 }
 
 PUBLIC
+const ISilentRedialHelper* MtcCallController::GetActiveRedialHelper() const
+{
+    return m_pRedialHelper;
+}
+
+PUBLIC
 void MtcCallController::ReleaseRedialHelper()
 {
     delete m_pRedialHelper;
     m_pRedialHelper = IMS_NULL;
+}
+
+PRIVATE
+void MtcCallController::ClearByeTransactionHandlers(IN IMS_BOOL bRemoveListener)
+{
+    for (IMS_UINT32 i = 0; i < m_lstByeHandlers.GetSize(); ++i)
+    {
+        // Do not access SessionInterfaceHolder#RemoveListener in the destructor execution flow.
+        // SessionInterfaceHolder is destructed before MtcCallController.
+        if (bRemoveListener)
+        {
+            m_objContext.GetSipInterfaceFactory().GetISessionHolder().RemoveListener(
+                    m_lstByeHandlers.GetAt(i));
+        }
+        delete m_lstByeHandlers.GetAt(i);
+    }
+    m_lstByeHandlers.Clear();
 }

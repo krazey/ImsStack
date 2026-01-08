@@ -70,7 +70,7 @@ public class ImsStackRegistry {
         boolean oldState = isImsServiceStarted(slotId);
 
         if (oldState != state) {
-            Log.i(Log.TAG, "ImsStackRegistry: service-state=" + state);
+            Log.i(ImsStackRegistry.class, "ImsService-state=" + state);
             sImsServiceStates.put(slotId, state);
             notifyImsServiceState(slotId, state);
         }

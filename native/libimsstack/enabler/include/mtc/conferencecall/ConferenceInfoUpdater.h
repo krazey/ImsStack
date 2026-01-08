@@ -18,12 +18,14 @@
 #define CONFERENCE_INFO_UPDATER_H_
 
 #include "ImsList.h"
-#include "MtcDef.h"
+#include "ImsTypeDef.h"
 #include "conferencecall/ConferenceInfo.h"
 
 class ConferenceFactory;
 class ConferenceParticipantList;
+class IMessageUtils;
 class MtcConfigurationProxy;
+struct ConfUser;
 
 enum class MatchingPolicy
 {
@@ -36,8 +38,8 @@ enum class MatchingPolicy
 class ConferenceInfoUpdater
 {
 public:
-    explicit ConferenceInfoUpdater(
-            IN ConferenceFactory& objFactory, IN MtcConfigurationProxy& objConfigProxy);
+    explicit ConferenceInfoUpdater(IN ConferenceFactory& objFactory,
+            IN MtcConfigurationProxy& objConfigProxy, IN IMessageUtils& objMessageUtils);
     virtual ~ConferenceInfoUpdater();
     ConferenceInfoUpdater(IN const ConferenceInfoUpdater&) = delete;
     ConferenceInfoUpdater& operator=(IN const ConferenceInfoUpdater&) = delete;
@@ -46,16 +48,20 @@ public:
     virtual IMS_UINT32 Update(
             IN ConferenceParticipantList* pParticipantList, IN const AString& strEventPackage);
 
+    // The visibility of these internal methods is currently public to allow for unit testing.
     static const IMS_CHAR* ConvertPolicyToString(IN MatchingPolicy ePolicy);
     static const IMS_CHAR* ConvertStatusToString(IN IMS_SINT32 nStatus);
 
-protected:
+private:
+    void Clear();
+
     IMS_RESULT ParseConferenceInfo(IN const AString& strEventPackage);
     IMS_RESULT CheckValidVersion() const;
     IMS_RESULT UpdateDescription();
     IMS_RESULT UpdateParticipantList();
     IMS_BOOL FindAndUpdate(IN MatchingPolicy ePolicy);
-    IMS_BOOL UpdateParticipant(IN ConferenceInfo::User* pUser, IN IMS_SINT32 nParticipantIndex);
+    IMS_BOOL UpdateParticipant(
+            IN const ConferenceInfo::User* pUser, IN IMS_SINT32 nParticipantIndex);
     void SetParticipantsMatchingStarted();
     void SetDeletedParticipantToDisconnected();
 
@@ -66,41 +72,39 @@ protected:
     IMS_SINT32 FindParticipantByReferToUri(IN const ConferenceInfo::User* pUser);
     IMS_SINT32 FindParticipantByUserEntity(IN const ConferenceInfo::User* pUser);
 
-    static IMS_UINT32 GetMatchingScore(IN const AString& strUriA, IN const AString& strUriB);
-    static IMS_UINT32 GetMatchingCount(IN const AString& strUriA, IN const AString& strUriB);
-
-    void Clear();
-
-    static IMS_BOOL IsSameUri(IN const AString& strUriA, IN const AString& strUriB,
-            IN IMS_BOOL bAllowPrefix = IMS_TRUE);
-    IMS_BOOL IsLocalUri(IN const AString& strUserEntity) const;
-    static IMS_BOOL IsAnonymousUri(IN const AString& strUserEntity);
-    static IMS_BOOL IsSamePrivacyUri(IN const AString& strUriA, IN const AString& strUriB);
-    IMS_BOOL IsInvalidStatusUpdate(
-            IN IMS_UINT32 nParticipantIndex, IN const ConferenceInfo::User* pUser) const;
     ImsList<ConferenceInfo::User*> GetSameUserEntities(IN const ConferenceInfo::User* pUser) const;
     void AddNotMatchedUserList(IN ConferenceInfo::User* pUser);
-    void RemoveFromNotMatchedUserList(IN ConferenceInfo::User* pUser);
+    void RemoveFromNotMatchedUserList(IN const ConferenceInfo::User* pUser);
     IMS_BOOL IsInitialNotifyWithoutUsers() const;
+    IMS_BOOL IsInvalidStatusUpdate(
+            IN IMS_UINT32 nParticipantIndex, IN const ConferenceInfo::User* pUser) const;
+    IMS_BOOL IsLocalUri(IN const AString& strUserEntity) const;
 
+    static IMS_BOOL IsSameUri(IN const AString& strUriA, IN const AString& strUriB,
+            IN IMessageUtils& objMessageUtils, IN IMS_BOOL bAllowPrefix = IMS_TRUE);
+    static IMS_BOOL IsSameUriParameter(
+            IN const AString& strUserEntityA, IN const AString& strUserEntityB);
+    static IMS_BOOL IsAnonymousUri(IN const AString& strUserEntity);
+    static IMS_BOOL IsSamePrivacyUri(IN const AString& strUriA, IN const AString& strUriB);
     static IMS_BOOL IsConnectedStatusCategory(IN IMS_UINT32 nStatus);
-
-private:
-    void ModifyParticipantInfoByConfig(IN ConfUser* pConfUser);
+    static IMS_UINT32 GetMatchingScore(IN const AString& strUriA, IN const AString& strUriB);
+    static IMS_UINT32 GetMatchingCount(IN const AString& strUriA, IN const AString& strUriB,
+            IN IMessageUtils& objMessageUtils);
 
 public:
     enum
     {
         RESULT_UPDATED = 0,
         RESULT_MALFORMED_XML = 1,
-        RESULT_NOTHING_UPDATED = 2,  // ambiguous??
-        RESULT_INVALID_VERSION = 3,  // ambiguous??
+        RESULT_NOTHING_UPDATED = 2,
+        RESULT_INVALID_VERSION = 3,
         RESULT_INFO_DELETED = 4,
         RESULT_AMBIGUOUS = 5
     };
 
 private:
     MtcConfigurationProxy& m_objConfigProxy;
+    IMessageUtils& m_objMessageUtils;
     ConferenceInfo* m_pConferenceInfo;
     ConferenceFactory& m_objFactory;
     ConferenceParticipantList* m_pParticipantList;

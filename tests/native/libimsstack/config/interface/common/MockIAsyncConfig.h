@@ -24,7 +24,7 @@ class MockIAsyncConfig : public IAsyncConfig
 {
 public:
     inline MockIAsyncConfig() {}
-    inline virtual ~MockIAsyncConfig() {}
+    ~MockIAsyncConfig() override = default;
 
     MOCK_METHOD(void, HandleMessage,
             (IN IMS_SINT32 nMsg, IN IMS_SINTP nParam1, IN IMS_SINTP nParam2), (override));

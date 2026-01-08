@@ -18,6 +18,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "IThreadImpListener.h"
 #include "ImsQueue.h"
 #include "OsMutex.h"
 #include "OsPthread.h"
@@ -26,10 +27,9 @@
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
-LOCAL
-void osPthread_Run(IN OsPthread* pThread)
+static void osPthread_Run(IN OsPthread* pThread)
 {
     if (pThread == IMS_NULL)
     {
@@ -40,8 +40,7 @@ void osPthread_Run(IN OsPthread* pThread)
     pthread_exit(NULL);
 }
 
-LOCAL
-IMS_PVOID osPthread_ThreadProc(void* param)
+static IMS_PVOID osPthread_ThreadProc(void* param)
 {
     osPthread_Run(reinterpret_cast<OsPthread*>(param));
     return IMS_NULL;

@@ -17,7 +17,9 @@
 #define AOS_E_REGISTRATION_H_
 
 #include "ServiceSystemTime.h"
+#include "IImsAosInfo.h"
 #include "interface/IAosEmergencyListener.h"
+#include "interface/IAosServicePhoneListener.h"
 #include "registration/AosRegistration.h"
 
 class EmergencyModeInfo
@@ -28,6 +30,7 @@ public:
             m_bEcbm(IMS_FALSE),
             m_bScbm(IMS_FALSE),
             m_bESms(IMS_FALSE),
+            m_eESmsPdn(EmergencyServicePdn::EMERGENCY),
             m_nCbmDurationSec(0),
             m_nCbmBeginTimeSec(0),
             m_nReregTryTimeSec(0)
@@ -39,6 +42,7 @@ public:
     inline IMS_BOOL IsEcbm() { return m_bEcbm; }
     inline IMS_BOOL IsScbm() { return m_bScbm; }
     inline IMS_BOOL IsESms() { return m_bESms; }
+    inline EmergencyServicePdn GetESmsPdn() { return m_eESmsPdn; }
     inline IMS_ULONG GetCbmDuration() { return m_nCbmDurationSec; }
     inline IMS_UINT32 GetCbmBeginTime() { return m_nCbmBeginTimeSec; }
     inline IMS_UINT32 GetReRegTryTime() { return m_nReregTryTimeSec; }
@@ -47,6 +51,7 @@ public:
     inline void SetEcbm(IN IMS_BOOL bEcbm) { m_bEcbm = bEcbm; }
     inline void SetScbm(IN IMS_BOOL bScbm) { m_bScbm = bScbm; }
     inline void SetESms(IN IMS_BOOL bESms) { m_bESms = bESms; }
+    inline void SetESmsPdn(IN EmergencyServicePdn eESmsPdn) { m_eESmsPdn = eESmsPdn; }
     inline void SetCbmDuration(IN IMS_ULONG nCbmDurationSec)
     {
         m_nCbmDurationSec = nCbmDurationSec;
@@ -65,21 +70,28 @@ private:
     IMS_BOOL m_bEcbm;
     IMS_BOOL m_bScbm;
     IMS_BOOL m_bESms;
+    EmergencyServicePdn m_eESmsPdn;
     IMS_ULONG m_nCbmDurationSec;
     IMS_UINT32 m_nCbmBeginTimeSec;
     IMS_UINT32 m_nReregTryTimeSec;
 };
 
-class AosERegistration : public AosRegistration, public IAosEmergencyListener
+class AosERegistration :
+        public AosRegistration,
+        public IAosEmergencyListener,
+        public AosServicePhoneListener
 {
 public:
     AosERegistration(IN IAosAppContext* piAppContext, IN AString& strRegId);
-    virtual ~AosERegistration();
+    ~AosERegistration() override;
 
-    void Start() final;
+    void Start() override;
     void Update(IN IMS_BOOL bIgnoreRetryTimer = IMS_FALSE,
             IN IMS_BOOL bExplicitUpdate = IMS_TRUE) final;
     void RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason = 0) final;
+    void NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized, IN EmergencyServicePdn ePdnType) final;
+
+    IMS_BOOL IsInCallbackMode() final;
 
 protected:
     IMS_BOOL OnMessage(IN IMSMSG& objMsg) final;
@@ -91,8 +103,14 @@ protected:
 
     void ProcessAuthenticationFailed() final;
 
-    void ProcessDefaultFlowRecovery_Start(IN IMS_SINT32 nStatusCode = 0) final;
-    void ProcessDefaultFlowRecovery_Update(IN IMS_SINT32 nStatusCode = 0) final;
+    void ProcessDefaultFlowRecovery_Start(IN IMS_SINT32 nStatusCode = 0) override;
+    void ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy(
+            IN IMS_UINT32 nRetryAfter) override;
+    void ProcessDefaultFlowRecovery_Update(IN IMS_SINT32 nStatusCode = 0) override;
+
+    IMS_BOOL ProcessStartFailed_305() final;
+    IMS_BOOL ProcessStartFailed_420() final;
+    IMS_BOOL ProcessStartFailed_423() final;
 
     void ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode) final;
     void ProcessStartFailed_TxnTimeout() final;
@@ -103,9 +121,13 @@ protected:
     void ProcessUpdateFailed_Others(IN IMS_SINT32 nReason) final;
 
     void ProcessStopRetryTimerExpired() final;
+    void ProcessModeTimerExpired() final;
     void ProcessTransactionTimerExpired() final;
+    void ProcessWaitEmergencyNetworkTimerExpired() final;
+    void ProcessScscfRestoration(IN IMS_UINT32 nUnavailableTimeForCurrentPcscf) final;
 
     void SetRefreshPolicy() final;
+    void SetReregFailureReportOnIpcanChangeRequired(IN IMS_BOOL bRequired) final;
 
     void UpdateTransactionStarted() final;
 
@@ -124,13 +146,18 @@ protected:
     void Transaction_OnConnectionSetupPrepared() final;
     void Transaction_OnTrafficPriorityChanged() final;
 
+    void ProcessGiba();
+
     void ClearCbm();
 
-    IMS_UINT32 GetRetryTime();
+    void SetCallFailureCauseToProperty(IN IMS_UINT32 nFailureCause);
 
     /// IAosEmergencyListener
-    void CallbackModeChanged(
-            IN EmcCallbackModeType eType, IN EmcCallbackMode eState, IN IMS_ULONG nDuration);
+    void CallbackModeChanged(IN EmergencyCallbackModeType eType, IN EmergencyCallbackMode eState,
+            IN IMS_ULONG nDuration) override;
+
+    // IAosServicePhoneListener
+    void ServicePhone_EmergencyRegistrationStateChanged(IN IMS_BOOL bEmergencyAttached) override;
 
     void HandleECallState(IN IMS_UINT32 nState);
     void HandleESmsState(IN IMS_UINT32 nState);
@@ -138,16 +165,22 @@ protected:
 
     IMS_BOOL IsRefreshRequiredByCbm();
     IMS_BOOL IsFakeModeCondition();
+    IMS_BOOL IsERegRequestedByOnlySms() const;
     IMS_BOOL IsReinitiationRequested() const;
     IMS_BOOL IsRetryAllowed() const;
+    IMS_BOOL IsAnonymousECallActionPresent(IN IMS_SINT32 nStatusCode) const;
+    IMS_BOOL IsNetworkReady() const;
 
     void ProcessReRegStart();
     void ProcessFakeMode();
     void ProcessFakeModeWithRegState(IN IMS_BOOL bIsRegistered);
     void ProcessRearrangePcscf();
     void ProcessReinitiateWithRegState(IN IMS_BOOL bIsRegistered);
+    IMS_BOOL ProcessNormalDefaultFlowRecovery_Start(IN IMS_SINT32 nStatusCode);
 
     void SetReinitiationRequested(IN IMS_BOOL bRequest);
+    void SetCallbackMode(IN EmergencyCallbackModeType eType, IN IMS_BOOL bEnable);
+    void StartRegRetryTimer();
 
     IMS_UINT32 GetPreferredRegScheme();
 
@@ -156,5 +189,7 @@ private:
 
 protected:
     EmergencyModeInfo* m_pEModeInfo;
+
+    static const IMS_UINT32 ECALL_FAILURE_CAUSE_EREG_TIMEOUT_DUE_TO_TCP_FAILURE = 1;
 };
 #endif  // AOS_E_REGISTRATION_H_

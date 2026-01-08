@@ -16,11 +16,13 @@
 #ifndef SERVICE_UTIL_H_
 #define SERVICE_UTIL_H_
 
-#include "IImsPrivateProperty.h"
-#include "ISystemProperty.h"
-#include "ISystemUtil.h"
-#include "IZLib.h"
 #include "PlatformService.h"
+
+class AString;
+class IImsPrivateProperty;
+class ISystemProperty;
+class ISystemUtil;
+class IZLib;
 
 class UtilService : public PlatformService
 {
@@ -30,7 +32,7 @@ public:
     UtilService& operator=(IN const UtilService&) = delete;
 
 protected:
-    virtual ~UtilService();
+    ~UtilService() override;
 
 public:
     virtual IImsPrivateProperty* GetPrivateProperty();

@@ -19,10 +19,9 @@
 
 #include "IMtcCallStateListener.h"
 #include "ImsList.h"
-#include "ImsMap.h"
-#include "ServiceTimer.h"
+#include "ImsTypeDef.h"
 #include "SipStatusCode.h"
-#include "call/IMtcUiNotifier.h"
+#include "conferencecall/ConferenceConfigurationHelper.h"
 #include "conferencecall/ConferenceEventNotifier.h"
 #include "conferencecall/ConferenceOperationQueue.h"
 #include "conferencecall/ConferenceParticipantList.h"
@@ -30,15 +29,19 @@
 #include "conferencecall/IConferenceController.h"
 #include "conferencecall/IConferenceControllerListener.h"
 #include "conferencecall/IConferenceOperationQueueListener.h"
+#include "conferencecall/IConferenceReference.h"
 #include "conferencecall/IConferenceReferenceListener.h"
 #include "conferencecall/IConferenceSubscriptionListener.h"
+#include "helper/IMtcTimerListener.h"
+#include "helper/MtcTimerWrapper.h"
 #include <memory>
 
 class IMtcContext;
-class IConferenceReference;
 class SuppService;
 class CallConnectionIdManager;
 class ConferenceFactory;
+class ConferenceSubscription;
+class MtcConfigurationProxy;
 struct CallInfo;
 struct CallStartOperationParams;
 struct ConfUser;
@@ -50,12 +53,12 @@ class ConferenceController :
         public IConferenceReferenceListener,
         public IConferenceController,
         public IConferenceOperationQueueListener,
-        public ITimerListener
+        public IMtcTimerListener
 {
 public:
     explicit ConferenceController(IN CallKey nConfCallKey, IMtcContext& objContext,
             IN CallConnectionIdManager& objConnectionIdManager, IN ConferenceFactory& objFactory);
-    virtual ~ConferenceController();
+    virtual ~ConferenceController() override;
     ConferenceController(IN const ConferenceController&) = delete;
     ConferenceController& operator=(IN const ConferenceController&) = delete;
 
@@ -75,30 +78,37 @@ public:
     void OnReferenceUpdated(IN IConferenceReference* piConfRef, IN IMS_SINT32 nSipFragCode,
             IN ReferSubscriptionState eState) override;
 
-    // ITimerListener interfaces implementation.
-    void Timer_TimerExpired(IN ITimer* piTimer) override;
+    // IMtcTimerListener interfaces implementation.
+    void OnTimerExpired(IN IMS_SINT32 nType) override;
 
     inline void SetListener(IConferenceControllerListener* piListener)
     {
         m_piListener = piListener;
     }
 
-    // TODO: need to optimize.
     // IConferenceController interfaces implementation
     void ProcessCommand(IN IMS_UINT32 nCmd, IN ImsList<ConfUser*>& objUsers,
             IN CallInfo& objCallInfo, IN MediaInfo& objMediaInfo,
-            IN ImsMap<SuppType, SuppService*>& objSuppServices) override;
+            IN ImsList<SuppService*>& objSuppServices) override;
     void ProcessCommand(IN IMS_UINT32 nCmd, IN ImsList<ConfUser*>& objUsers) override;
-    IMS_SINT32 GetState() const override;
+    void ProcessCommand(IN IMS_UINT32 nCmd) override;
     IndividualCallState GetCallStatusInConference(IN CallKey nKey) const override;
 
     // IConferenceOperationQueueListener interfaces implementation
     void OnOperationReady() override;
 
+    // The visibility of this internal method is currently public to allow for unit testing.
+    IMS_SINT32 GetState() const;
+
+    inline static IMS_BOOL IsRequiredForParticipant(IN const MtcConfigurationProxy& objConfigProxy)
+    {
+        return ConferenceConfigurationHelper::IsSubscriptionForParticipantRequired(objConfigProxy);
+    }
+
 protected:
     // basic operation set
     inline virtual void ProcessGroupCall(
-            IN ImsList<ConfUser*>&, IN CallInfo&, IN MediaInfo&, IN ImsMap<SuppType, SuppService*>&)
+            IN ImsList<ConfUser*>&, IN CallInfo&, IN MediaInfo&, IN ImsList<SuppService*>&)
     {
     }
     inline virtual void ProcessExpand(IN ImsList<ConfUser*>&) {}
@@ -199,8 +209,6 @@ protected:
 
     IConferenceControllerListener* m_piListener;
 
-    // FIXME : has IMtcCall reference or has only call id?
-
     CallKey m_nConfCallKey;
     IMtcContext& m_objContext;
     IMtcCallManager& m_objCallManager;
@@ -211,11 +219,12 @@ protected:
     std::unique_ptr<ConferenceOperationQueue> m_pOperationQueue;
     ConferenceSubscription* m_pSubscription;
     ImsList<IConferenceReference*> m_objIConfReferences;
-    ITimer* m_piTimer;
+    std::unique_ptr<MtcTimerWrapper> m_pTimer;
 
     IMS_UINT32 m_nConditionFinalSipfragTimer;
     IMS_SINT32 m_nState;
 
+    static const IMS_UINT32 TIMER_FINAL_SIPFRAG_WAIT = 0;
     static const IMS_UINT32 TIME_FINAL_SIPFRAG_WAIT = 3000;
 };
 

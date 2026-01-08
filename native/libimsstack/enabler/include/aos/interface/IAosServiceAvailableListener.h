@@ -17,9 +17,10 @@
 #define INTERFACE_AOS_SERVICE_AVAILABLE_LISTENER_H_
 
 /**
- * @brief
+ * @brief Interface for listeners that want to be notified of changes in service availability.
  *
- * @see
+ * This interface defines the methods that must be implemented by any class
+ * that wants to receive notifications about changes in service availability.
  */
 class IAosServiceAvailableListener
 {
@@ -29,14 +30,20 @@ public:
     /**
      * @brief Notifies if any service is available under the current conditions.
      *
-     * @param
+     * This method is called when the availability of any service changes.
+     *
+     * @param bNotify Indicates whether the notification should be suppressed.
+     *                 Set to true to prevent notifying listeners about the state change.
      */
-    virtual void ServiceAvailable_Changed() = 0;
+    virtual void ServiceAvailable_Changed(IN IMS_BOOL bNotify) = 0;
 
     /**
      * @brief Notifies if there are specific commands under the current conditions.
      *
-     * @param
+     * This method is called when specific commands are requested based on the current conditions.
+     *
+     * @param nCommand The command that is requested.
+     * @param nReason The reason for the command request.
      */
     virtual void ServiceAvailable_RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason) = 0;
 };

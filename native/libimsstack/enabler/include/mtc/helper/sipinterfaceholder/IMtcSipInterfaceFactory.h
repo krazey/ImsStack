@@ -17,36 +17,36 @@
 #ifndef INTERFACE_MTC_SIP_INTERFACE_FACTORY_H_
 #define INTERFACE_MTC_SIP_INTERFACE_FACTORY_H_
 
-#include "ImsTypeDef.h"
-#include "helper/sipinterfaceholder/IInterfaceHolderListener.h"
-
 class SessionInterfaceHolder;
 class ReferenceInterfaceHolder;
 class SubscriptionInterfaceHolder;
 
+/**
+ * @brief An interface for a factory that provides holders for various SIP interfaces.
+ */
 class IMtcSipInterfaceFactory
 {
 public:
     virtual ~IMtcSipInterfaceFactory() {}
 
     /**
-     * @brief Gets
+     * @brief Gets the session interface holder.
      *
-     * @return
+     * @return A reference to the SessionInterfaceHolder.
      */
-    virtual SessionInterfaceHolder* GetISessionHolder() = 0;
+    virtual SessionInterfaceHolder& GetISessionHolder() = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the reference interface holder.
      *
-     * @return
+     * @return A pointer to the ReferenceInterfaceHolder.
      */
     virtual ReferenceInterfaceHolder* GetIReferenceHolder() = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the subscription interface holder.
      *
-     * @return
+     * @return A pointer to the SubscriptionInterfaceHolder.
      */
     virtual SubscriptionInterfaceHolder* GetISubscriptionHolder() = 0;
 };

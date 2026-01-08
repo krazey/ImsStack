@@ -25,7 +25,7 @@ class OsPollFdSet : public ImsFdSet
 public:
     OsPollFdSet();
     OsPollFdSet(IN const OsPollFdSet& other);
-    virtual ~OsPollFdSet();
+    ~OsPollFdSet() override;
 
 public:
     OsPollFdSet& operator=(IN const OsPollFdSet& other);

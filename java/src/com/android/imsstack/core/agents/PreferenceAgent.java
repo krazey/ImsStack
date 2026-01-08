@@ -20,7 +20,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.text.TextUtils;
 
-import com.android.imsstack.util.AppContext;
+import com.android.imsstack.base.AppContext;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.Locale;
@@ -49,7 +49,7 @@ public class PreferenceAgent implements PreferenceInterface {
 
     @Override
     public String getString(String fileName, String key, int slotId) {
-        ImsLog.d("getString: file=" + fileName + ", key=" + key + ", slotId=" + slotId);
+        ImsLog.d(this, slotId, "Pref: getString - file=" + fileName + ", key=" + key);
 
         if (TextUtils.isEmpty(key)) {
             return null;
@@ -66,8 +66,8 @@ public class PreferenceAgent implements PreferenceInterface {
 
     @Override
     public boolean putString(String fileName, String key, String value, int slotId) {
-        ImsLog.d("putString: file=" + fileName
-                + ", key=" + key + ", value=" + value + ", slotId=" + slotId);
+        ImsLog.d(this, slotId, "Pref: putString - file=" + fileName
+                + ", key=" + key + ", value=" + value);
 
         if (TextUtils.isEmpty(key) || value == null) {
             return false;
@@ -86,7 +86,7 @@ public class PreferenceAgent implements PreferenceInterface {
 
     @Override
     public void remove(String fileName, String key, int slotId) {
-        ImsLog.d("remove: file=" + fileName + ", key=" + key + ", slotId=" + slotId);
+        ImsLog.d(this, slotId, "Pref: remove - file=" + fileName + ", key=" + key);
 
         if (TextUtils.isEmpty(key)) {
             return;

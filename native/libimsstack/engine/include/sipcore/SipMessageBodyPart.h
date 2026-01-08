@@ -16,16 +16,20 @@
 #ifndef SIP_MESSAGE_BODY_PART_H_
 #define SIP_MESSAGE_BODY_PART_H_
 
+#include "ByteArray.h"
+
 #include "ISipMessageBodyPart.h"
 #include "SipUnknownHeaders.h"
-#include "msg/SipMsgBody.h"
+
+class SipHeaderBase;
+class SipMsgBody;
 
 class SipMessageBodyPart : public ISipMessageBodyPart
 {
 public:
     explicit SipMessageBodyPart(IN IMS_BOOL bSdpBody = IMS_FALSE);
     explicit SipMessageBodyPart(IN SipMsgBody* pMsgBody, IN IMS_BOOL bSdpBody = IMS_FALSE);
-    virtual ~SipMessageBodyPart();
+    ~SipMessageBodyPart() override;
 
     SipMessageBodyPart(IN const SipMessageBodyPart&) = delete;
 

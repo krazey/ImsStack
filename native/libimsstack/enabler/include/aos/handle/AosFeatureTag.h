@@ -72,8 +72,8 @@ public:
     void AddUnavailableFeature(IN IMS_UINT32 nFeature);
     void RemoveUnavailableFeature(IN IMS_UINT32 nFeature);
 
-    IMS_UINT32 GetFeatures();
-    IMS_UINT32 GetUnavailableFeatures();
+    IMS_UINT32 GetFeatures() const;
+    IMS_UINT32 GetUnavailableFeatures() const;
     void ClearFeatures();
     void ClearFeatureTags();
     void Clear();

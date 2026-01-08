@@ -15,18 +15,25 @@
  */
 package com.android.imsstack.core.agents;
 
-import android.annotation.NonNull;
+import android.annotation.CallbackExecutor;
+import android.location.LastLocationRequest;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationRequest;
+import android.os.CancellationSignal;
 import android.util.ArraySet;
 
-import com.android.imsstack.util.AppContext;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.android.imsstack.base.AppContext;
+import com.android.imsstack.base.SystemServiceProxy.LocationManagerProxy;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * This class provides utilities classes/methods for Location information retrieval.
@@ -52,7 +59,6 @@ public final class LocationApi {
     // It indicates that Location API is ready to use.
     // If it's not set, LocationManager will be used as a default.
     private static final int FLAG_LOCATION_API_READY = 0x80000000;
-    private static final boolean ALWAYS_PROVIDER_ENABLED = true;
 
     private static LocationApi sLocationApi = null;
     private final Object mLock = new Object();
@@ -102,7 +108,7 @@ public final class LocationApi {
             return;
         }
 
-        logi("start - 0x" + Integer.toHexString(mFlag));
+        logi(this, "start - 0x" + Integer.toHexString(mFlag));
 
         addFlag(FLAG_LOCATION_API_READY);
 
@@ -121,7 +127,7 @@ public final class LocationApi {
 
         clearFlag(FLAG_LOCATION_API_READY);
 
-        logi("stop - 0x" + Integer.toHexString(mFlag));
+        logi(this, "stop - 0x" + Integer.toHexString(mFlag));
 
         if (mListenerPool != null) {
             mListenerPool.notifyServiceDisconnectedForLocationManagerApi();
@@ -135,11 +141,57 @@ public final class LocationApi {
      * @return true if the provider exists and is enabled
      */
     public boolean isProviderEnabled(String provider) {
-        if (ALWAYS_PROVIDER_ENABLED) {
-            return true;
-        }
-
         return LocationManagerApi.isProviderEnabled(provider);
+    }
+
+    /**
+     * Returns a preferred location provider for a location update.
+     *
+     * @param emergency A flag indicating an emergency service.
+     * @return A provider name.
+     */
+    public String getPreferredProvider(boolean emergency) {
+        if (isProviderEnabled(FUSED_PROVIDER)) {
+            return FUSED_PROVIDER;
+        } else if (isProviderEnabled(NETWORK_PROVIDER)) {
+            return NETWORK_PROVIDER;
+        } else if (isProviderEnabled(GPS_PROVIDER)) {
+            return GPS_PROVIDER;
+        } else {
+            // In case of an emergency, this is to obtain location information regardless of
+            // the provider's enablement (regardless of location settings).
+            if (emergency) {
+                return FUSED_PROVIDER;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Asynchronously returns a single current location fix from the given provider based on
+     * the given {@link LocationRequest}. This may activate sensors in order to compute
+     * a new location, unlike {@link #getLastKnownLocation(String)}, which will only return
+     * a cached fix if available. The given callback will be invoked once and only once,
+     * either with a valid location or with a null location if the provider was unable to
+     * generate a valid location.
+     *
+     * @param provider A provider listed by {@link LocationManager#getAllProviders()}.
+     * @param request The location request containing location parameters.
+     * @param cancellationSignal An optional signal that allows for cancelling this call
+     * @param executor The executor handling listener callbacks.
+     * @param consumer The callback invoked with either a {@link Location} or null
+     */
+    public void getCurrentLocation(@NonNull String provider,
+            @NonNull LocationRequest request,
+            @Nullable CancellationSignal cancellationSignal,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<Location> consumer) {
+        LocationManagerProxy lmp = getLocationManagerProxy();
+        if (lmp != null) {
+            lmp.getCurrentLocation(provider, request, cancellationSignal, executor, consumer);
+        } else {
+            executor.execute(() -> consumer.accept(null));
+        }
     }
 
     /**
@@ -225,6 +277,13 @@ public final class LocationApi {
         return (location != null) && location.getProvider().equals(FUSED_PROVIDER);
     }
 
+    /**
+     * Returns the string of the provider for specified location.
+     */
+    public static String getProvider(Location location) {
+        return (location != null) ? location.getProvider() : "unknown";
+    }
+
     private boolean isLocationApiReady() {
         synchronized (mLock) {
             return (mFlag & FLAG_LOCATION_API_READY) != 0;
@@ -237,20 +296,20 @@ public final class LocationApi {
         }
     }
 
-    private static LocationManager getLocationManager() {
-        return AppContext.getInstance().getSystemService(LocationManager.class);
+    private static LocationManagerProxy getLocationManagerProxy() {
+        return AppContext.getInstance().getSystemServiceProxy(LocationManagerProxy.class);
     }
 
-    private static void log(String s) {
-        ImsLog.d("[LocationApi] " + s);
+    private static void log(Object o, String s) {
+        ImsLog.d(o, "LocationApi: " + s);
     }
 
     private static void loge(String s) {
-        ImsLog.e("[LocationApi] " + s);
+        ImsLog.e(null, "LocationApi: " + s);
     }
 
-    private static void logi(String s) {
-        ImsLog.i("[LocationApi] " + s);
+    private static void logi(Object o, String s) {
+        ImsLog.i(o, "LocationApi: " + s);
     }
 
     private static class ListenerPool {
@@ -279,7 +338,7 @@ public final class LocationApi {
             synchronized (mListeners) {
                 mListeners.remove(listener);
 
-                log("LP - listeners=" + mListeners.size());
+                log(this, "LP - listeners=" + mListeners.size());
             }
         }
 
@@ -299,7 +358,7 @@ public final class LocationApi {
 
             clear();
 
-            log("LP - notifyServiceDisconnectedForLocationManagerApi");
+            log(this, "LP - notifyServiceDisconnectedForLocationManagerApi");
 
             for (LocationApi.Listener listener : listeners) {
                 LocationManagerApi.removeUpdates(listener);
@@ -323,14 +382,10 @@ public final class LocationApi {
 
     private static class LocationManagerApi {
         public static boolean isProviderEnabled(String provider) {
-            LocationManager lm = getLocationManager();
-
-            if (lm == null) {
-                return false;
-            }
+            LocationManagerProxy lmp = getLocationManagerProxy();
 
             try {
-                return lm.isProviderEnabled(provider);
+                return lmp.isProviderEnabled(provider);
             } catch (Exception e) {
                 loge(e.toString());
             }
@@ -339,14 +394,13 @@ public final class LocationApi {
         }
 
         public static Location getLastKnownLocation(String provider) {
-            LocationManager lm = getLocationManager();
-
-            if (lm == null) {
-                return null;
-            }
+            LocationManagerProxy lmp = getLocationManagerProxy();
 
             try {
-                return lm.getLastKnownLocation(provider);
+                return lmp.getLastKnownLocation(provider,
+                        new LastLocationRequest.Builder()
+                                .setLocationSettingsIgnored(true)
+                                .build());
             } catch (Exception e) {
                 loge(e.toString());
             }
@@ -372,15 +426,11 @@ public final class LocationApi {
                 return false;
             }
 
-            LocationManager lm = getLocationManager();
-
-            if (lm == null) {
-                return false;
-            }
+            LocationManagerProxy lmp = getLocationManagerProxy();
 
             try {
-                logi("LM :: requestLocationUpdates - " + request);
-                lm.requestLocationUpdates(provider, request, executor, listener);
+                logi(null, "LM: requestLocationUpdates - " + request);
+                lmp.requestLocationUpdates(provider, request, executor, listener);
                 return true;
             } catch (SecurityException e) {
                 loge("Location update request is failed; ignore - " + e);
@@ -394,14 +444,12 @@ public final class LocationApi {
         }
 
         public static void removeUpdates(LocationListener listener) {
-            LocationManager lm = getLocationManager();
+            LocationManagerProxy lmp = getLocationManagerProxy();
 
-            if (lm != null) {
-                try {
-                    lm.removeUpdates(listener);
-                } catch (Exception e) {
-                    loge(e.toString());
-                }
+            try {
+                lmp.removeUpdates(listener);
+            } catch (Exception e) {
+                loge(e.toString());
             }
         }
     }

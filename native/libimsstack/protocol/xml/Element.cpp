@@ -13,9 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "AString.h"
+
 #include "AttrImpl.h"
 #include "Element.h"
 #include "IElement.h"
+#include "NamedNodeMap.h"
+#include "NodeList.h"
 
 PUBLIC
 Element::Element(IN xmlNodePtr pstNode, IN IElement* piElement) :
@@ -67,7 +71,7 @@ PUBLIC VIRTUAL Element::~Element()
 
 PUBLIC VIRTUAL const AString& Element::GetAttribute(IN const AString& strName) const
 {
-    IAttr* piAttr = GetAttributeNode(strName);
+    const IAttr* piAttr = GetAttributeNode(strName);
 
     return (piAttr != IMS_NULL) ? piAttr->GetNodeValue() : AString::ConstNull();
 }
@@ -129,7 +133,7 @@ PUBLIC VIRTUAL IAttr* Element::GetAttributeNodeNs(
 PUBLIC VIRTUAL const AString& Element::GetAttributeNs(
         IN const AString& strNamespaceUri, IN const AString& strLocalName) const
 {
-    IAttr* piAttr = GetAttributeNodeNs(strNamespaceUri, strLocalName);
+    const IAttr* piAttr = GetAttributeNodeNs(strNamespaceUri, strLocalName);
 
     return (piAttr != IMS_NULL) ? piAttr->GetNodeValue() : AString::ConstNull();
 }
@@ -195,7 +199,7 @@ PUBLIC VIRTUAL IMS_BOOL Element::HasAttributeB(IN const AString& strName) const
 
     for (IMS_SINT32 i = 0; i < m_pNamedNodeMap->GetLength(); i++)
     {
-        INode* piNode = m_pNamedNodeMap->Item(i);
+        const INode* piNode = m_pNamedNodeMap->Item(i);
 
         if (strName.EqualsIgnoreCase(piNode->GetLocalName()))
         {
@@ -221,7 +225,7 @@ PUBLIC VIRTUAL IMS_BOOL Element::HasAttributeNs(
 
     for (IMS_SINT32 i = 0; i < m_pNamedNodeMap->GetLength(); i++)
     {
-        INode* piNode = m_pNamedNodeMap->Item(i);
+        const INode* piNode = m_pNamedNodeMap->Item(i);
 
         if (strLocalName.EqualsIgnoreCase(piNode->GetLocalName()) &&
                 strNamespaceUri.EqualsIgnoreCase(piNode->GetNameSpaceUri()))

@@ -16,8 +16,10 @@
 #ifndef INTERFACE_XML_TRANSACTION_PROVIDER_H_
 #define INTERFACE_XML_TRANSACTION_PROVIDER_H_
 
-#include "IXmlStateListener.h"
-#include "IXmlTransaction.h"
+#include "ImsTypeDef.h"
+
+class IXmlStateListener;
+class IXmlTransaction;
 
 /**
  * @brief This class provides an interface for parsing XML document asynchronously.

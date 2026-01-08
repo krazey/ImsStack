@@ -27,12 +27,13 @@ class SmsSendRequestInfo
 public:
     SmsSendRequestInfo(IN SmsFormatType eInitSmsFormat, IN ByteArray* pInitContent,
             IN const AString& strInitAddress, IN IMS_SINT32 nInitSeqId,
-            IN IMS_BOOL bInitEmergency) :
+            IN IMS_BOOL bInitEmergencyNumber, IN IMS_UINT32 nInitRetryCount) :
             eSmsFormat(eInitSmsFormat),
             pContent(pInitContent),
             strAddress(strInitAddress),
             nSeqId(nInitSeqId),
-            bEmergency(bInitEmergency)
+            bEmergencyNumber(bInitEmergencyNumber),
+            nRetryCount(nInitRetryCount)
     {
     }
 
@@ -40,7 +41,8 @@ public:
     ByteArray* pContent;
     AString strAddress;
     IMS_SINT32 nSeqId;
-    IMS_BOOL bEmergency;
+    IMS_BOOL bEmergencyNumber;
+    IMS_UINT32 nRetryCount;
 };
 
 enum class MtsTimerType
@@ -48,6 +50,21 @@ enum class MtsTimerType
     TIMER_UNKNOWN = 0,
     TIMER_SMS_CALLBACK_MODE = 1,
     TIMER_RETRY_AFTER = 2,
+};
+
+enum class MtsServiceType
+{
+    NORMAL = 0,
+    EMERGENCY,
+};
+
+enum class MtsTrafficStartResult
+{
+    TRAFFIC_READY = 0,
+    TRAFFIC_AWAITING_SETUP = 1,
+    TRAFFIC_NOT_ALLOWED = 2,
+    TRAFFIC_NOT_FOUND = 3,
+    TRAFFIC_UNKNOWN = 4,
 };
 
 enum class MtsTransactionType
@@ -69,9 +86,29 @@ enum
     SMS_MTI_NONE = -1
 };
 
-enum
+class MtsRegRecoveryPolicy
 {
-    MTS_REG_RECOVERY_POLICY_NONE = -1
+public:
+    enum Policy : IMS_SINT32
+    {
+        MTS_REG_RECOVERY_POLICY_NONE = -1,
+        REGISTER_START,
+        REGISTER_START_WITH_WLAN,
+        REGISTER_REFRESH,
+        REGISTER_STOP,
+        REGISTER_REINITIATE,
+        E_REGISTER_FAKE_WITH_NEXT_PCSCF,
+        PCSCF_NEXT,
+        PCSCF_NEXT_WITH_DISCOVERY,
+        IPSEC_DISABLED,
+        RETRY_COUNT_INCREASE,
+        RETRY_COUNT_INCREASE_WITH_INITIAL_REGISTRATION,
+        UPDATE_SIP_DELEGATE_REGISTRATION,
+        TRIGGER_SIP_DELEGATE_DEREGISTRATION,
+        TRIGGER_FULL_NETWORK_REGISTRATION,
+        PLMN_BLOCK_WITH_TIMEOUT,
+        E_REGISTER_FAKE_WITH_SAME_PCSCF
+    };
 };
 
 // RP Data Unit type in 3GPP SMS
@@ -104,7 +141,8 @@ enum
 
 enum
 {
-    MTS_RADIO_GUARD_TIME = 1000
+    MTS_RADIO_GUARD_TIMER_MS = 2000,
+    MTS_RADIO_EXTENDED_GUARD_TIMER_MS = 8000
 };
 
 // Call type
@@ -142,6 +180,12 @@ enum
     STATE_READY,
     STATE_LIMITED,
     STATE_NOTREADY
+};
+
+// SIP Header values
+enum
+{
+    CONTENT_TRANSFER_ENCODING_BINARY
 };
 
 #endif

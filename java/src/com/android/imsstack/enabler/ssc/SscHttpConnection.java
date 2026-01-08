@@ -19,6 +19,8 @@ package com.android.imsstack.enabler.ssc;
 import android.net.Network;
 import android.text.TextUtils;
 
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.WifiInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
@@ -42,9 +44,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 public class SscHttpConnection implements ISscHttpConnection {
-    private static final int HTTP_CONNECTION_TIMEOUT = 30 * 1000;
-    private static final int HTTP_READ_TIMEOUT = 20 * 1000;
-
     protected final int mSlotId;
     private final EApnType mApnType;
     protected HttpURLConnection mConnection = null;
@@ -65,8 +64,9 @@ public class SscHttpConnection implements ISscHttpConnection {
 
     @Override
     public int sendRequest(@HttpRequestType int requestType, String requestUri, String xui,
-            String body) {
-        ImsLog.d(mSlotId, "requestType : " + requestType + ", body : \n" + body);
+            String body, int timeoutMs) {
+        ImsLog.d(mSlotId, "requestType : " + requestType + ", timeout=" + timeoutMs + ", body : \n"
+                + body);
 
         if (TextUtils.isEmpty(requestUri)) {
             ImsLog.e("requestUri or xui is invalid");
@@ -87,9 +87,14 @@ public class SscHttpConnection implements ISscHttpConnection {
         int responseCode = HTTP_REQUEST_FAILED_UNSPECIFIED;
         try {
             Network nw = null;
-            IDcApn dcApn = DcFactory.getDcAgent(IDcApn.class, mSlotId);
-            if (dcApn != null) {
-                nw = dcApn.getNetworkByCapability(mApnType.getType());
+            if (mApnType.getType() == EApnType.WIFI.getType()) {
+                WifiInterface wifi = AgentFactory.getInstance().getAgent(WifiInterface.class);
+                nw = ((wifi != null) ? wifi.getNetwork() : null);
+            } else {
+                IDcApn dcApn = DcFactory.getDcAgent(IDcApn.class, mSlotId);
+                if (dcApn != null) {
+                    nw = dcApn.getNetworkByCapability(mApnType.getType());
+                }
             }
 
             if (nw == null) {
@@ -107,14 +112,14 @@ public class SscHttpConnection implements ISscHttpConnection {
             setHostnameVerifier();
 
             // Sets timer values
-            mConnection.setConnectTimeout(HTTP_CONNECTION_TIMEOUT);
-            mConnection.setReadTimeout(HTTP_READ_TIMEOUT);
+            mConnection.setConnectTimeout(timeoutMs);
+            mConnection.setReadTimeout(timeoutMs);
 
             setAuthorizationHeader(requestType, requestUri, body);
 
             int bodyLength = 0;
             if (!TextUtils.isEmpty(body)) {
-                bodyLength = body.length();
+                bodyLength = body.getBytes().length;
             }
 
             setExtraHeaders(connectionUrl, xui, bodyLength);

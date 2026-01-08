@@ -15,12 +15,19 @@
  */
 
 #include "CallReasonInfo.h"
+#include "IJniEnabler.h"
+#include "IJniMtcCallThread.h"
+#include "ImsList.h"
 #include "IuMtcCall.h"
+#include "JniEnablerConnector.h"
+#include "MtcDef.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "call/CallConnectionIdManager.h"
+#include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
+#include "call/IMtcSession.h"
 #include "call/IMtcUiNotifier.h"
 #include "conferencecall/ConferenceEventNotifier.h"
 #include "conferencecall/ConferenceParticipantList.h"
@@ -30,12 +37,12 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-ConferenceEventNotifier::ConferenceEventNotifier(IN IMtcCallContext& objConfCallContext,
-        IN CallConnectionIdManager& objConnectionIdManager) :
-        m_objConfCallContext(objConfCallContext),
+ConferenceEventNotifier::ConferenceEventNotifier(IN IMtcCallManager& objCallManager,
+        IN CallKey nConferenceCallKey, IN CallConnectionIdManager& objConnectionIdManager) :
+        m_objCallManager(objCallManager),
+        m_nConferenceCallKey(nConferenceCallKey),
         m_objConnectionIdManager(objConnectionIdManager)
 {
-    // TODO: memory leak.
     IMS_TRACE_I("+ConferenceEventNotifier", 0, 0, 0);
 }
 
@@ -45,13 +52,27 @@ PUBLIC VIRTUAL ConferenceEventNotifier::~ConferenceEventNotifier()
 }
 
 PUBLIC
-void ConferenceEventNotifier::NotifyMerged(IN ConferenceParticipantList& objParticipantList)
+void ConferenceEventNotifier::NotifyMerged(
+        IN ConferenceParticipantList& objParticipantList, IN IMS_BOOL bSubscribed)
 {
     IMS_TRACE_I("NotifyMerged", 0, 0, 0);
 
-    objParticipantList.Login();
+    objParticipantList.LogLn();
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread)
+    {
+        IMtcCallContext* piConferenceCallContext = GetConferenceCallContext();
+        if (piConferenceCallContext == IMS_NULL)
+        {
+            return;
+        }
 
-    m_objConfCallContext.GetUiNotifier().SendMerged(objParticipantList.GetConfUsers());
+        piThread->OnMerged(piConferenceCallContext->CreateJniCallInfo(),
+                piConferenceCallContext->GetMediaManager().GetMediaInfo(
+                        piConferenceCallContext->GetSession()->GetISession()),
+                piConferenceCallContext->GetSupplementaryService().GetServices(),
+                bSubscribed ? objParticipantList.GetConfUsers() : ImsList<ConfUser*>());
+    }
 }
 
 PUBLIC
@@ -59,15 +80,17 @@ void ConferenceEventNotifier::NotifyMergeFailed(IN const CallReasonInfo& objReas
 {
     IMS_TRACE_I("NotifyMergeFailed", 0, 0, 0);
 
-    m_objConfCallContext.GetUiNotifier().SendMergeFailed(objReason);
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread)
+    {
+        piThread->OnMergeFailed(objReason);
+    }
 }
 
 PUBLIC
 void ConferenceEventNotifier::NotifyGroupCallStarted()
 {
     IMS_TRACE_I("NotifyGroupCallStarted", 0, 0, 0);
-
-    // piCall->SetStartedToUI();
 }
 
 PUBLIC
@@ -80,8 +103,6 @@ PUBLIC
 void ConferenceEventNotifier::NotifyExpanded()
 {
     IMS_TRACE_I("NotifyExpanded", 0, 0, 0);
-
-    // piCall->SetStartedToUI();
 }
 
 PUBLIC
@@ -91,12 +112,15 @@ void ConferenceEventNotifier::NotifyExpandFailed(IN const CallReasonInfo& /*objR
 }
 
 PUBLIC
-void ConferenceEventNotifier::NotifyDropped(
-        IN const CallReasonInfo& objReason, IN ConferenceParticipantList& objParticipantList)
+void ConferenceEventNotifier::NotifyDropped(IN ConferenceParticipantList& objParticipantList)
 {
     IMS_TRACE_I("NotifyDropped", 0, 0, 0);
 
-    m_objConfCallContext.GetUiNotifier().SendDropped(IMS_SUCCESS, objReason);
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread)
+    {
+        piThread->OnConferenceParticipantRemoved();
+    }
 
     NotifyUsersInfo(objParticipantList);
 }
@@ -107,19 +131,24 @@ void ConferenceEventNotifier::NotifyDropFailed(
 {
     IMS_TRACE_I("NotifyDropFailed", 0, 0, 0);
 
-    m_objConfCallContext.GetUiNotifier().SendDropped(IMS_FAILURE, objReason);
-
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread)
+    {
+        piThread->OnConferenceParticipantRemoveFailed(objReason);
+    }
     NotifyUsersInfo(objParticipantList);
 }
 
 PUBLIC
-void ConferenceEventNotifier::NotifyJoined(
-        IN const CallReasonInfo& objReason, IN ConferenceParticipantList& objParticipantList)
+void ConferenceEventNotifier::NotifyJoined(IN ConferenceParticipantList& objParticipantList)
 {
     IMS_TRACE_I("NotifyJoined", 0, 0, 0);
 
-    m_objConfCallContext.GetUiNotifier().SendJoined(IMS_SUCCESS, objReason);
-
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread)
+    {
+        piThread->OnConferenceParticipantAdded();
+    }
     NotifyUsersInfo(objParticipantList);
 }
 
@@ -129,8 +158,11 @@ void ConferenceEventNotifier::NotifyJoinFailed(
 {
     IMS_TRACE_I("NotifyJoinFailed", 0, 0, 0);
 
-    m_objConfCallContext.GetUiNotifier().SendJoined(IMS_FAILURE, objReason);
-
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread)
+    {
+        piThread->OnConferenceParticipantAddFailed(objReason);
+    }
     NotifyUsersInfo(objParticipantList);
 }
 
@@ -139,19 +171,26 @@ void ConferenceEventNotifier::NotifyConferenceInfo(IN ConferenceParticipantList&
 {
     IMS_TRACE_I("NotifyConferenceInfo : max-user-count=[%d]", objParticipantList.GetMaxUserCount(),
             0, 0);
-
-    m_objConfCallContext.GetUiNotifier().SendNotifyConfInfo(
-            "", "", objParticipantList.GetSize(), objParticipantList.GetMaxUserCount(), "");
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread)
+    {
+        piThread->OnConferenceInfoChanged(
+                "", "", objParticipantList.GetSize(), objParticipantList.GetMaxUserCount(), "");
+    }
 }
 
 PUBLIC
 void ConferenceEventNotifier::NotifyUsersInfo(IN ConferenceParticipantList& objParticipantList)
 {
     IMS_TRACE_I("NotifyUsersInfo", 0, 0, 0);
-    objParticipantList.Login();
+    objParticipantList.LogLn();
 
     ImsList<ConfUser*> objUsers = objParticipantList.GetConfUsers();
-    m_objConfCallContext.GetUiNotifier().SendNotifyUsersInfo(objUsers);
+    IJniMtcCallThread* piThread = GetCallThread();
+    if (piThread)
+    {
+        piThread->OnConferenceParticipantsInfoChanged(objUsers);
+    }
     CheckDisconnectedConfUsersInfo(objParticipantList, objUsers);
 }
 
@@ -160,7 +199,7 @@ void ConferenceEventNotifier::NotifyIndividualCallTerminated(IN CallKey nKey)
 {
     IMS_TRACE_I("NotifyIndividualCallTerminated ", 0, 0, 0);
 
-    IMtcCall* piCall = m_objConfCallContext.GetCallManager().GetCallByCallKey(nKey);
+    IMtcCall* piCall = m_objCallManager.GetCallByCallKey(nKey);
     if (piCall->GetKey() == IMtcCall::CALL_KEY_INVALID)
     {
         IMS_TRACE_I("NotifyIndividualCallTerminated - call is already deleted.", 0, 0, 0);
@@ -195,8 +234,38 @@ void ConferenceEventNotifier::CheckDisconnectedConfUsersInfo(
         }
         else
         {
-            // ??
             pParticipant->SetDisconnectionNotified(IMS_FALSE);
         }
     }
+}
+
+PRIVATE
+IMtcCallContext* ConferenceEventNotifier::GetConferenceCallContext() const
+{
+    IMtcCall* piConferenceCall = m_objCallManager.GetCallByCallKey(m_nConferenceCallKey);
+    if (piConferenceCall->GetKey() == IMtcCall::CALL_KEY_INVALID)
+    {
+        return IMS_NULL;
+    }
+    return &piConferenceCall->GetCallContext();
+}
+
+PRIVATE
+IJniMtcCallThread* ConferenceEventNotifier::GetCallThread() const
+{
+    const IMtcCallContext* piConferenceCallContext = GetConferenceCallContext();
+    if (piConferenceCallContext == IMS_NULL)
+    {
+        return IMS_NULL;
+    }
+
+    const IJniEnabler* piJniMtcCall = JniEnablerConnector::GetInstance().GetJniEnabler(
+            piConferenceCallContext->GetSlotId(), EnablerType::MTC_CALL, m_nConferenceCallKey);
+    if (piJniMtcCall == IMS_NULL)
+    {
+        IMS_TRACE_D("GetCallThread : No JniMtcCall", 0, 0, 0);
+        return IMS_NULL;
+    }
+
+    return reinterpret_cast<IJniMtcCallThread*>(piJniMtcCall->GetJniThread());
 }

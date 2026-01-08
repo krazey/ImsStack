@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!--
+ * Copyright (C) 2025 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+<carrier_config>
+    <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
+    <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1142"/>
+    <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1142"/>
+    <string name="imsvoice.conference_factory_uri_string">sip:mmtel@conf-factory.ims.mnc110.mcc313.3gppnetwork.org</string>
+    <pbundle_as_map name="imsvoice.evs_payload_description_bundle">
+        <pbundle_as_map name="127">
+            <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
+                <item value="0"/>
+                <item value="4"/>
+            </int-array>
+            <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="2"/>
+        </pbundle_as_map>
+    </pbundle_as_map>
+    <pbundle_as_map name="imsvoice.amrwb_payload_description_bundle">
+        <pbundle_as_map name="104">
+            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
+            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
+        </pbundle_as_map>
+    </pbundle_as_map>
+    <pbundle_as_map name="imsvoice.amrnb_payload_description_bundle">
+        <pbundle_as_map name="110">
+            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
+            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
+        </pbundle_as_map>
+    </pbundle_as_map>
+    <int-array name="ims.geolocation_pidf_in_sip_register_support_int_array" num="3">
+        <item value="1"/>
+        <item value="2"/>
+        <item value="4"/>
+    </int-array>
+</carrier_config>

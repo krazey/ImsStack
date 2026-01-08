@@ -48,6 +48,40 @@ public interface LocationInterface extends IAgent {
     @Retention(RetentionPolicy.SOURCE)
     public @interface LocationCategory {}
 
+    /** Events for native layer. */
+    int EVENT_LOCATION_UPDATE_COMPLETED = 1;
+
+    /**
+     * Listener interface to receive the change notification of location information.
+     */
+    interface Listener {
+        /**
+         * Notifies that last known country code is changed.
+         */
+        default void onLastKnownCountryUpdated() {
+        }
+
+        /**
+         * Notifies that location information has been updated by the request.
+         */
+        default void onInstantRequestedLocationUpdated() {
+        }
+    }
+
+    /**
+     * Adds a listener to receive notification for the location information change.
+     *
+     * @param listener The listener to be set.
+     */
+    void addListener(Listener listener);
+
+    /**
+     * Removes the listener that was previously set.
+     *
+     * @param listener The listener to be removed.
+     */
+    void removeListener(Listener listener);
+
     /**
      * Initializes last known location information.
      */
@@ -101,7 +135,20 @@ public interface LocationInterface extends IAgent {
     void stopListeningForLocation();
 
     /**
-     * Starts an instant location update (one-time update).
+     * Requests a location update (one-time update).
+     *
+     * @param waitTimeMs A wait time to fix the location in milli-seconds.
+     * @return The request identifier for event handling for location update completion and
+     *         cancellation.
+     *         0(zero) indicates that the location update request cannot be performed,
+     *         otherwise an integer value greater than 0 is returned.
      */
-    void startInstantLocationUpdate();
+    int requestLocationUpdate(int waitTimeMs);
+
+    /**
+     * Cancels a previously requested location update.
+     *
+     * @param requestId A request identifier returned from {@link #requestLocationUpdate(int)}.
+     */
+    void cancelLocationUpdate(int requestId);
 }

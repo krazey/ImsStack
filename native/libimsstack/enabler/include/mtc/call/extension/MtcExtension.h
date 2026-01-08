@@ -36,7 +36,7 @@ public:
             IN const std::vector<RequestType>& lstSupportedRequestType,
             IN const std::vector<ResponseType>& lstSupportedResponseType);
     MtcExtension(IN const MtcExtension& objRhs);
-    virtual ~MtcExtension();
+    virtual ~MtcExtension() override;
     MtcExtension& operator=(IN const MtcExtension&) = delete;
 
     IMtcExtension* Clone() const override;

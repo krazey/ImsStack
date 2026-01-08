@@ -22,7 +22,7 @@ package com.android.imsstack.enabler.media;
 public class MediaConstants {
 
     public static final int IMS_MSG_BASE_MEDIA = 1400;
-    public static final int RESPONSE_WAIT_TIMEOUT = 1000;
+    public static final int RESPONSE_WAIT_TIMEOUT = 2500;
 
     // Requests
     public static final int IMSMEDIA_REQUEST              = IMS_MSG_BASE_MEDIA;
@@ -38,12 +38,15 @@ public class MediaConstants {
     public static final int REQUEST_QOS                   = (IMSMEDIA_REQUEST + 10);
 
     public static final int REQUEST_SET_QNS_MEDIA_THRESHOLD = (IMSMEDIA_REQUEST + 11);
+    public static final int REQUEST_UPDATE_ANBR_ENABLED_CONFIG = (IMSMEDIA_REQUEST + 12);
+    public static final int REQUEST_RTP_RECEPTION_STATS = (IMSMEDIA_REQUEST + 13);
 
     // Requests for video
     public static final int IMSMEDIA_VIDEO_REQUEST        = (IMSMEDIA_REQUEST + 50);
     public static final int REQUEST_SET_PREVIEW_SURFACE   = (IMSMEDIA_VIDEO_REQUEST + 1);
     public static final int REQUEST_SET_DISPLAY_SURFACE   = (IMSMEDIA_VIDEO_REQUEST + 2);
     public static final int REQUEST_VIDEO_DATA_USAGE      = (IMSMEDIA_VIDEO_REQUEST + 3);
+    public static final int REQUEST_ADJUST_DELAY          = (IMSMEDIA_VIDEO_REQUEST + 4);
 
     // Requests for text
     public static final int IMSMEDIA_RTT_REQUEST          = (IMSMEDIA_REQUEST + 80);
@@ -56,6 +59,7 @@ public class MediaConstants {
     public static final int RESPONSE_ADD_CONFIG           = (IMSMEDIA_RESPONSE + 3);
     public static final int RESPONSE_CONFIRM_CONFIG       = (IMSMEDIA_RESPONSE + 4);
     public static final int RESPONSE_SESSION_CLOSED       = (IMSMEDIA_RESPONSE + 5);
+    public static final int RESPONSE_SESSION_CLOSED_TIMEOUT = (IMSMEDIA_RESPONSE + 6);
 
     // Notifications
     public static final int NOTIFY_FIRST_PACKET           = (IMSMEDIA_RESPONSE + 11);
@@ -66,6 +70,10 @@ public class MediaConstants {
     public static final int NOTIFY_CALL_QUALITY_CHANGE    = (IMSMEDIA_RESPONSE + 16);
     public static final int NOTIFY_MEDIA_DETACH           = (IMSMEDIA_RESPONSE + 17);
     public static final int NOTIFY_QOS_INFO               = (IMSMEDIA_RESPONSE + 18);
+    public static final int TRIGGER_ANBR_QUERY            = (IMSMEDIA_RESPONSE + 20);
+    public static final int NOTIFY_ANBR_RECEIVED          = (IMSMEDIA_RESPONSE + 21);
+    public static final int NOTIFY_RTP_RECEPTION_STATS    = (IMSMEDIA_RESPONSE + 22);
+    public static final int NOTIFY_DTMF_RECEIVED          = (IMSMEDIA_RESPONSE + 40);
 
     // Notifications for video
     public static final int IMSMEDIA_VIDEO_RESPONSE       = (IMSMEDIA_RESPONSE + 60);

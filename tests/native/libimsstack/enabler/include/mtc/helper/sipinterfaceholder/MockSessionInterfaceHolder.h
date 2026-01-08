@@ -17,6 +17,8 @@
 #ifndef MOCK_SESSION_INTERFACE_HOLDER_H_
 #define MOCK_SESSION_INTERFACE_HOLDER_H_
 
+#include "ImsTypeDef.h"
+#include "call/IMtcCall.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include <gmock/gmock.h>
 
@@ -27,11 +29,11 @@ class IInterfaceHolderListener;
 class MockSessionInterfaceHolder : public SessionInterfaceHolder
 {
 public:
-    explicit MockSessionInterfaceHolder(IN IInterfaceHolderListener& objListener) :
-            SessionInterfaceHolder(objListener)
+    explicit MockSessionInterfaceHolder() :
+            SessionInterfaceHolder()
     {
     }
-    ~MockSessionInterfaceHolder() {}
+    ~MockSessionInterfaceHolder() override {}
     MOCK_METHOD(void, SessionAlerting, (IN ISession*), (override));
     MOCK_METHOD(void, SessionReferenceReceived, (IN ISession*, IN IReference*), (override));
     MOCK_METHOD(void, SessionStarted, (IN ISession*), (override));
@@ -40,6 +42,7 @@ public:
     MOCK_METHOD(void, SessionUpdated, (IN ISession*), (override));
     MOCK_METHOD(void, SessionUpdateFailed, (IN ISession*), (override));
     MOCK_METHOD(void, SessionUpdateReceived, (IN ISession*), (override));
+    MOCK_METHOD(void, SessionCanceledOnAccepted, (IN ISession*), (override));
     MOCK_METHOD(void, SessionCancelDelivered, (IN ISession*), (override));
     MOCK_METHOD(void, SessionCancelDeliveryFailed, (IN ISession*), (override));
     MOCK_METHOD(void, SessionEarlyMediaUpdated, (IN ISession*), (override));
@@ -56,12 +59,18 @@ public:
     MOCK_METHOD(
             void, SessionTransactionReceived, (IN ISession*, IN ISipServerConnection*), (override));
     MOCK_METHOD(void, Timer_TimerExpired, (IN ITimer* piTimer), (override));
+    MOCK_METHOD(void, AddListener, (IN IInterfaceHolderListener * pListener), (override));
+    MOCK_METHOD(void, RemoveListener, (IN IInterfaceHolderListener * pListener), (override));
     MOCK_METHOD(ISession*, GetISession,
-            (IN ICoreService* pICoreService, IN const AString& strFrom, IN const AString& strTo),
+            (IN CallKey nKey, IN ICoreService* pICoreService, IN const AString& strFrom,
+                    IN const AString& strTo),
             (override));
-    MOCK_METHOD(void, AddISession, (IN ISession* piSession), (override));
-    MOCK_METHOD(
-            void, ReleaseISession, (IN ISession* piSession, IN IMS_BOOL bTerminated), (override));
+    MOCK_METHOD(void, AddISession, (IN CallKey nKey, IN ISession* piSession), (override));
+    MOCK_METHOD(void, ReleaseISession, (IN ISession * piSession), (override));
+    MOCK_METHOD(void, ReleaseISession,
+            (IN ISession * piSession, IN IMS_BOOL bEnforceDestroy,
+                    IN IMS_BOOL bSessionTerminatedOrStartFailed),
+            (override));
     MOCK_METHOD(IMS_BOOL, IsReadyToDestroy, (IN ISession* piSession), ());
     MOCK_METHOD(void, ClearISessions, (), ());
     MOCK_METHOD(IMS_RESULT, StartTimer, (IN ISession* piSession, IN IMS_SINT32 nDuration), ());

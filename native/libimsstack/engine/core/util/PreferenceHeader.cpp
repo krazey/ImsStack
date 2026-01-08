@@ -175,7 +175,7 @@ IMS_BOOL PreferenceHeader::AddFeature(IN const AString& strTag, IN const AString
 PUBLIC
 IMS_BOOL PreferenceHeader::Contains(IN const AString& strTag) const
 {
-    FeatureSet* pFeatureSet = Lookup(strTag);
+    const FeatureSet* pFeatureSet = Lookup(strTag);
 
     if (pFeatureSet == IMS_NULL)
     {
@@ -188,7 +188,7 @@ IMS_BOOL PreferenceHeader::Contains(IN const AString& strTag) const
 PUBLIC
 IMS_BOOL PreferenceHeader::Contains(IN const AString& strTag, IN const AString& strValue) const
 {
-    FeatureSet* pFeatureSet = Lookup(strTag);
+    const FeatureSet* pFeatureSet = Lookup(strTag);
 
     if (pFeatureSet == IMS_NULL)
     {

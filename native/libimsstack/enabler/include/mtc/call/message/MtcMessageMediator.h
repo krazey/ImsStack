@@ -28,7 +28,7 @@ class MtcMessageMediator final : public IMessageMediator
 {
 public:
     explicit MtcMessageMediator(IN IMtcCallContext& objContext);
-    ~MtcMessageMediator();
+    ~MtcMessageMediator() override;
     MtcMessageMediator(IN const MtcMessageMediator&) = delete;
     MtcMessageMediator& operator=(IN const MtcMessageMediator&) = delete;
 
@@ -36,8 +36,15 @@ public:
             IN_OUT ISipMessage* piSipMessage, IN IMS_SINT32 nMessage) override;
 
 private:
-    AString GetContactHeaderWithoutFeatureTag(IN const AString& strFeatureTag);
-    CallType GetCallTypeOfCurrentMessage();
+    void MayAdjustContactHeader(IN_OUT ISipMessage* pMessage);
+    void MaySetVideoTextFeatureExclusively(
+            IN_OUT ISipHeader** pContactHeader, IN const ISipMessage* pMessage);
+    void MayFormatContactAddress(
+            IN_OUT ISipHeader** pContactHeader, IN const ISipMessage* pMessage);
+    ISipHeader* CreateContactHeader(IN const ISipMessage* pMessage) const;
+
+    CallType GetCallType() const;
+    IMS_UINT32 GetAosEmergencyRegMode() const;
 
     IMtcCallContext& m_objContext;
     AString m_strOriginalContactHeader;

@@ -82,4 +82,9 @@ public interface ConfigInterface extends IAgent {
      * @param listener A listener to be removed.
      */
     void removeListener(@NonNull Listener listener);
+
+    /**
+     * Notifies the carrier configuration change to the native layer.
+     */
+    void notifyCarrierConfigChangedForNative();
 }

@@ -229,7 +229,7 @@ void Media::RemoveMedia()
 
             for (IMS_UINT32 i = 0; i < objDescriptors.GetSize(); ++i)
             {
-                MediaDescriptor* pDescriptor = objDescriptors.GetAt(i);
+                const MediaDescriptor* pDescriptor = objDescriptors.GetAt(i);
 
                 if (pDescriptor == IMS_NULL)
                 {
@@ -248,7 +248,7 @@ void Media::RemoveMedia()
         {
             for (IMS_UINT32 i = 0; i < m_objDescriptors.GetSize(); ++i)
             {
-                MediaDescriptor* pDescriptor = m_objDescriptors.GetAt(i);
+                const MediaDescriptor* pDescriptor = m_objDescriptors.GetAt(i);
 
                 if (pDescriptor == IMS_NULL)
                 {
@@ -791,7 +791,7 @@ IMS_BOOL Media::InitInstance(IN const ImsList<IMS_SINT32>& objMids)
             return IMS_FALSE;
         }
 
-        SdpMediaParameter* pMediaParam = GetProposalMediaParameter(pDescriptor->GetMid());
+        const SdpMediaParameter* pMediaParam = GetProposalMediaParameter(pDescriptor->GetMid());
 
         if (pMediaParam != IMS_NULL)
         {
@@ -817,11 +817,11 @@ IMS_BOOL Media::InitInstance(IN const ImsList<IMS_SINT32>& objMids)
 PROTECTED
 IMS_BOOL Media::IsMediaAccepted() const
 {
-    MediaDescriptor* pDescriptor = GetMediaDescriptor();
+    const MediaDescriptor* pDescriptor = GetMediaDescriptor();
 
     if (pDescriptor != IMS_NULL)
     {
-        SdpMediaParameter* pMediaParameter = GetMediaParameter(pDescriptor->GetMid());
+        const SdpMediaParameter* pMediaParameter = GetMediaParameter(pDescriptor->GetMid());
 
         if (pMediaParameter != IMS_NULL)
         {
@@ -835,11 +835,11 @@ IMS_BOOL Media::IsMediaAccepted() const
 PROTECTED
 IMS_BOOL Media::IsMediaProposed() const
 {
-    MediaDescriptor* pDescriptor = GetMediaDescriptor();
+    const MediaDescriptor* pDescriptor = GetMediaDescriptor();
 
     if (pDescriptor != IMS_NULL)
     {
-        SdpMediaParameter* pMediaParameter = GetPeerMediaParameter(pDescriptor->GetMid());
+        const SdpMediaParameter* pMediaParameter = GetPeerMediaParameter(pDescriptor->GetMid());
 
         if (pMediaParameter != IMS_NULL)
         {

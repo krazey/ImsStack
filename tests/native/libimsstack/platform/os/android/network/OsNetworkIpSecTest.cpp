@@ -107,7 +107,7 @@ TEST_F(OsNetworkIpSecTest, CreatePolicy)
 {
     OsNetworkIpSec objOsNetworkIpSec(IMS_SLOT_0);
 
-    IIpSecPolicy* pIpSecPolicy = objOsNetworkIpSec.CreatePolicy();
+    const IIpSecPolicy* pIpSecPolicy = objOsNetworkIpSec.CreatePolicy();
     ASSERT_TRUE(pIpSecPolicy != nullptr);
 }
 
@@ -133,7 +133,7 @@ TEST_F(OsNetworkIpSecTest, DestroyAllPolicies)
 {
     OsNetworkIpSec objOsNetworkIpSec(IMS_SLOT_0);
 
-    IIpSecPolicy* pIpSecPolicy = objOsNetworkIpSec.CreatePolicy();
+    const IIpSecPolicy* pIpSecPolicy = objOsNetworkIpSec.CreatePolicy();
     ASSERT_TRUE(pIpSecPolicy != nullptr);
 
     IMS_SINT32 nId1 = pIpSecPolicy->GetId();
@@ -167,10 +167,10 @@ TEST_F(OsNetworkIpSecTest, AddPolicy)
     IIpSecPolicy* pIpSecPolicy = objOsNetworkIpSec.CreatePolicy();
     ASSERT_TRUE(pIpSecPolicy != nullptr);
 
-    IIpSecSp* pIpSecSp = pIpSecPolicy->CreateSp();
+    const IIpSecSp* pIpSecSp = pIpSecPolicy->CreateSp();
     ASSERT_TRUE(pIpSecSp != nullptr);
 
-    IIpSecSa* pIpSecSa = pIpSecPolicy->CreateSa();
+    const IIpSecSa* pIpSecSa = pIpSecPolicy->CreateSa();
     ASSERT_TRUE(pIpSecSa != nullptr);
 
     EXPECT_CALL(m_objSystem, AddIpSecSaParameter(_, _)).Times(1).WillRepeatedly(Return(1));
@@ -188,10 +188,10 @@ TEST_F(OsNetworkIpSecTest, DeletePolicy)
     IIpSecPolicy* pIpSecPolicy = objOsNetworkIpSec.CreatePolicy();
     ASSERT_TRUE(pIpSecPolicy != nullptr);
 
-    IIpSecSp* pIpSecSp = pIpSecPolicy->CreateSp();
+    const IIpSecSp* pIpSecSp = pIpSecPolicy->CreateSp();
     ASSERT_TRUE(pIpSecSp != nullptr);
 
-    IIpSecSa* pIpSecSa = pIpSecPolicy->CreateSa();
+    const IIpSecSa* pIpSecSa = pIpSecPolicy->CreateSa();
     ASSERT_TRUE(pIpSecSa != nullptr);
 
     EXPECT_CALL(m_objSystem, AddIpSecSaParameter(_, _)).Times(1).WillRepeatedly(Return(1));
@@ -283,12 +283,16 @@ TEST_F(OsNetworkIpSecTest, ApplyIpSecTransformWithArgsSockets)
     EXPECT_CALL(objMockServerSocket, GetSocketId()).Times(AnyNumber()).WillRepeatedly(Return(2));
 
     EXPECT_CALL(m_objSystem, ApplyIpSecSa(_, _, _, _)).Times(0);
-    EXPECT_EQ(IMS_FALSE, objOsNetworkIpSec.ApplyIpSecTransform(&objMockSocket, IMS_NULL));
-    EXPECT_EQ(IMS_FALSE, objOsNetworkIpSec.ApplyIpSecTransform(IMS_NULL, &objMockServerSocket));
+    EXPECT_EQ(IMS_FALSE,
+            objOsNetworkIpSec.ApplyIpSecTransform(&objMockSocket, IMS_NULL, m_objRemoteAddress));
+    EXPECT_EQ(IMS_FALSE,
+            objOsNetworkIpSec.ApplyIpSecTransform(
+                    IMS_NULL, &objMockServerSocket, m_objRemoteAddress));
 
     // no policy present
-    EXPECT_EQ(
-            IMS_TRUE, objOsNetworkIpSec.ApplyIpSecTransform(&objMockSocket, &objMockServerSocket));
+    EXPECT_EQ(IMS_TRUE,
+            objOsNetworkIpSec.ApplyIpSecTransform(
+                    &objMockSocket, &objMockServerSocket, m_objRemoteAddress));
 
     IIpSecPolicy* pIpSecPolicy = objOsNetworkIpSec.CreatePolicy();
     ASSERT_TRUE(pIpSecPolicy != nullptr);
@@ -309,8 +313,9 @@ TEST_F(OsNetworkIpSecTest, ApplyIpSecTransformWithArgsSockets)
 
     // server Socket ID not yet updated with Ipsec transform
     EXPECT_CALL(m_objSystem, ApplyIpSecSa(_, _, _, _)).Times(0);
-    EXPECT_EQ(
-            IMS_TRUE, objOsNetworkIpSec.ApplyIpSecTransform(&objMockSocket, &objMockServerSocket));
+    EXPECT_EQ(IMS_TRUE,
+            objOsNetworkIpSec.ApplyIpSecTransform(
+                    &objMockSocket, &objMockServerSocket, m_objRemoteAddress));
 
     // One policy present
     EXPECT_CALL(m_objSystem, ApplyIpSecSa(_, _, _, _)).Times(1).WillRepeatedly(Return(1));
@@ -320,12 +325,14 @@ TEST_F(OsNetworkIpSecTest, ApplyIpSecTransformWithArgsSockets)
 
     // ApplyIpSecSa fail
     EXPECT_CALL(m_objSystem, ApplyIpSecSa(_, _, _, _)).Times(1).WillRepeatedly(Return(0));
-    EXPECT_EQ(
-            IMS_FALSE, objOsNetworkIpSec.ApplyIpSecTransform(&objMockSocket, &objMockServerSocket));
+    EXPECT_EQ(IMS_FALSE,
+            objOsNetworkIpSec.ApplyIpSecTransform(
+                    &objMockSocket, &objMockServerSocket, m_objRemoteAddress));
 
     EXPECT_CALL(m_objSystem, ApplyIpSecSa(_, _, _, _)).Times(1).WillRepeatedly(Return(1));
-    EXPECT_EQ(
-            IMS_TRUE, objOsNetworkIpSec.ApplyIpSecTransform(&objMockSocket, &objMockServerSocket));
+    EXPECT_EQ(IMS_TRUE,
+            objOsNetworkIpSec.ApplyIpSecTransform(
+                    &objMockSocket, &objMockServerSocket, m_objRemoteAddress));
 }
 
 TEST_F(OsNetworkIpSecTest, RemoveIpSecTransforms)
@@ -383,8 +390,9 @@ TEST_F(OsNetworkIpSecTest, RemoveIpSecTransforms)
                     &objMockServerSocket, m_objLocalAddress, &m_objRemoteAddress));
 
     EXPECT_CALL(m_objSystem, ApplyIpSecSa(_, _, _, _)).Times(1).WillRepeatedly(Return(1));
-    EXPECT_EQ(
-            IMS_TRUE, objOsNetworkIpSec.ApplyIpSecTransform(&objMockSocket, &objMockServerSocket));
+    EXPECT_EQ(IMS_TRUE,
+            objOsNetworkIpSec.ApplyIpSecTransform(
+                    &objMockSocket, &objMockServerSocket, m_objRemoteAddress));
 
     EXPECT_CALL(m_objSystem, RemoveIpSecSa(_, _, _, _)).Times(2);
     objOsNetworkIpSec.RemoveIpSecTransforms(objMockServerSocket.GetSocketId());

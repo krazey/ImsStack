@@ -17,17 +17,24 @@ package com.android.imsstack.imsservice.mmtel.sms;
 
 import android.os.Handler;
 import android.telephony.CarrierConfigManager;
+import android.telephony.ServiceState;
 import android.telephony.SmsManager;
 import android.telephony.ims.stub.ImsSmsImplBase;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.agents.dcm.DcFactory;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
+import com.android.imsstack.core.config.CarrierConfig;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.enabler.mts.MtsController;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
+import com.android.imsstack.imsservice.mmtel.ImsRegistrationTracker;
+import com.android.imsstack.imsservice.mmtel.ImsServiceManager;
+import com.android.imsstack.imsservice.mmtel.ImsServiceRecord;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.ImsUtils;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.telephony.uicc.IccUtils;
-
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
@@ -37,8 +44,7 @@ import java.util.Arrays;
  */
 public class SmsRLStateMachine {
     private static final String TAG = "[GII-SmsRLSM] ";
-    //TODO: b/245837957: To be changed to False or ImsLog.isDebuggable()
-    private static final boolean DBG = true;
+    private static final boolean DBG = ImsLog.isDebuggable();
     private MtsController mMtsController = null;
     private SmsRelayLayer.Listener mListener = null;
     private SmsRLState mCurrentState;
@@ -47,6 +53,7 @@ public class SmsRLStateMachine {
     public int mToken;
     public int mMessageType;
     public int mRetryCount = 0;
+    public int mRpMr;
     public SmsRPdu mRPduData;
     public String mPSISmsc;
     public String mDestinationAddress;
@@ -97,7 +104,7 @@ public class SmsRLStateMachine {
          * @return the result  if incoming RPDU is processed successfully
          */
         default int onRPDataFromNetwork(SmsRLStateMachine smsRLStateMachine, SmsRPdu mtRPData) {
-            loge("onRPDataFromNetwork :: Invalid Event");
+            loge(smsRLStateMachine.mCurrentState + " State: onRPDataFromNetwork :: Invalid Event");
             return SmsUtils.SMSRL_RESULT_INVALID_STATE;
         }
 
@@ -109,7 +116,7 @@ public class SmsRLStateMachine {
          * @return the result if MO RPDU is sent successfully from RelayLayer
          */
         default int onRPDataFromTL(SmsRLStateMachine smsRLStateMachine, SmsRPdu moRPData) {
-            loge("onRPDataFromTL :: Invalid Event");
+            loge(smsRLStateMachine.mCurrentState + " State: onRPDataFromTL :: Invalid Event");
             return SmsUtils.SMSRL_RESULT_INVALID_STATE;
         }
         /**
@@ -119,7 +126,7 @@ public class SmsRLStateMachine {
          * @param moRPAck includes Encoded RPDU and other details of incoming RP-Ack
          */
         default void onRPAckFromNetwork(SmsRLStateMachine smsRLStateMachine, SmsRPdu moRPAck) {
-            loge("onRPAckFromNetwork :: Invalid Event");
+            loge(smsRLStateMachine.mCurrentState + " State: onRPAckFromNetwork :: Invalid Event");
         }
 
         /**
@@ -130,7 +137,7 @@ public class SmsRLStateMachine {
          * @return the result if RP-Ack is sent successfully from Relay Layer
          */
         default int onRPAckFromTL(SmsRLStateMachine smsRLStateMachine, SmsRPdu mtRPAck) {
-            loge("onRPAckFromTL :: Invalid Event");
+            loge(smsRLStateMachine.mCurrentState + " State: onRPAckFromTL :: Invalid Event");
             return SmsUtils.SMSRL_RESULT_INVALID_STATE;
         }
 
@@ -141,7 +148,7 @@ public class SmsRLStateMachine {
          * @param moRPError includes Encoded RPDU and other details of incoming RP-Ack
          */
         default void onRPErrorFromNetwork(SmsRLStateMachine smsRLStateMachine, SmsRPdu moRPError) {
-            loge("onRPErrorFromNetwork :: Invalid Event");
+            loge(smsRLStateMachine.mCurrentState + " State: onRPErrorFromNetwork :: Invalid Event");
         }
 
         /**
@@ -152,7 +159,7 @@ public class SmsRLStateMachine {
          * @return the result if MO RP-Error is sent successfully from Relay Layer
          */
         default int onRPErrorFromTL(SmsRLStateMachine smsRLStateMachine, SmsRPdu mtRPError) {
-            loge("onRPErrorFromTL :: Invalid Event");
+            loge(smsRLStateMachine.mCurrentState + " State: onRPErrorFromTL :: Invalid Event");
             return SmsUtils.SMSRL_RESULT_INVALID_STATE;
         }
 
@@ -163,7 +170,7 @@ public class SmsRLStateMachine {
          * this Sms Session
          */
         default void onTR1TimerExpired(SmsRLStateMachine smsRLStateMachine) {
-            loge("onTR1TimerExpired :: Invalid Event");
+            loge(smsRLStateMachine.mCurrentState + " State: onTR1TimerExpired :: Invalid Event");
         }
 
         /**
@@ -173,7 +180,7 @@ public class SmsRLStateMachine {
          * this Sms Session
          */
         default void onTR2TimerExpired(SmsRLStateMachine smsRLStateMachine) {
-            loge("onTR2TimerExpired :: Invalid Event");
+            loge(smsRLStateMachine.mCurrentState + " State: onTR2TimerExpired :: Invalid Event");
         }
 
         /**
@@ -187,7 +194,8 @@ public class SmsRLStateMachine {
          */
         default int onSipResponseForRPMessage(SmsRLStateMachine smsRLStateMachine,
                                               boolean isSuccess, int status) {
-            loge("onSipResponseForRPMessage :: Invalid Event");
+            loge(smsRLStateMachine.mCurrentState
+                    + " State: onSipResponseForRPMessage :: Invalid Event");
             return SmsUtils.SMSRL_RESULT_INVALID_STATE;
         }
     }
@@ -203,6 +211,7 @@ public class SmsRLStateMachine {
                     loge("Listener is null");
                     return SmsUtils.SMSRL_RESULT_FAILURE;
                 }
+                smsRLStateMachine.mRpMr = mtRPData.getMessageRef();
 
                 /** Framework's TPdu Parser expects the TPdu be prepended with SC-Address.
                  * else the parser will throw exception. So prepending TPdu with
@@ -254,9 +263,7 @@ public class SmsRLStateMachine {
                     return SmsUtils.SMSRL_RESULT_FAILURE;
                 }
                 if (DBG) {
-                    log("Encoded RPDU: "
-                                    + ImsLog.hiddenString(IccUtils.bytesToHexString(encodedPdu))
-                                    + " Target Address = "
+                    log(" Target Address = "
                                     + ImsLog.hiddenString(smsRLStateMachine.mPSISmsc)
                                     + " Dialled Number = "
                                     + ImsLog.hiddenString(smsRLStateMachine.mDestinationAddress)
@@ -267,7 +274,8 @@ public class SmsRLStateMachine {
                                                 SmsUtils.FORMAT_INT_3GPP, encodedPdu,
                                                 smsRLStateMachine.mPSISmsc,
                                                 smsRLStateMachine.mDestinationAddress,
-                                                moRPData.getMessageRef());
+                                                moRPData.getMessageRef(),
+                                                moRPData.isRetry());
 
                 if (!result) {
                     loge("Failed to send Sms");
@@ -353,6 +361,9 @@ public class SmsRLStateMachine {
                 log("handleMessage: token = " + smsRLStateMachine.mToken
                                                     + " Tp-MessageReference = "
                                                     + smsRLStateMachine.mTpMr);
+                if (smsRLStateMachine.mMtsController != null) {
+                    smsRLStateMachine.mMtsController.notifyMoSmsTimedOut();
+                }
                 smsRLStateMachine.mListener.notifyRLReportIndication(smsRLStateMachine.mToken,
                                                 smsRLStateMachine.mTpMr,
                                                 ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,
@@ -379,7 +390,7 @@ public class SmsRLStateMachine {
                                                     SmsManager.RESULT_NETWORK_ERROR, 0);
                 if (smsRLStateMachine.mHandler != null
                         && smsRLStateMachine.mTR1TimerHandler != null) {
-                    smsRLStateMachine.mHandler.removeCallbacksAndMessages(smsRLStateMachine
+                    smsRLStateMachine.mHandler.removeCallbacks(smsRLStateMachine
                                                                         .mTR1TimerHandler);
                     smsRLStateMachine.mTR1TimerHandler = null;
                 } else {
@@ -406,7 +417,7 @@ public class SmsRLStateMachine {
                 }
                 if (DBG) {
                     log("onRPAckFromTL: Encoded RPDU = "
-                            + ImsLog.hiddenString(IccUtils.bytesToHexString(encodedPdu))
+                            + ImsLog.hiddenString(ImsUtils.bytesToHexString(encodedPdu))
                             + " dialled number = " + ImsLog.hiddenString(smsRLStateMachine
                                                     .mDestinationAddress)
                             + " PSI/SMSC = " + ImsLog.hiddenString(smsRLStateMachine.mPSISmsc));
@@ -440,7 +451,7 @@ public class SmsRLStateMachine {
                 }
                 if (DBG) {
                     log("onRPErrorFromTL: Encoded RPDU = "
-                            + ImsLog.hiddenString(IccUtils.bytesToHexString(encodedPdu))
+                            + ImsLog.hiddenString(ImsUtils.bytesToHexString(encodedPdu))
                             + " dialled number = "
                             + ImsLog.hiddenString(smsRLStateMachine.mDestinationAddress)
                             + " PSI/SMSC = " + ImsLog.hiddenString(smsRLStateMachine.mPSISmsc));
@@ -468,8 +479,11 @@ public class SmsRLStateMachine {
             @Override
             public void onTR2TimerExpired(SmsRLStateMachine smsRLStateMachine) {
                 logi("onTR2TimerExpired");
+                if (smsRLStateMachine.mMtsController != null) {
+                    smsRLStateMachine.mMtsController.notifyMtSmsTimedOut(
+                            smsRLStateMachine.mRpMr);
+                }
                 smsRLStateMachine.setState(IDLE);
-                //TODO: Send an RP-Error back to network
             }
         }
     }
@@ -490,7 +504,11 @@ public class SmsRLStateMachine {
      */
     public int getSendStatus(int causeCode) {
         int sendStatus = SmsRPErrorCause.getSendSmsStatusByRPCauseCode(causeCode);
-
+        if (needToCheckNetworkStatus(causeCode)) {
+            if (isImsRegisteredOnWifi() && (isRoaming() || !isCellularNetworkAvailable())) {
+                return ImsSmsImplBase.SEND_STATUS_ERROR;
+            }
+        }
         int[] causeValues = getConfigInterface(mContext.getSlotId()).getCarrierConfig()
                 .getIntArray(CarrierConfigManager.ImsSms
                 .KEY_SMS_RP_CAUSE_VALUES_TO_RETRY_OVER_IMS_INT_ARRAY);
@@ -506,6 +524,51 @@ public class SmsRLStateMachine {
             sendStatus = ImsSmsImplBase.SEND_STATUS_ERROR_FALLBACK;
         }
         return sendStatus;
+    }
+
+    @VisibleForTesting
+    protected boolean isImsRegisteredOnWifi() {
+        ImsServiceRecord serviceRecord = ImsServiceManager.getServiceRecord(mContext.getPhoneId());
+        if (serviceRecord == null) {
+            return false;
+        }
+        ImsRegistrationTracker regTracker = serviceRecord.getRegistrationTracker();
+        if (regTracker == null) {
+            return false;
+        }
+        return regTracker.getRegisteredNetworkType() == IAosRegistrationListener.NetworkType.IWLAN;
+    }
+
+    @VisibleForTesting
+    protected boolean isRoaming() {
+        IDcNetWatcher dcnw = getNetworkWatcher();
+        return (dcnw != null) && dcnw.isRoaming();
+    }
+
+    @VisibleForTesting
+    protected boolean isCellularNetworkAvailable() {
+        IDcNetWatcher dcnw = getNetworkWatcher();
+        return (dcnw != null)
+                && (dcnw.getCellularDataServiceState() == ServiceState.STATE_IN_SERVICE);
+    }
+
+    @VisibleForTesting
+    protected boolean needToCheckNetworkStatus(int causeCode) {
+        ConfigInterface config = getConfigInterface(mContext.getSlotId());
+        CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
+        if (cc == null) {
+            return false;
+        }
+        int[] causeCodes = cc.getIntArray(
+                CarrierConfig.ImsSms.KEY_SMS_EVALUATE_RADIO_STATUS_FOR_RP_ERROR_CAUSES_INT_ARRAY);
+        if (causeCodes != null && Arrays.stream(causeCodes).anyMatch(value -> value == causeCode)) {
+            return true;
+        }
+        return false;
+    }
+
+    private IDcNetWatcher getNetworkWatcher() {
+        return DcFactory.getDcAgent(IDcNetWatcher.class, mContext.getSlotId());
     }
 
     /**

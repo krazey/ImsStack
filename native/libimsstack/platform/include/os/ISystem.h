@@ -17,10 +17,10 @@
 #define INTERFACE_SYSTEM_H_
 
 #include "AStringArray.h"
-#include "ByteArray.h"
-#include "ISystemListener.h"
-#include "ImsParcel.h"
-#include "IpSecSaParameter.h"
+
+class ISystemListener;
+class ImsParcel;
+class IpSecSaParameter;
 
 class ISystem
 {
@@ -36,8 +36,10 @@ public:
             IN IMS_UINT32 nCategory, IN ISystemListener* piListener, IN IMS_SINT32 nSlotId) = 0;
 
     ////
-    // Power-related information
+    // Common information
     ////
+    virtual void GetUuid(
+            IN IMS_SINT32 nVersion, IN const AString& strName, OUT AString& strUuid) = 0;
     virtual IMS_SINT32 GetPowerLevel() = 0;
 
     ////
@@ -52,11 +54,10 @@ public:
     virtual IMS_SINT32 GetSimMnc(OUT AString& strMnc, IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_SINT32 GetSimCountryIso(OUT AString& strCountry, IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_SINT32 GetNetworkCountryIso(OUT AString& strCountry, IN IMS_SINT32 nSlotId) = 0;
+    virtual IMS_SINT32 GetNetworkOperator(OUT AString& strOperator, IN IMS_SINT32 nSlotId) = 0;
     // For UICC (ISIM)
     virtual AString GetIsimState(IN IMS_SINT32 nSlotId) = 0;
-    virtual IMS_SINT32 ReadIsimFileAttributes(IN IMS_SINT32 nFileId, IN IMS_SINT32 nSlotId) = 0;
-    virtual IMS_SINT32 ReadIsimRecord(
-            IN IMS_SINT32 nFileId, IN IMS_SINT32 nIndex, IN IMS_SINT32 nSlotId) = 0;
+    virtual AStringArray GetIsimRecord(IN IMS_SINT32 nFileId, IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_RESULT RequestIsimAuthentication(
             IN const AString& strNonce, IN IMS_SINTP nOwner, IN IMS_SINT32 nSlotId) = 0;
     // For UICC (USIM)
@@ -71,7 +72,7 @@ public:
     virtual IMS_SINT32 GetTtyMode(IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_SINT32 GetRttMode(IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_SINT32 GetCsCallStateInOtherSlot(IN IMS_SINT32 nSlotId) = 0;
-
+    virtual IMS_BOOL IsCrossSimRedialingAvailable(IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_SINT32 GetDeviceName(OUT AString& strDeviceName) = 0;
 
     ////
@@ -83,6 +84,7 @@ public:
     virtual IMS_SINT32 GetVoiceRoamingType(IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_SINT32 GetDataRoamingType(IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_SINT32 GetServiceState(IN IMS_SINT32 nSlotId) = 0;
+    virtual IMS_SINT32 GetCellularServiceState(IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_SINT32 GetVoiceServiceState(IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_SINT32 GetAccessNetworkInfo(IN IMS_SINT32 nDefaultNetworkType,
             OUT IMS_SINT32& nNetworkType, OUT AStringArray& objAccessNetInfo,
@@ -104,14 +106,15 @@ public:
             IN IMS_SINT32 nApnType, IN IMS_SINT32 nIpVersion, IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_BOOL IsImsEmergencyCallSupported(IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_BOOL IsImsVoiceCallSupported(IN IMS_SINT32 nSlotId) = 0;
-    virtual IMS_BOOL IsLteEmergencyOnly(IN IMS_SINT32 nSlotId) = 0;
+    virtual IMS_BOOL IsEmergencyOnly(IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_BOOL IsEmergencyAttachSupported(IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_BOOL IsMobileDataEnabled(IN IMS_SINT32 nSlotId) = 0;
-    virtual IMS_SINT32 GetMocnPlmnInfo(IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_SINT32 GetMtu(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_SINT32 BindSocket(
             IN IMS_SINT32 nApnType, IN IMS_SINT32 nSockFd, IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_BOOL IsIpv6Preferred(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) = 0;
+    virtual IMS_SINT32 GetNetworkRegistrationRejectCause(IN IMS_SINT32 nSlotId) = 0;
+    virtual AString GetAccessNetworkPlmn(IN IMS_SINT32 nSlotId) = 0;
 
     ////
     // WiFi-related information
@@ -124,7 +127,7 @@ public:
     ////
     // Timer APIs
     ////
-    virtual IMS_SINT32 SetTimer(IN IMS_UINT32 nDuration, IN IMS_UINTP nTimerId) = 0;
+    virtual IMS_SINT32 SetTimer(IN IMS_SINT64 nDuration, IN IMS_UINTP nTimerId) = 0;
     virtual IMS_SINT32 KillTimer(IN IMS_UINTP nTimerId) = 0;
 
     ////
@@ -164,7 +167,8 @@ public:
     virtual void StopListeningForLocation(IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_SINT32 GetLastKnownLocation(
             OUT AStringArray& objLocationInfo, IN IMS_SINT32 nType, IN IMS_SINT32 nSlotId) = 0;
-    virtual IMS_BOOL StartInstantLocationUpdate(IN IMS_SINT32 nSlotId) = 0;
+    virtual IMS_SINT32 RequestLocationUpdate(IN IMS_SINT32 nWaitTimeMs, IN IMS_SINT32 nSlotId) = 0;
+    virtual void CancelLocationUpdate(IN IMS_SINT32 nId, IN IMS_SINT32 nSlotId) = 0;
 
     ////
     // Ims radio interface

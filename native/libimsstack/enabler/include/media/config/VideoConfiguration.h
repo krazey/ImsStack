@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,9 +19,11 @@
 
 #include "config/MediaConfiguration.h"
 
-/*!
- * @class   VideoConfiguration
- * @brief   Video Configuration class
+/**
+ * @class VideoConfiguration
+ * @brief Manages video-specific media configurations.
+ * @details This class holds all configuration parameters related to video streams,
+ * such as RTP/RTCP settings, bandwidth, DSCP values, and AVPF features.
  */
 class VideoConfiguration : public MediaConfiguration
 {
@@ -62,142 +64,156 @@ public:
     static const IMS_SINT32 DEFAULT_I_FRAME_INTERVAL = 1;
     static const IMS_SINT32 DEFAULT_CHANNEL = 0;
     static const IMS_SINT32 DEFAULT_VIDEO_SAMPLING_RATE = 90000;
-    static const IMS_BOOL DEFAULT_BW_NEGO_OPTION = MediaConfiguration::BW_OPTION_SOURCE_VALUE;
+    static const IMS_BOOL DEFAULT_BW_NEGO_OPTION = MediaConfiguration::BW_OPTION_LOCAL_VALUE;
     static const IMS_SINT32 DEFAULT_VIDEO_LOWEST_BITRATE = 0;
 
 public:
     /**
-     * @brief Construct a new video configuration
+     * @brief Constructs a new VideoConfiguration object.
      *
-     * @param eSessionType mediasession type
+     * @param eSessionType The type of media session.
      */
     explicit VideoConfiguration(IN MEDIA_CONTENT_TYPE eSessionType = MEDIA_TYPE_AUDIOVIDEO);
+
     /**
-     * @brief Destroy the video configuration
-     *
+     * @brief Destroys the VideoConfiguration object.
      */
-    virtual ~VideoConfiguration();
+    ~VideoConfiguration() override;
+
     /**
-     * @brief Create codec using the configuration
+     * @brief Initializes the video configuration by reading carrier-specific settings.
      *
-     * @param piCc configuration
-     * @return IMS_BOOL Return true if the create function is executed without error
-     * Return false if the create function is failed
+     * @param piCc A pointer to the carrier configuration interface.
+     * @return IMS_TRUE on success, IMS_FALSE on failure.
      */
-    IMS_BOOL Create(IN ICarrierConfig* piCc) override;
+    virtual IMS_BOOL Create(IN ICarrierConfig* piCc) override;
+
     /**
-     * @brief Update codec using the configuration
+     * @brief Updates the video configuration with new carrier-specific settings.
      *
-     * @param piCc configuration
-     * @return IMS_BOOL Return true if the create function is executed without error
-     * Return false if the create function is failed
+     * @param piCc A pointer to the carrier configuration interface.
+     * @return IMS_TRUE on success, IMS_FALSE on failure.
      */
-    IMS_BOOL Update(IN ICarrierConfig* piCc) override;
+    virtual IMS_BOOL Update(IN ICarrierConfig* piCc) override;
+
     /**
-     * @brief Get the video dscp value
+     * @brief Gets the Differentiated Services Code Point (DSCP) value for video RTP packets.
      *
-     * @return IMS_SINT32 Return video dscp value
+     * @return The DSCP value.
      */
-    IMS_SINT32 GetVideoDscp() const;
+    virtual IMS_SINT32 GetVideoDscp() const;
+
     /**
-     * @brief Get the sps/pps sending perioid
+     * @brief Gets the period for sending SPS/PPS NAL units.
      *
-     * @return IMS_SINT32 Return the sps/pps sending perioid
+     * @return The sending period setting. See {@link VideoConfiguration::SEND_ONCE_AT_START}.
      */
-    IMS_SINT32 GetVideoSendPeriodicSpsPps() const;
+    virtual IMS_SINT32 GetVideoSendPeriodicSpsPps() const;
+
     /**
-     * @brief Get the cvo id
+     * @brief Gets the Coordination of Video Orientation (CVO) identifier.
      *
-     * @return IMS_SINT32 Return the cvo-id
+     * @return The CVO identifier.
      */
-    IMS_SINT32 GetCvoId() const;
+    virtual IMS_SINT32 GetCvoId() const;
+
     /**
-     * @brief Get whether AVPF feature is enabled
+     * @brief Checks if the Audio-Visual Profile with Feedback (AVPF) is enabled for video.
      *
-     * @return IMS_BOOL Return true if AVPF is enabled
-     * Return false if AVPF is disabled
+     * @return IMS_TRUE if AVPF is enabled, otherwise IMS_FALSE.
      */
-    IMS_BOOL IsVideoAvpfEnabled() const;
+    virtual IMS_BOOL IsVideoAvpfEnabled() const;
+
     /**
-     * @brief Get whether AVPF trr attribute is enabled
+     * @brief Checks if AVPF Temporal-Spatial Trade-off Request (TRR) is enabled.
      *
-     * @return IMS_BOOL Return true if AVPF trr is enabled
-     * Return false if AVPF trr is disabled
+     * @return IMS_TRUE if TRR is enabled, otherwise IMS_FALSE.
      */
-    IMS_BOOL IsVideoAvpfTrrEnabled() const;
+    virtual IMS_BOOL IsVideoAvpfTrrEnabled() const;
+
     /**
-     * @brief Get whether AVPF nack attribute is enabled
+     * @brief Checks if AVPF Generic NACK is enabled.
      *
-     * @return IMS_BOOL Return true if AVPF nack is enabled
-     * Return false if AVPF nack is disabled
+     * @return IMS_TRUE if NACK is enabled, otherwise IMS_FALSE.
      */
-    IMS_BOOL IsVideoAvpfNackEnabled() const;
+    virtual IMS_BOOL IsVideoAvpfNackEnabled() const;
+
     /**
-     * @brief Get whether AVPF tmmbr attribute is enabled
+     * @brief Checks if AVPF Temporary Maximum Media Stream Bit Rate Request (TMMBR) is enabled.
      *
-     * @return IMS_BOOL Return true if AVPF tmmbr is enabled
-     * Return false if AVPF tmmbr is disabled
+     * @return IMS_TRUE if TMMBR is enabled, otherwise IMS_FALSE.
      */
-    IMS_BOOL IsVideoAvpfTmmbrEnabled() const;
+    virtual IMS_BOOL IsVideoAvpfTmmbrEnabled() const;
+
     /**
-     * @brief Get whether AVPF pli attribute is enabled
+     * @brief Checks if AVPF Picture Loss Indication (PLI) is enabled.
      *
-     * @return IMS_BOOL Return true if AVPF pli is enabled
-     * Return false if AVPF pli is disabled
+     * @return IMS_TRUE if PLI is enabled, otherwise IMS_FALSE.
      */
-    IMS_BOOL IsVideoAvpfPliEnabled() const;
+    virtual IMS_BOOL IsVideoAvpfPliEnabled() const;
+
     /**
-     * @brief Get whether AVPF fir attribute is enabled
+     * @brief Checks if AVPF Full Intra Request (FIR) is enabled.
      *
-     * @return IMS_BOOL Return true if AVPF fir is enabled
-     * Return false if AVPF fir is disabled
+     * @return IMS_TRUE if FIR is enabled, otherwise IMS_FALSE.
      */
-    IMS_BOOL IsVideoAvpfFirEnabled() const;
+    virtual IMS_BOOL IsVideoAvpfFirEnabled() const;
+
     /**
-     * @brief Get whether capability attribute is enabled
+     * @brief Checks if capability negotiation for AVPF is enabled.
      *
-     * @return IMS_BOOL Return true if AVPF capability negotiation attribute is enabled
-     * Return false if AVPF capability negotiation attribute is disabled
+     * @return IMS_TRUE if AVPF capability negotiation is enabled, otherwise IMS_FALSE.
      */
-    IMS_BOOL IsAvpfCapabilityNegotiationEnabled() const;
+    virtual IMS_BOOL IsAvpfCapabilityNegotiationEnabled() const;
+
     /**
-     * @brief Get whether the sdp offer cap nego for avpf
+     * @brief Gets the SDP offer capability negotiation option for AVPF.
      *
-     * @return IMS_BOOL Return true if SdpOfferCapNegoForAvpf is enabled
-     * Return false if SdpOfferCapNegoForAvpf is disabled
+     * @return The capability negotiation option. See {@link MediaConfiguration::CAPNEG_OFFER_NONE}.
      */
-    IMS_SINT32 GetSdpOfferCapNegoForAvpf() const;
+    virtual IMS_SINT32 GetSdpOfferCapNegoForAvpf() const;
+
     /**
-     * @brief Get the video iframe interval sec
+     * @brief Gets the interval for sending I-frames (intra-frames).
      *
-     * @return IMS_SINT32 Return the interval of the video iframe
+     * @return The I-frame interval in seconds.
      */
-    IMS_SINT32 GetVideoIframeIntervalSec() const;
+    virtual IMS_SINT32 GetVideoIframeIntervalSec() const;
+
     /**
-     * @brief Get the channel id
+     * @brief Gets the number of channels for video.
      *
-     * @return IMS_SINT32 Return the channel-id
+     * @return The number of channels.
      */
-    IMS_SINT32 GetChannel() const;
+    virtual IMS_SINT32 GetChannel() const;
+
     /**
-     * @brief Get the video sampling rate
+     * @brief Gets the sampling rate for the video clock.
      *
-     * @return IMS_SINT32 Return the video sampling rate
+     * @return The sampling rate in Hz (e.g., 90000).
      */
-    IMS_SINT32 GetVideoSamplingRate() const;
+    virtual IMS_SINT32 GetVideoSamplingRate() const;
+
     /**
-     * @brief Get whether the bandwidth nego option
+     * @brief Gets the bandwidth negotiation option for video.
      *
-     * @return IMS_BOOL Return true if BandwidthNegoOption is enabled
-     * Return false if BandwidthNegoOption is disabled
+     * @return IMS_TRUE to use the remote party's bandwidth values, IMS_FALSE to use local values.
      */
-    IMS_BOOL GetBandwidthNegoOption() const;
+    virtual IMS_BOOL GetBandwidthNegoOption() const;
+
     /**
-     * @brief Get the video lowest Bitrate bps
+     * @brief Gets the lowest allowed bitrate for video.
      *
-     * @return IMS_SINT32 video lowest Bitrate bps
+     * @return The lowest bitrate in bits per second (bps).
      */
-    IMS_SINT32 GetVideoLowestBitrateBps() const;
+    virtual IMS_SINT32 GetVideoLowestBitrateBps() const;
+
+    /**
+     * @brief Checks if the media direction should be set to 'inactive' when the video is on hold.
+     *
+     * @return IMS_TRUE to use 'inactive' on hold, otherwise IMS_FALSE.
+     */
+    virtual IMS_BOOL isVideoDirectionHoldUsingInactive() const;
 
 protected:
     /**
@@ -230,6 +246,7 @@ private:
     IMS_SINT32 m_nVideoSamplingRate;
     IMS_BOOL m_bVideoBwNegoOptionEnabled;
     IMS_SINT32 m_nVideoLowestBitrateBps;
+    IMS_BOOL m_bVideoHoldDirectionInactive;
 };
 
 #endif

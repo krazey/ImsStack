@@ -17,10 +17,12 @@
 #define SDP_MEDIA_PARAMETER_H_
 
 #include "SdpConnection.h"
-#include "SdpMediaDescription.h"
-#include "offeranswer/SdpMediaFormat.h"
+#include "SdpMedia.h"
 #include "offeranswer/SdpParameter.h"
 #include "offeranswer/SdpPrecondition.h"
+
+class SdpMediaDescription;
+class SdpMediaFormat;
 
 #define __IMS_SDP_PRECONDITION__
 
@@ -29,7 +31,7 @@ class SdpMediaParameter : public SdpParameter
 public:
     explicit SdpMediaParameter(IN IMS_SINT32 nMid);
     SdpMediaParameter(IN const SdpMediaParameter& other);
-    virtual ~SdpMediaParameter();
+    ~SdpMediaParameter() override;
 
 public:
     SdpMediaParameter& operator=(IN const SdpMediaParameter& other);
@@ -41,6 +43,11 @@ public:
      *        in the media-level parameter.
      */
     const AString& GetConnectionAddress() const override;
+
+    /**
+     * @brief Returns the SDP message from the media-level parameter.
+     */
+    AString ToSdp() const override;
 
     /**
      * @brief Negotiates the media-level parameters through the SDP offer/answer exchange.
@@ -144,11 +151,6 @@ public:
      * @brief Sets mid if it's changed.
      */
     void SetMid(IN IMS_SINT32 nMid);
-
-    /**
-     * @brief Returns the SDP message from the media-level parameter.
-     */
-    AString ToSdp() const;
 
     /**
      * @brief Updates the properties from the specified media-level parameter.

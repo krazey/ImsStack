@@ -20,6 +20,7 @@
 #include "ITimer.h"
 #include "interface/IAosBlock.h"
 #include "interface/IAosBlockListener.h"
+#include "interface/IAosBlockSilentListener.h"
 #include "interface/IAosCallTrackerListener.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosNConfigurationListener.h"
@@ -37,6 +38,7 @@ class AosServiceAvailableWifi;
 class AosCondition :
         public IEventListener,
         public IAosBlockListener,
+        public IAosBlockSilentListener,
         public IAosCallTrackerListener,
         public IAosNetTrackerListener,
         public IAosServiceAvailableListener,
@@ -47,7 +49,8 @@ class AosCondition :
 {
 public:
     explicit AosCondition(IN IAosAppContext* piAppContext);
-    virtual ~AosCondition();
+    inline explicit AosCondition(){};
+    ~AosCondition() override;
 
     virtual void Start();
     virtual void Stop();
@@ -72,7 +75,9 @@ public:
         REQUEST_STOP,
         REQUEST_DESTROY,
         REQUEST_RECOVER,
-        REQUEST_PDN_DISCONNECT
+        REQUEST_PDN_DISCONNECT,
+        REQUEST_RESET_CONNECTION_RECOVERY,
+        REQUEST_REASON_UPDATE
     };
     // eReason : AosReason
 
@@ -93,12 +98,22 @@ public:
         CHECK_WIFI = 0x2
     };
 
+    enum
+    {
+        HOLD_EVENT_NONE = 0x00,
+        HOLD_EVENT_ROAMING = 0x01,
+        HOLD_EVENT_IMS_SERVICE = 0x02
+    };
+
 protected:
+    virtual void AddConfigListener();
+    virtual void RemoveConfigListener();
+
     virtual void AddServiceAvailable();
     virtual void RemoveServiceAvailable();
 
-    virtual IMS_BOOL AddAosServiceListener();
-    virtual IMS_BOOL RemoveAosServiceListener();
+    virtual void AddAosServiceListener();
+    virtual void RemoveAosServiceListener();
 
     virtual void AddEventListener();
     virtual void RemoveEventListener();
@@ -109,6 +124,7 @@ protected:
 
     // IAosCallTrackerListener
     void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState) override;
+    inline void CallTracker_ECallSessionReleased(IN IMS_BOOL /* bEstablished */) override {};
 
     // IAosNetTrackerListener
     void NetTracker_StatusChanged() override;
@@ -119,8 +135,11 @@ protected:
     // IAosBlockListener
     void Block_Changed(IN IMS_UINT32 nType, IN IMS_UINT32 nParam) override;
 
+    // IAosBlockSilentListener
+    void Block_SilentChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nParam) override;
+
     // IAosServiceAvailableListener
-    void ServiceAvailable_Changed() override;
+    void ServiceAvailable_Changed(IN IMS_BOOL bNotify = IMS_TRUE) override;
     void ServiceAvailable_RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason) override;
 
     // IAosNConfigurationListener
@@ -130,23 +149,25 @@ protected:
     void ServicePhone_LocationInfoChanged(IN LocationInfo eState) override;
     void ServicePhone_PhoneNumberStateChanged(
             IN IMS_BOOL bIsRefresh, IN PhoneNumberState eState) override;
-    void ServicePhone_PlmnChanged() override;
+    void ServicePhone_PlmnChanged(IN const AString& strPlmn) override;
     void ServicePhone_PowerOff() override;
+    void ServicePhone_AllowedNetworkTypesChanged(IN IMS_ULONG nNetworkTypesBitMask) override;
 
     // AosServiceSettingListener
     void ServiceSetting_AirplaneChanged(IN IMS_BOOL bIsOn) override;
     void ServiceSetting_ServiceChanged(
             IN ServiceSetting eState, IN IMS_UINT32 nServiceBits) override;
     void ServiceSetting_TtyChanged(IN IMS_BOOL bIsOn) override;
+    void ServiceSetting_WifiChanged(IN IMS_BOOL bIsOn) override;
 
+    void Init();
     void AddListener(IN IMS_UINT32 nType);
     void RemoveListener(IN IMS_UINT32 nType);
     IMS_BOOL IsListenerEnabled(IN IMS_UINT32 nType) const;
 
-private:
     void AddHold(IN IMS_UINT32 nEvent, IN IMS_BOOL bIsEventReset = IMS_FALSE);
     void RemoveHold(IN IMS_UINT32 nEvent, IN IMS_BOOL bIsEventReset = IMS_FALSE);
-    IMS_BOOL IsHolded(IN IMS_UINT32 nEvent) const;
+    IMS_BOOL IsHeld(IN IMS_UINT32 nEvent) const;
     IMS_BOOL IsRefreshStarted() const;
 
     void SetInitialBlockReason();
@@ -162,50 +183,46 @@ private:
     void ProcessPhoneNumberAvailableEvent(IN IMS_BOOL bIsRefresh, IN PhoneNumberState eState);
     void ProcessImsServiceEvent(IN ServiceSetting eState, IN IMS_UINT32 nServiceBits);
     void ProcessTtyEvent(IN IMS_BOOL bIsOn);
-    void ProcessImsVopsEvent(IN IMS_UINT32 nState);
+    void ProcessWifiSettingEvent(IN IMS_BOOL bIsOn);
     void ProcessLocationInfo(IN LocationInfo eState);
-    void ProcessLteInfoEvent(IN IMS_UINT32 nState);
+    void ProcessLteInfoEvent(IN IMS_UINT32 nState, IN IMS_UINT32 nStateEx);
+    void ProcessTraceBlockEvent(IN const IMS_CHAR* pszPrefix, IN const IMS_CHAR* pszReason,
+            IN const IMS_CHAR* pszStatus) const;
+    void ProcessAllowedNetworkTypesEvent(IN IMS_ULONG nNetworkTypesBitMask);
 
-    void ResetImsDisableReason();
+    void ClearRegistrationAndDataFailureBlocks();
 
     SERVICE_TYPE GetServiceType();
     void SendConditionEvent(IN IMS_UINT32 eEvent, IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx = -1,
             IN SERVICE_TYPE eServiceType = SERVICE_WHOLE);
+    void UpdateEventListener(IN IMS_SINT32 nEvent, IN IMS_BOOL bAdd);
 
     IMS_BOOL RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason = 0) const;
 
     void UpdateRegistrationMode() const;
     IMS_BOOL IsServiceBlockedByMenu() const;
-
-protected:
-    enum
-    {
-        HOLD_EVENT_NONE = 0x00,
-        HOLD_EVENT_ROAMING = 0x01,
-        HOLD_EVENT_IMS_SERVICE = 0x02
-    };
+    IMS_BOOL IsRttSupported() const;
+    IMS_BOOL IsCombinedAttached() const;
+    IMS_BOOL IsDeregRequiredForTty() const;
 
 protected:
     IAosAppContext* m_piAppContext;
     IMS_SINT32 m_nSlotId;
     IAosConditionListener* m_piListener;
     AosServiceAvailableCellular* m_pAvailableCellular;
-    AosServiceAvailableWifi* m_pAvailableWiFi;
+    AosServiceAvailableWifi* m_pAvailableWifi;
     IAosBlock* m_piBlock;
     SERVICE_TYPE m_eServiceType;
     IMS_BOOL m_bIsRefreshStarted;
     IMS_BOOL m_bIsCombinedAttached;
     IMS_BOOL m_bCellServiceAvailable;
-    IMS_BOOL m_bWiFiServiceAvailable;
+    IMS_BOOL m_bWifiServiceAvailable;
     IMS_BOOL m_bIsTtyOn;
     IMS_UINT32 m_nHoldEvents;
     IMS_UINT32 m_nListeners;
 
     AString m_strTag;
     static const IMS_UINT32 RAT_CHANGE_GUARD_TIME_MILLIS = 2000;
-
-private:
-    friend class AosConditionTest;
 };
 
 #endif  // AOS_CONDITION_H_

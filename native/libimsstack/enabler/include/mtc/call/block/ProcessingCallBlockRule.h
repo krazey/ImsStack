@@ -17,18 +17,19 @@
 #ifndef PROCESSING_CALL_BLOCK_RULE_H_
 #define PROCESSING_CALL_BLOCK_RULE_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "call/IMtcCall.h"
 #include "call/block/IMtcBlockRule.h"
 
+class IMtcCall;
 class IMtcCallContext;
+template <class T>
+class ImsList;
 
 class ProcessingCallBlockRule final : public IMtcBlockRule
 {
 public:
     explicit ProcessingCallBlockRule(IN IMtcCallContext& objContext);
-    virtual ~ProcessingCallBlockRule();
+    virtual ~ProcessingCallBlockRule() override;
     ProcessingCallBlockRule(IN const ProcessingCallBlockRule&) = delete;
     ProcessingCallBlockRule& operator=(IN const ProcessingCallBlockRule&) = delete;
 
@@ -36,7 +37,7 @@ public:
 
 private:
     static IMS_BOOL IsCallSetupProcessing(IN const ImsList<IMtcCall*>& lstCalls);
-    static IMS_BOOL IsCallUpdating(IN const ImsList<IMtcCall*>& lstCalls);
+    static IMS_BOOL IsCallConverting(IN const ImsList<IMtcCall*>& lstCalls);
     static IMS_BOOL IsEmergencyCallExists(IN const ImsList<IMtcCall*>& lstCalls);
 
     IMtcCallContext& m_objContext;

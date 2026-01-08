@@ -36,7 +36,7 @@ public:
     QosProperty();
     explicit QosProperty(IN const AString& strContentType);
     QosProperty(IN const QosProperty& other);
-    inline virtual ~QosProperty() {}
+    ~QosProperty() override = default;
 
 public:
     QosProperty& operator=(IN const QosProperty& other);
@@ -47,7 +47,7 @@ public:
         return m_strContentType.Equals(strValue);
     }
     inline const AString& GetContentType() const { return m_strContentType; }
-    inline QualityOfService GetQos() const { return m_objQos; }
+    inline const QualityOfService& GetQos() const { return m_objQos; }
     AString GetQosString() const;
     IMS_BOOL SetQos(IN const AString& strValue);
 

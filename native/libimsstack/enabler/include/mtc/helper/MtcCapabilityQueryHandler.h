@@ -17,10 +17,10 @@
 #ifndef MTC_CAPABILITY_QUERY_HANDLER_H_
 #define MTC_CAPABILITY_QUERY_HANDLER_H_
 
+#include "AString.h"
 #include "ImsTypeDef.h"
 #include "base/IMessageMediator.h"
 
-class AString;
 class AStringArray;
 class ICapabilities;
 class ICoreService;
@@ -32,30 +32,32 @@ class IMtcContext;
 class MtcCapabilityQueryHandler : public IMessageMediator
 {
 public:
-    explicit MtcCapabilityQueryHandler(IN IMtcContext& objContext);
-    virtual ~MtcCapabilityQueryHandler();
+    explicit MtcCapabilityQueryHandler(IN IMtcContext& objContext,
+            IN const ICoreServiceConfig* piCoreServiceConfig, IN const IMediaConfig* piMediaConfig);
+    virtual ~MtcCapabilityQueryHandler() override;
     MtcCapabilityQueryHandler(IN const MtcCapabilityQueryHandler&) = delete;
     MtcCapabilityQueryHandler& operator=(IN const MtcCapabilityQueryHandler&) = delete;
 
     IMS_RESULT MessageMediator_AdjustMessage(
             IN_OUT ISipMessage* piSipMessage, IN IMS_SINT32 nMessage) override;
 
-    virtual IMS_RESULT HandleIncomingCapabilityQuery(IN ICoreService* piService,
-            IN ICapabilities* piCapabilities, IN const AString& strAppId,
-            IN const AString& strServiceId, IN IMS_UINT32 nFeatures);
+    virtual IMS_RESULT HandleIncomingCapabilityQuery(
+            IN ICoreService* piService, IN ICapabilities* piCapabilities, IN IMS_UINT32 nFeatures);
 
 private:
     void SetHeaderForCapabilityQuery(IN IMessage* piMessage);
-    IMS_RESULT SetBodyForCapabilityQuery(IN ICoreService* piService, IN IMessage* piMessage,
-            IN const AString& strAppId, IN const AString& strServiceId, IN IMS_UINT32 nFeatures);
-    virtual const AStringArray& GetMediaCapability(IN const ICoreServiceConfig* piCoreServiceConfig,
-            IN const IMediaConfig* piMediaConfig, IN IMS_SINT32 nMediaType) const;
-    static IMS_RESULT SetSessionLevelDescription(IN ICoreService* piService, OUT AString& strDesc);
+    IMS_RESULT SetBodyForCapabilityQuery(
+            IN const ICoreService* piService, IN IMessage* piMessage, IN IMS_UINT32 nFeatures);
+    virtual const AStringArray& GetMediaCapability(IN IMS_SINT32 nMediaType) const;
+    static IMS_RESULT SetSessionLevelDescription(
+            IN const ICoreService* piService, OUT AString& strDesc);
 
     // if EVS is supported by default, this should be removed.
     static AString GetAdjustedCodecList(IN const AStringArray& objAudioCaps);
 
     IMtcContext& m_objContext;
+    const ICoreServiceConfig* m_piCoreServiceConfig;
+    const IMediaConfig* m_piMediaConfig;
 };
 
 #endif

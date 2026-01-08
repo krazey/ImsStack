@@ -18,6 +18,7 @@
 #include "MockIMtcContext.h"
 #include "MockITimer.h"
 #include "PlatformContext.h"
+#include "SipStatusCode.h"
 #include "TestTimerService.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
@@ -31,11 +32,10 @@
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockReferenceInterfaceHolder.h"
-#include "sipcore/SipStatusCode.h"
 #include <gtest/gtest.h>
 
 // EctController::TIME_WAIT_OPERATION_COMPLETE
-LOCAL IMS_UINT32 TIME_WAIT_OPERATION_COMPLETE = 3000;
+LOCAL IMS_UINT32 TIME_WAIT_OPERATION_COMPLETE = 32000;
 
 using ::testing::_;
 using ::testing::Return;

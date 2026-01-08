@@ -18,22 +18,20 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-// TODO: Unit tests of only the uncovered lines are added. The other cases will be added.
-
 LOCAL PeerType ANY_PEER_TYPE = PeerType::MT;
 LOCAL CallType ANY_CALL_TYPE = CallType::VIDEO_RTT;
-LOCAL IMS_BOOL ANY_EMERGENCY_BOOL = IMS_TRUE;
+LOCAL EmergencyType ANY_EMERGENCY_TYPE = EmergencyType::NORMAL_ROUTING;
 LOCAL IMS_BOOL ANY_OFFLINE_BOOL = IMS_TRUE;
 LOCAL IMS_BOOL ANY_USSI_BOOL = IMS_TRUE;
 LOCAL IMS_BOOL ANY_CONFERENCE_BOOL = IMS_TRUE;
 
-TEST(CallInfoTest, CallInfoAssignOperator)
+TEST(CallInfoTest, CallInfoAssignmentOperator)
 {
     CallInfo objCallInfo;
     CallInfo objRightHandSide;
     objRightHandSide.ePeerType = ANY_PEER_TYPE;
     objRightHandSide.eInitialCallType = ANY_CALL_TYPE;
-    objRightHandSide.bEmergency = ANY_EMERGENCY_BOOL;
+    objRightHandSide.eEmergencyType = ANY_EMERGENCY_TYPE;
     objRightHandSide.bOffline = ANY_OFFLINE_BOOL;
     objRightHandSide.bUssi = ANY_USSI_BOOL;
     objRightHandSide.bConference = ANY_CONFERENCE_BOOL;
@@ -42,7 +40,7 @@ TEST(CallInfoTest, CallInfoAssignOperator)
 
     EXPECT_EQ(objCallInfo.ePeerType, objRightHandSide.ePeerType);
     EXPECT_EQ(objCallInfo.eInitialCallType, objRightHandSide.eInitialCallType);
-    EXPECT_EQ(objCallInfo.bEmergency, objRightHandSide.bEmergency);
+    EXPECT_EQ(objCallInfo.eEmergencyType, objRightHandSide.eEmergencyType);
     EXPECT_EQ(objCallInfo.bOffline, objRightHandSide.bOffline);
     EXPECT_EQ(objCallInfo.bUssi, objRightHandSide.bUssi);
     EXPECT_EQ(objCallInfo.bConference, objRightHandSide.bConference);
@@ -51,13 +49,13 @@ TEST(CallInfoTest, CallInfoAssignOperator)
 TEST(CallInfoTest, CallInfoEqualToOperator)
 {
     CallInfo objCallInfo;
-    CallInfo* pCallInfo = &objCallInfo;
+    const CallInfo* pCallInfo = &objCallInfo;
     EXPECT_TRUE(objCallInfo == *pCallInfo);
 
     CallInfo objCallInfoWithValues;
     objCallInfoWithValues.ePeerType = ANY_PEER_TYPE;
     objCallInfoWithValues.eInitialCallType = ANY_CALL_TYPE;
-    objCallInfoWithValues.bEmergency = ANY_EMERGENCY_BOOL;
+    objCallInfoWithValues.eEmergencyType = ANY_EMERGENCY_TYPE;
     objCallInfoWithValues.bOffline = ANY_OFFLINE_BOOL;
     objCallInfoWithValues.bUssi = ANY_USSI_BOOL;
     objCallInfoWithValues.bConference = ANY_CONFERENCE_BOOL;
@@ -65,7 +63,7 @@ TEST(CallInfoTest, CallInfoEqualToOperator)
     CallInfo objCallInfoWithValuesToCompare;
     objCallInfoWithValuesToCompare.ePeerType = ANY_PEER_TYPE;
     objCallInfoWithValuesToCompare.eInitialCallType = ANY_CALL_TYPE;
-    objCallInfoWithValuesToCompare.bEmergency = ANY_EMERGENCY_BOOL;
+    objCallInfoWithValuesToCompare.eEmergencyType = ANY_EMERGENCY_TYPE;
     objCallInfoWithValuesToCompare.bOffline = ANY_OFFLINE_BOOL;
     objCallInfoWithValuesToCompare.bUssi = ANY_USSI_BOOL;
     objCallInfoWithValuesToCompare.bConference = ANY_CONFERENCE_BOOL;
@@ -79,7 +77,7 @@ TEST(CallInfoTest, CallInfoNotEqual)
     CallInfo objCallInfoWithValues;
     objCallInfoWithValues.ePeerType = ANY_PEER_TYPE;
     objCallInfoWithValues.eInitialCallType = ANY_CALL_TYPE;
-    objCallInfoWithValues.bEmergency = ANY_EMERGENCY_BOOL;
+    objCallInfoWithValues.eEmergencyType = ANY_EMERGENCY_TYPE;
     objCallInfoWithValues.bOffline = ANY_OFFLINE_BOOL;
     objCallInfoWithValues.bUssi = ANY_USSI_BOOL;
     objCallInfoWithValues.bConference = ANY_CONFERENCE_BOOL;
@@ -87,7 +85,7 @@ TEST(CallInfoTest, CallInfoNotEqual)
     CallInfo objCallInfoWithValuesToCompare;
     objCallInfoWithValuesToCompare.ePeerType = ANY_PEER_TYPE;
     objCallInfoWithValuesToCompare.eInitialCallType = __DIFF_CALL_TYPE__;
-    objCallInfoWithValuesToCompare.bEmergency = ANY_EMERGENCY_BOOL;
+    objCallInfoWithValuesToCompare.eEmergencyType = ANY_EMERGENCY_TYPE;
     objCallInfoWithValuesToCompare.bOffline = ANY_OFFLINE_BOOL;
     objCallInfoWithValuesToCompare.bUssi = ANY_USSI_BOOL;
     objCallInfoWithValuesToCompare.bConference = ANY_CONFERENCE_BOOL;

@@ -29,7 +29,7 @@ public:
             AnyExtension()
     {
     }
-    ~MockAnyExtension() {}
+    ~MockAnyExtension() override {}
 
     MOCK_METHOD(UssiModeType, GetUssiModeType, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetAlertingPattern, (), (const, override));
@@ -42,7 +42,7 @@ public:
             UssiData()
     {
     }
-    ~MockUssiData() {}
+    ~MockUssiData() override {}
 
     MOCK_METHOD(AString&, GetLanguage, (), (const, override));
     MOCK_METHOD(AString&, GetUssdString, (), (const, override));
@@ -58,7 +58,7 @@ public:
             UssiDataParser()
     {
     }
-    ~MockUssiDataParser() {}
+    ~MockUssiDataParser() override {}
 
     MOCK_METHOD(UssiData*, Parse, (IN const AString&), (override));
 };

@@ -26,14 +26,14 @@ class MethodManager : public RcObject
 public:
     MethodManager();
     MethodManager(IN const MethodManager& other);
-    virtual ~MethodManager();
+    ~MethodManager() override;
 
     MethodManager& operator=(IN const MethodManager&) = delete;
 
 public:
     inline const ImsList<Method*>& GetMethods() const { return m_objMethods; }
     IMS_BOOL AddMethod(IN Method* pMethod);
-    void RemoveMethod(IN Method* pMethod);
+    void RemoveMethod(IN const Method* pMethod);
 
 private:
     ImsList<Method*> m_objMethods;

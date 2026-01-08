@@ -30,7 +30,8 @@ public:
             void, ImsAos_Connected, (IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan), (override));
     MOCK_METHOD(void, ImsAos_Connecting, (), (override));
     MOCK_METHOD(void, ImsAos_Disconnecting, (IN IMS_UINT32 nReason), (override));
-    MOCK_METHOD(void, ImsAos_Disconnected, (IN IMS_UINT32 nReason), (override));
+    MOCK_METHOD(void, ImsAos_Disconnected,
+            (IN IMS_UINT32 nReason, IN IMS_SINT32 nDataFailureReason), (override));
     MOCK_METHOD(void, ImsAos_Suspended, (IN IMS_UINT32 nReason), (override));
     MOCK_METHOD(void, ImsAos_Resumed, (), (override));
 };

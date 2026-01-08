@@ -18,6 +18,8 @@
 
 #include "SipDialogState.h"
 
+class SipMethod;
+
 /**
  * @brief This class is a base class for SIP dialog.
  */
@@ -35,7 +37,7 @@ public:
             m_pDState(other.m_pDState)
     {
     }
-    inline virtual ~SipDialogBase() {}
+    ~SipDialogBase() override = default;
 
 public:
     inline SipDialogBase& operator=(IN const SipDialogBase& other)

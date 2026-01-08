@@ -18,21 +18,22 @@
 #define OUTGOING_STATE_H_
 
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
+#include "call/ISilentRedialHelper.h"
 #include "call/state/MtcCallState.h"
+#include <memory>
 
 class AString;
 class IMessage;
 class IMtcCalContext;
 class IMtcSession;
-class SuppService;
+class UdpKeepAliveSender;
 enum class QosLossPolicy;
 
 class OutgoingState : public MtcCallState
 {
 public:
     explicit OutgoingState(IN IMtcCallContext& objContext);
-    virtual ~OutgoingState();
+    virtual ~OutgoingState() override;
     OutgoingState(IN const OutgoingState&) = delete;
     OutgoingState& operator=(IN const OutgoingState&) = delete;
 
@@ -66,22 +67,38 @@ public:
     CallStateName OnReceivingNetworkToneFailed() override;
     CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
     CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) override;
+    CallStateName OnRatChanged(IN IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType) override;
+    CallStateName OnConnectionFailed(
+            IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) override;
 
 protected:
     CallStateName HandleAosConnected() override;
+    const CallReasonInfo GetCallReasonInfoByAosDisconnection(
+            IN IMS_UINT32 nAosReason, IN IMS_SINT32 nDataFailureReason) const override;
+    CallStateName HandleAosDisconnectedByAllPcscfFailed() override;
 
 private:
+    CallStateName On100TryingReceived();
     void HandleCancel(IN ISession* piSession, IN const CallReasonInfo& objReason);
-    IMS_BOOL HandleB1TimerAfterTerminate(
-            IN IMtcSession* piMtcSession, IN const CallReasonInfo& objReason);
-    CallStateName HandleSilentRedial(IN ISession* piSession, IN const CallReasonInfo& objReason);
-    void HandleCountrySpecificServiceUrn(IN IMessage* piMessage);
-    void OnStarted(IN ISession* piSession);
-    void OnStartFailed(IN ISession* piSession, IN const CallReasonInfo& objReason);
-    void OnSessionForked(IN ISession* piOriginSession);
+    CallStateName MaySendPreconditionConfirmation(IN ISession& objSession);
+    CallReasonInfo MayGetUpdatedReasonByResponseWaitTimeout(IN IMS_SINT32 nReasonCode) const;
+    CallStateName HandleSilentRedialReason(IN const CallReasonInfo& objReason);
+    CallStateName PerformSilentRedial(
+            IN IMS_SINT32 nIntervalInMillis = ISilentRedialHelper::INTERVAL_BY_TYPE);
+    IMS_BOOL HasNotRespondedQosConfirmation(IN ISession& objISession) const;
+    void OnStarted(IN const IMtcSession& objMtcSession);
+    void OnStartFailed(
+            IN const CallReasonInfo& objReason, IN IMS_BOOL bReasonFromErrorHandler = IMS_FALSE);
+    CallReasonInfo ConvertConnectionFailureToCallReasonInfo(
+            IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) const;
+    CallStateName HandleAudioPortZero(IN ISession* piSession);
 
-    IMS_BOOL m_bTimer100WaitExpired;
-    IMS_BOOL m_bWaitingRedialEmergency;
+    std::unique_ptr<UdpKeepAliveSender> m_pUdpKeepAliveSender;
+    ISilentRedialHelper* m_pSilentRedialHelper;
+    IMS_BOOL m_bWaitingServiceConnectedForRedial;
+    IMS_BOOL m_bMoResponseTimeoutForReasonTimerExpired;
+
+    static const IMS_SINT32 DEFAULT_RETRY_AFTER = 1;
 };
 
 #endif

@@ -52,7 +52,7 @@ class Registration :
 {
 public:
     Registration();
-    virtual ~Registration();
+    ~Registration() override;
 
     Registration(IN const Registration&) = delete;
     Registration& operator=(IN const Registration&) = delete;
@@ -70,7 +70,7 @@ public:
     const RegInfo* GetRegInfo() const override;
     inline const RegStateTracker* GetStateTracker() const override { return m_pStateTracker.Get(); }
 
-    IMS_BOOL Create(IN IMS_UINT32 nFlowId, IN const SipAddress& objAor,
+    IMS_BOOL Create(IN IMS_UINT32 nFlowId, IN const SipAddress& objAor, IN IMS_BOOL bEmergency,
             IN const AString& strSubsId = AString::ConstNull(), IN SipProfile* pProfile = IMS_NULL);
     void Destroy();
     inline const ImsList<RegContact*>& GetAllContactsEx() const { return m_objContacts; }
@@ -128,10 +128,7 @@ private:
     {
         return m_pStateTracker->GetServiceRoutes();
     }
-    inline SipProfile* GetSipProfile() const override
-    {
-        return (!m_pStateTracker.IsNull()) ? m_pStateTracker->GetSipProfile() : IMS_NULL;
-    }
+    inline SipProfile* GetSipProfile() const override { return m_pStateTracker->GetSipProfile(); }
     inline IMS_SINT32 GetState() const override { return m_nState; }
     IMS_BOOL IsBindingsUpdated() const override;
     inline IMS_BOOL IsBindingsUpdating() const override
@@ -186,6 +183,10 @@ private:
     {
         return m_bActiveBindingsRestorationEnabled;
     }
+    inline IMS_BOOL IsEmergencyRegistration() const override
+    {
+        return m_pStateTracker->IsEmergencyRegistration();
+    }
 
     // IRefreshable interface
     void Refreshable_RefreshCompleted(
@@ -213,7 +214,7 @@ private:
     IMS_RESULT AdjustMessage(IN_OUT ISipMessage* piSipMsg,
             IN IMS_SINT32 nMessage = IMessageMediator::MESSAGE_NORMAL);
     void CallListener(IN IMS_SINT32 nPrevState, IN IMS_SINT32 nPrevSubState, IN IMS_SINT32 nReason);
-    void CheckUaLocation(IN ISipMessage* piSipMsg);
+    void CheckUaLocation(IN const ISipMessage* piSipMsg);
     void ChoosePreferredContact();
     void ClearNextRequest();
     IDigestAka* CreateDigestAka(IN const SubscriberConfig* pSubsConfig);
@@ -231,7 +232,7 @@ private:
     IMS_BOOL RespondToPendingChallenge(IN const Credential& objCredential);
     void RestoreSecurityHeaders();
     // IMS_AUTH_NONCE_REUSE {
-    void SetAuthenticationChallenge(IN ISipGenericChallenge* piChallenge);
+    void SetAuthenticationChallenge(IN const ISipGenericChallenge* piChallenge);
     // }
     IMS_RESULT SetContactNExpiresHeader(
             IN_OUT ISipMessage* piSipMsg, IN IMS_SINT32 nExpires = (-1));
@@ -240,11 +241,11 @@ private:
     // IMS_AUTH_NONCE_REUSE {
     void SetNextAuthenticationInfo(IN_OUT ISipClientConnection*& piScc);
     // SIP_DIGEST_AUTH_NONCE_REUSE
-    void SetNextNonce(IN ISipMessage* piSipMsg);
+    void SetNextNonce(IN const ISipMessage* piSipMsg);
     // }
     void SetOngoingConnection(IN ISipClientConnection* piScc);
-    void SetPreviousRequest(IN ISipMessage* piSipMsg);
-    void SetPreviousResponse(IN ISipMessage* piSipMsg);
+    void SetPreviousRequest(IN const ISipMessage* piSipMsg);
+    void SetPreviousResponse(IN const ISipMessage* piSipMsg);
     void SetState(IN IMS_SINT32 nState);
     void SetSubState(IN IMS_SINT32 nSubState);
     void StorePersistentHeaders(IN const ISipMessage* piSipMsg);
@@ -364,9 +365,10 @@ private:
     IMS_BOOL m_bIsWithinTrustDomain;
     // REG_RESTORATION_FOR_ACTIVE_BINDING
     IMS_BOOL m_bActiveBindingsRestorationEnabled;
-
     // Reference count for ISipConnectionNotifierErrorListener
     IMS_SINT32 m_nRefCountForScnErrorListener;
+    // Lenient to check Contact URI field of "reginfo" package subscription
+    IMS_BOOL m_bLenientToCheckContactUriOfRegInfo;
 };
 
 #endif

@@ -27,6 +27,7 @@ class IAosRegStateManager;
 class IAosRetryRepository;
 class IAosService;
 class IAosSubscriberManager;
+class IAosTracer;
 class IAosTransaction;
 
 class AosDnsQuery;
@@ -57,6 +58,7 @@ public:
     IAosRetryRepository* GetRetryRepository(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     IAosService* GetService(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     IAosSubscriberManager* GetSubscriberManager(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    IAosTracer* GetTracer(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     IAosTransaction* GetTransaction(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
 
     void SetCallTracker(IN IAosCallTracker* piCt, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
@@ -68,6 +70,7 @@ public:
     void SetService(IN IAosService* piService, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     void SetSubscriberManager(
             IN IAosSubscriberManager* piSubscriberManager, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    void SetTracer(IN IAosTracer* piTracer, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     void SetTransaction(IN IAosTransaction* piTransaction, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
 
 private:
@@ -82,6 +85,7 @@ private:
                 m_piRetryRepository(IMS_NULL),
                 m_piService(IMS_NULL),
                 m_piSubscriberManager(IMS_NULL),
+                m_piTracer(IMS_NULL),
                 m_piTransaction(IMS_NULL)
         {
         }
@@ -95,6 +99,7 @@ private:
         IAosRetryRepository* m_piRetryRepository;
         IAosService* m_piService;
         IAosSubscriberManager* m_piSubscriberManager;
+        IAosTracer* m_piTracer;
         IAosTransaction* m_piTransaction;
     };
 

@@ -16,6 +16,8 @@
 #ifndef SDP_INFORMATION_H_
 #define SDP_INFORMATION_H_
 
+#include "AString.h"
+
 #include "SdpLine.h"
 
 class SdpInformation : public SdpLine
@@ -23,7 +25,7 @@ class SdpInformation : public SdpLine
 public:
     SdpInformation();
     SdpInformation(IN const SdpInformation& other);
-    virtual ~SdpInformation();
+    ~SdpInformation() override;
 
 public:
     SdpInformation& operator=(IN const SdpInformation& other);

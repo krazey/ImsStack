@@ -16,11 +16,11 @@
 #ifndef SERVICE_EVENT_H_
 #define SERVICE_EVENT_H_
 
-#include "IEventListener.h"
 #include "ImsEventDef.h"
 #include "PlatformService.h"
 
 class EventServicePrivate;
+class IEventListener;
 
 // Event Service class
 class EventService : public PlatformService
@@ -31,7 +31,7 @@ public:
     EventService& operator=(IN const EventService&) = delete;
 
 protected:
-    virtual ~EventService();
+    ~EventService() override;
 
 public:
     virtual void AddListener(

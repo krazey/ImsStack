@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "IEventReceiverListener.h"
+#include "ISystem.h"
 #include "OsEventReceiver.h"
 #include "PlatformContext.h"
 #include "ServiceMemory.h"

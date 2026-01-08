@@ -16,6 +16,7 @@
 #include "ByteArray.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
+#include "ServiceTrace.h"
 
 #include "ISipStreamSocketListener.h"
 #include "SipDebug.h"
@@ -24,7 +25,7 @@
 #include "SipStreamSocket.h"
 #include "SipStreamSocketNotifier.h"
 
-__IMS_TRACE_TAG_SIP__;
+__IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC
 SipStreamSocketNotifier::SipStreamSocketNotifier(IN IMS_SINT32 nSlotId) :
@@ -62,7 +63,7 @@ PUBLIC VIRTUAL SipSocket* SipStreamSocketNotifier::Accept()
             return IMS_NULL;
         }
 
-        ApplyIpSec(piNewSocket);
+        ApplyIpSec(pStreamSocket);
 
         // Inherits the server's listener
         pStreamSocket->SetListener(m_piListener);

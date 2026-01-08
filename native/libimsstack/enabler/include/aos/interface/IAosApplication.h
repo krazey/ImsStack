@@ -40,9 +40,11 @@ public:
             IN IMS_UINT32 nType, OUT IMS_UINT32& nValue, OUT AString& strValue) = 0;
     virtual IMS_UINT32 GetAppState() = 0;
     virtual IMS_UINT32 GetOffReason() = 0;
+    virtual IMS_SINT32 GetDataFailureReason() const = 0;
 
     virtual IMS_BOOL IsActivated() = 0;
     virtual IMS_BOOL IsOn() = 0;
+    virtual IMS_BOOL IsCrossSimConnected() = 0;
 
     virtual void SetActivation(IN IMS_BOOL bActivation) = 0;
     virtual void NotifyEpsFallbackCallState(IN IMS_UINT32 nState) = 0;
@@ -72,6 +74,13 @@ public:
     enum
     {
         PROPERTY_REGISTERED_RAT = 0
+    };
+
+    /// Command
+    enum
+    {
+        CMD_ECALL_INIT = 100,
+        CMD_ESMS_INIT
     };
 
 protected:

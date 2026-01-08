@@ -19,12 +19,12 @@
 #include "Connection.h"
 #include "ISipTransactionStateListener.h"
 #include "ISipTransportListener.h"
-#include "SipDialog.h"
 #include "SipMessage.h"
-#include "SipTimerValues.h"
 
 class IOnSipErrorListener;
+class SipDialog;
 class SipProfile;
+class SipTimerValues;
 
 class SipConnection :
         public Connection,
@@ -33,7 +33,7 @@ class SipConnection :
 {
 protected:
     SipConnection();
-    virtual ~SipConnection();
+    ~SipConnection() override;
 
     SipConnection(IN const SipConnection&) = delete;
     SipConnection& operator=(IN const SipConnection&) = delete;
@@ -62,6 +62,7 @@ public:
     virtual IMS_RESULT SetContent(IN const ByteArray& objContent);
     virtual IMS_SINT32 GetHeaderCount(IN const AString& strName) const;
     inline virtual ISipMessage* GetMessage() const { return m_pMessage; }
+    inline virtual SipProfile* GetSipProfile() const { return IMS_NULL; }
     inline virtual void SetSipProfile(IN SipProfile* /*pProfile*/) {}
     void SetTransactionTimerValues(IN const SipTimerValues& objTimerValues);
 

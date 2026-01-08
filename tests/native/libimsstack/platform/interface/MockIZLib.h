@@ -23,8 +23,8 @@
 class MockIZLib : public IZLib
 {
 public:
-    inline MockIZLib() {}
-    inline virtual ~MockIZLib() {}
+    MockIZLib() = default;
+    ~MockIZLib() override = default;
 
     MOCK_METHOD(IMS_BOOL, Compress, (IN const ByteArray& objData, OUT ByteArray& objCompData),
             (override));

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
-#include "msg/SipHeaderList.h"
+
 #include "SipConfiguration.h"
+#include "msg/SipHeaderList.h"
 
 namespace android
 {
@@ -52,7 +53,7 @@ TEST_F(SipHeaderListTest, AddInsertRemoveHeaders)
             SipHeaderList::GetNewListObj(SipHeaderBase::ALLOW, nullptr));
     ASSERT_TRUE(pHeaderList != nullptr);
 
-    SipHeaderBase* pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ALLOW, nullptr);
+    SipHeaderBase* pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::ALLOW, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
     EXPECT_EQ(SIP_TRUE, pHeader->SetValue("INVITE"));
@@ -64,7 +65,7 @@ TEST_F(SipHeaderListTest, AddInsertRemoveHeaders)
 
     EXPECT_EQ(1, pHeaderList->GetSize());
 
-    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ALLOW, nullptr);
+    pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::ALLOW, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
     EXPECT_EQ(SIP_TRUE, pHeader->SetValue("CANCEL"));
@@ -77,7 +78,7 @@ TEST_F(SipHeaderListTest, AddInsertRemoveHeaders)
 
     pHeader->SipDelete();
 
-    pHeader = SipHeaderBase::GetNewObj(SipHeaderBase::ALLOW, nullptr);
+    pHeader = SipHeaderBase::CreateGenericHeader(SipHeaderBase::ALLOW, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
     EXPECT_EQ(SIP_TRUE, pHeader->SetValue("REFER"));
@@ -107,19 +108,20 @@ TEST_F(SipHeaderListTest, AddInsertRemoveHeaders)
     pHeaderList->SipDelete();
 }
 
-TEST_F(SipHeaderListTest, DecodeAndEncodeHdr)
+TEST_F(SipHeaderListTest, DecodeAndEncode)
 {
     SipHeaderList* pHeaderList = reinterpret_cast<SipHeaderList*>(
             SipHeaderList::GetNewListObj(SipHeaderBase::ALLOW, nullptr));
     ASSERT_TRUE(pHeaderList != nullptr);
 
     /* Allow empty header allowed, success */
-    EXPECT_EQ(SIP_TRUE, pHeaderList->DecodeHdr(const_cast<char*>(""), 0));
-    EXPECT_EQ(SIP_FALSE, pHeaderList->EncodeHdr(nullptr));
+    EXPECT_EQ(SIP_TRUE, pHeaderList->Decode("", 0));
+    EXPECT_EQ(SIP_FALSE, pHeaderList->Encode(nullptr));
+
     AStringBuffer objBuffer(256);
     EXPECT_EQ(SIP_TRUE, pHeaderList->Encode(objBuffer, SIP_TRUE));
 
-    EXPECT_EQ(SIP_TRUE, pHeaderList->DecodeHdr(const_cast<char*>("INVITE,ACK,UPDATE,REFER"), 23));
+    EXPECT_EQ(SIP_TRUE, pHeaderList->Decode("INVITE,ACK,UPDATE,REFER", 23));
 
     EXPECT_EQ(4, pHeaderList->GetSize());
 
@@ -129,14 +131,14 @@ TEST_F(SipHeaderListTest, DecodeAndEncodeHdr)
 
     pHeaderList->SipDelete();
 
-    const int BUFFER_SIZE = 256;
-    char aBuffer[BUFFER_SIZE] = {
+    const SIP_INT32 BUFFER_SIZE = 256;
+    SIP_CHAR aBuffer[BUFFER_SIZE] = {
             0,
     };
-    char* pBuff = &(aBuffer[0]);
+    SIP_CHAR* pBuff = &(aBuffer[0]);
 
     /* Normal Encode - single line, success */
-    EXPECT_EQ(SIP_TRUE, pCopyHeaderList->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeaderList->Encode(&pBuff));
 
     EXPECT_STREQ("INVITE,ACK,UPDATE,REFER", &(aBuffer[0]));
 
@@ -145,11 +147,11 @@ TEST_F(SipHeaderListTest, DecodeAndEncodeHdr)
 
     /* multi line encode, success */
     EXPECT_EQ(SIP_TRUE,
-            pCopyHeaderList->EncodeHdr(&pBuff, SIP_FALSE,
+            pCopyHeaderList->Encode(&pBuff, SIP_FALSE,
                     (SipConfiguration::MSG_OPT_ENCODE_MULTI_LINE |
                             SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM)));
 
-    char* pData = const_cast<char*>("INVITE\r\nAllow: ACK\r\nAllow: UPDATE\r\nAllow: REFER");
+    const SIP_CHAR* pData = "INVITE\r\nAllow: ACK\r\nAllow: UPDATE\r\nAllow: REFER";
     EXPECT_STREQ(pData, &(aBuffer[0]));
 
     pCopyHeaderList->SipDelete();
@@ -159,10 +161,8 @@ TEST_F(SipHeaderListTest, DecodeAndEncodeHdr)
     ASSERT_TRUE(pHeaderList != nullptr);
 
     /* Authentication Info header should be considered as one complete header, success */
-    EXPECT_EQ(SIP_TRUE,
-            pHeaderList->DecodeHdr(
-                    const_cast<char*>("nextnonce=\"abcdefgh\",nonce-count=\"3\""), 37));
-    EXPECT_EQ(SIP_TRUE, pHeaderList->DecodeHdr(const_cast<char*>("nonce-count=\"2\""), 15));
+    EXPECT_EQ(SIP_TRUE, pHeaderList->Decode("nextnonce=\"abcdefgh\",nonce-count=\"3\"", 37));
+    EXPECT_EQ(SIP_TRUE, pHeaderList->Decode("nonce-count=\"2\"", 15));
 
     EXPECT_EQ(2, pHeaderList->GetSize());
 
@@ -175,10 +175,10 @@ TEST_F(SipHeaderListTest, DecodeAndEncodeHdr)
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
 
-    EXPECT_EQ(SIP_TRUE, pCopyHeaderList->EncodeHdr(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pCopyHeaderList->Encode(&pBuff));
 
-    pData = const_cast<char*>("nextnonce=\"abcdefgh\",nonce-count=\"3\"\r\n\
-Authentication-Info: nonce-count=\"2\"");
+    pData = "nextnonce=\"abcdefgh\",nonce-count=\"3\"\r\n\
+Authentication-Info: nonce-count=\"2\"";
 
     EXPECT_STREQ(pData, &(aBuffer[0]));
 

@@ -21,7 +21,7 @@
 #include "Protocol.h"
 #include "ProtocolPermission.h"
 
-__IMS_TRACE_TAG_IMS__;
+__IMS_TRACE_TAG_USER_DECL__("GCF");
 
 PUBLIC
 IConnection* Connector::Open(IN const AString& strName)

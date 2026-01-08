@@ -17,59 +17,52 @@
 #define __SIP_HEADERS_H__
 
 #include "SipDatatypes.h"
+#include "SipMap.h"
 #include "SipRefBase.h"
+#include "msg/SipAuthBase.h"
+#include "msg/SipAuthInfoHeader.h"
+#include "msg/SipContentTypeHeader.h"
+#include "msg/SipCSeqHeader.h"
+#include "msg/SipDateHeader.h"
+#include "msg/SipEventHeader.h"
+#include "msg/SipGeolocationRoutingHeader.h"
 #include "msg/SipHeaderBase.h"
 #include "msg/SipHeaderList.h"
-#include "msg/SipAcceptHeader.h"
-#include "msg/SipAllowEventsHeader.h"
-#include "msg/SipAuthBase.h"
-#include "msg/SipCSeqHeader.h"
+#include "msg/SipIdentityHeader.h"
+#include "msg/SipInfoBase.h"
 #include "msg/SipIntegerHeader.h"
+#include "msg/SipMsgBody.h"
+#include "msg/SipPChargingVectorHeader.h"
+#include "msg/SipPPreferredServiceHeader.h"
 #include "msg/SipPrivacyHeader.h"
+#include "msg/SipPVisitedNetworkIdHeader.h"
+#include "msg/SipRAcKHeader.h"
+#include "msg/SipReferSubHeader.h"
 #include "msg/SipRequestDispositionHeader.h"
+#include "msg/SipRequestLine.h"
+#include "msg/SipResourcePriorityHeader.h"
 #include "msg/SipRetryAfterHeader.h"
+#include "msg/SipStatusLine.h"
 #include "msg/SipTimeStampHeader.h"
+#include "msg/SipTriggerConsentHeader.h"
+#include "msg/SipUnknownHeader.h"
 #include "msg/SipUserAgentHeader.h"
 #include "msg/SipViaHeader.h"
 #include "msg/SipWarningHeader.h"
-#include "msg/SipContentTypeHeader.h"
-#include "msg/SipEventHeader.h"
-#include "msg/SipReferSubHeader.h"
-#include "msg/SipRAcKHeader.h"
-#include "msg/SipInfoBase.h"
-#include "msg/SipDateHeader.h"
-#include "msg/SipIdentityHeader.h"
-#include "msg/SipResourcePriorityHeader.h"
-#include "msg/SipAcceptResourcePriorityHeader.h"
-#include "msg/SipAuthInfoHeader.h"
-#include "msg/SipPVisitedNetworkIdHeader.h"
-#include "msg/SipTriggerConsentHeader.h"
-#include "msg/SipPChargingFunctionAddressesHeader.h"
-#include "msg/SipPChargingVectorHeader.h"
-
-#include "msg/SipGeolocationRoutingHeader.h"
-#include "msg/SipPAssertedServiceHeader.h"
-#include "msg/SipPPreferredServiceHeader.h"
-#include "msg/SipUnknownHeader.h"
-
-#include "msg/SipMsgBody.h"
-#include "msg/SipRequestLine.h"
-#include "msg/SipStatusLine.h"
-#include "SipConfiguration.h"
 
 class SipHeaders
 {
 private:
-    SipHeaderBase* m_HeaderArray[SipHeaderBase::TYPE_END + SIP_ONE];
+    SipMap<SIP_INT32, SipHeaderBase*> m_objHeaders;
 
 public:
     SipHeaders();
     virtual ~SipHeaders();
     SIP_BOOL CopyHdrs(SipHeaders* pHdrs);
-    SIP_BOOL EncodeHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions);
+    SIP_BOOL Encode(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions);
 
-    SIP_BOOL DecodeHdrs(
-            SIP_CHAR* pStartPt, SIP_UINT32 nDecLen, SIP_CHAR** ppHdrName, SIP_CHAR** ppHdrBody);
+    SIP_BOOL Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nDecLen, SIP_CHAR** ppHdrName,
+            SIP_CHAR** ppHdrBody);
 
     SipHeaderBase* GetHdrObj(SIP_INT32 eHdrType);
 
@@ -89,16 +82,8 @@ public:
     static SIP_BOOL SipEncodeShortHdrName(SIP_INT32 eHdrType, SIP_CHAR** ppMsgBuffCurrPos);
 
 private:
-    inline SipHeaderBase* GetHeader(SIP_INT32 eHdrType) { return m_HeaderArray[eHdrType]; }
-    inline SIP_VOID SetHeader(SIP_INT32 eHdrType, SipHeaderBase* pHeader)
-    {
-        if (m_HeaderArray[eHdrType] != SIP_NULL)
-        {
-            m_HeaderArray[eHdrType]->SipDelete();
-        }
-
-        m_HeaderArray[eHdrType] = pHeader;
-    }
+    SipHeaderBase* GetHeader(SIP_INT32 eHdrType);
+    SIP_VOID SetHeader(SIP_INT32 eHdrType, SipHeaderBase* pHeader);
 
     SipHeaderBase* GetNewHdrObj(SIP_INT32 eHdrType, SipHeaderBase* pHeader = SIP_NULL);
 

@@ -26,7 +26,7 @@ class MediaProposal : public IMediaState
 {
 public:
     MediaProposal(IN ISdpOaState* piOaState);
-    virtual ~MediaProposal();
+    ~MediaProposal() override;
 
     MediaProposal(IN const MediaProposal&) = delete;
     MediaProposal& operator=(IN const MediaProposal&) = delete;

@@ -23,7 +23,7 @@ class MtcEnabler : public Enabler
 {
 public:
     explicit MtcEnabler(IN IMS_SINT32 nSlotId);
-    virtual ~MtcEnabler();
+    ~MtcEnabler() override;
 
     MtcEnabler(IN const MtcEnabler&) = delete;
     MtcEnabler& operator=(IN const MtcEnabler&) = delete;

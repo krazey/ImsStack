@@ -17,11 +17,11 @@
 #ifndef MTC_FACTORY_H_
 #define MTC_FACTORY_H_
 
-#include "IMutex.h"
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
 
 class IMtcApp;
+class IMutex;
 
 class MtcFactory
 {

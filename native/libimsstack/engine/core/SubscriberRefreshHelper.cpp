@@ -17,6 +17,7 @@
 #include "ServiceTrace.h"
 
 #include "ISipMessage.h"
+#include "SipMethod.h"
 #include "SipStatusCode.h"
 #include "SubState.h"
 #include "SubscriberRefreshHelper.h"
@@ -63,7 +64,7 @@ PUBLIC VIRTUAL IMS_RESULT SubscriberRefreshHelper::SendRefreshRequest(
 PUBLIC VIRTUAL IMS_RESULT SubscriberRefreshHelper::UpdateOnMessageReceived(
         IN const ISipConnection* piSc)
 {
-    ISipMessage* piSipMsg = piSc->GetMessage();
+    const ISipMessage* piSipMsg = piSc->GetMessage();
 
     if (piSipMsg == IMS_NULL)
     {
@@ -124,7 +125,7 @@ PUBLIC VIRTUAL IMS_RESULT SubscriberRefreshHelper::UpdateOnMessageReceived(
 PUBLIC VIRTUAL IMS_RESULT SubscriberRefreshHelper::UpdateOnMessageSent(
         IN const ISipConnection* piSc)
 {
-    ISipMessage* piSipMsg = piSc->GetMessage();
+    const ISipMessage* piSipMsg = piSc->GetMessage();
 
     if (piSipMsg == IMS_NULL)
     {

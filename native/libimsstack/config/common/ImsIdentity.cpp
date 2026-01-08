@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "AStringBuffer.h"
+#include "IPhoneInfoSubscriber.h"
 #include "ImsAccessNetworkInfoType.h"
 #include "ServiceMemory.h"
 #include "ServicePhoneInfo.h"
@@ -26,7 +27,7 @@ PUBLIC GLOBAL AString ImsIdentity::CreateSipUserId(
         IN IMS_SINT32 nSlotId, IN IMS_BOOL bUserPhoneParam /*= IMS_FALSE*/)
 {
     // "sip:<global number>@<home domain name>;user=phone" ; it will be derived from the MSISDN
-    ISubscriberInfo* piSubsInfo =
+    const ISubscriberInfo* piSubsInfo =
             PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(nSlotId);
 
     if (piSubsInfo == IMS_NULL)
@@ -157,7 +158,7 @@ PUBLIC GLOBAL AString ImsIdentity::CreateTelUserId(
         IN const AString& strPhoneContext, IN IMS_SINT32 nSlotId)
 {
     // "tel:<global number>" ; it will be derived from the MSISDN
-    ISubscriberInfo* piSubsInfo =
+    const ISubscriberInfo* piSubsInfo =
             PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(nSlotId);
 
     if (piSubsInfo == IMS_NULL)
@@ -210,7 +211,7 @@ PUBLIC GLOBAL AString ImsIdentity::CreateTemporaryHomeDomainName(IN IMS_SINT32 n
     // "ims.mnc<MNC>.mcc<MCC>.3gppnetwork.org"
     // WLAN : "wlan.mnc<MNC>.mcc<MCC>.3gppnetwork.org"
     // Emergency : "sos.wlan.mnc<MNC>.mcc<MCC>.3gppnetwork.org"
-    ISubscriberInfo* piSubsInfo =
+    const ISubscriberInfo* piSubsInfo =
             PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(nSlotId);
 
     if (piSubsInfo == IMS_NULL)
@@ -257,7 +258,7 @@ PUBLIC GLOBAL AString ImsIdentity::CreateTemporaryPrivateUserId(IN IMS_SINT32 nS
     //  "wlan.mnc<HomeMNC>.mcc<HomeMCC>.3gppnetwork.org!1<IMSI>@
     //  wlan.mnc<VisitedMNC>.mcc<VisitedMCC>.3gppnetwork.org"
 
-    ISubscriberInfo* piSubsInfo =
+    const ISubscriberInfo* piSubsInfo =
             PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(nSlotId);
 
     if (piSubsInfo == IMS_NULL)
@@ -295,7 +296,7 @@ PUBLIC GLOBAL AString ImsIdentity::CreateTemporaryPublicUserId(IN IMS_SINT32 nSl
 {
     // "sip:<IMSI>@ims.mnc<MNC>.mcc<MCC>.3gppnetwork.org"
 
-    ISubscriberInfo* piSubsInfo =
+    const ISubscriberInfo* piSubsInfo =
             PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(nSlotId);
 
     if (piSubsInfo == IMS_NULL)
@@ -366,7 +367,7 @@ PUBLIC GLOBAL IMS_BOOL ImsIdentity::GetMccMnc(IN const AString& strPlmn, IN IMS_
 {
     if (strPlmn.GetLength() == 0)
     {
-        ISubscriberInfo* piSubsInfo =
+        const ISubscriberInfo* piSubsInfo =
                 PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(nSlotId);
 
         if (piSubsInfo == IMS_NULL)

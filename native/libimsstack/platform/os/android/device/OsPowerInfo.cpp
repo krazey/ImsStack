@@ -13,15 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ISystem.h"
 #include "PlatformContext.h"
 #include "ServiceTrace.h"
 #include "device/OsPowerInfo.h"
 #include "system-intf/SystemConstants.h"
 
-__IMS_TRACE_TAG_ADAPT__;
+__IMS_TRACE_TAG_IPL__;
 
-LOCAL
-void osPowerInfo_NotifyEvent(IN OsPowerInfo* pPowerInfo, IN POWERLEVEL_ENTYPE ePowerEvent);
+static void osPowerInfo_NotifyEvent(IN OsPowerInfo* pPowerInfo, IN POWERLEVEL_ENTYPE ePowerEvent)
+{
+    if (pPowerInfo != IMS_NULL)
+    {
+        pPowerInfo->PostMsgRegisteredThread(ePowerEvent);
+    }
+}
 
 class OsPowerInfoPrivate
 {
@@ -58,15 +64,6 @@ private:
     POWERLEVEL_ENTYPE m_eOldPowerLevel;
     OsPowerInfo* m_pPowerInfo;
 };
-
-LOCAL
-void osPowerInfo_NotifyEvent(IN OsPowerInfo* pPowerInfo, IN POWERLEVEL_ENTYPE ePowerEvent)
-{
-    if (pPowerInfo != IMS_NULL)
-    {
-        pPowerInfo->PostMsgRegisteredThread(ePowerEvent);
-    }
-}
 
 PUBLIC VIRTUAL POWERLEVEL_ENTYPE OsPowerInfoPrivate::GetPowerLevel() const
 {

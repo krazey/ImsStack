@@ -15,20 +15,20 @@
  */
 
 #include "ICoreService.h"
+#include "IMessage.h"
+#include "IMessageBodyPart.h"
 #include "IMtcContext.h"
 #include "IMtcService.h"
+#include "ISipHeader.h"
+#include "ISipMessage.h"
 #include "ISubscription.h"
 #include "ImsTypeDef.h"
 #include "ServiceTrace.h"
-#include "core/IMessage.h"
-#include "core/IMessageBodyPart.h"
+#include "SipStatusCode.h"
 #include "dialogevent/DialogSubscription.h"
 #include "dialogevent/IDialogSubscription.h"
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SubscriptionInterfaceHolder.h"
-#include "sipcore/ISipHeader.h"
-#include "sipcore/ISipMessage.h"
-#include "sipcore/SipStatusCode.h"
 #include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -102,7 +102,7 @@ VIRTUAL PUBLIC void DialogSubscription::SubscriptionNotify(
     AString strEventPackage;
     for (IMS_UINT32 nIndex = 0; nIndex < objBodyParts.GetSize(); nIndex++)
     {
-        IMessageBodyPart* piBodyPart = objBodyParts.GetAt(nIndex);
+        const IMessageBodyPart* piBodyPart = objBodyParts.GetAt(nIndex);
         if (piBodyPart != IMS_NULL)
         {
             const ByteArray& objEventPackage = piBodyPart->GetContent();
@@ -136,12 +136,12 @@ VIRTUAL PUBLIC void DialogSubscription::SubscriptionStartFailed(IN ISubscription
     m_objListener.OnSubscriptionStartFailed();
 }
 
-VIRTUAL PUBLIC void DialogSubscription::SubscriptionTerminated(IN ISubscription* piSubscription)
+VIRTUAL PUBLIC void DialogSubscription::SubscriptionTerminated(
+        IN [[maybe_unused]] ISubscription* piSubscription)
 {
     IMS_TRACE_D("SubscriptionTerminated", 0, 0, 0);
-    (void)piSubscription;
     m_objListener.OnSubscriptionTerminated();
-    // TODO: re-attempt based on RFC 3265
+    // Re-attempting based on RFC 3265 is not considered yet
 }
 
 PRIVATE

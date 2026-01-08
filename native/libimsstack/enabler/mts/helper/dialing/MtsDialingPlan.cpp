@@ -15,6 +15,7 @@
  */
 
 #include "CarrierConfig.h"
+#include "INetworkConnection.h"
 #include "ServiceConfig.h"
 #include "ServiceTrace.h"
 #include "ServiceNetwork.h"
@@ -121,7 +122,6 @@ AString MtsDialingPlan::Translate(
 PRIVATE
 AccessNetworkInfo* MtsDialingPlan::GetAccessNetworkInfo(IN_OUT AccessNetworkInfo& objAni)
 {
-    // TODO: service type. normal or emergency.
     INetworkConnection* piConnection =
             NetworkService::GetNetworkService()->FindConnection(NetworkPolicy::APN_IMS, m_nSlotId);
 
@@ -183,8 +183,8 @@ IMS_BOOL MtsDialingPlan::FormNonTelUri(
     objUri.Append(ImsIdentity::GetHomeDomainName(m_nSlotId));
 
     // "user" parameter
-    ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
-    if (piCc->GetBoolean(CarrierConfig::Assets::KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL))
+    const ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
+    if (piCc->GetBoolean(CarrierConfig::ImsSms::KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL))
     // if ((m_nDialingPolicy != ImsIdentity::DIALING_POLICY_OTHER) &&
     //         (nNumberFormat == NUMBER_FORMAT_NON_TEL))
     {
