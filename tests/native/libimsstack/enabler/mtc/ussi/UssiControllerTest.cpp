@@ -305,22 +305,6 @@ TEST_F(UssiControllerTest, HasValidXmlReturnsTrueIfUssiModeIsNotNone)
     EXPECT_TRUE(objUssiController.HasValidXmlBodyForNetworkInitiatedUssi(&objMessage));
 }
 
-TEST_F(UssiControllerTest, IsByeForUssiReturnsFalseIfUssdHeaderNotExist)
-{
-    ON_CALL(objMessageUtils,
-            ContainsValue(&objMessage, HEADER_APPLICATION_USSDXML, ISipHeader::CONTENT_TYPE, _))
-            .WillByDefault(Return(IMS_FALSE));
-    EXPECT_FALSE(objUssiController.IsByeForUssi(&objMessage));
-}
-
-TEST_F(UssiControllerTest, IsByeForUssiReturnsTrueIfUssdHeaderExists)
-{
-    ON_CALL(objMessageUtils,
-            ContainsValue(&objMessage, HEADER_APPLICATION_USSDXML, ISipHeader::CONTENT_TYPE, _))
-            .WillByDefault(Return(IMS_TRUE));
-    EXPECT_TRUE(objUssiController.IsByeForUssi(&objMessage));
-}
-
 TEST_F(UssiControllerTest, IsUssiInfoReceivedReturnsFalseIfConnectionIsNull)
 {
     EXPECT_FALSE(objUssiController.IsUssiInfoReceived(IMS_NULL));
@@ -367,15 +351,39 @@ TEST_F(UssiControllerTest, HasXmlBodyInInfoReturnsTrueIfParsingUssiDataSucceeds)
     EXPECT_TRUE(objUssiController.HasXmlBodyInInfo(&objSipServerConnection));
 }
 
-TEST_F(UssiControllerTest, ParseUssiReturnsDefaultResultIfParsingUssiDataFails)
+TEST_F(UssiControllerTest, HandleUssiBodyReturnsDefaultResultIfParsingUssiDataFailsAndNotBye)
 {
+    ON_CALL(*pUssiDataParser, Parse(_)).WillByDefault(Return(nullptr));
+
+    EXPECT_EQ(objUssiController.HandleUssiBody(&objSipMessage, SipMethod::INFO),
+            UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE));
+}
+
+TEST_F(UssiControllerTest,
+        HandleUssiBodyReturnsDefaultResultIfParsingUssiDataFailsAndNetworkInitiated)
+{
+    objCallinfo.ePeerType = PeerType::MT;
     ON_CALL(*pUssiDataParser, Parse(_)).WillByDefault(Return(nullptr));
 
     EXPECT_EQ(objUssiController.HandleUssiBody(&objSipMessage, SipMethod::BYE),
             UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE));
 }
 
-TEST_F(UssiControllerTest, ParseUssiInByeNotifiesResultWithUssiNotifyType)
+TEST_F(UssiControllerTest,
+        HandleUssiBodyNotifiesNotifyWithErrorCode1IfParsingUssiDataFailsAndUeInitiated)
+{
+    objCallinfo.ePeerType = PeerType::MO;
+    ON_CALL(*pUssiDataParser, Parse(_)).WillByDefault(Return(nullptr));
+    const IMS_UINT32 INFO_TYPE_USSI = 11;
+    const AString strEmptyUssdString(AString::ConstEmpty());
+    EXPECT_CALL(
+            objUiNotifier, SendNotifyInfo(INFO_TYPE_USSI, _, (IMS_SINT32)UssiModeType::ERROR, _));
+
+    EXPECT_EQ(objUssiController.HandleUssiBody(&objSipMessage, SipMethod::BYE),
+            UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE));
+}
+
+TEST_F(UssiControllerTest, HandleUssiBodyInByeNotifiesResultWithUssiNotifyType)
 {
     objCallinfo.ePeerType = PeerType::MO;
     const IMS_UINT32 INFO_TYPE_USSI = 11;
@@ -389,7 +397,7 @@ TEST_F(UssiControllerTest, ParseUssiInByeNotifiesResultWithUssiNotifyType)
             UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE));
 }
 
-TEST_F(UssiControllerTest, ParseUssiSetsResultWithErrorCode1IfNoUssdString)
+TEST_F(UssiControllerTest, HandleUssiBodySetsResultWithErrorCode1IfNoUssdString)
 {
     objCallinfo.ePeerType = PeerType::MT;
     AString strEmptyUssdString;
@@ -401,7 +409,7 @@ TEST_F(UssiControllerTest, ParseUssiSetsResultWithErrorCode1IfNoUssdString)
             UssiResult(UssiNextAction::SEND_INFO_WITH_ERROR_CODE, UssiError::CODE_1));
 }
 
-TEST_F(UssiControllerTest, ParseUssiInAckSetsResultWithErrorCode4IfAnotherCallExists)
+TEST_F(UssiControllerTest, HandleUssiBodyInAckSetsResultWithErrorCode4IfAnotherCallExists)
 {
     objCallinfo.ePeerType = PeerType::MO;
     AString strUssdString("any ussd string");
@@ -420,7 +428,7 @@ TEST_F(UssiControllerTest, ParseUssiInAckSetsResultWithErrorCode4IfAnotherCallEx
             UssiResult(UssiNextAction::SEND_INFO_WITH_ERROR_CODE_AND_TERMINATE, UssiError::CODE_4));
 }
 
-TEST_F(UssiControllerTest, ParseUssiInInfoNotifiesResultWithUssiNotifyTypeIfMo)
+TEST_F(UssiControllerTest, HandleUssiBodyInInfoNotifiesResultWithUssiNotifyTypeIfMo)
 {
     objCallinfo.ePeerType = PeerType::MO;
     const IMS_UINT32 INFO_TYPE_USSI = 11;
@@ -434,7 +442,7 @@ TEST_F(UssiControllerTest, ParseUssiInInfoNotifiesResultWithUssiNotifyTypeIfMo)
             UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE));
 }
 
-TEST_F(UssiControllerTest, ParseUssiNotifiesResultWithUssiNotifyTypeIfMtAndUssdDataIsNotify)
+TEST_F(UssiControllerTest, HandleUssiBodyNotifiesResultWithUssiNotifyTypeIfMtAndUssdDataIsNotify)
 {
     objCallinfo.ePeerType = PeerType::MT;
     const IMS_UINT32 INFO_TYPE_USSI = 11;
@@ -449,7 +457,7 @@ TEST_F(UssiControllerTest, ParseUssiNotifiesResultWithUssiNotifyTypeIfMtAndUssdD
             UssiResult(UssiNextAction::SEND_INFO_WITH_NOTIFY_ELEMENT, UssiError::CODE_NONE));
 }
 
-TEST_F(UssiControllerTest, ParseUssiNotifiesUssiErrorIfUssiDataIsError)
+TEST_F(UssiControllerTest, HandleUssiBodyNotifiesUssiErrorIfUssiDataIsError)
 {
     objCallinfo.ePeerType = PeerType::MT;
     const IMS_UINT32 INFO_TYPE_USSI = 11;

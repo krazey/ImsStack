@@ -305,11 +305,6 @@ PUBLIC VIRTUAL CallStateName EstablishedState::UssiTerminated(IN ISession* piSes
     const IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_TERMINATE);
     UssiController* pUssiController = m_objContext.GetUssiController();
 
-    if (!pUssiController->IsByeForUssi(piMessage))
-    {
-        return SessionTerminated(piSession);
-    }
-
     pUssiController->HandleUssiBody(piMessage->GetMessage(), piMessage->GetMethod().ToInt());
 
     m_objContext.GetUiNotifier().SendTerminated(

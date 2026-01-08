@@ -50,7 +50,6 @@ public:
             IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
 
     virtual IMS_BOOL HasValidXmlBodyForNetworkInitiatedUssi(IN const IMessage* piMessage);
-    virtual IMS_BOOL IsByeForUssi(IN const IMessage* piMessage);
     virtual IMS_BOOL IsUssiInfoReceived(IN const ISipServerConnection* piSipServerConnection);
     virtual IMS_BOOL HasXmlBodyInInfo(IN const ISipServerConnection* piSipServerConnection);
     virtual UssiResult HandleUssiBody(

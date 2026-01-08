@@ -826,17 +826,8 @@ TEST_F(EstablishedStateTest,
             CallStateName::ESTABLISHED, pEstablishedState->SessionUpdateReceived(&objMockISession));
 }
 
-TEST_F(EstablishedStateTest, UssiTerminateJustInvokesSendTerminated)
-{
-    ON_CALL(*pMockUssiController, IsByeForUssi(_)).WillByDefault(Return(IMS_FALSE));
-    EXPECT_CALL(objUiNotifier, SendTerminated(_)).Times(1);
-
-    pEstablishedState->UssiTerminated(&objMockISession);
-}
-
 TEST_F(EstablishedStateTest, UssiTerminateInvokesCheckingUssiBodyAndSendTerminated)
 {
-    ON_CALL(*pMockUssiController, IsByeForUssi(_)).WillByDefault(Return(IMS_TRUE));
     MockISipMessage objMockISipMessage;
     ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objMockISipMessage));
     SipMethod objSipMethod(SipMethod::PUBLISH);

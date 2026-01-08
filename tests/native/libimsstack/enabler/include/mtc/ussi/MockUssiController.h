@@ -36,7 +36,6 @@ public:
     }
     ~MockUssiController() override {}
     MOCK_METHOD(IMS_BOOL, HasValidXmlBodyForNetworkInitiatedUssi, (IN const IMessage*), (override));
-    MOCK_METHOD(IMS_BOOL, IsByeForUssi, (IN const IMessage*), (override));
     MOCK_METHOD(IMS_BOOL, IsUssiInfoReceived, (IN const ISipServerConnection*), (override));
     MOCK_METHOD(IMS_BOOL, HasXmlBodyInInfo, (IN const ISipServerConnection*), (override));
 

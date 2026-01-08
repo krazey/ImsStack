@@ -129,20 +129,6 @@ IMS_BOOL UssiController::HasValidXmlBodyForNetworkInitiatedUssi(IN const IMessag
 }
 
 PUBLIC
-IMS_BOOL UssiController::IsByeForUssi(IN const IMessage* piMessage)
-{
-    IMS_BOOL bResult = IMS_FALSE;
-    if (m_objContext.GetMessageUtils().ContainsValue(
-                piMessage, UssiConstants::HEADER_APPLICATION_USSDXML, ISipHeader::CONTENT_TYPE))
-    {
-        bResult = IMS_TRUE;
-    }
-
-    IMS_TRACE_D("IsByeForUssi : %s", _TRACE_B_(bResult), 0, 0);
-    return bResult;
-}
-
-PUBLIC
 IMS_BOOL UssiController::IsUssiInfoReceived(IN const ISipServerConnection* piSipServerConnection)
 {
     IMS_BOOL bResult = IMS_FALSE;
@@ -196,8 +182,17 @@ UssiResult UssiController::HandleUssiBody(
 
     if (!pParsedData)
     {
-        IMS_TRACE_D("HandleUssiBody : there's no xml body.", 0, 0, 0);
-        return objResult;
+        if (nReceivedMethod == SipMethod::BYE && IsUeInitiated())
+        {
+            IMS_TRACE_I("UE initiated USSI termination by network BYE without USSD data.", 0, 0, 0);
+            NotifyUssiEvent(AString::ConstEmpty(), UssiModeType::NOTIFY, UssiError::CODE_1);
+            return objResult;
+        }
+        else
+        {
+            IMS_TRACE_D("HandleUssiBody : there's no xml body.", 0, 0, 0);
+            return objResult;
+        }
     }
 
     IMS_TRACE_D("HandleUssiBody : Method[%d] received.", nReceivedMethod, 0, 0);
