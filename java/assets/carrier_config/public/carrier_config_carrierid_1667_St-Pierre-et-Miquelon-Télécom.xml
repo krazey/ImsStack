@@ -15,6 +15,14 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <!-- MTC -->
+    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="4">
+        <item value="2"/>
+        <item value="4"/>
+        <item value="5"/>
+        <item value="6"/>
+    </int-array>
+
     <!-- AOS -->
     <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1100"/>
     <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1100"/>

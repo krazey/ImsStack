@@ -77,7 +77,7 @@
         <item value="0"/> <!-- NON_EMERGENCY_ON_CELLULAR -->
         <item value="1"/> <!-- EMERGENCY_ON_CELLULAR -->
         <item value="1"/> <!-- NORMAL_ROUTING_EMERGENCY_ON_WIFI -->
-        <item value="0"/> <!-- NORMAL_ROUTING_EMERGENCY_ON_CELLULAR -->
+        <item value="1"/> <!-- NORMAL_ROUTING_EMERGENCY_ON_CELLULAR -->
     </int-array>
     <int-array name="imsvoice.message_type_support_geolocation_pidf_int_array" num="1">
         <item value="0"/> <!-- INVITE -->

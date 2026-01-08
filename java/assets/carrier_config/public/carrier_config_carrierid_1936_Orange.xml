@@ -16,6 +16,14 @@
 -->
 <!-- carrier_name: Orange (Tunisia) -->
 <carrier_config>
+    <!-- MTC -->
+    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="4">
+        <item value="2"/>
+        <item value="4"/>
+        <item value="5"/>
+        <item value="6"/>
+    </int-array>
+
     <!-- MTS -->
     <int-array name="imssms.sms_rp_cause_values_to_fallback_int_array" num="23">
         <item value="1"/>

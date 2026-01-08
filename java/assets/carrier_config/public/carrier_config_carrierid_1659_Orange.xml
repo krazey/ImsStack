@@ -19,9 +19,11 @@
         <item value="2"/>
         <item value="4"/>
     </int-array>
-    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="2">
+    <int-array name="ims.geolocation_pidf_in_sip_invite_support_int_array" num="4">
         <item value="2"/>
         <item value="4"/>
+        <item value="5"/>
+        <item value="6"/>
     </int-array>
 
     <int name="imsemergency.emergency_registration_timer_millis_int" value="8000"/>
