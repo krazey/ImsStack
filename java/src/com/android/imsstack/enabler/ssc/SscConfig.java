@@ -357,10 +357,6 @@ public final class SscConfig {
         return getInt(slotId, CarrierConfig.ImsSs.KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT);
     }
 
-    static String getNafFqdn(int slotId) {
-        return getString(slotId, CarrierConfig.ImsSs.KEY_UT_NAF_FQDN_STRING);
-    }
-
     static int getUtTransactionTimer(int slotId) {
         return getInt(slotId, CarrierConfig.ImsSs.KEY_UT_TRANSACTION_TIMER_SEC_INT);
     }

@@ -366,7 +366,6 @@
     <boolean name="imsss.ut_omit_namespace_cp_bool" value="false"/>
     <boolean name="imsss.ut_insert_new_rule_bool" value="false"/>
     <int name="imsss.ut_uri_type_for_cf_target_number_int" value="0"/>
-    <string name="imsss.ut_naf_fqdn_string"></string>
     <int name="imsss.ut_transaction_timer_sec_int" value="0"/>
     <boolean name="imsss.ut_sync_with_cs_for_tb_ss_bool" value="true"/>
     <boolean name="imsss.ut_network_query_for_tb_oir_network_default_bool" value="false"/>

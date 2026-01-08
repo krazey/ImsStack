@@ -107,14 +107,18 @@ public class SscAuthAgent implements ISscAuthAgent {
     }
 
     @Override
-    public String getNafFqdn() {
-        String nafFqdn = SscConfig.getNafFqdn(mSlotId);
-        if (TextUtils.isEmpty(nafFqdn)) {
-            return getNafFqdnFromRealm();
-        } else {
-            ImsLog.d("nafFqdn : "  + nafFqdn);
-            return nafFqdn;
+    public String getNafFqdnFromRealm() {
+        String realm = mSscAuthCredentials.getRealm();
+        if (TextUtils.isEmpty(realm)) {
+            ImsLog.d("realm is invalid");
+            return null;
         }
+
+        String[] tokens = realm.split("@");
+        String nafFqdn = tokens.length > 1 ? tokens[1] : tokens[0];
+
+        ImsLog.d("nafFqdn : "  + nafFqdn);
+        return nafFqdn;
     }
 
     @Override
@@ -213,20 +217,6 @@ public class SscAuthAgent implements ISscAuthAgent {
     @Override
     public void setLastSuccessfulGbaMode(int gbaMode) {
         mLastSuccessfulGbaMode = gbaMode;
-    }
-
-    private String getNafFqdnFromRealm() {
-        String realm = mSscAuthCredentials.getRealm();
-        if (TextUtils.isEmpty(realm)) {
-            ImsLog.d("realm is invalid");
-            return null;
-        }
-
-        String[] tokens = realm.split("@");
-        String nafFqdn = tokens.length > 1 ? tokens[1] : tokens[0];
-
-        ImsLog.d("nafFqdn : "  + nafFqdn);
-        return nafFqdn;
     }
 
     private boolean isGbaValid(int appType) {
