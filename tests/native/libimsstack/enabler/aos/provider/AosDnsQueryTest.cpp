@@ -17,6 +17,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "INativeThreadMethods.h"
+#include "ServiceThread.h"
 #include "provider/AosDnsQuery.h"
 
 #include "provider/MockAosDnsQuery.h"
@@ -24,6 +26,13 @@
 
 using ::testing::_;
 using ::testing::Return;
+
+class MockINativeThreadMethods : public INativeThreadMethods
+{
+public:
+    MOCK_METHOD(void, AttachNativeThread, (const IMS_CHAR* pszName), (override));
+    MOCK_METHOD(void, DetachNativeThread, (), (override));
+};
 
 #define DECLARE_USING(Base)    \
     using Base::ResetEvent;    \
@@ -66,6 +75,8 @@ protected:
         {
             delete m_pAosDnsQuery;
         }
+        // Clean up the static ThreadService to ensure test isolation.
+        ThreadService::SetNativeThreadMethods(IMS_NULL);
     }
 };
 
@@ -442,4 +453,49 @@ TEST_F(AosDnsQueryTest, RunDnsQueryPrivateThenResetTerminateEvent)
 
     // THEN
     EXPECT_FALSE(m_pAosDnsQuery->HasEvent(TestAosDnsQuery::DNS_QUERY_TERMINATE));
+}
+
+TEST_F(AosDnsQueryTest, MsgDestroyLeadsToNativeThreadDetachWhenAvailable)
+{
+    // GIVEN
+    // Mock INativeThreadMethods and set it in ThreadService to simulate it being available.
+    MockINativeThreadMethods objMockINativeThreadMethods;
+    ThreadService::SetNativeThreadMethods(&objMockINativeThreadMethods);
+
+    // The OnMessage handler requires a listener to be set to avoid returning early.
+    MockIAosDnsQueryListener objMockIAosDnsQueryListener;
+    m_pAosDnsQuery->SetListener(&objMockIAosDnsQueryListener);
+
+    // Expect DetachNativeThread to be called once during the termination process.
+    EXPECT_CALL(objMockINativeThreadMethods, DetachNativeThread()).Times(1);
+
+    // WHEN
+    // 1. Simulate the MSG_DESTROY message. This triggers the internal Terminate() call,
+    //    which sets the DNS_QUERY_TERMINATE event.
+    IMSMSG objMsg(TestAosDnsQuery::MSG_DESTROY, 0, 0);
+    m_pAosDnsQuery->OnMessage(objMsg);
+
+    // 2. Manually execute RunImp. Since threads are disabled in test mode, we invoke the
+    //    thread's logic directly. It will see the termination event and execute cleanup.
+    m_pAosDnsQuery->RunImp();
+
+    // THEN
+    // The expectation is verified by GMock.
+}
+
+TEST_F(AosDnsQueryTest, RunImpDoesNotCrashWhenNativeThreadMethodsIsNull)
+{
+    // GIVEN
+    // Ensure that ThreadService returns null for native thread methods. This simulates the case
+    // where the native thread methods are not available.
+    ThreadService::SetNativeThreadMethods(IMS_NULL);
+
+    // WHEN
+    // Execute the RunImp method. In test mode, its loop runs once and then proceeds to the
+    // termination logic.
+    m_pAosDnsQuery->RunImp();
+
+    // THEN
+    // The test passes if no crash occurs, verifying the null check for piNativeThreadMethods
+    // before calling DetachNativeThread().
 }
