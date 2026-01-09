@@ -93,11 +93,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     private static final String PREFIX_MMI_PARTICIPANT_DROP = "callId:";
     private static final int TRANSFER_RESUME_RECOVERY_DELAY_TIME = 2000;
 
-    /**
-     * Extra key to identify that the session modification is handled by ImsCallSessionImpl.
-     * Value: boolean type
-     */
-    private static final String EXTRA_CALL_CONTROLLED_BY_IMS = "call_controlled_by_ims";
     public static final int CF_TTY = 0;
     public static final int CF_AUDIO_HOLD_WITH_INACTIVE = 1;
     public static final int CF_VIDEO_HOLD_WITH_INACTIVE = 2;
@@ -1314,21 +1309,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         notifyCallEventForVideoCallSession(IVideoCallSession.EVENT_CALL_ALERTING);
     }
 
-    public void updateCallProfileByCallManager() {
-        if (ImsCallUtils.isCallOnNativeAppsAndCountryKR(mCallContext)) {
-            int activeCalls = mCT.getActiveCalls();
-
-            if (activeCalls == 1) {
-                log("updateCallProfileByCallManager");
-                if (updateCallTypeChangeCapability()
-                        && getState() == ImsCallSessionImplBase.State.ESTABLISHED) {
-                    mCallback.invokeUpdated(ImsCallSessionImpl.this,
-                            ImsCallUtils.getSanitizedCallProfileForVideoDirection(mCallProfile));
-                }
-            }
-        }
-    }
-
     @VisibleForTesting
     public CallDetails getCallDetails() {
         return mCallDetails;
@@ -2267,9 +2247,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         if (mCall.isOnHeld() || mCall.isOnHold()) {
             logi("CallTypeChangeCapability :: on-hold call");
-        } else if (ImsCallUtils.isCallOnNativeAppsAndCountryKR(mCallContext)
-                && mCT.getActiveCalls() > 1) {
-            logi("CallTypeChangeCapability :: multiple calls");
         } else if (mCallProfile.getCallExtraBoolean(
                 ImsCallProfile.EXTRA_CALL_MODE_CHANGEABLE, false)) {
             // Google-Native: enable call switch capability from voice to video
@@ -3924,13 +3901,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             clearProposedCallProfile();
 
-            if (mLocalCallProfile.getCallExtraBoolean(EXTRA_CALL_CONTROLLED_BY_IMS, false)) {
-                // Ignore this event because it's not triggered by the IMS framework.
-                log("Ignore this event because it is automatically rejected by IMS");
-                mLocalCallProfile.setCallExtraBoolean(EXTRA_CALL_CONTROLLED_BY_IMS, false);
-                return;
-            }
-
             mCallback.invokeUpdateFailed(ImsCallSessionImpl.this,
                     ImsCallUtils.createImsReasonInfo(callReasonInfo));
         }
@@ -3982,10 +3952,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             if (ImsCallUtils.isCallTypeChanged(mCallProfile, callInfo)) {
-                if (checkAndRejectSessionModificationRequest()) {
-                    return;
-                }
-
                 if (shouldUpdateVideoCapabilityBeforeModifyRequest(
                         mCallProfile, mProposedCallProfile)) {
                     mCallProfile.setCallExtraBoolean(
@@ -4006,10 +3972,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
                 return;
             } else if (ImsCallUtils.isVideoProfileChanged(mCallProfile, callInfo, mediaInfo)) {
-                if (checkAndRejectSessionModificationRequest()) {
-                    return;
-                }
-
                 mVideoCallSession.receiveSessionModifyRequest(
                         ImsVideoCallSession.MODIFICATION_VIDEO_PROFILE, mediaInfo);
                 return;
@@ -4607,24 +4569,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     }
                 }
             }
-        }
-
-        private boolean checkAndRejectSessionModificationRequest() {
-            if (ImsCallUtils.isCallOnNativeAppsAndCountryKR(mCallContext)) {
-                if (mCT.getActiveCalls() > 1) {
-                    logi("SessionModificationRequest :: rejected by multiple calls");
-
-                    try {
-                        reject(ImsReasonInfo.CODE_USER_REJECTED_SESSION_MODIFICATION);
-                        mLocalCallProfile.setCallExtraBoolean(EXTRA_CALL_CONTROLLED_BY_IMS, true);
-                        return true;
-                    } catch (Throwable t) {
-                        loge(t.toString());
-                    }
-                }
-            }
-
-            return false;
         }
     }
 

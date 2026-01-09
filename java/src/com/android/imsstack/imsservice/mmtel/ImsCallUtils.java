@@ -27,7 +27,6 @@ import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsStreamMediaProfile;
 import android.text.TextUtils;
 
-import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.TelephonyInterface;
@@ -262,17 +261,6 @@ public class ImsCallUtils {
         updateCallProfileForEmergency(profile, incomingCall.callInfo);
         updateCallProfileFromCallInfo(context, profile, incomingCall.callInfo);
         updateCallProfileFromSuppInfo(context, profile, incomingCall.suppInfo);
-
-        if (isCallOnNativeAppsAndCountryKR(context)) {
-            // Do not set the conference extra info. in MT call setup.
-            if (MtcCallInfo.isConference(incomingCall.callInfo)) {
-                profile.setCallExtraBoolean(ImsCallProfile.EXTRA_CONFERENCE, false);
-            }
-
-            if ("LGU".equals(ImsPrivateProperties.getSimOperator(context.getSlotId()))) {
-                removeCallExtra(profile, ImsCallProfile.EXTRA_CNAP);
-            }
-        }
 
         return profile;
     }
@@ -753,10 +741,6 @@ public class ImsCallUtils {
             default:
                 return CallReasonInfo.CODE_UNSPECIFIED;
         }
-    }
-
-    public static boolean isCallOnNativeAppsAndCountryKR(ICallContext context) {
-        return "KR".equals(ImsPrivateProperties.getSimCountry(context.getSlotId()));
     }
 
     public static boolean isCallTypeChanged(int callType, int otherCallType) {
