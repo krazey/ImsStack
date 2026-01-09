@@ -35,12 +35,9 @@ import com.android.imsstack.imsservice.mmtel.videocall.base.VideoCallUtils;
 
 /** IMS extended interface implementation */
 public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
-    // milli-seconds
-    private static final int WAIT_TIME_FOR_UI_NOTIFICATION = 400;
     private final Object mLock = new Object();
     private String mCameraId = null;
     private int mSessionModificationType = IVideoCallSession.MODIFICATION_NONE;
-    private boolean mFirstPeerDisplayOrientationChanged = false;
 
     public ImsVideoCallProviderImpl(IVideoCallSession callSession,
             MtcMediaSession mediaSession) {
@@ -63,8 +60,6 @@ public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
             }
         }
 
-        boolean notificationDelayRequired = false;
-
         if (callTypeChangeRequest) {
             if (isAudioOnly) {
                 logi("Voice call is automatically accepted");
@@ -73,23 +68,6 @@ public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
             } else {
                 logi("Prepare preview for video call upgrade request (RX)");
             }
-        }
-
-        if (notificationDelayRequired) {
-            final VideoProfile receivedProfile = videoProfile;
-            Handler h = getCallHandler();
-
-            // UI notification is delayed to preserve startPreview
-            // when video call upgrade request is received.
-            // It waits for average 400ms.
-            h.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    logi("receiveSessionModifyRequest :: delayed");
-                    ImsVideoCallProviderImpl.super.receiveSessionModifyRequest(receivedProfile);
-                }
-            }, WAIT_TIME_FOR_UI_NOTIFICATION);
-            return;
         }
 
         super.receiveSessionModifyRequest(videoProfile);
@@ -209,12 +187,6 @@ public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
     }
 
     @Override
-    protected void handleMediaSessionStarted() {
-        enforcePeerDimensionsChanged();
-        super.handleMediaSessionStarted();
-    }
-
-    @Override
     protected void handleMediaSessionMediaInfoChanged(
             int mediaInfo, int intParam, String strParam) {
         if (mediaInfo == MtcCallUtils.INFO_TYPE_MEDIA_VIDEO_NO_DATA) {
@@ -234,28 +206,8 @@ public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
     }
 
     @Override
-    protected void handleMediaSessionPeerDisplayOrientationChanged(final int orientation) {
-        boolean enforceUpdate = false;
-
-        if (!mFirstPeerDisplayOrientationChanged) {
-            mFirstPeerDisplayOrientationChanged = true;
-            enforceUpdate = true;
-            handleCallSessionEvent(Connection.VideoProvider.SESSION_EVENT_RX_RESUME);
-        }
-
-        int changedOrientation = VideoCallUtils.getOrientationFromMtcMediaSession(orientation);
-
-        if (getCurrentVideoDimension() != null) {
-            updateReversedPeerDimensionFromVideoDimension(changedOrientation, enforceUpdate);
-        } else {
-            updateReversedPeerDimensionFromMediaProfile(changedOrientation, enforceUpdate);
-        }
-    }
-
-    @Override
     protected void handleMediaSessionPeerDimensionsChanged(final int width, final int height) {
         if ((width > 0) && (height > 0)) {
-            setCurrentVideoDimension(width, height);
             super.changePeerDimensions(width, height);
         }
     }
@@ -314,26 +266,6 @@ public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
         if (vd != null) {
             log("super.changePeerDimensions :: " + vd);
             super.changePeerDimensions(vd.getWidth(), vd.getHeight());
-        }
-    }
-
-    private void enforcePeerDimensionsChanged() {
-        IVideoCallSession callSession = getVideoCallSession();
-        ImsStreamMediaProfile mediaProfile = callSession.getStreamMediaProfile();
-
-        if (mediaProfile != null) {
-            int videoQuality = VideoCallUtils.getVideoQualityFromMediaProfileForMediaInfo(
-                    mediaProfile.getVideoQuality());
-
-            logi("Enforce super.changePeerDimensions on media started; videoQuality="
-                    + videoQuality);
-
-            VideoDimension vd = VideoCallUtils.getVideoDimension(videoQuality);
-
-            if (vd != null) {
-                setCurrentVideoDimension(vd.getWidth(), vd.getHeight());
-                super.changePeerDimensions(vd.getWidth(), vd.getHeight());
-            }
         }
     }
 }

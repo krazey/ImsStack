@@ -18,7 +18,6 @@ package com.android.imsstack.imsservice.mmtel.videocall.base;
 
 import android.net.Uri;
 import android.telecom.VideoProfile;
-import android.telephony.ims.ImsStreamMediaProfile;
 import android.telephony.ims.ImsVideoCallProvider;
 import android.view.Surface;
 
@@ -26,7 +25,6 @@ import androidx.annotation.NonNull;
 
 import com.android.imsstack.enabler.mtc.MtcMediaSession;
 import com.android.imsstack.imsservice.mmtel.call.IVideoCallSession;
-import com.android.imsstack.imsservice.mmtel.util.VideoDimension;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -63,7 +61,6 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
 
     protected final IVideoCallSession mCallSession;
     private MtcMediaSessionListenerProxy mListenerProxy = new MtcMediaSessionListenerProxy();
-    private VideoDimension mVideoDimension = null;
     private int mCallState = CALL_STATE_IDLE;
     protected MtcMediaSession mMediaSession = null;
 
@@ -202,11 +199,6 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         handleCallEvent(event);
     }
 
-    @Override
-    public void onSessionModificationAbortedByCameraOff() {
-        // no-op
-    }
-
     public void updateMediaSession(MtcMediaSession mediaSession) {
         if (mMediaSession != null) {
             mMediaSession.setVideoListener(null);
@@ -272,10 +264,6 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         }
     }
 
-    protected void handleMediaSessionStarted() {
-        // no-op
-    }
-
     protected void handleMediaSessionDataUsageChanged(long dataSize) {
         log("changeCallDataUsage dataSize : " + dataSize);
         changeCallDataUsage(dataSize);
@@ -290,83 +278,8 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         // no-op
     }
 
-    protected void handleMediaSessionPeerDisplayOrientationChanged(final int orientation) {
-        // no-op
-    }
-
     protected void handleMediaSessionPeerDimensionsChanged(final int width, final int height) {
         changePeerDimensions(width, height);
-    }
-
-    protected VideoDimension getCurrentVideoDimension() {
-        return mVideoDimension;
-    }
-
-    protected void setCurrentVideoDimension(int width, int height) {
-        mVideoDimension = null;
-        mVideoDimension = new VideoDimension(width, height);
-    }
-
-    protected void updateReversedPeerDimensionFromMediaProfile(int orientation,
-            boolean enforceUpdate) {
-        ImsStreamMediaProfile mediaProfile = mCallSession.getStreamMediaProfile();
-
-        if (mediaProfile != null) {
-            VideoDimension videoDimension = null;
-            int videoQuality = VideoCallUtils.getVideoQualityFromMediaProfileForMediaInfo(
-                    mediaProfile.getVideoQuality());
-
-            if ((orientation == VideoCallUtils.ORIENTATION_PORTRAIT)
-                    && !VideoCallUtils.isVideoPortrait(videoQuality)) {
-                videoDimension = VideoCallUtils.getReversedVideoDimension(videoQuality);
-            } else if ((orientation == VideoCallUtils.ORIENTATION_LANDSCAPE)
-                    && VideoCallUtils.isVideoPortrait(videoQuality)) {
-                videoDimension = VideoCallUtils.getReversedVideoDimension(videoQuality);
-            }
-
-            if (videoDimension != null) {
-                setCurrentVideoDimension(videoDimension.getWidth(), videoDimension.getHeight());
-                changePeerDimensions(videoDimension.getWidth(), videoDimension.getHeight());
-            } else if (enforceUpdate) {
-                VideoDimension vd = VideoCallUtils.getVideoDimension(videoQuality);
-
-                if (vd != null) {
-                    handleMediaSessionPeerDimensionsChanged(vd.getWidth(), vd.getHeight());
-                }
-            }
-        }
-    }
-
-    protected void updateReversedPeerDimensionFromVideoDimension(int orientation,
-            boolean enforceUpdate) {
-        boolean videoDimensionChanged = false;
-        int width = mVideoDimension.getWidth();
-        int height = mVideoDimension.getHeight();
-
-        if (orientation == VideoCallUtils.ORIENTATION_PORTRAIT) {
-            if (width > height) {
-                int temp = height;
-                height = width;
-                width = temp;
-
-                videoDimensionChanged = true;
-            }
-        } else if (orientation == VideoCallUtils.ORIENTATION_LANDSCAPE) {
-            if (width < height) {
-                int temp = height;
-                height = width;
-                width = temp;
-
-                videoDimensionChanged = true;
-            }
-        }
-
-        if (videoDimensionChanged) {
-            setCurrentVideoDimension(width, height);
-            changePeerDimensions(width, height);
-        } else if (enforceUpdate) {
-            changePeerDimensions(width, height);
-        }
     }
 
     protected static boolean checkRadius(int angle, int criteria, int threshold) {

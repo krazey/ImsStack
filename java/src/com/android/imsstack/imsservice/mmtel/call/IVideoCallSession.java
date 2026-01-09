@@ -53,7 +53,6 @@ public interface IVideoCallSession {
 
     public static interface EventListener {
         public void onCallEvent(int event);
-        public void onSessionModificationAbortedByCameraOff();
     }
 
     public ICallContext getCallContext();
