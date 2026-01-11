@@ -32,11 +32,28 @@
 #include "config/MockCodecTelephoneEventConfig.h"
 
 using ::testing::_;
+using ::testing::Invoke;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
 const AString LOCAL_IP = "127.0.0.1";
+
+const IMS_SINT32 DefaultSlotId = 0;
+
+/**
+ * @brief A spy class to expose protected methods and mock virtual methods for testing.
+ */
+class SpyAudioProfileGenerator : public AudioProfileGenerator
+{
+public:
+    // Expose the protected method for testing.
+    using AudioProfileGenerator::SetProfile;
+
+    // Mock the method we want to verify calls to.
+    MOCK_METHOD(IMS_BOOL, UpdateAudioProfileBandwidth,
+            (OUT AudioProfile * pAudioProfile, IN const AudioConfiguration* pConfig), (override));
+};
 
 class AudioProfileGeneratorTest : public ::testing::Test, protected AudioProfileGenerator
 {
@@ -343,8 +360,10 @@ TEST_F(AudioProfileGeneratorTest, UpdateAudioProfileBandwidth_Fallback)
 TEST_F(AudioProfileGeneratorTest, SetProfile_IPVersionChange)
 {
     AudioProfile audioProfile;
-    AudioConfiguration audioConfig;
     MockICoreService mockService;
+
+    // Mock the dynamic AS feature to be enabled for this test.
+    ON_CALL(*m_pConfig, IsCodecBasedDynamicAsEnabled()).WillByDefault(Return(true));
 
     // Setup profile with AMR-WB payload, mode 8 (23.85kbps), octet-aligned
     auto pAmrPayload = new AudioProfile::Payload();
@@ -360,7 +379,7 @@ TEST_F(AudioProfileGeneratorTest, SetProfile_IPVersionChange)
     IpAddress ipv4Address("192.168.1.1");
     ON_CALL(mockService, GetIpAddress()).WillByDefault(ReturnRef(ipv4Address));
 
-    SetProfile(&audioProfile, &audioConfig, MEDIA_SERVICE_DEFAULT, &mockService, 0);
+    SetProfile(&audioProfile, m_pConfig.get(), MEDIA_SERVICE_DEFAULT, &mockService, DefaultSlotId);
 
     // Expected AS for AMR-WB, mode 8, OA, IPv4 is 41 (from AMR_AS table)
     EXPECT_EQ(audioProfile.GetBandwidthAs(), 41);
@@ -371,9 +390,59 @@ TEST_F(AudioProfileGeneratorTest, SetProfile_IPVersionChange)
     ON_CALL(mockService, GetIpAddress()).WillByDefault(ReturnRef(ipv6Address));
 
     // Call SetProfile again to simulate profile regeneration
-    SetProfile(&audioProfile, &audioConfig, MEDIA_SERVICE_DEFAULT, &mockService, 0);
+    SetProfile(&audioProfile, m_pConfig.get(), MEDIA_SERVICE_DEFAULT, &mockService, DefaultSlotId);
 
     // Expected AS for AMR-WB, mode 8, OA, IPv6 is 49 (from AMR_AS table)
     EXPECT_EQ(audioProfile.GetBandwidthAs(), 49);
     EXPECT_TRUE(audioProfile.GetIpAddress().IsIPv6Address());
+}
+
+TEST_F(AudioProfileGeneratorTest, TestSetProfile_CodecBasedDynamicAs)
+{
+    AudioProfile profile;
+    auto mockService = std::make_unique<NiceMock<MockICoreService>>();
+    IpAddress defaultIpAddress;  // Default-constructed IpAddress
+    ON_CALL(*mockService, GetIpAddress()).WillByDefault(ReturnRef(defaultIpAddress));
+
+    const IMS_SINT32 configAs = 100;
+    ON_CALL(*m_pConfig, GetAsBandwidthKbps()).WillByDefault(Return(configAs));
+
+    // Case 1: IsCodecBasedDynamicAsEnabled returns true
+    {
+        SpyAudioProfileGenerator spyGenerator;
+        EXPECT_CALL(*m_pConfig, IsCodecBasedDynamicAsEnabled()).WillOnce(Return(true));
+        // Expect UpdateAudioProfileBandwidth to be called and simulate it changing the AS value.
+        const IMS_SINT32 updatedAs = 250;
+        EXPECT_CALL(spyGenerator, UpdateAudioProfileBandwidth(_, _))
+                .WillOnce(Invoke(
+                        [&](OUT AudioProfile* pAudioProfile,
+                                IN const AudioConfiguration* /* pConfig */)
+                        {
+                            pAudioProfile->SetBandwidthAs(updatedAs);
+                            return IMS_TRUE;
+                        }));
+
+        profile.SetBandwidthAs(0);  // Initialize to a different value
+
+        spyGenerator.SetProfile(
+                &profile, m_pConfig.get(), MEDIA_SERVICE_DEFAULT, mockService.get(), DefaultSlotId);
+        // Verify that the AS value was updated by the mock function.
+        EXPECT_EQ(profile.GetBandwidthAs(), updatedAs);
+        EXPECT_NE(profile.GetBandwidthAs(), m_pConfig->GetAsBandwidthKbps());
+    }
+
+    // Case 2: IsCodecBasedDynamicAsEnabled returns false
+    {
+        SpyAudioProfileGenerator spyGenerator;
+        EXPECT_CALL(*m_pConfig, IsCodecBasedDynamicAsEnabled()).WillOnce(Return(false));
+        // Expect UpdateAudioProfileBandwidth not to be called.
+        EXPECT_CALL(spyGenerator, UpdateAudioProfileBandwidth(_, _)).Times(0);
+
+        profile.SetBandwidthAs(0);  // Initialize to a different value
+
+        spyGenerator.SetProfile(
+                &profile, m_pConfig.get(), MEDIA_SERVICE_DEFAULT, mockService.get(), DefaultSlotId);
+        // Verify that the AS value falls back to the one from AudioConfiguration.
+        EXPECT_EQ(profile.GetBandwidthAs(), configAs);
+    }
 }

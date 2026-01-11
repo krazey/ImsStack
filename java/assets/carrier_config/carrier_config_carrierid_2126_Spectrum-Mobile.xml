@@ -46,6 +46,8 @@
         <item value="1"/>
     </int-array>
     <boolean name="ims.unsubscribe_registration_event_package_bool" value="true"/>
+    <!-- Media -->
+    <boolean name="imsvoice.codec_based_dynamic_as_enabled_bool" value="false"/>
     <int-array name="imsvoice.audio_rtcp_interval_int_array" num="2">
         <item value="5"/>
         <item value="2"/>

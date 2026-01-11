@@ -250,6 +250,7 @@
     <int name="imsvoice.audio_maxptime_millis_int" value="240"/>
     <boolean name="imsvoice.audio_show_codec_attribute_modeset_bool" value="false"/>
     <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
+    <boolean name="imsvoice.codec_based_dynamic_as_enabled_bool" value="false"/>
 
     <int name="imsvt.video_cvo_value_int" value="4"/>
     <int name="imsvt.video_sdp_offer_cap_nego_for_avpf_int" value="2"/>

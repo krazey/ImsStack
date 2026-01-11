@@ -196,6 +196,14 @@ public:
      */
     virtual IMS_BOOL IsAmrPayloadFormatRelaxedMatching() const;
 
+    /**
+     * @brief Determines whether to enable codec-based dynamic AS value calculation.
+     *
+     * @return IMS_TRUE to enable dynamic AS calculation, IMS_FALSE to use the static value from
+     * config.
+     */
+    virtual IMS_BOOL IsCodecBasedDynamicAsEnabled() const;
+
 public:
     enum
     {
@@ -266,6 +274,8 @@ private:
     IMS_BOOL m_bAmrPayloadFormatRelaxedMatching;
     /** The duration for playing a DTMF tone in milliseconds. */
     IMS_SINT32 m_nDtmfDuration;
+    /** Indicates whether to enable codec-based dynamic AS value calculation. */
+    IMS_BOOL m_bCodecBasedDynamicAsEnabled;
     /** A list of ICE candidate attributes for audio. */
     ImsVector<AString> m_objAudioCandidateAttribute;
     /** A list of reasons that trigger call termination upon media inactivity. */
