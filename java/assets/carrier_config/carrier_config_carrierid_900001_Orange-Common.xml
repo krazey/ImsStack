@@ -35,7 +35,9 @@
             <item value="2"/>
         </int-array>
     </pbundle_as_map>
+    <boolean name="imsemergency.release_epdn_upon_ecall_end_in_fake_mode_bool" value="true"/>
     <int name="imsemergency.ereg_retry_timer_millis_int" value="3000"/>
+    <int name="imsemergency.ipcan_release_emergency_pdn_upon_emergency_call_end_int" value="3"/>
 
     <!-- Mtc -->
     <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="8"/>
