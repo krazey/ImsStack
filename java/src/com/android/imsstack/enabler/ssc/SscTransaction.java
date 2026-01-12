@@ -488,7 +488,7 @@ public class SscTransaction {
 
         int appType = getSscUtils().getTelephonySimType(mSlotId);
         boolean isTls = SscConfig.isTls(mSlotId);
-        String nafFqdn = authAgent.getNafFqdn();
+        String nafFqdn = authAgent.getNafFqdnFromRealm();
         String securityProtocol = authAgent.getCipherSuite();
 
         GbaCredentials gbaCredentials;

@@ -41,12 +41,11 @@ public interface ISscAuthAgent {
 
     /**
      * Returns Network Application Function(NAF) fully qualified domain name (FQDN) from
-     * {@link CarrierConfig.ImsSs#KEY_UT_NAF_FQDN_STRING} or from realm in the network response.
+     * realm in the network response.
      *
-     * @return A URI string of NAF FQDN from {@link CarrierConfig.ImsSs#KEY_UT_NAF_FQDN_STRING}. If
-     * it's empty, NAF FQDN is extracted from realm of the network response.
+     * @return A URI string of NAF FQDN from realm of the network response.
      */
-    String getNafFqdn();
+    String getNafFqdnFromRealm();
 
     /**
      * Returns the realm used for authentication.
