@@ -50,7 +50,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.CellSignalStrength;
-import android.telephony.CellSignalStrengthCdma;
 import android.telephony.CellSignalStrengthGsm;
 import android.telephony.CellSignalStrengthLte;
 import android.telephony.CellSignalStrengthNr;
@@ -2224,66 +2223,6 @@ public class AosDebugTest extends ImsStackTest {
     }
 
     @Test
-    public void testGetNetworkTypeToStringCdma() {
-        // GIVEN
-        int type = TelephonyManager.NETWORK_TYPE_CDMA;
-
-        // WHEN
-        String result = FakeAosDebug.getNetworkTypeToString(type);
-
-        // THEN
-        assertTrue(result.contains("CDMA"));
-    }
-
-    @Test
-    public void testGetNetworkTypeToStringEvdo0() {
-        // GIVEN
-        int type = TelephonyManager.NETWORK_TYPE_EVDO_0;
-
-        // WHEN
-        String result = FakeAosDebug.getNetworkTypeToString(type);
-
-        // THEN
-        assertTrue(result.contains("EvDo"));
-    }
-
-    @Test
-    public void testGetNetworkTypeToStringEvdoA() {
-        // GIVEN
-        int type = TelephonyManager.NETWORK_TYPE_EVDO_A;
-
-        // WHEN
-        String result = FakeAosDebug.getNetworkTypeToString(type);
-
-        // THEN
-        assertTrue(result.contains("EvDo"));
-    }
-
-    @Test
-    public void testGetNetworkTypeToStringEvdoB() {
-        // GIVEN
-        int type = TelephonyManager.NETWORK_TYPE_EVDO_B;
-
-        // WHEN
-        String result = FakeAosDebug.getNetworkTypeToString(type);
-
-        // THEN
-        assertTrue(result.contains("EvDo"));
-    }
-
-    @Test
-    public void testGetNetworkTypeToString1xRtt() {
-        // GIVEN
-        int type = TelephonyManager.NETWORK_TYPE_1xRTT;
-
-        // WHEN
-        String result = FakeAosDebug.getNetworkTypeToString(type);
-
-        // THEN
-        assertTrue(result.contains("1xRTT"));
-    }
-
-    @Test
     public void testGetNetworkTypeToStringLte() {
         // GIVEN
         int type = TelephonyManager.NETWORK_TYPE_LTE;
@@ -2293,18 +2232,6 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertTrue(result.contains("LTE"));
-    }
-
-    @Test
-    public void testGetNetworkTypeToStringEhrpd() {
-        // GIVEN
-        int type = TelephonyManager.NETWORK_TYPE_EHRPD;
-
-        // WHEN
-        String result = FakeAosDebug.getNetworkTypeToString(type);
-
-        // THEN
-        assertTrue(result.contains("eHRPD"));
     }
 
     @Test
@@ -2558,18 +2485,6 @@ public class AosDebugTest extends ImsStackTest {
 
         // THEN
         assertEquals(AccessNetworkConstants.AccessNetworkType.UTRAN, type);
-    }
-
-    @Test
-    public void testGetAccessNetworkTypeCdma() {
-        // GIVEN
-        CellSignalStrength css = new CellSignalStrengthCdma();
-
-        // WHEN
-        int type = mFakeAosDebug.getAccessNetworkType(css);
-
-        // THEN
-        assertEquals(AccessNetworkConstants.AccessNetworkType.CDMA2000, type);
     }
 
     @Test

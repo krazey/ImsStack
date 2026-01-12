@@ -814,13 +814,7 @@ public class AosDebug implements IAosDebug {
             case TelephonyManager.NETWORK_TYPE_HSDPA -> "HSDPA";
             case TelephonyManager.NETWORK_TYPE_HSUPA -> "HSUPA";
             case TelephonyManager.NETWORK_TYPE_HSPA -> "HSPA";
-            case TelephonyManager.NETWORK_TYPE_CDMA -> "CDMA";
-            case TelephonyManager.NETWORK_TYPE_EVDO_0 -> "CDMA - EvDo rev. 0";
-            case TelephonyManager.NETWORK_TYPE_EVDO_A -> "CDMA - EvDo rev. A";
-            case TelephonyManager.NETWORK_TYPE_EVDO_B -> "CDMA - EvDo rev. B";
-            case TelephonyManager.NETWORK_TYPE_1xRTT -> "CDMA - 1xRTT";
             case TelephonyManager.NETWORK_TYPE_LTE -> "LTE";
-            case TelephonyManager.NETWORK_TYPE_EHRPD -> "CDMA - eHRPD";
             case TelephonyManager.NETWORK_TYPE_HSPAP -> "HSPA+";
             case TelephonyManager.NETWORK_TYPE_GSM -> "GSM";
             case TelephonyManager.NETWORK_TYPE_TD_SCDMA -> "TD_SCDMA";
