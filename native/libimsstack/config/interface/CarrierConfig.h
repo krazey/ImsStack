@@ -334,6 +334,16 @@ public:
         static const IMS_CHAR KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL[];
 
         /**
+         * Specifies whether to disable N1 mode capability when failing to establish IMS PDU Session
+         * for IMS.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
+        static const IMS_CHAR KEY_DISABLE_N1_MODE_ON_IMS_PDU_ESTABLISH_FAILURE_BOOL[];
+
+        /**
          * Specifies whether the re-registration is held when IPCAN is changed during IMS calls
          * and performed immediately after they are released.
          *

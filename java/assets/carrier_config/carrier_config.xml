@@ -460,6 +460,7 @@
     <boolean name="ims.block_reg_on_cs_call_bool" value="true"/>
     <boolean name="ims.call_end_and_pdn_reactivation_by_reg_terminated_bool" value="false"/>
     <boolean name="ims.destroy_unsecure_tcp_socket_on_accomplishing_reg_bool" value="false"/>
+    <boolean name="ims.disable_n1_mode_on_ims_pdu_establish_failure_bool" value="false"/>
     <boolean name="ims.hold_reg_with_ipcan_changed_during_ims_call_bool" value="false"/>
     <boolean name="ims.ims_dereg_on_3g_network_bool" value="false"/>
     <boolean name="ims.imsi_based_uri_prioritized_bool" value="false"/>

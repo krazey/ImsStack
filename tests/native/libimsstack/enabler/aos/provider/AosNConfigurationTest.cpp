@@ -572,6 +572,10 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::Ims::KEY_DISABLE_N1_MODE_ON_IMS_PDU_ESTABLISH_FAILURE_BOOL,
+                    IMS_FALSE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::ImsEmergency::
                                KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL,
                     IMS_FALSE))
@@ -1080,6 +1084,7 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
     EXPECT_TRUE(m_pAosNConfiguration->IsUseRegInfoContactWithoutUriCheck());
     EXPECT_FALSE(m_pAosNConfiguration->IsTestModeEnabled(
             CarrierConfig::Ims::TEST_MODE_PERMANENT_FAILURE_WITHOUT_IMS_PDN_DEACTIVATION));
+    EXPECT_FALSE(m_pAosNConfiguration->ShouldDisableN1ModeOnImsPduEstablishFailure());
     EXPECT_FALSE(m_pAosNConfiguration->ShouldKeepExistingPcscfOnPcscfChangeDuringTheCall());
 
     EXPECT_EQ(0, m_pAosNConfiguration->GetAuthFailureRetryMaxCnt());

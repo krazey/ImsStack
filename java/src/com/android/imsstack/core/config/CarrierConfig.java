@@ -437,6 +437,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "call_end_and_pdn_reactivation_by_reg_terminated_bool";
         public static final String KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL =
                 KEY_PREFIX + "destroy_unsecure_tcp_socket_on_accomplishing_reg_bool";
+        public static final String KEY_DISABLE_N1_MODE_ON_IMS_PDU_ESTABLISH_FAILURE_BOOL =
+                KEY_PREFIX + "disable_n1_mode_on_ims_pdu_establish_failure_bool";
         public static final String KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL =
                 KEY_PREFIX + "hold_reg_with_ipcan_changed_during_ims_call_bool";
         public static final String KEY_IMS_DEREG_ON_3G_NETWORK_BOOL =

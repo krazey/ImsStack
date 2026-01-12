@@ -555,6 +555,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsTestModeEnabled(IN IMS_SINT32 nType
     return m_objAsset.objTestMode.Contains(nType);
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::ShouldDisableN1ModeOnImsPduEstablishFailure() const
+{
+    return m_objAsset.bDisableN1ModeOnImsPduEstablishFailure;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::ShouldKeepExistingPcscfOnPcscfChangeDuringTheCall() const
 {
     return m_objAsset.bKeepExistingPcscfOnPcscfChangeDuringTheCall;
@@ -1686,6 +1691,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Ims::KEY_CALL_END_AND_PDN_REACTIVATION_BY_REG_TERMINATED_BOOL);
     m_objAsset.bDestroyUnsecureTcpSocketOnAccomplishingReg = piCc->GetBoolean(
             CarrierConfig::Ims::KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL);
+    m_objAsset.bDisableN1ModeOnImsPduEstablishFailure = piCc->GetBoolean(
+            CarrierConfig::Ims::KEY_DISABLE_N1_MODE_ON_IMS_PDU_ESTABLISH_FAILURE_BOOL);
     m_objAsset.bEmcCallBasedOnPAssociatedUriOfNormalReg = piCc->GetBoolean(
             CarrierConfig::ImsEmergency::KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL);
     m_objAsset.bEmcRegOnRandomPcscf =
