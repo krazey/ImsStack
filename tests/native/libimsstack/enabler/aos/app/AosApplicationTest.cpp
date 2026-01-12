@@ -2190,6 +2190,38 @@ TEST_F(AosApplicationTest, SetBlockPermanentDataFailedWhenStateConnectingConnect
     // THEN: The GIVEN condition should be met.
 }
 
+TEST_F(AosApplicationTest, BlockPlmnWithTimeoutWhenStateReadyConnectionDeactivated)
+{
+    m_pAosApplication->SetNetTrackerListener();
+    m_pAosApplication->SetAppType(AosRegistrationType::NORMAL);
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, GetNetworkType()).WillByDefault(Return(NW_REPORT_RADIO_NR));
+
+    EXPECT_CALL(m_objMockIAosService,
+            NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::NR,
+                    AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT, 0));
+
+    ImsMessage objMessage(
+            MSG_CONNECTION, CONNECTION_DEACTIVATED, AosConnector::REASON_TEMPORARILY_FAILED);
+    m_pAosApplication->StateReady_Connection(objMessage);
+}
+
+TEST_F(AosApplicationTest, BlockPlmnWithTimeoutWhenStateConnectingConnectionDeactivated)
+{
+    m_pAosApplication->SetNetTrackerListener();
+    m_pAosApplication->SetAppType(AosRegistrationType::NORMAL);
+    ON_CALL(m_objMockIAosConnection, IsEpdgEnabled()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNetTracker, GetNetworkType()).WillByDefault(Return(NW_REPORT_RADIO_NR));
+
+    EXPECT_CALL(m_objMockIAosService,
+            NotifyDeregistered(IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::NR,
+                    AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT, 0));
+
+    ImsMessage objMessage(
+            MSG_CONNECTION, CONNECTION_DEACTIVATED, AosConnector::REASON_TEMPORARILY_FAILED);
+    m_pAosApplication->StateConnecting_Connection(objMessage);
+}
+
 TEST_F(AosApplicationTest, SetBlockInvalidPcscfWhenStateReadyConnection)
 {
     m_pAosApplication->SetNetTrackerListener();

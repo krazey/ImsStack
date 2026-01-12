@@ -1657,6 +1657,10 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::StateReady_Connection(IN IMSMSG& objM
                     m_pCondition->SetBlock(BLOCK_PERMANENT_DATA_FAILED);
                     m_pConnector->Stop(PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS);
                 }
+                else if (nReason == AosConnector::REASON_TEMPORARILY_FAILED)
+                {
+                    ProcessPlmnBlock(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
+                }
                 else if (nReason == AosConnector::REASON_PCSCF_DISCOVERY_FAILED)
                 {
                     m_pCondition->SetBlock(BLOCK_INVALID_CONNECTION);
@@ -2104,6 +2108,11 @@ PROTECTED VIRTUAL void AosApplication::ProcessConnectionDeactivated(IN IMS_UINT3
     {
         m_pCondition->SetBlock(BLOCK_PERMANENT_DATA_FAILED, IMS_FALSE);
         CleanAll(AosReason::DATA_PERMANENTLY_FAILED);
+    }
+    else if (nReason == AosConnector::REASON_TEMPORARILY_FAILED)
+    {
+        ProcessPlmnBlock(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
+        CleanAll(AosReason::DATA_DISCONNECTED);
     }
     else if (nReason == AosConnector::REASON_IP_CHANGED)
     {

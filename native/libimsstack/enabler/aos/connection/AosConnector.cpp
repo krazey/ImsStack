@@ -920,7 +920,14 @@ PROTECTED VIRTUAL void AosConnector::AosConnection_ConnectionFailed()
     A_IMS_TRACE_I(APPPROFILE, "AosConnection_ConnectionFailed", 0, 0, 0);
 
     CleanAll();
-    Notify(LISTENER_TYPE_DEACTIVATED, REASON_PERMANENTLY_FAILED);
+    if (GET_N_CONFIG(m_piAppContext->GetSlotId())->ShouldDisableN1ModeOnImsPduEstablishFailure())
+    {
+        Notify(LISTENER_TYPE_DEACTIVATED, REASON_TEMPORARILY_FAILED);
+    }
+    else
+    {
+        Notify(LISTENER_TYPE_DEACTIVATED, REASON_PERMANENTLY_FAILED);
+    }
 }
 
 PROTECTED VIRTUAL void AosConnector::Pcscf_NotifyResult(IN IMS_BOOL bResult)
