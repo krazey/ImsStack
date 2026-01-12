@@ -29,12 +29,15 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Parcel;
 import android.telecom.PhoneAccount;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.ImsStackTest;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.enabler.uce.impl.UceAgent;
 import com.android.imsstack.enabler.uce.impl.define.UceConstant;
 import com.android.imsstack.enabler.uce.impl.define.UceFeatureTags;
@@ -76,6 +79,7 @@ public class UceAgentTest extends ImsStackTest {
     @Mock SubscribeResponse subscribeCb;
     @Mock UcePublishRequestController publishController;
     @Mock UceSubscribeRequestController subscribeController;
+    @Mock private NativeStateInterface mNativeStateInterface;
 
     private UceAgent mAgent;
 
@@ -90,14 +94,22 @@ public class UceAgentTest extends ImsStackTest {
         }
 
         @Override
-        public void init(int nSimSlot) {};
+        public void init(int nSimSlot) {}
 
         @Override
-        public void release(int nSimSlot) {};
+        public void release(int nSimSlot) {}
 
         @Override
         public void addListener(int nSimSlot, IUceJNIListener mListener, int nMsgType) {
             mUceJniListener = mListener;
+            if (mLatch != null) {
+                mLatch.countDown();
+            }
+        }
+
+        @Override
+        public void sendMessage(int nSimSlot, Parcel parcel) {
+            parcel.recycle();
             if (mLatch != null) {
                 mLatch.countDown();
             }
@@ -111,11 +123,17 @@ public class UceAgentTest extends ImsStackTest {
     @Before
     public void setUp(){
         MockitoAnnotations.initMocks(this);
+
+        AgentFactory.getInstance()
+                .setAgent(NativeStateInterface.class, mNativeStateInterface, SLOT_ID);
+
         mUceJni = new TestUceJni();
     }
 
     @After
     public void tearDown() throws Exception {
+        AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT_ID);
+
         mUceJni = null;
         if (mAgent != null) {
             mAgent.interrupt();
@@ -123,6 +141,37 @@ public class UceAgentTest extends ImsStackTest {
         }
 
         super.tearDown();
+    }
+
+    @Test
+    public void test_initialize() throws Exception {
+        mAgent = createUceAgent();
+        mAgent.mLoop = Looper.getMainLooper();
+
+        mAgent.initialize();
+
+        verify(mNativeStateInterface).addListener(any(NativeStateInterface.Listener.class));
+    }
+
+    @Test
+    public void test_deInitialize() throws Exception {
+        mAgent = createUceAgent();
+
+        mAgent.deInitialize();
+
+        verify(mNativeStateInterface).removeListener(any(NativeStateInterface.Listener.class));
+    }
+
+    @Test
+    public void test_onNativeServiceReady() throws Exception {
+        mAgent = createUceAgent();
+
+        CountDownLatch lock = new CountDownLatch(1);
+        mUceJni.setCountDownLatch(lock);
+
+        mAgent.mNativeStateListener.onNativeServiceReady();
+
+        assertTrue(lock.await(10, TimeUnit.SECONDS));
     }
 
     @Test
