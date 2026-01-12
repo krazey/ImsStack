@@ -578,15 +578,15 @@ PROTECTED VIRTUAL void AosHandle::Init()
 {
     A_IMS_TRACE_D(APPPROFILE, "Init", 0, 0, 0);
 
+    m_piInfo = new AosInfo(m_piAppContext);
+    m_piWifiWatcher = PhoneInfoService::GetPhoneInfoService()->GetWifiWatcher();
+
     InitializeHoldingBlocksPolicy();
     InitializeServiceBlock();
     InitializeServiceFeature();
     InitializeFeatureTags();
 
     AddListeners();
-
-    m_piInfo = new AosInfo(m_piAppContext);
-    m_piWifiWatcher = PhoneInfoService::GetPhoneInfoService()->GetWifiWatcher();
 
     IMSMSG objMSG(HANDLE_MSG_BLOCK_STATUS, 0, 0);
     OnStateMessage(objMSG);
