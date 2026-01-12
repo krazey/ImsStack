@@ -515,6 +515,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         MediaInfo mediaInfo;
 
+        // Currently it's always the default profile. See
+        // {@link ImsPhoneCallTracker#acceptCall} and {@link ImsCall#accept}.
         if (ImsCallMediaUtils.isDefaultMediaProfile(profile)) {
             int audioCaps = mCallContext.getMediaCapabilities(callType, ICallContext.MEDIA_AUDIO);
             int videoCaps = mCallContext.getMediaCapabilities(callType, ICallContext.MEDIA_VIDEO);

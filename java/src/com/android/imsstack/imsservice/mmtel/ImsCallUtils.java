@@ -297,8 +297,8 @@ public class ImsCallUtils {
      *
      * If the video direction in the provided {@code ImsCallProfile}'s {@code ImsStreamMediaProfile}
      * is {@code DIRECTION_INACTIVE}, it is converted to {@code DIRECTION_INVALID}. It's to address
-     * scenarios where the dialer assumes {@code DIRECTION_INACTIVE} as an unexpected status,
-     * leading to unintended video call resumption.
+     * scenarios where the dialer assumes {@code DIRECTION_INACTIVE} as an unexpected status for
+     * video calls, leading to unintended video call resumption.
      *
      * @param profile The {@code ImsCallProfile} to be sanitized.
      * @return A new {@code ImsCallProfile} instance with the sanitized video direction.
