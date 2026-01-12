@@ -95,13 +95,21 @@ IMS_UINT32 BaseService::RemovePendingMessages()
 PROTECTED
 void BaseService::SendDataUsingEnablerThread(IN const android::Parcel& objParcel)
 {
+    BaseThread* pEnablerThread =
+            ImsProcess::GetInstance()->GetThread(EnablerUtils::GetEnablerThreadName(m_nSlotId));
+    IThread* piThread = (pEnablerThread != IMS_NULL) ? pEnablerThread->GetThread() : IMS_NULL;
+
+    if (piThread == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "Not found %s thread",
+                EnablerUtils::GetEnablerThreadName(m_nSlotId).GetStr(), 0, 0);
+        return;
+    }
+
     android::Parcel* pParcelOut = new android::Parcel();
     pParcelOut->write(objParcel.data(), objParcel.dataSize());
     pParcelOut->setDataPosition(0);
 
     ImsMessage objMsg(pParcelOut->readInt32(), 0, reinterpret_cast<IMS_UINTP>(pParcelOut), this);
-    IThread* piThread = ImsProcess::GetInstance()
-                                ->GetThread(EnablerUtils::GetEnablerThreadName(m_nSlotId))
-                                ->GetThread();
     piThread->PostMessageI(objMsg);
 }
