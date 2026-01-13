@@ -399,7 +399,6 @@ PUBLIC VIRTUAL void MtcMediaManager::UpdatePemType(IN ISession* piSession, IN IM
     AString strPemHeader =
             m_objContext.GetMessageUtils().GetHeader(piMessage, ISipHeader::P_EARLY_MEDIA);
     PemType ePemType = MtcMediaUtil::GetPemType(strPemHeader);
-
     if (ePemType == PemType::NONE)
     {
         // GSMA IR.92 - Section 2.2.7:
@@ -407,6 +406,7 @@ PUBLIC VIRTUAL void MtcMediaManager::UpdatePemType(IN ISession* piSession, IN IM
         // the early media authorization state for the early dialog on which it was received.
         if (GetPemType(piSession) != PemType::NONE)
         {
+            IMS_TRACE_D("UpdatePemType : PemType::NONE, Keep Previous one", 0, 0, 0);
             return;
         }
 
@@ -744,20 +744,15 @@ void MtcMediaManager::UpdateLocalTone(
 
     switch (nLocalRbtPolicy)
     {
-        case ConfigVoice::DYNAMIC_NW_TONE_WHEN_PEM_NOT_CONTAINS_SEND:
-            SetLocalTone(IMS_FALSE);
-            return;
         case ConfigVoice::DYNAMIC_NW_TONE_WHEN_PEM_CONTAINS_SEND:
         case ConfigVoice::NW_TONE_WHEN_PEM_CONTAINS_SEND_AFTER_180:
-        {
             SetLocalTone(!ContainsSendInPem(piSession));
             return;
-        }
-        default:  // ConfigVoice::FORCE_LOCAL_TONE_ON_180
-        {
-            SetLocalTone(nStatusCode == SipStatusCode::SC_180);
+        case ConfigVoice::DYNAMIC_NW_TONE_WHEN_PEM_NOT_CONTAINS_SEND:
+        case ConfigVoice::DYNAMIC_NW_TONE_WHEN_PEM_ALL:
+        default:
+            SetLocalTone(IMS_FALSE);
             return;
-        }
     }
 }
 
@@ -853,16 +848,19 @@ IMS_UINT32 MtcMediaManager::GetWaitingNetworkToneDuration(
         return TIME_NO_WAIT_NW_TONE_RTP;
     }
 
-    if (ContainsSendInPem(piSession))
+    switch (m_objContext.GetConfigurationProxy().GetInt(
+            ConfigVoice::KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT))
     {
-        return (m_objContext.GetConfigurationProxy().GetInt(
-                        ConfigVoice::KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT) ==
-                       ConfigVoice::DYNAMIC_NW_TONE_WHEN_PEM_CONTAINS_SEND)
-                ? TIME_WAIT_NW_TONE_RTP
-                : TIME_NO_WAIT_NW_TONE_RTP;
+        case ConfigVoice::DYNAMIC_NW_TONE_WHEN_PEM_NOT_CONTAINS_SEND:
+            return !ContainsSendInPem(piSession) ? TIME_WAIT_NW_TONE_RTP : TIME_NO_WAIT_NW_TONE_RTP;
+        case ConfigVoice::DYNAMIC_NW_TONE_WHEN_PEM_ALL:
+            return TIME_WAIT_NW_TONE_RTP;
+        case ConfigVoice::DYNAMIC_NW_TONE_WHEN_PEM_CONTAINS_SEND:
+            return ContainsSendInPem(piSession) ? TIME_WAIT_NW_TONE_RTP : TIME_NO_WAIT_NW_TONE_RTP;
+        case ConfigVoice::NW_TONE_WHEN_PEM_CONTAINS_SEND_AFTER_180:
+        default:
+            return TIME_NO_WAIT_NW_TONE_RTP;
     }
-
-    return TIME_WAIT_NW_TONE_RTP;
 }
 
 PRIVATE
@@ -929,6 +927,7 @@ IMS_BOOL MtcMediaManager::IsDynamicRbtRequired(IN ISession* piSession)
             ConfigVoice::KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT);
 
     return (nLocalRbtPolicy == ConfigVoice::DYNAMIC_NW_TONE_WHEN_PEM_NOT_CONTAINS_SEND ||
+            nLocalRbtPolicy == ConfigVoice::DYNAMIC_NW_TONE_WHEN_PEM_ALL ||
             nLocalRbtPolicy == ConfigVoice::DYNAMIC_NW_TONE_WHEN_PEM_CONTAINS_SEND);
 }
 
