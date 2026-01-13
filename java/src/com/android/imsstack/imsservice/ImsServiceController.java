@@ -124,6 +124,7 @@ public class ImsServiceController {
             }
 
             sImsServiceController.startMmTelServices();
+            sImsServiceController.startRcsServices();
         } else {
             ImsServiceRecord isr = ImsServiceManager.getServiceRecord(slotId);
 
@@ -167,6 +168,14 @@ public class ImsServiceController {
                     mMmTelServices[i].start();
                 }
             });
+    }
+
+    private void startRcsServices() {
+        mExecutor.execute(() -> {
+            for (RcsFeatureImpl rcsFeature : mRcsFeature) {
+                rcsFeature.start();
+            }
+        });
     }
 
     public Executor getExecutor() {

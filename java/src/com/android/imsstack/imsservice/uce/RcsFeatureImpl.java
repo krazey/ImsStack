@@ -42,7 +42,6 @@ public class RcsFeatureImpl extends RcsFeature {
     public RcsFeatureImpl(IContext iContext) {
         super(iContext.getExecutor());
         mIContext = iContext;
-        setFeatureState(ImsFeature.STATE_READY);
     }
 
     @Override
@@ -131,6 +130,14 @@ public class RcsFeatureImpl extends RcsFeature {
                     pair.getRadioTech(), ImsFeature.CAPABILITY_ERROR_GENERIC);
             logi("onChangeCapabilityConfigurationError error  disable is sent");
         }
+    }
+
+    /**
+     * Starts the feature and notifies that it is ready.
+     */
+    public void start() {
+        logi("start");
+        setFeatureState(ImsFeature.STATE_READY);
     }
 
     /**

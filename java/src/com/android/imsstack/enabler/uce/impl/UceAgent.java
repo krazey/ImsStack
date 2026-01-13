@@ -24,6 +24,7 @@ import android.os.Parcel;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.PreferenceInterface;
 import com.android.imsstack.enabler.uce.impl.configuration.UceConfiguration;
 import com.android.imsstack.enabler.uce.impl.define.UceConstant;
@@ -70,10 +71,21 @@ public class UceAgent extends Thread implements IUceJNIListener {
 
     private int mRegistrationTech = UceConstant.RADIO_TECHNOLOGY_TYPE_UNKNOWN;
 
-    Looper mLoop = null;
+    @VisibleForTesting
+    public Looper mLoop = null;
 
     private UceJNI mUceJNI;
     private PreferenceInterface mPf;
+
+    @VisibleForTesting
+    public final NativeStateInterface.Listener mNativeStateListener =
+            new NativeStateInterface.Listener() {
+                @Override
+                public void onNativeServiceReady() {
+                    ImsLog.i(mSlotId, "NativeService is ready.");
+                    imsRegistrationStatusCheck();
+                }
+            };
 
     public UceAgent(String name, int nSimSlot) {
         this(name, nSimSlot, UceJNI.getInstance());
@@ -270,7 +282,8 @@ public class UceAgent extends Thread implements IUceJNIListener {
         return type;
     }
 
-    private void initialize() {
+    @VisibleForTesting
+    public void initialize() {
         ImsLog.d(mSlotId, "initialize");
         mUcePublishRequestController = new UcePublishRequestController(mSlotId, mLoop);
         mUceSubscribeRequestController = new UceSubscribeRequestController(mSlotId, mLoop);
@@ -291,11 +304,24 @@ public class UceAgent extends Thread implements IUceJNIListener {
         mPf = AgentFactory.getInstance().getAgent(PreferenceInterface.class);
         mUceConfiguration = new UceConfiguration(mSlotId);
         mUceConfiguration.init();
-        imsRegistrationStatusCheck();
+
+        NativeStateInterface nsi =
+                AgentFactory.getInstance().getAgent(NativeStateInterface.class, mSlotId);
+        if (nsi != null) {
+            nsi.addListener(mNativeStateListener);
+        }
     }
 
-    private void deInitialize() {
+    @VisibleForTesting
+    public void deInitialize() {
         ImsLog.d(mSlotId, "deInitialize");
+
+        NativeStateInterface nsi =
+                AgentFactory.getInstance().getAgent(NativeStateInterface.class, mSlotId);
+        if (nsi != null) {
+            nsi.removeListener(mNativeStateListener);
+        }
+
         mUceConfiguration = null;
         mUcePublishRequestController = null;
         mUceSubscribeRequestController = null;
