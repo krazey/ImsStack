@@ -1016,6 +1016,32 @@ TEST_F(AosServiceTest, NotifyCarrierSignalPcoValueChanged)
     m_pAosService->NotifyCarrierSignalPcoValueChanged(5);
 }
 
+TEST_F(AosServiceTest, NotifyCrossSimStatus)
+{
+    // GIVEN
+    MockIAosServicePhoneListener objMockListener1;
+    MockIAosServicePhoneListener objMockListener2;
+    MockIAosServicePhoneListener objMockListener3;
+
+    m_pAosService->AddListener(&objMockListener1);
+    m_pAosService->AddListener(&objMockListener2);
+    m_pAosService->AddListener(&objMockListener3);
+
+    // Expectation: Listeners should receive IMS_TRUE when notified with 1
+    EXPECT_CALL(objMockListener1, ServicePhone_CrossSimStatusChanged(IMS_TRUE));
+    EXPECT_CALL(objMockListener2, ServicePhone_CrossSimStatusChanged(IMS_TRUE));
+    EXPECT_CALL(objMockListener3, ServicePhone_CrossSimStatusChanged(IMS_TRUE));
+
+    // Expectation: Listeners should receive IMS_FALSE when notified with 0
+    EXPECT_CALL(objMockListener1, ServicePhone_CrossSimStatusChanged(IMS_FALSE));
+    EXPECT_CALL(objMockListener2, ServicePhone_CrossSimStatusChanged(IMS_FALSE));
+    EXPECT_CALL(objMockListener3, ServicePhone_CrossSimStatusChanged(IMS_FALSE));
+
+    // WHEN
+    m_pAosService->NotifyCrossSimStatus(1);
+    m_pAosService->NotifyCrossSimStatus(0);
+}
+
 TEST_F(AosServiceTest, ShouldReturnTrueWhenWhenNasSecurityAlgorithmChanged)
 {
     m_pAosService->NotifyNasSecurityAlgorithmChanged(1);
@@ -1122,6 +1148,17 @@ TEST_F(AosServiceTest, NotifyImsFeatureChanged)
 {
     EXPECT_TRUE(m_pAosService->NotifyImsFeatureChanged(
             IAosRegistration::IMS_REG_TYPE_NORMAL, AosNetworkType::LTE, 1));
+}
+
+TEST_F(AosServiceTest, NotifyTrace)
+{
+    // WHEN
+    IMS_BOOL result = m_pAosService->NotifyTrace(
+            static_cast<AosRegistrationType>(IAosRegistration::IMS_REG_TYPE_NORMAL),
+            AString("Test Log Message"));
+
+    // THEN
+    EXPECT_TRUE(result);
 }
 
 TEST_F(AosServiceTest, RequestWifiService)
@@ -1239,6 +1276,13 @@ TEST_F(AosServiceTest, IsSupportCapabilitiesForNetwork)
             AosNetworkType::IWLAN, AosCapability::OPTIONS_UCE));
     EXPECT_FALSE(m_pAosService->IsSupportCapabilitiesForNetwork(
             AosNetworkType::IWLAN, AosCapability::PRESENCE_UCE));
+}
+
+TEST_F(AosServiceTest, NotifyJniEnablerSet)
+{
+    // WHEN: NotifyJniEnablerSet is called
+    // THEN: It should execute without issues (If it crashes, the test fails)
+    m_pAosService->NotifyJniEnablerSet();
 }
 
 TEST_F(AosServiceTest, PrintCapabilities)
