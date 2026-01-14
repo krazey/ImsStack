@@ -21,6 +21,7 @@
 #include "Ims3gpp.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
+#include "SdpMedia.h"
 #include "call/IMtcCall.h"
 #include "media/IMedia.h"
 #include <optional>

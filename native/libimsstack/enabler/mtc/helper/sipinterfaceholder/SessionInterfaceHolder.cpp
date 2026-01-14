@@ -18,6 +18,7 @@
 #include "IConfiguration.h"
 #include "ICoreService.h"
 #include "ISession.h"
+#include "ISipConfig.h"
 #include "ISipConfigV.h"
 #include "ITimer.h"
 #include "ImsList.h"

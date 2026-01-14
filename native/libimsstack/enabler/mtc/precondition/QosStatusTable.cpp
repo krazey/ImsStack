@@ -17,6 +17,7 @@
 #include "MtcDef.h"
 #include "ServiceTrace.h"
 #include "media/IMedia.h"
+#include "media/IMediaDescriptor.h"
 #include "offeranswer/SdpSegmentedPrecondition.h"
 #include "precondition/QosStatusTable.h"
 #include "precondition/QosStringUtils.h"
