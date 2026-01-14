@@ -2343,6 +2343,22 @@ TEST_F(MtcPreconditionManagerTest, NotifiesQosReserveFailedOnWaitAudioDedicatedB
 }
 
 TEST_F(MtcPreconditionManagerTest,
+        QosReserveFailedWithReleaseOnWaitAudioDedicatedBearerTimerExpiredIfConfigEnabled)
+{
+    SetUpMockQosInfo();
+    pPreconditionManager->SetOnWlanForPrerequisite(IMS_FALSE);
+    ON_CALL(objTimer, IsQosTimerActivated(QosTimerType::WAIT_AVAILABLE_AFTER_W2L_HANDOVER))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_RELEASE_CALL_ON_DEDICATED_BEARER_WAIT_TIMEOUT_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objListener, QosReserveFailed(&objISession, QosLossPolicy::RELEASE)).Times(1);
+
+    pPreconditionManager->OnTimerExpired(&objTimer, QosTimerType::WAIT_AUDIO_DEDICATED_BEARER);
+}
+
+TEST_F(MtcPreconditionManagerTest,
         DoNothingOnWaitAvailableAfterW2LHandoverTimerExpiredIfWaitingAudioDedicatedBearer)
 {
     SetUpMockQosInfo();
