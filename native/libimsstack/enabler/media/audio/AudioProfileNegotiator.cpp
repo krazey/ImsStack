@@ -70,10 +70,20 @@ IMS_BOOL AudioProfileNegotiator::Negotiate(IN AudioProfile* pLocalProfile,
 
         if (pNegotiatedPayload == IMS_NULL)
         {
-            IMS_TRACE_D("Negotiate(): null negotiated payload", 0, 0, 0);
-            ResetNegotiatedProfile(IMS_FALSE, pLocalProfile, pPeerProfile,
+            const bool bPeerPortIsZero = (pPeerProfile->GetDataPort() == 0);
+
+            ResetNegotiatedProfile(bPeerPortIsZero, pLocalProfile, pPeerProfile,
                     reinterpret_cast<MediaBaseProfile**>(&pNegotiatedProfile));
-            return IMS_FALSE;
+
+            if (bPeerPortIsZero)
+            {
+                IMS_TRACE_D("Negotiate(): null negotiated payload with peer port 0", 0, 0, 0);
+            }
+            else
+            {
+                IMS_TRACE_D("Negotiate(): null negotiated payload", 0, 0, 0);
+                return IMS_FALSE;
+            }
         }
 
         if (!NegotiateDirection(pLocalProfile, pPeerProfile, pNegotiatedProfile))

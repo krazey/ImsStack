@@ -628,6 +628,49 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateNoMatchingAudioPayloadReturnsFalse)
     EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INACTIVE);
 }
 
+TEST_F(AudioProfileNegotiatorTest, NegotiateNoMatchingPayloadResetsProfile)
+{
+    // Arrange
+    m_pLocalProfile->AddPayload(CreateAmrWbPayload(kLocalPayload, 0xFF));
+    m_pPeerProfile->AddPayload(CreateEvsPayload(101, 0x07, 0x0FF));
+
+    // --- Case 1: Peer port is non-zero ---
+    {
+        m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+        m_pPeerProfile->SetDataPort(6014);
+
+        // Act
+        IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+                IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+        // Assert
+        EXPECT_FALSE(bResult);  // Should fail as no common audio codec found.
+        // Profile should be reset based on local (bPeerPreferred = false)
+        EXPECT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
+        EXPECT_EQ(m_pNegotiatedProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadType(), "AMR-WB");
+        EXPECT_EQ(m_pNegotiatedProfile->GetDataPort(), 0);
+        EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INACTIVE);
+    }
+
+    // --- Case 2: Peer port is zero ---
+    {
+        m_pPeerProfile->SetDirection(MEDIA_DIRECTION_INACTIVE);
+        m_pPeerProfile->SetDataPort(0);
+
+        // Act
+        IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+                IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+        // Assert
+        EXPECT_TRUE(bResult);  // Should succeed by resetting.
+        // Profile should be reset based on peer (bPeerPreferred = true)
+        EXPECT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
+        EXPECT_EQ(m_pNegotiatedProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadType(), "EVS");
+        EXPECT_EQ(m_pNegotiatedProfile->GetDataPort(), 0);
+        EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INACTIVE);
+    }
+}
+
 TEST_F(AudioProfileNegotiatorTest, NegotiateAmrPayloadFormatRelaxedMatching)
 {
     // Arrange
