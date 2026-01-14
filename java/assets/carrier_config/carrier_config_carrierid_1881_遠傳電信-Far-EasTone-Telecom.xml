@@ -29,10 +29,10 @@
     <!-- Ssc -->
     <int name="imsss.ut_cfnr_timer_update_method_int" value="2"/>
 
-    <!-- ImsMedia -->
+    <!-- Media -->
     <boolean name="imsvoice.audio_bw_nego_option_bool" value="false"/>
     <int name="imsvoice.audio_rtp_dscp_int" value="46"/>
-    <int-array name="imsvoice.audio_port_rtp_int_array" num="2">
+    <int-array name="imsvoice.audio_rtp_port_range_int_array" num="2">
         <item value="50010"/>
         <item value="50060"/>
     </int-array>
