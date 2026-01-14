@@ -26,6 +26,7 @@
 #include "Engine.h"
 #include "IConfigurable.h"
 #include "IConfiguration.h"
+#include "ISipConfig.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ISipMessageBodyPart.h"
