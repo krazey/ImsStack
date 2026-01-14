@@ -16,9 +16,10 @@
 #ifndef INTERFACE_REG_BASE_H_
 #define INTERFACE_REG_BASE_H_
 
-#include "ISipMessage.h"
+#include "ImsTypeDef.h"
 
 class IMessageMediator;
+class ISipMessage;
 
 /**
  * @brief This class provides a base interface for IMS registration.

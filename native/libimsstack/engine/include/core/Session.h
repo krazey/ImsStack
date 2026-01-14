@@ -20,7 +20,6 @@
 #include "IRetryTaskHelperListener.h"
 #include "ISessionState.h"
 #include "RetryCmd.h"
-#include "RetryTaskHelper.h"
 #include "ServiceMethod.h"
 #include "SipStatusCode.h"
 #include "VirtualSession.h"
@@ -38,6 +37,7 @@ class Media;
 class Publication;
 class Reference;
 class Replaces;
+class RetryTaskHelper;
 class SdpOaState;
 class SdpReader;
 class SessionDescriptor;

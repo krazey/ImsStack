@@ -24,6 +24,7 @@
 
 #include "Capabilities.h"
 #include "IOnCapabilitiesListener.h"
+#include "ISipClientConnection.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ISipServerConnection.h"
@@ -40,6 +41,7 @@
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 #include "util/CallerCapability.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;

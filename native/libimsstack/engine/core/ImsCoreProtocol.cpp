@@ -19,6 +19,7 @@
 
 #include "private/ConfigurationManager.h"
 
+#include "CoreService.h"
 #include "CoreServiceImpl.h"
 #include "IServiceManager.h"
 #include "ImsCoreContext.h"

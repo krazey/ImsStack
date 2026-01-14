@@ -22,6 +22,7 @@
 #include "private/ImsSubscriberInfo.h"
 #include "private/SubscriberConfig.h"
 
+#include "SipAddress.h"
 #include "SipDebug.h"
 #include "base/SubscriberTracker.h"
 

@@ -20,6 +20,7 @@
 #include "SessionDescriptor.h"
 #include "VirtualSessionImpl.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 #include "media/FramedMediaImpl.h"
 #include "media/StreamMediaImpl.h"
 

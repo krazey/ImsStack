@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "AStringBuffer.h"
 #include "ImsUuid.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
 #include "Feature.h"
+#include "IAppConfig.h"
 #include "ICoreServiceConfig.h"
 #include "ServiceIdentifier.h"
 
@@ -33,6 +35,7 @@
 #include "SipDebug.h"
 #include "SipFeatures.h"
 #include "SipParameter.h"
+#include "util/CallerCapability.h"
 
 __IMS_TRACE_TAG_REG__;
 

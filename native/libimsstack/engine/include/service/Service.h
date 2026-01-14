@@ -20,7 +20,6 @@
 
 #include "IConfigUpdateListener.h"
 #include "private/AppConfig.h"
-#include "private/CoreServiceConfig.h"
 #include "private/SipConfigV.h"
 
 #include "Connection.h"
@@ -30,7 +29,8 @@
 #include "SipAddress.h"
 #include "SipMethod.h"
 #include "SipProfile.h"
-#include "ServiceFilterCriteria.h"
+
+class CoreServiceConfig;
 
 class CallerCapability;
 class Capabilities;
@@ -46,6 +46,7 @@ class MethodManager;
 class PageMessage;
 class PreferenceHeader;
 class Reference;
+class ServiceFilterCriteria;
 class Session;
 
 /**

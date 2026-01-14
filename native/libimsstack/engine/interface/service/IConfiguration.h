@@ -18,10 +18,11 @@
 
 #include "AStringArray.h"
 
-#include "IAppConfig.h"
-#include "IMediaConfig.h"
-#include "ISipConfig.h"
-#include "ISubscriberConfig.h"
+class IAppConfig;
+class IMediaConfig;
+class ISipConfig;
+class ISubscriberConfig;
+class ImsRegistry;
 
 /**
  * @brief An interface for accessing/modifying the configuration for each IMS services.

@@ -16,7 +16,11 @@
 #ifndef SERVICE_RESOLVER_H_
 #define SERVICE_RESOLVER_H_
 
-#include "IRegBinding.h"
+#include "ImsList.h"
+
+class AString;
+
+class IRegBinding;
 
 /**
  * @brief This class is an interface to get/set IMS registration binding with IMS service.

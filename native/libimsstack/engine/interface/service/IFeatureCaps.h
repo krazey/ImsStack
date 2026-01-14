@@ -16,9 +16,9 @@
 #ifndef INTERFACE_FEATURE_CAPS_H_
 #define INTERFACE_FEATURE_CAPS_H_
 
-#include "AString.h"
-
 #include "ISipMessage.h"
+
+class AString;
 
 /**
  * @brief This class provides an interface to manage/control the feature capabilities.

@@ -19,6 +19,7 @@
 #include "private/SipConfigV.h"
 
 #include "IOnPageMessageListener.h"
+#include "ISipClientConnection.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ISipServerConnection.h"
@@ -28,6 +29,7 @@
 #include "SipConfigProxy.h"
 #include "SipHeaderName.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 

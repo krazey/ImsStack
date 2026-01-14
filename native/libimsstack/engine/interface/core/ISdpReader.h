@@ -18,8 +18,8 @@
 
 #include "ImsList.h"
 
-#include "ISessionDescriptor.h"
-#include "media/IMediaDescriptor.h"
+class IMediaDescriptor;
+class ISessionDescriptor;
 
 /**
  * @brief A SDP reader provides access to the SDP body part

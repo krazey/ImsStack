@@ -16,7 +16,10 @@
 #ifndef INTERFACE_REG_INFO_REGISTRATION_H_
 #define INTERFACE_REG_INFO_REGISTRATION_H_
 
-#include "IRegInfoContact.h"
+#include "ImsList.h"
+
+class IRegInfoContact;
+class SipAddress;
 
 /**
  * @brief This class provides an interface to access the registration element

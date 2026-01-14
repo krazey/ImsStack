@@ -20,9 +20,10 @@
 #include "ImsMap.h"
 
 #include "ISubscriberInfoListener.h"
-#include "SipAddress.h"
 
 class IMutex;
+
+class SipAddress;
 
 class SubscriberTracker : public ISubscriberInfoListener
 {

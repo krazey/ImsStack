@@ -16,6 +16,8 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
+#include "ISipClientConnection.h"
+#include "ISipMessage.h"
 #include "PubState.h"
 #include "PublicationRefreshHelper.h"
 #include "SipMethod.h"

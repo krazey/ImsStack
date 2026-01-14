@@ -16,12 +16,15 @@
 #ifndef REG_CONTACT_H_
 #define REG_CONTACT_H_
 
-#include "AStringBuffer.h"
 #include "ImsSlot.h"
+#include "IpAddress.h"
 
 #include "IRegContact.h"
-#include "util/CallerCapability.h"
+#include "SipAddress.h"
 
+class AStringBuffer;
+
+class CallerCapability;
 class IRegCapabilityChangeListener;
 class SipProfile;
 

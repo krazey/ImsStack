@@ -16,9 +16,10 @@
 #ifndef INTERFACE_REG_INFO_CONTACT_H_
 #define INTERFACE_REG_INFO_CONTACT_H_
 
+#include "AString.h"
 #include "ImsMap.h"
 
-#include "SipAddress.h"
+class SipAddress;
 
 /**
  * @brief This class provides an interface to access the contact element

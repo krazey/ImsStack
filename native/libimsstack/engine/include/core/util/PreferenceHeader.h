@@ -16,9 +16,10 @@
 #ifndef PREFERENCE_HEADER_H_
 #define PREFERENCE_HEADER_H_
 
-#include "AStringArray.h"
+#include "AString.h"
 
 class FeatureSet;
+
 class ISipHeader;
 
 class PreferenceHeader

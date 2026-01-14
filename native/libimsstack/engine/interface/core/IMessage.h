@@ -16,10 +16,13 @@
 #ifndef INTERFACE_MESSAGE_H_
 #define INTERFACE_MESSAGE_H_
 
-#include "SipMethod.h"
+#include "ImsList.h"
+
+class AString;
 
 class IMessageBodyPart;
 class ISipMessage;
+class SipMethod;
 
 /**
  * @brief This class provides functionality to manipulate headers and body parts

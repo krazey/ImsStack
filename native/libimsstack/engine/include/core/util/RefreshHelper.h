@@ -18,12 +18,12 @@
 
 #include "ITimer.h"
 
-#include "ISipClientConnection.h"
 #include "ISipClientConnectionListener.h"
 #include "ISipErrorListener.h"
-#include "base/IMessageMediator.h"
 
+class IMessageMediator;
 class IRefreshable;
+class ISipClientConnection;
 
 class RefreshHelper :
         public ITimerListener,

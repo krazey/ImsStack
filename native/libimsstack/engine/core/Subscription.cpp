@@ -18,6 +18,7 @@
 
 #include "Capabilities.h"
 #include "IOnSubscriptionListener.h"
+#include "ISipClientConnection.h"
 #include "ISipDialog.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
@@ -33,6 +34,7 @@
 #include "Subscription.h"
 #include "base/IRefreshListener.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 #include "util/CallerPreferenceManager.h"
 #include "util/DialogMethodManager.h"
 #include "util/ForkedDialogMethodManager.h"

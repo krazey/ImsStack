@@ -16,9 +16,9 @@
 #ifndef REG_INFO_PARSER_H_
 #define REG_INFO_PARSER_H_
 
-#include "AString.h"
-
 #include "RegKey.h"
+
+class AString;
 
 class IRegInfoParserListener;
 

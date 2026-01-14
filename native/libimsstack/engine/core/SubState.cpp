@@ -18,6 +18,7 @@
 #include "TextParser.h"
 
 #include "ISipHeader.h"
+#include "ISipMessage.h"
 #include "ISubscriptionState.h"
 #include "Sip.h"
 #include "SipDebug.h"

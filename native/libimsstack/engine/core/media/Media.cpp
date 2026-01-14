@@ -16,19 +16,22 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
+#include "offeranswer/SdpMediaParameter.h"
+#include "offeranswer/SdpSessionParameter.h"
+
 #include "ISdpOaState.h"
 #include "Service.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 #include "media/IOnMediaListener.h"
 #include "media/Media.h"
+#include "media/MediaDescriptor.h"
 #include "media/MediaProposal.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-// 3  100503
-// 3 To support the connection in the media object,
-// 3 it needs to be modified using any active class to send/receive MSG.
-
+// To support the connection in the media object,
+// it needs to be modified using any active class to send/receive MSG.
 PUBLIC
 Media::Media(IN Service* pService, IN ISdpOaState* piOaState) :
         m_pService(pService),

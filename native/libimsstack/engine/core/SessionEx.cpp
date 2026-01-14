@@ -38,6 +38,7 @@
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 #include "media/Media.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;

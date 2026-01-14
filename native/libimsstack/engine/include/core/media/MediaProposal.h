@@ -16,11 +16,12 @@
 #ifndef MEDIA_PROPOSAL_H_
 #define MEDIA_PROPOSAL_H_
 
-#include "ImsCore.h"
+#include "ImsList.h"
+
 #include "media/IMediaState.h"
-#include "media/MediaDescriptor.h"
 
 class ISdpOaState;
+class MediaDescriptor;
 
 class MediaProposal : public IMediaState
 {

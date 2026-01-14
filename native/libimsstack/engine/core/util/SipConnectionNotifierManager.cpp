@@ -31,6 +31,7 @@
 #include "ISipServerConnectionListener.h"
 #include "ImsCoreContext.h"
 #include "Service.h"
+#include "ServiceFilterCriteria.h"
 #include "ServiceManager.h"
 #include "Sip.h"
 #include "SipConfigProxy.h"

@@ -16,11 +16,11 @@
 #ifndef INTERFACE_REFERENCE_H_
 #define INTERFACE_REFERENCE_H_
 
-#include "ByteArray.h"
-
 #include "IServiceMethod.h"
 #include "ISubscriptionState.h"
 #include "SipStatusCode.h"
+
+class ByteArray;
 
 class INotificationListener;
 class IReferenceListener;

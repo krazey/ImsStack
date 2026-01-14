@@ -23,6 +23,7 @@
 #include "Capabilities.h"
 #include "IOnNotificationListener.h"
 #include "IOnReferenceListener.h"
+#include "ISipClientConnection.h"
 #include "ISipDialog.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
@@ -31,12 +32,14 @@
 #include "ImplicitSubscriberState.h"
 #include "ImsCoreContext.h"
 #include "Reference.h"
+#include "Replaces.h"
 #include "Service.h"
 #include "Sip.h"
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
 #include "SipFeatures.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 #include "util/DialogMethodManager.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;

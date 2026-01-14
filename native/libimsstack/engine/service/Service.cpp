@@ -20,6 +20,7 @@
 #include "Feature.h"
 #include "ImsIdentity.h"
 #include "private/ConfigurationManager.h"
+#include "private/CoreServiceConfig.h"
 #include "private/SipConfig.h"
 #include "private/SubscriberConfig.h"
 
@@ -35,6 +36,7 @@
 #include "ImsCoreContext.h"
 #include "PAccessNetworkInfoHeader.h"
 #include "Service.h"
+#include "ServiceFilterCriteria.h"
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
 #include "SipError.h"
@@ -43,6 +45,7 @@
 #include "SipStatusCode.h"
 #include "SipTimerValuesHelper.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 #include "base/Method.h"
 #include "util/CallerCapability.h"
 #include "util/CallerPreference.h"

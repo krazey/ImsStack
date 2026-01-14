@@ -21,9 +21,11 @@
 #include "ISipConnection.h"
 #include "ISipHeader.h"
 #include "Message.h"
+#include "SipMethod.h"
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 

@@ -16,6 +16,7 @@
 #ifndef STREAM_MEDIA_H_
 #define STREAM_MEDIA_H_
 
+#include "ImsCore.h"
 #include "media/Media.h"
 
 class StreamMedia : public Media

@@ -20,6 +20,8 @@
 
 #include "IServiceFilterCriteria.h"
 
+class ISipMessage;
+
 class ServiceFilterCriteria final : public IServiceFilterCriteria
 {
 public:

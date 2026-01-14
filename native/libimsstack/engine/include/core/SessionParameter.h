@@ -18,9 +18,10 @@
 
 #include "offeranswer/SdpSessionParameter.h"
 #include "offeranswer/SdpMediaGroup.h"
-#include "offeranswer/SdpMediaParameter.h"
 
 #include "ISessionParameter.h"
+
+class SdpMediaParameter;
 
 class SessionParameter : public ISessionParameter
 {

@@ -17,6 +17,8 @@
 #include "ServiceTrace.h"
 
 #include "ServiceFilterCriteria.h"
+#include "SipMethod.h"
+#include "TriggerPoint.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 

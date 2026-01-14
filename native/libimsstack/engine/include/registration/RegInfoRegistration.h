@@ -17,10 +17,12 @@
 #define REG_INFO_REGISTRATION_H_
 
 #include "IRegInfoRegistration.h"
-#include "RegInfoContact.h"
 
 class INamedNodeMap;
 class INode;
+
+class IRegInfoContact;
+class RegInfoContact;
 
 class RegInfoRegistration : public IRegInfoRegistration
 {

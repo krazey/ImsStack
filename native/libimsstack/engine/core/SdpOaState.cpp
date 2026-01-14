@@ -17,8 +17,12 @@
 #include "ServiceTrace.h"
 
 #include "private/ConfigurationManager.h"
+#include "private/CoreServiceConfig.h"
 #include "private/MediaConfig.h"
 
+#include "SdpMediaDescription.h"
+#include "SdpParser.h"
+#include "SdpSessionDescription.h"
 #include "offeranswer/SdpOfferAnswer.h"
 #include "offeranswer/SdpSessionParameter.h"
 
@@ -26,6 +30,7 @@
 #include "ISipMessageBodyPart.h"
 #include "SdpOaState.h"
 #include "Service.h"
+#include "SessionParameter.h"
 #include "SipDebug.h"
 #include "SipStatusCode.h"
 
