@@ -34,12 +34,12 @@
 
 __IMS_TRACE_TAG_MEDIA__;
 
-#define MTU_MOBILE     1500
-#define MTU_EPDG       1280
-#define SIZE_OF_IP_SEC 60
-#define SIZE_OF_IPV6   60
-#define SIZE_OF_IPV4   40
-#define SIZE_OF_RTP    20 + 8  // rtp + header extension (cvo)
+#define MTU_MOBILE                1500
+#define MTU_EPDG                  1280
+#define SIZE_OF_IP_SEC            60
+#define SIZE_OF_IPV6              60
+#define SIZE_OF_IPV4              40
+#define SIZE_OF_RTP               20 + 8  // rtp + header extension (cvo)
 #define AVSYNC_REPORT_INTERVAL_MS 3000
 
 using namespace android::telephony::imsmedia;
@@ -159,6 +159,13 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::DestroyProfile(IMS_UINTP nNegoId)
 
     IMS_BOOL bRet = IMS_TRUE;
     bRet &= m_pMediaNegoHandler->DeleteMediaNego(nNegoId);
+
+    // For VZW, modify the direction inactive before calling the delete session for forking.
+    if (!m_bSessionConfirmed)
+    {
+        m_pAudioController->UpdateMediaDirection(MEDIA_DIRECTION_INACTIVE);
+    }
+
     bRet &= m_pAudioController->DeleteSession(nNegoId);
     return bRet;
 }
