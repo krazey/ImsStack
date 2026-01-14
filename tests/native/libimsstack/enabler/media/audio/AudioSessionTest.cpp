@@ -138,6 +138,11 @@ TEST_F(AudioSessionTest, testUpdateEarlyMediaDirection)
     peerPayload->SetFmtp(std::make_shared<AudioProfile::EvsFmtp>());
     peerProfile.AddPayload(peerPayload);
 
+    // Set default behavior for mocks to avoid over-saturation in multi-case tests.
+    ON_CALL(*m_pAudioConfig, IsRecvOnlyEarlySessionEnabled()).WillByDefault(Return(false));
+    ON_CALL(*m_pAudioConfig, IsEarlyMediaDirectionInactiveOnPemInactiveEnabled())
+            .WillByDefault(Return(false));
+
     // Case 1: PEM type is SENDRECV -> should be SEND_RECEIVE
     {
         m_pSession->SetMediaPemType(MEDIA_PEM_TYPE::SENDRECV);
@@ -157,13 +162,13 @@ TEST_F(AudioSessionTest, testUpdateEarlyMediaDirection)
         ASSERT_NE(pConfig, nullptr);
         EXPECT_EQ(pConfig->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY);
 
-        // Subcase 2.2: RecvOnlyEarlySession is disabled -> should be SEND_RECEIVE
+        // Subcase 2.2: RecvOnlyEarlySession is disabled -> should be RECEIVE_ONLY
         m_pSession->SetMediaPemType(MEDIA_PEM_TYPE::SENDONLY);
         EXPECT_CALL(*m_pAudioConfig, IsRecvOnlyEarlySessionEnabled()).WillOnce(Return(false));
         pConfig = m_pSession->UpdateRtpConfig(
                 0, &localProfile, &peerProfile, &negoProfile, IMS_FALSE);
         ASSERT_NE(pConfig, nullptr);
-        EXPECT_EQ(pConfig->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE);
+        EXPECT_EQ(pConfig->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY);
     }
 
     // Case 3: PEM type is RECVONLY -> should be SEND_ONLY
@@ -179,9 +184,8 @@ TEST_F(AudioSessionTest, testUpdateEarlyMediaDirection)
     {
         // Subcase 4.1: Config is disabled (default) -> should be RECEIVE_ONLY
         m_pSession->SetMediaPemType(MEDIA_PEM_TYPE::INACTIVE);
-        EXPECT_CALL(*m_pAudioConfig, IsRecvOnlyEarlySessionEnabled()).WillOnce(Return(true));
-        EXPECT_CALL(*m_pAudioConfig, IsEarlyMediaDirectionInactiveOnPemInactiveEnabled())
-                .WillOnce(Return(false));
+        ON_CALL(*m_pAudioConfig, IsEarlyMediaDirectionInactiveOnPemInactiveEnabled())
+                .WillByDefault(Return(false));
         AudioConfig* pConfig = m_pSession->UpdateRtpConfig(
                 0, &localProfile, &peerProfile, &negoProfile, IMS_FALSE);
         ASSERT_NE(pConfig, nullptr);
@@ -189,8 +193,8 @@ TEST_F(AudioSessionTest, testUpdateEarlyMediaDirection)
 
         // Subcase 4.2: Config is enabled -> should be INACTIVE
         m_pSession->SetMediaPemType(MEDIA_PEM_TYPE::INACTIVE);
-        EXPECT_CALL(*m_pAudioConfig, IsEarlyMediaDirectionInactiveOnPemInactiveEnabled())
-                .WillOnce(Return(true));
+        ON_CALL(*m_pAudioConfig, IsEarlyMediaDirectionInactiveOnPemInactiveEnabled())
+                .WillByDefault(Return(true));
         pConfig = m_pSession->UpdateRtpConfig(
                 0, &localProfile, &peerProfile, &negoProfile, IMS_FALSE);
         ASSERT_NE(pConfig, nullptr);
@@ -226,6 +230,25 @@ TEST_F(AudioSessionTest, testUpdateEarlyMediaDirection)
         // Direction should remain as negotiated (SEND_RECEIVE)
         EXPECT_EQ(pConfig->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE);
     }
+}
+
+TEST_F(AudioSessionTest, testUpdateDirectionToInactiveByPem)
+{
+    // Common setup
+    AudioConfig* pConfig = static_cast<AudioConfig*>(m_pSession->GetRtpConfig());
+    ASSERT_NE(pConfig, nullptr);
+    pConfig->setRemotePort(5004);  // Mark config as valid
+    pConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE);
+
+    EXPECT_TRUE(m_pSession->UpdateDirectionToInactiveByPem());
+    EXPECT_EQ(pConfig->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_INACTIVE);
+
+    // Case 2: Direction is already INACTIVE -> Should not change
+    pConfig->setRemotePort(5004);
+    pConfig->setMediaDirection(RtpConfig::MEDIA_DIRECTION_INACTIVE);
+
+    EXPECT_FALSE(m_pSession->UpdateDirectionToInactiveByPem());
+    EXPECT_EQ(pConfig->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_INACTIVE);
 }
 
 TEST_F(AudioSessionTest, testUpdateMediaQualityThreshold)

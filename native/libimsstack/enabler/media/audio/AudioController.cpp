@@ -32,6 +32,7 @@ AudioController::AudioController() :
         m_objLocalAddr(IpAddress::IPv6NONE),
         m_nPort(0),
         m_nCurrentActiveNegoId(UNDEFINED_NEGO_ID),
+        m_bForceModify(IMS_FALSE),
         m_pAudioConfig(IMS_NULL)
 {
     m_listAudioSession.Clear();
@@ -291,6 +292,19 @@ IMS_BOOL AudioController::ModifySession(IN IMS_UINTP nNegoId)
 }
 
 PUBLIC
+void AudioController::SetMediaPemType(IN IMS_UINTP nNegoId, IN MEDIA_PEM_TYPE ePemType)
+{
+    AudioSession* pAudioSession = FindAudioSession(nNegoId);
+    if (pAudioSession == nullptr)
+    {
+        IMS_TRACE_E(0, "SetMediaPemType(): session not found", 0, 0, 0);
+        return;
+    }
+
+    pAudioSession->SetMediaPemType(ePemType);
+}
+
+PUBLIC
 IMS_BOOL AudioController::SetMediaQuality(IN IMS_UINTP nNegoId)
 {
     IMS_TRACE_D("SetMediaQuality(): NegoId[%" PFLS_x "], Size[%d]", nNegoId, 0, 0);
@@ -344,6 +358,7 @@ PUBLIC
 IMS_BOOL AudioController::CloseSession()
 {
     IMS_TRACE_I("CloseSession(): state[%d]", m_eMediaState, 0, 0);
+
     AudioSession* pAudioSession = FindAudioSession();
 
     if (pAudioSession != IMS_NULL)
@@ -357,6 +372,26 @@ IMS_BOOL AudioController::CloseSession()
     }
 
     return IMS_FALSE;
+}
+
+PUBLIC
+void AudioController::HandleForkedSessionUpdate(IN IMS_UINTP nPrevNegoId)
+{
+    IMS_TRACE_D("HandleForkedSessionUpdate(): checking previous session [%" PFLS_x "]", nPrevNegoId,
+            0, 0);
+    AudioSession* pPrevAudioSession = FindAudioSession(nPrevNegoId);
+    if (pPrevAudioSession != nullptr && pPrevAudioSession->GetPemType() != MEDIA_PEM_TYPE::INACTIVE)
+    {
+        IMS_TRACE_D("HandleForkedSessionUpdate(): previous session is active, updating to inactive",
+                0, 0, 0);
+        if (pPrevAudioSession->UpdateDirectionToInactiveByPem())
+        {
+            ModifySession(nPrevNegoId);
+            m_bForceModify = IMS_TRUE;
+            IMS_TRACE_D("HandleForkedSessionUpdate() - modifySession called for previous session",
+                    0, 0, 0);
+        }
+    }
 }
 
 PUBLIC
@@ -659,6 +694,13 @@ IMS_BOOL AudioController::IsAudioConfigChanged(IN AudioConfig* pAudioConfig)
         return IMS_TRUE;
     }
 
+    if (m_bForceModify)
+    {
+        IMS_TRACE_D("IsAudioConfigChanged(): RtpConfig changed (forced modify)", 0, 0, 0);
+        m_bForceModify = IMS_FALSE;
+        return IMS_TRUE;
+    }
+
     if (*m_pAudioConfig != *pAudioConfig)
     {
         IMS_TRACE_D("IsAudioConfigChanged(): RtpConfig changed", 0, 0, 0);
@@ -669,26 +711,6 @@ IMS_BOOL AudioController::IsAudioConfigChanged(IN AudioConfig* pAudioConfig)
     IMS_TRACE_D("IsAudioConfigChanged(): Same RtpConfig", 0, 0, 0);
 
     return IMS_FALSE;
-}
-
-PUBLIC
-void AudioController::SetMediaPemType(IN IMS_UINTP nNegoId, IN MEDIA_PEM_TYPE ePemType)
-{
-    if (nNegoId == UNDEFINED_NEGO_ID)
-    {
-        IMS_TRACE_D("SetMediaPemType() - NegoId is invalid", 0, 0, 0);
-        nNegoId = m_nCurrentActiveNegoId;
-    }
-
-    AudioSession* pAudioSession = FindAudioSession(nNegoId);
-    if (pAudioSession != IMS_NULL)
-    {
-        pAudioSession->SetMediaPemType(ePemType);
-    }
-    else
-    {
-        IMS_TRACE_E(0, "SetMediaPemType(): session not found", 0, 0, 0);
-    }
 }
 
 PUBLIC

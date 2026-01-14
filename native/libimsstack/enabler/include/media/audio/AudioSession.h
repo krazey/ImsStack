@@ -104,6 +104,13 @@ public:
             IN IMS_BOOL bConfirmedSession);
 
     /**
+     * @brief Updates the media direction in the current RtpConfig based on the PEM type.
+     *
+     * @return IMS_TRUE if the direction was changed, IMS_FALSE otherwise.
+     */
+    virtual IMS_BOOL UpdateDirectionToInactiveByPem();
+
+    /**
      * @brief Update the MediaQualityThreshold parameters and send it to the java
      *
      * @param bActiveSession Set IMS_TRUE if this session is active
@@ -219,7 +226,14 @@ public:
      *
      * @param ePemType The p-early media header value
      */
-    void SetMediaPemType(IN MEDIA_PEM_TYPE ePemType);
+    virtual void SetMediaPemType(IN MEDIA_PEM_TYPE ePemType);
+
+    /**
+     * @brief Get p-early media header
+     *
+     * @return MEDIA_PEM_TYPE The p-early media header value
+     */
+    virtual MEDIA_PEM_TYPE GetPemType() { return m_ePemType; }
 
     /**
      * @brief request REQUEST_RTP_RECEPTION_STATS for AV sync during the video call
@@ -229,6 +243,13 @@ public:
      */
     IMS_BOOL RequestRtpReceptionStats(IN IMS_SINT32 nReportingIntervalMs);
 
+    /**
+     * @brief Checks if the feature to set media direction to inactive on PEM inactive is enabled.
+     *
+     * @return IMS_TRUE if the feature is enabled, otherwise IMS_FALSE.
+     */
+    IMS_BOOL IsEarlyMediaDirectionInactiveOnPemInactiveEnabled() const;
+
 private:
     IMS_SINT32 ConvertBitrateToCodecMode(IMS_UINT32 nBitRate, IMS_UINT32 nCodecType);
     void NetworkToneTimerExpired();
@@ -237,7 +258,7 @@ private:
     IMS_SINT32 GetRtpInactivityTimer(IN IMS_BOOL bActiveSession);
     IMS_SINT32 GetRtcpInactivityTimer(IN IMS_BOOL bActiveSession);
     IMS_BOOL IsRtpInactivityForQnsNeeded(IN IMS_BOOL bConfirmedSession);
-    AudioConfiguration* GetConfiguration();
+    AudioConfiguration* GetConfiguration() const;
     IMS_SINT32 UpdateEarlyMediaDirection(IMS_SINT32 mediaDirection);
 
 protected:
