@@ -23,6 +23,7 @@
 #include "IMtsNetworkTracker.h"
 #include "IMtsService.h"
 #include "INetworkWatcher.h"
+#include "ISipConfig.h"
 #include "ISipConfigV.h"
 #include "IPageMessage.h"
 #include "ImsEventDef.h"

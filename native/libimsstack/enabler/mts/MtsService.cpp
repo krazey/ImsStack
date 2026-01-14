@@ -39,6 +39,7 @@
 #include "MtsTraffic.h"
 #include "ServiceImsRadio.h"
 #include "ServicePhoneInfo.h"
+#include "TriggerPoint.h"
 #include "message/IMtsMessageController.h"
 #include "utility/IMtsDynamicLoader.h"
 #include "utility/MtsAosUtils.h"
