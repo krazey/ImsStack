@@ -16,6 +16,9 @@
 
 #include <gtest/gtest.h>
 
+#include "SdpAttribute.h"
+#include "SdpBandwidth.h"
+
 #include "audio/AudioProfile.h"
 #include "audio/AudioSdpParser.h"
 #include "offeranswer/SdpAvCodec.h"

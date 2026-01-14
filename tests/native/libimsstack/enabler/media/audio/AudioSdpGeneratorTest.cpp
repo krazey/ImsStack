@@ -16,10 +16,12 @@
 
 #include <gtest/gtest.h>
 
+#include "SdpAttribute.h"
 #include "audio/AudioSdpGenerator.h"
 
 #include "core/MockISessionDescriptor.h"
 #include "media/MockIMediaDescriptor.h"
+#include "offeranswer/SdpMediaFormat.h"
 
 using ::testing::_;
 

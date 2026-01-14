@@ -16,6 +16,8 @@
 
 #include <gtest/gtest.h>
 
+#include "SdpAttribute.h"
+
 #include "video/VideoSdpGenerator.h"
 #include "video/VideoProfile.h"
 

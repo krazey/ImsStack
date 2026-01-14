@@ -22,6 +22,7 @@
 #include "video/VideoDef.h"
 #include "video/VideoProfile.h"
 #include "video/VideoSdpParser.h"
+#include "SdpAttribute.h"
 #include "SdpMedia.h"
 #include "core/media/MockIMediaDescriptor.h"
 #include "core/MockISessionDescriptor.h"

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "SdpAttribute.h"
 #include "ServiceTrace.h"
 #include "offeranswer/SdpAvCodec.h"
 #include "offeranswer/SdpMediaFormatParameter.h"

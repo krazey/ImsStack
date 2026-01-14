@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 
 #include "IpAddress.h"
+#include "SdpBandwidth.h"
 #include "offeranswer/SdpAvCodec.h"
 #include "text/TextSdpParser.h"
 #include "text/TextProfile.h"

@@ -15,6 +15,7 @@
  */
 
 #include "ServiceTrace.h"
+#include "offeranswer/SdpMediaFormat.h"
 
 #include "text/TextSdpGenerator.h"
 

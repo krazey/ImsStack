@@ -16,6 +16,7 @@
 
 #include "audio/AudioSdpParser.h"
 
+#include "SdpAttribute.h"
 #include "ServiceTrace.h"
 #include "audio/AudioProfileUtil.h"
 #include "offeranswer/SdpAvCodec.h"

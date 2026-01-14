@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+#include "SdpAttribute.h"
 #include "ServiceTrace.h"
 
 #include "audio/AudioProfileUtil.h"
 #include "audio/AudioSdpGenerator.h"
+#include "offeranswer/SdpMediaFormat.h"
 
 #define MODESET_MAX_AMR   7
 #define MODESET_MAX_AMRWB 8
