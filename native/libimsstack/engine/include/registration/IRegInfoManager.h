@@ -16,11 +16,12 @@
 #ifndef INTERFACE_REG_INFO_MANAGER_H_
 #define INTERFACE_REG_INFO_MANAGER_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
 
-#include "RegKey.h"
+class AString;
 
 class RegInfo;
+class RegKey;
 
 /**
  * @brief An interface for managing the information of "reg" event package.

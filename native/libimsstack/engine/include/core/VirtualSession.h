@@ -20,12 +20,12 @@
 
 #include "ISessionState.h"
 #include "Service.h"
+#include "SipAddress.h"
 
 class ISipMessage;
 class Media;
 class SdpOaState;
 class SessionDescriptor;
-class SipAddress;
 
 class VirtualSession : public RcObject, public ISessionState
 {

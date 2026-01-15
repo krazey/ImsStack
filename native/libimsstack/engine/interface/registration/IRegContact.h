@@ -16,13 +16,15 @@
 #ifndef INTERFACE_REG_CONTACT_H_
 #define INTERFACE_REG_CONTACT_H_
 
-#include "IpAddress.h"
+#include "AString.h"
 
 #include "CarrierConfig.h"
 
-#include "SipAddress.h"
+class IpAddress;
 
 class IRegContactListener;
+class SipAddress;
+class SipParameter;
 
 /**
  * @brief This class provides an interface to access/control the Contact information

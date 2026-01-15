@@ -16,8 +16,9 @@
 #ifndef MEDIA_IMPL_H_
 #define MEDIA_IMPL_H_
 
-#include "media/IMedia.h"
+#include "ImsTypeDef.h"
 
+class IMedia;
 class Media;
 
 class MediaImpl

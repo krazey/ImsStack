@@ -23,6 +23,7 @@
 #include "SipMethod.h"
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
+#include "base/IMessageMediator.h"
 #include "util/IRefreshable.h"
 #include "util/RefreshHelper.h"
 

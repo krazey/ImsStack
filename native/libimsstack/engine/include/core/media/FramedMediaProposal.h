@@ -16,6 +16,7 @@
 #ifndef FRAMED_MEDIA_PROPOSAL_H_
 #define FRAMED_MEDIA_PROPOSAL_H_
 
+#include "ImsCore.h"
 #include "media/MediaProposal.h"
 
 class FramedMediaProposal : public MediaProposal

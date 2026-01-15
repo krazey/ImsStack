@@ -16,7 +16,9 @@
 #ifndef INTERFACE_MESSAGE_BODY_PART_H_
 #define INTERFACE_MESSAGE_BODY_PART_H_
 
-#include "ByteArray.h"
+#include "AString.h"
+
+class ByteArray;
 
 /**
  * @brief This class provides an interface to access and control SIP message body parts.

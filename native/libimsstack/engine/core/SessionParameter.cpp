@@ -18,6 +18,7 @@
 
 #include "SdpAttribute.h"
 #include "SdpMediaDescription.h"
+#include "offeranswer/SdpMediaParameter.h"
 #include "offeranswer/SdpOfferAnswer.h"
 
 #include "SessionParameter.h"

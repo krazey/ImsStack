@@ -16,14 +16,17 @@
 #ifndef REG_INFO_MANAGER_H_
 #define REG_INFO_MANAGER_H_
 
-#include "AString.h"
+#include "ImsList.h"
 #include "ImsMap.h"
 
 #include "IRegInfoManager.h"
 #include "IRegInfoParserListener.h"
 
-class IDocument;
+class AString;
 class IMutex;
+
+class IDocument;
+
 class RegInfoParser;
 
 class RegInfoManager : public IRegInfoManager, public IRegInfoParserListener

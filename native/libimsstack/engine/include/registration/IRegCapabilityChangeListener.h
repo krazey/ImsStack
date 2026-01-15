@@ -16,7 +16,9 @@
 #ifndef INTERFACE_REG_CAPABILITY_CHANGE_LISTENER_H_
 #define INTERFACE_REG_CAPABILITY_CHANGE_LISTENER_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
+
+class AString;
 
 class IRegCapabilityChangeListener
 {

@@ -22,6 +22,7 @@
 #include "INode.h"
 
 #include "RegInfoConst.h"
+#include "RegInfoContact.h"
 #include "RegInfoRegistration.h"
 #include "SipDebug.h"
 

@@ -17,6 +17,7 @@
 #include "ServiceTrace.h"
 
 #include "IOnPublicationListener.h"
+#include "ISipClientConnection.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "PubState.h"
@@ -26,6 +27,7 @@
 #include "SipStatusCode.h"
 #include "base/IRefreshListener.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 

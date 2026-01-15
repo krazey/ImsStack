@@ -16,9 +16,7 @@
 #ifndef FRAMED_MEDIA_H_
 #define FRAMED_MEDIA_H_
 
-#include "AStringArray.h"
-#include "ByteArray.h"
-#include "ImsMap.h"
+#include "ImsCore.h"
 
 #include "media/Media.h"
 

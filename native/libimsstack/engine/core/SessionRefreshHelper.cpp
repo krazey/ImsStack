@@ -17,6 +17,7 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
+#include "ISipClientConnection.h"
 #include "ISipDialog.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"

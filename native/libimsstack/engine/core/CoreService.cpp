@@ -27,6 +27,7 @@
 #include "PageMessage.h"
 #include "Publication.h"
 #include "Reference.h"
+#include "Replaces.h"
 #include "SessionEx.h"
 #include "Sip.h"
 #include "SipConnectionFactory.h"
@@ -34,6 +35,7 @@
 #include "SipParsingHelper.h"
 #include "Subscription.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 

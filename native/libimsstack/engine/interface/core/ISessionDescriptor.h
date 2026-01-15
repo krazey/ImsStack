@@ -18,7 +18,7 @@
 
 #include "IpAddress.h"
 
-#include "SdpAttribute.h"
+class SdpAttribute;
 
 /**
  * @brief This class provides an interface to the session-level part of incoming/outgoing SDP.

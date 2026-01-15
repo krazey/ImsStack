@@ -16,8 +16,9 @@
 #ifndef SUB_STATE_H_
 #define SUB_STATE_H_
 
-#include "ISipMessage.h"
 #include "util/EventPackage.h"
+
+class ISipMessage;
 
 struct SipHeaderProperty;
 

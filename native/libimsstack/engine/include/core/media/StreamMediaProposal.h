@@ -16,6 +16,7 @@
 #ifndef STREAM_MEDIA_PROPOSAL_H_
 #define STREAM_MEDIA_PROPOSAL_H_
 
+#include "ImsCore.h"
 #include "media/MediaProposal.h"
 
 class StreamMediaProposal : public MediaProposal

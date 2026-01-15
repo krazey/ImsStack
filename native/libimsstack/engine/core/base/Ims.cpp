@@ -18,6 +18,7 @@
 #include "SystemConfig.h"
 
 #include "base/Ims.h"
+#include "base/ImsError.h"
 
 PRIVATE GLOBAL IMS_SINT32* Ims::s_pnErrorCode = IMS_NULL;
 

@@ -23,6 +23,7 @@
 #include "Connector.h"
 #include "IRegInfoManager.h"
 #include "IRegSubscriptionListener.h"
+#include "ISipClientConnection.h"
 #include "ISipDialog.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
@@ -43,6 +44,7 @@
 #include "SubscriberRefreshHelper.h"
 #include "SubscriberState.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 #include "util/DialogMethodManager.h"
 // NOTIFY_REQUEST_HANDLING_AFTER_DE_REG
 #include "util/ISipConnectionNotifierManager.h"

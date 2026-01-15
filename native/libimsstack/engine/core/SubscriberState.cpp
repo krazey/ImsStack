@@ -17,6 +17,7 @@
 #include "ServiceTrace.h"
 
 #include "ISipHeader.h"
+#include "ISipMessage.h"
 #include "Sip.h"
 #include "SipHeaderName.h"
 #include "SipHeaderProperty.h"

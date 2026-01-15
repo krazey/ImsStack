@@ -19,6 +19,7 @@
 #include "MessageBodyPart.h"
 #include "SipHeaderName.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 
 PUBLIC
 MessageBodyPart::MessageBodyPart(IN IMessage* piMessage, IN ISipMessageBodyPart* piBodyPart) :

@@ -16,7 +16,9 @@
 #ifndef REMOTE_CAPABILITIES_
 #define REMOTE_CAPABILITIES_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
+
+class AString;
 
 class AppConfig;
 class CoreServiceConfig;

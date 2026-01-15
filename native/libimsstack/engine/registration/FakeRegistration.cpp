@@ -29,6 +29,7 @@
 #include "SipStatusCode.h"
 #include "SipUrnHelper.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 
 __IMS_TRACE_TAG_REG__;
 

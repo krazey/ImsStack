@@ -17,7 +17,6 @@
 #define REFERENCE_H_
 
 #include "ISubscriptionState.h"
-#include "Replaces.h"
 #include "ServiceMethod.h"
 #include "SipMethod.h"
 #include "SipStatusCode.h"
@@ -26,6 +25,7 @@
 
 class IOnNotificationListener;
 class IOnReferenceListener;
+class Replaces;
 class SubState;
 
 // Reference: RFC 3515, RFC 3420, RFC 3725, RFC 3891, RFC 4488, RFC 4508, RFC 5368, RFC 3265

@@ -19,6 +19,8 @@
 
 #include "private/SipConfigV.h"
 
+#include "SdpMedia.h"
+#include "offeranswer/SdpMediaParameter.h"
 #include "offeranswer/SdpOfferAnswer.h"
 #include "offeranswer/SdpProfile.h"
 
@@ -27,12 +29,15 @@
 #include "ISipMessageBodyPart.h"
 #include "SdpOaState.h"
 #include "SessionDescriptor.h"
+#include "SessionParameter.h"
 #include "Sip.h"
 #include "SipHeaderName.h"
 #include "SipMethod.h"
 #include "SipStatusCode.h"
 #include "VirtualSession.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
+#include "media/Media.h"
 #include "media/MediaFactory.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;

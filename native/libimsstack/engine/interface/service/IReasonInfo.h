@@ -16,7 +16,9 @@
 #ifndef INTERFACE_REASON_INFO_H_
 #define INTERFACE_REASON_INFO_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
+
+class AString;
 
 /**
  * @brief This class provides an interface to enable an application to get details on

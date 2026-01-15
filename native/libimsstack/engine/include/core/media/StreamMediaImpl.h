@@ -16,6 +16,7 @@
 #ifndef STREAM_MEDIA_IMPL_H_
 #define STREAM_MEDIA_IMPL_H_
 
+#include "media/IMedia.h"
 #include "media/IOnMediaListener.h"
 #include "media/MediaImpl.h"
 #include "media/StreamMedia.h"

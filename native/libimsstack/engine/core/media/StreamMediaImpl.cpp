@@ -17,6 +17,7 @@
 #include "ServiceTrace.h"
 
 #include "base/Ims.h"
+#include "base/ImsError.h"
 #include "media/MediaDescriptor.h"
 #include "media/StreamMediaImpl.h"
 #include "media/StreamMediaProposalImpl.h"

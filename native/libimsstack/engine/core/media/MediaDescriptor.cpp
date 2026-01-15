@@ -23,6 +23,7 @@
 
 #include "SipDebug.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 #include "media/IMediaState.h"
 #include "media/MediaDescriptor.h"
 

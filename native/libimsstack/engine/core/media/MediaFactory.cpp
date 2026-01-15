@@ -19,6 +19,7 @@
 #include "ImsCore.h"
 #include "SdpMedia.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 #include "media/FramedMedia.h"
 #include "media/MediaFactory.h"
 #include "media/StreamMedia.h"

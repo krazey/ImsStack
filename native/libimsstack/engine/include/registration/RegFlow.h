@@ -16,9 +16,11 @@
 #ifndef REG_FLOW_H_
 #define REG_FLOW_H_
 
-#include "IpAddress.h"
+#include "AString.h"
 
 #include "RegKey.h"
+
+class IpAddress;
 
 class RegFlow
 {

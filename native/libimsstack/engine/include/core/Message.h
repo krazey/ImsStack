@@ -22,6 +22,9 @@
 
 class AppConfig;
 
+class IMessageBodyPart;
+class MessageBodyPart;
+
 class Message : public IMessage
 {
 public:

@@ -16,9 +16,9 @@
 #ifndef INTERFACE_PUBLICATION_H_
 #define INTERFACE_PUBLICATION_H_
 
-#include "ByteArray.h"
-
 #include "IServiceMethod.h"
+
+class ByteArray;
 
 class IPublicationListener;
 class IRefreshListener;

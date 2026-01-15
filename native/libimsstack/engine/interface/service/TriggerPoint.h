@@ -16,9 +16,11 @@
 #ifndef TRIGGER_POINT_H_
 #define TRIGGER_POINT_H_
 
-#include "AStringArray.h"
+#include "AString.h"
 
 #include "SipMethod.h"
+
+class AStringArray;
 
 class ISipHeader;
 class ISipMessage;

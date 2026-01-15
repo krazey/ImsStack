@@ -17,7 +17,9 @@
 #define FRAMED_MEDIA_IMPL_H_
 
 #include "media/FramedMedia.h"
+#include "media/IMedia.h"
 #include "media/IOnMediaListener.h"
+#include "media/MediaDescriptor.h"
 #include "media/MediaImpl.h"
 
 class FramedMediaProposalImpl;

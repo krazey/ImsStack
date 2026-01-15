@@ -16,6 +16,7 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
+#include "ISipClientConnection.h"
 #include "ISipDialog.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
@@ -27,6 +28,7 @@
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 

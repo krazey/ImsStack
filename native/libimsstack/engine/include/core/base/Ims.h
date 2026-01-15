@@ -16,7 +16,7 @@
 #ifndef IMS_H_
 #define IMS_H_
 
-#include "base/ImsError.h"
+#include "ImsTypeDef.h"
 
 class Ims
 {

@@ -18,7 +18,7 @@
 
 #include "ImsList.h"
 
-#include "RegObserver.h"
+class RegObserver;
 
 class RegSubject
 {

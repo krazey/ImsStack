@@ -16,9 +16,12 @@
 #ifndef MEDIA_FACTORY_H_
 #define MEDIA_FACTORY_H_
 
-#include "media/Media.h"
+#include "ImsList.h"
+
+class AString;
 
 class ISdpOaState;
+class Media;
 class Service;
 
 class MediaFactory

@@ -16,12 +16,15 @@
 #ifndef CALLER_PREFERENCE_H_
 #define CALLER_PREFERENCE_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
+
+class AString;
 
 class AppConfig;
 class CoreServiceConfig;
 class FeatureSet;
 class ISipConfigV;
+
 class PreferenceHeader;
 
 class CallerPreference
