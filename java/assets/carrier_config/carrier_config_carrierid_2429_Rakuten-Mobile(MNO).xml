@@ -16,6 +16,7 @@
 -->
 <carrier_config>
     <!-- Ims General -->
+    <int name="ims.registration_contact_user_info_part_int" value="1"/>
     <int name="ims.sip_timer_100_trying_millis_int" value="0"/>
 
     <!-- Aos -->
