@@ -49,6 +49,7 @@
 #include "SipFactory.h"
 #include "SipMethod.h"
 #include "SipStatusCode.h"
+#include "TriggerPoint.h"
 #include "common/IAppConfig.h"
 #include "common/ICoreServiceConfig.h"
 #include "common/IMediaConfig.h"

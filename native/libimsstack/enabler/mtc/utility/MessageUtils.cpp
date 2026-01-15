@@ -43,6 +43,7 @@
 #include "conferencecall/ConferenceDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "media/IMedia.h"
+#include "media/IMediaDescriptor.h"
 #include "utility/MessageUtil.h"
 #include "utility/MessageUtils.h"
 #include <tuple>

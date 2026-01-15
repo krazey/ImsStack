@@ -25,6 +25,7 @@
 #include "MtcDef.h"
 #include "ServiceTrace.h"
 #include "Sip.h"
+#include "SipAddress.h"
 #include "SipParameter.h"
 #include "TextParser.h"
 #include "call/IMtcCall.h"

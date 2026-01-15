@@ -27,6 +27,7 @@
 #include "media/IMedia.h"
 #include "media/IMediaDescriptor.h"
 #include "media/MtcMediaUtil.h"
+#include "offeranswer/SdpMediaParameter.h"
 #include "offeranswer/SdpPrecondition.h"
 #include "offeranswer/SdpSegmentedPrecondition.h"
 #include "precondition/QosStatusTable.h"
