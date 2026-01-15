@@ -39,6 +39,7 @@
 #include "IRegParameter.h"
 #include "IRegSubscription.h"
 #include "ISipHeader.h"
+#include "ISipMessage.h"
 #include "ISipMessageBodyPart.h"
 #include "ISipRtConfigHelper.h"
 #include "ISipTransportHelper.h"

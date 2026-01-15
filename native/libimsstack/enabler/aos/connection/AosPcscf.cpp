@@ -21,6 +21,7 @@
 
 #include "IConfigurable.h"
 #include "IConfiguration.h"
+#include "ISubscriberConfig.h"
 #include "CarrierConfig.h"
 #include "Engine.h"
 #include "ServerAddress.h"
