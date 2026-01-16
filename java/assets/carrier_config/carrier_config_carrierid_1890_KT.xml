@@ -64,6 +64,7 @@
     <int name="imsemergency.roaming_preferred_ereg_int" value="2"/>
 
     <!-- Media -->
+    <boolean name="imsvoice.sdp_reoffer_full_capability_bool" value="true"/>
     <int-array name="imsvoice.audio_rtp_port_range_int_array" num="2">
         <item value="49152"/>
         <item value="65535"/>

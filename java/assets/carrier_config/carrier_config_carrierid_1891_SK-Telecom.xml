@@ -68,6 +68,7 @@
     <int name="imsemergency.ipcan_release_emergency_pdn_upon_emergency_call_end_int" value="3"/>
 
     <!-- Media -->
+    <boolean name="imsvoice.sdp_reoffer_full_capability_bool" value="true"/>
     <int-array name="imsvoice.audio_rtp_port_range_int_array" num="2">
         <item value="7010"/>
         <item value="7012"/>
