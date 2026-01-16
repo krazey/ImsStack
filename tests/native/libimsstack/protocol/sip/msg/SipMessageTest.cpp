@@ -735,6 +735,23 @@ gzip message body\r\n";
 
     pDecodeMessage->SipDelete();
 
+    /* With no content-type header but with content-length, success */
+    pMsg = "Via: SIP/2.0/TCP host;branch=test-br\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:userA@host>\r\n\
+Call-ID: callid\r\n\
+CSeq: 3 INVITE\r\n\
+Content-Length: 19\r\n\
+\r\n\
+gzip message body\r\n";
+
+    pDecodeMessage = new SipMessage();
+    ASSERT_TRUE(pDecodeMessage != nullptr);
+
+    EXPECT_EQ(SIP_TRUE, pDecodeMessage->DecodeFragmentMsg(pMsg, SipPf_Strlen(pMsg)));
+
+    pDecodeMessage->SipDelete();
+
     /* headers and multipart message body, success */
     pMsg = "\r\nINVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
@@ -1322,7 +1339,7 @@ Content-Length: 0\r\n\
 
     pDecodeMessage->SipDelete();
 
-    /* With message body and no content-type header, fail */
+    /* With message body and no content-type header, success */
     pMsg = "INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
@@ -1336,7 +1353,8 @@ Messages-Waiting: yes\r\n";
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pDecodeMessage->Decode(pMsg, SipPf_Strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pDecodeMessage->Decode(pMsg, SipPf_Strlen(pMsg)));
+    ASSERT_TRUE(pDecodeMessage->GetMsgBody(0) == nullptr);
 
     pDecodeMessage->SipDelete();
 
