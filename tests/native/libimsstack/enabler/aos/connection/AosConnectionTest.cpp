@@ -36,7 +36,6 @@ using ::testing::ReturnRef;
 
 #define DECLARE_USING(Base)                           \
     using Base::Notify;                               \
-    using Base::SetActivationRequested;               \
     using Base::SetState;                             \
     using Base::UpdateIpcanForImsTraffic;             \
     using Base::NetworkConnection_OnConnected;        \

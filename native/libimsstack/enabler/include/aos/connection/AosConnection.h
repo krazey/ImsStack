@@ -33,6 +33,7 @@ public:
     IMS_BOOL Activate() override;
     void Deactivate() override;
     IMS_BOOL IsActivationRequested() override;
+    void SetActivationRequested(IN IMS_BOOL bRequest) override;
     IMS_UINT32 GetState() override;
 
     IMS_SINT32 GetConnectionType() override;
@@ -62,7 +63,6 @@ protected:
     IMS_BOOL IsConnected() const;
     IMS_BOOL IsOnDemandControl() const;
 
-    void SetActivationRequested(IN IMS_BOOL bRequest);
     void SetState(IN IMS_UINT32 nState);
     void UpdateIpcanForImsTraffic();
 
