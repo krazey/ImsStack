@@ -826,7 +826,12 @@
     </string-array>
     <int name="imsvoice.session_refresh_sdp_session_version_increment_int" value="0"/>
     <boolean name="imsvoice.csfb_when_all_pcscf_unavailable_bool" value="false"/>
-    <string-array name="imsemergency.dynamic_routing_number_per_plmn_string_array" num="21">
+    <string-array name="imsemergency.dynamic_routing_number_per_plmn_string_array" num="25">
+        <!-- b/435065218 -->
+        <item value="th,00,191,199,1669"/>
+        <item value="th,03,191,199,1669"/>
+        <item value="th,04,191,199,1669"/>
+        <item value="th,05,191,199,1669"/>
         <!-- b/419291707 -->
         <item value="rs,,193,194"/>
         <!-- b/419587461 -->
