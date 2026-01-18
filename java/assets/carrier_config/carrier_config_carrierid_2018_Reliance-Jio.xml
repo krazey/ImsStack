@@ -51,7 +51,7 @@
     <int name="imsvoice.silent_redial_interval_millis_int" value="8000"/>
     <int name="imsvoice.silent_redial_max_retry_count_int" value="100"/>
     <int name="imsvoice.silent_redial_ultimate_failure_action_int" value="1"/>
-    <string-array name="imsvoice.reject_code_and_action_set_string_array" num="43">
+    <string-array name="imsvoice.reject_code_and_action_set_string_array" num="42">
         <item value="300:5"/> <!-- REDIRECTION_BY_CONTACT -->
         <item value="301:5"/> <!-- REDIRECTION_BY_CONTACT -->
         <item value="302:5"/> <!-- REDIRECTION_BY_CONTACT -->
@@ -77,7 +77,6 @@
         <item value="481:3,1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE -->
         <item value="482:3,1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE -->
         <item value="483:3,1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE -->
-        <item value="484:3,1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE -->
         <item value="485:3,1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE -->
         <item value="487:3,1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE -->
         <item value="488:3,2,1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE_BY_SDP_CONTENT, SILENT_REINVITE -->
