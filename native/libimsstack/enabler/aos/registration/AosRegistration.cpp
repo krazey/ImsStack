@@ -1489,7 +1489,15 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::OnMessage(IN IMSMSG& objMsg)
             break;
 
         case MSG_REG_REQUIRED_WITH_NEXT_PCSCF:
-            ProcessRegRequiredWithNextPcscf();
+            if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrPolicy() ==
+                    CarrierConfig::Ims::ERROR_POLICY_PDN_REACTIVATED)
+            {
+                ProcessDefaultFlowRecovery_Start();
+            }
+            else
+            {
+                ProcessRegRequiredWithNextPcscf();
+            }
             break;
 
         case MSG_REG_REQUIRED_WITH_SCSCF_RESTORATION:
