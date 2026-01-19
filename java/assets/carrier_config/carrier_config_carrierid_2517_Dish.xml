@@ -80,6 +80,7 @@
         <item value="20000"/>
     </int-array>
     <string name="imsvoice.call_terminate_reason_header_sip_response_timeout_string">RELEASE_CAUSE;cause=6;text=&quot;Call-setup Time-out&quot;</string>
+    <string name="imsemergency.p_emergency_info_header_in_invite_string">WSS-WIFI-KEY;generic-key=#IMEI#</string>
 
     <!-- Media -->
     <boolean name="imsvoice.codec_based_dynamic_as_enabled_bool" value="false"/>
