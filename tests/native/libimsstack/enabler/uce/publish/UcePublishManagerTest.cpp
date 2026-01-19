@@ -122,6 +122,7 @@ public:
     IMS_BOOL IdlePublishRequested(IMSMSG& objMsg) { return StateIDLE_PublishRequested(objMsg); }
     IMS_BOOL IdleAoSConnected(IMSMSG& objMsg) { return StateIDLE_AoSConnected(objMsg); }
     IMS_BOOL OnPublishRequested(IMSMSG& objMsg) { return StateON_PublishRequested(objMsg); }
+    IMS_BOOL OnAosConnected(IMSMSG& objMsg) { return StateON_AoSConnected(objMsg); }
     IMS_BOOL OnAoSDisConnected(IMSMSG& objMsg) { return StateON_AoSDisConnected(objMsg); }
     IMS_BOOL PublishingPublishRequested(IMSMSG& objMsg)
     {
@@ -188,6 +189,12 @@ public:
 
     IMS_UINT32 GetResponseCode() { return GetLastResponseCode(); }
     void SetResponseCode(IMS_UINT32 nCode) { return SetLastResponseCode(nCode); }
+
+    IMS_BOOL GetRegistrationRequested() { return GetRegistrationRecoveryRequested(); }
+    void SetRegistrationRequested(IMS_BOOL bRequested)
+    {
+        SetRegistrationRecoveryRequested(bRequested);
+    }
 };
 
 class UcePublishManagerTest : public ::testing::Test
@@ -604,6 +611,42 @@ TEST_F(UcePublishManagerTest, StateON_PublishRequested)
             reinterpret_cast<IMS_UINTP>(pPublicationData));
 
     pUcePublishManager->OnPublishRequested(objMsg1);
+}
+
+TEST_F(UcePublishManagerTest, StateON_AoSConnected)
+{
+    IMS_TRACE_D("StateON_AoSConnected", 0, 0, 0);
+
+    pUcePublishManager->SetRegistrationRequested(IMS_FALSE);
+    pUcePublishManager->SetPublishState(TestUcePublishManager::ON);
+
+    EXPECT_CALL(objMockIPublication, SetListener(_)).Times(0);
+    EXPECT_CALL(objMockIPublication, SetRefreshListener(_)).Times(0);
+    EXPECT_CALL(objMockIUceJniThread, PublishErrorInd(_, _)).Times(0);
+
+    ON_CALL(objMockICoreService, CreatePublication(_, _, _))
+            .WillByDefault(Return(&objMockIPublication));
+
+    IMSMSG objMsg(TestUcePublishManager::AOS_CONNECTED, 0, 0);
+    EXPECT_TRUE(pUcePublishManager->OnAosConnected(objMsg));
+}
+
+TEST_F(UcePublishManagerTest, StateON_AoSConnectedByRequest)
+{
+    IMS_TRACE_D("StateON_AoSConnected", 0, 0, 0);
+
+    pUcePublishManager->SetRegistrationRequested(IMS_TRUE);
+    pUcePublishManager->SetPublishState(TestUcePublishManager::ON);
+
+    EXPECT_CALL(objMockIPublication, SetListener(_)).Times(1);
+    EXPECT_CALL(objMockIPublication, SetRefreshListener(_)).Times(1);
+    EXPECT_CALL(objMockIUceJniThread, PublishErrorInd(_, _)).Times(1);
+
+    ON_CALL(objMockICoreService, CreatePublication(_, _, _))
+            .WillByDefault(Return(&objMockIPublication));
+
+    IMSMSG objMsg(TestUcePublishManager::AOS_CONNECTED, 0, 0);
+    EXPECT_TRUE(pUcePublishManager->OnAosConnected(objMsg));
 }
 
 TEST_F(UcePublishManagerTest, StateON_AoSDisConnected)
