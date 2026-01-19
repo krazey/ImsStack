@@ -2538,6 +2538,14 @@ PROTECTED VIRTUAL IMS_BOOL Session::NotifySipForkedResponse(
         return IMS_FALSE;
     }
 
+    // Set a configuration as the original configuration
+    pSession->SetConfiguration(GetConfiguration());
+
+    if (pSession->m_pOaState != IMS_NULL && pSession->IsConfigurationSet(CONFIG_SUPPORT_PREVIEW))
+    {
+        pSession->m_pOaState->EnablePreviewModeSupport();
+    }
+
     // Management of forked sessions
     if (m_pForkedSessions.IsNull())
     {
@@ -2554,9 +2562,6 @@ PROTECTED VIRTUAL IMS_BOOL Session::NotifySipForkedResponse(
     }
 
     pSession->m_pForkedSessions = m_pForkedSessions;
-
-    // Set a configuration as the original configuration
-    pSession->m_nConfigValue = m_nConfigValue;
 
     // Update the dialog info. enforcelly
     pSession->CheckNCreateDialog(piForkedScc, IMS_TRUE);
