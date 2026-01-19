@@ -15,48 +15,9 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Ims General -->
-    <int name="ims.registration_contact_user_info_part_int" value="1"/>
-
-    <!-- Aos -->
-    <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
-    <int name="ims.reg_retry_default_policy_int" value="1"/>
-    <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>
-    <int-array name="ims.update_registration_with_rat_change_int_array" num="2">
-        <item value="3"/>
-        <item value="6"/>
+    <!-- Please always keep this config on the first line. -->
+    <!-- Specifies a list of parent carrier ids from which to inherit configuration values. -->
+    <int-array name="ims.parent_carrier_ids_int_array" num="1">
+        <item value="1839"/>
     </int-array>
-    <boolean name="imsemergency.ereg_on_random_pcscf_bool" value="true"/>
-    <int name="imsemergency.ereg_retry_max_cnt_int" value="1"/>
-    <int name="imsemergency.ereg_retry_timer_millis_int" value="2000"/>
-
-    <int name="imsvt.convert_user_response_timer_millis_int" value="55000"/>
-    <int name="imsvt.convert_remote_response_timer_millis_int" value="60000"/>
-    <boolean name="ims.allow_cellular_network_info_header_bool" value="false"/>
-    <int name="imsvoice.18x_timer_millis_int" value="195000"/>
-    <int name="imsvoice.send_udp_keep_alive_interval_time_millis_int" value="2000"/>
-    <boolean name="ims.allow_sip_p_access_network_info_header_in_initial_register_bool" value="true"/>
-    <boolean name="ims.use_sip_user_agent_header_in_ua_string_bool" value="true"/>
-    <boolean name="imsvoice.audio_rtcpxr_enable_bool" value="true"/>
-    <int name="imsemergency.emergency_ringback_timer_millis_int" value="-1"/>
-    <int-array name="imsvoice.call_initiation_to_18x_timer_millis_int_array" num="2">
-        <item value="20000"/>
-        <item value="20000"/>
-    </int-array>
-    <int name="ims.hide_mac_address_in_pani_header_int" value="2"/>
-    <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
-        <item value="1"/>
-    </int-array>
-    <boolean name="ims.unsubscribe_registration_event_package_bool" value="true"/>
-    <int-array name="imsvoice.audio_rtcp_interval_int_array" num="2">
-        <item value="5"/>
-        <item value="2"/>
-    </int-array>
-    <int-array name="imsrtt.text_rtcp_interval_int_array" num="2">
-        <item value="5"/>
-        <item value="2"/>
-    </int-array>
-
-    <!-- Media -->
-    <boolean name="imsvoice.codec_based_dynamic_as_enabled_bool" value="false"/>
 </carrier_config>
