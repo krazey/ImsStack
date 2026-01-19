@@ -1011,6 +1011,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "ut_network_query_for_tb_oir_network_default_bool";
         public static final String KEY_UT_UPDATE_CB_WITHOUT_PASSWORD_BOOL =
                 KEY_PREFIX + "ut_update_cb_without_password_bool";
+        public static final String KEY_UT_UPDATE_CB_WITH_CONDITIONS_ELEMENT_BOOL =
+                KEY_PREFIX + "ut_update_cb_with_conditions_element_bool";
 
         private ImsSs() {}
     }

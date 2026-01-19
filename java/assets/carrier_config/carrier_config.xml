@@ -371,6 +371,7 @@
     <boolean name="imsss.ut_sync_with_cs_for_tb_ss_bool" value="true"/>
     <boolean name="imsss.ut_network_query_for_tb_oir_network_default_bool" value="false"/>
     <boolean name="imsss.ut_update_cb_without_password_bool" value="false"/>
+    <boolean name="imsss.ut_update_cb_with_conditions_element_bool" value="false"/>
 
     <!-- Uce -->
     <int name="imsuce.expire_value_publish_sec_int" value="0"/>

@@ -374,6 +374,11 @@ public final class SscConfig {
         return getBoolean(slotId, CarrierConfig.ImsSs.KEY_UT_UPDATE_CB_WITHOUT_PASSWORD_BOOL);
     }
 
+    static boolean isUpdateCbWithConditionsElement(int slotId) {
+        return getBoolean(slotId,
+                CarrierConfig.ImsSs.KEY_UT_UPDATE_CB_WITH_CONDITIONS_ELEMENT_BOOL);
+    }
+
     // Specific APIs
     static boolean isGbaSupported(int slotId) {
         int gbaType = SscConfig.getGbaMode(slotId);

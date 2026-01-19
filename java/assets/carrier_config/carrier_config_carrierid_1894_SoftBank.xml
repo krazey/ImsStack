@@ -62,6 +62,7 @@
     </int-array>
     <string name="imsss.ut_target_address_country_code_replace_to_zero_string">+81</string>
     <boolean name="imsss.ut_update_cb_without_password_bool" value="true"/>
+    <boolean name="imsss.ut_update_cb_with_conditions_element_bool" value="true"/>
 
     <!-- MTC -->
     <boolean name="imsvoice.allow_sdp_in_prack_bool" value="false"/>

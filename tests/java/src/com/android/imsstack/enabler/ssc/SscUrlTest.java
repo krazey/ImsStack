@@ -314,10 +314,32 @@ public class SscUrlTest {
                 + "/~~/simservs/incoming-communication-barring/ruleset"
                 + "/rule%5B@id=%22all-incoming%22%5D";
 
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.ImsSs.KEY_UT_UPDATE_CB_WITH_CONDITIONS_ELEMENT_BOOL))
+                .thenReturn(false);
         SscXmlFormat.setRuleId(SLOT_0, SscXmlFormat.MEDIA_TYPE_AUDIO, SscXmlFormat.ICB,
                 SscConstant.CONDITION_BAIC, "all-incoming");
 
         SscServiceData updateData = getUpdateData(ESsType.ICB, SscConstant.ACTION_REGISTRATION,
+                SscConstant.CONDITION_BAIC, SscServiceClassUtil.SERVICE_CLASS_NONE);
+        String updateUri = mSscUrl.getUpdateUri(updateData, mXui);
+
+        assertEquals(expectedUri, updateUri);
+    }
+
+    @Test
+    public void getUpdateUri_icbWithConditionElement_enabled() {
+        String expectedUri = "/simservs.ngn.etsi.org/users/" + mXui + "/simservs.xml"
+                + "/~~/simservs/incoming-communication-barring/ruleset"
+                + "/rule%5B@id=%22all-incoming%22%5D/conditions";
+
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.ImsSs.KEY_UT_UPDATE_CB_WITH_CONDITIONS_ELEMENT_BOOL))
+                .thenReturn(true);
+        SscXmlFormat.setRuleId(SLOT_0, SscXmlFormat.MEDIA_TYPE_AUDIO, SscXmlFormat.ICB,
+                SscConstant.CONDITION_BAIC, "all-incoming");
+
+        SscServiceData updateData = getUpdateData(ESsType.ICB, SscConstant.ACTION_ACTIVATION,
                 SscConstant.CONDITION_BAIC, SscServiceClassUtil.SERVICE_CLASS_NONE);
         String updateUri = mSscUrl.getUpdateUri(updateData, mXui);
 
@@ -330,6 +352,28 @@ public class SscUrlTest {
                 + "/~~/simservs/outgoing-communication-barring/ruleset"
                 + "/rule%5B@id=%22all-outgoing%22%5D";
 
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.ImsSs.KEY_UT_UPDATE_CB_WITH_CONDITIONS_ELEMENT_BOOL))
+                .thenReturn(false);
+        SscXmlFormat.setRuleId(SLOT_0, SscXmlFormat.MEDIA_TYPE_AUDIO, SscXmlFormat.OCB,
+                SscConstant.CONDITION_BAOC, "all-outgoing");
+
+        SscServiceData updateData = getUpdateData(ESsType.OCB, SscConstant.ACTION_REGISTRATION,
+                SscConstant.CONDITION_BAOC, SscServiceClassUtil.SERVICE_CLASS_NONE);
+        String updateUri = mSscUrl.getUpdateUri(updateData, mXui);
+
+        assertEquals(expectedUri, updateUri);
+    }
+
+    @Test
+    public void getUpdateUri_ocbWithConditionElement_enabled() {
+        String expectedUri = "/simservs.ngn.etsi.org/users/" + mXui + "/simservs.xml"
+                + "/~~/simservs/outgoing-communication-barring/ruleset"
+                + "/rule%5B@id=%22all-outgoing%22%5D/conditions";
+
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.ImsSs.KEY_UT_UPDATE_CB_WITH_CONDITIONS_ELEMENT_BOOL))
+                .thenReturn(true);
         SscXmlFormat.setRuleId(SLOT_0, SscXmlFormat.MEDIA_TYPE_AUDIO, SscXmlFormat.OCB,
                 SscConstant.CONDITION_BAOC, "all-outgoing");
 
