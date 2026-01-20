@@ -184,8 +184,6 @@ GLOBAL IMS_BOOL PrependHeader(IN SipHeaderBase* pHeader, IN_OUT ::SipMessage*& p
 GLOBAL IMS_BOOL PrependUnknownHeader(
         IN const AString& strName, IN const AString& strValue, IN_OUT ::SipMessage*& pMessage);
 
-GLOBAL IMS_BOOL CheckMandatoryHeaders(IN const ::SipMessage* pMessage);
-
 GLOBAL SipHeaderBase* CloneHeader(IN SipHeaderBase* pHeader);
 GLOBAL ::SipMessage* CloneMessage(IN const ::SipMessage* pMessage);
 GLOBAL SipMsgBody* CloneMessageBody(IN const SipMsgBody* pMsgBody);
@@ -292,7 +290,6 @@ GLOBAL IMS_BOOL IsMessageRpr(IN ::SipMessage* pMessage);
 GLOBAL IMS_BOOL IsOptionRequired(IN ::SipMessage* pMessage, IN const AString& strOption);
 GLOBAL IMS_BOOL IsOptionSupported(IN ::SipMessage* pMessage, IN const AString& strOption);
 GLOBAL IMS_BOOL IsRequestMessage(IN const ::SipMessage* pMessage);
-GLOBAL IMS_BOOL IsSingleHeader(IN IMS_SINT32 nType);
 GLOBAL IMS_BOOL IsAddressFormatHeader(IN IMS_SINT32 nType, IN const AString& strName);
 GLOBAL IMS_BOOL IsAquotRequiredForAddressFormat(IN IMS_SINT32 nType, IN const AString& strName);
 GLOBAL IMS_BOOL IsUnknownHeader(
