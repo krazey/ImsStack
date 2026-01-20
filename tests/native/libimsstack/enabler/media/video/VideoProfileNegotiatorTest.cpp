@@ -250,7 +250,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiatePeerPortZero)
     // When IP/Port negotiation fails, ResetNegotiatedProfile is called.
     EXPECT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);  // Local payload is copied
     EXPECT_EQ(m_pNegotiatedProfile->GetDataPort(), 0);         // Port is reset
-    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INVALID);
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INACTIVE);
     EXPECT_FALSE(m_pNegotiatedProfile->IsOmitAttributes());
 }
 
@@ -310,7 +310,7 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateLocalPortZero)
     // When IP/Port negotiation fails, ResetNegotiatedProfile is called.
     EXPECT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);  // Local payload is copied
     EXPECT_EQ(m_pNegotiatedProfile->GetDataPort(), 0);         // Port is reset
-    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INVALID);
+    EXPECT_EQ(m_pNegotiatedProfile->GetDirection(), MEDIA_DIRECTION_INACTIVE);
 }
 
 TEST_F(VideoProfileNegotiatorTest, NegotiateAvcMultipleOffersSuccess)

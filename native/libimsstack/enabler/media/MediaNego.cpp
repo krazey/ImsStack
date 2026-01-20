@@ -485,31 +485,6 @@ SdpNegotiationResult MediaNego::NegotiateSdp(IN ISession* pSession)
 
     m_bForking = IMS_FALSE;
 
-    // Audio nego objResult
-    if (pNegotiatedAudioDescriptor != IMS_NULL &&
-            MEDIA_IS_CONTAINED_THIS_TYPE(m_eSessionType, MEDIA_TYPE_AUDIO) &&
-            GetNegotiatedAudioQuality() == AUDIO_CODEC_NOT_USED)
-    {
-        IMS_TRACE_E(0, "NegotiateSdp(): no valid audio codec", 0, 0, 0);
-        objResult.eResult = MEDIA_NEGO_ERROR_NO_CODEC_MATCHED;
-        return objResult;
-    }
-
-    // Video nego objResult
-    if (pNegotiatedVideoDescriptor != IMS_NULL &&
-            (m_pVideoNego->GetNegotiatedRtpPort() <= 0 ||
-                    GetNegotiatedVideoQuality() == VIDEO_RESOLUTION_NOT_USED))
-    {
-        IMS_TRACE_I("NegotiateSdp(): disable video", 0, 0, 0);
-        objResult.eVideoDirection = MEDIA_DIRECTION_INVALID;
-    }
-
-    // Text nego objResult
-    if (pNegotiatedTextDescriptor != IMS_NULL)
-    {
-        objResult.eTextDirection = GetNegotiatedTextDirection();
-    }
-
     objResult.eNegotiatedType = (MEDIA_CONTENT_TYPE)(objResult.eNegotiatedType |
             (GetNegotiatedAudioQuality() != AUDIO_CODEC_NOT_USED ? MEDIA_TYPE_AUDIO : 0) |
             (GetNegotiatedVideoQuality() != VIDEO_RESOLUTION_NOT_USED ? MEDIA_TYPE_VIDEO : 0) |
@@ -616,7 +591,7 @@ void MediaNego::FinalizeNegotiation()
 PUBLIC
 AUDIO_CODEC MediaNego::GetNegotiatedAudioQuality()
 {
-    if (m_pAudioNego == IMS_NULL || m_pAudioNego->GetRemotePort() < 0)
+    if (m_pAudioNego == IMS_NULL || m_pAudioNego->GetNegotiatedRtpPort() < 0)
     {
         return AUDIO_CODEC_NOT_USED;
     }

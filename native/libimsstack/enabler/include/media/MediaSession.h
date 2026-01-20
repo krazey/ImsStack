@@ -131,15 +131,6 @@ public:
     void OnMediaMtuChanged(IN const IMS_UINT32 nMtu) override;
 
 protected:
-    /**
-     * @brief request to registering QoS callback of the given session to java layer
-     *
-     * @param nNegoId The identification of the session
-     * @param eMediaType The type of media
-     * @return IMS_BOOL Returns IMS_TRUE when request Qos is done successfully, IMS_FALSE if the
-     * arguments is invalid.
-     */
-    IMS_BOOL RequestQos(IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_AUDIO);
     // QoS methods
     QosRequestParam* FindQosParam(const QosRequestParam* param);
     QosRequestParam* createQosParam(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eType);
@@ -174,6 +165,7 @@ private:
             MEDIA_CONTENT_TYPE eType);
     void CloseMediaSessions(MEDIA_CONTENT_TYPE eType, IN IMS_UINTP nNegoId);
     void StopRtpReceptionStats(IN IMS_UINTP nNegoId);
+    void ProcessNegotiationResult(IN IMS_UINTP nNegoId, IN std::shared_ptr<MediaNego> pMediaNego);
     /** Get the rtp fragment size from mtu */
     IMS_SINT32 GetRtpFragmentSize();
 
@@ -190,7 +182,6 @@ protected:
     std::shared_ptr<TextController> m_pTextController;
     IMS_BOOL m_bSessionConfirmed;
     std::mutex m_objMutex;
-    MEDIA_CONTENT_TYPE m_eCurMediaType;
     IMS_BOOL m_bIsConference;
     std::shared_ptr<MediaNetworkConnectionWatcher> m_pNetworkConnectionWatcher;
 };
