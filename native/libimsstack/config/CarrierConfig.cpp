@@ -651,6 +651,9 @@ const IMS_CHAR CarrierConfig::ImsRtt::KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT[
         KEY_IMS_RTT_PREFIX "text_rtcp_inactivity_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsRtt::KEY_TEXT_RTCP_INTERVAL_INT_ARRAY[] =
         KEY_IMS_RTT_PREFIX "text_rtcp_interval_int_array";
+const IMS_CHAR
+        CarrierConfig::ImsRtt::KEY_CHECK_LOCAL_RESOURCE_AFTER_ESTABLISHED_OR_MODIFIED_BOOL[] =
+                KEY_IMS_RTT_PREFIX "check_local_resource_after_established_or_modified_bool";
 
 //// ImsSms
 #define KEY_IMS_SMS_PREFIX "imssms."
@@ -1098,6 +1101,8 @@ const IMS_CHAR CarrierConfig::ImsVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT[] =
         KEY_IMS_VT_PREFIX "policy_for_text_with_video_int";
 const IMS_CHAR CarrierConfig::ImsVt::KEY_MINIMUM_BATTERY_LEVEL_FOR_LIMIT_VIDEO_CALL_INT[] =
         KEY_IMS_VT_PREFIX "minimum_battery_level_for_limit_video_call_int";
+const IMS_CHAR CarrierConfig::ImsVt::KEY_CHECK_LOCAL_RESOURCE_AFTER_ESTABLISHED_OR_MODIFIED_BOOL[] =
+        KEY_IMS_VT_PREFIX "check_local_resource_after_established_or_modified_bool";
 // Media
 const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_RTCP_INTERVAL_INT_ARRAY[] =
         KEY_IMS_VT_PREFIX "video_rtcp_interval_int_array";

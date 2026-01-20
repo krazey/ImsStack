@@ -883,6 +883,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "text_rtcp_interval_int_array";
         public static final String KEY_TEXT_HOLD_WITH_DIRECTION_INACTIVE_BOOL =
                 KEY_PREFIX + "text_hold_with_direction_inactive_bool";
+        public static final String KEY_CHECK_LOCAL_RESOURCE_AFTER_ESTABLISHED_OR_MODIFIED_BOOL =
+                KEY_PREFIX + "check_local_resource_after_established_or_modified_bool";
 
         private ImsRtt() {}
     }
@@ -1458,6 +1460,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "video_hold_with_direction_inactive_bool";
         public static final String KEY_REQUIRE_SIP_SIGNALING_ON_MULTITASKING_BOOL =
                 KEY_PREFIX + "require_sip_signaling_on_multitasking_bool";
+        public static final String KEY_CHECK_LOCAL_RESOURCE_AFTER_ESTABLISHED_OR_MODIFIED_BOOL =
+                KEY_PREFIX + "check_local_resource_after_established_or_modified_bool";
         // Media
         public static final String KEY_VIDEO_RTP_PORT_RANGE_INT_ARRAY =
                 KEY_PREFIX + "video_rtp_port_range_int_array";

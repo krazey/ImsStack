@@ -159,6 +159,7 @@ private:
     void SetRemoteResourceAvailable(IN ISession* piSession) const;
     void UpdateSupportingPrecondition(IN ISession* piSession, IN IMS_BOOL bRemoteSupported) const;
     void UpdateQosAttributesFromRemoteSdp(IN ISession* piSession);
+    IMS_UINT32 GetReservedMediaTypes(IN ISession* piSession, IN CallType eCallType) const;
     static IMS_BOOL IsNeedToUpdateQosStatus(IN QosStatus eCurrentStatus, IN QosStatus eNewStatus);
     IMS_BOOL IsDefaultBearerAllowed(IN IMS_UINT32 eMediaType) const;
     IMS_BOOL IsRemoteResourceReserved(IN ISession* piSession) const;
