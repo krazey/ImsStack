@@ -33,7 +33,7 @@ using ::testing::ReturnRef;
 class AudioSdpParserTest : public ::testing::Test
 {
 protected:
-    // cppcheck-suppress knownConditionTrueFalse
+    // cppcheck-suppress unusedStructMember
     MockIMediaDescriptor m_objMockMediaDescriptor;
     MockISessionDescriptor m_objMockSessionDescriptor;
 };

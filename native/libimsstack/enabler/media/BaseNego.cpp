@@ -182,14 +182,14 @@ PUBLIC VIRTUAL void BaseNego::CleanupIncompleteOaModels()
 
 PUBLIC const IpAddress& BaseNego::GetNegotiatedRemoteAddress()
 {
-    const auto pProfile = GetNegotiatedPeerProfile();
+    const MediaBaseProfile* pProfile = GetNegotiatedPeerProfile();
 
     return (pProfile != IMS_NULL) ? pProfile->GetIpAddress() : IpAddress::NONE;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 BaseNego::GetRemotePort()
 {
-    const auto pProfile = GetNegotiatedPeerProfile();
+    const MediaBaseProfile* pProfile = GetNegotiatedPeerProfile();
 
     return (pProfile != IMS_NULL) ? pProfile->GetDataPort() : MEDIA_PORT_INVALID;
 }

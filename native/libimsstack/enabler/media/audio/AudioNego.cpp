@@ -567,7 +567,7 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
 
     if (pPrevOaModel != IMS_NULL && pPrevOaModel->pNegotiatedProfile != IMS_NULL)
     {
-        const auto pMediaSessionConfig =
+        const MediaSessionConfig* pMediaSessionConfig =
                 MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
                         GetSlotId(), m_pEnvironment->eServiceType);
 
