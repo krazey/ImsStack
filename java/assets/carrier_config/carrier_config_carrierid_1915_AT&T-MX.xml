@@ -17,6 +17,12 @@
 <carrier_config>
     <!-- Carrier configurations -->
 
+    <!-- Aos -->
+    <int-array name="ims.permanent_pdn_failure_int_array" num="2">
+        <item value="27"/>
+        <item value="33"/>
+    </int-array>
+
     <!-- Ut/Xcap -->
     <int-array name="imsss.ut_http_permanent_error_code_int_array" num="3">
         <item value="404"/>
