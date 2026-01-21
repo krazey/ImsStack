@@ -939,6 +939,24 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     }
 
     @Test
+    public void testOnCallInitiatingChecksRatType() {
+        CallInfo callInfo = new CallInfo();
+        int ratType = 13; // TelephonyManager.NETWORK_TYPE_LTE
+        MtcCallInfo.setRatType(callInfo, ratType);
+
+        mImsCallSession.getCallListenerProxy().onCallInitiating(mMockMtcCall, callInfo,
+                mMockMediaInfo);
+
+        ArgumentCaptor<ImsCallProfile> profileCaptor =
+                ArgumentCaptor.forClass(ImsCallProfile.class);
+        verify(mMockImsCallSessionCallback).invokeInitiating(
+                any(ImsCallSessionImplBase.class), profileCaptor.capture());
+
+        assertEquals(ratType, profileCaptor.getValue().getCallExtraInt(
+                ImsCallProfile.EXTRA_CALL_NETWORK_TYPE));
+    }
+
+    @Test
     public void testOnCallProgressing() {
         SuppInfo suppInfo = new SuppInfo();
         suppInfo.addServiceBool(SuppInfo.SUPP_TYPE_CW, false);
