@@ -370,30 +370,6 @@ TEST_F(MtcSessionTest, SendProvisionalResponseSends180WithAlertInfoIfUpdatingSes
     pMtcSession->SendProvisionalResponse(IMS_TRUE, IMS_TRUE);
 }
 
-TEST_F(MtcSessionTest, SendProvisionalResponseSends183ForAlertingWithoutAlertInfoEvenIfCallWaiting)
-{
-    ON_CALL(*pConfigurationProxy,
-            GetBoolean(ConfigVoice::KEY_FORCE_183_FOR_ALERTING_ON_NON_100REL_INVITE_BOOL))
-            .WillByDefault(Return(IMS_TRUE));
-
-    CreateMtcSession();
-    SetUpForSetSdp(NegotiationState::STATE_IDLE, IMS_SUCCESS);
-    ImsList<IMtcCall*> objCalls;
-    MockIMtcCall objOtherCall1;
-    ON_CALL(objOtherCall1, GetState).WillByDefault(Return(IMtcCall::State::INCOMING));
-    objCalls.Append(&objOtherCall1);
-    MockIMtcCall objOtherCall2;
-    ON_CALL(objOtherCall2, GetState).WillByDefault(Return(IMtcCall::State::UPDATING));
-    objCalls.Append(&objOtherCall2);
-    ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objCalls));
-
-    EXPECT_CALL(*pMessageSender,
-            SendProvisionalResponse(SipStatusCode::SC_183, IMS_FALSE, IMS_FALSE, IMS_FALSE))
-            .Times(1);
-
-    pMtcSession->SendProvisionalResponse(IMS_TRUE, IMS_FALSE);
-}
-
 TEST_F(MtcSessionTest, SendProvisionalResponseSends183WithoutAlertInfoIfItIsConfirmedDialog)
 {
     CreateMtcSession();
@@ -475,25 +451,10 @@ TEST_F(MtcSessionTest, SendProvisionalResponseSends180RingingWhenUserAlerted)
     const IMS_BOOL bReliable = IMS_FALSE;
     CreateMtcSession();
     ON_CALL(*pConfigurationProxy,
-            GetBoolean(ConfigVoice::KEY_FORCE_183_FOR_ALERTING_ON_NON_100REL_INVITE_BOOL))
+            GetBoolean(ConfigVoice::KEY_FORCE_183_BEFORE_ALERTING_ON_NON_100REL_INVITE_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(*pMessageSender, SendProvisionalResponse(SipStatusCode::SC_180, bReliable, _, _))
-            .WillOnce(Return(IMS_SUCCESS));
-
-    EXPECT_EQ(IMS_SUCCESS, pMtcSession->SendProvisionalResponse(bUserAlert, bReliable));
-}
-
-TEST_F(MtcSessionTest, SendProvisionalResponseSends183SessionProgressWhenForcedByConfig)
-{
-    const IMS_BOOL bUserAlert = IMS_TRUE;
-    const IMS_BOOL bReliable = IMS_FALSE;
-    CreateMtcSession();
-    ON_CALL(*pConfigurationProxy,
-            GetBoolean(ConfigVoice::KEY_FORCE_183_FOR_ALERTING_ON_NON_100REL_INVITE_BOOL))
-            .WillByDefault(Return(IMS_TRUE));
-
-    EXPECT_CALL(*pMessageSender, SendProvisionalResponse(SipStatusCode::SC_183, bReliable, _, _))
             .WillOnce(Return(IMS_SUCCESS));
 
     EXPECT_EQ(IMS_SUCCESS, pMtcSession->SendProvisionalResponse(bUserAlert, bReliable));
@@ -505,13 +466,97 @@ TEST_F(MtcSessionTest, SendProvisionalResponseSends183SessionProgressWhenNotUser
     const IMS_BOOL bReliable = IMS_FALSE;
     CreateMtcSession();
     ON_CALL(*pConfigurationProxy,
-            GetBoolean(ConfigVoice::KEY_FORCE_183_FOR_ALERTING_ON_NON_100REL_INVITE_BOOL))
+            GetBoolean(ConfigVoice::KEY_FORCE_183_BEFORE_ALERTING_ON_NON_100REL_INVITE_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(*pMessageSender, SendProvisionalResponse(SipStatusCode::SC_183, bReliable, _, _))
             .WillOnce(Return(IMS_SUCCESS));
 
     EXPECT_EQ(IMS_SUCCESS, pMtcSession->SendProvisionalResponse(bUserAlert, bReliable));
+}
+
+TEST_F(MtcSessionTest, SendProvisionalResponseSends183Before180IfConfiguredAndNon100rel)
+{
+    CreateMtcSession();
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_FORCE_183_BEFORE_ALERTING_ON_NON_100REL_INVITE_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, IsResponseExist(&objSession, SipStatusCode::SC_183))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(*pMessageSender,
+            SendProvisionalResponse(SipStatusCode::SC_183, IMS_FALSE, IMS_FALSE, IMS_FALSE))
+            .Times(1)
+            .WillOnce(Return(IMS_SUCCESS));
+    EXPECT_CALL(*pMessageSender,
+            SendProvisionalResponse(SipStatusCode::SC_180, IMS_FALSE, IMS_FALSE, IMS_FALSE))
+            .Times(1)
+            .WillOnce(Return(IMS_SUCCESS));
+
+    pMtcSession->SendProvisionalResponse(IMS_TRUE, IMS_FALSE);
+}
+
+TEST_F(MtcSessionTest, SendProvisionalResponseDoesNotSend183Before180If183Exists)
+{
+    CreateMtcSession();
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_FORCE_183_BEFORE_ALERTING_ON_NON_100REL_INVITE_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, IsResponseExist(&objSession, SipStatusCode::SC_183))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(*pMessageSender, SendProvisionalResponse(SipStatusCode::SC_183, _, _, _)).Times(0);
+    EXPECT_CALL(*pMessageSender,
+            SendProvisionalResponse(SipStatusCode::SC_180, IMS_FALSE, IMS_FALSE, IMS_FALSE))
+            .Times(1)
+            .WillOnce(Return(IMS_SUCCESS));
+
+    pMtcSession->SendProvisionalResponse(IMS_TRUE, IMS_FALSE);
+}
+
+TEST_F(MtcSessionTest, SendProvisionalResponseDoesNotSend183Before180IfConfigIsFalse)
+{
+    CreateMtcSession();
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_FORCE_183_BEFORE_ALERTING_ON_NON_100REL_INVITE_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, IsResponseExist(&objSession, SipStatusCode::SC_183))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(*pMessageSender, SendProvisionalResponse(SipStatusCode::SC_183, _, _, _)).Times(0);
+    EXPECT_CALL(*pMessageSender,
+            SendProvisionalResponse(SipStatusCode::SC_180, IMS_FALSE, IMS_FALSE, IMS_FALSE))
+            .Times(1)
+            .WillOnce(Return(IMS_SUCCESS));
+
+    pMtcSession->SendProvisionalResponse(IMS_TRUE, IMS_FALSE);
+}
+
+TEST_F(MtcSessionTest, SendProvisionalResponseDoesNotSend183Before180If100relSupported)
+{
+    CreateMtcSession();
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_FORCE_183_BEFORE_ALERTING_ON_NON_100REL_INVITE_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, IsResponseExist(&objSession, SipStatusCode::SC_183))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils,
+            ContainsValueIgnoreCase(
+                    &objMessage, MtcExtensionSet::OPTION_TAG_RPR, ISipHeader::SUPPORTED, _))
+            .WillByDefault(Return(IMS_TRUE));
+    pMtcSession->HandleRequest(RequestType::START, objMessage);
+
+    EXPECT_CALL(*pMessageSender, SendProvisionalResponse(SipStatusCode::SC_183, _, _, _)).Times(0);
+    EXPECT_CALL(*pMessageSender,
+            SendProvisionalResponse(SipStatusCode::SC_180, IMS_FALSE, IMS_FALSE, IMS_FALSE))
+            .Times(1)
+            .WillOnce(Return(IMS_SUCCESS));
+
+    pMtcSession->SendProvisionalResponse(IMS_TRUE, IMS_FALSE);
 }
 
 TEST_F(MtcSessionTest, SendPrackSendsPrack)
