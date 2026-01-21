@@ -151,6 +151,7 @@
         <item value="600"/>
         <item value="603"/>
     </int-array>
+    <int name="imsuce.immediately_retry_publish_response_max_count_int" value="1"/>
     <int name="imsuce.fixed_time_retry_publish_response_max_count_int" value="3"/>
     <int name="imsuce.fixed_time_retry_publish_response_time_sec_int" value="3600"/>
     <int-array name="imsuce.reattempt_registration_publish_response_int_array" num="1">
