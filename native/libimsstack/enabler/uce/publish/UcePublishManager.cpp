@@ -1823,7 +1823,20 @@ IMS_BOOL UcePublishManager::Process423Scenario(IMS_BOOL bIsRefresh)
     piHeader->Destroy();
     IMS_TRACE_I("Process423Scenario:min Expire Value [%s]", szMinExpire.GetStr(), 0, 0);
     DestroyPublication();
-    return RetryPublish(bIsRefresh, szMinExpire);
+
+    IMS_BOOL bRetry = RetryPublish(bIsRefresh, szMinExpire);
+    if (bRetry)
+    {
+        if (bIsRefresh == INITIAL)
+        {
+            SetPublishState(PUBLISHING);
+        }
+        else
+        {
+            SetPublishState(REFRESHING);
+        }
+    }
+    return bRetry;
 }
 
 IMS_BOOL UcePublishManager::ProcessImmediatelyRetryResponseScenario()

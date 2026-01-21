@@ -322,7 +322,8 @@ TEST_F(UcePublishManagerTest, SetContactHeader)
     EXPECT_EQ(pUcePublishManager->MessageMediatorAdjustMessage(&objMockISipMessage), IMS_SUCCESS);
 
     ON_CALL(objMockISipMessage, GetHeader).WillByDefault(Return(AString(UceTag::TAG_CHAT)));
-    pUcePublishManager->SetConnectedService(CONNECTED_SERVICE_CPM_SESSION | CONNECTED_SERVICE_FTSMS);
+    pUcePublishManager->SetConnectedService(
+            CONNECTED_SERVICE_CPM_SESSION | CONNECTED_SERVICE_FTSMS);
     EXPECT_EQ(pUcePublishManager->MessageMediatorAdjustMessage(&objMockISipMessage), IMS_SUCCESS);
 
     ON_CALL(objMockISipMessage, GetHeader).WillByDefault(Return(AString(UceTag::TAG_CHAT)));
@@ -774,6 +775,42 @@ TEST_F(UcePublishManagerTest, StatePUBLISHING_Failed)
     EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::ON);
 }
 
+TEST_F(UcePublishManagerTest, StatePUBLISHING_FailedBy423)
+{
+    IMS_TRACE_D("StatePUBLISHING_FailedBy423", 0, 0, 0);
+
+    MockISipMessage objMockISipMessage;
+    MockISipMessageBodyPart objMockISipMessageBodyPart;
+    IMS_UINT32 nErrorCode = 423;
+    AString reason = AString("Interval Too Brief");
+    ImsList<AString> objReasonHeaders;
+    objReasonHeaders.Clear();
+
+    pUcePublishManager->SetPublishState(TestUcePublishManager::PUBLISHING);
+    pUcePublishManager->SetIPublication(&objMockIPublication);
+    pUcePublishManager->SetKey(10);
+
+    EXPECT_CALL(objMockIPublication, SetListener(_)).Times(1);
+    EXPECT_CALL(objMockIPublication, SetRefreshListener(_)).Times(1);
+    EXPECT_CALL(objMockISipMessage, AddHeader(_, _, _)).Times(AnyNumber());
+    EXPECT_CALL(objMockISipMessageBodyPart, SetContent(_)).Times(1);
+
+    ON_CALL(objMockIMessage, GetMessage).WillByDefault(Return(&objMockISipMessage));
+    ON_CALL(objMockISipMessage, GetHeader).WillByDefault(Return(AString("100")));
+    ON_CALL(objMockISipMessage, CreateBodyPart).WillByDefault(Return(&objMockISipMessageBodyPart));
+    ON_CALL(objMockICoreService, CreatePublication(_, _, _))
+            .WillByDefault(Return(&objMockIPublication));
+    ON_CALL(objMockIPublication, Publish).WillByDefault(Return(IMS_SUCCESS));
+    ON_CALL(objMockISipMessage, GetStatusCode).WillByDefault(Return(nErrorCode));
+    ON_CALL(objMockISipMessage, GetReasonPhrase).WillByDefault(ReturnRef(reason));
+    ON_CALL(objMockISipMessage, GetHeaders).WillByDefault(Return(objReasonHeaders));
+
+    IMSMSG objMsg(TestUcePublishManager::PUBLISH_FAILED, 0, 0);
+    pUcePublishManager->PublishingFailed(objMsg);
+
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::PUBLISHING);
+}
+
 TEST_F(UcePublishManagerTest, StatePUBLISHING_FailedWith403Twice)
 {
     IMS_TRACE_D("StatePUBLISHING_FailedWith403Twice", 0, 0, 0);
@@ -1020,6 +1057,41 @@ TEST_F(UcePublishManagerTest, StateREFRESHING_RefreshFailedWithNoResponse)
 
     pUcePublishManager->RefreshingRefreshFailedWithNoResponse(objMsg);
     EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::ON);
+}
+
+TEST_F(UcePublishManagerTest, StateREFRESHING_RefreshFailedBy423)
+{
+    IMS_TRACE_D("StateREFRESHING_RefreshFailedBy423", 0, 0, 0);
+
+    MockISipMessage objMockISipMessage;
+    MockISipMessageBodyPart objMockISipMessageBodyPart;
+    IMS_UINT32 nErrorCode = 423;
+    AString reason = AString("Interval Too Brief");
+    ImsList<AString> objReasonHeaders;
+    objReasonHeaders.Clear();
+
+    pUcePublishManager->SetPublishState(TestUcePublishManager::REFRESHING);
+    pUcePublishManager->SetIPublication(&objMockIPublication);
+    pUcePublishManager->SetKey(10);
+
+    EXPECT_CALL(objMockIPublication, SetListener(_)).Times(1);
+    EXPECT_CALL(objMockIPublication, SetRefreshListener(_)).Times(1);
+    EXPECT_CALL(objMockISipMessage, AddHeader(_, _, _)).Times(AnyNumber());
+
+    ON_CALL(objMockIMessage, GetMessage).WillByDefault(Return(&objMockISipMessage));
+    ON_CALL(objMockISipMessage, GetHeader).WillByDefault(Return(AString("100")));
+    ON_CALL(objMockISipMessage, CreateBodyPart).WillByDefault(Return(&objMockISipMessageBodyPart));
+    ON_CALL(objMockICoreService, CreatePublication(_, _, _))
+            .WillByDefault(Return(&objMockIPublication));
+    ON_CALL(objMockIPublication, Publish).WillByDefault(Return(IMS_SUCCESS));
+    ON_CALL(objMockISipMessage, GetStatusCode).WillByDefault(Return(nErrorCode));
+    ON_CALL(objMockISipMessage, GetReasonPhrase).WillByDefault(ReturnRef(reason));
+    ON_CALL(objMockISipMessage, GetHeaders).WillByDefault(Return(objReasonHeaders));
+
+    IMSMSG objMsg(TestUcePublishManager::PUBLISH_FAILED, 0, 0);
+    pUcePublishManager->PublishingFailed(objMsg);
+
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::REFRESHING);
 }
 
 TEST_F(UcePublishManagerTest, StateTERMINATING_PublishRequested)
