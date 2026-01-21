@@ -702,6 +702,131 @@ public class SscXmlParserTest {
     }
 
     @Test
+    public void getSscServiceFromDoc_cfaAudioWhenXmlHasAudioOnlyAndNoMedia() {
+        String xml = "<ss:communication-diversion active=\"true\">"
+                + "<cp:ruleset>"
+                + "<cp:rule id=\"call-diversion-unconditional-audio\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:media>audio</ss:media>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>tel:+1234567890</ss:target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "<cp:rule id=\"call-diversion-unconditional\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>tel:+1234567890</ss:target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "<cp:rule id=\"call-diversion-busy\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:busy/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>tel:+1234567890</ss:target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "</cp:ruleset>"
+                + "</ss:communication-diversion>";
+
+        processEntireDocumentQuery();
+
+        SscServiceQueryData queryData = getQueryData(ESsType.CF, SscConstant.CONDITION_CFA,
+                SscServiceClassUtil.SERVICE_CLASS_VOICE);
+        queryData.setResponseCode(SscConstant.HTTP_OK);
+        CfServiceData data = (CfServiceData) mSscXmlParser.getSscServiceFromDoc(queryData,
+                getDocumentFromString(xml), null);
+
+        assertNotNull(data);
+        assertEquals(SscConstant.CONDITION_CFA, data.getCondition());
+        assertNotNull(data.getRuleSet());
+        assertEquals(2, data.getRuleSet().size());
+        SscRuleData ruleData = data.getRuleSet().get(0);
+        assertEquals(SscConstant.CONDITION_CFU, ruleData.getSsCondition());
+        assertEquals(SscServiceClassUtil.SERVICE_CLASS_VOICE, ruleData.getServiceClass());
+        assertEquals(SscConstant.STATUS_DISABLE, ruleData.getState());
+        assertEquals("call-diversion-unconditional-audio", ruleData.getRuleId());
+        ruleData = data.getRuleSet().get(1);
+        assertEquals(SscConstant.CONDITION_CFB, ruleData.getSsCondition());
+        assertEquals(SscConstant.STATUS_DISABLE, ruleData.getState());
+        assertEquals("call-diversion-busy", ruleData.getRuleId());
+    }
+
+    @Test
+    public void getSscServiceFromDoc_cfacAudioWhenNoMediaInXml() {
+        String xml = "<ss:communication-diversion active=\"true\">"
+                + "<ss:NoReplyTimer>25</ss:NoReplyTimer>"
+                + "<cp:ruleset>"
+                + "<cp:rule id=\"call-diversion-unconditional\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>tel:+1234567890</ss:target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "<cp:rule id=\"call-diversion-busy\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:busy/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>tel:+1234567890</ss:target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "<cp:rule id=\"call-diversion-no-reply\">"
+                + "<cp:conditions>"
+                + "<ss:rule-deactivated/>"
+                + "<ss:no-answer/>"
+                + "</cp:conditions>"
+                + "<cp:actions>"
+                + "<ss:forward-to>"
+                + "<ss:target>tel:+1234567890</ss:target>"
+                + "</ss:forward-to>"
+                + "</cp:actions>"
+                + "</cp:rule>"
+                + "</cp:ruleset>"
+                + "</ss:communication-diversion>";
+
+        processEntireDocumentQuery();
+
+        SscServiceQueryData queryData = getQueryData(ESsType.CF, SscConstant.CONDITION_CFAC,
+                SscServiceClassUtil.SERVICE_CLASS_VOICE);
+        queryData.setResponseCode(SscConstant.HTTP_OK);
+        CfServiceData data = (CfServiceData) mSscXmlParser.getSscServiceFromDoc(queryData,
+                getDocumentFromString(xml), null);
+
+        assertNotNull(data);
+        assertEquals(SscConstant.CONDITION_CFAC, data.getCondition());
+        assertNotNull(data.getRuleSet());
+        assertEquals(25, data.getNoReplyTimer());
+        assertEquals(2, data.getRuleSet().size());
+        SscRuleData ruleData = data.getRuleSet().get(0);
+        assertEquals(SscConstant.CONDITION_CFB, ruleData.getSsCondition());
+        assertEquals(SscConstant.STATUS_DISABLE, ruleData.getState());
+        assertEquals("call-diversion-busy", ruleData.getRuleId());
+        ruleData = data.getRuleSet().get(1);
+        assertEquals(SscConstant.CONDITION_CFNR, ruleData.getSsCondition());
+        assertEquals(SscConstant.STATUS_DISABLE, ruleData.getState());
+        assertEquals("call-diversion-no-reply", ruleData.getRuleId());
+    }
+
+    @Test
     public void getSscServiceFromDoc_cfAudioWhenXmlHasAudioOnlyThenNoMedia() {
         String xml = "<ss:communication-diversion active=\"true\">"
                 + "<cp:ruleset>"
