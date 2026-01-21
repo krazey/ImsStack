@@ -22,6 +22,49 @@
     <boolean name="imsemergency.support_giba_for_ereg_in_roaming_bool" value="true"/>
 
     <!-- Mtc -->
+    <string-array name="imsvoice.reject_code_and_action_set_string_array" num="41">
+        <item value="300:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="301:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="302:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="305:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="380:6,0"/> <!-- NON_UE_DETECTABLE_EMERGENCY_CALL, CSFB -->
+        <item value="401:0"/> <!-- CSFB -->
+        <item value="403:7"/> <!-- HANDLE_FORBIDDEN_BY_POLICY -->
+        <item value="404:9"/> <!-- USSI_CSFB -->
+        <item value="405:0"/> <!-- CSFB -->
+        <item value="406:0"/> <!-- CSFB -->
+        <item value="407:0"/> <!-- CSFB -->
+        <item value="408:0"/> <!-- CSFB -->
+        <item value="410:0"/> <!-- CSFB -->
+        <item value="413:3,0"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, CSFB -->
+        <item value="414:0"/> <!-- CSFB -->
+        <item value="415:0"/> <!-- CSFB -->
+        <item value="416:0"/> <!-- CSFB -->
+        <item value="420:0"/> <!-- CSFB -->
+        <item value="421:0"/> <!-- CSFB -->
+        <item value="423:0"/> <!-- CSFB -->
+        <item value="481:0"/> <!-- CSFB -->
+        <item value="482:0"/> <!-- CSFB -->
+        <item value="483:0"/> <!-- CSFB -->
+        <item value="484:0"/> <!-- CSFB -->
+        <item value="485:0"/> <!-- CSFB -->
+        <item value="488:2,17,0"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT, SILENT_REINVITE_WITH_AUDIO, CSFB -->
+        <item value="489:0"/> <!-- CSFB -->
+        <item value="491:0"/> <!-- CSFB -->
+        <item value="493:0"/> <!-- CSFB -->
+        <item value="494:0"/> <!-- CSFB -->
+        <item value="500:3,12,0"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, TERMINATE_BY_RESPONSE_SOURCE, CSFB -->
+        <item value="501:0"/> <!-- CSFB -->
+        <item value="502:0"/> <!-- CSFB -->
+        <item value="503:10,0"/> <!-- BLOCK_CALL_BY_TIMER, CSFB-->
+        <item value="504:4,0"/> <!-- REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY, CSFB -->
+        <item value="505:0"/> <!-- CSFB -->
+        <item value="513:0"/> <!-- CSFB -->
+        <item value="580:1"/> <!-- SILENT_REINVITE -->
+        <item value="603:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="604:0"/> <!-- CSFB -->
+        <item value="606:2,0"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT, CSFB -->
+    </string-array>
     <int name="imsemergency.emergency_ringback_timer_millis_int" value="210000"/>
     <int-array name="ims.information_level_of_geolocation_pidf_int_array" num="6">
         <item value="0"/> <!-- NON_EMERGENCY_ON_WIFI -->
