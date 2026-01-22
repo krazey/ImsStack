@@ -102,6 +102,20 @@ public class ImsCallUtils {
     private static final int DYNAMIC_ROUTING_NUMBER_CONFIG_INDEX_MNC = 1;
     private static final int DYNAMIC_ROUTING_NUMBER_CONFIG_INDEX_NUMBER = 2;
 
+    /**
+     * Definition of the index as configured in
+     * CarrierConfig::ImsEmergency::KEY_EMERGENCY_SERVICE_CATEGORY_PER_PLMN_STRING_ARRAY
+     */
+    private static final int EMERGENCY_SERVICE_CATEGORY_CONFIG_INDEX_COUNTRY_ISO = 0;
+    private static final int EMERGENCY_SERVICE_CATEGORY_CONFIG_INDEX_MNC = 1;
+    private static final int EMERGENCY_SERVICE_CATEGORY_CONFIG_INDEX_NUMBER = 2;
+    private static final int EMERGENCY_SERVICE_CATEGORY_CONFIG_INDEX_CATEGORY = 3;
+
+    /**
+     * Wildcard MNC used in configurations to match any MNC.
+     */
+    private static final String WILDCARD_MNC = "";
+
     /** "sos" URN for IMS emergency call */
     private static final String SOS_SERVICE_URN_POLICE = "urn:service:sos.police";
     private static final String SOS_SERVICE_URN_AMBULANCE = "urn:service:sos.ambulance";
@@ -417,7 +431,9 @@ public class ImsCallUtils {
                         int[] policies = cc != null ? cc.getIntArray(
                             CarrierConfig.ImsEmergency.KEY_POLICY_FOR_EMERGENCY_URN_INT_ARRAY) : null;
                         urn = getSosUrnFromECallServiceCategory(
-                                profile.getEmergencyServiceCategories(), policies, context);
+                                resolveEmergencyServiceCategory(
+                                        context, callee, countryIso, profile),
+                                policies, context);
                     }
                 } else {
                     // The first item has priority ??
@@ -1128,6 +1144,54 @@ public class ImsCallUtils {
         }
 
         return Arrays.stream(policies).anyMatch(value -> value == policy);
+    }
+
+    private static @EmergencyServiceCategories int resolveEmergencyServiceCategory(
+            ICallContext context, String callee, String countryIso, ImsCallProfile profile) {
+        if (isFromNetworkOrSim(context, callee)) {
+            return profile.getEmergencyServiceCategories();
+        }
+
+        String[] configs = AgentFactory.getInstance().getAgent(ConfigInterface.class,
+                context.getSlotId()).getCarrierConfig().getStringArray(CarrierConfig.ImsEmergency
+                        .KEY_EMERGENCY_SERVICE_CATEGORY_PER_PLMN_STRING_ARRAY);
+        if (configs == null) {
+            return profile.getEmergencyServiceCategories();
+        }
+
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, context.getSlotId());
+        if (telephony == null) {
+            return profile.getEmergencyServiceCategories();
+        }
+        String mnc = telephony.getNetworkMnc();
+        ImsLog.d("resolveEmergencyServiceCategory :: countryIso=" + countryIso + ", mnc=" + mnc);
+
+        for (String config : configs) {
+            String[] fields = config.split(",");
+            // Format: "iso,mnc,number,category"
+            if (fields.length < 4) {
+                continue;
+            }
+            if (!fields[EMERGENCY_SERVICE_CATEGORY_CONFIG_INDEX_COUNTRY_ISO].equals(countryIso)) {
+                continue;
+            }
+            if (!fields[EMERGENCY_SERVICE_CATEGORY_CONFIG_INDEX_NUMBER].equals(callee)) {
+                continue;
+            }
+            if (fields[EMERGENCY_SERVICE_CATEGORY_CONFIG_INDEX_MNC].equals(WILDCARD_MNC)
+                    || fields[EMERGENCY_SERVICE_CATEGORY_CONFIG_INDEX_MNC].equals(mnc)) {
+                try {
+                    return Integer.parseInt(
+                            fields[EMERGENCY_SERVICE_CATEGORY_CONFIG_INDEX_CATEGORY]);
+                } catch (NumberFormatException e) {
+                    ImsLog.e("resolveEmergencyServiceCategory: Failed to parse category: "
+                            + config + " - " + e);
+                }
+            }
+        }
+
+        return profile.getEmergencyServiceCategories();
     }
 
     @VisibleForTesting
