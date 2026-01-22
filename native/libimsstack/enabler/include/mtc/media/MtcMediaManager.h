@@ -148,11 +148,12 @@ public:
     IMS_UINT32 GetSupportedMediaTypesFromSdp(IN ISession* piSession) override;
     IMS_BOOL IsPreviewMode(IN ISession* piSession) const override;
     IMS_BOOL IsForkedSession(IN const ISession* piSession) const override;
+    void Set180Received() override;
 
 private:
     void UpdateLocalTone(
             IN ISession* piSession, IN const IMessage* piMessage, IN NegotiationState eNegoState);
-    void UpdateLocalTone(IN ISession* piSession, IN IMS_BOOL bAudioBlocked);
+    void UpdateLocalTone(IN IMS_BOOL bNetworkToneReceived);
     void SetNetworkToneRtpTimer(IN IMS_UINTP nNegoId, IN IMS_UINT32 nDuration);
 
     IMS_BOOL IsNecessaryToRunMedia(IN ISession* piSession, IN const IMessage* piMessage);
@@ -161,7 +162,7 @@ private:
 
     static void HandleReceivingMediaDataStarted(IN IMS_UINT32 eMediaType);
     void HandleReceivingNetworkTone(IN IMS_BOOL bNetworkToneReceived);
-    IMS_BOOL IsDynamicRbtRequired(IN ISession* piSession);
+    IMS_BOOL IsDynamicRbtRequired();
     void SetDirectionToActiveFromInactive(
             IN const ISession& objISession, IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir);
 
@@ -183,6 +184,7 @@ protected:
     IMS_BOOL m_bLocalTone;
     IMS_BOOL m_bAudioInactive;
     IMediaSession* m_piMediaSession;
+    IMS_BOOL m_b180Received;
 
     static const IMS_UINT32 TIME_WAIT_NW_TONE_RTP = 1000;
     static const IMS_UINT32 TIME_NO_WAIT_NW_TONE_RTP = 0;

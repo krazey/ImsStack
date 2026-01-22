@@ -55,7 +55,8 @@ MtcMediaManager::MtcMediaManager(IN IMtcCallContext& objContext, IN MediaManager
         m_objSessionMedias(ImsMap<const ISession*, SessionMedia*>()),
         m_bLocalTone(IMS_FALSE),
         m_bAudioInactive(IMS_FALSE),
-        m_piMediaSession(IMS_NULL)
+        m_piMediaSession(IMS_NULL),
+        m_b180Received(IMS_FALSE)
 {
     IMS_TRACE_D("+MtcMediaManager Callkey[%d]", m_objContext.GetCallKey(), 0, 0);
 }
@@ -697,6 +698,11 @@ PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsForkedSession(IN const ISession* piSe
     return m_pProfileManager->IsForked(piSession);
 }
 
+PUBLIC VIRTUAL void MtcMediaManager::Set180Received()
+{
+    m_b180Received = IMS_TRUE;
+}
+
 PRIVATE void MtcMediaManager::DestroySessionMedia(IN const ISession& objISession)
 {
     IMS_SLONG nIndex = m_objSessionMedias.GetIndexOfKey(&objISession);
@@ -712,13 +718,13 @@ void MtcMediaManager::UpdateLocalTone(
         IN ISession* piSession, IN const IMessage* piMessage, IN NegotiationState eNegoState)
 {
     IMS_SINT32 nStatusCode = piMessage ? piMessage->GetStatusCode() : SipStatusCode::SC_INVALID;
-    IMS_TRACE_D("UpdateLocalTone status code[%d]", nStatusCode, 0, 0);
+    IMS_TRACE_D("UpdateLocalTone status code[%d], 180received[%d]", nStatusCode, m_b180Received, 0);
     /* 3GPP 24.628 - 4.7.2.1
      * NOTE 1 : In-band information received from the network overrides any locally generated
      * communication progress information also when the most recently received P-Early-Media header
      * fields of all early dialogs contain "inactive" or "recvonly".
      */
-    if (!m_objContext.GetMessageUtils().IsResponseExist(piSession, SipStatusCode::SC_180))
+    if (!m_b180Received)
     {
         SetLocalTone(IMS_FALSE);
         return;
@@ -757,9 +763,9 @@ void MtcMediaManager::UpdateLocalTone(
 }
 
 PRIVATE
-void MtcMediaManager::UpdateLocalTone(IN ISession* piSession, IN IMS_BOOL bNetworkToneReceived)
+void MtcMediaManager::UpdateLocalTone(IN IMS_BOOL bNetworkToneReceived)
 {
-    if (!IsDynamicRbtRequired(piSession))
+    if (!IsDynamicRbtRequired())
     {
         return;
     }
@@ -837,7 +843,7 @@ IMS_UINT32 MtcMediaManager::GetWaitingNetworkToneDuration(
         return TIME_WAIT_NW_TONE_RTP;
     }
 
-    if (!IsDynamicRbtRequired(piSession))
+    if (!IsDynamicRbtRequired())
     {
         return TIME_NO_WAIT_NW_TONE_RTP;
     }
@@ -890,7 +896,7 @@ void MtcMediaManager::HandleReceivingNetworkTone(IN IMS_BOOL bNetworkToneReceive
 
     if (!bConfirmed)
     {
-        UpdateLocalTone(piSession, bNetworkToneReceived);
+        UpdateLocalTone(bNetworkToneReceived);
     }
     else
     {
@@ -916,9 +922,11 @@ void MtcMediaManager::HandleReceivingNetworkTone(IN IMS_BOOL bNetworkToneReceive
 }
 
 PRIVATE
-IMS_BOOL MtcMediaManager::IsDynamicRbtRequired(IN ISession* piSession)
+IMS_BOOL MtcMediaManager::IsDynamicRbtRequired()
 {
-    if (!m_objContext.GetMessageUtils().IsResponseExist(piSession, SipStatusCode::SC_180))
+    IMS_TRACE_D("IsDynamicRbtRequired : 180received[%d]", m_b180Received, 0, 0);
+
+    if (!m_b180Received)
     {
         return IMS_FALSE;
     }

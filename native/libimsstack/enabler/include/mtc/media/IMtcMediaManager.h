@@ -325,6 +325,11 @@ public:
      * @return IMS_TRUE if the session is a forked session, otherwise IMS_FALSE.
      */
     virtual IMS_BOOL IsForkedSession(IN const ISession* piSession) const = 0;
+
+    /**
+     * @brief Sets the flag indicating that a 180 Ringing response has been received for the call.
+     */
+    virtual void Set180Received() = 0;
 };
 
 #endif

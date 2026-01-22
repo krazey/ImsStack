@@ -86,6 +86,7 @@ public:
     MOCK_METHOD(IMS_UINT32, GetSupportedMediaTypesFromSdp, (IN ISession * piSession), (override));
     MOCK_METHOD(IMS_BOOL, IsPreviewMode, (IN ISession * piSession), (const, override));
     MOCK_METHOD(IMS_BOOL, IsForkedSession, (IN const ISession* piSession), (const, override));
+    MOCK_METHOD(void, Set180Received, (), (override));
 };
 
 #endif
