@@ -89,13 +89,13 @@
 
     <!-- Media -->
     <boolean name="imsvoice.audio_bw_nego_option_bool" value="false"/>
+    <int name="imsvoice.audio_maxred_int" value="220"/>
 
     <!-- Ssc -->
     <string name="imsss.xcap_auid_prefix_string">/MyService</string>
     <int name="imsss.ut_xcap_apn_inactivity_timer_sec_int" value="600"/>
     <boolean name="imsss.ut_display_error_phrase_with_409_error_bool" value="true"/>
 
-    <int name="imsvoice.audio_maxred_int" value="220"/>
     <boolean name="ims.allow_sip_p_access_network_info_header_in_initial_register_bool" value="true"/>
     <int name="imsvoice.mo_call_request_timeout_for_eps_fallback_trigger_millis_int" value="4000"/>
 </carrier_config>
