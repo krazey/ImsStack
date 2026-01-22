@@ -194,6 +194,7 @@
         <item value="411"/>
     </int-array>
     <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="1"/>
+    <int name="imsvoice.silent_redial_ultimate_failure_action_int" value="2"/>
     <int name="imswfc.policy_for_tcall_timer_expiry_of_vowifi_call_int" value="1"/>
     <string-array name="imsvoice.reject_code_and_action_set_string_array" num="44">
         <item value="300:5,0"/> <!-- REDIRECTION_BY_CONTACT, CSFB -->
