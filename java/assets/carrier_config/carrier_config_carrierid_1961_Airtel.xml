@@ -42,6 +42,21 @@
     <!-- Ut/Xcap -->
     <int name="imsss.ut_oir_network_default_operation_int" value="1"/>
 
+    <!-- MTC -->
+    <int-array name="ims.information_level_of_geolocation_pidf_int_array" num="6">
+        <item value="2"/> <!-- NON_EMERGENCY_ON_WIFI -->
+        <item value="2"/> <!-- EMERGENCY_ON_WIFI -->
+        <item value="0"/> <!-- NON_EMERGENCY_ON_CELLULAR -->
+        <item value="0"/> <!-- EMERGENCY_ON_CELLULAR -->
+        <item value="2"/> <!-- NORMAL_ROUTING_EMERGENCY_ON_WIFI -->
+        <item value="0"/> <!-- NORMAL_ROUTING_EMERGENCY_ON_CELLULAR -->
+    </int-array>
+    <int-array name="imsvoice.message_type_support_geolocation_pidf_int_array" num="3">
+        <item value="0"/> <!-- INVITE -->
+        <item value="2"/> <!-- FINAL_SUCCESS_RESPONSE -->
+        <item value="3"/> <!-- FINAL_FAILURE_RESPONSE -->
+    </int-array>
+
     <!-- Media -->
     <!-- Audio -->
     <boolean name="imsvoice.audio_bw_nego_option_bool" value="true"/>
