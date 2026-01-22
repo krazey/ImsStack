@@ -573,6 +573,27 @@ public class ImsCallManager {
         }
 
         try {
+            if (session.getMtcCall().isTerminatedByAutoRejectedCall()) {
+                PhoneStateInterface phoneState = AgentFactory.getInstance().getAgent(
+                        PhoneStateInterface.class, mCallContext.getSlotId());
+                if (phoneState != null
+                        && phoneState.getCsCallState() != TelephonyManager.CALL_STATE_IDLE) {
+                    log("Not notify auto rejected call if CS call exists.");
+                    postAndRunTask(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                session.close();
+                                onCallDestroy(session);
+                            } catch (Throwable t) {
+                                loge("Exception: " + t.toString(), t);
+                            }
+                        }
+                    });
+                    return;
+                }
+            }
+
             logi("onCallIncomingReceived :: callId=" + session.getCallId()
                     + ", phoneId=" + getPhoneId());
 
