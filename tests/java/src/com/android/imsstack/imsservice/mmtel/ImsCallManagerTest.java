@@ -122,7 +122,6 @@ public class ImsCallManagerTest {
         mImsCallManager.clear();
         verify(mMockMtcApp).setCallListener(null);
         Assert.assertNull(mImsCallManager.mWifiCallWakeLock);
-        Assert.assertNull(mImsCallManager.mIncomingCallInfo);
     }
 
     @Test
@@ -174,14 +173,6 @@ public class ImsCallManagerTest {
         Assert.assertTrue(mImsCallManager.getPendingSession().containsKey(CALL_ID));
         mImsCallManager.closeAllSessions();
         Assert.assertFalse(mImsCallManager.getPendingSession().containsKey(CALL_ID));
-        verify(mMockImsCallSession, times(2)).getCallId();
-        Assert.assertEquals(0, mImsCallManager.getPendingSession().size());
-
-        // Verify destroyAllSessions->onCallDestroy->updateCallProfileOnSingleCall
-        reset(mMockImsCallSession);
-        when(mMockImsCallSession.getCallId()).thenReturn(CALL_ID);
-        mImsCallManager.getSession().put(CALL_ID, mMockImsCallSession);
-        mImsCallManager.closeAllSessions();
         verify(mMockImsCallSession, times(2)).getCallId();
         Assert.assertEquals(0, mImsCallManager.getPendingSession().size());
     }
@@ -716,10 +707,6 @@ public class ImsCallManagerTest {
 
         public ConcurrentHashMap<String, ImsCallSessionImpl> getPendingSession() {
             return mPendingSessions;
-        }
-
-        public ImsCallProfile getIncomingCallInfo() {
-            return mIncomingCallInfo;
         }
 
         @Override

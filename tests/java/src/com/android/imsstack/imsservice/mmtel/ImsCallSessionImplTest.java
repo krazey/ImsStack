@@ -1593,6 +1593,8 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 any(ImsCallSessionImplBase.class),
                 eq(RttModifyStatus.SESSION_MODIFY_REQUEST_FAIL));
         assertFalse(mCallDetails.is(ImsCallSessionImpl.CallDetails.RTT_TURNING_ON));
+        verify(mMockImsCallSessionCallback, times(1)).invokeUpdateFailed(
+                any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
 
         // RTT Turning Off Failed
         mImsCallSession = createImsCallSession("5", true);
@@ -1602,6 +1604,8 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 any(ImsCallSessionImplBase.class),
                 eq(RttModifyStatus.SESSION_MODIFY_REQUEST_FAIL));
         assertFalse(mCallDetails.is(ImsCallSessionImpl.CallDetails.RTT_TURNING_OFF));
+        verify(mMockImsCallSessionCallback, times(2)).invokeUpdateFailed(
+                any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
 
         // Video Session Modification in Progress
         mImsCallSession = createImsCallSession("6", true);
@@ -1618,17 +1622,9 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         mImsCallSession.getCallListenerProxy().onCallUpdateFailed(mMockMtcCall, mockCallReasonInfo);
         verify(mVideoCallSession).finalizeSessionModification();
 
-        // Call Controlled by IMS
-        mImsCallSession = createImsCallSession("8", true);
-        when(mVideoCallSession.isSessionModificationFinalizing()).thenReturn(false);
-        mImsCallSession.getLocalCallProfile().setCallExtraBoolean("call_controlled_by_ims", true);
-        mImsCallSession.getCallListenerProxy().onCallUpdateFailed(mMockMtcCall, mockCallReasonInfo);
-
-        assertFalse(mImsCallSession.getLocalCallProfile().getCallExtraBoolean(
-                "call_controlled_by_ims", false));
-
         // Generic Update Failed
-        mImsCallSession = createImsCallSession("9", true);
+        when(mVideoCallSession.isSessionModificationFinalizing()).thenReturn(false);
+        mImsCallSession = createImsCallSession("8", true);
         mImsCallSession.getCallListenerProxy().onCallUpdateFailed(mMockMtcCall, mockCallReasonInfo);
         verify(mMockImsCallSessionCallback, times(3)).invokeUpdateFailed(
                 any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));

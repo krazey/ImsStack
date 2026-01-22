@@ -344,19 +344,6 @@ public class ImsVideoCallProviderImplTest extends ImsVideoCallProviderTestBase {
 
     @SmallTest
     @Test
-    public void testHandleMediaSessionStarted() throws Exception {
-        when(mMockCallSession.getStreamMediaProfile()).thenReturn(mMockMediaProfile);
-        when(mMockMediaProfile.getVideoQuality()).thenReturn(
-                ImsStreamMediaProfile.VIDEO_QUALITY_QCIF);
-
-        getProviderImpl().handleMediaSessionStarted();
-
-        verify(mMockCallSession).getStreamMediaProfile();
-        verify(mMockCallback).changePeerDimensions(any(int.class), any(int.class));
-    }
-
-    @SmallTest
-    @Test
     public void testHandleMediaSessionMediaInfoChanged() throws RemoteException {
         getProviderImpl().handleMediaSessionMediaInfoChanged(
                 MtcCallUtils.INFO_TYPE_MEDIA_VIDEO_NO_DATA, 0, null);
@@ -374,18 +361,6 @@ public class ImsVideoCallProviderImplTest extends ImsVideoCallProviderTestBase {
     public void testHandleMediaSessionPeerFirstVideoReceived() throws RemoteException {
         getProviderImpl().handleMediaSessionPeerFirstVideoReceived();
         verify(mMockCallback).handleCallSessionEvent(
-                Connection.VideoProvider.SESSION_EVENT_RX_RESUME);
-    }
-
-    @SmallTest
-    @Test
-    public void testHandleMediaSessionPeerDisplayOrientationChanged() throws RemoteException {
-        getProviderImpl().handleMediaSessionPeerDisplayOrientationChanged(0);
-        verify(mMockCallback).handleCallSessionEvent(
-                Connection.VideoProvider.SESSION_EVENT_RX_RESUME);
-
-        getProviderImpl().handleMediaSessionPeerDisplayOrientationChanged(0);
-        verify(mMockCallback, times(1)).handleCallSessionEvent(
                 Connection.VideoProvider.SESSION_EVENT_RX_RESUME);
     }
 

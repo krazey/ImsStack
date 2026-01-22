@@ -24,9 +24,7 @@ import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsStreamMediaProfile;
 import android.telephony.ims.ImsVideoCallProvider;
 import android.telephony.ims.stub.ImsCallSessionImplBase;
-import android.widget.Toast;
 
-import com.android.imsstack.R;
 import com.android.imsstack.enabler.mtc.CallFeature;
 import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
@@ -120,20 +118,6 @@ public final class ImsVideoCallSession implements IVideoCallSession {
 
         logi("SessionModification-Request(SEND) :: "
                 + ImsCallMediaUtils.toString(toProfile));
-
-        if (checkAndRejectVideoCallControl(fromProfile, toProfile)) {
-            mVideoCallProvider.receiveSessionModifyResponse(
-                    Connection.VideoProvider.SESSION_MODIFY_REQUEST_INVALID,
-                    toProfile, fromProfile);
-
-            Toast.makeText(mCallContext.getContext(), mCallContext.getContext().getString(
-                    R.string.turning_off_camera_not_supported), Toast.LENGTH_SHORT).show();
-
-            if (mEventListener != null) {
-                mEventListener.onSessionModificationAbortedByCameraOff();
-            }
-            return;
-        }
 
         VideoProfile proposalProfile = ImsCallMediaUtils.cloneVideoProfile(toProfile);
 
@@ -590,32 +574,6 @@ public final class ImsVideoCallSession implements IVideoCallSession {
         setProposalProfile(null);
         setSessionModificationType(MODIFICATION_NONE);
         setProposedStreamMediaProfile(null);
-    }
-
-    private boolean checkAndRejectVideoCallControl(
-            VideoProfile fromProfile, VideoProfile toProfile) {
-        if (!ImsCallUtils.isCallOnNativeAppsAndCountryKR(mCallContext)) {
-            return false;
-        }
-
-        int fromState = (fromProfile != null) ? fromProfile.getVideoState()
-                : VideoProfile.STATE_BIDIRECTIONAL;
-        int toState = (toProfile != null) ? toProfile.getVideoState()
-                : VideoProfile.STATE_BIDIRECTIONAL;
-
-        if (VideoProfile.isBidirectional(fromState)) {
-            if ((!VideoProfile.isBidirectional(toState)
-                    && (VideoProfile.isTransmissionEnabled(toState)
-                        || VideoProfile.isReceptionEnabled(toState)))
-                    || VideoProfile.isPaused(toState)) {
-                log("checkAndRejectVideoCallControl :: rejected - from="
-                        + ImsCallMediaUtils.toString(fromProfile)
-                        + ", to=" + ImsCallMediaUtils.toString(toProfile));
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private ImsStreamMediaProfile createProposalMedia(VideoProfile profile,

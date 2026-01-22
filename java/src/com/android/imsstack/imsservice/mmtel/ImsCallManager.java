@@ -64,7 +64,6 @@ public class ImsCallManager {
     private ImsCallTracker mCT = new ImsCallTracker();
     private MtcAppCallListenerProxy mCallListener = new MtcAppCallListenerProxy();
     protected WifiCallWakeLock mWifiCallWakeLock = null;
-    protected ImsCallProfile mIncomingCallInfo = null;
 
     public ImsCallManager(ICallContext callContext, MtcApp mtcApp, IMmTelCallListener listener) {
         mCallContext = callContext;
@@ -115,8 +114,6 @@ public class ImsCallManager {
         mMtcApp.setCallListener(null);
 
         closeAllSessions();
-
-        removeIncomingCallInfo();
 
         if (mWifiCallWakeLock != null) {
             mWifiCallWakeLock.clear();
@@ -228,8 +225,6 @@ public class ImsCallManager {
                 newSession.takeCall();
             }
         }
-
-        removeIncomingCallInfo();
 
         if (newSession != null) {
             removePendingSession(newSession);
@@ -470,14 +465,6 @@ public class ImsCallManager {
         }
     }
 
-    private void removeIncomingCallInfo() {
-        if (mIncomingCallInfo != null) {
-            log("removeIncomingCallInfo");
-
-            mIncomingCallInfo = null;
-        }
-    }
-
     @SuppressWarnings("unchecked")
     private void removePendingSessions() {
         if (mPendingSessions.isEmpty()) {
@@ -565,8 +552,6 @@ public class ImsCallManager {
 
         logi("onCallDestroy :: sessions=" + mSessions.size() +
                 ", session=" + session.getCallId());
-
-        updateCallProfileOnSingleCall();
     }
 
     private void onCallPreIncomingReceived(final ImsCallSessionImpl session) {
@@ -597,11 +582,6 @@ public class ImsCallManager {
                     + t.getMessage(), t);
             rejectAndDestroyCall(session, true);
         }
-    }
-
-    private void onCallInfoReceived(final ImsCallProfile profile) {
-        mIncomingCallInfo = profile;
-        logi("onCallInfoReceived :: calltype=" + mIncomingCallInfo.getCallType());
     }
 
     private void postAndRunTask(Runnable task) {
@@ -734,36 +714,6 @@ public class ImsCallManager {
             }
 
             return activeSessionCount;
-        }
-    }
-
-    private void updateCallProfileOnSingleCall() {
-        if (!ImsCallUtils.isCallOnNativeAppsAndCountryKR(mCallContext)) {
-            return;
-        }
-
-        ImsCallSessionImpl callSession = null;
-
-        synchronized (mSessions) {
-            int count = mSessions.size();
-
-            if (count != 1) {
-                return;
-            }
-
-            // When single call is remained, update the call profile
-            for (Map.Entry<String, ImsCallSessionImpl> entry : mSessions.entrySet()) {
-                ImsCallSessionImpl session = entry.getValue();
-
-                if ((session != null) && session.isInCall()) {
-                    callSession = session;
-                    break;
-                }
-            }
-        }
-
-        if (callSession != null) {
-            callSession.updateCallProfileByCallManager();
         }
     }
 
