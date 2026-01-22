@@ -30,22 +30,22 @@ MtcExtension::MtcExtension(IN IMtcCallContext& objContext, IN const AString& str
         IN const std::vector<RequestType>& lstSupportedRequestType,
         IN const std::vector<ResponseType>& lstSupportedResponseType) :
         m_objContext(objContext),
+        m_bRequiredOnRemote(IMS_FALSE),
+        m_bSupportedOnRemote(IMS_FALSE),
         m_strOptionTag(strOptionTag),
         m_lstSupportedRequestType(lstSupportedRequestType),
-        m_lstSupportedResponseType(lstSupportedResponseType),
-        m_bRequiredOnRemote(IMS_FALSE),
-        m_bSupportedOnRemote(IMS_FALSE)
+        m_lstSupportedResponseType(lstSupportedResponseType)
 {
 }
 
 PUBLIC
 MtcExtension::MtcExtension(IN const MtcExtension& objRhs) :
         m_objContext(objRhs.m_objContext),
+        m_bRequiredOnRemote(objRhs.m_bRequiredOnRemote),
+        m_bSupportedOnRemote(objRhs.m_bSupportedOnRemote),
         m_strOptionTag(objRhs.m_strOptionTag),
         m_lstSupportedRequestType(objRhs.m_lstSupportedRequestType),
-        m_lstSupportedResponseType(objRhs.m_lstSupportedResponseType),
-        m_bRequiredOnRemote(objRhs.m_bRequiredOnRemote),
-        m_bSupportedOnRemote(objRhs.m_bSupportedOnRemote)
+        m_lstSupportedResponseType(objRhs.m_lstSupportedResponseType)
 {
 }
 

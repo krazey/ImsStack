@@ -117,25 +117,49 @@ PUBLIC VIRTUAL void PreconditionExtension::FormatResponse(
 PUBLIC VIRTUAL void PreconditionExtension::HandleRequest(
         IN RequestType eType, IN const IMessage& objRequest)
 {
-    if (eType != RequestType::START && !HasSdpWithPrecondition(objRequest))
+    if (!IsSupportedType(eType))
     {
-        IMS_TRACE_D("HandleRequest : Don't check precondition feature without SDP.", 0, 0, 0);
         return;
     }
 
-    MtcExtension::HandleRequest(eType, objRequest);
+    UpdateFromRequireAndSupportedHeader(objRequest, eType == RequestType::START);
 }
 
 PUBLIC VIRTUAL void PreconditionExtension::HandleResponse(
         IN ResponseType eType, IN const IMessage& objResponse)
 {
-    if (!HasSdpWithPrecondition(objResponse))
+    if (!IsSupportedType(eType))
     {
-        IMS_TRACE_D("HandleResponse : Don't check precondition feature without SDP.", 0, 0, 0);
         return;
     }
 
-    MtcExtension::HandleResponse(eType, objResponse);
+    UpdateFromRequireAndSupportedHeader(objResponse, IMS_FALSE);
+}
+
+PRIVATE
+void PreconditionExtension::UpdateFromRequireAndSupportedHeader(
+        IN const IMessage& objMessage, IN IMS_BOOL bTypeStart)
+{
+    if (!bTypeStart && !m_objContext.GetMessageUtils().HasSdp(&objMessage))
+    {
+        IMS_TRACE_D("UpdateFromRequireAndSupportedHeader : No SDP.", 0, 0, 0);
+        return;
+    }
+
+    if (bTypeStart || m_bRequiredOnRemote || HasPreconditionAttribute())
+    {
+        m_bRequiredOnRemote = m_objContext.GetMessageUtils().ContainsValueIgnoreCase(
+                &objMessage, GetOptionTag(), ISipHeader::REQUIRE);
+    }
+
+    if (bTypeStart || m_bSupportedOnRemote || HasPreconditionAttribute())
+    {
+        m_bSupportedOnRemote = m_objContext.GetMessageUtils().ContainsValueIgnoreCase(
+                &objMessage, GetOptionTag(), ISipHeader::SUPPORTED);
+    }
+
+    IMS_TRACE_D("UpdateFromRequireAndSupportedHeader : Tag[precondition] Require[%s] Supported[%s]",
+            _TRACE_B_(m_bRequiredOnRemote), _TRACE_B_(m_bSupportedOnRemote), 0);
 }
 
 PRIVATE IMS_BOOL PreconditionExtension::IsRequestIncludingOffer() const
@@ -144,9 +168,8 @@ PRIVATE IMS_BOOL PreconditionExtension::IsRequestIncludingOffer() const
                    &m_objContext.GetSession()->GetISession()) == NegotiationState::STATE_OFFER_SENT;
 }
 
-PRIVATE IMS_BOOL PreconditionExtension::HasSdpWithPrecondition(IN const IMessage& objMessage) const
+PRIVATE IMS_BOOL PreconditionExtension::HasPreconditionAttribute() const
 {
-    return m_objContext.GetMessageUtils().HasSdp(&objMessage) &&
-            m_objContext.GetPreconditionManager().IsPreconditionIncludedInSdp(
-                    &m_objContext.GetSession()->GetISession());
+    return m_objContext.GetPreconditionManager().IsPreconditionIncludedInSdp(
+            &m_objContext.GetSession()->GetISession());
 }

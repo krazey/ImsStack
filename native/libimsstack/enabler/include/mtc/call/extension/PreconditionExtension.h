@@ -42,8 +42,9 @@ public:
     void HandleResponse(IN ResponseType eType, IN const IMessage& objResponse) override;
 
 private:
+    void UpdateFromRequireAndSupportedHeader(IN const IMessage& objMessage, IN IMS_BOOL bTypeStart);
     IMS_BOOL IsRequestIncludingOffer() const;
-    IMS_BOOL HasSdpWithPrecondition(IN const IMessage& objMessage) const;
+    IMS_BOOL HasPreconditionAttribute() const;
 };
 
 #endif
