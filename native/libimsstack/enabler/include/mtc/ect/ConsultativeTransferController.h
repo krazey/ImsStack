@@ -18,6 +18,7 @@
 #define CONSULTATIVE_TRANSFER_CONTROLLER_H_
 
 #include "ImsTypeDef.h"
+#include "IMtcCallStateListener.h"
 #include "call/IMtcCall.h"
 #include "ect/EctController.h"
 
@@ -51,6 +52,10 @@ public:
      * @brief Initiates the consultative transfer process.
      */
     void Transfer() override;
+
+    /** See {@link IMtcCallStateListener#OnCallStateChanged}. */
+    void OnCallStateChanged(IN CallKey nCallKey, IN State eState, IN Type eType,
+            IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;
 
 protected:
     /**

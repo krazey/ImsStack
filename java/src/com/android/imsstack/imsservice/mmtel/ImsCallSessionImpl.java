@@ -4053,6 +4053,20 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
             log("onCallTransferFailed callId=" + getCallId());
 
+            if (mTransferRequestedSession != null) {
+                // it means the call with the transferee has terminated.
+                // We must recover the foreground call, which was internally placed on
+                // implicit hold (IMPLICIT_ON_HOLD) for the transfer operation.
+                mTransferRequestedSession = null;
+                if (mCallDetails.is(CallDetails.ON_ECT) && mCall.isOnHold()
+                        && mCallDetails.is(CallDetails.IMPLICIT_ON_HOLD)) {
+                    mCall.resume(MtcCallUtils.createUnholdMedia(
+                                mCall.getCallInfo(), mCall.getMediaInfo(),
+                                isCallFeatureSupported(CF_VIDEO_HOLD_WITH_INACTIVE)));
+                }
+
+                return;
+            }
             ImsReasonInfo reasonInfo = ImsCallUtils.createImsReasonInfo(callReasonInfo);
 
             if (mTransferTargetSession.mCallDetails.is(CallDetails.ON_ECT)) {

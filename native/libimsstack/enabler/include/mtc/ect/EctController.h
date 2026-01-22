@@ -18,6 +18,7 @@
 #define ECT_CONTROLLER_H_
 
 #include "CallReasonInfo.h"
+#include "IMtcCallStateListener.h"
 #include "ITimer.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
@@ -36,7 +37,10 @@ class EctReference;
  * such as blind and consultative transfers. It handles the {@link IReference} listening
  * and timer events.
  */
-class EctController : public IEctReferenceListener, public ITimerListener
+class EctController :
+        public IEctReferenceListener,
+        public ITimerListener,
+        public IMtcCallStateListener
 {
 public:
     /**
@@ -68,6 +72,14 @@ public:
      * @param piTimer Pointer to the expired timer.
      */
     void Timer_TimerExpired(IN ITimer* piTimer) override;
+
+    /** See {@link IMtcCallStateListener#OnCallStateChanged}. */
+    void OnCallStateChanged(IN [[maybe_unused]] CallKey nCallKey, IN [[maybe_unused]] State eState,
+            IN [[maybe_unused]] Type eType, IN [[maybe_unused]] IMS_BOOL bEmergency,
+            IN [[maybe_unused]] IMS_SINT32 nReason) override {};
+
+    /** See {@link IMtcCallStateListener#OnTotalCallStateChanged}. */
+    inline void OnTotalCallStateChanged(IN [[maybe_unused]] State) override{};
 
     /**
      * @brief Virtual method to initiate a transfer to a specific number.
