@@ -775,6 +775,17 @@ void MtcPreconditionManager::OnWaitAudioDedicatedBearerTimerExpired(IN QosTimer*
         return;
     }
 
+    if (m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigVoice::KEY_RELEASE_CALL_ON_DEDICATED_BEARER_WAIT_TIMEOUT_BOOL))
+    {
+        ISession* piSession = GetISessionWithTimer(pTimer);
+        if (piSession != IMS_NULL)
+        {
+            m_pListener->QosReserveFailed(piSession, QosLossPolicy::RELEASE);
+        }
+        return;
+    }
+
     HandleReservationFailureByTimerExpiration(pTimer);
 }
 
