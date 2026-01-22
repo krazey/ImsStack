@@ -20,6 +20,7 @@
 #include "ImsTypeDef.h"
 #include "MockISystem.h"
 #include "PlatformContext.h"
+#include "ServiceUtil.h"
 #include "TestPhoneInfoService.h"
 #include "device/OsSubscriberInfo.h"
 
@@ -200,4 +201,24 @@ TEST_F(OsSubscriberInfoTest, SetAndGetPreference)
     EXPECT_EQ(strValue, strOut);
 }
 
+TEST_F(OsSubscriberInfoTest, LogSipMessage)
+{
+    AString strMessage("test message");
+    EXPECT_CALL(m_objMockSystem, LogSipMessage(_, _, _, _)).Times(1);
+    UtilService::LogSipMessage(strMessage.GetStr(), strMessage.GetLength(), IMS_SLOT_0, IMS_TRUE);
+}
+
+TEST_F(OsSubscriberInfoTest, LogSipMessage_Incoming)
+{
+    AString strMessage("test incoming message");
+    EXPECT_CALL(m_objMockSystem, LogSipMessage(_, _, IMS_SLOT_0, IMS_FALSE)).Times(1);
+    UtilService::LogSipMessage(strMessage.GetStr(), strMessage.GetLength(), IMS_SLOT_0, IMS_FALSE);
+}
+
+TEST_F(OsSubscriberInfoTest, LogSipMessage_Slot1)
+{
+    AString strMessage("test message slot 1");
+    EXPECT_CALL(m_objMockSystem, LogSipMessage(_, _, IMS_SLOT_1, IMS_TRUE)).Times(1);
+    UtilService::LogSipMessage(strMessage.GetStr(), strMessage.GetLength(), IMS_SLOT_1, IMS_TRUE);
+}
 }  // namespace android

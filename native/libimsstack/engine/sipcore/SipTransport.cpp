@@ -18,6 +18,7 @@
 #include "ServiceNetwork.h"
 #include "ServiceSystemTime.h"
 #include "ServiceTrace.h"
+#include "ServiceUtil.h"
 
 #include "private/SipConfig.h"
 
@@ -588,6 +589,8 @@ PUBLIC GLOBAL void SipTransport::PrintMessage(IN IMS_SINT32 nSlotId, IN IMS_SINT
         IN IMS_BOOL bSend, IN const SipTransportAddress& objFarEnd, IN const IMS_CHAR* pszMessage,
         IN IMS_SINT32 nLength)
 {
+    UtilService::LogSipMessage(pszMessage, nLength, nSlotId, bSend);
+
     // SEND or RECV:Message Length:Transport Type:IP address:Port [Additional information]
     // For example,
     //    Socket FD: 101

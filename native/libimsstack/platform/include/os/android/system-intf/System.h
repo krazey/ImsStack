@@ -203,6 +203,12 @@ public:
     void RemoveIpSecSa(IN IMS_SINT32 nIpSecId, IN IMS_SINT32 nSpi, IN IMS_SINT32 nSocketFd,
             IN IMS_SINT32 nSlotId) override;
 
+    ////
+    // Logging
+    ////
+    void LogSipMessage(IN const IMS_CHAR* pszMessage, IN IMS_SINT32 nLength, IN IMS_SINT32 nSlotId,
+            IN IMS_BOOL bOutgoing) override;
+
 private:
     IMS_SINT32 GetInt(IN IMS_SINT32 nOperation, IN IMS_SINT32 nDefaultValue = 0,
             IN IMS_SINT32 nSlotId = IMS_SLOT_0);

@@ -1767,6 +1767,24 @@ void System::RemoveIpSecSa(
     }
 }
 
+PUBLIC
+void System::LogSipMessage(IN const IMS_CHAR* pszMessage, IN IMS_SINT32 nLength,
+        IN IMS_SINT32 nSlotId, IN IMS_BOOL bOutgoing)
+{
+    if (m_pCallback == IMS_NULL)
+    {
+        return;
+    }
+
+    Parcel in;
+    Parcel out;
+    in.writeInt32(nSlotId);
+    in.writeInt32(SystemConstants::LOG_SIP_MESSAGE);
+    in.writeInt32(bOutgoing ? 1 : 0 );
+    in.writeByteArray(nLength, (const uint8_t*)pszMessage);
+    m_pCallback->SendDataToJava(in, out);
+}
+
 PRIVATE
 void System::AddListenerIfCategoryMatched(IN IMS_UINT32 nCategories, IN IMS_UINT32 nCategory,
         IN ISystemListener* piListener, IN IMS_SINT32 nSlotId)

@@ -956,6 +956,16 @@ public final class SystemCallAgent implements SystemCallInterface {
         return (utils != null) ? utils.getAccessNetworkPlmn() : "";
     }
 
+    @Override
+    public void logSipMessage(@NonNull String sipMessage, int slotId, int direction) {
+        //TODO: Enable this later to verify the logging in separate gerrit with Nimbus
+        /*try {
+            ImsNimbusLogger.getInstance().logSipMessage(sipMessage, slotId, direction);
+        } catch (IllegalStateException e) {
+            Log.w(this, "ImsNimbusLogger not initialized: " + e.getMessage());
+        }*/
+    }
+
     private IDcApn getDcApn() {
         return DcFactory.getDcAgent(IDcApn.class, mSlotId);
     }
