@@ -325,7 +325,7 @@ TEST_F(MtsErrorHandlerTest, Handle503ErrorWithoutReasonHeader)
     ON_CALL(objConfigService.GetMockCarrierConfig(),
             GetInt(CarrierConfig::ImsSms::KEY_SMS_REG_POLICY_FOR_503_RESPONSE_INT,
                     MtsRegRecoveryPolicy::MTS_REG_RECOVERY_POLICY_NONE))
-            .WillByDefault(Return(ImsAosControl::REGISTER_REINITIATE));
+            .WillByDefault(Return(MtsRegRecoveryPolicy::REGISTER_REINITIATE));
 
     EXPECT_CALL(objMockMtsService, RequestRegistrationRecovery(_)).Times(0);
 
