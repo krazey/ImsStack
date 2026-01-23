@@ -17,6 +17,7 @@
 package com.android.imsstack.imsservice.mmtel;
 
 import static com.android.imsstack.base.TestAppContext.SLOT0;
+import static com.android.imsstack.base.TestAppContext.SUB_ID_1;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -26,6 +27,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -35,7 +38,6 @@ import static org.mockito.Mockito.when;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.PersistableBundle;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.CarrierConfigManager;
 import android.telephony.DataFailCause;
@@ -52,6 +54,8 @@ import com.android.imsstack.ContextFixture;
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.ContentProviderProxy.SettingsProxy;
 import com.android.imsstack.base.SystemServiceProxy.CarrierConfigManagerProxy;
+import com.android.imsstack.base.SystemServiceProxy.ImsManagerProxy;
+import com.android.imsstack.base.SystemServiceProxy.ImsMmTelManagerProxy;
 import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.agents.AgentFactory;
@@ -70,6 +74,7 @@ import com.android.imsstack.enabler.aos.IAosRegistrationListener.ReasonCode;
 import com.android.imsstack.enabler.aos.service.AosService;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 import com.android.imsstack.internal.ImsStackRegistry;
+import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.imsstack.util.MessageExecutor;
 
@@ -89,7 +94,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 @RunWith(JUnit4.class)
 public class ImsRegistrationTrackerTest {
@@ -104,6 +111,8 @@ public class ImsRegistrationTrackerTest {
     private ContextFixture mContextFixture;
     private TelephonyManagerProxy mTelephonyManagerProxy;
     private CarrierConfigManagerProxy mCarrierConfigManagerProxy;
+    private ImsManagerProxy mImsManagerProxy;
+    private ImsMmTelManagerProxy mImsMmTelManagerProxy;
 
     @Mock SettingsProxy mSettingsProxy;
     @Mock CarrierConfig mMockCarrierConfig;
@@ -118,6 +127,7 @@ public class ImsRegistrationTrackerTest {
     @Mock SharedPreferences.Editor mSpEditor;
     @Mock SimInterface mMockSimInterface;
     @Mock UsatInterface mMockUsatInterface;
+    @Mock MmTelFeatureRegistry mMockMmTelFeatureRegistry;
 
     @Before
     public void setUp() {
@@ -134,6 +144,8 @@ public class ImsRegistrationTrackerTest {
         mTelephonyManagerProxy = mTestAppContext.getSystemServiceProxy(TelephonyManagerProxy.class);
         mCarrierConfigManagerProxy = mTestAppContext.getSystemServiceProxy(
                 CarrierConfigManagerProxy.class);
+        mImsManagerProxy = mTestAppContext.getSystemServiceProxy(ImsManagerProxy.class);
+        mImsMmTelManagerProxy = mImsManagerProxy.getImsMmTelManagerProxy(anyInt());
         when(mTelephonyManagerProxy.isDataEnabled()).thenReturn(true);
         when(mMockBaseContext.getSlotId()).thenReturn(SLOT0);
         when(mMockBaseContext.getPhoneId()).thenReturn(SLOT0);
@@ -141,6 +153,7 @@ public class ImsRegistrationTrackerTest {
         when(mMockBaseContext.getDefaultLooper())
                 .thenReturn(AppContext.getInstance().getMainLooper());
         when(mMockBaseContext.getDefaultHandler()).thenReturn(mMockHandler);
+        when(mMockBaseContext.getExecutor()).thenReturn(Runnable::run);
         when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         when(mTestAppContext.getContext().getSharedPreferences(anyString(), anyInt()))
                 .thenReturn(mSp);
@@ -154,9 +167,13 @@ public class ImsRegistrationTrackerTest {
         when(mMockCarrierConfig.getBoolean(eq(CarrierConfigManager
                 .KEY_IGNORE_DATA_ENABLED_CHANGED_FOR_VIDEO_CALLS)))
                 .thenReturn(false);
+        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.ImsWfc
+                .KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOICE_BOOL)))
+                .thenReturn(true);
 
         when(mMockIDcNetWatcher.isVoiceRoaming()).thenReturn(false);
         when(mMockIDcNetWatcher.isRoaming()).thenReturn(false);
+        when(mMockMmTelFeatureRegistry.isVtSettingEnabled()).thenReturn(true);
 
         mFeatureManager = new ImsFeatureManager(mMockBaseContext, mMockFeatureCapabilityListener);
         mAosReg = new MockIAosRegistration();
@@ -785,7 +802,6 @@ public class ImsRegistrationTrackerTest {
         when(mMockIDcNetWatcher.isRoaming()).thenReturn(true);
         when(mTelephonyManagerProxy.isDataRoamingEnabled()).thenReturn(true);
         when(mTelephonyManagerProxy.isDataEnabled()).thenReturn(true);
-        when(mTestAppContext.getContext().getResources().getBoolean(anyInt())).thenReturn(true);
 
         List<CapabilityPair> enableCapabilities = new ArrayList<>();
         enableCapabilities.add(new CapabilityPair(
@@ -796,26 +812,42 @@ public class ImsRegistrationTrackerTest {
                 IAosRegistrationListener.NetworkType.LTE,
                 IAosRegistrationListener.Capability.VIDEO);
 
-        mRegTracker.changeCapabilities(enableCapabilities, new ArrayList<>());
-        assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
-
         // case1
-        PersistableBundle config = new PersistableBundle();
-        config.putBoolean(CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL, false);
-        when(mCarrierConfigManagerProxy.getConfigForSubId(anyInt(), any())).thenReturn(config);
-
-        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.ImsWfc
-                .KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOICE_BOOL)))
-                .thenReturn(true);
-
         mRegTracker.changeCapabilities(enableCapabilities, new ArrayList<>());
         assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
 
-        config = new PersistableBundle();
-        config.putBoolean(CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL, true);
-        when(mCarrierConfigManagerProxy.getConfigForSubId(anyInt(), any())).thenReturn(config);
+        doAnswer(invocation -> {
+            Executor executor = invocation.getArgument(2);
+            Consumer<Boolean> callback = invocation.getArgument(3);
+
+            executor.execute(() -> callback.accept(true));
+            return null;
+        }).when(mImsMmTelManagerProxy).isSupported(anyInt(), anyInt(), any(), any());
+
+        ArgumentCaptor<ConfigInterface.Listener> configListenerCaptor =
+                ArgumentCaptor.forClass(ConfigInterface.Listener.class);
+        verify(mMockConfigInterface).addListener(configListenerCaptor.capture());
+        ConfigInterface.Listener listener = configListenerCaptor.getValue();
+        listener.onCarrierConfigChanged(SLOT0, SUB_ID_1);
+
+        ArgumentCaptor<Runnable> initCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(mMockHandler, times(2)).post(initCaptor.capture());
+        initCaptor.getValue().run();
+
+        ArgumentCaptor<Runnable> callbackCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(mMockHandler, atLeastOnce()).post(callbackCaptor.capture());
+        callbackCaptor.getValue().run();
 
         capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.IWLAN,
+                IAosRegistrationListener.Capability.VIDEO);
+
+        mRegTracker.changeCapabilities(enableCapabilities, new ArrayList<>());
+        assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
+
+        when(mMockMmTelFeatureRegistry.isVtSettingEnabled()).thenReturn(false);
+
+        capabilityPairs = new CapabilityPairs(
+                IAosRegistrationListener.NetworkType.LTE,
                 IAosRegistrationListener.Capability.VIDEO);
 
         mRegTracker.changeCapabilities(enableCapabilities, new ArrayList<>());
@@ -952,13 +984,28 @@ public class ImsRegistrationTrackerTest {
         when(mMockIDcNetWatcher.isRoaming()).thenReturn(true);
         when(mTelephonyManagerProxy.isDataRoamingEnabled()).thenReturn(true);
         when(mTelephonyManagerProxy.isDataEnabled()).thenReturn(true);
-        when(mTestAppContext.getContext().getResources().getBoolean(anyInt())).thenReturn(true);
-        PersistableBundle config = new PersistableBundle();
-        config.putBoolean(CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL, true);
-        when(mCarrierConfigManagerProxy.getConfigForSubId(anyInt(), any())).thenReturn(config);
-        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.ImsWfc
-                .KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOICE_BOOL)))
-                .thenReturn(true);
+
+        doAnswer(invocation -> {
+            Executor executor = invocation.getArgument(2);
+            Consumer<Boolean> callback = invocation.getArgument(3);
+
+            executor.execute(() -> callback.accept(true));
+            return null;
+        }).when(mImsMmTelManagerProxy).isSupported(anyInt(), anyInt(), any(), any());
+
+        ArgumentCaptor<ConfigInterface.Listener> configListenerCaptor =
+                ArgumentCaptor.forClass(ConfigInterface.Listener.class);
+        verify(mMockConfigInterface).addListener(configListenerCaptor.capture());
+        ConfigInterface.Listener listener = configListenerCaptor.getValue();
+        listener.onCarrierConfigChanged(SLOT0, SUB_ID_1);
+
+        ArgumentCaptor<Runnable> initCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(mMockHandler, times(2)).post(initCaptor.capture());
+        initCaptor.getValue().run();
+
+        ArgumentCaptor<Runnable> callbackCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(mMockHandler, atLeastOnce()).post(callbackCaptor.capture());
+        callbackCaptor.getValue().run();
 
         List<CapabilityPair> enableCapabilities = new ArrayList<>();
         enableCapabilities.add(new CapabilityPair(
@@ -1035,11 +1082,6 @@ public class ImsRegistrationTrackerTest {
 
     @Test
     public void testchangeCapabilities_all() {
-        when(mTestAppContext.getContext().getResources().getBoolean(anyInt())).thenReturn(true);
-        PersistableBundle config = new PersistableBundle();
-        config.putBoolean(CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL, true);
-        when(mCarrierConfigManagerProxy.getConfigForSubId(anyInt(), any())).thenReturn(config);
-
         List<CapabilityPair> enableCapabilities = new ArrayList<>();
         enableCapabilities.add(new CapabilityPair(
                 MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE,
@@ -1145,6 +1187,10 @@ public class ImsRegistrationTrackerTest {
 
         verify(mMockIDcNetWatcher, times(2)).addListener(any(IDcNetWatcher.Listener.class));
         verify(mMockIDcNetWatcher, times(1)).removeListener(any(IDcNetWatcher.Listener.class));
+        verify(mMockMmTelFeatureRegistry, times(2)).addListener(
+                any(MmTelFeatureRegistry.Listener.class));
+        verify(mMockMmTelFeatureRegistry, times(1)).removeListener(
+                any(MmTelFeatureRegistry.Listener.class));
     }
 
     @Test
@@ -1197,6 +1243,10 @@ public class ImsRegistrationTrackerTest {
         listener.onImsServiceStarted(SLOT0);
         verify(mMockIDcNetWatcher, times(2)).addListener(any(IDcNetWatcher.Listener.class));
         verify(mMockIDcNetWatcher, times(1)).removeListener(any(IDcNetWatcher.Listener.class));
+        verify(mMockMmTelFeatureRegistry, times(2)).addListener(
+                any(MmTelFeatureRegistry.Listener.class));
+        verify(mMockMmTelFeatureRegistry, times(1)).removeListener(
+                any(MmTelFeatureRegistry.Listener.class));
     }
 
     @Test
@@ -1209,6 +1259,10 @@ public class ImsRegistrationTrackerTest {
         listener.onImsServiceStopped(SLOT0);
         verify(mMockIDcNetWatcher, times(2)).addListener(any(IDcNetWatcher.Listener.class));
         verify(mMockIDcNetWatcher, times(2)).removeListener(any(IDcNetWatcher.Listener.class));
+        verify(mMockMmTelFeatureRegistry, times(2)).addListener(
+                any(MmTelFeatureRegistry.Listener.class));
+        verify(mMockMmTelFeatureRegistry, times(2)).removeListener(
+                any(MmTelFeatureRegistry.Listener.class));
     }
 
     @Test
@@ -1238,7 +1292,7 @@ public class ImsRegistrationTrackerTest {
         assertNotNull(listener);
         listener.onRoamingStateChanged(true);
 
-        verify(mMockHandler).post(any(Runnable.class));
+        verify(mMockHandler, times(2)).post(any(Runnable.class));
     }
 
     @Test
@@ -1415,6 +1469,20 @@ public class ImsRegistrationTrackerTest {
     }
 
     @Test
+    public void testOnVtSettingChanged() {
+        ArgumentCaptor<MmTelFeatureRegistry.Listener> listenerCaptor =
+                ArgumentCaptor.forClass(MmTelFeatureRegistry.Listener.class);
+        verify(mMockMmTelFeatureRegistry, times(1)).addListener(
+                listenerCaptor.capture());
+
+        MmTelFeatureRegistry.Listener listener = listenerCaptor.getValue();
+        assertNotNull(listener);
+        listener.onVtSettingChanged();
+
+        verify(mMockHandler, times(2)).post(any(Runnable.class));
+    }
+
+    @Test
     @SmallTest
     public void dumpVerifiesPresenceOfKey() {
         // GIVEN: A mocked AosService is injected into the factory to intercept nested dump calls
@@ -1444,7 +1512,7 @@ public class ImsRegistrationTrackerTest {
 
         // Capture and run the Runnable posted to the mock handler to populate the log
         ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
-        verify(mMockHandler).post(runnableCaptor.capture());
+        verify(mMockHandler, times(2)).post(runnableCaptor.capture());
         runnableCaptor.getValue().run();
 
         // GIVEN: Prepare tools to capture the dump output
@@ -1509,6 +1577,11 @@ public class ImsRegistrationTrackerTest {
         @Override
         protected IDcNetWatcher getDcNetWatcher(int slotId) {
             return mMockIDcNetWatcher;
+        }
+
+        @Override
+        protected MmTelFeatureRegistry getMmTelFeatureRegistry(int slotId) {
+            return mMockMmTelFeatureRegistry;
         }
     }
 }

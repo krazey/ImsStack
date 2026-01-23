@@ -43,6 +43,7 @@ import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.PersistableBundle;
 import android.telecom.TelecomManager;
+import android.telephony.AccessNetworkConstants;
 import android.telephony.CarrierConfigManager;
 import android.telephony.CarrierConfigManager.CarrierConfigChangeListener;
 import android.telephony.SmsManager;
@@ -494,6 +495,18 @@ public class SystemServiceProxyImpl implements SystemServiceProxy {
                 mMmTelManager.setCrossSimCallingEnabled(isEnabled);
             } catch (ImsException e) {
                 Log.d(this, "setCrossSimCallingEnabled: " + e);
+            }
+        }
+
+        @Override
+        public void isSupported(@MmTelFeature.MmTelCapabilities.MmTelCapability int capability,
+                @AccessNetworkConstants.TransportType int transportType,
+                @NonNull @CallbackExecutor Executor executor,
+                @NonNull Consumer<Boolean> callback) {
+            try {
+                mMmTelManager.isSupported(capability, transportType, executor, callback);
+            } catch (ImsException e) {
+                Log.d(this, "isSupported: " + e);
             }
         }
     }
