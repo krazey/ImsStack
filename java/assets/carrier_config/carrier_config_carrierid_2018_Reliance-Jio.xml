@@ -46,6 +46,7 @@
     <boolean name="imsss.ut_insert_new_rule_bool" value="true"/>
 
     <!-- MTC -->
+    <int name="imswfc.policy_for_tcall_timer_expiry_of_vowifi_call_int" value="4"/>
     <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="4"/>
     <int name="imsvoice.silent_redial_max_duration_millis_int" value="128000"/>
     <int name="imsvoice.silent_redial_interval_millis_int" value="8000"/>
