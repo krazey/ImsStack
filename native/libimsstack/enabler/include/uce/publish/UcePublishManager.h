@@ -144,6 +144,7 @@ protected:
     virtual IMS_BOOL StateIDLE_AoSConnected(IN IMSMSG& objMsg);
     // ON
     virtual IMS_BOOL StateON_PublishRequested(IN IMSMSG& objMsg);
+    virtual IMS_BOOL StateON_AoSConnected(IN IMSMSG& objMsg);
     virtual IMS_BOOL StateON_AoSDisConnected(IN IMSMSG& objMsg);
     // PUBLISHING
     virtual IMS_BOOL StatePUBLISHING_PublishRequested(IN IMSMSG& objMsg);
@@ -172,7 +173,16 @@ protected:
     virtual IMS_BOOL StateALL_Terminated(IN IMSMSG& objMsg);
 
     inline IMS_UINT32 GetLastResponseCode() const { return m_nLastResponseCode; }
-    inline void SetLastResponseCode(IMS_UINT32 nCode) { m_nLastResponseCode = nCode; }
+    inline void SetLastResponseCode(IN IMS_UINT32 nCode) { m_nLastResponseCode = nCode; }
+
+    inline IMS_BOOL GetRegistrationRecoveryRequested() const
+    {
+        return m_bRegistrationRecoveryRequested;
+    }
+    inline void SetRegistrationRecoveryRequested(IN IMS_BOOL bRequested)
+    {
+        m_bRegistrationRecoveryRequested = bRequested;
+    }
 
 private:
     void LoadConfigValue();
@@ -195,6 +205,7 @@ private:
     void GetEtagAndExpireValue(const ISipMessage* piMessage);
     IMS_BOOL HandleFailResponse(IMS_SINT32 nResponseCode);
     void SetPublishStateToAoS(IN IMS_UINT32 nState);
+    void RequestRegistrationRecovery(IN IMS_UINT32 eControl);
     IMS_BOOL ProcessRetryAfterHeader();
     IMS_BOOL Process403Scenario();
     IMS_BOOL Process412Scenario();
@@ -288,6 +299,7 @@ private:
     IMS_BOOL m_bEnablePIDFCompression;
     IMS_BOOL m_bSetPublishStarted;
     IMS_BOOL m_bUnpublishSent;
+    IMS_BOOL m_bRegistrationRecoveryRequested;
 
     IMS_UINT32 m_nImmediatelyRetryCount;
     IMS_UINT32 m_nRetryCount;
