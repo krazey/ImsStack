@@ -275,6 +275,11 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
             IMS_TRACE_I("__UAS__ :: _____ REMOTE RETRANSMISSION _____", 0, 0, 0);
             return SipPrivate::MESSAGE_DISCARDED;
         }
+        case SipTxn::STATUS_ACK_RETRANSMISSION:
+        {
+            IMS_TRACE_I("__UAS__ :: _____ ACK RETRANSMISSION _____", 0, 0, 0);
+            return SipPrivate::MESSAGE_DISCARDED;
+        }
         case SipTxn::STATUS_ERROR_ON_SEND:    // FALL-THROUGH
         case SipTxn::STATUS_INVALID_MESSAGE:  // FALL-THROUGH
         case SipTxn::STATUS_INVALID:
@@ -314,9 +319,9 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
     LogSipMessageInfo(objMsgInfo);
 
     SipFactoryProxy* pFactoryProxy = SipFactoryProxy::GetInstance();
-    /* NOTE::
-    If the message is an ACK request for non-2xx response to INVITE request,
-    then stack drop the message by returning ignore request */
+
+    // If the message is an ACK request for non-2xx response to INVITE request,
+    // then stack drops the message by returning STATUS_IGNORE_REQ.
     if ((m_pTxnKey != IMS_NULL) && (m_pTxnKey->GetTxnType() == SipTxn::INVITE_SERVER))
     {
         if (objMethod.Equals(SipMethod::ACK) &&

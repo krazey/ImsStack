@@ -300,6 +300,11 @@ send to network
             pTxnKey->SipDelete();
             return SIP_TRUE;
         }
+        case SipTxn::STATUS_ACK_RETRANSMISSION:
+        {
+            *ppTxnKey = pTxnKey;
+            return SIP_TRUE;
+        }
         case SipTxn::STATUS_NEW_REQ_RECVD:
         case SipTxn::STATUS_RETRANSMISSION:
         case SipTxn::STATUS_VALID_MESSAGE:
