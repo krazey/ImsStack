@@ -949,6 +949,13 @@ PROTECTED void AosERegistration::CallbackModeChanged(
     }
 }
 
+PROTECTED void AosERegistration::EmergencyModeChanged(IN IMS_UINT32 nType, IN IMS_BOOL bEntered)
+{
+    A_IMS_TRACE_I(REGID, "EmergencyModeChanged :: nType (%d), bEntered(%d)", nType, bEntered, 0);
+    // TODO: Release the EPDN when the UE exits emergency mode (for both calls and SMS) if an EPDN
+    // exists without an emergency IMS registration even when the UICC is inserted.
+}
+
 PROTECTED void AosERegistration::ServicePhone_EmergencyRegistrationStateChanged(
         IN IMS_BOOL /* bEmergencyAttached */)
 {

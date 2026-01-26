@@ -155,6 +155,7 @@ protected:
     /// IAosEmergencyListener
     void CallbackModeChanged(IN EmergencyCallbackModeType eType, IN EmergencyCallbackMode eState,
             IN IMS_ULONG nDuration) override;
+    void EmergencyModeChanged(IN IMS_UINT32 nType, IN IMS_BOOL bEntered) override;
 
     // IAosServicePhoneListener
     void ServicePhone_EmergencyRegistrationStateChanged(IN IMS_BOOL bEmergencyAttached) override;

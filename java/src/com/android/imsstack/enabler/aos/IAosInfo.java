@@ -202,6 +202,14 @@ public interface IAosInfo {
     void notifyAllowedNetworkTypesChanged(long networkTypesBitMask);
 
     /**
+     * Called to notify the change of emergency mode.
+     *
+     * @param type The emergency mode type.
+     * @param entered {@code true} if the emergency mode is entered, {@code false} otherwise.
+     */
+    void notifyEmergencyModeChanged(int type, boolean entered);
+
+    /**
      * Represents the preferred voice network for roaming.
      */
     enum RoamingPreferredVoiceNetwork {

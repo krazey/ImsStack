@@ -230,6 +230,21 @@ PUBLIC VIRTUAL void AosService::NotifyEmergencyCallbackModeChanged(
     }
 }
 
+PUBLIC VIRTUAL void AosService::NotifyEmergencyModeChanged(
+        IN IMS_UINT32 nType, IN IMS_UINT32 nEntered)
+{
+    A_IMS_TRACE_I(AOSTAG, "NotifyEmergencyModeChanged nType(%d), nEntered(%d)", nType, nEntered, 0);
+    for (IMS_UINT32 i = 0; i < m_objAosEmergencyListeners.GetSize(); ++i)
+    {
+        IAosEmergencyListener* piListener = m_objAosEmergencyListeners.GetAt(i);
+
+        if (piListener != IMS_NULL)
+        {
+            piListener->EmergencyModeChanged(nType, TO_BOOLEAN(nEntered));
+        }
+    }
+}
+
 PUBLIC VIRTUAL void AosService::UpdateSipDelegateRegistration()
 {
     A_IMS_TRACE_I(AOSTAG, "UpdateSipDelegateRegistration", 0, 0, 0);
