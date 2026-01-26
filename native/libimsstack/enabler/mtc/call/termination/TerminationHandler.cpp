@@ -25,7 +25,7 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-LOCAL const AString REASON_TEXT_CALL_PULLED_VZW = "call has been pulled by another device";
+LOCAL const AString REASON_TEXT_CALL_PULLED_TYPE1 = "call has been pulled by another device";
 
 PUBLIC
 TerminationHandler::TerminationHandler(IN IMtcCallContext& objContext) :
@@ -118,5 +118,5 @@ PRIVATE IMS_BOOL TerminationHandler::IsByCallPull(IN const ReasonHeaderValue& ob
         return IMS_FALSE;
     }
     const AString strNormalizedText = objReasonValue.strText.SimplifyWsp().MakeLower();
-    return strNormalizedText.Contains(REASON_TEXT_CALL_PULLED_VZW);
+    return strNormalizedText.Contains(REASON_TEXT_CALL_PULLED_TYPE1);
 }

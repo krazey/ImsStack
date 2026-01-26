@@ -54,7 +54,7 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-LOCAL const AString REASON_TEXT_MAX_CALL_LIMIT_REACHED_VZW =
+LOCAL const AString REASON_TEXT_MAX_CALL_LIMIT_REACHED_TYPE1 =
         "simultaneous call limit has already been reached";
 
 // clang-format off
@@ -532,7 +532,7 @@ CallReasonInfo StartErrorHandler::HandleTerminateByReasonPhrase(IN const IMessag
     IMS_TRACE_I("HandleTerminateByReasonPhrase", 0, 0, 0);
 
     const AString strNormalizedReasonPhrase = objMessage.GetReasonPhrase().SimplifyWsp();
-    if (strNormalizedReasonPhrase.MakeLower().Contains(REASON_TEXT_MAX_CALL_LIMIT_REACHED_VZW))
+    if (strNormalizedReasonPhrase.MakeLower().Contains(REASON_TEXT_MAX_CALL_LIMIT_REACHED_TYPE1))
     {
         return CallReasonInfo(GetDefaultReasonCode(m_objContext, objMessage.GetStatusCode()), -1,
                 strNormalizedReasonPhrase);

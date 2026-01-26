@@ -28,8 +28,8 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-LOCAL const IMS_CHAR REASON_PHRASE_VZW_ON_EHRPD[] = "On eHRPD";
-LOCAL const IMS_CHAR REASON_PHRASE_VZW_VOLTE_OFF[] = "VoLTE setting OFF";
+LOCAL const IMS_CHAR REASON_PHRASE_ON_EHRPD_TYPE1[] = "On eHRPD";
+LOCAL const IMS_CHAR REASON_PHRASE_VOLTE_OFF_TYPE1[] = "VoLTE setting OFF";
 
 PUBLIC MtcRoutingRejectHandler::MtcRoutingRejectHandler(
         IN IMtcContext& objContext, IN INetworkWatcher& objNetworkWatcher) :
@@ -83,7 +83,7 @@ SipStatusCode MtcRoutingRejectHandler::GetRoutingRejectCodeForInvite(
     switch (eRat)
     {
         case NW_REPORT_RADIO_EHRPD:
-            return SipStatusCode(SipStatusCode::SC_488, REASON_PHRASE_VZW_ON_EHRPD);
+            return SipStatusCode(SipStatusCode::SC_488, REASON_PHRASE_ON_EHRPD_TYPE1);
 
         case NW_REPORT_RADIO_WLAN:
             if (m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_WFC_SETTING_CHANGED) !=
@@ -101,7 +101,7 @@ SipStatusCode MtcRoutingRejectHandler::GetRoutingRejectCodeForInvite(
             if (m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_VOLTE_SETTING) ==
                     IMS_VOLTE_SETTING_OFF)
             {
-                return SipStatusCode(SipStatusCode::SC_488, REASON_PHRASE_VZW_VOLTE_OFF);
+                return SipStatusCode(SipStatusCode::SC_488, REASON_PHRASE_VOLTE_OFF_TYPE1);
             }
             break;
 
