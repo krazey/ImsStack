@@ -204,6 +204,7 @@ using ::testing::SetArgReferee;
     using Base::UpdateCallingNumberVerification;                    \
     using Base::UpdateFeatureTag;                                   \
     using Base::UpdateIpsecSupported;                               \
+    using Base::UpdateNetworkFeatureRtt;                            \
     using Base::UpdatePreloadedRoute;                               \
     using Base::UpdateRegIpcanCategory;                             \
     using Base::UpdateTransactionStarted;
@@ -7765,7 +7766,7 @@ TEST_F(AosRegistrationTest, NoUpdateCallingNumberVerificationIfIRegisrationIsNul
     // GIVEN
     ON_CALL(m_objMockIAosNConfiguration, IsVerstatSupportedBasedOnNetworkForReg())
             .WillByDefault(Return(IMS_TRUE));
-    m_pAosRegistration->UpdateRegInstances(nullptr, &m_objMockAosSubscription,
+    m_pAosRegistration->UpdateRegInstances(IMS_NULL, &m_objMockAosSubscription,
             &m_objMockIRegContact, &m_objMockIRegParameter, &m_objMockAosIpsecHelper);
 
     // WHEN & THEN
@@ -8038,4 +8039,146 @@ TEST_F(AosRegistrationTest, ClearIpsecBlockReasonAndAuthIpsecCountWhenRequestToC
 
     EXPECT_EQ(m_pAosRegistration->GetIpsecBlockReason(), AosRegistration::IPSEC_BLOCK_NONE);
     EXPECT_EQ(m_pAosRegistration->GetAuthIpsecCount(), 0);
+}
+
+TEST_F(AosRegistrationTest, UpdateNetworkFeatureRttReturnsFalseIfIRegContactIsNull)
+{
+    // GIVEN: m_piRegContact is IMS_NULL
+    m_pAosRegistration->UpdateRegInstances(&m_objMockIRegistration, &m_objMockAosSubscription,
+            IMS_NULL, &m_objMockIRegParameter, &m_objMockAosIpsecHelper);
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosRegistration->UpdateNetworkFeatureRtt());
+}
+
+TEST_F(AosRegistrationTest, UpdateNetworkFeatureRttReturnsFalseIfMtcHandleIsNull)
+{
+    // GIVEN: MTC handle cannot be found
+    EXPECT_CALL(m_objMockIAosAppContext, GetHandle(ImsAosService::MTC)).WillOnce(Return(IMS_NULL));
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosRegistration->UpdateNetworkFeatureRtt());
+}
+
+TEST_F(AosRegistrationTest, UpdateNetworkFeatureRttReturnsFalseIfTextFeatureNotBinded)
+{
+    // GIVEN: TEXT feature is not in the binding list
+    AosFeatureTagList objBindedList;  // TEXT not included in Features
+    ON_CALL(m_objMockIAosHandle, GetBindedFeatureTagList()).WillByDefault(ReturnRef(objBindedList));
+
+    // WHEN & THEN
+    EXPECT_FALSE(m_pAosRegistration->UpdateNetworkFeatureRtt());
+}
+
+TEST_F(AosRegistrationTest, UpdateNetworkFeatureRttRemovesTextFromUnavailableIfNetworkSupportsRtt)
+{
+    // GIVEN: TEXT feature exists and is currently 'unavailable', but the network supports RTT
+    AosFeatureTagList objBindedList;
+    objBindedList.AddFeature(ImsAosFeature::TEXT);
+    objBindedList.AddUnavailableFeature(ImsAosFeature::TEXT);
+
+    ON_CALL(m_objMockIAosHandle, GetBindedFeatureTagList()).WillByDefault(ReturnRef(objBindedList));
+    ON_CALL(m_objMockIRegContact,
+            IsFeatureRegistered(AString(AosString::STR_RTT_FEATURE), AString::ConstNull()))
+            .WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosRegistration->UpdateNetworkFeatureRtt();
+
+    // THEN: Result should be TRUE and TEXT should be removed from the 'unavailable' list
+    EXPECT_TRUE(bResult);
+    EXPECT_FALSE(objBindedList.HasUnavailableFeature(ImsAosFeature::TEXT));
+}
+
+TEST_F(AosRegistrationTest, UpdateNetworkFeatureRttAddsTextToUnavailableIfNetworkDoesNotSupportRtt)
+{
+    // GIVEN: TEXT feature exists but the network does not support RTT
+    AosFeatureTagList objBindedList;
+    objBindedList.AddFeature(ImsAosFeature::TEXT);
+
+    ON_CALL(m_objMockIAosHandle, GetBindedFeatureTagList()).WillByDefault(ReturnRef(objBindedList));
+    ON_CALL(m_objMockIRegContact,
+            IsFeatureRegistered(AString(AosString::STR_RTT_FEATURE), AString::ConstNull()))
+            .WillByDefault(Return(IMS_FALSE));
+
+    // WHEN
+    IMS_BOOL bResult = m_pAosRegistration->UpdateNetworkFeatureRtt();
+
+    // THEN: Result should be FALSE and TEXT should be added to the 'unavailable' list
+    EXPECT_FALSE(bResult);
+    EXPECT_TRUE(objBindedList.HasUnavailableFeature(ImsAosFeature::TEXT));
+}
+
+TEST_F(AosRegistrationTest, UpdateNetworkFeatureRttUnavailableWhenRegistrationStarted)
+{
+    // GIVEN: TEXT feature is binded and the network does not support RTT
+    AosFeatureTagList objBindedList;
+    objBindedList.AddFeature(ImsAosFeature::TEXT);
+
+    ON_CALL(m_objMockIAosHandle, GetBindedFeatureTagList()).WillByDefault(ReturnRef(objBindedList));
+    ON_CALL(m_objMockIRegContact,
+            IsFeatureRegistered(AString(AosString::STR_RTT_FEATURE), AString::ConstNull()))
+            .WillByDefault(Return(IMS_FALSE));
+
+    // WHEN
+    m_pAosRegistration->Registration_Started();
+
+    // THEN: Verify that TEXT became Unavailable as a result of Registration_Started
+    EXPECT_TRUE(objBindedList.HasUnavailableFeature(ImsAosFeature::TEXT));
+}
+
+TEST_F(AosRegistrationTest, UpdateNetworkFeatureRttAvailableWhenRegistrationStarted)
+{
+    // GIVEN: TEXT feature is binded and the network supports RTT
+    AosFeatureTagList objBindedList;
+    objBindedList.AddFeature(ImsAosFeature::TEXT);
+
+    ON_CALL(m_objMockIAosHandle, GetBindedFeatureTagList()).WillByDefault(ReturnRef(objBindedList));
+    ON_CALL(m_objMockIRegContact,
+            IsFeatureRegistered(AString(AosString::STR_RTT_FEATURE), AString::ConstNull()))
+            .WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    m_pAosRegistration->Registration_Started();
+
+    // THEN: Verify that TEXT became Available as a result of Registration_Started
+    EXPECT_FALSE(objBindedList.HasUnavailableFeature(ImsAosFeature::TEXT));
+}
+
+TEST_F(AosRegistrationTest, UpdateNetworkFeatureRttUnavailableWhenRegistrationUpdated)
+{
+    // GIVEN: TEXT feature is binded and currently Available, but the network does not supports RTT
+    AosFeatureTagList objBindedList;
+    objBindedList.AddFeature(ImsAosFeature::TEXT);
+    objBindedList.AddUnavailableFeature(ImsAosFeature::TEXT);
+
+    ON_CALL(m_objMockIAosHandle, GetBindedFeatureTagList()).WillByDefault(ReturnRef(objBindedList));
+    ON_CALL(m_objMockIRegContact,
+            IsFeatureRegistered(AString(AosString::STR_RTT_FEATURE), AString::ConstNull()))
+            .WillByDefault(Return(IMS_FALSE));
+
+    // WHEN
+    m_pAosRegistration->Registration_Updated();
+
+    // THEN: Verify that TEXT became Unavailable as a result of Registration_Updated
+    EXPECT_TRUE(objBindedList.HasUnavailableFeature(ImsAosFeature::TEXT));
+}
+
+TEST_F(AosRegistrationTest, UpdateNetworkFeatureRttAvailableWhenRegistrationUpdated)
+{
+    // GIVEN: TEXT feature is binded and currently Unavailable, but the network supports RTT
+    AosFeatureTagList objBindedList;
+    objBindedList.AddFeature(ImsAosFeature::TEXT);
+    objBindedList.AddUnavailableFeature(ImsAosFeature::TEXT);
+
+    ON_CALL(m_objMockIAosHandle, GetBindedFeatureTagList()).WillByDefault(ReturnRef(objBindedList));
+    ON_CALL(m_objMockIRegContact,
+            IsFeatureRegistered(AString(AosString::STR_RTT_FEATURE), AString::ConstNull()))
+            .WillByDefault(Return(IMS_TRUE));
+
+    // WHEN
+    m_pAosRegistration->Registration_Updated();
+
+    // THEN: Verify that TEXT's Unavailable status is cleared as a result of Registration_Updated
+    EXPECT_FALSE(objBindedList.HasUnavailableFeature(ImsAosFeature::TEXT));
 }
