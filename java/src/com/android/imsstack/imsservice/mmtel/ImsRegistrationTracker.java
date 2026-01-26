@@ -389,7 +389,7 @@ public class ImsRegistrationTracker {
                 }
             }
             /*
-             * Note : To support TMO/VZW data roaming case, until framework supports.
+             * Note : To support data roaming case, until framework supports.
              */
             if (!getBooleanCarrierConfig(
                     CarrierConfigManager.KEY_IGNORE_DATA_ENABLED_CHANGED_FOR_VIDEO_CALLS)) {
@@ -409,7 +409,7 @@ public class ImsRegistrationTracker {
             }
         }
         /*
-         * Note : VZ_REQ_VOWIFI_6258874 support, add IWLAN-VIDEO capability when WFC-OFF.
+         * Note : Add IWLAN-VIDEO capability when WFC-OFF.
          */
         if (getBooleanCarrierConfig(
                     CarrierConfig.ImsWfc.KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOICE_BOOL)

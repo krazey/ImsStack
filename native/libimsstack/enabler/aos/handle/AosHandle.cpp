@@ -1801,7 +1801,6 @@ PROTECTED VIRTUAL void AosHandle::InitializeFeatureTags()
 {
     m_objFeatureTagList.ClearFeatureTags();
 
-    // VZW Req. - VZ_REQ_IMS_22939
     if (GET_N_CONFIG(m_nSlotId)->IsCdmalessFeatureTagRequired())
     {
         m_objFeatureTagList.AddFeatureTag(FeatureTags::CDMALESS);
