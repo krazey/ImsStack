@@ -2011,3 +2011,15 @@ TEST_F(AosSubscriberManagerTest, ReturnsStateWhenStateToString)
             m_pSubscriberManager->StateToString(IAosSubscriber::REFRESH_FAILED), "REFRESH_FAILED");
     EXPECT_STREQ(m_pSubscriberManager->StateToString(100 /* INVALID_STATE */), "INVALID");
 }
+
+TEST_F(AosSubscriberManagerTest, GetSimState)
+{
+    // GIVEN
+    m_pSubscriberManager->ServicePhone_SimStateChanged(SimState::ABSENT);
+
+    // WHEN
+    SimState state = m_pSubscriberManager->GetSimState();
+
+    // THEN
+    EXPECT_EQ(state, SimState::ABSENT);
+}

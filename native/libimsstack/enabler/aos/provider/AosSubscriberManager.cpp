@@ -61,7 +61,8 @@ AosSubscriberManager::AosSubscriberManager(IN IMS_SINT32 nSlotId) :
         m_nIsimIndexForImpu(DEFAULT_ISIM_INDEX_FOR_IMPU),
         m_bSupportLimitedAdminSmsMode(IMS_FALSE),
         m_bPrioritizeImsiBasedUri(IMS_FALSE),
-        m_objImsIdentityPriority(ImsVector<IMS_SINT32>())
+        m_objImsIdentityPriority(ImsVector<IMS_SINT32>()),
+        m_eSimState(SimState::UNKNOWN)
 {
     m_strTag.Sprintf("%d", m_nSlotId);
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [SLOT%d] AosSubscriberManager = %" PFLS_u "/%" PFLS_x,
@@ -206,6 +207,12 @@ const ISubscriberConfig* AosSubscriberManager::GetSubscriberConfig(
         IN IMS_SINT32 nType /*= IAosSubscriber::NORMAL*/) const
 {
     return GetSubscriberConfiguration(nType);
+}
+
+PUBLIC
+SimState AosSubscriberManager::GetSimState() const
+{
+    return m_eSimState;
 }
 
 PROTECTED
@@ -870,6 +877,7 @@ IMS_BOOL AosSubscriberManager::ProcessIsimStateChange(IN IsimState eState)
 PROTECTED
 IMS_BOOL AosSubscriberManager::ProcessSimStateChange(IN SimState eState)
 {
+    m_eSimState = eState;
     // If m_bIsim, SubscriberConfig will trigger ISIM state change events.
     // Handles ABSENT for PSIM, NOT_READY for ESIM.
     if (m_bUsim && (eState == SimState::ABSENT || eState == SimState::NOT_READY))

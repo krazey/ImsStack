@@ -36,6 +36,7 @@ public:
     const AStringArray& GetConfiguredImpus() const override;
     const AStringArray& GetFakeImpus() const override;
     const ISubscriberConfig* GetSubscriberConfig(IN IMS_SINT32 nType = NORMAL) const override;
+    SimState GetSimState() const override;
 
     void CreateTemporaryPublicUserIdForGiba() override;
     void ClearTemporaryPublicUserIdForGiba() override;

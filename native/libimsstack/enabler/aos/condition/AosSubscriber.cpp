@@ -119,6 +119,12 @@ PUBLIC VIRTUAL const ISubscriberConfig* AosSubscriber::GetSubscriberConfig(
                                                : IMS_NULL;
 }
 
+PUBLIC VIRTUAL SimState AosSubscriber::GetSimState() const
+{
+    return (m_piSubscriberManager != IMS_NULL) ? m_piSubscriberManager->GetSimState()
+                                               : SimState::UNKNOWN;
+}
+
 PROTECTED VIRTUAL void AosSubscriber::CreateTemporaryPublicUserIdForGiba()
 {
     m_strTempPuidForGiba = AString(ImsIdentity::CreateTemporaryPublicUserId(m_nSlotId));

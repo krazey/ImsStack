@@ -19,6 +19,7 @@
 #include "ImsTypeDef.h"
 #include "interface/IAosSubscriber.h"
 #include "interface/IAosSubscriberManagerListener.h"
+#include "interface/IAosServicePhoneListener.h"
 
 class IAosSubscriberManager
 {
@@ -41,6 +42,7 @@ public:
 
     virtual const ISubscriberConfig* GetSubscriberConfig(
             IN IMS_SINT32 nType = IAosSubscriber::NORMAL) const = 0;
+    virtual SimState GetSimState() const = 0;
 
 protected:
     friend class AosBuildDirector;
