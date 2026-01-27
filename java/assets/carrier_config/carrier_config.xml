@@ -864,6 +864,25 @@
         <item value="si,,113"/>
         <item value="ba,,122,123,124"/>
     </string-array>
+    <string-array name="imsemergency.emergency_service_category_per_plmn_string_array" num="17">
+        <item value="hu,,104,2"/>
+        <item value="hu,,105,4"/>
+        <item value="hu,,107,1"/>
+        <item value="cz,02,156,8"/>
+        <item value="cz,,150,4"/>
+        <item value="cz,,155,2"/>
+        <item value="cz,,158,1"/>
+        <item value="sk,,150,4"/>
+        <item value="sk,,155,2"/>
+        <item value="sk,,158,1"/>
+        <item value="no,,911,1"/>
+        <item value="jp,,110,1"/>
+        <item value="jp,,118,8"/>
+        <item value="jp,,119,6"/>
+        <item value="tw,,110,1"/>
+        <item value="tw,,119,4"/>
+        <item value="sg,05,995,2"/>
+    </string-array>
     <boolean name="imswfc.override_media_inactivity_to_wifi_lost_bool" value="false"/>
     <int name="imsvoice.policy_for_multiple_p_asserted_identity_headers_int" value="0"/>
 

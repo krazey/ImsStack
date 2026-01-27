@@ -850,6 +850,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "plmn_allowing_geolocation_pidf_in_sip_invite_no_uicc_string_array";
         public static final String KEY_DYNAMIC_ROUTING_NUMBER_PER_PLMN_STRING_ARRAY =
                 KEY_PREFIX + "dynamic_routing_number_per_plmn_string_array";
+        public static final String KEY_EMERGENCY_SERVICE_CATEGORY_PER_PLMN_STRING_ARRAY =
+                KEY_PREFIX + "emergency_service_category_per_plmn_string_array";
 
         /** Emergency URN policy **/
         public static final int NOT_USE_SERVICE_CATEGORY = 1;
