@@ -3365,7 +3365,7 @@ PROTECTED VIRTUAL void AosApplication::Connector_Deactivated(IN IMS_UINT32 nReas
     A_IMS_TRACE_I(APPID, "Connection_Deactivated :: reason(%d)", nReason, 0, 0);
 
     // To allow IMS registration to resume upon IMS PDN reconnection, the USIM authentication
-    // failure block is released when the IMS PDN disconnects. (SKT specific)
+    // failure block is released when the IMS PDN disconnects.
     m_pCondition->ResetBlock(BLOCK_USIM_AUTHENTICATION_FAILED);
     // If the data is disconnected, it will be newly connected. So, wifi connection will be also
     // newly connected

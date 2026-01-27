@@ -799,7 +799,7 @@ public class ImsRegistrationTrackerTest {
         mRegTracker.changeCapabilities(enableCapabilities, new ArrayList<>());
         assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
 
-        // VZW case
+        // case1
         PersistableBundle config = new PersistableBundle();
         config.putBoolean(CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL, false);
         when(mCarrierConfigManagerProxy.getConfigForSubId(anyInt(), any())).thenReturn(config);
@@ -829,7 +829,7 @@ public class ImsRegistrationTrackerTest {
 
         when(mTelephonyManagerProxy.isDataEnabled()).thenReturn(false);
 
-        // TMO case
+        // case2
         when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.ImsWfc
                 .KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOICE_BOOL)))
                 .thenReturn(false);
