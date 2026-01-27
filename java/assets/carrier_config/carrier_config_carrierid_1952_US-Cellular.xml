@@ -29,6 +29,7 @@
     <boolean name="imsemergency.stop_ereg_timer_on_epdn_connected_bool" value="true"/>
     <int name="imsemergency.ereg_retry_max_cnt_int" value="-1"/>
     <int name="imsemergency.ereg_retry_timer_millis_int" value="10000"/>
+    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
 
     <!-- MTC -->
     <int name="imsemergency.emergency_ringback_timer_millis_int" value="130000"/>
