@@ -160,6 +160,7 @@ public:
     IMS_SINT32 GetRegDefaultWaitTime() const override;
     IMS_SINT32 GetRegOutOfServicePolicy() const override;
     IMS_SINT32 GetRoamingPreferredEmcReg() const override;
+    IMS_SINT32 GetWaitTimeMillisForReleaseEpdnAfterEmcModeExitInFakeModeWithUicc() const override;
     IMS_SINT32 GetSipMessageThresholdForTransportChange() const override;
     IMS_SINT32 GetSubRetrySip503CodePolicy() const override;
     IMS_SINT32 GetUsatRegEventDownloadPolicy() const override;

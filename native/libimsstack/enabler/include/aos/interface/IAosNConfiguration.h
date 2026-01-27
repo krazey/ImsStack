@@ -1250,6 +1250,22 @@ public:
     virtual IMS_SINT32 GetRoamingPreferredEmcReg() const = 0;
 
     /**
+     * @brief Returns the wait time in millisecond before releasing an emergency PDN when exits
+     *        emergency mode.
+     *
+     *       Specifies the delay time from the exit of the emergency mode to the start of the
+     *       emergency PDN release. The time will start only when FAKE mode EIMS registration. If
+     *       this is set to zero, it means that the EPDN won't be released when UE exits emergency
+     *       mode.
+     *
+     * @return IMS_SINT32 Return the wait time in millisecond before releasing an emergency PDN.
+     * @see {@code
+     * imsemergency.wait_time_millis_for_release_epdn_after_emc_mode_exit_in_fake_mode_with_uicc_int}
+     */
+    virtual IMS_SINT32 GetWaitTimeMillisForReleaseEpdnAfterEmcModeExitInFakeModeWithUicc()
+            const = 0;
+
+    /**
      * @brief Get the SIP message threshold size caused by the transport change
      *
      *        If GetSipPreferredTransport() is #PREFERRED_TRANSPORT_DYNAMIC_UDP_TCP and

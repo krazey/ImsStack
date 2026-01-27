@@ -629,6 +629,7 @@
     <int name="imsemergency.ereg_retry_timer_millis_int" value="0"/>
     <int name="imsemergency.reg_timer_for_ecall_millis_int" value="0"/>
     <int name="imsemergency.roaming_preferred_ereg_int" value="-1"/>
+    <int name="imsemergency.wait_time_millis_for_release_epdn_after_emc_mode_exit_in_fake_mode_with_uicc_int" value="3000"/>
     <string-array name="imsemergency.plmns_release_epdn_upon_ecall_end_in_fake_mode_string_array" num="43">
         <item value="302610"/> <!-- Bell (Canada) -->
         <item value="302630"/> <!-- Bell (Canada) -->

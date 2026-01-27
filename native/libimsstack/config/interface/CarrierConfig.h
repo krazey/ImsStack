@@ -1912,6 +1912,18 @@ public:
         static const IMS_CHAR KEY_ROAMING_PREFERRED_EREG_INT[];
 
         /**
+         * Specifies the delay time from the exit of the emergency mode to the start of the
+         * emergency PDN release. The time will start only when FAKE mode EIMS registration. If this
+         * is set to zero, it means that the EPDN won't be released when UE exits emergency mode.
+         *
+         * Possible Values:
+         *   {@code 3000}
+         */
+        static const IMS_CHAR
+                KEY_WAIT_TIME_MILLIS_FOR_RELEASE_EPDN_AFTER_EMC_MODE_EXIT_IN_FAKE_MODE_WITH_UICC_INT
+                        [];
+
+        /**
          * Specifies the error codes of emergency registration which does not support the
          * common policy.
          *

@@ -856,6 +856,11 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
             GetInt(CarrierConfig::ImsEmergency::KEY_ROAMING_PREFERRED_EREG_INT, -1))
             .WillOnce(Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL));
     EXPECT_CALL(objCarrierConfig,
+            GetInt(CarrierConfig::ImsEmergency::
+                            KEY_WAIT_TIME_MILLIS_FOR_RELEASE_EPDN_AFTER_EMC_MODE_EXIT_IN_FAKE_MODE_WITH_UICC_INT,
+                    -1))
+            .WillOnce(Return(3000));
+    EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Ims::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT, -1))
             .WillOnce(Return(200));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_SUB_RETRY_503_POLICY_INT, -1))
@@ -1126,6 +1131,9 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
             m_pAosNConfiguration->GetReregRetrySip305CodePolicy());
     EXPECT_EQ(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL,
             m_pAosNConfiguration->GetRoamingPreferredEmcReg());
+    EXPECT_EQ(3000,
+            m_pAosNConfiguration
+                    ->GetWaitTimeMillisForReleaseEpdnAfterEmcModeExitInFakeModeWithUicc());
     EXPECT_EQ(200, m_pAosNConfiguration->GetSipMessageThresholdForTransportChange());
     EXPECT_EQ(CarrierConfig::Ims::SIP_503_CODE_POLICY_3GPP,
             m_pAosNConfiguration->GetSubRetrySip503CodePolicy());

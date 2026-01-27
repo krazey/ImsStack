@@ -114,6 +114,7 @@ public:
             nReregRetry305Policy(CarrierConfig::Ims::SIP_305_CODE_POLICY_DEFAULT),
             nRoamingPreferredEmcReg(
                     CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NOT_DEFINED),
+            nWaitTimeMillisForReleaseEpdnAfterEmcModeExitInFakeModeWithUicc(3000),
             nSipMessageThresholdForTransportChange(200),
             nSubRetry503Policy(CarrierConfig::Ims::SIP_503_CODE_POLICY_3GPP),
             nUsatRegEventDownloadPolicy(CarrierConfig::Ims::USAT_REG_EVENT_NOT_DOWNLOAD),
@@ -232,6 +233,7 @@ public:
     IMS_SINT32 nReleasePdnDelaySecAfterTempPlmnBlock;
     IMS_SINT32 nReregRetry305Policy;
     IMS_SINT32 nRoamingPreferredEmcReg;
+    IMS_SINT32 nWaitTimeMillisForReleaseEpdnAfterEmcModeExitInFakeModeWithUicc;
     IMS_SINT32 nSipMessageThresholdForTransportChange;
     IMS_SINT32 nSubRetry503Policy;
     IMS_SINT32 nUsatRegEventDownloadPolicy;
