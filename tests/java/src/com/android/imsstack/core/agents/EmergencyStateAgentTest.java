@@ -21,7 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -37,6 +37,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.base.TestAppContext;
+import com.android.imsstack.core.agents.EmergencyStateInterface.EmergencyCallbackModeState;
 
 import org.junit.After;
 import org.junit.Before;
@@ -46,6 +47,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 @RunWith(AndroidTestingRunner.class)
@@ -241,35 +244,97 @@ public class EmergencyStateAgentTest {
     @Test
     @SmallTest
     public void testSimStateChanged() {
+        mEmergencyStateAgent.addListener(mEmergencyStateListener);
         ArgumentCaptor<Sim.Listener> captor = ArgumentCaptor.forClass(Sim.Listener.class);
         verify(mSimInterface).addListener(captor.capture());
         Sim.Listener simListener = captor.getValue();
+        TelephonyCallback.EmergencyCallbackModeListener listener =
+                getEmergencyCallbackModeListener();
 
-        when(mSimInterface.isSimLoadCompleted()).thenReturn(true);
+        // Initial subId is SUB_ID_1 for SLOT0
+        listener.onCallbackModeStarted(TelephonyManager.EMERGENCY_CALLBACK_MODE_CALL,
+                Duration.ofMinutes(5), TestAppContext.SUB_ID_1);
+        processAllMessages();
+        verify(mEmergencyStateListener).onEmergencyCallbackModeChanged(
+                eq(TelephonyManager.EMERGENCY_CALLBACK_MODE_CALL),
+                eq(EmergencyCallbackModeState.START), eq(300L));
+
+        // Event for another subId should be ignored.
+        listener.onCallbackModeStarted(TelephonyManager.EMERGENCY_CALLBACK_MODE_CALL,
+                Duration.ofMinutes(5), TestAppContext.SUB_ID_2);
+        processAllMessages();
+        verifyNoMoreInteractions(mEmergencyStateListener);
+
+        // Change subId
         when(mSimInterface.getSubId()).thenReturn(TestAppContext.SUB_ID_2);
-
-        TelephonyManagerProxy telephonyManagerProxy = mock(TelephonyManagerProxy.class);
-        when(mTelephonyManagerProxy.createForSubscriptionId(eq(TestAppContext.SUB_ID_2)))
-                .thenReturn(telephonyManagerProxy);
-
         simListener.onSimStateChanged();
         processAllMessages();
 
-        verify(mTelephonyManagerProxy).unregisterTelephonyCallback((TelephonyCallback)
-                any(TelephonyCallback.DomainSelectionEmergencyModeListener.class));
-        verify(telephonyManagerProxy).registerTelephonyCallback(
-                any(Executor.class), (TelephonyCallback)
-                        any(TelephonyCallback.DomainSelectionEmergencyModeListener.class));
+        // Event for old subId should be ignored now.
+        listener.onCallbackModeStarted(TelephonyManager.EMERGENCY_CALLBACK_MODE_CALL,
+                Duration.ofMinutes(5), TestAppContext.SUB_ID_1);
+        processAllMessages();
+        verifyNoMoreInteractions(mEmergencyStateListener);
+
+        // Event for new subId should be processed.
+        listener.onCallbackModeStarted(TelephonyManager.EMERGENCY_CALLBACK_MODE_CALL,
+                Duration.ofMinutes(5), TestAppContext.SUB_ID_2);
+        processAllMessages();
+        verify(mEmergencyStateListener, times(2)).onEmergencyCallbackModeChanged(
+                eq(TelephonyManager.EMERGENCY_CALLBACK_MODE_CALL),
+                eq(EmergencyCallbackModeState.START), eq(300L));
+    }
+
+    @Test
+    @SmallTest
+    public void testEmergencyCallbackModeChanged() {
+        mEmergencyStateAgent.addListener(mEmergencyStateListener);
+
+        TelephonyCallback.EmergencyCallbackModeListener listener =
+                getEmergencyCallbackModeListener();
+
+        listener.onCallbackModeStarted(TelephonyManager.EMERGENCY_CALLBACK_MODE_CALL,
+                Duration.ofMinutes(5), TestAppContext.SUB_ID_1);
+        processAllMessages();
+
+        verify(mEmergencyStateListener).onEmergencyCallbackModeChanged(
+                eq(TelephonyManager.EMERGENCY_CALLBACK_MODE_CALL),
+                eq(EmergencyCallbackModeState.START), eq(300L));
+
+        listener.onCallbackModeStopped(TelephonyManager.EMERGENCY_CALLBACK_MODE_CALL,
+                TelephonyManager.STOP_REASON_EMERGENCY_SMS_SENT, TestAppContext.SUB_ID_1);
+        processAllMessages();
+
+        verify(mEmergencyStateListener).onEmergencyCallbackModeChanged(
+                eq(TelephonyManager.EMERGENCY_CALLBACK_MODE_CALL),
+                eq(EmergencyCallbackModeState.STOP_BY_EMERGENCY), eq(0L));
     }
 
     private TelephonyCallback.DomainSelectionEmergencyModeListener
             getDomainSelectionEmergencyModeListener() {
-        ArgumentCaptor<TelephonyCallback.DomainSelectionEmergencyModeListener> captor =
-                ArgumentCaptor.forClass(
-                        TelephonyCallback.DomainSelectionEmergencyModeListener.class);
-        verify(mTelephonyManagerProxy).registerTelephonyCallback(
-                any(Executor.class), (TelephonyCallback) captor.capture());
-        return captor.getValue();
+        ArgumentCaptor<TelephonyCallback> captor = ArgumentCaptor.forClass(TelephonyCallback.class);
+        verify(mTelephonyManagerProxy, atLeastOnce()).registerTelephonyCallback(
+                any(Executor.class), captor.capture());
+        List<TelephonyCallback> callbacks = captor.getAllValues();
+        for (TelephonyCallback callback : callbacks) {
+            if (callback instanceof TelephonyCallback.DomainSelectionEmergencyModeListener) {
+                return (TelephonyCallback.DomainSelectionEmergencyModeListener) callback;
+            }
+        }
+        return null;
+    }
+
+    private TelephonyCallback.EmergencyCallbackModeListener getEmergencyCallbackModeListener() {
+        ArgumentCaptor<TelephonyCallback> captor = ArgumentCaptor.forClass(TelephonyCallback.class);
+        verify(mTelephonyManagerProxy, atLeastOnce()).registerTelephonyCallback(
+                any(Executor.class), captor.capture());
+        List<TelephonyCallback> callbacks = captor.getAllValues();
+        for (TelephonyCallback callback : callbacks) {
+            if (callback instanceof TelephonyCallback.EmergencyCallbackModeListener) {
+                return (TelephonyCallback.EmergencyCallbackModeListener) callback;
+            }
+        }
+        return null;
     }
 
     private void processAllMessages() {

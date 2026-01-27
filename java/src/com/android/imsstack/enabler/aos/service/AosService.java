@@ -36,6 +36,7 @@ import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.EmergencyStateInterface;
+import com.android.imsstack.core.agents.EmergencyStateInterface.EmergencyCallbackModeState;
 import com.android.imsstack.core.agents.IPhoneStateNotifier;
 import com.android.imsstack.core.agents.ImsPhoneStateListener;
 import com.android.imsstack.core.agents.LocationInterface;
@@ -143,7 +144,22 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
     };
     final EmergencyStateInterface.EmergencyStateListener mEmergencyStateListener =
-            this::notifyEmergencyModeChanged;
+            new EmergencyStateInterface.EmergencyStateListener() {
+                @Override
+                public void onEmergencyModeChanged(int type, boolean entered) {
+                    notifyEmergencyModeChanged(type, entered);
+                }
+
+                @Override
+                public void onEmergencyCallbackModeChanged(
+                        @TelephonyManager.EmergencyCallbackModeType int type,
+                        EmergencyCallbackModeState state, long duration) {
+                    EmergencyCallbackModeType emergencyCbmType =
+                            (type == TelephonyManager.EMERGENCY_CALLBACK_MODE_CALL)
+                            ? EmergencyCallbackModeType.CALL : EmergencyCallbackModeType.SMS;
+                    notifyEmergencyCallbackModeChanged(emergencyCbmType, state, duration);
+                }
+            };
 
     public void init(int slotId) {
         mSlotId = slotId;

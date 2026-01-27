@@ -20,6 +20,8 @@ import static org.junit.Assert.assertEquals;
 
 import android.testing.AndroidTestingRunner;
 
+import com.android.imsstack.core.agents.EmergencyStateInterface.EmergencyCallbackModeState;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -68,15 +70,14 @@ public class IAosInfoTest {
 
     @Test
     public void emergencyCallbackModeState_getValue_shouldReturnCorrectValues() {
-        assertEquals(0, IAosInfo.EmergencyCallbackModeState.STOP.getValue());
-        assertEquals(1, IAosInfo.EmergencyCallbackModeState.START.getValue());
-        assertEquals(2, IAosInfo.EmergencyCallbackModeState.STOP_BY_EMERGENCY.getValue());
+        assertEquals(0, EmergencyCallbackModeState.STOP.getValue());
+        assertEquals(1, EmergencyCallbackModeState.START.getValue());
+        assertEquals(2, EmergencyCallbackModeState.STOP_BY_EMERGENCY.getValue());
     }
 
     @Test
     public void emergencyCallbackModeState_toString_shouldReturnNameAndValue() {
-        for (IAosInfo.EmergencyCallbackModeState state :
-                IAosInfo.EmergencyCallbackModeState.values()) {
+        for (EmergencyCallbackModeState state : EmergencyCallbackModeState.values()) {
 
             String expected = state.name() + "(" + state.getValue() + ")";
             String actual = state.toString();

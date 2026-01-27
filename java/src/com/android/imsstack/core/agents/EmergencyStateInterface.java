@@ -16,6 +16,7 @@
 package com.android.imsstack.core.agents;
 
 import static android.telephony.TelephonyManager.DomainSelectionEmergencyType;
+import static android.telephony.TelephonyManager.EmergencyCallbackModeType;
 
 import androidx.annotation.NonNull;
 
@@ -23,6 +24,45 @@ import androidx.annotation.NonNull;
  * An interface for monitoring the emergency state such as emergency mode entered/exited.
  */
 public interface EmergencyStateInterface extends IAgent {
+    /**
+     * Represents the state of the emergency callback mode.
+     */
+    enum EmergencyCallbackModeState {
+
+        STOP(0),
+        START(1),
+        STOP_BY_EMERGENCY(2);
+
+        private final int mValue;
+
+        EmergencyCallbackModeState(int value) {
+            mValue = value;
+        }
+
+        /**
+         * Returns the integer value associated with this emergency callback mode state.
+         *
+         * @return The integer value.
+         */
+        public int getValue() {
+            return mValue;
+        }
+
+        /**
+         * Returns a string representation of this state, including both its
+         * symbolic name and its integer value (e.g., "START(1)").
+         * This format is useful for logging, debugging, and dumpsys output,
+         * providing more context than just the name.
+         *
+         * @return The string representation of the enum in "NAME(VALUE)" format
+         * (e.g., "START(1)").
+         */
+        @Override
+        public String toString() {
+            return this.name() + "(" + mValue + ")";
+        }
+    }
+
     /**
      * An interface to monitor the emergency state events.
      */
@@ -34,6 +74,16 @@ public interface EmergencyStateInterface extends IAgent {
          * @param entered {@code true} if the emergency mode is entered, {@code false} otherwise.
          */
         void onEmergencyModeChanged(@DomainSelectionEmergencyType int type, boolean entered);
+
+        /**
+         * Called to notify the update of emergency callback mode.
+         *
+         * @param type {@code type} is callback mode entry {@link EmergencyCallbackModeType}
+         * @param state {@code state} is type of {@link EmergencyCallbackModeState}.
+         * @param duration is the number of seconds remaining in the emergency callback mode.
+         */
+        default void onEmergencyCallbackModeChanged(@EmergencyCallbackModeType int type,
+                EmergencyCallbackModeState state, long duration) {}
     }
 
     /**
