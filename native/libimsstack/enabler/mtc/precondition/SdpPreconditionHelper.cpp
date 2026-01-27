@@ -63,7 +63,16 @@ PUBLIC VIRTUAL void SdpPreconditionHelper::FormPreconditionSdp(
             continue;
         }
 
-        if (piMediaDescriptor->GetMediaDescriptionEx() != IMS_NULL &&
+        if (piSession->GetState() == ISession::STATE_ESTABLISHED &&
+                piMedia->GetState() == IMedia::STATE_INACTIVE)
+        {
+            // When forming with a newly added media after call is established,
+            // the IMediaDescriptor is pre-generated within MtcMediaManager::FormSdp(),
+            // containing proposal view data instead of peer data.
+            // Consequently, we should identify this scenario by confirming
+            // that the IMedia state is set to STATE_INACTIVE.
+        }
+        else if (piMediaDescriptor->GetMediaDescriptionEx() != IMS_NULL &&
                 !IsPreconditionIncludedInSdp(piMediaDescriptor))
         {
             IMS_TRACE_D("FormPreconditionSdp : no remote precondition attribute, skipped", 0, 0, 0);
