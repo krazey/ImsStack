@@ -1274,6 +1274,8 @@ const IMS_CHAR CarrierConfig::ImsVt::
         KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL[] =
                 KEY_IMS_VT_PREFIX
         "set_video_text_feature_exclusively_in_contact_header_by_session_type_bool";
+const IMS_CHAR CarrierConfig::ImsVt::KEY_ADD_VIDEO_FEATURE_TAG_IN_ACCEPT_CONTACT_ALWAYS_BOOL[] =
+        KEY_IMS_VT_PREFIX "add_video_feature_tag_in_accept_contact_always_bool";
 const IMS_CHAR CarrierConfig::ImsVt::KEY_REQUIRE_SIP_SIGNALING_ON_MULTITASKING_BOOL[] =
         KEY_IMS_VT_PREFIX "require_sip_signaling_on_multitasking_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING_BOOL[] =

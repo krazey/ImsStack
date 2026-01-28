@@ -769,6 +769,7 @@
     <boolean name="imswfc.reject_vowifi_voice_call_when_vowifi_setting_off_bool" value="false"/>
     <boolean name="imsvoice.check_server_outage_reason_for_vxlte_call_bool" value="false"/>
     <boolean name="imsvt.set_video_text_feature_exclusively_in_contact_header_by_session_type_bool" value="false"/>
+    <boolean name="imsvt.add_video_feature_tag_in_accept_contact_always_bool" value="false"/>
     <boolean name="imsvoice.maintain_multiple_early_sessions_by_forking_bool" value="true"/>
     <boolean name="imsvoice.destroy_inactive_early_sessions_when_established_bool" value="true"/>
     <boolean name="imsvoice.stop_ringback_timer_by_183_with_sdp_body_bool" value="false"/>
