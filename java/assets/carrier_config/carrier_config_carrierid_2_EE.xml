@@ -17,7 +17,9 @@
 <carrier_config>
     <!-- Aos -->
     <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
+    <boolean name="ims.keep_existing_pcscf_on_pcscf_change_during_the_call_bool" value="true"/>
     <int name="ims.reg_retry_default_policy_int" value="1"/>
+    <int name="imsemergency.ipcan_release_emergency_pdn_upon_emergency_call_end_int" value="0"/>
     <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
 
     <!-- Mtc Assets -->
