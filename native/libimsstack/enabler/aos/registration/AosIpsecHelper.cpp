@@ -470,13 +470,13 @@ PROTECTED VIRTUAL IMS_UINT32 AosIpsecHelper::FindAvailableUePort(
 PROTECTED VIRTUAL void AosIpsecHelper::SetUePortnSpi(IN IMS_BOOL bInitial)
 {
     static IMS_UINT32 nLastClientPort = 0;
-    static IMS_UINT32 nLastServerPort = 0;
 
     m_pUeIpsecInfo->nPortC = FindAvailableUePort(UePortType::CLIENT_PORT, nLastClientPort);
 
     // ONLY create PortS in initial registration
     if (bInitial)
     {
+        static IMS_UINT32 nLastServerPort = 0;
         m_pUeIpsecInfo->nPortS = FindAvailableUePort(UePortType::SERVER_PORT, nLastServerPort);
     }
 
