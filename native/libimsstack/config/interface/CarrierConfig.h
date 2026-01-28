@@ -548,7 +548,7 @@ public:
          * Specifies this item adds a customized +g.gsma.rcs.telephony feature tag in contact
          * header of SIP REGISTER message with "cs,volte" value.
          *
-         * The value is changed to "cs" at runtime according to the VZW VoWiFi
+         * The value is changed to "cs" at runtime according to the specific carrier's VoWiFi
          * requirement.
          *
          * Possible Values:

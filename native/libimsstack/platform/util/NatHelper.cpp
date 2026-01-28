@@ -216,7 +216,6 @@ PUBLIC GLOBAL NatHelper* NatHelper::GetInstance()
 
 PUBLIC GLOBAL IMS_BOOL NatHelper::IsNatResolverRequired()
 {
-    // FIXME: SKT only requires, but it's not used in the moment.
     return IMS_FALSE;
 }
 

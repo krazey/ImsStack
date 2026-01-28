@@ -73,7 +73,7 @@ public class ImsTissTest extends RegistrationTestBase {
                 (slotId, simApplicationState) -> {
                     int subId = getSubId(slotId);
                     TelephonyManagerProxyImpl telephony = getTelephonyManagerProxy(subId);
-                    telephony.setSimCarrierId(1); // TMO-US
+                    telephony.setSimCarrierId(1);
                 });
         startImsStack(SLOT0, mConfig);
         enableAllMmTelCapabilities();
