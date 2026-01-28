@@ -37,7 +37,7 @@ class UssiController : public ISipClientConnectionListener, public ISipErrorList
 {
 public:
     UssiController(IN IMtcCallContext& objContext, IN UssiDataParser* pParser);
-    virtual ~UssiController();
+    ~UssiController() override;
     UssiController(IN const UssiController&) = delete;
     UssiController& operator=(IN const UssiController&) = delete;
 
