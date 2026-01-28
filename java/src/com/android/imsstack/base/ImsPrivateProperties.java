@@ -290,13 +290,11 @@ public final class ImsPrivateProperties {
 
         /**
          * Tracks the last access network information.
-         *    - TMUS
          * Value: string
          */
         public static final String KEY_LAST_ACCESS_NETWORK_INFO = "last_access_network_info";
         /**
          * Shows Wi-Fi calling information pop-up for one time.
-         *    - ORG
          * Value: boolean (true / false)
          */
         public static final String KEY_SHOW_WFC_INFO = "show_wfc_info";
@@ -307,7 +305,6 @@ public final class ImsPrivateProperties {
         public static final String KEY_SIP_DEVICE_ID = "sip_device_id";
         /**
          * Device's latest SW version.
-         *    - TMUS
          * Value: string
          * SlotId SHOULD be a zero for this key because it's a device's information.
          */

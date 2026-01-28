@@ -473,51 +473,51 @@ TEST_F(AStringBufferTest, ReplaceCharPointer)
 {
     AStringBuffer objAStringBuffer(AString("Hello World, Good Morning!!"));
 
-    const IMS_CHAR* pValue = "Google";
+    const IMS_CHAR* pValue = "Android";
 
     objAStringBuffer.Replace(6, 5, pValue);
 
-    EXPECT_STREQ(objAStringBuffer.GetCharString(), "Hello Google, Good Morning!!");
+    EXPECT_STREQ(objAStringBuffer.GetCharString(), "Hello Android, Good Morning!!");
 }
 
 TEST_F(AStringBufferTest, ReplaceAString)
 {
     AStringBuffer objAStringBuffer(AString("Hello World, Good Morning!!"));
 
-    AString strValue("Google");
+    AString strValue("Android");
 
     objAStringBuffer.Replace(6, 5, strValue);
 
-    EXPECT_STREQ(objAStringBuffer.GetCharString(), "Hello Google, Good Morning!!");
+    EXPECT_STREQ(objAStringBuffer.GetCharString(), "Hello Android, Good Morning!!");
 }
 
 TEST_F(AStringBufferTest, ReplaceCharWithCharPointerString)
 {
     AStringBuffer objAStringBuffer(AString("hello G, hi G, hello G"));
 
-    const IMS_CHAR* pValue = "Google";
+    const IMS_CHAR* pValue = "Android";
 
     objAStringBuffer.Replace('G', pValue);
 
-    EXPECT_STREQ(objAStringBuffer.GetCharString(), "hello Google, hi Google, hello Google");
+    EXPECT_STREQ(objAStringBuffer.GetCharString(), "hello Android, hi Android, hello Android");
 }
 
 TEST_F(AStringBufferTest, ReplaceCharWithAStringString)
 {
     AStringBuffer objAStringBuffer(AString("hello G, hi G, hello G"));
 
-    AString strValue("Google");
+    AString strValue("Android");
 
     objAStringBuffer.Replace('G', strValue);
 
-    EXPECT_STREQ(objAStringBuffer.GetCharString(), "hello Google, hi Google, hello Google");
+    EXPECT_STREQ(objAStringBuffer.GetCharString(), "hello Android, hi Android, hello Android");
 }
 
 TEST_F(AStringBufferTest, ReplaceCharPointerStringWithCharPointerString)
 {
-    AStringBuffer objAStringBuffer(AString("hello Google, hi Google, hello Google"));
+    AStringBuffer objAStringBuffer(AString("hello Android, hi Android, hello Android"));
 
-    const IMS_CHAR* pOldValue = "Google";
+    const IMS_CHAR* pOldValue = "Android";
     const IMS_CHAR* pNewValue = "World";
 
     objAStringBuffer.Replace(pOldValue, pNewValue);
@@ -527,9 +527,9 @@ TEST_F(AStringBufferTest, ReplaceCharPointerStringWithCharPointerString)
 
 TEST_F(AStringBufferTest, ReplaceCharPointerStringWithAStringString)
 {
-    AStringBuffer objAStringBuffer(AString("hello Google, hi Google, hello Google"));
+    AStringBuffer objAStringBuffer(AString("hello Android, hi Android, hello Android"));
 
-    const IMS_CHAR* pOldValue = "Google";
+    const IMS_CHAR* pOldValue = "Android";
     AString strNewValue("World");
 
     objAStringBuffer.Replace(pOldValue, strNewValue);
@@ -539,9 +539,9 @@ TEST_F(AStringBufferTest, ReplaceCharPointerStringWithAStringString)
 
 TEST_F(AStringBufferTest, ReplaceAStringStringWithCharPointerString)
 {
-    AStringBuffer objAStringBuffer(AString("hello Google, hi Google, hello Google"));
+    AStringBuffer objAStringBuffer(AString("hello Android, hi Android, hello Android"));
 
-    AString strOldValue("Google");
+    AString strOldValue("Android");
     const IMS_CHAR* pNewValue = "World";
 
     objAStringBuffer.Replace(strOldValue, pNewValue);

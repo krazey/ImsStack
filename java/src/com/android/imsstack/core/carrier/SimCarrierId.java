@@ -28,8 +28,6 @@ import java.util.Objects;
 public final class SimCarrierId {
     /** Unknown carrier id. */
     public static final int UNKNOWN_ID = TelephonyManager.UNKNOWN_CARRIER_ID;
-    /** Carrier id for Google Fi SIM. */
-    public static final int GOOGLE_FI = 1989;
     /** SIM states */
     public static final int SIM_ABSENT = 0;
     public static final int SIM_LOCKED = 1;
