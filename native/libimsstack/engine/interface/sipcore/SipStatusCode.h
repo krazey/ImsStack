@@ -215,7 +215,7 @@ public:
         SC_491 = 491,  ///< 491 Request Pending
         SC_493 = 493,  ///< 493 Undecipherable
         SC_494 = 494,  ///< 494 Security Agreement Required [RFC 3329]
-        SC_499 = 499,  ///< 499 Not Reachable :: SKT_VT
+        SC_499 = 499,  ///< 499 Not Reachable
 
         /*
          * 5xx : server failure final response codes

@@ -4340,7 +4340,6 @@ GLOBAL void DisplayUnknownHeaders(IN ::SipMessage* pMessage)
         IMS_CHAR acLog[13 + 1] = {
                 '\0',
         };
-        IMS_BOOL bFullLog = IMS_FALSE;
 
         for (IMS_UINT32 i = 0; i < nSize; ++i)
         {
@@ -4353,21 +4352,10 @@ GLOBAL void DisplayUnknownHeaders(IN ::SipMessage* pMessage)
 
                 acLog[0] = '\0';
 
-                if (pszHdrName != SIP_NULL)
-                {
-                    if ((pszHdrName[0] == 'P') || (pszHdrName[0] == 'p'))
-                    {
-                        if (IMS_StrICmp(pszHdrName, "P-SKT-BYE-CAUSE") == 0)
-                        {
-                            bFullLog = IMS_TRUE;
-                        }
-                    }
-                }
-
                 if ((pszHdrName != SIP_NULL) && (pszHdrValue != SIP_NULL))
                 {
-                    IMS_TRACE_I("\t(U) %s: %s", pszHdrName,
-                            bFullLog ? pszHdrValue : GetLogString(pszHdrValue, acLog, 13), 0);
+                    IMS_TRACE_I(
+                            "\t(U) %s: %s", pszHdrName, GetLogString(pszHdrValue, acLog, 13), 0);
                 }
 
                 pUnknown->SipDelete();

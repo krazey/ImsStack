@@ -2676,7 +2676,6 @@ PROTECTED VIRTUAL void Session::NotifySipResponse(IN ISipClientConnection* piScc
                     (piSipMsg->GetSdpBodyPart() != IMS_NULL) ||
                     (piSipMsg->GetStatusCode() == SipStatusCode::SC_180))
             {
-                // KT
                 // 183 (to-tag1) -> 183 (early-session, to-tag2) -> 200-INVITE (to-tag2)
                 // 183 (early-session, to-tag1) -> 183 (forking, to-tag2) -> 200-INVITE (to-tag3)
                 m_pVirtualEarlySession = IMS_NULL;
