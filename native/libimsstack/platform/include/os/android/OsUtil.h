@@ -24,13 +24,12 @@ class OsUtil : public ISystemUtil, public ISystemProperty, public IZLib
 {
 public:
     OsUtil();
-    ~OsUtil() override;
+    ~OsUtil() override = default;
 
     OsUtil(IN const OsUtil&) = delete;
     OsUtil& operator=(IN const OsUtil&) = delete;
 
 public:
-    void InitializeReadOnlyProperties();
     void SetDebugOn(IN IMS_BOOL bDebugOn);
 
     // ISystemProperty class
@@ -55,8 +54,12 @@ private:
     IMS_BOOL Uncompress(IN const ByteArray& objCompData, OUT ByteArray& objData) override;
 
 private:
-    // READ-ONLY properties of ISystemProperty
-    IMS_BOOL m_bIsUserMode;
+    static constexpr IMS_SINT32 BUILD_TYPE_UNKNOWN = -1;
+    static constexpr IMS_SINT32 BUILD_TYPE_USER = 1;
+    static constexpr IMS_SINT32 BUILD_TYPE_DEBUG = 2;
+
+    // READ-ONLY properties
+    mutable IMS_SINT32 m_nBuildType;
     // READ-WRITE properties
     IMS_BOOL m_bImsDebugOn;
     // Privacy mode when logging

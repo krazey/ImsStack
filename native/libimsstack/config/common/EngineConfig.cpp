@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 #include "IImsPrivateProperty.h"
+#include "ISystemProperty.h"
 #include "ITraceOption.h"
 #include "ServiceTrace.h"
+#include "ServiceUtil.h"
 
 #include "private/EngineConfig.h"
 
@@ -27,6 +29,10 @@ EngineConfig::EngineConfig(IN IMS_SINT32 nSlotId) :
         m_nTraceOption(ITraceOption::OPT_DEFAULT),
         m_nTraceModule(IMS_TRACE_MODULE_ALL)
 {
+    if (IMS_UTIL_SYS_PROP_IS_USER_MODE())
+    {
+        m_nTraceOption = ITraceOption::RELEASE_OPT_DEFAULT;
+    }
 }
 
 PUBLIC VIRTUAL EngineConfig::~EngineConfig() {}

@@ -16,10 +16,12 @@
 #include <string.h>
 #include <cutils/log.h>
 
+#include "ISystemProperty.h"
 #include "ITraceOption.h"
 #include "ImsStrLib.h"
 #include "ImsTrace.h"
 #include "ServiceMemory.h"
+#include "ServiceUtil.h"
 
 PRIVATE GLOBAL const IMS_CHAR* ImsTrace::START[ITrace::TEXT_MAX] = {
         "TEXT_ANY_START\n",
@@ -47,6 +49,10 @@ ImsTrace::ImsTrace() :
         m_nOption(ITraceOption::OPT_DEFAULT),
         m_nTracedModules(IMS_TRACE_MODULE_ALL)
 {
+    if (IMS_UTIL_SYS_PROP_IS_USER_MODE())
+    {
+        m_nOption = ITraceOption::RELEASE_OPT_DEFAULT;
+    }
 }
 
 PUBLIC

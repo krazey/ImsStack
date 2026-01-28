@@ -28,39 +28,11 @@ __IMS_TRACE_TAG_IPL__;
 
 PUBLIC
 OsUtil::OsUtil() :
-        m_bIsUserMode(IMS_FALSE),
+        m_nBuildType(BUILD_TYPE_UNKNOWN),
         m_bImsDebugOn(IMS_FALSE),
         m_bHidePrivacyLog(IMS_FALSE),
         m_strChipsetVendor(AString::ConstNull())
 {
-}
-
-PUBLIC
-OsUtil::~OsUtil() {}
-
-PUBLIC
-void OsUtil::InitializeReadOnlyProperties()
-{
-    IMS_CHAR acValue[PROPERTY_VALUE_MAX] = {
-            0,
-    };
-
-    // Debug on
-    m_bImsDebugOn = IMS_FALSE;
-
-    // Build type : "ro.build.type"
-    property_get("ro.build.type", acValue, "userdebug");
-
-    if (IMS_StrICmp(acValue, "user") == 0)
-    {
-        m_bIsUserMode = IMS_TRUE;
-    }
-    else
-    {
-        m_bIsUserMode = IMS_FALSE;
-    }
-
-    IMS_TRACE_D("SystemProperties (1) :: build_type=%s", m_bIsUserMode ? "user" : "non-user", 0, 0);
 }
 
 PUBLIC
@@ -107,7 +79,25 @@ PUBLIC VIRTUAL IMS_BOOL OsUtil::IsServerInfoHiddenInLog() const
 
 PUBLIC VIRTUAL IMS_BOOL OsUtil::IsUserMode() const
 {
-    return m_bIsUserMode;
+    if (m_nBuildType == BUILD_TYPE_UNKNOWN)
+    {
+        IMS_CHAR acValue[PROPERTY_VALUE_MAX] = {
+                0,
+        };
+
+        // Build type : "ro.build.type"
+        property_get("ro.build.type", acValue, "userdebug");
+
+        if (IMS_StrICmp(acValue, "user") == 0)
+        {
+            m_nBuildType = BUILD_TYPE_USER;
+        }
+        else
+        {
+            m_nBuildType = BUILD_TYPE_DEBUG;
+        }
+    }
+    return m_nBuildType == BUILD_TYPE_USER;
 }
 
 PUBLIC GLOBAL OsUtil* OsUtil::GetInstance()
