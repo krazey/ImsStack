@@ -51,16 +51,8 @@ public:
 
 protected:
     IMtcCallContext& m_objContext;
-
-private:
-    const AString m_strOptionTag;
-    const std::vector<RequestType> m_lstSupportedRequestType;
-    const std::vector<ResponseType> m_lstSupportedResponseType;
-
     IMS_BOOL m_bRequiredOnRemote;
     IMS_BOOL m_bSupportedOnRemote;
-
-    void UpdateFromRequireAndSupportedHeader(IN const IMessage& objMessage);
 
     inline IMS_BOOL IsSupportedType(IN RequestType eType) const
     {
@@ -73,6 +65,13 @@ private:
         return std::find(m_lstSupportedResponseType.begin(), m_lstSupportedResponseType.end(),
                        eType) != m_lstSupportedResponseType.end();
     }
+
+private:
+    const AString m_strOptionTag;
+    const std::vector<RequestType> m_lstSupportedRequestType;
+    const std::vector<ResponseType> m_lstSupportedResponseType;
+
+    void UpdateFromRequireAndSupportedHeader(IN const IMessage& objMessage);
 };
 
 #endif
