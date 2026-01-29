@@ -45,6 +45,7 @@ import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.agents.dcmif.IDcSettings;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
+import com.android.imsstack.enabler.mtc.Call;
 import com.android.imsstack.system.ISystem;
 
 import org.junit.After;
@@ -68,6 +69,7 @@ public class ApnEmergencyTest {
     @Mock private IDcSettings mMockIDcSettings;
     @Mock private IDcUtils mMockIDcUtils;
     @Mock private ISystem mMockISystem;
+    @Mock private Call mMockCall;
 
     private ContextFixture mContextFixture;
     private TestableLooper mTestableLooper;
@@ -125,6 +127,18 @@ public class ApnEmergencyTest {
     }
 
     @Test
+    public void testConnect_shouldCancelPendingDisconnect() {
+        // GIVEN
+        mApnEmergency.mIsWaitForTransportChange = true;
+
+        // WHEN
+        mApnEmergency.connect();
+
+        // THEN
+        assertFalse(mApnEmergency.mIsWaitForTransportChange);
+    }
+
+    @Test
     public void testDisconnect() throws Exception {
         replaceInstance(Apn.class, "mNetworkCallback", mApnEmergency, mMockNetworkCallback);
 
@@ -146,6 +160,38 @@ public class ApnEmergencyTest {
     }
 
     @Test
+    public void testDisconnect_pendDuringTransportChange() throws Exception {
+        // GIVEN
+        replaceInstance(Apn.class, "mNetworkCallback", mApnEmergency, mMockNetworkCallback);
+        mApnEmergency.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+        mApnEmergency.setDataState(TelephonyManager.DATA_CONNECTED);
+        mApnEmergency.mIsWaitForTransportChange = true;
+
+        // WHEN
+        assertTrue(mApnEmergency.disconnect());
+
+        // THEN
+        verify(mConnectivityManagerProxy, never()).unregisterNetworkCallback(mMockNetworkCallback);
+        assertTrue(mApnEmergency.hasMessages(Apn.EVENT_DELAYED_DISCONNECT));
+    }
+
+    @Test
+    public void testDisconnect_shouldNotPendIfTransportDoesNotChange() throws Exception {
+        // GIVEN
+        replaceInstance(Apn.class, "mNetworkCallback", mApnEmergency, mMockNetworkCallback);
+        mApnEmergency.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+        mApnEmergency.setDataState(TelephonyManager.DATA_CONNECTED);
+        mApnEmergency.mIsWaitForTransportChange = false;
+
+        // WHEN
+        assertTrue(mApnEmergency.disconnect());
+
+        // THEN
+        verify(mConnectivityManagerProxy).unregisterNetworkCallback(mMockNetworkCallback);
+        assertFalse(mApnEmergency.hasMessages(Apn.EVENT_DELAYED_DISCONNECT));
+    }
+
+    @Test
     public void testGetApn() throws Exception {
         // when the mApnString is null
         assertEquals(EApnType.EMERGENCY.getString(), mApnEmergency.getApn());
@@ -154,6 +200,70 @@ public class ApnEmergencyTest {
         String newApnString = "NEWAPN";
         mApnEmergency.mApnString = newApnString;
         assertEquals(newApnString, mApnEmergency.getApn());
+    }
+
+    @Test
+    public void testOnCallCreated_shouldSendCallCreatedEvent() {
+        // GIVEN
+        when(mMockCall.getCallExtraBoolean(Call.EXTRA_E_CALL, false)).thenReturn(true);
+        when(mMockCall.getCallExtraBoolean(Call.EXTRA_WIFI_E_CALL, false)).thenReturn(true);
+        mApnEmergency.setDataState(TelephonyManager.DATA_CONNECTED);
+        mApnEmergency.mIpcanCategory = Apn.IPCAN_CATEGORY_MOBILE;
+
+        // WHEN
+        mApnEmergency.mMtcCallRegistryListener.onCallCreated(mMockCall);
+
+        // THEN
+        assertTrue(mApnEmergency.hasMessages(Apn.EVENT_CALL_CREATED));
+    }
+
+    @Test
+    public void testOnCallCreated_normalCall_shouldNotSendCallCreatedEvent() {
+        // GIVEN
+        when(mMockCall.getCallExtraBoolean(Call.EXTRA_E_CALL, false)).thenReturn(false);
+
+        // WHEN
+        mApnEmergency.mMtcCallRegistryListener.onCallCreated(mMockCall);
+
+        // THEN
+        assertFalse(mApnEmergency.hasMessages(Apn.EVENT_CALL_CREATED));
+    }
+
+    @Test
+    public void testOnCallCreated_disconnectedState_shouldNotSendCallCreatedEvent() {
+        // GIVEN
+        when(mMockCall.getCallExtraBoolean(Call.EXTRA_E_CALL, false)).thenReturn(true);
+        mApnEmergency.setDataState(TelephonyManager.DATA_DISCONNECTED);
+
+        // WHEN
+        mApnEmergency.mMtcCallRegistryListener.onCallCreated(mMockCall);
+
+        // THEN
+        assertFalse(mApnEmergency.hasMessages(Apn.EVENT_CALL_CREATED));
+    }
+
+    @Test
+    public void testOnCallDestroyed_shouldSendCallDestroyedEvent() throws Exception {
+        // GIVEN
+        when(mMockCall.getCallExtraBoolean(Call.EXTRA_E_CALL, false)).thenReturn(true);
+
+        // WHEN
+        mApnEmergency.mMtcCallRegistryListener.onCallDestroyed(mMockCall);
+
+        // THEN
+        assertTrue(mApnEmergency.hasMessages(Apn.EVENT_CALL_DESTROYED));
+    }
+
+    @Test
+    public void testOnCallCreated_normalCall_shouldNotSendCallDestroyedEvent() {
+        // GIVEN
+        when(mMockCall.getCallExtraBoolean(Call.EXTRA_E_CALL, false)).thenReturn(false);
+
+        // WHEN
+        mApnEmergency.mMtcCallRegistryListener.onCallDestroyed(mMockCall);
+
+        // THEN
+        assertFalse(mApnEmergency.hasMessages(Apn.EVENT_CALL_DESTROYED));
     }
 
     @Test
@@ -176,6 +286,21 @@ public class ApnEmergencyTest {
         assertEquals(TelephonyManager.DATA_CONNECTED, mApnEmergency.getDataState());
         verify(mMockISystem).notifyDataConnectionStateChanged(
                 EApnType.EMERGENCY.getType(), EDataState.DATA_STATE_CONNECTED.getState());
+    }
+
+    @Test
+    public void testHandleNetworkAvailable_shouldCancelPendingDisconnect() throws Exception {
+        // GIVEN
+        replaceInstance(Apn.class, "mNetworkCallback", mApnEmergency, mMockNetworkCallback);
+        mApnEmergency.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+        mApnEmergency.mIsWaitForTransportChange = true;
+
+        // WHEN
+        mApnEmergency.sendEmptyMessage(Apn.EVENT_NETWORK_AVAILABLE);
+        mTestableLooper.processAllMessages();
+
+        // THEN
+        assertFalse(mApnEmergency.mIsWaitForTransportChange);
     }
 
     @Test
@@ -365,6 +490,83 @@ public class ApnEmergencyTest {
                 EApnType.EMERGENCY.getType(), EDataState.DATA_STATE_DISCONNECTED.getState());
     }
 
+    @Test
+    public void testHandleDelayedDisconnect() throws Exception {
+        // GIVEN
+        replaceInstance(Apn.class, "mNetworkCallback", mApnEmergency, mMockNetworkCallback);
+        mApnEmergency.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+        mApnEmergency.setDataState(TelephonyManager.DATA_CONNECTED);
+        mApnEmergency.mIsWaitForTransportChange = true;
+
+        // WHEN
+        mApnEmergency.sendEmptyMessage(Apn.EVENT_DELAYED_DISCONNECT);
+        mTestableLooper.processAllMessages();
+
+        // THEN
+        verify(mConnectivityManagerProxy).unregisterNetworkCallback(mMockNetworkCallback);
+        assertFalse(mApnEmergency.mIsWaitForTransportChange);
+    }
+
+    @Test
+    public void testHandleCallCreated_shouldMarkTransportChange() {
+        // GIVEN
+        when(mMockCall.getCallExtraBoolean(Call.EXTRA_E_CALL, false)).thenReturn(true);
+        when(mMockCall.getCallExtraBoolean(Call.EXTRA_WIFI_E_CALL, false)).thenReturn(false);
+        mApnEmergency.setDataState(TelephonyManager.DATA_CONNECTED);
+        mApnEmergency.mIpcanCategory = Apn.IPCAN_CATEGORY_WLAN;
+
+        // WHEN
+        mApnEmergency.mMtcCallRegistryListener.onCallCreated(mMockCall);
+        mTestableLooper.processAllMessages();
+
+        // THEN
+        assertTrue(mApnEmergency.mIsWaitForTransportChange);
+    }
+
+    @Test
+    public void testHandleCallCreated_connectedToSameAsSelected_shouldNotMarkTransportChange() {
+        // GIVEN
+        when(mMockCall.getCallExtraBoolean(Call.EXTRA_E_CALL, false)).thenReturn(true);
+        when(mMockCall.getCallExtraBoolean(Call.EXTRA_WIFI_E_CALL, false)).thenReturn(true);
+        mApnEmergency.setDataState(TelephonyManager.DATA_CONNECTED);
+        mApnEmergency.mIpcanCategory = Apn.IPCAN_CATEGORY_WLAN;
+
+        // WHEN
+        mApnEmergency.mMtcCallRegistryListener.onCallCreated(mMockCall);
+        mTestableLooper.processAllMessages();
+
+        // THEN
+        assertFalse(mApnEmergency.mIsWaitForTransportChange);
+    }
+
+    @Test
+    public void testHandleCallCreated_invalidMessage_shouldNotMarkTransportChange() {
+        // WHEN
+        mApnEmergency.sendMessage(mApnEmergency.obtainMessage(Apn.EVENT_CALL_CREATED, null));
+        mTestableLooper.processAllMessages();
+
+        // THEN
+        assertFalse(mApnEmergency.mIsWaitForTransportChange);
+    }
+
+    @Test
+    public void testHandleCallDestroyed_shouldCancelPendingDisconnect() throws Exception {
+        // GIVEN
+        replaceInstance(Apn.class, "mNetworkCallback", mApnEmergency, mMockNetworkCallback);
+        when(mMockCall.getCallExtraBoolean(Call.EXTRA_E_CALL, false)).thenReturn(true);
+        mApnEmergency.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+        mApnEmergency.mIsWaitForTransportChange = true;
+        mApnEmergency.sendEmptyMessageDelayed(
+                Apn.EVENT_DELAYED_DISCONNECT, ApnEmergency.DISCONNECT_DELAY_TIME);
+
+        // WHEN
+        mApnEmergency.mMtcCallRegistryListener.onCallDestroyed(mMockCall);
+        mTestableLooper.processAllMessages();
+
+        // THEN
+        verify(mConnectivityManagerProxy).unregisterNetworkCallback(mMockNetworkCallback);
+        assertFalse(mApnEmergency.mIsWaitForTransportChange);
+    }
     private synchronized void replaceInstance(final Class c, final String instanceName,
             final Object obj, final Object newValue) throws Exception {
         Field field = c.getDeclaredField(instanceName);

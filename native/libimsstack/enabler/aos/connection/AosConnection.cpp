@@ -124,6 +124,11 @@ PUBLIC VIRTUAL IMS_BOOL AosConnection::IsActivationRequested()
     return m_bActivationRequested;
 }
 
+PUBLIC VIRTUAL void AosConnection::SetActivationRequested(IN IMS_BOOL bRequest)
+{
+    m_bActivationRequested = bRequest;
+}
+
 PUBLIC VIRTUAL IMS_UINT32 AosConnection::GetState()
 {
     A_IMS_TRACE_D(CNXID, "GetState :: state(%s)", StateToString(m_nState), 0, 0);
@@ -306,12 +311,6 @@ PROTECTED
 IMS_BOOL AosConnection::IsConnected() const
 {
     return (m_nState == STATE_ACTIVE);
-}
-
-PROTECTED
-void AosConnection::SetActivationRequested(IN IMS_BOOL bRequest)
-{
-    m_bActivationRequested = bRequest;
 }
 
 PROTECTED

@@ -353,6 +353,7 @@ PROTECTED VIRTUAL void AosEApplication::ProcessRegStart(IN IMSMSG& objMsg)
             StopTimer(TIMER_APP_CONNECTED);
         }
 
+        m_piContext->GetConnection()->SetActivationRequested(IMS_TRUE);
         SetAppState(STATE_CONNECTING);
         m_piRegistration->Start();
     }
