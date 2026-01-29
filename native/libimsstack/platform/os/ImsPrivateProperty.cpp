@@ -17,21 +17,6 @@
 #include "PlatformApi.h"
 #include "ServiceMemory.h"
 
-PUBLIC GLOBAL const IMS_CHAR ImsPrivateProperties::Ephemeral::KEY_KR_TTA_VERSION[] =
-        "kr_tta_version";
-PUBLIC GLOBAL const IMS_CHAR ImsPrivateProperties::Ephemeral::KEY_REG_0_BT[] = "reg_0_bt";
-PUBLIC GLOBAL const IMS_CHAR ImsPrivateProperties::Ephemeral::KEY_REG_1_MT[] = "reg_1_mt";
-PUBLIC GLOBAL const IMS_CHAR ImsPrivateProperties::Ephemeral::KEY_REG_2_CF[] = "reg_2_cf";
-PUBLIC GLOBAL const IMS_CHAR ImsPrivateProperties::Ephemeral::KEY_REG_3_UWT[] = "reg_3_uwt";
-PUBLIC GLOBAL const IMS_CHAR ImsPrivateProperties::Ephemeral::KEY_REG_4_AWT[] = "reg_4_awt";
-PUBLIC GLOBAL const IMS_CHAR ImsPrivateProperties::Ephemeral::KEY_SMS_NETWORK_REG_BIND[] =
-        "sms_network_reg_bind";
-PUBLIC GLOBAL const IMS_CHAR
-        ImsPrivateProperties::Ephemeral::KEY_THIRD_PARTY_DIALER_FOR_VIDEO_CALL[] =
-                "third_party_dialer_for_video_call";
-
-PUBLIC GLOBAL const IMS_CHAR ImsPrivateProperties::Persistent::KEY_SHOW_CODEC_INFO[] =
-        "show_codec_info";
 PUBLIC GLOBAL const IMS_CHAR ImsPrivateProperties::Persistent::KEY_WIFI_TEST[] = "wifi_test";
 PUBLIC GLOBAL const IMS_CHAR ImsPrivateProperties::Persistent::KEY_SIP_DEVICE_ID[] =
         "sip_device_id";
