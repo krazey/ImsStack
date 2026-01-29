@@ -1454,6 +1454,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "support_video_call_only_in_vops_off_status_bool";
         public static final String KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL =
                 KEY_PREFIX + "set_video_text_feature_exclusively_in_contact_header_by_session_type_bool";
+        public static final String KEY_ADD_VIDEO_FEATURE_TAG_IN_ACCEPT_CONTACT_ALWAYS_BOOL =
+                KEY_PREFIX + "add_video_feature_tag_in_accept_contact_always_bool";
         public static final String KEY_ONE_WAY_VIDEO_CALL_BY_LOCAL_END_SUPPORTED_BOOL =
                 KEY_PREFIX + "one_way_video_call_by_local_end_supported_bool";
         public static final String KEY_ONE_WAY_VIDEO_CALL_BY_REMOTE_END_SUPPORTED_BOOL =

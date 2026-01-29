@@ -2778,6 +2778,15 @@ public:
         static const IMS_CHAR KEY_SUPPORT_VIDEO_CALL_ONLY_IN_VOPS_OFF_STATUS_BOOL[];
         static const IMS_CHAR
                 KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL[];
+        /**
+         * Specifies whether to include the "video" feature tag in the Accept-Contact header
+         * regardless of the call type.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
+        static const IMS_CHAR KEY_ADD_VIDEO_FEATURE_TAG_IN_ACCEPT_CONTACT_ALWAYS_BOOL[];
         static const IMS_CHAR KEY_REQUIRE_SIP_SIGNALING_ON_MULTITASKING_BOOL[];
         /**
          * Specifies whether to check if local resource for video media is reserved after

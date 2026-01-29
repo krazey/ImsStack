@@ -443,7 +443,9 @@ void MessageFormatter::SetAcceptContactHeader(IN CallType eCallType)
     strAcceptContact.Append(AString(Const3GPP::ICSI_MMTEL).Replace(":", "%3A"));
     strAcceptContact.Append(TextParser::CHAR_DQUOT);
 
-    if (eCallType == CallType::VT || eCallType == CallType::VIDEO_RTT)
+    if (eCallType == CallType::VT || eCallType == CallType::VIDEO_RTT ||
+            m_objContext.GetConfigurationProxy().GetBoolean(
+                    ConfigVt::KEY_ADD_VIDEO_FEATURE_TAG_IN_ACCEPT_CONTACT_ALWAYS_BOOL))
     {
         strAcceptContact.Append(TextParser::CHAR_SEMICOLON);
         strAcceptContact.Append(MessageUtil::STR_VIDEO);

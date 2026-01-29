@@ -55,6 +55,10 @@ using ::testing::ReturnRef;
 LOCAL const IMS_SINT32 SLOT_ID = 0;
 LOCAL const AString HOME_DOMAIN = "homedomain";
 LOCAL const AString PRIVATE_USER_ID = "prid";
+LOCAL const AString ACCEPT_CONTACT_MMTEL =
+        "*;+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\"";
+LOCAL const AString ACCEPT_CONTACT_VIDEO =
+        "*;+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\";video";
 
 namespace android
 {
@@ -1137,4 +1141,48 @@ TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderSetsReasonHeaderForRefre
             &objMessage, ISession::TERMINATION_REASON_REFRESH_TIMEOUT);
 }
 
+TEST_F(MessageFormatterTest, SetAcceptContactHeaderWithVideoTagRegardlessCallType)
+{
+    ON_CALL(objConfigurationProxy,
+            GetBoolean(ConfigVt::KEY_ADD_VIDEO_FEATURE_TAG_IN_ACCEPT_CONTACT_ALWAYS_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, _, _, _)).Times(AnyNumber());
+    EXPECT_CALL(objMessageUtils, AddValueIfNotExists(&objMessage, _, _, _)).Times(AnyNumber());
+    EXPECT_CALL(objMessageUtils,
+            SetHeader(&objMessage, ACCEPT_CONTACT_VIDEO, ISipHeader::ACCEPT_CONTACT, _))
+            .Times(1);
+
+    pFormatter->FormStartMessage(CallType::VOIP);
+}
+
+TEST_F(MessageFormatterTest, SetAcceptContactHeaderWithoutVideoTagWhenVoipCall)
+{
+    ON_CALL(objConfigurationProxy,
+            GetBoolean(ConfigVt::KEY_ADD_VIDEO_FEATURE_TAG_IN_ACCEPT_CONTACT_ALWAYS_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, _, _, _)).Times(AnyNumber());
+    EXPECT_CALL(objMessageUtils, AddValueIfNotExists(&objMessage, _, _, _)).Times(AnyNumber());
+    EXPECT_CALL(objMessageUtils,
+            SetHeader(&objMessage, ACCEPT_CONTACT_MMTEL, ISipHeader::ACCEPT_CONTACT, _))
+            .Times(1);
+
+    pFormatter->FormStartMessage(CallType::VOIP);
+}
+
+TEST_F(MessageFormatterTest, SetAcceptContactHeaderWithVideoTagWhenVtCall)
+{
+    ON_CALL(objConfigurationProxy,
+            GetBoolean(ConfigVt::KEY_ADD_VIDEO_FEATURE_TAG_IN_ACCEPT_CONTACT_ALWAYS_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMessageUtils, SetHeader(&objMessage, _, _, _)).Times(AnyNumber());
+    EXPECT_CALL(objMessageUtils, AddValueIfNotExists(&objMessage, _, _, _)).Times(AnyNumber());
+    EXPECT_CALL(objMessageUtils,
+            SetHeader(&objMessage, ACCEPT_CONTACT_VIDEO, ISipHeader::ACCEPT_CONTACT, _))
+            .Times(1);
+
+    pFormatter->FormStartMessage(CallType::VIDEO_RTT);
+}
 }  // namespace android
