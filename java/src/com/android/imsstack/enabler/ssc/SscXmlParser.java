@@ -655,14 +655,21 @@ public class SscXmlParser {
 
         if (ruleSet != null && ruleSet.size() > 1
                 && queryData.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_VOICE) {
+
+            SparseBooleanArray conditionsWithAudio  = new SparseBooleanArray();
+            for (SscRuleData rule : ruleSet) {
+                if (rule.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_VOICE) {
+                    conditionsWithAudio.put(rule.getSsCondition(), true);
+                }
+            }
+
             // If there are multiple rules and the query is for VOICE, and one of the rules is for
             // VOICE, remove any rule that is SERVICE_CLASS_NONE.
             Iterator<SscRuleData> it = ruleSet.iterator();
-            while (it.hasNext()) {
-                if (it.next().getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_NONE) {
-                    it.remove();
-                }
-            }
+            ruleSet.removeIf(
+                    rule -> rule.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_NONE
+                            && conditionsWithAudio.get(rule.getSsCondition())
+            );
         }
 
         return ruleSet;
