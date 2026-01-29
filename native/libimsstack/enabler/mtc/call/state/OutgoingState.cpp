@@ -473,6 +473,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
 
     if (nStatusCode == SipStatusCode::SC_180)
     {
+        m_objContext.GetMediaManager().Set180Received();
         m_objContext.GetSupplementaryService().UpdateCw(piMessage);
     }
     else if (nStatusCode == SipStatusCode::SC_199)
@@ -576,6 +577,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
 
     if (nStatusCode == SipStatusCode::SC_180)
     {
+        m_objContext.GetMediaManager().Set180Received();
         m_objContext.GetSupplementaryService().UpdateCw(piMessage);
     }
     else if (nStatusCode == SipStatusCode::SC_199)

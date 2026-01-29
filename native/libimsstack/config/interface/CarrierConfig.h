@@ -2586,8 +2586,26 @@ public:
 
         static const IMS_CHAR KEY_INCOMING_RESUME_EVENT_SUPPORT_BOOL[];
         static const IMS_CHAR KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT[];
-        static const IMS_CHAR KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL[];
+
+        /**
+         * Specifies whether to initialize P-Early-Media type to 'inactive' when the header is
+         * missing in the received message and no P-Early-Media type has been set yet.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
+        static const IMS_CHAR KEY_SET_INACTIVE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL[];
+
         static const IMS_CHAR KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT[];
+        enum
+        {
+            DYNAMIC_NW_TONE_WHEN_PEM_NOT_CONTAINS_SEND = 0,
+            DYNAMIC_NW_TONE_WHEN_PEM_ALL = 1,
+            DYNAMIC_NW_TONE_WHEN_PEM_CONTAINS_SEND = 2,
+            NW_TONE_WHEN_PEM_CONTAINS_SEND_AFTER_180 = 3,
+        };
+
         static const IMS_CHAR KEY_USER_CANCEL_REASON_AFTER_RESPONSE_TIMEOUT_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT[];
         static const IMS_CHAR KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT[];

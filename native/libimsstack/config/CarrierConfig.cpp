@@ -1301,8 +1301,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_INCOMING_RESUME_EVENT_SUPPORT_BOOL[]
         KEY_IMS_VOICE_PREFIX "incoming_resume_event_support_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT[] =
         KEY_IMS_VOICE_PREFIX "sip_status_code_for_rejecting_call_type_change_int";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL[] =
-        KEY_IMS_VOICE_PREFIX "initialize_p_early_media_when_no_header_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_SET_INACTIVE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "set_inactive_p_early_media_when_no_header_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT[] =
         KEY_IMS_VOICE_PREFIX "policy_for_local_ringback_tone_with_180_response_int";
 const IMS_CHAR

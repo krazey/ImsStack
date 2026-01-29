@@ -1292,8 +1292,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "incoming_resume_event_support_bool";
         public static final String KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT =
                 KEY_PREFIX + "sip_status_code_for_rejecting_call_type_change_int";
-        public static final String KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL =
-                KEY_PREFIX + "initialize_p_early_media_when_no_header_bool";
+        public static final String KEY_SET_INACTIVE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL =
+                KEY_PREFIX + "set_inactive_p_early_media_when_no_header_bool";
         public static final String KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT =
                 KEY_PREFIX + "policy_for_local_ringback_tone_with_180_response_int";
         public static final String KEY_USER_CANCEL_REASON_AFTER_RESPONSE_TIMEOUT_TIMER_MILLIS_INT =

@@ -118,7 +118,7 @@
     <int name="imsvoice.incoming_call_reject_code_for_user_decline_int" value="603"/>
     <int name="imsvoice.incoming_call_reject_code_for_no_answer_int" value="487"/>
     <int name="imsvoice.prack_update_response_wait_timer_millis_int" value="0"/>
-    <int name="imsvoice.policy_for_local_ringback_tone_with_180_response_int" value="2"/>
+    <int name="imsvoice.policy_for_local_ringback_tone_with_180_response_int" value="3"/>
     <int name="imsvoice.call_max_count_int" value="2"/>
 
     <!-- MTC conference call -->
