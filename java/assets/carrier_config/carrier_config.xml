@@ -408,21 +408,7 @@
     </int-array>
     <boolean name="imsuce.add_video_tag_contact_header_in_publish_bool" value="false"/>
 
-    <!-- Acs -->
-    <int name="imsacs.refresh_ratio_int" value="100"/>
-    <int name="imsacs.throttling_time_sec_int" value="0"/>
-    <boolean name="imsacs.initial_request_https_bool" value="false"/>
-    <string-array name="imsacs.always_use_http_params_string_array" num="0">
-    </string-array>
-    <string-array name="imsacs.http_params_string_array" num="0">
-    </string-array>
-    <int-array name="imsacs.permanent_error_code_int_array" num="0">
-    </int-array>
-    <string name="imsacs.pdn_type_string">Internet</string> <!-- "apn_type" ? -->
-    <boolean name="imsacs.always_working_bool" value="false"/>
-    <boolean name="imsacs.use_pre_provisioning_bool" value="false"/>
-
-    <!-- Assets: non-carrier configurations -->
+    <!-- Assets: internal configurations -->
 
     <!-- Ims General -->
     <boolean name="ims.sdp_negotiation_required_for_non_rpr_bool" value="false"/>

@@ -693,31 +693,6 @@ public class CarrierConfig {
         private Ims() {}
     }
 
-    /** Configuration items for ACS. */
-    public static class ImsAcs {
-        public static final String KEY_PREFIX = "imsacs.";
-        public static final String KEY_REFRESH_RATIO_INT =
-                KEY_PREFIX + "refresh_ratio_int";
-        public static final String KEY_THROTTLING_TIME_SEC_INT =
-                KEY_PREFIX + "throttling_time_sec_int";
-        public static final String KEY_INITIAL_REQUEST_HTTPS_BOOL =
-                KEY_PREFIX + "initial_request_https_bool";
-        public static final String KEY_ALWAYS_USE_HTTP_PARAMS_STRING_ARRAY =
-                KEY_PREFIX + "always_use_http_params_string_array";
-        public static final String KEY_HTTP_PARAMS_STRING_ARRAY =
-                KEY_PREFIX + "http_params_string_array";
-        public static final String KEY_PERMANENT_ERROR_CODE_INT_ARRAY =
-                KEY_PREFIX + "permanent_error_code_int_array";
-        public static final String KEY_PDN_TYPE_STRING =
-                KEY_PREFIX + "pdn_type_string";
-        public static final String KEY_ALWAYS_WORKING_BOOL =
-                KEY_PREFIX + "always_working_bool";
-        public static final String KEY_USE_PRE_PROVISIONING_BOOL =
-                KEY_PREFIX + "use_pre_provisioning_bool";
-
-        private ImsAcs() {}
-    }
-
     /** Configuration items for emergency calling. */
     public static class ImsEmergency {
         public static final String KEY_PREFIX = "imsemergency.";
