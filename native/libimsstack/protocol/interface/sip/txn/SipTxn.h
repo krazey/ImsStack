@@ -77,6 +77,8 @@ public:
         /* When txn handler fails to handle receive message --> failure conditions */
         STATUS_INVALID_MESSAGE,
         STATUS_STRAY_PRACK,
+        /* Re-transmitted ACK request is received in the ACCEPTED state. */
+        STATUS_ACK_RETRANSMISSION,
         STATUS_INVALID
 
     };
@@ -235,6 +237,9 @@ private:
     /* Current Value of Timer Duration */
     SIP_UINT32 m_nCurrentDuration;
     SIP_BOOL m_bRprTxnTerminated;
+    /* A flag for detecting ACK retransmission
+       while Timer-L is running in an INVITE server transaction. */
+    SIP_BOOL m_bAckReceived;
 
     SipTxnTimerValues m_objTxnTimerValues;
 
@@ -304,6 +309,9 @@ public:
 
     inline SIP_BOOL IsRprTxnTerminated() const { return m_bRprTxnTerminated; }
     inline void SetRprTxnTerminated(IN SIP_BOOL bTerminated) { m_bRprTxnTerminated = bTerminated; }
+
+    inline SIP_BOOL IsAckReceived() const { return m_bAckReceived; }
+    inline void SetAckReceived(IN SIP_BOOL bAckReceived) { m_bAckReceived = bAckReceived; }
 
 private:
     ~SipTxn() override;
