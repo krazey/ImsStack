@@ -19,10 +19,10 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.os.Bundle;
 import android.telephony.ServiceState;
+import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsCallSession;
 import android.telephony.ims.ImsReasonInfo;
@@ -40,6 +41,8 @@ import android.telephony.ims.SrvccCall;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.android.imsstack.base.TestAppContext;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.PhoneStateInterface;
 import com.android.imsstack.enabler.mtc.CallTracker;
 import com.android.imsstack.enabler.mtc.IECallStateTracker;
 import com.android.imsstack.enabler.mtc.MtcApp;
@@ -77,6 +80,7 @@ public class ImsCallManagerTest {
     private ImsCallManager.MtcAppCallListenerProxy mMtcAppCallListenerProxyNull;
     private ImsCallManager.ImsCallTracker mImsCallTracker;
     private TestAppContext mTestAppContext;
+    private MessageExecutor mMockExecutor;
 
     @Before
     public void setUp() {
@@ -86,8 +90,12 @@ public class ImsCallManagerTest {
         mTestAppContext = new TestAppContext(mMockContext);
         mTestAppContext.setUp();
 
-        MessageExecutor mExecutor = new MessageExecutor(ImsCallManager.class.getSimpleName());
-        when(mMockCallContext.getExecutor()).thenReturn(mExecutor);
+        mMockExecutor = Mockito.mock(MessageExecutor.class);
+        doAnswer(invocation -> {
+            ((Runnable) invocation.getArgument(0)).run();
+            return null;
+        }).when(mMockExecutor).execute(any(Runnable.class));
+        when(mMockCallContext.getExecutor()).thenReturn(mMockExecutor);
         when(mMockCallContext.getContext()).thenReturn(mMockContext);
         when(mMockCallContext.getPhoneId()).thenReturn(1);
 
@@ -113,6 +121,7 @@ public class ImsCallManagerTest {
         mImsCallManagernull = null;
         mTestAppContext.tearDown();
         mTestAppContext = null;
+        mMockExecutor = null;
     }
 
     @Test
@@ -579,6 +588,8 @@ public class ImsCallManagerTest {
         // Verify onCallIncomingReceived
         ImsCallSessionImpl mPendingSession = Mockito.mock(ImsCallSessionImpl.class);
         when(mPendingSession.getCallId()).thenReturn(callId);
+        when(mPendingSession.getMtcCall()).thenReturn(mMockMtcCall);
+        when(mMockMtcCall.isTerminatedByAutoRejectedCall()).thenReturn(false);
         mImsCallManager.getPendingSession().put(callId, mPendingSession);
         mImsCallTracker.updateCallState(mPendingSession,
                 CallTracker.CALL_EVENT_INCOMING_RECEIVED, null);
@@ -594,8 +605,8 @@ public class ImsCallManagerTest {
                 CallTracker.CALL_EVENT_INCOMING_RECEIVED, null);
         verify(mMockIMmTelCallListener, never()).onIncomingCallReceived(
                 eq(mPendingSession));
-        verify(mPendingSession, timeout(100).times(2)).close();
-        verify(mPendingSession, timeout(100)).reject(
+        verify(mPendingSession, times(2)).close();
+        verify(mPendingSession).reject(
                 eq(ImsReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE));
 
         // Verify onCallDestroy with pending session
@@ -619,6 +630,52 @@ public class ImsCallManagerTest {
         mImsCallTracker.updateCallState(mMockImsCallSession, CallTracker.CALL_EVENT_DESTROY, null);
         Assert.assertTrue(mImsCallManager.getSession().isEmpty());
         Assert.assertEquals(0, mImsCallManager.getSession().size());
+    }
+
+    @Test
+    public void onCallIncomingReceived_terminatedByAutoRejectedWithCsCall() {
+        ImsCallSessionImpl pendingCallSession = Mockito.mock(ImsCallSessionImpl.class);
+        when(pendingCallSession.getCallId()).thenReturn(PENDING_CALL_ID);
+        mImsCallManager.getPendingSession().put(PENDING_CALL_ID, pendingCallSession);
+        when(pendingCallSession.getMtcCall()).thenReturn(mMockMtcCall);
+        when(mMockMtcCall.isTerminatedByAutoRejectedCall()).thenReturn(true);
+
+        PhoneStateInterface mockPhoneState = Mockito.mock(PhoneStateInterface.class);
+        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, mockPhoneState, 0);
+        when(mockPhoneState.getCsCallState()).thenReturn(TelephonyManager.CALL_STATE_RINGING);
+        when(mMockCallContext.getSlotId()).thenReturn(0);
+
+        mImsCallTracker.updateCallState(pendingCallSession,
+                CallTracker.CALL_EVENT_INCOMING_RECEIVED, null);
+
+        verify(pendingCallSession).close();
+
+        Assert.assertFalse(mImsCallManager.getPendingSession().containsKey(PENDING_CALL_ID));
+
+        verify(mMockIMmTelCallListener, never()).onIncomingCallReceived(any());
+
+        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, 0);
+    }
+
+    @Test
+    public void onCallIncomingReceived_terminatedByAutoRejectedWithIdleCsCall() {
+        ImsCallSessionImpl pendingCallSession = Mockito.mock(ImsCallSessionImpl.class);
+        when(pendingCallSession.getCallId()).thenReturn(PENDING_CALL_ID);
+        mImsCallManager.getPendingSession().put(PENDING_CALL_ID, pendingCallSession);
+        when(pendingCallSession.getMtcCall()).thenReturn(mMockMtcCall);
+        when(mMockMtcCall.isTerminatedByAutoRejectedCall()).thenReturn(true);
+
+        PhoneStateInterface mockPhoneState = Mockito.mock(PhoneStateInterface.class);
+        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, mockPhoneState, 0);
+        when(mockPhoneState.getCsCallState()).thenReturn(TelephonyManager.CALL_STATE_IDLE);
+        when(mMockCallContext.getSlotId()).thenReturn(0);
+
+        mImsCallTracker.updateCallState(pendingCallSession,
+                CallTracker.CALL_EVENT_INCOMING_RECEIVED, null);
+
+        verify(mMockIMmTelCallListener).onIncomingCallReceived(eq(pendingCallSession));
+
+        AgentFactory.getInstance().setAgent(PhoneStateInterface.class, null, 0);
     }
 
     // Test inner class MtcAppCallListenerProxy
@@ -651,8 +708,8 @@ public class ImsCallManagerTest {
         mMtcAppCallListenerProxyNull = mListenerArgNull.getValue();
         mImsCallManagernull.getSession().put(CALL_ID, mMockImsCallSession);
         mMtcAppCallListenerProxyNull.onPreIncomingCallReceived(mMockMtcApp, 12L);
-        verify(mMockImsCallSession, timeout(100)).close();
-        verify(mMockImsCallSession, timeout(100)).reject(
+        verify(mMockImsCallSession).close();
+        verify(mMockImsCallSession).reject(
                 eq(ImsReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE));
     }
 
@@ -660,6 +717,8 @@ public class ImsCallManagerTest {
     public void rejectAndDestroyCallExceptionTest() {
         ImsCallSessionImpl mPendingSession = Mockito.mock(ImsCallSessionImpl.class);
         RuntimeException mockRuntimeException = Mockito.mock(RuntimeException.class);
+        when(mPendingSession.getMtcCall()).thenReturn(mMockMtcCall);
+        when(mMockMtcCall.isTerminatedByAutoRejectedCall()).thenReturn(false);
         doThrow(mockRuntimeException).when(mMockIMmTelCallListener)
             .onIncomingCallReceived(mPendingSession);
         doThrow(mockRuntimeException).when(mPendingSession)
