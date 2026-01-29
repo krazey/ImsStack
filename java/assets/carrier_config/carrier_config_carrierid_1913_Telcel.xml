@@ -15,6 +15,12 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <!-- Aos -->
+    <int-array name="ims.permanent_pdn_failure_int_array" num="1">
+        <item value="33"/>
+    </int-array>
+    <int name="imsemergency.ipcan_release_emergency_pdn_upon_emergency_call_end_int" value="3"/>
+
     <!-- MTC -->
     <int name="imsemergency.emergency_ringback_timer_millis_int" value="90000"/>
     <string-array name="imsvoice.reject_code_and_action_set_string_array" num="65">
