@@ -2010,6 +2010,18 @@ public:
         static const IMS_CHAR KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT[];
         static const IMS_CHAR KEY_TEXT_RTP_INACTIVITY_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT[];
+        /**
+         * Specifies whether to check if local resource for text media is reserved after
+         * the call is established or updated.
+         *
+         * If {@code true} and text QoS hasn't activated, the next action will be determined
+         * by {@code imsrtt.policy_on_text_qos_deactivation_int} - usually downgrade.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
+        static const IMS_CHAR KEY_CHECK_LOCAL_RESOURCE_AFTER_ESTABLISHED_OR_MODIFIED_BOOL[];
     };
 
     class ImsSms
@@ -2594,7 +2606,8 @@ public:
         static const IMS_CHAR KEY_QOS_LOST_GUARD_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_QOS_FORCED_ACQUISITION_TIMER_MILLIS_INT[];
 
-        static const IMS_CHAR KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_INT_ARRAY[];
+        static const IMS_CHAR
+                KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_BEFORE_ESTABLISHED_INT_ARRAY[];
         enum
         {
             NO_WAIT_DEDICATED_BEARER_IN_NR = 0,
@@ -2766,6 +2779,18 @@ public:
         static const IMS_CHAR
                 KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL[];
         static const IMS_CHAR KEY_REQUIRE_SIP_SIGNALING_ON_MULTITASKING_BOOL[];
+        /**
+         * Specifies whether to check if local resource for video media is reserved after
+         * the call is established or updated.
+         *
+         * If {@code true} and video QoS hasn't activated, the next action will be determined
+         * by {@code imsvt.policy_on_video_qos_deactivation_int} - usually downgrade.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
+        static const IMS_CHAR KEY_CHECK_LOCAL_RESOURCE_AFTER_ESTABLISHED_OR_MODIFIED_BOOL[];
         // Media
         static const IMS_CHAR KEY_VIDEO_RTCP_INTERVAL_INT_ARRAY[];
         static const IMS_CHAR KEY_VIDEO_AVPF_FEATURE_INT[];

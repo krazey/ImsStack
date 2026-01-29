@@ -885,6 +885,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "text_rtcp_interval_int_array";
         public static final String KEY_TEXT_HOLD_WITH_DIRECTION_INACTIVE_BOOL =
                 KEY_PREFIX + "text_hold_with_direction_inactive_bool";
+        public static final String KEY_CHECK_LOCAL_RESOURCE_AFTER_ESTABLISHED_OR_MODIFIED_BOOL =
+                KEY_PREFIX + "check_local_resource_after_established_or_modified_bool";
 
         private ImsRtt() {}
     }
@@ -1332,8 +1334,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "qos_lost_guard_timer_millis_int";
         public static final String KEY_QOS_FORCED_ACQUISITION_TIMER_MILLIS_INT =
                 KEY_PREFIX + "qos_forced_acquisition_timer_millis_int";
-        public static final String KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_INT_ARRAY =
-                KEY_PREFIX + "rat_condition_for_not_waiting_dedicated_bearer_int_array";
+        public static final String KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_BEFORE_ESTABLISHED_INT_ARRAY =
+                KEY_PREFIX + "rat_condition_for_not_waiting_dedicated_bearer_before_established_int_array";
         public static final String KEY_TRIGGER_DEDICATED_BEARER_WAIT_TIMER_BY_SENDING_INITIAL_INVITE_BOOL =
                 KEY_PREFIX + "trigger_dedicated_bearer_wait_timer_by_sending_initial_invite_bool";
         public static final String KEY_RESTART_DEDICATED_BEARER_WAIT_TIMER_BY_EPS_FALLBACK_BOOL =
@@ -1460,6 +1462,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "video_hold_with_direction_inactive_bool";
         public static final String KEY_REQUIRE_SIP_SIGNALING_ON_MULTITASKING_BOOL =
                 KEY_PREFIX + "require_sip_signaling_on_multitasking_bool";
+        public static final String KEY_CHECK_LOCAL_RESOURCE_AFTER_ESTABLISHED_OR_MODIFIED_BOOL =
+                KEY_PREFIX + "check_local_resource_after_established_or_modified_bool";
         // Media
         public static final String KEY_VIDEO_RTP_PORT_RANGE_INT_ARRAY =
                 KEY_PREFIX + "video_rtp_port_range_int_array";

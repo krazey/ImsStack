@@ -259,7 +259,7 @@
     <int name="imsvoice.policy_on_audio_qos_deactivation_int" value="1"/>
     <int name="imsvoice.prealerting_timer_millis_int" value="7000"/>
     <int name="imsvoice.media_type_for_offerless_invite_int" value="1"/>
-    <int-array name="imsvoice.rat_condition_for_not_waiting_dedicated_bearer_int_array" num="3">
+    <int-array name="imsvoice.rat_condition_for_not_waiting_dedicated_bearer_before_established_int_array" num="3">
         <item value="0"/> <!-- NO_WAIT_DEDICATED_BEARER_IN_NR -->
         <item value="1"/> <!-- NO_WAIT_DEDICATED_BEARER_IN_EPS_FALLBACK -->
         <item value="2"/> <!-- NO_WAIT_DEDICATED_BEARER_IN_EPS_ONLY_ATTACH -->
@@ -271,6 +271,8 @@
         <item value="25000"/> <!-- EMERGENCY_WIFI -->
     </int-array>
     <int name="imsvt.convert_user_response_timer_millis_int" value="20000"/>
+    <boolean name="imsvt.check_local_resource_after_established_or_modified_bool" value="true"/>
+    <boolean name="imsrtt.check_local_resource_after_established_or_modified_bool" value="false"/>
     <!-- MTC terminate reason -->
     <string name="imsvoice.call_terminate_reason_header_user_ends_and_rtp_timeout_string">RELEASE_CAUSE;cause=2;text="User ends call RTP/RTCP time-out"</string>
     <string name="imsvoice.call_terminate_reason_header_user_ends_and_sip_response_timeout_string">RELEASE_CAUSE;cause=5;text="User ends call and SIP response time-out"</string>

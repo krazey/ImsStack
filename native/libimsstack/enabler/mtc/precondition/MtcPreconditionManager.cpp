@@ -390,7 +390,7 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnCallEstablished(IN ISession* piSes
 {
     IMS_TRACE_D("OnCallEstablished", 0, 0, 0);
 
-    if (IsNotUsingDedicatedWaitTimerByRatCondition())
+    if (m_bOnWlan)
     {
         return;
     }
@@ -410,7 +410,7 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnCallModified(IN ISession* piSessio
             ConfigVoice::KEY_POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING_INT);
     if (nPolicy == ConfigVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_AFTER_UPGRADE)
     {
-        if (IsNotUsingDedicatedWaitTimerByRatCondition())
+        if (m_bOnWlan)
         {
             return;
         }
@@ -809,27 +809,30 @@ void MtcPreconditionManager::OnWaitVideoTextAvailableTimerExpired(IN const QosTi
         return;
     }
 
+    CallType eCallType = m_objContext.GetSession()->GetCallType();
+    IMS_UINT32 eReservedMediaTypes = GetReservedMediaTypes(piSession, eCallType);
+
     if (IsConfirmedDialog(piSession))
     {
-        return HandleReservationFailureByTimerExpiration(pTimer);
+        IMS_UINT32 eMediaTypes = MtcMediaUtil::GetMediaTypesFromCallType(eCallType);
+        IMS_BOOL bVideoReservationFailed = (eMediaTypes & MEDIATYPE_VIDEO) &&
+                !(eReservedMediaTypes & MEDIATYPE_VIDEO) &&
+                m_objContext.GetConfigurationProxy().GetBoolean(
+                        ConfigVt::KEY_CHECK_LOCAL_RESOURCE_AFTER_ESTABLISHED_OR_MODIFIED_BOOL);
+        IMS_BOOL bTextReservationFailed = (eMediaTypes & MEDIATYPE_TEXT) &&
+                !(eReservedMediaTypes & MEDIATYPE_TEXT) &&
+                m_objContext.GetConfigurationProxy().GetBoolean(
+                        ConfigRtt::KEY_CHECK_LOCAL_RESOURCE_AFTER_ESTABLISHED_OR_MODIFIED_BOOL);
+
+        if (bVideoReservationFailed || bTextReservationFailed)
+        {
+            HandleReservationFailureByTimerExpiration(pTimer);
+        }
     }
-
-    CallType eCallType = m_objContext.GetSession()->GetCallType();
-    std::vector<IMS_UINT32> objMediaTypeList =
-            MtcMediaUtil::GetMediaTypeListFromCallType(eCallType);
-
-    IMS_UINT32 eReservedMediaTypes = std::accumulate(objMediaTypeList.begin(),
-            objMediaTypeList.end(), static_cast<IMS_UINT32>(MEDIATYPE_NONE),
-            [this, piSession](IMS_UINT32 eCurrentMediaTypes, IMS_UINT32 eMediaType)
-            {
-                if (GetQosStatus(piSession, eMediaType) == QosStatus::AVAILABLE)
-                {
-                    return eCurrentMediaTypes | eMediaType;
-                }
-                return eCurrentMediaTypes;
-            });
-
-    NotifyQosStatusToListener(piSession, IMS_TRUE, eReservedMediaTypes);
+    else
+    {
+        NotifyQosStatusToListener(piSession, IMS_TRUE, eReservedMediaTypes);
+    }
 }
 
 PRIVATE
@@ -1084,6 +1087,24 @@ void MtcPreconditionManager::UpdateQosAttributesFromRemoteSdp(IN ISession* piSes
 }
 
 PRIVATE
+IMS_UINT32 MtcPreconditionManager::GetReservedMediaTypes(
+        IN ISession* piSession, IN CallType eCallType) const
+{
+    std::vector<IMS_UINT32> objMediaTypeList =
+            MtcMediaUtil::GetMediaTypeListFromCallType(eCallType);
+    return std::accumulate(objMediaTypeList.begin(), objMediaTypeList.end(),
+            static_cast<IMS_UINT32>(MEDIATYPE_NONE),
+            [this, piSession](IMS_UINT32 eCurrentMediaTypes, IMS_UINT32 eMediaType)
+            {
+                if (GetQosStatus(piSession, eMediaType) == QosStatus::AVAILABLE)
+                {
+                    return eCurrentMediaTypes | eMediaType;
+                }
+                return eCurrentMediaTypes;
+            });
+}
+
+PRIVATE
 IMS_BOOL MtcPreconditionManager::IsNeedToUpdateQosStatus(
         IN QosStatus eCurrentStatus, IN QosStatus eNewStatus)
 {
@@ -1308,9 +1329,8 @@ IMS_BOOL MtcPreconditionManager::IsNeedToStartWaitAudioDedicatedBearerTimer(
         return IMS_FALSE;
     }
 
-    if (IsNotUsingDedicatedWaitTimerByRatCondition())
+    if (!IsAudioDedicatedBearerWaitTimerRequiredByRatCondition())
     {
-        IMS_TRACE_D("No need to start audio dedicated bearer wait timer.", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -1494,42 +1514,45 @@ IMS_BOOL MtcPreconditionManager::IsConfirmationRequired(IN const ISession& objIS
 }
 
 PRIVATE
-IMS_BOOL MtcPreconditionManager::IsNotUsingDedicatedWaitTimerByRatCondition() const
+IMS_BOOL MtcPreconditionManager::IsAudioDedicatedBearerWaitTimerRequiredByRatCondition() const
 {
-    IMS_TRACE_D("IsNotUsingDedicatedWaitTimerByRatCondition pre[%s] curr[%s]",
+    IMS_TRACE_D("IsAudioDedicatedBearerWaitTimerRequiredByRatCondition pre[%s] curr[%s]",
             MtcCallStringUtils::ConvertRatType(m_ePreviousRatType),
             MtcCallStringUtils::ConvertRatType(m_eCurrentRatType), 0);
 
     if (m_bOnWlan)
     {
-        return IMS_TRUE;
+        return IMS_FALSE;
     }
 
     if (m_objContext.GetConfigurationProxy().Contains(
-                ConfigVoice::KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_INT_ARRAY,
+                ConfigVoice::
+                        KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_BEFORE_ESTABLISHED_INT_ARRAY,
                 ConfigVoice::NO_WAIT_DEDICATED_BEARER_IN_NR) &&
             m_eCurrentRatType == INetworkWatcher::RADIOTECH_TYPE_NR)
     {
-        return IMS_TRUE;
+        return IMS_FALSE;
     }
 
     if (m_objContext.GetConfigurationProxy().Contains(
-                ConfigVoice::KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_INT_ARRAY,
+                ConfigVoice::
+                        KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_BEFORE_ESTABLISHED_INT_ARRAY,
                 ConfigVoice::NO_WAIT_DEDICATED_BEARER_IN_EPS_FALLBACK) &&
             IsEpsFallback())
     {
-        return IMS_TRUE;
+        return IMS_FALSE;
     }
 
     if (m_objContext.GetConfigurationProxy().Contains(
-                ConfigVoice::KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_INT_ARRAY,
+                ConfigVoice::
+                        KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_BEFORE_ESTABLISHED_INT_ARRAY,
                 ConfigVoice::NO_WAIT_DEDICATED_BEARER_IN_EPS_ONLY_ATTACH) &&
             m_objContext.GetService().IsEpsOnlyAttach())
     {
-        return IMS_TRUE;
+        return IMS_FALSE;
     }
 
-    return IMS_FALSE;
+    return IMS_TRUE;
 }
 
 PRIVATE
