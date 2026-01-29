@@ -3735,11 +3735,7 @@ PROTECTED VIRTUAL void AosApplication::RegistrationControl_ControlRegistration(
 
     if (eType == AosRegRequestType::START_IMS_EST_TIMER)
     {
-        if (GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTimeForLte() > 0)
-        {
-            PostMessage(MSG_IMS_EST_TIMER_CONTROL, 0, 0);
-        }
-
+        PostMessage(MSG_IMS_EST_TIMER_CONTROL, 0, 0);
         return;
     }
 }

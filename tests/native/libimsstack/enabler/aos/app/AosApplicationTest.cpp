@@ -3654,13 +3654,7 @@ TEST_F(AosApplicationTest, Callback)
     // eCause is DATA - eType is STOP
     m_pAosApplication->RegistrationControl_ControlRegistration(
             AosRegRequestType::STOP, AosPcscfOrder::CURRENT, AosControlCause::DATA);
-    // eCause is DATA - eType is START_IMS_EST_TIMER, Establish time 0
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTimeForLte()).WillOnce(Return(0));
-    m_pAosApplication->RegistrationControl_ControlRegistration(
-            AosRegRequestType::START_IMS_EST_TIMER, AosPcscfOrder::CURRENT, AosControlCause::DATA);
-    // eCause is DATA - eType is START_IMS_EST_TIMER, Establish time 120
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetImsEstablishmentTimeForLte())
-            .WillRepeatedly(Return(120));
+    // eCause is DATA - eType is START_IMS_EST_TIMER
     m_pAosApplication->RegistrationControl_ControlRegistration(
             AosRegRequestType::START_IMS_EST_TIMER, AosPcscfOrder::CURRENT, AosControlCause::DATA);
 
