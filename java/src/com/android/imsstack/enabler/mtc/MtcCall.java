@@ -2256,6 +2256,7 @@ public class MtcCall extends Call implements ConferenceTracker {
                     + ", " + MtcCallUtils.toString(mediaInfo)
                     + ", " + MtcCallUtils.toString(suppInfo));
 
+            setUpdateState(UPDATE_STATE_IDLE);
             setOnHeld(false);
 
             // Update the call/media info.
