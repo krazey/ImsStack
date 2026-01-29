@@ -1004,14 +1004,6 @@ PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequest(
         // Check the Request-URI validation
         IMS_BOOL bValidity = pService->ValidateRequestUri(objRequestUri);
 
-        if (!bValidity &&
-                SipFeatures::IsHostPartValidationRequiredForIncomingRequestRouting(
-                        piSsc->GetSlotId()))
-        {
-            // Checks if IP and port is matched with those in the Contact address.
-            bValidity = pService->ValidateRequestUriForIpAndPort(objRequestUri);
-        }
-
         if (!bValidity)
         {
             IMS_TRACE_D("Request-URI is not matched (%s)", pService->GetServiceId().GetStr(), 0, 0);
