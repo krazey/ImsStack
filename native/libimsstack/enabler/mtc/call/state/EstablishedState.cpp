@@ -187,7 +187,14 @@ PRIVATE VIRTUAL CallStateName EstablishedState::RejectUpdate(IN const CallReason
     // Restore the CallType that was changed by MtcSession#HandleRequest.
     objSession.SetCallType(objSession.GetPreviousCallType());
 
-    if (objMediaManager.GetNegotiationState(&objSession.GetISession()) == STATE_OFFER_RECEIVED &&
+    const IMessage* piMessage =
+            objSession.GetISession().GetPreviousRequest(IMessage::SESSION_UPDATE);
+    // The first condition is for rejections by user or telephony.
+    // The second condition is for rejection by the native(e.g. some block rule).
+    if ((objMediaManager.GetNegotiationState(&objSession.GetISession()) == STATE_OFFER_RECEIVED ||
+                (objMediaManager.GetNegotiationState(&objSession.GetISession()) ==
+                                NegotiationState::STATE_NEGOTIATED &&
+                        piMessage && m_objContext.GetMessageUtils().HasSdp(piMessage))) &&
             m_objContext.GetConfigurationProxy().GetInt(
                     ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT) ==
                     SipStatusCode::SC_200)
@@ -198,7 +205,10 @@ PRIVATE VIRTUAL CallStateName EstablishedState::RejectUpdate(IN const CallReason
         {
             objSession.Reject(GetReasonByNegotiationResult(objNegoResult.eResult));
         }
-        objSession.AcceptUpdate();
+        else
+        {
+            objSession.AcceptUpdate();
+        }
     }
     else
     {
