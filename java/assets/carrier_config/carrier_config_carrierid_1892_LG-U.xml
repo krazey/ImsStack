@@ -88,7 +88,6 @@
 
     <!-- Media -->
     <boolean name="imsvoice.sdp_reoffer_full_capability_bool" value="true"/>
-    <boolean name="imsvoice.audio_hold_with_direction_inactive_bool" value="true"/>
     <int-array name="imsvoice.audio_rtp_port_range_int_array" num="2">
         <item value="1230"/>
         <item value="1236"/>
@@ -132,9 +131,8 @@
     <boolean name="imsvoice.allow_incoming_hold_request_during_conference_call_bool" value="false"/>
     <string name="imsvoice.call_terminate_reason_header_session_refresh_failure_string">SIP;cause=103;text=&quot;Session-Expire&quot;;fc=9602</string>
 
-    <string-array name="imsvoice.carrier_specific_sip_headers_string_array" num="2">
+    <string-array name="imsvoice.carrier_specific_sip_headers_string_array" num="1">
         <item value="P-SKT-BYE-CAUSE"/>
-        <item value="P-TTA-VoLTE-Info"/>
     </string-array>
 
     <!-- Mts -->
