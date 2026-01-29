@@ -222,6 +222,7 @@ public:
             m_pIpsecHelperInstance(IMS_NULL)
     {
         m_pCounter = new AosCounter();
+        m_nCreateRegFailureCount = 10;
     }
     inline ~TestAosRegistration() override { delete m_pCounter; }
 

@@ -134,6 +134,7 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
         m_nAuthFailureCount(0),
         m_nAuthIpsecCount(0),
         m_nErrorCountForServerSocket(0),
+        m_nCreateRegFailureCount(0),
         m_bCallingNumberVerificationSupported(IMS_FALSE),
         m_nNetworkBindingFeatures(0),
         m_bEps5GsOnly(IMS_TRUE),
@@ -233,10 +234,19 @@ PUBLIC VIRTUAL void AosRegistration::Start()
 
     if (!CreateRegistration())
     {
+        if (m_nCreateRegFailureCount < CREATE_REG_FAILURE_MAX_COUNT)
+        {
+            m_nCreateRegFailureCount++;
+            PostMessage(MSG_REG_RESTART, 0, 0);
+            return;
+        }
+
+        ClearRegCreateFailureCount();
         ProcessUnpredictableFailure();
         return;
     }
 
+    ClearRegCreateFailureCount();
     SetState(STATE_REGISTERING);
     ReportTryingState();
 }
@@ -1482,6 +1492,10 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::OnMessage(IN IMSMSG& objMsg)
 
         case MSG_REG_RECONFIG:
             ProcessReconfigPending();
+            break;
+
+        case MSG_REG_RESTART:
+            ProcessReStart();
             break;
 
         case MSG_REG_REQUIRED_WITH_WAIT_TIME:
@@ -3230,6 +3244,11 @@ PROTECTED VIRTUAL void AosRegistration::ClearSipRtConfig()
     piConfHelper->RemoveConfig(SipRtConfig::CONFIG_I_REG_CONTACT_ADDRESS, IMS_NULL);
 }
 
+PROTECTED VIRTUAL void AosRegistration::ClearRegCreateFailureCount()
+{
+    m_nCreateRegFailureCount = 0;
+}
+
 PROTECTED VIRTUAL void AosRegistration::CloseUnsecureTcpSocket()
 {
     IpAddress objIpaPcscf(m_strPcscf);
@@ -3540,11 +3559,20 @@ PROTECTED VIRTUAL void AosRegistration::ProcessPendingTransaction()
                 {
                     if (!CreateRegistration())
                     {
+                        if (m_nCreateRegFailureCount < CREATE_REG_FAILURE_MAX_COUNT)
+                        {
+                            m_nCreateRegFailureCount++;
+                            PostMessage(MSG_REG_RESTART, 0, 0);
+                            return;
+                        }
+
+                        ClearRegCreateFailureCount();
                         ProcessUnpredictableFailure();
                         return;
                     }
                     else
                     {
+                        ClearRegCreateFailureCount();
                         SetRetryState();
                         ReportTryingState();
                     }
@@ -3700,6 +3728,23 @@ PROTECTED VIRTUAL void AosRegistration::ProcessReconfigPending()
         {
             m_pUtil->RemoveFeature(PENDING_UPDATE, m_nTxnPending);
         }
+    }
+}
+
+PROTECTED VIRTUAL void AosRegistration::ProcessReStart()
+{
+    Destroy();
+
+    if (IsAppReady())
+    {
+        A_IMS_TRACE_I(REGID, "ProcessReStart :: sleep 1 second , cnt(%d)", m_nCreateRegFailureCount,
+                0, 0);
+        IMS_SYS_Sleep(1000);
+        Start();
+    }
+    else
+    {
+        ClearRegCreateFailureCount();
     }
 }
 
