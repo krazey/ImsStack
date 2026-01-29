@@ -37,14 +37,6 @@ public:
     static IMS_BOOL IsHeaderSessionIdRequired(IN IMS_SINT32 nSlotId);
 
     /**
-     * @brief Indicates that the only validation of IP and port is required when Request-URI is
-     *        evaluated for the incoming request routing even if the full URI match is failed.
-     *
-     * @param nSlotId Slot id
-     */
-    static IMS_BOOL IsHostPartValidationRequiredForIncomingRequestRouting(IN IMS_SINT32 nSlotId);
-
-    /**
      * @brief Indicates that SIP dialog state is determined by the reference
      *        of multiple dialog usages.
      *

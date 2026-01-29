@@ -67,6 +67,8 @@ public:
         CoreService::SetImsConnected(bImsConnected);
     }
 
+    void MarkAsRegistrationActive(IN const SipAddress& objAor);
+
 public:
     MockIRegBinding m_objRegBinding;
     MockISipClientConnection m_objScc;

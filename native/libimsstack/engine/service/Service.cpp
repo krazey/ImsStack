@@ -1580,6 +1580,9 @@ IMS_BOOL Service::ValidateRequestUri(IN const SipAddress& objRequestUri,
         }
     }
 
+    IMS_BOOL bIsSameIpAndPort =
+            ValidateRequestUriForIpAndPort(objRequestUri, piDialog, bIsMidDialogRequest);
+
     // Checks if the public user identity matches or not
     for (IMS_UINT32 i = 0; i < m_objAuthorizedUserIds.GetSize(); ++i)
     {
@@ -1602,6 +1605,21 @@ IMS_BOOL Service::ValidateRequestUri(IN const SipAddress& objRequestUri,
             // The public user identity is matched, so this message can be routed to this service.
             return IMS_TRUE;
         }
+
+        if (bIsSameIpAndPort && pAddress->GetUser().Equals(objRequestUri.GetUser()))
+        {
+            // TE script case:
+            // The user-info field is set to the user-info of public user identity, and
+            // the host-info field is set to the IP/port of this UA.
+            return IMS_TRUE;
+        }
+    }
+
+    if (objRequestUri.GetUser().GetLength() == 0)
+    {
+        // Some carriers or TE script case:
+        // If the user-info field is empty, then validate the host-info (IP/Port) only.
+        return bIsSameIpAndPort;
     }
 
     return IMS_FALSE;
