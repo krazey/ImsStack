@@ -24,6 +24,7 @@ import com.android.imsstack.imsservice.mmtel.ImsRegistrationTracker;
 import com.android.imsstack.imsservice.mmtel.ImsServiceManager;
 import com.android.imsstack.imsservice.mmtel.ImsServiceRecord;
 import com.android.imsstack.internal.enabler.ImsStateStore;
+import com.android.imsstack.internal.enabler.MtcCallRegistry;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.ArrayList;
@@ -714,13 +715,13 @@ public final class MtcCallManager implements ICallStateTracker, IMtcCallManager 
         }
 
         public void onCallCreated(final Call call) {
-            if (mListeners.isEmpty()) {
-                return;
-            }
-
             postAndRunTask(new Runnable() {
                 @Override
                 public void run() {
+                    MtcCallRegistry mtcCallRegistry =
+                            MtcCallRegistry.getInstance(mContext.getSlotId());
+                    mtcCallRegistry.notifyCallCreated(call);
+
                     for (CallStateListener l : mListeners) {
                         l.onCallCreated(call);
                     }
@@ -729,15 +730,13 @@ public final class MtcCallManager implements ICallStateTracker, IMtcCallManager 
         }
 
         public void onCallDestroyed(final Call call) {
-            if (mListeners.isEmpty()) {
-                updateConnectedCallOnWifi(call, 0, "onCallDestroyed");
-                return;
-            }
-
             postAndRunTask(new Runnable() {
                 @Override
                 public void run() {
                     updateConnectedCallOnWifi(call, 0, "onCallDestroyed");
+                    MtcCallRegistry mtcCallRegistry =
+                            MtcCallRegistry.getInstance(mContext.getSlotId());
+                    mtcCallRegistry.notifyCallDestroyed(call);
 
                     for (CallStateListener l : mListeners) {
                         l.onCallDestroyed(call);
