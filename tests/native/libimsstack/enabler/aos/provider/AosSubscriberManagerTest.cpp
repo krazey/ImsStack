@@ -172,7 +172,7 @@ public:
         m_bSupportLimitedAdminSmsMode = bSupportLimitedAdminSmsMode;
     }
 
-    inline void SetImsIdentityPriority(IN ImsVector<IMS_SINT32> objImsIdentityPriority)
+    inline void SetImsIdentityPriority(IN const ImsVector<IMS_SINT32>& objImsIdentityPriority)
     {
         m_objImsIdentityPriority = objImsIdentityPriority;
     }
