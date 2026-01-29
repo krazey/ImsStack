@@ -16,9 +16,12 @@
 -->
 <carrier_config>
     <!-- Aos -->
-    <boolean name="ims.block_pcscf_on_reg_failure_bool" value="false"/>
-    <int name="ims.reg_out_of_service_policy_int" value="1"/>
-    <int name="ims.reg_retry_default_policy_int" value="1"/>
+    <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
+    <pbundle_as_map name="ims.extra_reg_err_bundle">
+        <int-array name="ims.extra_reg_err_code_int_array" num="1">
+            <item value="0"/>
+        </int-array>
+    </pbundle_as_map>
     <boolean name="imsemergency.release_epdn_upon_ecall_end_in_fake_mode_bool" value="true"/>
     <int name="imsemergency.preferred_emergency_registration_int" value="1"/>
     <int name="imsemergency.wait_time_millis_for_release_epdn_after_ecall_end_int" value="2000"/>
