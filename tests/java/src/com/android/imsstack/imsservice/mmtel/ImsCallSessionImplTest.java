@@ -281,9 +281,23 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         mImsCallSession.start("1234", mImsCallProfile);
 
         assertTrue(mCallDetails.is(mCallDetails.CALL_END_CALLBACK_NOTIFIED));
-        verify(mMockImsCallSessionCallback).invokeStartFailed(any(ImsCallSessionImplBase.class),
-                any(ImsReasonInfo.class));
-        verify(mMockMtcCall, times(0)).isEmergencyCall();
+        verify(mMockImsCallSessionCallback, times(1)).invokeStartFailed(
+                any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
+        verify(mMockMtcCall, times(1)).isEmergencyCall();
+
+        when(mMockMtcCall.isEmergencyCall()).thenReturn(true);
+        when(mMockMtcApp.getMtcEmergencyServiceManager())
+                .thenReturn(mMockMtcEmergencyServiceManager);
+
+        mImsCallSession = new TestImsCallSessionImpl(
+                mMockCallContext, mMockCallTracker, mMockMtcCall,
+                mCallId, mImsCallProfile, true, mMockImsCallSessionCallback, mVideoCallSession);
+
+        mImsCallSession.start("1234", mImsCallProfile);
+
+        verify(mMockImsCallSessionCallback, times(1)).invokeStartFailed(
+                any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
+        verify(mMockMtcCall, times(3)).isEmergencyCall();
     }
 
     @Test

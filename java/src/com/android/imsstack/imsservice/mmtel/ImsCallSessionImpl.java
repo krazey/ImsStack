@@ -398,7 +398,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         ImsCallApp callApp = (ImsCallApp) mCallContext.getApp();
         MtcApp mtcApp = callApp.getCallManager().getMtcApp();
-        if (mtcApp.isOutgoingCallBarringActivated(ImsCallUtils.getCallTypeFromProfile(
+        if (!mCall.isEmergencyCall() && mtcApp.isOutgoingCallBarringActivated(
+                ImsCallUtils.getCallTypeFromProfile(
                 profile.getCallType(), profile.getMediaProfile().isRttCall()), callee)) {
             notifyCallEnd(ImsCallUtils.createImsReasonInfo(ImsReasonInfo.CODE_CALL_BARRED));
             return;
