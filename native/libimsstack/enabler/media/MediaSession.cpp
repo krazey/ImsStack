@@ -161,6 +161,13 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::DestroyProfile(IMS_UINTP nNegoId)
 
     IMS_BOOL bRet = IMS_TRUE;
     bRet &= m_pMediaNegoHandler->DeleteMediaNego(nNegoId);
+
+    // For VZW, modify the direction inactive before calling the delete session for forking.
+    if (!m_bSessionConfirmed)
+    {
+        m_pAudioController->UpdateMediaDirection(MEDIA_DIRECTION_INACTIVE);
+    }
+
     bRet &= m_pAudioController->DeleteSession(nNegoId);
     return bRet;
 }
