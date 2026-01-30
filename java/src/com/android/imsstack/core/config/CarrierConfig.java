@@ -1386,6 +1386,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "audio_hold_with_direction_inactive_bool";
         public static final String KEY_MEDIA_RECVONLY_EARLY_SESSION_BOOL =
                 KEY_PREFIX + "media_recvonly_early_session_bool";
+        public static final String KEY_EARLY_MEDIA_INACTIVE_DIRECTION_ON_PEM_INACTIVE_BOOL =
+                KEY_PREFIX + "early_media_inactive_direction_on_pem_inactive_bool";
         public static final String KEY_AMR_CODEC_ATTRIBUTE_DTX_BOOL =
                 KEY_PREFIX + "amr_codec_attribute_dtx_bool";
         public static final String KEY_CODEC_BASED_DYNAMIC_AS_ENABLED_BOOL =

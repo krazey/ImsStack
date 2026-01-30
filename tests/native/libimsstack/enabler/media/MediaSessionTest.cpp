@@ -904,17 +904,31 @@ TEST_F(MediaSessionTest, testNotifySrvccCanceled)
     EXPECT_TRUE(m_pSession->NotifySrvccStatus(MEDIA_SRVCC_CANCELED));
 }
 
-TEST_F(MediaSessionTest, testNotifyFirstPacket)
+TEST_F(MediaSessionTest, testOnNotifyFirstPacketForAudio)
 {
+    // Arrange
+    const IMS_UINT32 kNetworkToneTimer = 5000;
+    ImsMediaResponseConfigParam param;
+    param.m_eMediaType = MEDIA_TYPE_AUDIO;
+
+    // Expect GetInactivityTimer to be called and return a positive value
+    EXPECT_CALL(*m_pMockAudioController, GetInactivityTimer(NETWORK_TONE_INACTIVITY, _))
+            .WillOnce(Return(kNetworkToneTimer));
+
+    // Expect SetNetworkToneTimer to be called with 0 to stop the timer
+    EXPECT_CALL(*m_pMockAudioController, SetNetworkToneTimer(UNDEFINED_NEGO_ID, 0)).Times(1);
+
+    // Expect two notifications to the client
     EXPECT_CALL(m_objMockClientListener,
             MediaSession_Notify(REPORT_DATA_RECEIVE_STARTED, MEDIA_TYPE_AUDIO, _))
             .Times(1);
+    EXPECT_CALL(m_objMockClientListener,
+            MediaSession_Notify(REPORT_NW_TONE_RTP_RECEIVE_STARTED, MEDIA_TYPE_AUDIO, _))
+            .Times(1);
 
-    ImsMediaResponseConfigParam objParam = ImsMediaResponseConfigParam(MEDIA_TYPE_AUDIO);
-
-    EXPECT_EQ(m_pSession->SendMessage(
-                      IJniMedia::NOTIFY_FIRST_PACKET, reinterpret_cast<IMS_UINTP>(&objParam)),
-            IMS_TRUE);
+    // Act & Assert
+    EXPECT_TRUE(m_pSession->SendMessage(
+            IJniMedia::NOTIFY_FIRST_PACKET, reinterpret_cast<IMS_UINTP>(&param)));
 }
 
 TEST_F(MediaSessionTest, testNotifyMediaInactivityElse)

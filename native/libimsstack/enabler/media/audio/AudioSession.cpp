@@ -138,6 +138,31 @@ IMS_BOOL AudioSession::IsSameNegoId(IMS_UINTP nNegoId)
 }
 
 PUBLIC
+IMS_BOOL AudioSession::UpdateDirectionToInactiveByPem()
+{
+    if (m_pRtpConfig == nullptr)
+    {
+        IMS_TRACE_E(0, "UpdateDirectionToInactiveByPem() - RtpConfig is null", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
+    AudioConfig* pCurrentConfig = static_cast<AudioConfig*>(m_pRtpConfig);
+    const RtpConfig::MediaDirection currentDirection =
+            static_cast<RtpConfig::MediaDirection>(pCurrentConfig->getMediaDirection());
+
+    if (pCurrentConfig->getRemotePort() > 0 &&
+            currentDirection != RtpConfig::MEDIA_DIRECTION_INACTIVE)
+    {
+        IMS_TRACE_D("UpdateDirectionToInactiveByPem(): Direction changed from [%d] to INACTIVE.",
+                currentDirection, 0, 0);
+        pCurrentConfig->setMediaDirection(
+                static_cast<int32_t>(RtpConfig::MEDIA_DIRECTION_INACTIVE));
+        return IMS_TRUE;
+    }
+    return IMS_FALSE;
+}
+
+PUBLIC
 AudioConfig* AudioSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
         IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
         IN AudioProfile* pNegoProfile, IN IMS_BOOL bConfirmedSession)
@@ -857,6 +882,7 @@ PUBLIC
 void AudioSession::SetMediaPemType(IN MEDIA_PEM_TYPE ePemType)
 {
     IMS_TRACE_D("SetMediaPemType() - Pem Type[%d]", ePemType, 0, 0);
+
     m_ePemType = ePemType;
 }
 
@@ -879,6 +905,19 @@ IMS_BOOL AudioSession::RequestRtpReceptionStats(IN IMS_SINT32 nReportingInterval
     }
 
     return bResult;
+}
+
+PUBLIC
+IMS_BOOL AudioSession::IsEarlyMediaDirectionInactiveOnPemInactiveEnabled() const
+{
+    const AudioConfiguration* pConfig = GetConfiguration();
+
+    if (pConfig != nullptr)
+    {
+        return pConfig->IsEarlyMediaDirectionInactiveOnPemInactiveEnabled();
+    }
+
+    return IMS_FALSE;
 }
 
 PRIVATE
@@ -947,7 +986,7 @@ IMS_BOOL AudioSession::IsRtpInactivityForQnsNeeded(IN IMS_BOOL bConfirmedSession
 }
 
 PRIVATE
-AudioConfiguration* AudioSession::GetConfiguration()
+AudioConfiguration* AudioSession::GetConfiguration() const
 {
     if (m_pConfiguration == IMS_NULL)
     {
@@ -961,13 +1000,28 @@ AudioConfiguration* AudioSession::GetConfiguration()
 PRIVATE
 IMS_SINT32 AudioSession::UpdateEarlyMediaDirection(IMS_SINT32 nMediaDirection)
 {
-    IMS_SINT32 nEarlyAudioDirection = nMediaDirection;
+    const AudioConfiguration* pConfig = GetConfiguration();
+    if (pConfig == IMS_NULL)
+    {
+        IMS_TRACE_E(0,
+                "UpdateEarlyMediaDirection() - Configuration is null, using default direction", 0,
+                0, 0);
+        return nMediaDirection;
+    }
+
+    // Default early media direction is receive-only, unless overridden below.
+    IMS_SINT32 nEarlyAudioDirection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
 
     switch (m_ePemType)
     {
         case MEDIA_PEM_TYPE::SENDONLY:
-        case MEDIA_PEM_TYPE::INACTIVE:
             nEarlyAudioDirection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
+            break;
+        case MEDIA_PEM_TYPE::INACTIVE:
+            if (pConfig->IsEarlyMediaDirectionInactiveOnPemInactiveEnabled())
+            {
+                nEarlyAudioDirection = RtpConfig::MEDIA_DIRECTION_INACTIVE;
+            }
             break;
         case MEDIA_PEM_TYPE::SENDRECV:
             nEarlyAudioDirection = RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE;
@@ -977,14 +1031,13 @@ IMS_SINT32 AudioSession::UpdateEarlyMediaDirection(IMS_SINT32 nMediaDirection)
             break;
         case MEDIA_PEM_TYPE::NONE:
         default:
-        {
-            if (GetConfiguration() != IMS_NULL &&
-                    GetConfiguration()->IsRecvOnlyEarlySessionEnabled())
+            // For NONE, or any other unhandled PEM type, default to RECEIVE_ONLY.
+            if (!pConfig->IsRecvOnlyEarlySessionEnabled())
             {
-                nEarlyAudioDirection = RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY;
+                // If the general early media feature is disabled, respect the original direction.
+                nEarlyAudioDirection = nMediaDirection;
             }
-        }
-        break;
+            break;
     }
 
     IMS_TRACE_D("UpdateEarlyMediaDirection() - PEM direction[%d], direction[%d]->[%d]", m_ePemType,

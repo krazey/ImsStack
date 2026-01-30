@@ -183,6 +183,7 @@ protected:
     IMS_BOOL m_bSessionConfirmed;
     std::mutex m_objMutex;
     IMS_BOOL m_bIsConference;
+    IMS_UINTP m_nPrevNegoId;
     std::shared_ptr<MediaNetworkConnectionWatcher> m_pNetworkConnectionWatcher;
 };
 

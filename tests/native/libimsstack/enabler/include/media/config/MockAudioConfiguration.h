@@ -71,6 +71,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsRecvOnlyEarlySessionEnabled, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsAmrPayloadFormatRelaxedMatching, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsCodecBasedDynamicAsEnabled, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsEarlyMediaDirectionInactiveOnPemInactiveEnabled, (), (const, override));
 };
 
 #endif  // MOCK_AUDIO_CONFIGURATION_H_

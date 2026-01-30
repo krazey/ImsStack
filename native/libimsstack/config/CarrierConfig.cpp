@@ -1419,6 +1419,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_INCOMING_DTMF_TONE_PLAY_SUPPORT_BOOL
         KEY_IMS_VOICE_PREFIX "incoming_dtmf_tone_play_support_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_MEDIA_RECVONLY_EARLY_SESSION_BOOL[] =
         KEY_IMS_VOICE_PREFIX "media_recvonly_early_session_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_EARLY_MEDIA_INACTIVE_DIRECTION_ON_PEM_INACTIVE_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "early_media_inactive_direction_on_pem_inactive_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_DTX_BOOL[] =
         KEY_IMS_VOICE_PREFIX "amr_codec_attribute_dtx_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CODEC_BASED_DYNAMIC_AS_ENABLED_BOOL[] =

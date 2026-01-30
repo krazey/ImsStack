@@ -60,7 +60,8 @@ MediaSession::MediaSession(MEDIA_NETWORK_TYPE eNetwork, MEDIA_SERVICE_TYPE eServ
         m_pVideoController(std::make_shared<VideoController>()),
         m_pTextController(std::make_shared<TextController>()),
         m_bSessionConfirmed(IMS_FALSE),
-        m_bIsConference(IMS_FALSE)
+        m_bIsConference(IMS_FALSE),
+        m_nPrevNegoId(UNDEFINED_NEGO_ID)
 {
     IMS_TRACE_D(
             "+MediaSession() - ServiceType[%" PFLS_u "], CallKey[%d]", eServiceType, nCallKey, 0);
@@ -519,6 +520,7 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
                 m_pVideoController->SetCallSessionState(param1);
             }
 
+            m_nPrevNegoId = UNDEFINED_NEGO_ID;
             m_bSessionConfirmed = (param1 > 0);
             IMS_TRACE_I("SetOptions() - Confirmed flag[%d]", m_bSessionConfirmed, 0, 0);
             break;
@@ -591,6 +593,12 @@ VIRTUAL void MediaSession::SetMediaPemType(IN IMS_UINTP nNegoId, IN MEDIA_PEM_TY
     if (pMediaNego != IMS_NULL && pMediaNego->GetAudioNego() != IMS_NULL)
     {
         m_pAudioController->SetMediaPemType(nNegoId, ePemType);
+
+        if (pMediaNego->IsForking() && ePemType == MEDIA_PEM_TYPE::INACTIVE &&
+                m_nPrevNegoId != UNDEFINED_NEGO_ID && m_nPrevNegoId != nNegoId)
+        {
+            m_pAudioController->HandleForkedSessionUpdate(m_nPrevNegoId);
+        }
     }
 
     // video
@@ -598,6 +606,8 @@ VIRTUAL void MediaSession::SetMediaPemType(IN IMS_UINTP nNegoId, IN MEDIA_PEM_TY
     {
         m_pVideoController->SetMediaPemType(ePemType);
     }
+
+    m_nPrevNegoId = nNegoId;
 }
 
 IMS_BOOL MediaSession::IsPreviewMode(IMS_UINTP nNegoId)
@@ -889,8 +899,12 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
                                 NETWORK_TONE_INACTIVITY, UNDEFINED_NEGO_ID) > 0)
                     {
                         m_pAudioController->SetNetworkToneTimer(UNDEFINED_NEGO_ID, 0);
+                    }
+                    if (!m_bSessionConfirmed)
+                    {
                         m_pClientListener->MediaSession_Notify(
                                 REPORT_NW_TONE_RTP_RECEIVE_STARTED, pParam->m_eMediaType);
+                        IMS_TRACE_I("OnNotify() - NW tone receive started", 0, 0, 0);
                     }
                 }
 

@@ -330,6 +330,7 @@
     <boolean name="imsvoice.incoming_dtmf_tone_play_support_bool" value="false"/>
     <boolean name="imsvoice.media_recvonly_early_session_bool" value="true"/>
     <boolean name="imsvoice.codec_based_dynamic_as_enabled_bool" value="true"/>
+    <boolean name="imsvoice.early_media_inactive_direction_on_pem_inactive_bool" value="false"/>
     <boolean name="imsrtt.text_codec_empty_redundant_bool" value="true"/>
     <int name="imsrtt.text_codec_redundancy_level_int" value="3"/>
     <int-array name="imsrtt.text_rtcp_interval_int_array" num="2">
