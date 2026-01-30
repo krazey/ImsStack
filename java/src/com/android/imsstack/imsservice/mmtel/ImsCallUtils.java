@@ -215,6 +215,8 @@ public class ImsCallUtils {
                 MtcCallInfo.isVideoCapable(ci));
         profile.setCallExtraBoolean(ImsCallProfile.EXTRA_IS_CROSS_SIM_CALL,
                 MtcCallInfo.isCrossSim(ci));
+        profile.setCallExtraInt(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE,
+                MtcCallInfo.getRatType(ci));
 
         boolean isAudioHD = MtcCallUtils.isAudioHDQuality(mi.audioQuality);
         boolean isAudioUHD = MtcCallUtils.isAudioUHDQuality(mi.audioQuality);

@@ -3140,6 +3140,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 return;
             }
 
+            ImsCallUtils.updateCallProfileFromCallInfo(mCallContext, mCallProfile, callInfo);
+
             ImsCallProfile profile = ImsCallUtils.createCallProfileFromCallInfo(
                     mCallContext, callInfo, mediaInfo);
             setCallInfo(profile);
