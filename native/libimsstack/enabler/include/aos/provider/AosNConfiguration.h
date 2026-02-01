@@ -150,7 +150,6 @@ public:
     IMS_SINT32 GetIpv6MtuSize() const override;
     IMS_SINT32 GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd() const override;
     IMS_SINT32 GetPreferredEmergencyRegistration() const override;
-    IMS_SINT32 GetWaitTimeMillisForReleaseEPdnAfterECallEnd() const override;
     IMS_SINT32 GetEmergencyRegistrationTimerMillis() const override;
     IMS_SINT32 GetImsSignallingDscp() const override;
     IMS_SINT32 GetMaxAllowedNetworkMtu() const override;

@@ -1511,31 +1511,6 @@ TEST_F(AosEApplicationTest, KeepEPdnWhenECallTerminatedOnCellularIfNoIpcanConfig
     EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_TERMINATED));
 }
 
-TEST_F(AosEApplicationTest, ShouldNotStartAppTerminatedTimerWhenECallTerminatedIfWaitTimeIsZero)
-{
-    ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
-            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_NONE));
-    ON_CALL(m_objMockIAosNConfiguration, GetWaitTimeMillisForReleaseEPdnAfterECallEnd())
-            .WillByDefault(Return(0));
-
-    EXPECT_CALL(m_objMockITimer, SetTimer(_, _)).Times(0);
-
-    m_pTestAosEApplication->ProcessECallTerminated();
-}
-
-TEST_F(AosEApplicationTest, StartAppTerminatedTimerWithConfiguredValueWhenECallTerminated)
-{
-    IMS_SINT32 nTime = 240000;
-    ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
-            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_NONE));
-    ON_CALL(m_objMockIAosNConfiguration, GetWaitTimeMillisForReleaseEPdnAfterECallEnd())
-            .WillByDefault(Return(nTime));
-
-    EXPECT_CALL(m_objMockITimer, SetTimer(nTime, _));
-
-    m_pTestAosEApplication->ProcessECallTerminated();
-}
-
 TEST_F(AosEApplicationTest, UpdateConnectedServices)
 {
     EXPECT_EQ(m_pTestAosEApplication->UpdateConnectedServices(IMS_FALSE), 0);

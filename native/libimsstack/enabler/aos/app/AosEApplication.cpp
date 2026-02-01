@@ -767,12 +767,9 @@ PROTECTED VIRTUAL void AosEApplication::ProcessECallTerminated()
         return;
     }
 
-    IMS_SINT32 nDelayTime = IsReleaseEmergencyPdnUponEmergencyCallEnd()
-            ? GET_N_CONFIG(m_nSlotId)->GetSipTimerT1()
-            : GET_N_CONFIG(m_nSlotId)->GetWaitTimeMillisForReleaseEPdnAfterECallEnd();
-    if (nDelayTime > 0)
+    if (IsReleaseEmergencyPdnUponEmergencyCallEnd())
     {
-        StartTimer(TIMER_APP_TERMINATED, nDelayTime);
+        StartTimer(TIMER_APP_TERMINATED, GET_N_CONFIG(m_nSlotId)->GetSipTimerT1());
     }
     else
     {

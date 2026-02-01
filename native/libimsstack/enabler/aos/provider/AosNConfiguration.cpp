@@ -670,11 +670,6 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetPreferredEmergencyRegistration()
     return m_objCarrierConfig.nPreferredEmergencyRegistration;
 }
 
-PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetWaitTimeMillisForReleaseEPdnAfterECallEnd() const
-{
-    return m_objCarrierConfig.nWaitTimeMillisForReleaseEPdnAfterECallEnd;
-}
-
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetEmergencyRegistrationTimerMillis() const
 {
     return m_objCarrierConfig.nEmergencyRegistrationTimerMillis;
@@ -1669,8 +1664,6 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
                     ImsEmergency::KEY_IPCAN_RELEASE_EMERGENCY_PDN_UPON_EMERGENCY_CALL_END_INT);
     m_objCarrierConfig.nPreferredEmergencyRegistration =
             piCc->GetInt(CarrierConfig::ImsEmergency::KEY_PREFERRED_EMERGENCY_REGISTRATION_INT);
-    m_objCarrierConfig.nWaitTimeMillisForReleaseEPdnAfterECallEnd = piCc->GetInt(
-            CarrierConfig::ImsEmergency::KEY_WAIT_TIME_MILLIS_FOR_RELEASE_EPDN_AFTER_ECALL_END_INT);
     /// imssms.
     m_objCarrierConfig.bSupportLimitedAdminSmsMode =
             piCc->GetBoolean(CarrierConfig::ImsSms::KEY_SUPPORT_LIMITED_ADMIN_SMS_MODE_BOOL);

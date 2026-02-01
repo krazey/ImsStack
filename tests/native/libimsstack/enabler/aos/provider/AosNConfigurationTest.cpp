@@ -130,7 +130,6 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(0, m_pAosNConfiguration->GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd());
     EXPECT_EQ(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK,
             m_pAosNConfiguration->GetPreferredEmergencyRegistration());
-    EXPECT_EQ(0, m_pAosNConfiguration->GetWaitTimeMillisForReleaseEPdnAfterECallEnd());
     EXPECT_FALSE(m_pAosNConfiguration->IsSupportLimitedAdminSmsMode());
     EXPECT_TRUE(m_pAosNConfiguration->IsNetworkInitiatedUssdOverImsSupported());
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegistrationPrivateHeader());
@@ -396,13 +395,6 @@ TEST_F(AosNConfigurationTest, InitConfig)
             .WillRepeatedly(
                     Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK));
 
-    EXPECT_CALL(objCarrierConfig,
-            GetInt(CarrierConfig::ImsEmergency::
-                            KEY_WAIT_TIME_MILLIS_FOR_RELEASE_EPDN_AFTER_ECALL_END_INT,
-                    -1))
-            .Times(2)
-            .WillRepeatedly(Return(240000));
-
     /// imssms
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::ImsSms::KEY_SUPPORT_LIMITED_ADMIN_SMS_MODE_BOOL, IMS_FALSE))
@@ -479,7 +471,6 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(0, m_pAosNConfiguration->GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd());
     EXPECT_EQ(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK,
             m_pAosNConfiguration->GetPreferredEmergencyRegistration());
-    EXPECT_EQ(240000, m_pAosNConfiguration->GetWaitTimeMillisForReleaseEPdnAfterECallEnd());
     EXPECT_FALSE(m_pAosNConfiguration->IsSupportLimitedAdminSmsMode());
     EXPECT_TRUE(m_pAosNConfiguration->IsNetworkInitiatedUssdOverImsSupported());
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegistrationPrivateHeader());
@@ -542,7 +533,6 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(0, m_pAosNConfiguration->GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd());
     EXPECT_EQ(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK,
             m_pAosNConfiguration->GetPreferredEmergencyRegistration());
-    EXPECT_EQ(240000, m_pAosNConfiguration->GetWaitTimeMillisForReleaseEPdnAfterECallEnd());
     EXPECT_FALSE(m_pAosNConfiguration->IsSupportLimitedAdminSmsMode());
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegistrationPrivateHeader());
     EXPECT_TRUE(m_pAosNConfiguration->IsNetworkInitiatedUssdOverImsSupported());
