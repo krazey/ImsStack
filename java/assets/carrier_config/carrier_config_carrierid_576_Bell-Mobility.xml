@@ -66,7 +66,7 @@
         <item value="603:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
         <item value="606:2"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT -->
     </string-array>
-    <int name="imsemergency.emergency_ringback_timer_millis_int" value="128000"/>
+    <int name="imsemergency.emergency_ringback_timer_millis_int" value="600000"/>
     <int name="imswfc.country_code_int" value="1"/>
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
         <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->
