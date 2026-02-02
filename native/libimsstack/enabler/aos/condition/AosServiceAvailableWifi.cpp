@@ -197,8 +197,6 @@ PROTECTED VIRTUAL void AosServiceAvailableWifi::NetworkPing_NotifyResult(
 PROTECTED VIRTUAL void AosServiceAvailableWifi::HandleCallStateChanged(
         IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx)
 {
-    A_IMS_TRACE_D(AOSTAG, "HandleCallStateChanged :: nType(%d), nState(%d)", nState, nStateEx, 0);
-
     if (nState == IAosCallTracker::TYPE_NORMAL)
     {
         if (static_cast<CallState>(nStateEx) == CallState::IDLE)

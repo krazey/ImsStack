@@ -93,8 +93,6 @@ void AosServiceAvailable::CleanUp()
 PUBLIC
 void AosServiceAvailable::SetListener(IN IAosServiceAvailableListener* piListener)
 {
-    A_IMS_TRACE_D(AOSTAG, "SetListener :: (%" PFLS_x ") is set", piListener, 0, 0);
-
     if (piListener == IMS_NULL)
     {
         return;
@@ -106,7 +104,6 @@ void AosServiceAvailable::SetListener(IN IAosServiceAvailableListener* piListene
 
         if (piTemp == piListener)
         {
-            A_IMS_TRACE_D(AOSTAG, "Already registered listener", 0, 0, 0);
             return;
         }
     }
@@ -117,8 +114,6 @@ void AosServiceAvailable::SetListener(IN IAosServiceAvailableListener* piListene
 PUBLIC
 void AosServiceAvailable::RemoveListener(IN IAosServiceAvailableListener* piListener)
 {
-    A_IMS_TRACE_D(AOSTAG, "RemoveListener :: (%" PFLS_x ") is set", piListener, 0, 0);
-
     if (piListener == IMS_NULL)
     {
         return;
@@ -217,45 +212,40 @@ PUBLIC IMS_BOOL AosServiceAvailable::IsRoaming()
 }
 
 PROTECTED VIRTUAL void AosServiceAvailable::HandleCallStateChanged(
-        IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx)
+        IN IMS_UINT32 /* nState*/, IN IMS_SINT32 /* nStateEx*/)
 {
-    A_IMS_TRACE_I(AOSTAG, "HandleCallStateChanged :: nState(%d) nStateEx(%d)", nState, nStateEx, 0);
+    // Default no-op; subclasses should override.
 }
 
 PROTECTED VIRTUAL void AosServiceAvailable::HandleNetworkStateChanged()
 {
-    A_IMS_TRACE_I(AOSTAG, "HandleNetworkStateChanged", 0, 0, 0);
+    // Default no-op; subclasses should override.
 }
 
 PRIVATE VIRTUAL void AosServiceAvailable::HandleBlockChanged(
         IN IMS_UINT32 nState, IN IMS_UINT32 nStateEx)
 {
-    A_IMS_TRACE_I(AOSTAG, "HandleBlockChanged :: Reason(%s) - %s",
-            AosBlock::BlockReasonToString(nState), (nStateEx > 0) ? "BLOCK" : "NOT_BLOCK", 0);
+    // Default no-op; subclasses should override.
 }
 
 PROTECTED VIRTUAL void AosServiceAvailable::HandleRoamingChanged(IN IMS_UINT32 nState)
 {
-    A_IMS_TRACE_I(AOSTAG, "HandleRoamingChanged :: nState(%d)", nState, 0, 0);
-
     m_bRoamingState = (nState == IMS_ROAMING_STATE_ON) ? IMS_TRUE : IMS_FALSE;
 }
 
 PROTECTED VIRTUAL void AosServiceAvailable::HandleAirplaneModeChanged(IN IMS_UINT32 nState)
 {
-    A_IMS_TRACE_I(AOSTAG, "HandleAirplaneModeChanged :: nState(%d)", nState, 0, 0);
-
     m_bAirplaneMode = (nState > 0) ? IMS_TRUE : IMS_FALSE;
 }
 
 PROTECTED VIRTUAL void AosServiceAvailable::HandleWifiConnectionChanged()
 {
-    A_IMS_TRACE_I(AOSTAG, "HandleWifiConnectionChanged", 0, 0, 0);
+    // Default no-op; subclasses should override.
 }
 
 PROTECTED VIRTUAL void AosServiceAvailable::HandleLocationInfoChanged()
 {
-    A_IMS_TRACE_I(AOSTAG, "HandleLocationInfoChanged", 0, 0, 0);
+    // Default no-op; subclasses should override.
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosServiceAvailable::CheckServiceAvailable()

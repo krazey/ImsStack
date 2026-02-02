@@ -45,8 +45,6 @@ PUBLIC VIRTUAL AosECondition::~AosECondition()
 PUBLIC VIRTUAL IMS_BOOL AosECondition::IsReady()
 {
     IMS_BOOL bReturn = m_piBlock->IsCleared();
-    A_IMS_TRACE_I(APPPROFILE, "IsReady(%s)", _TRACE_B_(bReturn), 0, 0);
-
     return bReturn;
 }
 
@@ -72,7 +70,7 @@ PROTECTED VIRTUAL void AosECondition::RemoveAosServiceListener()
 PROTECTED VIRTUAL void AosECondition::Block_Changed(IN IMS_UINT32 nType, IN IMS_UINT32 nParam)
 {
     A_IMS_TRACE_I(APPPROFILE, "Block_Changed :: Reason(%s)(%d) - %s",
-            AosBlock::BlockReasonToString(nType), nType, (nParam > 0) ? "BLOCK" : "NOT_BLOCK");
+            AosBlock::BlockReasonToString(nType), nType, (nParam > 0) ? "BLOCK" : "UNBLOCK");
 
     PrintBlockReasons();
 

@@ -107,8 +107,6 @@ PUBLIC VIRTUAL IJniEnablerThread* JniAosService::GetJniThread() const
 
 PRIVATE VIRTUAL void JniAosService::HandleMessage(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
 {
-    IMS_TRACE_D("HandleMessage() MSG=[%d]", nMsg, 0, 0);
-
     switch (nMsg)
     {
         case IIAosService::J2N_REQUEST_REGISTRATION:
