@@ -1444,7 +1444,6 @@ IMS_BOOL UcePublishManager::SetPublish(IN IMS_BOOL bIsRefresh, AString strMinExp
         IMS_TRACE_I("InitPublish:add SIP IF MATCH header with [%s]", m_strEtag.GetStr(), 0, 0);
     }
     SetRefreshPolicy(piMessage, strMinExpiryValue);
-    // check ATT/TMUS live network and equipment test
     piMessage->AddHeader(ISipHeader::ACCEPT_CONTACT, "*;+g.oma.sip-im;explicit;require");
     if (bIsRefresh == INITIAL)
     {
@@ -1561,7 +1560,6 @@ IMS_BOOL UcePublishManager::SetPidfXmlBody(ISipMessage* piMessage)
     const IMS_BYTE* pszXML = reinterpret_cast<const IMS_BYTE*>(m_strPidfXml.GetStr());
     objContent.Attach(pszXML, m_strPidfXml.GetLength());
 
-    // TMO TRD 2020 4Q - GID-MTRREQ-480586
     if (m_bEnablePIDFCompression == IMS_TRUE)
     {
         ByteArray objCompressedContent;
