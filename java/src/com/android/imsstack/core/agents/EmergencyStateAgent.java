@@ -30,6 +30,8 @@ import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.util.ImsLog;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -44,6 +46,7 @@ public class EmergencyStateAgent implements EmergencyStateInterface {
     private Sim.Listener mSimListener;
     private EmergencyModeListener mEmergencyModeListener;
     private final Set<Integer> mEmergencyModes = new CopyOnWriteArraySet<>();
+    private final Map<Integer, Long> mEmergencyCallbackModes = new HashMap<>();
 
     public EmergencyStateAgent(int slotId) {
         mSlotId = slotId;
@@ -85,6 +88,7 @@ public class EmergencyStateAgent implements EmergencyStateInterface {
         }
 
         mEmergencyModes.clear();
+        mEmergencyCallbackModes.clear();
     }
 
     @Override
@@ -106,6 +110,10 @@ public class EmergencyStateAgent implements EmergencyStateInterface {
         return mEmergencyModes.contains(type);
     }
 
+    private boolean isInEmergencyCallbackMode(int type) {
+        return mEmergencyCallbackModes.containsKey(type);
+    }
+
     private void notifyEmergencyModeChanged(
             @TelephonyManager.DomainSelectionEmergencyType int type, boolean entered) {
         for (EmergencyStateListener l : mListeners) {
@@ -124,6 +132,11 @@ public class EmergencyStateAgent implements EmergencyStateInterface {
     private void notifyCurrentStateIfPresent(EmergencyStateListener listener) {
         for (int type : mEmergencyModes) {
             listener.onEmergencyModeChanged(type, true);
+        }
+
+        for (Map.Entry<Integer, Long> entry : mEmergencyCallbackModes.entrySet()) {
+            listener.onEmergencyCallbackModeChanged(
+                    entry.getKey(), EmergencyCallbackModeState.START, entry.getValue());
         }
     }
 
@@ -145,17 +158,28 @@ public class EmergencyStateAgent implements EmergencyStateInterface {
             }
 
             ImsLog.i(this, mSlotId, "handleSimStateChanged: subId=" + subId);
-            mEmergencyModeListener.setSubId(subId);
+            // Do not clear mEmergencyModes or mEmergencyCallbackModes here. Both are managed based
+            // on the SIM slot rather than the Subscription ID; therefore, these states must persist
+            // across Subscription ID changes.
+            mEmergencyModeListener.unregisterCallbacks();
+            mEmergencyModeListener.dispose();
+
+            mEmergencyModeListener = new EmergencyModeListener(subId);
+            mEmergencyModeListener.registerCallbacks();
         }
     }
 
-    private static TelephonyManagerProxy getTelephonyManagerProxy() {
-        return AppContext.getInstance().getSystemServiceProxy(TelephonyManagerProxy.class);
+    private static TelephonyManagerProxy getTelephonyManagerProxy(int subId) {
+        if (!MSimUtils.isValidSubId(subId)) {
+            return AppContext.getInstance().getSystemServiceProxy(TelephonyManagerProxy.class);
+        }
+
+        return AppContext.getTelephonyManagerProxy(subId);
     }
 
     @SuppressLint("HandlerLeak")
     private final class EmergencyModeListener extends Handler {
-        private int mSubId;
+        private final int mSubId;
         private final DomainSelectionEmergencyModeListener mDomainSelectionListener =
                 new DomainSelectionEmergencyModeListener();
         private final EmergencyCallbackModeListener mEmergencyCallbackModeListener =
@@ -169,25 +193,20 @@ public class EmergencyStateAgent implements EmergencyStateInterface {
 
         public void dispose() {
             removeCallbacksAndMessages(null);
-            mEmergencyModes.clear();
         }
 
         public int getSubId() {
             return mSubId;
         }
 
-        public void setSubId(int subId) {
-            mSubId = subId;
-        }
-
         public void registerCallbacks() {
-            TelephonyManagerProxy tmp = getTelephonyManagerProxy();
+            TelephonyManagerProxy tmp = getTelephonyManagerProxy(getSubId());
             tmp.registerTelephonyCallback(this::post, mDomainSelectionListener);
             tmp.registerTelephonyCallback(this::post, mEmergencyCallbackModeListener);
         }
 
         public void unregisterCallbacks() {
-            TelephonyManagerProxy tmp = getTelephonyManagerProxy();
+            TelephonyManagerProxy tmp = getTelephonyManagerProxy(getSubId());
             tmp.unregisterTelephonyCallback(mDomainSelectionListener);
             tmp.unregisterTelephonyCallback(mEmergencyCallbackModeListener);
         }
@@ -202,10 +221,10 @@ public class EmergencyStateAgent implements EmergencyStateInterface {
                     return;
                 }
                 if (isInEmergencyMode(type)) {
-                    ImsLog.d(this, mSlotId, "Same ECM state");
+                    ImsLog.d(this, mSlotId, "Same ECM state: type=" + type);
                     return;
                 }
-                ImsLog.d(this, mSlotId, "onDomainSelectionEmergencyModeEntered: type=" + type
+                ImsLog.i(this, mSlotId, "onDomainSelectionEmergencyModeEntered: type=" + type
                         + ", subId=" + subscriptionId);
                 mEmergencyModes.add(type);
                 notifyEmergencyModeChanged(type, true);
@@ -219,10 +238,10 @@ public class EmergencyStateAgent implements EmergencyStateInterface {
                     return;
                 }
                 if (!isInEmergencyMode(type)) {
-                    ImsLog.d(this, mSlotId, "Same ECM state");
+                    ImsLog.d(this, mSlotId, "Same ECM state: type=" + type);
                     return;
                 }
-                ImsLog.d(this, mSlotId, "onDomainSelectionEmergencyModeExited: type=" + type
+                ImsLog.i(this, mSlotId, "onDomainSelectionEmergencyModeExited: type=" + type
                         + ", subId=" + subscriptionId);
                 mEmergencyModes.remove(type);
                 notifyEmergencyModeChanged(type, false);
@@ -238,9 +257,16 @@ public class EmergencyStateAgent implements EmergencyStateInterface {
                     return;
                 }
 
+                if (isInEmergencyCallbackMode(type)) {
+                    ImsLog.d(this, mSlotId, "Same ECBM state: type=" + type);
+                    return;
+                }
+
                 ImsLog.i(this, mSlotId, "onCallbackModeStarted() type: " + type);
+                long duration = timerDuration.toSeconds();
+                mEmergencyCallbackModes.put(type, duration);
                 notifyEmergencyCallbackModeChanged(
-                        type, EmergencyCallbackModeState.START, timerDuration.toSeconds());
+                        type, EmergencyCallbackModeState.START, duration);
             }
 
             @Override
@@ -252,6 +278,7 @@ public class EmergencyStateAgent implements EmergencyStateInterface {
                 }
 
                 ImsLog.i(this, mSlotId, "onCallbackModeRestarted() type: " + type);
+                mEmergencyCallbackModes.put(type, timerDuration.toSeconds());
                 notifyEmergencyCallbackModeChanged(
                         type, EmergencyCallbackModeState.START, timerDuration.toSeconds());
             }
@@ -266,6 +293,7 @@ public class EmergencyStateAgent implements EmergencyStateInterface {
                 ImsLog.i(this, mSlotId, "onCallbackModeStopped() type: " + type + ",reason: "
                         + reason);
 
+                mEmergencyCallbackModes.remove(type);
                 EmergencyCallbackModeState state = EmergencyCallbackModeState.STOP;
                 if (reason == TelephonyManager.STOP_REASON_OUTGOING_EMERGENCY_CALL_INITIATED
                         || reason == TelephonyManager.STOP_REASON_EMERGENCY_SMS_SENT) {
