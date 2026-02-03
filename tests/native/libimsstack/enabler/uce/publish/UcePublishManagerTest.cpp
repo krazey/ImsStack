@@ -190,7 +190,6 @@ public:
     IMS_UINT32 GetResponseCode() { return GetLastResponseCode(); }
     void SetResponseCode(IMS_UINT32 nCode) { return SetLastResponseCode(nCode); }
 
-    IMS_BOOL GetRegistrationRequested() { return GetRegistrationRecoveryRequested(); }
     void SetRegistrationRequested(IMS_BOOL bRequested)
     {
         SetRegistrationRecoveryRequested(bRequested);
