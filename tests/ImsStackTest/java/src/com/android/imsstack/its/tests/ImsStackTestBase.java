@@ -44,6 +44,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 import android.telephony.ims.feature.CapabilityChangeRequest;
+import android.telephony.imsmedia.ImsMediaManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -92,6 +93,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executors;
 
 /**
  * A test base class to provide common functionalities for each test.
@@ -110,6 +112,8 @@ public class ImsStackTestBase {
     protected static final int APN_IMS = NetworkCapabilities.NET_CAPABILITY_IMS;
     protected static final int APN_DEFAULT = NetworkCapabilities.NET_CAPABILITY_INTERNET;
     protected static final int APN_XCAP = NetworkCapabilities.NET_CAPABILITY_XCAP;
+    protected static final int DEFAULT_TEST_MODE = 4;
+
     /**
      * System property to store the test P-CSCF addresses.
      * Multiple P-CSCF addresses are configured as a comma-separated list.
@@ -133,6 +137,7 @@ public class ImsStackTestBase {
     private final SingleLatch mEventLatch = new SingleLatch("ImsStackTestBase");
     private TestValueInitializer mTestValueInitializer = this::initTestValues;
     private boolean mEnablerStoppable = true;
+    private ImsMediaManager mImsMediaManager;
 
     /**
      * A constant, immutable {@link ApnSetting} configured for IMS (IPv6) over cellular.
@@ -323,6 +328,7 @@ public class ImsStackTestBase {
         Log.i(this, name.getMethodName());
         setUpNetwork(slotId);
         setUpImsService(slotId);
+        setUpImsMedia();
     }
 
     /**
@@ -332,6 +338,10 @@ public class ImsStackTestBase {
      */
     public void tearDownBase(int slotId) {
         clearImsStackState(slotId);
+        if (mImsMediaManager != null) {
+            mImsMediaManager.release();
+            mImsMediaManager = null;
+        }
     }
 
     /**
@@ -621,6 +631,30 @@ public class ImsStackTestBase {
     public void updateCarrierConfig(int slotId, int subId) {
         ServiceCaps.updateServiceCapabilities(AppContext.getInstance(), slotId, subId);
         ServiceLoader.updateCarrierConfig(slotId);
+    }
+
+    private void setUpImsMedia() {
+        if (mImsMediaManager == null) {
+            mImsMediaManager = new ImsMediaManager(AppContext.getInstance(),
+                Executors.newSingleThreadExecutor(), new ImsMediaManager.OnConnectedCallback() {
+                @Override
+                public void onConnected() {
+                    logi(this, "ImsMedia - connected");
+                    if (mImsMediaManager != null) {
+                        mImsMediaManager.setTestMode(DEFAULT_TEST_MODE);
+                        logi(this, "ImsMedia - setTestMode - " + DEFAULT_TEST_MODE);
+                    }
+                }
+
+                @Override
+                public void onDisconnected() {
+                    logi(this, "ImsMedia - disconnected");
+                    if (mImsMediaManager != null) {
+                        mImsMediaManager.setTestMode(0);
+                    }
+                }
+                });
+        }
     }
 
     protected final TelephonyManagerProxyImpl getTelephonyManagerProxy(int subId) {
