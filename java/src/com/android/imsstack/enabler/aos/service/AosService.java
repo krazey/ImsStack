@@ -72,7 +72,6 @@ import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.imsstack.util.LocalLog;
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -638,10 +637,13 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
 
     @Override
     public void onCrossSimStatusChanged(boolean isCrossSimUsed, boolean isNetworkTypeIwlan) {
-        ImsLog.d(mSlotId, "AosService: onCrossSimStatusChanged");
         if (mIsConnectedOverCrossSim == isCrossSimUsed) {
             return;
         }
+
+        ImsLog.d(mSlotId, "AosService: onCrossSimStatusChanged - isCrossSimUsed=" + isCrossSimUsed
+                + ", isNetworkTypeIwlan=" + isNetworkTypeIwlan
+                + ", currentStatus=" + mIsConnectedOverCrossSim);
 
         mIsConnectedOverCrossSim = isCrossSimUsed;
         notifyCrossSimStatus();
@@ -785,16 +787,15 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     private int getPcoValue(byte[] values) {
         int value = PCO_NONE_VALUE;
         if (values == null) {
-            ImsLog.d("PCO Values are null");
             return value;
         }
-        ImsLog.d("PCO values : " + Arrays.toString(values));
+
         switch (values.length) {
             case 1 -> value = values[0];
             case 4 -> value = values[3];
-            default -> ImsLog.i("Invalid PCO values length : " + values.length);
+            default -> ImsLog.d(mSlotId, "Invalid PCO values length : " + values.length);
         }
-        ImsLog.d("Returns PCO value : " + value);
+        ImsLog.d(mSlotId, "Returns PCO value : " + value);
         return value;
     }
 
@@ -1025,7 +1026,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
 
     private void updateAssociatedUriChanged(Uri[] uris) {
         ImsLog.d(mSlotId, "updateAssociatedUriChanged :: URIs : " +
-                java.util.Arrays.toString(uris));
+                ImsLog.hiddenString(java.util.Arrays.toString(uris)));
         mHandler.post(() -> onAssociatedUriChanged(uris));
     }
 
@@ -1048,8 +1049,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     private void notifyRegEventStateChanged(int statusCode, Set<Uri> impus) {
-        ImsLog.d(mSlotId, "notifyRegEventStateChanged :: statusCode(" + statusCode + "), IMPU: "
-                + impus);
+        ImsLog.d(mSlotId, "notifyRegEventStateChanged :: statusCode(" + statusCode
+                + "), IMPU: " + ImsLog.hiddenString(String.valueOf(impus)));
         mHandler.post(() -> onRegEventStateChanged(statusCode, impus));
     }
 
@@ -1272,7 +1273,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                 case IIAosService.N2J_NOTIFY_ASSOCIATED_URI_CHANGED -> {
                     int count = parcel.readInt();
                     if (count <= 0) {
-                        ImsLog.d("No URIs");
+                        ImsLog.d(mSlotId, "No URIs");
                         mLocalLog.log("N2J_NOTIFY_ASSOCIATED_URI_CHANGED: count=0 uris=null");
                         updateAssociatedUriChanged(null);
                         break;

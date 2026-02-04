@@ -433,9 +433,7 @@ void AosSubscriberManager::ConfigureAsDefault()
     {
         SetProvisioned(IMS_TRUE);
 
-        A_IMS_TRACE_I(AOSTAG, "ConfigureAsDefault :: primary IMPU(%s) is provisioned",
-                m_objPuids.GetElementAt(0).GetStr(), 0, 0);
-
+        A_IMS_TRACE_I(AOSTAG, "ConfigureAsDefault :: primary IMPU is provisioned", 0, 0, 0);
         NotifyState(IAosSubscriber::READY);
     }
 }
@@ -827,8 +825,8 @@ IMS_BOOL AosSubscriberManager::ProcessPhoneNumberAvailable()
             return IMS_FALSE;
         }
 
-        A_IMS_TRACE_I(AOSTAG, "ProcessPhoneNumberAvailable :: primary IMPU(%s) is provisioned",
-                strImpu.GetStr(), 0, 0);
+        A_IMS_TRACE_I(
+                AOSTAG, "ProcessPhoneNumberAvailable :: primary IMPU is provisioned", 0, 0, 0);
 
         AString strTemporaryImpu = ImsIdentity::CreateTemporaryPublicUserId(m_nSlotId);
 
@@ -837,8 +835,7 @@ IMS_BOOL AosSubscriberManager::ProcessPhoneNumberAvailable()
             return IMS_FALSE;
         }
 
-        A_IMS_TRACE_I(AOSTAG, "ProcessPhoneNumberAvailable :: temp IMPU(%s) is provisioned",
-                strTemporaryImpu.GetStr(), 0, 0);
+        A_IMS_TRACE_I(AOSTAG, "ProcessPhoneNumberAvailable :: temp IMPU is provisioned", 0, 0, 0);
 
         if (strImpu.EqualsIgnoreCase(strTemporaryImpu))
         {

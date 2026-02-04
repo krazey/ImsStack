@@ -57,15 +57,11 @@ PUBLIC VIRTUAL void AosBlock::SetListener(IN IAosBlockListener* piListener)
 
         if (pTmpListener == piListener)
         {
-            A_IMS_TRACE_D(
-                    APPPROFILE, "SetListener :: (%" PFLS_X ") is already set", piListener, 0, 0);
             return;
         }
     }
 
     m_objListeners.Append(piListener);
-
-    A_IMS_TRACE_D(APPPROFILE, "SetListener :: (%" PFLS_X ") is set", piListener, 0, 0);
 }
 
 PUBLIC VIRTUAL void AosBlock::RemoveListener(IN IAosBlockListener* piListener)
@@ -82,9 +78,6 @@ PUBLIC VIRTUAL void AosBlock::RemoveListener(IN IAosBlockListener* piListener)
         if (pTmpListener == piListener)
         {
             m_objListeners.RemoveAt(i);
-
-            A_IMS_TRACE_D(
-                    APPPROFILE, "RemoveListener :: (%" PFLS_X ") is removed", piListener, 0, 0);
             return;
         }
     }
@@ -103,14 +96,11 @@ PUBLIC VIRTUAL void AosBlock::SetSilentListener(IN IAosBlockSilentListener* piLi
 
         if (pTmpListener == piListener)
         {
-            A_IMS_TRACE_D(APPPROFILE, "SetSilentListener :: (%" PFLS_X ") is already set",
-                    piListener, 0, 0);
             return;
         }
     }
 
     m_objSilentListeners.Append(piListener);
-    A_IMS_TRACE_D(APPPROFILE, "SetSilentListener :: (%" PFLS_X ") is set", piListener, 0, 0);
 }
 
 PUBLIC VIRTUAL void AosBlock::RemoveSilentListener(IN IAosBlockSilentListener* piListener)
@@ -127,9 +117,6 @@ PUBLIC VIRTUAL void AosBlock::RemoveSilentListener(IN IAosBlockSilentListener* p
         if (pTmpListener == piListener)
         {
             m_objSilentListeners.RemoveAt(i);
-
-            A_IMS_TRACE_D(APPPROFILE, "RemoveSilentListener :: (%" PFLS_X ") is removed",
-                    piListener, 0, 0);
             return;
         }
     }
@@ -327,7 +314,7 @@ PUBLIC VIRTUAL IMS_BOOL AosBlock::IsReasonBlocked(IN BLOCK_REASON eReason,
     }
 
     A_IMS_TRACE_D(APPPROFILE, "IsReasonBlocked :: eReason (%s) - (%s)",
-            BlockReasonToString(eReason), bResult ? "BLOCKED" : "NOT_BLOCKED", 0);
+            BlockReasonToString(eReason), _TRACE_B_(bResult), 0);
 
     return bResult;
 }
