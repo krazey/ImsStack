@@ -15,21 +15,9 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Aos -->
-    <int-array name="imsemergency.epdn_reject_causes_for_cross_stack_redial_int_array" num="1">
-        <item value="5"/>
-    </int-array>
-
-    <!-- MTC -->
-    <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
+    <!-- Please always keep this config on the first line. -->
+    <!-- Specifies a list of parent carrier ids from which to inherit configuration values. -->
+    <int-array name="ims.parent_carrier_ids_int_array" num="1">
         <item value="3"/>
-    </int-array>
-    <int-array name="ims.information_level_of_geolocation_pidf_int_array" num="6">
-        <item value="0"/> <!-- NON_EMERGENCY_ON_WIFI -->
-        <item value="1"/> <!-- EMERGENCY_ON_WIFI -->
-        <item value="0"/> <!-- NON_EMERGENCY_ON_CELLULAR -->
-        <item value="1"/> <!-- EMERGENCY_ON_CELLULAR -->
-        <item value="0"/> <!-- NORMAL_ROUTING_EMERGENCY_ON_WIFI -->
-        <item value="0"/> <!-- NORMAL_ROUTING_EMERGENCY_ON_CELLULAR -->
     </int-array>
 </carrier_config>

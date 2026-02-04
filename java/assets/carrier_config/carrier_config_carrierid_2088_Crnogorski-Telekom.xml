@@ -15,12 +15,9 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- MTC -->
-    <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
-        <item value="3"/>
-    </int-array>
-    <int-array name="imsvoice.call_initiation_to_18x_timer_millis_int_array" num="2">
-        <item value="5000"/>
-        <item value="5000"/>
+    <!-- Please always keep this config on the first line. -->
+    <!-- Specifies a list of parent carrier ids from which to inherit configuration values. -->
+    <int-array name="ims.parent_carrier_ids_int_array" num="1">
+        <item value="2363"/>
     </int-array>
 </carrier_config>
