@@ -465,9 +465,7 @@ public class ImsServiceManager {
 
                 mVoLteServiceFeatures[phoneId] = voLteServiceFeatures;
 
-                if (!"KR".equals(ImsPrivateProperties.getSimCountry(phoneId))) {
-                    operatorOrServiceFeaturesChanged = true;
-                }
+                operatorOrServiceFeaturesChanged = true;
             }
         }
 

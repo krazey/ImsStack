@@ -131,7 +131,7 @@ public class ConferenceProxy {
 
     /**
      * Checks if the call is initially extended to the conference call.
-     * e.g. initial call merge, initial conference extension(SKT)
+     * e.g. initial call merge, initial conference extension
      */
     public boolean isInitialConferenceExtension() {
         return mInitialConferenceExtension;

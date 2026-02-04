@@ -85,14 +85,6 @@ public class ImsCallUtils {
      * For call type translation: ImsCallProfile#getVideoStateFromImsCallProfile
      */
     private static final boolean CALL_TYPE_ABBREVIATION = true;
-    /**
-     * For call type conversion from the media information
-     * L-OS: true
-     * M-OS: false
-     * JUMP: true
-     * P-OS: true (AOSP based video state control - CALL_TYPE_VT_NODIR is not used)
-     */
-    private static final boolean CALL_TYPE_OVERRIDE_VT_FROM_MEDIA_INFO = true;
 
     /**
      * Definition of the index as configured in
@@ -125,7 +117,6 @@ public class ImsCallUtils {
     private static final String SOS_SERVICE_URN_MIEC = "urn:service:sos.ecall.manual";
     private static final String SOS_SERVICE_URN_AIEC = "urn:service:sos.ecall.automatic";
     private static final String SOS_SERVICE_URN_GENERIC = "urn:service:sos";
-    //To-Do: Need to check AOSP behaviour.
     // for supplementary Service
     public static final String EXTRA_CDIV_CAUSE = "cdiv_cause";
     //  for Conference disconnect cause
@@ -200,8 +191,9 @@ public class ImsCallUtils {
         }
 
         ImsStreamMediaProfile mediaProfile = ImsCallMediaUtils.getMediaProfileFromMediaInfo(mi);
-        if (CALL_TYPE_OVERRIDE_VT_FROM_MEDIA_INFO
-                && (callType == ImsCallProfile.CALL_TYPE_VT)) {
+        if (callType == ImsCallProfile.CALL_TYPE_VT) {
+            // For video calls, the call type needs to be updated according to the video direction.
+            // CALL_TYPE_VT_NODIR is not used.
             callType = ImsCallMediaUtils.getVideoCallType(mediaProfile);
         }
         ImsCallMediaUtils.updateMediaProfileFromMediaInfoForAudioCodecAttributes(mediaProfile, mi);
