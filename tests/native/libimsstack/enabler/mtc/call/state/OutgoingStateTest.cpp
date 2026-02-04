@@ -866,8 +866,52 @@ TEST_F(OutgoingStateTest, QosReserveFailedDoesNothingCallIfNextActionIsNotReleas
             pOutgoingState->QosReserveFailed(&objSession, QosLossPolicy::MODIFY));
 }
 
+TEST_F(OutgoingStateTest, SessionStartedReturnsOutgoingStateIfNoResponseForUpdate)
+{
+    ON_CALL(objMediaManager, GetNegotiatedDirection(&objSession, MEDIATYPE_AUDIO))
+            .WillByDefault(Return(MEDIA_DIRECTION::MEDIA_DIRECTION_INACTIVE));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_EARLY_UPDATE, -1))
+            .WillByDefault(Return(SipStatusCode::SC_INVALID));
+    MockIMessage objUpdateMessage;
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE))
+            .WillByDefault(Return(&objUpdateMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objUpdateMessage)).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objMtcSession, SendAck);
+
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionStarted(&objSession));
+}
+
+TEST_F(OutgoingStateTest, SessionStartedReturnsOutgoingStateIfNoResponseForPrack)
+{
+    ON_CALL(objMediaManager, GetNegotiatedDirection(&objSession, MEDIATYPE_AUDIO))
+            .WillByDefault(Return(MEDIA_DIRECTION::MEDIA_DIRECTION_INACTIVE));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_EARLY_UPDATE, -1))
+            .WillByDefault(Return(SipStatusCode::SC_INVALID));
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE))
+            .WillByDefault(Return(nullptr));
+    MockIMessage objPrackMessage;
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_PRACK))
+            .WillByDefault(Return(&objPrackMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objPrackMessage)).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objMtcSession, SendAck);
+
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionStarted(&objSession));
+}
+
 TEST_F(OutgoingStateTest, SessionStartedReturnsEstablishedIfNoResponseForPrack)
 {
+    ON_CALL(objMediaManager, GetNegotiatedDirection(&objSession, MEDIATYPE_AUDIO))
+            .WillByDefault(Return(MEDIA_DIRECTION::MEDIA_DIRECTION_SEND_RECEIVE));
     MockIMessage objMessage;
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(&objMessage));
@@ -887,6 +931,8 @@ TEST_F(OutgoingStateTest, SessionStartedReturnsEstablishedIfNoResponseForPrack)
 
 TEST_F(OutgoingStateTest, SessionStartedReturnsEstablishedIfNoResponseForUpdate)
 {
+    ON_CALL(objMediaManager, GetNegotiatedDirection(&objSession, MEDIATYPE_AUDIO))
+            .WillByDefault(Return(MEDIA_DIRECTION::MEDIA_DIRECTION_SEND_RECEIVE));
     MockIMessage objMessage;
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(&objMessage));
@@ -914,6 +960,25 @@ TEST_F(OutgoingStateTest, SessionStartedTerminatesCallIfSdpOaFails)
     ON_CALL(objMessageUtils, GetHeader(_, _, _)).WillByDefault(Return(AString("id")));
     ON_CALL(objMessageUtils, IsHeaderPresent(_, _, _)).WillByDefault(Return(IMS_FALSE));
 
+    EXPECT_CALL(objMtcSession, SendAck);
+    EXPECT_CALL(objMtcSession, Terminate(_, CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE)));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE)));
+
+    EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionStarted(&objSession));
+}
+
+TEST_F(OutgoingStateTest, SessionStartedDoesNotSendAckIfAlreadySent)
+{
+    MockIMessage objAck;
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_ACK)).WillByDefault(Return(&objAck));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
+            .WillByDefault(Return(&objMessage));
+    SetSdpOaFailure(objMessage);
+    ON_CALL(objMessageUtils, GetHeader(_, _, _)).WillByDefault(Return(AString("id")));
+    ON_CALL(objMessageUtils, IsHeaderPresent(_, _, _)).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMtcSession, SendAck).Times(0);
     EXPECT_CALL(objMtcSession, Terminate(_, CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE)));
     EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE)));
 
@@ -1494,6 +1559,24 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdatedInvokesSendEarlyUpdate)
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionEarlyMediaUpdated(&objSession));
 }
 
+TEST_F(OutgoingStateTest, SessionEarlyMediaUpdatedInvokesSessionStartedIfEstablished)
+{
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_EARLY_UPDATE, -1))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+
+    ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_ESTABLISHED));
+
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
+            .WillByDefault(Return(&objMessage));
+    EXPECT_CALL(objUiNotifier, SendStarted);
+
+    EXPECT_EQ(CallStateName::ESTABLISHED, pOutgoingState->SessionEarlyMediaUpdated(&objSession));
+}
+
 TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedReturnsTerminating)
 {
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_EARLY_UPDATE, -1))
@@ -1968,6 +2051,29 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredReturnsOutgoingIf200OkIsAlreadyRe
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL)).Times(0);
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPrackDelivered(&objSession));
+}
+
+TEST_F(OutgoingStateTest, SessionPrackDeliveredInvokesSessionStartedIfEstablished)
+{
+    MockIMessage objMessage;
+    ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, -1))
+            .WillByDefault(Return(SipStatusCode::SC_200));
+    ON_CALL(objMediaManager, GetNegotiationState(&objSession))
+            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+
+    MockISipMessage objSipMessage;
+    ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objInviteMethod));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
+            .WillByDefault(Return(&objMessage));
+
+    EXPECT_CALL(objUiNotifier, SendStarted);
+    EXPECT_EQ(CallStateName::ESTABLISHED, pOutgoingState->SessionPrackDelivered(&objSession));
 }
 
 TEST_F(OutgoingStateTest, SessionPrackDeliveryFailedDoesNothingIfNeedToIgnoreByConfig)
