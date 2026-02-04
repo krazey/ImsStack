@@ -583,7 +583,6 @@ void MessageFormatter::SetCarrierSpecificHeaders()
         if (m_eFormType == FormType::START || m_eFormType == FormType::ACCEPT ||
                 m_eFormType == FormType::UPDATE || m_eFormType == FormType::ACCEPT_UPDATE)
         {
-            IMS_TRACE_D("SetCarrierSpecificHeaders : avchange", 0, 0, 0);
             m_objContext.GetMessageUtils().AddValueIfNotExists(m_piNextMessage,
                     MessageUtil::STR_AVCHANGE, ISipHeader::UNKNOWN,
                     MessageUtil::STR_P_TTA_VOLTE_INFO);

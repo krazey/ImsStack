@@ -702,9 +702,6 @@ PUBLIC ReasonHeaderValue MessageUtils::GetPrioritizedReasonHeader(IN const IMess
 
     for (const auto& strProtocol : lstPrioritizedProtocols)
     {
-        IMS_TRACE_D("GetPrioritizedReasonHeader: Trying protocol [%s]",
-                strProtocol.GetStr() ? strProtocol.GetStr() : "any", 0, 0);
-
         ReasonHeaderValue objValue = GetCauseAndTextFromReasonHeader(piMessage, strProtocol);
 
         if (objValue.nCause != -1 || objValue.strText.GetLength() > 0)
@@ -713,10 +710,13 @@ PUBLIC ReasonHeaderValue MessageUtils::GetPrioritizedReasonHeader(IN const IMess
             objResaultValue.strText = objValue.strText;
             objResaultValue.strProtocol = objValue.strProtocol;
 
+            IMS_TRACE_D("GetPrioritizedReasonHeader: Cause[%d] Text[%s] Protocol[%s]",
+                    objValue.nCause, objValue.strText.GetStr(), objValue.strProtocol.GetStr());
+
             return objResaultValue;
         }
     }
-    IMS_TRACE_D("GetPrioritizedReasonHeader: No matching Reason Header found.", 0, 0, 0);
+
     return objResaultValue;
 }
 
@@ -1252,7 +1252,6 @@ PUBLIC CallType MessageUtils::GetCallTypeFromSdp(IN ISession* piSession,
         }
         else if (pSdpMedia->GetType() == SdpMedia::TYPE_VIDEO)
         {
-            IMS_TRACE_D("GetCallTypeFromSdp : media state [%d]", piMedia->GetState(), 0, 0);
             if (!bActiveMediaOnly || piMedia->GetState() != IMedia::STATE_DELETED)
             {
                 bVideo = IMS_TRUE;
@@ -1260,7 +1259,6 @@ PUBLIC CallType MessageUtils::GetCallTypeFromSdp(IN ISession* piSession,
         }
         else if (pSdpMedia->GetType() == SdpMedia::TYPE_TEXT)
         {
-            IMS_TRACE_D("GetCallTypeFromSdp : media state [%d]", piMedia->GetState(), 0, 0);
             if (!bActiveMediaOnly || piMedia->GetState() != IMedia::STATE_DELETED)
             {
                 bText = IMS_TRUE;
