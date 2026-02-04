@@ -23,9 +23,11 @@ import android.telephony.ims.ImsSsData;
 import android.telephony.ims.ImsSsInfo;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.ims.internal.IImsUt;
 import com.android.ims.internal.IImsUtListener;
+import com.android.imsstack.its.util.SingleLatch;
 import com.android.imsstack.util.Log;
 
 /**
@@ -35,9 +37,11 @@ public final class ImsUtWrapper {
 
     public static final int INVALID_TID = -1;
     private static final String TAG = "ImsUtWrapper";
-
     @NonNull private final IImsUt mIImsUt;
     @NonNull private final IImsUtListenerProxy mImsUtListenerProxy;
+    private volatile ImsCallForwardInfo[] mLastCfInfo = null;
+    private volatile ImsSsInfo[] mLastSsInfo = null;
+    private final SingleLatch mQueryLatch = new SingleLatch("queryLatch");
 
     /** Constructor. */
     public ImsUtWrapper(@NonNull IImsUt imsUt) {
@@ -271,12 +275,50 @@ public final class ImsUtWrapper {
         }
     }
 
+    /**
+     * Retrieves query results for {@link ImsSsInfo}.
+     * The returned array contains information for call waiting and call barring.
+     *
+     * @return A list of {@link ImsSsInfo} for query result
+     */
+    @Nullable public ImsSsInfo[] queryResult() {
+        return mLastSsInfo;
+    }
+
+    /**
+     * Retrieves query results for {@link ImsCallForwardInfo}.
+     *
+     * @return A list of {@link ImsCallForwardInfo}  for query result
+     */
+    @Nullable public ImsCallForwardInfo[] queryCfResult() {
+        return mLastCfInfo;
+    }
+
+    /**
+     * Waits query Result for supplementary service.
+     *
+     * @param timeInMillis The waiting time for query result
+     */
+    public void waitForQueryResult(int timeInMillis) {
+        mQueryLatch.await(timeInMillis);
+    }
+
     private void setUtListener(@NonNull IImsUtListenerProxy listener) throws RemoteException {
         mIImsUt.setListener(listener);
     }
 
     private void loge(String s, Throwable tr) {
         Log.e(TAG, s, tr);
+    }
+
+    private void saveQueryResultAndNotify(ImsSsInfo[] info) {
+        mLastSsInfo = info;
+        mQueryLatch.countDownAndInit();
+    }
+
+    private void saveQueryCfResultAndNotify(ImsCallForwardInfo[] info) {
+        mLastCfInfo = info;
+        mQueryLatch.countDownAndInit();
     }
 
     /**
@@ -299,15 +341,21 @@ public final class ImsUtWrapper {
         public void lineIdentificationSupplementaryServiceResponse(int id, ImsSsInfo config) {}
         @Override
         public void utConfigurationCallBarringQueried(IImsUt ut,
-                int id, ImsSsInfo[] cbInfo) {}
+                int id, ImsSsInfo[] cbInfo) {
+            saveQueryResultAndNotify(cbInfo);
+        }
 
         @Override
         public void utConfigurationCallForwardQueried(IImsUt ut,
-                int id, ImsCallForwardInfo[] cfInfo) {}
+                int id, ImsCallForwardInfo[] cfInfo) {
+            saveQueryCfResultAndNotify(cfInfo);
+        }
 
         @Override
         public void utConfigurationCallWaitingQueried(IImsUt ut,
-                int id, ImsSsInfo[] cwInfo) {}
+                int id, ImsSsInfo[] cwInfo) {
+            saveQueryResultAndNotify(cwInfo);
+        }
 
         @Override
         public void onSupplementaryServiceIndication(ImsSsData ssData) {}
