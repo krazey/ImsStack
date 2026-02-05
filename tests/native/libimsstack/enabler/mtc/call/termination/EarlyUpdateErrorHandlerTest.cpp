@@ -274,3 +274,54 @@ TEST_F(EarlyUpdateErrorHandlerTest, Handle503MessageWithNotCombinedAttachReturns
     EXPECT_EQ(CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, strRetryAfter),
             EarlyUpdateErrorHandler(objContext).Handle(&objMessage));
 }
+
+TEST_F(EarlyUpdateErrorHandlerTest, HandleMessageWithMultipleActionsExecutesFirst)
+{
+    // Clear default actions from SetUp to set a specific multi-action config for this test.
+    objActionSets.Clear();
+
+    // Configure SC_491 with two actions: glare condition first, then terminate dialog.
+    // The handler should execute the first valid action and return immediately.
+    SetActionConfigs(SipStatusCode::SC_491,
+            {ConfigVoice::EARLY_UPDATE_ERROR_ACTION_GLARE_CONDITION,
+                    ConfigVoice::EARLY_UPDATE_ERROR_ACTION_TERMINATE_DIALOG});
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_491));
+    ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+
+    // The expected result should be from the first configured action (glare condition).
+    EXPECT_EQ(CODE_SIP_REQUEST_PENDING,
+            EarlyUpdateErrorHandler(objContext).Handle(&objMessage).nCode);
+}
+
+TEST_F(EarlyUpdateErrorHandlerTest, HandleMessageWithInvalidActionFallsBackToDefault)
+{
+    // Clear default actions from SetUp to ensure a clean configuration.
+    objActionSets.Clear();
+    const IMS_SINT32 BOGUS_ACTION = 999;
+
+    // Configure a status code with an action that does not exist in the action map.
+    SetActionConfigs(SipStatusCode::SC_500, {BOGUS_ACTION});
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_500));
+
+    // Expect the default action (HandleTerminateCall) because the configured action is invalid
+    // and the loop will finish without returning, triggering the fallback handler.
+    EXPECT_EQ(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR, SipStatusCode::SC_500),
+            EarlyUpdateErrorHandler(objContext).Handle(&objMessage));
+}
+
+TEST_F(EarlyUpdateErrorHandlerTest, HandleMessageWithInvalidAndValidActionsExecutesValid)
+{
+    // Clear default actions from SetUp to set a specific config for this test.
+    objActionSets.Clear();
+    const IMS_SINT32 BOGUS_ACTION = 999;
+
+    // Configure with an invalid action, followed by a valid one.
+    // The handler should ignore the invalid action and execute the subsequent valid one.
+    SetActionConfigs(SipStatusCode::SC_408,
+            {BOGUS_ACTION, ConfigVoice::EARLY_UPDATE_ERROR_ACTION_TERMINATE_DIALOG});
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_408));
+
+    // Expect the valid action to be executed.
+    EXPECT_EQ(CallReasonInfo(CODE_INTERNAL_TERMINATE_EARLYDIALOG, SipStatusCode::SC_408),
+            EarlyUpdateErrorHandler(objContext).Handle(&objMessage));
+}
