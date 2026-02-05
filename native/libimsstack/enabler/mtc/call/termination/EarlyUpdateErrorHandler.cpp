@@ -70,7 +70,6 @@ CallReasonInfo EarlyUpdateErrorHandler::Handle(IN const IMessage* piMessage)
 {
     m_eStatusCode = piMessage ? piMessage->GetStatusCode() : SipStatusCode::SC_INVALID;
 
-    IMS_TRACE_I("Handle : StatusCode[%d]", m_eStatusCode, 0, 0);
     ImsVector<IMS_SINT32> objActions = MtcConfigurationResolver::LookupActionForStatusCode(
             m_objContext.GetConfigurationProxy(),
             ConfigVoice::KEY_EARLY_UPDATE_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY, m_eStatusCode);

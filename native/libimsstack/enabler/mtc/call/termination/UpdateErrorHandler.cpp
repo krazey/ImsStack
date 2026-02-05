@@ -65,11 +65,9 @@ CallReasonInfo UpdateErrorHandler::Handle(IN const IMessage* piMessage) const
 {
     if (piMessage == IMS_NULL)
     {
-        IMS_TRACE_I("Handle : piMessage is null", 0, 0, 0);
+        IMS_TRACE_D("Handle : piMessage is null", 0, 0, 0);
         return CallReasonInfo(CODE_SIP_SERVER_ERROR);
     }
-
-    IMS_TRACE_D("Handle : status code[%d]", piMessage->GetStatusCode(), 0, 0);
 
     ImsVector<IMS_SINT32> objActions = MtcConfigurationResolver::LookupActionForStatusCode(
             m_objContext.GetConfigurationProxy(),
@@ -195,7 +193,7 @@ CallReasonInfo UpdateErrorHandler::GetDefaultCallReasonInfo(IN const IMessage& o
             nReasonCode = CODE_SIP_SERVER_ERROR;
         }
     }
-    IMS_TRACE_I("GetDefaultCallReasonInfo [%d]", nReasonCode, 0, 0);
+    IMS_TRACE_D("GetDefaultCallReasonInfo [%d]", nReasonCode, 0, 0);
     return CallReasonInfo(nReasonCode, GetDefaultExtraCode(objMessage));
 }
 
