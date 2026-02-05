@@ -65,7 +65,7 @@ public:
             m_pForkedSession(IMS_NULL)
     {
     }
-    inline ~TestSession()
+    inline ~TestSession() override
     {
         if (m_pForkedSession != IMS_NULL)
         {
@@ -108,7 +108,7 @@ public:
         NotifySipForkedResponse(piScc, piForkedScc);
     }
 
-    inline void DispatchMessageForTest(IN ImsMessage& objMsg)
+    inline void DispatchMessageForTest(IN const ImsMessage& objMsg)
     {
         switch (objMsg.GetName())
         {
@@ -312,7 +312,7 @@ TEST_F(SessionTest, NotifySipForkedResponse)
     m_pSession->SetConfiguration(m_pSession->GetConfiguration() | Session::CONFIG_SUPPORT_PREVIEW);
     m_pSession->NotifySipForkedResponseForTest(&GetScc(), &m_objForkedScc);
 
-    Session* pForkedSession = m_pSession->GetForkedSession();
+    const Session* pForkedSession = m_pSession->GetForkedSession();
     ASSERT_TRUE(pForkedSession != IMS_NULL);
     ASSERT_EQ(m_pSession->GetConfiguration(), pForkedSession->GetConfiguration());
 }
