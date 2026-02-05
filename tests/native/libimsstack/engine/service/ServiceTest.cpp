@@ -38,10 +38,10 @@ class ServiceTest : public ::testing::Test
 public:
     inline ServiceTest() :
             m_pThreadService(new TestThreadService()),
-            m_pCoreService(IMS_NULL)
+            m_pCoreService(IMS_NULL),
+            m_nPortS(39001),
+            m_strUserInfo("1234")
     {
-        m_strUserInfo = "1234";
-        m_nPortS = 39001;
         AString strIpAddr("192.168.0.1");
         m_objIpAddress.Parse(strIpAddr);
         AString strContactAddress;
