@@ -131,7 +131,7 @@ CallReasonInfo EmergencyStartErrorHandler::Handle(IN const IMessage* piMessage) 
         }
     }
 
-    IMS_TRACE_I("Default action : CSFB for [%d]", nStatusCode, 0, 0);
+    IMS_TRACE_D("Default action : CSFB for [%d]", nStatusCode, 0, 0);
     return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY);
 }
 
@@ -159,7 +159,7 @@ PRIVATE
 CallReasonInfo EmergencyStartErrorHandler::HandleSilentReinviteWithNextPcscfIfEpdn(
         IN [[maybe_unused]] const IMessage* piMessage) const
 {
-    IMS_TRACE_I("HandleSilentReinviteWithNextPcscfIfEpdn", 0, 0, 0);
+    IMS_TRACE_D("HandleSilentReinviteWithNextPcscfIfEpdn", 0, 0, 0);
     if (!m_objContext.GetService().IsEmergency())
     {
         return CallReasonInfo(CODE_NONE);
@@ -182,7 +182,7 @@ PRIVATE
 CallReasonInfo EmergencyStartErrorHandler::HandleSilentReinviteByRetryAfter(
         IN const IMessage* piMessage) const
 {
-    IMS_TRACE_I("HandleSilentReinviteByRetryAfter", 0, 0, 0);
+    IMS_TRACE_D("HandleSilentReinviteByRetryAfter", 0, 0, 0);
     IMS_SINT32 nRetryAfterInSeconds = m_objContext.GetMessageUtils().GetHeaderValueInt(
             piMessage, ISipHeader::RETRY_AFTER_ANY);
     if (nRetryAfterInSeconds > 0)
@@ -199,7 +199,7 @@ PRIVATE
 CallReasonInfo EmergencyStartErrorHandler::HandleSilentReinviteAsVoipByRttRejection(
         IN [[maybe_unused]] const IMessage* piMessage) const
 {
-    IMS_TRACE_I("HandleSilentReinviteAsVoipByRttRejection", 0, 0, 0);
+    IMS_TRACE_D("HandleSilentReinviteAsVoipByRttRejection", 0, 0, 0);
     if (m_objContext.GetSession(&m_objSession)->GetCallType() != CallType::RTT)
     {
         return CallReasonInfo(CODE_NONE);
@@ -212,7 +212,7 @@ PRIVATE
 CallReasonInfo EmergencyStartErrorHandler::HandleSilentReinviteWithAnonymousByNetworkRejection(
         IN [[maybe_unused]] const IMessage* piMessage) const
 {
-    IMS_TRACE_I("HandleSilentReinviteWithAnonymousByNetworkRejection", 0, 0, 0);
+    IMS_TRACE_D("HandleSilentReinviteWithAnonymousByNetworkRejection", 0, 0, 0);
     const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
     const IMS_UINT32 nAosRegistrationMode =
             pAosConnector ? pAosConnector->GetRegistrationMode() : IImsAosInfo::REG_MODE_INTERNAL;
@@ -230,7 +230,7 @@ PRIVATE
 CallReasonInfo EmergencyStartErrorHandler::HandleSilentReinviteCrossSimByTempFailure(
         IN [[maybe_unused]] const IMessage* piMessage) const
 {
-    IMS_TRACE_I("HandleSilentReinviteCrossSimByTempFailure", 0, 0, 0);
+    IMS_TRACE_D("HandleSilentReinviteCrossSimByTempFailure", 0, 0, 0);
     return IsCrossSimRedialAvailable() ? CallReasonInfo(CODE_EMERGENCY_TEMP_FAILURE)
                                        : CallReasonInfo(CODE_NONE);
 }
@@ -239,7 +239,7 @@ PRIVATE
 CallReasonInfo EmergencyStartErrorHandler::HandleSilentReinviteCrossSimByPermFailure(
         IN [[maybe_unused]] const IMessage* piMessage) const
 {
-    IMS_TRACE_I("HandleSilentReinviteCrossSimByPermFailure", 0, 0, 0);
+    IMS_TRACE_D("HandleSilentReinviteCrossSimByPermFailure", 0, 0, 0);
     return IsCrossSimRedialAvailable() ? CallReasonInfo(CODE_EMERGENCY_PERM_FAILURE)
                                        : CallReasonInfo(CODE_NONE);
 }
@@ -247,7 +247,7 @@ CallReasonInfo EmergencyStartErrorHandler::HandleSilentReinviteCrossSimByPermFai
 PRIVATE
 CallReasonInfo EmergencyStartErrorHandler::HandleTerminate(IN const IMessage* piMessage) const
 {
-    IMS_TRACE_I("HandleTerminate", 0, 0, 0);
+    IMS_TRACE_D("HandleTerminate", 0, 0, 0);
     const IMS_SINT32 nStatusCode = GetStatusCode(piMessage);
 
     AString strRequiredReasonText =
@@ -272,7 +272,7 @@ PRIVATE
 CallReasonInfo EmergencyStartErrorHandler::HandleSilentReinviteToAlternatePcscfOnce(
         IN [[maybe_unused]] const IMessage* piMessage) const
 {
-    IMS_TRACE_I("HandleSilentReinviteToAlternatePcscfOnce", 0, 0, 0);
+    IMS_TRACE_D("HandleSilentReinviteToAlternatePcscfOnce", 0, 0, 0);
     return HandleSilentReinviteToAlternatePcscfInternal(EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF_ONCE);
 }
 
@@ -280,7 +280,7 @@ PRIVATE
 CallReasonInfo EmergencyStartErrorHandler::HandleSilentReinviteToAlternatePcscf(
         IN [[maybe_unused]] const IMessage* piMessage) const
 {
-    IMS_TRACE_I("HandleSilentReinviteToAlternatePcscf", 0, 0, 0);
+    IMS_TRACE_D("HandleSilentReinviteToAlternatePcscf", 0, 0, 0);
     return HandleSilentReinviteToAlternatePcscfInternal(EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF);
 }
 
