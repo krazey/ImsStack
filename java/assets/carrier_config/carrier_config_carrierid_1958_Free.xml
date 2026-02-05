@@ -17,4 +17,25 @@
 <carrier_config>
     <!-- imssms. -->
     <boolean name="imssms.support_sms_capability_in_wifi_roaming_bool" value="false"/>
+
+    <!-- Mtc -->
+    <string-array name="imsvoice.reject_code_and_action_set_string_array" num="17">
+        <item value="300:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="301:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="302:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="305:5"/> <!-- REDIRECTION_BY_CONTACT -->
+        <item value="380:6,0"/> <!-- NON_UE_DETECTABLE_EMERGENCY_CALL, CSFB  -->
+        <item value="403:0"/> <!-- START_ERROR_ACTION_CSFB  -->
+        <item value="404:3,9"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, USSI_CSFB -->
+        <item value="413:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="480:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="486:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="488:2,17"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT, START_ERROR_ACTION_SILENT_REINVITE_WITH_AUDIO -->
+        <item value="500:0"/> <!-- START_ERROR_ACTION_CSFB -->
+        <item value="503:0"/> <!-- START_ERROR_ACTION_CSFB -->
+        <item value="504:4"/> <!-- REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY -->
+        <item value="600:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="603:3"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="606:2"/> <!-- SILENT_REINVITE_BY_SDP_CONTENT -->
+    </string-array>
 </carrier_config>
