@@ -18,6 +18,8 @@ package com.android.imsstack.system;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.imsstack.util.Log;
+
 public class IpSecSaPolicy implements Parcelable {
     public static final int DIRECTION_IN = 0;
     public static final int DIRECTION_OUT = 1;
@@ -76,7 +78,7 @@ public class IpSecSaPolicy implements Parcelable {
         sb.append("spi=0x");
         sb.append(Integer.toHexString(mSpi));
         sb.append("(");
-        sb.append(mSpi);
+        sb.append(Integer.toUnsignedString(mSpi, 10));
         sb.append(")");
         sb.append(", direction=");
         sb.append(mDirection == 0 ? "IN" : "OUT");
@@ -85,7 +87,7 @@ public class IpSecSaPolicy implements Parcelable {
         sb.append(", localIp=");
         sb.append(mLocalIp);
         sb.append(", remoteIp=");
-        sb.append(mRemoteIp);
+        sb.append(Log.pii(mRemoteIp));
         sb.append(" ]");
 
         return sb.toString();

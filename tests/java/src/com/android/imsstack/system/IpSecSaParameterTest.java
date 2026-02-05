@@ -17,7 +17,13 @@
 package com.android.imsstack.system;
 
 import static com.android.imsstack.system.IpSecSaParameter.ENCRYPTION_ALGORITHM_AES_CBC;
+import static com.android.imsstack.system.IpSecSaParameter.ENCRYPTION_ALGORITHM_AES_GCM;
+import static com.android.imsstack.system.IpSecSaParameter.ENCRYPTION_ALGORITHM_DES_EDE3_CBC;
+import static com.android.imsstack.system.IpSecSaParameter.ENCRYPTION_ALGORITHM_NULL;
+import static com.android.imsstack.system.IpSecSaParameter.INTEGRITY_ALGORITHM_AES_GMAC;
+import static com.android.imsstack.system.IpSecSaParameter.INTEGRITY_ALGORITHM_HMAC_MD5_96;
 import static com.android.imsstack.system.IpSecSaParameter.INTEGRITY_ALGORITHM_HMAC_SHA_1_96;
+import static com.android.imsstack.system.IpSecSaParameter.INTEGRITY_ALGORITHM_NULL;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -98,5 +104,33 @@ public class IpSecSaParameterTest {
         IpSecSaParameter[] saParameters = IpSecSaParameter.CREATOR.newArray(2);
 
         assertEquals(2, saParameters.length);
+    }
+
+    @Test
+    @SmallTest
+    public void testIntegrityAlgorithmToString() {
+        assertEquals("aes-gmac",
+                IpSecSaParameter.integrityAlgorithmToString(INTEGRITY_ALGORITHM_AES_GMAC));
+        assertEquals("hmac-md5-96",
+                IpSecSaParameter.integrityAlgorithmToString(INTEGRITY_ALGORITHM_HMAC_MD5_96));
+        assertEquals("hmac-sha-1-96",
+                IpSecSaParameter.integrityAlgorithmToString(INTEGRITY_ALGORITHM_HMAC_SHA_1_96));
+        assertEquals("null",
+                IpSecSaParameter.integrityAlgorithmToString(INTEGRITY_ALGORITHM_NULL));
+        assertEquals("unknown", IpSecSaParameter.integrityAlgorithmToString(100));
+    }
+
+    @Test
+    @SmallTest
+    public void testEncryptionAlgorithmToString() {
+        assertEquals("aes-cbc",
+                IpSecSaParameter.encryptionAlgorithmToString(ENCRYPTION_ALGORITHM_AES_CBC));
+        assertEquals("aes-gcm",
+                IpSecSaParameter.encryptionAlgorithmToString(ENCRYPTION_ALGORITHM_AES_GCM));
+        assertEquals("des-ede3-cbc",
+                IpSecSaParameter.encryptionAlgorithmToString(ENCRYPTION_ALGORITHM_DES_EDE3_CBC));
+        assertEquals("null",
+                IpSecSaParameter.encryptionAlgorithmToString(ENCRYPTION_ALGORITHM_NULL));
+        assertEquals("unknown", IpSecSaParameter.encryptionAlgorithmToString(100));
     }
 }
