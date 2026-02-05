@@ -465,9 +465,7 @@ public class ImsServiceManager {
 
                 mVoLteServiceFeatures[phoneId] = voLteServiceFeatures;
 
-                if (!"KR".equals(ImsPrivateProperties.getSimCountry(phoneId))) {
-                    operatorOrServiceFeaturesChanged = true;
-                }
+                operatorOrServiceFeaturesChanged = true;
             }
         }
 
@@ -575,11 +573,11 @@ public class ImsServiceManager {
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-IMPL] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 
     private static void logi(String s) {
-        ImsLog.i("[GII-IMPL] " + s);
+        ImsLog.i("[ISIL] " + s);
     }
 
     protected class ImsServiceListener implements ImsStackRegistry.ImsServiceListener {

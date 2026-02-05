@@ -762,11 +762,11 @@ public final class ConferenceInfo {
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-CALL] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 
     private static void logi(String s) {
-        ImsLog.i("[GII-CALL] " + s);
+        ImsLog.i("[ISIL] " + s);
     }
 
     private static String dbgLog(String s) {

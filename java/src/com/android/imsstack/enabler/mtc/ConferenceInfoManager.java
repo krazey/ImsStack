@@ -123,6 +123,6 @@ public final class ConferenceInfoManager {
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-CALL] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 }

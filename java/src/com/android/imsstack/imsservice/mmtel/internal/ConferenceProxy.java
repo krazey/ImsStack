@@ -131,7 +131,7 @@ public class ConferenceProxy {
 
     /**
      * Checks if the call is initially extended to the conference call.
-     * e.g. initial call merge, initial conference extension(SKT)
+     * e.g. initial call merge, initial conference extension
      */
     public boolean isInitialConferenceExtension() {
         return mInitialConferenceExtension;
@@ -325,19 +325,19 @@ public class ConferenceProxy {
     }
 
     protected static void log(String s) {
-        ImsLog.d("[GII-IMPL] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 
     protected static void loge(String s, Throwable t) {
         if (t == null) {
-            ImsLog.e("[GII-IMPL] " + s);
+            ImsLog.e("[ISIL] " + s);
         } else {
-            ImsLog.e("[GII-IMPL] " + s, t);
+            ImsLog.e("[ISIL] " + s, t);
         }
     }
 
     protected static void logi(String s) {
-        ImsLog.i("[GII-IMPL] " + s);
+        ImsLog.i("[ISIL] " + s);
     }
 
     protected static String dbgLog(String[] s) {

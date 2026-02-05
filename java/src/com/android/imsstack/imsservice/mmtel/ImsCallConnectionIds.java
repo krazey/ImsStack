@@ -39,7 +39,7 @@ public final class ImsCallConnectionIds {
         List<Integer> callConnectionIds = getConnectionIds(slotId);
 
         if (callConnectionIds == null) {
-            ImsLog.d("[GII-IMPL] No call connection ids");
+            ImsLog.d("[ISIL] No call connection ids");
             return 1;
         }
 
@@ -65,7 +65,7 @@ public final class ImsCallConnectionIds {
             List<Integer> callConnectionIds = getConnectionIds(slotId);
 
             if (callConnectionIds == null) {
-                ImsLog.d("[GII-IMPL] No call connection ids");
+                ImsLog.d("[ISIL] No call connection ids");
                 return;
             }
 
@@ -83,7 +83,7 @@ public final class ImsCallConnectionIds {
             List<Integer> callConnectionIds = getConnectionIds(slotId);
 
             if (callConnectionIds == null) {
-                ImsLog.d("[GII-IMPL] No call connection ids");
+                ImsLog.d("[ISIL] No call connection ids");
                 return;
             }
 
@@ -99,7 +99,7 @@ public final class ImsCallConnectionIds {
         List<Integer> callConnectionIds = getConnectionIds(slotId);
 
         if (callConnectionIds == null) {
-            ImsLog.d("[GII-IMPL] No call connection ids");
+            ImsLog.d("[ISIL] No call connection ids");
             return;
         }
 
@@ -118,7 +118,7 @@ public final class ImsCallConnectionIds {
     }
 
     private static void displayCallConnectionIds(List<Integer> ids, String tag) {
-        ImsLog.d("[GII-IMPL] ImsCallConnectionIds :: "
+        ImsLog.d("[ISIL] ImsCallConnectionIds :: "
                 + tag + " - " + ids.toString());
     }
 

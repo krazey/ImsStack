@@ -1676,15 +1676,15 @@ public class MtcCall extends Call implements ConferenceTracker {
     }
 
     private void log(String s) {
-        ImsLog.d("[GII-MTC][" + getLogTag() + "] " + s);
+        ImsLog.d("[ISIL][" + getLogTag() + "] " + s);
     }
 
     private void loge(String s) {
-        ImsLog.e("[GII-MTC][" + getLogTag() + "] " + s);
+        ImsLog.e("[ISIL][" + getLogTag() + "] " + s);
     }
 
     private void logi(String s) {
-        ImsLog.i("[GII-MTC][" + getLogTag() + "] " + s);
+        ImsLog.i("[ISIL][" + getLogTag() + "] " + s);
     }
 
     /**

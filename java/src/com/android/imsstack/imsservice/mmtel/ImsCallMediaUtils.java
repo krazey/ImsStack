@@ -260,7 +260,7 @@ public class ImsCallMediaUtils {
     }
 
     public static int getVideoCallType(ImsStreamMediaProfile profile) {
-        // P-OS: CALL_TYPE_VT_NODIR is not used for video state control
+        // CALL_TYPE_VT_NODIR is not used for video state control
         if (profile != null) {
             if (profile.getVideoDirection() == ImsStreamMediaProfile.DIRECTION_RECEIVE) {
                 return ImsCallProfile.CALL_TYPE_VT_RX;
@@ -310,7 +310,6 @@ public class ImsCallMediaUtils {
     }
 
     public static int getDirectionFromGTTMode(int gttMode) {
-        // VZW requires "sendrecv" direction if TTY is enabled
         switch (gttMode) {
         case MediaInfo.GTTMODE_FULL:
             return MediaInfo.DIRECTION_SEND_RECEIVE;

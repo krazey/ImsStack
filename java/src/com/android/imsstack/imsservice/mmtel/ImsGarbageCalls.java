@@ -123,7 +123,7 @@ public class ImsGarbageCalls {
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-IMPL] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 
     private static class Call {

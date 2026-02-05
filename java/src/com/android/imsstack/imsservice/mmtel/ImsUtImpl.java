@@ -463,7 +463,7 @@ public final class ImsUtImpl extends ImsUtImplBase {
     }
 
     private void log(Throwable t, String message) {
-        ImsLog.e(mContext.getSlotId(), "[GII-IMPL] " + message + t, t);
+        ImsLog.e(mContext.getSlotId(), "[ISIL] " + message + t, t);
 
         if (t instanceof DeadObjectException) {
             mListener = null;
@@ -471,7 +471,7 @@ public final class ImsUtImpl extends ImsUtImplBase {
     }
 
     private void log(String s) {
-        ImsLog.d(mContext.getSlotId(), "[GII-IMPL] " + s);
+        ImsLog.d(mContext.getSlotId(), "[ISIL] " + s);
     }
 
     private class UtListenerProxy implements IUtListener {

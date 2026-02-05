@@ -767,7 +767,7 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
             parcel.recycle();
             parcel = null;
 
-            ImsLog.e("[GII-MTC] Media session is already closed");
+            ImsLog.e("[ISIL] Media session is already closed");
             return;
         }
 
@@ -855,7 +855,7 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-MTC] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 
     @VisibleForTesting

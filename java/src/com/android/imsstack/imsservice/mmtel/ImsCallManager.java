@@ -696,19 +696,19 @@ public class ImsCallManager {
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-IMPL] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 
     private static void loge(String s, Throwable t) {
         if (t == null) {
-            ImsLog.e("[GII-IMPL] " + s);
+            ImsLog.e("[ISIL] " + s);
         } else {
-            ImsLog.e("[GII-IMPL] " + s, t);
+            ImsLog.e("[ISIL] " + s, t);
         }
     }
 
     private static void logi(String s) {
-        ImsLog.i("[GII-IMPL] " + s);
+        ImsLog.i("[ISIL] " + s);
     }
 
     protected class WifiCallWakeLock implements ImsStateStore.Listener {

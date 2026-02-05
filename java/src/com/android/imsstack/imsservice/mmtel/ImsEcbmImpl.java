@@ -67,11 +67,11 @@ public final class ImsEcbmImpl extends ImsEcbmImplBase {
     }
 
     private void loge(Throwable t, String message) {
-        ImsLog.e("[GII-IMPL] " + message + t, t);
+        ImsLog.e("[ISIL] " + message + t, t);
     }
 
     private static void logi(String s) {
-        ImsLog.i("[GII-IMPL] " + s);
+        ImsLog.i("[ISIL] " + s);
     }
 
     private class EcbmListenerProxy implements EcbmListener {

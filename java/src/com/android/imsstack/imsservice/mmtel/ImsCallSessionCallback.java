@@ -751,15 +751,15 @@ public class ImsCallSessionCallback {
         if (t instanceof DeadObjectException) {
             mListener = null;
         } else if (mListener != null) {
-            ImsLog.e("[GII-IMPL] " + message + t.getMessage(), t);
+            ImsLog.e("[ISIL] " + message + t.getMessage(), t);
         }
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-IMPL] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 
     private static void logi(String s) {
-        ImsLog.i("[GII-IMPL] " + s);
+        ImsLog.i("[ISIL] " + s);
     }
 }

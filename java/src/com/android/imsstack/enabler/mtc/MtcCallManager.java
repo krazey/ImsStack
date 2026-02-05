@@ -620,11 +620,11 @@ public final class MtcCallManager implements ICallStateTracker, IMtcCallManager 
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-MTC] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 
     private static void logi(String s) {
-        ImsLog.i("[GII-MTC] " + s);
+        ImsLog.i("[ISIL] " + s);
     }
 
     private static class CallNode {

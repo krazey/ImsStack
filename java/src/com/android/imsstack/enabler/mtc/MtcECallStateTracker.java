@@ -406,11 +406,11 @@ public class MtcECallStateTracker implements IECallStateTracker {
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-MTC] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 
     private static void logi(String s) {
-        ImsLog.i("[GII-MTC] " + s);
+        ImsLog.i("[ISIL] " + s);
     }
 
     private boolean sendEmptyMessage(int what) {

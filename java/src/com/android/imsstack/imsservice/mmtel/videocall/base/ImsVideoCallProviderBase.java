@@ -307,11 +307,11 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
     }
 
     protected static void log(String s) {
-        ImsLog.d("[GII-IMPL] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 
     protected static void logi(String s) {
-        ImsLog.i("[GII-IMPL] " + s);
+        ImsLog.i("[ISIL] " + s);
     }
 
     private class MtcMediaSessionListenerProxy extends MtcMediaSession.VideoListener {

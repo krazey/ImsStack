@@ -159,11 +159,11 @@ public final class SrvccStateTracker implements ISrvccStateTracker {
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-IMPL] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 
     private static void logi(String s) {
-        ImsLog.i("[GII-IMPL] " + s);
+        ImsLog.i("[ISIL] " + s);
     }
 
     private final class VoLteServiceStateListener implements ImsPhoneStateListener {

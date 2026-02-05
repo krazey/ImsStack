@@ -653,7 +653,7 @@ public class ImsRegistrationTracker {
     }
 
     private static void logi(String s) {
-        ImsLog.i("[GII-IMPL] " + s);
+        ImsLog.i("[ISIL] " + s);
     }
 
     private void addNetWatcherListener() {

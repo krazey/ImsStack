@@ -343,15 +343,15 @@ public final class ConferenceInfoHelper {
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-CALL] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 
     private static void loge(String s) {
-        ImsLog.e("[GII-CALL] " + s);
+        ImsLog.e("[ISIL] " + s);
     }
 
     private static void logi(String s) {
-        ImsLog.i("[GII-CALL] " + s);
+        ImsLog.i("[ISIL] " + s);
     }
 
     private static String dbgLog(String s) {

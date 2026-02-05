@@ -153,10 +153,10 @@ public final class ImsConferenceHelper implements ConferenceProxy.DisposalCallba
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-IMPL] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 
     private static void loge(String s) {
-        ImsLog.e("[GII-IMPL] " + s);
+        ImsLog.e("[ISIL] " + s);
     }
 }

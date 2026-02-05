@@ -767,14 +767,14 @@ public final class ImsVideoCallSession implements IVideoCallSession {
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-IMPL] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 
     private static void logi(String s) {
-        ImsLog.i("[GII-IMPL] " + s);
+        ImsLog.i("[ISIL] " + s);
     }
 
     private void loge(String message, Throwable t) {
-        ImsLog.e("[GII-IMPL] " + message, t);
+        ImsLog.e("[ISIL] " + message, t);
     }
 }

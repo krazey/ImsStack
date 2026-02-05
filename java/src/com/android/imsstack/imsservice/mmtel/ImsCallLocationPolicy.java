@@ -252,7 +252,7 @@ public final class ImsCallLocationPolicy implements ICallLocationPolicy {
     }
 
     private static void logi(String s) {
-        ImsLog.i("[GII-IMPL] " + s);
+        ImsLog.i("[ISIL] " + s);
     }
 
     @VisibleForTesting

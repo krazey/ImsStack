@@ -456,15 +456,15 @@ public class MtcApp implements Closeable {
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-MTC] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 
     private static void loge(String s) {
-        ImsLog.e("[GII-MTC] " + s);
+        ImsLog.e("[ISIL] " + s);
     }
 
     private static void logi(String s) {
-        ImsLog.i("[GII-MTC] " + s);
+        ImsLog.i("[ISIL] " + s);
     }
 
     private class JNIImsListenerProxy implements JniImsListener {

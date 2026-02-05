@@ -175,6 +175,6 @@ public class RcsFeatureImpl extends RcsFeature {
     }
 
     private static void logi(String s) {
-        ImsLog.i("[GII-IMPL] " + s);
+        ImsLog.i("[ISIL] " + s);
     }
 }

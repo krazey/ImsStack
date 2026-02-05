@@ -183,7 +183,7 @@ public class ImsServiceController {
     }
 
     private static void logi(Object o, String s) {
-        Log.i(o, "[GII-IMPL] " + s);
+        Log.i(o, "[ISIL] " + s);
     }
 
     public RcsFeature getRcsFeature(int slotId) {
