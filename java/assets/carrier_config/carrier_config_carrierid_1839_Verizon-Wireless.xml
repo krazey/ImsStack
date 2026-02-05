@@ -408,6 +408,7 @@
     </int-array>
     <boolean name="imsvoice.media_recvonly_early_session_bool" value="false"/>
     <boolean name="imsvoice.codec_based_dynamic_as_enabled_bool" value="false"/>
+    <int name="imsvt.video_iframe_interval_sec_int" value="1"/>
     <int name="imsvt.video_cvo_value_int" value="4"/>
     <int name="imsvt.video_sdp_offer_cap_nego_for_avpf_int" value="1"/>
     <int name="imsvt.video_avpf_feature_int" value="30"/>

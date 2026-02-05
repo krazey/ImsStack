@@ -54,6 +54,7 @@
     <boolean name="imsvt.video_codec_hevc_priority_order_bool" value="true"/>
     <boolean name="imsvoice.audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
     <boolean name="imsvoice.audio_show_codec_attribute_dtx_bool" value="false"/>
+    <int name="imsvt.video_iframe_interval_sec_int" value="1"/>
     <int name="imsvt.video_cvo_value_int" value="4"/>
     <int name="imsvt.video_sdp_offer_cap_nego_for_avpf_int" value="0"/>
     <int name="imsvt.video_avpf_feature_int" value="30"/>
