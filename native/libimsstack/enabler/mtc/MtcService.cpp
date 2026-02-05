@@ -87,13 +87,15 @@ MtcService::MtcService(IN IMtcContext& objContext, IN ServiceType eType) :
         m_objSsacTimerHandler(SsacTimerHandler(m_objContext)),
         m_pPermanentSuppService(std::make_unique<MtcPermanentSupplementaryService>())
 {
-    IMS_TRACE_I("+MtcService [slot_%d][type:%d]", m_objContext.GetSlotId(), m_eType, 0);
+    IMS_TRACE_I(
+            "+MtcService [%d]emergency:%s", m_objContext.GetSlotId(), _TRACE_B_(IsEmergency()), 0);
     Init();
 }
 
 PUBLIC VIRTUAL MtcService::~MtcService()
 {
-    IMS_TRACE_I("~MtcService [slot_%d][type:%d]", m_objContext.GetSlotId(), m_eType, 0);
+    IMS_TRACE_I(
+            "~MtcService [%d]emergency:%s", m_objContext.GetSlotId(), _TRACE_B_(IsEmergency()), 0);
 
     if (m_eType == ServiceType::NORMAL)
     {
@@ -240,7 +242,6 @@ PUBLIC VIRTUAL IJniMtcServiceThread* MtcService::GetJniServiceThread() const
 
 PUBLIC VIRTUAL void MtcService::UpdateSrvccState(IN SrvccState eState)
 {
-    IMS_TRACE_I("UpdateSrvccState", 0, 0, 0);
     m_pSrvccStateManager->UpdateSrvccState(eState);
     if (m_eType == ServiceType::NORMAL)
     {
@@ -337,7 +338,7 @@ PUBLIC VIRTUAL void MtcService::CoreService_CapabilityQueryReceived(
 
 PUBLIC VIRTUAL void MtcService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan)
 {
-    IMS_TRACE_I("ImsAos_Connected ipcan[%d]", nIpcan, 0, 0);
+    IMS_TRACE_I("ImsAos_Connected emergency[%s], ipcan[%d]", _TRACE_B_(IsEmergency()), nIpcan, 0);
     SetStatus(ServiceStatus::SERVICE_ACTIVE);
     m_bCrossSimConnected = m_pAosConnector->IsCrossSimConnected();
     if (!IsEmergency())
@@ -352,12 +353,17 @@ PUBLIC VIRTUAL void MtcService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS
 
 PUBLIC VIRTUAL void MtcService::ImsAos_Disconnecting(IN IMS_UINT32 nReason)
 {
+    IMS_TRACE_I(
+            "ImsAos_Disconnecting emergency[%s] nReason[%d]", _TRACE_B_(IsEmergency()), nReason, 0);
     m_pAosEventHandler->OnDisconnecting(nReason);
 }
 
 PUBLIC VIRTUAL void MtcService::ImsAos_Disconnected(
         IN IMS_UINT32 nReason, IN IMS_SINT32 nDataFailureReason)
 {
+    IMS_TRACE_I(
+            "ImsAos_Disconnected emergency[%s] nReason[%d]", _TRACE_B_(IsEmergency()), nReason, 0);
+
     SetStatus(ServiceStatus::SERVICE_IDLE);
     m_pNetworkWatcher->OnDisconnected();
     m_pAosEventHandler->OnDisconnected(nReason, nDataFailureReason);
@@ -365,12 +371,14 @@ PUBLIC VIRTUAL void MtcService::ImsAos_Disconnected(
 
 PUBLIC VIRTUAL void MtcService::ImsAos_Suspended(IN IMS_UINT32 nReason)
 {
+    IMS_TRACE_I("ImsAos_Suspended emergency[%s] nReason[%d]", _TRACE_B_(IsEmergency()), nReason, 0);
     SetStatus(ServiceStatus::SERVICE_SUSPENDED);
     m_pAosEventHandler->OnSuspended(nReason);
 }
 
 PUBLIC VIRTUAL void MtcService::ImsAos_Resumed()
 {
+    IMS_TRACE_I("ImsAos_Resumed emergency[%s]", _TRACE_B_(IsEmergency()), 0, 0);
     SetStatus(ServiceStatus::SERVICE_ACTIVE);
     m_pAosEventHandler->OnResumed();
 }
@@ -410,8 +418,6 @@ PUBLIC VIRTUAL void MtcService::ImsAosMonitor_Notify(IN IMS_UINT32 nType, IN IMS
 PRIVATE
 void MtcService::Init()
 {
-    IMS_TRACE_I("Init", 0, 0, 0);
-
     if (m_eType == ServiceType::NORMAL)
     {
         JniEnablerConnector::GetInstance().SetNativeEnabler(

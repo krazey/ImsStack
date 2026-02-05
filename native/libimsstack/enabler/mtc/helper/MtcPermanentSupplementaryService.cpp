@@ -26,13 +26,11 @@ PUBLIC
 MtcPermanentSupplementaryService::MtcPermanentSupplementaryService() :
         m_objPermanentSuppServices(ImsList<SuppService*>())
 {
-    IMS_TRACE_I("+MtcPermanentSupplementaryService", 0, 0, 0);
 }
 
 PUBLIC
 MtcPermanentSupplementaryService::~MtcPermanentSupplementaryService()
 {
-    IMS_TRACE_I("~MtcPermanentSupplementaryService", 0, 0, 0);
     DeleteServices();
 }
 

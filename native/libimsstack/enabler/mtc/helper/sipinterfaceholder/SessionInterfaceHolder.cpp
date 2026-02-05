@@ -39,7 +39,6 @@ SessionInterfaceHolder::SessionInterfaceHolder() :
         m_nTransactionGuardTimeMillis(0),
         m_objListeners(ImsList<IInterfaceHolderListener*>())
 {
-    IMS_TRACE_D("+SessionInterfaceHolder", 0, 0, 0);
     m_nTransactionGuardTimeMillis =
             Engine::GetConfiguration()
                     ->GetSipConfig(ThreadService::GetCurrentSlotId(IMS_SLOT_0))
@@ -51,8 +50,6 @@ SessionInterfaceHolder::SessionInterfaceHolder() :
 PUBLIC
 SessionInterfaceHolder::~SessionInterfaceHolder()
 {
-    IMS_TRACE_D("~SessionInterfaceHolder", 0, 0, 0);
-
     for (const auto& sessionRecord : m_objSessionRecords)
     {
         if (sessionRecord.second->piSession != IMS_NULL)

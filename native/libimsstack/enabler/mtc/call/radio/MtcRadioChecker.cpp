@@ -44,13 +44,10 @@ MtcRadioChecker::MtcRadioChecker(IN IMtcContext& objContext) :
         m_objMtcTrafficInfos(ImsList<MtcTrafficInfo*>()),
         m_nRegistrationThrottlingTimeMillis(0)
 {
-    IMS_TRACE_D("+MtcRadioChecker", 0, 0, 0);
 }
 
 PUBLIC MtcRadioChecker::~MtcRadioChecker()
 {
-    IMS_TRACE_D("~MtcRadioChecker", 0, 0, 0);
-
     DeInit();
 }
 

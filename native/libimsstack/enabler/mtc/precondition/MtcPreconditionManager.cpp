@@ -63,13 +63,11 @@ MtcPreconditionManager::MtcPreconditionManager(IN IMtcCallContext& objContext) :
         m_ePreviousRatType(m_objContext.GetService().GetMobileRatType()),
         m_eCurrentRatType(m_ePreviousRatType)
 {
-    IMS_TRACE_D("+MtcPreconditionManager Callkey[%d]", m_objContext.GetCallKey(), 0, 0);
     m_objContext.GetMediaManager().SetQosListener(this);
 }
 
 PUBLIC VIRTUAL MtcPreconditionManager::~MtcPreconditionManager()
 {
-    IMS_TRACE_D("~MtcPreconditionManager Callkey[%d]", m_objContext.GetCallKey(), 0, 0);
     m_objContext.GetMediaManager().SetQosListener(IMS_NULL);
     delete m_pSdpPreconditionHelper;
     DestroyAllQosInfo();
@@ -158,7 +156,7 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsPreconditionSupportedInLocal()
             break;
     }
 
-    IMS_TRACE_D("IsPreconditionSupportedInLocal CallType[%s][%s]",
+    IMS_TRACE_D("IsPreconditionSupportedInLocal CallType[%s] supported[%s]",
             MtcCallStringUtils::ConvertCallType(eCallType), _TRACE_B_(bSupport), 0);
     return bSupport;
 }
@@ -177,8 +175,6 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsDedicatedBearerAllocated(
 PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsCheckingResourcesRequiredToAlertUser(
         IN ISession* piSession) const
 {
-    IMS_TRACE_D("IsCheckingResourcesRequiredToAlertUser", 0, 0, 0);
-
     if (IsDefaultBearerAllowed(MEDIATYPE_AUDIO))
     {
         return IMS_FALSE;
@@ -200,7 +196,6 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsCheckingResourcesRequiredToAle
 
 PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsAvailableToAlertUser(IN ISession* piSession) const
 {
-    IMS_TRACE_D("IsAvailableToAlertUser", 0, 0, 0);
     if (piSession == IMS_NULL)
     {
         return IMS_FALSE;
@@ -213,7 +208,10 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsAvailableToAlertUser(IN ISessi
     {
         return bLocalReserved;
     }
-    return bLocalReserved && IsRemoteResourceReserved(piSession);
+    IMS_BOOL bAvailable = bLocalReserved && IsRemoteResourceReserved(piSession);
+    IMS_TRACE_D("IsAvailableToAlertUser local-reserved[%s] available[%s]",
+            _TRACE_B_(bLocalReserved), _TRACE_B_(bAvailable), 0);
+    return bAvailable;
 }
 
 PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsLocalResourceConfirmationRequired(
@@ -285,7 +283,6 @@ PUBLIC VIRTUAL void MtcPreconditionManager::FormPreconditionSdp(
 {
     if (!IsPreconditionSupported(piSession))
     {
-        IMS_TRACE_D("FormPreconditionSdp : UE don't use precondition mechanism", 0, 0, 0);
         m_pSdpPreconditionHelper->RemovePreconditionSdp(piSession);
         return;
     }
@@ -324,7 +321,6 @@ PUBLIC VIRTUAL void MtcPreconditionManager::FormPreconditionSdp(
 
 PUBLIC VIRTUAL void MtcPreconditionManager::OnSdpReceived(IN ISession* piSession)
 {
-    IMS_TRACE_D("OnSdpReceived QoS[%s]", _TRACE_B_(IsPreconditionIncludedInSdp(piSession)), 0, 0);
     UpdateQosAttributesFromRemoteSdp(piSession);
 
     if (IsNeedToStartWaitAudioDedicatedBearerTimer(piSession, IMS_FALSE))
@@ -336,7 +332,6 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnSdpReceived(IN ISession* piSession
 PUBLIC VIRTUAL void MtcPreconditionManager::OnSdpSent(
         IN ISession* piSession, IN IMS_BOOL bInitialInvite /* = IMS_FALSE */)
 {
-    IMS_TRACE_D("OnSdpSent", 0, 0, 0);
     if (IsNeedToStartWaitAudioDedicatedBearerTimer(piSession, bInitialInvite))
     {
         StartQosTimer(piSession, QosTimerType::WAIT_AUDIO_DEDICATED_BEARER);
@@ -351,7 +346,6 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnMessageReceived(
         return;
     }
 
-    IMS_TRACE_D("OnMessageReceived", 0, 0, 0);
     IMS_SINT32 nStatusCode = piMessage->GetStatusCode();
     if (SipStatusCode::IsFinalSuccess(nStatusCode) || nStatusCode == SipStatusCode::SC_180)
     {
@@ -439,13 +433,13 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnCallModified(IN ISession* piSessio
 
 PUBLIC VIRTUAL void MtcPreconditionManager::OnRatChanged(IN IMS_SINT32 eRatType)
 {
-    IMS_TRACE_D("OnRatChanged RAT type[%s]", MtcCallStringUtils::ConvertRatType(eRatType), 0, 0);
     UpdateMobileRatType(m_objContext.GetService().GetMobileRatType());
 
     IMS_BOOL bPreviousOnWlan = m_bOnWlan;
     SetOnWlan(eRatType == INetworkWatcher::RADIOTECH_TYPE_IWLAN);
     if (bPreviousOnWlan != m_bOnWlan)  // W2L or L2W
     {
+        IMS_TRACE_D("OnRatChanged HO[%s]", m_bOnWlan ? "L2W" : "W2L", 0, 0);
         for (IMS_UINT32 index = 0; index < m_objQosInfos.GetSize(); index++)
         {
             ISession* piSession = m_objQosInfos.GetKeyAt(index);
@@ -486,6 +480,7 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnRatChanged(IN IMS_SINT32 eRatType)
 
     if (IsEpsFallback())
     {
+        IMS_TRACE_D("OnRatChanged EPS-FB case.", 0, 0, 0);
         if (!m_objContext.GetConfigurationProxy().GetBoolean(
                     ConfigVoice::KEY_RESTART_DEDICATED_BEARER_WAIT_TIMER_BY_EPS_FALLBACK_BOOL))
         {
@@ -600,10 +595,6 @@ QosInfo* MtcPreconditionManager::GetQosInfo(IN ISession* piSession) const
 PROTECTED
 IMS_BOOL MtcPreconditionManager::IsEpsFallback() const
 {
-    IMS_TRACE_D("IsEpsFallback pre[%s] curr[%s]",
-            MtcCallStringUtils::ConvertRatType(m_ePreviousRatType),
-            MtcCallStringUtils::ConvertRatType(m_eCurrentRatType), 0);
-
     if (m_ePreviousRatType != INetworkWatcher::RADIOTECH_TYPE_NR)
     {
         return IMS_FALSE;
@@ -879,8 +870,6 @@ void MtcPreconditionManager::InitializeStatusForUnusedLostQos(IN ISession* piSes
 PRIVATE
 void MtcPreconditionManager::CreateStatusRecordsWithActiveMediaTypes(IN ISession* piSession)
 {
-    IMS_TRACE_D("CreateStatusRecordsWithActiveMediaTypes", 0, 0, 0);
-
     CallType eCallType = m_objContext.GetSession()->GetCallType();
 
     for (IMS_UINT32 eMediaType : MtcMediaUtil::GetMediaTypeListFromCallType(eCallType))
@@ -907,11 +896,9 @@ void MtcPreconditionManager::CreateStatusRecords(IN ISession* piSession, IN IMS_
     IMS_SINT32 eSdpMediaType = MtcMediaUtil::GetSdpMediaType(eMediaType);
     if (!pStatusTable->GetRecords(eSdpMediaType).IsEmpty())
     {
-        IMS_TRACE_D("CreateStatusRecords : already created", 0, 0, 0);
         return;
     }
 
-    IMS_TRACE_D("CreateStatusRecords", 0, 0, 0);
     pStatusTable->InitializeRecords(eSdpMediaType);
     IMS_BOOL bLocalReserved = IsLocalResourceReservedByMediaType(piSession, eMediaType) ||
             GetQosTimer(piSession)->IsQosTimerActivated(
@@ -936,6 +923,7 @@ void MtcPreconditionManager::CreateStatusRecords(IN ISession* piSession, IN IMS_
     }
     else
     {
+        IMS_TRACE_D("CreateStatusRecords", 0, 0, 0);
         if (!m_objContext.GetMediaManager().IsForkedSession(piSession))
         {
             m_bLocalResourceConfirmedInitially = bLocalReserved;
@@ -1251,9 +1239,12 @@ IMS_BOOL MtcPreconditionManager::IsPreconditionSupported(IN ISession* piSession)
     }
 
     const QosInfo* pInfo = GetQosInfo(piSession);
-    IMS_BOOL bResult = (pInfo != IMS_NULL) ? pInfo->IsPreconditionSupported() : IMS_FALSE;
-    IMS_TRACE_D("IsPreconditionSupported [%s]", _TRACE_B_(bResult), 0, 0);
-    return bResult;
+    if (pInfo && pInfo->IsPreconditionSupported())
+    {
+        return IMS_TRUE;
+    }
+    IMS_TRACE_D("IsPreconditionSupported not supported", 0, 0, 0);
+    return IMS_FALSE;
 }
 
 PRIVATE
@@ -1275,9 +1266,6 @@ IMS_BOOL MtcPreconditionManager::IsPreconditionSupportedInLocal(IN IMS_UINT32 eM
         bSupport = m_objContext.GetConfigurationProxy().GetBoolean(
                 ConfigRtt::KEY_TEXT_QOS_PRECONDITION_SUPPORTED_BOOL);
     }
-
-    IMS_TRACE_D("IsPreconditionSupportedInLocal MediaType[%s][%s]",
-            MtcMediaStringUtils::ConvertContentType(eMediaType), _TRACE_B_(bSupport), 0);
 
     return bSupport;
 }
@@ -1516,10 +1504,6 @@ IMS_BOOL MtcPreconditionManager::IsConfirmationRequired(IN const ISession& objIS
 PRIVATE
 IMS_BOOL MtcPreconditionManager::IsAudioDedicatedBearerWaitTimerRequiredByRatCondition() const
 {
-    IMS_TRACE_D("IsAudioDedicatedBearerWaitTimerRequiredByRatCondition pre[%s] curr[%s]",
-            MtcCallStringUtils::ConvertRatType(m_ePreviousRatType),
-            MtcCallStringUtils::ConvertRatType(m_eCurrentRatType), 0);
-
     if (m_bOnWlan)
     {
         return IMS_FALSE;
@@ -1531,6 +1515,7 @@ IMS_BOOL MtcPreconditionManager::IsAudioDedicatedBearerWaitTimerRequiredByRatCon
                 ConfigVoice::NO_WAIT_DEDICATED_BEARER_IN_NR) &&
             m_eCurrentRatType == INetworkWatcher::RADIOTECH_TYPE_NR)
     {
+        IMS_TRACE_D("IsAudioDedicatedBearerWaitTimerRequiredByRatCondition - NR", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -1540,6 +1525,7 @@ IMS_BOOL MtcPreconditionManager::IsAudioDedicatedBearerWaitTimerRequiredByRatCon
                 ConfigVoice::NO_WAIT_DEDICATED_BEARER_IN_EPS_FALLBACK) &&
             IsEpsFallback())
     {
+        IMS_TRACE_D("IsAudioDedicatedBearerWaitTimerRequiredByRatCondition - EPS-FB", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -1549,6 +1535,7 @@ IMS_BOOL MtcPreconditionManager::IsAudioDedicatedBearerWaitTimerRequiredByRatCon
                 ConfigVoice::NO_WAIT_DEDICATED_BEARER_IN_EPS_ONLY_ATTACH) &&
             m_objContext.GetService().IsEpsOnlyAttach())
     {
+        IMS_TRACE_D("IsAudioDedicatedBearerWaitTimerRequiredByRatCondition - EPS Only", 0, 0, 0);
         return IMS_FALSE;
     }
 

@@ -28,13 +28,10 @@ QosTimer::QosTimer(IN IQosTimerListener* pListener) :
         m_objTimers(ImsMap<QosTimerType, ITimer*>()),
         m_pQosTimerListener(pListener)
 {
-    IMS_TRACE_D("+QosTimer", 0, 0, 0);
 }
 
 PUBLIC VIRTUAL QosTimer::~QosTimer()
 {
-    IMS_TRACE_D("~QosTimer", 0, 0, 0);
-
     for (IMS_UINT32 index = 0; index < m_objTimers.GetSize(); index++)
     {
         ITimer* piTimer = m_objTimers.GetValueAt(index);

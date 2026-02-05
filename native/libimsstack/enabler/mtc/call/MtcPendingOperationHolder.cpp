@@ -24,14 +24,10 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-MtcPendingOperationHolder::MtcPendingOperationHolder()
-{
-    IMS_TRACE_D("+MtcPendingOperationHolder", 0, 0, 0);
-}
+MtcPendingOperationHolder::MtcPendingOperationHolder() {}
 
 PUBLIC MtcPendingOperationHolder::~MtcPendingOperationHolder()
 {
-    IMS_TRACE_D("~MtcPendingOperationHolder ", 0, 0, 0);
     while (!m_objPendingOperations.IsEmpty())
     {
         PopPendingOperation();

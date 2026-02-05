@@ -125,12 +125,11 @@ PUBLIC VIRTUAL IMtcService* MtcApp::GetServiceByType(IN ServiceType eServiceType
 
         if (eServiceType == piService->GetServiceType())
         {
-            IMS_TRACE_I("GetServiceByType : Type[%d]", eServiceType, 0, 0);
             return piService;
         }
     }
 
-    IMS_TRACE_D("GetServiceByType : Service Type[%d] Not Found", eServiceType, 0, 0);
+    IMS_TRACE_E(0, "Service Type[%d] Not Found", eServiceType, 0, 0);
     return IMS_NULL;
 }
 

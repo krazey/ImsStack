@@ -26,13 +26,11 @@ SrvccStateManager::SrvccStateManager() :
         m_eState(SrvccState::IDLE),
         m_objListeners(ImsList<ISrvccStateListener*>())
 {
-    IMS_TRACE_I("+SrvccStateManager", 0, 0, 0);
 }
 
 PUBLIC
 SrvccStateManager::~SrvccStateManager()
 {
-    IMS_TRACE_I("~SrvccStateManager", 0, 0, 0);
     m_objListeners.Clear();
 }
 
@@ -67,10 +65,10 @@ void SrvccStateManager::UpdateSrvccState(IN SrvccState eState)
 {
     if (m_eState == eState)
     {
-        IMS_TRACE_E(0, "State is not changed", 0, 0, 0);
         return;
     }
 
+    IMS_TRACE_I("UpdateSrvccState [%d]", eState, 0, 0);
     m_eState = eState;
 
     NotifyListeners();

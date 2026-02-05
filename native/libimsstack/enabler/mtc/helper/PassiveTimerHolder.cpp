@@ -29,13 +29,10 @@ PassiveTimerHolder::PassiveTimerHolder() :
         m_piService(IMS_NULL),
         m_objTimerInfoByType(ImsMap<IPassiveTimerHolder::Type, TimerInfo*>())
 {
-    IMS_TRACE_I("+PassiveTimerHolder", 0, 0, 0);
 }
 
 PUBLIC VIRTUAL PassiveTimerHolder::~PassiveTimerHolder()
 {
-    IMS_TRACE_I("~PassiveTimerHolder", 0, 0, 0);
-
     if (m_piService)
     {
         m_piService->RemoveAosStateListener(this);
@@ -48,19 +45,18 @@ PUBLIC VIRTUAL void PassiveTimerHolder::AddTimer(IN IPassiveTimerHolder::Type eT
         IN IMS_SINT32 nTimeInMillis, IN IMS_BOOL bAllowReset /* = IMS_FALSE */,
         IN IMS_BOOL bKeepOnAosDisconnect /* = IMS_FALSE */)
 {
-    IMS_TRACE_D("AddTimer Type[%d] Duration[%d], Keep on Aos disconnect[%s]", eType, nTimeInMillis,
-            _TRACE_B_(bKeepOnAosDisconnect));
-
     if (nTimeInMillis < 0)
     {
         return;
     }
 
+    IMS_TRACE_D("AddTimer Type[%d], Allow Reset[%s], Keep on Aos disconnect[%s]", eType,
+            _TRACE_B_(bAllowReset), _TRACE_B_(bKeepOnAosDisconnect));
+
     if (IsActive(eType))
     {
         if (bAllowReset == IMS_FALSE)
         {
-            IMS_TRACE_D("AddTimer Type[%d] is ignored. Same type is active.", eType, 0, 0);
             return;
         }
 

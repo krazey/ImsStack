@@ -19,15 +19,12 @@
 #include "IConfiguration.h"
 #include "ISession.h"
 #include "MtcDef.h"
-#include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/message/EmergencyMessageFormatter.h"
 #include "call/message/MessageSender.h"
 #include "helper/TransactionTimerUpdateHelper.h"
 #include <memory>
-
-__IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 MessageSender::MessageSender(IN IMtcCallContext& objContext, IN ISession& objSession) :
@@ -37,14 +34,10 @@ MessageSender::MessageSender(IN IMtcCallContext& objContext, IN ISession& objSes
         m_objTimerUpdateHelper(
                 objContext, Engine::GetConfiguration()->GetSipConfig(objContext.GetSlotId()))
 {
-    IMS_TRACE_I("+MessageSender", 0, 0, 0);
     CreateFormatter();
 }
 
-PUBLIC VIRTUAL MessageSender::~MessageSender()
-{
-    IMS_TRACE_I("~MessageSender", 0, 0, 0);
-}
+PUBLIC VIRTUAL MessageSender::~MessageSender() {}
 
 PUBLIC
 IMS_RESULT MessageSender::Start(IN CallType eCallType)

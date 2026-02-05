@@ -233,7 +233,6 @@ PUBLIC VIRTUAL IMS_BOOL SdpPreconditionHelper::IsPreconditionIncludedInSdp(
 
         if (IsPreconditionIncludedInSdp(piMediaDescriptor))
         {
-            IMS_TRACE_D("IsPreconditionIncludedInSdp : true", 0, 0, 0);
             return IMS_TRUE;
         }
     }

@@ -89,7 +89,6 @@ void JniMtcService::Initialize(IN Jni_SendDataToJava pfnSendDataToJava)
         IMS_TRACE_E(0, "JniMtcService : can't create listener thread", 0, 0, 0);
         return;
     }
-    IMS_TRACE_D("Initialize()", 0, 0, 0);
     m_pThread->SetCallback(reinterpret_cast<IMS_SINTP>(this), pfnSendDataToJava);
     Attach();
 }
@@ -102,7 +101,6 @@ PUBLIC VIRTUAL void JniMtcService::NotifyNativeEnablerSet()
 PUBLIC
 IJniEnablerThread* JniMtcService::GetJniThread() const
 {
-    IMS_TRACE_D("GetJniThread()", 0, 0, 0);
     return DYNAMIC_CAST(IJniEnablerThread*, m_pThread);
 }
 
