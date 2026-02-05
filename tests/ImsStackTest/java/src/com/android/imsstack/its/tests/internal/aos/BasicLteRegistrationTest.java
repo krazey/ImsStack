@@ -352,6 +352,103 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
 
     @Test
     @P2
+    public void register_onLte_withAccessTypeDisabled_verifiesTagNotPresent() throws Exception {
+        // 1. Set up the server to expect a REGISTER request and verify its Contact header
+        //    does not include the '+g.3gpp.accesstype' feature tag.
+        // 2. The server then completes the registration and subscription flow.
+        // 3. Configure the device via CarrierConfig to disable the preferred access type feature
+        //    tag.
+        // 4. Trigger IMS registration on the device.
+        // 5. Verify that the device successfully registers on LTE.
+
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister()
+                .addRuleSet(new RuleSet.Builder("REGISTER : No access-type tag")
+                        .addRule(new RuleSet.Rule.RuleBuilder("Contact")
+                                .addNotContainRule("+g.3gpp.accesstype")
+                                .build())
+                        .build())
+                .build());
+        generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        mConfig.putInt(CarrierConfig.Ims.KEY_REGISTRATION_PREFERRED_ACCESSTYPE_FEATURE_TAG_INT,
+                PREFERRED_ACCESSTYPE_FEATURE_TAG_DISABLED);
+
+        RegistrationInfo regInfo = mInfoBuilder.addConfig(mConfig).build();
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
+    }
+
+    @Test
+    @P1
+    public void register_onLte_withAccessTypeEnabled_verifiesNumericalTag() throws Exception {
+        // 1. Set up the server to expect a REGISTER request and verify its Contact header
+        //    includes the '+g.3gpp.accesstype="cellular2"' feature tag.
+        // 2. The server then completes the registration and subscription flow.
+        // 3. Configure the device via CarrierConfig to enable the preferred access type
+        //    feature tag with a numerical value.
+        // 4. Trigger IMS registration on the device.
+        // 5. Verify that the device successfully registers on LTE.
+
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister()
+                .addRuleSet(new RuleSet.Builder("REGISTER : Numerical access-type tag")
+                        .addRule(new RuleSet.Rule.RuleBuilder("Contact")
+                                .addContainRule("+g.3gpp.accesstype=\"cellular2\"")
+                                .build())
+                        .build())
+                .build());
+        generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        mConfig.putInt(CarrierConfig.Ims.KEY_REGISTRATION_PREFERRED_ACCESSTYPE_FEATURE_TAG_INT,
+                PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED);
+
+        RegistrationInfo regInfo = mInfoBuilder.addConfig(mConfig).build();
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
+    }
+
+    @Test
+    @P2
+    public void register_onLte_withAccessTypeWithoutNumericalValue_verifiesTag()
+            throws Exception {
+        // 1. Set up the server to expect a REGISTER request and verify its Contact header
+        //    includes the '+g.3gpp.accesstype="cellular"' feature tag.
+        // 2. The server then completes the registration and subscription flow.
+        // 3. Configure the device via CarrierConfig to enable the preferred access type
+        //    feature tag without a numerical value.
+        // 4. Trigger IMS registration on the device.
+        // 5. Verify that the device successfully registers on LTE.
+
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessage(MessageBuildUtils.getDefaultRegister()
+                .addRuleSet(new RuleSet.Builder("REGISTER : Plain access-type tag")
+                        .addRule(new RuleSet.Rule.RuleBuilder("Contact")
+                                .addContainRule("+g.3gpp.accesstype=\"cellular\"")
+                                .build())
+                        .build())
+                .build());
+        generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        mConfig.putInt(CarrierConfig.Ims.KEY_REGISTRATION_PREFERRED_ACCESSTYPE_FEATURE_TAG_INT,
+                PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED_WITHOUT_NUMERICAL_VALUE);
+
+        RegistrationInfo regInfo = mInfoBuilder.addConfig(mConfig).build();
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+
+        mRegistration.expect().registered(
+                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
+    }
+
+    @Test
+    @P2
     public void register_onLte_with305AsPolicy3gpp_triggersDeregistered() throws Exception {
         // 1. Set up the server to respond to the REGISTER request with a 305 Use Proxy response.
         // 2. This test simulates a scenario where only a single P-CSCF is available, so the
