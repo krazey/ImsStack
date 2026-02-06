@@ -15,6 +15,11 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <!-- Aos -->
+    <boolean name="imsemergency.reg_timer_for_ecall_timeout_as_failure_bool" value="false"/>
+    <int name="imsemergency.reg_timer_for_ecall_millis_int" value="4000"/>
+
+    <!-- Media -->
     <int-array name="imsvoice.audio_rtcp_interval_int_array" num="2">
         <item value="2"/>
         <item value="2"/>
