@@ -131,8 +131,6 @@ AString MtsSipFormUtils::FormContentTypeEnumToStr(IN SmsFormatType nType)
             break;
     }
 
-    IMS_TRACE_D("FormContentTypeEnumToStr (%d) to (%s)", nType, strContentType.GetStr(), 0);
-
     return strContentType;
 }
 
@@ -153,8 +151,6 @@ SmsFormatType MtsSipFormUtils::FormContentTypeStrToEnum(IN const AString& strCon
     {
         IMS_TRACE_E(0, "This ContentType Str (%s) is not supported", strContentType.GetStr(), 0, 0);
     }
-
-    IMS_TRACE_D("FormContentTypeStrToEnum (%s) to (%d)", strContentType.GetStr(), eSmsFormat, 0);
 
     return eSmsFormat;
 }
