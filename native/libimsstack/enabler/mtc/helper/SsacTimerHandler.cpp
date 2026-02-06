@@ -20,24 +20,18 @@
 #include "INetworkWatcher.h"
 #include "ServiceImsRadio.h"
 #include "ServiceSystemTime.h"
-#include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "helper/IPassiveTimerHolder.h"
 #include "helper/SsacTimerHandler.h"
-
-__IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 SsacTimerHandler::SsacTimerHandler(IN IMtcContext& objContext) :
         m_objContext(objContext)
 {
-    IMS_TRACE_I("+SsacTimerHandler", 0, 0, 0);
 }
 
 PUBLIC VIRTUAL SsacTimerHandler::~SsacTimerHandler()
 {
-    IMS_TRACE_I("~SsacTimerHandler", 0, 0, 0);
-
     Clear();
 }
 

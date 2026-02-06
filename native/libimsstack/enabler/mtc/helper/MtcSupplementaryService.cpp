@@ -52,24 +52,18 @@ MtcSupplementaryService::MtcSupplementaryService(
         m_objConfigurationProxy(objConfigurationProxy),
         m_objSuppServices(ImsList<SuppService*>())
 {
-    IMS_TRACE_I("+MtcSupplementaryService", 0, 0, 0);
 }
 
 PUBLIC
 MtcSupplementaryService::~MtcSupplementaryService()
 {
-    IMS_TRACE_I("~MtcSupplementaryService", 0, 0, 0);
     SuppServiceUtils::DeleteServices(m_objSuppServices);
 }
 
 PUBLIC
 void MtcSupplementaryService::UpdateServices(IN const ImsList<SuppService*>& objSuppServices)
 {
-    IMS_UINT32 nInServiceSize = objSuppServices.GetSize();
-    IMS_TRACE_I("UpdateServices : ServiceNum[%d] InServiceNum[%d]", m_objSuppServices.GetSize(),
-            nInServiceSize, 0);
-
-    for (IMS_UINT32 i = 0; i < nInServiceSize; i++)
+    for (IMS_UINT32 i = 0; i < objSuppServices.GetSize(); i++)
     {
         if (SuppServiceUtils::Get(m_objSuppServices, objSuppServices.GetAt(i)->nType) != IMS_NULL)
         {
@@ -84,8 +78,6 @@ void MtcSupplementaryService::UpdateServices(IN const ImsList<SuppService*>& obj
 PUBLIC
 void MtcSupplementaryService::UpdateServices(IN IMessage* piMessage)
 {
-    IMS_TRACE_I("UpdateServices : update services using a received SIP message", 0, 0, 0);
-
     UpdateCallerId(piMessage);
     UpdateCnap(piMessage);
     UpdateCdiv(piMessage);

@@ -26,13 +26,11 @@ MtcTimerWrapper::MtcTimerWrapper() :
         m_lstTimers(ImsList<MtcTimer*>()),
         m_piListener(IMS_NULL)
 {
-    IMS_TRACE_D("+MtcTimerWrapper", 0, 0, 0);
 }
 
 PUBLIC
 MtcTimerWrapper::~MtcTimerWrapper()
 {
-    IMS_TRACE_D("~MtcTimerWrapper", 0, 0, 0);
     Clear();
 }
 
@@ -63,7 +61,6 @@ void MtcTimerWrapper::Start(IN IMS_UINT32 eType, IN IMS_SINT32 nDuration)
 {
     if (IsActive(eType))
     {
-        IMS_TRACE_I("Start : Type:[%d] timer is already running >> re-start", eType, 0, 0);
         Stop(eType);
     }
 

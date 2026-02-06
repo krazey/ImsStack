@@ -19,13 +19,10 @@
 #include "ImsMap.h"
 #include "ImsMessage.h"
 #include "ImsTypeDef.h"
-#include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "helper/CallStateProxy.h"
-
-__IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 CallStateProxy::CallStateProxy(IN IMtcCallManager& objCallManager) :
@@ -35,7 +32,6 @@ CallStateProxy::CallStateProxy(IN IMtcCallManager& objCallManager) :
         m_objCallManager(objCallManager),
         m_eTotalState(IMtcCall::State::IDLE)
 {
-    IMS_TRACE_D("+CallStateProxy", 0, 0, 0);
 }
 
 PUBLIC VIRTUAL CallStateProxy::~CallStateProxy() {}
@@ -53,7 +49,6 @@ void CallStateProxy::AddListener(IN IMtcCallStateListener* pListener)
             }
         }
         m_objSynchronousListeners.Append(pListener);
-        IMS_TRACE_D("AddListener sync size=[%d]", m_objSynchronousListeners.GetSize(), 0, 0);
     }
     else
     {
@@ -65,7 +60,6 @@ void CallStateProxy::AddListener(IN IMtcCallStateListener* pListener)
             }
         }
         m_objAsynchronousListeners.Append(pListener);
-        IMS_TRACE_D("AddListener async size=[%d]", m_objAsynchronousListeners.GetSize(), 0, 0);
     }
 }
 
@@ -79,8 +73,6 @@ void CallStateProxy::RemoveListener(IN IMtcCallStateListener* pListener)
             if (pListener == m_objSynchronousListeners.GetAt(i))
             {
                 m_objSynchronousListeners.RemoveAt(i);
-                IMS_TRACE_D(
-                        "RemoveListener sync size=[%d]", m_objSynchronousListeners.GetSize(), 0, 0);
                 return;
             }
         }
@@ -92,8 +84,6 @@ void CallStateProxy::RemoveListener(IN IMtcCallStateListener* pListener)
             if (pListener == m_objAsynchronousListeners.GetAt(i))
             {
                 m_objAsynchronousListeners.RemoveAt(i);
-                IMS_TRACE_D("RemoveListener async size=[%d]", m_objAsynchronousListeners.GetSize(),
-                        0, 0);
                 return;
             }
         }
@@ -105,8 +95,6 @@ void CallStateProxy::UpdateCallState(IN CallKey nCallkey, IN IMtcCall::State eSt
         IN CallType eCallType, IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason /* = CODE_NONE */)
 {
     IMS_BOOL bTotalCallStateUpdated = UpdateTotalCallState();
-    IMS_TRACE_D("UpdateCallState state[%d] totalStateUpdated[%s]", eState,
-            _TRACE_B_(bTotalCallStateUpdated), 0);
 
     CallStateDetails* pDetails =
             new CallStateDetails(nCallkey, static_cast<IMtcCallStateListener::State>(eState),
@@ -207,8 +195,6 @@ PRIVATE
 void CallStateProxy::NotifyToListeners(IN IMS_BOOL bSynchronous, IN CallStateDetails* pDetails,
         IN IMS_BOOL bTotalCallStateUpdated) const
 {
-    IMS_TRACE_D("NotifyToListeners sync[%s]", _TRACE_B_(bSynchronous), 0, 0);
-
     if (bSynchronous)
     {
         NotifyCallState(m_objSynchronousListeners, pDetails);

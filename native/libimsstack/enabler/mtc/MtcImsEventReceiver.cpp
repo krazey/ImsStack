@@ -98,8 +98,6 @@ void MtcImsEventReceiver::RemoveListener(IN IMtcImsEventListener* pListener, IN 
 PUBLIC VIRTUAL void MtcImsEventReceiver::Event_NotifyEvent(
         IN ImsEvent nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam)
 {
-    IMS_TRACE_D("Event_NotifyEvent : event[%x] param1[%d] param2[%d]", nEvent, nWParam, nLParam);
-
     EventEntry* pEntry = GetEntry(nEvent);
     if (pEntry == IMS_NULL)
     {

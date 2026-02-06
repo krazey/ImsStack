@@ -31,14 +31,12 @@ CallConnectionIdManager::CallConnectionIdManager(IN IMtcContext& objContext) :
         m_objCallKeyConnections(ImsList<CallKeyConnection*>()),
         m_objControllers(ImsList<IConferenceController*>())
 {
-    IMS_TRACE_D("+CallConnectionIdManager", 0, 0, 0);
     m_objContext.GetCallStateProxy().AddListener(this);
 }
 
 PUBLIC
 CallConnectionIdManager::~CallConnectionIdManager()
 {
-    IMS_TRACE_D("~CallConnectionIdManager", 0, 0, 0);
     m_objCallKeyConnections.Clear();
     m_objControllers.Clear();
 }
@@ -48,7 +46,6 @@ PUBLIC VIRTUAL void CallConnectionIdManager::OnCallStateChanged(IN CallKey nCall
 {
     if (eState == State::IDLE)
     {
-        IMS_TRACE_D("OnCallStateChanged - MtcCall created but no reference available yet", 0, 0, 0);
         return;
     }
 
@@ -235,7 +232,7 @@ void CallConnectionIdManager::AddKeyConnectionId(IN CallKey nCallKey)
         m_objCallKeyConnections.InsertAt(pNewKeyConnection, nNewIndex - 1);
     }
 
-    IMS_TRACE_D("AddKeyConnectionId : list[%s] addId=[%d] key=[%d]", GetIds().GetStr(), nNewIndex,
+    IMS_TRACE_D("AddKeyConnectionId : list[%s] id=[%d] key=[%d]", GetIds().GetStr(), nNewIndex,
             nCallKey);
 }
 
@@ -255,7 +252,7 @@ void CallConnectionIdManager::RemoveKeyConnectionId(IN IMS_SINT32 nIndex)
 
     delete pKeyConnection;
     m_objCallKeyConnections.RemoveAt(nIndex);
-    IMS_TRACE_D("RemoveKeyConnectionId : list[%s] removeId=[%d] key=[%d]", GetIds().GetStr(),
+    IMS_TRACE_D("RemoveKeyConnectionId : list[%s] id=[%d] key=[%d]", GetIds().GetStr(),
             nConnectionId, nKey);
 }
 
