@@ -337,7 +337,6 @@ PUBLIC VIRTUAL CallStateName IdleState::OnTimerExpired(IN IMS_SINT32 nType)
     switch (nType)
     {
         case TIMER_MT_ALERTING:
-            IMS_TRACE_D("TIMER_MT_ALERTING expires in IdleState", 0, 0, 0);
             return RejectIncomingAndToTerminating(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR));
         default:
             break;
@@ -374,8 +373,6 @@ PROTECTED VIRTUAL const CallReasonInfo IdleState::GetCallReasonInfoByAosDisconne
 
 PUBLIC VIRTUAL CallStateName IdleState::HandleIncomingUssi(IN ISession* piSession)
 {
-    IMS_TRACE_D("HandleIncomingUssi", 0, 0, 0);
-
     m_objContext.GetCallInfo().bUssi = IMS_TRUE;
     m_objContext.CreateSession(piSession);
 
@@ -404,8 +401,6 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncomingUssi(IN ISession* piSessio
 
 PUBLIC VIRTUAL CallStateName IdleState::OnUssiAttached()
 {
-    IMS_TRACE_D("OnUssiAttached", 0, 0, 0);
-
     ISession* piSession = GetISession();
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);

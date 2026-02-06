@@ -102,7 +102,7 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
 
 PUBLIC VIRTUAL MtcCall::~MtcCall()
 {
-    IMS_TRACE_I("%s - ~MtcCall key[%lu]", ToString().GetStr(), m_nKey, 0);
+    IMS_TRACE_D("%s - ~MtcCall key[%lu]", ToString().GetStr(), m_nKey, 0);
 
     m_objService.RemoveAosStateListener(this);
     m_objService.RemoveSrvccStateListener(this);
