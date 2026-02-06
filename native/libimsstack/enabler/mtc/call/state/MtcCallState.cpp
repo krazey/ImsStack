@@ -731,8 +731,6 @@ CallStateName MtcCallState::RejectIncomingAndToTerminating(IN const CallReasonIn
 PROTECTED
 void MtcCallState::SendIncomingUpdateToUi(IN CallType eCallType)
 {
-    IMS_TRACE_D("SendIncomingUpdateToUi", 0, 0, 0);
-
     m_objContext.GetUpdatingInfo().SetAlerted();
     m_objContext.GetUiNotifier().SendIncomingUpdate(eCallType);
     m_objContext.GetTimer().Start(TIMER_CONVERT_USER_RESPONSE,
@@ -771,7 +769,7 @@ IMS_BOOL MtcCallState::IsNeedToIgnore(IN ISession* piSession, IN const IMessage*
     {
         if (eState == NegotiationState::STATE_NEGOTIATED)
         {
-            IMS_TRACE_I("IsNeedToIgnore - Offer is included in ACK", 0, 0, 0);
+            IMS_TRACE_D("IsNeedToIgnore - Offer is included in ACK", 0, 0, 0);
             return IMS_TRUE;
         }
     }

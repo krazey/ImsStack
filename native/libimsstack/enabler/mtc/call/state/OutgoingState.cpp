@@ -376,7 +376,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPrackDeliveryFailed(IN ISessi
 {
     IMS_SINT32 ePolicy = m_objContext.GetConfigurationProxy().GetInt(
             ConfigVoice::KEY_POLICY_FOR_PRACK_DELIVERY_FAILURE_INT);
-    IMS_TRACE_D("SessionPrackDeliveryFailed : Policy[%d]", ePolicy, 0, 0);
 
     if (ePolicy == ConfigVoice::PRACK_DELIVERY_FAILURE_POLICY_IGNORE)
     {
@@ -394,7 +393,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPrackDeliveryFailed(IN ISessi
     // So, do not consider that case.
     IMS_SINT32 nStatusCode = m_objContext.GetMessageUtils().GetResponseStatusCode(
             piSession, IMessage::SESSION_PRACK);
-    IMS_TRACE_D("SessionPrackDeliveryFailed statusCode[%d]", nStatusCode, 0, 0);
 
     CallReasonInfo objReason = CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_PRACK);
     IMS_BOOL bRestorationRequired;
@@ -647,7 +645,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
 
 PUBLIC VIRTUAL CallStateName OutgoingState::UssiStarted(IN ISession* piSession)
 {
-    IMS_TRACE_D("UssiStarted", 0, 0, 0);
     return SessionStarted(piSession);
 }
 
@@ -891,8 +888,6 @@ void OutgoingState::HandleCancel(IN ISession* piSession, IN const CallReasonInfo
 PRIVATE
 CallStateName OutgoingState::MaySendPreconditionConfirmation(IN ISession& objSession)
 {
-    IMS_TRACE_D("MaySendPreconditionConfirmation", 0, 0, 0);
-
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
     if (objMediaManager.GetNegotiationState(&objSession) != NegotiationState::STATE_NEGOTIATED ||
             objMediaManager.IsPreviewMode(&objSession))
@@ -909,6 +904,7 @@ CallStateName OutgoingState::MaySendPreconditionConfirmation(IN ISession& objSes
     objMediaManager.AdjustDirectionForLocalResourceConfirmation(
             objSession, m_objContext.GetSession(&objSession)->GetCallType());
 
+    IMS_TRACE_D("MaySendPreconditionConfirmation : Send", 0, 0, 0);
     if (SendEarlyUpdate(UpdateType::NORMAL, m_objContext.GetSession(&objSession)) == IMS_FAILURE)
     {
         IMS_TRACE_E(0, "MaySendPreconditionConfirmation : Fail to send early UPDATE.", 0, 0, 0);
@@ -954,7 +950,7 @@ CallReasonInfo OutgoingState::MayGetUpdatedReasonByResponseWaitTimeout(
 PRIVATE
 CallStateName OutgoingState::HandleSilentRedialReason(IN const CallReasonInfo& objReason)
 {
-    IMS_TRACE_D("HandleSilentRedialReason", 0, 0, 0);
+    IMS_TRACE_D("HandleSilentRedialReason : extraCode[%d]", objReason.nExtraCode, 0, 0);
     m_pSilentRedialHelper =
             &m_objContext.GetCallController().GetRedialHelper(m_objContext, objReason);
 
@@ -1088,7 +1084,6 @@ CallStateName OutgoingState::HandleAudioPortZero(IN ISession* piSession)
 
     if (m_objContext.IsUssi())
     {
-        IMS_TRACE_I("HandleAudioPortZero : Ignore for USSI", 0, 0, 0);
         return GetStateName();
     }
 

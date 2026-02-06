@@ -285,8 +285,6 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
 
 PUBLIC VIRTUAL CallStateName EstablishedState::TerminateUssi(IN const CallReasonInfo& objReason)
 {
-    IMS_TRACE_D("TerminateUssi", 0, 0, 0);
-
     if (objReason.nCode == CODE_INTERNAL_USSI_COMPLETED)
     {
         return Terminate(objReason);
@@ -300,8 +298,6 @@ PUBLIC VIRTUAL CallStateName EstablishedState::TerminateUssi(IN const CallReason
 
 PUBLIC VIRTUAL CallStateName EstablishedState::UssiTerminated(IN ISession* piSession)
 {
-    IMS_TRACE_D("UssiTerminated", 0, 0, 0);
-
     const IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_TERMINATE);
     UssiController* pUssiController = m_objContext.GetUssiController();
 
@@ -315,8 +311,6 @@ PUBLIC VIRTUAL CallStateName EstablishedState::UssiTerminated(IN ISession* piSes
 
 PUBLIC VIRTUAL CallStateName EstablishedState::SendUssd(IN const AString& strUssd)
 {
-    IMS_TRACE_D("SendUssi", 0, 0, 0);
-
     SendInfoForUssi(strUssd);
     return GetStateName();
 }
@@ -324,7 +318,6 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SendUssd(IN const AString& strUss
 PUBLIC VIRTUAL CallStateName EstablishedState::UssiInfoReceived(
         IN ISession* /*piSession*/, IN ISipServerConnection* piSipServerConnection)
 {
-    IMS_TRACE_D("UssiInfoReceived", 0, 0, 0);
     IMS_SINT32 nMethod = piSipServerConnection->GetMethod().ToInt();
 
     if (nMethod != SipMethod::INFO)
@@ -556,7 +549,6 @@ IMS_RESULT EstablishedState::HandleUpdate(
 PRIVATE
 CallReasonInfo EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
 {
-    IMS_TRACE_D("HandleReceivedUpdate", 0, 0, 0);
     IMtcSession* pMtcSession = m_objContext.GetSession();
     ISession& objSession = pMtcSession->GetISession();
     SdpNegotiationResult objNegoResult = m_objContext.GetMediaManager().NegotiateSdp(&objSession);
