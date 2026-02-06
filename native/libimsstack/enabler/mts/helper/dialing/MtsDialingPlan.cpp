@@ -139,7 +139,7 @@ PRIVATE
 IMS_BOOL MtsDialingPlan::FormNonTelUri(
         IN const AString& strTargetAddress, IN IMS_BOOL bAquot, OUT AStringBuffer& objUri)
 {
-    IMS_TRACE_I("FormNonTelUri", 0, 0, 0);
+    IMS_TRACE_D("FormNonTelUri", 0, 0, 0);
 
     objUri.Append(GetScheme());
     objUri.Append(':');
@@ -207,7 +207,7 @@ IMS_BOOL MtsDialingPlan::FormNonTelUri(
 PRIVATE
 IMS_BOOL MtsDialingPlan::FormTelUri(IN const AString& strTargetAddress, OUT AStringBuffer& objUri)
 {
-    IMS_TRACE_I("FormTelUri", 0, 0, 0);
+    IMS_TRACE_D("FormTelUri", 0, 0, 0);
 
     if (strTargetAddress.StartsWith('+'))
     {

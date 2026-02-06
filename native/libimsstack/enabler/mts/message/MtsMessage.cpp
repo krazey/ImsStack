@@ -35,14 +35,11 @@ MtsMessage::MtsMessage(IN IMS_SINT32 nSlotId) :
         m_eSmsFormat(SmsFormatType::SMSFORMAT_INVALID),
         m_eTransactionType(MtsTransactionType::MESSAGE_TYPE_INVALID)
 {
-    IMS_TRACE_I("+MtsMessage [slot_%d]", m_nSlotId, 0, 0);
 }
 
 PUBLIC
 MtsMessage::~MtsMessage()
 {
-    IMS_TRACE_I("~MtsMessage [slot_%d]", m_nSlotId, 0, 0);
-
     if (m_piPageMessage != IMS_NULL)
     {
         m_piPageMessage->Destroy();
@@ -59,12 +56,12 @@ void MtsMessage::PrintInfo()
 {
     if (m_eSmsFormat == SmsFormatType::SMSFORMAT_3GPP)
     {
-        IMS_TRACE_I("PrintInfo : 3GPP(%s), RP_MR(%d), DataSize(%d)", PS_MtiStringFrom3gpp(m_nMti),
+        IMS_TRACE_D("PrintInfo : 3GPP(%s), RP_MR(%d), DataSize(%d)", PS_MtiStringFrom3gpp(m_nMti),
                 m_nMrOfRp, m_nSmSize);
     }
     else if (m_eSmsFormat == SmsFormatType::SMSFORMAT_3GPP2)
     {
-        IMS_TRACE_I(
+        IMS_TRACE_D(
                 "PrintInfo : 3GPP2(%s), DataSize(%d)", PS_MtiStringFrom3gpp2(m_nMti), m_nSmSize, 0);
     }
     else
