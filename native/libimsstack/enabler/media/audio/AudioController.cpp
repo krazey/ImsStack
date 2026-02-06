@@ -123,7 +123,6 @@ IMS_BOOL AudioController::UpdateSession(
     }
 
     UpdateAnbrEnabledConfig(nNegoId, pNegotiatedProfile->IsAnbrSupported());
-    IMS_TRACE_D("UpdateSession(): anbr enabled[%d]", pNegotiatedProfile->IsAnbrSupported(), 0, 0);
 
     IMS_BOOL bRtpConfigChanged = UpdateRtpConfig(nNegoId, nAccessNetwork, pNego);
     IMS_BOOL bQualityThresholdUpdated = UpdateQualityThreshold(nNegoId, pNego);
@@ -382,14 +381,10 @@ void AudioController::HandleForkedSessionUpdate(IN IMS_UINTP nPrevNegoId)
     AudioSession* pPrevAudioSession = FindAudioSession(nPrevNegoId);
     if (pPrevAudioSession != nullptr && pPrevAudioSession->GetPemType() != MEDIA_PEM_TYPE::INACTIVE)
     {
-        IMS_TRACE_D("HandleForkedSessionUpdate(): previous session is active, updating to inactive",
-                0, 0, 0);
         if (pPrevAudioSession->UpdateDirectionToInactiveByPem())
         {
             ModifySession(nPrevNegoId);
             m_bForceModify = IMS_TRUE;
-            IMS_TRACE_D("HandleForkedSessionUpdate() - modifySession called for previous session",
-                    0, 0, 0);
         }
     }
 }
@@ -427,9 +422,6 @@ IMS_BOOL AudioController::UpdateRtpConfig(
 PUBLIC
 IMS_BOOL AudioController::UpdateAnbrEnabledConfig(IN IMS_UINTP nNegoId, IN IMS_BOOL bAnbrEnabled)
 {
-    IMS_TRACE_D("UpdateAnbrEnabledConfig(): NegoId[%" PFLS_x "], anbr enable[%d]", nNegoId,
-            bAnbrEnabled, 0);
-
     if (nNegoId == UNDEFINED_NEGO_ID)
     {
         IMS_TRACE_E(0, "UpdateAnbrEnabledConfig(): invalid param", 0, 0, 0);
@@ -590,9 +582,6 @@ IMS_BOOL AudioController::UpdateMediaDirection(MEDIA_DIRECTION eDirection, IMS_B
 
 PUBLIC void AudioController::SetNetworkToneTimer(IN IMS_UINTP nNegoId, IN IMS_UINT32 nTimer)
 {
-    IMS_TRACE_I("SetNetworkToneTimer(): NegoId[%" PFLS_x "], CurrentNegoId[%" PFLS_x "], timer[%d]",
-            nNegoId, m_nCurrentActiveNegoId, nTimer);
-
     if (nNegoId == UNDEFINED_NEGO_ID)
     {
         nNegoId = m_nCurrentActiveNegoId;

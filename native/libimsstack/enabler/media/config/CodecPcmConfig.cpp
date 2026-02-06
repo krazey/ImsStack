@@ -24,7 +24,6 @@ PUBLIC
 CodecPcmConfig::CodecPcmConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNum) :
         CodecConfig(nType, nPayloadTypeNum)
 {
-    IMS_TRACE_I("+CodecPcmConfig - Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecPcmConfig::~CodecPcmConfig()

@@ -50,7 +50,6 @@ AudioConfiguration::AudioConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
         m_objAudioCandidateAttribute(ImsVector<AString>()),
         m_objAudioInactivityCallEndReasons(ImsVector<IMS_SINT32>())
 {
-    IMS_TRACE_I("+AudioConfiguration - SessionType[%d]", eSessionType, 0, 0);
     m_objAudioCandidateAttribute.Push(DEFAULT_CANDIDATE_ATTRIBUTE);
 }
 
@@ -169,7 +168,6 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
         return IMS_FALSE;
     }
 
-    ToDebugString();
     return IMS_TRUE;
 }
 

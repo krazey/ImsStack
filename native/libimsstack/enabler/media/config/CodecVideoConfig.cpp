@@ -38,7 +38,6 @@ CodecVideoConfig::CodecVideoConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTy
         m_strImageAttr(strImageAttr),
         m_strFrameSize(strFrameSize)
 {
-    IMS_TRACE_I("+CodecVideoConfig - Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecVideoConfig::~CodecVideoConfig()
