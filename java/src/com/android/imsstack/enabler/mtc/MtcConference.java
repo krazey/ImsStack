@@ -291,10 +291,7 @@ public class MtcConference {
             SuppInfo suppInfo = new SuppInfo(parcel);
             long confCallId = 0; //parcel.readLong();
 
-            logi("EXPANDED :: Call Id=" + Long.toHexString(confCallId)
-                    + ", " + MtcCallUtils.toString(callInfo)
-                    + ", " + MtcCallUtils.toString(mediaInfo)
-                    + ", " + MtcCallUtils.toString(suppInfo));
+                logi("EXPANDED :: Call Id=" + Long.toHexString(confCallId));
 
             ImsArgs args = ImsArgs.obtain(callInfo, mediaInfo, suppInfo);
             args.mLongArg = confCallId;
@@ -312,8 +309,6 @@ public class MtcConference {
         {
                 CallReasonInfo callReasonInfo = new CallReasonInfo(parcel);
 
-                logi("EXPANDFAILED :: " + MtcCallUtils.toString(callReasonInfo));
-
                 mCT.updateConferenceState(this,
                         ConferenceTracker.EVENT_EXTEND_FAILED,
                         ImsArgs.obtain(callReasonInfo, null, null));
@@ -329,10 +324,7 @@ public class MtcConference {
             SuppInfo suppInfo = new SuppInfo(parcel);
             long confCallId = parcel.readLong();
 
-            logi("EXPANDED_BY :: confCallId=" + Long.toHexString(confCallId)
-                    + ", " + MtcCallUtils.toString(callInfo)
-                    + ", " + MtcCallUtils.toString(mediaInfo)
-                    + ", " + MtcCallUtils.toString(suppInfo));
+                logi("EXPANDED_BY :: confCallId=" + Long.toHexString(confCallId));
 
             ImsArgs args = ImsArgs.obtain(callInfo, mediaInfo, suppInfo);
             args.mLongArg = confCallId;
@@ -353,11 +345,6 @@ public class MtcConference {
             SuppInfo suppInfo = new SuppInfo(parcel);
             UsersInfo usersInfo = new UsersInfo(parcel);
 
-            logi("MERGED :: " + MtcCallUtils.toString(callInfo)
-                    + ", " + MtcCallUtils.toString(mediaInfo)
-                    + ", " + MtcCallUtils.toString(suppInfo)
-                    + ", " + MtcCallUtils.toString(usersInfo));
-
             mCT.updateConferenceState(this,
                     ConferenceTracker.EVENT_MERGED,
                     ImsArgs.obtain(callInfo, mediaInfo, suppInfo));
@@ -369,8 +356,6 @@ public class MtcConference {
         case IUConf.MERGEFAILED:
         {
                 CallReasonInfo callReasonInfo = new CallReasonInfo(parcel);
-
-                logi("MERGEFAILED :: " + MtcCallUtils.toString(callReasonInfo));
 
                 mCT.updateConferenceState(this,
                         ConferenceTracker.EVENT_MERGE_FAILED,

@@ -558,14 +558,12 @@ public class MtcCall extends Call implements ConferenceTracker {
             }
         }
 
-        log(toString());
+        log("close :: " + toString());
 
         nativeCallId = getNativeCallId();
         callId = getCallId();
 
         super.close();
-
-        logi("close :: object=" + nativeCallId);
 
         setCallState(CallTracker.CALL_STATE_IDLE);
 
@@ -2059,18 +2057,12 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
 
         private void onInitiating(CallInfo callInfo, MediaInfo mediaInfo) {
-            logi("INITIATING");
-
             if (hasListener()) {
                 mListener.onCallInitiating(MtcCall.this, callInfo, mediaInfo);
             }
         }
 
         private void onProgressing(CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo) {
-            logi("PROGRESSING :: " + MtcCallUtils.toString(callInfo)
-                    + ", " + MtcCallUtils.toString(mediaInfo)
-                    + ", " + MtcCallUtils.toString(suppInfo));
-
             // Update the call/media info.
             updateCallParameters(callInfo, mediaInfo, suppInfo);
 
@@ -2083,10 +2075,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
 
         private void onStarted(CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo) {
-            logi("STARTED :: " + MtcCallUtils.toString(callInfo)
-                    + ", " + MtcCallUtils.toString(mediaInfo)
-                    + ", " + MtcCallUtils.toString(suppInfo));
-
             setCallState(CallTracker.CALL_STATE_OFFHOOK);
 
             // Update the call/media info.
@@ -2118,8 +2106,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
 
         private void onStartFailed(CallReasonInfo callReasonInfo) {
-            logi("START_FAILED :: " + MtcCallUtils.toString(callReasonInfo));
-
             if (isCallFailedByAlreadyOpenedServiceClosed(callReasonInfo)) {
                 if (mEmergencyCallFailureListener != null && mEmergencyCallFailureListener
                         .onEmergencyCallFailedByAlreadyOpenedServiceClosed()) {
@@ -2153,8 +2139,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
 
         private void onTerminated(CallReasonInfo callReasonInfo) {
-            logi("TERMINATED :: " + MtcCallUtils.toString(callReasonInfo));
-
             clearHoldState();
             setCallState(CallTracker.CALL_STATE_IDLE);
 
@@ -2170,10 +2154,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
 
         private void onHeld(CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo) {
-            logi("HELD :: " + MtcCallUtils.toString(callInfo)
-                    + ", " + MtcCallUtils.toString(mediaInfo)
-                    + ", " + MtcCallUtils.toString(suppInfo));
-
             setOnHold(true);
 
             // Update the call/media info.
@@ -2188,18 +2168,12 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
 
         private void onHoldFailed(CallReasonInfo callReasonInfo) {
-            logi("HOLD_FAILED :: " + MtcCallUtils.toString(callReasonInfo));
-
             if (hasListener()) {
                 mListener.onCallHoldFailed(MtcCall.this, callReasonInfo);
             }
         }
 
         private void onHeldBy(CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo) {
-            logi("HELD_BY :: " + MtcCallUtils.toString(callInfo)
-                    + ", " + MtcCallUtils.toString(mediaInfo)
-                    + ", " + MtcCallUtils.toString(suppInfo));
-
             setOnHeld(true);
 
             // Update the call/media info.
@@ -2214,10 +2188,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
 
         private void onResumed(CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo) {
-            logi("RESUMED :: " + MtcCallUtils.toString(callInfo)
-                    + ", " + MtcCallUtils.toString(mediaInfo)
-                    + ", " + MtcCallUtils.toString(suppInfo));
-
             // Update the call/media info.
             updateCallParameters(callInfo, mediaInfo, suppInfo);
 
@@ -2238,18 +2208,12 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
 
         private void onResumeFailed(CallReasonInfo callReasonInfo) {
-            logi("RESUME_FAILED :: " + MtcCallUtils.toString(callReasonInfo));
-
             if (hasListener()) {
                 mListener.onCallResumeFailed(MtcCall.this, callReasonInfo);
             }
         }
 
         private void onResumedBy(CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo) {
-            logi("RESUMED_BY :: " + MtcCallUtils.toString(callInfo)
-                    + ", " + MtcCallUtils.toString(mediaInfo)
-                    + ", " + MtcCallUtils.toString(suppInfo));
-
             setUpdateState(UPDATE_STATE_IDLE);
             setOnHeld(false);
 
@@ -2265,10 +2229,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
 
         private void onUpdatedBy(CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo) {
-            logi("UPDATED_BY :: " + MtcCallUtils.toString(callInfo)
-                    + ", " + MtcCallUtils.toString(mediaInfo)
-                    + ", " + MtcCallUtils.toString(suppInfo));
-
             // Update the call/media info.
             updateCallParameters(callInfo, mediaInfo, suppInfo);
 
@@ -2289,10 +2249,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
 
         private void onUpdated(CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo) {
-            logi("UPDATED :: " + MtcCallUtils.toString(callInfo)
-                    + ", " + MtcCallUtils.toString(mediaInfo)
-                    + ", " + MtcCallUtils.toString(suppInfo));
-
             // Update the call/media info.
             updateCallParameters(callInfo, mediaInfo, suppInfo);
             setCallExtraBoolean(EXTRA_CONFERENCE_AVAIL,
@@ -2341,8 +2297,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
 
         private void onUpdateFailed(CallReasonInfo callReasonInfo) {
-            logi("UPDATE_FAILED :: " + MtcCallUtils.toString(callReasonInfo));
-
             setUpdateState(UPDATE_STATE_IDLE);
 
             if (hasListener()) {
@@ -2351,11 +2305,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
 
         private void onIncomingUpdate(CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo) {
-            logi("INCOMING_UPDATE :: updateState=" + updateStateToString(getUpdateState())
-                    + ", " + MtcCallUtils.toString(callInfo)
-                    + ", " + MtcCallUtils.toString(mediaInfo)
-                    + ", " + MtcCallUtils.toString(suppInfo));
-
             if (getUpdateState() == UPDATE_STATE_SENT) {
                 rejectInternal(MtcCall.this, IUMtcCall.REJECT_UPDATE,
                         CallReasonInfo.CODE_REJECT_ONGOING_CALL_UPGRADE);
@@ -2371,11 +2320,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
 
         private void onIncomingResume(CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo) {
-            logi("INCOMING_RESUME :: updateState=" + updateStateToString(getUpdateState())
-                    + ", " + MtcCallUtils.toString(callInfo)
-                    + ", " + MtcCallUtils.toString(mediaInfo)
-                    + ", " + MtcCallUtils.toString(suppInfo));
-
             setUpdateState(UPDATE_STATE_RESUME_RECEIVED);
 
             if (hasListener()) {
@@ -2385,7 +2329,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
 
         private void onIncomingCallReceived(IncomingMtcCall incomingCall) {
-            logi("INCOMING_CALL_RECEIVED");
             setDetails(Details.ON_PRE_INCOMING, false);
             setRemoteNumber(incomingCall.callerPartyNum);
             updateCallExtras(incomingCall);
@@ -2405,8 +2348,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
 
         private void onEctCompleted(int result, CallReasonInfo callReasonInfo) {
-            logi("ECT_COMPLETED :: result=" + result);
-
             if (!hasListener()) {
                 return;
             }
@@ -2420,10 +2361,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
         private void onReplacedBy(CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo,
                 long newNativeCallId, int typeForReplacedBy) {
-            logi("REPLACED_BY :: newCallId=" + Long.toHexString(newNativeCallId)
-                    + ", " + MtcCallUtils.toString(callInfo)
-                    + ", " + MtcCallUtils.toString(mediaInfo)
-                    + ", " + MtcCallUtils.toString(suppInfo));
+            logi("REPLACED_BY :: newCallId=" + Long.toHexString(newNativeCallId));
 
             if (!hasListener()) {
                 return;
