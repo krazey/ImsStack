@@ -30,7 +30,9 @@ RegRefreshHelper::RegRefreshHelper(IN IRefreshable* piRefreshable) :
 
 PUBLIC VIRTUAL RegRefreshHelper::~RegRefreshHelper()
 {
+#ifdef __IMS_CORE_DEBUG__
     IMS_TRACE_D("Destructor :: RegRefreshHelper", 0, 0, 0);
+#endif
 }
 
 PUBLIC VIRTUAL IMS_RESULT RegRefreshHelper::SendRefreshRequest(IN ISipClientConnection* piScc)

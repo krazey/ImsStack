@@ -286,8 +286,7 @@ SipStackTransaction* SipStackState::RemoveTransaction(IN ::SipTxnKey* pKey, IN I
     if (nKeyIndex < 0)
     {
         // Transaction not found
-        IMS_TRACE_D("REMOVE :: TXN (%s) NOT FOUND, BUT OK!!!", SipStack::TxnKey_GetViaBranch(pKey),
-                0, 0);
+        IMS_TRACE_D("RemoveTransaction(%s): not found", SipStack::TxnKey_GetViaBranch(pKey), 0, 0);
         return IMS_NULL;
     }
 
@@ -303,7 +302,7 @@ SipStackTransaction* SipStackState::RemoveTransaction(IN ::SipTxnKey* pKey, IN I
             // Matched transaction found ...
             if (nOption == TXN_REMOVE)
             {
-                IMS_TRACE_D("REMOVE TRANSACTION - S (%d)", GetTransactionCount(), 0, 0);
+                IMS_UINT32 nOldTxnCount = GetTransactionCount();
 
                 objTransactions.RemoveAt(i);
 
@@ -316,7 +315,7 @@ SipStackTransaction* SipStackState::RemoveTransaction(IN ::SipTxnKey* pKey, IN I
                 // DEBUG ...
                 SipStack::DisplayTxnKey(pTransaction->GetKey());
 
-                IMS_TRACE_D("REMOVE TRANSACTION - E (%d)", GetTransactionCount(), 0, 0);
+                IMS_TRACE_D("RemoveTransaction (%d >> %d)", nOldTxnCount, GetTransactionCount(), 0);
             }
 
             return pTransaction;

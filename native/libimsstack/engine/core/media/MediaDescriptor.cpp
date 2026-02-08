@@ -162,8 +162,7 @@ PRIVATE VIRTUAL ImsList<AString> MediaDescriptor::GetAttributes() const
     if (pMediaParam == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
-
-        IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
+        IMS_TRACE_D("No peer media parameter", 0, 0, 0);
         return ImsList<AString>();
     }
 
@@ -187,8 +186,7 @@ PRIVATE VIRTUAL ImsList<AString> MediaDescriptor::GetBandwidthInfo() const
     if (pMediaParam == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
-
-        IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
+        IMS_TRACE_D("No peer media parameter", 0, 0, 0);
         return ImsList<AString>();
     }
 
@@ -212,8 +210,7 @@ PRIVATE VIRTUAL AString MediaDescriptor::GetMediaDescription() const
     if (pMediaParam == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
-
-        IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
+        IMS_TRACE_D("No peer media parameter", 0, 0, 0);
         return AString::ConstNull();
     }
 
@@ -234,8 +231,7 @@ PRIVATE VIRTUAL AString MediaDescriptor::GetMediaTitle() const
     if (pMediaParam == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
-
-        IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
+        IMS_TRACE_D("No peer media parameter", 0, 0, 0);
         return AString::ConstNull();
     }
 
@@ -608,8 +604,7 @@ PRIVATE VIRTUAL const AString& MediaDescriptor::GetAttribute(
     if (pMediaParam == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
-
-        IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
+        IMS_TRACE_D("No peer media parameter", 0, 0, 0);
         return AString::ConstNull();
     }
 
@@ -659,8 +654,7 @@ PRIVATE VIRTUAL ImsList<AString> MediaDescriptor::GetAttributes(
     if (pMediaParam == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
-
-        IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
+        IMS_TRACE_D("No peer media parameter", 0, 0, 0);
         return ImsList<AString>();
     }
 
@@ -725,8 +719,7 @@ PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetAttributeInt(
     if (pMediaParam == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
-
-        IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
+        IMS_TRACE_D("No peer media parameter", 0, 0, 0);
         return INVALID_VALUE;
     }
 
@@ -820,8 +813,7 @@ PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetBandwidth(
     if (pMediaParam == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
-
-        IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
+        IMS_TRACE_D("No peer media parameter", 0, 0, 0);
         return INVALID_VALUE;
     }
 
@@ -854,8 +846,7 @@ PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetDirection() const
     if (pMediaParam == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
-
-        IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
+        IMS_TRACE_D("No peer media parameter", 0, 0, 0);
         return Sdp::DIRECTION_NONE;
     }
 
@@ -869,8 +860,7 @@ PRIVATE VIRTUAL const SdpMedia* MediaDescriptor::GetMediaDescriptionEx() const
     if (pMediaParam == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
-
-        IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
+        IMS_TRACE_D("No peer media parameter", 0, 0, 0);
         return IMS_NULL;
     }
 
@@ -886,10 +876,8 @@ PRIVATE VIRTUAL const ImsList<SdpMediaFormat*>& MediaDescriptor::GetMediaFormats
     if (pMediaParam == IMS_NULL)
     {
         static ImsList<SdpMediaFormat*> objMediaFormats;
-
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
-
-        IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
+        IMS_TRACE_D("No peer media parameter", 0, 0, 0);
         return objMediaFormats;
     }
 
@@ -1483,7 +1471,7 @@ PRIVATE VIRTUAL const AString& MediaDescriptor::GetRemoteAddressAsString() const
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
+        IMS_TRACE_D("No peer media parameter", 0, 0, 0);
         return AString::ConstNull();
     }
 
@@ -1502,7 +1490,7 @@ PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetRemotePort() const
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
+        IMS_TRACE_D("No peer media parameter", 0, 0, 0);
         return 0;
     }
 
@@ -1518,8 +1506,7 @@ PRIVATE VIRTUAL const SdpPrecondition* MediaDescriptor::GetPrecondition(
     if (pMediaParam == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
-
-        IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
+        IMS_TRACE_D("No peer media parameter", 0, 0, 0);
         return IMS_NULL;
     }
 

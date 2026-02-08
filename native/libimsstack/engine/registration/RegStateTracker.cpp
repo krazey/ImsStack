@@ -81,7 +81,9 @@ PUBLIC VIRTUAL RegStateTracker::~RegStateTracker()
         delete m_pContactAddressForOutgoingMessage;
     }
 
+#ifdef __IMS_CORE_DEBUG__
     IMS_TRACE_D("Destructor :: RegStateTracker", 0, 0, 0);
+#endif
 }
 
 PUBLIC

@@ -154,6 +154,7 @@ PUBLIC VIRTUAL Session::~Session()
 
 PUBLIC VIRTUAL void Session::Destroy()
 {
+    IMS_TRACE_D("Session: Destroy", 0, 0, 0);
     CleanupOnDestroy();
     ServiceMethod::Destroy();
     GetService()->DeregisterMethod(this);
@@ -4262,7 +4263,6 @@ IMS_BOOL Session::CheckNCreateSessionDescriptor()
     {
         if (m_pSessionDescriptor != IMS_NULL)
         {
-            IMS_TRACE_D("SessionDescriptor already exists", 0, 0, 0);
             return IMS_TRUE;
         }
 
@@ -4296,7 +4296,6 @@ IMS_BOOL Session::CheckNCreateSessionDescriptor()
     {
         if (m_pSessionDescriptor != IMS_NULL)
         {
-            IMS_TRACE_D("SessionDescriptor already exists", 0, 0, 0);
             return IMS_TRUE;
         }
 
@@ -4400,7 +4399,9 @@ IMS_BOOL Session::CheckNTerminateSession(IN const ISipMessage* piSipMsg)
 {
     if (!m_bTerminatePending)
     {
+#ifdef __IMS_CORE_DEBUG__
         IMS_TRACE_D("No pending terminate()", 0, 0, 0);
+#endif
         return IMS_FALSE;
     }
 
@@ -5142,7 +5143,6 @@ void Session::RemoveSessionFromCallControlHelper()
 {
     if (m_strSessionIdForCallControl.GetLength() <= 0)
     {
-        IMS_TRACE_D("No session id for the 3rd-party call control", 0, 0, 0);
         return;
     }
 

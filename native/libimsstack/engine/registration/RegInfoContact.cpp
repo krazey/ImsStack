@@ -48,8 +48,10 @@ RegInfoContact::RegInfoContact() :
 
 PUBLIC VIRTUAL RegInfoContact::~RegInfoContact()
 {
+#ifdef __IMS_CORE_DEBUG__
     IMS_TRACE_D("Destructor :: uri=%s, id=%s", SipDebug::GetUri1(m_objUri.ToString()).GetStr(),
             m_strId.GetStr(), 0);
+#endif
 }
 
 PUBLIC VIRTUAL const AString& RegInfoContact::GetUnknownParameter(IN const AString& strName) const
@@ -316,7 +318,9 @@ void RegInfoContact::SetCallId(IN const INamedNodeMap* piNodeMap)
 
     if (piNode == IMS_NULL)
     {
+#ifdef __IMS_CORE_DEBUG__
         IMS_TRACE_D("No 'callid' attribute", 0, 0, 0);
+#endif
         return;
     }
 
@@ -330,7 +334,9 @@ void RegInfoContact::SetCSeq(IN const INamedNodeMap* piNodeMap)
 
     if (piNode == IMS_NULL)
     {
+#ifdef __IMS_CORE_DEBUG__
         IMS_TRACE_D("No 'cseq' attribute", 0, 0, 0);
+#endif
         return;
     }
 
@@ -353,7 +359,9 @@ void RegInfoContact::SetDurationRegistered(IN const INamedNodeMap* piNodeMap)
 
     if (piNode == IMS_NULL)
     {
+#ifdef __IMS_CORE_DEBUG__
         IMS_TRACE_D("No 'duration-registered' attribute", 0, 0, 0);
+#endif
         return;
     }
 
@@ -430,7 +438,9 @@ void RegInfoContact::SetExpiresValue(IN const INamedNodeMap* piNodeMap)
 
     if (piNode == IMS_NULL)
     {
+#ifdef __IMS_CORE_DEBUG__
         IMS_TRACE_D("No 'expires' attribute", 0, 0, 0);
+#endif
         return;
     }
 
@@ -469,7 +479,9 @@ void RegInfoContact::SetQValue(IN const INamedNodeMap* piNodeMap)
 
     if (piNode == IMS_NULL)
     {
+#ifdef __IMS_CORE_DEBUG__
         IMS_TRACE_D("No 'q' attribute", 0, 0, 0);
+#endif
         return;
     }
 
@@ -484,7 +496,9 @@ void RegInfoContact::SetRetryAfterValue(IN const INamedNodeMap* piNodeMap)
 
     if (piNode == IMS_NULL)
     {
+#ifdef __IMS_CORE_DEBUG__
         IMS_TRACE_D("No 'retry-after' attribute", 0, 0, 0);
+#endif
         return;
     }
 
@@ -659,6 +673,7 @@ void RegInfoContact::SetUnknownParameter(IN INode* piNode)
         }
     }
 
+#ifdef __IMS_CORE_DEBUG__
     if (!IMS_UTIL_SYS_PROP_IS_SERVER_INFO_HIDDEN_IN_LOG())
     {
         if (strValue.IsEmpty())
@@ -671,6 +686,7 @@ void RegInfoContact::SetUnknownParameter(IN INode* piNode)
                     SipDebug::GetCharA1(strValue.GetStr(), 6), 0);
         }
     }
+#endif
 
     m_objUnknownParameters.SetValue(strName, strValue);
 }

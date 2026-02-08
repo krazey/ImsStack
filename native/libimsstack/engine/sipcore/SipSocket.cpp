@@ -20,7 +20,6 @@
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
 #include "ServiceTrace.h"
-#include "ServiceUtil.h"
 
 #include "ISipKeepAliveListener.h"
 #include "ISipSocketListener.h"
@@ -404,15 +403,10 @@ void SipSocket::SetSocketOptions(IN const IpAddress& objLocalIp, IN IMS_UINT32 n
                 IMS_TRACE_E(0, "Setting IP-level QoS failed", 0, 0, 0);
             }
 
-            if (IMS_UTIL_SYS_PROP_IS_DEBUG_MODE())
-            {
-                IMS_TRACE_D("SipSocket :: OPT_IP_QOS (option=0x%02X)", pIpQos->nValue, 0, 0);
-            }
+#ifdef __IMS_SIP_DEBUG__
+            IMS_TRACE_D("SipSocket: OPT_IP_QOS (option=0x%02X)", pIpQos->nValue, 0, 0);
+#endif
         }
-    }
-    else if (IMS_UTIL_SYS_PROP_IS_DEBUG_MODE())
-    {
-        IMS_TRACE_D("SipSocket :: OPT_IP_QOS is not configured", 0, 0, 0);
     }
 }
 
@@ -448,10 +442,9 @@ PROTECTED GLOBAL void SipSocket::SetSocketOption(IN IMS_SINT32 nSlotId, IN ISock
                 IMS_TRACE_E(0, "Setting %s failed", pszOptionName, 0, 0);
             }
 
-            if (IMS_UTIL_SYS_PROP_IS_DEBUG_MODE())
-            {
-                IMS_TRACE_D("SipSocket :: %s (option=%d)", pszOptionName, pSockOpt->nValue, 0);
-            }
+#ifdef __IMS_SIP_DEBUG__
+            IMS_TRACE_D("SipSocket: %s (option=%d)", pszOptionName, pSockOpt->nValue, 0);
+#endif
         }
     }
 }

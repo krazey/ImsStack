@@ -35,7 +35,9 @@ PublicationRefreshHelper::PublicationRefreshHelper(
 
 PUBLIC VIRTUAL PublicationRefreshHelper::~PublicationRefreshHelper()
 {
+#ifdef __IMS_CORE_DEBUG__
     IMS_TRACE_D("Destructor :: PublicationRefreshHelper", 0, 0, 0);
+#endif
 }
 
 PUBLIC VIRTUAL IMS_RESULT PublicationRefreshHelper::SendRefreshRequest(

@@ -29,13 +29,17 @@ ReliableProvResponseHelper::ReliableProvResponseHelper(IN IMS_BOOL bIsMobileOrig
         m_nRSeqNumber(1),
         m_nCSeqNumber(0)
 {
+#ifdef __IMS_CORE_DEBUG__
     IMS_TRACE_D("Constructor :: ReliableProvResponseHelper", 0, 0, 0);
+#endif
 }
 
 PUBLIC
 ReliableProvResponseHelper::~ReliableProvResponseHelper()
 {
+#ifdef __IMS_CORE_DEBUG__
     IMS_TRACE_D("Destructor :: ReliableProvResponseHelper", 0, 0, 0);
+#endif
 }
 
 PUBLIC

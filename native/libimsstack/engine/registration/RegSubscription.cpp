@@ -16,7 +16,6 @@
 #include "ISystemProperty.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "ServiceUtil.h"
 
 #include "ImsIdentity.h"
 
@@ -147,7 +146,9 @@ PUBLIC VIRTUAL RegSubscription::~RegSubscription()
     ImsCoreContext::GetInstance()->GetSipConnectionNotifierManager()->ReleaseConnectionNotifier(
             m_piReferredScn);
 
+#ifdef __IMS_CORE_DEBUG__
     IMS_TRACE_D("Destructor :: RegSubscription", 0, 0, 0);
+#endif
 }
 
 PUBLIC VIRTUAL ISipMessage* RegSubscription::GetNextRequest()
@@ -944,13 +945,11 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::Dialog_NotifyRequest(IN ISipServerConn
 
             AString strRegInfo = piBodyPart->GetContent().ToString();
 
+#ifdef __IMS_CORE_DEBUG__
             strContentType.Prepend("REG_INFO ( ");
             strContentType.Append(" )");
-
-            if (!IMS_UTIL_SYS_PROP_IS_SERVER_INFO_HIDDEN_IN_LOG())
-            {
-                IMS_TRACE_XML(strContentType.GetStr(), strRegInfo.GetStr(), strRegInfo.GetLength());
-            }
+            IMS_TRACE_XML(strContentType.GetStr(), strRegInfo.GetStr(), strRegInfo.GetLength());
+#endif
 
             ImsCoreContext::GetInstance()->GetRegInfoManager()->Update(m_objRegKey, strRegInfo);
 

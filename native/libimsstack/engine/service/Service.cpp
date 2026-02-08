@@ -196,7 +196,6 @@ PUBLIC VIRTUAL IMS_BOOL Service::CreateConfig(IN const AppConfig& objAppConfig)
         }
     }
 
-    // __IMS_DEBUG__
     if (pServiceConfig != IMS_NULL)
     {
         IMS_TRACE_D("Service :: IARI (%s)", pServiceConfig->GetIari().ToString().GetStr(), 0, 0);

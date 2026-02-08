@@ -487,7 +487,6 @@ PUBLIC VIRTUAL IMS_SINT32 SdpOaState::GetSessionCurrentView(
 {
     if (m_nState != STATE_ESTABLISHED)
     {
-        IMS_TRACE_D("SessionCurrentView :: Invalid state (%d)", m_nState, 0, 0);
         return ISdpOaState::RESULT_INVALID_STATE;
     }
 
@@ -608,7 +607,7 @@ PUBLIC VIRTUAL IMS_SINT32 SdpOaState::GetMediaPeerView(
 {
     if (m_pPeerView == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Error (Peer View does not exist)", 0, 0, 0);
+        IMS_TRACE_D("No peer view", 0, 0, 0);
         return ISdpOaState::RESULT_ERROR;
     }
 

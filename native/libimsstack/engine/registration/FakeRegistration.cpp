@@ -60,10 +60,12 @@ PUBLIC VIRTUAL FakeRegistration::~FakeRegistration()
 
     RegBindingProxy::DestroyBinding(GetSlotId(), this);
 
+#ifdef __IMS_CORE_DEBUG__
     IMS_TRACE_D("Destructor :: Registration - %s",
             (m_pRegFlow != IMS_NULL) ? SipDebug::GetCharA1(m_pRegFlow->GetCallId().GetStr(), 8, '@')
                                      : "__UNKNOWN__",
             0, 0);
+#endif
 
     if (m_pRegFlow != IMS_NULL)
     {
@@ -684,7 +686,7 @@ PRIVATE VIRTUAL void FakeRegistration::RemoveObserver(IN RegObserver* pObserver)
 
 PRIVATE VIRTUAL IMS_SINT32 FakeRegistration::AddReferenceForScnErrorListener()
 {
-#ifdef __IMS_DEBUG__
+#ifdef __IMS_CORE_DEBUG__
     IMS_TRACE_D("Registration :: SCNEL (add) - %d >> %d", m_nRefCountForScnErrorListener,
             (m_nRefCountForScnErrorListener + 1), 0);
 #endif
@@ -698,7 +700,7 @@ PRIVATE VIRTUAL IMS_SINT32 FakeRegistration::RemoveReferenceForScnErrorListener(
 {
     if (m_nRefCountForScnErrorListener > 0)
     {
-#ifdef __IMS_DEBUG__
+#ifdef __IMS_CORE_DEBUG__
         IMS_TRACE_D("Registration :: SCNEL (remove) - %d >> %d", m_nRefCountForScnErrorListener,
                 (m_nRefCountForScnErrorListener - 1), 0);
 #endif

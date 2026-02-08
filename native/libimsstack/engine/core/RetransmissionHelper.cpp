@@ -57,7 +57,9 @@ RetransmissionHelper::RetransmissionHelper(
 
 PUBLIC VIRTUAL RetransmissionHelper::~RetransmissionHelper()
 {
+#ifdef __IMS_CORE_DEBUG__
     IMS_TRACE_D("Destructor :: RetransmissionHelper", 0, 0, 0);
+#endif
 
     if (m_piTimer != IMS_NULL)
     {

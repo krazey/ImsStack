@@ -23,7 +23,7 @@ class StreamMedia : public Media
 {
 public:
     StreamMedia(IN Service* pService, IN ISdpOaState* piOaState);
-    ~StreamMedia() override;
+    ~StreamMedia() override = default;
 
     StreamMedia(IN const StreamMedia&) = delete;
     StreamMedia& operator=(IN const StreamMedia&) = delete;

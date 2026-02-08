@@ -48,8 +48,10 @@ PUBLIC VIRTUAL RegInfoRegistration::~RegInfoRegistration()
         }
     }
 
+#ifdef __IMS_CORE_DEBUG__
     IMS_TRACE_D("Destructor :: aor=%s, id=%s", SipDebug::GetUri1(m_objAor.ToString()).GetStr(),
             m_strId.GetStr(), 0);
+#endif
 }
 
 PUBLIC VIRTUAL IRegInfoContact* RegInfoRegistration::GetContact(

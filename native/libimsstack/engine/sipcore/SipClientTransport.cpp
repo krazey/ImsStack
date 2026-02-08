@@ -379,9 +379,6 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::ReserveResource(
             return IMS_FALSE;
         }
 
-        IMS_TRACE_D("ClientTransport :: server (%s, %d, %d) is created",
-                SipDebug::GetIp(objSsa.GetIpAddress()), objSsa.GetPort(), objSsa.GetType());
-
         m_pServerSocket->SetListener(this);
     }
 

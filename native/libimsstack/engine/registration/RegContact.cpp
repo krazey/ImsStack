@@ -118,8 +118,10 @@ PUBLIC VIRTUAL RegContact::~RegContact()
 
     RemoveAllHeaderParameters();
 
+#ifdef __IMS_CORE_DEBUG__
     IMS_TRACE_D("Destructor :: RegContact (%s, %d)", SipDebug::GetIp(m_objIpAddr),
             m_objContactAddress.GetPort(), 0);
+#endif
 }
 
 PUBLIC VIRTUAL IMS_UINT32 RegContact::GetExpires() const

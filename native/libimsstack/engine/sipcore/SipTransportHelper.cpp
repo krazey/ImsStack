@@ -1027,7 +1027,9 @@ SipSocket* SipTransportHelper::LookupStreamSocket(IN const SipSocketAddress& obj
 
         pSocket->GetSockName(objIp, nPort);
 
+#ifdef __IMS_SIP_DEBUG__
         IMS_TRACE_D("Lookup :: TCP client (%s, %d) at (%d)", SipDebug::GetIp(objIp), nPort, i);
+#endif
 
         if (objIp.Equals(objSockAddr.GetIpAddress()) &&
                 (nPort == static_cast<IMS_UINT32>(objSockAddr.GetPort())) &&
@@ -1076,7 +1078,9 @@ SipSocket* SipTransportHelper::LookupStreamSocket(
 
     if (objCandidates.IsEmpty())
     {
+#ifdef __IMS_SIP_DEBUG__
         IMS_TRACE_D("Lookup :: TCP client does not exist; %s", strFarEnd.GetStr(), 0, 0);
+#endif
         return IMS_NULL;
     }
 
@@ -1091,7 +1095,9 @@ SipSocket* SipTransportHelper::LookupStreamSocket(
 
         pSocket->GetSockName(objIp, nPort);
 
+#ifdef __IMS_SIP_DEBUG__
         IMS_TRACE_D("Lookup :: TCP client (%s, %d) at (%d)", SipDebug::GetIp(objIp), nPort, i);
+#endif
 
         if (objIp.Equals(objSockAddr.GetIpAddress()) &&
                 (nPort == static_cast<IMS_UINT32>(objSockAddr.GetPort())))

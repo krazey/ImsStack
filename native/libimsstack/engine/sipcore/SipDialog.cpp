@@ -29,8 +29,10 @@ __IMS_TRACE_TAG_SIP_CORE__;
 PUBLIC
 SipDialog::~SipDialog()
 {
+#ifdef __IMS_SIP_DEBUG__
     IMS_TRACE_D("Destructor :: SipDialog (%s)",
             SipDebug::GetCharA1(m_pDialogEx->GetDialogState()->GetCallId().GetStr(), 8, '@'), 0, 0);
+#endif
 }
 
 PUBLIC
