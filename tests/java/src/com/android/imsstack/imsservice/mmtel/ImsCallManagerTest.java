@@ -44,7 +44,6 @@ import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.PhoneStateInterface;
 import com.android.imsstack.enabler.mtc.CallTracker;
-import com.android.imsstack.enabler.mtc.IECallStateTracker;
 import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcCall;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
@@ -193,15 +192,10 @@ public class ImsCallManagerTest {
 
         // verify checkAndExitEcbm()
         int callAttributes = MtcCall.FLAG_MO | MtcCall.FLAG_EMERGENCY;
-        IECallStateTracker mockIECallStateTracker = Mockito.mock(IECallStateTracker.class);
-        when(mMockCallContext.getECallStateTracker()).thenReturn(mockIECallStateTracker);
-        when(mockIECallStateTracker.isEcbmEntered()).thenReturn(true);
         when(mMockMtcApp.createMtcCallAndAttach(callAttributes)).thenReturn(mMockMtcCall);
         when(mMockMtcCall.isEmergencyCall()).thenReturn(true);
         when(mMockImsCallSession.getCallId()).thenReturn(CALL_ID);
         ImsCallSessionImpl result = mImsCallManager.createSession(profile);
-        verify(mockIECallStateTracker).exitEmergencyCallbackMode(anyBoolean());
-        verify(mMockCallContext).getECallStateTracker();
         verify(mMockMtcApp).createMtcCallAndAttach((MtcCall.FLAG_EMERGENCY | MtcCall.FLAG_MO));
         verify(mMockMtcCall).isEmergencyCall();
         verify(mMockMtcCall, never()).open(anyInt(), anyInt(), anyBoolean(), anyBoolean(),

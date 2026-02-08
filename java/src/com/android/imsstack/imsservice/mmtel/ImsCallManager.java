@@ -29,7 +29,6 @@ import com.android.imsstack.core.agents.PhoneStateInterface;
 import com.android.imsstack.core.config.ServiceCaps;
 import com.android.imsstack.enabler.mtc.CallTracker;
 import com.android.imsstack.enabler.mtc.ConferenceInfoHelper;
-import com.android.imsstack.enabler.mtc.IECallStateTracker;
 import com.android.imsstack.enabler.mtc.IUMtcCall;
 import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcCall;
@@ -144,10 +143,6 @@ public class ImsCallManager {
 
         if (profile.getServiceType() == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
             sessionAttributes |= MtcCall.FLAG_EMERGENCY;
-
-            // ECBM
-            checkAndExitEcbm();
-
             if (String.valueOf(ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN).equals(
                     ImsCallUtils.getCallExtraFromOemExtras(
                             profile, ImsCallProfile.EXTRA_CALL_RAT_TYPE, ""))) {
@@ -398,15 +393,6 @@ public class ImsCallManager {
                 PhoneStateInterface.class, mCallContext.getSlotId());
         if (phoneState != null) {
             phoneState.setImsCallState(state);
-        }
-    }
-
-    private void checkAndExitEcbm() {
-        // It requires to exit an ECBM if emergency call is initiated
-        IECallStateTracker ecst = mCallContext.getECallStateTracker();
-
-        if ((ecst != null) && ecst.isEcbmEntered()) {
-            ecst.exitEmergencyCallbackMode(true);
         }
     }
 

@@ -74,11 +74,6 @@ public interface IMtcCallManager {
     Call getPendingCall(long callId);
 
     /**
-     * Gets {@code MtcECallStateTracker}
-     */
-    MtcECallStateTracker getECallStateTracker();
-
-    /**
      * Gets {@code Call}
      *
      * @param callId a ID which wants to match

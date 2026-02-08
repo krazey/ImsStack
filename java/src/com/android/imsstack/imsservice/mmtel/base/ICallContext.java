@@ -19,7 +19,6 @@ package com.android.imsstack.imsservice.mmtel.base;
 import android.annotation.Nullable;
 
 import com.android.imsstack.enabler.IBaseContext;
-import com.android.imsstack.enabler.mtc.IECallStateTracker;
 
 public interface ICallContext extends IBaseContext {
     public static final int MEDIA_AUDIO = 1;
@@ -36,12 +35,6 @@ public interface ICallContext extends IBaseContext {
      */
     @Nullable
     public ICallLocationPolicy getCallLocationPolicy();
-
-    /**
-     * Returns emergency call state tracker if it's required for this call context.
-     */
-    @Nullable
-    public IECallStateTracker getECallStateTracker();
 
     /**
      * Returns SRVCC state tracker if it's required for this call context.
