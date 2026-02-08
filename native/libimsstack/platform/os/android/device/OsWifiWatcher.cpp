@@ -50,8 +50,6 @@ PUBLIC VIRTUAL IMS_SINT32 OsWifiWatcher::GetState()
         m_nWifiState = IWifiWatcher::STATE_DISCONNECTED;
     }
 
-    IMS_TRACE_D("GetState :: state=%d", m_nWifiState, 0, 0);
-
     return m_nWifiState;
 }
 

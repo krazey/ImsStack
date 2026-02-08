@@ -216,8 +216,6 @@ PRIVATE VIRTUAL void OsTimerService::System_NotifyEvent(
         return;
     }
 
-    IMS_TRACE_D("TimerExpired (timerId=%" PFLS_u ")", nWParam, 0, 0);
-
     m_objLockTimer.Lock();
 
     for (IMS_UINT32 i = 0; i < m_objTimers.GetSize(); ++i)

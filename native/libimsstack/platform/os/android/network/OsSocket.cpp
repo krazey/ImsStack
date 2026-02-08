@@ -2138,6 +2138,13 @@ void OsSocket::OutputDebugString(
     strLog.Sprintf("socket=%d, error=%d(%s), code-line=%s:%d", m_hSocket, nErrorCode,
             strerror(nErrorCode), pszModule, nLine);
 
-    IMS_TRACE_E(nErrorCode, "SocketError - %s", strLog.GetStr(), 0, 0);
+    if (nErrorCode == EINPROGRESS || nErrorCode == EWOULDBLOCK)
+    {
+        IMS_TRACE_I("Socket: %s", strLog.GetStr(), 0, 0);
+    }
+    else
+    {
+        IMS_TRACE_E(nErrorCode, "SocketError: %s", strLog.GetStr(), 0, 0);
+    }
 }
 #endif  // _DEBUG

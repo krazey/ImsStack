@@ -374,7 +374,9 @@ PROTECTED VIRTUAL void OsThread::JoinThread()
 
     if (nResult == 0)
     {
+#ifdef __IMS_DEBUG__
         IMS_TRACE_D("pthread_join - %lu", m_nThreadId, 0, 0);
+#endif
     }
     else if (nResult == EINVAL)
     {

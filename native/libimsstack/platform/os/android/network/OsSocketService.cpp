@@ -353,8 +353,9 @@ IMS_SINT32 SocketFdManager::ResetControlEvent()
 
     if ((m_nCtrlEvent & 0x01) != 0x01)
     {
-        // Comment the below trace later
+#ifdef __IMS_DEBUG__
         IMS_TRACE_D("[SocketCtrlEvent] No control event (%d)", m_nCtrlEvent, 0, 0);
+#endif
         goto EXIT_ResetControlEvent;
     }
 
@@ -402,8 +403,9 @@ IMS_SINT32 SocketFdManager::SetControlEvent()
 
     if ((m_nCtrlEvent & 0x01) == 0x01)
     {
-        // Comment the below trace later
+#ifdef __IMS_DEBUG__
         IMS_TRACE_D("[SocketCtrlEvent] Control event (%d) is already set", m_nCtrlEvent, 0, 0);
+#endif
         goto EXIT_SetControlEvent;
     }
 
@@ -569,14 +571,10 @@ PUBLIC VIRTUAL void OsSocketThread::RunImp()
 
                 if (nMaxEvent <= 0)
                 {
-                    IMS_TRACE_D("[SocketCtrlEvent] READ only enabled", 0, 0, 0);
-                    continue;
-                }
-                else
-                {
 #ifdef __IMS_DEBUG__
-                    IMS_TRACE_D("[SocketCtrlEvent] READ enabled", 0, 0, 0);
+                    IMS_TRACE_D("[SocketCtrlEvent] READ only enabled", 0, 0, 0);
 #endif
+                    continue;
                 }
             }
             // }

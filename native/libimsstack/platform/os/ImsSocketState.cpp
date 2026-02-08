@@ -91,7 +91,9 @@ void ImsSocketState::DestroyDeadSockets()
 
             if (pSocket != IMS_NULL)
             {
+#ifdef __IMS_DEBUG__
                 IMS_TRACE_D("DEAD SOCKET (%p) :: DESTROY", pSocket, 0, 0);
+#endif
                 delete pSocket;
             }
         }

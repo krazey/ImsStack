@@ -405,7 +405,9 @@ PUBLIC VIRTUAL IMS_SINT32 OsPollFdSet::SetEvent(IN IMS_SINT32 nFd, IN IMS_SINT32
         // Ignores the initial CLOSE event for TCP sockets
         if (((nEvent & EVENT_TCP) != 0) && ((nEvent & EVENT_ALL) == EVENT_EXCEPT))
         {
+#ifdef __IMS_DEBUG__
             IMS_TRACE_D("PollFdSet :: TCP CLOSE event will be set later; fd=%d", nFd, 0, 0);
+#endif
             return 0;
         }
 
