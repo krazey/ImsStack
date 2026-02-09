@@ -71,10 +71,10 @@ public:
         EVENT_WRITE = 0x02,
         EVENT_EXCEPT = 0x04,
         EVENT_ALL = 0x0F,
-        /// TCP client socket :: poll() only
+        /// TCP client socket: poll() only
         /// SetEvent(), IsEventSet()
         EVENT_TCP_C = 0x10000,
-        /// TCP sockets :: poll() only
+        /// TCP sockets: poll() only
         /// If this flag is set, the EXCEPT event will be added when any other event is installed
         /// SetEvent()
         EVENT_TCP = 0x20000

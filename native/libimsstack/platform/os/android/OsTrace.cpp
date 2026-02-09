@@ -113,7 +113,7 @@ PUBLIC VIRTUAL void OsTrace::OutV(IN IMS_SINT32 nCategory, IN const IMS_CHAR* ps
 
     pNode->Format(pszFormat, args, strSuffix);
 
-    // When the node is processing...
+    // When the node is processing.
     if (IsLogging())
     {
         AddTraceNode(pNode);
@@ -176,7 +176,6 @@ PRIVATE VIRTUAL void OsTrace::OutputString(IN IMS_SINT32 nCategory, IN IMS_CHAR*
 
     ImsTrace::OutputString(nCategory, pszTrace, nLength, pszLogTag);
 
-    // If serial logging is set ...
     if ((nOption & ITraceOption::OPT_MEDIUM_SERIAL) != 0)
     {
         IMS_UINT32 nCurrentPos = 0;

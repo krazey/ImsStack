@@ -1194,7 +1194,7 @@ IMS_SINT32 AString::GetIndexOf(IN const AString& objStr, IN IMS_SINT32 nOffset /
     const IMS_CHAR* pNeedle = objStr.m_pData->pValue;
     const IMS_CHAR* pHayStack = m_pData->pValue + nOffset;
     const IMS_CHAR* pEnd = m_pData->pValue + (nLen - nOtherLen);
-    // FIXME: __IMS_LP64__
+    // __IMS_LP64__
     const IMS_UINT32 OL_MINUS_1 = nOtherLen - 1;
     IMS_UINT32 nHashNeedle = 0;
     IMS_UINT32 nHashHayStack = 0;
@@ -1298,7 +1298,7 @@ IMS_SINT32 AString::GetLastIndexOf(IN const AString& objStr, IN IMS_SINT32 nOffs
     const IMS_CHAR* pNeedle = objStr.m_pData->pValue;
     const IMS_CHAR* pHayStack = m_pData->pValue + nOffset;
     const IMS_CHAR* pEnd = m_pData->pValue;
-    // FIXME: __IMS_LP64__
+    // __IMS_LP64__
     const IMS_UINT32 OL_MINUS_1 = nOtherLen - 1;
     const IMS_CHAR* pEndOfNeedle = pNeedle + OL_MINUS_1;
     const IMS_CHAR* pEndOfHayStack = pHayStack + OL_MINUS_1;

@@ -187,7 +187,7 @@ typedef double IMS_DOUBLE;
 typedef IMS_SINT32 IMS_RESULT;
 #endif
 
-// START :: definitions for 64-bit platform
+// START: definitions for 64-bit platform
 #ifdef __IMS_LP64__
 
 #ifndef IMS_SINT64
@@ -263,7 +263,7 @@ typedef unsigned int IMS_UINTP;
 
 #define PTR_TO_UINTP(p) (reinterpret_cast<IMS_UINTP>(p))
 #define PTR_TO_SINTP(p) (reinterpret_cast<IMS_SINTP>(p))
-// END :: definitions for 64-bit platform
+// END: definitions for 64-bit platform
 
 // Slot definition for Multi-IMS architecture
 // Slot 0 is a default if not specified

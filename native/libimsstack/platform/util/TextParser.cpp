@@ -558,7 +558,7 @@ PRIVATE GLOBAL IMS_BOOL TextParser::IsParameterValueString(IN const AString& str
 PRIVATE GLOBAL IMS_BOOL TextParser::IsQdText(IN const IMS_CHAR c)
 {
     // HTAB, SP, %x21, %x23-5B, %x5D-7E,
-    // UTF8-NONASCII <- It will be handled another method...
+    // UTF8-NONASCII: It will be handled another method.
     if ((c == 0x09) || (c == 0x20) || (c == 0x21) || ((c >= 0x23) && (c <= 0x5B)) ||
             ((c >= 0x5D) && (c <= 0x7E)))
     {
@@ -624,7 +624,6 @@ PRIVATE GLOBAL IMS_BOOL TextParser::IsQuotedString(IN const AString& strQuotedSt
                 return IMS_FALSE;
             }
 
-            // TODO::????
             if ((strQuotedString[nTrackPos] != CHAR_BACKSLASH) &&
                     (strQuotedString[nTrackPos] != CHAR_DQUOT))
             {
