@@ -141,7 +141,6 @@ PROTECTED VIRTUAL void SubscriberTracker::SubscriberInfo_UpdateImpu(IN IMS_SINT3
     {
         if ((strOld.GetLength() == 0) && (strNew.GetLength() == 0))
         {
-            // Ignore the issue...
             return;
         }
 

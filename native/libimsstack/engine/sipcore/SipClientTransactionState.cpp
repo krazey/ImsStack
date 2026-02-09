@@ -758,7 +758,6 @@ IMS_SINT32 SipClientTransactionState::HandleResponse(IN ::SipMessage* pSipMsg)
 
     if (m_nCSeqNumber != nCSeqNum)
     {
-        // notify the error ???
         IMS_TRACE_E(0, "Sequence number is not ordered - Current (%d), New (%d)", m_nCSeqNumber,
                 nCSeqNum, 0);
         return SipPrivate::MESSAGE_DISCARDED;
@@ -991,7 +990,7 @@ PUBLIC GLOBAL IMS_SINT32 SipClientTransactionState::MatchTransaction(IN ::SipMes
         return SipPrivate::MESSAGE_FAILED;
     }
 
-    // FORKED_RESPONSE :: Check & look up the appropriate client transaction ...
+    // FORKED_RESPONSE: Check & look up the appropriate client transaction.
     // FORKED_RESPONSE_TO_SUPPORT_EARLY_DIALOG_TERMINATION
     RcPtr<SipForkedTransactionManager> pTmpFtm;
 
@@ -1206,7 +1205,7 @@ IMS_BOOL SipClientTransactionState::HandleForkedResponse(IN const SipMessageInfo
         return IMS_FALSE;
     }
 
-    // Add the forked transaction to the forked transaction manager...
+    // Add the forked transaction to the forked transaction manager.
     pForkedCtState->m_pForkedTxnMngr = m_pForkedTxnMngr;
 
     if (!pForkedCtState->m_pForkedTxnMngr.IsNull())

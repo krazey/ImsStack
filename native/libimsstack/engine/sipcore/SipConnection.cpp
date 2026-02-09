@@ -359,7 +359,7 @@ PROTECTED VIRTUAL void SipConnection::Transport_NotifyError(
     // SIP_TRANSPORT_ERROR_REPORT_ON_TXN
     if (!IsTransportErrorReportRequired(nCode, strMessage))
     {
-        // Ignore the transport error...
+        // Ignore the transport error.
         IMS_TRACE_D("SC: transport error report is off.", 0, 0, 0);
         return;
     }

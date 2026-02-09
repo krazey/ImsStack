@@ -616,8 +616,8 @@ IMS_BOOL VirtualSession::CheckNCreateSessionDescriptor()
 
     IMS_SINT32 nOaState = GetOfferAnswerState();
 
-    // IDLE :: 183 response w/o SDP
-    // OFFER_RECEIVED :: 183 response w/ SDP
+    // IDLE: 183 response w/o SDP
+    // OFFER_RECEIVED: 183 response w/ SDP
     if ((nOaState != SdpOaState::STATE_IDLE) && (nOaState != SdpOaState::STATE_OFFER_RECEIVED))
     {
         IMS_TRACE_E(0, "__ SessionDescriptor can't be created in offer/answer state (%d) __",

@@ -116,7 +116,7 @@ private:
     AString m_strEventId;
     // For CSeq number of the NOTIFY request with "terminated"
     // when the subsequent NOTIFY request is received
-    // before sending the response of the previous NOTIFY request...
+    // before sending the response of the previous NOTIFY request.
     IMS_UINT32 m_nCSeqForNotifyWithTerminated;
 };
 

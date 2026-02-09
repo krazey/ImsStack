@@ -1284,7 +1284,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetMediaFormat(IN const SdpMediaForm
                 return IMS_FAILURE;
             }
 
-            // Media format parameter :: rtcp-fb / framesize / ...
+            // Media format parameter: rtcp-fb / framesize / ...
             const ImsList<SdpMediaFormatParameter*>& objExtraParameters =
                     pMediaFormat->GetExtraParameters();
 

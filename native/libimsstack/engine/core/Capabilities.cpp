@@ -656,10 +656,9 @@ PRIVATE VIRTUAL void Capabilities::NotifySipResponse(IN ISipClientConnection* pi
     // Add the response message received
     UpdateResponseOnReceived(IMessage::CAPABILITIES_QUERY, piScc);
 
-    // Handle the response to OPTIONS request ...
+    // Handle the response to OPTIONS request.
     if (SipStatusCode::Is1XX(nStatusCode))
     {
-        // Do nothing ...
         return;
     }
     else if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
@@ -1028,7 +1027,7 @@ void Capabilities::HandleCapabilities(IN const ISipClientConnection* piScc)
             {
                 const AString& strScheme = pAddress->GetScheme();
 
-                // Collects all SIP & TEL URIs ...
+                // Collects all SIP & TEL URIs.
                 if (strScheme.EqualsIgnoreCase(Sip::STR_SIP) ||
                         strScheme.EqualsIgnoreCase(Sip::STR_SIPS) ||
                         strScheme.EqualsIgnoreCase(Sip::STR_TEL))

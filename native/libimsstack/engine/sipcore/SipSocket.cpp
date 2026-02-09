@@ -112,7 +112,7 @@ PUBLIC VIRTUAL IMS_BOOL SipSocket::Create(
         return IMS_FALSE;
     }
 
-    // Check the socket option and set it if it is present...
+    // Check the socket option and set it if it is present.
     SetSocketOptions(objIp, nPort);
 
     if ((m_objSockAddr.GetType() != SipSocketAddress::SOCKET_UDP) &&

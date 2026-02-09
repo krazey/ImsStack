@@ -59,7 +59,7 @@ PUBLIC VIRTUAL IMS_RESULT RegRefreshHelper::SendRefreshRequest(IN ISipClientConn
 PUBLIC
 IMS_BOOL RegRefreshHelper::UpdateRefreshTimer(IN IMS_SINT32 nDuration)
 {
-    // Stop the refresh timer if it is running...
+    // Stop the refresh timer if it is running.
     if (IsTimerActive())
     {
         StopRefresh();
@@ -85,7 +85,6 @@ IMS_BOOL RegRefreshHelper::UpdateRefreshTimer(IN IMS_SINT32 nDuration)
 PROTECTED VIRTUAL void RegRefreshHelper::RefreshCompleted(
         IN ISipClientConnection* piScc, IN IMS_SINT32 nCode /*= 0*/)
 {
-    // do something ...
     if (nCode == 0)
     {
         IMS_SINT32 nStatusCode = piScc->GetStatusCode();
@@ -98,8 +97,6 @@ PROTECTED VIRTUAL void RegRefreshHelper::RefreshCompleted(
                 Refreshable_RefreshCompleted(piScc, nCode);
                 return;
             }
-
-            // If the refresh timer is not running ..... ????
         }
     }
     else if (nCode == TRANSACTION_TIMEOUT)

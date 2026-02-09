@@ -194,7 +194,7 @@ SipHeader::SipHeader(IN const SipHeaderBase* pSipHdr) :
 
     SipStack::EncodeHeaderBody(pSipHdr, IMS_FALSE, m_strBody);
 
-    // If the header type is unknown, decode the body according to the general syntax rule...
+    // If the header type is unknown, decode the body according to the general syntax rule.
     if (m_nType == ISipHeader::UNKNOWN)
     {
         ParseUnknownBody(m_strBody);
@@ -514,7 +514,7 @@ PUBLIC VIRTUAL AString SipHeader::ToStringWithoutName() const
         if (pParameter != IMS_NULL)
         {
             objHeaderValue.Append(TextParser::CHAR_SEMICOLON);
-            // Do not add the white space...
+            // Do not add the white space.
             // strHeader.Append(TextParser::CHAR_SP);
             objHeaderValue.Append(pParameter->ToString());
         }
@@ -565,7 +565,7 @@ IMS_BOOL SipHeader::Decode(IN const AString& strBody, IN IMS_BOOL bParseParamete
 
     SipStack::EncodeHeaderBody(pSipHdr, IMS_FALSE, m_strBody);
 
-    // If the header type is unknown, decode the body according to the general syntax rule...
+    // If the header type is unknown, decode the body according to the general syntax rule.
     if (m_nType == ISipHeader::UNKNOWN)
     {
         ParseUnknownBody(m_strBody);

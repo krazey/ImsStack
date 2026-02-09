@@ -626,7 +626,6 @@ PUBLIC VIRTUAL IMS_RESULT SessionRefreshHelper::UpdateOnMessageReceived(
         if (objMethod.Equals(SipMethod::UPDATE) &&
                 piDialog->GetState() != ISipDialog::STATE_CONFIRMED)
         {
-            // do nothing...
             return RESULT_SUCCESS;
         }
 
@@ -641,7 +640,6 @@ PUBLIC VIRTUAL IMS_RESULT SessionRefreshHelper::UpdateOnMessageReceived(
     // The rest of the code is valid only for INVITE/UPDATE and responses to it.
     if (!objMethod.Equals(SipMethod::INVITE) && !objMethod.Equals(SipMethod::UPDATE))
     {
-        // do nothing...
         return RESULT_SUCCESS;
     }
 
@@ -1075,7 +1073,7 @@ void SessionRefreshHelper::UpdateTimerOptionOnRequestReceived(IN const ISipConne
     const SipMethod& objMethod = piSipMsg->GetMethod();
 
     // Checks if the initial INVITE/re-INVITE/UPDATE request supports
-    // the session timer or not... (Supported header)
+    // the session timer or not. (Supported header)
     if (objMethod.Equals(SipMethod::INVITE) &&
             ((piDialog == IMS_NULL) || (piDialog->GetState() != ISipDialog::STATE_CONFIRMED)))
     {
@@ -1182,7 +1180,6 @@ PROTECTED VIRTUAL IMS_SINT32 SessionRefreshHelper::GetTimerInterval() const
 PROTECTED VIRTUAL void SessionRefreshHelper::RefreshCompleted(
         IN ISipClientConnection* piScc, IN IMS_SINT32 nCode /*= 0*/)
 {
-    // do something ...
     if (nCode == 0)
     {
         IMS_SINT32 nStatusCode = piScc->GetStatusCode();
@@ -1484,7 +1481,7 @@ void SessionRefreshHelper::UpdateProperties(IN const ISipConnection* piSc,
 
     m_nLocalSessionTimerDuration = 0;
 
-    //// To handle other optional cases for session refresh...
+    //// To handle other optional cases for session refresh.
     if (!bSent && !piSipMsg->IsHeaderPresent(ISipHeader::SESSION_EXPIRES) && bTimerOptionSupported)
     {
         // According to RFC 4028,

@@ -74,11 +74,11 @@ PUBLIC VIRTUAL IMS_RESULT SubscriberRefreshHelper::UpdateOnMessageReceived(
 
     const SipMethod& objMethod = piSipMsg->GetMethod();
 
-    // Case 1) SUBSCRIBE response received ...
+    // Case 1) SUBSCRIBE response received
     if (objMethod.Equals(SipMethod::SUBSCRIBE))
     {
         // If the subscription is in TERMINATED state & the refresh timer is active,
-        // then stop the refresh timer...
+        // then stop the refresh timer.
         if (m_pSubState->IsTerminated())
         {
             StopRefresh();
@@ -114,10 +114,10 @@ PUBLIC VIRTUAL IMS_RESULT SubscriberRefreshHelper::UpdateOnMessageReceived(
             ConsumeRemainedTime();
         }
     }
-    // Case 2) NOTIFY request received ...
+    // Case 2) NOTIFY request received
     else
     {
-        // No actions after receiving NOTIFY request ...
+        // No actions after receiving NOTIFY request.
     }
 
     return IMS_SUCCESS;
@@ -133,16 +133,16 @@ PUBLIC VIRTUAL IMS_RESULT SubscriberRefreshHelper::UpdateOnMessageSent(
         return IMS_FAILURE;
     }
 
-    // Case 1) SUBSCRIBE request sent ...
+    // Case 1) SUBSCRIBE request sent
     if (piSipMsg->GetMethod().Equals(SipMethod::SUBSCRIBE))
     {
-        // No actions after sending SUBSCRIBE request ...
+        // No actions after sending SUBSCRIBE request.
     }
-    // Case 2) NOTIFY response sent ...
+    // Case 2) NOTIFY response sent
     else
     {
         // If the subscription is in TERMINATED state & the refresh timer is active,
-        // then stop the refresh timer...
+        // then stop the refresh timer.
         if (m_pSubState->IsTerminated())
         {
             StopRefresh();
@@ -184,7 +184,6 @@ PROTECTED VIRTUAL void SubscriberRefreshHelper::RefreshCompleted(
 {
     Refreshable_RefreshCompleted(piScc, nCode);
 
-    // do something ...
     if (nCode == 0)
     {
         IMS_SINT32 nStatusCode = piScc->GetStatusCode();

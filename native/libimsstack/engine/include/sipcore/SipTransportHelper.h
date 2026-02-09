@@ -159,7 +159,7 @@ private:
     ImsList<SipSocket*> m_objSockets;
     ImsList<TransportBuffer*> m_objBuffers;
     ISipTransportMessageListener* m_piMessageListener;
-    // MULTI_REG_TRANSPORT :: <Socket object's pointer, count>
+    // MULTI_REG_TRANSPORT: <Socket object's pointer, count>
     ImsMap<IMS_UINTP, IMS_SINT32> m_objClientInitiatedConnections;
     // LOCAL_DNS_QUERY
     // 1) Test purpose

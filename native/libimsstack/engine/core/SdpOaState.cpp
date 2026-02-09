@@ -940,7 +940,7 @@ IMS_SINT32 SdpOaState::HandleOfferAnswer(IN const ISipMessage* piSipMsg)
         if ((m_nState == STATE_ESTABLISHED) &&
                 ((m_nOldState == STATE_OFFER_SENT) || (m_nOldState == STATE_OFFER_CHANGE_SENT)))
         {
-            // Ignore the SDP answer if SDP body part is malformed...
+            // Ignore the SDP answer if SDP body part is malformed.
             SetState(m_nOldState);
 
             if (m_nOldState == STATE_OFFER_SENT)
@@ -959,7 +959,7 @@ IMS_SINT32 SdpOaState::HandleOfferAnswer(IN const ISipMessage* piSipMsg)
             m_nMode = MODE_IDLE;
             // Revert the flag for tracking state changes
             m_bStateChanged = IMS_FALSE;
-            // Ignore the SDP offer if SDP body part is malformed...
+            // Ignore the SDP offer if SDP body part is malformed.
             SetState(m_nOldState);
         }
 

@@ -391,7 +391,7 @@ PUBLIC
 IMS_RESULT SipConnectionNotifier::ReserveTransportResource(IN const IpAddress& objIp,
         IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFlowControl)
 {
-    // Port (US) will not be updated in here; it will be set when SCN is created...
+    // Port (US) will not be updated in here; it will be set when SCN is created.
     (void)nPortS;
 
     // MULTI_REG_TRANSPORT
@@ -659,7 +659,7 @@ PRIVATE VIRTUAL void SipConnectionNotifier::Socket_NotifyError(
     if ((nErrorCode == SipSocket::ERROR_CLOSED) ||
             (nErrorCode == SipSocket::ERROR_DATA_CONNECTION_LOST))
     {
-        //// Listening channel only waits for the local resource release case...
+        //// Listening channel only waits for the local resource release case.
     }
     else
     {

@@ -580,7 +580,7 @@ IMS_RESULT SessionEx::SendRpr(IN IMS_SINT32 nStatusCode,
         return IMS_FAILURE;
     }
 
-    // Set SDP body if the condition meets...
+    // Set SDP body if the condition meets.
     if (bSdp)
     {
         CheckNSetSdpBodyPart(piSipMsgRpr);

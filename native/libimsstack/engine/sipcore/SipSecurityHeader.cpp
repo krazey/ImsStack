@@ -269,7 +269,7 @@ AString SipSecurityHeader::ToString() const
 
     if (!m_bParameterRequired)
     {
-        // When the additional parameter is not required...
+        // When the additional parameter is not required.
         return static_cast<const AStringBuffer&>(objBuffer).GetString();
     }
 

@@ -508,7 +508,7 @@ PRIVATE VIRTUAL IMS_BOOL CoreService::ServerConnection_NotifyRequest(IN ISipServ
     IMS_TRACE_I("CoreService (%s) :: %s request received ...", GetServiceId().GetStr(),
             objMethod.ToString().GetStr(), 0);
 
-    // Checks if the direct listener is registered or not...
+    // Checks if the direct listener is registered or not.
     // And if direct listener is present, pass the transaction to that listener.
     if (CheckAndHandleDirectSipRequest(piSsc) == RESULT_DIRECT_TXN_HANDLED)
     {

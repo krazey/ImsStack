@@ -82,7 +82,6 @@ PRIVATE VIRTUAL void SipMessageHandler::TransportMessage_PacketReceived(IN IMS_S
         return;
     }
 
-    /// TRACE_DEBUG ....
     SipStack::DisplayUnknownHeaders(pSipMsg);
 
     if (SipStack::GetBadHeaderCount(pSipMsg) > 0)
@@ -373,7 +372,7 @@ IMS_SINT32 SipMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN ::SipMessa
     // If IPSec is applied, check the validity of source IP and port.
     if (!CheckIpSecValidityForRequest(nSlotId, pStState.Get(), objNearEnd, objFarEnd))
     {
-        // Discard the incoming request...
+        // Discard the incoming request.
         IMS_TRACE_D("IPSEC :: Discarded...", 0, 0, 0);
         pStState->Abort();
         return SipPrivate::MESSAGE_DISCARDED;
@@ -410,7 +409,7 @@ IMS_SINT32 SipMessageHandler::NotifyResponse(IN IMS_SINT32 nSlotId, IN ::SipMess
     // If IPSec is applied, check the validity of source IP and port.
     if (!CheckIpSecValidityForResponse(nSlotId, pSipMsg, objNearEnd, objFarEnd))
     {
-        // Discard the incoming response...
+        // Discard the incoming response.
         IMS_TRACE_D("IPSEC :: Discarded...", 0, 0, 0);
         return SipPrivate::MESSAGE_DISCARDED;
     }

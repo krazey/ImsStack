@@ -99,7 +99,7 @@ SipStreamSocket::SipStreamSocket(IN IMS_SINT32 nSlotId, IN ISocket* piSocket) :
         nPort = 0;
         m_piSocket->GetSockName(objIp, nPort);
 
-        // Check the socket option and set it if it is present...
+        // Check the socket option and set it if it is present.
         SetSocketOptions(objIp, nPort);
     }
 

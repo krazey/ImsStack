@@ -329,7 +329,7 @@ PRIVATE VIRTUAL void FakeRegistration::DestroyAllContacts()
     {
         RegContact* pContact = m_objContacts.GetAt(0);
 
-        // Notify the removal of contact to the RegBinding ...
+        // Notify the removal of contact to the RegBinding.
         UpdateBindingState(BINDING_DESTROY_CONTACT);
 
         delete pContact;
@@ -347,7 +347,7 @@ PRIVATE VIRTUAL void FakeRegistration::DestroyContact(IN IRegContact* piContact)
 
         if (pContact == piContact)
         {
-            // Notify the removal of contact to the RegBinding ...
+            // Notify the removal of contact to the RegBinding.
             UpdateBindingState(BINDING_DESTROY_CONTACT);
 
             delete pContact;
@@ -368,7 +368,7 @@ PRIVATE VIRTUAL void FakeRegistration::DestroyContact(
 
         if (objIpAddr.Equals(pContact->GetIpAddress()) && (nPort == pContact->GetPort()))
         {
-            // Notify the removal of contact to the RegBinding ...
+            // Notify the removal of contact to the RegBinding.
             UpdateBindingState(BINDING_DESTROY_CONTACT);
 
             delete pContact;

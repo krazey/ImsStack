@@ -223,13 +223,13 @@ IMS_SINT32 SipDialogUsage::GetActionForResponse(IN const SipMessageInfo& objMsgI
 
                 // Impacts on transaction only
             default:
-                // In this case, the state will not be changed ...
+                // In this case, the state will not be changed.
                 if (m_pDialogBase->GetState() == SipDState::STATE_CONFIRMED)
                 {
                     if (nStatusCode == SipStatusCode::SC_408)
                     {
                         // Case1) TYPE_INVITE
-                        //      It should be verified in the commercial networks...
+                        //      It should be verified in the commercial networks.
                         //      return SipDState::ACTION_DESTROY_USAGE;
                         // Case2) TYPE_SUBSCRIBE
                         //      If re-SUBSCRIBE is timed out (Timer F),

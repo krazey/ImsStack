@@ -305,7 +305,7 @@ IMS_BOOL TriggerPoint::Evaluate(IN const ISipMessage* piSipMsg) const
         }
     }
 
-    // In case the method is only matched ...
+    // In case the method is only matched.
     if (m_objHeaders.IsEmpty() && m_objNegatedHeaders.IsEmpty())
     {
         if (CompareSdpInfo(m_objSdpMLines, m_objSdpALines, piSipMsg, m_nEvaluationRule) ==
@@ -394,7 +394,7 @@ PRIVATE GLOBAL IMS_SINT32 TriggerPoint::CompareHeader(IN const ISipHeader* piHea
         return SPT_MATCH_NOK;
     }
 
-    // The below header fields will be evaluated for only SIP parameters ...
+    // The below header fields will be evaluated for only SIP parameters.
     if (IsParameterComparisonRequired(piHeader))
     {
         const ImsList<SipParameter*>& objParameters = piHeader->GetParameters();

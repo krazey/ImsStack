@@ -525,7 +525,7 @@ IMS_BOOL Method::RespondToChallenge(IN ISipClientConnection* piScc)
         return IMS_FALSE;
     }
 
-    // Updates the authentication challenge information ...
+    // Updates the authentication challenge information.
     if (m_piAuthChallenge != IMS_NULL)
     {
         m_piAuthChallenge->Destroy();

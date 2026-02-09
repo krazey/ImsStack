@@ -342,7 +342,7 @@ void Media::TransitMedia(IN IMS_SINT32 nSessionTransition, IN IMS_SINT32 nOaStat
     {
         if (nOaStatus == OFFER_RECEIVED)
         {
-            // When the initial offer received, do not anything ...
+            // When the initial offer received, do not anything.
             // To access the MediaDescriptor
             m_bInitialOfferReceived = IMS_TRUE;
             return;
@@ -437,7 +437,7 @@ void Media::TransitMedia(IN IMS_SINT32 nSessionTransition, IN IMS_SINT32 nOaStat
                 m_piOaState->AbortProposal();
             }
 
-            // 4 Check if the proposal media is accepted or not...
+            // 4 Check if the proposal media is accepted or not.
             // 4 for state change (ACTIVE to DELETED)
 
             SetUpdateState(UPDATE_UNCHANGED);
@@ -497,7 +497,7 @@ void Media::TransitMedia(IN IMS_SINT32 nSessionTransition, IN IMS_SINT32 nOaStat
             {
                 if (!IsMediaAccepted() && (GetUpdateState() == UPDATE_MODIFIED))
                 {
-                    // Re-arrange the update state according to the media port information...
+                    // Re-arrange the update state according to the media port information.
                     SetUpdateState(UPDATE_REMOVED);
                 }
             }

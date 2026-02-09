@@ -150,7 +150,7 @@ IMS_BOOL ExtraHeaders::AddHeader(IN const AString& strName, IN const AString& st
         }
     }
 
-    // If no match found...
+    // If no match found.
     pNewHeader->AddReference();
 
     if (!m_objHeaders.Append(pNewHeader))

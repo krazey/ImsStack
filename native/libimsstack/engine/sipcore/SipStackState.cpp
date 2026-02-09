@@ -187,7 +187,7 @@ void SipStackState::SetTransactionTimerValues(IN IMS_SINT32 nSlotId, IN const Si
     if ((pProfile == IMS_NULL) && (pSipConfigV != IMS_NULL) &&
             !pSipConfigV->IsTimerValueConfiguredOnRuntime())
     {
-        // Do not update the transaction timer values in runtime...
+        // Do not update the transaction timer values in runtime.
         IMS_TRACE_D("SIP timer values are not configured on runtime ...", 0, 0, 0);
         return;
     }
@@ -269,7 +269,7 @@ SipStackTransaction* SipStackState::FindTransaction(IN ::SipTxnKey* pKey)
         // Check if the transaction is matched or not
         if (pTransaction->CompareKey(pKey))
         {
-            // Matched transaction found ...
+            // Matched transaction found.
             return pTransaction;
         }
     }
@@ -300,7 +300,7 @@ SipStackTransaction* SipStackState::RemoveTransaction(IN ::SipTxnKey* pKey, IN I
         // Check if the transaction is matched or not
         if (pTransaction->CompareKey(pKey))
         {
-            // Matched transaction found ...
+            // Matched transaction found.
             if (nOption == TXN_REMOVE)
             {
                 IMS_TRACE_D("REMOVE TRANSACTION - S (%d)", GetTransactionCount(), 0, 0);
@@ -313,7 +313,6 @@ SipStackTransaction* SipStackState::RemoveTransaction(IN ::SipTxnKey* pKey, IN I
                     m_objTxnAggregate.RemoveAt(nKeyIndex);
                 }
 
-                // DEBUG ...
                 SipStack::DisplayTxnKey(pTransaction->GetKey());
 
                 IMS_TRACE_D("REMOVE TRANSACTION - E (%d)", GetTransactionCount(), 0, 0);

@@ -398,10 +398,9 @@ PRIVATE VIRTUAL void PageMessage::NotifySipResponse(IN ISipClientConnection* piS
     // Add the received response message
     UpdateResponseOnReceived(IMessage::PAGEMESSAGE_SEND, piScc);
 
-    // Handle the response to MESSAGE request ...
+    // Handle the response to MESSAGE request.
     if (SipStatusCode::Is1XX(nStatusCode))
     {
-        // Do nothing ...
         return;
     }
     else if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))

@@ -51,7 +51,7 @@ void ReliableProvResponseHelper::Initialize(IN const ISipMessage* piSipMsg)
 
     if (m_bIsMobileOriginated)
     {
-        // When the first RPR is received ...
+        // When the first RPR is received.
 
         AString strRSeq = piSipMsg->GetHeader(ISipHeader::RSEQ);
 
@@ -64,7 +64,7 @@ void ReliableProvResponseHelper::Initialize(IN const ISipMessage* piSipMsg)
     }
     else
     {
-        // When a new request is received ...
+        // When a new request is received.
         m_nRSeqNumber = 1;
     }
 
