@@ -461,8 +461,6 @@ PUBLIC VIRTUAL void AosHandle::ReinitiateRegistration(IN IMS_UINT32 nAfterSec)
 
 PUBLIC VIRTUAL void AosHandle::CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState)
 {
-    A_IMS_TRACE_D(APPPROFILE, "CallTracker_StateChanged :: nType=%d, nState=%d", nType,
-            static_cast<IMS_UINT32>(eState), 0);
     // Implemented in child
 }
 
@@ -1522,9 +1520,6 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnecting(IN IMSMSG& objMSG)
             IMS_UINT32 nState = LONG_TO_INT(objMSG.nWparam);
             SetReason(LONG_TO_INT(objMSG.nLparam));
 
-            A_IMS_TRACE_I(APPPROFILE, "HANDLE_MSG_APP_STATUS :: State(%d), m_nReason(%d)", nState,
-                    m_nReason, 0);
-
             switch (nState)
             {
                 case IAosApplication::APP_CONNECTED:
@@ -1594,9 +1589,6 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnected(IN IMSMSG& objMSG)
         {
             IMS_UINT32 nState = LONG_TO_INT(objMSG.nWparam);
             SetReason(LONG_TO_INT(objMSG.nLparam));
-
-            A_IMS_TRACE_I(APPPROFILE, "HANDLE_MSG_APP_STATUS :: State(%d), m_nReason(%d)", nState,
-                    m_nReason, 0);
 
             switch (nState)
             {
@@ -1668,9 +1660,6 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateDisconnecting(IN IMSMSG& objMSG)
         {
             IMS_UINT32 nState = LONG_TO_INT(objMSG.nWparam);
             SetReason(LONG_TO_INT(objMSG.nLparam));
-
-            A_IMS_TRACE_I(APPPROFILE, "HANDLE_MSG_APP_STATUS :: State(%d), m_nReason(%d)", nState,
-                    m_nReason, 0);
 
             switch (nState)
             {

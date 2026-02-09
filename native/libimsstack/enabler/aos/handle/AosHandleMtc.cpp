@@ -121,8 +121,6 @@ PUBLIC VIRTUAL IMS_UINT32 AosHandleMtc::GetFeatures() const
     }
     else  // Will be always supported if not based on network feature
     {
-        A_IMS_TRACE_D(
-                APPPROFILE, "GetFeatures :: Internally added VERSTAT feature by default", 0, 0, 0);
         nFeatures |= ImsAosFeature::VERSTAT;
     }
 
