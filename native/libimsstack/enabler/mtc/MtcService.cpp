@@ -87,15 +87,15 @@ MtcService::MtcService(IN IMtcContext& objContext, IN ServiceType eType) :
         m_objSsacTimerHandler(SsacTimerHandler(m_objContext)),
         m_pPermanentSuppService(std::make_unique<MtcPermanentSupplementaryService>())
 {
-    IMS_TRACE_I(
-            "+MtcService [%d]emergency:%s", m_objContext.GetSlotId(), _TRACE_B_(IsEmergency()), 0);
+    IMS_TRACE_I("+MtcService [%d][%s]", m_objContext.GetSlotId(),
+            m_eType == ServiceType::EMERGENCY ? "emergency" : "normal", 0);
     Init();
 }
 
 PUBLIC VIRTUAL MtcService::~MtcService()
 {
-    IMS_TRACE_I(
-            "~MtcService [%d]emergency:%s", m_objContext.GetSlotId(), _TRACE_B_(IsEmergency()), 0);
+    IMS_TRACE_I("~MtcService [%d][%s]", m_objContext.GetSlotId(),
+            m_eType == ServiceType::EMERGENCY ? "emergency" : "normal", 0);
 
     if (m_eType == ServiceType::NORMAL)
     {
