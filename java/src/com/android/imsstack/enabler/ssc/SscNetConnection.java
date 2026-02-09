@@ -137,8 +137,6 @@ public class SscNetConnection implements ISscNetConnection {
 
     @Override
     public boolean isConnected() {
-        ImsLog.d(mSlotId, "");
-
         if (mApnType == null) {
             ImsLog.e(mSlotId, "mApnType is null");
             return false;
@@ -161,8 +159,6 @@ public class SscNetConnection implements ISscNetConnection {
 
     @Override
     public boolean connect(long timeoutMs) {
-        ImsLog.d(mSlotId, "");
-
         if (timeoutMs <= 0) {
             ImsLog.e(mSlotId, "invalid timeoutMs : " + timeoutMs);
             return false;

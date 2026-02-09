@@ -163,7 +163,7 @@ public class SscHttpConnection implements ISscHttpConnection {
             }
 
             if (mConnection.getContentLength() > 0) {
-                ImsLog.w(mSlotId, "getContentLength > 0");
+                ImsLog.d(mSlotId, "getContentLength > 0");
                 if ((responseCode >= 200) && (responseCode < 300)) {
                     mDoc = readInputStream(mConnection.getInputStream());
                 } else {
@@ -171,7 +171,7 @@ public class SscHttpConnection implements ISscHttpConnection {
                 }
             } else if (("chunked").equalsIgnoreCase(
                     mConnection.getHeaderField("Transfer-Encoding"))) {
-                ImsLog.w(mSlotId, "Transfer Encoding : chunked");
+                ImsLog.d(mSlotId, "Transfer Encoding : chunked");
                 if ((responseCode >= 200) && (responseCode < 300)) {
                     mDoc = readInputStream(mConnection.getInputStream());
                 } else {

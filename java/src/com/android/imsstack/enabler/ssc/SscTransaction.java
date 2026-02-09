@@ -110,8 +110,6 @@ public class SscTransaction {
     }
 
     public void startGetTransaction(SscServiceQueryData data) {
-        ImsLog.d("");
-
         mSscTransactionThread = new SscTransactionThread();
         mTransaction = new GetTransaction(data);
         mEventNumber = data.getEventNumber();
@@ -122,8 +120,6 @@ public class SscTransaction {
     }
 
     public void startPutTransaction(SscServiceData data) {
-        ImsLog.d("");
-
         mSscTransactionThread = new SscTransactionThread();
         mTransaction = new PutTransaction(data);
         mEventNumber = data.getEventNumber();

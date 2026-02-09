@@ -34,6 +34,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 
@@ -88,11 +89,15 @@ public class SscUtils {
             return null;
         }
 
-        String domain;
-        String impi = getImpi(slotId);
-        if (subsInfo.isIsimEnabled() && !TextUtils.isEmpty(impi) && impi.contains("@")) { // ISIM
-            domain = impi.substring(impi.lastIndexOf("@") + 1);
-        } else { // USIM
+        String domain = null;
+        if (subsInfo.isIsimEnabled()) { // ISIM
+            String impi = getImpi(slotId);
+            if (!TextUtils.isEmpty(impi) && impi.contains("@")) {
+                domain = impi.substring(impi.lastIndexOf("@") + 1);
+            }
+        }
+
+        if (TextUtils.isEmpty(domain)) { // USIM
             TelephonyInterface telephony = getTelephonyInterface(slotId);
             if (telephony == null) {
                 return null;
@@ -306,7 +311,7 @@ public class SscUtils {
      * @param networkType One of network type defined in {@link TelephonyManager}. See
      * {@link TelephonyManager#NETWORK_TYPE_IWLAN}, {@link TelephonyManager#NETWORK_TYPE_LTE}, and
      * others.
-     * @return Matched network type of {@link SscConstant.AccessNetworkTypes}
+     * @return Matched network type of {@link AccessNetworkTypes}
      */
     protected static @AccessNetworkTypes int convertToAccessNetworkType(int networkType) {
         switch (networkType) {
@@ -404,7 +409,7 @@ public class SscUtils {
     }
 
     protected long getCurrentUtcTimeEpochMs() {
-        return java.time.Instant.now().toEpochMilli();
+        return Instant.now().toEpochMilli();
     }
 
     @VisibleForTesting
