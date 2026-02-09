@@ -41,11 +41,15 @@ cc_defaults {
         misc_undefined: ["bounds"],
         scs: true,
     },
+    static_libs: [
+        "imsstack_flags_cc_lib",
+    ],
 }
 
 cc_defaults {
     name: "imsstack_shared_libs_defaults",
     shared_libs: [
+        "libaconfig_storage_read_api_cc",
         "libbinder",
         "libcutils",
         "liblog",
@@ -53,6 +57,7 @@ cc_defaults {
         "libutils",
         "libxml2",
         "libz",
+        "server_configurable_flags",
     ],
 }
 
