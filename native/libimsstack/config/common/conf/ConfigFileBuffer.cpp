@@ -410,7 +410,6 @@ PROTECTED VIRTUAL IMS_BOOL ConfigFileBuffer::WriteToMedium() const
 
 PROTECTED VIRTUAL IMS_BOOL ConfigFileBuffer::Create(IN IMS_SINT32 nId)
 {
-    // FIXME: if file configuration is required, please use this input argument.
     (void)nId;
     AString strConfName = ResolveLocator();
 

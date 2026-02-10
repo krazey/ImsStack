@@ -276,7 +276,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
     {
         case IConfigurable::CP_I_START_SIP_V:
         case IConfigurable::CP_I_END_SIP_V:
-            // Control messages MUST be notified to the application...
+            // Control messages MUST be notified to the application.
             break;
 
         case IConfigurable::CP_I_TIMER_T1:
