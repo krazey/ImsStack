@@ -273,8 +273,6 @@ PROTECTED VIRTUAL IMS_SINT32 RetryTaskHelper::RetryTimer_OnInterimExpired(IN Ret
         return RetryTimer::RESULT_STOP;
     }
 
-    // TODO:: retry-after handling
-
     if (m_pCmd->ExecuteCmd() != IMS_SUCCESS)
     {
         CallListener(RESULT_NOK_INTERNAL_OPERATION);

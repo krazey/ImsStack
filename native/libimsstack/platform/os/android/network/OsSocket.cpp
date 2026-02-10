@@ -484,7 +484,6 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Close()
         {
             UnbindSocketFromIpSecTransform(hClosedSocket);
 
-            // do something
             IMS_SINT32 nError = errno;
 
             switch (nError)
@@ -502,13 +501,12 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Close()
                     break;
             }
 
-            // What to do : returns SUCCESS or ERROR ?????
             return RESULT_ERROR;
         }
 
         UnbindSocketFromIpSecTransform(hClosedSocket);
 
-        // 100 ms : wait for socket closing ...
+        // 100 ms : wait for socket closing.
         usleep(100000);
     }
 
@@ -1797,8 +1795,6 @@ PROTECTED VIRTUAL void OsSocket::DispatchServiceMessage(IN IMS_UINTP nWparam, IN
 
         case IMS_SOCKET_CLOSED:
         {
-            // Checks if the owner thread is same or not...
-
             // FIX_SOCKET_SYNC_ISSUE
             const IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
 

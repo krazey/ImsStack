@@ -348,7 +348,7 @@ PUBLIC GLOBAL IMS_BOOL AccessNetworkInfoFormatter::Encode(IN const AccessNetwork
         return IMS_FALSE;
     }
 
-    // Type info. will be preferred...
+    // "access-type" is preferred.
     if (objAni.nType != AccessNetworkInfo::TYPE_NONE)
     {
         return GetHeaderFromAccessType(objAni, strCellInfo, strHeader);

@@ -196,7 +196,7 @@ PUBLIC VIRTUAL IMS_UINT32 OsFile::GetPos() const
         return INVALID_VALUE;
     }
 
-    // FIXME: adjust the type of return value
+    // Adjust the type of return value if necessary.
     return LONG_TO_INT(nPos);
 }
 

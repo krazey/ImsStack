@@ -201,7 +201,6 @@ PRIVATE VIRTUAL void OsNetworkConnection::GetAccessNetworkInfo(
 
     IMS_SINT32 nDefaultNetworkType = RADIOTECH_TYPE_UNKNOWN;
 
-    // FIXME: __IMS_VONR__ : consider NR network type
     if (GetApnType() == NetworkPolicy::APN_EMERGENCY)
     {
         nDefaultNetworkType = RADIOTECH_TYPE_LTE;

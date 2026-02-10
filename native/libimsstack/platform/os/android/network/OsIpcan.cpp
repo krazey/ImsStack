@@ -86,7 +86,6 @@ PROTECTED VIRTUAL void OsIpcan::GetAccessInfoForWiFi(OUT AccessNetworkInfo& objA
             }
         }
 
-        // FIXME: obtain the proper access type
         objAni.nType = AccessNetworkInfo::TYPE_IEEE_802_11;
         objAni.nClass = AccessNetworkInfo::CLASS_NONE;
     }
@@ -133,7 +132,6 @@ PROTECTED VIRTUAL void OsIpcan::GetLastAccessInfo(IN IMS_SINT32 nSlotId,
 PROTECTED VIRTUAL void OsIpcan::GetLastAccessInfoForWiFi(
         OUT AccessNetworkInfo& objAni, OUT AString& strTimestamp, OUT AString& strCellInfoAge)
 {
-    // FIXME: consider to implement the below logic later
     strTimestamp = AString::ConstNull();
     strCellInfoAge = AString::ConstNull();
 

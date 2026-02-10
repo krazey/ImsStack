@@ -107,7 +107,7 @@ private:
     SslCertificate m_objCertificate;
 };
 
-// Example...
+// For example,
 // CA_FILE : "/data/local/root.pem"
 // CERTIFICATE : "/system/etc/msrpcert.pem"
 // PASSWORD : "password"
@@ -177,7 +177,7 @@ PUBLIC
 IMS_BOOL OsSsl::Initialize()
 {
     // TLSv1 : TLSv1_method, TLSv1_server_method, TLSv1_client_method
-    // FIXME: consider TLS_method() for generic scheme
+    // Consider TLS_method() for generic scheme.
     const SSL_METHOD* pMethod = TLSv1_method();
 
     m_pstCtx = SSL_CTX_new(pMethod);
@@ -798,7 +798,7 @@ void OsSslSocket::DoHandshake()
 
     SetSslState(SSL_STATE_CONNECTING);
 
-    // After the retry interval, try to connect again...
+    // After the retry interval, try to connect again.
     m_piSslConnectRetryTimer = TimerService::GetTimerService()->CreateTimer();
 
     if (m_piSslConnectRetryTimer != IMS_NULL)
