@@ -38,6 +38,7 @@ import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.PersistableBundle;
 import android.telecom.TelecomManager;
+import android.telephony.AccessNetworkConstants;
 import android.telephony.CarrierConfigManager.CarrierConfigChangeListener;
 import android.telephony.SubscriptionManager.PhoneNumberSource;
 import android.telephony.ims.ImsMmTelManager.WiFiCallingMode;
@@ -598,6 +599,24 @@ public interface SystemServiceProxy {
          *                  false otherwise
          */
         void setCrossSimCallingEnabled(boolean isEnabled);
+
+        /**
+         * Query whether or not the requested MmTel capability is supported by the carrier on the
+         * specified network transport.
+         *
+         * {@link CarrierConfigManager#ACTION_CARRIER_CONFIG_CHANGED} broadcast for this subscription.
+         * @param capability The capability that is being queried for support on the
+         *                   carrier network.
+         * @param transportType The transport type of the capability to check support for.
+         * @param executor The executor that the callback will be called with.
+         * @param callback A consumer containing a Boolean result specifying whether or not the
+         *                 capability is supported on this carrier network for the transport
+         *                 specified.
+         */
+        void isSupported(@MmTelFeature.MmTelCapabilities.MmTelCapability int capability,
+                @AccessNetworkConstants.TransportType int transportType,
+                @NonNull @CallbackExecutor Executor executor,
+                @NonNull Consumer<Boolean> callback);
     }
 
     /**
