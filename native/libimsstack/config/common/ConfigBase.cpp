@@ -109,7 +109,7 @@ IMS_BOOL ConfigBase::AddListener(IN IMS_SINT32 nCpi, IN IConfigUpdateListener* p
         objListeners.Append(piListener);
         m_objConfigUpdateListeners.Add(nCpi, objListeners);
 
-        IMS_TRACE_D("ConfigUpdateListener :: add - %d / %p", m_objConfigUpdateListeners.GetSize(),
+        IMS_TRACE_D("ConfigUpdateListener: add(%d/%p)", m_objConfigUpdateListeners.GetSize(),
                 piListener, 0);
 
         return IMS_TRUE;
@@ -133,7 +133,7 @@ IMS_BOOL ConfigBase::AddListener(IN IMS_SINT32 nCpi, IN IConfigUpdateListener* p
         }
     }
 
-    IMS_TRACE_D("ConfigUpdateListener :: add - %d / %p / %d", m_objConfigUpdateListeners.GetSize(),
+    IMS_TRACE_D("ConfigUpdateListener: add(%d/%p/%d)", m_objConfigUpdateListeners.GetSize(),
             piListener, objListeners.GetSize());
 
     return objListeners.Append(piListener);
@@ -179,8 +179,8 @@ void ConfigBase::RemoveListener(IN IMS_SINT32 nCpi, IN IConfigUpdateListener* pi
         m_objConfigUpdateListeners.RemoveAt(nIndex);
     }
 
-    IMS_TRACE_D("ConfigUpdateListener :: remove - %d / %p / %d",
-            m_objConfigUpdateListeners.GetSize(), piListener, nRemainingListeners);
+    IMS_TRACE_D("ConfigUpdateListener: remove(%d/%p/%d)", m_objConfigUpdateListeners.GetSize(),
+            piListener, nRemainingListeners);
 }
 
 PROTECTED

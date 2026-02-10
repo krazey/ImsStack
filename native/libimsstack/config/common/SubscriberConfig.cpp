@@ -1944,7 +1944,7 @@ void SubscriberConfig::ToDebugString()
         }
         else
         {
-            IMS_TRACE_D("Credential - password: %s", "xxx", 0, 0);
+            IMS_TRACE_D("Credential - password: ***", 0, 0, 0);
         }
         IMS_TRACE_D("Credential - realm: %s",
                 GetLog(pSubsInfo->m_objCredential.GetRealm(), 4).GetStr(), 0, 0);

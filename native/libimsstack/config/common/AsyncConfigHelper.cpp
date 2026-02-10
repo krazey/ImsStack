@@ -74,7 +74,7 @@ IMS_BOOL AsyncConfigHelper::SendTo(
 {
     if (!IsRegisteredConfig(piConfig))
     {
-        IMS_TRACE_D("AsyncConfig is not registered ...", 0, 0, 0);
+        IMS_TRACE_D("AsyncConfig is not registered", 0, 0, 0);
         return IMS_FALSE;
     }
 

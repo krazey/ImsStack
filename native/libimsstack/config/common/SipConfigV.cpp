@@ -287,7 +287,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("TIMER_T1 :: %d", m_nTimerValueT1, 0, 0);
+            IMS_TRACE_D("TIMER_T1: %d", m_nTimerValueT1, 0, 0);
             break;
         }
         case IConfigurable::CP_I_TIMER_T2:
@@ -298,7 +298,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("TIMER_T2 :: %d", m_nTimerValueT2, 0, 0);
+            IMS_TRACE_D("TIMER_T2: %d", m_nTimerValueT2, 0, 0);
             break;
         }
         case IConfigurable::CP_I_TIMER_T4:
@@ -309,7 +309,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("TIMER_T4 :: %d", m_nTimerValueT4, 0, 0);
+            IMS_TRACE_D("TIMER_T4: %d", m_nTimerValueT4, 0, 0);
             break;
         }
         case IConfigurable::CP_I_TIMER_A:
@@ -319,7 +319,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("TIMER_A :: %d", m_nTimerValueA, 0, 0);
+            IMS_TRACE_D("TIMER_A: %d", m_nTimerValueA, 0, 0);
             break;
         }
         case IConfigurable::CP_I_TIMER_B:
@@ -330,7 +330,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("TIMER_B :: %d", m_nTimerValueB, 0, 0);
+            IMS_TRACE_D("TIMER_B: %d", m_nTimerValueB, 0, 0);
             break;
         }
         case IConfigurable::CP_I_TIMER_C:
@@ -341,7 +341,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("TIMER_C :: %d", m_nTimerValueC, 0, 0);
+            IMS_TRACE_D("TIMER_C: %d", m_nTimerValueC, 0, 0);
             break;
         }
         case IConfigurable::CP_I_TIMER_D:
@@ -352,7 +352,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("TIMER_D :: %d", m_nTimerValueD, 0, 0);
+            IMS_TRACE_D("TIMER_D: %d", m_nTimerValueD, 0, 0);
             break;
         }
         case IConfigurable::CP_I_TIMER_E:
@@ -362,7 +362,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("TIMER_E :: %d", m_nTimerValueE, 0, 0);
+            IMS_TRACE_D("TIMER_E: %d", m_nTimerValueE, 0, 0);
             break;
         }
         case IConfigurable::CP_I_TIMER_F:
@@ -373,7 +373,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("TIMER_F :: %d", m_nTimerValueF, 0, 0);
+            IMS_TRACE_D("TIMER_F: %d", m_nTimerValueF, 0, 0);
             break;
         }
         case IConfigurable::CP_I_TIMER_G:
@@ -383,7 +383,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("TIMER_G :: %d", m_nTimerValueG, 0, 0);
+            IMS_TRACE_D("TIMER_G: %d", m_nTimerValueG, 0, 0);
             break;
         }
         case IConfigurable::CP_I_TIMER_H:
@@ -394,7 +394,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("TIMER_H :: %d", m_nTimerValueH, 0, 0);
+            IMS_TRACE_D("TIMER_H: %d", m_nTimerValueH, 0, 0);
             break;
         }
         case IConfigurable::CP_I_TIMER_I:
@@ -404,7 +404,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("TIMER_I :: %d", m_nTimerValueI, 0, 0);
+            IMS_TRACE_D("TIMER_I: %d", m_nTimerValueI, 0, 0);
             break;
         }
         case IConfigurable::CP_I_TIMER_J:
@@ -415,7 +415,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("TIMER_J :: %d", m_nTimerValueJ, 0, 0);
+            IMS_TRACE_D("TIMER_J: %d", m_nTimerValueJ, 0, 0);
             break;
         }
         case IConfigurable::CP_I_TIMER_K:
@@ -425,7 +425,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("TIMER_K :: %d", m_nTimerValueK, 0, 0);
+            IMS_TRACE_D("TIMER_K: %d", m_nTimerValueK, 0, 0);
             break;
         }
         case IConfigurable::CP_I_UA_VERSION:
@@ -441,7 +441,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
                         piCc->GetString(CarrierConfig::Ims::KEY_IMS_USER_AGENT_STRING);
             }
 
-            IMS_TRACE_D("SERVICE_VERSION :: %s", m_strServiceVersion.GetStr(), 0, 0);
+            IMS_TRACE_D("SERVICE_VERSION: %s", m_strServiceVersion.GetStr(), 0, 0);
             break;
         }
         case IConfigurable::CP_I_FEATURE_TAG_OPTIONS:
@@ -455,7 +455,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
                 m_nFeatureTagOptions = FEATURE_TAG_DEFAULT;
             }
 
-            IMS_TRACE_D("FEATURE_TAGS :: %08X", m_nFeatureTagOptions, 0, 0);
+            IMS_TRACE_D("FEATURE_TAGS: %08X", m_nFeatureTagOptions, 0, 0);
             break;
         }
         case IConfigurable::CP_I_SESSION_MINSE:
@@ -467,7 +467,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("SESSION_MINSE :: %d", m_objSession.nMinSe, 0, 0);
+            IMS_TRACE_D("SESSION_MINSE: %d", m_objSession.nMinSe, 0, 0);
             break;
         }
         case IConfigurable::CP_I_SESSION_EXPIRES:
@@ -478,7 +478,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("SESSION_EXPIRES :: %d", m_objSession.nSessionExpires, 0, 0);
+            IMS_TRACE_D("SESSION_EXPIRES: %d", m_objSession.nSessionExpires, 0, 0);
             break;
         }
         case IConfigurable::CP_I_SIP_ALL:
@@ -489,7 +489,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
         default:
         {
             bUpdateResult = IMS_FALSE;
-            IMS_TRACE_D("No configurable parameter item (%d)", nCpi, 0, 0);
+            IMS_TRACE_D("No configurable parameter item(%d)", nCpi, 0, 0);
             break;
         }
     }

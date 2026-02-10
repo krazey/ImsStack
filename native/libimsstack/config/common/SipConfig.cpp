@@ -274,7 +274,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfig::Update(
                 m_nTimerValue100Trying = strValue.ToInt32();
             }
 
-            IMS_TRACE_D("Timer value for 100 TRYING :: %d", m_nTimerValue100Trying, 0, 0);
+            IMS_TRACE_D("Timer value for 100 TRYING: %d", m_nTimerValue100Trying, 0, 0);
             break;
         }
         case IConfigurable::CP_I_SIP_FEATURES:
@@ -288,7 +288,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfig::Update(
                 m_nSipFeatureCaps = ReadSipFeatureCaps(GetCarrierConfig());
             }
 
-            IMS_TRACE_D("SIP_FEATURES :: %08X", m_nSipFeatureCaps, 0, 0);
+            IMS_TRACE_D("SIP_FEATURES: %08X", m_nSipFeatureCaps, 0, 0);
             break;
         }
         case IConfigurable::CP_I_TCP_CRITERION_LENGTH:
@@ -304,7 +304,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfig::Update(
                         piCc->GetInt(CarrierConfig::Ims::KEY_IPV6_SIP_MTU_SIZE_CELLULAR_INT);
             }
 
-            IMS_TRACE_D("TCP_CRITERION_LENGTH :: %d", m_nTcpCriterionLength, 0, 0);
+            IMS_TRACE_D("TCP_CRITERION_LENGTH: %d", m_nTcpCriterionLength, 0, 0);
             break;
         }
         case IConfigurable::CP_I_REG_EXPIRES:
@@ -315,7 +315,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfig::Update(
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("REG_EXPIRES :: %d", m_nRegExpiration, 0, 0);
+            IMS_TRACE_D("REG_EXPIRES: %d", m_nRegExpiration, 0, 0);
             break;
         }
         case IConfigurable::CP_I_REG_SUB:
@@ -331,7 +331,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfig::Update(
                         CarrierConfig::Ims::KEY_REGISTRATION_EVENT_PACKAGE_SUPPORTED_BOOL);
             }
 
-            IMS_TRACE_D("REG_SUB :: %s", _TRACE_B_(m_bRegSubscription), 0, 0);
+            IMS_TRACE_D("REG_SUB: %s", _TRACE_B_(m_bRegSubscription), 0, 0);
             break;
         }
         case IConfigurable::CP_I_REG_SUB_EXPIRES:
@@ -343,13 +343,13 @@ PROTECTED VIRTUAL IMS_BOOL SipConfig::Update(
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("REG_SUB_EXPIRES :: %d", m_nRegSubExpiration, 0, 0);
+            IMS_TRACE_D("REG_SUB_EXPIRES: %d", m_nRegSubExpiration, 0, 0);
             break;
         }
         default:
         {
             bUpdateResult = IMS_FALSE;
-            IMS_TRACE_D("No configurable parameter item (%d)", nCpi, 0, 0);
+            IMS_TRACE_D("No configurable parameter item(%d)", nCpi, 0, 0);
             break;
         }
     }
@@ -430,7 +430,7 @@ void SipConfig::UpdateTcpTimerValues()
         m_objTcpTimerValues.m_nTvWouldblockWaiting = nTimerValueT1 * 32;
     }
 
-    IMS_TRACE_D("TcpTimerValues :: ka=%d, cw=%d, ww=%d", m_objTcpTimerValues.m_nTvKeepAlive,
+    IMS_TRACE_D("TcpTimerValues: ka=%d, cw=%d, ww=%d", m_objTcpTimerValues.m_nTvKeepAlive,
             m_objTcpTimerValues.m_nTvConnectionWaiting, m_objTcpTimerValues.m_nTvWouldblockWaiting);
 }
 
