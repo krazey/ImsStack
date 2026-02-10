@@ -78,7 +78,7 @@ PUBLIC VIRTUAL IMS_RESULT XmlTransactionProvider::Push(IN IXmlTransaction* piTra
 
     m_objTransactions.Push(piTransaction);
 
-    IMS_TRACE_D("Push :: size=%d", m_objTransactions.GetSize(), 0, 0);
+    IMS_TRACE_D("Push: size=%d", m_objTransactions.GetSize(), 0, 0);
 
     return IMS_SUCCESS;
 }
@@ -89,14 +89,14 @@ PUBLIC VIRTUAL IXmlTransaction* XmlTransactionProvider::Pop()
 
     m_objTransactions.Pop();
 
-    IMS_TRACE_D("Pop :: size=%d", m_objTransactions.GetSize(), 0, 0);
+    IMS_TRACE_D("Pop: size=%d", m_objTransactions.GetSize(), 0, 0);
 
     return piTransaction;
 }
 
 PRIVATE VIRTUAL IMS_BOOL XmlTransactionProvider::OnMessage(IN IMSMSG& objMsg)
 {
-    IMS_TRACE_D("OnMessage :: msg=%d", objMsg.GetName(), 0, 0);
+    IMS_TRACE_D("OnMessage: msg=%d", objMsg.GetName(), 0, 0);
 
     if (m_objTransactions.GetSize() < 1)
     {
@@ -224,7 +224,7 @@ void XmlTransactionProvider::SetState(IN IMS_SINT32 nState)
 {
     if (m_nState != nState)
     {
-        IMS_TRACE_I("XmlState :: %d >> %d", m_nState, nState, 0);
+        IMS_TRACE_I("XmlState: %d >> %d", m_nState, nState, 0);
 
         m_nState = nState;
 

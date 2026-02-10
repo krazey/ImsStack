@@ -314,7 +314,7 @@ IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIs
                 {
                     // Overwrite the transport protocol according to the SDP answer
                     // Add if "tcap" attribute is provided in the previous SDP offer
-                    IMS_TRACE_D("SDPCapNego :: Media transport protocol will be changed"
+                    IMS_TRACE_D("SDPCapNego: Media transport protocol will be changed"
                                 "(%d >> %d)",
                             nLocalTransportProtocol, nPeerTransportProtocol, 0);
 
@@ -326,7 +326,7 @@ IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIs
                 {
                     // Overwrite the transport protocol according to the SDP answer
                     // Add if "tcap" attribute is provided in the previous SDP offer
-                    IMS_TRACE_D("SDPCapNego(2) :: Media transport protocol will be changed"
+                    IMS_TRACE_D("SDPCapNego(2): Media transport protocol will be changed"
                                 "(%d >> %d)",
                             nLocalTransportProtocol, nPeerTransportProtocol, 0);
 
@@ -420,7 +420,7 @@ IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIs
                         if (!strOfferedPayloadType.Equals(strAnsweredPayloadType))
                         {
                             IMS_TRACE_D("Payload type (O:%s, A:%s) is not matched "
-                                        "during the session; skipped...",
+                                        "during the session; skipped",
                                     strOfferedPayloadType.GetStr(), strAnsweredPayloadType.GetStr(),
                                     0);
 
@@ -435,7 +435,7 @@ IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIs
                                 CopyMediaFormat(objTempMediaFormats, objPeerMediaFormats);
 
                                 IMS_TRACE_D("Payload type (%s) is added during an active call "
-                                            "as preferred codec...",
+                                            "as preferred codec",
                                         pPeerMediaFormat->GetValue().GetStr(), 0, 0);
                             }
 
@@ -469,7 +469,7 @@ IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIs
             {
                 if (!bAtLeastOneCodecMatched)
                 {
-                    IMS_TRACE_D("New media format is detected...", 0, 0, 0);
+                    IMS_TRACE_D("New media format is detected", 0, 0, 0);
                     bAtLeastOneCodecMatched = IMS_TRUE;
                 }
 
@@ -965,7 +965,7 @@ void SdpMediaParameter::SetMid(IN IMS_SINT32 nMid)
 {
     if (m_nMid != nMid)
     {
-        IMS_TRACE_I("SetMid :: %d >> %d", m_nMid, nMid, 0);
+        IMS_TRACE_I("SetMid: %d >> %d", m_nMid, nMid, 0);
         m_nMid = nMid;
     }
 }
@@ -1111,7 +1111,7 @@ IMS_BOOL SdpMediaParameter::SetPrecondition(
     if ((nAttribute != SdpAttribute::CURR) && (nAttribute != SdpAttribute::DES) &&
             (nAttribute != SdpAttribute::CONF))
     {
-        IMS_TRACE_D("Illegal argument :: attribute (%d)", nAttribute, 0, 0);
+        IMS_TRACE_D("Illegal argument: attribute (%d)", nAttribute, 0, 0);
         return IMS_FALSE;
     }
 
@@ -1513,7 +1513,7 @@ PUBLIC GLOBAL SdpPrecondition* SdpMediaParameter::CreatePrecondition(
     {
         const SdpAttribute& objAttr = objAttributes.GetAt(i);
 
-        IMS_TRACE_D("'qos' attribute :: %s", objAttr.GetAttributeValue().GetStr(), 0, 0);
+        IMS_TRACE_D("'qos' attribute: %s", objAttr.GetAttributeValue().GetStr(), 0, 0);
 
         if (!SdpPrecondition::ExtractProperties(
                     objAttr.GetAttributeValue(), nType, nSubType, objInfo))
@@ -1904,7 +1904,7 @@ PUBLIC GLOBAL void SdpMediaParameter::CorrectFmtps(
         return;
     }
 
-    IMS_TRACE_D("SdpMediaParameter :: correct the duplicated fmtp attributes ...", 0, 0, 0);
+    IMS_TRACE_D("SdpMediaParameter: correct the duplicated fmtp attributes", 0, 0, 0);
 
     for (IMS_UINT32 i = 0; i < objDuplicatedFmtps.GetSize(); ++i)
     {

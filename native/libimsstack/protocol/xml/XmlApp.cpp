@@ -39,7 +39,7 @@ XmlApp::~XmlApp() {}
 PUBLIC
 void XmlApp::Attach(IN const AString& strTargetName)
 {
-    IMS_TRACE_D("Attach :: app=%s", strTargetName.GetStr(), 0, 0);
+    IMS_TRACE_D("Attach: app=%s", strTargetName.GetStr(), 0, 0);
 
     m_strTargetName = strTargetName;
 
@@ -69,7 +69,7 @@ IMS_RESULT XmlApp::Parse(IN XmlTransaction* pTransaction)
 
     if (piRequest == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Parse :: IXmlRequest is null", 0, 0, 0);
+        IMS_TRACE_E(0, "Parse: IXmlRequest is null", 0, 0, 0);
         return IMS_FAILURE;
     }
 

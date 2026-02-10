@@ -73,7 +73,7 @@ IDocument* DocumentBuilderPrivate::Parse(IN const IMS_CHAR* pszXml, IN IMS_SINT3
         return IMS_NULL;
     }
 
-    IMS_TRACE_D("DocumentBuilder :: Parse done (l=%d, standalone=%d, properties=0x%04x)", nLength,
+    IMS_TRACE_D("DocumentBuilder: Parse done (l=%d, standalone=%d, properties=0x%04x)", nLength,
             pstDoc->standalone, pstDoc->properties);
 
     return CreateDocument(pstDoc);

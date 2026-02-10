@@ -46,7 +46,7 @@ Node::Node() :
         m_pstNode(IMS_NULL)
 {
 #ifdef __IMS_XML_DEBUG__
-    IMS_TRACE_D("Constructor :: Node", 0, 0, 0);
+    IMS_TRACE_D("ctor: Node", 0, 0, 0);
 #endif
 }
 
@@ -68,7 +68,7 @@ Node::Node(IN xmlNodePtr pstNode) :
         m_pstNode(pstNode)
 {
 #ifdef __IMS_XML_DEBUG__
-    IMS_TRACE_D("Constructor :: Node(node) w/ %s", m_strNodeName.GetStr(), 0, 0);
+    IMS_TRACE_D("ctor: Node(node) w/ %s", m_strNodeName.GetStr(), 0, 0);
 #endif
 
     if (m_pstNode->nsDef != IMS_NULL)
@@ -108,7 +108,7 @@ Node::Node(IN xmlDocPtr pstDoc) :
         m_pstNode(IMS_NULL)
 {
 #ifdef __IMS_XML_DEBUG__
-    IMS_TRACE_D("Constructor :: Node(doc) w/ %s", m_strNodeName.GetStr(), 0, 0);
+    IMS_TRACE_D("ctor: Node(doc) w/ %s", m_strNodeName.GetStr(), 0, 0);
 #endif
 
     if (pstDoc->oldNs != IMS_NULL)
@@ -138,7 +138,7 @@ Node::Node(IN xmlAttrPtr pstAttr) :
         m_pstNode(IMS_NULL)
 {
 #ifdef __IMS_XML_DEBUG__
-    IMS_TRACE_D("Constructor :: Node(attr) w/ %s", m_strNodeName.GetStr(), 0, 0);
+    IMS_TRACE_D("ctor: Node(attr) w/ %s", m_strNodeName.GetStr(), 0, 0);
 #endif
 
     if (pstAttr->children != IMS_NULL)
@@ -158,7 +158,7 @@ Node::Node(IN xmlAttrPtr pstAttr) :
 PUBLIC VIRTUAL Node::~Node()
 {
 #ifdef __IMS_XML_DEBUG__
-    IMS_TRACE_D("Destructor :: Node(%s)", m_strNodeName.GetStr(), 0, 0);
+    IMS_TRACE_D("dtor: Node(%s)", m_strNodeName.GetStr(), 0, 0);
 #endif
 
     if (m_pNodeList != IMS_NULL)
