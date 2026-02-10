@@ -43,21 +43,20 @@ public:
 
 protected:
     void DestroyStaticConfig();
+    void CreateAos();
+    void DestroyAos();
+    virtual IAosBuilder* AosBuilderFactory();
 
 private:
     void CreateStaticConfig();
-    void CreateAos();
-    void DestroyAos();
-
-    IAosBuilder* AosBuilderFactory();
 
 protected:
     AosBuildDirector* m_pBuildDirector;
     AosStaticConfig* m_pStaticConfig;
+    ImsMap<AString, IAosAppContext*> m_objAppContext;
 
 private:
     IMS_SINT32 m_nSlotId;
     ImsList<AString> m_objAppId;
-    ImsMap<AString, IAosAppContext*> m_objAppContext;
 };
 #endif  // AOS_MNGR_H_
