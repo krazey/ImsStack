@@ -43,8 +43,6 @@ public final class MtcCallManager implements ICallStateTracker, IMtcCallManager 
     private List<CallNode> mCallNodes = new ArrayList<CallNode>();
     private List<CallNode> mPendingCallNodes = new ArrayList<CallNode>();
     private MtcCallTracker mCT = new MtcCallTracker();
-    // E-call tracker
-    private MtcECallStateTracker mECallStateTracker = null;
     private int mCallStateVoLte = MtcStateUtils.STATE_INACTIVE;
     private int mCallStateVt = MtcStateUtils.STATE_INACTIVE;
 
@@ -65,21 +63,11 @@ public final class MtcCallManager implements ICallStateTracker, IMtcCallManager 
     @Override
     public void init() {
         log("init");
-
-        if (MtcECallStateTracker.isEcbmSupportedForVolte(mContext.getSlotId())
-                || MtcECallStateTracker.isEcbmSupportedForVowifi(mContext.getSlotId())) {
-            mECallStateTracker = new MtcECallStateTracker(mContext, this);
-        }
     }
 
     @Override
     public void clear() {
         log("clear");
-
-        if (mECallStateTracker != null) {
-            mECallStateTracker.dispose();
-            mECallStateTracker = null;
-        }
 
         mPendingCallNodes.clear();
         mCallNodes.clear();
@@ -103,11 +91,6 @@ public final class MtcCallManager implements ICallStateTracker, IMtcCallManager 
     @Override
     public boolean hasEstablishedCall() {
         return hasAtLeastOneEstablishedCall();
-    }
-
-    @Override
-    public MtcECallStateTracker getECallStateTracker() {
-        return mECallStateTracker;
     }
 
     // For originating call

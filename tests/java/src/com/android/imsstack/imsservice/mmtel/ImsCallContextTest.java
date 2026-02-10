@@ -40,7 +40,6 @@ import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.IMtcCallManager;
 import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcCall;
-import com.android.imsstack.enabler.mtc.MtcECallStateTracker;
 import com.android.imsstack.enabler.mtc.MtcServiceStateTracker;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.imsservice.mmtel.base.ImsApp;
@@ -159,15 +158,6 @@ public class ImsCallContextTest extends ImsStackTest {
     @Test
     public void getDefaultLooperTest() {
         Assert.assertNotNull(mImsCallContext.getDefaultLooper());
-    }
-
-    @Test
-    public void getECallStateTrackerTest() {
-        IMtcCallManager mockIMtcCallManager = Mockito.mock(IMtcCallManager.class);
-        MtcECallStateTracker mockIECallStateTracker = Mockito.mock(MtcECallStateTracker.class);
-        when(mMtcapp.getCallManager()).thenReturn(mockIMtcCallManager);
-        when(mockIMtcCallManager.getECallStateTracker()).thenReturn(mockIECallStateTracker);
-        Assert.assertNotNull(mImsCallContext.getECallStateTracker());
     }
 
     @Test

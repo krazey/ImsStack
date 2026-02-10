@@ -107,31 +107,11 @@ public class MtcCallManagerTest extends ImsStackTest {
     }
 
     @Test
-    public void testInit() {
-        IServiceStateTracker sst = Mockito.mock(IServiceStateTracker.class);
-        doReturn(mMockContext).when(mMockBaseContext).getContext();
-        doReturn(Looper.myLooper()).when(mMockContext).getMainLooper();
-        doReturn(sst).when(mMockBaseContext).getServiceStateTracker();
-        doReturn(false).when(mMockCarrierConfig).getBoolean(
-                CarrierConfig.ImsEmergency.KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL);
-        doReturn(true).when(mMockCarrierConfig).getBoolean(
-                CarrierConfig.ImsEmergency.KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL);
-
-        mTestMtcCallManager.init();
-
-        assertNotNull(mTestMtcCallManager.getECallStateTracker());
-    }
-
-    @Test
     public void testClear() {
         IServiceStateTracker sst = Mockito.mock(IServiceStateTracker.class);
         doReturn(mMockContext).when(mMockBaseContext).getContext();
         doReturn(Looper.myLooper()).when(mMockContext).getMainLooper();
         doReturn(sst).when(mMockBaseContext).getServiceStateTracker();
-        doReturn(false).when(mMockCarrierConfig).getBoolean(
-                CarrierConfig.ImsEmergency.KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL);
-        doReturn(true).when(mMockCarrierConfig).getBoolean(
-                CarrierConfig.ImsEmergency.KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL);
 
         mTestMtcCallManager.init();
         mTestMtcCallManager.addListener(mMockCallStateListener);
@@ -139,13 +119,11 @@ public class MtcCallManagerTest extends ImsStackTest {
         mTestMtcCallManager.attachPreIncomingCall(mMockMtcCall);
         processAllMessages();
 
-        assertNotNull(mTestMtcCallManager.getECallStateTracker());
         assertNotNull(mTestMtcCallManager.getCall(mNativeCallId));
         assertNotNull(mTestMtcCallManager.getPendingCall(mNativeCallId));
 
         mTestMtcCallManager.clear();
 
-        assertNull(mTestMtcCallManager.getECallStateTracker());
         assertNull(mTestMtcCallManager.getCall(mNativeCallId));
         assertNull(mTestMtcCallManager.getPendingCall(mNativeCallId));
     }

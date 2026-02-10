@@ -285,7 +285,7 @@ public class ImsCallApp extends ImsApp {
 
     public ImsEcbmImpl getEcbmInterface() {
         if (mEcbm == null) {
-            mEcbm = new ImsEcbmImpl(mCallContext);
+            mEcbm = new ImsEcbmImpl();
         }
 
         return mEcbm;
