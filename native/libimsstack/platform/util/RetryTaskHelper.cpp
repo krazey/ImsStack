@@ -36,7 +36,9 @@ RetryTaskHelper::RetryTaskHelper(IN IMS_BOOL bTimerOnCmdCompleted /*= IMS_FALSE*
 
 PUBLIC VIRTUAL RetryTaskHelper::~RetryTaskHelper()
 {
+#ifdef __IMS_DEBUG__
     IMS_TRACE_D("Destructor :: RetryTaskHelper", 0, 0, 0);
+#endif
 }
 
 /**

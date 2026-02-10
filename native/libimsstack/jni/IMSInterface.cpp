@@ -61,7 +61,9 @@ static int SendDataToJava(long nNativeObject, const android::Parcel& objParcel)
     JNIEnv* env;
     jlong jNativeObject = nNativeObject;
 
+#if defined(__JNI_DEBUG__)
     IMS_TRACE_D("SendDataToJava: object=%" PFLS_x, nNativeObject, 0, 0);
+#endif
 
     if ((s_classJniIms == NULL) || (s_methodSendDataToJava == NULL))
     {
@@ -379,7 +381,9 @@ static jint JniIms_nativeSendData(
 {
     long nNativeObject = INT64_TO_SINTP(jNativeObject);
 
+#if defined(__JNI_DEBUG__)
     IMS_TRACE_D("JniIms_nativeSendData :: object=%" PFLS_x, nNativeObject, 0, 0);
+#endif
 
     BaseService* pService = reinterpret_cast<BaseService*>(nNativeObject);
 

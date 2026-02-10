@@ -69,7 +69,7 @@ PUBLIC VIRTUAL void OsNetworkIpSec::DestroyPolicy(IN IIpSecPolicy* piPolicy)
 
 PUBLIC VIRTUAL void OsNetworkIpSec::DestroyAllPolicies()
 {
-    IMS_TRACE_D("DestroyAllPolicies :: Policy-size(%d) -- starts", m_objPolicies.GetSize(), 0, 0);
+    IMS_TRACE_D("DestroyAllPolicies: Policy-size(%d)", m_objPolicies.GetSize(), 0, 0);
 
     for (IMS_UINT32 i = 0; i < m_objPolicies.GetSize(); i++)
     {
@@ -98,14 +98,10 @@ PUBLIC VIRTUAL void OsNetworkIpSec::DestroyAllPolicies()
     }
 
     m_objPolicies.Clear();
-
-    IMS_TRACE_D("DestroyAllPolicies -- ends", 0, 0, 0);
 }
 
 PUBLIC VIRTUAL IMS_BOOL OsNetworkIpSec::AddPolicy(IN IIpSecPolicy* piPolicy)
 {
-    IMS_TRACE_D("AddPolicy(SP+SA) -- starts", 0, 0, 0);
-
     OsIpSecPolicy* pPolicy = DYNAMIC_CAST(OsIpSecPolicy*, piPolicy);
     const ImsList<OsIpSecSp*>& objSPs = pPolicy->GetSPs();
     const ImsList<OsIpSecSa*>& objSAs = pPolicy->GetSAs();
@@ -145,15 +141,11 @@ PUBLIC VIRTUAL IMS_BOOL OsNetworkIpSec::AddPolicy(IN IIpSecPolicy* piPolicy)
         m_objSaParams.Add(reinterpret_cast<IMS_UINTP>(pPolicy), objSaParam);
     }
 
-    IMS_TRACE_D("AddPolicy(SP+SA) -- ends", 0, 0, 0);
-
     return IMS_TRUE;
 }
 
 PUBLIC VIRTUAL void OsNetworkIpSec::DeletePolicy(IN IIpSecPolicy* piPolicy)
 {
-    IMS_TRACE_D("DeletePolicy(SP+SA) -- starts", 0, 0, 0);
-
     OsIpSecPolicy* pPolicy = DYNAMIC_CAST(OsIpSecPolicy*, piPolicy);
     IMS_SLONG nIndex = m_objSaParams.GetIndexOfKey(reinterpret_cast<IMS_UINTP>(pPolicy));
 
@@ -169,8 +161,6 @@ PUBLIC VIRTUAL void OsNetworkIpSec::DeletePolicy(IN IIpSecPolicy* piPolicy)
             objSaParam.GetIpSecId(), m_nSlotId);
 
     m_objSaParams.RemoveAt(nIndex);
-
-    IMS_TRACE_D("DeletePolicy(SP+SA) -- ends", 0, 0, 0);
 }
 
 PUBLIC VIRTUAL void OsNetworkIpSec::DumpPolicy(IN IIpSecPolicy* piPolicy)

@@ -610,8 +610,10 @@ PRIVATE VIRTUAL void OsNetworkConnection::System_NotifyEvent(
     // APN Type
     if (GetApnType() != LONG_TO_SINT(nWParam))
     {
+#ifdef __IMS_DEBUG__
         IMS_TRACE_D("APN is different - apnType(%d), received apnType(%" PFLS_d ")", GetApnType(),
                 nWParam, 0);
+#endif
         return;
     }
 
@@ -784,10 +786,6 @@ IMS_BOOL OsNetworkConnection::CacheLocalAddress()
     // APN name
     m_strApn = PlatformContext::GetInstance()->GetSystem()->GetApnName(GetApnType(), GetSlotId());
 
-    IMS_TRACE_D("Mobile :: LOCAL - IPv4 (%s), IPv6 (%s), APN (%s)",
-            m_objLocalAddressIpv4.ToString().GetStr(), m_objLocalAddressIpv6.ToString().GetStr(),
-            m_strApn.GetStr());
-
     // Network interface identifier
     m_nIfaceId = PlatformContext::GetInstance()->GetSystem()->GetIfaceId(GetApnType(), GetSlotId());
 
@@ -795,8 +793,11 @@ IMS_BOOL OsNetworkConnection::CacheLocalAddress()
     m_strIfaceName =
             PlatformContext::GetInstance()->GetSystem()->GetIfaceName(GetApnType(), GetSlotId());
 
-    IMS_TRACE_D("Mobile :: IfaceId=%d, IpcanCategory=%d, IfaceName=%s", m_nIfaceId,
-            m_nIpcanCategory, m_strIfaceName.GetStr());
+    AString strLog;
+    strLog.Sprintf("Mobile: ipv4=%s, ipv6=%s, apn=%s, if-id=%d, if-name=%s, ipcan=%d",
+            m_objLocalAddressIpv4.ToString().GetStr(), m_objLocalAddressIpv6.ToString().GetStr(),
+            m_strApn.GetStr(), m_nIfaceId, m_strIfaceName.GetStr(), m_nIpcanCategory);
+    IMS_TRACE_D("%s", strLog.GetStr(), 0, 0);
 
     return IMS_TRUE;
 }
