@@ -1778,6 +1778,32 @@ TEST_F(MtcPreconditionManagerTest, DoNotStartQosTimerOnCallModifiedIfLocalResour
     pPreconditionManager->OnCallModified(&objISession);
 }
 
+TEST_F(MtcPreconditionManagerTest, DoNotStartQosTimerOnSdpSentIfEmergencyAndSkipConfigEnabled)
+{
+    SetUpMockQosInfo();
+    pPreconditionManager->SetCurrentRatTypeForPrerequisite(INetworkWatcher::RADIOTECH_TYPE_LTE);
+    ON_CALL(objMediaManager, GetNegotiationState(&objISession))
+            .WillByDefault(Return(NEGO_STATE::STATE_NEGOTIATED));
+    ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::IDLE));
+    SetUpNothingOnDefaultBearerSupported();
+
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(objCallContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigEmergency::KEY_EMERGENCY_QOS_PRECONDITION_SUPPORTED_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(
+                    ConfigEmergency::KEY_SKIP_AUDIO_DEDICATED_BEARER_WAIT_TIMER_FOR_EMERGENCY_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objTimer, StartQosTimer(QosTimerType::WAIT_AUDIO_DEDICATED_BEARER, _)).Times(0);
+
+    pPreconditionManager->OnSdpSent(&objISession);
+}
+
 TEST_F(MtcPreconditionManagerTest, StartsQosTimerOnCallModifiedIfLocalResourceIsNotReserved)
 {
     SetUpMockQosInfo();

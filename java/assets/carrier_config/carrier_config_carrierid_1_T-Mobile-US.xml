@@ -345,6 +345,7 @@
         <item value="606:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
         <item value="699:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
     </string-array>
+    <boolean name="imsemergency.skip_audio_dedicated_bearer_wait_timer_for_emergency_bool" value="true"/>
     <int name="imsemergency.emergency_tcall_timer_millis_int" value="5000"/>
     <int name="imsemergency.emergency_ringback_timer_millis_int" value="-1"/>
     <int name="imsemergency.emergency_18x_timer_millis_int" value="-1"/>
