@@ -271,10 +271,7 @@ PUBLIC VIRTUAL void QosStatusTable::SetDirectionTag(IN IMS_SINT32 eSdpMediaType,
 
     QosStatusRecord* pRecord = lstRecords.GetAt(0);
 
-    if (pRecord->eDirTag != eDirTag)
-    {
-        pRecord->eDirTag = eDirTag;
-    }
+    pRecord->eDirTag = eDirTag;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 QosStatusTable::GetStrengthTag(
