@@ -581,8 +581,6 @@ PUBLIC VIRTUAL IMS_UINT32 AosRegistration::GetProperty(
 
 PUBLIC VIRTUAL IMS_UINT32 AosRegistration::GetState()
 {
-    A_IMS_TRACE_I(
-            REGID, "GetState :: (%s)", AosProvider::GetLog()->RegStateToString(m_nState), 0, 0);
     return m_nState;
 }
 
@@ -747,9 +745,6 @@ void AosRegistration::SetRetryTime()
 {
     m_nRetryBaseTime = GET_N_CONFIG(m_nSlotId)->GetRegistrationRetryBaseTime() / 1000;
     m_nRetryMaxTime = GET_N_CONFIG(m_nSlotId)->GetRegistrationRetryMaxTime() / 1000;
-
-    A_IMS_TRACE_I(REGID, "m_nRetryBaseTime (%d) , m_nRetryMaxTime (%d)", m_nRetryBaseTime,
-            m_nRetryMaxTime, 0);
 }
 
 PROTECTED
