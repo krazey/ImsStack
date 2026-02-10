@@ -52,7 +52,7 @@ public:
     inline void SetTransactionCompleted(IN IMS_SINT32 nStatusCode) { m_nStatusCode = nStatusCode; }
 
 private:
-    // FIX_NO_ACK_RETRANSMISSION :: this will be used for 2xx response received case only
+    // FIX_NO_ACK_RETRANSMISSION: used for 2xx response received case only
     IMS_SINT32 m_nStatusCode;
     ImsList<RcPtr<SipClientTransactionState>> m_objTxnStates;
 };

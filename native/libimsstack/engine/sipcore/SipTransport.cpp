@@ -182,7 +182,7 @@ SipSocket* SipTransport::CreateTcpClientSocket()
                 }
             }
 
-            // If the transport protocol is TLS, SSL socket will be created...
+            // If the transport protocol is TLS, SSL socket will be created.
             if (m_objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TLS)
             {
                 objSockAddr.SetSecure(IMS_TRUE);
@@ -368,7 +368,7 @@ IMS_BOOL SipTransport::SendToNetwork(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 n
         }
     }
 
-    // For an initial TCP client connection...
+    // For an initial TCP client connection.
     if (!m_pSocket->Connect())
     {
         IMS_TRACE_E(0, "Connecting transport channel failed ...", 0, 0, 0);
@@ -685,21 +685,18 @@ PROTECTED VIRTUAL void SipTransport::Socket_SendEnabled(IN SipSocket* pSocket)
 
     if (m_pSocket == IMS_NULL)
     {
-        // Do nothing...
         IMS_TRACE_D("Socket NULL", 0, 0, 0);
         return;
     }
 
     if (m_pSocket != pSocket)
     {
-        // Do nothing...
         IMS_TRACE_D("Socket not matched", 0, 0, 0);
         return;
     }
 
     if (m_pSocket->GetState() != SipSocket::STATE_CONNECTED)
     {
-        // Do nothing ...
         IMS_TRACE_D("Socket is not ready", 0, 0, 0);
         return;
     }
@@ -873,7 +870,7 @@ IMS_BOOL SipTransport::ReserveSocket(IN const SipProfile* pProfile /*= IMS_NULL*
     // If the transport has already the connected socket, do not reserve the socket again.
     if (GetTransportHelper()->IsSocketPresent(m_pSocket))
     {
-        // Check if the port is same or not...
+        // Check if the port is same.
         if (m_nType != TYPE_CLIENT)
         {
             // In case of server transport & TCP protocol used
@@ -893,7 +890,7 @@ IMS_BOOL SipTransport::ReserveSocket(IN const SipProfile* pProfile /*= IMS_NULL*
             if ((m_pSocket->GetType() == SipSocketAddress::SOCKET_UDP) &&
                     (m_objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_UDP))
             {
-                // If the port is same, the socket will be re-used...
+                // If the port is same, the socket will be re-used.
                 IMS_TRACE_D("Transport :: UDP client (%s, %d) is re-used", SipDebug::GetIp(objIp),
                         nPort, 0);
                 return IMS_TRUE;
@@ -926,7 +923,7 @@ IMS_BOOL SipTransport::ReserveSocket(IN const SipProfile* pProfile /*= IMS_NULL*
             if (objPeerIp.Equals(m_objFarEnd.GetIpAddress()) &&
                     (m_objFarEnd.GetPort() == static_cast<IMS_SINT32>(nPeerPort)))
             {
-                // If the port is same, the socket will be re-used...
+                // If the port is same, the socket will be re-used.
                 IMS_TRACE_D("Transport :: TCP client (%s, %d) is re-used", SipDebug::GetIp(objIp),
                         nPort, 0);
 
@@ -950,7 +947,7 @@ IMS_BOOL SipTransport::ReserveSocket(IN const SipProfile* pProfile /*= IMS_NULL*
             }
         }
 
-        // Release the previous socket and create a new socket...
+        // Release the previous socket and create a new socket.
         ReleaseSocket();
     }
 
@@ -1021,7 +1018,7 @@ IMS_BOOL SipTransport::TransmitMessage(IN const IMS_BYTE* pBuffer, IN IMS_SINT32
     IMS_SINT32 nSentBytes =
             m_pSocket->Send(pBuffer, nBuffLen, m_objFarEnd.GetPort(), m_objFarEnd.GetIpAddress());
 
-    // DEBUGGING message ...
+    // SIP message logging.
     {
         PrintMessage(GetSlotId(), m_pSocket->GetSocketId(), IMS_TRUE, m_objFarEnd,
                 reinterpret_cast<const IMS_CHAR*>(pBuffer), nBuffLen);

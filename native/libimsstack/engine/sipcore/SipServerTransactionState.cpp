@@ -366,7 +366,6 @@ void SipServerTransactionState::RejectRequest(
 
     if (objMethod.ToInt() == SipMethod::ACK)
     {
-        // Do not anything ...
         return;
     }
 
@@ -616,8 +615,7 @@ IMS_SINT32 SipServerTransactionState::HandleRequest(OUT RcPtr<SipDialogEx>& pOri
         // 3) NOTIFY request is received after its SUBSCRIBE dialog is destroyed.
         if (objMethod.Equals(SipMethod::ACK))
         {
-            // 4 Send it to application ??? : 2xx is handled by UA Core
-            //  TRACE :: ACK request is received - DISCARD or JUST BYPASS ???
+            // 4) ACK request is received, but discarded.
             return SipPrivate::MESSAGE_DISCARDED;
         }
         else if (objMethod.Equals(SipMethod::NOTIFY) || objMethod.Equals(SipMethod::BYE) ||
@@ -662,17 +660,17 @@ IMS_SINT32 SipServerTransactionState::HandleRequest(OUT RcPtr<SipDialogEx>& pOri
     else
     {
         // The dialog is in EARLY state and this CANCEL is not related to the dialog,
-        // so, the dialog for CANCEL is created with a default information...
+        // so, the dialog for CANCEL is created with a default information.
         if (objMethod.Equals(SipMethod::CANCEL))
         {
-            // Update the dialog details from INVITE-created dialog...
+            // Update the dialog details from INVITE-created dialog.
             pTempDState->InitDialogDetails(SipDialogState::DIALOG_CANCELLED, pOrigDState.Get());
 
             m_pDialogEx = SipDialogEx::CreateDialog(pTempDState.Get(), objMsgInfo);
         }
         else if (bIsForked && objMethod.Equals(SipMethod::NOTIFY))
         {
-            // Update the dialog details from NOTIFY-created dialog...
+            // Update the dialog details from NOTIFY-created dialog.
             pTempDState->InitDialogDetails(
                     SipDialogState::DIALOG_FORKED_REQUEST, pOrigDState.Get());
 
@@ -684,7 +682,7 @@ IMS_SINT32 SipServerTransactionState::HandleRequest(OUT RcPtr<SipDialogEx>& pOri
         else if (objMethod.Equals(SipMethod::BYE) && pOrigDState->IsCaller() &&
                 (pOrigDState->GetState() == SipDState::STATE_INIT))
         {
-            // Update the dialog details from INVITE-created dialog...
+            // Update the dialog details from INVITE-created dialog.
             pTempDState->InitDialogDetails(SipDialogState::DIALOG_CANCELLED, pOrigDState.Get());
 
             m_pDialogEx = SipDialogEx::CreateDialog(pTempDState.Get(), objMsgInfo);
@@ -695,16 +693,16 @@ IMS_SINT32 SipServerTransactionState::HandleRequest(OUT RcPtr<SipDialogEx>& pOri
         }
         else
         {
-            // Find an existing dialog usage from this server transaction if present...
+            // Find an existing dialog usage from this server transaction if present.
             m_pDialogEx = pOrigDState->GetDialogUsage(objMsgInfo);
 
             if (m_pDialogEx.IsNull())
             {
                 // If the subscribe dialog usage is not found for this NOTIFY request,
-                // then reject the request with 481 ...
+                // then reject the request with 481.
                 if (objMethod.Equals(SipMethod::NOTIFY))
                 {
-                    // Create a new dialog usage from this server transaction...
+                    // Create a new dialog usage from this server transaction.
                     m_pDialogEx = SipDialogEx::CreateDialog(pTempDState.Get(), objMsgInfo);
 
                     if (!m_pDialogEx.IsNull())
@@ -720,7 +718,7 @@ IMS_SINT32 SipServerTransactionState::HandleRequest(OUT RcPtr<SipDialogEx>& pOri
                 IMS_TRACE_D("_____ CREATE A NEW DIALOG USAGE (%s) _____",
                         objMethod.ToString().GetStr(), 0, 0);
 
-                // Create a new dialog usage from this server transaction...
+                // Create a new dialog usage from this server transaction.
                 m_pDialogEx = SipDialogEx::CreateDialog(pOrigDState.Get(), objMsgInfo);
             }
             else

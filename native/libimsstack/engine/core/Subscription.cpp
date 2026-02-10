@@ -135,7 +135,7 @@ IMS_RESULT Subscription::Poll()
     }
 
     // if the state is in ACTIVE and refresh is started by the subscription,
-    // keep the request and after refresh is completed, try to send a SUBSCRIBE request...
+    // keep the request and after refresh is completed, try to send a SUBSCRIBE request.
 
     ISipClientConnection* piScc = CreateConnection(SipMethod(SipMethod::SUBSCRIBE));
 
@@ -209,7 +209,7 @@ IMS_RESULT Subscription::Subscribe()
     }
 
     // if the state is in ACTIVE and refresh is started by the subscription,
-    // keep the request and after refresh is completed, try to send a SUBSCRIBE request...
+    // keep the request and after refresh is completed, try to send a SUBSCRIBE request.
     if (m_pSubState->GetOperation() == SubState::OPERATION_IMPLICIT_REFRESH)
     {
         m_nPendingOperation = SubState::OPERATION_REFRESH;
@@ -320,7 +320,7 @@ IMS_RESULT Subscription::Unsubscribe()
     }
 
     // If the state is in ACTIVE and refresh is started by the subscription,
-    // keep the request and after refresh is completed, try to send a SUBSCRIBE request...
+    // keep the request and after refresh is completed, try to send a SUBSCRIBE request.
     if (m_pSubState->GetOperation() == SubState::OPERATION_IMPLICIT_REFRESH)
     {
         m_nPendingOperation = SubState::OPERATION_REMOVE;
@@ -639,10 +639,9 @@ PROTECTED VIRTUAL void Subscription::NotifySipResponse(IN ISipClientConnection* 
 
     UpdateResponse(piScc);
 
-    // Handle the response to SUBSCRIBE request ...
+    // Handle the response to SUBSCRIBE request.
     if (SipStatusCode::Is1XX(nStatusCode))
     {
-        // Do nothing ...
         return;
     }
     else if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
@@ -790,7 +789,7 @@ PROTECTED VIRTUAL IMS_BOOL Subscription::Dialog_Compare(IN ISipServerConnection*
 
     if (piDialog == IMS_NULL)
     {
-        // In case of an early NOTIFY received ...
+        // In case of an early NOTIFY received.
         if (GetState() == STATE_PENDING)
         {
             IMS_SINT32 nOperation = m_pSubState->GetOperation();
@@ -895,7 +894,6 @@ PROTECTED VIRTUAL IMS_BOOL Subscription::Dialog_NotifyRequest(IN ISipServerConne
 
     if (pMessage == IMS_NULL)
     {
-        // Internal error ... ???
         if (GetService()->SendResponse(piSsc, SipStatusCode::SC_500))
         {
             m_pSubState->UpdateState(piSsc->GetMessage());
@@ -1220,7 +1218,6 @@ void Subscription::CloseConnection()
             ServiceMethod::CloseConnection(IMessage::SUBSCRIPTION_UNSUBSCRIBE);
             break;
         default:
-            // Do nothing ...
             break;
     }
 
@@ -1271,7 +1268,6 @@ void Subscription::UpdateResponse(IN const ISipClientConnection* piScc)
             UpdateResponseOnReceived(IMessage::SUBSCRIPTION_UNSUBSCRIBE, piScc);
             break;
         default:
-            // Do nothing ...
             break;
     }
 }

@@ -45,7 +45,7 @@ RetransmissionHelper::RetransmissionHelper(
 
     if (bIntervalCap)
     {
-        // Interval cap will be read from the timer T2...
+        // Interval cap will be read from the timer T2.
         m_nIntervalCap = SipConfigProxy::GetTimerValueT2(
                 pService->GetSlotId(), pService->GetSipProfile(), piSipConfigV);
     }

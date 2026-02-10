@@ -94,7 +94,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::FormViaHeader(
     }
     else
     {
-        // Overwrites the transport protocol by the local configuration...
+        // Overwrites the transport protocol by the local configuration.
         IMS_SINT32 nProtocol = Sip::TRANSPORT_EXT_ANY;
 
         if (!IsExplicitTargetProtocolSelected())
@@ -323,12 +323,12 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::ReserveResource(
 
     if (IsTcpConnectionOnlyRequired())
     {
-        // Do not create a server socket for the SIP client connection...
+        // Do not create a server socket for the SIP client connection.
         IMS_TRACE_D("ClientTransport :: TCP client connection is only required...", 0, 0, 0);
         return IMS_TRUE;
     }
 
-    // Reserves the listening sockets for incoming SIP message...
+    // Reserves the listening sockets for incoming SIP message.
     if (m_pServerSocket != IMS_NULL)
     {
         // If the near port number is changed, then destroy & create a TCP server socket.
@@ -359,7 +359,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::ReserveResource(
         {
             objSsa.SetType(SipSocketAddress::SOCKET_TCP);
 
-            // If the transport protocol is TLS, SSL socket will be created...
+            // If the transport protocol is TLS, SSL socket will be created.
             if (objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TLS)
             {
                 objSsa.SetSecure(IMS_TRUE);
@@ -559,7 +559,6 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
 
         if (bDnsQueryRequired)
         {
-            // Do DNS query ...
             INetworkConnection* piConnection =
                     NetworkService::GetNetworkService()->FindConnection(objIpAddr);
 

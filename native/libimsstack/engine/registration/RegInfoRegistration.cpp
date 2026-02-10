@@ -259,7 +259,7 @@ RegInfoContact* RegInfoRegistration::CheckNCreateContact(IN INode* piNode)
         }
     }
 
-    // New contact updated...
+    // New contact updated.
     RegInfoContact* pContact = new RegInfoContact();
 
     if (pContact == IMS_NULL)

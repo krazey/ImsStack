@@ -200,7 +200,7 @@ IMS_BOOL RegInfo::Update(IN const IDocument* piDocument)
     {
         IMS_TRACE_D("RegInfo :: 'full' state received", 0, 0, 0);
 
-        // Remove all the registrations & updates all...
+        // Remove all the registrations & updates all.
         RemoveAllRegistrations();
     }
 
@@ -308,7 +308,7 @@ RegInfoRegistration* RegInfo::CheckNCreateRegistration(IN INode* piNode)
         }
     }
 
-    // New registration updated...
+    // New registration updated.
     RegInfoRegistration* pRegistration = new RegInfoRegistration();
 
     if (pRegistration == IMS_NULL)

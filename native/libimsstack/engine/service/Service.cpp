@@ -152,9 +152,6 @@ PUBLIC VIRTUAL IMS_BOOL Service::CreateConfig(IN const AppConfig& objAppConfig)
         return IMS_FALSE;
     }
 
-    // Creates Contact URI for this service; Move to SetSIPReady(...) method.
-    // CreateContactAddress();
-
     // Constructs a caller capability which sets in Contact header
     m_pCallerCapability = new CallerCapability(GetServiceCode());
 
@@ -1801,7 +1798,7 @@ PUBLIC GLOBAL IMS_BOOL Service::ValidateReferTo(
 
 PROTECTED VIRTUAL void Service::Close()
 {
-    // Destroy a service-specific configurations .....
+    // Destroy a service-specific configurations.
     const SipConfig* pSipConfig =
             const_cast<SipConfig*>(ConfigurationManager::GetInstance()->GetSipConfig(GetSlotId()));
 

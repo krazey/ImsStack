@@ -647,7 +647,7 @@ IMS_BOOL SipDialogState::InitDialogDetails(IN IMS_SINT32 nTrigger, IN const SipD
 {
     if (nTrigger == DIALOG_CANCELLED)
     {
-        // Copy the remote sequence number from INVITE dialog...
+        // Copy the remote sequence number from INVITE dialog.
         m_nRemoteCSeq = pDState->m_nRemoteCSeq;
         m_nRemoteCSeqForInvite = pDState->m_nRemoteCSeqForInvite;
     }
@@ -659,7 +659,7 @@ IMS_BOOL SipDialogState::InitDialogDetails(IN IMS_SINT32 nTrigger, IN const SipD
     }
     else if (nTrigger == DIALOG_FORKED_RESPONSE)
     {
-        // It will be updated from the previous request later...
+        // It will be updated from the previous request later.
         m_nLocalCSeq = 1;
 
 #ifdef __IMS_SIP_DIALOG_COMPONENT_BY_REFERENCE__
@@ -849,7 +849,7 @@ PUBLIC
 IMS_SINT32 SipDialogState::UpdateDialogDetails(IN const SipMessageInfo& objMsgInfo,
         IN IMS_SINT32 nUsageState, IN IMS_SINT32 nAction, IN IMS_SINT32 nTrigger)
 {
-    // If the dialog's state is already in TERMINATED state, skip the below procedures ...
+    // If the dialog's state is already in TERMINATED state, skip the below procedures.
     if (m_nState == SipDState::STATE_TERMINATED)
     {
         IMS_TRACE_D("INVALID STATE : Dialog (%s) is already in TERMINATED state",
@@ -1603,7 +1603,7 @@ void SipDialogState::UpdateSessionId(IN const SipMessageInfo& objMsgInfo)
 {
     if (m_strSessionId.GetLength() > 0)
     {
-        // Session-ID is already set by the previous request or response...
+        // Session-ID is already set by the previous request or response.
         return;
     }
 
@@ -1634,7 +1634,7 @@ void SipDialogState::UpdateState(
 
             if (m_pSharedState->IsShared() && (nUsageState == SipDState::STATE_TERMINATED))
             {
-                // Do not transit the state...
+                // Do not transit the state.
                 nNextState = SipDState::STATE_MAX;
             }
             break;

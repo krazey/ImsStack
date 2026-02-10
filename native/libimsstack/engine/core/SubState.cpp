@@ -93,7 +93,6 @@ IMS_BOOL SubState::SetHeadersAndBodyParts(IN_OUT ISipMessage *&piSipMsg)
 {
     if (m_piSipMsg == IMS_NULL)
     {
-        // Nothing to do ...
         return IMS_TRUE;
     }
 

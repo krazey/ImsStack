@@ -48,7 +48,7 @@ IMS_BOOL MethodManager::AddMethod(IN Method* pMethod)
         }
     }
 
-    // If not found, adds a new method ...
+    // If not found, adds a new method.
 
     return m_objMethods.Append(pMethod);
 }

@@ -461,7 +461,7 @@ IMS_BOOL SipConnectionNotifierManagerPrivate::IsConnectionNotifierPresent(
 PRIVATE GLOBAL IMS_BOOL SipConnectionNotifierManagerPrivate::CheckMessageValidity(
         IN const ISipMessage* piSipMsg, OUT AString& strReason)
 {
-    // According to the SIP method, check the mandatory header or parameters ...
+    // According to the SIP method, check the mandatory header or parameters.
     const SipMethod& objMethod = piSipMsg->GetMethod();
 
     // RFC 3891 : Replaces header requirements
@@ -756,7 +756,7 @@ PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::HandleSipRequest(
         return;
     }
 
-    // First, check if the message is CANCEL request ...
+    // First, check if the message is CANCEL request.
     if (piSsc->GetMethod().Equals(SipMethod::CANCEL))
     {
         IMS_BOOL bHandled = CancellableMethodManager::GetInstance()->HandleCancelRequest(piSsc);
@@ -876,7 +876,7 @@ PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::HandleSipRequest(
                 objStatusCode = SipStatusCode::SC_404;
             }
 
-            // Send 404 response (480 ???)
+            // Send 404 response (or 480?)
             IMS_TRACE_D("SipConnectionNotifierManager :: Sending %d response to %s request ...",
                     objStatusCode.ToInt(), piSsc->GetMethod().ToString().GetStr(), 0);
 
@@ -979,12 +979,11 @@ PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequest(
             continue;
         }
 
-        // If Service is not yet opened, then skips this service...
+        // If Service is not yet opened, then skips this service.
         if (!pService->IsImsConnected())
         {
             IMS_TRACE_I("IMS is not connected (%s, %s)", pService->GetAppId().GetStr(),
                     pService->GetServiceId().GetStr(), 0);
-
             // Drop the service since it is not connected to the IMS network
             objServices.RemoveAt(i);
             continue;
@@ -1060,7 +1059,7 @@ PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequest(
             continue;
         }
 
-        // If Service is not yet opened, then skips this service...
+        // If Service is not yet opened, then skips this service.
         if (!pService->IsImsConnected())
         {
             IMS_TRACE_I("CallerPreference :: IMS is not connected (%s, %s)",

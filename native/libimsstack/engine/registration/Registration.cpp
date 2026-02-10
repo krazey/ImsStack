@@ -512,7 +512,7 @@ PRIVATE VIRTUAL void Registration::ClientConnection_NotifyResponse(
     }
     else
     {
-        // Do not clear the authentication challenge...
+        // Do not clear the authentication challenge.
         // Initial registration required: 305 / 408 / 500 / 504 / 600 / txn timeout
         // // IMS_AUTH_NONCE_REUSE {
         // SetAuthenticationChallenge(IMS_NULL);
@@ -721,7 +721,7 @@ PRIVATE VIRTUAL void Registration::DestroyAllContacts()
     {
         RegContact* pContact = m_objContacts.GetAt(0);
 
-        // Notify the removal of contact to the RegBinding ...
+        // Notify the removal of contact to the RegBinding.
         UpdateBindingState(BINDING_DESTROY_CONTACT);
 
         delete pContact;
@@ -739,7 +739,7 @@ PRIVATE VIRTUAL void Registration::DestroyContact(IN IRegContact* piContact)
 
         if (pContact == piContact)
         {
-            // Notify the removal of contact to the RegBinding ...
+            // Notify the removal of contact to the RegBinding.
             UpdateBindingState(BINDING_DESTROY_CONTACT);
 
             delete pContact;
@@ -760,7 +760,7 @@ PRIVATE VIRTUAL void Registration::DestroyContact(
 
         if (objIpAddr.Equals(pContact->GetIpAddress()) && (nPort == pContact->GetPort()))
         {
-            // Notify the removal of contact to the RegBinding ...
+            // Notify the removal of contact to the RegBinding.
             UpdateBindingState(BINDING_DESTROY_CONTACT);
 
             delete pContact;
@@ -1308,7 +1308,7 @@ PRIVATE VIRTUAL IRegSubscription* Registration::CreateSubscription(
         return IMS_NULL;
     }
 
-    //// Register the listener to obtain the reginfo ...
+    //// Register the listener to obtain the reginfo.
     RegInfo* pRegInfo =
             ImsCoreContext::GetInstance()->GetRegInfoManager()->GetRegInfo(m_pRegFlow->GetRegKey());
 
@@ -1542,7 +1542,7 @@ PRIVATE VIRTUAL void Registration::Refreshable_RefreshCompleted(
         }
         else
         {
-            // Do not clear the authentication challenge...
+            // Do not clear the authentication challenge.
             // Initial registration required: 305 / 408 / 500 / 504 / txn timeout
             // // IMS_AUTH_NONCE_REUSE {
             // SetAuthenticationChallenge(IMS_NULL);
@@ -1563,8 +1563,7 @@ PRIVATE VIRTUAL void Registration::Refreshable_RefreshCompleted(
     // The session refresh request is timed out.
     else if (nCode == RefreshHelper::TRANSACTION_TIMEOUT)
     {
-        // 140225, hwangoo.park
-        // Do not clear the authentication challenge...
+        // Do not clear the authentication challenge.
         // // IMS_AUTH_NONCE_REUSE {
         // SetAuthenticationChallenge(IMS_NULL);
         // // }
@@ -2119,7 +2118,7 @@ IMS_BOOL Registration::CreateSa(IN const Credential& objCredential, IN const Ims
         return IMS_TRUE;
     }
 
-    // Checks if the security association is required or not...
+    // Checks if the security association is required or not.
     if (!m_pRegParam->IsSecurityAssociationRequired())
     {
         IMS_TRACE_D("Security association is not required ...", 0, 0, 0);
@@ -2488,10 +2487,6 @@ IMS_BOOL Registration::RespondToChallenge(IN ISipClientConnection* piScc)
 
             return IMS_TRUE;
         }
-        else
-        {
-            // do nothing !!!
-        }
 
         IMS_TRACE_D("RespondToChallenge :: Respond to MD5 authentication challenge ...", 0, 0, 0);
 
@@ -2743,7 +2738,7 @@ IMS_BOOL Registration::RespondToPendingChallenge(IN const Credential& objCredent
             if ((nPrevState == STATE_INIT) &&
                     (objCredential.GetAkaResponse().m_nStatus != ImsAkaParam::RESULT_OK))
             {
-                // Do not add P-Access-Network-Info header since the authentication is failed...
+                // Do not add P-Access-Network-Info header since the authentication is failed.
             }
             else
             {

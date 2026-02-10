@@ -573,7 +573,7 @@ const SipAddress::UserInfoPart* SipAddress::GetUserInfoPart() const
     {
         // No userinfo part
 
-        // If SIP address is "tel" URI...
+        // If SIP address is "tel" URI.
         if (IsSchemeTel())
         {
             return CreateUserInfoPart(m_strHostInfo);
@@ -1398,7 +1398,7 @@ IMS_BOOL SipAddress::CompareTransportParameters(IN const SipAddress& objAddress)
 
     if ((strTransport.GetLength() == 0) && (strOtherTransport.GetLength() == 0))
     {
-        // Exceptional case :: It MUST NOT be reached.
+        // Exceptional case: MUST NOT be reached.
         return IMS_TRUE;
     }
     else if ((strTransport.GetLength() != 0) && (strOtherTransport.GetLength() != 0))

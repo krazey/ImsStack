@@ -51,7 +51,7 @@ private:
     // Event header
     AString m_strEvent;
     ISipHeader* m_piEventHeader;
-    // In any case, MIN & MAX expiration value needs to be defined ...
+    // In any case, MIN & MAX expiration value needs to be defined.
     // Expires header
     //    - "Expires" header in the initial SUBSCRIBE request
     //    - We will take it as the default subscription duration for this event package

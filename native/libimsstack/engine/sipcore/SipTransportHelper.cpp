@@ -260,7 +260,7 @@ void SipTransportHelper::Destroy(IN SipSocket*& pSocket, IN const ISipSocketList
                         pStreamSocket->IsKeepAlivePermanent()) &&
                     (pStreamSocket->GetState() == SipSocket::STATE_CONNECTED))
             {
-                // The stream socket will be destroyed when the keep-alive timer is expired...
+                // The stream socket will be destroyed when the keep-alive timer is expired.
                 pSocket = IMS_NULL;
                 IMS_TRACE_D("TransportHelper :: Destroy (Keep-Alive) - Sockets (%d)",
                         m_objSockets.GetSize(), 0, 0);
@@ -783,7 +783,6 @@ PRIVATE VIRTUAL void SipTransportHelper::DatagramSocket_DataReceived(IN SipSocke
     pBuffer->m_objNearEnd.SetPort(nSockPort);
     pBuffer->m_objNearEnd.SetIpAddress(objSockIp);
 
-    // DEBUG ...
     pBuffer->DisplayMessage(GetSlotId(), pSocket->GetSocketId());
 
     if (!m_objBuffers.Append(pBuffer))
@@ -852,7 +851,6 @@ PRIVATE VIRTUAL void SipTransportHelper::StreamSocket_DataReceived(
         pBuffer->m_objNearEnd.SetPort(nTmpPort);
         pBuffer->m_objNearEnd.SetIpAddress(objTmpIp);
 
-        // DEBUG ...
         pBuffer->DisplayMessage(GetSlotId(), pSocket->GetSocketId());
 
         if (!m_objBuffers.Append(pBuffer))
@@ -983,11 +981,11 @@ SipSocket* SipTransportHelper::LookupSocket(
                     continue;
                 }
 
-                // CASE :: system socket is already closed (no socket handle)
+                // CASE: system socket is already closed (no socket handle)
                 // To avoid the crash, it just checks the address of socket object.
                 if ((pSocket != pOtherSocket) && (nPort == 0))
                 {
-                    // It's different socket...
+                    // A different socket.
                     continue;
                 }
             }

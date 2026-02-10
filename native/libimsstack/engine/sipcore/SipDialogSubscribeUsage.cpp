@@ -383,7 +383,7 @@ PROTECTED VIRTUAL IMS_SINT32 SipDialogSubscribeUsage::GetActionNTrigger(
                 if ((nStatusCode != SipStatusCode::SC_401) &&
                         (nStatusCode != SipStatusCode::SC_407))
                 {
-                    // No "Retry-After" header... ???
+                    // No "Retry-After" header.
                 }
             }
         }

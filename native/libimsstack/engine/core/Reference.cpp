@@ -446,7 +446,7 @@ IMS_RESULT Reference::AcceptEx(IN IMS_SINT32 nStatusCode /*= SipStatusCode::SC_2
         return IMS_FAILURE;
     }
 
-    // Send a response to REFER request immediately...
+    // Send a response to REFER request immediately.
     if (!SendNUpdateResponse(IMessage::REFERENCE_REFER, piSsc))
     {
         IMS_TRACE_E(0, "Sending the response to REFER request failed ...", 0, 0, 0);
@@ -635,7 +635,7 @@ IMS_RESULT Reference::RejectEx(IN IMS_SINT32 nStatusCode)
         return IMS_FAILURE;
     }
 
-    // Send a response to REFER request immediately...
+    // Send a response to REFER request immediately.
     if (!SendNUpdateResponse(IMessage::REFERENCE_REFER, piSsc))
     {
         IMS_TRACE_E(0, "Sending the response to REFER request failed ...", 0, 0, 0);
@@ -860,7 +860,7 @@ PROTECTED VIRTUAL IMS_BOOL Reference::NotifySipRequest(IN ISipServerConnection* 
         return IMS_FALSE;
     }
 
-    // Send a response to REFER request immediately...
+    // Send a response to REFER request immediately.
     if (!SendNUpdateResponse(IMessage::REFERENCE_REFER, piSsc))
     {
         IMS_TRACE_E(0, "Sending the response to REFER request failed ...", 0, 0, 0);
@@ -1051,7 +1051,7 @@ PROTECTED VIRTUAL IMS_BOOL Reference::Dialog_Compare(IN ISipServerConnection* pi
 
     if (piDialog == IMS_NULL)
     {
-        // In case of an early NOTIFY received ...
+        // In case of an early NOTIFY received.
         if (GetState() == STATE_PROCEEDING)
         {
             const ISipClientConnection* piScc = GetClientConnection(IMessage::REFERENCE_REFER);
@@ -1141,7 +1141,6 @@ PROTECTED VIRTUAL IMS_BOOL Reference::Dialog_NotifyRequest(IN ISipServerConnecti
 
     if (pMessage == IMS_NULL)
     {
-        // Internal error ... ???
         if (GetService()->SendResponse(piSsc, SipStatusCode::SC_500))
         {
             m_pSubState->UpdateState(piSsc->GetMessage());
@@ -1195,7 +1194,6 @@ PROTECTED VIRTUAL void Reference::ReferredMessage_NotifyOnActive(IN ISipMessage*
 
     if (piSipMsg == IMS_NULL)
     {
-        // Nothing to do...
         return;
     }
 

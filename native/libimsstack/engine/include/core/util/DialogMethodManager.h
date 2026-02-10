@@ -42,7 +42,7 @@ public:
 
 private:
     IMS_BOOL HandleRequestWithinDialog(IN ISipServerConnection* piSsc);
-    // In case of receiving a forked request ...
+    // In case of receiving a forked request.
     IMS_BOOL HandleRequestWithinDialog(IN ISipServerConnection* piSsc, IN ISipDialog* piOrigDialog);
 
 private:

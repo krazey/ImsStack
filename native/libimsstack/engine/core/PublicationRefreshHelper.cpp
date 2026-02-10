@@ -74,11 +74,11 @@ PUBLIC VIRTUAL IMS_RESULT PublicationRefreshHelper::UpdateOnMessageReceived(
         return IMS_FAILURE;
     }
 
-    // On PUBLISH response received ...
+    // On PUBLISH response received.
     if (piSipMsg->GetMethod().Equals(SipMethod::PUBLISH))
     {
         // If the publication state is in TERMINATED state & the refresh timer is active,
-        // then stop the refresh timer...
+        // then stop the refresh timer.
         if (m_pPubState->IsTerminated())
         {
             StopRefresh();
@@ -121,7 +121,6 @@ PROTECTED VIRTUAL void PublicationRefreshHelper::RefreshCompleted(
 {
     Refreshable_RefreshCompleted(piScc, nCode);
 
-    // do something ...
     if (nCode == 0)
     {
         IMS_SINT32 nStatusCode = piScc->GetStatusCode();

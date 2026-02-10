@@ -704,7 +704,7 @@ IMS_BOOL SipMessage::CreateBodyParts()
                 return IMS_FALSE;
             }
 
-            // Clear the previous message body parts ...
+            // Clear the previous message body parts.
             while (!m_objBodyParts.IsEmpty())
             {
                 SipMessageBodyPart* pBodyPart = m_objBodyParts.GetAt(0);
@@ -729,7 +729,7 @@ IMS_BOOL SipMessage::CreateBodyParts()
         return IMS_FALSE;
     }
 
-    // Clear the previous message body parts ...
+    // Clear the previous message body parts.
     while (!m_objBodyParts.IsEmpty())
     {
         SipMessageBodyPart* pBodyPart = m_objBodyParts.GetAt(0);

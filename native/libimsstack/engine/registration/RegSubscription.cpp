@@ -302,7 +302,7 @@ PUBLIC VIRTUAL IMS_RESULT RegSubscription::Subscribe()
     }
 
     // if the state is in ACTIVE and refresh is started by the subscription,
-    // keep the request and after refresh is completed, try to send a SUBSCRIBE request...
+    // keep the request and after refresh is completed, try to send a SUBSCRIBE request.
     if (m_pSubState->GetOperation() == SubState::OPERATION_IMPLICIT_REFRESH)
     {
         m_nPendingOperation = SubState::OPERATION_REFRESH;
@@ -414,7 +414,7 @@ PUBLIC VIRTUAL IMS_RESULT RegSubscription::Unsubscribe()
     }
 
     // If the state is in ACTIVE and refresh is started by the subscription,
-    // keep the request and after refresh is completed, try to send a SUBSCRIBE request...
+    // keep the request and after refresh is completed, try to send a SUBSCRIBE request.
     if (m_pSubState->GetOperation() == SubState::OPERATION_IMPLICIT_REFRESH)
     {
         m_nPendingOperation = SubState::OPERATION_REMOVE;
@@ -650,10 +650,9 @@ PRIVATE VIRTUAL void RegSubscription::NotifySipResponse(IN ISipClientConnection*
     // Handle the response according to the SIP method.
     IMS_SINT32 nStatusCode = piSipMsg->GetStatusCode();
 
-    // Handle the response to SUBSCRIBE request ...
+    // Handle the response to SUBSCRIBE request.
     if (SipStatusCode::Is1XX(nStatusCode))
     {
-        // Do nothing ...
         return;
     }
 
@@ -824,7 +823,7 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::Dialog_Compare(IN ISipServerConnection
 
     if (piDialog == IMS_NULL)
     {
-        // In case of an early NOTIFY received ...
+        // In case of an early NOTIFY received.
         if (GetState() == STATE_PENDING)
         {
             IMS_SINT32 nOperation = m_pSubState->GetOperation();
@@ -1047,7 +1046,6 @@ PRIVATE VIRTUAL void RegSubscription::Refreshable_RefreshCompleted(
     // The subscription refresh request is timed out.
     else if (nCode == RefreshHelper::TRANSACTION_TIMEOUT)
     {
-        // 4 what to do ... ? In this moment, do nothing ...
         PostMessage(AMSG_REG_SUBSCRIPTION_UPDATE_FAILED, REASON_TRANSACTION_TIMEOUT, 0);
 
         if (!IsFeatureEnabled(FEATURE_KEEP_ACTIVE_ON_REFRESH_TRANSACTION_TIMEOUT))
@@ -1856,7 +1854,7 @@ PRIVATE GLOBAL ISipClientConnection* RegSubscription::CreateConnection(IN RegSub
     }
 
     // IPSEC {
-    // RFC 3329 - SIP Security Agreement :: Sets Security-Client / Security-Verify headers
+    // RFC 3329 - SIP Security Agreement: Sets Security-Client / Security-Verify headers
     // Do not add Security-Client headers
     const AStringArray& objSecurityVerifys = pStateTracker->GetSecurityVerifys();
 

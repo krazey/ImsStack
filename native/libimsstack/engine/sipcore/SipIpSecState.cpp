@@ -407,7 +407,7 @@ void SipIpSecState::NotifyMessageReceivedInternal(IN const SipTransportAddress& 
     IMS_BOOL bStrayResponseOnNewSa = IMS_FALSE;
     IMS_BOOL bStrayResponseOnOldSa = IMS_FALSE;
 
-    //// Check a new SA...
+    // Check a new SA.
     if ((m_pNewSa != IMS_NULL) && m_pNewSa->CheckIpAddress(objNearEnd, objFarEnd))
     {
         IMS_SINT32 nSaPair =
@@ -445,7 +445,7 @@ void SipIpSecState::NotifyMessageReceivedInternal(IN const SipTransportAddress& 
         }
     }
 
-    // Checks an old SA...
+    // Checks an old SA.
     if ((m_pOldSa != IMS_NULL) && m_pOldSa->CheckIpAddress(objNearEnd, objFarEnd))
     {
         IMS_SINT32 nSaPair =
@@ -527,7 +527,7 @@ void SipIpSecState::NotifyMessageSentInternal(IN const SipTransportAddress& objN
     IMS_BOOL bStrayResponseOnNewSa = IMS_FALSE;
     IMS_BOOL bStrayResponseOnOldSa = IMS_FALSE;
 
-    //// Check a new SA...
+    // Check a new SA.
     if ((m_pNewSa != IMS_NULL) && m_pNewSa->CheckIpAddress(objNearEnd, objFarEnd))
     {
         IMS_SINT32 nSaPair =
@@ -559,7 +559,7 @@ void SipIpSecState::NotifyMessageSentInternal(IN const SipTransportAddress& objN
         }
     }
 
-    // Checks an old SA...
+    // Checks an old SA.
     if ((m_pOldSa != IMS_NULL) && m_pOldSa->CheckIpAddress(objNearEnd, objFarEnd))
     {
         IMS_SINT32 nSaPair =

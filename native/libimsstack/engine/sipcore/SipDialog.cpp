@@ -183,7 +183,7 @@ IMS_BOOL SipDialog::IsSameDialog(IN const SipDialog* pDialog)
         return IMS_FALSE;
     }
 
-    // Only check a dialog usage in this time ...
+    // Only check a dialog usage in this time.
     return m_pDialogEx->Equals(pDialog->m_pDialogEx.Get());
 }
 

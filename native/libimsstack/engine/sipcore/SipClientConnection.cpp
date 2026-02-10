@@ -358,7 +358,6 @@ PUBLIC VIRTUAL IMS_RESULT SipClientConnection::Send()
 
         if (nResult == SipClientTransmissionProxy::RESULT_OK)
         {
-            // Update a dialog info...
             if (SipDialogBase::IsDialogCreatable(GetMethod()))
             {
                 if (m_pDialog != IMS_NULL)
@@ -1035,7 +1034,6 @@ IMS_RESULT SipClientConnection::SendWithCredentials()
 
     if (nResult == SipClientTransmissionProxy::RESULT_OK)
     {
-        // Update a dialog info...
         if (SipDialogBase::IsDialogCreatable(GetMethod()))
         {
             if (m_pDialog != IMS_NULL)
@@ -1288,7 +1286,6 @@ PRIVATE VIRTUAL void SipClientConnection::ClientTransmission_TransmissionComplet
         return;
     }
 
-    // Update a dialog info...
     if (SipDialogBase::IsDialogCreatable(GetMethod()))
     {
         if (m_pDialog != IMS_NULL)

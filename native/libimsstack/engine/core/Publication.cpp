@@ -119,10 +119,10 @@ PUBLIC VIRTUAL IMS_RESULT Publication::Publish(
     }
 
     // if the state is in ACTIVE and refresh is started by the publication,
-    // keep the request and after refresh is completed, try to send a PUBLISH request...
+    // keep the request and after refresh is completed, try to send a PUBLISH request.
     if (m_pPubState->GetOperation() == PubState::OPERATION_REFRESH)
     {
-        // 1 : save all the information ? try to send later .... ???
+        // 1 : save all the information.
         // SetState(STATE_PENDING);
 
         // Ims::SetLastError(ImsError::NO_ERROR);
@@ -257,10 +257,10 @@ PUBLIC VIRTUAL IMS_RESULT Publication::Unpublish()
     }
 
     // If the state is in ACTIVE and refresh is started by the publication,
-    // keep the request and after refresh is completed, try to send a PUBLISH request...
+    // keep the request and after refresh is completed, try to send a PUBLISH request.
     if (m_pPubState->GetOperation() == PubState::OPERATION_REFRESH)
     {
-        // 4 : save all the information ? try to send later .... ???
+        // 4 : save all the information.
         // nPendingOperation = PubState::OPERATION_REMOVE;
 
         // SetState(STATE_PENDING);
@@ -524,10 +524,9 @@ PRIVATE VIRTUAL void Publication::NotifySipResponse(IN ISipClientConnection* piS
 
     ReceiveResponse(piScc);
 
-    // Handle the response to PUBLISH request ...
+    // Handle the response to PUBLISH request.
     if (SipStatusCode::Is1XX(nStatusCode))
     {
-        // Do nothing ...
         return;
     }
     else if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
@@ -792,7 +791,6 @@ void Publication::CloseConnection()
             ServiceMethod::CloseConnection(IMessage::PUBLICATION_UNPUBLISH);
             break;
         default:
-            // Do nothing ...
             break;
     }
 
@@ -833,7 +831,6 @@ void Publication::ReceiveResponse(IN const ISipClientConnection* piScc)
             UpdateResponseOnReceived(IMessage::PUBLICATION_UNPUBLISH, piScc);
             break;
         default:
-            // Do nothing ...
             break;
     }
 }
