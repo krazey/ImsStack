@@ -148,7 +148,7 @@ PUBLIC VIRTUAL AString SdpMediaParameter::ToSdp() const
         // we don't need to set the other lines (b, a, ...).
         // So, if the m-line is not supported by the endpoint, m-line only will be set.
 
-        // BRUCE :: because of 'file-transfer-id', all SDP will be formed.
+        // Because of 'file-transfer-id', all SDP will be formed.
         // return strSDP;
     }
 
@@ -416,7 +416,7 @@ IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIs
                         const AString& strOfferedPayloadType = pOfferedMediaFormat->GetValue();
                         const AString& strAnsweredPayloadType = pAnsweredMediaFormat->GetValue();
 
-                        // Payload type should be retained during the session ...
+                        // Payload type should be retained during the session.
                         if (!strOfferedPayloadType.Equals(strAnsweredPayloadType))
                         {
                             IMS_TRACE_D("Payload type (O:%s, A:%s) is not matched "
@@ -885,7 +885,7 @@ IMS_BOOL SdpMediaParameter::SetMedia(IN IMS_SINT32 nType, IN IMS_SINT32 nPort,
     ClearMediaFormat(m_objMediaFormats);
 
     // If the media type is not an audio/video,
-    // then set the media formats automatically using the format list...
+    // then set the media formats automatically using the format list.
     if ((nTransportProtocol == SdpMedia::TRANSPORT_RTP_AVP) ||
             (nTransportProtocol == SdpMedia::TRANSPORT_RTP_AVPF) ||
             (nTransportProtocol == SdpMedia::TRANSPORT_RTP_SAVP) ||

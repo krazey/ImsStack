@@ -1494,7 +1494,7 @@ SipUnknownHeader* SipMessage::GetUnknownHdrObj(SIP_INT32 eType)
                     }
                     break;
 
-                        /*TODO - All required headers to be added on need basis.*/
+                        /*All required headers to be added on need basis.*/
                         /*other option - Use SipMessage::GetUnknownHdrObj(SIP_CHAR* strHdrName)*/
                     default:
                         break;

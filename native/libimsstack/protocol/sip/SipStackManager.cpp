@@ -108,9 +108,6 @@ not perform any processing, it simply return success. Also pTxnKey will be NULL
        implementor shall not deleted any parameters*/
     if (SendToNetwork(pTranspInfo, pUserData) == SIP_FALSE)
     {
-        /* BSP_TODO: do we need to inform Txn layer for error
-           objTxnHandler.OnSendTranspError */
-
         if (objTxnInfo.m_bTxnCreated == SIP_TRUE)
         {
             // It will be destroyed by the caller.
@@ -386,9 +383,6 @@ send to network
 
         pUserData->SetSipMsg(objTxnInfo.m_pSendSipMsg);
 
-        /* BSP_TODO:
-           In case of 100 Trying, Txn Obj may not have user date, better to use user passed data
-           For failure ACK, better to user Txn stored data */
         if (SendToNetwork(pTranspInfo, objTxnInfo.m_pUserData) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvMessage: SendToNetwork Failed", 0, 0);
@@ -407,12 +401,9 @@ send to network
                     objTxnInfo.m_pUserData);
         }
 
-        /*Update Txn details for last message send to network */
-        /* BSP_TODO: it's overwriting the existing transpInfo... is it correct way to do
-           why can't only update the necessary details and maintaining old key data for security */
+        /* Update Txn details for last message send to network */
         if (objTxnHandler.UpdateTxnDetails(pTxnKey, pTranspInfo, pnError) == SIP_FALSE)
         {
-            /* BSP_TODO: oops what to doooooooooo???*/
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvMessage: UpdateTxnDetails Failed", 0, 0);
         }
     }

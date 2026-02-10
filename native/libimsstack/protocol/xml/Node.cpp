@@ -468,7 +468,7 @@ PROTECTED GLOBAL IMS_SINT32 Node::ConvertXmlNodeType(IN IMS_SINT32 nXmlNodeType)
         case XML_NAMESPACE_DECL:
         case XML_XINCLUDE_START:
         case XML_XINCLUDE_END:
-            // TODO:: No Type
+            // No Type
             return INode::INVALID_NODE;
 #endif
         default:

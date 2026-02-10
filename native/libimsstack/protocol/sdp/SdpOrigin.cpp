@@ -155,7 +155,7 @@ PUBLIC VIRTUAL IMS_BOOL SdpOrigin::Decode(IN const AString& strValue)
         m_nAddrType = Sdp::ADDR_TYPE_OTHER;
     }
 
-    // TODO:: allow FQDN, so needs to be parsed using URI parser
+    // To allow FQDN, so needs to be parsed using URI parser
     // unicast-address field
     m_strUnicastAddress = objTokens.GetElementAt(5);
 

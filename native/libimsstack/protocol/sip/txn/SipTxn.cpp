@@ -470,7 +470,6 @@ SIP_BOOL SipTxn::PrepareACK(SipMessage* pSipRespMsg, /* IN */
         }
     }
 
-    /* ###TODO Setting of Msg Body in Response currently not supported */
     *ppSipAckMsg = pSipAckMsg;
     return SIP_TRUE;
 }
