@@ -68,6 +68,7 @@
 #include "helper/ISrvccStateListener.h"
 #include "helper/MockICallStateProxy.h"
 #include "helper/MockILastComeFirstServedHelper.h"
+#include "helper/MockIMtcAosConnector.h"
 #include "helper/MockIPassiveTimerHolder.h"
 #include "helper/MockMtcTimerWrapper.h"
 #include "helper/OperationAsyncRunner.h"
@@ -113,6 +114,7 @@ public:
     MockIMtcService objService;
     MockIMtcContext objContext;
     CallInfo objCallInfo;
+    MockIMtcAosConnector objAosConnector;
     MockICallStateProxy objCallStateProxy;
     MockIMtcSipInterfaceFactory objSipInterfaceFactory;
     MockMtcConfigurationProxy* pConfigurationProxy;
@@ -136,6 +138,8 @@ protected:
 
         pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
+
+        ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
 
         ON_CALL(objCallStateProxy, UpdateCallState(_, _, _, _, _)).WillByDefault(Return());
 

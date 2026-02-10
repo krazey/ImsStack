@@ -43,6 +43,7 @@
 #include "helper/MtcLocationObject.h"
 #include "helper/MtcSupplementaryService.h"
 #include "utility/CallComposerUtil.h"
+#include "utility/CallTypeUtil.h"
 #include "utility/IMessageUtils.h"
 #include "utility/MessageUtil.h"
 
@@ -444,7 +445,7 @@ void MessageFormatter::SetAcceptContactHeader(IN CallType eCallType)
     strAcceptContact.Append(AString(Const3GPP::ICSI_MMTEL).Replace(":", "%3A"));
     strAcceptContact.Append(TextParser::CHAR_DQUOT);
 
-    if (eCallType == CallType::VT || eCallType == CallType::VIDEO_RTT ||
+    if (CallTypeUtil::IsVideoCall(eCallType) ||
             m_objContext.GetConfigurationProxy().GetBoolean(
                     ConfigVt::KEY_ADD_VIDEO_FEATURE_TAG_IN_ACCEPT_CONTACT_ALWAYS_BOOL))
     {

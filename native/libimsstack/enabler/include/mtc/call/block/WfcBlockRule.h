@@ -48,7 +48,6 @@ private:
     IMS_BOOL IsVopsAvailable() const;
     IMS_BOOL IsVoiceBlockedBySsac() const;
     IMS_BOOL IsWfcOn() const;
-    IMS_BOOL IsVideoCall(IN CallType eCallType) const;
 };
 
 #endif

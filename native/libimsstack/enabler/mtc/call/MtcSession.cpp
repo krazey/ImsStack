@@ -42,6 +42,7 @@
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include "media/IMtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
+#include "utility/CallTypeUtil.h"
 #include "utility/IMessageUtils.h"
 #include "utility/MessageUtil.h"
 #include <algorithm>
@@ -397,32 +398,8 @@ PUBLIC VIRTUAL void MtcSession::SetCallType(IN CallType eNewCallType)
 
 PUBLIC VIRTUAL void MtcSession::SetCapableCallType(IN CallType eNewCallType)
 {
-    CallType eCapableCallType = eNewCallType;
-
-    if (!m_bVideoCapable)
-    {
-        if (eCapableCallType == CallType::VT)
-        {
-            eCapableCallType = CallType::VOIP;
-        }
-        else if (eCapableCallType == CallType::VIDEO_RTT)
-        {
-            eCapableCallType = CallType::RTT;
-        }
-    }
-    if (!m_bRttCapable)
-    {
-        if (eCapableCallType == CallType::RTT)
-        {
-            eCapableCallType = CallType::VOIP;
-        }
-        else if (eCapableCallType == CallType::VIDEO_RTT)
-        {
-            eCapableCallType = CallType::VT;
-        }
-    }
-
-    SetCallType(eCapableCallType);
+    SetCallType(CallTypeUtil::RestrictCallTypeByCapability(
+            eNewCallType, m_bVideoCapable, m_bRttCapable));
 }
 
 PRIVATE
@@ -517,7 +494,8 @@ IMS_RESULT MtcSession::UpdateCallTypeFromMessage(
 
     if (eCallTypeOfMessage != CallType::UNKNOWN)
     {
-        SetCallType(RestrictCallTypeByRegisteredFeature(eCallTypeOfMessage));
+        SetCallType(CallTypeUtil::RestrictCallTypeByRegisteredFeature(
+                eCallTypeOfMessage, m_objContext.GetService().GetAosConnector()));
         return IMS_SUCCESS;
     }
 
@@ -618,28 +596,14 @@ void MtcSession::HandleInConference(IN const IMessage& objMessage)
 }
 
 PRIVATE
-CallType MtcSession::RestrictCallTypeByRegisteredFeature(IN const CallType& eCallType) const
-{
-    IMS_BOOL bVideoFeature = IsRegisteredFeature(ImsAosFeature::VIDEO);
-    IMS_BOOL bTextFeature = IsRegisteredFeature(ImsAosFeature::TEXT);
-
-    if ((eCallType == CallType::VT && !bVideoFeature) ||
-            (eCallType == CallType::RTT && !bTextFeature))
-    {
-        return CallType::VOIP;
-    }
-
-    return eCallType;
-}
-
-PRIVATE
 CallType MtcSession::GetCallTypeForOfferlessInvite() const
 {
     IMS_SINT32 eMediaType = m_objContext.GetConfigurationProxy().GetInt(
             ConfigVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_INVITE_INT);
     if (eMediaType == ConfigVoice::OFFERLESS_INVITE_MEDIA_TYPE_FULL_CAPABILITY)
     {
-        return GetCallTypeByRegisteredFeature();
+        return CallTypeUtil::GetCallTypeByRegisteredFeature(
+                m_objContext.GetService().GetAosConnector(), m_objContext.GetConfigurationProxy());
     }
     else  // ConfigVoice::OFFERLESS_INVITE_MEDIA_TYPE_AUDIO
     {
@@ -655,7 +619,9 @@ CallType MtcSession::GetCallTypeForOfferlessReInvite() const
     switch (eMediaType)
     {
         case ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_FULL:
-            return GetCallTypeByRegisteredFeature();
+            return CallTypeUtil::GetCallTypeByRegisteredFeature(
+                    m_objContext.GetService().GetAosConnector(),
+                    m_objContext.GetConfigurationProxy());
         case ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_AUDIO:
             return CallType::VOIP;
         case ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_CURRENT:
@@ -665,40 +631,6 @@ CallType MtcSession::GetCallTypeForOfferlessReInvite() const
         default:  // OFFERLESS_REINVITE_MEDIA_TYPE_INITIALLY_OFFERED
             return MayGetFirstCallType();
     }
-}
-
-PRIVATE
-CallType MtcSession::GetCallTypeByRegisteredFeature() const
-{
-    IMS_BOOL bVideoFeature = IsRegisteredFeature(ImsAosFeature::VIDEO);
-    IMS_BOOL bTextFeature = IsRegisteredFeature(ImsAosFeature::TEXT);
-
-    if (bVideoFeature && !bTextFeature)
-    {
-        return CallType::VT;
-    }
-    else if (!bVideoFeature && bTextFeature)
-    {
-        return CallType::RTT;
-    }
-    else if (bVideoFeature && bTextFeature)
-    {
-        // Video && RTT
-        IMS_SINT32 nPolicyForTextAndVideo = m_objContext.GetConfigurationProxy().GetInt(
-                ConfigVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT);
-        if (nPolicyForTextAndVideo == ConfigVt::TEXT_VIDEO_NOT_ALLOWED ||
-                nPolicyForTextAndVideo == ConfigVt::TEXT_VIDEO_NOT_ALLOWED_IF_ACTIVE)
-        {
-            return CallType::VT;
-        }
-        else
-        {
-            // TEXT_VIDEO_ALLOWED
-            return CallType::VIDEO_RTT;
-        }
-    }
-
-    return CallType::VOIP;
 }
 
 PRIVATE
@@ -767,8 +699,7 @@ MtcSession::ResultSetSdp MtcSession::SetSdpToSend(IN IMS_BOOL bAllowReOffer,
 PRIVATE
 IMS_BOOL MtcSession::IsRegisteredFeature(IMS_UINT32 nFeature) const
 {
-    const IMtcAosConnector* pAosConnector =
-            m_objContext.GetAosConnector(m_objContext.GetService().GetServiceType());
+    const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
     if (pAosConnector == IMS_NULL)
     {
         return IMS_FALSE;

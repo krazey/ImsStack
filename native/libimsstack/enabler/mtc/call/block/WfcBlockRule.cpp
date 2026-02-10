@@ -26,6 +26,7 @@
 #include "call/block/WfcBlockRule.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/IPassiveTimerHolder.h"
+#include "utility/CallTypeUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -49,7 +50,7 @@ PUBLIC VIRTUAL WfcBlockRule::Result WfcBlockRule::Check(
     }
 
     // On WLAN, but WFC is OFF and cellular voice is not available. Only one video call is allowed.
-    if (!IsVideoCall(m_eCallType))
+    if (!CallTypeUtil::IsVideoCall(m_eCallType))
     {
         IMS_TRACE_D("Wi-Fi voice call is unavailable", 0, 0, 0);
         return Result(Result::Status::BLOCKED,
@@ -71,7 +72,7 @@ PRIVATE IMS_BOOL WfcBlockRule::HasVideoCall() const
     const ImsList<IMtcCall*>& lstCalls = m_objContext.GetOtherCalls();
     for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
     {
-        if (IsVideoCall(lstCalls.GetAt(nIndex)->GetCallType()))
+        if (CallTypeUtil::IsVideoCall(lstCalls.GetAt(nIndex)->GetCallType()))
         {
             return IMS_TRUE;
         }
@@ -112,10 +113,4 @@ IMS_BOOL WfcBlockRule::IsWfcOn() const
 {
     return m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_WFC_SETTING_CHANGED) ==
             IMS_WFC_ON;
-}
-
-PRIVATE
-IMS_BOOL WfcBlockRule::IsVideoCall(IN CallType eCallType) const
-{
-    return eCallType == CallType::VT || eCallType == CallType::VIDEO_RTT;
 }
