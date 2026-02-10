@@ -385,7 +385,7 @@ void OsLocationInfo::SetLastKnownCountry(IN const AString& strCountry)
 {
     if (!m_strLastKnownCountry.Equals(strCountry))
     {
-        IMS_TRACE_D("SetLastKnownCountry :: %s >> %s", m_strLastKnownCountry.GetStr(),
+        IMS_TRACE_D("SetLastKnownCountry: %s >> %s", m_strLastKnownCountry.GetStr(),
                 strCountry.GetStr(), 0);
 
         m_strLastKnownCountry = strCountry;

@@ -73,8 +73,8 @@ static void osSocket_GetAddressNPort(IN const struct sockaddr* pstSockAddr, IN I
         nPort = ntohs(pstAddr4->sin_port);
         objIpAddr.Parse(pszIpv4);
 
-        IMS_TRACE_D("getnameinfo() - %s : %d",
-                OsUtil::GetInstance()->IsDebugMode() ? acIpv4 : "xxx", nPort, 0);
+        IMS_TRACE_D("getnameinfo: %s:%d", OsUtil::GetInstance()->IsDebugMode() ? acIpv4 : "***",
+                nPort, 0);
     }
     // IPv6
     else if (pstSockAddr->sa_family == AF_INET6)
@@ -90,8 +90,8 @@ static void osSocket_GetAddressNPort(IN const struct sockaddr* pstSockAddr, IN I
         nPort = ntohs(pstAddr6->sin6_port);
         objIpAddr.Parse(pszIpv6);
 
-        IMS_TRACE_D("getnameinfo() - [%s] : %d",
-                OsUtil::GetInstance()->IsDebugMode() ? acIpv6 : "xxx", nPort, 0);
+        IMS_TRACE_D("getnameinfo: [%s]:%d", OsUtil::GetInstance()->IsDebugMode() ? acIpv6 : "***",
+                nPort, 0);
     }
     else
     {
@@ -121,7 +121,7 @@ static void osSocket_SetNetworkForSocket(
     if (PlatformContext::GetInstance()->GetSystem()->BindSocket(
                 pNc->GetApnType(), hSocket, nSlotId) != 1)
     {
-        IMS_TRACE_D("BindSocket is failed - slotId=%d, apnType=%d, sockFd=%d.", nSlotId,
+        IMS_TRACE_D("BindSocket failed: slotId=%d, apnType=%d, sockFd=%d", nSlotId,
                 pNc->GetApnType(), hSocket);
     }
 }
@@ -154,11 +154,11 @@ OsSocket::OsSocket() :
 
 PUBLIC VIRTUAL OsSocket::~OsSocket()
 {
-    IMS_TRACE_D("Destructor :: OsSocket (%d)", m_nInternalSocketId, 0, 0);
+    IMS_TRACE_D("dtor: OsSocket(%d)", m_nInternalSocketId, 0, 0);
 
     if (m_hSocket != INVALID_SOCKET)
     {
-        IMS_TRACE_I("Socket :: Close(%d-%d)", m_hSocket, GetInternalSocketId(), 0);
+        IMS_TRACE_I("Socket: Close(%d-%d)", m_hSocket, GetInternalSocketId(), 0);
 
         if (GetSocketType() == TYPE_STREAM)
         {
@@ -187,7 +187,7 @@ PUBLIC VIRTUAL IMS_SINT32 OsSocket::GetLastError() const
     {
         if (nErrorCode != 0)
         {
-            IMS_TRACE_D("SocketLastError - socket=%d, error=%d(%s)", m_hSocket, nErrorCode,
+            IMS_TRACE_D("SocketLastError: socket=%d, error=%d(%s)", m_hSocket, nErrorCode,
                     strerror(nErrorCode));
         }
     }
@@ -218,7 +218,7 @@ PUBLIC VIRTUAL IMS_SINT32 OsSocket::GetSocketState() const
     if (nReadSize == 0)
     {
         // Socket is closed by the peer
-        IMS_TRACE_D("TCP client socket (%d-%d) is closed by the peer", m_hSocket,
+        IMS_TRACE_D("TCP client socket(%d-%d) is closed by the peer", m_hSocket,
                 m_nInternalSocketId, 0);
         return SOCKET_STATE_CLOSED;
     }
@@ -229,17 +229,17 @@ PUBLIC VIRTUAL IMS_SINT32 OsSocket::GetSocketState() const
             case EINTR:
             case EWOULDBLOCK:
             case EINPROGRESS:
-                IMS_TRACE_D("TCP client socket (%d-%d) is connecting ... (%d)", m_hSocket,
+                IMS_TRACE_D("TCP client socket(%d-%d) is connecting (%d)", m_hSocket,
                         m_nInternalSocketId, errno);
                 return SOCKET_STATE_NOT_READY;
 
             case ENOTCONN:
-                IMS_TRACE_D("TCP client socket (%d-%d) is not connected ... (%d)", m_hSocket,
+                IMS_TRACE_D("TCP client socket(%d-%d) is not connected (%d)", m_hSocket,
                         m_nInternalSocketId, errno);
                 return SOCKET_STATE_NOT_READY;
 
             default:
-                IMS_TRACE_D("TCP client socket (%d-%d) is abnormally closed ... (%d)", m_hSocket,
+                IMS_TRACE_D("TCP client socket(%d-%d) is abnormally closed (%d)", m_hSocket,
                         m_nInternalSocketId, errno);
                 return SOCKET_STATE_CLOSED;
         }
@@ -293,7 +293,7 @@ PUBLIC GLOBAL IMS_BOOL OsSocket::CheckIpAndPortAvailability(
 
     if (hSocket == INVALID_SOCKET)
     {
-        IMS_TRACE_E(0, "Creating a socket handle failed - %d(%s)", errno, strerror(errno), 0);
+        IMS_TRACE_E(0, "Creating a socket handle failed: %d(%s)", errno, strerror(errno), 0);
         return IMS_FALSE;
     }
 
@@ -378,7 +378,7 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Open(
 
     if (m_hSocket != INVALID_SOCKET)
     {
-        IMS_TRACE_E(0, "Socket (%d) is already opened", m_hSocket, 0, 0);
+        IMS_TRACE_E(0, "Socket(%d) is already opened", m_hSocket, 0, 0);
         return RESULT_ERROR;
     }
 
@@ -424,7 +424,7 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Open(
 
     m_hSocket = socket(nAf, nSockType, PROTOCOL_TYPE);
 
-    IMS_TRACE_I("Socket :: Open(%d-%d)", m_hSocket, GetInternalSocketId(), 0);
+    IMS_TRACE_I("Socket: Open(%d-%d)", m_hSocket, GetInternalSocketId(), 0);
 
     if (m_hSocket != INVALID_SOCKET)
     {
@@ -463,7 +463,7 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Close()
 
     if (m_hSocket != INVALID_SOCKET)
     {
-        IMS_TRACE_I("Socket :: Close(%d-%d)", m_hSocket, GetInternalSocketId(), 0);
+        IMS_TRACE_I("Socket: Close(%d-%d)", m_hSocket, GetInternalSocketId(), 0);
 
         if (GetSocketType() == TYPE_STREAM)
         {
@@ -1283,7 +1283,7 @@ RETRY_SENDTO:
         // PATCH_FOR_NON_SOCKET
         if (nError == ENOTSOCK)
         {
-            IMS_TRACE_D("Socket operation on non-socket (%d); try to recover the socket", m_hSocket,
+            IMS_TRACE_D("Socket operation on non-socket(%d); try to recover the socket", m_hSocket,
                     0, 0);
 
             if (DoSocketRecovery() == RESULT_SUCCESS)
@@ -1556,7 +1556,7 @@ PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SIN
                 }
             }
 
-            IMS_TRACE_D("SetOption (%d) - IP_QOS (TOS or TCLASS), %d", m_hSocket, nOptionValue, 0);
+            IMS_TRACE_D("SetOption(%d): IP_QOS(TOS or TCLASS)|%d", m_hSocket, nOptionValue, 0);
             break;
 
             // tcp_keepalive_probes (count)
@@ -1569,7 +1569,7 @@ PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SIN
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("SetOption (%d) - TCP_KEEPCNT, %d", m_hSocket, nOptionValue, 0);
+            IMS_TRACE_D("SetOption(%d): TCP_KEEPCNT|%d", m_hSocket, nOptionValue, 0);
             break;
 
             // tcp_keepalive_time (seconds)
@@ -1583,7 +1583,7 @@ PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SIN
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("SetOption (%d) - TCP_KEEPIDLE, %d", m_hSocket, nOptionValue, 0);
+            IMS_TRACE_D("SetOption(%d): TCP_KEEPIDLE|%d", m_hSocket, nOptionValue, 0);
             break;
 
             // tcp_keepalive_intvl (seconds)
@@ -1596,7 +1596,7 @@ PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SIN
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("SetOption (%d) - TCP_KEEPINTVL, %d", m_hSocket, nOptionValue, 0);
+            IMS_TRACE_D("SetOption(%d): TCP_KEEPINTVL|%d", m_hSocket, nOptionValue, 0);
             break;
 
         case OPT_TCP_MAXSEG:
@@ -1606,7 +1606,7 @@ PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SIN
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("SetOption (%d) - TCP_MAXSEG, %d", m_hSocket, nOptionValue, 0);
+            IMS_TRACE_D("SetOption(%d): TCP_MAXSEG|%d", m_hSocket, nOptionValue, 0);
             break;
 
         case OPT_RCVBUF:
@@ -1616,7 +1616,7 @@ PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SIN
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("SetOption (%d) - SO_RCVBUF, %d", m_hSocket, nOptionValue, 0);
+            IMS_TRACE_D("SetOption(%d): SO_RCVBUF|%d", m_hSocket, nOptionValue, 0);
             break;
 
         case OPT_SNDBUF:
@@ -1626,7 +1626,7 @@ PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SIN
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("SetOption (%d) - SO_SNDBUF, %d", m_hSocket, nOptionValue, 0);
+            IMS_TRACE_D("SetOption(%d): SO_SNDBUF|%d", m_hSocket, nOptionValue, 0);
             break;
 
         case OPT_REUSEADDR:
@@ -1636,7 +1636,7 @@ PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SIN
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("SetOption (%d) - SO_REUSEADDR, %d", m_hSocket, nOptionValue, 0);
+            IMS_TRACE_D("SetOption(%d): SO_REUSEADDR|%d", m_hSocket, nOptionValue, 0);
             break;
 
         case OPT_LINGER:
@@ -1652,8 +1652,8 @@ PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SIN
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("SetOption (%d) - SO_LINGER, %d, %d", m_hSocket, stLinger.l_onoff,
-                    nOptionValue);
+            IMS_TRACE_D(
+                    "SetOption(%d): SO_LINGER|%d|%d", m_hSocket, stLinger.l_onoff, nOptionValue);
         }
         break;
 
@@ -1664,7 +1664,7 @@ PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SIN
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("SetOption (%d) - OPT_KEEPALIVE, %d", m_hSocket, nOptionValue, 0);
+            IMS_TRACE_D("SetOption(%d): OPT_KEEPALIVE|%d", m_hSocket, nOptionValue, 0);
             break;
 
         case OPT_UDP_ENCAP:
@@ -1674,7 +1674,7 @@ PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SIN
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D("SetOption (%d) - OPT_UDP_ENCAP, %d", m_hSocket, nOptionValue, 0);
+            IMS_TRACE_D("SetOption(%d): OPT_UDP_ENCAP|%d", m_hSocket, nOptionValue, 0);
             break;
 
         case OPT_SHUTDOWN:
@@ -1683,11 +1683,11 @@ PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SIN
                 m_nOptionForShutdown = nOptionValue;
             }
 
-            IMS_TRACE_D("SetOption (%d) - OPT_SHUTDOWN, %d", m_hSocket, nOptionValue, 0);
+            IMS_TRACE_D("SetOption(%d): OPT_SHUTDOWN|%d", m_hSocket, nOptionValue, 0);
             break;
 
         default:
-            IMS_TRACE_D("Unsupported socket option (%d)", nOption, 0, 0);
+            IMS_TRACE_D("Unsupported socket option(%d)", nOption, 0, 0);
             return IMS_FALSE;
     }
 
@@ -1800,7 +1800,7 @@ PROTECTED VIRTUAL void OsSocket::DispatchServiceMessage(IN IMS_UINTP nWparam, IN
 
             if (piThread != m_piOwnerThread)
             {
-                IMS_TRACE_D("Socket :: socket(%d) owner is different; ignored...", m_hSocket, 0, 0);
+                IMS_TRACE_D("Socket: socket(%d) owner is different", m_hSocket, 0, 0);
                 break;
             }
 
@@ -1833,7 +1833,7 @@ PROTECTED VIRTUAL void OsSocket::NotifyDataReceived(IN IMS_SINT32 nErrorCode)
     }
     else
     {
-        IMS_TRACE_D("NotifyDataReceived - socket=%d, error=%d", m_hSocket, nErrorCode, 0);
+        IMS_TRACE_D("NotifyDataReceived: socket=%d, error=%d", m_hSocket, nErrorCode, 0);
     }
 }
 
@@ -1846,7 +1846,7 @@ PROTECTED VIRTUAL void OsSocket::NotifySendEnabled(IN IMS_SINT32 nErrorCode)
     }
     else
     {
-        IMS_TRACE_D("NotifySendEnabled - socket=%d, error=%d", m_hSocket, nErrorCode, 0);
+        IMS_TRACE_D("NotifySendEnabled: socket=%d, error=%d", m_hSocket, nErrorCode, 0);
     }
 }
 
@@ -1859,7 +1859,7 @@ PROTECTED VIRTUAL void OsSocket::NotifyConnectionReceived(IN IMS_SINT32 nErrorCo
     }
     else
     {
-        IMS_TRACE_D("NotifyConnectionReceived - socket=%d, error=%d", m_hSocket, nErrorCode, 0);
+        IMS_TRACE_D("NotifyConnectionReceived: socket=%d, error=%d", m_hSocket, nErrorCode, 0);
 
         // Send a CLOSED event when socket is aborted by the local system.
         if ((nErrorCode == ENETDOWN) || (nErrorCode == ENETRESET) || (nErrorCode == ECONNABORTED))
@@ -1879,7 +1879,7 @@ PROTECTED VIRTUAL void OsSocket::NotifyConnected(IN IMS_SINT32 nErrorCode)
             if (GetCloseReason() != CLOSE_REASON_UNKNOWN)
             {
                 DeselectEventEx(FD_CONNECT);
-                IMS_TRACE_E(0, "Socket (%d) is already aborted or closed on NotifyConnected",
+                IMS_TRACE_E(0, "Socket(%d) is already aborted or closed on NotifyConnected",
                         m_hSocket, 0, 0);
                 break;
             }
@@ -1906,7 +1906,7 @@ PROTECTED VIRTUAL void OsSocket::NotifyConnected(IN IMS_SINT32 nErrorCode)
         {
             SetSocketConnected(IMS_FALSE);
             DeselectEventEx(FD_READ);
-            IMS_TRACE_E(0, "Unknown socket (%d) error (%d) on Connected", m_hSocket, nErrorCode, 0);
+            IMS_TRACE_E(0, "Unknown socket(%d) error(%d) on Connected", m_hSocket, nErrorCode, 0);
             OsSocket::NotifyMessage(IMS_SOCKET_CLOSED);
             break;
         }
@@ -1921,12 +1921,12 @@ PROTECTED VIRTUAL void OsSocket::NotifyClosed(IN IMS_SINT32 nErrorCode)
     // Remove all events: READ/WRITE/CLOSE (common), TCP/TCP_C (PollFdSet)
     DeselectEventEx(FD_READ | FD_WRITE | FD_CLOSE | FD_TCP | FD_TCP_C);
 
-    IMS_TRACE_D("NotifyClosed - socket=%d, error=%d", m_hSocket, nErrorCode, 0);
+    IMS_TRACE_D("NotifyClosed: socket=%d, error=%d", m_hSocket, nErrorCode, 0);
 
     // FIX_SOCKET_SYNC_ISSUE
     if (m_nCloseReason == CLOSE_REASON_USER_ACTION)
     {
-        IMS_TRACE_D("Socket(%d) is already closed by the user; ignored...", m_hSocket, 0, 0);
+        IMS_TRACE_D("Socket(%d) is already closed by the user; ignored", m_hSocket, 0, 0);
         return;
     }
 
@@ -2080,7 +2080,7 @@ ISocket::SOCKET_RESULT OsSocket::DoSocketRecovery()
 
     if (Bind(m_objSocketAddress, m_nSocketPort) == RESULT_ERROR)
     {
-        IMS_TRACE_E(0, "Binding a socket (%d) failed", m_hSocket, 0, 0);
+        IMS_TRACE_E(0, "Binding a socket(%d) failed", m_hSocket, 0, 0);
         return RESULT_ERROR;
     }
 

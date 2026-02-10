@@ -129,7 +129,7 @@ static void osIsim_HandleAuthResponse(IN IMS_SINT32 nSlotId, IN OsIsimAuthRespon
 
     if (!pIsim->IsDigestAkaPresent(pDigestAka))
     {
-        IMS_TRACE_D("ISIM: Digest AKA (%p) is not present; ignore...", pDigestAka, 0, 0);
+        IMS_TRACE_D("ISIM: Digest AKA(%p) is not present", pDigestAka, 0, 0);
         return;
     }
 

@@ -102,7 +102,7 @@ ImsList<ISystemListener*>* SystemListenerHolder::GetListeners(IN IMS_UINT32 nCat
 
     if (nIndex < 0)
     {
-        IMS_TRACE_D("%s :: No category", CategoryToString(nCategory), 0, 0);
+        IMS_TRACE_D("%s: No category", CategoryToString(nCategory), 0, 0);
         return IMS_NULL;
     }
 
@@ -110,7 +110,7 @@ ImsList<ISystemListener*>* SystemListenerHolder::GetListeners(IN IMS_UINT32 nCat
 
     if (objListeners.IsEmpty())
     {
-        IMS_TRACE_D("%s :: No listeners", CategoryToString(nCategory), 0, 0);
+        IMS_TRACE_D("%s: No listeners", CategoryToString(nCategory), 0, 0);
         return IMS_NULL;
     }
 
@@ -338,7 +338,7 @@ void System::NotifyData(IN const android::Parcel& in, OUT android::Parcel& out)
     strLog.Sprintf("slotId=%d, cmd=%08X, category=%08X, sub-category=%d", nSlotId, nCmd,
             (nCmd & 0xFFFF0000), (nCmd & 0xFFFF));
 
-    IMS_TRACE_I("NotifyData :: %s", strLog.GetStr(), 0, 0);
+    IMS_TRACE_I("NotifyData: %s", strLog.GetStr(), 0, 0);
 
     if ((nCmd & SystemConstants::CATEGORY_NETWORK) == SystemConstants::CATEGORY_NETWORK)
     {
@@ -393,8 +393,8 @@ PUBLIC
 void System::AddListener(
         IN IMS_UINT32 nCategory, IN ISystemListener* piListener, IN IMS_SINT32 nSlotId)
 {
-    IMS_TRACE_D("AddListener :: category=0x%08x, listener=%p, slotId=%d", nCategory, piListener,
-            nSlotId);
+    IMS_TRACE_D(
+            "AddListener: category=0x%08x, listener=%p, slotId=%d", nCategory, piListener, nSlotId);
 
     if (piListener == IMS_NULL)
     {
@@ -418,7 +418,7 @@ PUBLIC
 void System::RemoveListener(
         IN IMS_UINT32 nCategory, IN ISystemListener* piListener, IN IMS_SINT32 nSlotId)
 {
-    IMS_TRACE_D("RemoveListener :: category=0x%08x, listener=%p, slotId=%d", nCategory, piListener,
+    IMS_TRACE_D("RemoveListener: category=0x%08x, listener=%p, slotId=%d", nCategory, piListener,
             nSlotId);
 
     if (piListener == IMS_NULL)
@@ -1863,7 +1863,7 @@ void System::NotifyNetworkCategory(
     }
     else
     {
-        IMS_TRACE_D("CATEGORY_NETWORK :: Cmd (%u) is not handled", nCmd, 0, 0);
+        IMS_TRACE_D("CATEGORY_NETWORK: Cmd(%u) is not handled", nCmd, 0, 0);
         return;
     }
 
@@ -1908,7 +1908,7 @@ void System::NotifyWifiCategory(
     }
     else
     {
-        IMS_TRACE_D("CATEGORY_WIFI :: Cmd (%u) is not handled", nCmd, 0, 0);
+        IMS_TRACE_D("CATEGORY_WIFI: Cmd(%u) is not handled", nCmd, 0, 0);
         return;
     }
 
@@ -1948,7 +1948,7 @@ void System::NotifyPowerCategory(
     }
     else
     {
-        IMS_TRACE_D("CATEGORY_POWER :: Cmd (%u) is not handled", nCmd, 0, 0);
+        IMS_TRACE_D("CATEGORY_POWER: Cmd(%u) is not handled", nCmd, 0, 0);
         return;
     }
 
@@ -1988,7 +1988,7 @@ void System::NotifyTimerCategory(
     }
     else
     {
-        IMS_TRACE_D("CATEGORY_TIMER ::  Cmd (%u) is not handled", nCmd, 0, 0);
+        IMS_TRACE_D("CATEGORY_TIMER: Cmd(%u) is not handled", nCmd, 0, 0);
         return;
     }
 
@@ -2026,7 +2026,7 @@ void System::NotifyConfigCategory(
     }
     else
     {
-        IMS_TRACE_D("CATEGORY_CONFIG :: Cmd (%u) is not handled", nCmd, 0, 0);
+        IMS_TRACE_D("CATEGORY_CONFIG: Cmd(%u) is not handled", nCmd, 0, 0);
         return;
     }
 
@@ -2065,7 +2065,7 @@ void System::NotifyEventCategory(
     }
     else
     {
-        IMS_TRACE_D("CATEGORY_EVENT :: Cmd (%u) is not handled", nCmd, 0, 0);
+        IMS_TRACE_D("CATEGORY_EVENT: Cmd(%u) is not handled", nCmd, 0, 0);
         return;
     }
 

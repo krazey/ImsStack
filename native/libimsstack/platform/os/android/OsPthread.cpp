@@ -116,19 +116,19 @@ PUBLIC VIRTUAL IMS_BOOL OsPthread::Activate()
     {
         if (nResult == EAGAIN)
         {
-            IMS_TRACE_E(0, "pthread_create - Failed (lack of resource)", 0, 0, 0);
+            IMS_TRACE_E(0, "pthread_create: (lack of resource)", 0, 0, 0);
         }
         else if (nResult == EINVAL)
         {
-            IMS_TRACE_E(0, "pthread_create - Failed (invalid attribute)", 0, 0, 0);
+            IMS_TRACE_E(0, "pthread_create: (invalid attribute)", 0, 0, 0);
         }
         else if (nResult == EPERM)
         {
-            IMS_TRACE_E(0, "pthread_create - Failed (inappropriate permission)", 0, 0, 0);
+            IMS_TRACE_E(0, "pthread_create: (inappropriate permission)", 0, 0, 0);
         }
         else
         {
-            IMS_TRACE_E(0, "pthread_create - Failed (%d)", nResult, 0, 0);
+            IMS_TRACE_E(0, "pthread_create: failed(%d)", nResult, 0, 0);
         }
 
         m_pThreadP->m_nThreadId = 0x00;
@@ -140,7 +140,7 @@ PUBLIC VIRTUAL IMS_BOOL OsPthread::Activate()
     {
         m_pThreadP->m_bIsRunning = IMS_TRUE;
 
-        IMS_TRACE_D("PThread :: Created (%x)", m_pThreadP->m_nThreadId, 0, 0);
+        IMS_TRACE_D("PThread: Created (%x)", m_pThreadP->m_nThreadId, 0, 0);
 
         nResult = pthread_detach(m_pThreadP->m_nThreadId);
 
@@ -148,17 +148,16 @@ PUBLIC VIRTUAL IMS_BOOL OsPthread::Activate()
         {
             if (nResult == EINVAL)
             {
-                IMS_TRACE_E(0, "pthread_detach - Failed (does not refer to a joinable thread)", 0,
-                        0, 0);
+                IMS_TRACE_E(0, "pthread_detach: (does not refer to a joinable thread)", 0, 0, 0);
             }
             else if (nResult == ESRCH)
             {
-                IMS_TRACE_E(0, "pthread_detach - Failed (can not found thread id (%x))",
+                IMS_TRACE_E(0, "pthread_detach: (can not found thread id (%x))",
                         m_pThreadP->m_nThreadId, 0, 0);
             }
             else
             {
-                IMS_TRACE_E(0, "pthread_detach - Failed (%d)", nResult, 0, 0);
+                IMS_TRACE_E(0, "pthread_detach: failed(%d)", nResult, 0, 0);
             }
         }
     }
@@ -170,7 +169,7 @@ PUBLIC VIRTUAL void OsPthread::Deactivate()
 {
     if (!(m_pThreadP->m_bIsRunning))
     {
-        IMS_TRACE_D("Thread is not running", 0, 0, 0);
+        IMS_TRACE_D("Thread not running", 0, 0, 0);
         return;
     }
 
@@ -179,21 +178,21 @@ PUBLIC VIRTUAL void OsPthread::Deactivate()
     if (nResult == 0)
     {
 #ifdef __IMS_DEBUG__
-        IMS_TRACE_D("pthread_join - %lu", m_pThreadP->m_nThreadId, 0, 0);
+        IMS_TRACE_D("pthread_join: %lu", m_pThreadP->m_nThreadId, 0, 0);
 #endif
     }
     else if (nResult == EINVAL)
     {
-        IMS_TRACE_E(0, "pthread_join - failed (does not refer to a joinable thread)", 0, 0, 0);
+        IMS_TRACE_E(0, "pthread_join: (does not refer to a joinable thread)", 0, 0, 0);
     }
     else if (nResult == ESRCH)
     {
-        IMS_TRACE_E(0, "pthread_join - failed (can not found thread id (%x))",
-                m_pThreadP->m_nThreadId, 0, 0);
+        IMS_TRACE_E(
+                0, "pthread_join: (can not found thread id (%x))", m_pThreadP->m_nThreadId, 0, 0);
     }
     else
     {
-        IMS_TRACE_E(0, "pthread_join - failed (%d)", nResult, 0, 0);
+        IMS_TRACE_E(0, "pthread_join: failed(%d)", nResult, 0, 0);
     }
 }
 
@@ -259,7 +258,7 @@ PUBLIC GLOBAL IMS_ULONG OsPthread::GetCurrentThreadId()
 
 PROTECTED VIRTUAL IMS_ULONG OsPthread::Run()
 {
-    IMS_TRACE_I("PThread :: Started (%s, %x, %p)", GetName().GetStr(), m_pThreadP->m_nThreadId,
+    IMS_TRACE_I("PThread: Started (%s|%x|%p)", GetName().GetStr(), m_pThreadP->m_nThreadId,
             m_piImpListener);
 
     if (m_piImpListener != IMS_NULL)
@@ -269,7 +268,7 @@ PROTECTED VIRTUAL IMS_ULONG OsPthread::Run()
 
     if (m_pThreadP == IMS_NULL)
     {
-        IMS_TRACE_D("PThread is destroyed", 0, 0, 0);
+        IMS_TRACE_D("PThread already destroyed", 0, 0, 0);
         return 0x00;
     }
 

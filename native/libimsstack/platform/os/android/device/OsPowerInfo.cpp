@@ -106,7 +106,7 @@ void OsPowerInfoPrivate::UpdatePowerLevel()
     {
         Update();
 
-        IMS_TRACE_D("PowerLevel :: %d >> %d", m_eOldPowerLevel, m_ePowerLevel, 0);
+        IMS_TRACE_D("PowerLevel: %d >> %d", m_eOldPowerLevel, m_ePowerLevel, 0);
 
         m_eOldPowerLevel = m_ePowerLevel;
     }
@@ -161,7 +161,7 @@ PUBLIC VIRTUAL void OsPowerInfo::System_NotifyEvent(
 {
     (void)nLParam;
 
-    IMS_TRACE_D("PowerInfo :: event=%d, wp=%" PFLS_d ", lp=%" PFLS_d, nEvent, nWParam, nLParam);
+    IMS_TRACE_D("PowerInfo: event=%d, wp=%" PFLS_d ", lp=%" PFLS_d, nEvent, nWParam, nLParam);
 
     switch (nEvent)
     {

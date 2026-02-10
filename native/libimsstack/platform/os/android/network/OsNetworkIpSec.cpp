@@ -40,7 +40,7 @@ PUBLIC VIRTUAL IIpSecPolicy* OsNetworkIpSec::CreatePolicy()
 {
     OsIpSecPolicy* pPolicy = new OsIpSecPolicy(GetAvailableId());
 
-    IMS_TRACE_D("CreatePolicy :: Policy(%p:%d)", pPolicy, pPolicy->GetId(), 0);
+    IMS_TRACE_D("CreatePolicy: Policy(%p:%d)", pPolicy, pPolicy->GetId(), 0);
 
     m_objPolicies.Append(pPolicy);
 
@@ -51,7 +51,7 @@ PUBLIC VIRTUAL void OsNetworkIpSec::DestroyPolicy(IN IIpSecPolicy* piPolicy)
 {
     OsIpSecPolicy* pPolicy = DYNAMIC_CAST(OsIpSecPolicy*, piPolicy);
 
-    IMS_TRACE_D("DestroyPolicy :: Policy(%p:%d)", piPolicy, pPolicy->GetId(), 0);
+    IMS_TRACE_D("DestroyPolicy: Policy(%p:%d)", piPolicy, pPolicy->GetId(), 0);
 
     for (IMS_UINT32 i = 0; i < m_objPolicies.GetSize(); i++)
     {
@@ -59,7 +59,7 @@ PUBLIC VIRTUAL void OsNetworkIpSec::DestroyPolicy(IN IIpSecPolicy* piPolicy)
 
         if (pTmpPolicy == pPolicy)
         {
-            IMS_TRACE_I("DestroyPolicy :: Policy(%p) removed", pPolicy, 0, 0);
+            IMS_TRACE_I("DestroyPolicy: Policy(%p) removed", pPolicy, 0, 0);
             delete pTmpPolicy;
             m_objPolicies.RemoveAt(i);
             return;
@@ -78,7 +78,7 @@ PUBLIC VIRTUAL void OsNetworkIpSec::DestroyAllPolicies()
         const ImsList<OsIpSecSp*>& objSPs = pPolicy->GetSPs();
         const ImsList<OsIpSecSa*>& objSAs = pPolicy->GetSAs();
 
-        IMS_TRACE_D("DestroyAllPolicies :: Policy(%p) , SP-size(%d), SA-size(%d)", pPolicy,
+        IMS_TRACE_D("DestroyAllPolicies: Policy(%p), SP-size(%d), SA-size(%d)", pPolicy,
                 objSPs.GetSize(), objSAs.GetSize());
 
         IMS_SLONG nIndex = m_objSaParams.GetIndexOfKey(reinterpret_cast<IMS_UINTP>(pPolicy));
@@ -106,7 +106,7 @@ PUBLIC VIRTUAL IMS_BOOL OsNetworkIpSec::AddPolicy(IN IIpSecPolicy* piPolicy)
     const ImsList<OsIpSecSp*>& objSPs = pPolicy->GetSPs();
     const ImsList<OsIpSecSa*>& objSAs = pPolicy->GetSAs();
 
-    IMS_TRACE_I("AddPolicy :: SP-size=%d, SA-size=%d", objSPs.GetSize(), objSAs.GetSize(), 0);
+    IMS_TRACE_I("AddPolicy: SP-size=%d, SA-size=%d", objSPs.GetSize(), objSAs.GetSize(), 0);
 
     OsIpSecSa* pIpSecSa;
     IMS_UINT32 i = 0;
@@ -151,7 +151,7 @@ PUBLIC VIRTUAL void OsNetworkIpSec::DeletePolicy(IN IIpSecPolicy* piPolicy)
 
     if (nIndex < 0)
     {
-        IMS_TRACE_E(0, "Finding Policy is failed.", 0, 0, 0);
+        IMS_TRACE_E(0, "Finding Policy is failed", 0, 0, 0);
         return;
     }
 
@@ -194,7 +194,7 @@ PUBLIC VIRTUAL IMS_BOOL OsNetworkIpSec::ApplyIpSecTransform(IN ISocket* piSocket
 
     // pRemote (IMS_NULL): UDP socket, TCP server socket
     // pRemote (non-IMS_NULL): TCP client socket
-    IMS_TRACE_I("ApplyIpSecTransform - sa-size=%d, socket=%d", m_objSaParams.GetSize(),
+    IMS_TRACE_I("ApplyIpSecTransform: sa-size=%d, socket=%d", m_objSaParams.GetSize(),
             piSocket->GetSocketId(), 0);
 
     IMS_SINT32 nTransportProtocol = IpSecSaParameter::Policy::TRANSPORT_PROTOCOL_UDP;
@@ -261,7 +261,7 @@ PUBLIC VIRTUAL IMS_BOOL OsNetworkIpSec::ApplyIpSecTransform(
         return IMS_FALSE;
     }
 
-    IMS_TRACE_I("ApplyIpSecTransform - sa-size=%d, socket=%d, serverSocket=%d",
+    IMS_TRACE_I("ApplyIpSecTransform: sa-size=%d, socket=%d, serverSocket=%d",
             m_objSaParams.GetSize(), piSocket->GetSocketId(), piServerSocket->GetSocketId());
 
     for (IMS_UINT32 i = 0; i < m_objSaParams.GetSize(); i++)
@@ -299,7 +299,7 @@ PUBLIC VIRTUAL IMS_BOOL OsNetworkIpSec::ApplyIpSecTransform(
 PUBLIC VIRTUAL void OsNetworkIpSec::RemoveIpSecTransforms(IN IMS_SINT32 nSocketId)
 {
     IMS_TRACE_I(
-            "RemoveIpSecTransforms - sa-size=%d, socket=%d", m_objSaParams.GetSize(), nSocketId, 0);
+            "RemoveIpSecTransforms: sa-size=%d, socket=%d", m_objSaParams.GetSize(), nSocketId, 0);
 
     for (IMS_UINT32 i = 0; i < m_objSaParams.GetSize(); i++)
     {

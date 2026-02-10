@@ -65,7 +65,7 @@ void ImsSocketState::AddDeadSocket(IN ImsSocket* pSocket)
 
     m_objDeadSockets.Append(pSocket);
 
-    IMS_TRACE_I("DEAD SOCKET (%p) :: ADD (size=%d)", pSocket, m_objDeadSockets.GetSize(), 0);
+    IMS_TRACE_I("DEAD SOCKET(%p): ADD (size=%d)", pSocket, m_objDeadSockets.GetSize(), 0);
 }
 
 PUBLIC
@@ -92,7 +92,7 @@ void ImsSocketState::DestroyDeadSockets()
             if (pSocket != IMS_NULL)
             {
 #ifdef __IMS_DEBUG__
-                IMS_TRACE_D("DEAD SOCKET (%p) :: DESTROY", pSocket, 0, 0);
+                IMS_TRACE_D("DEAD SOCKET(%p): DESTROY", pSocket, 0, 0);
 #endif
                 delete pSocket;
             }
@@ -107,8 +107,8 @@ void ImsSocketState::AttachHandle(IN IMS_SOCKET hSocket, IN ImsSocket* pSocket)
 
     m_objHandle2Object.Add(hSocket, pSocket);
 
-    IMS_TRACE_I("SOCKET (%u, %p) IS ATTACHED (size=%d)", hSocket, pSocket,
-            m_objHandle2Object.GetSize());
+    IMS_TRACE_I(
+            "SOCKET(%u|%p) IS ATTACHED (size=%d)", hSocket, pSocket, m_objHandle2Object.GetSize());
 }
 
 PUBLIC
@@ -182,7 +182,7 @@ void ImsSocketState::DetachHandle(IN IMS_SOCKET hSocket)
 
     m_objHandle2Object.Remove(hSocket);
 
-    IMS_TRACE_I("SOCKET (%u) IS DETACHED (size=%d)", hSocket, m_objHandle2Object.GetSize(), 0);
+    IMS_TRACE_I("SOCKET(%u) IS DETACHED (size=%d)", hSocket, m_objHandle2Object.GetSize(), 0);
 }
 
 PUBLIC
