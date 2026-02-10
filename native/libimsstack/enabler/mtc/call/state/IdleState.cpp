@@ -67,6 +67,7 @@
 #include "media/MtcMediaUtil.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "ussi/UssiController.h"
+#include "utility/CallTypeUtil.h"
 #include "utility/IMessageUtils.h"
 #include <memory>
 
@@ -110,7 +111,9 @@ PUBLIC VIRTUAL CallStateName IdleState::Start(IN CallType eCallType, IN const AS
     }
     else
     {
-        m_objContext.GetCallInfo().eInitialCallType = eCallType;
+        m_objContext.GetCallInfo().eInitialCallType =
+                CallTypeUtil::RestrictCallTypeByRegisteredFeature(
+                        eCallType, m_objContext.GetService().GetAosConnector());
         objMediaInfoToStart = objMediaInfo;
     }
 
@@ -144,7 +147,8 @@ PUBLIC VIRTUAL CallStateName IdleState::StartConference(IN CallType eCallType,
         IN const ImsList<SuppService*>& objSuppServices, IN const ImsList<ConfUser*>& lstUsers)
 {
     m_objContext.GetSupplementaryService().UpdateServices(objSuppServices);
-    m_objContext.GetCallInfo().eInitialCallType = eCallType;
+    m_objContext.GetCallInfo().eInitialCallType = CallTypeUtil::RestrictCallTypeByRegisteredFeature(
+            eCallType, m_objContext.GetService().GetAosConnector());
     m_objContext.GetCallInfo().ePeerType = PeerType::MO;
     m_objContext.GetCallInfo().bConference = IMS_TRUE;
     m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(strTarget);
@@ -163,7 +167,8 @@ PUBLIC VIRTUAL CallStateName IdleState::StartConference(IN CallType eCallType,
 PUBLIC VIRTUAL CallStateName IdleState::StartConference(
         IN CallType eCallType, IN const AString& strTarget, IN const ImsList<ConfUser*>& lstUsers)
 {
-    m_objContext.GetCallInfo().eInitialCallType = eCallType;
+    m_objContext.GetCallInfo().eInitialCallType = CallTypeUtil::RestrictCallTypeByRegisteredFeature(
+            eCallType, m_objContext.GetService().GetAosConnector());
     m_objContext.GetCallInfo().ePeerType = PeerType::MO;
     m_objContext.GetCallInfo().bConference = IMS_TRUE;
     m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(strTarget);

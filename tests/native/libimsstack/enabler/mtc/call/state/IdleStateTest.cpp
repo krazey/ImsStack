@@ -272,6 +272,21 @@ TEST_F(IdleStateTest, StartSetsUpCallInfo)
     EXPECT_EQ(IMS_FALSE, objCallInfo.bConference);
 }
 
+TEST_F(IdleStateTest, StartRestrictsInitialCallTypeByCapability)
+{
+    AString strTarget("some_target");
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
+    ON_CALL(objDialingPlan, GetToUri(_, _, _)).WillByDefault(Return(strTarget));
+    ON_CALL(objAosConnector, GetFeatures)
+            .WillByDefault(Return(ImsAosFeature::MMTEL | ImsAosFeature::VIDEO));
+
+    pIdleState->Start(CallType::RTT, strTarget, objInputMediaInfo, objInputSuppServices);
+
+    EXPECT_EQ(CallType::VOIP, objCallInfo.eInitialCallType);
+}
+
 TEST_F(IdleStateTest, StartSetsUpParticipantInfo)
 {
     CallType eCallType = CallType::VOIP;
