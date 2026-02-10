@@ -1039,7 +1039,7 @@ PROTECTED void AosERegistration::HandleFakeMode(IN IMS_UINT32 nReason)
         {
             Destroy();
             ReportStateChanged(RESULT_FAILURE,
-                    GET_N_CONFIG(m_nSlotId)->IsKeepEPdnUponPcscfUnavailable()
+                    GET_N_CONFIG(m_nSlotId)->IsDelayEPdnReleaseWhenECallFailure()
                             ? REASON_FAILURE_NO_PCSCF_AVAILABLE
                             : REASON_FAILURE_GENERAL);
             return;

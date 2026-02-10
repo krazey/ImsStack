@@ -679,7 +679,7 @@ TEST_F(AosERegistrationTest, ReportFailureWithGeneral_HandleFakeMode)
 TEST_F(AosERegistrationTest, ReportFailureWithNoPcscf_HandleFakeModeAndNoPcscf)
 {
     ON_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(m_objMockIAosNConfiguration, IsKeepEPdnUponPcscfUnavailable())
+    ON_CALL(m_objMockIAosNConfiguration, IsDelayEPdnReleaseWhenECallFailure())
             .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objMockIAosPcscf, RemoveCurrentPcscf());
