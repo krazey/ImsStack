@@ -208,6 +208,50 @@ TEST_F(IdleStateTest, OnEnterDoesNotInvokePreRadioCheckForMt)
     pIdleState->OnEnter();
 }
 
+TEST_F(IdleStateTest, OnEnterStartsCallSetupWatchdogTimer)
+{
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
+    objCallInfo.ePeerType = PeerType::MO;
+
+    IMS_SINT32 n18xWaitTimer = 20000;
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_18X_TIMER_MILLIS_INT))
+            .WillByDefault(Return(n18xWaitTimer));
+
+    // TIMER_C_WITH_MARGIN_TIME_MS = 200000
+    const static IMS_SINT32 TIMER_C_WITH_MARGIN_TIME_MS = 200000;
+    EXPECT_CALL(objTimerWrapper,
+            Start(MtcCallState::TimerType::TIMER_MO_CALL_SETUP_WATCHDOG,
+                    TIMER_C_WITH_MARGIN_TIME_MS));
+    pIdleState->OnEnter();
+
+    n18xWaitTimer = 300000;
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_18X_TIMER_MILLIS_INT))
+            .WillByDefault(Return(n18xWaitTimer));
+    EXPECT_CALL(objTimerWrapper,
+            Start(MtcCallState::TimerType::TIMER_MO_CALL_SETUP_WATCHDOG, n18xWaitTimer));
+    pIdleState->OnEnter();
+}
+
+TEST_F(IdleStateTest, OnEnterDoesNotStartCallSetupWatchdogTimerIfEmergency)
+{
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    objCallInfo.ePeerType = PeerType::MO;
+
+    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_CALL_SETUP_WATCHDOG, _))
+            .Times(0);
+    pIdleState->OnEnter();
+}
+
+TEST_F(IdleStateTest, OnEnterDoesNotStartCallSetupWatchdogTimerIfMtCall)
+{
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
+    objCallInfo.ePeerType = PeerType::MT;
+
+    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_CALL_SETUP_WATCHDOG, _))
+            .Times(0);
+    pIdleState->OnEnter();
+}
+
 TEST_F(IdleStateTest, StartSetsUpCallInfo)
 {
     CallType eCallType = CallType::VOIP;
@@ -1848,6 +1892,16 @@ TEST_F(IdleStateTest, OnBlockCheckedTriggersEpsfbIfRequired)
     EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
     EXPECT_CALL(*pEpsfbTrigger, TriggerEpsFallback(EpsFallbackReason::RADIO_CHECK_BLOCK));
     EXPECT_EQ(CallStateName::IDLE, pIdleState->OnBlockChecked(objBlockResult));
+}
+
+TEST_F(IdleStateTest, OnTimerExpiredNotifiesSendStartFailedIfCallSetupWatchdogTimerExpired)
+{
+    const CallReasonInfo objReason(CODE_LOCAL_INTERNAL_ERROR);
+
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pIdleState->OnTimerExpired(MtcCallState::TIMER_MO_CALL_SETUP_WATCHDOG));
 }
 
 TEST_F(IdleStateTest, OnTimerExpiredRejectIncomingCallIfAlertingTimerExpired)

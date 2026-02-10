@@ -277,6 +277,11 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdated(IN ISession
         return CallStateName::TERMINATING;
     }
 
+    if (m_objContext.GetTimer().IsActive(TIMER_MO_CALL_SETUP_WATCHDOG))
+    {
+        // Renew the timer.
+        StartTimer(TIMER_MO_CALL_SETUP_WATCHDOG);
+    }
     m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_TRUE);
     m_objContext.GetUiNotifier().SendProgressing();
 
@@ -351,6 +356,11 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN I
         return CallStateName::TERMINATING;
     }
 
+    if (m_objContext.GetTimer().IsActive(TIMER_MO_CALL_SETUP_WATCHDOG))
+    {
+        // Renew the timer.
+        StartTimer(TIMER_MO_CALL_SETUP_WATCHDOG);
+    }
     m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_TRUE);
     m_objContext.GetUiNotifier().SendProgressing();
     return GetStateName();
@@ -480,6 +490,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
         return On100TryingReceived();
     }
 
+    StopTimer(TIMER_MO_CALL_SETUP_WATCHDOG);
     StopTimer(TIMER_MO_18X_WAIT);
     StopTimer(TIMER_MO_CALL_INITIATION_TO_18X_WAIT);
     StartTimer(TIMER_MO_NOANSWER);
@@ -554,10 +565,15 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
             piMessage->GetStatusCode() == SipStatusCode::SC_183 &&
             m_objContext.GetMessageUtils().HasSdp(piMessage))
     {
+        if (!m_objContext.GetCallInfo().IsEmergency())
+        {
+            StartTimer(TIMER_MO_CALL_SETUP_WATCHDOG);
+        }
         StopTimer(TIMER_MO_NOANSWER);
     }
     else
     {
+        StopTimer(TIMER_MO_CALL_SETUP_WATCHDOG);
         StartTimer(TIMER_MO_NOANSWER);
     }
 
@@ -810,6 +826,19 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 nType)
 {
     switch (nType)
     {
+        case TIMER_MO_CALL_SETUP_WATCHDOG:
+        {
+            IMS_TRACE_E(0, "call setup watchdog timer expired.", 0, 0, 0);
+            CallReasonInfo objReason(CODE_SIP_SERVER_TIMEOUT);
+            HandleCancel(GetISession(), objReason);
+            OnStartFailed(objReason);
+            const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+            if (pAosConnector)
+            {
+                pAosConnector->Control(ImsAosControl::REGISTER_REINITIATE);
+            }
+            return CallStateName::TERMINATING;
+        }
         case TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL:
             OnStartFailed(CallReasonInfo(CODE_SIP_SERVER_ERROR));
             return CallStateName::TERMINATING;

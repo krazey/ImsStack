@@ -353,7 +353,6 @@ private:
     ParticipantInfo m_objParticipantInfo;
     UpdatingInfo* m_pUpdatingInfo;
     ImsList<IMtcSession*> m_lstSessions;
-    MtcCallStateMachine m_objStateMachine;
     MtcPendingOperationHolder m_objPendingOperationHolder;
     std::unique_ptr<MtcTimerWrapper> m_pTimer;
     MtcUiNotifier m_objUiNotifier;
@@ -364,6 +363,10 @@ private:
     UssiController* m_pUssiController;
     EpsFallbackTrigger* m_pEpsFallbackTrigger;
     CurrentLocationDiscoveryController* m_pCurrentLocationDiscoveryController;
+
+    // Ensure MtcCallStateMachine is created last to guarantee other IMtcCallContext resources
+    // are initialized first.
+    MtcCallStateMachine m_objStateMachine;
 };
 
 #endif

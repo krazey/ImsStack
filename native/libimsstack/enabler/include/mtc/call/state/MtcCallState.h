@@ -145,11 +145,13 @@ public:
 
     enum TimerType
     {
+        TIMER_MO_CALL_SETUP_WATCHDOG,
         TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL,
         TIMER_MO_CALL_INITIATION_TO_18X_WAIT,
         TIMER_MO_18X_WAIT,
         TIMER_MO_NOANSWER,
         TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON,
+
         TIMER_MT_ALERTING,
         TIMER_MT_PRACK_WAIT,
 
@@ -220,6 +222,8 @@ private:
     {
         return SipStatusCode::SC_180 <= eStatusCode && eStatusCode <= SipStatusCode::SC_183;
     }
+
+    static const IMS_SINT32 TIMER_C_WITH_MARGIN_TIME_MS = 180000 + 20000;
 
     const CallStateName m_eStateName;
 };

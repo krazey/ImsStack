@@ -85,6 +85,13 @@ PUBLIC VIRTUAL IdleState::~IdleState() {}
 
 PUBLIC VIRTUAL void IdleState::OnEnter()
 {
+    if (!m_objContext.GetCallInfo().IsEmergency())
+    {
+        if (m_objContext.GetCallInfo().ePeerType == PeerType::MO)
+        {
+            StartTimer(TIMER_MO_CALL_SETUP_WATCHDOG);
+        }
+    }
     PerformPreRadioCheckForMo();
 }
 
@@ -336,6 +343,16 @@ PUBLIC VIRTUAL CallStateName IdleState::OnTimerExpired(IN IMS_SINT32 nType)
 {
     switch (nType)
     {
+        case TIMER_MO_CALL_SETUP_WATCHDOG:
+        {
+            IMS_TRACE_E(0, "call setup watchdog timer expired.", 0, 0, 0);
+            const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+            if (pAosConnector)
+            {
+                pAosConnector->Control(ImsAosControl::REGISTER_REINITIATE);
+            }
+            return Terminate(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR));
+        }
         case TIMER_MT_ALERTING:
             return RejectIncomingAndToTerminating(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR));
         default:
