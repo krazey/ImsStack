@@ -84,4 +84,5 @@
 
     <!-- Media -->
     <boolean name="imsvoice.codec_based_dynamic_as_enabled_bool" value="false"/>
+    <boolean name="imsvoice.media_anbr_capability_in_modem_bool" value="true"/>
 </carrier_config>
