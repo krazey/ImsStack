@@ -94,6 +94,7 @@
         <item value="0"/> <!-- NORMAL_ROUTING_EMERGENCY_ON_WIFI -->
         <item value="0"/> <!-- NORMAL_ROUTING_EMERGENCY_ON_CELLULAR -->
     </int-array>
+    <int name="ims.geolocation_routing_header_mode_int" value="1"/>
 
     <!-- Media -->
     <boolean name="imsvoice.codec_based_dynamic_as_enabled_bool" value="false"/>

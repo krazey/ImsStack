@@ -359,7 +359,7 @@ PROTECTED VIRTUAL void MessageFormatter::SetLocation()
         return;
     }
 
-    MtcLocationObject(m_objContext).SetLocationToMessage(*m_piNextMessage, IMS_TRUE);
+    MtcLocationObject(m_objContext).SetLocationToMessage(*m_piNextMessage);
 }
 
 PROTECTED VIRTUAL void MessageFormatter::SetCallerIdHeader()

@@ -24,6 +24,7 @@
 
     <!-- Mtc Assets -->
     <int name="ims.geolocation_policy_for_location_based_call_int" value="13"/>
+    <int name="ims.geolocation_routing_header_mode_int" value="1"/>
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
         <item value="1"/> <!-- NOT_USE_SERVICE_CATEGORY -->
     </int-array>

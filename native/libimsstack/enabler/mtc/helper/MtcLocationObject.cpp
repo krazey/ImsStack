@@ -136,8 +136,8 @@ PUBLIC GLOBAL MtcLocationProperties* MtcLocationObject::GetLocationFromMessage(
 }
 
 PUBLIC
-void MtcLocationObject::SetLocationToMessage(IN_OUT IMessage& objMessage,
-        IN IMS_BOOL bGeolocationRouting, IN const ByteArray& objContent)
+void MtcLocationObject::SetLocationToMessage(
+        IN_OUT IMessage& objMessage, IN const ByteArray& objContent)
 {
     if (objContent.GetLength() <= 0)
     {
@@ -148,8 +148,19 @@ void MtcLocationObject::SetLocationToMessage(IN_OUT IMessage& objMessage,
     const AString strCid = CreateCid();
 
     objMessage.AddHeader(SipHeaderName::GEOLOCATION, GetGeolocationHeader(strCid));
-    objMessage.AddHeader(SipHeaderName::GEOLOCATION_ROUTING,
-            bGeolocationRouting ? GEOLOCATION_ROUTING_YES : GEOLOCATION_ROUTING_NO);
+
+    IMS_SINT32 eGeoRoutingHeaderMode = m_objContext.GetConfigurationProxy().GetInt(
+            ConfigIms::KEY_GEOLOCATION_ROUTING_HEADER_MODE_INT);
+    if (eGeoRoutingHeaderMode == ConfigIms::GEOLOCATION_HEADER_MODE_INCLUDE_YES_ALWAYS ||
+            (eGeoRoutingHeaderMode == ConfigIms::GEOLOCATION_HEADER_MODE_INCLUDE_YES_ON_IWLAN &&
+                    m_objContext.GetService().IsWlanIpCanType()))
+    {
+        objMessage.AddHeader(SipHeaderName::GEOLOCATION_ROUTING, GEOLOCATION_ROUTING_YES);
+    }
+    else if (eGeoRoutingHeaderMode == ConfigIms::GEOLOCATION_HEADER_MODE_INCLUDE_NO_ALWAYS)
+    {
+        objMessage.AddHeader(SipHeaderName::GEOLOCATION_ROUTING, GEOLOCATION_ROUTING_NO);
+    }
 
     IMessageBodyPart* pBodyPart = objMessage.CreateBodyPart();
     pBodyPart->SetContent(objContent);

@@ -139,6 +139,8 @@ const IMS_CHAR CarrierConfig::Ims::KEY_IMS_USER_AGENT_STRING[] =
         KEY_IMS_PREFIX "ims_user_agent_string";
 const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORTED_RATS_INT_ARRAY[] =
         KEY_IMS_PREFIX "supported_rats_int_array";
+const IMS_CHAR CarrierConfig::Ims::KEY_GEOLOCATION_ROUTING_HEADER_MODE_INT[] =
+        KEY_IMS_PREFIX "geolocation_routing_header_mode_int";
 // Bundle {
 const IMS_CHAR CarrierConfig::Ims::KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE[] =
         KEY_IMS_PREFIX "mmtel_requires_provisioning_bundle";

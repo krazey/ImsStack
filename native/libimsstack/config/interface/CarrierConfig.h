@@ -1535,6 +1535,29 @@ public:
             GEOLOCATION_PIDF_INFO_COUNTRY_CODE_AND_STATE = 3,
         };
 
+        /**
+         * Specifies the mode for including the Geolocation-Routing header.
+         *
+         * Possible Values:
+         *   {@code GEOLOCATION_HEADER_MODE_NOT_PRESENT} (0) : The Geolocation-Routing header is
+         *                                                     not included.
+         *   {@code GEOLOCATION_HEADER_MODE_INCLUDE_YES_ON_IWLAN} (1) : Include "yes" in the
+         *                                                              Geolocation-Routing header
+         *                                                              only when on IWLAN.
+         *   {@code GEOLOCATION_HEADER_MODE_INCLUDE_YES_ALWAYS} (2) : Always include "yes" in the
+         *                                                            Geolocation-Routing header.
+         *   {@code GEOLOCATION_HEADER_MODE_INCLUDE_NO_ALWAYS} (3) : Always include "no" in the
+         *                                                           Geolocation-Routing header.
+         */
+        static const IMS_CHAR KEY_GEOLOCATION_ROUTING_HEADER_MODE_INT[];
+        enum
+        {
+            GEOLOCATION_HEADER_MODE_NOT_PRESENT = 0,
+            GEOLOCATION_HEADER_MODE_INCLUDE_YES_ON_IWLAN = 1,
+            GEOLOCATION_HEADER_MODE_INCLUDE_YES_ALWAYS = 2,
+            GEOLOCATION_HEADER_MODE_INCLUDE_NO_ALWAYS = 3
+        };
+
         // Unused.
         // Network types
         enum

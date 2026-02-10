@@ -792,6 +792,7 @@
     <boolean name="imsvt.one_way_video_call_by_remote_end_supported_bool" value="true"/>
     <boolean name="imsvoice.notify_conf_state_when_anonymous_user_bool" value="false"/>
     <int name="ims.geolocation_policy_for_location_based_call_int" value="0"/>
+    <int name="ims.geolocation_routing_header_mode_int" value="2"/>
     <int-array name="imsvoice.location_based_number_list_int_array" num="0">
     </int-array>
     <boolean name="imsvoice.call_mergeable_on_conference_on_hold_bool" value="false"/>

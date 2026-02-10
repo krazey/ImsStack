@@ -671,7 +671,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "information_level_of_geolocation_pidf_int_array";
         public static final String KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT =
                 KEY_PREFIX + "geolocation_policy_for_location_based_call_int";
-
+        public static final String KEY_GEOLOCATION_ROUTING_HEADER_MODE_INT =
+                KEY_PREFIX + "geolocation_routing_header_mode_int";
         // Indicates preferred IP version
         public static final int IPV4_PREFERRED = 0;
         public static final int IPV6_PREFERRED = 1;
