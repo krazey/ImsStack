@@ -315,6 +315,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsImsOverNrEnabled() const
     return IMS_FALSE;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsDelayEPdnReleaseWhenECallFailure() const
+{
+    return m_objAsset.bDelayEPdnReleaseWhenECallFailure;
+}
+
 PUBLIC VIRTUAL IMS_BOOL
 AosNConfiguration::IsEmergencyCallBasedOnPauOfNormalRegistrationSupported() const
 {
@@ -1687,6 +1692,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Ims::KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL);
     m_objAsset.bDisableN1ModeOnImsPduEstablishFailure = piCc->GetBoolean(
             CarrierConfig::Ims::KEY_DISABLE_N1_MODE_ON_IMS_PDU_ESTABLISH_FAILURE_BOOL);
+    m_objAsset.bDelayEPdnReleaseWhenECallFailure = piCc->GetBoolean(
+            CarrierConfig::ImsEmergency::KEY_DELAY_EPDN_RELEASE_WHEN_ECALL_FAILURE_BOOL);
     m_objAsset.bEmcCallBasedOnPAssociatedUriOfNormalReg = piCc->GetBoolean(
             CarrierConfig::ImsEmergency::KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL);
     m_objAsset.bEmcRegOnRandomPcscf =

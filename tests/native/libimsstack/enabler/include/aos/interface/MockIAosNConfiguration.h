@@ -66,6 +66,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsUnsecureTcpSocketOnAccomplishingRegDestroyed, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSmsOverImsSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsImsOverNrEnabled, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsDelayEPdnReleaseWhenECallFailure, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergencyCallBasedOnPauOfNormalRegistrationSupported, (),
             (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmcRegOnRandomPcscf, (), (const, override));

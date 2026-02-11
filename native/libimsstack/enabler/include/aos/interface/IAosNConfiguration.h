@@ -372,6 +372,15 @@ public:
     virtual IMS_BOOL IsImsOverNrEnabled() const = 0;
 
     /**
+     * @brief Flag indicating whether to delay EPDN disconnection or not when an emergency call
+     *        setup fails and the carrier requires UE to release EPDN after the call ends.
+     *
+     * @return IMS_BOOL Return whether to delay or not
+     * @see {@code imsemergency.delay_epdn_release_when_ecall_failure_bool}
+     */
+    virtual IMS_BOOL IsDelayEPdnReleaseWhenECallFailure() const = 0;
+
+    /**
      * @brief Flag indicating whether the authorized IMPU from P-Associated-URI header in 200 OK
      *        for IMS registration is used in emergency call.
      *

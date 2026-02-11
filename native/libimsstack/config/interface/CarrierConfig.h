@@ -1652,6 +1652,18 @@ public:
         };
 
         /**
+         * Specifies whether to delay EPDN disconnection or not when an emergency call setup fails
+         * and the carrier requires UE to release EPDN after the call ends.
+         * If {@code true}, the EPDN will only be released after Timer T1 expires to avoid
+         * interfering with the domain reselection procedure.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
+        static const IMS_CHAR KEY_DELAY_EPDN_RELEASE_WHEN_ECALL_FAILURE_BOOL[];
+
+        /**
          * Specifies whether the authorized IMPU from P-Associated-URI header in 200 OK for IMS
          * registration is used in emergency call.
          *

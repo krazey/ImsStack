@@ -81,6 +81,7 @@ public:
     IMS_BOOL IsUnsecureTcpSocketOnAccomplishingRegDestroyed() const override;
     IMS_BOOL IsSmsOverImsSupported() const override;
     IMS_BOOL IsImsOverNrEnabled() const override;
+    IMS_BOOL IsDelayEPdnReleaseWhenECallFailure() const override;
     IMS_BOOL IsEmergencyCallBasedOnPauOfNormalRegistrationSupported() const override;
     IMS_BOOL IsEmcRegOnRandomPcscf() const override;
     IMS_BOOL IsERegWithOnlyTcpInRoaming() const override;

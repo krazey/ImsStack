@@ -566,6 +566,10 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::ImsEmergency::KEY_DELAY_EPDN_RELEASE_WHEN_ECALL_FAILURE_BOOL,
+                    IMS_FALSE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::ImsEmergency::
                                KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL,
                     IMS_FALSE))
@@ -1032,6 +1036,7 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
     EXPECT_TRUE(m_pAosNConfiguration->IsBlockRegOnCsCall());
     EXPECT_FALSE(m_pAosNConfiguration->IsCallEndAndPdnReactivationByRegTerminated());
     EXPECT_FALSE(m_pAosNConfiguration->IsUnsecureTcpSocketOnAccomplishingRegDestroyed());
+    EXPECT_FALSE(m_pAosNConfiguration->IsDelayEPdnReleaseWhenECallFailure());
     EXPECT_FALSE(m_pAosNConfiguration->IsEmergencyCallBasedOnPauOfNormalRegistrationSupported());
     EXPECT_TRUE(m_pAosNConfiguration->IsEmcRegOnRandomPcscf());
     EXPECT_TRUE(m_pAosNConfiguration->IsERegWithOnlyTcpInRoaming());

@@ -31,6 +31,7 @@ public:
             bCallEndAndPdnReactivationByRegTerminated(IMS_FALSE),
             bDestroyUnsecureTcpSocketOnAccomplishingReg(IMS_FALSE),
             bDisableN1ModeOnImsPduEstablishFailure(IMS_FALSE),
+            bDelayEPdnReleaseWhenECallFailure(IMS_FALSE),
             bEmcCallBasedOnPAssociatedUriOfNormalReg(IMS_FALSE),
             bEmcRegOnRandomPcscf(IMS_FALSE),
             bERegWithOnlyTcpInRoaming(IMS_FALSE),
@@ -152,6 +153,7 @@ public:
     IMS_BOOL bCallEndAndPdnReactivationByRegTerminated;
     IMS_BOOL bDestroyUnsecureTcpSocketOnAccomplishingReg;
     IMS_BOOL bDisableN1ModeOnImsPduEstablishFailure;
+    IMS_BOOL bDelayEPdnReleaseWhenECallFailure;
     IMS_BOOL bEmcCallBasedOnPAssociatedUriOfNormalReg;
     IMS_BOOL bEmcRegOnRandomPcscf;
     IMS_BOOL bERegWithOnlyTcpInRoaming;

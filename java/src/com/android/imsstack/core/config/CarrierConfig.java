@@ -713,6 +713,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "ipcan_release_emergency_pdn_upon_emergency_call_end_int";
         public static final String KEY_PREFERRED_EMERGENCY_REGISTRATION_INT =
                 KEY_PREFIX + "preferred_emergency_registration_int";
+        public static final String KEY_DELAY_EPDN_RELEASE_WHEN_ECALL_FAILURE_BOOL =
+                KEY_PREFIX + "delay_epdn_release_when_ecall_failure_bool";
         public static final String KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL =
                 KEY_PREFIX + "ecall_based_on_p_associated_uri_of_normal_reg_bool";
         public static final String KEY_EREG_ON_RANDOM_PCSCF_BOOL =
