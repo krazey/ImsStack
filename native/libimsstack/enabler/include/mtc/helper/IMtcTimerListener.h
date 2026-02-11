@@ -23,9 +23,9 @@ public:
     virtual ~IMtcTimerListener() = default;
 
     /**
-     * @brief Notifies
+     * @brief Notifies a timer expiration event.
      *
-     * @param nType
+     * @param nType The type of the expired timer.
      */
     virtual void OnTimerExpired(IN IMS_SINT32 nType) = 0;
 };

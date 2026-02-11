@@ -21,6 +21,9 @@
 
 class IMessage;
 
+/**
+ * Defines the types of SIP requests relevant to a call session.
+ */
 enum class RequestType
 {
     START,
@@ -32,6 +35,9 @@ enum class RequestType
     TERMINATE,
 };
 
+/**
+ * Defines the types of SIP responses relevant to a call session.
+ */
 enum class ResponseType
 {
     PROVISIONAL_RESPONSE,
@@ -42,8 +48,12 @@ enum class ResponseType
     ACCEPT_UPDATE,
 };
 
-/*
- * This class can update its status from the incoming messages.
+/**
+ * @brief Defines an interface for components that handle incoming SIP messages to update their
+ *        internal state.
+ *
+ * Implementers of this interface can inspect incoming SIP requests and responses
+ * to track call state, media parameters, or other session-related information.
  */
 class IMtcMessageHandler
 {
@@ -51,18 +61,27 @@ public:
     virtual ~IMtcMessageHandler() {}
 
     /**
-     * Updates its state from the given request from the remote.
+     * @brief Handles an incoming request from the remote party.
+     *
+     * @param eType The type of the incoming request.
+     * @param objRequest The incoming SIP request message.
      */
     virtual void HandleRequest(IN RequestType eType, IN const IMessage& objRequest) = 0;
 
     /**
-     * Updates its state from the given response from the remote.
+     * @brief Handles an incoming response from the remote party.
+     *
+     * @param eType The type of the incoming response.
+     * @param objResponse The incoming SIP response message.
      */
     virtual void HandleResponse(IN ResponseType eType, IN const IMessage& objResponse) = 0;
 };
 
-/*
- * This class formats outgoing requests and responses.
+/**
+ * @brief Defines an interface for components that format outgoing SIP messages.
+ *
+ * Implementers can add, remove, or modify headers and body parts of an outgoing SIP message before
+ * it is sent to the network.
  */
 class IMtcMessageFormatter
 {
@@ -70,12 +89,18 @@ public:
     virtual ~IMtcMessageFormatter() {}
 
     /**
-     * Formats the given request message before the request is sent to the remote.
+     * @brief Formats an outgoing request message before it is sent.
+     *
+     * @param eType The type of the outgoing request.
+     * @param objRequest The outgoing SIP request message to be formatted.
      */
     virtual void FormatRequest(IN RequestType eType, IN_OUT IMessage& objRequest) = 0;
 
     /**
-     * Formats the given response message before the response is sent to the remote.
+     * @brief Formats an outgoing response message before it is sent.
+     *
+     * @param eType The type of the outgoing response.
+     * @param objResponse The outgoing SIP response message to be formatted.
      */
     virtual void FormatResponse(IN ResponseType eType, IN_OUT IMessage& objResponse) = 0;
 };
