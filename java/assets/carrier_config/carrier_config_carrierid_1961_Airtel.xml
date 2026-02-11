@@ -74,6 +74,7 @@
         <item value="1230"/>
         <item value="1236"/>
     </int-array>
+    <int name="imsvt.video_iframe_interval_sec_int" value="1"/>
     <int name="imsvt.video_send_periodic_sps_pps_int" value="1"/>
     <boolean name="imsvt.video_drop_p_frame_bool" value="true"/>
     <int name="imsvt.video_cvo_value_int" value="4"/>
