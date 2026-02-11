@@ -83,8 +83,8 @@ public:
     {
         // Vital: Destroy real objects created by the base AosMngr constructor. This prevents
         //        the test from interacting with uninitialized real system components.
-        DestroyStaticConfig();
         FullDestroyAos();
+        DestroyStaticConfig();
 
         // Re-initialize using the Mock Builder.
         CreateAos();
