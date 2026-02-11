@@ -33,7 +33,8 @@ public:
     virtual ~VideoSdpGenerator() override;
 
     virtual IMS_BOOL Generate(OUT ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile) override;
+            OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile,
+            IN const MediaSessionConfig* pConfig) override;
 
 protected:
     void GeneratePayload(OUT IMediaDescriptor* pDescriptor, IN VideoProfile* pProfile);

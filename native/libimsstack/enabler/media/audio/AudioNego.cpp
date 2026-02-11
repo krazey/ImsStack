@@ -24,15 +24,14 @@
 #include "MediaProfileFactory.h"
 #include "MediaProfileUtil.h"
 #include "ServiceTrace.h"
+#include "audio/AudioProfileGenerator.h"
 #include "audio/AudioProfileNegotiator.h"
 #include "audio/AudioProfileUtil.h"
-#include "audio/AudioSdpParser.h"
 #include "audio/AudioSdpGenerator.h"
-#include "audio/AudioProfileGenerator.h"
+#include "audio/AudioSdpParser.h"
 #include "config/AudioConfiguration.h"
-#include "config/MediaSessionConfigFactory.h"
-#include "config/MediaSessionConfig.h"
 #include "config/MediaConfigUtil.h"
+#include "config/MediaSessionConfig.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
@@ -481,7 +480,7 @@ IMS_BOOL AudioNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
     {
         // Make the SDP from profile
         IMS_BOOL bSdpMade = m_pSdpGenerator->Generate(pSessionDescriptor, pDescriptor,
-                GetLocalProfile(*CreateOaModel(eDirection, bDisable)));
+                GetLocalProfile(*CreateOaModel(eDirection, bDisable)), GetMediaSessionConfig());
 
         // Remove the session level direction
         pSessionDescriptor->SetDirection(MEDIA_DIRECTION_INVALID);
@@ -531,8 +530,8 @@ IMS_BOOL AudioNego::FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
     IMS_TRACE_D("FormAnswer(): direction[%d], disable[%d]", eDirection, bDisable, 0);
 
     // Make the SDP from profile
-    IMS_BOOL bSdpMade = m_pSdpGenerator->Generate(
-            pSessionDescriptor, pDescriptor, GetNegotiatedProfile(*pNewOaModel));
+    IMS_BOOL bSdpMade = m_pSdpGenerator->Generate(pSessionDescriptor, pDescriptor,
+            GetNegotiatedProfile(*pNewOaModel), GetMediaSessionConfig());
 
     // Remove the session level direction
     pSessionDescriptor->SetDirection(MEDIA_DIRECTION_INVALID);
@@ -567,10 +566,7 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
 
     if (pPrevOaModel != IMS_NULL && pPrevOaModel->pNegotiatedProfile != IMS_NULL)
     {
-        const MediaSessionConfig* pMediaSessionConfig =
-                MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
-                        GetSlotId(), m_pEnvironment->eServiceType);
-
+        const MediaSessionConfig* pMediaSessionConfig = GetMediaSessionConfig();
         const bool bUseFullCapability = bEnforceReofferMode ||
                 (pMediaSessionConfig != IMS_NULL &&
                         pMediaSessionConfig->IsSdpReofferFullCapability());
@@ -641,8 +637,8 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
     m_listOaModel.Append(pNewOaModel);
 
     // Make the SDP from profile
-    IMS_BOOL bSdpMade = m_pSdpGenerator->Generate(
-            pSessionDescriptor, pDescriptor, GetLocalProfile(*pNewOaModel));
+    IMS_BOOL bSdpMade = m_pSdpGenerator->Generate(pSessionDescriptor, pDescriptor,
+            GetLocalProfile(*pNewOaModel), GetMediaSessionConfig());
 
     // Delete Session Level Direction Attribute
     pSessionDescriptor->SetDirection(MEDIA_DIRECTION_INVALID);

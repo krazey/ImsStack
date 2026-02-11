@@ -25,6 +25,7 @@
 #include "MediaProfileGenerator.h"
 #include "MediaProfileUtil.h"
 #include "ServiceTrace.h"
+#include "config/MediaSessionConfigFactory.h"
 #include "config/MediaConfiguration.h"
 
 __IMS_TRACE_TAG_MEDIA__;
@@ -484,4 +485,15 @@ IMS_BOOL BaseNego::CheckArgument(IN ISessionDescriptor* pSessionDescriptor,
     }
 
     return IMS_TRUE;
+}
+
+PROTECTED
+const MediaSessionConfig* BaseNego::GetMediaSessionConfig() const
+{
+    if (m_pEnvironment == IMS_NULL)
+    {
+        return IMS_NULL;
+    }
+    return MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
+            GetSlotId(), m_pEnvironment->eServiceType);
 }

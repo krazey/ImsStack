@@ -16,6 +16,7 @@
 
 #include "ServiceTrace.h"
 #include "offeranswer/SdpMediaFormat.h"
+#include "config/MediaSessionConfig.h"
 
 #include "text/TextSdpGenerator.h"
 
@@ -30,9 +31,11 @@ PUBLIC VIRTUAL TextSdpGenerator::~TextSdpGenerator() {}
 
 PUBLIC
 IMS_BOOL TextSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
-        OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile)
+        OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile,
+        IN const MediaSessionConfig* pConfig)
 {
-    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || pBaseProfile == IMS_NULL)
+    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || pBaseProfile == IMS_NULL ||
+            pConfig == IMS_NULL)
     {
         IMS_TRACE_E(0, "Generate(): invalid argument", 0, 0, 0);
         return IMS_FALSE;
@@ -40,7 +43,7 @@ IMS_BOOL TextSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
 
     IMS_TRACE_I("Generate(): PayloadSize[%d]", pBaseProfile->GetPayloadList().GetSize(), 0, 0);
 
-    GenerateCommonAttributes(pSessionDescriptor, pDescriptor, pBaseProfile);
+    GenerateCommonAttributes(pSessionDescriptor, pDescriptor, pBaseProfile, pConfig);
 
     TextProfile* pProfile = static_cast<TextProfile*>(pBaseProfile);
 

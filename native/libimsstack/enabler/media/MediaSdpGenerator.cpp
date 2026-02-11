@@ -23,6 +23,8 @@
 #include "MediaNegoUtil.h"
 #include "MediaSdpGenerator.h"
 
+#include "config/MediaSessionConfig.h"
+
 __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC MediaSdpGenerator::MediaSdpGenerator(IN const MEDIA_CONTENT_TYPE eType) :
@@ -34,9 +36,11 @@ PUBLIC VIRTUAL MediaSdpGenerator::~MediaSdpGenerator() {}
 
 PROTECTED
 void MediaSdpGenerator::GenerateCommonAttributes(OUT ISessionDescriptor* pSessionDescriptor,
-        OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pProfile)
+        OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pProfile,
+        IN const MediaSessionConfig* pConfig)
 {
-    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || pProfile == IMS_NULL)
+    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || pProfile == IMS_NULL ||
+            pConfig == IMS_NULL)
     {
         return;
     }
@@ -46,6 +50,9 @@ void MediaSdpGenerator::GenerateCommonAttributes(OUT ISessionDescriptor* pSessio
 
     // make"c" &"o" line of session level if IP does not matched
     SetSdpSessionIpAddress(pSessionDescriptor, pProfile);
+
+    // make "c" line of media level if enabled by config
+    SetSdpMediaIpAddress(pSessionDescriptor, pDescriptor, pProfile, pConfig);
 
     // make"m" line
     // ------"m=audio xxxx RTP/AVP 104 110 105 102 108 100"
@@ -145,6 +152,25 @@ PRIVATE void MediaSdpGenerator::ClearAttributeAndBandwidth(OUT IMediaDescriptor*
 
     ImsList<AString> strEmptyList;
     pDescriptor->SetBandwidthInfo(strEmptyList);
+}
+
+PRIVATE void MediaSdpGenerator::SetSdpMediaIpAddress(OUT ISessionDescriptor* pSessionDescriptor,
+        OUT IMediaDescriptor* pDescriptor, IN const MediaBaseProfile* pProfile,
+        IN const MediaSessionConfig* pConfig)
+{
+    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || pProfile == IMS_NULL ||
+            pConfig == IMS_NULL)
+    {
+        return;
+    }
+
+    if (pConfig->IsAddCLineForEachMediaEnabled())
+    {
+        IMS_TRACE_D("SetSdpMediaIpAddress() - Add media-level c-line. SessionIP[%s], ProfileIP[%s]",
+                pSessionDescriptor->GetLocalAddress().ToCharString(),
+                pProfile->GetIpAddress().ToCharString(), 0);
+        pDescriptor->SetConnectionAddress(pProfile->GetIpAddress().ToString());
+    }
 }
 
 PRIVATE void MediaSdpGenerator::SetSdpSessionIpAddress(
