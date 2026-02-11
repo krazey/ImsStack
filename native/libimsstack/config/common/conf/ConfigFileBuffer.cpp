@@ -201,7 +201,7 @@ PROTECTED VIRTUAL IMS_SINT32 ConfigFileBuffer::ReadKeyCount(IN const IMS_CHAR* p
 
     if (!bOk)
     {
-        IMS_TRACE_E(0, "Converting a numeric string (key: %s) failed", strKeyCount.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "Converting a numeric string(key:%s) failed", strKeyCount.GetStr(), 0, 0);
         return (-1);
     }
 
@@ -212,7 +212,7 @@ PROTECTED VIRTUAL const AString& ConfigFileBuffer::ReadValue(IN const IMS_CHAR* 
 {
     if (m_pWorkSection == IMS_NULL)
     {
-        IMS_TRACE_E(0, "There is no captured section : key (%s)", pszKey, 0, 0);
+        IMS_TRACE_E(0, "There is no captured section: key(%s)", pszKey, 0, 0);
         return AString::ConstNull();
     }
 
@@ -224,7 +224,7 @@ PROTECTED VIRTUAL const AString& ConfigFileBuffer::ReadValue(
 {
     if (m_pWorkSection == IMS_NULL)
     {
-        IMS_TRACE_E(0, "There is no captured section : key (%s_%d)", pszKey, nIndex, 0);
+        IMS_TRACE_E(0, "There is no captured section: key(%s_%d)", pszKey, nIndex, 0);
         return AString::ConstNull();
     }
 
@@ -238,7 +238,7 @@ PROTECTED VIRTUAL IMS_BOOL ConfigFileBuffer::ReadValueBoolean(IN const IMS_CHAR*
 {
     if (m_pWorkSection == IMS_NULL)
     {
-        IMS_TRACE_E(0, "There is no captured section : key (%s)", pszKey, 0, 0);
+        IMS_TRACE_E(0, "There is no captured section: key(%s)", pszKey, 0, 0);
         return IMS_FALSE;
     }
 
@@ -257,7 +257,7 @@ PROTECTED VIRTUAL IMS_SINT32 ConfigFileBuffer::ReadValueInt(IN const IMS_CHAR* p
 {
     if (m_pWorkSection == IMS_NULL)
     {
-        IMS_TRACE_E(0, "There is no captured section : key (%s)", pszKey, 0, 0);
+        IMS_TRACE_E(0, "There is no captured section: key(%s)", pszKey, 0, 0);
         return (-1);
     }
 
@@ -267,7 +267,7 @@ PROTECTED VIRTUAL IMS_SINT32 ConfigFileBuffer::ReadValueInt(IN const IMS_CHAR* p
 
     if (!bOk)
     {
-        IMS_TRACE_E(0, "Converting a numeric string (value: %s) failed", strValue.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "Converting a numeric string(value:%s) failed", strValue.GetStr(), 0, 0);
         return (-1);
     }
 
@@ -280,7 +280,7 @@ PROTECTED VIRTUAL IMS_BOOL ConfigFileBuffer::WriteKeyCount(
     if (m_pWorkSection == IMS_NULL)
     {
         IMS_TRACE_E(
-                0, "There is no captured section : key (%s_count), value (%d)", pszKey, nCount, 0);
+                0, "There is no captured section: key(%s_count), value (%d)", pszKey, nCount, 0);
         return IMS_FALSE;
     }
 
@@ -298,7 +298,7 @@ PROTECTED VIRTUAL IMS_BOOL ConfigFileBuffer::WriteValue(
 {
     if (m_pWorkSection == IMS_NULL)
     {
-        IMS_TRACE_E(0, "There is no captured section : key (%s), value (%d)", pszKey,
+        IMS_TRACE_E(0, "There is no captured section: key(%s), value(%d)", pszKey,
                 strValue.GetStr(), 0);
         return IMS_FALSE;
     }
@@ -311,7 +311,7 @@ PROTECTED VIRTUAL IMS_BOOL ConfigFileBuffer::WriteValue(
 {
     if (m_pWorkSection == IMS_NULL)
     {
-        IMS_TRACE_E(0, "There is no captured section : key (%s_%d), value (%d)", pszKey, nIndex,
+        IMS_TRACE_E(0, "There is no captured section: key(%s_%d), value(%d)", pszKey, nIndex,
                 strValue.GetStr());
         return IMS_FALSE;
     }
@@ -327,7 +327,7 @@ PROTECTED VIRTUAL IMS_BOOL ConfigFileBuffer::WriteValueBoolean(
 {
     if (m_pWorkSection == IMS_NULL)
     {
-        IMS_TRACE_E(0, "There is no captured section : key (%s), value (%s)", pszKey,
+        IMS_TRACE_E(0, "There is no captured section: key(%s), value(%s)", pszKey,
                 TextParser::BooleanToString(bValue), 0);
         return IMS_FALSE;
     }
@@ -340,7 +340,7 @@ PROTECTED VIRTUAL IMS_BOOL ConfigFileBuffer::WriteValueInt(
 {
     if (m_pWorkSection == IMS_NULL)
     {
-        IMS_TRACE_E(0, "There is no captured section : key (%s), value (%d)", pszKey, nValue, 0);
+        IMS_TRACE_E(0, "There is no captured section: key(%s), value(%d)", pszKey, nValue, 0);
         return IMS_FALSE;
     }
 
@@ -382,7 +382,7 @@ PROTECTED VIRTUAL IMS_BOOL ConfigFileBuffer::WriteToMedium() const
 
     if (!piFile->Open(strConfName, FILE_OPEN_WRITEONLY))
     {
-        IMS_TRACE_E(0, "Opening the configuration (%s) failed", strConfName.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "Opening the configuration(%s) failed", strConfName.GetStr(), 0, 0);
 
         piFile->Close();
         IMS_FILE_Destroy(piFile);
@@ -395,7 +395,7 @@ PROTECTED VIRTUAL IMS_BOOL ConfigFileBuffer::WriteToMedium() const
     if (piFile->Write(reinterpret_cast<void*>(strConfigData.GetStr()), strConfigData.GetLength()) ==
             0)
     {
-        IMS_TRACE_E(0, "Writing the configuration (%s) failed", strConfName.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "Writing the configuration(%s) failed", strConfName.GetStr(), 0, 0);
 
         piFile->Close();
         IMS_FILE_Destroy(piFile);
@@ -422,7 +422,7 @@ PROTECTED VIRTUAL IMS_BOOL ConfigFileBuffer::Create(IN IMS_SINT32 nId)
 
     if (!piFile->Open(strConfName, FILE_OPEN_READONLY))
     {
-        IMS_TRACE_E(0, "Opening the configuration (%s) failed", strConfName.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "Opening the configuration(%s) failed", strConfName.GetStr(), 0, 0);
 
         piFile->Close();
         IMS_FILE_Destroy(piFile);
@@ -434,7 +434,7 @@ PROTECTED VIRTUAL IMS_BOOL ConfigFileBuffer::Create(IN IMS_SINT32 nId)
     if (nBuffSize == 0)
     {
         IMS_TRACE_E(
-                0, "Configuration (%s) does not exist; Size is zero", strConfName.GetStr(), 0, 0);
+                0, "Configuration(%s) does not exist; Size is zero", strConfName.GetStr(), 0, 0);
 
         piFile->Close();
         IMS_FILE_Destroy(piFile);
@@ -445,7 +445,7 @@ PROTECTED VIRTUAL IMS_BOOL ConfigFileBuffer::Create(IN IMS_SINT32 nId)
 
     if (pcBuffer == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Allocating the buffer for the configuration (%s) failed",
+        IMS_TRACE_E(0, "Allocating the buffer for the configuration(%s) failed",
                 strConfName.GetStr(), 0, 0);
 
         piFile->Close();
@@ -457,7 +457,7 @@ PROTECTED VIRTUAL IMS_BOOL ConfigFileBuffer::Create(IN IMS_SINT32 nId)
 
     if ((nReadSize = piFile->Read(reinterpret_cast<void*>(pcBuffer), nBuffSize)) == 0)
     {
-        IMS_TRACE_E(0, "Reading the configuration (%s) failed", strConfName.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "Reading the configuration(%s) failed", strConfName.GetStr(), 0, 0);
 
         delete[] pcBuffer;
         piFile->Close();
@@ -476,7 +476,7 @@ PROTECTED VIRTUAL IMS_BOOL ConfigFileBuffer::Create(IN IMS_SINT32 nId)
 
     if (!ParseConfig(strConfigData))
     {
-        IMS_TRACE_E(0, "Parsing the configuration (%s) failed", strConfName.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "Parsing the configuration(%s) failed", strConfName.GetStr(), 0, 0);
 
         delete[] pcBuffer;
         return IMS_FALSE;
@@ -623,7 +623,7 @@ IMS_BOOL ConfigFileBuffer::ParseConfig(IN const AString& strConfigData)
                 {
                     delete pSection;
 
-                    IMS_TRACE_E(0, "Parameter (%s) is malformed", strLine.GetStr(), 0, 0);
+                    IMS_TRACE_E(0, "Parameter(%s) is malformed", strLine.GetStr(), 0, 0);
                     return IMS_FALSE;
                 }
 
@@ -696,7 +696,7 @@ AString ConfigFileBuffer::ResolveLocator() const
     strLocator.Append(TextParser::CHAR_DOT);
     strLocator.Append(FILE_EXTENSION);
 
-    IMS_TRACE_D("Configuration Locator - (%s)", strLocator.GetStr(), 0, 0);
+    IMS_TRACE_D("Configuration Locator: %s", strLocator.GetStr(), 0, 0);
 
     return strLocator;
 }
