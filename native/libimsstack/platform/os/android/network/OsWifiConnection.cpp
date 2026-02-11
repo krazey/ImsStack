@@ -281,8 +281,6 @@ PRIVATE VIRTUAL IMS_SINT32 OsWifiConnection::GetHostByName(IN const AString& str
         }
     }
 
-    // ANDROID_L: android_gethostbynameforiface (KK-OS)
-    // ANDROID_P: android_gethostbynamefornet (libc)
     AStringArray objHostIps = PlatformContext::GetInstance()->GetSystem()->GetHostByName(
             strHostName, nIpVersion, GetApnType(), GetSlotId());
 

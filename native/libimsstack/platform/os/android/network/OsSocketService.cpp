@@ -912,7 +912,6 @@ void OsSocketService::DoNotificationCallback(IN SOCKET nSocket, IN IMS_SLONG nEv
                     {
                         if (nErrorCode != 0)
                         {
-                            // hwangoo park
                             pSocket->NotifyDataReceived(0);
                             IMS_TRACE_D("Notify data available (PSH, FIN) "
                                         "even though error occurred (%d)",
