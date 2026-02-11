@@ -85,8 +85,6 @@ PUBLIC VIRTUAL void AosNConfiguration::SetListener(IN IAosNConfigurationListener
     }
 
     m_objListeners.Append(piListener);
-
-    A_IMS_TRACE_D(LOGTAG, "SetListener :: Listener (%" PFLS_x ") is set", piListener, 0, 0);
 }
 
 PUBLIC VIRTUAL void AosNConfiguration::RemoveListener(IN IAosNConfigurationListener* piListener)
@@ -103,9 +101,6 @@ PUBLIC VIRTUAL void AosNConfiguration::RemoveListener(IN IAosNConfigurationListe
         if (piCurrListener == piListener)
         {
             m_objListeners.RemoveAt(i);
-
-            A_IMS_TRACE_D(
-                    LOGTAG, "RemoveListener - Listener (%" PFLS_x ") is removed", piListener, 0, 0);
             return;
         }
     }

@@ -313,9 +313,6 @@ PUBLIC VIRTUAL IMS_BOOL AosBlock::IsReasonBlocked(IN BLOCK_REASON eReason,
         bResult = (m_objBlockWifi.GetValueAt(&REASON[eReason]) == &BLOCK_ENABLED);
     }
 
-    A_IMS_TRACE_D(APPPROFILE, "IsReasonBlocked :: eReason (%s) - (%s)",
-            BlockReasonToString(eReason), _TRACE_B_(bResult), 0);
-
     return bResult;
 }
 

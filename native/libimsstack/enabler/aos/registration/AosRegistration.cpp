@@ -1901,7 +1901,6 @@ PROTECTED VIRTUAL void AosRegistration::DestroyRegistration()
 
     if (m_piRegistration == IMS_NULL)
     {
-        A_IMS_TRACE_D(REGID, "reg is already destroyed", 0, 0, 0);
         return;
     }
 
@@ -3163,7 +3162,11 @@ PROTECTED VIRTUAL void AosRegistration::ClearRetryCount(IN IMS_BOOL bForced /* =
         }
     }
 
-    A_IMS_TRACE_D(REGID, "ClearRetryCount :: (%d) -> (%d)", m_nConsecutiveFailure, 0, 0);
+    if (m_nConsecutiveFailure > 0)
+    {
+        A_IMS_TRACE_D(REGID, "ClearRetryCount :: (%d) -> (%d)", m_nConsecutiveFailure, 0, 0);
+    }
+
     m_nConsecutiveFailure = 0;
     m_nSubConsecutiveFailureForRegForbiddenInWifi = 0;
 

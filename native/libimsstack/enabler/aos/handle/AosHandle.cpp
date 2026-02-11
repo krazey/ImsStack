@@ -377,12 +377,7 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::IsFeatureConnected(IN IMS_UINT32 nFeature) co
 
 PUBLIC VIRTUAL IMS_BOOL AosHandle::IsImsConnected() const
 {
-    IMS_UINT32 nState = GetState();
-
-    A_IMS_TRACE_D(APPPROFILE, "IsImsConnected :: connected(%s)",
-            _TRACE_B_(nState == STATE_CONNECTED), 0, 0);
-
-    return (nState == STATE_CONNECTED);
+    return (GetState() == STATE_CONNECTED);
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosHandle::IsImsSuspended() const
@@ -459,7 +454,8 @@ PUBLIC VIRTUAL void AosHandle::ReinitiateRegistration(IN IMS_UINT32 nAfterSec)
     }
 }
 
-PUBLIC VIRTUAL void AosHandle::CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState)
+PUBLIC VIRTUAL void AosHandle::CallTracker_StateChanged(
+        IN IMS_UINT32 /*nType*/, IN CallState /*eState*/)
 {
     // Implemented in child
 }
@@ -1374,8 +1370,8 @@ PROTECTED VIRTUAL void AosHandle::ProcessCapabilitiesChanged(
         return;
     }
 
-    A_IMS_TRACE_I(APPPROFILE, "ProcessCapabilitiesChanged :: Size[%d]",
-            objNewCapabilities.GetSize(), 0, 0);
+    A_IMS_TRACE_I(APPPROFILE, "ProcessCapabilitiesChanged :: Size[%d], m_nNetworkType[%s]",
+            objNewCapabilities.GetSize(), RadioTypeToString(m_nNetworkType), 0);
 
     for (IMS_UINT32 i = 0; i < m_objCapabilities.GetSize(); i++)
     {
@@ -1389,13 +1385,7 @@ PROTECTED VIRTUAL void AosHandle::ProcessCapabilitiesChanged(
             continue;
         }
 
-        IMS_UINT32 nNewCapabilities = objNewCapabilities.GetValue(nCapaNetworkType);
-
-        A_IMS_TRACE_D(APPPROFILE, "ProcessCapabilitiesChanged :: \
-                nCapaNetworkType[%d], nNewCapabilities[%x], m_nNetworkType[%s]",
-                nCapaNetworkType, nNewCapabilities, RadioTypeToString(m_nNetworkType));
-
-        m_objCapabilities.SetValue(nCapaNetworkType, nNewCapabilities);
+        m_objCapabilities.SetValue(nCapaNetworkType, objNewCapabilities.GetValue(nCapaNetworkType));
     }
 }
 

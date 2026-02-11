@@ -152,14 +152,11 @@ PUBLIC VIRTUAL void AosConnection::SetListener(IN IAosConnectionListener* piList
 
         if (pTmpListener == piListener)
         {
-            A_IMS_TRACE_D(CNXID, "SetListener :: (%" PFLS_x ") is already set", piListener, 0, 0);
             return;
         }
     }
 
     m_objListeners.Append(piListener);
-
-    A_IMS_TRACE_D(CNXID, "SetListener :: (%" PFLS_x ") is set", piListener, 0, 0);
 }
 
 PUBLIC VIRTUAL void AosConnection::RemoveListener(IN IAosConnectionListener* piListener)
@@ -176,8 +173,6 @@ PUBLIC VIRTUAL void AosConnection::RemoveListener(IN IAosConnectionListener* piL
         if (pTmpListener == piListener)
         {
             m_objListeners.RemoveAt(i);
-
-            A_IMS_TRACE_D(CNXID, "RemoveListener :: (%" PFLS_x ") is removed", piListener, 0, 0);
             return;
         }
     }
@@ -315,11 +310,13 @@ IMS_BOOL AosConnection::IsConnected() const
 PROTECTED
 void AosConnection::SetState(IN IMS_UINT32 nState)
 {
-    IMS_UINT32 nOldState = m_nState;
-
-    m_nState = nState;
-    A_IMS_TRACE_D(CNXID, "SetState :: OLD(%s) -> NEW(%s)", StateToString(nOldState),
-            StateToString(nState), 0);
+    if (m_nState != nState)
+    {
+        IMS_UINT32 nOldState = m_nState;
+        m_nState = nState;
+        A_IMS_TRACE_D(CNXID, "SetState :: OLD(%s) -> NEW(%s)", StateToString(nOldState),
+                StateToString(nState), 0);
+    }
 }
 
 PROTECTED

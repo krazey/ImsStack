@@ -581,8 +581,6 @@ IMS_UINT32 AosUtil::Pow(IN IMS_UINT32 nArg1, IN IMS_UINT32 nArg2)
         nResult = nResult * nArg1;
     }
 
-    IMS_TRACE_I("Pow :: (%d) ^ (%d) = (%d)", nArg1, nArg2, nResult);
-
     return nResult;
 }
 
@@ -690,7 +688,6 @@ IMS_BOOL AosUtil::UpdateFeatureTagOptions(IN IMS_UINT32 nUpdatedFeatureTags,
 
             if (nNewFeatureTags == nOldFeatureTags)
             {
-                IMS_TRACE_I("No change in FeatureTags", 0, 0, 0);
                 return IMS_FALSE;
             }
 
