@@ -104,8 +104,7 @@ PROTECTED VIRTUAL void RegRefreshHelper::RefreshCompleted(
     else if (nCode == TRANSACTION_TIMEOUT)
     {
         // Behaves as if the 408 request timeout response received
-        // hwangoo.park, 130529, do not stop registration refresh timer
-        // even though the transaction timer is expired.
+        // Do not stop registration refresh timer even though the transaction timer is expired.
         // StopRefresh();
     }
 
