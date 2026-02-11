@@ -82,7 +82,7 @@ PUBLIC VIRTUAL RegStateTracker::~RegStateTracker()
     }
 
 #ifdef __IMS_CORE_DEBUG__
-    IMS_TRACE_D("Destructor :: RegStateTracker", 0, 0, 0);
+    IMS_TRACE_D("dtor: RegStateTracker", 0, 0, 0);
 #endif
 }
 

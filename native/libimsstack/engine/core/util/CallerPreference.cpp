@@ -567,7 +567,7 @@ PUBLIC GLOBAL IMS_SINT32 CallerPreference::GetCandidateScore(IN const AppConfig*
 
         if (objScore.GetScore() == SCORE_INVALID)
         {
-            IMS_TRACE_D("CallerPreference :: SERVICE (%s, %s) IS DROPPED ...",
+            IMS_TRACE_D("CallerPreference: SERVICE(%s|%s) IS DROPPED",
                     pAppConfig->GetAppId().GetStr(),
                     (pServiceConfig != IMS_NULL) ? pServiceConfig->GetServiceId().GetStr()
                                                  : "__NULL__",
@@ -584,8 +584,7 @@ PUBLIC GLOBAL IMS_SINT32 CallerPreference::GetCandidateScore(IN const AppConfig*
 
     if (nSumOfNvmCs < nNfCs)
     {
-        IMS_TRACE_D("CallerPreference :: SERVICE (%s, %s) IS DROPPED ...",
-                pAppConfig->GetAppId().GetStr(),
+        IMS_TRACE_D("CallerPreference: SERVICE(%s|%s) IS DROPPED", pAppConfig->GetAppId().GetStr(),
                 (pServiceConfig != IMS_NULL) ? pServiceConfig->GetServiceId().GetStr() : "__NULL__",
                 0);
 
@@ -635,8 +634,7 @@ PRIVATE GLOBAL void CallerPreference::AddFeature(IN IMS_BOOL bBooleanFeature,
             // Exact match found; the current header already contains the given feature-param.
             if (pHeader->Contains(strTag))
             {
-                IMS_TRACE_D("CallerPreference::AddFeature() - Already Exists: %s", strTag.GetStr(),
-                        0, 0);
+                IMS_TRACE_D("CallerPreference: Already Exists(%s)", strTag.GetStr(), 0, 0);
                 return;
             }
         }
@@ -645,8 +643,8 @@ PRIVATE GLOBAL void CallerPreference::AddFeature(IN IMS_BOOL bBooleanFeature,
             // Exact match found; the current header already contains the given feature-param.
             if (pHeader->Contains(strTag, strValue))
             {
-                IMS_TRACE_D("CallerPreference::AddFeature() - Already Exists: %s=%s",
-                        strTag.GetStr(), strValue.GetStr(), 0);
+                IMS_TRACE_D("CallerPreference: Already Exists(%s=%s)", strTag.GetStr(),
+                        strValue.GetStr(), 0);
                 return;
             }
         }

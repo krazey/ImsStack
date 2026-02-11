@@ -65,7 +65,7 @@ SessionRefreshHelper::SessionRefreshHelper(IN Service* pService, IN IRefreshable
 PUBLIC VIRTUAL SessionRefreshHelper::~SessionRefreshHelper()
 {
 #ifdef __IMS_SIP_DEBUG__
-    IMS_TRACE_D("Destructor :: SessionRefreshHelper", 0, 0, 0);
+    IMS_TRACE_D("dtor: SessionRefreshHelper", 0, 0, 0);
 #endif
 }
 
@@ -1474,8 +1474,8 @@ void SessionRefreshHelper::UpdateProperties(IN const ISipConnection* piSc,
 
     if (bSessionIntervalChangeable && (m_nMinSe > m_nSessionTimerDuration))
     {
-        IMS_TRACE_I("SessionTimer(notSupport or 422) :: %d >> %d", m_nSessionTimerDuration,
-                m_nMinSe, 0);
+        IMS_TRACE_I(
+                "SessionTimer(notSupport or 422): %d >> %d", m_nSessionTimerDuration, m_nMinSe, 0);
         m_nSessionTimerDuration = m_nMinSe;
     }
 

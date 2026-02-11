@@ -71,7 +71,7 @@ PUBLIC VIRTUAL Media::~Media()
         m_pMediaProposal = IMS_NULL;
     }
 
-    IMS_TRACE_D("Destructor :: Media", 0, 0, 0);
+    IMS_TRACE_D("dtor: Media", 0, 0, 0);
 }
 
 PUBLIC
@@ -856,7 +856,7 @@ IMS_BOOL Media::IsMediaProposed() const
 PROTECTED
 void Media::SetState(IN IMS_SINT32 nState)
 {
-    IMS_TRACE_I("Media :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
+    IMS_TRACE_I("Media: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
     m_nState = nState;
 }
@@ -864,8 +864,8 @@ void Media::SetState(IN IMS_SINT32 nState)
 PROTECTED
 void Media::SetUpdateState(IN IMS_SINT32 nState)
 {
-    IMS_TRACE_I("Media :: %s to %s", UpdateStateToString(m_nUpdateState),
-            UpdateStateToString(nState), 0);
+    IMS_TRACE_I(
+            "Media: %s to %s", UpdateStateToString(m_nUpdateState), UpdateStateToString(nState), 0);
 
     m_nUpdateState = nState;
 }

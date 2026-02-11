@@ -33,8 +33,7 @@ PUBLIC GLOBAL IMS_BOOL RegBindingProxy::CreateBinding(IN IMS_SINT32 nSlotId,
     {
         pRegBinding->Create(piRegEx);
 
-        IMS_TRACE_D("REG (CREATE) :: AID=%s, SID=%s, REG=%p", strAppId.GetStr(),
-                strServiceId.GetStr(), piRegEx);
+        IMS_TRACE_D("REG (CREATE): %s|%s|%p", strAppId.GetStr(), strServiceId.GetStr(), piRegEx);
         return IMS_TRUE;
     }
 
@@ -49,8 +48,7 @@ PUBLIC GLOBAL IMS_BOOL RegBindingProxy::CreateBinding(IN IMS_SINT32 nSlotId,
 
     pRegBinding->Create(piRegEx);
 
-    IMS_TRACE_D("REG (CREATE) :: NEW - AID=%s, SID=%s, REG=%p", strAppId.GetStr(),
-            strServiceId.GetStr(), piRegEx);
+    IMS_TRACE_D("REG (CREATE): NEW - %s|%s|%p", strAppId.GetStr(), strServiceId.GetStr(), piRegEx);
 
     return IMS_TRUE;
 }
@@ -63,7 +61,7 @@ PUBLIC GLOBAL void RegBindingProxy::DestroyBinding(
 
     if (pRegBinding == IMS_NULL)
     {
-        IMS_TRACE_D("REG (DESTROY) :: NOT FOUND - AID=%s, SID=%s, slotId=%d", strAppId.GetStr(),
+        IMS_TRACE_D("REG (DESTROY): NOT FOUND - %s|%s|s%d", strAppId.GetStr(),
                 strServiceId.GetStr(), nSlotId);
         return;
     }
@@ -71,8 +69,7 @@ PUBLIC GLOBAL void RegBindingProxy::DestroyBinding(
     // The destructor will be invoked inside of Destroy method
     pRegBinding->Destroy();
 
-    IMS_TRACE_D("REG (DESTROY) :: AID=%s, SID=%s, slotId=%d", strAppId.GetStr(),
-            strServiceId.GetStr(), nSlotId);
+    IMS_TRACE_D("REG (DESTROY): %s|%s|s%d", strAppId.GetStr(), strServiceId.GetStr(), nSlotId);
 }
 
 PUBLIC GLOBAL void RegBindingProxy::DestroyBinding(
@@ -87,7 +84,7 @@ PUBLIC GLOBAL void RegBindingProxy::DestroyBinding(
         if (pRegBinding == IMS_NULL)
         {
             ++i;
-            IMS_TRACE_D("REG (DESTROY) :: RegBinding is null", 0, 0, 0);
+            IMS_TRACE_D("REG (DESTROY): RegBinding is null", 0, 0, 0);
             continue;
         }
 
@@ -104,7 +101,7 @@ PUBLIC GLOBAL void RegBindingProxy::DestroyBinding(
         }
     }
 
-    IMS_TRACE_D("REG (DESTROY) :: COUNT (%d)", objRegBindings.GetSize(), 0, 0);
+    IMS_TRACE_D("REG (DESTROY): COUNT (%d)", objRegBindings.GetSize(), 0, 0);
 }
 
 PUBLIC GLOBAL IMS_BOOL RegBindingProxy::BindContact(IN IMS_SINT32 nSlotId,
@@ -115,15 +112,14 @@ PUBLIC GLOBAL IMS_BOOL RegBindingProxy::BindContact(IN IMS_SINT32 nSlotId,
 
     if (pRegBinding == IMS_NULL)
     {
-        IMS_TRACE_D("CONTACT (BIND) :: NOT FOUND - AID=%s, SID=%s, slotId=%d", strAppId.GetStr(),
+        IMS_TRACE_D("CONTACT (BIND): NOT FOUND - %s|%s|s%d", strAppId.GetStr(),
                 strServiceId.GetStr(), nSlotId);
         return IMS_FALSE;
     }
 
     pRegBinding->UpdateContact(piContact);
 
-    IMS_TRACE_D("CONTACT (BIND) :: AID=%s, SID=%s, CONTACT=%p", strAppId.GetStr(),
-            strServiceId.GetStr(), piContact);
+    IMS_TRACE_D("CONTACT (BIND): %s|%s|%p", strAppId.GetStr(), strServiceId.GetStr(), piContact);
 
     return IMS_TRUE;
 }
@@ -136,7 +132,7 @@ PUBLIC GLOBAL void RegBindingProxy::UnbindContact(
 
     if (pRegBinding == IMS_NULL)
     {
-        IMS_TRACE_D("CONTACT (UNBIND) :: NOT FOUND - AID=%s, SID=%s, slotId=%d", strAppId.GetStr(),
+        IMS_TRACE_D("CONTACT (UNBIND): NOT FOUND - %s|%s|s%d", strAppId.GetStr(),
                 strServiceId.GetStr(), nSlotId);
         return;
     }
@@ -144,8 +140,7 @@ PUBLIC GLOBAL void RegBindingProxy::UnbindContact(
     // Update the registration contact as NULL
     pRegBinding->UpdateContact(IMS_NULL);
 
-    IMS_TRACE_D("CONTACT (UNBIND) :: AID=%s, SID=%s, slotId=%d", strAppId.GetStr(),
-            strServiceId.GetStr(), nSlotId);
+    IMS_TRACE_D("CONTACT (UNBIND): %s|%s|s%d", strAppId.GetStr(), strServiceId.GetStr(), nSlotId);
 }
 
 PUBLIC GLOBAL void RegBindingProxy::UnbindContact(
@@ -177,7 +172,7 @@ PUBLIC GLOBAL void RegBindingProxy::QueryCapability(IN IMS_SINT32 nSlotId,
 
     if (pRegBinding == IMS_NULL)
     {
-        IMS_TRACE_D("CONTACT (CAP) :: NOT FOUND - AID=%s, SID=%s, slotId=%d", strAppId.GetStr(),
+        IMS_TRACE_D("CONTACT (CAP): NOT FOUND - %s|%s|s%d", strAppId.GetStr(),
                 strServiceId.GetStr(), nSlotId);
         return;
     }
@@ -193,8 +188,8 @@ PUBLIC GLOBAL void RegBindingProxy::QueryRegistrationHeaders(IN IMS_SINT32 nSlot
 
     if (pRegBinding == IMS_NULL)
     {
-        IMS_TRACE_D("REG (HEADER) :: NOT FOUND - AID=%s, SID=%s, slotId=%d", strAppId.GetStr(),
-                strServiceId.GetStr(), nSlotId);
+        IMS_TRACE_D("REG (HEADER): NOT FOUND - %s|%s|s%d", strAppId.GetStr(), strServiceId.GetStr(),
+                nSlotId);
         return;
     }
 

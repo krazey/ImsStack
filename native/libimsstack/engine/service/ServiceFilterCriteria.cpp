@@ -62,7 +62,7 @@ PUBLIC VIRTUAL void ServiceFilterCriteria::RemoveTriggerPoint(IN IMS_SINT32 nTri
 
     if (nIndex < 0)
     {
-        IMS_TRACE_D("ServiceFilterCriteria :: No trigger point (%d)", nTriggerPointId, 0, 0);
+        IMS_TRACE_D("ServiceFilterCriteria: No trigger point(%d)", nTriggerPointId, 0, 0);
         return;
     }
 

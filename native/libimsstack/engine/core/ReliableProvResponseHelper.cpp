@@ -30,7 +30,7 @@ ReliableProvResponseHelper::ReliableProvResponseHelper(IN IMS_BOOL bIsMobileOrig
         m_nCSeqNumber(0)
 {
 #ifdef __IMS_CORE_DEBUG__
-    IMS_TRACE_D("Constructor :: ReliableProvResponseHelper", 0, 0, 0);
+    IMS_TRACE_D("ctor: ReliableProvResponseHelper", 0, 0, 0);
 #endif
 }
 
@@ -38,7 +38,7 @@ PUBLIC
 ReliableProvResponseHelper::~ReliableProvResponseHelper()
 {
 #ifdef __IMS_CORE_DEBUG__
-    IMS_TRACE_D("Destructor :: ReliableProvResponseHelper", 0, 0, 0);
+    IMS_TRACE_D("dtor: ReliableProvResponseHelper", 0, 0, 0);
 #endif
 }
 
@@ -218,7 +218,7 @@ PRIVATE
 void ReliableProvResponseHelper::SetState(IN IMS_SINT32 nState)
 {
     IMS_TRACE_I(
-            "ReliableProvResponse :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
+            "ReliableProvResponse: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
     m_nState = nState;
 }

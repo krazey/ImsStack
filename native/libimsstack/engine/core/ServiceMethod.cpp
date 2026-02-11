@@ -544,7 +544,7 @@ IMS_BOOL ServiceMethod::IsPrivacyRequested(IN IMS_BOOL bRequest /*= IMS_TRUE*/) 
 
             if (pParameter != IMS_NULL)
             {
-                IMS_TRACE_D("Privacy is requested...", 0, 0, 0);
+                IMS_TRACE_D("Privacy is requested", 0, 0, 0);
 
                 piHeader->Destroy();
                 return IMS_TRUE;
@@ -603,7 +603,7 @@ IMS_BOOL ServiceMethod::SendNUpdateRequestEx(IN IMS_SINT32 nServiceMethod, IN IS
 
     if (piSc->Send() != IMS_SUCCESS)
     {
-        IMS_TRACE_E(0, "Sending a request message (%s) failed - Error (%d)",
+        IMS_TRACE_E(0, "Sending a request message(%s) failed (%d)",
                 Message::GetMessageType(nServiceMethod), SipError::GetLastError(), 0);
         return IMS_FALSE;
     }
@@ -619,8 +619,7 @@ IMS_BOOL ServiceMethod::SendNUpdateResponseEx(IN IMS_SINT32 nServiceMethod, IN I
 
     if (piSc->Send() != IMS_SUCCESS)
     {
-        IMS_TRACE_E(0, "Sending a response message failed - Error (%d)", SipError::GetLastError(),
-                0, 0);
+        IMS_TRACE_E(0, "Sending a response message failed (%d)", SipError::GetLastError(), 0, 0);
         return IMS_FALSE;
     }
 

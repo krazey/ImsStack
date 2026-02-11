@@ -203,7 +203,7 @@ IMS_RESULT Subscription::Subscribe()
 
     if (m_pSubState->IsInstantSubscription())
     {
-        IMS_TRACE_E(0, "INVALID OPERATION :: It is for an instant subscription.", 0, 0, 0);
+        IMS_TRACE_E(0, "INVALID OPERATION: Instant subscription", 0, 0, 0);
         Ims::SetLastError(ImsError::INVALID_OPERATION);
         return IMS_FAILURE;
     }
@@ -604,7 +604,7 @@ PROTECTED VIRTUAL void Subscription::NotifySipResponse(IN ISipClientConnection* 
     const ISipMessage* piSipMsg = piScc->GetMessage();
     const SipMethod& objMethod = piSipMsg->GetMethod();
 
-    IMS_TRACE_I("The response is received in the %s", StateToString(GetState()), 0, 0);
+    IMS_TRACE_I("SIP response on %s", StateToString(GetState()), 0, 0);
 
     if (!objMethod.Equals(SipMethod::SUBSCRIBE))
     {
@@ -795,7 +795,7 @@ PROTECTED VIRTUAL IMS_BOOL Subscription::Dialog_Compare(IN ISipServerConnection*
             IMS_SINT32 nOperation = m_pSubState->GetOperation();
             const ISipClientConnection* piScc = IMS_NULL;
 
-            IMS_TRACE_I("Checks if the early NOTIFY is received or not ...", 0, 0, 0);
+            IMS_TRACE_I("Checks if the early NOTIFY is received", 0, 0, 0);
 
             if (nOperation == SubState::OPERATION_CREATE)
             {
@@ -910,7 +910,7 @@ PROTECTED VIRTUAL IMS_BOOL Subscription::Dialog_NotifyRequest(IN ISipServerConne
         delete pMessage;
         piSsc->Close();
 
-        IMS_TRACE_E(0, "Creating & sending the response to NOTIFY request failed", 0, 0, 0);
+        IMS_TRACE_E(0, "Sending 200-NOTIFY failed", 0, 0, 0);
 
         return IMS_FALSE;
     }
@@ -1021,7 +1021,7 @@ PROTECTED VIRTUAL IMS_BOOL Subscription::ForkedDialog_NotifyRequest(IN ISipServe
 PROTECTED VIRTUAL void Subscription::Refreshable_RefreshCompleted(
         IN ISipClientConnection* piScc, IN IMS_SINT32 nCode /*= 0*/)
 {
-    IMS_TRACE_I("___ SUBSCRIPTION REFRESH COMPLETED ... Code (%d)", nCode, 0, 0);
+    IMS_TRACE_I("___ SUBSCRIPTION REFRESH COMPLETED (%d)", nCode, 0, 0);
 
     if (m_piRefreshListener != IMS_NULL)
     {
@@ -1072,7 +1072,7 @@ PROTECTED VIRTUAL IMS_BOOL Subscription::Refreshable_RefreshStarted()
     IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
     IMS_SINT32 nState = GetState();
 
-    IMS_TRACE_I("___ SUBSCRIPTION REFRESH STARTED ... in the %s", StateToString(nState), 0, 0);
+    IMS_TRACE_I("___ SUBSCRIPTION REFRESH STARTED on %s", StateToString(nState), 0, 0);
 
     if (m_piRefreshListener != IMS_NULL)
     {
@@ -1143,7 +1143,7 @@ PROTECTED VIRTUAL IMS_BOOL Subscription::Refreshable_RefreshStarted()
 
 PROTECTED VIRTUAL void Subscription::Refreshable_RefreshTerminated()
 {
-    IMS_TRACE_D("_____ SUBSCRIPTION REFRESH TERMINATED ...", 0, 0, 0);
+    IMS_TRACE_D("___ SUBSCRIPTION REFRESH TERMINATED", 0, 0, 0);
 
     if (m_piRefreshListener != IMS_NULL)
     {
@@ -1247,7 +1247,7 @@ ISipClientConnection* Subscription::CreateConnectionL(
 PRIVATE
 void Subscription::SetState(IN IMS_SINT32 nState)
 {
-    IMS_TRACE_I("Subscription :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
+    IMS_TRACE_I("Subscription: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
     m_nState = nState;
 }

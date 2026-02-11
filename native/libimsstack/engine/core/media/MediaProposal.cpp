@@ -35,7 +35,7 @@ MediaProposal::MediaProposal(IN ISdpOaState* piOaState) :
 
 PUBLIC VIRTUAL MediaProposal::~MediaProposal()
 {
-    IMS_TRACE_D("Destructor :: MediaProposal", 0, 0, 0);
+    IMS_TRACE_D("dtor: MediaProposal", 0, 0, 0);
 
     if (!m_objDescriptors.IsEmpty())
     {

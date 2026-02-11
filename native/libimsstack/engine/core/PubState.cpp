@@ -173,7 +173,7 @@ IMS_BOOL PubState::UpdateStateOnTxnTimerExpired()
 PRIVATE
 void PubState::SetState(IN IMS_SINT32 nState)
 {
-    IMS_TRACE_I("PUB_STATE : %s - %s >> %s", m_objEventPackage.GetEvent().GetStr(),
+    IMS_TRACE_I("PUB_STATE: %s - %s >> %s", m_objEventPackage.GetEvent().GetStr(),
             StateToString(m_nState), StateToString(nState));
 
     m_nState = nState;

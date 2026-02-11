@@ -147,7 +147,7 @@ PUBLIC VIRTUAL RegSubscription::~RegSubscription()
             m_piReferredScn);
 
 #ifdef __IMS_CORE_DEBUG__
-    IMS_TRACE_D("Destructor :: RegSubscription", 0, 0, 0);
+    IMS_TRACE_D("dtor: RegSubscription", 0, 0, 0);
 #endif
 }
 
@@ -296,7 +296,7 @@ PUBLIC VIRTUAL IMS_RESULT RegSubscription::Subscribe()
 
     if (m_pSubState->IsInstantSubscription())
     {
-        IMS_TRACE_E(0, "INVALID OPERATION :: It is for an instant subscription.", 0, 0, 0);
+        IMS_TRACE_E(0, "INVALID OPERATION: Instant subscription", 0, 0, 0);
         Ims::SetLastError(ImsError::INVALID_OPERATION);
         return IMS_FAILURE;
     }
@@ -828,7 +828,7 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::Dialog_Compare(IN ISipServerConnection
         {
             IMS_SINT32 nOperation = m_pSubState->GetOperation();
 
-            IMS_TRACE_I("Checks if the early NOTIFY is received or not ...", 0, 0, 0);
+            IMS_TRACE_I("Checks if the early NOTIFY is received", 0, 0, 0);
 
             if ((nOperation == SubState::OPERATION_CREATE) ||
                     (nOperation == SubState::OPERATION_FETCH))
@@ -908,7 +908,7 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::Dialog_NotifyRequest(IN ISipServerConn
 
     IMS_UINT16 nReasonParameter = GetReasonParameter(piSipMsgNotify);
 
-    IMS_TRACE_D("START - reginfo parsing ...", 0, 0, 0);
+    IMS_TRACE_D("START - reginfo parsing", 0, 0, 0);
 
     // Parsing 'application/reginfo+xml' using XML parser & update the reginfo.
     ImsList<ISipMessageBodyPart*> objBodyParts = piSipMsgNotify->GetBodyParts();
@@ -957,7 +957,7 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::Dialog_NotifyRequest(IN ISipServerConn
     }
     else
     {
-        IMS_TRACE_D("RegSubscription -> No body parts", 0, 0, 0);
+        IMS_TRACE_D("RegSubscription: No body parts", 0, 0, 0);
     }
 
     // Send a 2xx response to NOTIFY request immediately
@@ -965,7 +965,7 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::Dialog_NotifyRequest(IN ISipServerConn
     {
         piSsc->Close();
 
-        IMS_TRACE_E(0, "Creating & sending the response to NOTIFY request failed", 0, 0, 0);
+        IMS_TRACE_E(0, "Sending 200-NOTIFY failed", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -997,7 +997,7 @@ PRIVATE VIRTUAL void RegSubscription::Refreshable_RefreshCompleted(
 {
     (void)piScc;
 
-    IMS_TRACE_I("___ REGISTRATION SUBSCRIBER REFRESH COMPLETED ... Code (%d)", nCode, 0, 0);
+    IMS_TRACE_I("___ REGISTRATION SUBSCRIBER REFRESH COMPLETED (%d)", nCode, 0, 0);
 
     // In case, the subscription refresh request is successfully done.
     if (nCode == 0)
@@ -1062,7 +1062,8 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::Refreshable_RefreshStarted()
 {
     IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
 
-    IMS_TRACE_I("___ REGISTRATION SUBSCRIPTION REFRESH STARTED ... State(%d)", GetState(), 0, 0);
+    IMS_TRACE_I(
+            "___ REGISTRATION SUBSCRIPTION REFRESH STARTED on %s", StateToString(GetState()), 0, 0);
 
     if (GetState() == STATE_ACTIVE)
     {
@@ -1084,7 +1085,7 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::Refreshable_RefreshStarted()
 
 PRIVATE VIRTUAL void RegSubscription::Refreshable_RefreshTerminated()
 {
-    IMS_TRACE_D("_____ REGISTRATION SUBSCRIBER REFRESH TERMINATED ...", 0, 0, 0);
+    IMS_TRACE_D("___ REGISTRATION SUBSCRIBER REFRESH TERMINATED", 0, 0, 0);
 
     if (GetState() == STATE_ACTIVE)
     {
@@ -1207,9 +1208,7 @@ IMS_BOOL RegSubscription::SendResponse(IN ISipServerConnection* piSsc, IN IMS_SI
 {
     if (piSsc->InitResponse(nStatusCode) != IMS_SUCCESS)
     {
-        IMS_TRACE_E(0, "Initializing a SIP response failed - SipError(%d)",
-                SipError::GetLastError(), 0, 0);
-
+        IMS_TRACE_E(0, "Initializing a SIP response failed(%d)", SipError::GetLastError(), 0, 0);
         Ims::SetLastError(ImsError::GENERAL_ERROR);
         return IMS_FALSE;
     }
@@ -1519,7 +1518,7 @@ IMS_BOOL RegSubscription::SetHeaders(IN_OUT ISipMessage*& piSipMsg)
 PRIVATE
 void RegSubscription::SetState(IN IMS_SINT32 nState)
 {
-    IMS_TRACE_I("RegSubscription :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
+    IMS_TRACE_I("RegSubscription: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
     m_nState = nState;
 }
@@ -1652,7 +1651,7 @@ IMS_BOOL RegSubscription::ValidateRequestUri(
 
     if (pContact == IMS_NULL)
     {
-        IMS_TRACE_D("No contacts in the dialog; use the default contact address...", 0, 0, 0);
+        IMS_TRACE_D("No contacts in the dialog; use the default contact address", 0, 0, 0);
 
         pContact = m_pRegStateTracker->GetContactAddressForOutgoingMessage();
 
@@ -1695,8 +1694,8 @@ PRIVATE GLOBAL ISipClientConnection* RegSubscription::CreateConnection(IN RegSub
     IMS_BOOL bOverwriteTarget = IMS_FALSE;
     IMS_SINT32 nTransportExt = pStateTracker->GetTransportExt();
 
-    IMS_TRACE_D("CreateConnection - To (%s), Method (SUBSCRIBE)",
-            SipDebug::GetUri1(strAor).GetStr(), 0, 0);
+    IMS_TRACE_D(
+            "CreateConnection: Standalone(%s|SUBSCRIBE)", SipDebug::GetUri1(strAor).GetStr(), 0, 0);
 
     if (pRegSub->GetState() == STATE_ACTIVE)
     {
@@ -1723,7 +1722,7 @@ PRIVATE GLOBAL ISipClientConnection* RegSubscription::CreateConnection(IN RegSub
                     IRegSubscription::FEATURE_USE_TCP_TRANSPORT_ON_INITIAL_SUBSCRIPTION))
         {
             nTransportExt |= Sip::TRANSPORT_EXT_TCP;
-            IMS_TRACE_D("RegSubscription :: TCP transport protocol will be used", 0, 0, 0);
+            IMS_TRACE_D("RegSubscription: TCP transport protocol being used", 0, 0, 0);
         }
     }
 

@@ -107,7 +107,7 @@ PUBLIC VIRTUAL IMS_BOOL ImplicitSubscriberState::UpdateState(IN const ISipMessag
     if (nSipMsg == MESSAGE_INVALID)
     {
         IMS_TRACE_I(
-                "SUBS_STATE - NO TRANSITION (%s)", piSipMsg->GetMethod().ToString().GetStr(), 0, 0);
+                "SUBS_STATE: NO TRANSITION(%s)", piSipMsg->GetMethod().ToString().GetStr(), 0, 0);
         return IMS_TRUE;
     }
 
@@ -231,7 +231,7 @@ IMS_BOOL ImplicitSubscriberState::UpdateOnNotifyRequest(IN const ISipMessage* pi
     {
         if (!piSipMsg->IsHeaderPresent(ISipHeader::EVENT))
         {
-            IMS_TRACE_E(0, "Mandatory header missing : Event header", 0, 0, 0);
+            IMS_TRACE_E(0, "Mandatory header missing: Event header", 0, 0, 0);
             return IMS_FALSE;
         }
 
@@ -247,7 +247,7 @@ IMS_BOOL ImplicitSubscriberState::UpdateOnNotifyRequest(IN const ISipMessage* pi
 
     if (piHeader == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Mandatory header missing : Subscription-State header", 0, 0, 0);
+        IMS_TRACE_E(0, "Mandatory header missing: Subscription-State header", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -402,7 +402,7 @@ void ImplicitSubscriberState::UpdateOnReferResponse(IN const ISipMessage* piSipM
 {
     if (GetState() == STATE_TERMINATED)
     {
-        IMS_TRACE_D("Subscription is already in TERMINATED state...", 0, 0, 0);
+        IMS_TRACE_D("Subscription is already in TERMINATED state", 0, 0, 0);
         return;
     }
 

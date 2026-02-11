@@ -733,7 +733,7 @@ void RegBinding::RestoreTransportResourceForServerConnection(
 PRIVATE
 void RegBinding::SetState(IN IMS_SINT32 nState)
 {
-    IMS_TRACE_I("RegBinding (%s) :: %s to %s",
+    IMS_TRACE_I("RegBinding: (%s) %s to %s",
             SipDebug::GetUri1(GetAuthorizedAor().GetUri()).GetStr(), StateToString(m_nState),
             StateToString(nState));
 

@@ -123,7 +123,7 @@ PUBLIC GLOBAL SubscriberTracker* SubscriberTracker::GetInstance()
 PROTECTED VIRTUAL void SubscriberTracker::SubscriberInfo_UpdateImpu(IN IMS_SINT32 nSlotId,
         IN const AString& strId, IN const AString& strOld, IN const AString& strNew)
 {
-    IMS_TRACE_I("Subscriber :: ID (%s), OLD (%s), NEW (%s)", strId.GetStr(),
+    IMS_TRACE_I("Subscriber: ID (%s), OLD (%s), NEW (%s)", strId.GetStr(),
             SipDebug::GetUri1(strOld).GetStr(), SipDebug::GetUri2(strNew).GetStr());
 
     LockGuard objLock(m_piLock);

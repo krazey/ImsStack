@@ -49,7 +49,7 @@ RegInfoContact::RegInfoContact() :
 PUBLIC VIRTUAL RegInfoContact::~RegInfoContact()
 {
 #ifdef __IMS_CORE_DEBUG__
-    IMS_TRACE_D("Destructor :: uri=%s, id=%s", SipDebug::GetUri1(m_objUri.ToString()).GetStr(),
+    IMS_TRACE_D("dtor: uri=%s, id=%s", SipDebug::GetUri1(m_objUri.ToString()).GetStr(),
             m_strId.GetStr(), 0);
 #endif
 }
@@ -184,7 +184,7 @@ IMS_BOOL RegInfoContact::Update(IN INode* piNode)
 
         if (!IMS_UTIL_SYS_PROP_IS_SERVER_INFO_HIDDEN_IN_LOG())
         {
-            IMS_TRACE_I("Contact :: uri=%s, id=%s", SipDebug::GetUri1(m_objUri.ToString()).GetStr(),
+            IMS_TRACE_I("Contact: uri=%s, id=%s", SipDebug::GetUri1(m_objUri.ToString()).GetStr(),
                     m_strId.GetStr(), 0);
         }
     }
@@ -299,14 +299,14 @@ void RegInfoContact::DisplayRegInfo(IN const AString& strTag /*= AString::ConstN
 
     objLog.Append(", unknown-param-count=").Append(m_objUnknownParameters.GetSize());
 
-    IMS_TRACE_I("CON(%s) :: %s", strTag.GetStr(), objLog.GetCharString(), 0);
+    IMS_TRACE_I("CON(%s): %s", strTag.GetStr(), objLog.GetCharString(), 0);
 
     for (IMS_UINT32 i = 0; i < m_objUnknownParameters.GetSize(); ++i)
     {
         const AString& strName = m_objUnknownParameters.GetKeyAt(i);
         const AString& strValue = m_objUnknownParameters.GetValueAt(i);
 
-        IMS_TRACE_D("(%s) unknown-param :: %s=%s", strTag.GetStr(), strName.GetStr(),
+        IMS_TRACE_D("(%s) unknown-param: %s=%s", strTag.GetStr(), strName.GetStr(),
                 SipDebug::GetCharA1(strValue.GetStr(), 6));
     }
 }
@@ -384,7 +384,7 @@ IMS_BOOL RegInfoContact::SetEvent(IN const INamedNodeMap* piNodeMap)
 
     if (piNode == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Can't find 'event' attribute", 0, 0, 0);
+        IMS_TRACE_E(0, "No 'event' attribute", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -463,7 +463,7 @@ IMS_BOOL RegInfoContact::SetId(IN const INamedNodeMap* piNodeMap)
 
     if (piNode == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Can't find 'id' attribute", 0, 0, 0);
+        IMS_TRACE_E(0, "No 'id' attribute", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -521,7 +521,7 @@ IMS_BOOL RegInfoContact::SetState(IN const INamedNodeMap* piNodeMap)
 
     if (piNode == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Can't find 'state' attribute", 0, 0, 0);
+        IMS_TRACE_E(0, "No 'state' attribute", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -567,7 +567,7 @@ void RegInfoContact::SetPublicGruu(IN INode* piNode)
     if (piAttrNode == IMS_NULL)
     {
         piNode->DestroyNamedNodeMap(piNodeMap);
-        IMS_TRACE_D("Pub-GRUU :: Can't find 'uri' attribute", 0, 0, 0);
+        IMS_TRACE_D("Pub-GRUU: No 'uri' attribute", 0, 0, 0);
         return;
     }
 
@@ -591,7 +591,7 @@ void RegInfoContact::SetTemporaryGruu(IN INode* piNode)
     if (piAttrNode == IMS_NULL)
     {
         piNode->DestroyNamedNodeMap(piNodeMap);
-        IMS_TRACE_D("Temp-GRUU :: Can't find 'uri' attribute", 0, 0, 0);
+        IMS_TRACE_D("Temp-GRUU: No 'uri' attribute", 0, 0, 0);
         return;
     }
 
@@ -604,7 +604,7 @@ void RegInfoContact::SetTemporaryGruu(IN INode* piNode)
         m_objTempGruu.m_nFirstCSeq = 0;
         piNode->DestroyNamedNodeMap(piNodeMap);
 
-        IMS_TRACE_D("Temp-GRUU :: Can't find 'first-cseq' attribute", 0, 0, 0);
+        IMS_TRACE_D("Temp-GRUU: No 'first-cseq' attribute", 0, 0, 0);
         return;
     }
 
@@ -678,11 +678,11 @@ void RegInfoContact::SetUnknownParameter(IN INode* piNode)
     {
         if (strValue.IsEmpty())
         {
-            IMS_TRACE_D("unknown-param :: %s", strName.GetStr(), 0, 0);
+            IMS_TRACE_D("unknown-param: %s", strName.GetStr(), 0, 0);
         }
         else
         {
-            IMS_TRACE_D("unknown-param :: %s=%s", strName.GetStr(),
+            IMS_TRACE_D("unknown-param: %s=%s", strName.GetStr(),
                     SipDebug::GetCharA1(strValue.GetStr(), 6), 0);
         }
     }

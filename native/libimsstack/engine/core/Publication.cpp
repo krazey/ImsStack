@@ -497,7 +497,7 @@ PRIVATE VIRTUAL void Publication::NotifySipResponse(IN ISipClientConnection* piS
     const ISipMessage* piSipMsg = piScc->GetMessage();
     const SipMethod& objMethod = piSipMsg->GetMethod();
 
-    IMS_TRACE_I("The response is received in the %s", StateToString(GetState()), 0, 0);
+    IMS_TRACE_I("SIP response on %s", StateToString(GetState()), 0, 0);
 
     if (!objMethod.Equals(SipMethod::PUBLISH))
     {
@@ -623,7 +623,7 @@ PRIVATE VIRTUAL void Publication::NotifySipError(
 PRIVATE VIRTUAL void Publication::Refreshable_RefreshCompleted(
         IN ISipClientConnection* piScc, IN IMS_SINT32 nCode /*= 0*/)
 {
-    IMS_TRACE_I("___ PUBLICATION REFRESH COMPLETED ... Code (%d)", nCode, 0, 0);
+    IMS_TRACE_I("___ PUBLICATION REFRESH COMPLETED (%d)", nCode, 0, 0);
 
     if (m_piRefreshListener != IMS_NULL)
     {
@@ -691,7 +691,7 @@ PRIVATE VIRTUAL IMS_BOOL Publication::Refreshable_RefreshStarted()
     IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
     IMS_SINT32 nState = GetState();
 
-    IMS_TRACE_I("___ PUBLICATION REFRESH STARTED ... State(%d)", nState, 0, 0);
+    IMS_TRACE_I("___ PUBLICATION REFRESH STARTED on %s", StateToString(nState), 0, 0);
 
     if (m_piRefreshListener != IMS_NULL)
     {
@@ -759,7 +759,7 @@ PRIVATE VIRTUAL IMS_BOOL Publication::Refreshable_RefreshStarted()
 
 PRIVATE VIRTUAL void Publication::Refreshable_RefreshTerminated()
 {
-    IMS_TRACE_D("_____ PUBLICATION REFRESH TERMINATED ...", 0, 0, 0);
+    IMS_TRACE_D("___ PUBLICATION REFRESH TERMINATED", 0, 0, 0);
 
     if (m_piRefreshListener != IMS_NULL)
     {
@@ -838,7 +838,7 @@ void Publication::ReceiveResponse(IN const ISipClientConnection* piScc)
 PRIVATE
 void Publication::SetState(IN IMS_SINT32 nState)
 {
-    IMS_TRACE_I("Publication :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
+    IMS_TRACE_I("Publication: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
     m_nState = nState;
 }
