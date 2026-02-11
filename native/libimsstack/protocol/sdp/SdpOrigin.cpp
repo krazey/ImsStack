@@ -162,7 +162,7 @@ PUBLIC VIRTUAL IMS_BOOL SdpOrigin::Decode(IN const AString& strValue)
     // Check if the address format is valid
     if (!CheckValidityForAddress(m_strUnicastAddress, m_nAddrType))
     {
-        IMS_TRACE_E(0, "o-line :: Address validity failed : %s", strValue.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "o-line: Address validity failed : %s", strValue.GetStr(), 0, 0);
         return IMS_FALSE;
     }
 
@@ -387,7 +387,7 @@ IMS_BOOL SdpOrigin::SetValue(IN const AString& strUsername, IN const AString& st
     // Check if the address format is valid
     if (!CheckValidityForAddress(strAddress, m_nAddrType))
     {
-        IMS_TRACE_E(0, "o-line :: Address validity failed : %s", strAddress.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "o-line: Address validity failed : %s", strAddress.GetStr(), 0, 0);
         return IMS_FALSE;
     }
 
