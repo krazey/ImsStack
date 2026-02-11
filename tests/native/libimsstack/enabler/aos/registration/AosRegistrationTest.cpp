@@ -4910,7 +4910,7 @@ TEST_F(AosRegistrationTest, ProcessIpVersionChangeReturnsTrueIfSucceedToUpdatePc
 TEST_F(AosRegistrationTest, NotifyRegEventStateWhenRegEventChangeIfConfiguredAsConditional)
 {
     ON_CALL(m_objMockIAosNConfiguration, GetUsatRegEventDownloadPolicy())
-            .WillByDefault(Return(CarrierConfig::Ims::USAT_REG_EVENT_CONDITIONAL_DOWNLOAD));
+            .WillByDefault(Return(CarrierConfig::Ims::USAT_REG_EVENT_ALL_CONDITIONAL_DOWNLOAD));
 
     EXPECT_CALL(
             m_objMockIAosService, NotifyRegEventState(SipStatusCode::SC_403, ImsList<AString>()));

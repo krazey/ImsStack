@@ -960,19 +960,17 @@ public:
          *
          * Possible Values:
          *   {@code USAT_REG_EVENT_NOT_DOWNLOAD} (0)
-         *   {@code :} Not support IMS Registration Event.
          *   {@code USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD} (1)
-         *   {@code :} Support IMS Registration Event without checking EF-UICCIARI.
-         *   {@code USAT_REG_EVENT_CONDITIONAL_DOWNLOAD} (2)
-         *   {@code :} Support IMS Registration Event if there is EF-UICCIARI.
-         *   {@code (b/279986730)}
+         *   {@code USAT_REG_EVENT_SETUP_EVENT_LIST_CONDITIONAL_DOWNLOAD} (2)
+         *   {@code USAT_REG_EVENT_ALL_CONDITIONAL_DOWNLOAD} (3)
          */
         static const IMS_CHAR KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT[];
         enum
         {
             USAT_REG_EVENT_NOT_DOWNLOAD = 0,
             USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD = 1,
-            USAT_REG_EVENT_CONDITIONAL_DOWNLOAD = 2
+            USAT_REG_EVENT_SETUP_EVENT_LIST_CONDITIONAL_DOWNLOAD = 2,
+            USAT_REG_EVENT_ALL_CONDITIONAL_DOWNLOAD = 3
         };
 
         /**

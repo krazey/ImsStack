@@ -687,9 +687,22 @@ public class ImsRegistrationTrackerTest {
     }
 
     @Test
-    public void testNotifyRegEventStateChanged_configIsConditional() {
+    public void testNotifyRegEventStateChanged_configIsSetupEventListConditional() {
         when(mMockCarrierConfig.getInt(CarrierConfig.Ims.KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT))
-                .thenReturn(CarrierConfig.Ims.USAT_REG_EVENT_CONDITIONAL_DOWNLOAD);
+                .thenReturn(CarrierConfig.Ims.USAT_REG_EVENT_SETUP_EVENT_LIST_CONDITIONAL_DOWNLOAD);
+        when(mMockUsatInterface.isInSetupEventList(anyInt())).thenReturn(true);
+        when(mMockSimInterface.getUiccIari()).thenReturn(Collections.emptySet());
+
+        mAosRegListener.notifyRegEventStateChanged(SIP_STATUS_CODE_200_OK, URI_SET);
+
+        verify(mMockUsatInterface).createRegEventDownloadCommand(
+                eq(SIP_STATUS_CODE_200_OK), eq(URI_SET), any(Usat.Listener.class));
+    }
+
+    @Test
+    public void testNotifyRegEventStateChanged_configIsAllConditional() {
+        when(mMockCarrierConfig.getInt(CarrierConfig.Ims.KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT))
+                .thenReturn(CarrierConfig.Ims.USAT_REG_EVENT_ALL_CONDITIONAL_DOWNLOAD);
         when(mMockUsatInterface.isInSetupEventList(anyInt())).thenReturn(true);
         Set<String> iariSet = Set.of("urn::3gpp-application.ims.iari.ttc-iss");
         when(mMockSimInterface.getUiccIari()).thenReturn(iariSet);
