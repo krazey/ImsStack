@@ -127,7 +127,7 @@ PUBLIC GLOBAL const AString& UtilService::GetLogString(IN const AString& strInpu
 
     if (bAddPostFix)
     {
-        strOutput.Append("xxx");
+        strOutput.Append("***");
     }
 
     return strOutput;

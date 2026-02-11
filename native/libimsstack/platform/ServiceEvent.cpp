@@ -291,13 +291,13 @@ void EventHolder::SetUnregisteredEvents()
 
             m_piReceiver->SetEvent(nEvent);
 
-            IMS_TRACE_I("UnregisteredEvents :: event=%08X, listeners=%d", nEvent,
+            IMS_TRACE_I("UnregisteredEvents: event=%08X, listeners=%d", nEvent,
                     objActivities.GetSize(), 0);
         }
     }
     else
     {
-        IMS_TRACE_D("UnregisteredEvents :: no events", 0, 0, 0);
+        IMS_TRACE_D("UnregisteredEvents: no events", 0, 0, 0);
     }
 }
 
@@ -314,13 +314,13 @@ PRIVATE VIRTUAL IMS_BOOL EventHolder::EventReceiver_NotifyEvent(
         return IMS_FALSE;
     }
 
-    IMS_TRACE_I("EventReceiver :: E (%d), W (%d), L (%d)", nEvent, nWParam, nLParam);
+    IMS_TRACE_I("EventReceiver: E (%d), W (%d), L (%d)", nEvent, nWParam, nLParam);
 
     ImsList<EventActivity*>& objActivities = m_objEventMap.GetValueAt(nIndex);
 
     if (objActivities.IsEmpty())
     {
-        IMS_TRACE_D("There are no event receivers", 0, 0, 0);
+        IMS_TRACE_D("No event receivers", 0, 0, 0);
         return IMS_FALSE;
     }
 

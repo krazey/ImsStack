@@ -50,7 +50,7 @@ PUBLIC VIRTUAL IMS_SINT32 ImsNetworkPing::Ping(IN const IpAddress& objSrcIp,
 {
     if (GetState() != STATE_IDLE)
     {
-        IMS_TRACE_D("NetPing :: Request pending...", 0, 0, 0);
+        IMS_TRACE_D("NetPing: Request pending", 0, 0, 0);
         return PING_STATUS_PENDING;
     }
 
@@ -77,7 +77,7 @@ PUBLIC VIRTUAL IMS_SINT32 ImsNetworkPing::Ping(IN const IpAddress& objSrcIp,
     else
     {
         ClearResources();
-        IMS_TRACE_D("NetPing :: Connect failed", 0, 0, 0);
+        IMS_TRACE_D("NetPing: Connect failed", 0, 0, 0);
         return PING_STATUS_NOK;
     }
 
@@ -201,7 +201,7 @@ IMS_BOOL ImsNetworkPing::PrepareResources(IN const IpAddress& objIp, IN IMS_BOOL
 
         if (m_piTimer == IMS_NULL)
         {
-            IMS_TRACE_E(0, "NetPing :: Timer creation failed", 0, 0, 0);
+            IMS_TRACE_E(0, "NetPing: Timer creation failed", 0, 0, 0);
             return IMS_FALSE;
         }
     }
@@ -214,7 +214,7 @@ IMS_BOOL ImsNetworkPing::PrepareResources(IN const IpAddress& objIp, IN IMS_BOOL
     if (m_piSocket == IMS_NULL)
     {
         ClearResources();
-        IMS_TRACE_E(0, "NetPing :: Socket creation failed", 0, 0, 0);
+        IMS_TRACE_E(0, "NetPing: Socket creation failed", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -261,7 +261,7 @@ void ImsNetworkPing::ClearAndNotifyResult(IN IMS_SINT32 nResult)
 PROTECTED
 void ImsNetworkPing::NotifyResult(IN IMS_SINT32 nResult)
 {
-    IMS_TRACE_I("NetPing :: Result=%d", nResult, 0, 0);
+    IMS_TRACE_I("NetPing: Result=%d", nResult, 0, 0);
 
     if (m_piListener != IMS_NULL)
     {
@@ -280,7 +280,7 @@ void ImsNetworkPing::SetState(IN IMS_SINT32 nState)
 {
     if (m_nState != nState)
     {
-        IMS_TRACE_I("NetPing :: %d >> %d", m_nState, nState, 0);
+        IMS_TRACE_I("NetPing: %d >> %d", m_nState, nState, 0);
         m_nState = nState;
     }
 }
@@ -297,7 +297,7 @@ PROTECTED GLOBAL IMS_SINT32 ImsNetworkPing::GetRandomPort(IN const IpAddress& ob
 
         if (pNetworkService->CheckIpAndPortAvailability(objIp, nPort, ISocket::TYPE_STREAM))
         {
-            IMS_TRACE_D("NetPing :: random-port=%d(%d)", nPort, i, 0);
+            IMS_TRACE_D("NetPing: random-port=%d(%d)", nPort, i, 0);
             return nPort;
         }
     }

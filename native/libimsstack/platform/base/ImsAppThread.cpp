@@ -52,7 +52,7 @@ PROTECTED VIRTUAL void ImsAppThread::OnAppControl(IN IMS_SINT32 nParam, IN const
         return;
     }
 
-    IMS_TRACE_D("OnAppControl :: param=%d, name=%s", nParam, pAppInfo->m_strName.GetStr(), 0);
+    IMS_TRACE_D("OnAppControl: param=%d, name=%s", nParam, pAppInfo->m_strName.GetStr(), 0);
 
     switch (nParam)
     {

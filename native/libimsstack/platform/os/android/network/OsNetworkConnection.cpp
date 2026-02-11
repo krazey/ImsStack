@@ -75,7 +75,7 @@ OsNetworkConnection::OsNetworkConnection(IN IMS_SINT32 nSlotId) :
         m_piConnectionListener(IMS_NULL),
         m_objReferenceListeners(ImsList<INetworkConnectionListener*>())
 {
-    IMS_TRACE_D("Constructor :: Mobile network connection", 0, 0, 0);
+    IMS_TRACE_D("ctor: OsNetworkConnection", 0, 0, 0);
 
     m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
 
@@ -85,7 +85,7 @@ OsNetworkConnection::OsNetworkConnection(IN IMS_SINT32 nSlotId) :
 
 PUBLIC VIRTUAL OsNetworkConnection::~OsNetworkConnection()
 {
-    IMS_TRACE_D("Destructor :: Mobile network connection", 0, 0, 0);
+    IMS_TRACE_D("dtor: OsNetworkConnection", 0, 0, 0);
 
     PlatformContext::GetInstance()->GetSystem()->RemoveListener(
             SystemConstants::CATEGORY_NETWORK, this, GetSlotId());
@@ -126,7 +126,7 @@ PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsNetworkConnection::Activate(
     {
         CacheLocalAddress();
 
-        IMS_TRACE_I("Mobile :: Activate() - APN (%s) is already activated; state=%d",
+        IMS_TRACE_I("Mobile: Activate - APN (%s) is already activated; state=%d",
                 GetProfileName().GetStr(), m_nDataState, 0);
 
         SetState(STATE_ACTIVE);
@@ -136,7 +136,7 @@ PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsNetworkConnection::Activate(
 
     IMS_SINT32 nApnType = GetApnType();
 
-    IMS_TRACE_D("Mobile :: Activate() - apnType=%d, state=%d", nApnType, m_nDataState, 0);
+    IMS_TRACE_D("Mobile: Activate - apnType=%d, state=%d", nApnType, m_nDataState, 0);
 
     if ((nApnType == NetworkPolicy::APN_EMERGENCY) ||
             (bEnableApn && (nApnType == NetworkPolicy::APN_IMS)) ||
@@ -161,7 +161,7 @@ PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsNetworkConnection::Activate(
 PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsNetworkConnection::Deactivate(
         IN IMS_BOOL bDisableApn /*= IMS_FALSE*/)
 {
-    IMS_TRACE_D("Mobile :: Deactivate() - apnType=%d, state=%d", GetApnType(), m_nDataState, 0);
+    IMS_TRACE_D("Mobile: Deactivate - apnType=%d, state=%d", GetApnType(), m_nDataState, 0);
 
     if (!Release(bDisableApn))
     {
@@ -171,7 +171,7 @@ PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsNetworkConnection::Deactivat
 
     if (m_nState == STATE_TERMINATED)
     {
-        IMS_TRACE_D("Mobile :: Deactivate() in TERMINATED state", 0, 0, 0);
+        IMS_TRACE_D("Mobile: Deactivate in TERMINATED state", 0, 0, 0);
         return RESULT_DONE;
     }
 
@@ -214,7 +214,7 @@ PRIVATE VIRTUAL void OsNetworkConnection::GetAccessNetworkInfo(
     if (nNetworkType == RADIOTECH_TYPE_UNKNOWN)
     {
         nNetworkType = PlatformContext::GetInstance()->GetSystem()->GetNetworkType(GetSlotId());
-        IMS_TRACE_I("PANI :: network-type (%d)", nNetworkType, 0, 0);
+        IMS_TRACE_I("PANI: network-type (%d)", nNetworkType, 0, 0);
     }
 
     objAccessNetInfo = CreateAccessNetworkInfo(nNetworkType, objCellIdentities);
@@ -308,8 +308,8 @@ PRIVATE VIRTUAL IMS_SINT32 OsNetworkConnection::GetHostByName(IN const AString& 
         OUT ImsList<IpAddress>& objIpAddrs,
         IN IMS_SINT32 nIpVersion /*= 0 default-local-address-based*/)
 {
-    IMS_TRACE_I("DNS lookup (%d) :: apnType=%d, domain=%s", nIpVersion, GetApnType(),
-            OsUtil::GetInstance()->IsDebugMode() ? strHostName.GetStr() : "xxx");
+    IMS_TRACE_I("DNS lookup (%d): apnType=%d, domain=%s", nIpVersion, GetApnType(),
+            OsUtil::GetInstance()->IsDebugMode() ? strHostName.GetStr() : "***");
 
     if ((nIpVersion != IpAddress::IPV4) && (nIpVersion != IpAddress::IPV6))
     {
@@ -351,9 +351,9 @@ PRIVATE VIRTUAL IMS_SINT32 OsNetworkConnection::GetHostByName(IN const AString& 
             objIpAddrs.Append(objIp);
         }
 
-        IMS_TRACE_D("gethostbyname() :: %s >>> %s at index(%d)",
-                OsUtil::GetInstance()->IsDebugMode() ? strHostName.GetStr() : "xxx",
-                OsUtil::GetInstance()->IsDebugMode() ? strHostIp.GetStr() : "xxx", i);
+        IMS_TRACE_D("gethostbyname: %s >>> %s at index(%d)",
+                OsUtil::GetInstance()->IsDebugMode() ? strHostName.GetStr() : "***",
+                OsUtil::GetInstance()->IsDebugMode() ? strHostIp.GetStr() : "***", i);
     }
 
     if (objIpAddrs.IsEmpty())
@@ -604,7 +604,7 @@ PRIVATE VIRTUAL IMS_SINT32 OsNetworkConnection::GetApnType() const
 PRIVATE VIRTUAL void OsNetworkConnection::System_NotifyEvent(
         IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
 {
-    IMS_TRACE_D("Mobile :: event=%d, wp=%" PFLS_d ", lp=%" PFLS_d, nEvent, nWParam, nLParam);
+    IMS_TRACE_D("Mobile: event=%d, wp=%" PFLS_d ", lp=%" PFLS_d, nEvent, nWParam, nLParam);
 
     // APN Type
     if (GetApnType() != LONG_TO_SINT(nWParam))
@@ -620,7 +620,7 @@ PRIVATE VIRTUAL void OsNetworkConnection::System_NotifyEvent(
     {
         case IMS_SYSTEM_DATACONNECTION_FAILED:
         {
-            IMS_TRACE_I("Mobile :: data connection state changed in %s - connection failed",
+            IMS_TRACE_I("Mobile: data connection state changed in %s - connection failed",
                     StateToString(m_nState), 0, 0);
 
             PostEvent(NET_CONNECT_FAILED);
@@ -628,7 +628,7 @@ PRIVATE VIRTUAL void OsNetworkConnection::System_NotifyEvent(
         }
         case IMS_SYSTEM_DATACONNECTION_STATE_CHANGED:
         {
-            IMS_TRACE_I("Mobile :: data connection state changed in %s - %" PFLS_d,
+            IMS_TRACE_I("Mobile: data connection state changed in %s - %" PFLS_d,
                     StateToString(m_nState), nLParam, 0);
 
             if (nLParam == DATA_DISCONNECTED)
@@ -671,7 +671,7 @@ PRIVATE VIRTUAL void OsNetworkConnection::System_NotifyEvent(
         }
         default:
         {
-            IMS_TRACE_D("___ Event (%d) :: Ignored ___", nEvent, 0, 0);
+            IMS_TRACE_D("Event(%d): not handled", nEvent, 0, 0);
             break;
         }
     }
@@ -685,8 +685,7 @@ IMS_BOOL OsNetworkConnection::AdjustPreferredLocalAddress()
         if (!m_objLocalAddressIpv4.Equals(IpAddress::NONE) &&
                 !m_objLocalAddressIpv4.Equals(m_objLocalAddress))
         {
-            IMS_TRACE_D("Preferred local address :: %s >> %s",
-                    m_objLocalAddress.ToString().GetStr(),
+            IMS_TRACE_D("Preferred local address: %s >> %s", m_objLocalAddress.ToString().GetStr(),
                     m_objLocalAddressIpv4.ToString().GetStr(), 0);
 
             m_objLocalAddress = m_objLocalAddressIpv4;
@@ -697,8 +696,7 @@ IMS_BOOL OsNetworkConnection::AdjustPreferredLocalAddress()
         if (!m_objLocalAddressIpv6.Equals(IpAddress::IPv6NONE) &&
                 !m_objLocalAddressIpv6.Equals(m_objLocalAddress))
         {
-            IMS_TRACE_D("Preferred local address :: %s >> %s",
-                    m_objLocalAddress.ToString().GetStr(),
+            IMS_TRACE_D("Preferred local address: %s >> %s", m_objLocalAddress.ToString().GetStr(),
                     m_objLocalAddressIpv6.ToString().GetStr(), 0);
 
             m_objLocalAddress = m_objLocalAddressIpv6;
@@ -754,7 +752,7 @@ IMS_BOOL OsNetworkConnection::CacheLocalAddress()
     }
     else
     {
-        IMS_TRACE_D("Local IP address :: APN (%s), IP (%s)", GetProfileName().GetStr(),
+        IMS_TRACE_D("Local IP address: APN (%s), IP (%s)", GetProfileName().GetStr(),
                 m_objLocalAddress.ToCharString(), 0);
     }
 
@@ -972,7 +970,7 @@ void OsNetworkConnection::NotifyDataConnected(IN IMS_SINT32 nErrorCode)
 {
     if (m_nState == STATE_ACTIVE)
     {
-        IMS_TRACE_I("Mobile :: Network Connection is already activated.", 0, 0, 0);
+        IMS_TRACE_I("Mobile: Data connection is already activated", 0, 0, 0);
 
         if (m_objLocalAddress.IsNoneAddress())
         {
@@ -1050,7 +1048,7 @@ void OsNetworkConnection::NotifyIpChanged(IN IMS_SINT32 nErrorCode)
     if (m_nState != STATE_ACTIVE)
     {
         // Ignore the event
-        IMS_TRACE_D("Mobile :: IP changed - not ACTIVE", 0, 0, 0);
+        IMS_TRACE_D("Mobile: IP changed - not ACTIVE", 0, 0, 0);
         return;
     }
 
@@ -1081,7 +1079,7 @@ void OsNetworkConnection::NotifyIpcanCatChanged()
     if (m_nState != STATE_ACTIVE)
     {
         // Ignore the event
-        IMS_TRACE_D("Mobile :: IPCAN category changed - not ACTIVE", 0, 0, 0);
+        IMS_TRACE_D("Mobile: IPCAN category changed - not ACTIVE", 0, 0, 0);
         return;
     }
 
@@ -1099,7 +1097,7 @@ void OsNetworkConnection::NotifyPcscfChanged()
     if (m_nState != STATE_ACTIVE)
     {
         // Ignore the event
-        IMS_TRACE_D("Mobile :: P-CSCF changed - not ACTIVE", 0, 0, 0);
+        IMS_TRACE_D("Mobile: P-CSCF changed - not ACTIVE", 0, 0, 0);
         return;
     }
 
@@ -1152,7 +1150,7 @@ IMS_BOOL OsNetworkConnection::HandleEmergencyPdnOnIpChanged(IN IMS_SINT32 nError
 
     AdjustPreferredLocalAddress();
 
-    IMS_TRACE_D("EmergencyPdnOnIpChanged :: preferred=%s, ipv4=%s, ipv6=%s",
+    IMS_TRACE_D("EmergencyPdnOnIpChanged: preferred=%s, ipv4=%s, ipv6=%s",
             m_objLocalAddress.ToString().GetStr(), m_objLocalAddressIpv4.ToString().GetStr(),
             m_objLocalAddressIpv6.ToString().GetStr());
 
@@ -1220,7 +1218,7 @@ void OsNetworkConnection::SetIpcanCategory(IN IMS_SINT32 nCategory)
 {
     if (m_nIpcanCategory != nCategory)
     {
-        IMS_TRACE_I("Mobile :: IPCAN-category - %d >> %d in %s", m_nIpcanCategory, nCategory,
+        IMS_TRACE_I("Mobile: IPCAN-category - %d >> %d in %s", m_nIpcanCategory, nCategory,
                 StateToString(m_nState));
 
         m_nIpcanCategory = nCategory;
@@ -1234,7 +1232,7 @@ void OsNetworkConnection::SetState(IN IMS_UINT32 nState)
 {
     if (m_nState != nState)
     {
-        IMS_TRACE_I("Mobile :: connection(%s) - %s >> %s", GetProfileName().GetStr(),
+        IMS_TRACE_I("Mobile: connection(%s) - %s >> %s", GetProfileName().GetStr(),
                 StateToString(m_nState), StateToString(nState));
 
         m_nState = nState;
@@ -1295,7 +1293,7 @@ PRIVATE GLOBAL AccessNetworkInfo OsNetworkConnection::CreateAccessNetworkInfo(
                 (strMnc.GetLength() > ANI_3GPP_MNC_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (MCC=%d, MNC=%d)", strMcc.GetLength(),
+            IMS_TRACE_D("PANI: Invalid length (MCC=%d, MNC=%d)", strMcc.GetLength(),
                     strMnc.GetLength(), 0);
             return objAni;
         }
@@ -1304,7 +1302,7 @@ PRIVATE GLOBAL AccessNetworkInfo OsNetworkConnection::CreateAccessNetworkInfo(
                 (strCellId.GetLength() > ANI_3GPP_UTRAN_CELL_ID_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (TAC=%d, CellIdentity=%d)", strTac.GetLength(),
+            IMS_TRACE_D("PANI: Invalid length (TAC=%d, CellIdentity=%d)", strTac.GetLength(),
                     strCellId.GetLength(), 0);
             return objAni;
         }
@@ -1379,10 +1377,10 @@ PRIVATE GLOBAL AccessNetworkInfo OsNetworkConnection::CreateAccessNetworkInfo(
             nIndex++;
         }
 
-        IMS_TRACE_I("PANI :: %s (%s, %d)", bIsNetworkTypeLte ? "LTE" : "3G",
+        IMS_TRACE_I("PANI: %s (%s, %d)", bIsNetworkTypeLte ? "LTE" : "3G",
                 OsUtil::GetInstance()->IsDebugMode()
                         ? objAni.uniAI.utran_cell_id_3gpp.acUTRAN_CELL_ID
-                        : "xxx",
+                        : "***",
                 nIndex);
     }
     else if (nNetworkType == RADIOTECH_TYPE_NR)
@@ -1419,7 +1417,7 @@ PRIVATE GLOBAL AccessNetworkInfo OsNetworkConnection::CreateAccessNetworkInfo(
                 (strMnc.GetLength() > ANI_3GPP_MNC_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (MCC=%d, MNC=%d)", strMcc.GetLength(),
+            IMS_TRACE_D("PANI: Invalid length (MCC=%d, MNC=%d)", strMcc.GetLength(),
                     strMnc.GetLength(), 0);
             return objAni;
         }
@@ -1428,7 +1426,7 @@ PRIVATE GLOBAL AccessNetworkInfo OsNetworkConnection::CreateAccessNetworkInfo(
                 (strCellId.GetLength() > ANI_3GPP_NR_CELL_ID_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (TAC=%d, CellIdentity=%d)", strTac.GetLength(),
+            IMS_TRACE_D("PANI: Invalid length (TAC=%d, CellIdentity=%d)", strTac.GetLength(),
                     strCellId.GetLength(), 0);
             return objAni;
         }
@@ -1503,10 +1501,10 @@ PRIVATE GLOBAL AccessNetworkInfo OsNetworkConnection::CreateAccessNetworkInfo(
             nIndex++;
         }
 
-        IMS_TRACE_I("PANI :: NR (%s, %d)",
+        IMS_TRACE_I("PANI: NR (%s, %d)",
                 OsUtil::GetInstance()->IsDebugMode()
                         ? objAni.uniAI.nr_utran_cell_id_3gpp.acUTRAN_CELL_ID
-                        : "xxx",
+                        : "***",
                 nIndex, 0);
     }
     else if ((nNetworkType == RADIOTECH_TYPE_GPRS) || (nNetworkType == RADIOTECH_TYPE_EDGE))
@@ -1530,7 +1528,7 @@ PRIVATE GLOBAL AccessNetworkInfo OsNetworkConnection::CreateAccessNetworkInfo(
                 (strMnc.GetLength() > ANI_3GPP_MNC_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (MCC=%d, MNC=%d)", strMcc.GetLength(),
+            IMS_TRACE_D("PANI: Invalid length (MCC=%d, MNC=%d)", strMcc.GetLength(),
                     strMnc.GetLength(), 0);
             return objAni;
         }
@@ -1539,7 +1537,7 @@ PRIVATE GLOBAL AccessNetworkInfo OsNetworkConnection::CreateAccessNetworkInfo(
                 (strCellId.GetLength() > ANI_3GPP_GERAN_CELL_ID_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (LAC=%d, CellIdentity=%d)", strLac.GetLength(),
+            IMS_TRACE_D("PANI: Invalid length (LAC=%d, CellIdentity=%d)", strLac.GetLength(),
                     strCellId.GetLength(), 0);
             return objAni;
         }
@@ -1611,8 +1609,8 @@ PRIVATE GLOBAL AccessNetworkInfo OsNetworkConnection::CreateAccessNetworkInfo(
             nIndex++;
         }
 
-        IMS_TRACE_I("PANI :: GERAN (%s, %d)",
-                OsUtil::GetInstance()->IsDebugMode() ? objAni.uniAI.cgi_3gpp.acCGI : "xxx", nIndex,
+        IMS_TRACE_I("PANI: GERAN (%s, %d)",
+                OsUtil::GetInstance()->IsDebugMode() ? objAni.uniAI.cgi_3gpp.acCGI : "***", nIndex,
                 0);
     }
     else if (nNetworkType == RADIOTECH_TYPE_EHRPD)
@@ -1636,7 +1634,7 @@ PRIVATE GLOBAL AccessNetworkInfo OsNetworkConnection::CreateAccessNetworkInfo(
                 (strSubnet.GetLength() > ANI_3GPP2_SUBNET_LENGTH_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (sectorId=%d, subnetLength=%d)",
+            IMS_TRACE_D("PANI: Invalid length (sectorId=%d, subnetLength=%d)",
                     strSector.GetLength(), strSubnet.GetLength(), 0);
             return objAni;
         }
@@ -1673,8 +1671,8 @@ PRIVATE GLOBAL AccessNetworkInfo OsNetworkConnection::CreateAccessNetworkInfo(
             nIndex++;
         }
 
-        IMS_TRACE_I("PANI :: eHRPD (%s, %d)",
-                OsUtil::GetInstance()->IsDebugMode() ? objAni.uniAI.ci_3gpp2.acCI : "xxx", nIndex,
+        IMS_TRACE_I("PANI: eHRPD (%s, %d)",
+                OsUtil::GetInstance()->IsDebugMode() ? objAni.uniAI.ci_3gpp2.acCI : "***", nIndex,
                 0);
     }
     else

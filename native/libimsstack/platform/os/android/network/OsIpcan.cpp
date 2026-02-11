@@ -206,7 +206,7 @@ PRIVATE GLOBAL AccessNetworkInfo OsIpcan::CreateAccessNetworkInfo(
                 (strMnc.GetLength() > ANI_3GPP_MNC_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (MCC=%d, MNC=%d)", strMcc.GetLength(),
+            IMS_TRACE_D("PANI: Invalid length (MCC=%d, MNC=%d)", strMcc.GetLength(),
                     strMnc.GetLength(), 0);
             return objAni;
         }
@@ -215,7 +215,7 @@ PRIVATE GLOBAL AccessNetworkInfo OsIpcan::CreateAccessNetworkInfo(
                 (strCellId.GetLength() > ANI_3GPP_UTRAN_CELL_ID_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (TAC=%d, CellIdentity=%d)", strTac.GetLength(),
+            IMS_TRACE_D("PANI: Invalid length (TAC=%d, CellIdentity=%d)", strTac.GetLength(),
                     strCellId.GetLength(), 0);
             return objAni;
         }
@@ -290,9 +290,9 @@ PRIVATE GLOBAL AccessNetworkInfo OsIpcan::CreateAccessNetworkInfo(
             nIndex++;
         }
 
-        IMS_TRACE_I("PANI :: %s (%s, %d)", bIsNetworkTypeLte ? "LTE" : "3G",
+        IMS_TRACE_I("PANI: %s (%s, %d)", bIsNetworkTypeLte ? "LTE" : "3G",
                 IMS_UTIL_SYS_PROP_IS_DEBUG_MODE() ? objAni.uniAI.utran_cell_id_3gpp.acUTRAN_CELL_ID
-                                                  : "xxx",
+                                                  : "***",
                 nIndex);
     }
     else if (nNetworkType == TYPE_NR)
@@ -329,7 +329,7 @@ PRIVATE GLOBAL AccessNetworkInfo OsIpcan::CreateAccessNetworkInfo(
                 (strMnc.GetLength() > ANI_3GPP_MNC_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (MCC=%d, MNC=%d)", strMcc.GetLength(),
+            IMS_TRACE_D("PANI: Invalid length (MCC=%d, MNC=%d)", strMcc.GetLength(),
                     strMnc.GetLength(), 0);
             return objAni;
         }
@@ -338,7 +338,7 @@ PRIVATE GLOBAL AccessNetworkInfo OsIpcan::CreateAccessNetworkInfo(
                 (strCellId.GetLength() > ANI_3GPP_NR_CELL_ID_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (TAC=%d, CellIdentity=%d)", strTac.GetLength(),
+            IMS_TRACE_D("PANI: Invalid length (TAC=%d, CellIdentity=%d)", strTac.GetLength(),
                     strCellId.GetLength(), 0);
             return objAni;
         }
@@ -413,10 +413,10 @@ PRIVATE GLOBAL AccessNetworkInfo OsIpcan::CreateAccessNetworkInfo(
             nIndex++;
         }
 
-        IMS_TRACE_I("PANI :: NR (%s, %d)",
+        IMS_TRACE_I("PANI: NR (%s, %d)",
                 IMS_UTIL_SYS_PROP_IS_DEBUG_MODE()
                         ? objAni.uniAI.nr_utran_cell_id_3gpp.acUTRAN_CELL_ID
-                        : "xxx",
+                        : "***",
                 nIndex, 0);
     }
     else if ((nNetworkType == TYPE_GPRS) || (nNetworkType == TYPE_EDGE))
@@ -440,7 +440,7 @@ PRIVATE GLOBAL AccessNetworkInfo OsIpcan::CreateAccessNetworkInfo(
                 (strMnc.GetLength() > ANI_3GPP_MNC_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (MCC=%d, MNC=%d)", strMcc.GetLength(),
+            IMS_TRACE_D("PANI: Invalid length (MCC=%d, MNC=%d)", strMcc.GetLength(),
                     strMnc.GetLength(), 0);
             return objAni;
         }
@@ -449,7 +449,7 @@ PRIVATE GLOBAL AccessNetworkInfo OsIpcan::CreateAccessNetworkInfo(
                 (strCellId.GetLength() > ANI_3GPP_GERAN_CELL_ID_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (LAC=%d, CellIdentity=%d)", strLac.GetLength(),
+            IMS_TRACE_D("PANI: Invalid length (LAC=%d, CellIdentity=%d)", strLac.GetLength(),
                     strCellId.GetLength(), 0);
             return objAni;
         }
@@ -521,8 +521,8 @@ PRIVATE GLOBAL AccessNetworkInfo OsIpcan::CreateAccessNetworkInfo(
             nIndex++;
         }
 
-        IMS_TRACE_I("PANI :: GERAN (%s, %d)",
-                IMS_UTIL_SYS_PROP_IS_DEBUG_MODE() ? objAni.uniAI.cgi_3gpp.acCGI : "xxx", nIndex, 0);
+        IMS_TRACE_I("PANI: GERAN (%s, %d)",
+                IMS_UTIL_SYS_PROP_IS_DEBUG_MODE() ? objAni.uniAI.cgi_3gpp.acCGI : "***", nIndex, 0);
     }
     else if (nNetworkType == TYPE_EHRPD)
     {
@@ -545,7 +545,7 @@ PRIVATE GLOBAL AccessNetworkInfo OsIpcan::CreateAccessNetworkInfo(
                 (strSubnet.GetLength() > ANI_3GPP2_SUBNET_LENGTH_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (sectorId=%d, subnetLength=%d)",
+            IMS_TRACE_D("PANI: Invalid length (sectorId=%d, subnetLength=%d)",
                     strSector.GetLength(), strSubnet.GetLength(), 0);
             return objAni;
         }
@@ -582,8 +582,8 @@ PRIVATE GLOBAL AccessNetworkInfo OsIpcan::CreateAccessNetworkInfo(
             nIndex++;
         }
 
-        IMS_TRACE_I("PANI :: eHRPD (%s, %d)",
-                IMS_UTIL_SYS_PROP_IS_DEBUG_MODE() ? objAni.uniAI.ci_3gpp2.acCI : "xxx", nIndex, 0);
+        IMS_TRACE_I("PANI: eHRPD (%s, %d)",
+                IMS_UTIL_SYS_PROP_IS_DEBUG_MODE() ? objAni.uniAI.ci_3gpp2.acCI : "***", nIndex, 0);
     }
     else
     {

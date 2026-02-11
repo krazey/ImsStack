@@ -47,7 +47,7 @@ PUBLIC GLOBAL IMS_BOOL MessageService::PostMessage(
 
         if (!bResult)
         {
-            IMS_TRACE_D("PostMessage(failed) :: target=%s, msg=%d", strTarget.GetStr(),
+            IMS_TRACE_D("PostMessage(failed): target=%s, msg=%d", strTarget.GetStr(),
                     objMsg.GetName(), 0);
         }
     }
@@ -76,7 +76,7 @@ PUBLIC GLOBAL IMS_BOOL MessageService::PostMessageThread(
 
         if (!bResult)
         {
-            IMS_TRACE_D("PostMessage(failed) :: msg=%d", objMsg.GetName(), 0, 0);
+            IMS_TRACE_D("PostMessage(failed): msg=%d", objMsg.GetName(), 0, 0);
         }
     }
 

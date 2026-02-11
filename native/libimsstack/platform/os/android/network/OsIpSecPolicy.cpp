@@ -117,7 +117,7 @@ PUBLIC VIRTUAL void OsIpSecPolicy::ManageLifetime(IMS_UINT32 nDuration)
 
     IMS_UINTP nTid = m_piTimer->SetTimer(nDuration, this);
 
-    IMS_TRACE_I("SA lifetime - timer(%" PFLS_u ") started", nTid, 0, 0);
+    IMS_TRACE_I("SA lifetime: timer(%" PFLS_u ") started", nTid, 0, 0);
 }
 
 PUBLIC VIRTUAL void OsIpSecPolicy::SetListener(IN IIpSecPolicyListener* piListener)
@@ -128,7 +128,7 @@ PUBLIC VIRTUAL void OsIpSecPolicy::SetListener(IN IIpSecPolicyListener* piListen
 PUBLIC
 void OsIpSecPolicy::DestroyAllSas()
 {
-    IMS_TRACE_I("DestroyAllSAs - SP-size(%d), SA-size(%d)", m_objIpSecSps.GetSize(),
+    IMS_TRACE_I("DestroyAllSas: SP-size(%d), SA-size(%d)", m_objIpSecSps.GetSize(),
             m_objIpSecSas.GetSize(), 0);
 
     for (IMS_UINT32 i = 0; i < m_objIpSecSps.GetSize(); i++)
@@ -169,7 +169,7 @@ OsIpSecSp* OsIpSecPolicy::FindSp(IN IMS_UINT32 nSpi)
 
         if (pIpSecSp->GetSpi() == nSpi)
         {
-            IMS_TRACE_I("FindSP - SP=%p", pIpSecSp, 0, 0);
+            IMS_TRACE_I("FindSp: SP=%p", pIpSecSp, 0, 0);
             return pIpSecSp;
         }
     }
@@ -186,7 +186,7 @@ OsIpSecSa* OsIpSecPolicy::FindSa(IN IMS_UINT32 nSpi)
 
         if (pIpSecSa->GetSpi() == nSpi)
         {
-            IMS_TRACE_I("FindSA - SA=%p", pIpSecSa, 0, 0);
+            IMS_TRACE_I("FindSa: SA=%p", pIpSecSa, 0, 0);
             return pIpSecSa;
         }
     }

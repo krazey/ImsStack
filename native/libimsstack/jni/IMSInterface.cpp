@@ -277,7 +277,9 @@ static void JniAttachNativeThread(const char* threadName)
 
 static void JniDetachNativeThread()
 {
+#if defined(__JNI_DEBUG__)
     IMS_TRACE_D("JniDetachNativeThread:", 0, 0, 0);
+#endif
 
     JavaVM* jvm = GetJavaVm();
 
@@ -382,7 +384,7 @@ static jint JniIms_nativeSendData(
     long nNativeObject = INT64_TO_SINTP(jNativeObject);
 
 #if defined(__JNI_DEBUG__)
-    IMS_TRACE_D("JniIms_nativeSendData :: object=%" PFLS_x, nNativeObject, 0, 0);
+    IMS_TRACE_D("JniIms_nativeSendData: object=%" PFLS_x, nNativeObject, 0, 0);
 #endif
 
     BaseService* pService = reinterpret_cast<BaseService*>(nNativeObject);

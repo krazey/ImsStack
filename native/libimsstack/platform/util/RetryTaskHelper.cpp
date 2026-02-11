@@ -37,7 +37,7 @@ RetryTaskHelper::RetryTaskHelper(IN IMS_BOOL bTimerOnCmdCompleted /*= IMS_FALSE*
 PUBLIC VIRTUAL RetryTaskHelper::~RetryTaskHelper()
 {
 #ifdef __IMS_DEBUG__
-    IMS_TRACE_D("Destructor :: RetryTaskHelper", 0, 0, 0);
+    IMS_TRACE_D("dtor: RetryTaskHelper", 0, 0, 0);
 #endif
 }
 
@@ -131,7 +131,7 @@ IMS_BOOL RetryTaskHelper::Start(IN IMS_SINT32 nParam /*= START_COMMAND*/)
         case START_COMMAND_N_TIMER:
             if (m_pTimer == IMS_NULL)
             {
-                IMS_TRACE_E(0, "Invalid parameter (%d) - No retry timer", nParam, 0, 0);
+                IMS_TRACE_E(0, "Invalid parameter(%d): No retry timer", nParam, 0, 0);
                 return IMS_FALSE;
             }
 
@@ -148,7 +148,7 @@ IMS_BOOL RetryTaskHelper::Start(IN IMS_SINT32 nParam /*= START_COMMAND*/)
         case START_TIMER:
             if (m_pTimer == IMS_NULL)
             {
-                IMS_TRACE_E(0, "Invalid parameter (%d) - No retry timer", nParam, 0, 0);
+                IMS_TRACE_E(0, "Invalid parameter(%d): No retry timer", nParam, 0, 0);
                 return IMS_FALSE;
             }
 
@@ -160,7 +160,7 @@ IMS_BOOL RetryTaskHelper::Start(IN IMS_SINT32 nParam /*= START_COMMAND*/)
         case START_TIMER_N_COMMAND:
             if (m_pTimer == IMS_NULL)
             {
-                IMS_TRACE_E(0, "Invalid parameter (%d) - No retry timer", nParam, 0, 0);
+                IMS_TRACE_E(0, "Invalid parameter(%d): No retry timer", nParam, 0, 0);
                 return IMS_FALSE;
             }
 

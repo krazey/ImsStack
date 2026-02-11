@@ -206,7 +206,7 @@ void SocketFdManager::DetachSocketHandle(IN IMS_SOCKET hSocket)
 
             if (ResetFdSet(hSocket, ImsFdSet::EVENT_ALL) != 0)
             {
-                IMS_TRACE_D("FATAL :: Socket (%d) event is cleared by detach", hSocket, 0, 0);
+                IMS_TRACE_D("FATAL: Socket(%d) event is cleared by detach", hSocket, 0, 0);
             }
             return;
         }
@@ -533,7 +533,7 @@ PUBLIC VIRTUAL void OsSocketThread::RunImp()
         if (m_objFdMngr.ResetControlEvent() < 0)
         {
             // RECOVER_CONTROL_PIPE
-            IMS_TRACE_I("SocketService :: Control pipe will be re-created", 0, 0, 0);
+            IMS_TRACE_I("SocketService: Control pipe is being re-created", 0, 0, 0);
             m_objFdMngr.DestroyControlPipe();
             m_objFdMngr.CreateControlPipe();
         }
@@ -611,7 +611,7 @@ PUBLIC VIRTUAL void OsSocketThread::RunImp()
         }
         else
         {
-            IMS_TRACE_D("Socket worker thread :: select (%d), errno (%d)", nMaxEvent, errno, 0);
+            IMS_TRACE_D("SocketService: select(%d), errno(%d)", nMaxEvent, errno, 0);
         }
     }
 
@@ -699,7 +699,7 @@ IMS_BOOL OsSocketService::StartUp()
 PUBLIC
 void OsSocketService::CleanUp()
 {
-    IMS_TRACE_D("SocketService :: CleanUp", 0, 0, 0);
+    IMS_TRACE_D("SocketService: CleanUp", 0, 0, 0);
 
     ExitInstance();
 }
@@ -715,7 +715,7 @@ void OsSocketService::AttachHandle(IN SOCKET hSocket, IN OsSocketBase* pSocket)
 {
     if (LookupHandle(hSocket) != IMS_NULL)
     {
-        IMS_TRACE_D("SocketService :: Socket (%d) already exists", hSocket, 0, 0);
+        IMS_TRACE_D("SocketService: Socket(%d) already exists", hSocket, 0, 0);
         return;
     }
 
@@ -758,7 +758,7 @@ void OsSocketService::KillSocket(IN SOCKET hSocket)
 {
     if (LookupHandle(hSocket) == IMS_NULL)
     {
-        IMS_TRACE_D("KillSocket :: Socket (%d) is already dead", hSocket, 0, 0);
+        IMS_TRACE_D("KillSocket: Socket(%d) is already dead", hSocket, 0, 0);
         return;
     }
 
@@ -837,7 +837,7 @@ void OsSocketService::SendControlEvent()
     if (m_pWorkerThread->GetSocketFdManager().SetControlEvent() < 0)
     {
         // RECOVER_CONTROL_PIPE
-        IMS_TRACE_I("SocketService :: Control pipe will be re-created", 0, 0, 0);
+        IMS_TRACE_I("SocketService: Control pipe is being re-created", 0, 0, 0);
 
         m_pWorkerThread->GetSocketFdManager().DestroyControlPipe();
         m_pWorkerThread->GetSocketFdManager().CreateControlPipe();
@@ -871,7 +871,7 @@ void OsSocketService::DoNotificationCallback(IN SOCKET nSocket, IN IMS_SLONG nEv
 
     if (nErrorCode != 0)
     {
-        IMS_TRACE_D("DoNotificationCallback - socket=%d, error=%d", nSocket, nErrorCode, 0);
+        IMS_TRACE_D("DoNotificationCallback: socket=%d, error=%d", nSocket, nErrorCode, 0);
     }
 
     switch (nEvent)
@@ -900,8 +900,7 @@ void OsSocketService::DoNotificationCallback(IN SOCKET nSocket, IN IMS_SLONG nEv
                         if (pTmpSocket == IMS_NULL)
                         {
                             IMS_TRACE_E(0,
-                                    "TCP socket (%d) is already dead "
-                                    "on IMS_SOCKET_DATA_RECEIVED",
+                                    "TCP socket(%d) is already dead on IMS_SOCKET_DATA_RECEIVED",
                                     nSocket, 0, 0);
                         }
                         else
@@ -967,7 +966,7 @@ void OsSocketService::DoNotificationCallback(IN SOCKET nSocket, IN IMS_SLONG nEv
             if (pTmpSocket == IMS_NULL)
             {
                 IMS_TRACE_E(
-                        0, "TCP socket (%d) is already dead on IMS_SOCKET_CLOSED", nSocket, 0, 0);
+                        0, "TCP socket(%d) is already dead on IMS_SOCKET_CLOSED", nSocket, 0, 0);
                 break;
             }
 

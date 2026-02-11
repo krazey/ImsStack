@@ -451,7 +451,7 @@ PUBLIC VIRTUAL IMS_BOOL OsFileUtil::DeleteAllFiles(
 
     if (pDir == IMS_NULL)
     {
-        IMS_TRACE_E(0, "DeleteAllFiles :: opendir failed", 0, 0, 0);
+        IMS_TRACE_E(0, "DeleteAllFiles: opendir failed", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -463,7 +463,7 @@ PUBLIC VIRTUAL IMS_BOOL OsFileUtil::DeleteAllFiles(
 
         if (strFileName.Equals(".") || strFileName.Equals(".."))
         {
-            IMS_TRACE_D("DeleteAllFiles :: . or .. : %s", pFile->d_name, 0, 0);
+            IMS_TRACE_D("DeleteAllFiles: . or .. : %s", pFile->d_name, 0, 0);
             continue;
         }
 
@@ -477,7 +477,7 @@ PUBLIC VIRTUAL IMS_BOOL OsFileUtil::DeleteAllFiles(
             // If it is the sub-directory
             strSubPathName.Append("/");
 
-            IMS_TRACE_D("DeleteAllFiles :: sub-dir=%s", strSubPathName.GetStr(), 0, 0);
+            IMS_TRACE_D("DeleteAllFiles: sub-dir=%s", strSubPathName.GetStr(), 0, 0);
 
             closedir(pSubDir);
 
@@ -492,7 +492,7 @@ PUBLIC VIRTUAL IMS_BOOL OsFileUtil::DeleteAllFiles(
         else
         {
             // If it is the file
-            IMS_TRACE_D("DeleteAllFiles :: file=%s", strSubPathName.GetStr(), 0, 0);
+            IMS_TRACE_D("DeleteAllFiles: file=%s", strSubPathName.GetStr(), 0, 0);
 
             AString strFileExtension;
 
@@ -528,7 +528,7 @@ PUBLIC VIRTUAL ImsList<AString> OsFileUtil::GetAllFiles(
 
     if (pDir == IMS_NULL)
     {
-        IMS_TRACE_E(0, "GetAllFiles :: opendir failed", 0, 0, 0);
+        IMS_TRACE_E(0, "GetAllFiles: opendir failed", 0, 0, 0);
         return objFileNameList;
     }
 
@@ -540,7 +540,7 @@ PUBLIC VIRTUAL ImsList<AString> OsFileUtil::GetAllFiles(
 
         if (strFileName.Equals(".") || strFileName.Equals(".."))
         {
-            IMS_TRACE_D("GetAllFiles :: . or .. : %s", pFile->d_name, 0, 0);
+            IMS_TRACE_D("GetAllFiles: . or .. : %s", pFile->d_name, 0, 0);
             continue;
         }
 

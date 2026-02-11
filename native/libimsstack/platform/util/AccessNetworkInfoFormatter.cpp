@@ -330,21 +330,21 @@ PUBLIC GLOBAL IMS_BOOL AccessNetworkInfoFormatter::Encode(IN const AccessNetwork
     if ((objAni.nType < AccessNetworkInfo::TYPE_NONE) ||
             (objAni.nType >= AccessNetworkInfo::TYPE_MAX))
     {
-        IMS_TRACE_D("ANInfo - invalid type", 0, 0, 0);
+        IMS_TRACE_D("ANInfo: invalid type", 0, 0, 0);
         return IMS_FALSE;
     }
 
     if ((objAni.nClass < AccessNetworkInfo::CLASS_NONE) ||
             (objAni.nClass >= AccessNetworkInfo::CLASS_MAX))
     {
-        IMS_TRACE_D("ANInfo - invalid class", 0, 0, 0);
+        IMS_TRACE_D("ANInfo: invalid class", 0, 0, 0);
         return IMS_FALSE;
     }
 
     if ((objAni.nType == AccessNetworkInfo::TYPE_NONE) &&
             (objAni.nClass == AccessNetworkInfo::CLASS_NONE))
     {
-        IMS_TRACE_D("ANInfo - no network type & class", 0, 0, 0);
+        IMS_TRACE_D("ANInfo: no network type & class", 0, 0, 0);
         return IMS_FALSE;
     }
 
