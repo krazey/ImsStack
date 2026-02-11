@@ -245,7 +245,7 @@ void SipConnectionNotifierManagerPrivate::Init(IN IMS_SINT32 nSlotId)
         AString strName;
         strName.Sprintf("SSCLP_%02d", nSlotId);
 
-        IMS_TRACE_I("SCN :: %s is created", strName.GetStr(), 0, 0);
+        IMS_TRACE_I("SCN: %s created", strName.GetStr(), 0, 0);
 
         m_ppListenerProxy[nSlotId] = new SipServerConnectionListenerProxy(strName, this);
     }
@@ -295,8 +295,8 @@ ISipConnectionNotifier* SipConnectionNotifierManagerPrivate::CreateConnectionNot
     AddConnectionNotifier(strKey, piScn);
     AddReference(strKey);
 
-    IMS_TRACE_D("SIP Connection Notifier (%s, %d) is created",
-            SipDebug::GetCharA1(strKey.GetStr(), 5), piScn->GetSlotId(), 0);
+    IMS_TRACE_D("SIP Connection Notifier(%s|s%d) created", SipDebug::GetCharA1(strKey.GetStr(), 5),
+            piScn->GetSlotId(), 0);
 
     return piScn;
 }
@@ -374,7 +374,7 @@ void SipConnectionNotifierManagerPrivate::AddReference(IN const AString& strKey)
     {
         // It is just created, so add a new reference count
         m_objReferenceCounts.Add(strKey, 1);
-        IMS_TRACE_D("SCN_REF (%s) :: Created", SipDebug::GetCharA1(strKey.GetStr(), 5), 0, 0);
+        IMS_TRACE_D("SCN_REF(%s): Created", SipDebug::GetCharA1(strKey.GetStr(), 5), 0, 0);
         return;
     }
 
@@ -382,8 +382,8 @@ void SipConnectionNotifierManagerPrivate::AddReference(IN const AString& strKey)
 
     ++nValue;
 
-    IMS_TRACE_D("SCN_REF (%s) :: %d >>> %d", SipDebug::GetCharA1(strKey.GetStr(), 5), nValue - 1,
-            nValue);
+    IMS_TRACE_D(
+            "SCN_REF(%s): %d >>> %d", SipDebug::GetCharA1(strKey.GetStr(), 5), nValue - 1, nValue);
 }
 
 PRIVATE
@@ -401,8 +401,8 @@ IMS_SINT32 SipConnectionNotifierManagerPrivate::RemoveReference(IN const AString
 
     --nValue;
 
-    IMS_TRACE_D("SCN_REF (%s) :: %d >>> %d", SipDebug::GetCharA1(strKey.GetStr(), 5), nValue + 1,
-            nValue);
+    IMS_TRACE_D(
+            "SCN_REF(%s): %d >>> %d", SipDebug::GetCharA1(strKey.GetStr(), 5), nValue + 1, nValue);
 
     return nValue;
 }
@@ -519,7 +519,7 @@ PRIVATE GLOBAL IMS_BOOL SipConnectionNotifierManagerPrivate::CheckMessageValidit
 
             if (pParameter == IMS_NULL)
             {
-                IMS_TRACE_D("Refer-To :: method parameter does not exist", 0, 0, 0);
+                IMS_TRACE_D("Refer-To: no method parameter", 0, 0, 0);
                 piHeader->Destroy();
                 break;
             }
@@ -702,7 +702,7 @@ PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::GetRejectCode(
 
         if (objStatusCode != nStatusCode)
         {
-            IMS_TRACE_D("SIPRoutingReject(%d) :: Status code is overwritten (%d >> %d)", nLogInfo,
+            IMS_TRACE_D("SipRoutingReject(%d): Status code is overwritten (%d >> %d)", nLogInfo,
                     nStatusCode, objStatusCode.ToInt());
         }
     }
@@ -734,7 +734,7 @@ PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::HandleSipRequest(
         return;
     }
 
-    IMS_TRACE_I("___ %s REQUEST RECEIVED ___", piSsc->GetMethod().ToString().GetStr(), 0, 0);
+    IMS_TRACE_I("___ SIP-REQ: %s", piSsc->GetMethod().ToString().GetStr(), 0, 0);
 
     // Check the message validity
     AString strReasonPhrase(AString::ConstNull());
@@ -764,10 +764,7 @@ PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::HandleSipRequest(
         if (!bHandled)
         {
             // Send 481 response
-            IMS_TRACE_D("SipConnectionNotifierManager :: Sending 481 response "
-                        "to CANCEL request ...",
-                    0, 0, 0);
-
+            IMS_TRACE_D("SCNM: Sending 481-CANCEL", 0, 0, 0);
             SendResponse(piScn, piSsc, SipStatusCode::SC_481);
             piSsc->Close();
         }
@@ -795,7 +792,7 @@ PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::HandleSipRequest(
                     objMethod.Equals(SipMethod::INVITE) || objMethod.Equals(SipMethod::UPDATE) ||
                     objMethod.Equals(SipMethod::REFER))
             {
-                IMS_TRACE_D("SipConnectionNotifierManager :: Dialog is already terminated, "
+                IMS_TRACE_D("SCNM: Dialog is already terminated, "
                             "but try to route the message to the proper service method",
                         0, 0, 0);
                 bRequestWithinDialog = IMS_TRUE;
@@ -823,15 +820,13 @@ PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::HandleSipRequest(
         {
             if (piSsc->GetMethod().Equals(SipMethod::ACK))
             {
-                IMS_TRACE_D("SipConnectionNotifierManager :: ACK request is received, "
-                            "but no dialog(%s) matched ...",
+                IMS_TRACE_D("SCNM: ACK request is received, but no dialog(%s) matched",
                         SipDebug::GetStr1(piDialog->GetDialogId(), 8, '@').GetStr(), 0, 0);
             }
             else
             {
                 // Send 481 response
-                IMS_TRACE_D("SipConnectionNotifierManager :: Sending 481 response "
-                            "to %s request within the dialog (%s) ...",
+                IMS_TRACE_D("SCNM: Sending 481-%s within the dialog(%s)",
                         piSsc->GetMethod().ToString().GetStr(),
                         SipDebug::GetStr1(piDialog->GetDialogId(), 8, '@').GetStr(), 0);
 
@@ -865,8 +860,7 @@ PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::HandleSipRequest(
             {
                 piSsc->Close();
 
-                IMS_TRACE_D("SipConnectionNotifierManager :: ACK request is received, ignored...",
-                        0, 0, 0);
+                IMS_TRACE_D("SCNM: ACK received", 0, 0, 0);
                 return;
             }
 
@@ -877,8 +871,8 @@ PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::HandleSipRequest(
             }
 
             // Send 404 response (or 480?)
-            IMS_TRACE_D("SipConnectionNotifierManager :: Sending %d response to %s request ...",
-                    objStatusCode.ToInt(), piSsc->GetMethod().ToString().GetStr(), 0);
+            IMS_TRACE_D("SCNM: Sending %d-%s", objStatusCode.ToInt(),
+                    piSsc->GetMethod().ToString().GetStr(), 0);
 
             SendResponse(
                     piScn, piSsc, objStatusCode.ToInt(), objStatusCode.GetReasonPhrase(), IMS_TRUE);
@@ -932,7 +926,7 @@ PRIVATE GLOBAL IMS_BOOL SipConnectionNotifierManagerPrivate::IsCalleePreferenceS
 
         if (pSfc->IsCalleePreferenceSupported(objMethod))
         {
-            IMS_TRACE_D("Service (%s) supports the callee preference",
+            IMS_TRACE_D("Service(%s) supports the callee preference",
                     pService->GetServiceId().GetStr(), 0, 0);
 
             bCalleePreference = IMS_TRUE;
@@ -951,7 +945,7 @@ PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequest(
     if (objServices.IsEmpty())
     {
         GetRejectCode(piSsc, SipStatusCode::SC_404, 1, objStatusCode);
-        IMS_TRACE_E(0, "There are no installed services", 0, 0, 0);
+        IMS_TRACE_E(0, "No installed services", 0, 0, 0);
         return IMS_NULL;
     }
 
@@ -960,8 +954,7 @@ PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequest(
     const AString& strRequestUri = piSsc->GetRequestUri();
     SipAddress objRequestUri(strRequestUri);
 
-    IMS_TRACE_D(
-            "RouteSipRequest :: Request-URI (%s)", SipDebug::GetUri1(strRequestUri).GetStr(), 0, 0);
+    IMS_TRACE_D("RouteSipRequest: R-URI(%s)", SipDebug::GetUri1(strRequestUri).GetStr(), 0, 0);
 
     if (SipFeatures::IsTransportParameterIgnoredForIncomingRequestRouting(piSsc->GetSlotId()))
     {
@@ -982,7 +975,7 @@ PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequest(
         // If Service is not yet opened, then skips this service.
         if (!pService->IsImsConnected())
         {
-            IMS_TRACE_I("IMS is not connected (%s, %s)", pService->GetAppId().GetStr(),
+            IMS_TRACE_I("IMS is not connected (%s|%s)", pService->GetAppId().GetStr(),
                     pService->GetServiceId().GetStr(), 0);
             // Drop the service since it is not connected to the IMS network
             objServices.RemoveAt(i);
@@ -992,9 +985,8 @@ PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequest(
         // Check the method if it supports or not
         if (!pService->ValidateMethod(objMethod))
         {
-            IMS_TRACE_D("Method (%s) is not supported in the service (%s)",
+            IMS_TRACE_D("Method(%s) is not supported in the service(%s)",
                     objMethod.ToString().GetStr(), pService->GetServiceId().GetStr(), 0);
-
             // Drop the service since the request-uri validation fails.
             objServices.RemoveAt(i);
             continue;
@@ -1005,8 +997,7 @@ PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequest(
 
         if (!bValidity)
         {
-            IMS_TRACE_D("Request-URI is not matched (%s)", pService->GetServiceId().GetStr(), 0, 0);
-
+            IMS_TRACE_D("R-URI is not matched(%s)", pService->GetServiceId().GetStr(), 0, 0);
             // Drop the service since the request-uri validation fails.
             objServices.RemoveAt(i);
             continue;
@@ -1018,7 +1009,7 @@ PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequest(
     if (objServices.IsEmpty())
     {
         GetRejectCode(piSsc, SipStatusCode::SC_404, 2, objStatusCode);
-        IMS_TRACE_E(0, "There are no matched services", 0, 0, 0);
+        IMS_TRACE_E(0, "SCNM: No matched services", 0, 0, 0);
         return IMS_NULL;
     }
 
@@ -1062,7 +1053,7 @@ PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequest(
         // If Service is not yet opened, then skips this service.
         if (!pService->IsImsConnected())
         {
-            IMS_TRACE_I("CallerPreference :: IMS is not connected (%s, %s)",
+            IMS_TRACE_I("CallerPreference: IMS is not connected (%s|%s)",
                     pService->GetAppId().GetStr(), pService->GetServiceId().GetStr(), 0);
             continue;
         }
@@ -1103,7 +1094,7 @@ PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequest(
     {
         delete[] pnScore;
 
-        IMS_TRACE_I("CallerPreference :: No candidated services", 0, 0, 0);
+        IMS_TRACE_I("CallerPreference: No candidated services", 0, 0, 0);
 
         Service* pService = RouteSipRequestByIfc(objServices, piSsc);
 
@@ -1143,7 +1134,7 @@ PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequest(
 
         if (pServiceByIfc != IMS_NULL)
         {
-            IMS_TRACE_I("CallerPreference :: Service is overridden by iFC", 0, 0, 0);
+            IMS_TRACE_I("CallerPreference: Service is overridden by iFC", 0, 0, 0);
             pService = pServiceByIfc;
         }
     }
@@ -1154,12 +1145,12 @@ PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequest(
 
         if (pPreferredService != IMS_NULL)
         {
-            IMS_TRACE_I("CallerPreference :: Service is overridden by callee preference", 0, 0, 0);
+            IMS_TRACE_I("CallerPreference: Service is overridden by callee preference", 0, 0, 0);
             pService = pPreferredService;
         }
     }
 
-    IMS_TRACE_I("CallerPreference :: SERVICE (%s, %s) IS SELECTED", pService->GetAppId().GetStr(),
+    IMS_TRACE_I("CallerPreference: selected service (%s|%s)", pService->GetAppId().GetStr(),
             pService->GetServiceId().GetStr(), 0);
 
     return pService;
@@ -1188,7 +1179,7 @@ PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequestByIf
 
         if (!pService->IsImsConnected())
         {
-            IMS_TRACE_I("iFC :: IMS is not connected (%s, %s)", pService->GetAppId().GetStr(),
+            IMS_TRACE_I("iFC: IMS is not connected (%s|%s)", pService->GetAppId().GetStr(),
                     pService->GetServiceId().GetStr(), 0);
             continue;
         }
@@ -1219,7 +1210,7 @@ PRIVATE GLOBAL Service* SipConnectionNotifierManagerPrivate::RouteSipRequestByIf
 
     if (pBestService != IMS_NULL)
     {
-        IMS_TRACE_I("iFC :: SERVICE ([%s, %s]|%d) IS SELECTED", pBestService->GetAppId().GetStr(),
+        IMS_TRACE_I("iFC: selected service ([%s|%s]=%d)", pBestService->GetAppId().GetStr(),
                 pBestService->GetServiceId().GetStr(), nMaxScore);
     }
 

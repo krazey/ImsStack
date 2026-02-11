@@ -134,7 +134,7 @@ PUBLIC VIRTUAL Registration::~Registration()
     RegBindingProxy::DestroyBinding(GetSlotId(), this);
 
 #ifdef __IMS_CORE_DEBUG__
-    IMS_TRACE_D("Destructor :: Registration - %s",
+    IMS_TRACE_D("dtor: Registration - %s",
             (m_pRegFlow != IMS_NULL) ? SipDebug::GetCharA1(m_pRegFlow->GetCallId().GetStr(), 8, '@')
                                      : "__UNKNOWN__",
             0, 0);
@@ -225,7 +225,7 @@ void Registration::Destroy()
 {
     m_bDestroyed = IMS_TRUE;
 
-    IMS_TRACE_D("Registration :: Destroy() - SCNEL=%d", m_nRefCountForScnErrorListener, 0, 0);
+    IMS_TRACE_D("Registration: Destroy(SCNEL=%d)", m_nRefCountForScnErrorListener, 0, 0);
 
     RegInfo* pRegInfo =
             ImsCoreContext::GetInstance()->GetRegInfoManager()->GetRegInfo(m_pRegFlow->GetRegKey());
@@ -345,7 +345,7 @@ PRIVATE VIRTUAL IMS_BOOL Registration::DispatchMessage(IN ImsMessage& objMsg)
         case AMSG_REGISTRATION_AKA_RESPONSE_RECEIVED:
             if (m_bDestroyed)
             {
-                IMS_TRACE_D("Registration is already destroyed :: AKA_RESPONSE_RECEIVED", 0, 0, 0);
+                IMS_TRACE_D("Registration is already destroyed on AKA_RESPONSE_RECEIVED", 0, 0, 0);
                 return IMS_TRUE;
             }
 
@@ -395,7 +395,7 @@ PRIVATE VIRTUAL void Registration::ClientConnection_NotifyResponse(
 
     IMS_SINT32 nStatusCode = piScc->GetStatusCode();
 
-    IMS_TRACE_I("Registration - %d response to REGISTER received", nStatusCode, 0, 0);
+    IMS_TRACE_I("___ SIP-RSP: %d-REGISTER", nStatusCode, 0, 0);
 
     if (SipStatusCode::Is1XX(nStatusCode))
     {
@@ -542,8 +542,7 @@ PRIVATE VIRTUAL void Registration::Error_NotifyError(
 {
     (void)strMessage;
 
-    IMS_TRACE_I("Registration::Error_NotifyError() - Code (%d), Message (%s)", nCode,
-            strMessage.GetStr(), 0);
+    IMS_TRACE_I("Error_NotifyError: %d|%s", nCode, strMessage.GetStr(), 0);
 
     if (piSc == IMS_NULL)
     {
@@ -1081,7 +1080,7 @@ PRIVATE VIRTUAL void Registration::RemoveActiveBindingsForcingly()
 {
     if (GetState() != STATE_ACTIVE)
     {
-        IMS_TRACE_D("Registration :: No active bindings", 0, 0, 0);
+        IMS_TRACE_D("Registration: No active bindings", 0, 0, 0);
         return;
     }
 
@@ -1105,7 +1104,7 @@ PRIVATE VIRTUAL void Registration::RemoveActiveBindingsForcingly()
 
 PRIVATE VIRTUAL void Registration::Restore()
 {
-    IMS_TRACE_I("Registration::Restore - State (%s)", StateToString(GetState()), 0, 0);
+    IMS_TRACE_I("Registration: Restore on %s", StateToString(GetState()), 0, 0);
 
     // 4 contact handling/ connection if present
     //  Reset the refresh timer
@@ -1169,13 +1168,13 @@ PRIVATE VIRTUAL IMS_RESULT Registration::RestoreActiveBindings()
 {
     if (!m_bActiveBindingsRestorationEnabled)
     {
-        IMS_TRACE_D("Registration :: Restoration(for active bindings) is disabled", 0, 0, 0);
+        IMS_TRACE_D("Registration: Restoration(for active bindings) is disabled", 0, 0, 0);
         return IMS_FAILURE;
     }
 
     if (GetState() != STATE_ACTIVE)
     {
-        IMS_TRACE_D("Registration :: No active bindings", 0, 0, 0);
+        IMS_TRACE_D("Registration: No active bindings", 0, 0, 0);
         return IMS_FAILURE;
     }
 
@@ -1253,7 +1252,7 @@ PRIVATE VIRTUAL void Registration::SetFlagForWithinTrustDomain(IN IMS_BOOL bWith
 {
     if (m_bIsWithinTrustDomain != bWithinTrustDomain)
     {
-        IMS_TRACE_I("WithinTrustDomain:: %s > %s", _TRACE_B_(m_bIsWithinTrustDomain),
+        IMS_TRACE_I("WithinTrustDomain: %s > %s", _TRACE_B_(m_bIsWithinTrustDomain),
                 _TRACE_B_(bWithinTrustDomain), 0);
 
         m_bIsWithinTrustDomain = bWithinTrustDomain;
@@ -1325,12 +1324,11 @@ PRIVATE VIRTUAL void Registration::ConnectionNotifierError_NotifyError(
 {
     (void)piScn;
 
-    IMS_TRACE_D("ConnectionNotifierError_NotifyError :: code=%d, message=%s", nCode,
-            strMessage.GetStr(), 0);
+    IMS_TRACE_D("ConnectionNotifierError_NotifyError: %d|%s", nCode, strMessage.GetStr(), 0);
 
     if (GetState() != STATE_ACTIVE)
     {
-        IMS_TRACE_D("Registration :: State is not in the ACTIVE; ignored ...", 0, 0, 0);
+        IMS_TRACE_D("Registration: State not in ACTIVE", 0, 0, 0);
         return;
     }
 
@@ -1341,13 +1339,13 @@ PRIVATE VIRTUAL void Registration::ConnectionNotifierError_NotifyError(
         const INetworkConnection* piConnection =
                 pNetworkService->FindConnection(m_pStateTracker->GetIpAddress());
 
-        // Checks if the data connection is lost or not...
+        // Checks if the data connection is lost or not.
         // If the loss of data connection detects,
         // the error doesn't need to notify the application.
         if ((piConnection == IMS_NULL) ||
                 (piConnection->GetState() != INetworkConnection::STATE_CONNECTED))
         {
-            IMS_TRACE_D("Registration :: Restoration(for active bindings) is enabled", 0, 0, 0);
+            IMS_TRACE_D("Registration: Restoration(for active bindings) is enabled", 0, 0, 0);
             return;
         }
     }
@@ -1395,7 +1393,7 @@ PRIVATE VIRTUAL void Registration::RemoveObserver(IN RegObserver* pObserver)
 PRIVATE VIRTUAL IMS_SINT32 Registration::AddReferenceForScnErrorListener()
 {
 #ifdef __IMS_CORE_DEBUG__
-    IMS_TRACE_D("Registration :: SCNEL (add) - %d >> %d", m_nRefCountForScnErrorListener,
+    IMS_TRACE_D("Registration: SCNEL (add) - %d >> %d", m_nRefCountForScnErrorListener,
             (m_nRefCountForScnErrorListener + 1), 0);
 #endif
 
@@ -1409,7 +1407,7 @@ PRIVATE VIRTUAL IMS_SINT32 Registration::RemoveReferenceForScnErrorListener()
     if (m_nRefCountForScnErrorListener > 0)
     {
 #ifdef __IMS_CORE_DEBUG__
-        IMS_TRACE_D("Registration :: SCNEL (remove) - %d >> %d", m_nRefCountForScnErrorListener,
+        IMS_TRACE_D("Registration: SCNEL (remove) - %d >> %d", m_nRefCountForScnErrorListener,
                 (m_nRefCountForScnErrorListener - 1), 0);
 #endif
 
@@ -1417,7 +1415,7 @@ PRIVATE VIRTUAL IMS_SINT32 Registration::RemoveReferenceForScnErrorListener()
 
         if (m_nRefCountForScnErrorListener == 0)
         {
-            IMS_TRACE_D("Registration :: SCNEL (0)", 0, 0, 0);
+            IMS_TRACE_D("Registration: SCNEL (0)", 0, 0, 0);
         }
     }
 
@@ -1434,8 +1432,7 @@ PRIVATE VIRTUAL void Registration::Refreshable_RefreshCompleted(
 {
     IMS_SINT32 nStatusCode = piScc->GetStatusCode();
 
-    IMS_TRACE_I("_____ REGISTRATION REFRESH COMPLETED ... Refresh Code (%d, %d)", nCode,
-            nStatusCode, 0);
+    IMS_TRACE_I("___ REGISTRATION REFRESH COMPLETED (%d|%d)", nCode, nStatusCode, 0);
 
     if (SipStatusCode::Is1XX(nStatusCode))
     {
@@ -1602,11 +1599,11 @@ PRIVATE VIRTUAL IMS_BOOL Registration::Refreshable_RefreshStarted()
 {
     IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
 
-    IMS_TRACE_I("_____ REGISTRATION REFRESH STARTED ... State(%d)", m_nState, 0, 0);
+    IMS_TRACE_I("___ REGISTRATION REFRESH STARTED on %s", StateToString(m_nState), 0, 0);
 
     if (IsBindingsUpdating())
     {
-        IMS_TRACE_D("Registration has been already requested by a service ...", 0, 0, 0);
+        IMS_TRACE_D("Registration has been already requested by a service", 0, 0, 0);
         return IMS_TRUE;
     }
 
@@ -1625,7 +1622,7 @@ PRIVATE VIRTUAL IMS_BOOL Registration::Refreshable_RefreshStarted()
 
 PRIVATE VIRTUAL void Registration::Refreshable_RefreshTerminated()
 {
-    IMS_TRACE_I("_____ REGISTRATION REFRESH TERMINATED ...", 0, 0, 0);
+    IMS_TRACE_I("___ REGISTRATION REFRESH TERMINATED", 0, 0, 0);
 
     // IMS_AUTH_NONCE_REUSE {
     SetAuthenticationChallenge(IMS_NULL);
@@ -1684,7 +1681,7 @@ PRIVATE VIRTUAL void Registration::RegInfo_Updated(IN IMS_BOOL bStale /*= IMS_FA
         return;
     }
 
-    IMS_TRACE_D("RegInfo :: Updated", 0, 0, 0);
+    IMS_TRACE_D("RegInfo: Updated", 0, 0, 0);
 
     const SipAddress& objAor = m_pStateTracker->GetAuthorizedAor();
 
@@ -1742,7 +1739,7 @@ PRIVATE VIRTUAL void Registration::RegInfo_Updated(IN IMS_BOOL bStale /*= IMS_FA
 
     if (bUpdateRefreshTimer)
     {
-        IMS_TRACE_D("RegInfo :: Active & Shortened (%d)", nShortenedExpires, 0, 0);
+        IMS_TRACE_D("RegInfo: Active & Shortened (%d)", nShortenedExpires, 0, 0);
         m_pRefreshHelper->UpdateRefreshTimer(static_cast<IMS_SINT32>(nShortenedExpires));
     }
 }
@@ -1751,7 +1748,7 @@ PRIVATE VIRTUAL void Registration::DigestAka_OnResponse(IN const ByteArray& objR
         IN const ByteArray& objIk /*= ByteArray::ConstNull()*/,
         IN const ByteArray& objCk /*= ByteArray::ConstNull()*/)
 {
-    IMS_TRACE_I("Registration :: AKA RES received", 0, 0, 0);
+    IMS_TRACE_I("Registration: AKA RES received", 0, 0, 0);
 
     if (GetSubState() == SUB_STATE_IDLE)
     {
@@ -1779,7 +1776,7 @@ PRIVATE VIRTUAL void Registration::DigestAka_OnResponse(IN const ByteArray& objR
 
 PRIVATE VIRTUAL void Registration::DigestAka_OnAutsFailed(IN const ByteArray& objAuts)
 {
-    IMS_TRACE_I("Registration :: AUTS failed", 0, 0, 0);
+    IMS_TRACE_I("Registration: AUTS failed", 0, 0, 0);
 
     if (GetSubState() == SUB_STATE_IDLE)
     {
@@ -1809,7 +1806,7 @@ PRIVATE VIRTUAL void Registration::DigestAka_OnAutsFailed(IN const ByteArray& ob
 
 PRIVATE VIRTUAL void Registration::DigestAka_OnMacFailed()
 {
-    IMS_TRACE_I("Registration :: MAC failed", 0, 0, 0);
+    IMS_TRACE_I("Registration: MAC failed", 0, 0, 0);
 
     if (GetSubState() == SUB_STATE_IDLE)
     {
@@ -1918,7 +1915,7 @@ void Registration::CheckUaLocation(IN const ISipMessage* piSipMsg)
 
     if (pParameter == IMS_NULL)
     {
-        IMS_TRACE_D("The 'received' parameter does not exist", 0, 0, 0);
+        IMS_TRACE_D("No 'received' parameter", 0, 0, 0);
 
         piHeader->Destroy();
 
@@ -2121,13 +2118,13 @@ IMS_BOOL Registration::CreateSa(IN const Credential& objCredential, IN const Ims
     // Checks if the security association is required or not.
     if (!m_pRegParam->IsSecurityAssociationRequired())
     {
-        IMS_TRACE_D("Security association is not required ...", 0, 0, 0);
+        IMS_TRACE_D("Security association is not required", 0, 0, 0);
         return IMS_TRUE;
     }
 
     if (m_piListener == IMS_NULL)
     {
-        IMS_TRACE_D("Security association is not required ... ; no listener", 0, 0, 0);
+        IMS_TRACE_D("No listener", 0, 0, 0);
         return IMS_TRUE;
     }
 
@@ -2477,8 +2474,7 @@ IMS_BOOL Registration::RespondToChallenge(IN ISipClientConnection* piScc)
                 return IMS_FALSE;
             }
 
-            IMS_TRACE_D(
-                    "RespondToChallenge :: Waiting for AKA authentication response ...", 0, 0, 0);
+            IMS_TRACE_D("RespondToChallenge: Waiting for AKA authentication response", 0, 0, 0);
 
             // IMS_AUTH_NONCE_REUSE {
             // Keep the authentication challenge for re/de-registration
@@ -2488,7 +2484,7 @@ IMS_BOOL Registration::RespondToChallenge(IN ISipClientConnection* piScc)
             return IMS_TRUE;
         }
 
-        IMS_TRACE_D("RespondToChallenge :: Respond to MD5 authentication challenge ...", 0, 0, 0);
+        IMS_TRACE_D("RespondToChallenge: Respond to MD5 authentication challenge", 0, 0, 0);
 
         // Overwrite the realm parameter if it required
         if (m_pRegParam->IsAuthRealmLenient() &&
@@ -2591,7 +2587,7 @@ IMS_BOOL Registration::RespondToPendingChallenge(IN const Credential& objCredent
     IMS_SINT32 nPrevState = GetState();
     IMS_SINT32 nPrevSubState = GetSubState();
 
-    IMS_TRACE_D("Start to respond to AKA authentication challenge ...", 0, 0, 0);
+    IMS_TRACE_D("Start to respond to AKA authentication challenge", 0, 0, 0);
 
     if ((nPrevSubState == SUB_STATE_REGISTERING) || (nPrevSubState == SUB_STATE_DEREGISTERING))
     {
@@ -2865,7 +2861,7 @@ IMS_BOOL Registration::RespondToPendingChallenge(IN const Credential& objCredent
         piScc->RemoveAllCredentials();
     }
 
-    IMS_TRACE_D("Terminate to respond to AKA authentication challenge ...", 0, 0, 0);
+    IMS_TRACE_D("Terminate to respond to AKA authentication challenge", 0, 0, 0);
 
     return IMS_TRUE;
 }
@@ -3236,7 +3232,7 @@ void Registration::SetPreviousResponse(IN const ISipMessage* piSipMsg)
 PRIVATE
 void Registration::SetState(IN IMS_SINT32 nState)
 {
-    IMS_TRACE_I("Registration (%s) :: %s to %s",
+    IMS_TRACE_I("Registration: (%s) %s to %s",
             SipDebug::GetUri1(m_pStateTracker->GetAor().GetUri()).GetStr(), StateToString(m_nState),
             StateToString(nState));
 
@@ -3246,7 +3242,7 @@ void Registration::SetState(IN IMS_SINT32 nState)
 PRIVATE
 void Registration::SetSubState(IN IMS_SINT32 nSubState)
 {
-    IMS_TRACE_I("Registration (Sub-State) :: %s to %s", SubStateToString(m_nSubState),
+    IMS_TRACE_I("Registration: %s to %s (Sub-State)", SubStateToString(m_nSubState),
             SubStateToString(nSubState), 0);
 
     m_nSubState = nSubState;
@@ -3284,7 +3280,7 @@ void Registration::StorePersistentHeaders(IN const ISipMessage* piSipMsg)
     {
         objTmpArray.AddElement(m_pStateTracker->GetAor().ToString());
 
-        IMS_TRACE_D("P-Associated-URI is not present; AOR (%s)",
+        IMS_TRACE_D("No P-Associated-URI (aor=%s)",
                 SipDebug::GetUri1(objTmpArray.GetElementAt(0)).GetStr(), 0, 0);
     }
 
@@ -3410,7 +3406,7 @@ IMS_RESULT Registration::UpdateBindings(IN const ISipMessage* piSipMsg)
         }
     }
 
-    IMS_TRACE_D("Contact header field :: count=%d", objHeaders.GetSize(), 0, 0);
+    IMS_TRACE_D("Contact header field: count=%d", objHeaders.GetSize(), 0, 0);
 
     if (objHeaders.GetSize() == 1)
     {
@@ -3557,7 +3553,7 @@ void Registration::UpdateProtectedServerPortForContact(IN_OUT ISipMessage* piSip
 
                 if (pAddress->GetPort() != nPort)
                 {
-                    IMS_TRACE_D("RegContact :: port is changed; %d >> %d", pAddress->GetPort(),
+                    IMS_TRACE_D("RegContact: port is changed (%d >> %d)", pAddress->GetPort(),
                             nPort, 0);
 
                     pAddress->SetPort(nPort);
@@ -3570,7 +3566,7 @@ void Registration::UpdateProtectedServerPortForContact(IN_OUT ISipMessage* piSip
             else
             {
                 // Exceptional case
-                IMS_TRACE_D("ReformContactHeader :: SipAddress is null", 0, 0, 0);
+                IMS_TRACE_D("ReformContactHeader: SipAddress is null", 0, 0, 0);
                 ReformContactHeader(piSipMsg);
             }
 
@@ -3579,7 +3575,7 @@ void Registration::UpdateProtectedServerPortForContact(IN_OUT ISipMessage* piSip
         else
         {
             // Exceptional case
-            IMS_TRACE_D("ReformContactHeader :: ISipHeader is null", 0, 0, 0);
+            IMS_TRACE_D("ReformContactHeader: ISipHeader is null", 0, 0, 0);
             ReformContactHeader(piSipMsg);
         }
     }
@@ -3646,8 +3642,8 @@ PRIVATE GLOBAL ISipClientConnection* Registration::CreateConnection(IN Registrat
 
     ISipClientConnection* piScc = DYNAMIC_CAST(ISipClientConnection*, Connector::Open(strAor));
 
-    IMS_TRACE_D("CreateConnection - To (%s), Method (REGISTER)", SipDebug::GetUri1(strAor).GetStr(),
-            0, 0);
+    IMS_TRACE_D(
+            "CreateConnection: Standalone(%s|REGISTER)", SipDebug::GetUri1(strAor).GetStr(), 0, 0);
 
     if (piScc == IMS_NULL)
     {

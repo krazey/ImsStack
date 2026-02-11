@@ -34,8 +34,8 @@ PUBLIC GLOBAL IRegBinding* ServiceResolver::GetRegBinding(
         return pService->GetRegBinding();
     }
 
-    IMS_TRACE_E(0, "Can't find a service (%d, %s, %s)", nSlotId, strAppId.GetStr(),
-            strServiceId.GetStr());
+    IMS_TRACE_E(
+            0, "Service(s%d|%s|%s) not found", nSlotId, strAppId.GetStr(), strServiceId.GetStr());
 
     return IMS_NULL;
 }
@@ -73,6 +73,6 @@ PUBLIC GLOBAL void ServiceResolver::SetRegBinding(IN IMS_SINT32 nSlotId, IN cons
         return;
     }
 
-    IMS_TRACE_E(0, "Can't find a service (%d, %s, %s)", nSlotId, strAppId.GetStr(),
-            strServiceId.GetStr());
+    IMS_TRACE_E(
+            0, "Service(s%d|%s|%s) not found", nSlotId, strAppId.GetStr(), strServiceId.GetStr());
 }

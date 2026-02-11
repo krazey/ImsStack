@@ -195,14 +195,14 @@ PUBLIC VIRTUAL IMS_BOOL Service::CreateConfig(IN const AppConfig& objAppConfig)
 
     if (pServiceConfig != IMS_NULL)
     {
-        IMS_TRACE_D("Service :: IARI (%s)", pServiceConfig->GetIari().ToString().GetStr(), 0, 0);
+        IMS_TRACE_D("Service: IARI (%s)", pServiceConfig->GetIari().ToString().GetStr(), 0, 0);
 
         const ImsList<ServiceIdentifier>& objIcsis = pServiceConfig->GetIcsis();
 
         for (IMS_UINT32 i = 0; i < objIcsis.GetSize(); ++i)
         {
             const ServiceIdentifier& objSi = objIcsis.GetAt(i);
-            IMS_TRACE_D("Service :: ICSI (%s) at (%d)", objSi.ToString().GetStr(), i, 0);
+            IMS_TRACE_D("Service: ICSI (%s) at (%d)", objSi.ToString().GetStr(), i, 0);
         }
     }
 
@@ -237,8 +237,8 @@ PUBLIC VIRTUAL ISipClientConnection* Service::CreateConnection(IN const SipAddre
     IMS_BOOL bOverwriteTarget = IMS_FALSE;
     AString strTarget = pTo->ToString();
 
-    IMS_TRACE_D("Service::CreateConnection() - To (%s), Method (%s)",
-            SipDebug::GetUri1(strTarget).GetStr(), objMethod.ToString().GetStr(), 0);
+    IMS_TRACE_D("CreateConnection: Standalone(%s|%s)", SipDebug::GetUri1(strTarget).GetStr(),
+            objMethod.ToString().GetStr(), 0);
 
     if (!pTo->IsSchemeSip() && !pTo->IsSchemeSips())
     {
@@ -483,7 +483,7 @@ PUBLIC VIRTUAL ISipClientConnection* Service::CreateConnection(IN ISipDialog* pi
     // BYE_REQUEST_ON_DIALOG_TERMINATED
     AString strDialogId = piDialog->GetDialogIdEx();
 
-    IMS_TRACE_I("Service::CreateConnection() - Dialog (%s), Method (%s)",
+    IMS_TRACE_I("CreateConnection: Dialog(%s|%s)",
             SipDebug::GetCharA1(strDialogId.GetStr(), 8, '@'), objMethod.ToString().GetStr(), 0);
 
     ISipClientConnection* piScc = piDialog->GetNewClientConnection(objMethod.ToString());
@@ -491,9 +491,7 @@ PUBLIC VIRTUAL ISipClientConnection* Service::CreateConnection(IN ISipDialog* pi
     if (piScc == IMS_NULL)
     {
         Ims::SetLastError(ImsError::NO_MEMORY);
-
-        IMS_TRACE_E(0, "Creating a new SIP connection failed - SipError (%d)",
-                SipError::GetLastError(), 0, 0);
+        IMS_TRACE_E(0, "Creating a new SIP connection failed(%d)", SipError::GetLastError(), 0, 0);
         return IMS_NULL;
     }
 
@@ -713,14 +711,11 @@ PUBLIC VIRTUAL IMS_BOOL Service::CreateResponse(IN_OUT ISipServerConnection* piS
         IN IMS_SINT32 nStatusCode, IN const AString& strPhrase /*= AString::ConstNull()*/,
         IN IMS_BOOL bPrivacy /*= IMS_FALSE*/)
 {
-    IMS_TRACE_I("Service::CreateResponse() - Method (%s), Status Code (%d)",
-            piSsc->GetMethod().ToString().GetStr(), nStatusCode, 0);
+    IMS_TRACE_I("CreateResponse: %d-%s", nStatusCode, piSsc->GetMethod().ToString().GetStr(), 0);
 
     if (piSsc->InitResponse(nStatusCode) != IMS_SUCCESS)
     {
-        IMS_TRACE_E(0, "Initializing a SIP response failed - SipError(%d)",
-                SipError::GetLastError(), 0, 0);
-
+        IMS_TRACE_E(0, "Initializing a SIP response failed(%d)", SipError::GetLastError(), 0, 0);
         Ims::SetLastError(ImsError::GENERAL_ERROR);
         return IMS_FALSE;
     }
@@ -917,14 +912,14 @@ IMS_UINT32 Service::EvaluateFilterCriteria(IN const ISipMessage* piSipMsg) const
         return 0;
     }
 
-    IMS_TRACE_D("iFC :: Evaluating ... (%s)", GetServiceId().GetStr(), 0, 0);
+    IMS_TRACE_D("iFC: Evaluating (%s)", GetServiceId().GetStr(), 0, 0);
 
     IMS_UINT32 nScore = m_pFilterCriteria->Evaluate(piSipMsg);
 
     if (nScore != 0)
     {
-        IMS_TRACE_D("iFC :: Match OK (%s : %s : %d)", GetAppId().GetStr(), GetServiceId().GetStr(),
-                nScore);
+        IMS_TRACE_D(
+                "iFC: Match OK (%s|%s|%d)", GetAppId().GetStr(), GetServiceId().GetStr(), nScore);
     }
 
     return nScore;
@@ -1305,7 +1300,7 @@ IMS_BOOL Service::UpdateFeatureTags(IN const ImsList<AString>& objFeatureTags,
 
     if (bCallerCapabilityChanged)
     {
-        IMS_TRACE_D("Service(%s) :: caller capability is updated (%s)", GetServiceId().GetStr(),
+        IMS_TRACE_D("Service(%s): caller capability is updated (%s)", GetServiceId().GetStr(),
                 (nOperation == FEATURE_TAG_OP_ADD) ? "ADD" : "REMOVE", 0);
 
         m_bCallerCapabilityChanged = IMS_TRUE;
@@ -1346,8 +1341,7 @@ PUBLIC
 IMS_BOOL Service::SendResponse(IN ISipServerConnection* piSsc, IN IMS_SINT32 nStatusCode,
         IN const AString& strPhrase /*= AString::ConstNull()*/)
 {
-    IMS_TRACE_I("___ Sending %d response to %s ...", nStatusCode,
-            piSsc->GetMethod().ToString().GetStr(), 0);
+    IMS_TRACE_I("___ Sending %d-%s", nStatusCode, piSsc->GetMethod().ToString().GetStr(), 0);
 
     if (!CreateResponse(piSsc, nStatusCode, strPhrase))
     {
@@ -1474,7 +1468,7 @@ IMS_BOOL Service::ValidateRequestUri(IN const SipAddress& objRequestUri,
 
         if (pContact == IMS_NULL)
         {
-            IMS_TRACE_D("No contacts in the dialog; use the default contact address...", 0, 0, 0);
+            IMS_TRACE_D("No contacts in the dialog; use the default contact address", 0, 0, 0);
 
             if (IsRegBindingOnActive())
             {
@@ -1652,7 +1646,7 @@ IMS_BOOL Service::ValidateRequestUriForIpAndPort(IN const SipAddress& objRequest
         if (pContact == IMS_NULL)
         {
             IMS_TRACE_D("Contact header is not present in the dialog; "
-                        "use the default contact address...",
+                        "use the default contact address.",
                     0, 0, 0);
 
             if (IsRegBindingOnActive())
@@ -1733,8 +1727,7 @@ PUBLIC GLOBAL IMS_BOOL Service::ValidateFromAndTo(
     {
         if (!objAddress.Create(strFrom))
         {
-            IMS_TRACE_E(
-                    0, "ILLEGAL ARGUMENT - From (%s)", SipDebug::GetUri1(strFrom).GetStr(), 0, 0);
+            IMS_TRACE_E(0, "ILLEGAL ARGUMENT: From(%s)", SipDebug::GetUri1(strFrom).GetStr(), 0, 0);
             return IMS_FALSE;
         }
     }
@@ -1747,13 +1740,13 @@ PUBLIC GLOBAL IMS_BOOL Service::ValidateFromAndTo(
 
     if (strTo.IsNULL())
     {
-        IMS_TRACE_E(0, "ILLEGAL ARGUMENT - To", 0, 0, 0);
+        IMS_TRACE_E(0, "ILLEGAL ARGUMENT: To", 0, 0, 0);
         return IMS_FALSE;
     }
 
     if (!objAddress.Create(strTo))
     {
-        IMS_TRACE_E(0, "ILLEGAL ARGUMENT - To (%s)", SipDebug::GetUri1(strTo).GetStr(), 0, 0);
+        IMS_TRACE_E(0, "ILLEGAL ARGUMENT: To(%s)", SipDebug::GetUri1(strTo).GetStr(), 0, 0);
         return IMS_FALSE;
     }
 
@@ -1771,8 +1764,7 @@ PUBLIC GLOBAL IMS_BOOL Service::ValidateReferTo(
 
     if (!objUri.Create(strUri))
     {
-        IMS_TRACE_E(
-                0, "ILLEGAL ARGUMENT - Refer-To (%s)", SipDebug::GetUri1(strUri).GetStr(), 0, 0);
+        IMS_TRACE_E(0, "ILLEGAL ARGUMENT: Refer-To(%s)", SipDebug::GetUri1(strUri).GetStr(), 0, 0);
         return IMS_FALSE;
     }
 
@@ -1788,7 +1780,7 @@ PUBLIC GLOBAL IMS_BOOL Service::ValidateReferTo(
 
         if ((ch < 'A') || (ch > 'Z'))
         {
-            IMS_TRACE_E(0, "ILLEGAL ARGUMENT - Method (%s) in Refer-To", strMethod.GetStr(), 0, 0);
+            IMS_TRACE_E(0, "ILLEGAL ARGUMENT: Method(%s) in Refer-To", strMethod.GetStr(), 0, 0);
             return IMS_FALSE;
         }
     }
@@ -1857,7 +1849,7 @@ PROTECTED VIRTUAL void Service::ConfigUpdate_NotifyUpdate(IN IMS_SINT32 nCpi,
 
         if (nTmpFts != m_nFeatureTags)
         {
-            IMS_TRACE_D("SIP feature-tags is updated :: %08X >> %08X", m_nFeatureTags, nTmpFts, 0);
+            IMS_TRACE_D("SIP feature-tags is updated: %08X >> %08X", m_nFeatureTags, nTmpFts, 0);
 
             m_nFeatureTags = nTmpFts;
 
@@ -1868,7 +1860,7 @@ PROTECTED VIRTUAL void Service::ConfigUpdate_NotifyUpdate(IN IMS_SINT32 nCpi,
 
 PROTECTED VIRTUAL void Service::RegBinding_OnActive()
 {
-    IMS_TRACE_D("Service (%s) :: OnActive()", m_strServiceId.GetStr(), 0, 0);
+    IMS_TRACE_D("Service(%s): OnActive", m_strServiceId.GetStr(), 0, 0);
 
     SetImsConnected(IMS_TRUE);
 
@@ -1882,7 +1874,7 @@ PROTECTED VIRTUAL void Service::RegBinding_OnActive()
 
 PROTECTED VIRTUAL void Service::RegBinding_OnDestroy()
 {
-    IMS_TRACE_D("Service (%s) :: OnDestroy()", m_strServiceId.GetStr(), 0, 0);
+    IMS_TRACE_D("Service(%s): OnDestroy", m_strServiceId.GetStr(), 0, 0);
 
     if (IsImsConnected())
     {
@@ -1895,7 +1887,7 @@ PROTECTED VIRTUAL void Service::RegBinding_OnDestroy()
 
 PROTECTED VIRTUAL void Service::RegBinding_OnInit(IN const SipAddress* pAor)
 {
-    IMS_TRACE_D("Service (%s) :: OnInit()", m_strServiceId.GetStr(), 0, 0);
+    IMS_TRACE_D("Service(%s): OnInit", m_strServiceId.GetStr(), 0, 0);
 
     if (pAor != IMS_NULL)
     {
@@ -1909,14 +1901,14 @@ PROTECTED VIRTUAL void Service::RegBinding_OnInit(IN const SipAddress* pAor)
 
 PROTECTED VIRTUAL void Service::RegBinding_OnQueryCapability(OUT CallerCapability*& pCapability)
 {
-    IMS_TRACE_D("Service (%s) :: OnQueryCapability()", m_strServiceId.GetStr(), 0, 0);
+    IMS_TRACE_D("Service(%s): OnQueryCapability", m_strServiceId.GetStr(), 0, 0);
 
     pCapability = m_pCallerCapability;
 }
 
 PROTECTED VIRTUAL void Service::RegBinding_OnQueryRegistrationHeaders(OUT AStringArray& objHeaders)
 {
-    IMS_TRACE_D("Service (%s) :: OnQueryRegistrationHeaders()", m_strServiceId.GetStr(), 0, 0);
+    IMS_TRACE_D("Service(%s): OnQueryRegistrationHeaders", m_strServiceId.GetStr(), 0, 0);
 
     if (m_pAppConfig == IMS_NULL)
     {
@@ -1935,7 +1927,7 @@ PROTECTED VIRTUAL void Service::RegBinding_OnQueryRegistrationHeaders(OUT AStrin
 
 PROTECTED VIRTUAL void Service::RegBinding_OnTerminated()
 {
-    IMS_TRACE_D("Service (%s) :: OnTerminated()", m_strServiceId.GetStr(), 0, 0);
+    IMS_TRACE_D("Service(%s): OnTerminated", m_strServiceId.GetStr(), 0, 0);
 
     if (IsImsConnected())
     {
@@ -2115,8 +2107,7 @@ void Service::FormContactHeader(IN const SipMethod& objMethod, IN IMS_BOOL bPriv
     // CONTACT_FEATURE_CAPS
     if (bDeviceIdRequired && strContact.Contains(Sip::STR_SIP_INSTANCE))
     {
-        IMS_TRACE_D("FeatureCaps :: Device id is directly formed by the application; ignore it", 0,
-                0, 0);
+        IMS_TRACE_D("FeatureCaps: Device id is directly formed by the application", 0, 0, 0);
         bDeviceIdRequired = IMS_FALSE;
     }
 
@@ -2338,7 +2329,7 @@ void Service::UpdateAuthorizedUserIds()
         }
     }
 
-    IMS_TRACE_D("Service :: AssociatedURIs (%d), AuthorizedUserIds (%d)",
+    IMS_TRACE_D("Service: AssociatedURIs (%d), AuthorizedUserIds (%d)",
             objAssociatedUris.GetCount(), m_objAuthorizedUserIds.GetSize(), 0);
 }
 

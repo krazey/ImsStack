@@ -81,7 +81,7 @@ void MediaDescriptor::SetMid(IN IMS_SINT32 nMid)
 {
     if (m_nMid != nMid)
     {
-        IMS_TRACE_I("SetMid :: %d >> %d", m_nMid, nMid, 0);
+        IMS_TRACE_I("SetMid: %d >> %d", m_nMid, nMid, 0);
         m_nMid = nMid;
     }
 }

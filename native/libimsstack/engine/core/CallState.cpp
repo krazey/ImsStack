@@ -72,7 +72,7 @@ IMS_BOOL CallState::UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 nM
     if (nSipMsg == MESSAGE_INVALID)
     {
         IMS_TRACE_I(
-                "CALL_STATE - NO TRANSITION (%s)", piSipMsg->GetMethod().ToString().GetStr(), 0, 0);
+                "CALL_STATE: NO TRANSITION(%s)", piSipMsg->GetMethod().ToString().GetStr(), 0, 0);
         return IMS_TRUE;
     }
 
@@ -91,7 +91,7 @@ IMS_BOOL CallState::UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 nM
                 (objMethod.Equals(SipMethod::BYE) && (m_nState != STATE_BYE_SENT) &&
                         (m_nState != STATE_BYE_RECEIVED)))
         {
-            IMS_TRACE_D("NO STATE TRANSITION - RESPONSE TO CANCELLING the INVITE", 0, 0, 0);
+            IMS_TRACE_D("NO STATE TRANSITION: RESPONSE TO CANCELLING the INVITE", 0, 0, 0);
             return IMS_TRUE;
         }
     }
@@ -404,12 +404,12 @@ PRIVATE GLOBAL void CallState::PrintStateChanged(
     if (!((nState > STATE_INVALID) && (nState < STATE_MAX)) ||
             !((nNextState > STATE_INVALID) && (nNextState < STATE_MAX)))
     {
-        IMS_TRACE_I("CALL_STATE : %s - %d >> %d", SipDebug::GetCharA1(strCallId.GetStr(), 8, '@'),
+        IMS_TRACE_I("CALL_STATE: %s - %d >> %d", SipDebug::GetCharA1(strCallId.GetStr(), 8, '@'),
                 nState, nNextState);
         return;
     }
 
-    IMS_TRACE_I("CALL_STATE : %s - %s >> %s", SipDebug::GetCharA1(strCallId.GetStr(), 8, '@'),
+    IMS_TRACE_I("CALL_STATE: %s - %s >> %s", SipDebug::GetCharA1(strCallId.GetStr(), 8, '@'),
             STATE[nState], STATE[nNextState]);
 }
 

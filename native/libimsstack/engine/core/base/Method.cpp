@@ -223,7 +223,7 @@ IMS_BOOL Method::ServerConnection_NotifyRequest(IN ISipServerConnection* piSsc)
         return IMS_FALSE;
     }
 
-    IMS_TRACE_I("Method - \"%s\" REQUEST RECEIVED", piSsc->GetMethod().ToString().GetStr(), 0, 0);
+    IMS_TRACE_I("Method: \"%s\" REQUEST RECEIVED", piSsc->GetMethod().ToString().GetStr(), 0, 0);
 
     piSsc->SetErrorListener(this);
 
@@ -330,11 +330,11 @@ IMS_BOOL Method::HandleAllSipResponse(IN ISipClientConnection* piScc)
         {
             if (SipError::GetLastError() == SipError::NO_MESSAGE)
             {
-                IMS_TRACE_I("No more messages in this client transaction", 0, 0, 0);
+                IMS_TRACE_I("No more messages", 0, 0, 0);
                 break;
             }
 
-            IMS_TRACE_E(0, "Receive() :: SipError (%d)", SipError::GetLastError(), 0, 0);
+            IMS_TRACE_E(0, "Receive: SipError(%d)", SipError::GetLastError(), 0, 0);
             return IMS_FALSE;
         }
 
@@ -342,7 +342,7 @@ IMS_BOOL Method::HandleAllSipResponse(IN ISipClientConnection* piScc)
 
         if (piSipMsg == IMS_NULL)
         {
-            IMS_TRACE_E(0, "SIP message does not exist", 0, 0, 0);
+            IMS_TRACE_E(0, "ISipMessage is null", 0, 0, 0);
             return IMS_FALSE;
         }
 
@@ -352,14 +352,14 @@ IMS_BOOL Method::HandleAllSipResponse(IN ISipClientConnection* piScc)
             IMS_TRACE_E(0, "Parsing a message body part failed", 0, 0, 0);
 
             Error_NotifyError(
-                    piScc, SipError::PARSING_ERROR, AString("Parsing Error :: message body part"));
+                    piScc, SipError::PARSING_ERROR, AString("Parsing Error: message body part"));
             return IMS_FALSE;
         }
 
         IMS_SINT32 nStatusCode = piSipMsg->GetStatusCode();
 
-        IMS_TRACE_I("___ %d response to %s request is received ...", nStatusCode,
-                piSipMsg->GetMethod().ToString().GetStr(), 0);
+        IMS_TRACE_I(
+                "___ SIP-RSP: %d-%s", nStatusCode, piSipMsg->GetMethod().ToString().GetStr(), 0);
 
         // Update the remote user identities if present
         if (SipStatusCode::IsProvisional(nStatusCode) || SipStatusCode::IsFinalSuccess(nStatusCode))
@@ -501,7 +501,7 @@ IMS_BOOL Method::RespondToChallenge(IN ISipClientConnection* piScc)
         objCredential.SetRealm(piChallenge->GetRealm());
     }
 
-    IMS_TRACE_D("Respond to the authentication challenge ...", 0, 0, 0);
+    IMS_TRACE_D("Respond to the authentication challenge", 0, 0, 0);
 
     if (piScc->InitResubmissionRequest() != IMS_SUCCESS)
     {
@@ -538,7 +538,7 @@ IMS_BOOL Method::RespondToChallenge(IN ISipClientConnection* piScc)
     {
         m_piAuthChallenge = piChallenge->Clone();
 
-        IMS_TRACE_D("Authentication challenge is updated...", 0, 0, 0);
+        IMS_TRACE_D("Authentication challenge is updated", 0, 0, 0);
     }
 
     // Remove the previous credential information for re-authentication
@@ -551,7 +551,7 @@ IMS_BOOL Method::RespondToChallenge(IN ISipClientConnection* piScc)
 
         ++nAuthChallengeCount;
 
-        IMS_TRACE_I("Authentication challenge :: %d >> %d ", nAuthChallengeCount - 1,
+        IMS_TRACE_I("Authentication challenge: %d >> %d ", nAuthChallengeCount - 1,
                 nAuthChallengeCount, 0);
     }
 
@@ -664,10 +664,12 @@ PRIVATE VIRTUAL void Method::ClientConnection_NotifyResponse(
     {
         if (SipError::GetLastError() == SipError::NO_MESSAGE)
         {
-            IMS_TRACE_I("No more messages in this client transaction", 0, 0, 0);
+            IMS_TRACE_I("No more messages", 0, 0, 0);
         }
-
-        IMS_TRACE_E(0, "Receive() :: SipError (%d)", SipError::GetLastError(), 0, 0);
+        else
+        {
+            IMS_TRACE_E(0, "Receive: SipError(%d)", SipError::GetLastError(), 0, 0);
+        }
         return;
     }
 
@@ -675,7 +677,7 @@ PRIVATE VIRTUAL void Method::ClientConnection_NotifyResponse(
 
     if (piSipMsg == IMS_NULL)
     {
-        IMS_TRACE_E(0, "No SIP message", 0, 0, 0);
+        IMS_TRACE_E(0, "ISipMessage is null", 0, 0, 0);
         return;
     }
 
@@ -685,14 +687,13 @@ PRIVATE VIRTUAL void Method::ClientConnection_NotifyResponse(
         IMS_TRACE_E(0, "Parsing a message body part failed", 0, 0, 0);
 
         Error_NotifyError(
-                piScc, SipError::PARSING_ERROR, AString("Parsing Error :: message body part"));
+                piScc, SipError::PARSING_ERROR, AString("Parsing Error: message body part"));
         return;
     }
 
     IMS_SINT32 nStatusCode = piSipMsg->GetStatusCode();
 
-    IMS_TRACE_I("___ %d response to %s request is received ...", nStatusCode,
-            piSipMsg->GetMethod().ToString().GetStr(), 0);
+    IMS_TRACE_I("___ SIP-RSP: %d-%s", nStatusCode, piSipMsg->GetMethod().ToString().GetStr(), 0);
 
     // Update the remote user identities if present
     if (SipStatusCode::IsProvisional(nStatusCode) || SipStatusCode::IsFinalSuccess(nStatusCode))
@@ -713,7 +714,7 @@ PRIVATE VIRTUAL void Method::ClientConnection_NotifyResponse(
 PRIVATE VIRTUAL void Method::Error_NotifyError(
         IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage)
 {
-    IMS_TRACE_I("Error_NotifyError - %s : %d : %s", piSc->GetMethod().ToString().GetStr(), nCode,
+    IMS_TRACE_I("Error_NotifyError: %s|%d|%s", piSc->GetMethod().ToString().GetStr(), nCode,
             strMessage.GetStr());
 
     // SipError::TRANSACTION_TIMER_EXPIRED
@@ -736,12 +737,12 @@ PRIVATE VIRTUAL void Method::Error_NotifyError(
 PUBLIC
 Method::SccListener::SccListener()
 {
-    IMS_TRACE_D("Constructor :: SccListener", 0, 0, 0);
+    IMS_TRACE_D("ctor: SccListener", 0, 0, 0);
 }
 
 PUBLIC VIRTUAL Method::SccListener::~SccListener()
 {
-    IMS_TRACE_D("Destructor :: SccListener", 0, 0, 0);
+    IMS_TRACE_D("dtor: SccListener", 0, 0, 0);
 }
 
 PROTECTED VIRTUAL void Method::SccListener::Error_NotifyError(
@@ -752,8 +753,8 @@ PROTECTED VIRTUAL void Method::SccListener::Error_NotifyError(
         return;
     }
 
-    IMS_TRACE_I("SCCListener :: Error_NotifyError - %s : %d : %s",
-            piSc->GetMethod().ToString().GetStr(), nCode, strMessage.GetStr());
+    IMS_TRACE_I("SccListener: Error_NotifyError - %s|%d|%s", piSc->GetMethod().ToString().GetStr(),
+            nCode, strMessage.GetStr());
 
     piSc->Close();
 
@@ -777,10 +778,12 @@ PROTECTED VIRTUAL void Method::SccListener::ClientConnection_NotifyResponse(
     {
         if (SipError::GetLastError() == SipError::NO_MESSAGE)
         {
-            IMS_TRACE_I("No more messages in this client transaction", 0, 0, 0);
+            IMS_TRACE_I("No more messages", 0, 0, 0);
         }
-
-        IMS_TRACE_E(0, "Receive() :: SipError (%d)", SipError::GetLastError(), 0, 0);
+        else
+        {
+            IMS_TRACE_E(0, "Receive: SipError(%d)", SipError::GetLastError(), 0, 0);
+        }
 
         piScc->Close();
 
@@ -788,8 +791,8 @@ PROTECTED VIRTUAL void Method::SccListener::ClientConnection_NotifyResponse(
         return;
     }
 
-    IMS_TRACE_I("SCCListener :: ___ %d response to %s request is received ...",
-            piScc->GetStatusCode(), piScc->GetMethod().ToString().GetStr(), 0);
+    IMS_TRACE_I("SccListener: ___ SIP-RSP: %d-%s", piScc->GetStatusCode(),
+            piScc->GetMethod().ToString().GetStr(), 0);
 
     piScc->Close();
 
