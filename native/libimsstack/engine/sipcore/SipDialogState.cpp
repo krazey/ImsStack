@@ -357,7 +357,6 @@ IMS_SINT32 SipDialogState::CompareTo(IN SipDialogState* pDState, IN ::SipMessage
         // For response to CANCEL and non-2xx response to INVITE,
         // the comparison should be lenient against the To-Tags.
 
-        // Fix for CSR 1-1316815
         // The To-Tag leniency should be present for CANCEL request,
         // response for CANCEL, and failure responses for INVITE.
         // If the forking flag is enabled and it's a 1xx/2xx response to SUBSCRIBE,
@@ -1965,7 +1964,6 @@ PRIVATE GLOBAL IMS_SINT32 SipDialogState::CompareHeaders(IN SipHeaderBase* pNewH
         }
         else
         {
-            // Fix for CSR 1-1316815
             // Leniency should be present only for the To-To pair.
             // For all other pairs (i.e. From-From, From-To, To-From),
             // it should map to NOT_MATCHED.
@@ -1983,7 +1981,6 @@ PRIVATE GLOBAL IMS_SINT32 SipDialogState::CompareHeaders(IN SipHeaderBase* pNewH
     {
         if (!strExistingTag.IsNULL())
         {
-            // Fix for CSR 1-1316815
             // Leniency should be present only for the To-To pair and that too
             // if the bToTagLenient flag is set (i.e. to provide leniency for special cases).
             if (bToTagComparison && bToTagLenient)

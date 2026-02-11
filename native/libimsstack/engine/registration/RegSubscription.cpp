@@ -1824,7 +1824,7 @@ PRIVATE GLOBAL ISipClientConnection* RegSubscription::CreateConnection(IN RegSub
     }
 
     // Sets P-Preferred-Identity header fields
-    // hwangoo.park, 130514, do not add P-Preferred-Identity header
+    // Do not add P-Preferred-Identity header.
     if (SipConfigProxy::IsPPreferredIdInRegSubRequired(
                 pRegSub->GetSlotId(), pStateTracker->GetSipProfile()))
     {
