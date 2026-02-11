@@ -121,6 +121,7 @@ public class IpsecEnabledRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
+        mConfig.putBoolean(CarrierConfigManager.Ims.KEY_SIP_OVER_IPSEC_ENABLED_BOOL, true);
         mConfig.putInt(CarrierConfigManager.Ims.KEY_SIP_PREFERRED_TRANSPORT_INT,
                 CarrierConfigManager.Ims.PREFERRED_TRANSPORT_TCP);
 
@@ -197,6 +198,7 @@ public class IpsecEnabledRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
+        mConfig.putBoolean(CarrierConfigManager.Ims.KEY_SIP_OVER_IPSEC_ENABLED_BOOL, true);
         mConfig.putInt(CarrierConfigManager.Ims.KEY_SIP_PREFERRED_TRANSPORT_INT,
                 CarrierConfigManager.Ims.PREFERRED_TRANSPORT_TCP);
 
@@ -276,6 +278,7 @@ public class IpsecEnabledRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
+        mConfig.putBoolean(CarrierConfigManager.Ims.KEY_SIP_OVER_IPSEC_ENABLED_BOOL, true);
         mConfig.putInt(CarrierConfigManager.Ims.KEY_SIP_PREFERRED_TRANSPORT_INT,
                 CarrierConfigManager.Ims.PREFERRED_TRANSPORT_TCP);
 
