@@ -564,17 +564,12 @@ PUBLIC VIRTUAL IMS_UINT32 AosPcscf::GetChangedType()
 
 PUBLIC VIRTUAL void AosPcscf::SetListener(IN IAosPcscfListener* piListener)
 {
-    A_IMS_TRACE_D(APPPROFILE, "SetListener :: (%" PFLS_x ") is set", piListener, 0, 0);
-
     m_piListener = piListener;
 }
 
 PROTECTED
 void AosPcscf::AddPcscf(IN const AString& strHost, IN IMS_SINT32 nPort)
 {
-    A_IMS_TRACE_D(APPPROFILE, "AddPcscf :: (%s) :: (%d)",
-            IMS_UTIL_SYS_PROP_IS_SERVER_INFO_HIDDEN_IN_LOG() ? "xxx" : strHost.GetStr(), nPort, 0);
-
     Pcscf* pPcscf = new Pcscf(strHost, nPort);
     m_objPcscfList.Append(pPcscf);
 }

@@ -109,10 +109,6 @@ PUBLIC VIRTUAL void AosTransaction::SetListener(
 
         objListeners.Append(piListener);
         m_objListeners.Add(nType, objListeners);
-
-        A_IMS_TRACE_D(AOSTAG, "AosTransactionListener :: add - %d / %d / %p", nType,
-                objListeners.GetSize(), piListener);
-
         return;
     }
 
@@ -134,9 +130,6 @@ PUBLIC VIRTUAL void AosTransaction::SetListener(
     }
 
     objListeners.Append(piListener);
-
-    A_IMS_TRACE_D(AOSTAG, "AosTransactionListener :: add - %d / %d / %p", nType,
-            objListeners.GetSize(), piListener);
 }
 
 PUBLIC VIRTUAL void AosTransaction::RemoveListener(

@@ -867,12 +867,8 @@ PROTECTED VIRTUAL void AosApplication::SetAppType(IN AosRegistrationType eRegTyp
 PROTECTED VIRTUAL void AosApplication::SetAppState(IN IMS_UINT32 nState)
 {
     IMS_UINT32 nOldState = GetState();
-    A_IMS_TRACE_I(APPID, "SetAppState :: old (%s) , curr (%s)",
-            AosProvider::GetLog()->AppStateToString(nOldState),
-            AosProvider::GetLog()->AppStateToString(nState), 0);
 
     SetState(nState);
-
     if (m_piRegistration)
     {
         m_piRegistration->SetAppReady((IsUpdateAvailable()) ? IMS_TRUE : IMS_FALSE);
@@ -880,6 +876,9 @@ PROTECTED VIRTUAL void AosApplication::SetAppState(IN IMS_UINT32 nState)
 
     if (nOldState != nState)
     {
+        A_IMS_TRACE_I(APPID, "SetAppState :: old (%s) , curr (%s)",
+                AosProvider::GetLog()->AppStateToString(nOldState),
+                AosProvider::GetLog()->AppStateToString(nState), 0);
         TRACE_APP_STATUS;
     }
 }

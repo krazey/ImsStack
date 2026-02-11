@@ -169,8 +169,6 @@ PUBLIC VIRTUAL void AosCallTracker::SetListener(IN IAosCallTrackerListener* piLi
 
         if (pTmpListener == piListener)
         {
-            A_IMS_TRACE_D(AOSTAG, "SetListener() :: Listener (%" PFLS_x ") is already set",
-                    piListener, 0, 0);
             return;
         }
     }
@@ -187,9 +185,6 @@ PUBLIC VIRTUAL void AosCallTracker::RemoveListener(IN IAosCallTrackerListener* p
         if (pTmpListener == piListener)
         {
             m_objListeners.RemoveAt(i);
-
-            A_IMS_TRACE_D(AOSTAG, "RemoveListener :: Listener (%" PFLS_x ") is removed", piListener,
-                    0, 0);
             return;
         }
     }

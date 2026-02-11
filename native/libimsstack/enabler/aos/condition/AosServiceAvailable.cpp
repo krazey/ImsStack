@@ -263,8 +263,6 @@ void AosServiceAvailable::Notify(IN IMS_BOOL bNotify /*=IMS_TRUE*/)
         return;
     }
 
-    A_IMS_TRACE_I(AOSTAG, "Notify", 0, 0, 0);
-
     m_bAvailableLastNotified = bAvailable;
 
     if (m_piBlock != IMS_NULL)

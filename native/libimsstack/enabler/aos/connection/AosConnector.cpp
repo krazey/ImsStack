@@ -99,8 +99,6 @@ PUBLIC VIRTUAL IMS_BOOL AosConnector::Start()
 
     if (m_nState == STATE_READY)
     {
-        A_IMS_TRACE_D(APPPROFILE, "Start :: already ready", 0, 0, 0);
-
         if (m_bIsPcscfChangeIgnored)
         {
             m_piPcscf->CheckAndProcessChangeFromPco();
