@@ -145,6 +145,26 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
             m_objContext.GetMessageUtils().GetPreviousResponse(piSession, IMessage::SESSION_START);
     IMtcSession* pSession = m_objContext.GetSession(piSession);
 
+    IMS_BOOL bHasNotRespondedQosConfirmation = HasNotRespondedQosConfirmation(*piSession);
+
+    if (bHasNotRespondedQosConfirmation &&
+            m_objContext.GetMediaManager().GetNegotiatedDirection(piSession, MEDIATYPE_AUDIO) ==
+                    MEDIA_DIRECTION::MEDIA_DIRECTION_INACTIVE)
+    {
+        // If the negotiated media direction is still 'inactive' and the SDP ANSWER is not received,
+        // UE should wait the response for the UPDATE/PRACK even after the 200-INVITE is received.
+        IMS_TRACE_I("SessionStarted - wait response for UPDATE to make a media active", 0, 0, 0);
+        if (pSession->SendAck() == IMS_FAILURE)
+        {
+            CallReasonInfo objReason(CODE_REJECT_INTERNAL_ERROR);
+            HandleCancel(piSession, objReason);
+            OnStartFailed(objReason);
+
+            return CallStateName::TERMINATING;
+        }
+        return GetStateName();
+    }
+
     pSession->HandleResponse(ResponseType::ACCEPT, *piMessage);
     m_objContext.GetSupplementaryService().UpdateTip(piMessage);
     m_objContext.GetSupplementaryService().UpdateSessionId(piMessage);
@@ -154,7 +174,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
         m_objContext.GetMediaManager().SetConferenceCall();
     }
 
-    if (HasNotRespondedQosConfirmation(*piSession))
+    if (bHasNotRespondedQosConfirmation)
     {
         // Once receiving a 200-INVITE, we assume that the remote QoS is already confirmed even if
         // the response for the UPDATE or the PRACK hasn't come. It won't be an issue when the
@@ -168,7 +188,10 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
         CallReasonInfo objReason = HandleReceivedSdp(piSession, piMessage);
         if (objReason.nCode != CODE_NONE)
         {
-            pSession->SendAck();
+            if (!piSession->GetPreviousRequest(IMessage::SESSION_ACK))
+            {
+                pSession->SendAck();
+            }
             HandleCancel(piSession, objReason);
             OnStartFailed(objReason);
 
@@ -187,7 +210,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
 
     m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
 
-    if (pSession->SendAck() == IMS_FAILURE)
+    if (!piSession->GetPreviousRequest(IMessage::SESSION_ACK) && pSession->SendAck() == IMS_FAILURE)
     {
         CallReasonInfo objReason(CODE_REJECT_INTERNAL_ERROR);
         HandleCancel(piSession, objReason);
@@ -256,6 +279,12 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdated(IN ISession
 
     m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_TRUE);
     m_objContext.GetUiNotifier().SendProgressing();
+
+    if (piSession->GetState() == ISession::STATE_ESTABLISHED)
+    {
+        IMS_TRACE_I("SessionEarlyMediaUpdated - Handle pending started event", 0, 0, 0);
+        return SessionStarted(piSession);
+    }
 
     return MaySendPreconditionConfirmation(*piSession);
 }
@@ -367,6 +396,14 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPrackDelivered(IN ISession* p
     if (nStatusCode == SipStatusCode::SC_183)
     {
         return MaySendPreconditionConfirmation(*piSession);
+    }
+    else if (nStatusCode == SipStatusCode::SC_200)
+    {
+        if (m_objContext.GetMessageUtils().HasSdp(piMessage))
+        {
+            IMS_TRACE_I("SessionPrackDelivered - Handle pending started event", 0, 0, 0);
+            return SessionStarted(piSession);
+        }
     }
 
     return GetStateName();
