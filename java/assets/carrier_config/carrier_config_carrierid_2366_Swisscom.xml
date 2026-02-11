@@ -18,4 +18,60 @@
     <int-array name="ims.parent_carrier_ids_int_array" num="1">
         <item value="16"/>
     </int-array>
+
+    <!-- Mts -->
+    <int-array name="imssms.sms_fallback_error_codes_int_array" num="51">
+        <item value="300"/>
+        <item value="301"/>
+        <item value="302"/>
+        <item value="305"/>
+        <item value="380"/>
+        <item value="401"/>
+        <item value="402"/>
+        <item value="405"/>
+        <item value="406"/>
+        <item value="407"/>
+        <item value="408"/>
+        <item value="410"/>
+        <item value="412"/>
+        <item value="413"/>
+        <item value="414"/>
+        <item value="415"/>
+        <item value="416"/>
+        <item value="417"/>
+        <item value="420"/>
+        <item value="421"/>
+        <item value="422"/>
+        <item value="423"/>
+        <item value="424"/>
+        <item value="428"/>
+        <item value="429"/>
+        <item value="430"/>
+        <item value="433"/>
+        <item value="436"/>
+        <item value="437"/>
+        <item value="438"/>
+        <item value="439"/>
+        <item value="440"/>
+        <item value="469"/>
+        <item value="470"/>
+        <item value="480"/>
+        <item value="481"/>
+        <item value="482"/>
+        <item value="483"/>
+        <item value="484"/>
+        <item value="485"/>
+        <item value="486"/>
+        <item value="487"/>
+        <item value="489"/>
+        <item value="491"/>
+        <item value="493"/>
+        <item value="494"/>
+        <item value="499"/>
+        <item value="600"/>
+        <item value="603"/>
+        <item value="604"/>
+        <item value="606"/>
+    </int-array>
+    <int name="imsss.sms_retry_policy_for_expiry_timer_f_int" value="4"/>
 </carrier_config>
