@@ -1710,16 +1710,6 @@ public:
         static const IMS_CHAR KEY_EREG_USING_FIRST_IMPU_IN_ISIM_BOOL[];
 
         /**
-         * Specifies whether to keep emergency pdn when there is no pcscf available by
-         * requesting fake registration with the next pcscf.
-         *
-         * Possible Values:
-         *   {@code true}
-         *   {@code false}
-         */
-        static const IMS_CHAR KEY_KEEP_EPDN_UPON_PCSCF_UNAVAILABLE_BOOL[];
-
-        /**
          * Specifies whether keep on retrying emergency registration while the emergency PDN is
          * connected on WLAN.
          *

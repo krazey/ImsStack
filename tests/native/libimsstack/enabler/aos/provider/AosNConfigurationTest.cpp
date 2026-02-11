@@ -610,10 +610,6 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
             GetBoolean(CarrierConfig::Ims::KEY_INIT_SUB_UPON_SUB_TERMINATED_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::ImsEmergency::KEY_KEEP_EPDN_UPON_PCSCF_UNAVAILABLE_BOOL,
-                    IMS_FALSE))
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::ImsEmergency::KEY_KEEP_EREG_RETRY_ON_WLAN_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
@@ -1048,7 +1044,6 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
     EXPECT_FALSE(m_pAosNConfiguration->IsImsiBasedUriPrioritized());
     EXPECT_FALSE(m_pAosNConfiguration->IsIpsecInitializedWithNewPcscf());
     EXPECT_FALSE(m_pAosNConfiguration->IsInitSubUponSubTerminated());
-    EXPECT_FALSE(m_pAosNConfiguration->IsKeepEPdnUponPcscfUnavailable());
     EXPECT_FALSE(m_pAosNConfiguration->IsKeepERegRetryOnWlanRequired());
     EXPECT_TRUE(m_pAosNConfiguration->IsKeepRegRetryCntUponPdnReconnect());
     EXPECT_TRUE(m_pAosNConfiguration->IsKeepRegRetryTimerOnAllEnablersDetached());

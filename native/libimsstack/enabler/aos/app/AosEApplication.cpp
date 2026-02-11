@@ -44,7 +44,6 @@ __IMS_TRACE_TAG_AOS__;
 PUBLIC
 AosEApplication::AosEApplication(IN IAosAppContext* piAppContext, IN AString& strAppId) :
         AosApplication(piAppContext, strAppId),
-        m_bKeepEPdnWhenNoPcscf(IMS_FALSE),
         m_bRegBlockInCbm(IMS_FALSE)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosEApplication = %" PFLS_u "/%" PFLS_x, APPID,
@@ -118,13 +117,7 @@ PUBLIC VIRTUAL void AosEApplication::GetProperty(
 
 PROTECTED void AosEApplication::InitEmergencyVariable()
 {
-    SetKeepEPdnWhenNoPcscf(IMS_FALSE);
     SetRegBlockInCbm(IMS_FALSE);
-}
-
-PROTECTED void AosEApplication::SetKeepEPdnWhenNoPcscf(IN IMS_BOOL bEnable)
-{
-    m_bKeepEPdnWhenNoPcscf = bEnable;
 }
 
 PROTECTED void AosEApplication::SetRegBlockInCbm(IN IMS_BOOL bBlock)
@@ -144,11 +137,6 @@ PROTECTED void AosEApplication::ProcessFakeRegRequest(IN IMS_UINT32 nReason)
         A_IMS_TRACE_D(APPID, "PDN is not connected", 0, 0, 0);
         ProcessCleanAll(AosReason::DATA_DISCONNECTED);
     }
-}
-
-PROTECTED IMS_BOOL AosEApplication::IsKeepEPdnWhenNoPcscf() const
-{
-    return m_bKeepEPdnWhenNoPcscf;
 }
 
 PROTECTED IMS_BOOL AosEApplication::IsRegBlockInCbm() const
@@ -480,7 +468,6 @@ PROTECTED VIRTUAL void AosEApplication::ProcessRegFailed_StateConnected(IN IMS_U
 {
     if (nReason == IAosRegistration::REASON_FAILURE_NO_PCSCF_AVAILABLE)
     {
-        SetKeepEPdnWhenNoPcscf(IMS_TRUE);
         ProcessCleanAll(AosReason::DATA_CONNECTION_MAINTAIN);
     }
     else

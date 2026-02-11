@@ -500,15 +500,6 @@ public:
     virtual IMS_BOOL IsInitSubUponSubTerminated() const = 0;
 
     /**
-     * @brief Flag indicating whether to keep the emergency pdn when pcscf is unavailable by
-     *        requesting fake registration with the next pcscf.
-     *
-     * @return IMS_BOOL Return whether to keep the emergency pdn or not in this case.
-     * @see {@code imsemergency.keep_epdn_upon_pcscf_unavailable_bool}
-     */
-    virtual IMS_BOOL IsKeepEPdnUponPcscfUnavailable() const = 0;
-
-    /**
      * @brief Flag indicating whether to keep on retrying emergency registration on WLAN.
      *
      * @return IMS_BOOL Return whether to keep on retrying emergency registration on WLAN or not.
