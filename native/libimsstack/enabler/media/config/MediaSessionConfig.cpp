@@ -37,7 +37,7 @@ MediaSessionConfig::MediaSessionConfig(IN IMS_SINT32 nSlotId, IN MEDIA_SERVICE_T
         m_bSupportMultiConfigInEarlySession(DEFAULT_SUPPORT_MULTICONFIG),
         m_bSdpReofferFullCapability(IMS_TRUE)
 {
-    IMS_TRACE_I("+MediaSessionConfig() - SlotId[%d], ServiceType[%d]", nSlotId, serviceType, 0);
+    (void)nSlotId;
 }
 
 PUBLIC VIRTUAL MediaSessionConfig::~MediaSessionConfig()
@@ -80,8 +80,6 @@ IMS_BOOL MediaSessionConfig::Create(IN IMS_SINT32 nSlotId)
     {
         CreateTextConfiguration(piCc);
     }
-
-    ToDebugString();
 
     return IMS_TRUE;
 }

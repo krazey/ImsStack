@@ -36,7 +36,6 @@ CodecAvcConfig::CodecAvcConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNu
         m_bIncludeSpropParameterSets(DEFAULT_INCLUDE_SPROP),
         m_strProfileLevelId(DEFAULT_AVC_PROFILE_ID)
 {
-    IMS_TRACE_I("+CodecAvcConfig - Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecAvcConfig::~CodecAvcConfig()

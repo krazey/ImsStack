@@ -42,7 +42,6 @@ VideoConfiguration::VideoConfiguration(IN MEDIA_CONTENT_TYPE eSessionType) :
         m_nVideoLowestBitrateBps(DEFAULT_VIDEO_LOWEST_BITRATE),
         m_bVideoHoldDirectionInactive(IMS_FALSE)
 {
-    IMS_TRACE_I("+VideoConfiguration - SessionType[%d]", eSessionType, 0, 0);
 }
 
 PUBLIC VIRTUAL VideoConfiguration::~VideoConfiguration()
@@ -119,8 +118,6 @@ PUBLIC VIRTUAL IMS_BOOL VideoConfiguration::Create(IN ICarrierConfig* piCc)
         IMS_TRACE_E(0, "Create - CreateCodecConfigs failure ", 0, 0, 0);
         return IMS_FALSE;
     }
-
-    ToDebugString();
 
     return IMS_TRUE;
 }

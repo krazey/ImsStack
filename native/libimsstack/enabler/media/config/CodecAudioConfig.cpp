@@ -50,7 +50,6 @@ CodecAudioConfig::CodecAudioConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTy
         m_nModeChangePeriod(DEFAULT_MODECHANGE_PERIOD),
         m_nModeChangeNeighbor(DEFAULT_MODECHANGE_NEIGHBOR)
 {
-    IMS_TRACE_I("+CodecAudioConfig - Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecAudioConfig::~CodecAudioConfig()
@@ -60,8 +59,6 @@ PUBLIC VIRTUAL CodecAudioConfig::~CodecAudioConfig()
 
 PUBLIC VIRTUAL IMS_BOOL CodecAudioConfig::Create(IN ICarrierConfig* piCc)
 {
-    IMS_TRACE_D("Create - Codec[%s]", ImsCodec::CodecToString(m_nCodec), 0, 0);
-
     if (piCc == IMS_NULL)
     {
         IMS_TRACE_E(0, "Create - piCc is NULL", 0, 0, 0);

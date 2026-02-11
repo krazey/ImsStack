@@ -43,7 +43,6 @@ CodecHevcConfig::CodecHevcConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadType
         m_nHevcProfile(DEFAULT_HEVC_PROFILE),
         m_nHevcLevel(DEFAULT_HEVC_LEVEL)
 {
-    IMS_TRACE_I("+CodecHevcConfig - Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecHevcConfig::~CodecHevcConfig()

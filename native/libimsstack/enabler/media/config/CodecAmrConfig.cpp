@@ -35,7 +35,6 @@ CodecAmrConfig::CodecAmrConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNu
         m_nOctetAlign(DEFAULT_PAYLOAD_FORMAT),
         m_nSamplingRate(DEFAULT_SAMPLING_RATE_AMRWB)
 {
-    IMS_TRACE_I("+CodecAmrConfig - Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecAmrConfig::~CodecAmrConfig()
@@ -45,8 +44,6 @@ PUBLIC VIRTUAL CodecAmrConfig::~CodecAmrConfig()
 
 PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
 {
-    IMS_TRACE_D("Create - Codec[%s]", ImsCodec::CodecToString(m_nCodec), 0, 0);
-
     if (piCc == IMS_NULL)
     {
         IMS_TRACE_E(0, "Create - piCc is NULL or invalid codec index", 0, 0, 0);

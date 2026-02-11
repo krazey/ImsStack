@@ -165,8 +165,6 @@ IMS_BOOL TextController::UpdateRtpConfig(IN std::shared_ptr<TextNego> pNego)
 PUBLIC
 IMS_BOOL TextController::UpdateAccessNetwork(IN IMS_UINT32 nAccessNetwork)
 {
-    IMS_TRACE_I("UpdateAccessNetwork() - accessNetwork[%d]", nAccessNetwork, 0, 0);
-
     if (m_pSession != IMS_NULL)
     {
         m_pSession->SetAccessNetwork(nAccessNetwork);

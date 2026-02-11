@@ -38,8 +38,6 @@ PROTECTED MediaManager::MediaManager(IN CONST AString& strName, IN IMS_SINT32 nS
         m_lstSessionNode(ImsList<std::shared_ptr<MediaSessionNode>>()),
         m_pResourceMngr(std::make_shared<MediaResourceManager>())
 {
-    IMS_TRACE_D("+MediaManager() thread[%s], nSlotId[%d]", strName.GetStr(), nSlotId, 0);
-
     JniEnablerConnector::GetInstance().SetNativeEnabler(
             m_nSlotId, EnablerType::MEDIA_SESSION, DYNAMIC_CAST(INativeEnabler*, this));
 }
