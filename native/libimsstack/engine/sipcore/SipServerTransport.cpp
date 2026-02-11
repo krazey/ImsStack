@@ -45,7 +45,7 @@ SipServerTransport::SipServerTransport(IN IMS_SINT32 nSlotId,
 PUBLIC VIRTUAL SipServerTransport::~SipServerTransport()
 {
 #ifdef __IMS_SIP_DEBUG__
-    IMS_TRACE_D("Destructor :: SipServerTransport", 0, 0, 0);
+    IMS_TRACE_D("dtor: SipServerTransport", 0, 0, 0);
 #endif
 }
 

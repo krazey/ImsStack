@@ -65,7 +65,7 @@ PUBLIC VIRTUAL SipServerTransactionState::~SipServerTransactionState()
     }
 
 #ifdef __IMS_SIP_DEBUG__
-    IMS_TRACE_D("Destructor :: SipServerTransactionState", 0, 0, 0);
+    IMS_TRACE_D("dtor: SipServerTransactionState", 0, 0, 0);
 #endif
 }
 
@@ -141,14 +141,14 @@ IMS_BOOL SipServerTransactionState::IsSameTransaction(
 
     if ((m_pTxnKey == IMS_NULL) || (pStState->m_pTxnKey == IMS_NULL))
     {
-        IMS_TRACE_D("Transaction Key Does Not Exist", 0, 0, 0);
+        IMS_TRACE_D("No transaction key", 0, 0, 0);
         return IMS_FALSE;
     }
 
     // Compares these values : Call-ID, CSeq number, From-Tag, Via branch parameter
     if (!SipStack::CompareTxnKeysForCancel(m_pTxnKey, pStState->m_pTxnKey))
     {
-        IMS_TRACE_D("Transaction Not Matched : Cancel (%s), Ongoing (%s:%s)",
+        IMS_TRACE_D("Transaction Not Matched: Cancel(%s), Ongoing(%s:%s)",
                 SipStack::TxnKey_GetViaBranch(m_pTxnKey),
                 SipStack::TxnKey_GetMethod(pStState->m_pTxnKey),
                 SipStack::TxnKey_GetViaBranch(pStState->m_pTxnKey));
@@ -156,7 +156,7 @@ IMS_BOOL SipServerTransactionState::IsSameTransaction(
         return IMS_FALSE;
     }
 
-    IMS_TRACE_D("Transaction Matched : Cancel (%s), Ongoing (%s:%s)",
+    IMS_TRACE_D("Transaction Matched: Cancel(%s), Ongoing(%s:%s)",
             SipStack::TxnKey_GetViaBranch(m_pTxnKey),
             SipStack::TxnKey_GetMethod(pStState->m_pTxnKey),
             SipStack::TxnKey_GetViaBranch(pStState->m_pTxnKey));
@@ -238,8 +238,7 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
 
     if (bStatus == SIP_FALSE)
     {
-        IMS_TRACE_D("SIPServerTransactionstate::MatchTransaction -> OnRecvMessage() Failed (%d)",
-                nError, 0, 0);
+        IMS_TRACE_D("MatchTransaction: OnRecvMessage failed(%d)", nError, 0, 0);
         return SipPrivate::MESSAGE_FAILED;
     }
 
@@ -247,53 +246,53 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
     {
         case SipTxn::STATUS_NEW_REQ_RECVD:
         {
-            IMS_TRACE_I("__UAS__ :: _____ NEW REQUEST _____", 0, 0, 0);
+            IMS_TRACE_I("__UAS__: ___ NEW REQUEST ___", 0, 0, 0);
             break;
         }
         case SipTxn::STATUS_VALID_MESSAGE:
         {
-            IMS_TRACE_I("__UAS__ :: _____ VALID MESSAGE _____", 0, 0, 0);
+            IMS_TRACE_I("__UAS__: ___ VALID MESSAGE ___", 0, 0, 0);
             break;
         }
         case SipTxn::STATUS_IGNORE_REQ:
         {
-            IMS_TRACE_I("__UAS__ :: _____ IGNORE REQUEST _____", 0, 0, 0);
+            IMS_TRACE_I("__UAS__: ___ IGNORE REQUEST ___", 0, 0, 0);
             return SipPrivate::MESSAGE_DISCARDED;
         }
         case SipTxn::STATUS_IGNORE_RESP:
         {
-            IMS_TRACE_I("__UAS__ :: _____ IGNORE RESPONSE _____", 0, 0, 0);
+            IMS_TRACE_I("__UAS__: ___ IGNORE RESPONSE ___", 0, 0, 0);
             return SipPrivate::MESSAGE_DISCARDED;
         }
         case SipTxn::STATUS_STRAY_RESP:
         {
-            IMS_TRACE_I("__UAS__ :: _____ STRAY RESPONSE _____", 0, 0, 0);
+            IMS_TRACE_I("__UAS__: ___ STRAY RESPONSE ___", 0, 0, 0);
             return SipPrivate::MESSAGE_DISCARDED;
         }
         case SipTxn::STATUS_RETRANSMISSION:
         {
-            IMS_TRACE_I("__UAS__ :: _____ REMOTE RETRANSMISSION _____", 0, 0, 0);
+            IMS_TRACE_I("__UAS__: ___ REMOTE RETRANSMISSION ___", 0, 0, 0);
             return SipPrivate::MESSAGE_DISCARDED;
         }
         case SipTxn::STATUS_ACK_RETRANSMISSION:
         {
-            IMS_TRACE_I("__UAS__ :: _____ ACK RETRANSMISSION _____", 0, 0, 0);
+            IMS_TRACE_I("__UAS__: ___ ACK RETRANSMISSION ___", 0, 0, 0);
             return SipPrivate::MESSAGE_DISCARDED;
         }
         case SipTxn::STATUS_ERROR_ON_SEND:    // FALL-THROUGH
         case SipTxn::STATUS_INVALID_MESSAGE:  // FALL-THROUGH
         case SipTxn::STATUS_INVALID:
         {
-            IMS_TRACE_I("__UAS__ :: _____ PROCESSING FAILED _____", 0, 0, 0);
+            IMS_TRACE_I("__UAS__: ___ PROCESSING FAILED ___", 0, 0, 0);
             return SipPrivate::MESSAGE_FAILED;
         }
         case SipTxn::STATUS_STRAY_PRACK:
         {
-            IMS_TRACE_I("__UAS__ :: _____ STRAY PRACK RECEIVED _____", 0, 0, 0);
+            IMS_TRACE_I("__UAS__: ___ STRAY PRACK RECEIVED ___", 0, 0, 0);
             return SipPrivate::MESSAGE_INVALID_481;
         }
         default:
-            IMS_TRACE_I("__UAS__ :: _____ PROCESSING FAILED _____", 0, 0, 0);
+            IMS_TRACE_I("__UAS__: ___ PROCESSING FAILED ___", 0, 0, 0);
             return SipPrivate::MESSAGE_FAILED;
     }
 
@@ -327,7 +326,7 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
         if (objMethod.Equals(SipMethod::ACK) &&
                 (m_pTxnKey->GetResponseCode() >= SipStatusCode::SC_300))
         {
-            IMS_TRACE_I("__UAS__ :: ___ ACK (%s) TO UNSUCCESSFUL FINAL RESPONSE ___",
+            IMS_TRACE_I("__UAS__: ___ ACK (%s) TO UNSUCCESSFUL FINAL RESPONSE ___",
                     SipDebug::GetCharA1(m_pTxnKey->GetCallId(), 8, '@'), 0, 0);
 
             // SIP_MESSAGE_TRACKER
@@ -537,7 +536,7 @@ void SipServerTransactionState::RejectRequest(
         }
     }
 
-    IMS_TRACE_I("RejectRequest - Sending a %d response ...", nStatusCode, 0, 0);
+    IMS_TRACE_I("RejectRequest: Sending %d response", nStatusCode, 0, 0);
 
     if (!FormMessage())
     {
@@ -603,7 +602,7 @@ IMS_SINT32 SipServerTransactionState::HandleRequest(OUT RcPtr<SipDialogEx>& pOri
 
         if (m_pDialogEx.IsNull())
         {
-            IMS_TRACE_E(0, "NULL POINTER : Instantiating a dialog usage for %s failed",
+            IMS_TRACE_E(0, "NullPointer: Instantiating a dialog usage for %s failed",
                     objMethod.ToString().GetStr(), 0, 0);
             return SipPrivate::MESSAGE_FAILED;
         }
@@ -687,9 +686,7 @@ IMS_SINT32 SipServerTransactionState::HandleRequest(OUT RcPtr<SipDialogEx>& pOri
 
             m_pDialogEx = SipDialogEx::CreateDialog(pTempDState.Get(), objMsgInfo);
 
-            IMS_TRACE_D("___ BYE request received before receiving 1xx response "
-                        "to INVITE request ___",
-                    0, 0, 0);
+            IMS_TRACE_D("___ BYE received before receiving 1xx-INVITE ___", 0, 0, 0);
         }
         else
         {
@@ -715,15 +712,15 @@ IMS_SINT32 SipServerTransactionState::HandleRequest(OUT RcPtr<SipDialogEx>& pOri
                     return SipPrivate::MESSAGE_DISCARDED;
                 }
 
-                IMS_TRACE_D("_____ CREATE A NEW DIALOG USAGE (%s) _____",
-                        objMethod.ToString().GetStr(), 0, 0);
+                IMS_TRACE_D("___ CREATE A NEW DIALOG USAGE (%s) ___", objMethod.ToString().GetStr(),
+                        0, 0);
 
                 // Create a new dialog usage from this server transaction.
                 m_pDialogEx = SipDialogEx::CreateDialog(pOrigDState.Get(), objMsgInfo);
             }
             else
             {
-                IMS_TRACE_D("_____ REUSE AN EXISTING DIALOG USAGE (%s) _____",
+                IMS_TRACE_D("___ REUSE AN EXISTING DIALOG USAGE (%s) ___",
                         objMethod.ToString().GetStr(), 0, 0);
             }
         }
@@ -751,7 +748,7 @@ IMS_SINT32 SipServerTransactionState::HandleRequest(OUT RcPtr<SipDialogEx>& pOri
                     SipStack::FreeAddrSpec(pAddrSpec);
                     SipStack::FreeAddrSpec(pLocalAddrSpec);
 
-                    IMS_TRACE_D("Request-URI (%s, %s) is not matched",
+                    IMS_TRACE_D("R-URI(%s|%s) is not matched",
                             SipDebug::GetUri1(strLocalAddrSpec).GetStr(),
                             SipDebug::GetUri2(strAddrSpec).GetStr(), 0);
 
@@ -768,7 +765,7 @@ IMS_SINT32 SipServerTransactionState::HandleRequest(OUT RcPtr<SipDialogEx>& pOri
                 SipStack::FreeAddrSpec(pAddrSpec);
                 SipStack::FreeAddrSpec(pLocalAddrSpec);
 
-                IMS_TRACE_D("Request-URI is not matched", 0, 0, 0);
+                IMS_TRACE_D("R-URI is not matched", 0, 0, 0);
 
                 if (!objMethod.Equals(SipMethod::ACK))
                 {
@@ -884,7 +881,7 @@ PRIVATE VIRTUAL void SipServerTransactionState::Timer_TimerExpired(IN ITimer* pi
         return;
     }
 
-    IMS_TRACE_I("SipServerTransactionState - 100 Trying response timer expired", 0, 0, 0);
+    IMS_TRACE_I("ServerTransactionState: 100 Trying timer expired", 0, 0, 0);
 
     SendResponse100Trying(this);
 
@@ -1152,7 +1149,7 @@ PRIVATE GLOBAL IMS_RESULT SipServerTransactionState::SendResponse100Trying(
 
     if (pSipMsg100Trying == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Creating a 100 Trying response message failed", 0, 0, 0);
+        IMS_TRACE_E(0, "Creating a 100 Trying response failed", 0, 0, 0);
         return IMS_FAILURE;
     }
 
@@ -1172,11 +1169,11 @@ PRIVATE GLOBAL IMS_RESULT SipServerTransactionState::SendResponse100Trying(
     {
         SipStack::FreeMessage(pSipMsg100Trying);
 
-        IMS_TRACE_E(0, "Initializing a 100 Trying response message failed", 0, 0, 0);
+        IMS_TRACE_E(0, "Initializing a 100 Trying response failed", 0, 0, 0);
         return IMS_FAILURE;
     }
 
-    IMS_TRACE_I("___ SENDING 100 \"TRYING\" ...", 0, 0, 0);
+    IMS_TRACE_I("___ SENDING 100 \"TRYING\"", 0, 0, 0);
 
     // Update the transport information to route the response to the proper network entity
     if (pStState->m_pTransport != IMS_NULL)
@@ -1212,7 +1209,7 @@ PRIVATE GLOBAL void SipServerTransactionState::StopTimer100Trying(
 {
     if (pStState->m_piTimer100Trying != IMS_NULL)
     {
-        IMS_TRACE_I("___ Stopping 100 Trying response timer ...", 0, 0, 0);
+        IMS_TRACE_I("___ Stopping 100 Trying timer", 0, 0, 0);
 
         pStState->m_piTimer100Trying->KillTimer();
         TimerService::GetTimerService()->DestroyTimer(pStState->m_piTimer100Trying);

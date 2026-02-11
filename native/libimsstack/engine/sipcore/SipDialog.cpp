@@ -30,7 +30,7 @@ PUBLIC
 SipDialog::~SipDialog()
 {
 #ifdef __IMS_SIP_DEBUG__
-    IMS_TRACE_D("Destructor :: SipDialog (%s)",
+    IMS_TRACE_D("dtor: SipDialog(%s)",
             SipDebug::GetCharA1(m_pDialogEx->GetDialogState()->GetCallId().GetStr(), 8, '@'), 0, 0);
 #endif
 }

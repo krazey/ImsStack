@@ -51,7 +51,7 @@ PUBLIC VIRTUAL SipMessageBodyPart::~SipMessageBodyPart()
     SipStack::FreeMessageBody(m_pMsgBody);
 
 #ifdef __IMS_SIP_DEBUG__
-    IMS_TRACE_D("Destructor :: SipMessageBodyPart", 0, 0, 0);
+    IMS_TRACE_D("dtor: SipMessageBodyPart", 0, 0, 0);
 #endif
 }
 

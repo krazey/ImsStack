@@ -103,7 +103,7 @@ PUBLIC VIRTUAL SipTransactionState::~SipTransactionState()
     SipStack::FreeTxnKey(m_pTxnKey);
     SipStack::FreeTxnKey(m_pRprTxnKey);
 
-    IMS_TRACE_D("Destructor :: SipTransactionState", 0, 0, 0);
+    IMS_TRACE_D("dtor: SipTransactionState", 0, 0, 0);
 }
 
 PUBLIC VIRTUAL void SipTransactionState::Abort()
@@ -141,7 +141,7 @@ PUBLIC VIRTUAL void SipTransactionState::Abort()
  */
 PUBLIC VIRTUAL void SipTransactionState::Terminate()
 {
-    IMS_TRACE_D("STS::Terminate", 0, 0, 0);
+    IMS_TRACE_D("Terminate", 0, 0, 0);
 
     // If there is ongoing transaction, it will be terminated promptly.
     (void)SipStackState::GetInstance()->AbortTransaction(m_pTxnKey, this);
@@ -429,8 +429,7 @@ IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN const SipTimerVa
 
                 if (objMethod.Equals(SipMethod::ACK))
                 {
-                    IMS_TRACE_D("AUTH_CHALLENGE_TO_INVITE :: ACK (%d) "
-                                "& transaction state is cloned",
+                    IMS_TRACE_D("AUTH_CHALLENGE_TO_INVITE: ACK (%d) & transaction state is cloned",
                             nStatusCode, 0, 0);
 
                     bIsTxnStateSet = IMS_TRUE;

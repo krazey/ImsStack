@@ -39,7 +39,7 @@ PUBLIC VIRTUAL SipDialogImpl::~SipDialogImpl()
     }
 
 #ifdef __IMS_SIP_DEBUG__
-    IMS_TRACE_D("Destructor :: SipDialogImpl", 0, 0, 0);
+    IMS_TRACE_D("dtor: SipDialogImpl", 0, 0, 0);
 #endif
 }
 
@@ -58,7 +58,7 @@ PUBLIC VIRTUAL ISipDialog* SipDialogImpl::Clone() const
 {
     if (m_pDialog == IMS_NULL)
     {
-        IMS_TRACE_E(0, "NULL - Dialog", 0, 0, 0);
+        IMS_TRACE_E(0, "ISipDialog is null", 0, 0, 0);
         return IMS_NULL;
     }
 

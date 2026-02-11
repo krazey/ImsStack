@@ -23,7 +23,7 @@ __IMS_TRACE_TAG_SIP_CORE__;
 PUBLIC
 SipTxnContextData::~SipTxnContextData()
 {
-    IMS_TRACE_D("Destructor :: SipTxnContextData (%" PFLS_x ")",
+    IMS_TRACE_D("dtor: SipTxnContextData (%" PFLS_x ")",
             m_pTxnState.IsNull() ? 0 : m_pTxnState.Get(), 0, 0);
 
     m_pTxnState = IMS_NULL;

@@ -132,7 +132,7 @@ SipSocket* SipTransportHelper::Create(IN const SipSocketAddress& objSockAddr)
     {
         SipPrivate::SetLastError(SipError::NO_ERROR);
 
-        IMS_TRACE_D("TransportHelper :: Socket (%s, %d, %d) will be re-used",
+        IMS_TRACE_D("TransportHelper: Socket(%s|%d|%d) re-used",
                 SipDebug::GetIp(objSockAddr.GetIpAddress()), objSockAddr.GetPort(),
                 objSockAddr.GetType());
 
@@ -242,7 +242,7 @@ void SipTransportHelper::Destroy(IN SipSocket*& pSocket, IN const ISipSocketList
 
     if (!IsSocketPresent(pSocket))
     {
-        IMS_TRACE_D("TransportHelper :: Socket(%p) is already destroyed", pSocket, 0, 0);
+        IMS_TRACE_D("TransportHelper: Socket(%p) already destroyed", pSocket, 0, 0);
         return;
     }
 
@@ -262,7 +262,7 @@ void SipTransportHelper::Destroy(IN SipSocket*& pSocket, IN const ISipSocketList
             {
                 // The stream socket will be destroyed when the keep-alive timer is expired.
                 pSocket = IMS_NULL;
-                IMS_TRACE_D("TransportHelper :: Destroy (Keep-Alive) - Sockets (%d)",
+                IMS_TRACE_D("TransportHelper: Destroy(keep-alive, sockets=%d)",
                         m_objSockets.GetSize(), 0, 0);
                 return;
             }
@@ -276,25 +276,23 @@ void SipTransportHelper::Destroy(IN SipSocket*& pSocket, IN const ISipSocketList
         {
             if (pSocket->IsSocketForcinlyClosed())
             {
-                IMS_TRACE_D("TransportHelper :: Socket(%p) is not found; ignored", pSocket, 0, 0);
+                IMS_TRACE_D("TransportHelper: Socket(%p) not found", pSocket, 0, 0);
             }
             else
             {
-                IMS_TRACE_D(
-                        "TransportHelper :: Socket(%p) is not found; destroy it", pSocket, 0, 0);
-
+                IMS_TRACE_D("TransportHelper: Socket(%p) not found - destroy", pSocket, 0, 0);
                 delete pSocket;
             }
         }
 
         pSocket = IMS_NULL;
 
-        IMS_TRACE_D("TransportHelper :: Destroy - Sockets (%d)", m_objSockets.GetSize(), 0, 0);
+        IMS_TRACE_D("TransportHelper: Destroy(sockets=%d)", m_objSockets.GetSize(), 0, 0);
     }
     else
     {
-        IMS_TRACE_D("TransportHelper :: Destroy - Sockets (%d), RefCount (%d, %p)",
-                m_objSockets.GetSize(), nRefCount, pSocket);
+        IMS_TRACE_D("TransportHelper: Destroy(sockets=%d, ref=%d|%p)", m_objSockets.GetSize(),
+                nRefCount, pSocket);
     }
 
     if (m_objSockets.IsEmpty())
@@ -361,7 +359,7 @@ void SipTransportHelper::DestroyStreamSocket(
 
             delete pStreamSocket;
 
-            IMS_TRACE_D("TransportHelper :: DestroyStreamSocket - Destroyed", 0, 0, 0);
+            IMS_TRACE_D("TransportHelper: DestroyStreamSocket(destroyed)", 0, 0, 0);
         }
     }
     else
@@ -372,7 +370,7 @@ void SipTransportHelper::DestroyStreamSocket(
         }
     }
 
-    IMS_TRACE_D("TransportHelper :: DestroyStreamSocket - Sockets(%d), RefCount(%d, 0x%" PFLS_x ")",
+    IMS_TRACE_D("TransportHelper: DestroyStreamSocket(sockets=%d, ref=%d|0x%" PFLS_x ")",
             m_objSockets.GetSize(), nRefCount, nSocket);
 
     if (m_objSockets.IsEmpty())
@@ -433,7 +431,7 @@ IMS_SINT32 SipTransportHelper::AttachClientInitiatedConnection(IN SipSocket* pSo
     {
         IMS_SINT32 nCount = 1;
         m_objClientInitiatedConnections.Add(nSocketHandle, nCount);
-        IMS_TRACE_D("TransportHelper :: Attach - TCP socket=%" PFLS_x, nSocketHandle, 0, 0);
+        IMS_TRACE_D("TransportHelper: Attach - TCP socket=%" PFLS_x, nSocketHandle, 0, 0);
         return 1;
     }
 
@@ -464,7 +462,7 @@ void SipTransportHelper::DetachClientInitiatedConnection(IN SipSocket* pSocket)
         m_objClientInitiatedConnections.RemoveAt(nIndex);
     }
 
-    IMS_TRACE_D("TransportHelper :: Detach - TCP socket=%" PFLS_x "(%d)", nSocketHandle, nCount, 0);
+    IMS_TRACE_D("TransportHelper: Detach - TCP socket=%" PFLS_x "(%d)", nSocketHandle, nCount, 0);
 }
 
 PUBLIC
@@ -563,7 +561,7 @@ PRIVATE VIRTUAL void SipTransportHelper::DestroyTcpSocket(IN const IpAddress& ob
     ImsList<SipSocket*> objRemovedSockets;
     SipSocketAddress objSockAddr;
 
-    IMS_TRACE_D("DestroyTcpSocket (S) :: Sockets (%d)", m_objSockets.GetSize(), 0, 0);
+    IMS_TRACE_D("DestroyTcpSocket: (S) Sockets (%d)", m_objSockets.GetSize(), 0, 0);
 
     if (!bIsConnectionByPeer)
     {
@@ -633,7 +631,7 @@ PRIVATE VIRTUAL void SipTransportHelper::DestroyTcpSocket(IN const IpAddress& ob
         }
     }
 
-    IMS_TRACE_D("DestroyTcpSocket (E) :: Sockets (%d)", m_objSockets.GetSize(), 0, 0);
+    IMS_TRACE_D("DestroyTcpSocket: (E) Sockets (%d)", m_objSockets.GetSize(), 0, 0);
 
     if (m_objSockets.IsEmpty())
     {
@@ -875,7 +873,7 @@ PRIVATE VIRTUAL void SipTransportHelper::StreamSocket_KeepAliveExpired(IN SipSoc
     {
         LookupSocket(*pSocket, IMS_TRUE);
         delete pSocket;
-        IMS_TRACE_D("TransportHelper :: Destroy (Keep-Alive Expired) - Sockets (%d)",
+        IMS_TRACE_D("TransportHelper: Destroy(keep-alive expired,sockets=%d)",
                 m_objSockets.GetSize(), 0, 0);
     }
 }
@@ -889,8 +887,7 @@ PRIVATE VIRTUAL void SipTransportHelper::StreamSocket_PassiveClosed(IN SipSocket
 
     if (IsClientInitiatedConnection(pSocket))
     {
-        IMS_TRACE_D("SipTransportHelper :: Managed client initiated connection is required...", 0,
-                0, 0);
+        IMS_TRACE_D("SipTransportHelper: Managed client initiated connection is required", 0, 0, 0);
         return;
     }
 
@@ -902,7 +899,7 @@ PRIVATE VIRTUAL void SipTransportHelper::StreamSocket_PassiveClosed(IN SipSocket
         {
             m_objSockets.RemoveAt(i);
             delete pSocket;
-            IMS_TRACE_D("TransportHelper :: Destroy (Passive Closed) - Sockets (%d)",
+            IMS_TRACE_D("TransportHelper: Destroy(passive closed,sockets=%d)",
                     m_objSockets.GetSize(), 0, 0);
             return;
         }
@@ -1010,8 +1007,8 @@ SipSocket* SipTransportHelper::LookupStreamSocket(IN const SipSocketAddress& obj
     SipSocket* pStreamSocket = IMS_NULL;
     AString strNearEnd;
 
-    strNearEnd.Sprintf("Near End (%s, %d)", SipDebug::GetIp(objSockAddr.GetIpAddress()),
-            objSockAddr.GetPort());
+    strNearEnd.Sprintf(
+            "Near(%s|%d)", SipDebug::GetIp(objSockAddr.GetIpAddress()), objSockAddr.GetPort());
 
     // Find a socket using the source address & port again
     for (IMS_UINT32 i = 0; i < m_objSockets.GetSize(); ++i)
@@ -1026,14 +1023,14 @@ SipSocket* SipTransportHelper::LookupStreamSocket(IN const SipSocketAddress& obj
         pSocket->GetSockName(objIp, nPort);
 
 #ifdef __IMS_SIP_DEBUG__
-        IMS_TRACE_D("Lookup :: TCP client (%s, %d) at (%d)", SipDebug::GetIp(objIp), nPort, i);
+        IMS_TRACE_D("Lookup: TCP client(%s|%d) at (%d)", SipDebug::GetIp(objIp), nPort, i);
 #endif
 
         if (objIp.Equals(objSockAddr.GetIpAddress()) &&
                 (nPort == static_cast<IMS_UINT32>(objSockAddr.GetPort())) &&
                 !pSocket->IsClosedOrBeingClosed())
         {
-            IMS_TRACE_D("Lookup :: TCP client (%s, %d), %s", SipDebug::GetIp(objIp), nPort,
+            IMS_TRACE_D("Lookup: TCP client(%s|%d), %s", SipDebug::GetIp(objIp), nPort,
                     strNearEnd.GetStr());
             return pSocket;
         }
@@ -1041,7 +1038,7 @@ SipSocket* SipTransportHelper::LookupStreamSocket(IN const SipSocketAddress& obj
 
     if (pStreamSocket == IMS_NULL)
     {
-        IMS_TRACE_D("Lookup :: TCP client (not found) (%s, %d), %s",
+        IMS_TRACE_D("Lookup: TCP client(not found)(%s|%d), %s",
                 SipDebug::GetIp(objSockAddr.GetIpAddress()), objSockAddr.GetPort(),
                 strNearEnd.GetStr());
     }
@@ -1057,9 +1054,9 @@ SipSocket* SipTransportHelper::LookupStreamSocket(
     AString strFarEnd;
 
     // LOG_EXCLUDING_SERVER_INFO
-    strFarEnd.Sprintf("Far End (%s, %d)",
+    strFarEnd.Sprintf("Far(%s|%d)",
             SipRtConfigUtils::IsRoutingInfoHiddenInLog(GetSlotId())
-                    ? "xxx"
+                    ? "***"
                     : SipDebug::GetIp(objFarEnd.GetIpAddress()),
             objFarEnd.GetPort());
 
@@ -1077,7 +1074,7 @@ SipSocket* SipTransportHelper::LookupStreamSocket(
     if (objCandidates.IsEmpty())
     {
 #ifdef __IMS_SIP_DEBUG__
-        IMS_TRACE_D("Lookup :: TCP client does not exist; %s", strFarEnd.GetStr(), 0, 0);
+        IMS_TRACE_D("Lookup: TCP client not found, %s", strFarEnd.GetStr(), 0, 0);
 #endif
         return IMS_NULL;
     }
@@ -1094,13 +1091,13 @@ SipSocket* SipTransportHelper::LookupStreamSocket(
         pSocket->GetSockName(objIp, nPort);
 
 #ifdef __IMS_SIP_DEBUG__
-        IMS_TRACE_D("Lookup :: TCP client (%s, %d) at (%d)", SipDebug::GetIp(objIp), nPort, i);
+        IMS_TRACE_D("Lookup: TCP client(%s|%d) at (%d)", SipDebug::GetIp(objIp), nPort, i);
 #endif
 
         if (objIp.Equals(objSockAddr.GetIpAddress()) &&
                 (nPort == static_cast<IMS_UINT32>(objSockAddr.GetPort())))
         {
-            IMS_TRACE_D("Lookup :: TCP client (%s, %d), %s", SipDebug::GetIp(objIp), nPort,
+            IMS_TRACE_D("Lookup: TCP client(%s|%d), %s", SipDebug::GetIp(objIp), nPort,
                     strFarEnd.GetStr());
             return pSocket;
         }
@@ -1111,23 +1108,22 @@ SipSocket* SipTransportHelper::LookupStreamSocket(
             if (objIp.Equals(objSockAddr.GetIpAddress()))
             {
                 pStreamSocket = pSocket;
-                IMS_TRACE_D("Lookup :: TCP client (%s, %d) w/o port, %s", SipDebug::GetIp(objIp),
-                        nPort, strFarEnd.GetStr());
+                IMS_TRACE_D("Lookup: TCP client(%s|%d) w/o port, %s", SipDebug::GetIp(objIp), nPort,
+                        strFarEnd.GetStr());
             }
         }
     }
 
     if (pStreamSocket == IMS_NULL)
     {
-        IMS_TRACE_D("Lookup :: TCP client (not found) (%s, %d), %s",
+        IMS_TRACE_D("Lookup: TCP client(not found)(%s|%d), %s",
                 SipDebug::GetIp(objSockAddr.GetIpAddress()), objSockAddr.GetPort(),
                 strFarEnd.GetStr());
     }
 
     if (objCandidates.GetSize() > 1)
     {
-        IMS_TRACE_D(
-                "Lookup :: TCP client socket is ambiguous ... (%d)", objCandidates.GetSize(), 0, 0);
+        IMS_TRACE_D("Lookup: TCP client socket is ambiguous(%d)", objCandidates.GetSize(), 0, 0);
     }
 
     return pStreamSocket;

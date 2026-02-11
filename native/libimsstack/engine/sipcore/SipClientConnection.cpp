@@ -329,7 +329,7 @@ PUBLIC VIRTUAL IMS_RESULT SipClientConnection::Send()
             if (m_pAuHelper->IsChallengePresent())
             {
                 IMS_TRACE_D("Authorization/Proxy-Authorization in the initial request; "
-                            "The credentials will be removed...",
+                            "Credentials being removed.",
                         0, 0, 0);
 
                 m_pAuHelper->RemoveAllCredentials();
@@ -338,7 +338,7 @@ PUBLIC VIRTUAL IMS_RESULT SipClientConnection::Send()
 
         if (!m_pCtState->FormMessage())
         {
-            IMS_TRACE_E(0, "FormMessage() failed", 0, 0, 0);
+            IMS_TRACE_E(0, "FormMessage failed", 0, 0, 0);
             return IMS_FAILURE;
         }
 
@@ -346,7 +346,7 @@ PUBLIC VIRTUAL IMS_RESULT SipClientConnection::Send()
 
         if (nResult == SipClientTransmissionProxy::RESULT_NOK)
         {
-            IMS_TRACE_E(0, "Send() failed", 0, 0, 0);
+            IMS_TRACE_E(0, "Send failed", 0, 0, 0);
             return IMS_FAILURE;
         }
 
@@ -750,9 +750,9 @@ IMS_RESULT SipClientConnection::SetCredentials(IN const Credential& objCredentia
     }
 
     // LOG_EXCLUDING_SERVER_INFO
-    IMS_TRACE_D("Credential :: UserName (%s), Password (%s), Realm (%s)",
+    IMS_TRACE_D("Credential: (%s|%s|%s)",
             SipDebug::GetCharA1(objCredential.GetUsername().GetStr(), 6),
-            bPasswordLogging ? objCredential.GetPassword().GetStr() : "xxx",
+            bPasswordLogging ? objCredential.GetPassword().GetStr() : "***",
             SipDebug::GetCharA2(objCredential.GetRealm().GetStr(), 4));
 
     if ((objCredential.GetType() == Credential::TYPE_AKAv1_MD5) ||
@@ -1095,7 +1095,7 @@ PRIVATE VIRTUAL void SipClientConnection::ClientTransactionState_ForkedResponseR
 {
     SipClientConnection* pScc = new SipClientConnection(pCtState);
 
-    IMS_TRACE_D("SCC :: Handling a forked response ...", 0, 0, 0);
+    IMS_TRACE_D("SCC: Handling a forked response", 0, 0, 0);
 
     if (pScc == IMS_NULL)
     {
@@ -1182,7 +1182,7 @@ PRIVATE VIRTUAL void SipClientConnection::ClientTransactionState_ResponseReceive
 
             if (m_pAuHelper->IsCredentialPresent())
             {
-                IMS_TRACE_D("___ AUTHENTICATION IS PROCESSED BY SIP STACK ...", 0, 0, 0);
+                IMS_TRACE_D("___ AUTHENTICATION IS PROCESSED BY SIP STACK", 0, 0, 0);
 
                 SetState(STATE_UNAUTHORIZED);
 
@@ -1195,7 +1195,7 @@ PRIVATE VIRTUAL void SipClientConnection::ClientTransactionState_ResponseReceive
         }
         else
         {
-            IMS_TRACE_D("Authentication helper does not exist...", 0, 0, 0);
+            IMS_TRACE_D("No authentication helper", 0, 0, 0);
 
             m_pAuHelper = new SipAuHelper();
 
@@ -1349,7 +1349,7 @@ void SipClientConnection::StopTcpConnectionMonitoringTimer()
 PRIVATE
 void SipClientConnection::SetState(IN IMS_SINT32 nState)
 {
-    IMS_TRACE_I("SCC :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
+    IMS_TRACE_I("SCC: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
     m_nState = nState;
 }

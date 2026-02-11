@@ -28,7 +28,7 @@ __IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC VIRTUAL SipDialogUsage::~SipDialogUsage()
 {
-    IMS_TRACE_D("Destructor :: SipDialogUsage (%s)",
+    IMS_TRACE_D("dtor: SipDialogUsage(%s)",
             (m_nType == TYPE_EPHEMERAL) ? "EPHEMERAL"
                                         : ((m_nType == TYPE_INVITE) ? "INVITE" : "SUBSCRIBE"),
             0, 0);
@@ -89,8 +89,8 @@ PUBLIC VIRTUAL IMS_SINT32 SipDialogUsage::UpdateUsageDetails(IN const SipMessage
         }
     }
 
-    IMS_TRACE_D("UpdateDialogDetails() - %s : %s", ActionToString(nAction),
-            TriggerToString(nTrigger), 0);
+    IMS_TRACE_D(
+            "UpdateDialogDetails: %s|%s", ActionToString(nAction), TriggerToString(nTrigger), 0);
 
     return m_pDialogBase->OnUpdateDialogDetails(objMsgInfo, m_nType, nAction, nTrigger);
 }

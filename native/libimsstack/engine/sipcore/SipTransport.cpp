@@ -64,7 +64,7 @@ PUBLIC VIRTUAL SipTransport::~SipTransport()
     ReleaseSocket();
 
 #ifdef __IMS_SIP_DEBUG__
-    IMS_TRACE_D("Destructor :: SipTransport", 0, 0, 0);
+    IMS_TRACE_D("dtor: SipTransport", 0, 0, 0);
 #endif
 }
 
@@ -74,7 +74,7 @@ SipSocket* SipTransport::CreateTcpClientSocket()
     if ((m_objFarEnd.GetProtocol() != SipTransportAddress::PROTOCOL_TCP) &&
             (m_objFarEnd.GetProtocol() != SipTransportAddress::PROTOCOL_TLS))
     {
-        IMS_TRACE_E(0, "Transport :: Protocol does not use TCP", 0, 0, 0);
+        IMS_TRACE_E(0, "Transport: Protocol does not use TCP", 0, 0, 0);
         return IMS_NULL;
     }
 
@@ -84,8 +84,8 @@ SipSocket* SipTransport::CreateTcpClientSocket()
 
     if (IsFlowControlPortConfigured())
     {
-        IMS_TRACE_D("Transport :: Flow control (%d >> %d) will be applied", nTempPortC,
-                m_nPortFlowControl, 0);
+        IMS_TRACE_D(
+                "Transport: Flow control (%d >> %d) configured", nTempPortC, m_nPortFlowControl, 0);
 
         nTempPortC = m_nPortFlowControl;
     }
@@ -121,7 +121,7 @@ SipSocket* SipTransport::CreateTcpClientSocket()
         if ((pSocket == IMS_NULL) && IsFlowControlPortConfigured() &&
                 IsTransactionFlowControlRequired())
         {
-            IMS_TRACE_D("Transport :: TCP client (%s, %d) can't be created by flow control",
+            IMS_TRACE_D("Transport: TCP client(%s|%d) can't be created by flow control",
                     SipDebug::GetIp(objSockAddr.GetIpAddress()), objSockAddr.GetPort(), 0);
             return IMS_NULL;
         }
@@ -172,12 +172,12 @@ SipSocket* SipTransport::CreateTcpClientSocket()
             {
                 if (IsTcpConnectionOnlyRequired())
                 {
-                    IMS_TRACE_D("Transport :: TCP client connection is only required...", 0, 0, 0);
+                    IMS_TRACE_D("Transport: TCP client connection is only required", 0, 0, 0);
                     objSockAddr.SetPort(nTempPortC);
                 }
                 else if (IsFlowControlPortConfigured())
                 {
-                    IMS_TRACE_D("Transport :: Flow control is required", 0, 0, 0);
+                    IMS_TRACE_D("Transport: Flow control is required", 0, 0, 0);
                     objSockAddr.SetPort(nTempPortC);
                 }
             }
@@ -193,20 +193,20 @@ SipSocket* SipTransport::CreateTcpClientSocket()
             if (pSocket == IMS_NULL)
             {
                 // LOG_EXCLUDING_SERVER_INFO
-                IMS_TRACE_E(0, "Creating TCP client (FAR - %s, %d)",
+                IMS_TRACE_E(0, "Creating TCP client(FAR:%s|%d)",
                         SipRtConfigUtils::IsRoutingInfoHiddenInLog(GetSlotId())
-                                ? "xxx"
+                                ? "***"
                                 : SipDebug::GetIp(objSockAddrFarEnd.GetIpAddress()),
                         objSockAddrFarEnd.GetPort(), 0);
                 return IMS_NULL;
             }
 
-            IMS_TRACE_D("Transport :: TCP client (%s, %d) is created",
+            IMS_TRACE_D("Transport: TCP client(%s|%d) created",
                     SipDebug::GetIp(objSockAddr.GetIpAddress()), objSockAddr.GetPort(), 0);
         }
         else
         {
-            IMS_TRACE_D("Transport :: TCP client (%s, %d) is re-used (port-c=%d)",
+            IMS_TRACE_D("Transport: TCP client(%s|%d) re-used(port-c=%d)",
                     SipDebug::GetIp(objSockAddr.GetIpAddress()), objSockAddr.GetPort(), nTempPortC);
         }
     }
@@ -363,7 +363,7 @@ IMS_BOOL SipTransport::SendToNetwork(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 n
 
         if (m_pSocket == IMS_NULL)
         {
-            IMS_TRACE_E(0, "Can't find a proper SIP socket from the transport layer.", 0, 0, 0);
+            IMS_TRACE_E(0, "No valid SIP socket", 0, 0, 0);
             goto EXIT_SendToNetwork;
         }
     }
@@ -371,13 +371,13 @@ IMS_BOOL SipTransport::SendToNetwork(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 n
     // For an initial TCP client connection.
     if (!m_pSocket->Connect())
     {
-        IMS_TRACE_E(0, "Connecting transport channel failed ...", 0, 0, 0);
+        IMS_TRACE_E(0, "Connecting transport channel failed", 0, 0, 0);
         goto EXIT_SendToNetwork;
     }
 
     if (m_pSocket->GetState() != SipSocket::STATE_CONNECTED)
     {
-        IMS_TRACE_D("___ Waiting the establishment of transport channel ...", 0, 0, 0);
+        IMS_TRACE_D("___ Waiting for socket connection", 0, 0, 0);
 
         if (m_pSendBuffer != IMS_NULL)
         {
@@ -391,7 +391,7 @@ IMS_BOOL SipTransport::SendToNetwork(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 n
 
     if (!TransmitMessage(pBuffer, nBuffLen))
     {
-        IMS_TRACE_E(0, "Transmitting SIP message to the destination (%s:%d) failed",
+        IMS_TRACE_E(0, "Transmitting SIP message(dst=%s|%d) failed",
                 SipDebug::GetIp(m_objFarEnd.GetIpAddress()), m_objFarEnd.GetPort(), 0);
         goto EXIT_SendToNetwork;
     }
@@ -511,7 +511,7 @@ void SipTransport::StoreResource()
         {
             m_pSocket->SetListener(this);
 
-            IMS_TRACE_D("Transport :: TCP connection is bound", 0, 0, 0);
+            IMS_TRACE_D("Transport: TCP connection is bound", 0, 0, 0);
         }
     }
 }
@@ -661,7 +661,7 @@ PROTECTED VIRTUAL void SipTransport::Socket_NotifyError(
 {
     if (m_pSocket != pSocket)
     {
-        IMS_TRACE_D("Socket_NotifyError() :: Socket not matched", 0, 0, 0);
+        IMS_TRACE_D("Socket_NotifyError: Socket not matched", 0, 0, 0);
         return;
     }
 
@@ -685,7 +685,7 @@ PROTECTED VIRTUAL void SipTransport::Socket_SendEnabled(IN SipSocket* pSocket)
 
     if (m_pSocket == IMS_NULL)
     {
-        IMS_TRACE_D("Socket NULL", 0, 0, 0);
+        IMS_TRACE_D("Socket is null", 0, 0, 0);
         return;
     }
 
@@ -769,11 +769,11 @@ void SipTransport::NotifyTransportError(IN IMS_SINT32 nErrorCode, IN IMS_SINT32 
 {
     if (m_piListener == IMS_NULL)
     {
-        IMS_TRACE_D("Transport :: No Listener, Error (%d)", nErrorCode, 0, 0);
+        IMS_TRACE_D("Transport: No listener - error=%d", nErrorCode, 0, 0);
         return;
     }
 
-    IMS_TRACE_D("Transport :: Error (%d)", nErrorCode, 0, 0);
+    IMS_TRACE_D("Transport: error=%d", nErrorCode, 0, 0);
 
     switch (nErrorCode)
     {
@@ -861,8 +861,8 @@ IMS_BOOL SipTransport::ReserveSocket(IN const SipProfile* pProfile /*= IMS_NULL*
 
     if (IsFlowControlPortConfigured())
     {
-        IMS_TRACE_D("Transport :: Flow control (%d >> %d) will be applied", nTempPortC,
-                m_nPortFlowControl, 0);
+        IMS_TRACE_D(
+                "Transport: Flow control(%d >> %d) configured", nTempPortC, m_nPortFlowControl, 0);
 
         nTempPortC = m_nPortFlowControl;
     }
@@ -874,8 +874,7 @@ IMS_BOOL SipTransport::ReserveSocket(IN const SipProfile* pProfile /*= IMS_NULL*
         if (m_nType != TYPE_CLIENT)
         {
             // In case of server transport & TCP protocol used
-            IMS_TRACE_D(
-                    "Transport :: server transport will use an existing TCP connection", 0, 0, 0);
+            IMS_TRACE_D("Transport: server transport uses an existing TCP connection", 0, 0, 0);
             return IMS_TRUE;
         }
 
@@ -891,8 +890,8 @@ IMS_BOOL SipTransport::ReserveSocket(IN const SipProfile* pProfile /*= IMS_NULL*
                     (m_objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_UDP))
             {
                 // If the port is same, the socket will be re-used.
-                IMS_TRACE_D("Transport :: UDP client (%s, %d) is re-used", SipDebug::GetIp(objIp),
-                        nPort, 0);
+                IMS_TRACE_D(
+                        "Transport: UDP client(%s|%d) re-used", SipDebug::GetIp(objIp), nPort, 0);
                 return IMS_TRUE;
             }
             else if ((m_pSocket->GetType() == SipSocketAddress::SOCKET_TCP_CLIENT) &&
@@ -924,8 +923,8 @@ IMS_BOOL SipTransport::ReserveSocket(IN const SipProfile* pProfile /*= IMS_NULL*
                     (m_objFarEnd.GetPort() == static_cast<IMS_SINT32>(nPeerPort)))
             {
                 // If the port is same, the socket will be re-used.
-                IMS_TRACE_D("Transport :: TCP client (%s, %d) is re-used", SipDebug::GetIp(objIp),
-                        nPort, 0);
+                IMS_TRACE_D(
+                        "Transport: TCP client(%s|%d) re-used", SipDebug::GetIp(objIp), nPort, 0);
 
                 // MULTI_REG_SIP_PROFILE
                 SipStreamSocket* pStreamSocket = DYNAMIC_CAST(SipStreamSocket*, m_pSocket);
@@ -936,12 +935,12 @@ IMS_BOOL SipTransport::ReserveSocket(IN const SipProfile* pProfile /*= IMS_NULL*
             }
             else
             {
-                IMS_TRACE_D("Transport :: TCP client (%s, %d) is matched", SipDebug::GetIp(objIp),
+                IMS_TRACE_D("Transport: TCP client(%s|%d) is matched", SipDebug::GetIp(objIp),
                         nPort, 0);
                 // LOG_EXCLUDING_SERVER_INFO
-                IMS_TRACE_D("Transport :: TCP client (peer) (%s, %d) is not matched",
+                IMS_TRACE_D("Transport: TCP client(peer)(%s|%d) is not matched",
                         SipRtConfigUtils::IsRoutingInfoHiddenInLog(GetSlotId())
-                                ? "xxx"
+                                ? "***"
                                 : SipDebug::GetIp(objPeerIp),
                         nPeerPort, 0);
             }
@@ -989,12 +988,12 @@ IMS_BOOL SipTransport::ReserveSocket(IN const SipProfile* pProfile /*= IMS_NULL*
 
         if (m_pSocket == IMS_NULL)
         {
-            IMS_TRACE_E(0, "Creating UDP client (%s, %d)",
+            IMS_TRACE_E(0, "Creating UDP client(%s|%d)",
                     SipDebug::GetIp(objSockAddr.GetIpAddress()), objSockAddr.GetPort(), 0);
             return IMS_FALSE;
         }
 
-        IMS_TRACE_D("Transport :: UDP client (%s, %d) is created",
+        IMS_TRACE_D("Transport: UDP client(%s|%d) created",
                 SipDebug::GetIp(objSockAddr.GetIpAddress()), objSockAddr.GetPort(), 0);
     }
 
@@ -1057,7 +1056,7 @@ IMS_BOOL SipTransport::TransmitMessage(IN const IMS_BYTE* pBuffer, IN IMS_SINT32
         }
     }
 
-    IMS_TRACE_I("___ SipTransport - SENT BYTES (%d) ___", nSentBytes, 0, 0);
+    IMS_TRACE_I("___ Transport: SENT BYTES(%d) ___", nSentBytes, 0, 0);
 
     return IMS_TRUE;
 }

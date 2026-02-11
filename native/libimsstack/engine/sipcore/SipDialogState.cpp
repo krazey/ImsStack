@@ -194,7 +194,7 @@ PUBLIC VIRTUAL SipDialogState::~SipDialogState()
     // REMOTE_TARGET_UPDATE_FROM_MID_DIALOG_REQUEST
     RemoveAllPendingRemoteTargets();
 
-    IMS_TRACE_D("Destructor :: SipDialogState (%s : %s)", m_bIsCaller ? "__CALLER__" : "__CALLEE__",
+    IMS_TRACE_D("dtor: SipDialogState (%s: %s)", m_bIsCaller ? "__CALLER__" : "__CALLEE__",
             SipDebug::GetCharA1(m_strCallId.GetStr(), 8, '@'), 0);
 }
 
@@ -1034,7 +1034,7 @@ IMS_SINT32 SipDialogState::UpdateDialogDetails(IN const SipMessageInfo& objMsgIn
 PUBLIC
 void SipDialogState::UpdateLocalCSeq(IN IMS_UINT32 nCSeq)
 {
-    IMS_TRACE_I("Dialog (%s) - CSeq: %d >> %d", SipDebug::GetCharA1(m_strCallId.GetStr(), 8, '@'),
+    IMS_TRACE_I("Dialog(%s): CSeq: %d >> %d", SipDebug::GetCharA1(m_strCallId.GetStr(), 8, '@'),
             m_nLocalCSeq, nCSeq);
 
     m_nLocalCSeq = nCSeq;
@@ -1067,8 +1067,7 @@ IMS_SINT32 SipDialogState::ValidateRemoteCSeq(
             // after new re-INVITE request is received.
             if (!SipStatusCode::IsFinalSuccess(nPrevStatusCode))
             {
-                IMS_TRACE_E(
-                        0, "OUT OF SEQUENCE :: ACK (%d, %d)", m_nRemoteCSeqForInvite, nSeqNum, 0);
+                IMS_TRACE_E(0, "OUT OF SEQUENCE: ACK(%d|%d)", m_nRemoteCSeqForInvite, nSeqNum, 0);
                 return SipPrivate::MESSAGE_DISCARDED;
             }
         }
@@ -1561,7 +1560,7 @@ IMS_BOOL SipDialogState::UpdateRemoteUri(IN const SipMessageInfo& objMsgInfo)
 
     SipStack::FreeHeaderEx(pSipHdr);
 
-    IMS_TRACE_D("DialogState :: from-change is done", 0, 0, 0);
+    IMS_TRACE_D("DialogState: from-change is done", 0, 0, 0);
 
     return IMS_TRUE;
 }
@@ -1668,8 +1667,7 @@ void SipDialogState::UpdateState(
                 };
         // clang-format on
 
-        IMS_TRACE_I(
-                "_____ DIALOG STATE : (%s) >>> (%s) _____", STATE[m_nState], STATE[nNextState], 0);
+        IMS_TRACE_I("___ DIALOG STATE: (%s) >>> (%s) ___", STATE[m_nState], STATE[nNextState], 0);
 
         m_nState = nNextState;
     }
@@ -1701,7 +1699,7 @@ void SipDialogState::AddPendingRemoteTarget(IN const SipMessageInfo& objMsgInfo)
 
         if (strKey.Equals(pRemoteTarget->strKey))
         {
-            IMS_TRACE_D("PendingRemoteTarget(add) :: key(dup)=%s, count=%d",
+            IMS_TRACE_D("PendingRemoteTarget(add): key(dup)=%s, count=%d",
                     SipDebug::GetCharA1(strKey.GetStr(), 8, '@'),
                     m_objPendingRemoteTargets.GetSize(), 0);
             return;
@@ -1726,7 +1724,7 @@ void SipDialogState::AddPendingRemoteTarget(IN const SipMessageInfo& objMsgInfo)
 
     m_objPendingRemoteTargets.Append(new PendingRemoteTarget(strKey, pContact));
 
-    IMS_TRACE_D("PendingRemoteTarget(add) :: key=%s, count=%d",
+    IMS_TRACE_D("PendingRemoteTarget(add): key=%s, count=%d",
             SipDebug::GetCharA1(strKey.GetStr(), 8, '@'), m_objPendingRemoteTargets.GetSize(), 0);
 }
 
@@ -1782,7 +1780,7 @@ void SipDialogState::RemovePendingRemoteTarget(IN const SipMessageInfo& objMsgIn
             m_objPendingRemoteTargets.RemoveAt(i);
             delete pRemoteTarget;
 
-            IMS_TRACE_D("PendingRemoteTarget(remove) :: key=%s, count=%d",
+            IMS_TRACE_D("PendingRemoteTarget(remove): key=%s, count=%d",
                     SipDebug::GetCharA1(strKey.GetStr(), 8, '@'),
                     m_objPendingRemoteTargets.GetSize(), 0);
             break;
@@ -1859,7 +1857,7 @@ void SipDialogState::UpdateAndRemovePendingRemoteTarget(IN const SipMessageInfo&
             }
         }
 
-        IMS_TRACE_D("PendingRemoteTarget(update&remove) :: key=%s, index=%d, count=%d",
+        IMS_TRACE_D("PendingRemoteTarget(update&remove): key=%s, index=%d, count=%d",
                 SipDebug::GetCharA1(strKey.GetStr(), 8, '@'), nMatchedIndex,
                 m_objPendingRemoteTargets.GetSize());
     }
@@ -1874,7 +1872,7 @@ void SipDialogState::SetFromChangeOption(IN IMS_SINT32 nOption)
 
     if (bChanged)
     {
-        IMS_TRACE_D("DialogState :: from-change=%02x", m_nFromChangeOption, 0, 0);
+        IMS_TRACE_D("DialogState: from-change=%02x", m_nFromChangeOption, 0, 0);
     }
 }
 

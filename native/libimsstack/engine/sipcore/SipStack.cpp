@@ -3804,7 +3804,7 @@ GLOBAL void DisplayBadHeaders(IN ::SipMessage* pMessage)
 #ifdef SIP_BADMESSAGE_PARSING
     SIPStackError(EERR_NOERR);
 
-    IMS_TRACE_I("___ SIP bad headers - S ___", 0, 0, 0);
+    IMS_TRACE_I("___ SIP bad headers ___", 0, 0, 0);
 
     SipHeaderList* pBadHdrList = pMessage->GetBadHdrs();
 
@@ -3829,8 +3829,6 @@ GLOBAL void DisplayBadHeaders(IN ::SipMessage* pMessage)
             pBadHeader->SipDelete();
         }
     }
-
-    IMS_TRACE_I("___ SIP bad headers - E ___", 0, 0, 0);
 #else
     (void)pMessage;
 #endif

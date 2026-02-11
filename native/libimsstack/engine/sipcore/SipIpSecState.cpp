@@ -66,7 +66,7 @@ SipIpSecState::SecurityAssociation::SecurityAssociation(
 PRIVATE
 SipIpSecState::SecurityAssociation::~SecurityAssociation()
 {
-    IMS_TRACE_D("SA :: Destructor - txnkeys=%d", objSipTxnKeys.GetSize(), 0, 0);
+    IMS_TRACE_D("SA: Destructor - txnkeys=%d", objSipTxnKeys.GetSize(), 0, 0);
 }
 
 PUBLIC
@@ -78,7 +78,7 @@ IMS_BOOL SipIpSecState::SecurityAssociation::AddTransaction(IN const sipcore::Si
 
         if (objTxnKey.Equals(pTxnKey))
         {
-            IMS_TRACE_D("SA :: Txn (%d:%s) already exists", objTxnKey.GetCSeq(),
+            IMS_TRACE_D("SA: Txn(%d:%s) already exists", objTxnKey.GetCSeq(),
                     objTxnKey.GetViaBranch().GetStr(), 0);
             return IMS_FALSE;
         }
@@ -86,7 +86,7 @@ IMS_BOOL SipIpSecState::SecurityAssociation::AddTransaction(IN const sipcore::Si
 
     objSipTxnKeys.Append(*pTxnKey);
 
-    IMS_TRACE_D("SA :: Txn (%d:%s) is added - size=%d", pTxnKey->GetCSeq(),
+    IMS_TRACE_D("SA: Txn(%d:%s) is added - size=%d", pTxnKey->GetCSeq(),
             pTxnKey->GetViaBranch().GetStr(), objSipTxnKeys.GetSize());
 
     return IMS_TRUE;
@@ -179,7 +179,7 @@ IMS_BOOL SipIpSecState::SecurityAssociation::RemoveTransaction(IN const sipcore:
 
     if (bRemoved)
     {
-        IMS_TRACE_D("SA :: Txn (%d:%s) is removed - size=%d", pTxnKey->GetCSeq(),
+        IMS_TRACE_D("SA: Txn(%d:%s) is removed - size=%d", pTxnKey->GetCSeq(),
                 pTxnKey->GetViaBranch().GetStr(), objSipTxnKeys.GetSize());
     }
 
@@ -191,7 +191,7 @@ void SipIpSecState::SecurityAssociation::SetState(IN IMS_SINT32 nState)
 {
     if (this->nState != nState)
     {
-        IMS_TRACE_I("SA :: %s >> %s", StateToString(this->nState), StateToString(nState), 0);
+        IMS_TRACE_I("SA: %s >> %s", StateToString(this->nState), StateToString(nState), 0);
 
         this->nState = nState;
     }
@@ -495,7 +495,7 @@ void SipIpSecState::NotifyMessageReceivedInternal(IN const SipTransportAddress& 
 
     if (bStrayResponseOnNewSa && (m_pOldSa != IMS_NULL))
     {
-        IMS_TRACE_D("IpSecState :: Stray response is detected on new SA", 0, 0, 0);
+        IMS_TRACE_D("IpSecState: Stray response is detected on new SA", 0, 0, 0);
 
         if (m_pOldSa->RemoveTransaction(pTxnKey))
         {
@@ -514,7 +514,7 @@ void SipIpSecState::NotifyMessageReceivedInternal(IN const SipTransportAddress& 
 
     if (bStrayResponseOnOldSa && (m_pNewSa != IMS_NULL))
     {
-        IMS_TRACE_D("IpSecState :: Stray response is detected on old SA", 0, 0, 0);
+        IMS_TRACE_D("IpSecState: Stray response is detected on old SA", 0, 0, 0);
 
         m_pNewSa->RemoveTransaction(pTxnKey);
     }
@@ -609,7 +609,7 @@ void SipIpSecState::NotifyMessageSentInternal(IN const SipTransportAddress& objN
 
     if (bStrayResponseOnNewSa && (m_pOldSa != IMS_NULL))
     {
-        IMS_TRACE_D("IPSecState :: Stray response is detected on new SA", 0, 0, 0);
+        IMS_TRACE_D("IpSecState: Stray response is detected on new SA", 0, 0, 0);
 
         if (m_pOldSa->RemoveTransaction(pTxnKey))
         {
@@ -628,7 +628,7 @@ void SipIpSecState::NotifyMessageSentInternal(IN const SipTransportAddress& objN
 
     if (bStrayResponseOnOldSa && (m_pNewSa != IMS_NULL))
     {
-        IMS_TRACE_D("IPSecState :: Stray response is detected on old SA", 0, 0, 0);
+        IMS_TRACE_D("IpSecState: Stray response is detected on old SA", 0, 0, 0);
 
         m_pNewSa->RemoveTransaction(pTxnKey);
     }

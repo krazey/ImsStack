@@ -348,19 +348,19 @@ PROTECTED VIRTUAL void SipConnection::TransactionState_TimerExpired()
 
 PROTECTED VIRTUAL void SipConnection::Transport_NotifyPendingMessageSent()
 {
-    IMS_TRACE_D("SC: pending message is completely sent.", 0, 0, 0);
+    IMS_TRACE_D("SC: pending message is completely sent", 0, 0, 0);
 }
 
 PROTECTED VIRTUAL void SipConnection::Transport_NotifyError(
         IN IMS_SINT32 nCode, IN const AString& strMessage)
 {
-    IMS_TRACE_I("SC: SIP transport error - [%d, %s]", nCode, strMessage.GetStr(), 0);
+    IMS_TRACE_I("SC: SIP transport error(%d|%s)", nCode, strMessage.GetStr(), 0);
 
     // SIP_TRANSPORT_ERROR_REPORT_ON_TXN
     if (!IsTransportErrorReportRequired(nCode, strMessage))
     {
         // Ignore the transport error.
-        IMS_TRACE_D("SC: transport error report is off.", 0, 0, 0);
+        IMS_TRACE_D("SC: transport error report is off", 0, 0, 0);
         return;
     }
 

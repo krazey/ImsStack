@@ -110,9 +110,9 @@ SipStreamSocket::SipStreamSocket(IN IMS_SINT32 nSlotId, IN ISocket* piSocket) :
 
 PUBLIC VIRTUAL SipStreamSocket::~SipStreamSocket()
 {
-    IMS_TRACE_D("StreamSocket(D) :: (FarEnd: %s, %d)",
+    IMS_TRACE_D("StreamSocket(D) (Far=%s|%d)",
             SipRtConfigUtils::IsRoutingInfoHiddenInLog(GetSlotId())
-                    ? "xxx"
+                    ? "***"
                     : SipDebug::GetIp(m_objSockAddr.GetIpAddress()),
             m_objSockAddr.GetPort(), 0);
 
@@ -192,8 +192,8 @@ PUBLIC VIRTUAL IMS_BOOL SipStreamSocket::Create(
 
     m_bSecure = bSecure;
 
-    IMS_TRACE_I("StreamSocket(C) :: (%s , %d)",
-            SipRtConfigUtils::IsRoutingInfoHiddenInLog(GetSlotId()) ? "xxx"
+    IMS_TRACE_I("StreamSocket(C) (%s|%d)",
+            SipRtConfigUtils::IsRoutingInfoHiddenInLog(GetSlotId()) ? "***"
                                                                     : SipDebug::GetIp(objIp),
             nPort, 0);
 
@@ -296,7 +296,7 @@ void SipStreamSocket::ReuseSocket()
         // Start a keep-alive timer
         StartKeepAliveTimer(0);
 
-        IMS_TRACE_D("Stream socket will be re-used...", 0, 0, 0);
+        IMS_TRACE_D("Stream socket being re-used", 0, 0, 0);
     }
 }
 
@@ -305,7 +305,7 @@ void SipStreamSocket::SetConfigForSipKeepAlive(IN IMS_BOOL bSipKeepAlive)
 {
     if (m_bSipKeepAliveConfigured != bSipKeepAlive)
     {
-        IMS_TRACE_D("SIPKeepAlive is changed; %s", _TRACE_B_(bSipKeepAlive), 0, 0);
+        IMS_TRACE_D("SipKeepAlive is changed to %s", _TRACE_B_(bSipKeepAlive), 0, 0);
 
         m_bSipKeepAliveConfigured = bSipKeepAlive;
     }
@@ -392,10 +392,10 @@ PROTECTED VIRTUAL void SipStreamSocket::Timer_TimerExpired(IN ITimer* piTimer)
     else if ((m_piKeepAliveTimer != IMS_NULL) && (m_piKeepAliveTimer == piTimer))
     {
         IMS_TRACE_D("KeepAliveTimer Expired", 0, 0, 0);
-        // DEBUGGING messages...
-        {
-            IMS_TRACE_D("KeepAliveTimer - ends (%s)", IMS_SYS_GetTimeString().GetStr(), 0, 0);
-        }
+
+#ifdef __IMS_SIP_DEBUG__
+        IMS_TRACE_D("KeepAliveTimer - ends (%s)", IMS_SYS_GetTimeString().GetStr(), 0, 0);
+#endif
 
         IMS_UINT32 nInactiveInterval = IMS_SYS_GetTimeInSeconds() - m_nLastAliveTime;
 
@@ -446,7 +446,7 @@ PROTECTED VIRTUAL void SipStreamSocket::Socket_OnDataReceived(IN ISocket* piSock
     {
         nReadBytes = piSocket->Receive(pRecvBuffer, pMessageBuffer->GetLength());
 
-        IMS_TRACE_I("SipStreamSocket(%p) :: read-bytes=%d", piSocket, nReadBytes, 0);
+        IMS_TRACE_I("StreamSocket(%p): read-bytes=%d", piSocket, nReadBytes, 0);
 
         if (nReadBytes == ISocket::RESULT_ERROR || nReadBytes == ISocket::RESULT_WOULDBLOCK)
         {
@@ -576,7 +576,7 @@ IMS_RESULT SipStreamSocket::StartTxTimer(IN IMS_SINT32 nDuration)
 {
     if (nDuration <= 0)
     {
-        IMS_TRACE_D("Do not start the trasmission timer, TV (%d)", nDuration, 0, 0);
+        IMS_TRACE_D("Do not start the transmission timer(%d)", nDuration, 0, 0);
         return IMS_SUCCESS;
     }
 
@@ -617,8 +617,7 @@ IMS_RESULT SipStreamSocket::StartKeepAliveTimer(IN IMS_SINT32 nInactiveInterval)
 {
     if (m_objTcpTimerValues.m_nTvKeepAlive <= 0)
     {
-        IMS_TRACE_D("Do not start a keep-alive timer, TV (%d)", m_objTcpTimerValues.m_nTvKeepAlive,
-                0, 0);
+        IMS_TRACE_D("Do not start keep-alive timer(%d)", m_objTcpTimerValues.m_nTvKeepAlive, 0, 0);
         return IMS_SUCCESS;
     }
 
@@ -631,10 +630,9 @@ IMS_RESULT SipStreamSocket::StartKeepAliveTimer(IN IMS_SINT32 nInactiveInterval)
     // If KEEP_ALIVE timer is present, kill it.
     StopKeepAliveTimer();
 
-    // DEBUGGING messages...
-    {
-        IMS_TRACE_D("KeepAliveTimer - starts (%s)", IMS_SYS_GetTimeString().GetStr(), 0, 0);
-    }
+#ifdef __IMS_SIP_DEBUG__
+    IMS_TRACE_D("KeepAliveTimer - starts (%s)", IMS_SYS_GetTimeString().GetStr(), 0, 0);
+#endif
 
     m_piKeepAliveTimer = TimerService::GetTimerService()->CreateTimer();
 

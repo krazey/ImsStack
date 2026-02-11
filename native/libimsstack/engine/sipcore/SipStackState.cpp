@@ -49,7 +49,7 @@ void SipStackState::CleanUp()
 {
     LockGuard objLock(m_piLock);
 
-    IMS_TRACE_D("StackState - Number Of Transaction : (%d)", m_objTxnAggregate.GetSize(), 0, 0);
+    IMS_TRACE_D("StackState: Number Of Transaction(%d)", m_objTxnAggregate.GetSize(), 0, 0);
 
     if (!m_objTxnAggregate.IsEmpty())
     {
@@ -70,7 +70,7 @@ void SipStackState::CleanUp()
 
                 SipStack::TerminateTransaction(pKey);
 
-                IMS_TRACE_D("StackState (Transaction) - Call ID (%s), Via Branch (%s)",
+                IMS_TRACE_D("StackState: call-id=%s, via-branch=%s",
                         SipDebug::GetCharA1(SipStack::TxnKey_GetCallId(pKey), 8, '@'),
                         SipStack::TxnKey_GetViaBranch(pKey), 0);
 
@@ -188,7 +188,7 @@ void SipStackState::SetTransactionTimerValues(IN IMS_SINT32 nSlotId, IN const Si
             !pSipConfigV->IsTimerValueConfiguredOnRuntime())
     {
         // Do not update the transaction timer values in runtime.
-        IMS_TRACE_D("SIP timer values are not configured on runtime ...", 0, 0, 0);
+        IMS_TRACE_D("SIP timer values are not configured on runtime", 0, 0, 0);
         return;
     }
 

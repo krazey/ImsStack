@@ -200,7 +200,7 @@ PUBLIC VIRTUAL IMS_RESULT SipServerConnection::Send()
             return IMS_FAILURE;
         }
 
-        IMS_TRACE_I("Retransmission of %d to INVITE request is requested .....", nStatusCode, 0, 0);
+        IMS_TRACE_I("Retransmission of %d to INVITE request is requested", nStatusCode, 0, 0);
 
         if (!m_pMessage->FormMessageOnRetransmission())
         {
@@ -542,7 +542,7 @@ void SipServerConnection::AdjustTimerHFor2xx()
                 }
             }
 
-            IMS_TRACE_D("TimerH(2XX) is adjusted - %d >> %d",
+            IMS_TRACE_D("TimerH(2XX) is adjusted: %d >> %d",
                     pTimerValues->GetValue(SipTimerValues::TIMER_H), (nT1 * 64), 0);
 
             pTimerValues->SetValue(SipTimerValues::TIMER_H, (nT1 * 64));
@@ -553,7 +553,7 @@ void SipServerConnection::AdjustTimerHFor2xx()
 PRIVATE
 void SipServerConnection::SetState(IN IMS_SINT32 nState)
 {
-    IMS_TRACE_I("SSC :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
+    IMS_TRACE_I("SSC: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
     m_nState = nState;
 }
@@ -614,7 +614,7 @@ void SipServerConnection::StartClosePendingTimer()
 
     if (m_piClosePendingTimer != IMS_NULL)
     {
-        IMS_TRACE_D("SSC: starts a close pending timer...", 0, 0, 0);
+        IMS_TRACE_D("SSC: starts a close pending timer", 0, 0, 0);
         m_piClosePendingTimer->SetTimer(nTimerDuration, this);
     }
     else

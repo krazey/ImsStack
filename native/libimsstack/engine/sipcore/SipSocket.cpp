@@ -49,7 +49,7 @@ PUBLIC VIRTUAL SipSocket::~SipSocket()
 {
     CloseSocket();
 #ifdef __IMS_SIP_DEBUG__
-    IMS_TRACE_D("Destructor :: SipSocket", 0, 0, 0);
+    IMS_TRACE_D("dtor: SipSocket", 0, 0, 0);
 #endif
 }
 
@@ -337,7 +337,7 @@ void SipSocket::SetSocketOptionForTcpMaxSeg(
     // because ePDG can use the IPv6 for tunneling.
     if (bWfcSupported && (nMss > Sip::MTU_IPV6))
     {
-        IMS_TRACE_I("MTU(%s) :: %d >> %d", (bIpV6 ? "IPv6" : "IPv4"), nMss, Sip::MTU_IPV6);
+        IMS_TRACE_I("MTU(%s): %d >> %d", (bIpV6 ? "IPv6" : "IPv4"), nMss, Sip::MTU_IPV6);
         nMss = Sip::MTU_IPV6;
     }
 
@@ -413,7 +413,7 @@ void SipSocket::SetSocketOptions(IN const IpAddress& objLocalIp, IN IMS_UINT32 n
 PROTECTED
 void SipSocket::SetState(IN IMS_SINT32 nState)
 {
-    IMS_TRACE_I("SipSocket :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
+    IMS_TRACE_I("SipSocket: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
     m_nState = nState;
 }

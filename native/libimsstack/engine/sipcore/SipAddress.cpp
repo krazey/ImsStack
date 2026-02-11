@@ -1231,7 +1231,7 @@ IMS_BOOL SipAddress::CompareSipUris(IN const SipAddress& objAddress) const
             {
                 if (!pParam->Equals(pOtherParam))
                 {
-                    IMS_TRACE_E(0, "Parameter (%s) is not matched - %s : %s", strName.GetStr(),
+                    IMS_TRACE_E(0, "Parameter(%s) is not matched(%s|%s)", strName.GetStr(),
                             pParam->GetValue().GetStr(), pOtherParam->GetValue().GetStr());
                     return IMS_FALSE;
                 }

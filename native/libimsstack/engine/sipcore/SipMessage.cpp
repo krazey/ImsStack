@@ -78,7 +78,7 @@ PUBLIC VIRTUAL SipMessage::~SipMessage()
     }
 
 #ifdef __IMS_SIP_DEBUG__
-    IMS_TRACE_D("Destructor :: SipMessage", 0, 0, 0);
+    IMS_TRACE_D("dtor: SipMessage", 0, 0, 0);
 #endif
 }
 

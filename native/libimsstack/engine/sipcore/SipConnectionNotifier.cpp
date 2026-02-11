@@ -124,7 +124,7 @@ PUBLIC VIRTUAL SipConnectionNotifier::~SipConnectionNotifier()
 
     ClearTransportResource();
 
-    IMS_TRACE_D("Destructor :: SipConnectionNotifier (%s, %d, type: %s)",
+    IMS_TRACE_D("dtor: SipConnectionNotifier(%s|%d|%s)",
             (m_nMode == SHARED) ? "__SHARED__" : "__DEDICATED__", m_nPort, m_strType.GetStr());
 }
 
@@ -408,12 +408,11 @@ IMS_RESULT SipConnectionNotifier::ReserveTransportResource(IN const IpAddress& o
 
         CreateClientInitiatedConnection(nPortC, &objFarEnd);
 
-        IMS_TRACE_D("ConnectionNotifier :: TCP client connection is only required... %p",
-                m_pSocketTcpClient, 0, 0);
+        IMS_TRACE_D("SCN: TCP client(%p) connection only required", m_pSocketTcpClient, 0, 0);
 
         if (m_nPort != nPortC)
         {
-            IMS_TRACE_D("SCN :: port_us changed (%d >> %d)", m_nPort, nPortC, 0);
+            IMS_TRACE_D("SCN: port_us changed(%d >> %d)", m_nPort, nPortC, 0);
             m_nPort = nPortC;
         }
 
@@ -454,8 +453,7 @@ IMS_RESULT SipConnectionNotifier::ReserveTransportResource(IN const IpAddress& o
 
         if (m_pSocketTcp == IMS_NULL)
         {
-            IMS_TRACE_E(
-                    0, "Creating TCP Server (%s:%d) failed", SipDebug::GetIp(objIp), m_nPort, 0);
+            IMS_TRACE_E(0, "Creating TCP Server(%s:%d) failed", SipDebug::GetIp(objIp), m_nPort, 0);
             // Do not return even though TCP server socket is not created
             // return IMS_FAILURE;
         }
@@ -473,7 +471,7 @@ IMS_RESULT SipConnectionNotifier::ReserveTransportResource(IN const IpAddress& o
     {
         ClearTransportResource();
 
-        IMS_TRACE_E(0, "Creating UDP Server (%s:%d) failed", SipDebug::GetIp(objIp), m_nPort, 0);
+        IMS_TRACE_E(0, "Creating UDP Server(%s:%d) failed", SipDebug::GetIp(objIp), m_nPort, 0);
         return IMS_FAILURE;
     }
 
@@ -482,7 +480,7 @@ IMS_RESULT SipConnectionNotifier::ReserveTransportResource(IN const IpAddress& o
     // FIX_MESSAGE_ORDER_ON_MIXED_TRANSPORT_USE
     ControlUdpClientReference(CTRL_CREATE);
 
-    IMS_TRACE_I("SCN :: transport-resources - u=%p, t=%p, u_c=%p", m_pSocketUdp, m_pSocketTcp,
+    IMS_TRACE_I("SCN: transport-resources - u=%p, t=%p, u_c=%p", m_pSocketUdp, m_pSocketTcp,
             m_pSocketUdpClient);
 
     return IMS_SUCCESS;
@@ -528,7 +526,7 @@ void SipConnectionNotifier::UpdatePortFlowControl(IN IMS_SINT32 nPort)
 {
     if (nPort != m_nPortFlowControl)
     {
-        IMS_TRACE_D("SCN :: port_flow_control changed (%d >> %d)", m_nPortFlowControl, nPort, 0);
+        IMS_TRACE_D("SCN: port_flow_control changed(%d >> %d)", m_nPortFlowControl, nPort, 0);
 
         if (IsClientInitiatedConnectionRequired())
         {
@@ -557,7 +555,7 @@ void SipConnectionNotifier::UpdatePortUc(IN IMS_SINT32 nPort)
 {
     if (nPort != m_nPortC)
     {
-        IMS_TRACE_D("SCN :: port_uc changed (%d >> %d)", m_nPortC, nPort, 0);
+        IMS_TRACE_D("SCN: port_uc changed (%d >> %d)", m_nPortC, nPort, 0);
 
         if (IsTcpConnectionOnlyRequired())
         {
@@ -569,7 +567,7 @@ void SipConnectionNotifier::UpdatePortUc(IN IMS_SINT32 nPort)
 
                 if (m_nPort != nPort)
                 {
-                    IMS_TRACE_D("SCN :: port_us changed (%d >> %d)", m_nPort, nPort, 0);
+                    IMS_TRACE_D("SCN: port_us changed (%d >> %d)", m_nPort, nPort, 0);
                     m_nPort = nPort;
                 }
             }
@@ -663,21 +661,21 @@ PRIVATE VIRTUAL void SipConnectionNotifier::Socket_NotifyError(
     }
     else
     {
-        IMS_TRACE_D("ConnectionNotifier :: Socket(%p), ErrorCode(%d)", pSocket, nErrorCode, 0);
+        IMS_TRACE_D("SCN: Socket(%p) error=%d", pSocket, nErrorCode, 0);
         return;
     }
 
     // FIX_MESSAGE_ORDER_ON_MIXED_TRANSPORT_USE
     if (pSocket == m_pSocketUdpClient)
     {
-        IMS_TRACE_D("UDP Client :: NotifyError (%d)", nErrorCode, 0, 0);
+        IMS_TRACE_D("UDP Client: error=%d", nErrorCode, 0, 0);
         ControlUdpClientReference(CTRL_DESTROY);
         return;
     }
 
     if (m_pSocketTcpClient == pSocket)
     {
-        IMS_TRACE_D("TCP Client :: NotifyError (%d)", nErrorCode, 0, 0);
+        IMS_TRACE_D("TCP Client: error=%d", nErrorCode, 0, 0);
 
         if (m_piErrorListener != IMS_NULL)
         {
@@ -709,7 +707,7 @@ PRIVATE VIRTUAL void SipConnectionNotifier::Socket_NotifyError(
 
     if (pSocket == m_pSocketTcp)
     {
-        IMS_TRACE_D("TCP Server :: NotifyError (%d)", nErrorCode, 0, 0);
+        IMS_TRACE_D("TCP Server: error=%d", nErrorCode, 0, 0);
 
         pTransportHelper->Destroy(m_pSocketTcp, this);
         m_pSocketTcp = IMS_NULL;
@@ -724,7 +722,7 @@ PRIVATE VIRTUAL void SipConnectionNotifier::Socket_NotifyError(
 
     if (pSocket == m_pSocketUdp)
     {
-        IMS_TRACE_D("UDP Server :: NotifyError (%d)", nErrorCode, 0, 0);
+        IMS_TRACE_D("UDP Server: error=%d", nErrorCode, 0, 0);
 
         pTransportHelper->Destroy(m_pSocketUdp, this);
         m_pSocketUdp = IMS_NULL;
@@ -741,13 +739,13 @@ PRIVATE VIRTUAL void SipConnectionNotifier::Socket_SendEnabled(IN SipSocket* pSo
 {
     if (pSocket == m_pSocketUdp)
     {
-        IMS_TRACE_I("UDP Server :: SendEnabled", 0, 0, 0);
+        IMS_TRACE_I("UDP Server: SendEnabled", 0, 0, 0);
     }
 
     // FIX_MESSAGE_ORDER_ON_MIXED_TRANSPORT_USE
     if (pSocket == m_pSocketUdpClient)
     {
-        IMS_TRACE_I("UDP Client :: SendEnabled", 0, 0, 0);
+        IMS_TRACE_I("UDP Client: SendEnabled", 0, 0, 0);
     }
 }
 
@@ -811,8 +809,7 @@ void SipConnectionNotifier::ControlUdpClientReference(IN IMS_SINT32 nControl)
             {
                 m_pSocketUdpClient->SetListener(this);
 
-                IMS_TRACE_D("UDP client (Ref. :: %s-%d) is created", SipDebug::GetIp(m_objIpAddr),
-                        m_nPortC, 0);
+                IMS_TRACE_D("UDP client(%s|%d) created", SipDebug::GetIp(m_objIpAddr), m_nPortC, 0);
             }
         }
     }
@@ -916,9 +913,9 @@ IMS_BOOL SipConnectionNotifier::ConnectClientInitiatedConnection()
         // LOG_EXCLUDING_SERVER_INFO
         if (m_pSockAddrFarEnd != IMS_NULL)
         {
-            IMS_TRACE_E(0, "Connecting TCP client socket failed; (peer=%s,%d)",
+            IMS_TRACE_E(0, "Connecting TCP client socket failed; (peer=%s|%d)",
                     SipRtConfigUtils::IsRoutingInfoHiddenInLog(GetSlotId())
-                            ? "xxx"
+                            ? "***"
                             : SipDebug::GetIp(m_pSockAddrFarEnd->GetIpAddress()),
                     m_pSockAddrFarEnd->GetPort(), 0);
         }
@@ -967,7 +964,7 @@ void SipConnectionNotifier::ExtractProperties(IN const AString& strParams)
 
     if (strTmp.GetLength() > 0)
     {
-        IMS_TRACE_D("SCN :: params=%s", strTmp.GetStr(), 0, 0);
+        IMS_TRACE_D("SCN: params=%s", strTmp.GetStr(), 0, 0);
     }
 
     m_objParameters = SipStack::ExtractParameters(strTmp, TextParser::CHAR_SEMICOLON);
@@ -993,7 +990,7 @@ void SipConnectionNotifier::ExtractProperties(IN const AString& strParams)
                         m_nTransportExt = Sip::TRANSPORT_EXT_ANY;
                     }
 
-                    IMS_TRACE_D("SCN :: transportProtocolExt=%02X", m_nTransportExt, 0, 0);
+                    IMS_TRACE_D("SCN: transportProtocolExt=%02X", m_nTransportExt, 0, 0);
 
                     m_objParameters.RemoveAt(i);
                     break;
@@ -1004,7 +1001,7 @@ void SipConnectionNotifier::ExtractProperties(IN const AString& strParams)
 
     if (m_objParameters.IsEmpty())
     {
-        IMS_TRACE_I("SipConnectionNotifier - NO PARAMETERS IN NAME (open())", 0, 0, 0);
+        IMS_TRACE_I("SCN: NO PARAMETERS IN NAME(open)", 0, 0, 0);
         return;
     }
 
