@@ -137,12 +137,12 @@ void VideoSdpParser::ParsePayloads(
 
     for (IMS_UINT32 i = 0; i < lstMediaFormat.GetSize(); i++)
     {
-        const SdpAvCodec* pSdpCodec = DYNAMIC_CAST(SdpAvCodec*, lstMediaFormat.GetAt(i));
-
-        if (pSdpCodec == IMS_NULL)
+        SdpMediaFormat* pFormat = lstMediaFormat.GetAt(i);
+        if (pFormat == IMS_NULL || pFormat->GetType() != SdpMediaFormat::TYPE_RTP)
         {
             continue;
         }
+        const SdpAvCodec* pSdpCodec = static_cast<SdpAvCodec*>(pFormat);
 
         VideoProfile::Payload* pPayload = new VideoProfile::Payload();
 

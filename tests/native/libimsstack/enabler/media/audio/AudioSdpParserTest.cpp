@@ -697,3 +697,35 @@ TEST_F(AudioSdpParserTest, ParsePayloadsEvsWithoutbrbw)
     EXPECT_EQ(pEvsFmtp->GetCmr(), 1);
     EXPECT_TRUE(pEvsFmtp->IsCmrVisible());
 }
+
+TEST_F(AudioSdpParserTest, ParsePayloadsSkipsNonRtpFormats)
+{
+    TestableAudioSdpParser objParser;
+    AudioProfile objProfile;
+    ImsList<SdpMediaFormat*> lstMediaFormats;
+
+    auto pValidCodec1 = std::make_unique<SdpAvCodec>();
+    pValidCodec1->SetParameters("97 AMR-WB/16000", "97 octet-align=1");
+    lstMediaFormats.Append(pValidCodec1.get());
+
+    auto pMsrpFormat = std::make_unique<SdpMediaFormat>(SdpMediaFormat::TYPE_MSRP);
+    pMsrpFormat->SetValue("*");
+    lstMediaFormats.Append(pMsrpFormat.get());
+
+    auto pValidCodec2 = std::make_unique<SdpAvCodec>();
+    pValidCodec2->SetParameters("98 EVS/16000", "98 br=9.6-24.4");
+    lstMediaFormats.Append(pValidCodec2.get());
+
+    const ImsList<SdpMediaFormat*>& constListMediaFormats = lstMediaFormats;
+    ON_CALL(m_objMockMediaDescriptor, GetMediaFormats())
+            .WillByDefault(ReturnRef(constListMediaFormats));
+
+    objParser.ParsePayloads(&m_objMockMediaDescriptor, &objProfile);
+
+    // Expect only the valid SdpAvCodec payloads to be added. The non-RTP format should be
+    // skipped.
+    EXPECT_EQ(objProfile.GetPayloadList().GetSize(), 2);
+    EXPECT_TRUE(
+            objProfile.GetPayloadAt(0)->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR-WB"));
+    EXPECT_TRUE(objProfile.GetPayloadAt(1)->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"));
+}
