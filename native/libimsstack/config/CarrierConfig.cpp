@@ -593,6 +593,9 @@ const IMS_CHAR CarrierConfig::ImsEmergency::
 const IMS_CHAR CarrierConfig::ImsEmergency::
         KEY_EMERGENCY_EXCLUDE_URI_PARAMETERS_FOR_EMERGENCY_TEST_NUMBER_BOOL[] =
                 KEY_IMS_EMERGENCY_PREFIX "exclude_uri_parameters_for_emergency_test_number_bool";
+const IMS_CHAR CarrierConfig::ImsEmergency::
+        KEY_SKIP_AUDIO_DEDICATED_BEARER_WAIT_TIMER_FOR_EMERGENCY_BOOL[] = KEY_IMS_EMERGENCY_PREFIX
+        "skip_audio_dedicated_bearer_wait_timer_for_emergency_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EMERGENCY_TCALL_TIMER_MILLIS_INT[] =
         KEY_IMS_EMERGENCY_PREFIX "emergency_tcall_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EMERGENCY_RINGBACK_TIMER_MILLIS_INT[] =

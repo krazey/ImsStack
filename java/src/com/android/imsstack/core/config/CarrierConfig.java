@@ -771,6 +771,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "exclude_uri_parameters_for_emergency_test_number_bool";
         public static final String KEY_EMERGENCY_RETRY_WITHOUT_CHECKING_380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL_BOOL =
                 KEY_PREFIX + "emergency_retry_without_checking_380_content_for_non_ue_detectable_emergency_call_bool";
+        public static final String KEY_SKIP_AUDIO_DEDICATED_BEARER_WAIT_TIMER_FOR_EMERGENCY_BOOL =
+                KEY_PREFIX + "skip_audio_dedicated_bearer_wait_timer_for_emergency_bool";
         public static final String KEY_EMERGENCY_TCALL_TIMER_MILLIS_INT =
                 KEY_PREFIX + "emergency_tcall_timer_millis_int";
         public static final String KEY_EMERGENCY_RINGBACK_TIMER_MILLIS_INT =

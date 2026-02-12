@@ -1322,6 +1322,13 @@ IMS_BOOL MtcPreconditionManager::IsNeedToStartWaitAudioDedicatedBearerTimer(
         return IMS_FALSE;
     }
 
+    if (m_objContext.GetCallInfo().IsEmergency() &&
+            m_objContext.GetConfigurationProxy().GetBoolean(
+                    ConfigEmergency::KEY_SKIP_AUDIO_DEDICATED_BEARER_WAIT_TIMER_FOR_EMERGENCY_BOOL))
+    {
+        return IMS_FALSE;
+    }
+
     return IMS_TRUE;
 }
 
