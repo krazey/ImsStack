@@ -900,6 +900,13 @@ IMS_SINT32 MtcCallState::GetTimeInMilliseconds(IN IMS_UINT32 nType) const
     const IMS_CHAR* pszKey;
     switch (nType)
     {
+        case TIMER_MO_CALL_SETUP_WATCHDOG:
+        {
+            IMS_SINT32 n18xWaitTimer = m_objContext.GetConfigurationProxy().GetInt(
+                    ConfigVoice::KEY_18X_TIMER_MILLIS_INT);
+            return TIMER_C_WITH_MARGIN_TIME_MS > n18xWaitTimer ? TIMER_C_WITH_MARGIN_TIME_MS
+                                                               : n18xWaitTimer;
+        }
         case TIMER_MO_18X_WAIT:
             if (bNormal)
             {

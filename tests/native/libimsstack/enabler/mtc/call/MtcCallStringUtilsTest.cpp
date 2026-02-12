@@ -100,7 +100,10 @@ TEST_F(MtcCallStringUtilsTest, ConvertUpdateType)
 
 TEST_F(MtcCallStringUtilsTest, ConvertTimerType)
 {
-    IMS_SINT32 nTimerType = MtcCallState::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL;
+    IMS_SINT32 nTimerType = MtcCallState::TIMER_MO_CALL_SETUP_WATCHDOG;
+    EXPECT_STREQ(MtcCallStringUtils::ConvertTimerType(nTimerType), "TIMER_MO_CALL_SETUP_WATCHDOG");
+
+    nTimerType = MtcCallState::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL;
     EXPECT_STREQ(MtcCallStringUtils::ConvertTimerType(nTimerType),
             "TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL");
 
@@ -141,7 +144,7 @@ TEST_F(MtcCallStringUtilsTest, ConvertTimerType)
     EXPECT_STREQ(
             MtcCallStringUtils::ConvertTimerType(nTimerType), "TIMER_DELAY_UPDATE_AFTER_CONNECTED");
 
-    nTimerType = MtcCallState::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL - 1;
+    nTimerType = MtcCallState::TIMER_MO_CALL_SETUP_WATCHDOG - 1;
     EXPECT_STREQ(MtcCallStringUtils::ConvertTimerType(nTimerType), "OUT_OF_RANGE");
 
     nTimerType = MtcCallState::TIMER_DELAY_UPDATE_AFTER_CONNECTED + 1;

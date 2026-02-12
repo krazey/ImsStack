@@ -75,8 +75,6 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
         m_objParticipantInfo(ParticipantInfo(*this)),
         m_pUpdatingInfo(IMS_NULL),
         m_lstSessions(ImsList<IMtcSession*>()),
-        m_objStateMachine(
-                MtcCallStateMachine(*this, CallStateName::IDLE, std::move(pStateFactory), this)),
         m_objPendingOperationHolder(),
         m_pTimer(objContext.CreateTimer()),
         m_objUiNotifier(MtcUiNotifier(*this)),
@@ -87,7 +85,9 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
         m_objMessageMediator(MtcMessageMediator(*this)),
         m_pUssiController(IMS_NULL),
         m_pEpsFallbackTrigger(IMS_NULL),
-        m_pCurrentLocationDiscoveryController(IMS_NULL)
+        m_pCurrentLocationDiscoveryController(IMS_NULL),
+        m_objStateMachine(
+                MtcCallStateMachine(*this, CallStateName::IDLE, std::move(pStateFactory), this))
 {
     IMS_TRACE_D("%s - +MtcCall key[%lu]", ToString().GetStr(), m_nKey, 0);
 
