@@ -17,9 +17,12 @@ package com.android.imsstack.its.tests.internal.mtc.normal;
 
 import static com.android.imsstack.its.base.TestConstants.SLOT0;
 
+import static org.junit.Assert.assertEquals;
+
 import android.net.QosSession;
 import android.telephony.CarrierConfigManager;
 import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.stub.ImsCallSessionImplBase;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -73,10 +76,14 @@ public class PreconditionEnabledMoCallTest extends CallTestBase {
         mConnectivityManagerProxy.setQosSessionBearerType(0);
     }
 
+    /**
+     * When the remote party also supports the precondition mechanism, if QoS is acquired before
+     * the PRACK transaction, this test verifies that an early UPDATE with the local precondition
+     * attribute set to "sendrecv" is sent immediately after the PRACK transaction
+     * completes.
+     */
     @Test
     public void remotePreconditionEnabled_qosEnabledEarly_updateSentAfterPrack() throws Exception {
-        logi(this, "remotePreconditionEnabled_qosEnabledEarly_updateSentAfterPrack");
-
         // 5. Ensure QoS is acquired immediately after a 183 Session Progress is received.
         mConnectivityManagerProxy.setQosSessionBearerType(QosSession.TYPE_EPS_BEARER);
 
@@ -106,10 +113,13 @@ public class PreconditionEnabledMoCallTest extends CallTestBase {
         verifyNormalDisconnection(timeToTerminateMs);
     }
 
+    /**
+     * When the remote party also supports the precondition mechanism, if QoS is acquired after the
+     * PRACK transaction, this test verifies that the client waits for QoS to be acquired and then
+     * sends an early UPDATE with the local precondition attribute set to "sendrecv".
+     */
     @Test
     public void remotePreconditionEnabled_qosEnabledLate_updateSentAfterQos() throws Exception {
-        logi(this, "remotePreconditionEnabled_qosEnabledLate_updateSentAfterQos");
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.getNormalRegistrationSequence(true));
 
@@ -143,10 +153,113 @@ public class PreconditionEnabledMoCallTest extends CallTestBase {
         verifyNormalDisconnection(timeToTerminateMs);
     }
 
+    /**
+     * When the remote party also supports the precondition mechanism, if an early UPDATE is sent
+     * after QoS is acquired but the 200 OK for the INVITE arrives before the 200 OK for the
+     * UPDATE, this test verifies that the call is immediately moved to the connected state without
+     * waiting for the UPDATE's 200 OK.
+     *
+     * Ref: b/411385901
+     */
+    @Test
+    public void remotePreconditionEnabled_late200Update_connectedBy200Invite() throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessages(BasicScenarioTemplates.getNormalRegistrationSequence(true));
+
+        // 3. Set up a call scenario where preconditions are enabled on both the local
+        //    and remote sides.
+        // 4. Verify that precondition attributes in the INVITE request are set correctly.
+        // 6. Verify that an UPDATE for precondition confirmation is sent 2 seconds
+        //    after the 183 response is received.
+        // 7. Set the 200 OK for the UPDATE request is sent 4s after receiving ACK.
+        // 9. Verify the call remains active for 3 seconds, after which a BYE is sent.
+        int qosFromStartCallDelayMs = 2000;
+        int timeToTerminateMs = 2000;
+        int update200DelayMs = 4000;
+        setupScenarioWithLate200Update(generator, qosFromStartCallDelayMs, timeToTerminateMs,
+                "sendrecv", update200DelayMs);
+
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        // 1. Complete the normal registration process.
+        performRegistration();
+
+        // 2. Make an MO call.
+        mCall.startVoiceCall();
+
+        // 5. Ensure QoS is acquired 2s after a 183 response is received.
+        mCall.expectWithin(qosFromStartCallDelayMs).nothing();
+        mConnectivityManagerProxy.setQosSessionBearerType(QosSession.TYPE_EPS_BEARER);
+        mConnectivityManagerProxy.notifyQosSessionAvailable();
+
+        // 8. Verify that the call is successfully connected without waiting 200-UPDATE(4s).
+        mCall.expectWithin(update200DelayMs - 2000).initiated();
+        assertEquals(mCall.getState(), ImsCallSessionImplBase.State.ESTABLISHED);
+
+        // 10. Terminate the call after 6 seconds.
+        verifyNormalDisconnection(timeToTerminateMs);
+    }
+
+    /**
+     * When the remote party also supports the precondition mechanism, if the media direction in the
+     * 183 is "inactive" and the 200 OK for the INVITE is received before the 200 OK for the UPDATE,
+     * this test verifies that the client waits for the 200 OK for the UPDATE, negotiates the media
+     * direction to "sendrecv", and then moves the call to the connected state.
+     *
+     * Ref: b/475676680
+     */
+    @Test
+    public void remotePreconditionEnabled_late200UpdateAnd183Inactive_connectedBy200Update()
+            throws Exception {
+        ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
+        generator.addMessages(BasicScenarioTemplates.getNormalRegistrationSequence(true));
+
+        // 3. Set up a call scenario where preconditions are enabled on both the local
+        //    and remote sides.
+        // 4. Verify that precondition attributes in the INVITE request are set correctly.
+        // 5. Set the media direction of 183 Session Progressing to inactive.
+        // 7. Verify that an UPDATE for precondition confirmation is sent 2 seconds
+        //    after the 183 response is received.
+        // 8. Set the 200 OK for the UPDATE request is sent 4s after receiving ACK.
+        // 11. Verify the call remains active for 3 seconds, after which a BYE is sent.
+        int qosFromStartCallDelayMs = 2000;
+        int timeToTerminateMs = 2000;
+        int update200DelayMs = 4000;
+        setupScenarioWithLate200Update(generator, qosFromStartCallDelayMs, timeToTerminateMs,
+                "inactive", update200DelayMs);
+
+        mServerControlConnection.sendControlCommand(generator.build().toString());
+
+        // 1. Complete the normal registration process.
+        performRegistration();
+
+        // 2. Make an MO call.
+        mCall.startVoiceCall();
+
+        // 6. Ensure QoS is acquired 2s after a 183 response is received.
+        mCall.expectWithin(qosFromStartCallDelayMs).nothing();
+        mConnectivityManagerProxy.setQosSessionBearerType(QosSession.TYPE_EPS_BEARER);
+        mConnectivityManagerProxy.notifyQosSessionAvailable();
+
+        // 9. Verify that the call is not connected by receiving 200-UPDATE(4s) even after
+        // receiving 200-INVITE.
+        mCall.expectWithin(update200DelayMs).not().initiated();
+        // 10. Verify that the call is successfully connected.
+        assertEquals(mCall.getState(), ImsCallSessionImplBase.State.ESTABLISHING);
+        mCall.expectWithin(2000).nothing();
+        mCall.expectToHaveBeen().initiated();
+        assertEquals(mCall.getState(), ImsCallSessionImplBase.State.ESTABLISHED);
+
+        // 12. Terminate the call after 6 seconds.
+        verifyNormalDisconnection(timeToTerminateMs);
+    }
+
+    /**
+     * When the remote party does not support the precondition mechanism, this test verifies that an
+     * early UPDATE is not sent, even if QoS has already been acquired before the PRACK transaction.
+     */
     @Test
     public void remotePreconditionDisabled_qosEnabledEarly_updateNotSent() throws Exception {
-        logi(this, "remotePreconditionDisabled_qosEnabledEarly_updateNotSent");
-
         // 5. Ensure QoS is acquired immediately after a 183 Session Progress is received.
         mConnectivityManagerProxy.setQosSessionBearerType(QosSession.TYPE_EPS_BEARER);
 
@@ -176,10 +289,12 @@ public class PreconditionEnabledMoCallTest extends CallTestBase {
         verifyNormalDisconnection(timeToTerminateMs);
     }
 
+    /**
+     * When the remote party does not support the precondition mechanism, this test verifies that an
+     * early UPDATE is not sent, even if QoS is acquired after the PRACK transaction.
+     */
     @Test
     public void remotePreconditionDisabled_qosEnabledLate_updateNotSent() throws Exception {
-        logi(this, "remotePreconditionDisabled_qosEnabledLate_updateNotSent");
-
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.getNormalRegistrationSequence(true));
 
@@ -307,6 +422,65 @@ public class PreconditionEnabledMoCallTest extends CallTestBase {
         generator.addMessages("""
                 <180-INVITE | >PRACK | <200-PRACK | <200-INVITE | >ACK
                 """);
+        generator.addDisallowedMessage(
+                "BYE should not be sent for 2s", "BYE",
+                timeToWaitByeMs - TIMING_MARGIN_MS);
+        generator.addMessage(new ClientMessage.Builder()
+                .setMethodOrCode("BYE")
+                .addConfig(ControlProtocolConstants.CONFIG_DELAY,
+                        String.valueOf(timeToWaitByeMs + TIMING_MARGIN_MS))
+                .build());
+        generator.addMessages("<200-BYE");
+    }
+
+    private void setupScenarioWithLate200Update(
+            ScenarioGeneratorUtils generator, int qosFromStartCallDelayMs, int timeToWaitByeMs,
+            String audioDirection183, int update200DelayMs) {
+        generator.addMessage(new ClientMessage.Builder()
+                .setMethodOrCode("INVITE")
+                .addConfig(ControlProtocolConstants.CONFIG_DELAY, "5000")
+                .addRuleSet(new RuleSet.Builder("INVITE with precondition")
+                        .addRule(new Rule.RuleBuilder(ControlProtocolConstants.RULE_CATEGORY_BODY)
+                                .addContainRule("a=curr:qos local none")
+                                .addContainRule("a=curr:qos remote none")
+                                .build())
+                        .build())
+                .addRuleSet(new RuleSet.Builder("Supported precondition")
+                        .addRule(new Rule.RuleBuilder("Supported")
+                                .addContainRule("precondition")
+                                .build())
+                        .build())
+                .addRuleSet(new RuleSet.Builder("No Require precondition")
+                        .addRule(new Rule.RuleBuilder("Require")
+                                .addNotContainRule("precondition")
+                                .build())
+                        .build())
+                .build());
+        generator.addMessages("<100-INVITE");
+        generator.addMessage(new ServerMessage.Builder()
+                .setMethodOrCode("183-INVITE")
+                .setSdp(ControlProtocolConstants.SDP_COPY)
+                .addConfig(ControlProtocolConstants.CONFIG_DELAY, "10")
+                .addConfig(ControlProtocolConstants.CONFIG_AUDIO_DIR, audioDirection183)
+                .addConfig(ControlProtocolConstants.CONFIG_REQUIRE_PRECONDITION, "true")
+                .addConfig(ControlProtocolConstants.CONFIG_REQUIRE_100REL, "true")
+                .addHeader("Supported", "100rel")
+                .build());
+        generator.addMessages(">PRACK | <200-PRACK");
+
+        if (qosFromStartCallDelayMs > 0) {
+            generator.addDisallowedMessage("UPDATE waits QoS active for 2s", "UPDATE",
+                    qosFromStartCallDelayMs);
+        }
+        generator.addMessage(new ClientMessage.Builder()
+                .setMethodOrCode("UPDATE")
+                .addRuleSet(new RuleSet.Builder("UPDATE with confirmation")
+                        .addRule(new Rule.RuleBuilder(ControlProtocolConstants.RULE_CATEGORY_BODY)
+                                .addContainRule("a=curr:qos local sendrecv")
+                                .build())
+                        .build())
+                .build());
+        generator.addMessages("<200-INVITE | >ACK | <200-UPDATE s-copy d-" + update200DelayMs);
         generator.addDisallowedMessage(
                 "BYE should not be sent for 2s", "BYE",
                 timeToWaitByeMs - TIMING_MARGIN_MS);
