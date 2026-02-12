@@ -19,10 +19,11 @@
 #include "ISipUserData.h"
 #include "SipRefBase.h"
 #include "SipTimerContext.h"
-#include "msg/SipMessage.h"
 #include "transport/SipTransportInfo.h"
 #include "txn/SipTxnKey.h"
 #include "txn/SipTxnTimerValues.h"
+
+class SipMessage;
 
 class SipTxn : public SipRefBase
 {
