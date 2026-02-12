@@ -26,7 +26,7 @@ cc_library_headers {
 }
 
 cc_library_static {
-    name:"libimsstack-config",
+    name: "libimsstack-config",
     defaults: [
         "imsstack_native_defaults",
     ],

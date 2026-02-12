@@ -23,7 +23,7 @@ if [ -z $TARGET_ARCH ]; then
 fi
 TEST_PACKAGE='com.android.imsstack.tests'
 TEST_MODULE_NAME='ImsStackJavaTests'
-TEST_MODULE_PATH='vendor/google/services/ImsStack/tests/java'
+TEST_MODULE_PATH='packages/modules/ImsStack/tests/java'
 TEST_MODULE_INSTALL_PATH="testcases/$TEST_MODULE_NAME/$TARGET_ARCH/$TEST_MODULE_NAME.apk"
 
 ##### End app specific parameters #####

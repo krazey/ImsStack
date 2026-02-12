@@ -19,7 +19,7 @@ package {
 java_defaults {
     name: "imsstack_mockito_target_extended_defaults",
     static_libs: [
-        "mockito-target-extended-minus-junit4"
+        "mockito-target-extended-minus-junit4",
     ],
     jni_libs: [
         "libdexmakerjvmtiagent",
@@ -27,14 +27,8 @@ java_defaults {
     ],
 }
 
-java_import {
-    name: "ImsCallExtLib-prebuilt",
-    jars: ["prebuilt/ImsCallExtLib.jar"],
-}
-
 java_library {
     name: "imsstack-prebuilt",
     static_libs: [
-        "ImsCallExtLib-prebuilt",
     ],
 }

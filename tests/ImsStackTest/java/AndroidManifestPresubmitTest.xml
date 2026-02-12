@@ -43,8 +43,7 @@
     <uses-permission android:name="android.permission.USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER"/>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
-    <uses-permission android:name="com.android.telephony.permission.USE_PIXELIMSMEDIA" />
-    <uses-permission android:name="com.android.telephony.permission.USE_IMS_CALL_EXT_FEATURE"/>
+    <uses-permission android:name="com.android.telephony.permission.USE_IMSMEDIA"/>
 
     <application
         android:name=".ImsStackTestApp"

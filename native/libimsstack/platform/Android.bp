@@ -39,7 +39,7 @@ cc_library_headers {
 }
 
 cc_library_static {
-    name:"libimsstack-platform",
+    name: "libimsstack-platform",
     defaults: [
         "imsstack_native_defaults",
         "imsstack_tls_libs_defaults",

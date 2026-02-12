@@ -70,7 +70,6 @@ import com.android.imsstack.enabler.mtc.SuppInfo;
 import com.android.imsstack.enabler.mtc.SuppServiceUtils.SuppService;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.enabler.mtc.reg.MtcServiceState;
-import com.android.imsstack.imsservice.mmtel.ImsCallSessionImpl.ImsCallExtManagerProxy;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.imsservice.mmtel.internal.ConferenceProxy;
 import com.android.imsstack.util.MessageExecutor;
@@ -969,8 +968,6 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         suppServiceSessionId.strValue = SESSION_ID;
         suppInfo.updateService(SuppInfo.SUPP_TYPE_SESSION_ID, suppServiceSessionId);
         mImsCallSession = createImsCallSession("2", true);
-        ImsCallExtManagerProxy mockProxy = Mockito.mock(ImsCallExtManagerProxy.class);
-        mImsCallSession.setImsCallExtManagerProxy(mockProxy);
         when(mMockMtcCall.getRemoteNumber()).thenReturn("123");
         mImsCallSession.getCallListenerProxy().onCallProgressing(mMockMtcCall, mMockCallInfo,
                 mediaInfo, suppInfo);
@@ -981,8 +978,6 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 ImsCallSessionImplBase.class), any(ImsStreamMediaProfile.class));
         verify(mMockImsCallSessionCallback).invokeSuppServiceReceived(any(
                 ImsCallSessionImplBase.class), any(ImsSuppServiceNotification.class));
-        verify(mockProxy).reportCallInfo(anyInt(), anyString(), any(byte[].class),
-                any(byte[].class), anyString());
     }
 
     @Test
@@ -1046,8 +1041,6 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         suppServiceSessionId.strValue = SESSION_ID;
         suppInfo.updateService(SuppInfo.SUPP_TYPE_SESSION_ID, suppServiceSessionId);
         mImsCallSession = createImsCallSession("1", true);
-        ImsCallExtManagerProxy mockProxy = Mockito.mock(ImsCallExtManagerProxy.class);
-        mImsCallSession.setImsCallExtManagerProxy(mockProxy);
         when(mMockMtcCall.getRemoteNumber()).thenReturn("123");
         mImsCallSession.getCallListenerProxy().onCallStarted(mMockMtcCall, mMockCallInfo,
                 mMockMediaInfo, suppInfo);
@@ -1062,8 +1055,6 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 ImsCallSessionImplBase.class), any(Integer.class));
         //MO_STARTED
         assertTrue(mCallDetails.is(mCallDetails.MO_STARTED));
-        verify(mockProxy).reportCallInfo(anyInt(), anyString(), any(byte[].class),
-                any(byte[].class), anyString());
 
         //verify onTtyModeReceived() onwards
         mMockMediaInfo.gttMode = MediaInfo.GTTMODE_FULL;

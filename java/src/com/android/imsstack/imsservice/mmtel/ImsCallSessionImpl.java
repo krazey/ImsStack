@@ -37,7 +37,6 @@ import android.telephony.ims.ImsStreamMediaProfile;
 import android.telephony.ims.ImsVideoCallProvider;
 import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.ims.stub.ImsCallSessionImplBase;
-import android.telephony.imscallext.ImsCallExtManager;
 import android.text.TextUtils;
 
 import com.android.imsstack.base.ImsPrivateProperties;
@@ -145,29 +144,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     protected ImsCallSessionImpl mTransferTargetSession = null;
     private Map<Integer, Boolean> mCallFeatureCache = new HashMap<Integer, Boolean>();
     private ImsReasonInfo mCacheCallEndReason = null;
-    private boolean mIsE2eeCallInfoNotified = false;
-    private ImsCallExtManagerProxy mCallExtManagerProxy = new ImsCallExtManagerProxy() {
-        @Override
-        public void reportCallInfo(int slotId, String imsCallSessionId, byte[] localSessionId,
-                byte[] remoteSessionId, String remotePhoneNumber) {
-            try {
-                logi("reportCallInfo slotId : " + slotId);
-                ImsCallExtManager.getInstance(mCallContext.getContext()).reportCallInfo(slotId,
-                        imsCallSessionId, localSessionId, remoteSessionId, remotePhoneNumber);
-            } catch (Exception e) {
-                log("can't notify E2EE");
-            }
-        }
-    };
-
-    public interface ImsCallExtManagerProxy {
-        /**
-         * The ImsService needs to notify E2EE module with related call information for
-         * RTP encryption.
-         */
-        void reportCallInfo(int slotId, String imsCallSessionId, byte[] localSessionId,
-                byte[] remoteSessionId, String remotePhoneNumber);
-    }
 
     public ImsCallSessionImpl(ICallContext callContext,
             CallTracker ct, MtcCall call,
@@ -3251,8 +3227,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 mCallback.invokeSuppServiceReceived(ImsCallSessionImpl.this,
                         ImsSuppServiceUtils.MO.getCallIsWaiting());
             }
-
-            notifyE2eeCallInfo(suppInfo, mCall.getRemoteNumber());
         }
 
         @Override
@@ -3310,8 +3284,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             notifyCallEventForVideoCallSession(IVideoCallSession.EVENT_CALL_ESTABLISHED);
-
-            notifyE2eeCallInfo(suppInfo, mCall.getRemoteNumber());
         }
 
         @Override
@@ -4103,8 +4075,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             mCT.updateCallState(ImsCallSessionImpl.this,
                     CallTracker.CALL_EVENT_INCOMING_RECEIVED, null);
-
-            notifyE2eeCallInfo(incomingCall.suppInfo, mCall.getRemoteNumber());
         }
 
         @Override
@@ -4633,28 +4603,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 ImsCallProfile.CALL_TYPE_VOICE_N_VIDEO);
         mProposedCallProfile.setCallerNumberVerificationStatus(
                 ImsCallProfile.VERIFICATION_STATUS_NOT_VERIFIED);
-    }
-
-    private void notifyE2eeCallInfo(SuppInfo suppInfo, String remoteNumber) {
-        if (mIsE2eeCallInfoNotified) {
-            return;
-        }
-
-        log("notifyE2eeCallInfo");
-        SuppService suppSessionId = suppInfo.getService(SuppInfo.SUPP_TYPE_SESSION_ID);
-        String sessionId = suppSessionId == null ? "" : suppSessionId.strValue;
-        if (sessionId.isEmpty()) {
-            return;
-        }
-
-        mCallExtManagerProxy.reportCallInfo(mCallContext.getSlotId(), getCallId(),
-                sessionId.getBytes(), sessionId.getBytes(), remoteNumber);
-        mIsE2eeCallInfoNotified = true;
-    }
-
-    @VisibleForTesting
-    public void setImsCallExtManagerProxy(ImsCallExtManagerProxy proxy) {
-        mCallExtManagerProxy = proxy;
     }
 
     protected class MtcConferenceListenerProxy extends MtcConference.Listener
