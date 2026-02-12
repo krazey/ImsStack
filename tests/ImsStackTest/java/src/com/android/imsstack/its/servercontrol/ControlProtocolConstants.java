@@ -41,6 +41,7 @@ public class ControlProtocolConstants {
     public static final String BODY_ADDITION = "message-addbody=";
     public static final String BODY_TYPE_SDP = "sdp";
     public static final String BODY_TYPE_XML = "xml";
+    public static final String BODY_TYPE_HTTP = "http";
 
     // Target message ID
     public static final String MESSAGE_ID = "message-id=";
