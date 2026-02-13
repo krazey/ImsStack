@@ -23,7 +23,10 @@
 
 enum class ServiceType;
 
-// Holds `IMtcCall` objects and provides methods to create, delete and find them.
+/**
+ * Manages the lifecycle of {@code IMtcCall} objects, providing methods to create, retrieve, and
+ * remove them.
+ */
 class IMtcCallManager
 {
 public:
@@ -36,100 +39,92 @@ public:
      *
      * @param eServiceType The service type for the call.
      * @param objCallInfo The initial information for the call.
-     * @param strLogTag A log tag for to call.
-     * @return The created call object. Returns a null call object if creation fails.
+     * @param strLogTag A log tag for the call.
+     * @return A pointer to the created {@code IMtcCall} object. If the service for the given type
+     *         is not active, a null call object is returned.
      */
     virtual IMtcCall* CreateCall(
             IN ServiceType eServiceType, IN CallInfo& objCallInfo, IN const AString& strLogTag) = 0;
 
     /**
      * @brief Removes the call matching the given call key. Does nothing if the call doesn't exist.
-     * Mtc must guarantee that the target MtcCall is in TERMINATING state when it's removed.
      *
-     * @param nCallKey Key of the MtcCall to be removed.
+     * The user must guarantee that the target call is in TERMINATING state when it's removed.
+     *
+     * @param nCallKey Key of the call to be removed.
      */
     virtual void RemoveCall(IN CallKey nCallKey) = 0;
 
-    // Returns a call matching the given call key.
-    // Returns new `UnknownCall` instance if the call doesn't exist.
-
     /**
-     * @brief Gets
+     * @brief Returns a call matching the given call key.
      *
-     * @param nCallKey
-     * @return
+     * @param nCallKey The key of the call to retrieve.
+     * @return A pointer to the {@code IMtcCall} object, or a null call object if not found.
      */
     virtual IMtcCall* GetCallByCallKey(IN CallKey nCallKey) = 0;
 
-    // Returns a list of all calls.
-    // The list is sorted in the order in which the calls were created.
-
     /**
-     * @brief Gets
+     * @brief Returns a list of all calls.
      *
-     * @return
+     * The list is sorted in the order in which the calls were created.
+     *
+     * @return A list of pointers to all managed {@code IMtcCall} objects.
      */
     virtual ImsList<IMtcCall*> GetCalls() = 0;
 
-    // Returns a list of all calls excluding a given one.
-    // The list is sorted in the order in which the calls were created.
-
     /**
-     * @brief Gets
+     * @brief Returns a list of all calls excluding a given one.
      *
-     * @param nExcludingCallKey
-     * @return
+     * The list is sorted in the order in which the calls were created.
+     *
+     * @param nExcludingCallKey The key of the call to exclude from the list.
+     * @return A list of {@code IMtcCall} pointers, excluding the specified call.
      */
     virtual ImsList<IMtcCall*> GetCallsExcluding(IN CallKey nExcludingCallKey) = 0;
 
-    // Returns a list of calls matching the given session type.
-    // The list is sorted in the order in which the calls were created.
-
     /**
-     * @brief Gets
+     * @brief Returns a list of calls matching the given session type.
      *
-     * @param eCallType
-     * @return
+     * The list is sorted in the order in which the calls were created.
+     *
+     * @param eCallType The type of calls to retrieve.
+     * @return A list of {@code IMtcCall} pointers that match the given call type.
      */
     virtual ImsList<IMtcCall*> GetCallsByType(IN CallType eCallType) = 0;
 
-    // Returns a list of calls matching the given service type.
-    // The list is sorted in the order in which the calls were created.
-
     /**
-     * @brief Gets
+     * @brief Returns a list of calls matching the given service type.
      *
-     * @param eServiceType
-     * @return
+     * The list is sorted in the order in which the calls were created.
+     *
+     * @param eServiceType The service type of calls to retrieve.
+     * @return A list of {@code IMtcCall} pointers that match the given service type.
      */
     virtual ImsList<IMtcCall*> GetCallsByServiceType(IN ServiceType eServiceType) = 0;
 
-    // Returns a list of conference calls.
-    // The list is sorted in the order in which the calls were created.
-
     /**
-     * @brief Gets
+     * @brief Returns a list of conference calls.
      *
-     * @return
+     * The list is sorted in the order in which the calls were created.
+     *
+     * @return A list of {@code IMtcCall} pointers for calls that are part of a conference.
      */
     virtual ImsList<IMtcCall*> GetCallsInConference() = 0;
 
-    // Returns a list of calls that in the specific state.
-    // The list is sorted in the order in which the calls were created.
-
     /**
-     * @brief Gets
+     * @brief Returns a list of calls that are in the specific state.
      *
-     * @param eState
-     * @return
+     * The list is sorted in the order in which the calls were created.
+     *
+     * @param eState The state of the calls to retrieve.
+     * @return A list of {@code IMtcCall} pointers that are in the specified state.
      */
     virtual ImsList<IMtcCall*> GetCallsByState(IN State eState) = 0;
-
-    // Returns a next call index.
 
     /**
      * @brief Gets the next available call index.
      *        The index cycles from 1 to a predefined maximum value.
+     *
      * @return A next call index.
      */
     virtual IMS_UINT32 GetNextCallIndex() = 0;

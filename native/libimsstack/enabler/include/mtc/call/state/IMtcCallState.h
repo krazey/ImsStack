@@ -40,595 +40,308 @@ class ImsList;
 
 using CallStateName = IMtcCall::State;
 
+/**
+ * @brief Defines the interface for a state in the MTC call state machine.
+ *
+ * The methods in this interface correspond to events that can occur during a call. When an event
+ * occurs, the corresponding method in the current state is invoked. This method is responsible for
+ * handling the event, performing any necessary actions, and returning the name of the next state
+ * to which the call should transition.
+ */
 class IMtcCallState
 {
 public:
     virtual ~IMtcCallState() {}
 
     /**
-     * @brief Notifies
-     *
+     * @brief Called when entering this state.
      */
     virtual void OnEnter() = 0;
 
     /**
-     * @brief Notifies
-     *
+     * @brief Called when exiting this state.
      */
     virtual void OnExit() = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the name of this state.
      *
-     * @return
+     * @return The name of the state.
      */
     virtual CallStateName GetStateName() const = 0;
 
-    /**
-     * @brief Starts
-     *
-     * @param eCallType
-     * @param strTarget
-     * @param objMediaInfo
-     * @param objSuppServices
-     * @return
-     */
+    /** @see IMtcCall#Start */
     virtual CallStateName Start(IN CallType eCallType, IN const AString& strTarget,
             IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices) = 0;
 
-    /**
-     * @brief Starts
-     *
-     * @param eCallType
-     * @param strTarget
-     * @param objMediaInfo
-     * @param objSuppServices
-     * @param lstUsers
-     * @return
-     */
+    /** @see IMtcCall#StartConference */
     virtual CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
             IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices,
             IN const ImsList<ConfUser*>& lstUsers) = 0;
 
-    /**
-     * @brief Starts
-     *
-     * @param eCallType
-     * @param strTarget
-     * @param lstUsers
-     * @return
-     */
+    /** @see IMtcCall#StartConference */
     virtual CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
             IN const ImsList<ConfUser*>& lstUsers) = 0;
 
-    /**
-     * @brief Handles
-     *
-     * @param piSession
-     * @return
-     */
+    /** @see IMtcCall#HandleIncoming */
     virtual CallStateName HandleIncoming(IN ISession* piSession) = 0;
 
-    /**
-     * @brief Handles
-     *
-     * @return
-     */
+    /** @see IMtcCall#HandleUserAlert */
     virtual CallStateName HandleUserAlert() = 0;
 
-    /**
-     * @brief Accepts
-     *
-     * @param eCallType
-     * @param objMediaInfo
-     * @return
-     */
+    /** @see IMtcCall#Accept */
     virtual CallStateName Accept(IN CallType eCallType, IN MediaInfo& objMediaInfo) = 0;
 
-    /**
-     * @brief Rejects
-     *
-     * @param objReason
-     * @return
-     */
+    /** @see IMtcCall#Reject */
     virtual CallStateName Reject(IN const CallReasonInfo& objReason) = 0;
 
-    /**
-     * @brief Holds
-     *
-     * @param objMediaInfo
-     * @return
-     */
+    /** @see IMtcCall#Hold */
     virtual CallStateName Hold(IN MediaInfo& objMediaInfo) = 0;
 
-    /**
-     * @brief Resumes
-     *
-     * @param objMediaInfo
-     * @return
-     */
+    /** @see IMtcCall#Resume */
     virtual CallStateName Resume(IN MediaInfo& objMediaInfo) = 0;
 
-    /**
-     * @brief Accepts
-     *
-     * @param eCallType
-     * @param objMediaInfo
-     * @return
-     */
+    /** @see IMtcCall#AcceptResume */
     virtual CallStateName AcceptResume(IN CallType eCallType, IN MediaInfo& objMediaInfo) = 0;
 
-    /**
-     * @brief Rejects
-     *
-     * @param objReason
-     * @return
-     */
+    /** @see IMtcCall#RejectResume */
     virtual CallStateName RejectResume(IN const CallReasonInfo& objReason) = 0;
 
-    /**
-     * @brief Updates
-     *
-     * @param eCallType
-     * @param objMediaInfo
-     * @return
-     */
+    /** @see IMtcCall#Update */
     virtual CallStateName Update(IN CallType eCallType, IN MediaInfo& objMediaInfo) = 0;
 
-    /**
-     * @brief Accepts
-     *
-     * @param eCallType
-     * @param objMediaInfo
-     * @return
-     */
+    /** @see IMtcCall#AcceptUpdate */
     virtual CallStateName AcceptUpdate(IN CallType eCallType, IN MediaInfo& objMediaInfo) = 0;
 
-    /**
-     * @brief Rejects
-     *
-     * @param objReason
-     * @return
-     */
+    /** @see IMtcCall#RejectUpdate */
     virtual CallStateName RejectUpdate(IN const CallReasonInfo& objReason) = 0;
 
-    /**
-     * @brief Cancels
-     *
-     * @param objReason
-     * @return
-     */
+    /** @see IMtcCall#CancelUpdate */
     virtual CallStateName CancelUpdate(IN const CallReasonInfo& objReason) = 0;
 
-    /**
-     * @brief Terminates
-     *
-     * @param objReason
-     * @return
-     */
+    /** @see IMtcCall#Terminate */
     virtual CallStateName Terminate(IN const CallReasonInfo& objReason) = 0;
 
     /**
-     * @brief Handles
+     * @brief Handles an incoming USSI request.
      *
-     * @param piSession
-     * @return
+     * This is used instead of {@link HandleIncoming} for USSI.
+     *
+     * @param piSession The session associated with the USSI request.
+     * @return The next call state.
      */
     virtual CallStateName HandleIncomingUssi(IN ISession* piSession) = 0;
 
     /**
-     * @brief Notifies
+     * @brief Notifies that the USSI call has been attached to the framework.
      *
-     * @return
+     * This is used instead of {@link OnAttached} for USSI.
+     *
+     * @return The next call state.
      */
     virtual CallStateName OnUssiAttached() = 0;
 
     /**
-     * @brief Accepts
+     * @brief Accepts an incoming USSI request.
      *
-     * @param eCallType
-     * @param objMediaInfo
-     * @return
+     * This is used instead of {@link Accept} for USSI.
+     *
+     * @param eCallType The call type for the USSI session.
+     * @param objMediaInfo The media information for the USSI session.
+     * @return The next call state.
      */
     virtual CallStateName AcceptUssi(IN CallType eCallType, IN MediaInfo& objMediaInfo) = 0;
 
     /**
-     * @brief Ussis
+     * @brief Handles the start of a USSI session.
      *
-     * @param piSession
-     * @return
+     * This is used instead of {@link SessionStarted} for USSI.
+     *
+     * @param piSession The USSI session that has started.
+     * @return The next call state.
      */
     virtual CallStateName UssiStarted(IN ISession* piSession) = 0;
 
     /**
-     * @brief Terminates
+     * @brief Terminates a USSI session.
      *
-     * @param objReason
-     * @return
+     * This is used instead of {@link Terminate} for USSI.
+     *
+     * @param objReason The reason for terminating the USSI session.
+     * @return The next call state.
      */
     virtual CallStateName TerminateUssi(IN const CallReasonInfo& objReason) = 0;
 
     /**
-     * @brief Ussis
+     * @brief Handles the termination of a USSI session.
      *
-     * @param piSession
-     * @return
+     * This is used instead of {@link SessionTerminated} for USSI.
+     *
+     * @param piSession The USSI session that has been terminated.
+     * @return The next call state.
      */
     virtual CallStateName UssiTerminated(IN ISession* piSession) = 0;
 
-    /**
-     * @brief Sends
-     *
-     * @param strUssd
-     * @return
-     */
+    /** @see IMtcCall#SendUssd */
     virtual CallStateName SendUssd(IN const AString& strUssd) = 0;
 
     /**
-     * @brief Ussis
+     * @brief Handles a received USSI INFO message.
      *
-     * @param piSession
-     * @param piSipServerConnection
-     * @return
+     * This is used instead of {@link SessionTransactionReceived} for USSI.
+     *
+     * @param piSession The session associated with the USSI.
+     * @param piSipServerConnection The SIP server connection.
+     * @return The next call state.
      */
     virtual CallStateName UssiInfoReceived(
             IN ISession* piSession, IN ISipServerConnection* piSipServerConnection) = 0;
 
-    /**
-     * @brief Sessions
-     *
-     * @param piSession
-     * @return
-     */
+    /** @see ISessionListener#SessionAlerting */
     virtual CallStateName SessionAlerting(IN ISession* piSession) = 0;
 
-    /**
-     * @brief Sessions
-     *
-     * @param piSession
-     * @param piReference
-     * @return
-     */
+    /** @see ISessionListener#SessionReferenceReceived */
     virtual CallStateName SessionReferenceReceived(
             IN ISession* piSession, IN IReference* piReference) = 0;
 
-    /**
-     * @brief Sessions
-     *
-     * @param piSession
-     * @return
-     */
+    /** @see ISessionListener#SessionStarted */
     virtual CallStateName SessionStarted(IN ISession* piSession) = 0;
 
-    /**
-     * @brief Sessions
-     *
-     * @param piSession
-     * @return
-     */
+    /** @see ISessionListener#SessionStartFailed */
     virtual CallStateName SessionStartFailed(IN ISession* piSession) = 0;
 
-    /**
-     * @brief Sessions
-     *
-     * @param piSession
-     * @return
-     */
+    /** @see ISessionListener#SessionTerminated */
     virtual CallStateName SessionTerminated(IN ISession* piSession) = 0;
 
-    /**
-     * @brief Sessions
-     *
-     * @param piSession
-     * @return
-     */
+    /** @see ISessionListener#SessionUpdated */
     virtual CallStateName SessionUpdated(IN ISession* piSession) = 0;
 
-    /**
-     * @brief Sessions
-     *
-     * @param piSession
-     * @return
-     */
+    /** @see ISessionListener#SessionUpdateFailed */
     virtual CallStateName SessionUpdateFailed(IN ISession* piSession) = 0;
 
-    /**
-     * @brief Sessions
-     *
-     * @param piSession
-     * @return
-     */
+    /** @see ISessionListener#SessionUpdateReceived */
     virtual CallStateName SessionUpdateReceived(IN ISession* piSession) = 0;
 
-    /**
-     * @brief Handles {@link ISessionListener#SessionCanceledOnAccepted} event.
-     *
-     * @param piSession Subject {@link ISession}.
-     * @return Next state to transition.
-     */
+    /** @see ISessionListener#SessionCanceledOnAccepted */
     virtual CallStateName SessionCanceledOnAccepted(IN ISession* piSession) = 0;
 
-    /**
-     * @brief Sessions
-     *
-     * @param piSession
-     * @return
-     */
+    /** @see ISessionListener#SessionCancelDelivered */
     virtual CallStateName SessionCancelDelivered(IN ISession* piSession) = 0;
 
-    /**
-     * @brief Sessions
-     *
-     * @param piSession
-     * @return
-     */
+    /** @see ISessionListener#SessionCancelDeliveryFailed */
     virtual CallStateName SessionCancelDeliveryFailed(IN ISession* piSession) = 0;
 
-    /**
-     * @brief Sessions
-     *
-     * @param piSession
-     * @return
-     */
+    /** @see ISessionListener#SessionEarlyMediaUpdated */
     virtual CallStateName SessionEarlyMediaUpdated(IN ISession* piSession) = 0;
 
-    /**
-     * @brief Sessions
-     *
-     * @param piSession
-     * @return
-     */
+    /** @see ISessionListener#SessionEarlyMediaUpdateFailed */
     virtual CallStateName SessionEarlyMediaUpdateFailed(IN ISession* piSession) = 0;
 
-    /**
-     * @brief Sessions
-     *
-     * @param piSession
-     * @return
-     */
+    /** @see ISessionListener#SessionEarlyMediaUpdateReceived */
     virtual CallStateName SessionEarlyMediaUpdateReceived(IN ISession* piSession) = 0;
 
-    /**
-     * @brief Sessions
-     *
-     * @param piSession
-     * @param piForkedSession
-     * @return
-     */
+    /** @see ISessionListener#SessionForkedResponseReceived */
     virtual CallStateName SessionForkedResponseReceived(
             IN ISession* piSession, IN ISession* piForkedSession) = 0;
 
-    /**
-     * @brief Sessions
-     *
-     * @param piSession
-     * @return
-     */
+    /** @see ISessionListener#SessionPrackDelivered */
     virtual CallStateName SessionPrackDelivered(IN ISession* piSession) = 0;
 
-    /**
-     * @brief Sessions
-     *
-     * @param piSession
-     * @return
-     */
+    /** @see ISessionListener#SessionPrackDeliveryFailed */
     virtual CallStateName SessionPrackDeliveryFailed(IN ISession* piSession) = 0;
 
-    /**
-     * @brief Sessions
-     *
-     * @param piSession
-     * @return
-     */
+    /** @see ISessionListener#SessionPrackReceived */
     virtual CallStateName SessionPrackReceived(IN ISession* piSession) = 0;
 
-    /**
-     * @brief Sessions
-     *
-     * @param piSession
-     * @param nIndex
-     * @return
-     */
+    /** @see ISessionListener#SessionProvisionalResponseReceived */
     virtual CallStateName SessionProvisionalResponseReceived(
             IN ISession* piSession, IN IMS_UINT32 nIndex) = 0;
 
-    /**
-     * @brief Sessions
-     *
-     * @param piSession
-     * @return
-     */
+    /** @see ISessionListener#SessionRprDeliveryFailed */
     virtual CallStateName SessionRprDeliveryFailed(IN ISession* piSession) = 0;
 
-    /**
-     * @brief Sessions
-     *
-     * @param piSession
-     * @param nIndex
-     * @return
-     */
+    /** @see ISessionListener#SessionRprReceived */
     virtual CallStateName SessionRprReceived(IN ISession* piSession, IN IMS_UINT32 nIndex) = 0;
 
-    /**
-     * @brief Sessions
-     *
-     * @param piSession
-     * @param piSipServerConnection
-     * @return
-     */
+    /** @see ISessionListener#SessionTransactionReceived */
     virtual CallStateName SessionTransactionReceived(
             IN ISession* piSession, IN ISipServerConnection* piSipServerConnection) = 0;
 
-    /**
-     * @brief Refresh_s
-     *
-     * @param piScc
-     * @return
-     */
+    /** @see IRefreshListener#Refresh_NotifyCompleted */
     virtual CallStateName Refresh_NotifyCompleted(IN ISipClientConnection* piScc) = 0;
 
-    /**
-     * @brief Refresh_s
-     *
-     * @return
-     */
+    /** @see IRefreshListener#Refresh_NotifyTerminated */
     virtual CallStateName Refresh_NotifyTerminated() = 0;
 
-    /**
-     * @brief Refresh_s
-     *
-     * @param bDoImplicitRefresh
-     * @return
-     */
+    /** @see IRefreshListener#Refresh_NotifyTimerExpired */
     virtual CallStateName Refresh_NotifyTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh) = 0;
 
-    /**
-     * @brief Notifies
-     *
-     * @param nType
-     * @return
-     */
+    /** @see IMtcTimerListener#OnTimerExpired */
     virtual CallStateName OnTimerExpired(IN IMS_SINT32 nType) = 0;
 
-    /**
-     * @brief Notifies
-     *
-     * @param objResult
-     * @return
-     */
+    /** @see IMtcBlockCheckListener#OnBlockChecked */
     virtual CallStateName OnBlockChecked(IN IMtcBlockChecker::Result objResult) = 0;
 
-    /**
-     * @brief Qoss
-     *
-     * @param piSession
-     * @param eMediaType
-     * @return
-     */
+    /** @see IMtcPreconditionListener#QosReserved */
     virtual CallStateName QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType) = 0;
 
-    /**
-     * @brief Qoss
-     *
-     * @param piSession
-     * @param eNextAction
-     * @return
-     */
+    /** @see IMtcPreconditionListener#QosReserveFailed */
     virtual CallStateName QosReserveFailed(
             IN ISession* piSession, IN QosLossPolicy eNextAction) = 0;
 
     /**
-     * @brief Notifies
+     * @brief Handles an internal failure (e.g., unexpected null parameter from the other modules).
      *
-     * @return
+     * @return The next call state.
      */
     virtual CallStateName OnInternalFailure() = 0;
 
-    /**
-     * @brief Notifies
-     *
-     * @return
-     */
+    /** @see IMtcCall#Attach */
     virtual CallStateName OnAttached() = 0;
 
-    /**
-     * @brief Notifies
-     *
-     * @param eMediaType
-     * @param eProtocolType
-     * @return
-     */
+    /** @see IMediaReportEventListener#OnReceivingMediaDataStarted */
     virtual CallStateName OnReceivingMediaDataStarted(
             IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) = 0;
 
-    /**
-     * @brief Notifies
-     *
-     * @param eMediaType
-     * @param eProtocolType
-     * @return
-     */
+    /** @see IMediaReportEventListener#OnReceivingMediaDataFailed */
     virtual CallStateName OnReceivingMediaDataFailed(
             IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) = 0;
 
-    /**
-     * @brief Notifies
-     *
-     * @return
-     */
+    /** @see IMediaReportEventListener#OnVideoLowestBitRate */
     virtual CallStateName OnVideoLowestBitRate() = 0;
 
-    /**
-     * @brief Notifies
-     *
-     * @return
-     */
+    /** @see IMediaReportEventListener#OnReceivingNetworkToneStarted */
     virtual CallStateName OnReceivingNetworkToneStarted() = 0;
 
-    /**
-     * @brief Notifies
-     *
-     * @return
-     */
+    /** @see IMediaReportEventListener#OnReceivingNetworkToneFailed */
     virtual CallStateName OnReceivingNetworkToneFailed() = 0;
 
-    /**
-     * @brief Notifies
-     *
-     * @param objReason
-     * @return
-     */
+    /** @see IMediaReportEventListener#OnMediaFailed */
     virtual CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) = 0;
 
-    /**
-     * @brief Notifies
-     *
-     * @param eState
-     * @return
-     */
+    /** @see ISrvccStateListener#OnSrvccStateUpdated */
     virtual CallStateName OnSrvccStateUpdated(IN SrvccState eState) = 0;
 
-    /**
-     * @brief Notifies
-     *
-     * @param eState
-     * @param eAosReason
-     * @param nDataFailureReason
-     * @return
-     */
+    /** @see IMtcAosStateListener#OnAosStateChanged */
     virtual CallStateName OnAosStateChanged(
             IN MtcAosState eState, IN IMS_UINT32 eAosReason, IN IMS_SINT32 nDataFailureReason) = 0;
 
     /**
-     * @brief Notifies
+     * @brief Notifies a IP-CAN is changed between IWLAN and mobile RAT.
      *
-     * @param eIpcan
-     * @return
+     * @see IMtcNetworkWatcherListener#OnRatChanged
      */
     virtual CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) = 0;
 
     /**
-     * @brief Reports OnRatChanged information received from the IMtcNetworkWatcherListener.
+     * @brief Notifies a mobile RAT change event except for IP-CAN change.
      *
-     * @param eOldRatType The type of the old RAT.
-     * @param eRatType The type of the new RAT. It can't be same as an old RAT.
-     * @return The CallStateName after handling this event.
+     * @see OnIpcanChanged
+     * @see IMtcNetworkWatcherListener#OnRatChanged
      */
     virtual CallStateName OnRatChanged(IN IMS_SINT32 eOldRatType, IN IMS_SINT32 eRatType) = 0;
 
-    /**
-     * Reports the OnConnectionFailed information received from the IMtcRadioCheckerListener.
-     * <p>
-     * This method forwards the connection failure details, including the reason and
-     * suggested wait time before retrying, originally provided by the network through
-     * the {@link IMtcRadioCheckerListener} and {@link IImsRadioConnectionListener}.
-     *
-     * @param nFailureReason The reason for the connection failure.
-     *                       See {@link IImsRadio#ConnectionFailureReason} for possible values.
-     * @param nWaitTimeMillis The retry wait time suggested by the network, in milliseconds.
-     *
-     * @return The CallStateName after handling this event.
-     */
+    /** @see IMtcRadioCheckerListener#OnConnectionFailed */
     virtual CallStateName OnConnectionFailed(
             IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) = 0;
 };

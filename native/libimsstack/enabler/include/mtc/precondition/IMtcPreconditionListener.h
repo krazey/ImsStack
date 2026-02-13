@@ -28,18 +28,18 @@ public:
     virtual ~IMtcPreconditionListener(){};
 
     /**
-     * @brief Notifies
+     * @brief Handles the successful reservation of QoS.
      *
-     * @param piSession
-     * @param eMediaType
+     * @param piSession The session for which QoS was reserved.
+     * @param eMediaType The media type for which QoS was reserved.
      */
     virtual void QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType) = 0;
 
     /**
-     * @brief Notifies
+     * @brief Handles the failure of QoS reservation.
      *
-     * @param piSession
-     * @param eNextAction
+     * @param piSession The session for which QoS reservation failed.
+     * @param eNextAction The next action to take based on the QoS loss policy.
      */
     virtual void QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) = 0;
 };
