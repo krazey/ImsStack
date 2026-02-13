@@ -108,7 +108,7 @@
         <item value="400:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
         <item value="401:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
         <item value="402:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
-        <item value="403:5:6"/> <!-- CROSS_SIM_PERM_FAILURE, TERMINATE -->
+        <item value="403:5,6"/> <!-- CROSS_SIM_PERM_FAILURE, TERMINATE -->
         <item value="404:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
         <item value="405:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
         <item value="406:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
@@ -137,7 +137,7 @@
         <item value="500:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
         <item value="501:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
         <item value="502:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
-        <item value="503:7:5"/> <!-- SILENT_REINVITE_TO_ALTERNATE_PCSCF_ONCE, CROSS_SIM_PERM_FAILURE -->
+        <item value="503:7,5"/> <!-- SILENT_REINVITE_TO_ALTERNATE_PCSCF_ONCE, CROSS_SIM_PERM_FAILURE -->
         <item value="504:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
         <item value="505:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
         <item value="513:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
