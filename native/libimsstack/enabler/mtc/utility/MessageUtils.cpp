@@ -694,10 +694,10 @@ PUBLIC ReasonHeaderValue MessageUtils::GetCauseAndTextFromReasonHeader(
 PUBLIC ReasonHeaderValue MessageUtils::GetPrioritizedReasonHeader(IN const IMessage* piMessage,
         IN const std::initializer_list<AString>& lstPrioritizedProtocols)
 {
-    ReasonHeaderValue objResaultValue;
+    ReasonHeaderValue objResultValue;
     if (!piMessage)
     {
-        return objResaultValue;
+        return objResultValue;
     }
 
     for (const auto& strProtocol : lstPrioritizedProtocols)
@@ -706,18 +706,18 @@ PUBLIC ReasonHeaderValue MessageUtils::GetPrioritizedReasonHeader(IN const IMess
 
         if (objValue.nCause != -1 || objValue.strText.GetLength() > 0)
         {
-            objResaultValue.nCause = objValue.nCause;
-            objResaultValue.strText = objValue.strText;
-            objResaultValue.strProtocol = objValue.strProtocol;
+            objResultValue.nCause = objValue.nCause;
+            objResultValue.strText = objValue.strText;
+            objResultValue.strProtocol = objValue.strProtocol;
 
             IMS_TRACE_D("GetPrioritizedReasonHeader: Cause[%d] Text[%s] Protocol[%s]",
                     objValue.nCause, objValue.strText.GetStr(), objValue.strProtocol.GetStr());
 
-            return objResaultValue;
+            return objResultValue;
         }
     }
 
-    return objResaultValue;
+    return objResultValue;
 }
 
 PUBLIC Ims3gpp& MessageUtils::GetIms3gppFromBody(
