@@ -183,6 +183,7 @@ void AosMngr::DestroyStaticConfig()
     if (m_pStaticConfig != IMS_NULL)
     {
         m_pStaticConfig->Destroy();
+        delete m_pStaticConfig;
         m_pStaticConfig = IMS_NULL;
     }
 }

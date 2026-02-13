@@ -137,6 +137,13 @@ public:
     }
 };
 
+class MockAosStaticConfig : public AosStaticConfig
+{
+public:
+    MOCK_METHOD(void, Die, ());
+    virtual ~MockAosStaticConfig() { Die(); }
+};
+
 /**
  * @class AosMngrTest
  * @brief Test Suite for AosMngr class.
@@ -390,4 +397,19 @@ TEST_F(AosMngrTest, DestroyAosClearsAppContexts)
 
     // THEN: The internal AppContext map should be empty.
     EXPECT_EQ(m_pAosMngr->GetAppContextCount(), 0);
+}
+
+TEST_F(AosMngrTest, DestroyStaticConfigDeletesObject)
+{
+    // GIVEN
+    m_pAosMngr = new TestAosMngr(SLOT_ID, m_pMockBuilder);
+    MockAosStaticConfig* pMockAosStaticConfig = new MockAosStaticConfig();
+    m_pAosMngr->SetStaticConfig(pMockAosStaticConfig);
+
+    EXPECT_CALL(*pMockAosStaticConfig, Die()).Times(1);
+
+    // WHEN
+    m_pAosMngr->DestroyStaticConfig();
+
+    // THEN: The Die() expectation confirms the object was deleted.
 }
