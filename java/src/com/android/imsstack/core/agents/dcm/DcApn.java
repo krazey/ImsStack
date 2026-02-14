@@ -112,10 +112,10 @@ public class DcApn implements IDcApn {
             sim.addListener(mSimListener);
         }
 
-        mPreciseDcStateListener = new PreciseDcStateListener();
         mSubId = MSimUtils.getSubId(mSlotId);
         if (mSubId != MSimUtils.INVALID_SUB_ID) {
             TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(mSubId);
+            mPreciseDcStateListener = new PreciseDcStateListener();
             mPreciseDcStateListener.register(tmp);
         }
     }
@@ -157,9 +157,14 @@ public class DcApn implements IDcApn {
         }
 
         if (apnType == EApnType.EMERGENCY.getType() && mSubId == MSimUtils.INVALID_SUB_ID) {
-            TelephonyManagerProxy tmp = AppContext.getInstance()
-                    .getSystemServiceProxy(TelephonyManagerProxy.class);
-            mPreciseDcStateListener.register(tmp);
+            if (mPreciseDcStateListener == null) {
+                synchronized (mLock) {
+                    mPreciseDcStateListener = new PreciseDcStateListener();
+                    TelephonyManagerProxy tmp = AppContext.getInstance()
+                            .getSystemServiceProxy(TelephonyManagerProxy.class);
+                    mPreciseDcStateListener.register(tmp);
+                }
+            }
         }
 
         return iApn.connect();
@@ -698,17 +703,20 @@ public class DcApn implements IDcApn {
 
         synchronized (mLock) {
             int subId = sim.getSubId();
-
-            if (mSubId == subId || subId == MSimUtils.INVALID_SUB_ID) {
+            if (mSubId == subId) {
                 return;
             }
 
-            mSubId = subId;
             ImsLog.i(mSlotId, "updateSubscription :: subId=" + subId);
-
             if (mPreciseDcStateListener != null) {
-                TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(mSubId);
                 mPreciseDcStateListener.unregister();
+                mPreciseDcStateListener = null;
+            }
+
+            mSubId = subId;
+            if (mSubId != MSimUtils.INVALID_SUB_ID) {
+                mPreciseDcStateListener = new PreciseDcStateListener();
+                TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(mSubId);
                 mPreciseDcStateListener.register(tmp);
             }
         }
@@ -724,7 +732,6 @@ public class DcApn implements IDcApn {
 
         public void register(TelephonyManagerProxy tmp) {
             mTelephonyManagerProxy = tmp;
-
             if (mTelephonyManagerProxy != null) {
                 mTelephonyManagerProxy.registerTelephonyCallback(
                         AppContext.getInstance().getMainExecutor(), this);
