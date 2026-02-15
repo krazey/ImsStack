@@ -880,6 +880,7 @@
     <!-- Media -->
     <boolean name="imsvoice.support_multi_config_in_early_session_bool" value="false"/>
     <boolean name="imsvoice.media_session_level_bandwidth_bool" value="false"/>
+    <boolean name="imsvoice.media_add_c_line_for_each_media_bool" value="false"/>
     <boolean name="imsvoice.sdp_answer_full_capability_bool" value="false"/>
     <boolean name="imsvoice.sdp_reoffer_full_capability_bool" value="false"/>
 

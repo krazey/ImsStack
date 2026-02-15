@@ -250,7 +250,7 @@ TEST_F(VideoNegoTest, testFormSdpOfferIdle)
     MockIMediaDescriptor objMediaDescriptor;
 
     ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _)).WillByDefault(Return(m_pBaseProfile));
-    ON_CALL(*m_pMockVideoSdpGenerator, Generate(_, _, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*m_pMockVideoSdpGenerator, Generate(_, _, _, _)).WillByDefault(Return(IMS_TRUE));
     EXPECT_TRUE(m_pVideoNego->FormSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
 }
@@ -261,7 +261,7 @@ TEST_F(VideoNegoTest, testFormSdpOfferNegotiated)
     MockIMediaDescriptor objMediaDescriptor;
 
     ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _)).WillByDefault(Return(m_pBaseProfile));
-    ON_CALL(*m_pMockVideoSdpGenerator, Generate(_, _, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*m_pMockVideoSdpGenerator, Generate(_, _, _, _)).WillByDefault(Return(IMS_TRUE));
     EXPECT_TRUE(m_pVideoNego->FormSdp(STATE_NEGOTIATED, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
 }
@@ -284,7 +284,7 @@ TEST_F(VideoNegoTest, testFormSdpReoffer)
     MockIMediaDescriptor objMediaDescriptor;
 
     ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _)).WillByDefault(Return(m_pBaseProfile));
-    ON_CALL(*m_pMockVideoSdpGenerator, Generate(_, _, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*m_pMockVideoSdpGenerator, Generate(_, _, _, _)).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_TRUE(m_pVideoNego->FormSdp(STATE_NEGOTIATED, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_TRUE));
@@ -311,7 +311,7 @@ TEST_F(VideoNegoTest, testFormSdpOfferIdleGenerateFail)
     MockIMediaDescriptor objMediaDescriptor;
 
     ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _)).WillByDefault(Return(m_pBaseProfile));
-    ON_CALL(*m_pMockVideoSdpGenerator, Generate(_, _, _)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*m_pMockVideoSdpGenerator, Generate(_, _, _, _)).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_FALSE(m_pVideoNego->FormSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
@@ -396,7 +396,7 @@ TEST_F(VideoNegoTest, testNegotiateSdpIdleSuccessAndFormSdpOfferReceived)
     m_pVideoNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
     EXPECT_EQ(eDirection, MEDIA_DIRECTION_SEND);
 
-    ON_CALL(*m_pMockVideoSdpGenerator, Generate(_, _, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*m_pMockVideoSdpGenerator, Generate(_, _, _, _)).WillByDefault(Return(IMS_TRUE));
     EXPECT_TRUE(m_pVideoNego->FormSdp(STATE_OFFER_RECEIVED, &objSessionDescriptor,
             &objMediaDescriptor, MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
 }
@@ -437,7 +437,7 @@ TEST_F(VideoNegoTest, testNegotiateSdpOfferSentSuccess)
             .WillByDefault(ReturnRoundRobin({pLocalProfile, pPeerProfile, pNegoProfile}));
 
     // form offer in the idle state
-    ON_CALL(*m_pMockVideoSdpGenerator, Generate(_, _, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*m_pMockVideoSdpGenerator, Generate(_, _, _, _)).WillByDefault(Return(IMS_TRUE));
     EXPECT_TRUE(m_pVideoNego->FormSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
 

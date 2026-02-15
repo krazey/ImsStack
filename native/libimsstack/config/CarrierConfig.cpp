@@ -1418,6 +1418,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_SDP_ANSWER_FULL_CAPABILITY_BOOL[] =
         KEY_IMS_VOICE_PREFIX "sdp_answer_full_capability_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL[] =
         KEY_IMS_VOICE_PREFIX "sdp_reoffer_full_capability_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_MEDIA_ADD_C_LINE_FOR_EACH_MEDIA_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "media_add_c_line_for_each_media_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_SESSION_REFRESH_SDP_SESSION_VERSION_INCREMENT_INT[] =
         KEY_IMS_VOICE_PREFIX "session_refresh_sdp_session_version_increment_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_INCOMING_DTMF_TONE_PLAY_SUPPORT_BOOL[] =

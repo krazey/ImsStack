@@ -22,7 +22,6 @@
 #include "MediaProfileUtil.h"
 #include "ServiceTrace.h"
 #include "config/MediaSessionConfig.h"
-#include "config/MediaSessionConfigFactory.h"
 #include "video/VideoProfileGenerator.h"
 #include "video/VideoSdpGenerator.h"
 
@@ -145,7 +144,7 @@ IMS_BOOL VideoNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
     {
         // Make the SDP from profile
         return m_pSdpGenerator->Generate(pSessionDescriptor, pDescriptor,
-                GetLocalProfile(*CreateOaModel(eDirection, bDisable)));
+                GetLocalProfile(*CreateOaModel(eDirection, bDisable)), GetMediaSessionConfig());
     }
 
     return IMS_FALSE;
@@ -206,8 +205,8 @@ PROTECTED IMS_BOOL VideoNego::FormAnswer(IN ISessionDescriptor* pSessionDescript
     }
 
     // Make the SDP from profile
-    return m_pSdpGenerator->Generate(
-            pSessionDescriptor, pDescriptor, GetNegotiatedProfile(*pNewOaModel));
+    return m_pSdpGenerator->Generate(pSessionDescriptor, pDescriptor,
+            GetNegotiatedProfile(*pNewOaModel), GetMediaSessionConfig());
 }
 
 PROTECTED IMS_BOOL VideoNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
@@ -236,10 +235,7 @@ PROTECTED IMS_BOOL VideoNego::FormReoffer(IN ISessionDescriptor* pSessionDescrip
     // Make new Offer/Answer model, and copy source profile from previous negotiated profile
     std::shared_ptr<OaModel> pNewOaModel = std::make_shared<OaModel>();
 
-    const MediaSessionConfig* pMediaSessionConfig =
-            MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
-                    GetSlotId(), m_pEnvironment->eServiceType);
-
+    const MediaSessionConfig* pMediaSessionConfig = GetMediaSessionConfig();
     if (m_listOaModel.IsEmpty())
     {
         pNewOaModel->pLocalProfile =
@@ -319,8 +315,8 @@ PROTECTED IMS_BOOL VideoNego::FormReoffer(IN ISessionDescriptor* pSessionDescrip
     m_listOaModel.Append(pNewOaModel);
 
     // Make the SDP from profile
-    return m_pSdpGenerator->Generate(
-            pSessionDescriptor, pDescriptor, GetLocalProfile(*pNewOaModel));
+    return m_pSdpGenerator->Generate(pSessionDescriptor, pDescriptor, GetLocalProfile(*pNewOaModel),
+            GetMediaSessionConfig());
 }
 
 PROTECTED MEDIA_DIRECTION VideoNego::NegotiateOffer(

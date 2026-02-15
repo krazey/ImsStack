@@ -20,6 +20,7 @@
 #include "MediaEnvironment.h"
 #include "MediaProfileFactory.h"
 #include "ServiceTrace.h"
+#include "config/MediaSessionConfig.h"
 #include "text/TextProfileGenerator.h"
 #include "text/TextSdpGenerator.h"
 
@@ -155,7 +156,7 @@ IMS_BOOL TextNego::FormOffer(IN ISessionDescriptor* pSessionDescriptor,
     {
         // Make the SDP from profile
         return m_pSdpGenerator->Generate(pSessionDescriptor, pDescriptor,
-                GetLocalProfile(*CreateOaModel(eDirection, bDisable)));
+                GetLocalProfile(*CreateOaModel(eDirection, bDisable)), GetMediaSessionConfig());
     }
 
     return IMS_FALSE;
@@ -197,8 +198,8 @@ PROTECTED IMS_BOOL TextNego::FormAnswer(IN ISessionDescriptor* pSessionDescripto
             GetNegotiatedProfile(*pNegotiatedOaModel)->GetDirection(), bDisable, 0);
 
     // Make the SDP from profile
-    return m_pSdpGenerator->Generate(
-            pSessionDescriptor, pDescriptor, GetNegotiatedProfile(*pNegotiatedOaModel));
+    return m_pSdpGenerator->Generate(pSessionDescriptor, pDescriptor,
+            GetNegotiatedProfile(*pNegotiatedOaModel), GetMediaSessionConfig());
 }
 
 PROTECTED
@@ -281,8 +282,8 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
 
     m_listOaModel.Append(pNewOaModel);
 
-    return m_pSdpGenerator->Generate(
-            pSessionDescriptor, pDescriptor, GetLocalProfile(*pNewOaModel));
+    return m_pSdpGenerator->Generate(pSessionDescriptor, pDescriptor, GetLocalProfile(*pNewOaModel),
+            GetMediaSessionConfig());
 }
 
 PROTECTED MEDIA_DIRECTION TextNego::NegotiateOffer(

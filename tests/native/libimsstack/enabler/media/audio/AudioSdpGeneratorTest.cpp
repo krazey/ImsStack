@@ -22,8 +22,10 @@
 #include "core/MockISessionDescriptor.h"
 #include "media/MockIMediaDescriptor.h"
 #include "offeranswer/SdpMediaFormat.h"
+#include "config/MockMediaSessionConfig.h"
 
 using ::testing::_;
+using ::testing::Return;
 
 // for AudioFmtp
 const int MODESET_LIST = 7;
@@ -240,6 +242,7 @@ class AudioSdpGeneratorFullTest : public AudioSdpGenerator, public ::testing::Te
 public:
     std::unique_ptr<MockIMediaDescriptor> m_pMockIMediaDescriptor;
     std::unique_ptr<MockISessionDescriptor> m_pMockISessionDescriptor;
+    std::unique_ptr<MockMediaSessionConfig> m_pMockMediaSessionConfig;
     std::unique_ptr<AudioProfile> m_pAudioProfile;
 
 protected:
@@ -248,6 +251,7 @@ protected:
         m_pMockIMediaDescriptor = std::make_unique<MockIMediaDescriptor>();
         m_pMockISessionDescriptor = std::make_unique<MockISessionDescriptor>();
         m_pAudioProfile = std::make_unique<AudioProfile>();
+        m_pMockMediaSessionConfig = std::make_unique<MockMediaSessionConfig>();
 
         // Populate the profile with various attributes to test all generator functions
         m_pAudioProfile->SetPtime(20);
@@ -316,11 +320,37 @@ TEST_F(AudioSdpGeneratorFullTest, TestGenerateFullSdp)
     EXPECT_CALL(*m_pMockIMediaDescriptor, AddAttribute(SdpAttribute::ANBR, _, _)).Times(1);
 
     // Act
-    IMS_BOOL result = Generate(
-            m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(), m_pAudioProfile.get());
+    IMS_BOOL result = Generate(m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(),
+            m_pAudioProfile.get(), m_pMockMediaSessionConfig.get());
 
     // Assert
     EXPECT_TRUE(result);
+}
+
+TEST_F(AudioSdpGeneratorFullTest, TestSetSdpMediaIpAddress)
+{
+    const AString kTestIpAddress = "192.168.1.100";
+    m_pAudioProfile->SetIpAddress(IpAddress(kTestIpAddress));
+
+    // Case 1: IsAddCLineForEachMediaEnabled() returns true.
+    // SetConnectionAddress should be called with the profile's IP address.
+    EXPECT_CALL(*m_pMockMediaSessionConfig, IsAddCLineForEachMediaEnabled())
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(*m_pMockIMediaDescriptor, SetConnectionAddress(AString(kTestIpAddress))).Times(1);
+
+    GenerateCommonAttributes(m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(),
+            m_pAudioProfile.get(), m_pMockMediaSessionConfig.get());
+
+    testing::Mock::VerifyAndClearExpectations(m_pMockIMediaDescriptor.get());
+
+    // Case 2: IsAddCLineForEachMediaEnabled() returns false.
+    // SetConnectionAddress should NOT be called.
+    EXPECT_CALL(*m_pMockMediaSessionConfig, IsAddCLineForEachMediaEnabled())
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(*m_pMockIMediaDescriptor, SetConnectionAddress(_)).Times(0);
+
+    GenerateCommonAttributes(m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(),
+            m_pAudioProfile.get(), m_pMockMediaSessionConfig.get());
 }
 
 class AudioSdpGeneratorEvsTest : public AudioSdpGenerator, public ::testing::Test
