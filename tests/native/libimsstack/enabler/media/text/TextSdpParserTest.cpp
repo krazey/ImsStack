@@ -18,6 +18,7 @@
 
 #include "IpAddress.h"
 #include "SdpBandwidth.h"
+#include "offeranswer/SdpMediaFormat.h"
 #include "offeranswer/SdpAvCodec.h"
 #include "text/TextSdpParser.h"
 #include "text/TextProfile.h"
@@ -252,5 +253,41 @@ TEST_F(TextSdpParserTest, ParseRedSubPtExistWithNullCodec)
 
     // The function should handle the null codec gracefully and return false
     // as the subtype is not found.
+    EXPECT_FALSE(objParser.ParseRedSubPtExist(100, lstMediaFormats));
+}
+
+TEST_F(TextSdpParserTest, ParsePayloadsWithNonRtpFormat)
+{
+    TestableTextSdpParser objParser;
+    TextProfile objProfile;
+    ImsList<SdpMediaFormat*> lstMediaFormats;
+
+    SdpMediaFormat objMmsrpFormat(SdpMediaFormat::TYPE_MSRP);
+    lstMediaFormats.Append(&objMmsrpFormat);
+
+    // Add a valid RTP codec
+    auto pT140Codec = std::make_unique<SdpAvCodec>();
+    pT140Codec->SetParameters("100 t140/1000", "");
+    lstMediaFormats.Append(pT140Codec.get());
+
+    ON_CALL(m_objMockMediaDescriptor, GetMediaFormats()).WillByDefault(ReturnRef(lstMediaFormats));
+
+    // This should skip the non-RTP format and only process the T140 codec.
+    objParser.ParsePayloads(&m_objMockMediaDescriptor, &objProfile);
+
+    EXPECT_EQ(objProfile.GetPayloadList().GetSize(), 1);
+    ASSERT_NE(objProfile.GetPayloadAt(0), nullptr);
+    EXPECT_EQ(objProfile.GetPayloadAt(0)->GetRtpMap().GetPayloadNumber(), 100);
+}
+
+TEST_F(TextSdpParserTest, ParseRedSubPtExistWithNonRtpFormat)
+{
+    TestableTextSdpParser objParser;
+    ImsList<SdpMediaFormat*> lstMediaFormats;
+
+    SdpMediaFormat objMmsrpFormat(SdpMediaFormat::TYPE_MSRP);
+    lstMediaFormats.Append(&objMmsrpFormat);
+
+    // Should skip non-RTP format even if payload number matches, and return false
     EXPECT_FALSE(objParser.ParseRedSubPtExist(100, lstMediaFormats));
 }
