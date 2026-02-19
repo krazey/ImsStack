@@ -17,6 +17,7 @@
 #include "audio/AudioNego.h"
 
 #include <map>
+#include <vector>
 
 #include "ISessionDescriptor.h"
 #include "ImsTypeDef.h"
@@ -556,12 +557,12 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
     }
 
     IMS_TRACE_I("FormReoffer(): direction[%d], OA model[%d], reOffer[%d]", eDirection,
-            m_listOaModel.GetSize(), bEnforceReofferMode);
+            (int)m_listOaModel.GetSize(), bEnforceReofferMode);
 
     // Make new Offer/Answer model, and copy source profile from previous negotiated profile
     std::shared_ptr<OaModel> pNewOaModel = std::make_shared<OaModel>();
 
-    MediaBaseProfile* pSourceProfile = m_pBaseProfile.get();
+    std::shared_ptr<MediaBaseProfile> pProfileToReoffer;
     std::shared_ptr<OaModel> pPrevOaModel = GetNegotiatedOaModel();
 
     if (pPrevOaModel != IMS_NULL && pPrevOaModel->pNegotiatedProfile != IMS_NULL)
@@ -571,77 +572,114 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
                 (pMediaSessionConfig != IMS_NULL &&
                         pMediaSessionConfig->IsSdpReofferFullCapability());
 
-        // Reuse the previously negotiated profile if the call was on hold (port 0),
+        // The new local profile is based on the previous local profile
+        // to preserve the full codec list, not the negotiated one.
+        MediaBaseProfile* pPrevLocal = GetLocalProfile(*pPrevOaModel);
+
+        if (pPrevLocal == IMS_NULL)
+        {
+            IMS_TRACE_E(
+                    0, "FormReoffer(): Previous local profile is NULL. Use base profile.", 0, 0, 0);
+            pPrevLocal = m_pBaseProfile.get();
+        }
+
+        pNewOaModel->pLocalProfile =
+                MediaProfileFactory::GetInstance()->CreateProfile(m_eType, pPrevLocal);
+
+        // Use the previously negotiated profile if the call was on hold (port 0),
         // or if we are not explicitly configured to use full capabilities for a re-offer.
         if (pPrevOaModel->pNegotiatedProfile->GetDataPort() == 0 || !bUseFullCapability)
         {
-            pSourceProfile = GetNegotiatedProfile(*pPrevOaModel);
+            pProfileToReoffer = MediaProfileFactory::GetInstance()->CreateProfile(
+                    m_eType, GetNegotiatedProfile(*pPrevOaModel));
+        }
+        else
+        {
+            IMS_TRACE_I("FormReoffer(): Use the LocalProfile for SDP", 0, 0, 0);
+            // For a full-capability re-offer, use the previous local profile (which we just cloned)
+            pProfileToReoffer = pNewOaModel->pLocalProfile;
         }
     }
     else
     {
         IMS_TRACE_I("FormReoffer(): no previous negotiated profile, using base profile.", 0, 0, 0);
+        pNewOaModel->pLocalProfile =
+                MediaProfileFactory::GetInstance()->CreateProfile(m_eType, m_pBaseProfile.get());
+        pProfileToReoffer = pNewOaModel->pLocalProfile;
     }
 
-    pNewOaModel->pLocalProfile =
-            MediaProfileFactory::GetInstance()->CreateProfile(m_eType, pSourceProfile);
-
-    if (pNewOaModel->pLocalProfile == IMS_NULL)
+    if (pNewOaModel->pLocalProfile == IMS_NULL || pProfileToReoffer == IMS_NULL)
     {
-        IMS_TRACE_E(0, "create LocalProfile has failed", 0, 0, 0);
+        IMS_TRACE_E(0, "create LocalProfile or SourceProfile failed", 0, 0, 0);
         return IMS_FALSE;
     }
 
     // set default AS value when localProfile AS value is 0 in ReOffer case
-    if (pNewOaModel->pLocalProfile->GetBandwidthAs() <= 0)
+    if (pProfileToReoffer->GetBandwidthAs() <= 0)
     {
         IMS_TRACE_I("FormReoffer(): use default AS value", 0, 0, 0);
-        pNewOaModel->pLocalProfile->SetBandwidthAs(m_pBaseProfile->GetBandwidthAs());
+        pProfileToReoffer->SetBandwidthAs(m_pBaseProfile->GetBandwidthAs());
     }
 
-    if (eDirection > MEDIA_DIRECTION_INVALID)
+    // Identify unique profiles to update (could be 1 or 2 objects)
+    std::vector<MediaBaseProfile*> profilesToUpdate = {pProfileToReoffer.get()};
+    if (pNewOaModel->pLocalProfile != pProfileToReoffer)
     {
-        IMS_TRACE_I("FormReoffer(): direction[%d]", eDirection, 0, 0);
-        pNewOaModel->pLocalProfile->SetDirection(eDirection);
+        profilesToUpdate.push_back(pNewOaModel->pLocalProfile.get());
     }
 
-    // Modify a RS/RR by conditions (for RTCP enable/disable)
-    MediaProfileUtil::SetRtcpRsRr(GetLocalProfile(*pNewOaModel),
-            MediaConfigUtil::GetAudioConfig(GetSlotId(), m_pEnvironment->eServiceType),
-            MEDIA_DIRECTION_IS_AUDIO_HOLD(eDirection));
-
-    if (bDisable)
+    for (auto* pProfile : profilesToUpdate)
     {
-        pNewOaModel->pLocalProfile->SetDataPort(0);
-        pNewOaModel->pLocalProfile->SetControlPort(0);
-    }
-    else
-    {
-        pNewOaModel->pLocalProfile->SetDataPort(m_pBaseProfile->GetDataPort());
-        pNewOaModel->pLocalProfile->SetControlPort(m_pBaseProfile->GetControlPort());
-    }
-
-    // when reoffer case - recover rtcpxr to default in sendrecv case
-    auto pAudioBaseProfile = std::static_pointer_cast<AudioProfile>(m_pBaseProfile);
-    if (pAudioBaseProfile && pAudioBaseProfile->IsRtcpXrSupported() &&
-            pNewOaModel->pLocalProfile->GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE)
-    {
-        auto pLocalAudioProfile = GetLocalProfile(*pNewOaModel);
-        if (pLocalAudioProfile)
+        if (eDirection > MEDIA_DIRECTION_INVALID)
         {
-            pLocalAudioProfile->SetSupportRtcpXr(pAudioBaseProfile->IsRtcpXrSupported());
-            pLocalAudioProfile->SetRtcpXrAttr(pAudioBaseProfile->GetRtcpXrAttr());
+            pProfile->SetDirection(eDirection);
+        }
+
+        // Modify a RS/RR by conditions (for RTCP enable/disable)
+        MediaProfileUtil::SetRtcpRsRr(pProfile,
+                MediaConfigUtil::GetAudioConfig(GetSlotId(), m_pEnvironment->eServiceType),
+                MEDIA_DIRECTION_IS_AUDIO_HOLD(eDirection));
+
+        if (bDisable)
+        {
+            pProfile->SetDataPort(0);
+            pProfile->SetControlPort(0);
+        }
+        else
+        {
+            pProfile->SetDataPort(m_pBaseProfile->GetDataPort());
+            pProfile->SetControlPort(m_pBaseProfile->GetControlPort());
+        }
+
+        // when reoffer case - recover rtcpxr to default in sendrecv case
+        auto pAudioBase = std::static_pointer_cast<AudioProfile>(m_pBaseProfile);
+        if (pAudioBase && pAudioBase->IsRtcpXrSupported() &&
+                pProfileToReoffer->GetDirection() == MEDIA_DIRECTION_SEND_RECEIVE)
+        {
+            auto* pAudioProfile = static_cast<AudioProfile*>(pProfile);
+            if (pAudioProfile)
+            {
+                pAudioProfile->SetSupportRtcpXr(pAudioBase->IsRtcpXrSupported());
+                pAudioProfile->SetRtcpXrAttr(pAudioBase->GetRtcpXrAttr());
+            }
         }
     }
 
     m_listOaModel.Append(pNewOaModel);
 
     // Make the SDP from profile
-    IMS_BOOL bSdpMade = m_pSdpGenerator->Generate(pSessionDescriptor, pDescriptor,
-            GetLocalProfile(*pNewOaModel), GetMediaSessionConfig());
+    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "FormReoffer(): pSessionDescriptor or pDescriptor is NULL", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
+    IMS_BOOL bSdpMade = m_pSdpGenerator->Generate(
+            pSessionDescriptor, pDescriptor, pProfileToReoffer.get(), GetMediaSessionConfig());
 
     // Delete Session Level Direction Attribute
     pSessionDescriptor->SetDirection(MEDIA_DIRECTION_INVALID);
+
     return bSdpMade;
 }
 
@@ -657,7 +695,7 @@ MEDIA_DIRECTION AudioNego::NegotiateOffer(
         return MEDIA_DIRECTION_INVALID;
     }
 
-    IMS_TRACE_I("NegotiateOffer(): local port[%d]", m_pBaseProfile->GetDataPort(), 0, 0);
+    IMS_TRACE_I("NegotiateOffer(): local port[%d]", (int)m_pBaseProfile->GetDataPort(), 0, 0);
 
     // Make new Offer/Answer model, and copy source profile
     std::shared_ptr<OaModel> pNewOaModel = std::make_shared<OaModel>();

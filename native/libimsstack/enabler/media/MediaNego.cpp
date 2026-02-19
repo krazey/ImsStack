@@ -944,69 +944,93 @@ IMS_BOOL MediaNego::ProcessMediaLine(OUT ISession* pSession, IN MEDIA_CONTENT_TY
     // Send a "FormSdp" to each session
     if (pDescriptorForAudio != IMS_NULL)
     {
-        if (!m_pAudioNego->FormSdp(GetNegoState(), pSession->GetSessionDescriptor(),
-                    pDescriptorForAudio, (MEDIA_DIRECTION)eAudioDirection,
-                    !MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_AUDIO) ? IMS_TRUE
-                                                                                : IMS_FALSE,
-                    bEnforceReofferMode))
+        if (m_pAudioNego != IMS_NULL)
         {
-            IMS_TRACE_E(0, "ProcessMediaLine(): failed to form audio SDP", 0, 0, 0);
-            return IMS_FALSE;
+            if (!m_pAudioNego->FormSdp(GetNegoState(), pSession->GetSessionDescriptor(),
+                        pDescriptorForAudio, (MEDIA_DIRECTION)eAudioDirection,
+                        !MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_AUDIO) ? IMS_TRUE
+                                                                                    : IMS_FALSE,
+                        bEnforceReofferMode))
+            {
+                IMS_TRACE_E(0, "ProcessMediaLine(): failed to form audio SDP", 0, 0, 0);
+                return IMS_FALSE;
+            }
+            else
+            {
+                IMS_SINT32 nTmpAs = m_pAudioNego->GetNegotiatedBandwidth();
+
+                if (nTmpAs > 0)
+                {
+                    nTotalAs = nTmpAs;
+                }
+            }
         }
         else
         {
-            IMS_SINT32 nTmpAs = m_pAudioNego->GetNegotiatedBandwidth();
-
-            if (nTmpAs > 0)
-            {
-                nTotalAs = nTmpAs;
-            }
+            IMS_TRACE_E(0, "ProcessMediaLine(): audio negotiator is NULL", 0, 0, 0);
+            return IMS_FALSE;
         }
     }
 
     if (pDescriptorForVideo != IMS_NULL)
     {
-        if (!m_pVideoNego->FormSdp(GetNegoState(), pSession->GetSessionDescriptor(),
-                    pDescriptorForVideo, (MEDIA_DIRECTION)eVideoDirection,
-                    !MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_VIDEO) ? IMS_TRUE
-                                                                                : IMS_FALSE,
-                    bEnforceReofferMode))
+        if (m_pVideoNego != IMS_NULL)
         {
-            IMS_TRACE_E(0, "ProcessMediaLine(): failed to form video SDP", 0, 0, 0);
-            return IMS_FALSE;
-        }
-
-        if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_VIDEO))
-        {
-            IMS_SINT32 nTmpAS = m_pVideoNego->GetNegotiatedBandwidth();
-
-            if (nTmpAS > 0)
+            if (!m_pVideoNego->FormSdp(GetNegoState(), pSession->GetSessionDescriptor(),
+                        pDescriptorForVideo, (MEDIA_DIRECTION)eVideoDirection,
+                        !MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_VIDEO) ? IMS_TRUE
+                                                                                    : IMS_FALSE,
+                        bEnforceReofferMode))
             {
-                nTotalAs = nTmpAS;
+                IMS_TRACE_E(0, "ProcessMediaLine(): failed to form video SDP", 0, 0, 0);
+                return IMS_FALSE;
             }
+
+            if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_VIDEO))
+            {
+                IMS_SINT32 nTmpAS = m_pVideoNego->GetNegotiatedBandwidth();
+
+                if (nTmpAS > 0)
+                {
+                    nTotalAs = nTmpAS;
+                }
+            }
+        }
+        else
+        {
+            IMS_TRACE_E(0, "ProcessMediaLine(): video negotiator is NULL", 0, 0, 0);
+            return IMS_FALSE;
         }
     }
 
     if (pDescriptorForText != IMS_NULL)
     {
-        if (!m_pTextNego->FormSdp(GetNegoState(), pSession->GetSessionDescriptor(),
-                    pDescriptorForText, (MEDIA_DIRECTION)eTextDirection,
-                    !MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT) ? IMS_TRUE
-                                                                               : IMS_FALSE,
-                    bEnforceReofferMode))
+        if (m_pTextNego != IMS_NULL)
         {
-            IMS_TRACE_E(0, "ProcessMediaLine(): failed to form text SDP", 0, 0, 0);
-            return IMS_FALSE;
-        }
-
-        if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT))
-        {
-            IMS_SINT32 nTmpAS = m_pTextNego->GetNegotiatedBandwidth();
-
-            if (nTmpAS > 0)
+            if (!m_pTextNego->FormSdp(GetNegoState(), pSession->GetSessionDescriptor(),
+                        pDescriptorForText, (MEDIA_DIRECTION)eTextDirection,
+                        !MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT) ? IMS_TRUE
+                                                                                   : IMS_FALSE,
+                        bEnforceReofferMode))
             {
-                nTotalAs = nTmpAS;
+                IMS_TRACE_E(0, "ProcessMediaLine(): failed to form text SDP", 0, 0, 0);
+                return IMS_FALSE;
             }
+
+            if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT))
+            {
+                IMS_SINT32 nTmpAS = m_pTextNego->GetNegotiatedBandwidth();
+
+                if (nTmpAS > 0)
+                {
+                    nTotalAs = nTmpAS;
+                }
+            }
+        }
+        else
+        {
+            IMS_TRACE_E(0, "ProcessMediaLine(): text negotiator is NULL", 0, 0, 0);
+            return IMS_FALSE;
         }
     }
 

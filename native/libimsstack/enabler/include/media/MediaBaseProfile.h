@@ -352,6 +352,31 @@ public:
     inline IMS_SINT32 GetPayloadListSize() const { return m_lstPayload.GetSize(); }
     inline ImsList<std::shared_ptr<BasePayload>>& GetPayloadList() { return m_lstPayload; }
     inline void AddPayload(std::shared_ptr<BasePayload> pPayload) { m_lstPayload.Append(pPayload); }
+    inline IMS_SINT32 FindPayload(
+            const AString& strPayloadType, const IMS_UINT32 nSamplingRate) const
+    {
+        for (IMS_UINT32 i = 0; i < m_lstPayload.GetSize(); ++i)
+        {
+            const auto& pPayload = m_lstPayload.GetAt(i);
+            if (pPayload &&
+                    pPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase(strPayloadType) &&
+                    pPayload->GetRtpMap().GetSamplingRate() == nSamplingRate)
+                return i;
+        }
+        return -1;
+    }
+    inline IMS_BOOL IsPayloadNumberUsed(IN IMS_UINT32 nPayloadNum) const
+    {
+        for (IMS_UINT32 i = 0; i < m_lstPayload.GetSize(); ++i)
+        {
+            const auto& pPayload = m_lstPayload.GetAt(i);
+            if (pPayload && pPayload->GetRtpMap().GetPayloadNumber() == nPayloadNum)
+            {
+                return IMS_TRUE;
+            }
+        }
+        return IMS_FALSE;
+    }
     inline void SetOmitAttributes(IMS_BOOL bOmitAttributes) { m_bOmitAttributes = bOmitAttributes; }
     inline IMS_BOOL IsOmitAttributes() const { return m_bOmitAttributes; }
 

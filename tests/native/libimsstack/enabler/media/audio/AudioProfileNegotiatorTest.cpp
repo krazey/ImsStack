@@ -145,7 +145,7 @@ protected:
     std::unique_ptr<AudioProfile> m_pLocalProfile;
     std::unique_ptr<AudioProfile> m_pPeerProfile;
     std::unique_ptr<AudioProfile> m_pNegotiatedProfile;
-    MockAudioConfiguration m_objMockConfig;
+    testing::NiceMock<MockAudioConfiguration> m_objMockConfig;
 };
 
 TEST_F(AudioProfileNegotiatorTest, NegotiateNullInputsReturnsFalse)
@@ -1747,5 +1747,116 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateAmrWbLocalAmrPeerFmtpNullReturnsFals
 
     // Assert
     // Should fail because AMR-WB (16k) does not match AMR (8k)
+    EXPECT_FALSE(bResult);
+}
+
+TEST_F(AudioProfileNegotiatorTest, NegotiateWithPayloadNumberCollision)
+{
+    // Arrange
+    // Local has AMR-WB on PT 98 and telephone-event on PT 96.
+    m_pLocalProfile->AddPayload(CreateAmrWbPayload(99, 0xFF));
+    m_pLocalProfile->AddPayload(CreateAmrPayload(98, 0xFF));
+    m_pLocalProfile->AddPayload(CreateTelephoneEventPayload(96, 8000));
+
+    // Peer offers AMR-WB with PT 96. This will be negotiated.
+    m_pPeerProfile->AddPayload(CreateAmrPayload(96, 0xFF));
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->SetDataPort(6004);
+
+    // Act: Negotiate in an offer-received (MT) scenario.
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadNumber(), 96);
+
+    // Verify the local profile was updated correctly.
+    AudioProfile::Payload* pLocalAmr = nullptr;
+    AudioProfile::Payload* pLocalTelEvent = nullptr;
+
+    for (IMS_UINT32 i = 0; i < m_pLocalProfile->GetPayloadListSize(); ++i)
+    {
+        auto* p = m_pLocalProfile->GetPayloadAt(i);
+        if (p->GetRtpMap().GetPayloadType().EqualsIgnoreCase("AMR"))
+            pLocalAmr = p;
+        if (p->GetRtpMap().GetPayloadType().EqualsIgnoreCase("telephone-event"))
+            pLocalTelEvent = p;
+    }
+
+    ASSERT_NE(pLocalAmr, nullptr);
+    ASSERT_NE(pLocalTelEvent, nullptr);
+
+    // The local AMR-WB should now have the negotiated payload number.
+    EXPECT_EQ(pLocalAmr->GetRtpMap().GetPayloadNumber(), 96);
+    // The local telephone-event should have been re-numbered to avoid the collision.
+    EXPECT_NE(pLocalTelEvent->GetRtpMap().GetPayloadNumber(), 96);
+}
+
+TEST_F(AudioProfileNegotiatorTest, NegotiateEvsWithPayloadNumberCollision)
+{
+    // Local has EVS on PT 98 and telephone-event on PT 96.
+    m_pLocalProfile->AddPayload(CreateEvsPayload(98, EVS_BW_SWB, 0xFFF));
+    m_pLocalProfile->AddPayload(CreateAmrWbPayload(99, 0xFF));
+    m_pLocalProfile->AddPayload(CreateAmrPayload(97, 0xFF));
+    m_pLocalProfile->AddPayload(CreateTelephoneEventPayload(96, 8000));
+
+    // Peer offers EVS with PT 96. This will be negotiated.
+    m_pPeerProfile->AddPayload(CreateEvsPayload(96, EVS_BW_SWB, 0xFFF));
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->SetDataPort(6004);
+
+    // Act: Negotiate in an offer-received (MT) scenario.
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadNumber(), 96);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadType(), "EVS");
+
+    // Verify the local profile was updated correctly.
+    AudioProfile::Payload* pLocalEvs = nullptr;
+    AudioProfile::Payload* pLocalTelEvent = nullptr;
+
+    for (IMS_UINT32 i = 0; i < m_pLocalProfile->GetPayloadListSize(); ++i)
+    {
+        auto* p = m_pLocalProfile->GetPayloadAt(i);
+        if (p->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
+            pLocalEvs = p;
+        if (p->GetRtpMap().GetPayloadType().EqualsIgnoreCase("telephone-event"))
+            pLocalTelEvent = p;
+    }
+
+    ASSERT_NE(pLocalEvs, nullptr);
+    ASSERT_NE(pLocalTelEvent, nullptr);
+
+    // The local EVS codec should now have the negotiated payload number.
+    EXPECT_EQ(pLocalEvs->GetRtpMap().GetPayloadNumber(), 96);
+    // The local telephone-event should have been re-numbered to avoid the collision.
+    EXPECT_NE(pLocalTelEvent->GetRtpMap().GetPayloadNumber(), 96);
+}
+
+TEST_F(AudioProfileNegotiatorTest, NegotiateWithPayloadNumberCollisionExhausted)
+{
+    // Arrange: Exhaust all dynamic payload numbers (96-127) in the local profile.
+    for (IMS_UINT32 pt = 96; pt <= 127; ++pt)
+    {
+        m_pLocalProfile->AddPayload(CreateAmrPayload(pt, 0xFF));
+    }
+
+    // Peer offers a new payload with a number that is already used locally.
+    // Since all 96-127 are used, re-numbering should fail.
+    m_pPeerProfile->AddPayload(CreateAmrWbPayload(96, 0xFF));
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->SetDataPort(6004);
+
+    // Act: Negotiate in an offer-received (MT) scenario.
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+    // Assert: Negotiation should fail because no PT is available for re-numbering.
     EXPECT_FALSE(bResult);
 }
