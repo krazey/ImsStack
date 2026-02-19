@@ -15,12 +15,13 @@
  */
 package com.android.imsstack.system;
 
-import android.annotation.NonNull;
 import android.os.Parcel;
 import android.telephony.ims.ProvisioningManager;
 import android.telephony.ims.stub.ImsConfigImplBase;
 import android.util.ArraySet;
 import android.util.SparseArray;
+
+import androidx.annotation.NonNull;
 
 import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.base.MSimUtils;
@@ -36,6 +37,8 @@ import com.android.imsstack.jni.JniImsProxy;
 import com.android.imsstack.jni.JniObjectId;
 import com.android.imsstack.jni.JniSystemListener;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.IndentingPrintWriter;
+import com.android.imsstack.util.LocalLog;
 import com.android.imsstack.util.MessageExecutor;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -56,6 +59,7 @@ public class SystemInterface implements JniSystemListener {
             Map.entry(SystemConstants.GET_BATTERY_LEVEL, "GET_BATTERY_LEVEL"),
             Map.entry(SystemConstants.IS_EMERGENCY_NUMBER, "IS_EMERGENCY_NUMBER"),
             Map.entry(SystemConstants.GET_TTY_MODE, "GET_TTY_MODE"),
+            Map.entry(SystemConstants.GET_RTT_MODE, "GET_RTT_MODE"),
             Map.entry(SystemConstants.IS_IMS_VOICE_CALL_SUPPORTED, "IS_IMS_VOICE_CALL_SUPPORTED"),
             Map.entry(SystemConstants.REQUEST_NETWORK, "REQUEST_NETWORK"),
             Map.entry(SystemConstants.RELEASE_NETWORK, "RELEASE_NETWORK"),
@@ -72,6 +76,8 @@ public class SystemInterface implements JniSystemListener {
             Map.entry(SystemConstants.GET_ROAMING_STATE, "GET_ROAMING_STATE"),
             Map.entry(SystemConstants.GET_SERVICE_STATE, "GET_SERVICE_STATE"),
             Map.entry(SystemConstants.IS_EMERGENCY_ONLY, "IS_EMERGENCY_ONLY"),
+            Map.entry(SystemConstants.IS_IMS_EMERGENCY_CALL_SUPPORTED,
+                    "IS_IMS_EMERGENCY_CALL_SUPPORTED"),
             Map.entry(SystemConstants.IS_MOBILE_DATA_ENABLED, "IS_MOBILE_DATA_ENABLED"),
             Map.entry(SystemConstants.GET_VOICE_SERVICE_STATE, "GET_VOICE_SERVICE_STATE"),
             Map.entry(SystemConstants.GET_VOICE_ROAMING_TYPE, "GET_VOICE_ROAMING_TYPE"),
@@ -135,10 +141,12 @@ public class SystemInterface implements JniSystemListener {
             Map.entry(SystemConstants.TRIGGER_EPS_FALLBACK, "TRIGGER_EPS_FALLBACK"),
             Map.entry(SystemConstants.SET_TRAFFIC_PRIORITY, "SET_TRAFFIC_PRIORITY"),
             Map.entry(SystemConstants.IS_CROSS_SIM_REDIALING_AVAILABLE,
-                    "IS_CROSS_SIM_REDIALING_AVAILABLE"));
+                    "IS_CROSS_SIM_REDIALING_AVAILABLE"),
+            Map.entry(SystemConstants.LOG_SIP_MESSAGE, "LOG_SIP_MESSAGE"));
 
     private static SystemInterface sSystemInterface = null;
     private long mNativeObject = 0;
+    private final LocalLog mSystemCallLog = new LocalLog(100);
     private final SparseArray<ImsSystem> mSystems = new SparseArray<>(2);
     private final MessageExecutor mDefaultExecutor;
     private DefaultSystemCallInterface mDefaultSystemCall;
@@ -414,13 +422,26 @@ public class SystemInterface implements JniSystemListener {
         return JniImsProxy.RESULT_FAILURE;
     }
 
+    /**
+     * Dumps this instance into a readable format for dumpsys usage.
+     *
+     * @param pw A {@link IndentingPrintWriter} object used to write the formatted logs.
+     */
+    public void dump(@NonNull IndentingPrintWriter pw) {
+        pw.println("SystemInterface:");
+        pw.increaseIndent();
+        pw.println("System call logs:");
+        pw.increaseIndent();
+        mSystemCallLog.dump(pw);
+        pw.decreaseIndent();
+        pw.decreaseIndent();
+    }
+
     private void handleMessage(Parcel in, FileDescriptor fd, Parcel out) {
         int slotId = in.readInt();
         int method = in.readInt();
 
-        if (ImsLog.DBG) {
-            ImsLog.d(slotId, "ImsSystem: " + METHOD_TO_STRING.get(method));
-        }
+        mSystemCallLog.log("S" + slotId + ": " + METHOD_TO_STRING.get(method));
 
         if (!handleDefaultSystemCall(method, in, out)) {
             // Initializes the data position and consumes the slot and method parameter

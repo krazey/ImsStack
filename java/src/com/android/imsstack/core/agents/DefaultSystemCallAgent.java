@@ -18,6 +18,7 @@ package com.android.imsstack.core.agents;
 
 import android.telephony.TelephonyManager;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.imsstack.base.AppContext;
@@ -25,6 +26,7 @@ import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.system.DefaultSystemCallInterface;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.ImsUtils;
+import com.android.imsstack.util.IndentingPrintWriter;
 
 /**
  * An agent class to handle the default system calls.
@@ -226,5 +228,14 @@ public final class DefaultSystemCallAgent implements DefaultSystemCallInterface 
         }
 
         return false;
+    }
+
+    /**
+     * Dumps this instance into a readable format for dumpsys usage.
+     *
+     * @param pw A {@link IndentingPrintWriter} object used to write the formatted logs.
+     */
+    public void dump(@NonNull IndentingPrintWriter pw) {
+        SystemInterface.getInstance().dump(pw);
     }
 }

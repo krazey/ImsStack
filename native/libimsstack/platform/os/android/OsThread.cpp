@@ -171,8 +171,11 @@ PUBLIC VIRTUAL IMS_BOOL OsThread::PostMessageI(IN ImsMessage& objMsg)
 
     if (SendSignal())
     {
-        IMS_TRACE_D("PostMessageI: msg=%u, p1=%" PFLS_u ", p2=%" PFLS_u, objMsg.GetName(),
-                objMsg.nWparam, objMsg.nLparam);
+        if (objMsg.GetName() >= IMS_MSG_USER)
+        {
+            IMS_TRACE_D("PostMessageI: msg=%u, p1=%" PFLS_u ", p2=%" PFLS_u, objMsg.GetName(),
+                    objMsg.nWparam, objMsg.nLparam);
+        }
     }
 
     return nExpectedIndex == nAddedIndex;
