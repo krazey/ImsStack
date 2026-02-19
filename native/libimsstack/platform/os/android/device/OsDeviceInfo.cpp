@@ -37,8 +37,8 @@ PUBLIC VIRTUAL IMS_BOOL OsDeviceInfo::GetDeviceId(IN IMS_SINT32 nSlotId, OUT ASt
         strId = AString::ConstNull();
     }
 
-    IMS_TRACE_D("SubsInfo :: deviceId=%s",
-            IMS_UTIL_SYS_PROP_IS_DEBUG_MODE() ? strId.GetStr() : "xxx", 0, 0);
+    IMS_TRACE_D("SubsInfo: deviceId=%s", IMS_UTIL_SYS_PROP_IS_DEBUG_MODE() ? strId.GetStr() : "***",
+            0, 0);
 
     return (nResult == 1);
 }

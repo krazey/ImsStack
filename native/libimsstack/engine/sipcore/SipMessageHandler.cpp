@@ -78,11 +78,10 @@ PRIVATE VIRTUAL void SipMessageHandler::TransportMessage_PacketReceived(IN IMS_S
         SipStack::FreeMessage(pSipMsg);
 
         IMS_TRACE_E(SipStack::GetLastError(),
-                "DECODING FAILURE : The incoming packet MAY be a malformed SIP message", 0, 0, 0);
+                "DECODING FAILURE: Incoming packet MAY be a malformed SIP message", 0, 0, 0);
         return;
     }
 
-    /// TRACE_DEBUG ....
     SipStack::DisplayUnknownHeaders(pSipMsg);
 
     if (SipStack::GetBadHeaderCount(pSipMsg) > 0)
@@ -94,7 +93,7 @@ PRIVATE VIRTUAL void SipMessageHandler::TransportMessage_PacketReceived(IN IMS_S
             SipStack::FreeMessage(pSipMsg);
 
             IMS_TRACE_E(SipStack::GetLastError(),
-                    "DECODING FAILURE : Malformed SIP message - mandatory headers", 0, 0, 0);
+                    "DECODING FAILURE: Malformed SIP message - mandatory headers", 0, 0, 0);
             return;
         }
     }
@@ -191,7 +190,7 @@ IMS_SINT32 SipMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN ::SipMessa
                 if ((nPort == Sip::PORT_UNSPECIFIED) && SipStack::IsLastErrorNoExist())
                 {
                     nPort = SipConfigProxy::GetPort(nSlotId);
-                    IMS_TRACE_D("ConnectionNotifier :: port(%d) from config.", nPort, 0, 0);
+                    IMS_TRACE_D("ConnectionNotifier: port(%d) from config.", nPort, 0, 0);
                 }
             }
 
@@ -205,7 +204,7 @@ IMS_SINT32 SipMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN ::SipMessa
 
                 if (piListener != IMS_NULL)
                 {
-                    IMS_TRACE_D("ConnectionNotifier found by (%s, %d)",
+                    IMS_TRACE_D("ConnectionNotifier found by (%s|%d)",
                             SipDebug::GetIp(objTAddr.GetIpAddress()), objTAddr.GetPort(), 0);
                 }
             }
@@ -217,7 +216,7 @@ IMS_SINT32 SipMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN ::SipMessa
 
     if (SystemConfig::IsMultiSimEnabled())
     {
-        IMS_TRACE_D("Incoming SIP request on SIM%d ...", nSlotId, 0, 0);
+        IMS_TRACE_D("Incoming SIP request on slot%d", nSlotId, 0, 0);
     }
 
     RcPtr<SipServerTransactionState> pStState =
@@ -291,7 +290,7 @@ IMS_SINT32 SipMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN ::SipMessa
 
     if (piListener == IMS_NULL)
     {
-        IMS_TRACE_D("NO LISTENER :: REQUEST MESSAGE IS DISCARDED", 0, 0, 0);
+        IMS_TRACE_D("NO LISTENER - MESSAGE DISCARDED", 0, 0, 0);
 
         // Update the transport information
         pStState->SetTransportTuple(
@@ -318,7 +317,7 @@ IMS_SINT32 SipMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN ::SipMessa
 
                 if (objStatusCode != SipStatusCode::SC_404)
                 {
-                    IMS_TRACE_D("SIPRoutingReject :: Status code is overwritten (404 >> %d)",
+                    IMS_TRACE_D("SipRoutingReject: Status code is overwritten (404 >> %d)",
                             objStatusCode.ToInt(), 0, 0);
                 }
             }
@@ -357,7 +356,7 @@ IMS_SINT32 SipMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN ::SipMessa
 
                 if (objStatusCode != SipStatusCode::SC_400)
                 {
-                    IMS_TRACE_D("SIPRoutingReject :: Status code is overwritten (400 >> %d)",
+                    IMS_TRACE_D("SipRoutingReject: Status code is overwritten (400 >> %d)",
                             objStatusCode.ToInt(), 0, 0);
                 }
             }
@@ -373,8 +372,8 @@ IMS_SINT32 SipMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN ::SipMessa
     // If IPSec is applied, check the validity of source IP and port.
     if (!CheckIpSecValidityForRequest(nSlotId, pStState.Get(), objNearEnd, objFarEnd))
     {
-        // Discard the incoming request...
-        IMS_TRACE_D("IPSEC :: Discarded...", 0, 0, 0);
+        // Discard the incoming request.
+        IMS_TRACE_D("IPSEC: Discarded", 0, 0, 0);
         pStState->Abort();
         return SipPrivate::MESSAGE_DISCARDED;
     }
@@ -410,8 +409,8 @@ IMS_SINT32 SipMessageHandler::NotifyResponse(IN IMS_SINT32 nSlotId, IN ::SipMess
     // If IPSec is applied, check the validity of source IP and port.
     if (!CheckIpSecValidityForResponse(nSlotId, pSipMsg, objNearEnd, objFarEnd))
     {
-        // Discard the incoming response...
-        IMS_TRACE_D("IPSEC :: Discarded...", 0, 0, 0);
+        // Discard the incoming response.
+        IMS_TRACE_D("IPSEC: Discarded", 0, 0, 0);
         return SipPrivate::MESSAGE_DISCARDED;
     }
 
@@ -442,7 +441,7 @@ IMS_BOOL SipMessageHandler::CheckIpSecValidityForRequest(IN IMS_SINT32 nSlotId,
     {
         if (!IsIpSecSaMatched(nSlotId, objNearEnd, objFarEnd))
         {
-            IMS_TRACE_D("IPSEC :: SIP request is dropped by non-SA", 0, 0, 0);
+            IMS_TRACE_D("IPSEC: SIP request is dropped by non-SA", 0, 0, 0);
             return IMS_FALSE;
         }
     }
@@ -459,7 +458,7 @@ IMS_BOOL SipMessageHandler::CheckIpSecValidityForResponse(IN IMS_SINT32 nSlotId,
     {
         if (!IsIpSecSaMatched(nSlotId, objNearEnd, objFarEnd))
         {
-            IMS_TRACE_D("IPSEC :: SIP response is dropped by non-SA", 0, 0, 0);
+            IMS_TRACE_D("IPSEC: SIP response is dropped by non-SA", 0, 0, 0);
             return IMS_FALSE;
         }
     }
@@ -487,8 +486,8 @@ IMS_BOOL SipMessageHandler::IsIpSecSaMatched(IN IMS_SINT32 nSlotId,
         if ((objIpSecSa.GetPortPc() != objFarEnd.GetPort()) &&
                 (objIpSecSa.GetPortPs() != objFarEnd.GetPort()))
         {
-            IMS_TRACE_I("IPSec :: PortP is mismatched; pc(%d), ps(%d), far(%d)",
-                    objIpSecSa.GetPortPc(), objIpSecSa.GetPortPs(), objFarEnd.GetPort());
+            IMS_TRACE_I("IPSEC: PortP mismatched: pc(%d), ps(%d), far(%d)", objIpSecSa.GetPortPc(),
+                    objIpSecSa.GetPortPs(), objFarEnd.GetPort());
             continue;
         }
 
@@ -496,11 +495,11 @@ IMS_BOOL SipMessageHandler::IsIpSecSaMatched(IN IMS_SINT32 nSlotId,
         {
             if (pConfigHelper->IsRoutingInfoHiddenInLog())
             {
-                IMS_TRACE_I("IPSec :: IPP is mismatched", 0, 0, 0);
+                IMS_TRACE_I("IPSEC: IPP mismatched", 0, 0, 0);
             }
             else
             {
-                IMS_TRACE_I("IPSec :: IPP is mismatched; ipp(%s), far(%s)",
+                IMS_TRACE_I("IPSEC: IPP mismatched: ipp(%s), far(%s)",
                         SipDebug::GetStr1(objIpSecSa.GetIpAddrP().ToString(), 5).GetStr(),
                         SipDebug::GetIp(objFarEnd.GetIpAddress()), 0);
             }
@@ -510,8 +509,8 @@ IMS_BOOL SipMessageHandler::IsIpSecSaMatched(IN IMS_SINT32 nSlotId,
         if ((objIpSecSa.GetPortUc() != objNearEnd.GetPort()) &&
                 (objIpSecSa.GetPortUs() != objNearEnd.GetPort()))
         {
-            IMS_TRACE_I("IPSec :: PortU is mismatched; uc(%d), us(%d), near(%d)",
-                    objIpSecSa.GetPortPc(), objIpSecSa.GetPortPs(), objNearEnd.GetPort());
+            IMS_TRACE_I("IPSEC: PortU mismatched: uc(%d), us(%d), near(%d)", objIpSecSa.GetPortPc(),
+                    objIpSecSa.GetPortPs(), objNearEnd.GetPort());
             continue;
         }
 

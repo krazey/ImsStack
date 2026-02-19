@@ -37,7 +37,8 @@ SipTxn::SipTxn() :
         m_nMaxDuration(SIP_ZERO),
         m_nDurationExpired(SIP_ZERO),
         m_nCurrentDuration(SIP_ZERO),
-        m_bRprTxnTerminated(SIP_FALSE)
+        m_bRprTxnTerminated(SIP_FALSE),
+        m_bAckReceived(SIP_FALSE)
 {
 }
 
@@ -55,7 +56,8 @@ SipTxn::SipTxn(IN SIP_INT32 eTxnType, IN const SipTxnKey* pTxnKey, IN const SipM
         m_nMaxDuration(SIP_ZERO),
         m_nDurationExpired(SIP_ZERO),
         m_nCurrentDuration(SIP_ZERO),
-        m_bRprTxnTerminated(SIP_FALSE)
+        m_bRprTxnTerminated(SIP_FALSE),
+        m_bAckReceived(SIP_FALSE)
 {
     m_eTxnType = eTxnType;
     m_pTxnKey = new SipTxnKey(pTxnKey, pnError);
@@ -468,7 +470,6 @@ SIP_BOOL SipTxn::PrepareACK(SipMessage* pSipRespMsg, /* IN */
         }
     }
 
-    /* ###TODO Setting of Msg Body in Response currently not supported */
     *ppSipAckMsg = pSipAckMsg;
     return SIP_TRUE;
 }

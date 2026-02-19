@@ -26,7 +26,6 @@ class AString;
 class IReference;
 class ISession;
 class ISipClientConnection;
-class ISipConnection;
 class ISipServerConnection;
 enum class CallType;
 enum class MtcAosState;
@@ -82,12 +81,7 @@ public:
     MOCK_METHOD(CallStateName, UssiTerminated, (IN ISession* piSession), (override));
     MOCK_METHOD(CallStateName, SendUssd, (IN const AString& strUssd), (override));
     MOCK_METHOD(CallStateName, UssiInfoReceived,
-            (IN ISession* piSession, IN ISipServerConnection* piSipServerConnection), (override));
-    MOCK_METHOD(CallStateName, NotifyResponseToUssiInfo,
-            (IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc), (override));
-    MOCK_METHOD(CallStateName, NotifyErrorToUssiInfo,
-            (IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage),
-            (override));
+            (IN ISession * piSession, IN ISipServerConnection* piSipServerConnection), (override));
     MOCK_METHOD(CallStateName, SessionAlerting, (IN ISession* piSession), (override));
     MOCK_METHOD(CallStateName, SessionReferenceReceived,
             (IN ISession* piSession, IN IReference* piReference), (override));
@@ -130,11 +124,6 @@ public:
             (IN ISession* piSession, IN QosLossPolicy eNextAction), (override));
     MOCK_METHOD(CallStateName, OnInternalFailure, (), (override));
     MOCK_METHOD(CallStateName, OnAttached, (), (override));
-    MOCK_METHOD(CallStateName, ClientConnection_NotifyResponse,
-            (IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc), (override));
-    MOCK_METHOD(CallStateName, Error_NotifyError,
-            (IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage),
-            (override));
     MOCK_METHOD(CallStateName, OnReceivingMediaDataStarted,
             (IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType), (override));
     MOCK_METHOD(CallStateName, OnReceivingMediaDataFailed,

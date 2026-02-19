@@ -34,14 +34,11 @@ ConferenceManager::ConferenceManager(IN IMtcContext& objContext) :
         m_objDestroyer(ObjectAsyncDestroyer<ConferenceController>()),
         m_objCallConnectionIdManager(objContext.GetCallConnectionIdManager())
 {
-    IMS_TRACE_D("+ConferenceManager", 0, 0, 0);
 }
 
 PUBLIC
 ConferenceManager::~ConferenceManager()
 {
-    IMS_TRACE_D("~ConferenceManager", 0, 0, 0);
-
     for (IMS_UINT32 i = 0; i < m_objControllers.GetSize(); i++)
     {
         ConferenceController* pController = m_objControllers.GetValueAt(i);
@@ -54,7 +51,6 @@ ConferenceManager::~ConferenceManager()
 PUBLIC
 void ConferenceManager::OnClosed(IN ConferenceController* pController)
 {
-    IMS_TRACE_D("OnClosed", 0, 0, 0);
     ReleaseController(pController);
 }
 

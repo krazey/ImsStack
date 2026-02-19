@@ -55,7 +55,8 @@ EctReference::EctReference(IN IMtcContext& objContext, IN CallKey nTransfereeKey
 PUBLIC EctReference::~EctReference()
 {
     IMS_TRACE_I("~EctReference", 0, 0, 0);
-    m_objContext.GetSipInterfaceFactory().GetIReferenceHolder()->ReleaseIReference(m_piReference);
+    m_objContext.GetSipInterfaceFactory().GetIReferenceHolder()->ReleaseIReference(
+            m_piReference, true);
 }
 
 PUBLIC VIRTUAL void EctReference::ReferenceDelivered(IN IReference* piReference)
@@ -161,8 +162,7 @@ IMS_RESULT EctReference::SendRefer(
         return IMS_FAILURE;
     }
 
-    const IMtcCall* piTransfereeCall =
-            m_objContext.GetCallManager().GetCallByCallKey(m_nTransfereeKey);
+    IMtcCall* piTransfereeCall = m_objContext.GetCallManager().GetCallByCallKey(m_nTransfereeKey);
     if (piTransfereeCall->GetKey() == IMtcCall::CALL_KEY_INVALID)
     {
         IMS_TRACE_E(0, "transferee call is NullCall", 0, 0, 0);
@@ -170,12 +170,8 @@ IMS_RESULT EctReference::SendRefer(
     }
 
     m_piReference = m_objContext.GetSipInterfaceFactory().GetIReferenceHolder()->GetIReference(
-            &m_objContext.GetCallManager()
-                     .GetCallByCallKey(m_nTransfereeKey)
-                     ->GetCallContext()
-                     .GetSession()
-                     ->GetISession(),
-            strReferToUri, METHOD_INVITE);
+            &piTransfereeCall->GetCallContext().GetSession()->GetISession(), strReferToUri,
+            METHOD_INVITE);
 
     if (m_piReference == IMS_NULL)
     {

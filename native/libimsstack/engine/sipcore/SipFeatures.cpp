@@ -26,12 +26,6 @@ PUBLIC GLOBAL IMS_BOOL SipFeatures::IsHeaderSessionIdRequired(IN IMS_SINT32 nSlo
     return SipConfigProxy::IsSessionIdHeaderSupported(nSlotId);
 }
 
-PUBLIC GLOBAL IMS_BOOL SipFeatures::IsHostPartValidationRequiredForIncomingRequestRouting(
-        IN IMS_SINT32 /* nSlotId*/)
-{
-    return IMS_FALSE;
-}
-
 PUBLIC GLOBAL IMS_BOOL SipFeatures::IsMultipleDialogUsagesRequiredForNonSharedDialog(
         IN IMS_SINT32 /* nSlotId*/)
 {

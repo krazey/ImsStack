@@ -171,7 +171,7 @@ private:
     };
 
     IMS_SINT32 m_nTimerSupportedOnRemoteEnd;
-    // SipConfigV :: SESSION_HEADER_XXX
+    // SipConfigV::SESSION_HEADER_XXX
     IMS_SINT32 m_nSipHeaders;
     Service* m_pService;
 };

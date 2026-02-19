@@ -29,6 +29,7 @@ class MediaConfiguration;
 class MediaEnvironment;
 class MediaProfileGenerator;
 class MediaSdpGenerator;
+class MediaSessionConfig;
 
 class BaseNego : public ImsSlot
 {
@@ -226,6 +227,7 @@ protected:
             IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bDisable);
     virtual IMS_BOOL CheckArgument(IN ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection);
+    const MediaSessionConfig* GetMediaSessionConfig() const;
     virtual IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MEDIA_DIRECTION eDirection,
             IN IMS_BOOL bDisable) = 0;

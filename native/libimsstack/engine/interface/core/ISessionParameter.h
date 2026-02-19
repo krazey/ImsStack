@@ -16,8 +16,10 @@
 #ifndef INTERFACE_SESSION_PARAMETER_H_
 #define INTERFACE_SESSION_PARAMETER_H_
 
-#include "offeranswer/SdpMediaParameter.h"
-#include "offeranswer/SdpSessionParameter.h"
+#include "ImsTypeDef.h"
+
+class SdpMediaParameter;
+class SdpSessionParameter;
 
 /**
  * @brief This class provides an interface to access SDP parameters.

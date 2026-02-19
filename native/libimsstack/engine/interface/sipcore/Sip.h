@@ -46,7 +46,7 @@ public:
         TRANSPORT_MAX,
     };
 
-    /// MULTI_REG_TRANSPORT :: Extension for transport protocol selection\n
+    /// MULTI_REG_TRANSPORT: Extension for transport protocol selection\n
     /// It will be provided by the additional parameters when creating an SCN.
     /// Parameter - name: "transport_ext"
     enum

@@ -38,8 +38,6 @@ PROTECTED MediaManager::MediaManager(IN CONST AString& strName, IN IMS_SINT32 nS
         m_lstSessionNode(ImsList<std::shared_ptr<MediaSessionNode>>()),
         m_pResourceMngr(std::make_shared<MediaResourceManager>())
 {
-    IMS_TRACE_D("+MediaManager() thread[%s], nSlotId[%d]", strName.GetStr(), nSlotId, 0);
-
     JniEnablerConnector::GetInstance().SetNativeEnabler(
             m_nSlotId, EnablerType::MEDIA_SESSION, DYNAMIC_CAST(INativeEnabler*, this));
 }
@@ -231,28 +229,7 @@ PROTECTED
 VIRTUAL void MediaManager::HandleMessage(
         IN IMS_SINT32 nMsg, IN IMS_UINTP wParam, IN IMS_SINTP lParam)
 {
-    IMS_TRACE_I("HandleMessage(): nMsg[%d]", nMsg, 0, 0);
-
-    switch (nMsg)
-    {
-        case IJniMedia::NOTIFY_QOS_INFO:
-        {
-            ImsMediaMsgQosParam* pQosNotifyParam = reinterpret_cast<ImsMediaMsgQosParam*>(lParam);
-
-            if (pQosNotifyParam != IMS_NULL)
-            {
-                IMS_SINTP nCallKey = wParam;
-                MediaSession* pSession = GetSession(nCallKey);
-                if (pSession != IMS_NULL)
-                {
-                    IMS_TRACE_I("HandleMessage(): QOS - CallKey[%d], nPort[%d], bResult[%d]",
-                            nCallKey, pQosNotifyParam->m_nPort, pQosNotifyParam->m_bResult);
-                    pSession->SendMessage(nMsg, lParam);
-                }
-            }
-        }
-        break;
-    }
+    SendMessage(nMsg, wParam, lParam);
 }
 
 PROTECTED
@@ -324,7 +301,6 @@ PROTECTED VIRTUAL IMS_BOOL MediaManager::SendMessageToSessions(
 
     if (pMediaSession != IMS_NULL)
     {
-        IMS_TRACE_I("SendMessageToSessions(): nMsg[%d], CallKey[%d]", nMsg, nCallKey, 0);
         return pMediaSession->SendMessage(nMsg, pParam);
     }
 

@@ -33,38 +33,176 @@ class SdpPreconditionHelperTest : public ::testing::Test
 public:
     inline SdpPreconditionHelperTest() :
             objISession(),
-            objIMediaDescriptor(),
             objQosStatusTable(),
+            lstMedias(),
+            objAudioMedia(),
+            objAudioMediaDescriptor(),
+            objAudioSdpMedia(),
+            objVideoMedia(),
+            objVideoMediaDescriptor(),
+            objVideoSdpMedia(),
             pSdpPreconditionHelper(IMS_NULL)
     {
     }
 
 public:
     MockISession objISession;
-    MockIMediaDescriptor objIMediaDescriptor;
     MockQosStatusTable objQosStatusTable;
+    ImsList<IMedia*> lstMedias;
+    MockIMedia objAudioMedia;
+    MockIMediaDescriptor objAudioMediaDescriptor;
+    SdpMedia objAudioSdpMedia;
+    MockIMedia objVideoMedia;
+    MockIMediaDescriptor objVideoMediaDescriptor;
+    SdpMedia objVideoSdpMedia;
     SdpPreconditionHelper* pSdpPreconditionHelper;
 
 protected:
-    virtual void SetUp() override { pSdpPreconditionHelper = new SdpPreconditionHelper(); }
+    virtual void SetUp() override
+    {
+        ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_CREATED));
+
+        ON_CALL(objAudioMedia, GetState()).WillByDefault(Return(IMedia::STATE_ACTIVE));
+        ON_CALL(objAudioMedia, GetUpdateState()).WillByDefault(Return(IMedia::UPDATE_UNCHANGED));
+        ON_CALL(objAudioMedia, GetMediaDescriptor())
+                .WillByDefault(Return(&objAudioMediaDescriptor));
+        ON_CALL(objAudioMediaDescriptor, GetMediaDescriptionExAsLocal())
+                .WillByDefault(Return(&objAudioSdpMedia));
+        objAudioSdpMedia.SetType(SdpMedia::TYPE_AUDIO);
+
+        ON_CALL(objVideoMedia, GetState()).WillByDefault(Return(IMedia::STATE_ACTIVE));
+        ON_CALL(objVideoMedia, GetUpdateState()).WillByDefault(Return(IMedia::UPDATE_UNCHANGED));
+        ON_CALL(objVideoMedia, GetMediaDescriptor())
+                .WillByDefault(Return(&objVideoMediaDescriptor));
+        ON_CALL(objVideoMediaDescriptor, GetMediaDescriptionExAsLocal())
+                .WillByDefault(Return(&objVideoSdpMedia));
+        objVideoSdpMedia.SetType(SdpMedia::TYPE_VIDEO);
+
+        pSdpPreconditionHelper = new SdpPreconditionHelper();
+    }
 
     virtual void TearDown() override { delete pSdpPreconditionHelper; }
 };
 
-TEST_F(SdpPreconditionHelperTest, FormPreconditionSdpWithReservedLocalResource)
+TEST_F(SdpPreconditionHelperTest, FormPreconditionSdpDoesNothingIfSessionIsNull)
 {
-    ImsList<IMedia*> lstMedias;
-    MockIMedia objAudioMedia;
+    EXPECT_CALL(objAudioMediaDescriptor, SetPrecondition(SdpAttribute::CURR, _)).Times(0);
+    EXPECT_CALL(objAudioMediaDescriptor, SetPrecondition(SdpAttribute::DES, _)).Times(0);
+
+    pSdpPreconditionHelper->FormPreconditionSdp(IMS_NULL, &objQosStatusTable, IMS_FALSE);
+}
+
+TEST_F(SdpPreconditionHelperTest, FormPreconditionSdpDoesNothingIfStatusTableIsNull)
+{
+    EXPECT_CALL(objAudioMediaDescriptor, SetPrecondition(SdpAttribute::CURR, _)).Times(0);
+    EXPECT_CALL(objAudioMediaDescriptor, SetPrecondition(SdpAttribute::DES, _)).Times(0);
+
+    pSdpPreconditionHelper->FormPreconditionSdp(&objISession, IMS_NULL, IMS_FALSE);
+}
+
+TEST_F(SdpPreconditionHelperTest, FormPreconditionSdpDoesNothingIfMediasIsEmpty)
+{
+    EXPECT_CALL(objAudioMediaDescriptor, SetPrecondition(SdpAttribute::CURR, _)).Times(0);
+    EXPECT_CALL(objAudioMediaDescriptor, SetPrecondition(SdpAttribute::DES, _)).Times(0);
+
+    pSdpPreconditionHelper->FormPreconditionSdp(&objISession, &objQosStatusTable, IMS_FALSE);
+}
+
+TEST_F(SdpPreconditionHelperTest, FormPreconditionSdpDoesNothingIfMediaIsNull)
+{
+    lstMedias.Append(IMS_NULL);
+    ON_CALL(objISession, GetMedia()).WillByDefault(Return(lstMedias));
+
+    EXPECT_CALL(objAudioMediaDescriptor, SetPrecondition(SdpAttribute::CURR, _)).Times(0);
+    EXPECT_CALL(objAudioMediaDescriptor, SetPrecondition(SdpAttribute::DES, _)).Times(0);
+
+    pSdpPreconditionHelper->FormPreconditionSdp(&objISession, &objQosStatusTable, IMS_FALSE);
+}
+
+TEST_F(SdpPreconditionHelperTest, FormPreconditionSdpDoesNothingIfMediaStateIsDeleted)
+{
+    ON_CALL(objAudioMedia, GetState()).WillByDefault(Return(IMedia::STATE_DELETED));
     lstMedias.Append(&objAudioMedia);
     ON_CALL(objISession, GetMedia()).WillByDefault(Return(lstMedias));
-    ON_CALL(objAudioMedia, GetState()).WillByDefault(Return(IMedia::STATE_ACTIVE));
-    ON_CALL(objAudioMedia, GetUpdateState()).WillByDefault(Return(IMedia::UPDATE_UNCHANGED));
-    ON_CALL(objAudioMedia, GetMediaDescriptor()).WillByDefault(Return(&objIMediaDescriptor));
 
-    SdpMedia objSdpMedia;
-    objSdpMedia.SetType(SdpMedia::TYPE_AUDIO);
-    ON_CALL(objIMediaDescriptor, GetMediaDescriptionExAsLocal())
-            .WillByDefault(Return(&objSdpMedia));
+    EXPECT_CALL(objAudioMediaDescriptor, SetPrecondition(SdpAttribute::CURR, _)).Times(0);
+    EXPECT_CALL(objAudioMediaDescriptor, SetPrecondition(SdpAttribute::DES, _)).Times(0);
+
+    pSdpPreconditionHelper->FormPreconditionSdp(&objISession, &objQosStatusTable, IMS_FALSE);
+}
+
+TEST_F(SdpPreconditionHelperTest, FormPreconditionSdpDoesNothingIfMediaDescriptorIsNull)
+{
+    ON_CALL(objAudioMedia, GetMediaDescriptor()).WillByDefault(Return(IMS_NULL));
+    lstMedias.Append(&objAudioMedia);
+    ON_CALL(objISession, GetMedia()).WillByDefault(Return(lstMedias));
+
+    EXPECT_CALL(objAudioMediaDescriptor, SetPrecondition(SdpAttribute::CURR, _)).Times(0);
+    EXPECT_CALL(objAudioMediaDescriptor, SetPrecondition(SdpAttribute::DES, _)).Times(0);
+
+    pSdpPreconditionHelper->FormPreconditionSdp(&objISession, &objQosStatusTable, IMS_FALSE);
+}
+
+TEST_F(SdpPreconditionHelperTest, FormPreconditionSdpDoesNothingIfLocalSdpIsNull)
+{
+    ON_CALL(objAudioMediaDescriptor, GetMediaDescriptionExAsLocal())
+            .WillByDefault(Return(IMS_NULL));
+    lstMedias.Append(&objAudioMedia);
+    ON_CALL(objISession, GetMedia()).WillByDefault(Return(lstMedias));
+
+    EXPECT_CALL(objAudioMediaDescriptor, SetPrecondition(SdpAttribute::CURR, _)).Times(0);
+    EXPECT_CALL(objAudioMediaDescriptor, SetPrecondition(SdpAttribute::DES, _)).Times(0);
+
+    pSdpPreconditionHelper->FormPreconditionSdp(&objISession, &objQosStatusTable, IMS_FALSE);
+}
+
+TEST_F(SdpPreconditionHelperTest,
+        FormPreconditionSdpDoesNothingForVideoIfPreconditionIsNotIncludedInSdp)
+{
+    ON_CALL(objVideoMediaDescriptor, GetMediaDescriptionEx())
+            .WillByDefault(Return(&objVideoSdpMedia));
+    ON_CALL(objVideoMediaDescriptor, GetPrecondition(SdpAttribute::CURR, SdpPrecondition::TYPE_QOS))
+            .WillByDefault(Return(IMS_NULL));
+
+    lstMedias.Append(&objAudioMedia);
+    lstMedias.Append(&objVideoMedia);
+    ON_CALL(objISession, GetMedia()).WillByDefault(Return(lstMedias));
+
+    EXPECT_CALL(objAudioMediaDescriptor, SetPrecondition(SdpAttribute::CURR, _));
+    EXPECT_CALL(objAudioMediaDescriptor, SetPrecondition(SdpAttribute::DES, _));
+    EXPECT_CALL(objVideoMediaDescriptor, SetPrecondition(SdpAttribute::CURR, _)).Times(0);
+    EXPECT_CALL(objVideoMediaDescriptor, SetPrecondition(SdpAttribute::DES, _)).Times(0);
+
+    pSdpPreconditionHelper->FormPreconditionSdp(&objISession, &objQosStatusTable, IMS_FALSE);
+}
+
+TEST_F(SdpPreconditionHelperTest, FormPreconditionSdpSetPreconditionForVideoIfInitialOffer)
+{
+    ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHED));
+    ON_CALL(objVideoMedia, GetState()).WillByDefault(Return(IMedia::STATE_INACTIVE));
+
+    ON_CALL(objVideoMediaDescriptor, GetMediaDescriptionEx())
+            .WillByDefault(Return(&objVideoSdpMedia));
+    ON_CALL(objVideoMediaDescriptor, GetPrecondition(SdpAttribute::CURR, SdpPrecondition::TYPE_QOS))
+            .WillByDefault(Return(IMS_NULL));
+
+    lstMedias.Append(&objAudioMedia);
+    lstMedias.Append(&objVideoMedia);
+    ON_CALL(objISession, GetMedia()).WillByDefault(Return(lstMedias));
+
+    EXPECT_CALL(objAudioMediaDescriptor, SetPrecondition(SdpAttribute::CURR, _));
+    EXPECT_CALL(objAudioMediaDescriptor, SetPrecondition(SdpAttribute::DES, _));
+    EXPECT_CALL(objVideoMediaDescriptor, SetPrecondition(SdpAttribute::CURR, _));
+    EXPECT_CALL(objVideoMediaDescriptor, SetPrecondition(SdpAttribute::DES, _));
+
+    pSdpPreconditionHelper->FormPreconditionSdp(&objISession, &objQosStatusTable, IMS_FALSE);
+}
+
+TEST_F(SdpPreconditionHelperTest, FormPreconditionSdpWithReservedLocalResource)
+{
+    lstMedias.Append(&objAudioMedia);
+    ON_CALL(objISession, GetMedia()).WillByDefault(Return(lstMedias));
+
     ON_CALL(objQosStatusTable, GetDirectionTag(SdpMedia::TYPE_AUDIO, SdpAttribute::CURR, _))
             .WillByDefault(Return(SdpPrecondition::DIRECTION_SENDRECV));
     ON_CALL(objQosStatusTable,
@@ -73,11 +211,11 @@ TEST_F(SdpPreconditionHelperTest, FormPreconditionSdpWithReservedLocalResource)
 
     EXPECT_CALL(objQosStatusTable, SetLocalResourceConfirmed(SdpMedia::TYPE_AUDIO, IMS_TRUE))
             .Times(1);
-    EXPECT_CALL(objIMediaDescriptor, SetPrecondition(SdpAttribute::CURR, _)).Times(1);
+    EXPECT_CALL(objAudioMediaDescriptor, SetPrecondition(SdpAttribute::CURR, _)).Times(1);
 
     ON_CALL(objQosStatusTable, GetStrengthTag(_, _, _))
             .WillByDefault(Return(SdpPrecondition::STRENGTH_MANDATORY));
-    EXPECT_CALL(objIMediaDescriptor, SetPrecondition(SdpAttribute::DES, _)).Times(1);
+    EXPECT_CALL(objAudioMediaDescriptor, SetPrecondition(SdpAttribute::DES, _)).Times(1);
 
     pSdpPreconditionHelper->FormPreconditionSdp(&objISession, &objQosStatusTable, IMS_FALSE);
 }

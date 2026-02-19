@@ -39,7 +39,9 @@ PUBLIC VIRTUAL RetryTimer::~RetryTimer()
         TimerService::GetTimerService()->DestroyTimer(m_piTimer);
     }
 
-    IMS_TRACE_D("Destructor :: RetryTimer", 0, 0, 0);
+#ifdef __IMS_DEBUG__
+    IMS_TRACE_D("dtor: RetryTimer", 0, 0, 0);
+#endif
 }
 
 /**

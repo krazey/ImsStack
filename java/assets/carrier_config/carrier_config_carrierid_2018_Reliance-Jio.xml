@@ -26,8 +26,6 @@
         <item value="403"/>
         <item value="404"/>
     </int-array>
-    <boolean name="imsemergency.release_epdn_upon_ecall_end_in_fake_mode_bool" value="true"/>
-    <int name="imsemergency.ipcan_release_emergency_pdn_upon_emergency_call_end_int" value="3"/>
     <int-array name="imsemergency.epdn_reject_causes_for_cross_stack_redial_int_array" num="1">
         <item value="5"/>
     </int-array>
@@ -46,12 +44,13 @@
     <boolean name="imsss.ut_insert_new_rule_bool" value="true"/>
 
     <!-- MTC -->
+    <int name="imswfc.policy_for_tcall_timer_expiry_of_vowifi_call_int" value="4"/>
     <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="4"/>
     <int name="imsvoice.silent_redial_max_duration_millis_int" value="128000"/>
     <int name="imsvoice.silent_redial_interval_millis_int" value="8000"/>
     <int name="imsvoice.silent_redial_max_retry_count_int" value="100"/>
     <int name="imsvoice.silent_redial_ultimate_failure_action_int" value="1"/>
-    <string-array name="imsvoice.reject_code_and_action_set_string_array" num="43">
+    <string-array name="imsvoice.reject_code_and_action_set_string_array" num="42">
         <item value="300:5"/> <!-- REDIRECTION_BY_CONTACT -->
         <item value="301:5"/> <!-- REDIRECTION_BY_CONTACT -->
         <item value="302:5"/> <!-- REDIRECTION_BY_CONTACT -->
@@ -77,7 +76,6 @@
         <item value="481:3,1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE -->
         <item value="482:3,1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE -->
         <item value="483:3,1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE -->
-        <item value="484:3,1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE -->
         <item value="485:3,1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE -->
         <item value="487:3,1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE -->
         <item value="488:3,2,1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, SILENT_REINVITE_BY_SDP_CONTENT, SILENT_REINVITE -->
@@ -110,7 +108,7 @@
     <string name="imsvoice.call_terminate_reason_header_media_not_supported_string">SIP;text=&quot;Offer Refused&quot;</string>
     <string name="imsvoice.call_terminate_reason_header_media_bearer_not_met_string">SIP;text=&quot;QOS&quot;</string>
 
-    <!-- Audio -->
+    <!-- Media -->
     <boolean name="imsvoice.audio_bw_nego_option_bool" value="true"/>
     <int name="imsvoice.audio_rtp_dscp_int" value="46"/>
     <int-array name="imsvoice.audio_rtp_port_range_int_array" num="2">
@@ -119,12 +117,12 @@
     </int-array>
     <int name="imsvoice.audio_telephone_event_duration_millis_int" value="200"/>
     <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
-
-    <!-- Video -->
+    <boolean name="imsvoice.codec_based_dynamic_as_enabled_bool" value="false"/>
     <int-array name="imsvt.video_rtp_port_range_int_array" num="2">
         <item value="1230"/>
         <item value="1236"/>
     </int-array>
+    <int name="imsvt.video_iframe_interval_sec_int" value="1"/>
     <int name="imsvt.video_send_periodic_sps_pps_int" value="1"/>
     <boolean name="imsvt.video_drop_p_frame_bool" value="true"/>
     <int name="imsvt.video_cvo_value_int" value="4"/>

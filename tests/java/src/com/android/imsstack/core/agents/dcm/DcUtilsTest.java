@@ -105,6 +105,31 @@ public class DcUtilsTest {
 
     @Test
     @SmallTest
+    public void getAccessNetworkInfo_recentNetworkTypeUnknown() {
+        when(mTelephonyManagerProxy.getServiceState(anyInt())).thenReturn(null);
+
+        IDcUtils.AccessNetworkInfo ani =
+                mDcUtils.getAccessNetworkInfo(TelephonyManager.NETWORK_TYPE_UNKNOWN);
+
+        assertNotNull(ani);
+        assertEquals(TelephonyManager.NETWORK_TYPE_LTE, ani.mNetworkType);
+    }
+
+    @Test
+    @SmallTest
+    public void getAccessNetworkInfo_recentNetworkTypeNr() {
+        mDcUtils.mRecentNetworkType = TelephonyManager.NETWORK_TYPE_NR;
+        when(mTelephonyManagerProxy.getServiceState(anyInt())).thenReturn(null);
+
+        IDcUtils.AccessNetworkInfo ani =
+                mDcUtils.getAccessNetworkInfo(TelephonyManager.NETWORK_TYPE_UNKNOWN);
+
+        assertNotNull(ani);
+        assertEquals(TelephonyManager.NETWORK_TYPE_NR, ani.mNetworkType);
+    }
+
+    @Test
+    @SmallTest
     public void getAccessNetworkInfo_defaultNetworkTypeUnknown() {
         int[] testNetworkTypes = {
             TelephonyManager.NETWORK_TYPE_LTE,

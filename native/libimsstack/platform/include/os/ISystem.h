@@ -189,6 +189,12 @@ public:
             IN IMS_SINT32 nSocketFd, IN IMS_SINT32 nSlotId) = 0;
     virtual void RemoveIpSecSa(IN IMS_SINT32 nIpSecId, IN IMS_SINT32 nSpi, IN IMS_SINT32 nSocketFd,
             IN IMS_SINT32 nSlotId) = 0;
+
+    ////
+    // Logging
+    ////
+    virtual void LogSipMessage(IN const IMS_CHAR* pszMessage, IN IMS_SINT32 nLength,
+            IN IMS_SINT32 nSlotId, IN IMS_BOOL bOutgoing) = 0;
 };
 
 #endif

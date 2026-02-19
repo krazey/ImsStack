@@ -46,6 +46,12 @@ public:
     // Return value: strOutput (user mode & config-debug-off), strInput (non-user mode)
     static const AString& GetLogString(IN const AString& strInput, IN_OUT AString& strOutput,
             IN IMS_SINT32 nOutSize, IN IMS_CHAR cDelimiter = 0 /* no delimiter */);
+
+    ////
+    // Logging
+    ////
+    static void LogSipMessage(IN const IMS_CHAR* pszMessage, IN IMS_SINT32 nLength,
+        IN IMS_SINT32 nSlotId = 0, IN IMS_BOOL bOutgoing = IMS_FALSE);
 };
 
 #define IMS_UTIL_SYS_PROP_IS_SERVER_INFO_HIDDEN_IN_LOG() \

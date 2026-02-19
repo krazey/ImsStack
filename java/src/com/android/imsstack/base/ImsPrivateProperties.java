@@ -61,42 +61,6 @@ public final class ImsPrivateProperties {
     /** Ephemeral properties. */
     public static class Ephemeral {
         /**
-         * Codec information during IMS call.
-         * Value: string
-         */
-        public static final String KEY_CODEC_IN_USE = "codec_in_use";
-        /**
-         * TTA version for KR operators.
-         * Value: string
-         */
-        public static final String KEY_KR_TTA_VERSION = "kr_tta_version";
-        /**
-         * Configuration information for registration recovery interval.
-         *    Retry Base Time
-         *    Retry Max Time
-         *    Consecutive Failure
-         *    Upperbound Waiting Time
-         *    Actual Waiting Time
-         * Value: int
-         */
-        public static final String KEY_REG_0_BT = "reg_0_bt";
-        public static final String KEY_REG_1_MT = "reg_1_mt";
-        public static final String KEY_REG_2_CF = "reg_2_cf";
-        public static final String KEY_REG_3_UWT = "reg_3_uwt";
-        public static final String KEY_REG_4_AWT = "reg_4_awt";
-        /**
-         * sms network bind for KR operators
-         * Value: boolean
-         */
-        public static final String KEY_SMS_NETWORK_REG_BIND = "sms_network_reg_bind";
-
-        /**
-         * Caches the default dialer information and it will be checked in active call.
-         * Value: boolean
-         */
-        public static final String KEY_THIRD_PARTY_DIALER_FOR_VIDEO_CALL =
-                "third_party_dialer_for_video_call";
-        /**
          * Caches the video quality information for H.265 if operator provides this value.
          * It may be used for preview's video resolution for 3rd party dialer.
          * Value: String
@@ -246,21 +210,6 @@ public final class ImsPrivateProperties {
     public static class Persistent {
         // Test properties
         /**
-         * IMS preferred operator for test purpose.
-         * Value: string
-         */
-        public static final String KEY_PREF_OPERATOR = "pref_operator";
-        /**
-         * IMS preferred country for test purpose.
-         * Value: string
-         */
-        public static final String KEY_PREF_COUNTRY = "pref_country";
-        /**
-         * Enables / disables KR operator's USIM mobility enabler (KR enabler) for test purpose.
-         * Value: boolean (true / false)
-         */
-        public static final String KEY_PREF_KR_ENABLER = "pref_kr_enabler";
-        /**
          * Wi-Fi test configuration.
          * Value: int (1 / 0)
          */
@@ -290,28 +239,14 @@ public final class ImsPrivateProperties {
 
         /**
          * Tracks the last access network information.
-         *    - TMUS
          * Value: string
          */
         public static final String KEY_LAST_ACCESS_NETWORK_INFO = "last_access_network_info";
-        /**
-         * Shows Wi-Fi calling information pop-up for one time.
-         *    - ORG
-         * Value: boolean (true / false)
-         */
-        public static final String KEY_SHOW_WFC_INFO = "show_wfc_info";
         /**
          * SIP device id (UUID-based) for multi-device requirement.
          * Value: string
          */
         public static final String KEY_SIP_DEVICE_ID = "sip_device_id";
-        /**
-         * Device's latest SW version.
-         *    - TMUS
-         * Value: string
-         * SlotId SHOULD be a zero for this key because it's a device's information.
-         */
-        public static final String KEY_DEVICE_SW_VERSION = "device_sw_version";
         /**
          * A flag specifying whether IMS is disabled or not.
          * Value : boolean (true / false)
@@ -453,9 +388,6 @@ public final class ImsPrivateProperties {
         private static final String NAME = "persistent_prop";
 
         public static final String[] TEST_PROPERTIES = {
-            KEY_PREF_OPERATOR,
-            KEY_PREF_COUNTRY,
-            KEY_PREF_KR_ENABLER,
             KEY_WIFI_TEST,
             KEY_TEST_SIMULATED_IMS_HAL,
             KEY_TEST_IMS_DISABLED,

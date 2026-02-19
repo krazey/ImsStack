@@ -20,6 +20,7 @@
 #include "SessionDescriptor.h"
 #include "VirtualSessionImpl.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 #include "media/FramedMediaImpl.h"
 #include "media/StreamMediaImpl.h"
 
@@ -27,7 +28,7 @@ __IMS_TRACE_TAG_IMS_CORE__;
 
 static void virtualSessionImpl_MethodNotSupported()
 {
-    IMS_TRACE_I("Method call is not supported...", 0, 0, 0);
+    IMS_TRACE_I("Method not supported", 0, 0, 0);
 }
 
 PUBLIC
@@ -35,12 +36,12 @@ VirtualSessionImpl::VirtualSessionImpl(IN ISession* piOwnerSession, IN VirtualSe
         m_piOwnerSession(piOwnerSession),
         m_pSession(pSession)
 {
-    IMS_TRACE_I("VirtualSessionImpl - C", 0, 0, 0);
+    IMS_TRACE_I("ctor: VirtualSessionImpl", 0, 0, 0);
 }
 
 PUBLIC VIRTUAL VirtualSessionImpl::~VirtualSessionImpl()
 {
-    IMS_TRACE_I("VirtualSessionImpl - D", 0, 0, 0);
+    IMS_TRACE_I("dtor: VirtualSessionImpl", 0, 0, 0);
 
     m_piOwnerSession = IMS_NULL;
     m_pSession = IMS_NULL;

@@ -17,6 +17,7 @@
 #include "ServiceTrace.h"
 
 #include "ISipHeader.h"
+#include "ISipMessage.h"
 #include "PubState.h"
 #include "SipHeaderName.h"
 #include "SipMethod.h"
@@ -109,7 +110,6 @@ IMS_BOOL PubState::SetHeaders(IN_OUT ISipMessage*& piSipMsg)
 {
     if (m_piSipMsg == IMS_NULL)
     {
-        // Nothing to do ...
         return IMS_TRUE;
     }
 
@@ -143,9 +143,9 @@ IMS_BOOL PubState::UpdateState(IN const ISipMessage* piSipMsg)
         return IMS_FALSE;
     }
 
-    // Update the publication state information...
+    // Update the publication state information.
 
-    // On PUBLISH request sent ...
+    // On PUBLISH request sent.
     if (piSipMsg->GetType() == ISipMessage::TYPE_REQUEST)
     {
         if (!UpdateOnPublishRequest(piSipMsg))
@@ -154,7 +154,7 @@ IMS_BOOL PubState::UpdateState(IN const ISipMessage* piSipMsg)
             return IMS_FALSE;
         }
     }
-    // On PUBLISH response received ...
+    // On PUBLISH response received.
     else
     {
         UpdateOnPublishResponse(piSipMsg);
@@ -173,7 +173,7 @@ IMS_BOOL PubState::UpdateStateOnTxnTimerExpired()
 PRIVATE
 void PubState::SetState(IN IMS_SINT32 nState)
 {
-    IMS_TRACE_I("PUB_STATE : %s - %s >> %s", m_objEventPackage.GetEvent().GetStr(),
+    IMS_TRACE_I("PUB_STATE: %s - %s >> %s", m_objEventPackage.GetEvent().GetStr(),
             StateToString(m_nState), StateToString(nState));
 
     m_nState = nState;
@@ -236,7 +236,7 @@ void PubState::StoreMessage(IN const ISipMessage* piSipMsg)
             }
         }
 
-        // Remove all the message body parts if present...
+        // Remove all the message body parts if present.
         m_piSipMsg->RemoveBodyParts();
     }
 }
@@ -258,7 +258,7 @@ IMS_BOOL PubState::UpdateOnPublishRequest(IN const ISipMessage* piSipMsg)
         {
             IMS_SINT32 nPublicationDuration = piHeader->GetValueInt();
 
-            // Stores the Expires value in the initial SUBSCRIBE request...
+            // Stores the Expires value in the initial SUBSCRIBE request.
             if (GetOperation() == OPERATION_CREATE)
             {
                 pEventPackage->SetDuration(nPublicationDuration);
@@ -301,7 +301,7 @@ void PubState::UpdateOnPublishResponse(IN const ISipMessage* piSipMsg)
 
     if (SipStatusCode::Is1XX(nStatusCode))
     {
-        // Do nothing ...
+        // no-op
     }
     else if (SipStatusCode::IsFinalSuccess(nStatusCode))
     {

@@ -303,7 +303,7 @@ public class ImsMmTelServiceTest extends ImsStackTest {
     @Test
     public void testGetEcbm() {
         ImsEcbmImplBase ecbmImplBase = mMmTelFeature.getEcbm();
-        ImsEcbmImpl ecbmImpl = new ImsEcbmImpl(mMockCallContext);
+        ImsEcbmImpl ecbmImpl = new ImsEcbmImpl();
         assertNull(ecbmImplBase);
 
         mMmTelFeature = createMmTelService(null);

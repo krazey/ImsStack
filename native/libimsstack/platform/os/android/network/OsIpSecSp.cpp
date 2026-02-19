@@ -104,7 +104,9 @@ PUBLIC VIRTUAL void OsIpSecSp::SetSecurityAlgorithmInfo(IN IMS_UINT32 nSecurityP
 
 PUBLIC VIRTUAL void OsIpSecSp::DoneSp()
 {
+#ifdef __IMS_DEBUG__
     IMS_TRACE_D("IPSEC-SP done.", 0, 0, 0);
+#endif
 }
 
 PUBLIC
@@ -122,15 +124,12 @@ void OsIpSecSp::DisplayInfo()
     }
 
     AString strLog;
-
-    IMS_TRACE_D("IPSEC-SP-INFO(spi|s-ip|d-ip|s-port|d-port|dir|proto|mode|action)", 0, 0, 0);
-
-    strLog.Sprintf("IMS_SP=0x%x|%s|%s|%d|%d|%d|%d|%d|%d", m_pIpSecSpP->m_nSpi,
-            m_pIpSecSpP->m_objSrcIp.ToString().GetStr(),
+    strLog.Sprintf("IMS_SP=0x%x|%s|%s|%d|%d|%d|%d|%d|%d"
+                   "(spi|s-ip|d-ip|s-port|d-port|dir|proto|mode|action)",
+            m_pIpSecSpP->m_nSpi, m_pIpSecSpP->m_objSrcIp.ToString().GetStr(),
             m_pIpSecSpP->m_objDstIp.ToString().GetStr(), m_pIpSecSpP->m_nSrcPort,
             m_pIpSecSpP->m_nDstPort, m_pIpSecSpP->m_nDirection, m_pIpSecSpP->m_nTransportProtocol,
             m_pIpSecSpP->m_nMode, m_pIpSecSpP->m_nAction);
-
     IMS_TRACE_D("%s", strLog.GetStr(), 0, 0);
 }
 

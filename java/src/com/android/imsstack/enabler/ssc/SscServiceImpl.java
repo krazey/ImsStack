@@ -829,7 +829,6 @@ public class SscServiceImpl implements IUtInterface {
     }
 
     private void startTransaction(SscData data) {
-        ImsLog.d("");
         if (data instanceof SscServiceQueryData) { // Query Case
             mSscTransaction = mSscTransactionFactory.getSscTransaction(data.getSlotId(),
                     mSscCallbackHandler);
@@ -1248,6 +1247,7 @@ public class SscServiceImpl implements IUtInterface {
 
             SscRequestData requestData = mSscRequestQueue.peekFirst();
             if (requestData == null) {
+                ImsLog.e(mSlotId, "no request in queue");
                 return;
             }
 
@@ -1277,7 +1277,7 @@ public class SscServiceImpl implements IUtInterface {
                         && SscConfig.isLocalUpdateRequiredForOir(mSlotId)) {
                     OirServiceData oirData = (OirServiceData) requestData.peakSscData();
                     if (!mSscPreferenceHelper.updateOir(oirData.getState())) {
-                        ImsLog.d(mSlotId, "local update error");
+                        ImsLog.e(mSlotId, "local update error");
                     }
                 }
 

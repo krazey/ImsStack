@@ -16,6 +16,7 @@
 #ifndef SIP_DIALOG_STATE_H_
 #define SIP_DIALOG_STATE_H_
 
+#include "AString.h"
 #include "RcObject.h"
 
 #include "msg/SipMessage.h"

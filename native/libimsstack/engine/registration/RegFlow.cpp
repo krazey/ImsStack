@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ServiceMemory.h"
+#include "IpAddress.h"
 #include "ServiceSystemTime.h"
 #include "ServiceTrace.h"
 
@@ -48,8 +48,8 @@ RegFlow::RegFlow(IN const RegFlow& other) :
 PUBLIC
 RegFlow::~RegFlow()
 {
-    IMS_TRACE_D("Destructor :: %X, %s, %u", m_nSubscriber,
-            SipDebug::GetCharA1(m_strCallId.GetStr(), 8, '@'), m_nCSeqValue);
+    IMS_TRACE_D("dtor: %X|%s|%u", m_nSubscriber, SipDebug::GetCharA1(m_strCallId.GetStr(), 8, '@'),
+            m_nCSeqValue);
 }
 
 PUBLIC

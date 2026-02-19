@@ -655,14 +655,21 @@ public class SscXmlParser {
 
         if (ruleSet != null && ruleSet.size() > 1
                 && queryData.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_VOICE) {
+
+            SparseBooleanArray conditionsWithAudio  = new SparseBooleanArray();
+            for (SscRuleData rule : ruleSet) {
+                if (rule.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_VOICE) {
+                    conditionsWithAudio.put(rule.getSsCondition(), true);
+                }
+            }
+
             // If there are multiple rules and the query is for VOICE, and one of the rules is for
             // VOICE, remove any rule that is SERVICE_CLASS_NONE.
             Iterator<SscRuleData> it = ruleSet.iterator();
-            while (it.hasNext()) {
-                if (it.next().getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_NONE) {
-                    it.remove();
-                }
-            }
+            ruleSet.removeIf(
+                    rule -> rule.getServiceClass() == SscServiceClassUtil.SERVICE_CLASS_NONE
+                            && conditionsWithAudio.get(rule.getSsCondition())
+            );
         }
 
         return ruleSet;
@@ -949,35 +956,4 @@ public class SscXmlParser {
                 || SscXmlFormat.NS_CP_PREFIX.equals(namespace + ":")
                 || SscXmlFormat.NS_XE_PREFIX.equals(namespace + ":");
     }
-
-    // KDDI - getting preferred URI format(SIP) from one element.
-    // TODO_JS: Adding carrier configuration or just remove
-    /*
-    private String getURIFromData(String preferredURI, String element, NodeList nodeList ) {
-        String result = null;
-        Node oneNode = null;
-        String content = null;
-
-        if (nodeList.getLength() == 0) {
-            ImsLog.d("node list is null");
-            return result;
-        }
-
-        for (int conIdx = 0; conIdx < nodeList.getLength(); conIdx++) {
-            oneNode = (Node)nodeList.item(conIdx);
-            content = oneNode.getAttributes().getNamedItem(element).getTextContent();
-            if (content.startsWith(preferredURI)) {
-                ImsLog.d("Preferred URI (" + preferredURI + "), idx : " + conIdx);
-                result = content;
-                break;
-            }
-        }
-
-        if (result == null) {
-            oneNode = (Node)nodeList.item(0);
-            result = oneNode.getAttributes().getNamedItem(element).getTextContent();
-        }
-        return result;
-    }
-     */
 }

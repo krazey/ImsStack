@@ -16,13 +16,14 @@
 #ifndef STREAM_MEDIA_H_
 #define STREAM_MEDIA_H_
 
+#include "ImsCore.h"
 #include "media/Media.h"
 
 class StreamMedia : public Media
 {
 public:
     StreamMedia(IN Service* pService, IN ISdpOaState* piOaState);
-    ~StreamMedia() override;
+    ~StreamMedia() override = default;
 
     StreamMedia(IN const StreamMedia&) = delete;
     StreamMedia& operator=(IN const StreamMedia&) = delete;

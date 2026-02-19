@@ -222,6 +222,11 @@ public final class ApnIms extends Apn {
         return ret;
     }
 
+    private boolean shouldDisableN1Mode() {
+        return mDcSettings.disableN1ModeOnImsPduEstablishFailure()
+                && (mDcNetWatcher.getNetworkType() == TelephonyManager.NETWORK_TYPE_NR);
+    }
+
     private final class HandleNetworkAvailable implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
@@ -309,7 +314,7 @@ public final class ApnIms extends Apn {
 
             int causeCode = (int) msg.obj;
             if (mDcSettings != null) {
-                if (mDcSettings.isPermanentFailure(mType, causeCode)) {
+                if (mDcSettings.isPermanentFailure(mType, causeCode) || shouldDisableN1Mode()) {
                     sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_CONNECT_FAILED);
                 }
             }

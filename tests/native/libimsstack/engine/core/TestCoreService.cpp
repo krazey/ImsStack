@@ -45,3 +45,9 @@ TestCoreService::~TestCoreService()
 {
     ImsCoreContext::GetInstance()->GetServiceManager()->DetachService(this);
 }
+
+void TestCoreService::MarkAsRegistrationActive(IN const SipAddress& objAor)
+{
+    RegBinding_OnInit(&objAor);
+    RegBinding_OnActive();
+}

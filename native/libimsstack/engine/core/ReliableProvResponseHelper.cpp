@@ -29,13 +29,17 @@ ReliableProvResponseHelper::ReliableProvResponseHelper(IN IMS_BOOL bIsMobileOrig
         m_nRSeqNumber(1),
         m_nCSeqNumber(0)
 {
-    IMS_TRACE_D("Constructor :: ReliableProvResponseHelper", 0, 0, 0);
+#ifdef __IMS_CORE_DEBUG__
+    IMS_TRACE_D("ctor: ReliableProvResponseHelper", 0, 0, 0);
+#endif
 }
 
 PUBLIC
 ReliableProvResponseHelper::~ReliableProvResponseHelper()
 {
-    IMS_TRACE_D("Destructor :: ReliableProvResponseHelper", 0, 0, 0);
+#ifdef __IMS_CORE_DEBUG__
+    IMS_TRACE_D("dtor: ReliableProvResponseHelper", 0, 0, 0);
+#endif
 }
 
 PUBLIC
@@ -51,7 +55,7 @@ void ReliableProvResponseHelper::Initialize(IN const ISipMessage* piSipMsg)
 
     if (m_bIsMobileOriginated)
     {
-        // When the first RPR is received ...
+        // When the first RPR is received.
 
         AString strRSeq = piSipMsg->GetHeader(ISipHeader::RSEQ);
 
@@ -64,7 +68,7 @@ void ReliableProvResponseHelper::Initialize(IN const ISipMessage* piSipMsg)
     }
     else
     {
-        // When a new request is received ...
+        // When a new request is received.
         m_nRSeqNumber = 1;
     }
 
@@ -214,7 +218,7 @@ PRIVATE
 void ReliableProvResponseHelper::SetState(IN IMS_SINT32 nState)
 {
     IMS_TRACE_I(
-            "ReliableProvResponse :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
+            "ReliableProvResponse: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
     m_nState = nState;
 }

@@ -36,8 +36,8 @@ SipStreamSocketNotifier::SipStreamSocketNotifier(IN IMS_SINT32 nSlotId) :
 
 PUBLIC VIRTUAL SipStreamSocketNotifier::~SipStreamSocketNotifier()
 {
-    IMS_TRACE_D("StreamSocketNotifier(D) :: (%s, %d)",
-            SipDebug::GetIp(m_objSockAddr.GetIpAddress()), m_objSockAddr.GetPort(), 0);
+    IMS_TRACE_D("StreamSocketNotifier(D) (%s|%d)", SipDebug::GetIp(m_objSockAddr.GetIpAddress()),
+            m_objSockAddr.GetPort(), 0);
 }
 
 PUBLIC VIRTUAL SipSocket* SipStreamSocketNotifier::Accept()
@@ -51,7 +51,7 @@ PUBLIC VIRTUAL SipSocket* SipStreamSocketNotifier::Accept()
 
     if (piNewSocket != IMS_NULL)
     {
-        IMS_TRACE_I("StreamSocket will be created by remote end", 0, 0, 0);
+        IMS_TRACE_I("StreamSocket being created by remote end", 0, 0, 0);
 
         SipStreamSocket* pStreamSocket = new SipStreamSocket(GetSlotId(), piNewSocket);
 
@@ -102,8 +102,8 @@ PUBLIC VIRTUAL IMS_BOOL SipStreamSocketNotifier::Create(
 
     SetState(STATE_CONNECTED);
 
-    IMS_TRACE_I("StreamSocketNotifier(C) :: (%s, %d)",
-            SipRtConfigUtils::IsRoutingInfoHiddenInLog(GetSlotId()) ? "xxx"
+    IMS_TRACE_I("StreamSocketNotifier(C) (%s|%d)",
+            SipRtConfigUtils::IsRoutingInfoHiddenInLog(GetSlotId()) ? "***"
                                                                     : SipDebug::GetIp(objIp),
             nPort, 0);
 

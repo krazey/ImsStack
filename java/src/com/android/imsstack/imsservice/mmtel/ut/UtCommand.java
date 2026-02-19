@@ -396,6 +396,6 @@ public final class UtCommand {
     }
 
     private void log(String s) {
-        ImsLog.d(mContext.getSlotId(), "[GII-IMPL] " + s);
+        ImsLog.d(mContext.getSlotId(), "[ISIL] " + s);
     }
 }

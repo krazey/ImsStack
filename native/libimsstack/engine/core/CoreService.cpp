@@ -27,6 +27,7 @@
 #include "PageMessage.h"
 #include "Publication.h"
 #include "Reference.h"
+#include "Replaces.h"
 #include "SessionEx.h"
 #include "Sip.h"
 #include "SipConnectionFactory.h"
@@ -34,6 +35,7 @@
 #include "SipParsingHelper.h"
 #include "Subscription.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
@@ -48,7 +50,7 @@ CoreService::CoreService(IN const AString& strAppId, IN const AString& strServic
 
 PUBLIC VIRTUAL CoreService::~CoreService()
 {
-    IMS_TRACE_D("Destructor :: CoreService (%s)", GetServiceId().GetStr(), 0, 0);
+    IMS_TRACE_D("dtor: CoreService(%s)", GetServiceId().GetStr(), 0, 0);
 }
 
 PUBLIC VIRTUAL void CoreService::Close()
@@ -460,7 +462,7 @@ PRIVATE VIRTUAL void CoreService::Exception_NotifyError(IN IMS_SINT32 nErrorCode
     // Notify the service closed
     if (m_piCoreServiceListener == IMS_NULL)
     {
-        IMS_TRACE_E(0, "CoreService - LISTENER IS NOT REGISTERED", 0, 0, 0);
+        IMS_TRACE_E(0, "CoreService: LISTENER IS NOT REGISTERED", 0, 0, 0);
         return;
     }
 
@@ -503,10 +505,9 @@ PRIVATE VIRTUAL IMS_BOOL CoreService::ServerConnection_NotifyRequest(IN ISipServ
     const SipMethod& objMethod = piSipMsg->GetMethod();
     Method* pMethod = IMS_NULL;
 
-    IMS_TRACE_I("CoreService (%s) :: %s request received ...", GetServiceId().GetStr(),
-            objMethod.ToString().GetStr(), 0);
+    IMS_TRACE_I("CoreService: %s (%s)", objMethod.ToString().GetStr(), GetServiceId().GetStr(), 0);
 
-    // Checks if the direct listener is registered or not...
+    // Checks if the direct listener is registered or not.
     // And if direct listener is present, pass the transaction to that listener.
     if (CheckAndHandleDirectSipRequest(piSsc) == RESULT_DIRECT_TXN_HANDLED)
     {
@@ -608,7 +609,7 @@ PRIVATE VIRTUAL IMS_BOOL CoreService::ServerConnection_NotifyRequest(IN ISipServ
 
             if (pMethodP == IMS_NULL)
             {
-                IMS_TRACE_D("Refer-To :: method parameter does not exist", 0, 0, 0);
+                IMS_TRACE_D("Refer-To: no method parameter", 0, 0, 0);
 
                 SipMethod objReferToMethod(SipMethod::INVITE);
                 pMethod = new Reference(

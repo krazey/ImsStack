@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+#include "AStringArray.h"
+#include "SdpAttribute.h"
+#include "SdpBandwidth.h"
+#include "SdpMedia.h"
 #include "ServiceTrace.h"
 #include "MediaSdpParser.h"
 #include "MediaProfileFactory.h"

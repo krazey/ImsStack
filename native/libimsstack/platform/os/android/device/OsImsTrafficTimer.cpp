@@ -29,7 +29,7 @@ OsImsTrafficTimer::OsImsTrafficTimer(
         m_piTimer(IMS_NULL),
         m_piTrafficListener(IMS_NULL)
 {
-    IMS_TRACE_D("OsImsTrafficTimer :: [%d] type = %d, duration = %d", nSlot, nType, nDuration);
+    IMS_TRACE_D("OsImsTrafficTimer: [%d] type = %d, duration = %d", nSlot, nType, nDuration);
 }
 
 PUBLIC VIRTUAL OsImsTrafficTimer::~OsImsTrafficTimer()
@@ -51,7 +51,7 @@ PUBLIC VIRTUAL void OsImsTrafficTimer::Start()
     m_piTimer = TimerService::GetTimerService()->CreateTimer();
     IMS_UINTP nID = m_piTimer->SetTimer(m_nDuration, this);
 
-    IMS_TRACE_D("Start :: id (%p) , duration (%d)", nID, m_nDuration, 0);
+    IMS_TRACE_D("Start: id (%p) , duration (%d)", nID, m_nDuration, 0);
 }
 
 PUBLIC VIRTUAL void OsImsTrafficTimer::Stop()

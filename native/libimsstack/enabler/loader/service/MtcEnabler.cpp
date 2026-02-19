@@ -28,7 +28,10 @@ MtcEnabler::MtcEnabler(IN IMS_SINT32 nSlotId) :
     IMS_TRACE_D("+MtcEnabler", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL MtcEnabler::~MtcEnabler() {}
+PUBLIC VIRTUAL MtcEnabler::~MtcEnabler()
+{
+    IMS_TRACE_D("~MtcEnabler", 0, 0, 0);
+}
 
 PUBLIC VIRTUAL void MtcEnabler::Start()
 {

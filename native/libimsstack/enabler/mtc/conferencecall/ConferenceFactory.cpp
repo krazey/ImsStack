@@ -16,7 +16,6 @@
 
 #include "IMtcContext.h"
 #include "ImsList.h"
-#include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "conferencecall/ConferenceEventNotifier.h"
 #include "conferencecall/ConferenceFactory.h"
@@ -31,19 +30,13 @@
 #include "conferencecall/IConferenceSubscriptionListener.h"
 #include "configuration/MtcConfigurationProxy.h"
 
-__IMS_TRACE_TAG_COM_MTC__;
-
 PUBLIC
 ConferenceFactory::ConferenceFactory(IN IMtcContext& objContext) :
         m_objContext(objContext)
 {
-    IMS_TRACE_I("+ConferenceFactory", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL ConferenceFactory::~ConferenceFactory()
-{
-    IMS_TRACE_I("~ConferenceFactory", 0, 0, 0);
-}
+PUBLIC VIRTUAL ConferenceFactory::~ConferenceFactory() {}
 
 PUBLIC VIRTUAL ConferenceSubscription* ConferenceFactory::CreateSubscription(
         IN CallKey nConfCallKey, IN ConferenceParticipantList& objList,

@@ -160,7 +160,6 @@ PUBLIC VIRTUAL IMS_BOOL AosNetTracker::IsSuspended()
 
     if (IsDataConnected() && !IsServiceIn(TYPE_MOBILE))
     {
-        A_IMS_TRACE_I(CNXID, "Network Suspended", 0, 0, 0);
         return IMS_TRUE;
     }
 
@@ -203,16 +202,11 @@ PUBLIC VIRTUAL void AosNetTracker::SetListener(IN IAosNetTrackerListener* piList
 
         if (pTmpListener == piListener)
         {
-            A_IMS_TRACE_D(CNXID, "SetListener() - Listener (%" PFLS_x ") is already set",
-                    piListener, 0, 0);
             return;
         }
     }
 
     m_objListeners.Append(piListener);
-
-    A_IMS_TRACE_D(CNXID, "SetListener() - Listener (%" PFLS_x ") is set", piListener, 0, 0);
-
     piListener->NetTracker_StatusChanged();
 }
 
@@ -230,9 +224,6 @@ PUBLIC VIRTUAL void AosNetTracker::RemoveListener(IN IAosNetTrackerListener* piL
         if (pTmpListener == piListener)
         {
             m_objListeners.RemoveAt(i);
-
-            A_IMS_TRACE_D(
-                    CNXID, "RemoveListener - Listener (%" PFLS_x ") is removed", piListener, 0, 0);
             return;
         }
     }
@@ -251,15 +242,11 @@ PUBLIC VIRTUAL void AosNetTracker::SetTimerListener(IN IAosNetTrackerTimerListen
 
         if (pTmpListener == piListener)
         {
-            A_IMS_TRACE_D(CNXID, "SetTimerListener() - Listener (%" PFLS_x ") is already set",
-                    piListener, 0, 0);
             return;
         }
     }
 
     m_objTimerListeners.Append(piListener);
-
-    A_IMS_TRACE_D(CNXID, "SetTimerListener() - Listener (%" PFLS_x ") is set", piListener, 0, 0);
 }
 
 PUBLIC VIRTUAL void AosNetTracker::RemoveTimerListener(IN IAosNetTrackerTimerListener* piListener)
@@ -276,9 +263,6 @@ PUBLIC VIRTUAL void AosNetTracker::RemoveTimerListener(IN IAosNetTrackerTimerLis
         if (pTmpListener == piListener)
         {
             m_objTimerListeners.RemoveAt(i);
-
-            A_IMS_TRACE_D(CNXID, "RemoveTimerListener - Listener (%" PFLS_x ") is removed",
-                    piListener, 0, 0);
             return;
         }
     }
@@ -407,8 +391,6 @@ PUBLIC VIRTUAL void AosNetTracker::NetworkWatcher_NotifyStatus(IN INetworkWatche
     {
         return;
     }
-
-    A_IMS_TRACE_D(CNXID, "NotifyNetWatcherStatus", 0, 0, 0);
 
     if (m_nFeature != FEATURE_NONE)
     {

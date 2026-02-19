@@ -41,19 +41,19 @@ public:
     DialogInfoManager(IN const DialogInfoManager&) = delete;
     DialogInfoManager& operator=(IN const DialogInfoManager&) = delete;
 
-    /** See {@link IDialogInfoManager#Update}. */
+    /** @see IDialogInfoManager#Update */
     IMS_RESULT Update(IN const AString& strEventPackage) override;
 
-    /** See {@link IDialogInfoManager#GetDialogs}. */
+    /** @see IDialogInfoManager#GetDialogs */
     const ImsList<Dialog*>& GetDialogs() const override;
 
-    /** See {@link IDialogInfoManager#GetState}. */
+    /** @see IDialogInfoManager#GetState */
     IMS_UINT32 GetState() const override;
 
-    /** See {@link IDialogInfoManager#GetVersion}. */
+    /** @see IDialogInfoManager#GetVersion */
     IMS_UINT32 GetVersion() const override;
 
-    /** See {@link IDialogInfoManager#GetEntity}. */
+    /** @see IDialogInfoManager#GetEntity */
     const AString& GetEntity() const override;
 
 private:

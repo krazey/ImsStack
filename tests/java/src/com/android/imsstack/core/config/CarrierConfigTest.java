@@ -85,6 +85,8 @@ public class CarrierConfigTest {
         assertNotNull(mCarrierConfig.getConfig());
         assertFalse(mCarrierConfig.isVoLteProvisioningRequired());
         assertFalse(mCarrierConfig.getBoolean(CarrierConfig.Ims.KEY_SIP_COMPACT_FORM_ENABLED_BOOL));
+        assertFalse(mCarrierConfig.getBoolean(
+                CarrierConfig.ImsVoice.KEY_AMR_CODEC_PAYLOAD_FORMAT_RELAXED_MATCHING_BOOL));
         assertNull(mCarrierConfig.getBooleanArray(KEY_TEST_BOOL_ARRAY));
         assertEquals(-1, mCarrierConfig.getInt(
                 CarrierConfig.ImsVoice.KEY_18X_TIMER_MILLIS_INT));
@@ -108,6 +110,8 @@ public class CarrierConfigTest {
         assertNotNull(mCarrierConfig.getConfig());
         assertTrue(mCarrierConfig.isVoLteProvisioningRequired());
         assertTrue(mCarrierConfig.getBoolean(CarrierConfig.Ims.KEY_SIP_COMPACT_FORM_ENABLED_BOOL));
+        assertTrue(mCarrierConfig.getBoolean(
+                CarrierConfig.ImsVoice.KEY_AMR_CODEC_PAYLOAD_FORMAT_RELAXED_MATCHING_BOOL));
         assertTrue(Arrays.equals(TEST_BOOL_LIST,
                 mCarrierConfig.getBooleanArray(KEY_TEST_BOOL_ARRAY)));
         assertEquals(SIP_18X_TIMER_MILLIS, mCarrierConfig.getInt(
@@ -245,6 +249,8 @@ public class CarrierConfigTest {
         assertEquals("false", CarrierConfig.getValue(config, "test_config_boolean"));
         assertEquals("false", CarrierConfig.getValue(config,
                 CarrierConfig.Ims.KEY_SIP_COMPACT_FORM_ENABLED_BOOL));
+        assertEquals("false", CarrierConfig.getValue(config,
+                CarrierConfig.ImsVoice.KEY_AMR_CODEC_PAYLOAD_FORMAT_RELAXED_MATCHING_BOOL));
         assertEquals("null", CarrierConfig.getValue(config, KEY_TEST_BOOL_ARRAY));
         assertEquals("-1", CarrierConfig.getValue(config,
                 CarrierConfig.ImsVoice.KEY_18X_TIMER_MILLIS_INT));
@@ -265,6 +271,8 @@ public class CarrierConfigTest {
 
         assertNotEquals("false", CarrierConfig.getValue(config,
                 CarrierConfig.Ims.KEY_SIP_COMPACT_FORM_ENABLED_BOOL));
+        assertNotEquals("false", CarrierConfig.getValue(config,
+                CarrierConfig.ImsVoice.KEY_AMR_CODEC_PAYLOAD_FORMAT_RELAXED_MATCHING_BOOL));
         assertNotEquals("null", CarrierConfig.getValue(config, KEY_TEST_BOOL_ARRAY));
         assertNotEquals("-1", CarrierConfig.getValue(config,
                 CarrierConfig.ImsVoice.KEY_18X_TIMER_MILLIS_INT));
@@ -323,6 +331,8 @@ public class CarrierConfigTest {
         PersistableBundle b = new PersistableBundle();
         b.putBoolean(CarrierConfigManager.KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL, true);
         b.putBoolean(CarrierConfig.Ims.KEY_SIP_COMPACT_FORM_ENABLED_BOOL, true);
+        b.putBoolean(
+                CarrierConfig.ImsVoice.KEY_AMR_CODEC_PAYLOAD_FORMAT_RELAXED_MATCHING_BOOL, true);
         b.putBooleanArray(KEY_TEST_BOOL_ARRAY, TEST_BOOL_LIST);
         b.putInt(CarrierConfig.ImsVoice.KEY_18X_TIMER_MILLIS_INT, SIP_18X_TIMER_MILLIS);
         b.putIntArray(CarrierConfig.Ims.KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY,

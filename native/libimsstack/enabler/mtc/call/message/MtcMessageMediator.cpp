@@ -24,6 +24,7 @@
 #include "ImsTrace.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
+#include "SipAddress.h"
 #include "SipParsingHelper.h"
 #include "TextParser.h"
 #include "call/IMtcCall.h"

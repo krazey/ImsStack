@@ -19,6 +19,8 @@
 
 #include "private/SipConfigV.h"
 
+#include "SdpMedia.h"
+#include "offeranswer/SdpMediaParameter.h"
 #include "offeranswer/SdpOfferAnswer.h"
 #include "offeranswer/SdpProfile.h"
 
@@ -27,12 +29,15 @@
 #include "ISipMessageBodyPart.h"
 #include "SdpOaState.h"
 #include "SessionDescriptor.h"
+#include "SessionParameter.h"
 #include "Sip.h"
 #include "SipHeaderName.h"
 #include "SipMethod.h"
 #include "SipStatusCode.h"
 #include "VirtualSession.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
+#include "media/Media.h"
 #include "media/MediaFactory.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
@@ -45,7 +50,7 @@ VirtualSession::VirtualSession(IN Service* pService, IN const SipAddress* pUserA
         m_pOaState(IMS_NULL),
         m_pSessionDescriptor(IMS_NULL)
 {
-    IMS_TRACE_I("VirtualSession - C", 0, 0, 0);
+    IMS_TRACE_I("ctor: VirtualSession", 0, 0, 0);
 
     Init(pUserAor);
 }
@@ -64,7 +69,7 @@ VirtualSession::VirtualSession(IN const VirtualSession& other) :
 
 PUBLIC VIRTUAL VirtualSession::~VirtualSession()
 {
-    IMS_TRACE_I("VirtualSession - D", 0, 0, 0);
+    IMS_TRACE_I("dtor: VirtualSession", 0, 0, 0);
 
     if (m_pSessionDescriptor != IMS_NULL)
     {
@@ -611,8 +616,8 @@ IMS_BOOL VirtualSession::CheckNCreateSessionDescriptor()
 
     IMS_SINT32 nOaState = GetOfferAnswerState();
 
-    // IDLE :: 183 response w/o SDP
-    // OFFER_RECEIVED :: 183 response w/ SDP
+    // IDLE: 183 response w/o SDP
+    // OFFER_RECEIVED: 183 response w/ SDP
     if ((nOaState != SdpOaState::STATE_IDLE) && (nOaState != SdpOaState::STATE_OFFER_RECEIVED))
     {
         IMS_TRACE_E(0, "__ SessionDescriptor can't be created in offer/answer state (%d) __",
@@ -648,11 +653,11 @@ IMS_BOOL VirtualSession::CheckNCreateSessionDescriptor()
 
     if (nOaState == SdpOaState::STATE_IDLE)
     {
-        IMS_TRACE_D("__ SessionDescriptor is created in IDLE state __", 0, 0, 0);
+        IMS_TRACE_D("__ SessionDescriptor created on IDLE __", 0, 0, 0);
     }
     else
     {
-        IMS_TRACE_D("__ SessionDescriptor is created in OFFER_RECEIVED state __", 0, 0, 0);
+        IMS_TRACE_D("__ SessionDescriptor created on OFFER_RECEIVED __", 0, 0, 0);
     }
 
     return IMS_TRUE;
@@ -740,7 +745,7 @@ IMS_BOOL VirtualSession::UpdateMedia(IN IMS_SINT32 nTrigger)
 {
     if (!m_pOaState->IsSessionChanged())
     {
-        IMS_TRACE_D("UpdateMedia :: No session changed", 0, 0, 0);
+        IMS_TRACE_D("UpdateMedia: No session changed", 0, 0, 0);
         return IMS_TRUE;
     }
 
@@ -762,7 +767,7 @@ IMS_BOOL VirtualSession::UpdateMedia(IN IMS_SINT32 nTrigger)
             }
             else
             {
-                IMS_TRACE_D("UpdateMedia :: SDP Offer/Answer is IDLE", 0, 0, 0);
+                IMS_TRACE_D("UpdateMedia: SDP OA is IDLE", 0, 0, 0);
             }
             break;
         case SdpOaState::STATE_OFFER_RECEIVED:  // FALL-THROUGH
@@ -770,7 +775,7 @@ IMS_BOOL VirtualSession::UpdateMedia(IN IMS_SINT32 nTrigger)
             bResult = UpdateMediaOnOfferReceived(nTrigger);
             break;
         default:
-            IMS_TRACE_D("UpdateMedia :: NOT HANDLED", 0, 0, 0);
+            IMS_TRACE_D("UpdateMedia: NOT HANDLED", 0, 0, 0);
             return IMS_FALSE;
     }
 
@@ -816,7 +821,7 @@ IMS_BOOL VirtualSession::UpdateOfferAnswerStateOnMessageReceived(IN const ISipMe
             if ((nState == STATE_NEGOTIATING) &&
                     (GetOfferAnswerState() == SdpOaState::STATE_ESTABLISHED))
             {
-                IMS_TRACE_D("UpdateOfferAnswerStateOnMessageReceived() :: "
+                IMS_TRACE_D("UpdateOfferAnswerStateOnMessageReceived: "
                             "Ignore the SDP in subsequent RPR as offer-answer is completed",
                         0, 0, 0);
 
@@ -893,7 +898,7 @@ void VirtualSession::Init(IN const SipAddress* pUserAor)
 PRIVATE
 void VirtualSession::SetState(IN IMS_SINT32 nState)
 {
-    IMS_TRACE_I("Session :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
+    IMS_TRACE_I("Session: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
     m_nState = nState;
 }

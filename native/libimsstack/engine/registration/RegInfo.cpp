@@ -23,6 +23,7 @@
 #include "IRegInfoListener.h"
 #include "RegInfo.h"
 #include "RegInfoConst.h"
+#include "RegInfoContact.h"
 #include "RegInfoRegistration.h"
 
 __IMS_TRACE_TAG_REG__;
@@ -187,9 +188,8 @@ IMS_BOOL RegInfo::Update(IN const IDocument* piDocument)
         // refreshed SUBSCRIBE needs to be sent
         bSubscriptionRefreshRequired = IMS_TRUE;
 
-        IMS_TRACE_I("RegInfo :: Subscription refresh is required - "
-                    "New version (%d), Old version (%d)",
-                nNewVersion, m_nVersion, 0);
+        IMS_TRACE_I("RegInfo: Subscription refresh required - version(n:%d, o:%d)", nNewVersion,
+                m_nVersion, 0);
     }
 
     m_bIsCreated = IMS_TRUE;
@@ -197,9 +197,9 @@ IMS_BOOL RegInfo::Update(IN const IDocument* piDocument)
 
     if (strState.EqualsIgnoreCase(RegInfoConst::ATTR_STATE_FULL))
     {
-        IMS_TRACE_D("RegInfo :: 'full' state received", 0, 0, 0);
+        IMS_TRACE_D("RegInfo: 'full' state received", 0, 0, 0);
 
-        // Remove all the registrations & updates all...
+        // Remove all the registrations & updates all.
         RemoveAllRegistrations();
     }
 
@@ -234,7 +234,7 @@ IMS_BOOL RegInfo::Update(IN const IDocument* piDocument)
 
 void RegInfo::DisplayRegInfo()
 {
-    IMS_TRACE_I("RegInfo :: Version (%d)", m_nVersion, 0, 0);
+    IMS_TRACE_I("RegInfo: version=%d", m_nVersion, 0, 0);
 
     for (IMS_UINT32 i = 0; i < m_objRegistrations.GetSize(); ++i)
     {
@@ -307,7 +307,7 @@ RegInfoRegistration* RegInfo::CheckNCreateRegistration(IN INode* piNode)
         }
     }
 
-    // New registration updated...
+    // New registration updated.
     RegInfoRegistration* pRegistration = new RegInfoRegistration();
 
     if (pRegistration == IMS_NULL)

@@ -1875,4 +1875,18 @@ TEST_F(SystemTest, RemoveIpSecSa)
             .WillRepeatedly(Return(0));
     m_pSystem->RemoveIpSecSa(1, 1102393271, 124, 0);
 }
+
+TEST_F(SystemTest, LogSipMessage)
+{
+    const AString strMessage("SIP/2.0 200 OK");
+
+    EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, -1))
+            .Times(1)
+            .WillOnce(Return(1));
+
+    m_pSystem->LogSipMessage(strMessage.GetStr(), strMessage.GetLength(), IMS_SLOT_0, IMS_TRUE);
+
+    m_pSystem->SetCallback(IMS_NULL);
+    m_pSystem->LogSipMessage(strMessage.GetStr(), strMessage.GetLength(), IMS_SLOT_0, IMS_TRUE);
+}
 }  // namespace android

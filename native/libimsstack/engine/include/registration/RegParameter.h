@@ -18,10 +18,10 @@
 
 #include "AStringArray.h"
 #include "Credential.h"
+#include "ImsList.h"
 #include "ImsSlot.h"
 
 #include "IRegParameter.h"
-#include "RegStateTracker.h"
 #include "SipAddress.h"
 #include "SipSecurityHeader.h"
 
@@ -29,6 +29,7 @@ class ISipMessage;
 class ISipClientConnection;
 class ExtraHeaders;
 class ImsSubscriberInfo;
+class RegStateTracker;
 
 class RegParameter final : public ImsSlot, public IRegParameter
 {

@@ -49,6 +49,7 @@ import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
+import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.agents.dcmif.IDcSettings;
 import com.android.imsstack.system.ISystem;
 
@@ -70,6 +71,7 @@ public class ApnImsTest {
     @Mock private IApn.Listener mMockApnListener;
     @Mock private IDcApn mMockIDcApn;
     @Mock private IDcSettings mMockIDcSettings;
+    @Mock private IDcNetWatcher mMockIDcNetWatcher;
     @Mock private ISystem mMockISystem;
     @Mock private ImsTrafficInterface mMockImsTrafficInterface;
     @Mock private SubsInfoInterface mMockSubsInfoInterface;
@@ -94,6 +96,7 @@ public class ApnImsTest {
         mApnIms = new ApnIms(mContextFixture.getTestDouble(), SLOT0);
         mTestableLooper = TestableLooper.get(ApnImsTest.this);
         mTestableLooper.processAllMessages();
+        replaceInstance(Apn.class, "mDcNetWatcher", mApnIms, mMockIDcNetWatcher);
         replaceInstance(Apn.class, "mSystem", mApnIms, mMockISystem);
         replaceInstance(Apn.class, "mDcSettings", mApnIms, mMockIDcSettings);
     }
@@ -391,51 +394,104 @@ public class ApnImsTest {
     }
 
     @Test
-    public void testHandleDataConnectionFailed() throws Exception {
-        int failureCause = 33;
-        when(mMockIDcSettings.isPermanentFailure(EApnType.IMS, failureCause))
-                .thenReturn(false)
-                .thenReturn(true);
-
-        // if apn has been requested before, notify data connection state change
+    public void testHandleDataConnectionFailed_setToDisableN1ModeOnNrNetwork() throws Exception {
+        int failureCause = 65540;
         mApnIms.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+        when(mMockIDcNetWatcher.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_NR);
+        when(mMockIDcSettings.disableN1ModeOnImsPduEstablishFailure()).thenReturn(true);
+        when(mMockIDcSettings.isPermanentFailure(EApnType.IMS, failureCause))
+                .thenReturn(false);
 
-        // not permanent failure
-        Message msg1 = Message.obtain();
-        msg1.what = Apn.EVENT_DATA_CONNECTION_FAILED;
-        msg1.obj = failureCause;
-        mApnIms.sendMessage(msg1);
-
-        // permanent failure
-        Message msg2 = Message.obtain();
-        msg2.what = Apn.EVENT_DATA_CONNECTION_FAILED;
-        msg2.obj = failureCause;
-        mApnIms.sendMessage(msg2);
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_DATA_CONNECTION_FAILED;
+        msg.obj = failureCause;
+        mApnIms.sendMessage(msg);
         mTestableLooper.processAllMessages();
 
         verify(mMockISystem).notifyDataConnectionFailed(EApnType.IMS.getType());
     }
 
     @Test
-    public void testHandleDataConnectionFailed_invalidCase() throws Exception {
+    public void testHandleDataConnectionFailed_setToDisableN1ModeOnLteNetwork() throws Exception {
+        int failureCause = 65540;
+        mApnIms.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+        when(mMockIDcNetWatcher.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
+        when(mMockIDcSettings.disableN1ModeOnImsPduEstablishFailure()).thenReturn(true);
+        when(mMockIDcSettings.isPermanentFailure(EApnType.IMS, failureCause))
+                .thenReturn(false);
+
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_DATA_CONNECTION_FAILED;
+        msg.obj = failureCause;
+        mApnIms.sendMessage(msg);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockISystem, never()).notifyDataConnectionFailed(EApnType.IMS.getType());
+    }
+
+    @Test
+    public void testHandleDataConnectionFailed_withPermanentFailure() throws Exception {
         int failureCause = 33;
+        mApnIms.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+        when(mMockIDcNetWatcher.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
         when(mMockIDcSettings.isPermanentFailure(EApnType.IMS, failureCause))
                 .thenReturn(true);
 
-        // if apn is not requested, ignore event
-        mApnIms.setApnReqState(EApnReqState.APN_REQUEST_IDLE);
-        Message msg1 = Message.obtain();
-        msg1.what = Apn.EVENT_DATA_CONNECTION_FAILED;
-        msg1.obj = failureCause;
-        mApnIms.sendMessage(msg1);
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_DATA_CONNECTION_FAILED;
+        msg.obj = failureCause;
+        mApnIms.sendMessage(msg);
         mTestableLooper.processAllMessages();
 
-        // if msg.obj is null, ignore event
+        verify(mMockISystem).notifyDataConnectionFailed(EApnType.IMS.getType());
+    }
+
+    @Test
+    public void testHandleDataConnectionFailed_withTemporaryFailure() throws Exception {
+        int failureCause = 65540;
         mApnIms.setApnReqState(EApnReqState.APN_REQUEST_DONE);
-        Message msg2 = Message.obtain();
-        msg2.what = Apn.EVENT_DATA_CONNECTION_FAILED;
-        msg2.obj = null;
-        mApnIms.sendMessage(msg2);
+        when(mMockIDcNetWatcher.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
+        when(mMockIDcSettings.isPermanentFailure(EApnType.IMS, failureCause))
+                .thenReturn(false);
+
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_DATA_CONNECTION_FAILED;
+        msg.obj = failureCause;
+        mApnIms.sendMessage(msg);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockISystem, never()).notifyDataConnectionFailed(EApnType.IMS.getType());
+    }
+
+    @Test
+    public void testHandleDataConnectionFailed_withNullObject() throws Exception {
+        int failureCause = 33;
+        mApnIms.setApnReqState(EApnReqState.APN_REQUEST_DONE);
+        when(mMockIDcNetWatcher.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
+        when(mMockIDcSettings.isPermanentFailure(EApnType.IMS, failureCause))
+                .thenReturn(true);
+
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_DATA_CONNECTION_FAILED;
+        msg.obj = null;
+        mApnIms.sendMessage(msg);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockISystem, never()).notifyDataConnectionFailed(EApnType.IMS.getType());
+    }
+
+    @Test
+    public void testHandleDataConnectionFailed_butDidNotRequest() throws Exception {
+        int failureCause = 33;
+        mApnIms.setApnReqState(EApnReqState.APN_REQUEST_IDLE);
+        when(mMockIDcNetWatcher.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
+        when(mMockIDcSettings.isPermanentFailure(EApnType.IMS, failureCause))
+                .thenReturn(true);
+
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_DATA_CONNECTION_FAILED;
+        msg.obj = failureCause;
+        mApnIms.sendMessage(msg);
         mTestableLooper.processAllMessages();
 
         verify(mMockISystem, never()).notifyDataConnectionFailed(EApnType.IMS.getType());

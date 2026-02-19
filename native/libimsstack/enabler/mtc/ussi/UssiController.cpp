@@ -15,9 +15,11 @@
  */
 
 #include "AStringBuffer.h"
+#include "CallReasonInfo.h"
 #include "IMessage.h"
 #include "ISession.h"
 #include "ISipClientConnection.h"
+#include "ISipConnection.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ISipMessageBodyPart.h"
@@ -26,6 +28,8 @@
 #include "ServiceTrace.h"
 #include "SipHeaderName.h"
 #include "SipMethod.h"
+#include "SipStatusCode.h"
+#include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
@@ -43,6 +47,7 @@ UssiController::UssiController(IN IMtcCallContext& objContext, IN UssiDataParser
         m_objContext(objContext),
         m_pDataParser(pParser),
         m_objEventNotifier(UssiEventNotifier(objContext)),
+        m_pCurrentInfoClientConnection(IMS_NULL),
         m_eUssiModeType(UssiModeType::NONE),
         m_objLastResult(UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE))
 {
@@ -52,6 +57,10 @@ UssiController::UssiController(IN IMtcCallContext& objContext, IN UssiDataParser
 PUBLIC VIRTUAL UssiController::~UssiController()
 {
     IMS_TRACE_I("~UssiController", 0, 0, 0);
+    if (m_pCurrentInfoClientConnection)
+    {
+        m_pCurrentInfoClientConnection->Close();
+    }
 }
 
 PUBLIC GLOBAL IMS_BOOL UssiController::IsNetworkInitiatedUssi(
@@ -75,6 +84,31 @@ PUBLIC GLOBAL IMS_BOOL UssiController::IsNetworkInitiatedUssi(
     return bResult;
 }
 
+PUBLIC VIRTUAL void UssiController::ClientConnection_NotifyResponse(IN ISipClientConnection* piScc,
+        IN [[maybe_unused]] ISipClientConnection* piForkedScc /*= IMS_NULL*/)
+{
+    IMS_TRACE_D("ClientConnection_NotifyResponse", 0, 0, 0);
+    if (piScc->Receive() != IMS_SUCCESS)
+    {
+        piScc->Close();
+        m_pCurrentInfoClientConnection = IMS_NULL;
+        return;
+    }
+
+    if (!SipStatusCode::IsFinal(piScc->GetStatusCode()))
+    {
+        return;
+    }
+    CompleteClientConnection();
+}
+
+PUBLIC VIRTUAL void UssiController::Error_NotifyError(IN [[maybe_unused]] ISipConnection* piSc,
+        IN [[maybe_unused]] IMS_SINT32 nCode, IN [[maybe_unused]] const AString& strMessage)
+{
+    IMS_TRACE_D("Error_NotifyError", 0, 0, 0);
+    CompleteClientConnection();
+}
+
 PUBLIC
 IMS_BOOL UssiController::HasValidXmlBodyForNetworkInitiatedUssi(IN const IMessage* piMessage)
 {
@@ -91,20 +125,6 @@ IMS_BOOL UssiController::HasValidXmlBodyForNetworkInitiatedUssi(IN const IMessag
     }
 
     IMS_TRACE_D("HasValidXmlBodyForNetworkInitiatedUssi : %s", _TRACE_B_(bResult), 0, 0);
-    return bResult;
-}
-
-PUBLIC
-IMS_BOOL UssiController::IsByeForUssi(IN const IMessage* piMessage)
-{
-    IMS_BOOL bResult = IMS_FALSE;
-    if (m_objContext.GetMessageUtils().ContainsValue(
-                piMessage, UssiConstants::HEADER_APPLICATION_USSDXML, ISipHeader::CONTENT_TYPE))
-    {
-        bResult = IMS_TRUE;
-    }
-
-    IMS_TRACE_D("IsByeForUssi : %s", _TRACE_B_(bResult), 0, 0);
     return bResult;
 }
 
@@ -162,8 +182,17 @@ UssiResult UssiController::HandleUssiBody(
 
     if (!pParsedData)
     {
-        IMS_TRACE_D("HandleUssiBody : there's no xml body.", 0, 0, 0);
-        return objResult;
+        if (nReceivedMethod == SipMethod::BYE && IsUeInitiated())
+        {
+            IMS_TRACE_I("UE initiated USSI termination by network BYE without USSD data.", 0, 0, 0);
+            NotifyUssiEvent(AString::ConstEmpty(), UssiModeType::NOTIFY, UssiError::CODE_1);
+            return objResult;
+        }
+        else
+        {
+            IMS_TRACE_D("HandleUssiBody : there's no xml body.", 0, 0, 0);
+            return objResult;
+        }
     }
 
     IMS_TRACE_D("HandleUssiBody : Method[%d] received.", nReceivedMethod, 0, 0);
@@ -244,23 +273,40 @@ IMS_RESULT UssiController::FormAcceptUssi()
 }
 
 PUBLIC
-IMS_RESULT UssiController::FormInfoRequest(IN ISipClientConnection* piSipClientConnection,
-        IN const AString& strUssdString, IN UssiError eErrorCode)
+IMS_RESULT UssiController::SendInfo(
+        IN ISession& objSession, IN const AString& strUssdString, IN UssiError eErrorCode)
 {
-    IMS_TRACE_D("FormInfoRequest", 0, 0, 0);
+    IMS_TRACE_D("SendInfo", 0, 0, 0);
 
-    if (FormHeadersForInfo(piSipClientConnection) == IMS_FAILURE)
+    m_pCurrentInfoClientConnection = objSession.CreateTransaction(SipMethod::INFO);
+
+    if (m_pCurrentInfoClientConnection)
     {
+        m_pCurrentInfoClientConnection->SetListener(this);
+        m_pCurrentInfoClientConnection->SetErrorListener(this);
+    }
+    else
+    {
+        IMS_TRACE_E(0, "CreateTransaction failed.", 0, 0, 0);
         return IMS_FAILURE;
     }
 
-    if (FormBodyForInfo(piSipClientConnection->GetMessage(), strUssdString, eErrorCode) ==
-            IMS_FAILURE)
+    if (FormInfoRequest(strUssdString, eErrorCode) == IMS_FAILURE)
     {
+        IMS_TRACE_E(0, "FormInfoRequest failed.", 0, 0, 0);
+        m_pCurrentInfoClientConnection->Close();
+        m_pCurrentInfoClientConnection = IMS_NULL;
         return IMS_FAILURE;
     }
 
-    return IMS_SUCCESS;
+    IMS_RESULT eResult = m_pCurrentInfoClientConnection->Send();
+    if (eResult == IMS_FAILURE)
+    {
+        m_pCurrentInfoClientConnection->Close();
+        m_pCurrentInfoClientConnection = IMS_NULL;
+    }
+
+    return eResult;
 }
 
 PUBLIC
@@ -269,12 +315,6 @@ void UssiController::SetNextActionByTerminateUssi()
     IMS_TRACE_D("SetNextActionByTerminateUssi", 0, 0, 0);
     SetLastResult(
             UssiResult(UssiNextAction::SEND_INFO_WITH_ERROR_CODE_AND_TERMINATE, UssiError::CODE_1));
-}
-
-PUBLIC
-UssiResult UssiController::GetLastResult() const
-{
-    return m_objLastResult;
 }
 
 PRIVATE
@@ -369,27 +409,41 @@ IMS_RESULT UssiController::SetAcceptHeader(IN IMessage* piMessage)
 }
 
 PRIVATE
-IMS_RESULT UssiController::FormHeadersForInfo(IN ISipClientConnection* piSipClientConnection)
+IMS_RESULT UssiController::FormInfoRequest(IN const AString& strUssdString, IN UssiError eErrorCode)
 {
-    IMS_TRACE_D("FormHeadersForInfo", 0, 0, 0);
-    if (!piSipClientConnection)
+    IMS_TRACE_D("FormInfoRequest", 0, 0, 0);
+
+    if (FormHeadersForInfo() == IMS_FAILURE)
     {
         return IMS_FAILURE;
     }
 
-    if (piSipClientConnection->SetHeader(UssiConstants::HEADER_INFO_PACKAGE,
+    if (FormBodyForInfo(m_pCurrentInfoClientConnection->GetMessage(), strUssdString, eErrorCode) ==
+            IMS_FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    return IMS_SUCCESS;
+}
+
+PRIVATE
+IMS_RESULT UssiController::FormHeadersForInfo()
+{
+    IMS_TRACE_D("FormHeadersForInfo", 0, 0, 0);
+    if (m_pCurrentInfoClientConnection->SetHeader(UssiConstants::HEADER_INFO_PACKAGE,
                 UssiConstants::HEADER_USSD_PACKAGE) == IMS_FAILURE)
     {
         return IMS_FAILURE;
     }
 
-    if (piSipClientConnection->SetHeader(SipHeaderName::CONTENT_TYPE,
+    if (m_pCurrentInfoClientConnection->SetHeader(SipHeaderName::CONTENT_TYPE,
                 UssiConstants::HEADER_APPLICATION_USSDXML) == IMS_FAILURE)
     {
         return IMS_FAILURE;
     }
 
-    if (piSipClientConnection->SetHeader(SipHeaderName::CONTENT_DISPOSITION,
+    if (m_pCurrentInfoClientConnection->SetHeader(SipHeaderName::CONTENT_DISPOSITION,
                 UssiConstants::HEADER_INFO_PACKAGE) == IMS_FAILURE)
     {
         return IMS_FAILURE;
@@ -481,6 +535,22 @@ PRIVATE
 void UssiController::SetLastResult(IN UssiResult objResult)
 {
     m_objLastResult = objResult;
+}
+
+PRIVATE
+void UssiController::CompleteClientConnection()
+{
+    m_pCurrentInfoClientConnection->Close();
+    m_pCurrentInfoClientConnection = IMS_NULL;
+
+    if (m_objLastResult.eAction == UssiNextAction::SEND_INFO_WITH_ERROR_CODE_AND_TERMINATE)
+    {
+        // In accordance with 3GPP TS 24.390, the network is expected to initiate the BYE.
+        // However, since the call session is already ended in the telephony layer,
+        // and the spec permits the UE to trigger a BYE whenever necessary,
+        // gImsStack sends the BYE directly as a safeguard.
+        m_objContext.GetCall().Terminate(CallReasonInfo(CODE_INTERNAL_USSI_COMPLETED));
+    }
 }
 
 PRIVATE

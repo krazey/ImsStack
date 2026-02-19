@@ -33,7 +33,6 @@ import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.enabler.mtc.CallFeature;
-import com.android.imsstack.enabler.mtc.IECallStateTracker;
 import com.android.imsstack.enabler.mtc.IServiceStateTracker;
 import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcServiceStateTracker;
@@ -263,11 +262,6 @@ public class ImsCallContext implements ICallContext {
     }
 
     @Override
-    public IECallStateTracker getECallStateTracker() {
-        return mMtcApp.getCallManager().getECallStateTracker();
-    }
-
-    @Override
     public ISrvccStateTracker getSrvccStateTracker() {
         if (mSrvccStateTracker == null) {
             if (CallFeature.isSrvccSupported(getSlotId())) {
@@ -370,6 +364,6 @@ public class ImsCallContext implements ICallContext {
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-IMPL] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 }

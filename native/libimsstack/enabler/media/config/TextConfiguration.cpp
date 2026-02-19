@@ -29,7 +29,6 @@ TextConfiguration::TextConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
         m_nTextDscp(DEFAULT_TEXT_DSCP),
         m_bTextCodecEmptyRedundantEnabled(DEFAULT_EMPTY_REDUNDANT)
 {
-    IMS_TRACE_I("+TextConfiguration - SessionType[%d]", eSessionType, 0, 0);
 }
 
 PUBLIC
@@ -79,7 +78,6 @@ PUBLIC VIRTUAL IMS_BOOL TextConfiguration::Create(IN ICarrierConfig* piCc)
         return IMS_FALSE;
     }
 
-    ToDebugString();
     return IMS_TRUE;
 }
 

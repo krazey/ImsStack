@@ -22,7 +22,6 @@
 #include "ImsList.h"
 #include "IuMtcService.h"
 #include "MtcDef.h"
-#include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "call/ISilentRedialHelper.h"
@@ -39,8 +38,6 @@
 #include <functional>
 #include <memory>
 
-__IMS_TRACE_TAG_COM_MTC__;
-
 PUBLIC
 MtcCallController::MtcCallController(IN IMtcContext& objContext) :
         m_objContext(objContext),
@@ -48,12 +45,10 @@ MtcCallController::MtcCallController(IN IMtcContext& objContext) :
         m_pRedialHelper(IMS_NULL),
         m_lstByeHandlers(ImsList<ByeTransactionHandler*>())
 {
-    IMS_TRACE_D("+MtcCallController", 0, 0, 0);
 }
 
 PUBLIC VIRTUAL MtcCallController::~MtcCallController()
 {
-    IMS_TRACE_D("~MtcCallController", 0, 0, 0);
     m_objContext.ReleaseAsyncOperation(this);
     ClearByeTransactionHandlers(IMS_FALSE);
     delete m_pRedialHelper;

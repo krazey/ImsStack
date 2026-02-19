@@ -15,6 +15,7 @@
  */
 
 #include "CallReasonInfo.h"
+#include "IMtcCallStateListener.h"
 #include "IMtcContext.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
@@ -23,6 +24,7 @@
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
+#include "call/IMtcUiNotifier.h"
 #include "ect/ConsultativeTransferController.h"
 #include "ect/EctReference.h"
 
@@ -62,6 +64,40 @@ PUBLIC VIRTUAL void ConsultativeTransferController::Transfer()
     }
 
     StartTimer();
+}
+
+PUBLIC VIRTUAL void ConsultativeTransferController::OnCallStateChanged(IN CallKey nCallKey,
+        IN IMtcCall::State eState, IN [[maybe_unused]] Type eType,
+        IN [[maybe_unused]] IMS_BOOL bEmergency, IN [[maybe_unused]] IMS_SINT32 nReason)
+{
+    if (eState == IMtcCall::State::TERMINATING)
+    {
+        if (nCallKey != m_nTransferTargetKey)
+        {
+            // If the call with the transferee has terminated, it is impossible to receive the
+            // transfer result. Therefore, we must immediately notify a transfer failure and recover
+            // the call with the transfer target.
+            m_nTransfereeKey = IMtcCall::CALL_KEY_INVALID;
+
+            // OnFailed() destroys this instance, so cache necessary members.
+            IMtcContext& objContext = m_objContext;
+            CallKey nTransferTargetKey = m_nTransferTargetKey;
+            OnFailed();
+
+            IMtcCall* piTransferTarget =
+                    objContext.GetCallManager().GetCallByCallKey(nTransferTargetKey);
+            if (piTransferTarget->GetKey() == IMtcCall::CALL_KEY_INVALID)
+            {
+                return;
+            }
+            IMtcUiNotifier& objNotifier = piTransferTarget->GetCallContext().GetUiNotifier();
+            objNotifier.SendEctCompleted(IMS_FAILURE, CallReasonInfo(CODE_USER_TERMINATED));
+            return;
+        }
+
+        // The transfer process is maintained because the transfer may still succeed even if
+        // the call with the transfer target has terminated.
+    }
 }
 
 PROTECTED VIRTUAL void ConsultativeTransferController::OnSuccess()
@@ -106,7 +142,12 @@ void ConsultativeTransferController::TerminateTransferTargetCall()
     // according to 3GPP 24.629, the TransferTarget sends BYE
     // so Transferror should wait.
     // It could be 'not safe' to send BYE to TransferTarget.
-    m_objContext.GetCallManager()
-            .GetCallByCallKey(m_nTransferTargetKey)
-            ->Terminate(CallReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_ECT));
+    IMtcCall* piTransferTarget =
+            m_objContext.GetCallManager().GetCallByCallKey(m_nTransferTargetKey);
+    if (piTransferTarget->GetKey() == IMtcCall::CALL_KEY_INVALID)
+    {
+        return;
+    }
+
+    piTransferTarget->Terminate(CallReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_ECT));
 }

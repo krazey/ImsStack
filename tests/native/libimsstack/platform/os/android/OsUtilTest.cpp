@@ -55,15 +55,6 @@ protected:
     }
 };
 
-TEST_F(OsUtilTest, InitializeReadOnlyProperties)
-{
-    m_pOsUtil->InitializeReadOnlyProperties();
-    EXPECT_THAT(m_pOsUtil->IsUserMode(), AnyOf(IMS_TRUE, IMS_FALSE));
-
-    m_pOsUtil->SetDebugOn(IMS_TRUE);
-    EXPECT_TRUE(m_pOsUtil->IsDebugMode());
-}
-
 TEST_F(OsUtilTest, IsServerInfoHiddenInLog)
 {
     EXPECT_FALSE(m_pOsUtil->IsServerInfoHiddenInLog());

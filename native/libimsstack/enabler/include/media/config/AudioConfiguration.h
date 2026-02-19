@@ -196,6 +196,22 @@ public:
      */
     virtual IMS_BOOL IsAmrPayloadFormatRelaxedMatching() const;
 
+    /**
+     * @brief Determines whether to enable codec-based dynamic AS value calculation.
+     *
+     * @return IMS_TRUE to enable dynamic AS calculation, IMS_FALSE to use the static value from
+     * config.
+     */
+    virtual IMS_BOOL IsCodecBasedDynamicAsEnabled() const;
+
+    /**
+     * @brief Determines whether to set the media direction to inactive when the P-Early-Media
+     * header indicates an inactive state.
+     *
+     * @return IMS_TRUE to update the direction to inactive, IMS_FALSE to keep the current behavior.
+     */
+    virtual IMS_BOOL IsEarlyMediaDirectionInactiveOnPemInactiveEnabled() const;
+
 public:
     enum
     {
@@ -266,6 +282,10 @@ private:
     IMS_BOOL m_bAmrPayloadFormatRelaxedMatching;
     /** The duration for playing a DTMF tone in milliseconds. */
     IMS_SINT32 m_nDtmfDuration;
+    /** Indicates whether to enable codec-based dynamic AS value calculation. */
+    IMS_BOOL m_bCodecBasedDynamicAsEnabled;
+    /** Indicates whether to set media direction to inactive on PEM inactive. */
+    IMS_BOOL m_bEarlyMediaDirectionInactiveOnPemInactive;
     /** A list of ICE candidate attributes for audio. */
     ImsVector<AString> m_objAudioCandidateAttribute;
     /** A list of reasons that trigger call termination upon media inactivity. */

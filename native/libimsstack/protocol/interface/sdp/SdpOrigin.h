@@ -16,6 +16,8 @@
 #ifndef SDP_ORIGIN_H_
 #define SDP_ORIGIN_H_
 
+#include "AString.h"
+
 #include "SdpLine.h"
 
 class SdpOrigin : public SdpLine

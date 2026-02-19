@@ -50,8 +50,6 @@ PUBLIC VIRTUAL IMS_SINT32 OsWifiWatcher::GetState()
         m_nWifiState = IWifiWatcher::STATE_DISCONNECTED;
     }
 
-    IMS_TRACE_D("GetState :: state=%d", m_nWifiState, 0, 0);
-
     return m_nWifiState;
 }
 
@@ -60,7 +58,7 @@ PUBLIC VIRTUAL void OsWifiWatcher::System_NotifyEvent(
 {
     (void)nLParam;
 
-    IMS_TRACE_D("WifiWatcher :: event=%d, wp=%" PFLS_d ", lp=%" PFLS_d, nEvent, nWParam, nLParam);
+    IMS_TRACE_D("WifiWatcher: event=%d, wp=%" PFLS_d ", lp=%" PFLS_d, nEvent, nWParam, nLParam);
 
     switch (nEvent)
     {
@@ -97,7 +95,7 @@ void OsWifiWatcher::UpdateWifiConnectionStateChanged(IN IMS_UINT32 nConnectionSt
 
 void OsWifiWatcher::UpdateWifiStateChanged(IN IMS_UINT32 nState)
 {
-    IMS_TRACE_D("UpdateWifiStateChanged :: state=%d", nState, 0, 0);
+    IMS_TRACE_D("UpdateWifiStateChanged: state=%d", nState, 0, 0);
 
     switch (nState)
     {

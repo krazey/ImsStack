@@ -418,9 +418,7 @@ public final class ConferenceInfo {
         user.setSIPStatusCode(sipStatusCode);
         user.setDisconnectedCause(disconnectedCause);
 
-        synchronized(mUsers) {
-            mUsers.add(user);
-        }
+        mUsers.add(user);
 
         log("addUser: callId=" + callId + ", uid=" + dbgLog(uid) + ", status=" + status);
 
@@ -444,9 +442,7 @@ public final class ConferenceInfo {
         user.setSIPStatusCode(sipStatusCode);
         user.setDisconnectedCause(disconnectedCause);
 
-        synchronized(mUsers) {
-            mUsers.add(user);
-        }
+        mUsers.add(user);
 
         log("addUserForInterimStatus: callId=" + callId
                 + ", uid=" + dbgLog(uid) + ", status=" + status);
@@ -465,18 +461,14 @@ public final class ConferenceInfo {
      * Returns the user's count which are participated in the conference call.
      */
     public int getUserCount() {
-        synchronized (mUsers) {
-            return mUsers.size();
-        }
+        return mUsers.size();
     }
 
     /**
      * Returns the users which are participated in the conference call.
      */
     public List<User> getUsers() {
-        synchronized (mUsers) {
-            return mUsers;
-        }
+        return mUsers;
     }
 
     /**
@@ -510,11 +502,9 @@ public final class ConferenceInfo {
      */
     public User getUserForCallConnectionId(int callConnectionId) {
         if (callConnectionId > 0) {
-            synchronized (mUsers) {
-                for (User user : mUsers) {
-                    if (user.getCallConnectionId() == callConnectionId) {
-                        return user;
-                    }
+            for (User user : mUsers) {
+                if (user.getCallConnectionId() == callConnectionId) {
+                    return user;
                 }
             }
         }
@@ -537,15 +527,13 @@ public final class ConferenceInfo {
     }
 
     public boolean hasActiveUser() {
-        synchronized (mUsers) {
-            if (mUsers.isEmpty()) {
-                return false;
-            }
+        if (mUsers.isEmpty()) {
+            return false;
+        }
 
-            for (User user : mUsers) {
-                if (user.isReportable()) {
-                    return true;
-                }
+        for (User user : mUsers) {
+            if (user.isReportable()) {
+                return true;
             }
         }
 
@@ -553,10 +541,8 @@ public final class ConferenceInfo {
     }
 
     public void notifyUserStatusIfChanged() {
-        synchronized(mUsers) {
-            for (User user : mUsers) {
-                user.notifyStatusChange();
-            }
+        for (User user : mUsers) {
+            user.notifyStatusChange();
         }
     }
 
@@ -564,9 +550,7 @@ public final class ConferenceInfo {
         User user = getUser(callId, uid);
 
         if (user != null) {
-            synchronized(mUsers) {
-                mUsers.remove(user);
-            }
+            mUsers.remove(user);
         }
     }
 
@@ -691,11 +675,9 @@ public final class ConferenceInfo {
      */
     private User getUser(String uid) {
         if (uid != null) {
-            synchronized (mUsers) {
-                for (User user : mUsers) {
-                    if (uid.equals(user.getId())) {
-                        return user;
-                    }
+            for (User user : mUsers) {
+                if (uid.equals(user.getId())) {
+                    return user;
                 }
             }
         }
@@ -708,11 +690,9 @@ public final class ConferenceInfo {
      */
     private User getUserForCallId(String callId) {
         if (callId != null) {
-            synchronized (mUsers) {
-                for (User user : mUsers) {
-                    if (callId.equals(user.getCallId())) {
-                        return user;
-                    }
+            for (User user : mUsers) {
+                if (callId.equals(user.getCallId())) {
+                    return user;
                 }
             }
         }
@@ -725,12 +705,10 @@ public final class ConferenceInfo {
      */
     private User getUserForCallIdWithPartialMatch(String callId) {
         if (callId != null) {
-            synchronized (mUsers) {
-                for (User user : mUsers) {
-                    String userCallId = user.getCallId();
-                    if ((userCallId != null) && userCallId.contains(callId)) {
-                        return user;
-                    }
+            for (User user : mUsers) {
+                String userCallId = user.getCallId();
+                if ((userCallId != null) && userCallId.contains(callId)) {
+                    return user;
                 }
             }
         }
@@ -743,11 +721,9 @@ public final class ConferenceInfo {
      */
     private User getUserForEndpointEntity(String endpointEntity) {
         if (endpointEntity != null) {
-            synchronized (mUsers) {
-                for (User user : mUsers) {
-                    if (endpointEntity.equals(user.getEndpoint())) {
-                        return user;
-                    }
+            for (User user : mUsers) {
+                if (endpointEntity.equals(user.getEndpoint())) {
+                    return user;
                 }
             }
         }
@@ -760,11 +736,9 @@ public final class ConferenceInfo {
      */
     private User getUserForUserEntity(String userEntity) {
         if (userEntity != null) {
-            synchronized (mUsers) {
-                for (User user : mUsers) {
-                    if (userEntity.equals(user.getUser())) {
-                        return user;
-                    }
+            for (User user : mUsers) {
+                if (userEntity.equals(user.getUser())) {
+                    return user;
                 }
             }
         }
@@ -777,11 +751,9 @@ public final class ConferenceInfo {
      */
     private User getUserForUuid(String uuid) {
         if (!TextUtils.isEmpty(uuid)) {
-            synchronized (mUsers) {
-                for (User user : mUsers) {
-                    if (uuid.equals(user.getUuid())) {
-                        return user;
-                    }
+            for (User user : mUsers) {
+                if (uuid.equals(user.getUuid())) {
+                    return user;
                 }
             }
         }
@@ -790,11 +762,11 @@ public final class ConferenceInfo {
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-CALL] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 
     private static void logi(String s) {
-        ImsLog.i("[GII-CALL] " + s);
+        ImsLog.i("[ISIL] " + s);
     }
 
     private static String dbgLog(String s) {

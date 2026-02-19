@@ -41,6 +41,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsAnbrSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSupportMultiConfigInEarlySession, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSdpReofferFullCapability, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsAddCLineForEachMediaEnabled, (), (const override));
 };
 
 #endif  // MOCK_MEDIA_SESSION_CONFIG_H_

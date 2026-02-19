@@ -24,9 +24,7 @@ import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsStreamMediaProfile;
 import android.telephony.ims.ImsVideoCallProvider;
 import android.telephony.ims.stub.ImsCallSessionImplBase;
-import android.widget.Toast;
 
-import com.android.imsstack.R;
 import com.android.imsstack.enabler.mtc.CallFeature;
 import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
@@ -75,16 +73,12 @@ public final class ImsVideoCallSession implements IVideoCallSession {
 
     @Override
     public int getSessionModificationType() {
-        synchronized (this) {
-            return mModificationType;
-        }
+        return mModificationType;
     }
 
     @Override
     public ImsStreamMediaProfile getProposedStreamMediaProfile() {
-        synchronized (this) {
-            return mProposalMediaProfile;
-        }
+        return mProposalMediaProfile;
     }
 
     @Override
@@ -120,20 +114,6 @@ public final class ImsVideoCallSession implements IVideoCallSession {
 
         logi("SessionModification-Request(SEND) :: "
                 + ImsCallMediaUtils.toString(toProfile));
-
-        if (checkAndRejectVideoCallControl(fromProfile, toProfile)) {
-            mVideoCallProvider.receiveSessionModifyResponse(
-                    Connection.VideoProvider.SESSION_MODIFY_REQUEST_INVALID,
-                    toProfile, fromProfile);
-
-            Toast.makeText(mCallContext.getContext(), mCallContext.getContext().getString(
-                    R.string.turning_off_camera_not_supported), Toast.LENGTH_SHORT).show();
-
-            if (mEventListener != null) {
-                mEventListener.onSessionModificationAbortedByCameraOff();
-            }
-            return;
-        }
 
         VideoProfile proposalProfile = ImsCallMediaUtils.cloneVideoProfile(toProfile);
 
@@ -465,16 +445,12 @@ public final class ImsVideoCallSession implements IVideoCallSession {
     }
 
     public boolean isSessionModificationFinalizing() {
-        synchronized (this) {
-            return (mUpdateState == UPDATE_STATE_FINALIZING);
-        }
+        return (mUpdateState == UPDATE_STATE_FINALIZING);
     }
 
     public boolean isSessionModificationInProgress() {
-        synchronized (this) {
-            return (mUpdateState == UPDATE_STATE_SENT)
-                    || (mUpdateState == UPDATE_STATE_RECEIVED);
-        }
+        return (mUpdateState == UPDATE_STATE_SENT)
+                || (mUpdateState == UPDATE_STATE_RECEIVED);
     }
 
     public void notifyCallEvent(int event) {
@@ -592,32 +568,6 @@ public final class ImsVideoCallSession implements IVideoCallSession {
         setProposedStreamMediaProfile(null);
     }
 
-    private boolean checkAndRejectVideoCallControl(
-            VideoProfile fromProfile, VideoProfile toProfile) {
-        if (!ImsCallUtils.isCallOnNativeAppsAndCountryKR(mCallContext)) {
-            return false;
-        }
-
-        int fromState = (fromProfile != null) ? fromProfile.getVideoState()
-                : VideoProfile.STATE_BIDIRECTIONAL;
-        int toState = (toProfile != null) ? toProfile.getVideoState()
-                : VideoProfile.STATE_BIDIRECTIONAL;
-
-        if (VideoProfile.isBidirectional(fromState)) {
-            if ((!VideoProfile.isBidirectional(toState)
-                    && (VideoProfile.isTransmissionEnabled(toState)
-                        || VideoProfile.isReceptionEnabled(toState)))
-                    || VideoProfile.isPaused(toState)) {
-                log("checkAndRejectVideoCallControl :: rejected - from="
-                        + ImsCallMediaUtils.toString(fromProfile)
-                        + ", to=" + ImsCallMediaUtils.toString(toProfile));
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     private ImsStreamMediaProfile createProposalMedia(VideoProfile profile,
             boolean sessionModificationRequest) {
         ImsCallProfile callProfile = getCallProfile();
@@ -724,49 +674,39 @@ public final class ImsVideoCallSession implements IVideoCallSession {
     }
 
     private void setProposedStreamMediaProfile(ImsStreamMediaProfile profile) {
-        synchronized (this) {
-            mProposalMediaProfile = profile;
-        }
+        mProposalMediaProfile = profile;
     }
 
     private void setUpdateState(int state) {
-        synchronized (this) {
-            if ((mUpdateState == UPDATE_STATE_IDLE)
-                    && (state == UPDATE_STATE_FINALIZING)) {
-                log("ImsVideoCallSession :: FINALIZING on IDLE - Ignored");
-                return;
-            }
+        if ((mUpdateState == UPDATE_STATE_IDLE)
+                && (state == UPDATE_STATE_FINALIZING)) {
+            log("ImsVideoCallSession :: FINALIZING on IDLE - Ignored");
+            return;
+        }
 
-            if (mUpdateState != state) {
-                logi("ImsVideoCallSession :: " + updateStateToString(mUpdateState)
-                        + " >> " + updateStateToString(state));
+        if (mUpdateState != state) {
+            logi("ImsVideoCallSession :: " + updateStateToString(mUpdateState)
+                    + " >> " + updateStateToString(state));
 
-                mUpdateState = state;
-            }
+            mUpdateState = state;
         }
     }
 
     private VideoProfile getProposalProfile() {
-        synchronized (this) {
-            return mProposalProfile;
-        }
+        return mProposalProfile;
     }
 
     private void setProposalProfile(VideoProfile profile) {
-        synchronized (this) {
-            mProposalProfile = profile;
-        }
+        mProposalProfile = profile;
     }
 
     private void setSessionModificationType(int type) {
-        synchronized (this) {
-            if (mModificationType != type) {
-                log("ImsVideoCallSession(mod-type) :: "
-                        + modificationTypeToString(mModificationType)
-                        + " >> " + modificationTypeToString(type));
+        if (mModificationType != type) {
+            log("ImsVideoCallSession(mod-type) :: "
+                    + modificationTypeToString(mModificationType)
+                    + " >> " + modificationTypeToString(type));
 
-                mModificationType = type;
-            }
+            mModificationType = type;
         }
     }
 
@@ -827,14 +767,14 @@ public final class ImsVideoCallSession implements IVideoCallSession {
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-IMPL] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 
     private static void logi(String s) {
-        ImsLog.i("[GII-IMPL] " + s);
+        ImsLog.i("[ISIL] " + s);
     }
 
     private void loge(String message, Throwable t) {
-        ImsLog.e("[GII-IMPL] " + message, t);
+        ImsLog.e("[ISIL] " + message, t);
     }
 }

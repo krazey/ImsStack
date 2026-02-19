@@ -22,6 +22,7 @@
 #include "video/VideoDef.h"
 #include "video/VideoProfile.h"
 #include "video/VideoSdpParser.h"
+#include "SdpAttribute.h"
 #include "SdpMedia.h"
 #include "core/media/MockIMediaDescriptor.h"
 #include "core/MockISessionDescriptor.h"
@@ -377,4 +378,32 @@ TEST_F(VideoSdpParserTest, ParsePayloadTypeNumber)
     ASSERT_NE(payload2, nullptr);
     EXPECT_EQ(payload2->GetRtpMap().GetPayloadNumber(), 97);
     EXPECT_EQ(payload2->GetFmtp(), nullptr);
+}
+
+TEST_F(VideoSdpParserTest, ParsePayloadsSkipsNonRtpFormats)
+{
+    TestableVideoSdpParser objParser;
+    VideoProfile objProfile;
+    ImsList<SdpMediaFormat*> lstMediaFormats;
+
+    auto pValidCodec = std::make_unique<SdpAvCodec>();
+    pValidCodec->SetParameters("96 H264/90000", "");  // Dynamic payload, valid codec
+    lstMediaFormats.Append(pValidCodec.get());
+
+    // Its type is TYPE_MSRP.
+    auto pMsrpFormat = std::make_unique<SdpMediaFormat>(SdpMediaFormat::TYPE_MSRP);
+    pMsrpFormat->SetValue("*");
+    lstMediaFormats.Append(pMsrpFormat.get());
+
+    auto pAnotherValidCodec = std::make_unique<SdpAvCodec>();
+    pAnotherValidCodec->SetParameters("97 H265/90000", "");
+    lstMediaFormats.Append(pAnotherValidCodec.get());
+
+    const ImsList<SdpMediaFormat*>& constListMediaFormats = lstMediaFormats;
+    ON_CALL(m_objMockMediaDescriptor, GetMediaFormats())
+            .WillByDefault(ReturnRef(constListMediaFormats));
+
+    objParser.ParsePayloads(&m_objMockMediaDescriptor, &objProfile);
+
+    EXPECT_EQ(objProfile.GetPayloadList().GetSize(), 2);
 }

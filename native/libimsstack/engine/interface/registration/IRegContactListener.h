@@ -16,7 +16,9 @@
 #ifndef INTERFACE_REG_CONTACT_LISTENER_H_
 #define INTERFACE_REG_CONTACT_LISTENER_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
+
+class AString;
 
 /**
  * @brief This class provides an interface to monitor the contact binding of IMS registration.

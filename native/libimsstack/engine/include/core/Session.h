@@ -20,7 +20,6 @@
 #include "IRetryTaskHelperListener.h"
 #include "ISessionState.h"
 #include "RetryCmd.h"
-#include "RetryTaskHelper.h"
 #include "ServiceMethod.h"
 #include "SipStatusCode.h"
 #include "VirtualSession.h"
@@ -38,6 +37,7 @@ class Media;
 class Publication;
 class Reference;
 class Replaces;
+class RetryTaskHelper;
 class SdpOaState;
 class SdpReader;
 class SessionDescriptor;
@@ -430,7 +430,7 @@ public:
         /// This is to override SIP configuration for SDP handling of non-RPR.
         CONFIG_ALLOW_SDP_NEGOTIATION_ON_NON_RPR = 1 << 2,
         /// This is to indicate that early session model is supported.
-        /// ex. VRBT (Video RingBack Tone) for KR operators
+        /// ex. VRBT (Video RingBack Tone).
         CONFIG_SUPPORT_EARLY_SESSION_MODEL = 1 << 3,
         /// This is to specify whether the 100 Trying response needs to be notified to the enabler.
         CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED = 1 << 4,

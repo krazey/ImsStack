@@ -26,6 +26,7 @@
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "Sip.h"
+#include "SipAddress.h"
 #include "SipStatusCode.h"
 #include "TextParser.h"
 #include "IUceJniThread.h"

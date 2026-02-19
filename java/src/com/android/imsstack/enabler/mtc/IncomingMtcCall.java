@@ -83,7 +83,6 @@ public class IncomingMtcCall implements Parcelable {
     }
 
     public IncomingMtcCall(Parcel source) {
-        ImsLog.i("");
         readFromParcel(source);
     }
 

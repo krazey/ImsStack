@@ -475,11 +475,18 @@ public class SmsTPdu {
     }
 
     private static void logd(String s) {
+        if (!SystemProperties.getBoolean("dbg.ims.enable_pii_logging", false)) {
+            return;
+        }
         ImsLog.d(TAG + s);
     }
 
+    private static void logi(String s) {
+        ImsLog.i(TAG + s);
+    }
+
     public void dumpToLog() {
-        logd("  Direction: " + mDirection);
+        logi("  Direction: " + mDirection);
         logd("  TP-MTI: " + getMessageTypeIndicator() + " (" + getMtiString() + ")");
         logd("  TP-RP (Reply Path): " + mReplyPath);
         logd("  TP-UDHI (UDH Indicator): " + mUserDataHeaderIndicator);
@@ -495,7 +502,7 @@ public class SmsTPdu {
                 logd("  TP-DCS (Data Coding Scheme): " + getDataCodingSchemeHex());
                 logd("  TP-UDL (User Data Length): " + mUserDataLength);
             } else if (mMessageTypeIndicator == MTI_DELIVER_REPORT) {
-                logd("  TP-FCS (Failure Cause): " + String.format("0x%02X", mFailureCause));
+                logi("  TP-FCS (Failure Cause): " + String.format("0x%02X", mFailureCause));
                 appendOptionalParamsToLog();
             }
         } else { // SC_TO_MS
@@ -515,7 +522,7 @@ public class SmsTPdu {
                 logd("  TP-ST (Status): " + String.format("0x%02X", mStatus));
                 appendOptionalParamsToLog();
             } else if (mMessageTypeIndicator == MTI_SUBMIT_REPORT) {
-                logd("  TP-FCS (Failure Cause): " + String.format("0x%02X", mFailureCause));
+                logi("  TP-FCS (Failure Cause): " + String.format("0x%02X", mFailureCause));
                 appendOptionalParamsToLog();
             }
         }
@@ -526,18 +533,16 @@ public class SmsTPdu {
                     && (mUdhIei == IEI_CONCATENATED_SMS_8BIT
                             || mUdhIei == IEI_CONCATENATED_SMS_16BIT)) {
                 logd("    Concat IEI: " + String.format("0x%02X", mUdhIei));
-                logd("    Concat Ref: " + mUdhReference);
-                logd("    Concat Max: " + mUdhMaxNum);
-                logd("    Concat Seq: " + mUdhSeqNum);
+                logi("    Concat Ref: " + mUdhReference);
+                logi("    Concat Max: " + mUdhMaxNum);
+                logi("    Concat Seq: " + mUdhSeqNum);
             }
         } else {
             logd("  TP-UDH (User Data Header): Not Present");
         }
 
-        logd("  T-PDU Header: " + byteArrayToString(getTpduHeader()));
-        if (SystemProperties.getBoolean("dbg.ims.enable_pii_logging", false)) {
-            logd(" T-PDU User Data: " + byteArrayToString(mUserData));
-        }
+        logi("  T-PDU Header: " + byteArrayToString(getTpduHeader()));
+        logd(" T-PDU User Data: " + byteArrayToString(mUserData));
     }
 
     private void appendOptionalParamsToLog() {

@@ -20,7 +20,6 @@
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
 #include "ServiceTrace.h"
-#include "ServiceUtil.h"
 
 #include "ISipKeepAliveListener.h"
 #include "ISipSocketListener.h"
@@ -50,7 +49,7 @@ PUBLIC VIRTUAL SipSocket::~SipSocket()
 {
     CloseSocket();
 #ifdef __IMS_SIP_DEBUG__
-    IMS_TRACE_D("Destructor :: SipSocket", 0, 0, 0);
+    IMS_TRACE_D("dtor: SipSocket", 0, 0, 0);
 #endif
 }
 
@@ -112,7 +111,7 @@ PUBLIC VIRTUAL IMS_BOOL SipSocket::Create(
         return IMS_FALSE;
     }
 
-    // Check the socket option and set it if it is present...
+    // Check the socket option and set it if it is present.
     SetSocketOptions(objIp, nPort);
 
     if ((m_objSockAddr.GetType() != SipSocketAddress::SOCKET_UDP) &&
@@ -338,7 +337,7 @@ void SipSocket::SetSocketOptionForTcpMaxSeg(
     // because ePDG can use the IPv6 for tunneling.
     if (bWfcSupported && (nMss > Sip::MTU_IPV6))
     {
-        IMS_TRACE_I("MTU(%s) :: %d >> %d", (bIpV6 ? "IPv6" : "IPv4"), nMss, Sip::MTU_IPV6);
+        IMS_TRACE_I("MTU(%s): %d >> %d", (bIpV6 ? "IPv6" : "IPv4"), nMss, Sip::MTU_IPV6);
         nMss = Sip::MTU_IPV6;
     }
 
@@ -404,22 +403,17 @@ void SipSocket::SetSocketOptions(IN const IpAddress& objLocalIp, IN IMS_UINT32 n
                 IMS_TRACE_E(0, "Setting IP-level QoS failed", 0, 0, 0);
             }
 
-            if (IMS_UTIL_SYS_PROP_IS_DEBUG_MODE())
-            {
-                IMS_TRACE_D("SipSocket :: OPT_IP_QOS (option=0x%02X)", pIpQos->nValue, 0, 0);
-            }
+#ifdef __IMS_SIP_DEBUG__
+            IMS_TRACE_D("SipSocket: OPT_IP_QOS (option=0x%02X)", pIpQos->nValue, 0, 0);
+#endif
         }
-    }
-    else if (IMS_UTIL_SYS_PROP_IS_DEBUG_MODE())
-    {
-        IMS_TRACE_D("SipSocket :: OPT_IP_QOS is not configured", 0, 0, 0);
     }
 }
 
 PROTECTED
 void SipSocket::SetState(IN IMS_SINT32 nState)
 {
-    IMS_TRACE_I("SipSocket :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
+    IMS_TRACE_I("SipSocket: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
     m_nState = nState;
 }
@@ -448,10 +442,9 @@ PROTECTED GLOBAL void SipSocket::SetSocketOption(IN IMS_SINT32 nSlotId, IN ISock
                 IMS_TRACE_E(0, "Setting %s failed", pszOptionName, 0, 0);
             }
 
-            if (IMS_UTIL_SYS_PROP_IS_DEBUG_MODE())
-            {
-                IMS_TRACE_D("SipSocket :: %s (option=%d)", pszOptionName, pSockOpt->nValue, 0);
-            }
+#ifdef __IMS_SIP_DEBUG__
+            IMS_TRACE_D("SipSocket: %s (option=%d)", pszOptionName, pSockOpt->nValue, 0);
+#endif
         }
     }
 }

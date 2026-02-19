@@ -39,6 +39,7 @@
 #include "MockITimer.h"
 #include "MtsDef.h"
 #include "PlatformContext.h"
+#include "SipAddress.h"
 #include "SipHeaderName.h"
 #include "TestConfigService.h"
 #include "TestPhoneInfoService.h"

@@ -27,6 +27,7 @@
 #include "ect/EctController.h"
 #include "ect/EctFactory.h"
 #include "ect/MockIEctControllerListener.h"
+#include "helper/MockICallStateProxy.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;
@@ -66,6 +67,7 @@ public:
     MockIMtcUiNotifier objNotifier;
     MockIMtcCall objTransfereeCall;
     MockIMtcCallContext objTransfereeCallContext;
+    MockICallStateProxy objCallStateProxy;
 
 protected:
     virtual void SetUp() override
@@ -77,6 +79,7 @@ protected:
                 .WillByDefault(ReturnRef(objTransfereeCallContext));
         ON_CALL(objTransfereeCall, GetKey).WillByDefault(Return(TRANSFEREE_KEY));
         ON_CALL(objTransfereeCallContext, GetUiNotifier).WillByDefault(ReturnRef(objNotifier));
+        ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
 
         pController = new EctController(objContext, TRANSFEREE_KEY, objListener, objFactory);
     }

@@ -55,7 +55,7 @@ private:
 
     IMS_SINT32 m_nState;
     IMS_UINTP m_nTimerId;
-    // For internal uses :: compare the internal timer id with lParam
+    // For internal uses: compare the internal timer id with lParam
     IMS_UINT32 m_nInternalTimerId;
 };
 

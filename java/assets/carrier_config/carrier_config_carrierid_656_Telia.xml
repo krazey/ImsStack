@@ -22,6 +22,7 @@
     <int-array name="ims.keep_reg_with_mmtel_feature_tag_policy_int_array" num="1">
         <item value="3"/>
     </int-array>
+    <int name="imswfc.registration_private_header_int" value="1"/>
 
     <!-- Ut/Xcap -->
     <int name="imsss.ut_xcap_apn_inactivity_timer_sec_int" value="30"/>

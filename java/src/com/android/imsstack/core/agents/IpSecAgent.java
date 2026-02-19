@@ -18,9 +18,13 @@ package com.android.imsstack.core.agents;
 import android.content.Context;
 import android.util.SparseArray;
 
+import androidx.annotation.NonNull;
+
 import com.android.imsstack.system.IpSecSaParameter;
 import com.android.imsstack.system.SystemCallInterface;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.IndentingPrintWriter;
+import com.android.imsstack.util.LocalLog;
 
 import java.io.FileDescriptor;
 
@@ -28,6 +32,7 @@ public class IpSecAgent implements IpSecInterface {
     /** In general, IMS can have up to 3 security associations at the same time. */
     private static final int MAX_CONNECTOR = 3;
 
+    private final LocalLog mLocalLog = new LocalLog(10);
     private final int mSlotId;
     private final SparseArray<IpSecConnector> mConnectors;
 
@@ -48,7 +53,7 @@ public class IpSecAgent implements IpSecInterface {
 
     @Override
     public int addIpSecSaParameter(IpSecSaParameter param) {
-        ImsLog.d(this, mSlotId, "IpSec: add=" + param.toString());
+        logd("IpSec: add=" + param.toString());
 
         IpSecConnector connector = mConnectors.get(param.getId());
 
@@ -73,7 +78,7 @@ public class IpSecAgent implements IpSecInterface {
     public void removeIpSecSaParameter(int ipSecId) {
         IpSecConnector connector = mConnectors.get(ipSecId);
 
-        ImsLog.d(this, mSlotId, "IpSec: remove="
+        logd("IpSec: remove="
                 + (connector != null ? connector.getSaParameter().toString() : "not-found"));
 
         if (connector != null) {
@@ -114,5 +119,21 @@ public class IpSecAgent implements IpSecInterface {
                 }
             }
         }
+    }
+
+    @Override
+    public void dump(@NonNull IndentingPrintWriter pw) {
+        pw.println("IpSecAgent:");
+        pw.increaseIndent();
+        pw.println("Most recent logs:");
+        pw.increaseIndent();
+        mLocalLog.dump(pw);
+        pw.decreaseIndent();
+        pw.decreaseIndent();
+    }
+
+    private void logd(String s) {
+        ImsLog.d(this, mSlotId, s);
+        mLocalLog.log(s);
     }
 }

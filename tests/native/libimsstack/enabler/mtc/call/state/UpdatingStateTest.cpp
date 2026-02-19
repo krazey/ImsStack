@@ -141,8 +141,7 @@ protected:
         ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
         ON_CALL(objMediaManager, GetNegotiationState(&objSession))
                 .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
-        const SipMethod objMethod(SipMethod::ACK);
-        ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
+        ON_CALL(objMessage, GetMethod()).WillByDefault(ReturnRef(*pSipMethod));
         ON_CALL(objMediaManager, NegotiateSdp(&objSession)).WillByDefault(Return(objNegoResult));
     }
 

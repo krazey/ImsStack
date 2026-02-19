@@ -52,7 +52,9 @@ PUBLIC VIRTUAL IIpSecSp* OsIpSecPolicy::CreateSp()
 {
     OsIpSecSp* pIpSecSp = new OsIpSecSp();
 
-    IMS_TRACE_D("CreateSP(%p)", pIpSecSp, 0, 0);
+#ifdef __IMS_DEBUG__
+    IMS_TRACE_D("CreateSp(%p)", pIpSecSp, 0, 0);
+#endif
 
     m_objIpSecSps.Append(pIpSecSp);
 
@@ -61,27 +63,29 @@ PUBLIC VIRTUAL IIpSecSp* OsIpSecPolicy::CreateSp()
 
 PUBLIC VIRTUAL void OsIpSecPolicy::DestroySp(IN IIpSecSp* piSp)
 {
-    IMS_TRACE_D("DestroySP(%p)", piSp, 0, 0);
-
     for (IMS_UINT32 i = 0; i < m_objIpSecSps.GetSize(); i++)
     {
         OsIpSecSp* pIpSecSp = m_objIpSecSps.GetAt(i);
 
         if (pIpSecSp == piSp)
         {
-            IMS_TRACE_I("DestroySP :: SP(%p) removed", piSp, 0, 0);
             delete pIpSecSp;
             m_objIpSecSps.RemoveAt(i);
-            break;
+            IMS_TRACE_I("DestroySp: SP(%p) removed (size:%d)", piSp, m_objIpSecSps.GetSize(), 0);
+            return;
         }
     }
+
+    IMS_TRACE_D("DestroySp: SP(%p) not found", piSp, 0, 0);
 }
 
 PUBLIC VIRTUAL IIpSecSa* OsIpSecPolicy::CreateSa()
 {
     OsIpSecSa* pIpSecSa = new OsIpSecSa();
 
-    IMS_TRACE_D("CreateSA(%p)", pIpSecSa, 0, 0);
+#ifdef __IMS_DEBUG__
+    IMS_TRACE_D("CreateSa(%p)", pIpSecSa, 0, 0);
+#endif
 
     m_objIpSecSas.Append(pIpSecSa);
 
@@ -90,20 +94,20 @@ PUBLIC VIRTUAL IIpSecSa* OsIpSecPolicy::CreateSa()
 
 PUBLIC VIRTUAL void OsIpSecPolicy::DestroySa(IN IIpSecSa* piSa)
 {
-    IMS_TRACE_D("DestroySA(%p)", piSa, 0, 0);
-
     for (IMS_UINT32 i = 0; i < m_objIpSecSas.GetSize(); i++)
     {
         OsIpSecSa* pIpSecSa = m_objIpSecSas.GetAt(i);
 
         if (pIpSecSa == piSa)
         {
-            IMS_TRACE_I("DestroySA :: SA(%p) removed", piSa, 0, 0);
             delete pIpSecSa;
             m_objIpSecSas.RemoveAt(i);
-            break;
+            IMS_TRACE_I("DestroySa: SA(%p) removed (size:%d)", piSa, m_objIpSecSas.GetSize(), 0);
+            return;
         }
     }
+
+    IMS_TRACE_D("DestroySa: SA(%p) not found", piSa, 0, 0);
 }
 
 PUBLIC VIRTUAL void OsIpSecPolicy::ManageLifetime(IMS_UINT32 nDuration)
@@ -113,7 +117,7 @@ PUBLIC VIRTUAL void OsIpSecPolicy::ManageLifetime(IMS_UINT32 nDuration)
 
     IMS_UINTP nTid = m_piTimer->SetTimer(nDuration, this);
 
-    IMS_TRACE_I("SA lifetime - timer(%" PFLS_u ") started", nTid, 0, 0);
+    IMS_TRACE_I("SA lifetime: timer(%" PFLS_u ") started", nTid, 0, 0);
 }
 
 PUBLIC VIRTUAL void OsIpSecPolicy::SetListener(IN IIpSecPolicyListener* piListener)
@@ -124,7 +128,7 @@ PUBLIC VIRTUAL void OsIpSecPolicy::SetListener(IN IIpSecPolicyListener* piListen
 PUBLIC
 void OsIpSecPolicy::DestroyAllSas()
 {
-    IMS_TRACE_I("DestroyAllSAs - SP-size(%d), SA-size(%d)", m_objIpSecSps.GetSize(),
+    IMS_TRACE_I("DestroyAllSas: SP-size(%d), SA-size(%d)", m_objIpSecSps.GetSize(),
             m_objIpSecSas.GetSize(), 0);
 
     for (IMS_UINT32 i = 0; i < m_objIpSecSps.GetSize(); i++)
@@ -159,20 +163,16 @@ const ImsList<OsIpSecSa*>& OsIpSecPolicy::GetSAs() const
 PUBLIC
 OsIpSecSp* OsIpSecPolicy::FindSp(IN IMS_UINT32 nSpi)
 {
-    IMS_TRACE_D("FindSp -- starts", 0, 0, 0);
-
     for (IMS_UINT32 i = 0; i < m_objIpSecSps.GetSize(); i++)
     {
         OsIpSecSp* pIpSecSp = m_objIpSecSps.GetAt(i);
 
         if (pIpSecSp->GetSpi() == nSpi)
         {
-            IMS_TRACE_I("FindSP - SP=%p", pIpSecSp, 0, 0);
+            IMS_TRACE_I("FindSp: SP=%p", pIpSecSp, 0, 0);
             return pIpSecSp;
         }
     }
-
-    IMS_TRACE_D("FindSp -- ends", 0, 0, 0);
 
     return IMS_NULL;
 }
@@ -180,20 +180,16 @@ OsIpSecSp* OsIpSecPolicy::FindSp(IN IMS_UINT32 nSpi)
 PUBLIC
 OsIpSecSa* OsIpSecPolicy::FindSa(IN IMS_UINT32 nSpi)
 {
-    IMS_TRACE_D("FindSa -- starts", 0, 0, 0);
-
     for (IMS_UINT32 i = 0; i < m_objIpSecSas.GetSize(); i++)
     {
         OsIpSecSa* pIpSecSa = m_objIpSecSas.GetAt(i);
 
         if (pIpSecSa->GetSpi() == nSpi)
         {
-            IMS_TRACE_I("FindSA - SA=%p", pIpSecSa, 0, 0);
+            IMS_TRACE_I("FindSa: SA=%p", pIpSecSa, 0, 0);
             return pIpSecSa;
         }
     }
-
-    IMS_TRACE_D("FindSa -- ends", 0, 0, 0);
 
     return IMS_NULL;
 }

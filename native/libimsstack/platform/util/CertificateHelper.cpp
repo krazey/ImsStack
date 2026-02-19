@@ -56,7 +56,7 @@ void CertificateHelper::Init()
     // Sample fingerprint: "06:11:F7:C0:1F:93:54:0F:50:AA:95:A9:84:55:7B:CD:09:78:B9:EB"
     m_strFingerPrint = AString::ConstNull();
 
-    IMS_TRACE_D("Init :: Certificate(%s) -> Fingerprint(%s)", m_strCertificateName.GetStr(),
+    IMS_TRACE_D("Init: Certificate(%s) -> Fingerprint(%s)", m_strCertificateName.GetStr(),
             m_strFingerPrint.GetStr(), 0);
 }
 

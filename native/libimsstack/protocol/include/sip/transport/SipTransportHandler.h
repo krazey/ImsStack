@@ -16,7 +16,11 @@
 #ifndef __SIP_TRANSPORT_HANDLER_H__
 #define __SIP_TRANSPORT_HANDLER_H__
 
-#include "transport/SipTransportInfo.h"
+#include "SipDatatypes.h"
+
+class SipTransportBuffer;
+class SipTransportInfo;
+class SipTransportParameter;
 
 class SipTransportHandler
 {

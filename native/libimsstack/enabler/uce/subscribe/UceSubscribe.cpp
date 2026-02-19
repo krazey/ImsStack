@@ -28,6 +28,7 @@
 #include "ServiceMessage.h"
 #include "ServiceTimer.h"
 #include "ServiceUtil.h"
+#include "SipAddress.h"
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
 #include "TextParser.h"

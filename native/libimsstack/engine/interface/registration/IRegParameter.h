@@ -16,13 +16,13 @@
 #ifndef INTERFACE_REG_PARAMETER_H_
 #define INTERFACE_REG_PARAMETER_H_
 
-#include "AStringArray.h"
-
-#include "SipAddress.h"
 #include "SipSecurityHeader.h"
-#include "SipTimerValues.h"
+
+class AStringArray;
 
 class ISipMessageBodyPart;
+class SipAddress;
+class SipTimerValues;
 
 /**
  * @brief This class provides an interface to access/control SIP header/parameters

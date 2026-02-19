@@ -98,7 +98,7 @@ PUBLIC VIRTUAL OsTimerService::~OsTimerService()
 
     osTimerService_RemoveListener(this);
 
-    IMS_TRACE_D("Destructor :: TimerService", 0, 0, 0);
+    IMS_TRACE_D("dtor: TimerService", 0, 0, 0);
 }
 
 PUBLIC
@@ -212,11 +212,9 @@ PRIVATE VIRTUAL void OsTimerService::System_NotifyEvent(
 
     if (nEvent != IMS_SYSTEM_TIMER_EXPIRED)
     {
-        IMS_TRACE_D("Event(%d) will be ignored", nEvent, 0, 0);
+        IMS_TRACE_D("Event(%d) ignored", nEvent, 0, 0);
         return;
     }
-
-    IMS_TRACE_D("TimerExpired (timerId=%" PFLS_u ")", nWParam, 0, 0);
 
     m_objLockTimer.Lock();
 
@@ -254,16 +252,15 @@ void OsTimerService::NotifyTimerExpired(IN OsTimerWrapper* pTimerWrapper)
 
     if (piOwnerThread == IMS_NULL)
     {
-        IMS_TRACE_D("Timer (%" PFLS_u ") is already stopped", pTimerWrapper->GetTimerId(), 0, 0);
+        IMS_TRACE_D("Timer(%" PFLS_u ") is already stopped", pTimerWrapper->GetTimerId(), 0, 0);
         return;
     }
 
     ImsMessage objMsg(IMS_MSG_TIMER, pTimerWrapper->m_pTimer->GetTimerId(),
             pTimerWrapper->m_pTimer->GetInternalTimerId());
 
-    IMS_TRACE_D("Timer (%" PFLS_u ", %d) is expired; size=%d",
-            pTimerWrapper->m_pTimer->GetTimerId(), pTimerWrapper->m_pTimer->GetInternalTimerId(),
-            m_objTimers.GetSize());
+    IMS_TRACE_D("Timer(%" PFLS_u "-%d) is expired; size=%d", pTimerWrapper->m_pTimer->GetTimerId(),
+            pTimerWrapper->m_pTimer->GetInternalTimerId(), m_objTimers.GetSize());
 
     MessageService::PostMessageThread(piOwnerThread, objMsg);
 }

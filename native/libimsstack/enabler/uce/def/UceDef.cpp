@@ -43,7 +43,7 @@ PUBLIC GLOBAL const IMS_CHAR UceTag::TAG_CHAT[] =
         "urn%3Aurn-7%3A3gpp-service.ims.icsi.oma.cpm.session";
 
 PUBLIC GLOBAL const IMS_CHAR UceTag::TAG_IM[] =
-        "urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.im";  // KR RCS
+        "urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.im";  // RCS
 
 PUBLIC GLOBAL const IMS_CHAR UceTag::TAG_FULL_STORE_AND_FORWARD_GROUP_CHAT[] =
         "urn%3Aurn-7%3A3gppapplication.ims.iari.rcs.fullsfgroupchat";
@@ -55,16 +55,16 @@ PUBLIC GLOBAL const IMS_CHAR UceTag::TAG_FILE_TRANSFER_STORE_AND_FORWARD[] =
         "urn%3Aurn-7%3A3gppapplication.ims.iari.rcs.ftstandfw";
 
 PUBLIC GLOBAL const IMS_CHAR UceTag::TAG_FILE_TRANSFER_HTTP[] =
-        "urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.fthttp";  // KR RCS
+        "urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.fthttp";  // RCS
 
 PUBLIC GLOBAL const IMS_CHAR UceTag::TAG_GEOLOCATION_PUSH[] =
-        "urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.geopush";  // KR RCS
+        "urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.geopush";  // RCS
 
 PUBLIC GLOBAL const IMS_CHAR UceTag::TAG_FT_SMS[] =
-        "urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.ftsms";  // KR RCS
+        "urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.ftsms";  // RCS
 
 PUBLIC GLOBAL const IMS_CHAR UceTag::TAG_GEOLOCATIONPUSH_SMS[] =
-        "urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.geosms";  // KR RCS
+        "urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.geosms";  // RCS
 
 PUBLIC GLOBAL const IMS_CHAR UceTag::TAG_PRESENCE[] =
         "urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.dp";

@@ -18,11 +18,13 @@
 
 #include "IpAddress.h"
 
-#include "SdpAttribute.h"
-#include "SdpBandwidth.h"
-#include "SdpMedia.h"
-#include "offeranswer/SdpMediaFormat.h"
 #include "offeranswer/SdpPrecondition.h"
+
+class AStringArray;
+
+class SdpAttribute;
+class SdpMedia;
+class SdpMediaFormat;
 
 /**
  * @brief IMediaDescriptor is an interface towards the media parts of the SDP.

@@ -28,7 +28,7 @@ __IMS_TRACE_TAG_IPL__;
 
 PUBLIC
 OsUtil::OsUtil() :
-        m_bIsUserMode(IMS_FALSE),
+        m_nBuildType(BUILD_TYPE_UNKNOWN),
         m_bImsDebugOn(IMS_FALSE),
         m_bHidePrivacyLog(IMS_FALSE),
         m_strChipsetVendor(AString::ConstNull())
@@ -36,40 +36,12 @@ OsUtil::OsUtil() :
 }
 
 PUBLIC
-OsUtil::~OsUtil() {}
-
-PUBLIC
-void OsUtil::InitializeReadOnlyProperties()
-{
-    IMS_CHAR acValue[PROPERTY_VALUE_MAX] = {
-            0,
-    };
-
-    // Debug on
-    m_bImsDebugOn = IMS_FALSE;
-
-    // Build type : "ro.build.type"
-    property_get("ro.build.type", acValue, "userdebug");
-
-    if (IMS_StrICmp(acValue, "user") == 0)
-    {
-        m_bIsUserMode = IMS_TRUE;
-    }
-    else
-    {
-        m_bIsUserMode = IMS_FALSE;
-    }
-
-    IMS_TRACE_D("SystemProperties (1) :: build_type=%s", m_bIsUserMode ? "user" : "non-user", 0, 0);
-}
-
-PUBLIC
 void OsUtil::SetDebugOn(IN IMS_BOOL bDebugOn)
 {
     if (bDebugOn != m_bImsDebugOn)
     {
-        IMS_TRACE_D("System :: ImsDebugOn (%s >> %s)", _TRACE_B_(m_bImsDebugOn),
-                _TRACE_B_(bDebugOn), 0);
+        IMS_TRACE_D(
+                "System: ImsDebugOn (%s >> %s)", _TRACE_B_(m_bImsDebugOn), _TRACE_B_(bDebugOn), 0);
 
         m_bImsDebugOn = bDebugOn;
     }
@@ -107,7 +79,25 @@ PUBLIC VIRTUAL IMS_BOOL OsUtil::IsServerInfoHiddenInLog() const
 
 PUBLIC VIRTUAL IMS_BOOL OsUtil::IsUserMode() const
 {
-    return m_bIsUserMode;
+    if (m_nBuildType == BUILD_TYPE_UNKNOWN)
+    {
+        IMS_CHAR acValue[PROPERTY_VALUE_MAX] = {
+                0,
+        };
+
+        // Build type : "ro.build.type"
+        property_get("ro.build.type", acValue, "userdebug");
+
+        if (IMS_StrICmp(acValue, "user") == 0)
+        {
+            m_nBuildType = BUILD_TYPE_USER;
+        }
+        else
+        {
+            m_nBuildType = BUILD_TYPE_DEBUG;
+        }
+    }
+    return m_nBuildType == BUILD_TYPE_USER;
 }
 
 PUBLIC GLOBAL OsUtil* OsUtil::GetInstance()
@@ -169,7 +159,7 @@ PRIVATE VIRTUAL IMS_BOOL OsUtil::Compress(IN const ByteArray& objData, OUT ByteA
     if ((nError = deflateInit2(&stream, Z_DEFAULT_COMPRESSION, Z_DEFLATED, GZIP_MAX_WBITS,
                  MAX_MEM_LEVEL, Z_FILTERED)) != Z_OK)
     {
-        IMS_TRACE_E(0, "ZLib :: deflateInit (%d, %s)", nError,
+        IMS_TRACE_E(0, "ZLib: deflateInit (%d, %s)", nError,
                 (stream.msg != IMS_NULL) ? stream.msg : "-", 0);
         return IMS_FALSE;
     }
@@ -192,11 +182,11 @@ PRIVATE VIRTUAL IMS_BOOL OsUtil::Compress(IN const ByteArray& objData, OUT ByteA
             objCompData.Append(abyCompData, MAX_COMPRESS_SIZE);
 
             ++nIndex;
-            IMS_TRACE_D("ZLib :: intermediate compressed data (index=%d)", nIndex, 0, 0);
+            IMS_TRACE_D("ZLib: intermediate compressed data (index=%d)", nIndex, 0, 0);
         }
         else
         {
-            IMS_TRACE_E(0, "ZLib :: intermediate compressed data (index=%d) >> error (%d)", nIndex,
+            IMS_TRACE_E(0, "ZLib: intermediate compressed data (index=%d) >> error (%d)", nIndex,
                     nError, 0);
             break;
         }
@@ -204,7 +194,7 @@ PRIVATE VIRTUAL IMS_BOOL OsUtil::Compress(IN const ByteArray& objData, OUT ByteA
 
     if (objCompData.GetLength() < static_cast<IMS_SINT32>(stream.total_out))
     {
-        IMS_TRACE_D("ZLib :: last compressed data (comp=%d, total=%d, avail_out=%d)",
+        IMS_TRACE_D("ZLib: last compressed data (comp=%d, total=%d, avail_out=%d)",
                 objCompData.GetLength(), stream.total_out, stream.avail_out);
         // Append the last compressed data
         objCompData.Append(abyCompData, MAX_COMPRESS_SIZE - stream.avail_out);
@@ -212,12 +202,12 @@ PRIVATE VIRTUAL IMS_BOOL OsUtil::Compress(IN const ByteArray& objData, OUT ByteA
 
     if ((nError = deflateEnd(&stream)) != Z_OK)
     {
-        IMS_TRACE_E(0, "ZLib :: deflateEnd (%d, %s)", nError,
+        IMS_TRACE_E(0, "ZLib: deflateEnd (%d, %s)", nError,
                 (stream.msg != IMS_NULL) ? stream.msg : "-", 0);
     }
 
     IMS_TRACE_D(
-            "ZLib :: compressed data (%d >> %d)", objData.GetLength(), objCompData.GetLength(), 0);
+            "ZLib: compressed data (%d >> %d)", objData.GetLength(), objCompData.GetLength(), 0);
 
     return IMS_TRUE;
 }
@@ -265,7 +255,7 @@ PRIVATE VIRTUAL IMS_BOOL OsUtil::Uncompress(IN const ByteArray& objCompData, OUT
 
     if (nError != Z_OK)
     {
-        IMS_TRACE_E(0, "ZLib :: inflateInit (gzip:%d, %d, %s)", bGZIP, nError,
+        IMS_TRACE_E(0, "ZLib: inflateInit (gzip:%d, %d, %s)", bGZIP, nError,
                 (stream.msg != IMS_NULL) ? stream.msg : "-");
         return IMS_FALSE;
     }
@@ -286,7 +276,7 @@ PRIVATE VIRTUAL IMS_BOOL OsUtil::Uncompress(IN const ByteArray& objCompData, OUT
         if (nError == Z_OK)
         {
             ++nIndex;
-            IMS_TRACE_D("ZLib :: intermediate uncompressed data "
+            IMS_TRACE_D("ZLib: intermediate uncompressed data "
                         "(index=%d, total=%d, avail_out=%d)",
                     nIndex, stream.total_out, stream.avail_out);
 
@@ -301,7 +291,7 @@ PRIVATE VIRTUAL IMS_BOOL OsUtil::Uncompress(IN const ByteArray& objCompData, OUT
         else
         {
             IMS_TRACE_E(0,
-                    "ZLib :: intermediate uncompressed data (index=%d) >> "
+                    "ZLib: intermediate uncompressed data (index=%d) >> "
                     "error (%d, %s)",
                     nIndex, nError, (stream.msg != IMS_NULL) ? stream.msg : "-");
             break;
@@ -310,7 +300,7 @@ PRIVATE VIRTUAL IMS_BOOL OsUtil::Uncompress(IN const ByteArray& objCompData, OUT
 
     if (objData.GetLength() < static_cast<IMS_SINT32>(stream.total_out))
     {
-        IMS_TRACE_D("ZLib :: last uncompressed data (uncomp=%d, total=%d, avail_out=%d)",
+        IMS_TRACE_D("ZLib: last uncompressed data (uncomp=%d, total=%d, avail_out=%d)",
                 objData.GetLength(), stream.total_out, stream.avail_out);
         // Append the last uncompressed data
         objData.Append(abyUncompData, MAX_UNCOMPRESS_SIZE - stream.avail_out);
@@ -318,12 +308,12 @@ PRIVATE VIRTUAL IMS_BOOL OsUtil::Uncompress(IN const ByteArray& objCompData, OUT
 
     if ((nError = inflateEnd(&stream)) != Z_OK)
     {
-        IMS_TRACE_E(0, "ZLib :: inflateEnd (%d, %s)", nError,
+        IMS_TRACE_E(0, "ZLib: inflateEnd (%d, %s)", nError,
                 (stream.msg != IMS_NULL) ? stream.msg : "-", 0);
     }
 
-    IMS_TRACE_D("ZLib :: uncompressed data (%d >> %d)", objCompData.GetLength(),
-            objData.GetLength(), 0);
+    IMS_TRACE_D(
+            "ZLib: uncompressed data (%d >> %d)", objCompData.GetLength(), objData.GetLength(), 0);
 
     return IMS_TRUE;
 }

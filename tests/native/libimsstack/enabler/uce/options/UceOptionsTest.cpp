@@ -25,6 +25,7 @@
 #include "MockICapabilities.h"
 #include "MockIMessage.h"
 #include "MockISipMessage.h"
+#include "SipAddress.h"
 
 #include "ServiceMessage.h"
 #include "ServiceTimer.h"

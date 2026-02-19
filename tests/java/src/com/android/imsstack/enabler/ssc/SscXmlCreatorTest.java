@@ -944,6 +944,10 @@ public class SscXmlCreatorTest {
 
     @Test
     public void createXml_updateIcbEnable() {
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.ImsSs.KEY_UT_UPDATE_CB_WITH_CONDITIONS_ELEMENT_BOOL))
+                .thenReturn(false);
+
         SscServiceData updateData = getCbUpdateData(ESsType.ICB, SscConstant.ACTION_ACTIVATION,
                 SscConstant.CONDITION_BAIC, SscServiceClassUtil.SERVICE_CLASS_NONE);
 
@@ -960,6 +964,10 @@ public class SscXmlCreatorTest {
 
     @Test
     public void createXml_updateIcbDisable() {
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.ImsSs.KEY_UT_UPDATE_CB_WITH_CONDITIONS_ELEMENT_BOOL))
+                .thenReturn(false);
+
         SscServiceData updateData = getCbUpdateData(ESsType.ICB, SscConstant.ACTION_DEACTIVATION,
                 SscConstant.CONDITION_BIC_WR, SscServiceClassUtil.SERVICE_CLASS_NONE);
 
@@ -976,6 +984,44 @@ public class SscXmlCreatorTest {
         NodeList ruleCondition = xml.getElementsByTagName(
                 SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.BIC_WR));
         assertEquals(1, ruleCondition.getLength());
+    }
+
+    @Test
+    public void createXml_updateIcbEnable_ConditionElementEnabled() {
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.ImsSs.KEY_UT_UPDATE_CB_WITH_CONDITIONS_ELEMENT_BOOL))
+                .thenReturn(true);
+
+        SscServiceData updateData = getCbUpdateData(ESsType.ICB, SscConstant.ACTION_ACTIVATION,
+                SscConstant.CONDITION_BAIC, SscServiceClassUtil.SERVICE_CLASS_NONE);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.CONDITIONS), xml.getTagName());
+
+        NodeList nodeList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE_DEACTIVATED));
+        assertEquals(0, nodeList.getLength());
+    }
+
+    @Test
+    public void createXml_updateIcbDisableWithConditionsElement() {
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.ImsSs.KEY_UT_UPDATE_CB_WITH_CONDITIONS_ELEMENT_BOOL))
+                .thenReturn(true);
+
+        SscServiceData updateData = getCbUpdateData(ESsType.ICB, SscConstant.ACTION_DEACTIVATION,
+                SscConstant.CONDITION_BAIC, SscServiceClassUtil.SERVICE_CLASS_NONE);
+
+        Element xml = mSscXmlCreator.createXml(mCachedDoc, updateData);
+
+        assertNotNull(xml);
+        assertEquals(SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.CONDITIONS), xml.getTagName());
+
+        NodeList nodeList = xml.getElementsByTagName(
+                SscXmlFormat.getSsElement(SLOT_0, SscXmlFormat.RULE_DEACTIVATED));
+        assertEquals(1, nodeList.getLength());
     }
 
     @Test

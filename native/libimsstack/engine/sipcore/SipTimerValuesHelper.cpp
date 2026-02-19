@@ -35,7 +35,7 @@ PUBLIC GLOBAL SipTimerValues SipTimerValuesHelper::GetValues(IN IMS_SINT32 nSlot
     if ((pProfile == IMS_NULL) && (pSipConfigV != IMS_NULL) &&
             !pSipConfigV->IsTimerValueConfiguredOnRuntime())
     {
-        IMS_TRACE_D("SIP timer values are not configured on runtime ...", 0, 0, 0);
+        IMS_TRACE_D("SIP timer values not configured on runtime", 0, 0, 0);
         return objTv;
     }
 

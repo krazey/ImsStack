@@ -16,10 +16,11 @@
 #ifndef INTERFACE_SERVICE_MANAGER_H_
 #define INTERFACE_SERVICE_MANAGER_H_
 
-#include "AString.h"
 #include "ImsList.h"
 
 #include "IServiceCloseListener.h"
+
+class AString;
 
 class Service;
 

@@ -87,10 +87,14 @@ public class TestConfigMenu extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        ImsLog.d("");
-
         super.onCreate(savedInstanceState);
 
+        if (ImsUtils.IS_USER) {
+            finish();
+            return;
+        }
+
+        ImsLog.d("");
         Window wd = getWindow();
 
         if (wd != null) {

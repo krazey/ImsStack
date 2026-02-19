@@ -20,6 +20,8 @@
 #include "ISessionDescriptor.h"
 #include "media/IMediaDescriptor.h"
 
+class MediaSessionConfig;
+
 #include "MediaBaseProfile.h"
 
 const AString SEMICOLON = ";";
@@ -46,11 +48,13 @@ public:
      *                  IMS_FALSE
      */
     virtual IMS_BOOL Generate(OUT ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile) = 0;
+            OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile,
+            IN const MediaSessionConfig* pConfig) = 0;
 
 protected:
     void GenerateCommonAttributes(OUT ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pProfile);
+            OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pProfile,
+            IN const MediaSessionConfig* pConfig);
     IMS_BOOL GenerateRtpMap(OUT AString& strRtpmap, OUT AString& strPayloadNum,
             IN MediaBaseProfile::RtpMap& objRtpMap);
     IMS_SINT32 GenerateDirection(OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pProfile);
@@ -60,6 +64,9 @@ protected:
 
 private:
     void ClearAttributeAndBandwidth(OUT IMediaDescriptor* pDescriptor);
+    void SetSdpMediaIpAddress(OUT ISessionDescriptor* pSessionDescriptor,
+            OUT IMediaDescriptor* pDescriptor, IN const MediaBaseProfile* pProfile,
+            IN const MediaSessionConfig* pConfig);
     void SetSdpSessionIpAddress(
             OUT ISessionDescriptor* pSessionDescriptor, IN const MediaBaseProfile* pProfile);
     void SetSdpMediaDescription(OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pProfile);

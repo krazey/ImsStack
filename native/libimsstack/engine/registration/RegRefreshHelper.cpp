@@ -16,6 +16,7 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
+#include "ISipClientConnection.h"
 #include "RegRefreshHelper.h"
 #include "SipStatusCode.h"
 
@@ -29,7 +30,9 @@ RegRefreshHelper::RegRefreshHelper(IN IRefreshable* piRefreshable) :
 
 PUBLIC VIRTUAL RegRefreshHelper::~RegRefreshHelper()
 {
-    IMS_TRACE_D("Destructor :: RegRefreshHelper", 0, 0, 0);
+#ifdef __IMS_CORE_DEBUG__
+    IMS_TRACE_D("dtor: RegRefreshHelper", 0, 0, 0);
+#endif
 }
 
 PUBLIC VIRTUAL IMS_RESULT RegRefreshHelper::SendRefreshRequest(IN ISipClientConnection* piScc)
@@ -58,7 +61,7 @@ PUBLIC VIRTUAL IMS_RESULT RegRefreshHelper::SendRefreshRequest(IN ISipClientConn
 PUBLIC
 IMS_BOOL RegRefreshHelper::UpdateRefreshTimer(IN IMS_SINT32 nDuration)
 {
-    // Stop the refresh timer if it is running...
+    // Stop the refresh timer if it is running.
     if (IsTimerActive())
     {
         StopRefresh();
@@ -84,7 +87,6 @@ IMS_BOOL RegRefreshHelper::UpdateRefreshTimer(IN IMS_SINT32 nDuration)
 PROTECTED VIRTUAL void RegRefreshHelper::RefreshCompleted(
         IN ISipClientConnection* piScc, IN IMS_SINT32 nCode /*= 0*/)
 {
-    // do something ...
     if (nCode == 0)
     {
         IMS_SINT32 nStatusCode = piScc->GetStatusCode();
@@ -97,15 +99,12 @@ PROTECTED VIRTUAL void RegRefreshHelper::RefreshCompleted(
                 Refreshable_RefreshCompleted(piScc, nCode);
                 return;
             }
-
-            // If the refresh timer is not running ..... ????
         }
     }
     else if (nCode == TRANSACTION_TIMEOUT)
     {
         // Behaves as if the 408 request timeout response received
-        // hwangoo.park, 130529, do not stop registration refresh timer
-        // even though the transaction timer is expired.
+        // Do not stop registration refresh timer even though the transaction timer is expired.
         // StopRefresh();
     }
 

@@ -572,4 +572,13 @@ public interface SystemCallInterface {
      * operator. 5 or 6 decimal digits.
      */
     @NonNull String getAccessNetworkPlmn();
+
+    //// Logging {
+    /**
+     * Logs the SIP message.
+     *
+     * @param sipMessage The SIP message to be logged.
+     */
+    void logSipMessage(@NonNull String sipMessage, int slotId, int direction);
+    //// }
 }

@@ -16,7 +16,7 @@
 #ifndef SIP_URN_HELPER_H_
 #define SIP_URN_HELPER_H_
 
-#include "AStringBuffer.h"
+#include "AString.h"
 
 #include "ISipConfig.h"
 

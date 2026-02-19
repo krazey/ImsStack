@@ -98,7 +98,7 @@ public:
         IMS_BOOL m_bInfoUpdated;
         // set true every time info is updated by C-NOTIFY and set false after updating is done.
         IMS_BOOL m_bMatchingCompleted;
-        // set true once "disconnected" or "disconnecting" info is notifed to GII
+        // set true once "disconnected" or "disconnecting" info is notifed to ISIL
         IMS_BOOL m_bDisconnectionNotified;
         IMS_BOOL m_bDisconnectedExplicitly;
     };

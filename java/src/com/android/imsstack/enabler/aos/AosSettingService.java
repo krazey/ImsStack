@@ -130,22 +130,16 @@ public class AosSettingService {
     }
 
     private void setListener(UserMobileDataStateListener listener) {
-        ImsLog.d(mSlotId, "");
-
         TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(listener.getSubId());
         tmp.registerTelephonyCallback(AppContext.getInstance().getMainExecutor(), listener);
     }
 
     private void removeListener(UserMobileDataStateListener listener) {
-        ImsLog.d(mSlotId, "");
-
         TelephonyManagerProxy tmp = AppContext.getTelephonyManagerProxy(listener.getSubId());
         tmp.unregisterTelephonyCallback(listener);
     }
 
     private void updateSubscription() {
-        ImsLog.d(mSlotId, "");
-
         SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
 
         if (sim == null || !sim.isSimLoadCompleted()) {

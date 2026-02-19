@@ -155,14 +155,14 @@ PUBLIC VIRTUAL IMS_BOOL SdpOrigin::Decode(IN const AString& strValue)
         m_nAddrType = Sdp::ADDR_TYPE_OTHER;
     }
 
-    // TODO:: allow FQDN, so needs to be parsed using URI parser
+    // To allow FQDN, so needs to be parsed using URI parser
     // unicast-address field
     m_strUnicastAddress = objTokens.GetElementAt(5);
 
     // Check if the address format is valid
     if (!CheckValidityForAddress(m_strUnicastAddress, m_nAddrType))
     {
-        IMS_TRACE_E(0, "o-line :: Address validity failed : %s", strValue.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "o-line: Address validity failed : %s", strValue.GetStr(), 0, 0);
         return IMS_FALSE;
     }
 
@@ -387,7 +387,7 @@ IMS_BOOL SdpOrigin::SetValue(IN const AString& strUsername, IN const AString& st
     // Check if the address format is valid
     if (!CheckValidityForAddress(strAddress, m_nAddrType))
     {
-        IMS_TRACE_E(0, "o-line :: Address validity failed : %s", strAddress.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "o-line: Address validity failed : %s", strAddress.GetStr(), 0, 0);
         return IMS_FALSE;
     }
 

@@ -198,6 +198,10 @@ PROTECTED VIRTUAL IMS_BOOL AosERegistration::OnMessage(IN IMSMSG& objMsg)
             ProcessGiba();
             break;
 
+        case MSG_REG_RESTART:
+            ProcessReStart();
+            break;
+
         default:
             break;
     }

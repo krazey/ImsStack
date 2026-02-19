@@ -22,19 +22,20 @@
 #include "ussi/UssiDef.h"
 #include <gmock/gmock.h>
 
+class AString;
 class IMtcCallContext;
+class ISession;
 class UssiDataParser;
 
 class MockUssiController : public UssiController
 {
 public:
-    explicit MockUssiController(IN IMtcCallContext& objContext, IN UssiDataParser* pParser) :
+    MockUssiController(IN IMtcCallContext& objContext, IN UssiDataParser* pParser) :
             UssiController(objContext, pParser)
     {
     }
     ~MockUssiController() override {}
     MOCK_METHOD(IMS_BOOL, HasValidXmlBodyForNetworkInitiatedUssi, (IN const IMessage*), (override));
-    MOCK_METHOD(IMS_BOOL, IsByeForUssi, (IN const IMessage*), (override));
     MOCK_METHOD(IMS_BOOL, IsUssiInfoReceived, (IN const ISipServerConnection*), (override));
     MOCK_METHOD(IMS_BOOL, HasXmlBodyInInfo, (IN const ISipServerConnection*), (override));
 
@@ -42,12 +43,9 @@ public:
 
     MOCK_METHOD(IMS_RESULT, FormStartUssiRequest, (IN const AString&), (override));
     MOCK_METHOD(IMS_RESULT, FormAcceptUssi, (), (override));
-    MOCK_METHOD(IMS_RESULT, FormInfoRequest,
-            (IN ISipClientConnection*, IN const AString&, IN UssiError), (override));
+    MOCK_METHOD(IMS_RESULT, SendInfo, (IN ISession&, IN const AString&, IN UssiError), (override));
 
     MOCK_METHOD(void, SetNextActionByTerminateUssi, (), (override));
-
-    MOCK_METHOD(UssiResult, GetLastResult, (), (const, override));
 };
 
 #endif

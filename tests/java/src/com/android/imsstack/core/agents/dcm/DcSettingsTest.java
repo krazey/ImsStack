@@ -201,6 +201,17 @@ public class DcSettingsTest {
     }
 
     @Test
+    public void testDisableN1ModeOnImsPduReject() throws Exception {
+        when(mMockCarrierConfig.getBoolean(
+                eq(CarrierConfig.Ims.KEY_DISABLE_N1_MODE_ON_IMS_PDU_ESTABLISH_FAILURE_BOOL),
+                        anyBoolean()))
+                .thenReturn(false)
+                .thenReturn(true);
+        assertFalse(mDcSettingsUT.disableN1ModeOnImsPduEstablishFailure());
+        assertTrue(mDcSettingsUT.disableN1ModeOnImsPduEstablishFailure());
+    }
+
+    @Test
     public void testFailToGetCarrierConfig() throws Exception {
         int permanentFailureCause = 33;
 
@@ -218,6 +229,7 @@ public class DcSettingsTest {
         assertFalse(mDcSettingsUT.isPermanentFailure(EApnType.IMS, permanentFailureCause));
         assertFalse(mDcSettingsUT.isCrossStackRedialCause(EApnType.EMERGENCY,
                 permanentFailureCause));
+        assertFalse(mDcSettingsUT.disableN1ModeOnImsPduEstablishFailure());
     }
 
     private class FakeDcSettings extends DcSettings {

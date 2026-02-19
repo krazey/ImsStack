@@ -16,6 +16,8 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
+#include "ISipClientConnection.h"
+#include "ISipMessage.h"
 #include "PubState.h"
 #include "PublicationRefreshHelper.h"
 #include "SipMethod.h"
@@ -33,7 +35,9 @@ PublicationRefreshHelper::PublicationRefreshHelper(
 
 PUBLIC VIRTUAL PublicationRefreshHelper::~PublicationRefreshHelper()
 {
-    IMS_TRACE_D("Destructor :: PublicationRefreshHelper", 0, 0, 0);
+#ifdef __IMS_CORE_DEBUG__
+    IMS_TRACE_D("dtor: PublicationRefreshHelper", 0, 0, 0);
+#endif
 }
 
 PUBLIC VIRTUAL IMS_RESULT PublicationRefreshHelper::SendRefreshRequest(
@@ -70,11 +74,11 @@ PUBLIC VIRTUAL IMS_RESULT PublicationRefreshHelper::UpdateOnMessageReceived(
         return IMS_FAILURE;
     }
 
-    // On PUBLISH response received ...
+    // On PUBLISH response received.
     if (piSipMsg->GetMethod().Equals(SipMethod::PUBLISH))
     {
         // If the publication state is in TERMINATED state & the refresh timer is active,
-        // then stop the refresh timer...
+        // then stop the refresh timer.
         if (m_pPubState->IsTerminated())
         {
             StopRefresh();
@@ -117,7 +121,6 @@ PROTECTED VIRTUAL void PublicationRefreshHelper::RefreshCompleted(
 {
     Refreshable_RefreshCompleted(piScc, nCode);
 
-    // do something ...
     if (nCode == 0)
     {
         IMS_SINT32 nStatusCode = piScc->GetStatusCode();

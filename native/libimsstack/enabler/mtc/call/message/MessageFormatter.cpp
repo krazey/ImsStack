@@ -359,7 +359,7 @@ PROTECTED VIRTUAL void MessageFormatter::SetLocation()
         return;
     }
 
-    MtcLocationObject(m_objContext).SetLocationToMessage(*m_piNextMessage, IMS_TRUE);
+    MtcLocationObject(m_objContext).SetLocationToMessage(*m_piNextMessage);
 }
 
 PROTECTED VIRTUAL void MessageFormatter::SetCallerIdHeader()
@@ -443,7 +443,9 @@ void MessageFormatter::SetAcceptContactHeader(IN CallType eCallType)
     strAcceptContact.Append(AString(Const3GPP::ICSI_MMTEL).Replace(":", "%3A"));
     strAcceptContact.Append(TextParser::CHAR_DQUOT);
 
-    if (eCallType == CallType::VT || eCallType == CallType::VIDEO_RTT)
+    if (eCallType == CallType::VT || eCallType == CallType::VIDEO_RTT ||
+            m_objContext.GetConfigurationProxy().GetBoolean(
+                    ConfigVt::KEY_ADD_VIDEO_FEATURE_TAG_IN_ACCEPT_CONTACT_ALWAYS_BOOL))
     {
         strAcceptContact.Append(TextParser::CHAR_SEMICOLON);
         strAcceptContact.Append(MessageUtil::STR_VIDEO);
@@ -581,7 +583,6 @@ void MessageFormatter::SetCarrierSpecificHeaders()
         if (m_eFormType == FormType::START || m_eFormType == FormType::ACCEPT ||
                 m_eFormType == FormType::UPDATE || m_eFormType == FormType::ACCEPT_UPDATE)
         {
-            IMS_TRACE_D("SetCarrierSpecificHeaders : avchange", 0, 0, 0);
             m_objContext.GetMessageUtils().AddValueIfNotExists(m_piNextMessage,
                     MessageUtil::STR_AVCHANGE, ISipHeader::UNKNOWN,
                     MessageUtil::STR_P_TTA_VOLTE_INFO);

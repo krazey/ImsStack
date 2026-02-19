@@ -121,8 +121,6 @@ PUBLIC VIRTUAL IMS_UINT32 AosHandleMtc::GetFeatures() const
     }
     else  // Will be always supported if not based on network feature
     {
-        A_IMS_TRACE_D(
-                APPPROFILE, "GetFeatures :: Internally added VERSTAT feature by default", 0, 0, 0);
         nFeatures |= ImsAosFeature::VERSTAT;
     }
 
@@ -409,7 +407,6 @@ PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::IsHandleBlocked() const
 
         if (GET_N_CONFIG(m_nSlotId)->IsVideoOverWifiSupportedWithoutVoice())
         {
-            // VZW Reqs. - VZ_REQ_VOWIFI_6230394
             bBlocked = bBlocked && AosHandle::IsHandleBlocked(BLOCK_VIWIFI_CAPABILITY);
         }
 
@@ -526,7 +523,6 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessDataConnectionChanged()
         return;
     }
 
-    // VZ_REQ_LTEDATA_39857
     if (!m_bDataConnected && !IsSupportedNetworkType(m_nNetworkType) &&
             m_nNetworkType != NW_REPORT_RADIO_NOSRV)
     {
@@ -592,7 +588,7 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessNetworkChanged()
             }
         }
 
-        if (IsVolteHysTimerRunning())  // VZ_REQ_LTEDATA_39857
+        if (IsVolteHysTimerRunning())
         {
             if (m_nNetworkType != NW_REPORT_RADIO_NOSRV && !m_bDataConnected)
             {
@@ -718,10 +714,6 @@ PROTECTED VIRTUAL void AosHandleMtc::Request(IN IMS_UINT32 nType, IN IMS_UINT32 
 PROTECTED
 void AosHandleMtc::UpdateGGsmaRcsTelephonyFeatureTag()
 {
-    /* VZW Req. - VZ_REQ_IMS_22939, VZ_REQ_VOWIFI_6230394
-                  VZ_REQ_VOWIFI_6258874, VZ_REQ_VOWIFI_6258951
-    */
-
     const IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
     if (piCallTracker != IMS_NULL && piCallTracker->IsNormalCallActive())
     {
@@ -913,7 +905,6 @@ IMS_BOOL AosHandleMtc::IsPlmnBlockCondition() const
 PROTECTED
 IMS_BOOL AosHandleMtc::IsVoiceCapableOnWiFiCalling() const
 {
-    // VZ_REQ_VOWIFI_6258874
     if (!GET_N_CONFIG(m_nSlotId)->IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
     {
         return IMS_FALSE;

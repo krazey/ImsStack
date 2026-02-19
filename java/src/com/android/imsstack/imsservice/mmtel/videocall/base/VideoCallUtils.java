@@ -25,7 +25,6 @@ import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsStreamMediaProfile;
 
 import com.android.imsstack.base.AppContext;
-import com.android.imsstack.enabler.mtc.IUMtcMedia;
 import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.imsservice.mmtel.util.VideoDimension;
 import com.android.imsstack.util.ImsLog;
@@ -56,9 +55,6 @@ public class VideoCallUtils {
     public static final int VIDEO_QUALITY_SIF_PORTRAIT = (1 << 17);
     public static final int VIDEO_QUALITY_HD_LANDSCAPE = (1 << 18);
     public static final int VIDEO_QUALITY_HD_PORTRAIT = (1 << 19);
-
-    public static final int ORIENTATION_PORTRAIT = 1;
-    public static final int ORIENTATION_LANDSCAPE = 2;
 
     private static final String PAUSE_IMAGE_FILE = ImsUtils.STORAGE_ROOT_DIR + "/pause_img.jpg";
 
@@ -154,17 +150,6 @@ public class VideoCallUtils {
         return file.getAbsolutePath();
     }
 
-    public static int getOrientationFromMtcMediaSession(int orientation) {
-        if (orientation == IUMtcMedia.Notify.NOTIFY_ORIENTATION_PORTRAIT) {
-            return ORIENTATION_PORTRAIT;
-        } else if (orientation == IUMtcMedia.Notify.NOTIFY_ORIENTATION_LANDSCAPE) {
-            return ORIENTATION_LANDSCAPE;
-        } else {
-            // Unknown: not-reachable
-            return 0;
-        }
-    }
-
     public static VideoDimension getReversedVideoDimension(int videoQuality) {
         Integer vq = sOrientationReversedVideoQualities.get(Integer.valueOf(videoQuality));
         return (vq != null) ? sVideoDimensions.get(vq) : null;
@@ -224,21 +209,6 @@ public class VideoCallUtils {
     public static int getVideoQualityFromMediaProfileForMediaInfo(int videoQuality) {
         Integer vq = sVideoQualityForMediaProfileAndMediaInfo.get(videoQuality);
         return (vq != null) ? vq.intValue() : MediaInfo.VIDEO_QUALITY_NONE;
-    }
-
-    public static boolean isVideoPortrait(int videoQuality) {
-        switch (videoQuality) {
-        case MediaInfo.VIDEO_QUALITY_QVGA_PR: // FALL-THROUGH
-        case MediaInfo.VIDEO_QUALITY_VGA_PR: // FALL-THROUGH
-        case MediaInfo.VIDEO_QUALITY_CIF_PR: // FALL-THROUGH
-        case MediaInfo.VIDEO_QUALITY_QCIF_PR: // FALL-THROUGH
-        case MediaInfo.VIDEO_QUALITY_SQCIF_PR: // FALL-THROUGH
-        case MediaInfo.VIDEO_QUALITY_SIF_PR: // FALL-THROUGH
-        case MediaInfo.VIDEO_QUALITY_HD_PR:
-            return true;
-        default:
-            return false;
-        }
     }
 
     private static int calculateInSampleSize(BitmapFactory.Options options, VideoDimension vd) {

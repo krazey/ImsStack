@@ -19,6 +19,7 @@
 #include "private/SipConfigV.h"
 
 #include "IOnPageMessageListener.h"
+#include "ISipClientConnection.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ISipServerConnection.h"
@@ -28,6 +29,7 @@
 #include "SipConfigProxy.h"
 #include "SipHeaderName.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
@@ -217,14 +219,14 @@ IMS_RESULT PageMessage::Accept(IN IMS_SINT32 nStatusCode /*= SipStatusCode::SC_2
     // Send a 200 OK to MESSAGE request
     if (CreateResponse(piSsc, nStatusCode) == IMS_FALSE)
     {
-        IMS_TRACE_E(0, "Initializing the response to MESSAGE request failed", 0, 0, 0);
+        IMS_TRACE_E(0, "Initializing %d-MESSAGE failed", nStatusCode, 0, 0);
     }
 
     if (!SendNUpdateResponse(IMessage::PAGEMESSAGE_SEND, piSsc))
     {
         CloseConnection(IMessage::PAGEMESSAGE_SEND);
 
-        IMS_TRACE_E(0, "Sending a response to MESSAGE request failed!", 0, 0, 0);
+        IMS_TRACE_E(0, "Sending %d-MESSAGE failed", nStatusCode, 0, 0);
         return IMS_FAILURE;
     }
 
@@ -259,7 +261,7 @@ IMS_RESULT PageMessage::Reject(IN IMS_SINT32 nStatusCode, IN IMS_SINT32 nRetryAf
     // Send a failure final response to OPTIONS request
     if (CreateResponse(piSsc, nStatusCode) == IMS_FALSE)
     {
-        IMS_TRACE_E(0, "Initializing the response to MESSAGE request failed", 0, 0, 0);
+        IMS_TRACE_E(0, "Initializing %d-MESSAGE failed", nStatusCode, 0, 0);
     }
 
     // Now, the variable, piSIPMsg will be used for MESSAGE response message
@@ -278,7 +280,7 @@ IMS_RESULT PageMessage::Reject(IN IMS_SINT32 nStatusCode, IN IMS_SINT32 nRetryAf
     {
         CloseConnection(IMessage::PAGEMESSAGE_SEND);
 
-        IMS_TRACE_E(0, "Sending a response to MESSAGE request failed!", 0, 0, 0);
+        IMS_TRACE_E(0, "Sending %d-MESSAGE failed", nStatusCode, 0, 0);
         return IMS_FAILURE;
     }
 
@@ -336,8 +338,6 @@ PRIVATE VIRTUAL IMS_BOOL PageMessage::SendRequestToChallenge(IN ISipClientConnec
 
 PRIVATE VIRTUAL IMS_BOOL PageMessage::NotifySipRequest(IN ISipServerConnection* piSsc)
 {
-    IMS_TRACE_I("PageMessage - MESSAGE REQUEST RECEIVED ...", 0, 0, 0);
-
     if (!UpdateRequestOnReceived(IMessage::PAGEMESSAGE_SEND, piSsc))
     {
         IMS_TRACE_E(0, "Updating SIP message failed", 0, 0, 0);
@@ -350,13 +350,9 @@ PRIVATE VIRTUAL IMS_BOOL PageMessage::NotifySipRequest(IN ISipServerConnection* 
     {
         if (pSipConfigV->IsPageMessageRespByApp())
         {
-            IMS_TRACE_I("INCOMING MESSAGE REQUEST WILL BE HANDLED BY APPLICATION", 0, 0, 0);
-
             SetState(STATE_RECEIVED);
-
             // Notify the information which the PageMessage is received
             PostMessage(AMSG_PAGE_MESSAGE_RECEIVED, 0, 0);
-
             return IMS_TRUE;
         }
     }
@@ -366,7 +362,7 @@ PRIVATE VIRTUAL IMS_BOOL PageMessage::NotifySipRequest(IN ISipServerConnection* 
     {
         CloseConnection(IMessage::PAGEMESSAGE_SEND);
 
-        IMS_TRACE_E(0, "Initializing a response to MESSAGE request failed", 0, 0, 0);
+        IMS_TRACE_E(0, "Initializing 200-MESSAGE failed", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -374,7 +370,7 @@ PRIVATE VIRTUAL IMS_BOOL PageMessage::NotifySipRequest(IN ISipServerConnection* 
     {
         CloseConnection(IMessage::PAGEMESSAGE_SEND);
 
-        IMS_TRACE_E(0, "Sending a response to MESSAGE request failed!", 0, 0, 0);
+        IMS_TRACE_E(0, "Sending 200-MESSAGE failed!", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -396,10 +392,9 @@ PRIVATE VIRTUAL void PageMessage::NotifySipResponse(IN ISipClientConnection* piS
     // Add the received response message
     UpdateResponseOnReceived(IMessage::PAGEMESSAGE_SEND, piScc);
 
-    // Handle the response to MESSAGE request ...
+    // Handle the response to MESSAGE request.
     if (SipStatusCode::Is1XX(nStatusCode))
     {
-        // Do nothing ...
         return;
     }
     else if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
@@ -449,7 +444,7 @@ PRIVATE VIRTUAL void PageMessage::NotifySipError(
 PRIVATE
 void PageMessage::SetState(IN IMS_SINT32 nState)
 {
-    IMS_TRACE_I("PageMessage :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
+    IMS_TRACE_I("PageMessage: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
     m_nState = nState;
 }

@@ -199,7 +199,7 @@ public class MtcTerminalBasedSupplementaryServiceNotifier {
     }
 
     /**
-     * Gets the device's current network country ISO code (e.g., "KR" for South Korea).
+     * Gets the device's current network country ISO code (e.g., "US" for the United States).
      */
     private String getNetworkCountryIso() {
         TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
@@ -294,7 +294,7 @@ public class MtcTerminalBasedSupplementaryServiceNotifier {
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-MTC] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 
     @VisibleForTesting

@@ -27,19 +27,22 @@
 #include "MediaNetworkConnectionWatcher.h"
 #include "ServiceTrace.h"
 #include "audio/AudioController.h"
+#include "audio/AudioNego.h"
 #include "config/MediaSessionConfigFactory.h"
 #include "config/MediaConfigUtil.h"
 #include "text/TextController.h"
+#include "text/TextNego.h"
 #include "video/VideoController.h"
+#include "video/VideoNego.h"
 
 __IMS_TRACE_TAG_MEDIA__;
 
-#define MTU_MOBILE     1500
-#define MTU_EPDG       1280
-#define SIZE_OF_IP_SEC 60
-#define SIZE_OF_IPV6   60
-#define SIZE_OF_IPV4   40
-#define SIZE_OF_RTP    20 + 8  // rtp + header extension (cvo)
+#define MTU_MOBILE                1500
+#define MTU_EPDG                  1280
+#define SIZE_OF_IP_SEC            60
+#define SIZE_OF_IPV6              60
+#define SIZE_OF_IPV4              40
+#define SIZE_OF_RTP               20 + 8  // rtp + header extension (cvo)
 #define AVSYNC_REPORT_INTERVAL_MS 3000
 
 using namespace android::telephony::imsmedia;
@@ -57,8 +60,8 @@ MediaSession::MediaSession(MEDIA_NETWORK_TYPE eNetwork, MEDIA_SERVICE_TYPE eServ
         m_pVideoController(std::make_shared<VideoController>()),
         m_pTextController(std::make_shared<TextController>()),
         m_bSessionConfirmed(IMS_FALSE),
-        m_eCurMediaType(MEDIA_TYPE_INVALID),
-        m_bIsConference(IMS_FALSE)
+        m_bIsConference(IMS_FALSE),
+        m_nPrevNegoId(UNDEFINED_NEGO_ID)
 {
     IMS_TRACE_D(
             "+MediaSession() - ServiceType[%" PFLS_u "], CallKey[%d]", eServiceType, nCallKey, 0);
@@ -159,6 +162,13 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::DestroyProfile(IMS_UINTP nNegoId)
 
     IMS_BOOL bRet = IMS_TRUE;
     bRet &= m_pMediaNegoHandler->DeleteMediaNego(nNegoId);
+
+    // For VZW, modify the direction inactive before calling the delete session for forking.
+    if (!m_bSessionConfirmed)
+    {
+        m_pAudioController->UpdateMediaDirection(MEDIA_DIRECTION_INACTIVE);
+    }
+
     bRet &= m_pAudioController->DeleteSession(nNegoId);
     return bRet;
 }
@@ -195,11 +205,6 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::FormSdp(IN IMS_UINTP nNegoId, OUT ISession
     else
     {
         CloseMediaSessions(MEDIA_TYPE_VIDEO, nNegoId);
-    }
-
-    if (GetNegoState(nNegoId) == STATE_NEGOTIATED)
-    {
-        RequestQos(nNegoId, eType);
     }
 
     return IMS_TRUE;
@@ -244,21 +249,7 @@ PUBLIC VIRTUAL SdpNegotiationResult MediaSession::NegotiateSdp(
 
     OpenMediaSessions(nNegoId, pMediaNego, objResult.eNegotiatedType);
 
-    if (!(objResult.eNegotiatedType & MEDIA_TYPE_VIDEO))
-    {
-        CloseMediaSessions(MEDIA_TYPE_VIDEO, nNegoId);
-    }
-
-    if (!(objResult.eNegotiatedType & MEDIA_TYPE_TEXT))
-    {
-        CloseMediaSessions(MEDIA_TYPE_TEXT, UNDEFINED_NEGO_ID);
-    }
-
-    if (GetNegoState(nNegoId) == STATE_NEGOTIATED)
-    {
-        RequestQos(nNegoId, objResult.eNegotiatedType);
-    }
-
+    ProcessNegotiationResult(nNegoId, pMediaNego);
     IMS_TRACE_I("NegotiateSdp() - Audio[%d], Video[%d], Text[%d]", objResult.eAudioDirection,
             objResult.eVideoDirection, objResult.eTextDirection);
     return objResult;
@@ -529,6 +520,7 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
                 m_pVideoController->SetCallSessionState(param1);
             }
 
+            m_nPrevNegoId = UNDEFINED_NEGO_ID;
             m_bSessionConfirmed = (param1 > 0);
             IMS_TRACE_I("SetOptions() - Confirmed flag[%d]", m_bSessionConfirmed, 0, 0);
             break;
@@ -601,6 +593,12 @@ VIRTUAL void MediaSession::SetMediaPemType(IN IMS_UINTP nNegoId, IN MEDIA_PEM_TY
     if (pMediaNego != IMS_NULL && pMediaNego->GetAudioNego() != IMS_NULL)
     {
         m_pAudioController->SetMediaPemType(nNegoId, ePemType);
+
+        if (pMediaNego->IsForking() && ePemType == MEDIA_PEM_TYPE::INACTIVE &&
+                m_nPrevNegoId != UNDEFINED_NEGO_ID && m_nPrevNegoId != nNegoId)
+        {
+            m_pAudioController->HandleForkedSessionUpdate(m_nPrevNegoId);
+        }
     }
 
     // video
@@ -608,6 +606,8 @@ VIRTUAL void MediaSession::SetMediaPemType(IN IMS_UINTP nNegoId, IN MEDIA_PEM_TY
     {
         m_pVideoController->SetMediaPemType(ePemType);
     }
+
+    m_nPrevNegoId = nNegoId;
 }
 
 IMS_BOOL MediaSession::IsPreviewMode(IMS_UINTP nNegoId)
@@ -640,39 +640,6 @@ QosRequestParam* MediaSession::FindQosParam(const QosRequestParam* targetParam)
     }
 
     return IMS_NULL;
-}
-
-PROTECTED VIRTUAL IMS_BOOL MediaSession::RequestQos(
-        IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eType)
-{
-    IMS_TRACE_I("RequestQos() - NegoId[%" PFLS_x "], Type[%d] CurMediaType[%d]", nNegoId, eType,
-            m_eCurMediaType);
-
-    if ((eType & MEDIA_TYPE_AUDIO))
-    {
-        RequestQosParam(nNegoId, MEDIA_TYPE_AUDIO);
-    }
-
-    if ((eType & MEDIA_TYPE_VIDEO))
-    {
-        RequestQosParam(nNegoId, MEDIA_TYPE_VIDEO);
-    }
-    else if (m_eCurMediaType & MEDIA_TYPE_VIDEO)
-    {
-        ReleaseQosParam(MEDIA_TYPE_VIDEO);
-    }
-
-    if ((eType & MEDIA_TYPE_TEXT))
-    {
-        RequestQosParam(nNegoId, MEDIA_TYPE_TEXT);
-    }
-    else if (m_eCurMediaType & MEDIA_TYPE_TEXT)
-    {
-        ReleaseQosParam(MEDIA_TYPE_TEXT);
-    }
-
-    m_eCurMediaType = eType;
-    return IMS_TRUE;
 }
 
 PROTECTED QosRequestParam* MediaSession::createQosParam(
@@ -932,8 +899,12 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
                                 NETWORK_TONE_INACTIVITY, UNDEFINED_NEGO_ID) > 0)
                     {
                         m_pAudioController->SetNetworkToneTimer(UNDEFINED_NEGO_ID, 0);
+                    }
+                    if (!m_bSessionConfirmed)
+                    {
                         m_pClientListener->MediaSession_Notify(
                                 REPORT_NW_TONE_RTP_RECEIVE_STARTED, pParam->m_eMediaType);
+                        IMS_TRACE_I("OnNotify() - NW tone receive started", 0, 0, 0);
                     }
                 }
 
@@ -1273,6 +1244,7 @@ void MediaSession::UpdateMediaSessions(
 
     // Update Audio Session
     if (eType & MEDIA_TYPE_AUDIO && m_pAudioController != IMS_NULL &&
+            m_pAudioController->IsSessionOpened() &&
             !m_pAudioController->UpdateSession(nNegoId, nAccessNetwork, pMediaNego->GetAudioNego()))
     {
         IMS_TRACE_E(0, "UpdateMediaSessions() - fail to update audio", 0, 0, 0);
@@ -1378,4 +1350,48 @@ IMS_SINT32 MediaSession::GetRtpFragmentSize()
             GetNetworkType());
 
     return nMtu;
+}
+
+PRIVATE
+void MediaSession::ProcessNegotiationResult(
+        IN IMS_UINTP nNegoId, IN std::shared_ptr<MediaNego> pMediaNego)
+{
+    if (pMediaNego->GetAudioNego() != IMS_NULL)
+    {
+        if (pMediaNego->GetAudioNego()->GetNegotiatedRtpPort() <= 0)
+        {
+            ReleaseQosParam(MEDIA_TYPE_AUDIO);
+            CloseMediaSessions(MEDIA_TYPE_AUDIO, nNegoId);
+        }
+        else
+        {
+            RequestQosParam(nNegoId, MEDIA_TYPE_AUDIO);
+        }
+    }
+
+    if (pMediaNego->GetVideoNego() != IMS_NULL)
+    {
+        if (pMediaNego->GetVideoNego()->GetNegotiatedRtpPort() <= 0)
+        {
+            ReleaseQosParam(MEDIA_TYPE_VIDEO);
+            CloseMediaSessions(MEDIA_TYPE_VIDEO, nNegoId);
+        }
+        else
+        {
+            RequestQosParam(nNegoId, MEDIA_TYPE_VIDEO);
+        }
+    }
+
+    if (pMediaNego->GetTextNego() != IMS_NULL)
+    {
+        if (pMediaNego->GetTextNego()->GetNegotiatedRtpPort() <= 0)
+        {
+            ReleaseQosParam(MEDIA_TYPE_TEXT);
+            CloseMediaSessions(MEDIA_TYPE_TEXT, UNDEFINED_NEGO_ID);
+        }
+        else
+        {
+            RequestQosParam(nNegoId, MEDIA_TYPE_TEXT);
+        }
+    }
 }

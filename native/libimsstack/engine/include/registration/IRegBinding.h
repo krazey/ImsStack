@@ -16,13 +16,16 @@
 #ifndef INTERFACE_REG_BINDING_H_
 #define INTERFACE_REG_BINDING_H_
 
-#include "AStringArray.h"
-#include "IpAddress.h"
+#include "ImsList.h"
 
-#include "SipAddress.h"
+class AString;
+class AStringArray;
+class IpAddress;
 
 class IRegBindingListener;
 class IRegInfo;
+class SipAddress;
+class SipParameter;
 class SipProfile;
 
 class IRegBinding

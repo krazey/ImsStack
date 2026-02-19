@@ -187,7 +187,14 @@ PRIVATE VIRTUAL CallStateName EstablishedState::RejectUpdate(IN const CallReason
     // Restore the CallType that was changed by MtcSession#HandleRequest.
     objSession.SetCallType(objSession.GetPreviousCallType());
 
-    if (objMediaManager.GetNegotiationState(&objSession.GetISession()) == STATE_OFFER_RECEIVED &&
+    const IMessage* piMessage =
+            objSession.GetISession().GetPreviousRequest(IMessage::SESSION_UPDATE);
+    // The first condition is for rejections by user or telephony.
+    // The second condition is for rejection by the native(e.g. some block rule).
+    if ((objMediaManager.GetNegotiationState(&objSession.GetISession()) == STATE_OFFER_RECEIVED ||
+                (objMediaManager.GetNegotiationState(&objSession.GetISession()) ==
+                                NegotiationState::STATE_NEGOTIATED &&
+                        piMessage && m_objContext.GetMessageUtils().HasSdp(piMessage))) &&
             m_objContext.GetConfigurationProxy().GetInt(
                     ConfigVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT) ==
                     SipStatusCode::SC_200)
@@ -198,7 +205,10 @@ PRIVATE VIRTUAL CallStateName EstablishedState::RejectUpdate(IN const CallReason
         {
             objSession.Reject(GetReasonByNegotiationResult(objNegoResult.eResult));
         }
-        objSession.AcceptUpdate();
+        else
+        {
+            objSession.AcceptUpdate();
+        }
     }
     else
     {
@@ -283,9 +293,12 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
     return eStateName;
 }
 
-PUBLIC VIRTUAL CallStateName EstablishedState::TerminateUssi(IN const CallReasonInfo& /*objReason*/)
+PUBLIC VIRTUAL CallStateName EstablishedState::TerminateUssi(IN const CallReasonInfo& objReason)
 {
-    IMS_TRACE_D("TerminateUssi", 0, 0, 0);
+    if (objReason.nCode == CODE_INTERNAL_USSI_COMPLETED)
+    {
+        return Terminate(objReason);
+    }
 
     SendInfoForUssi(AString::ConstEmpty(), UssiError::CODE_1);
     m_objContext.GetUssiController()->SetNextActionByTerminateUssi();
@@ -295,15 +308,8 @@ PUBLIC VIRTUAL CallStateName EstablishedState::TerminateUssi(IN const CallReason
 
 PUBLIC VIRTUAL CallStateName EstablishedState::UssiTerminated(IN ISession* piSession)
 {
-    IMS_TRACE_D("UssiTerminated", 0, 0, 0);
-
     const IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_TERMINATE);
     UssiController* pUssiController = m_objContext.GetUssiController();
-
-    if (!pUssiController->IsByeForUssi(piMessage))
-    {
-        return SessionTerminated(piSession);
-    }
 
     pUssiController->HandleUssiBody(piMessage->GetMessage(), piMessage->GetMethod().ToInt());
 
@@ -315,8 +321,6 @@ PUBLIC VIRTUAL CallStateName EstablishedState::UssiTerminated(IN ISession* piSes
 
 PUBLIC VIRTUAL CallStateName EstablishedState::SendUssd(IN const AString& strUssd)
 {
-    IMS_TRACE_D("SendUssi", 0, 0, 0);
-
     SendInfoForUssi(strUssd);
     return GetStateName();
 }
@@ -324,7 +328,6 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SendUssd(IN const AString& strUss
 PUBLIC VIRTUAL CallStateName EstablishedState::UssiInfoReceived(
         IN ISession* /*piSession*/, IN ISipServerConnection* piSipServerConnection)
 {
-    IMS_TRACE_D("UssiInfoReceived", 0, 0, 0);
     IMS_SINT32 nMethod = piSipServerConnection->GetMethod().ToInt();
 
     if (nMethod != SipMethod::INFO)
@@ -359,36 +362,6 @@ PUBLIC VIRTUAL CallStateName EstablishedState::UssiInfoReceived(
     }
 
     return GetStateName();
-}
-
-PUBLIC VIRTUAL CallStateName EstablishedState::NotifyResponseToUssiInfo(
-        IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc)
-{
-    IMS_TRACE_D("NotifyResponseToUssiInfo", 0, 0, 0);
-    CallStateName eState = ClientConnection_NotifyResponse(piScc, piForkedScc);
-
-    if (m_objContext.GetUssiController()->GetLastResult().eAction ==
-            UssiNextAction::SEND_INFO_WITH_ERROR_CODE_AND_TERMINATE)
-    {
-        return TerminateUssiAfterInfoTransaction();
-    }
-
-    return eState;
-}
-
-PUBLIC VIRTUAL CallStateName EstablishedState::NotifyErrorToUssiInfo(
-        IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage)
-{
-    IMS_TRACE_D("NotifyErrorToUssiInfo", 0, 0, 0);
-    CallStateName eState = Error_NotifyError(piSc, nCode, strMessage);
-
-    if (m_objContext.GetUssiController()->GetLastResult().eAction ==
-            UssiNextAction::SEND_INFO_WITH_ERROR_CODE_AND_TERMINATE)
-    {
-        return TerminateUssiAfterInfoTransaction();
-    }
-
-    return eState;
 }
 
 PUBLIC VIRTUAL CallStateName EstablishedState::Refresh_NotifyCompleted(
@@ -586,7 +559,6 @@ IMS_RESULT EstablishedState::HandleUpdate(
 PRIVATE
 CallReasonInfo EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
 {
-    IMS_TRACE_D("HandleReceivedUpdate", 0, 0, 0);
     IMtcSession* pMtcSession = m_objContext.GetSession();
     ISession& objSession = pMtcSession->GetISession();
     SdpNegotiationResult objNegoResult = m_objContext.GetMediaManager().NegotiateSdp(&objSession);
@@ -756,22 +728,4 @@ IMS_BOOL EstablishedState::ShouldPendOperation() const
     IMtcSession* piMtcSession = m_objContext.GetSession();
     return (piMtcSession && piMtcSession->GetISession().IsSessionRefreshInProgress()) ||
             m_objContext.GetTimer().IsActive(TIMER_DELAY_UPDATE_AFTER_CONNECTED);
-}
-
-PRIVATE
-CallStateName EstablishedState::TerminateUssiAfterInfoTransaction()
-{
-    IMS_TRACE_D("TerminateUssiAfterInfoTransaction", 0, 0, 0);
-
-    CallReasonInfo objReason(CODE_UNSPECIFIED);
-
-    // In accordance with 3GPP TS 24.390, the network is expected to initiate the BYE.
-    // However, since the call session is already ended in the telephony layer,
-    // and the spec permits the UE to trigger a BYE whenever necessary,
-    // gImsStack sends the BYE directly as a safeguard.
-    m_objContext.GetSession()->Terminate(IMS_TRUE, objReason);
-
-    m_objContext.GetUiNotifier().SendStartFailed(objReason);
-
-    return CallStateName::TERMINATING;
 }

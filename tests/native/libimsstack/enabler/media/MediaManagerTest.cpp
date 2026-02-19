@@ -206,6 +206,9 @@ TEST_F(MediaManagerTest, TestSendMessageCommonNotification)
     EXPECT_CALL(
             *m_pMockClient, MediaSession_Notify(REPORT_DATA_RECEIVE_STARTED, MEDIA_TYPE_AUDIO, _))
             .Times(1);
+    EXPECT_CALL(*m_pMockClient,
+            MediaSession_Notify(REPORT_NW_TONE_RTP_RECEIVE_STARTED, MEDIA_TYPE_AUDIO, _))
+            .Times(1);
     EXPECT_TRUE(m_pMediaManager->SendMessage(IJniMedia::NOTIFY_FIRST_PACKET, CALL_KEY_1,
             reinterpret_cast<IMS_UINTP>(pParam1.release())));
 
@@ -285,7 +288,7 @@ TEST_F(MediaManagerTest, TestHandleMessageAndDispatch)
     m_pMediaManager->CreateSession(
             MEDIA_NETWORK_WIFI, MEDIA_SERVICE_DEFAULT, &m_objCoreService, CALL_KEY_1);
 
-    auto pParam = new ImsMediaMsgDtmfParam();
+    auto pParam = new ImsMediaMsgQosParam();
     ImsMessage msg(IJniMedia::NOTIFY_QOS_INFO, CALL_KEY_1, reinterpret_cast<IMS_UINTP>(pParam));
 
     // DispatchMessage calls HandleMessage, which in turn calls SendMessage.

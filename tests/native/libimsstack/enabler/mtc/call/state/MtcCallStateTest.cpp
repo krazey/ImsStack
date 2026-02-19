@@ -243,19 +243,6 @@ TEST_F(MtcCallStateTest, UssiInfoReceivedDoesNothing)
     EXPECT_EQ(INITIAL_CALL_STATE, pState->UssiInfoReceived(&objISession, piFakeConnection));
 }
 
-TEST_F(MtcCallStateTest, NotifyResponseToUssiInfoDoesNothing)
-{
-    ISipClientConnection* piFakeConnection = reinterpret_cast<ISipClientConnection*>(0x1);
-    EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->NotifyResponseToUssiInfo(piFakeConnection, piFakeConnection));
-}
-
-TEST_F(MtcCallStateTest, NotifyErrorToUssiInfoDoesNothing)
-{
-    ISipConnection* piFakeConnection = reinterpret_cast<ISipConnection*>(0x1);
-    EXPECT_EQ(INITIAL_CALL_STATE, pState->NotifyErrorToUssiInfo(piFakeConnection, 0, "anyMessage"));
-}
-
 TEST_F(MtcCallStateTest, SessionAlertingDoesNothing)
 {
     EXPECT_EQ(INITIAL_CALL_STATE, pState->SessionAlerting(&objISession));
@@ -411,45 +398,6 @@ TEST_F(MtcCallStateTest, OnInternalFailureDoesNothingButReturnsTerminating)
 TEST_F(MtcCallStateTest, OnAttachedDoesNothing)
 {
     EXPECT_EQ(INITIAL_CALL_STATE, pState->OnAttached());
-}
-
-TEST_F(MtcCallStateTest, ClientConnectionNotifyResponseInvokesReceive)
-{
-    ISipClientConnection* piFakeConnection = reinterpret_cast<ISipClientConnection*>(0x1);
-    MockISipClientConnection objClientConnection;
-    EXPECT_CALL(objClientConnection, Receive).Times(1).WillOnce(Return(IMS_SUCCESS));
-
-    EXPECT_CALL(objClientConnection, GetStatusCode)
-            .Times(1)
-            .WillOnce(Return(SipStatusCode::SC_200));
-
-    EXPECT_CALL(objClientConnection, Close).Times(1);
-
-    EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->ClientConnection_NotifyResponse(&objClientConnection, piFakeConnection));
-}
-
-TEST_F(MtcCallStateTest, ClientConnectionNotifyResponseInvokesReceiveAndFails)
-{
-    ISipClientConnection* piFakeConnection = reinterpret_cast<ISipClientConnection*>(0x1);
-    MockISipClientConnection objClientConnection;
-    EXPECT_CALL(objClientConnection, Receive).Times(1).WillOnce(Return(IMS_FAILURE));
-
-    EXPECT_CALL(objClientConnection, GetStatusCode).Times(0);
-
-    EXPECT_CALL(objClientConnection, Close).Times(0);
-
-    EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->ClientConnection_NotifyResponse(&objClientConnection, piFakeConnection));
-}
-
-TEST_F(MtcCallStateTest, ErrorNotifyErrorInvokesClose)
-{
-    MockISipClientConnection objClientConnection;
-    EXPECT_CALL(objClientConnection, Close).Times(1);
-
-    EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->Error_NotifyError(&objClientConnection, SipStatusCode::SC_420, "anyMessage"));
 }
 
 TEST_F(MtcCallStateTest, OnReceivingMediaDataStartedDoesNothing)

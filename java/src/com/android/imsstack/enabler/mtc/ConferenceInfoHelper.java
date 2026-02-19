@@ -26,11 +26,16 @@ public final class ConferenceInfoHelper {
     private ConferenceInfoHelper() {
     }
 
-    public static synchronized int getAnonymousId() {
+    public static int getAnonymousId() {
         return sAnonymousId;
     }
 
-    public static synchronized void setAnonymousId(int anonymousId) {
+    /**
+     * Sets the anonymous ID.
+     *
+     * @param anonymousId The anonymous ID to set.
+     */
+    public static void setAnonymousId(int anonymousId) {
         sAnonymousId = anonymousId;
 
         if (sAnonymousId == Integer.MAX_VALUE) {
@@ -338,15 +343,15 @@ public final class ConferenceInfoHelper {
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-CALL] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 
     private static void loge(String s) {
-        ImsLog.e("[GII-CALL] " + s);
+        ImsLog.e("[ISIL] " + s);
     }
 
     private static void logi(String s) {
-        ImsLog.i("[GII-CALL] " + s);
+        ImsLog.i("[ISIL] " + s);
     }
 
     private static String dbgLog(String s) {

@@ -115,7 +115,11 @@ public class SscUrl {
                 if (data.getEventNumber() == SscConstant.EVENT_SSC_INSERT_CB) {
                     updateUri += getServiceUri(data);
                 } else {
-                    updateUri += getRuleUri(data);
+                    if (SscConfig.isUpdateCbWithConditionsElement(slotId)) {
+                        updateUri += getRuleConditionUri(data);
+                    } else {
+                        updateUri += getRuleUri(data);
+                    }
                 }
                 break;
             case CW:

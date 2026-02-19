@@ -61,9 +61,11 @@ void AudioProfileGenerator::SetProfile(IN MediaBaseProfile* pProfile,
     AudioProfileUtil::SetRtcpXr(pAudioProfile, pAudioConfig);
     AudioProfileUtil::SetAnbr(pAudioProfile, eServiceType, nSlotId);
 
-    UpdateAudioProfileBandwidth(pAudioProfile, pAudioConfig);
-
-    IMS_TRACE_D("SetProfile(): Call UpdateAudioProfileBandwidth", 0, 0, 0);
+    if (pAudioConfig->IsCodecBasedDynamicAsEnabled())
+    {
+        UpdateAudioProfileBandwidth(pAudioProfile, pAudioConfig);
+        IMS_TRACE_D("SetProfile(): Called UpdateAudioProfileBandwidth", 0, 0, 0);
+    }
 
     IMS_TRACE_D("SetProfile(): Ptime[%d], MaxPtime[%d]", pAudioProfile->GetPtime(),
             pAudioProfile->GetMaxPtime(), 0);

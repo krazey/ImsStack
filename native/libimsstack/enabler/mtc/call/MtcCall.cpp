@@ -75,8 +75,6 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
         m_objParticipantInfo(ParticipantInfo(*this)),
         m_pUpdatingInfo(IMS_NULL),
         m_lstSessions(ImsList<IMtcSession*>()),
-        m_objStateMachine(
-                MtcCallStateMachine(*this, CallStateName::IDLE, std::move(pStateFactory), this)),
         m_objPendingOperationHolder(),
         m_pTimer(objContext.CreateTimer()),
         m_objUiNotifier(MtcUiNotifier(*this)),
@@ -87,7 +85,9 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
         m_objMessageMediator(MtcMessageMediator(*this)),
         m_pUssiController(IMS_NULL),
         m_pEpsFallbackTrigger(IMS_NULL),
-        m_pCurrentLocationDiscoveryController(IMS_NULL)
+        m_pCurrentLocationDiscoveryController(IMS_NULL),
+        m_objStateMachine(
+                MtcCallStateMachine(*this, CallStateName::IDLE, std::move(pStateFactory), this))
 {
     IMS_TRACE_D("%s - +MtcCall key[%lu]", ToString().GetStr(), m_nKey, 0);
 
@@ -102,7 +102,7 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
 
 PUBLIC VIRTUAL MtcCall::~MtcCall()
 {
-    IMS_TRACE_I("%s - ~MtcCall key[%lu]", ToString().GetStr(), m_nKey, 0);
+    IMS_TRACE_D("%s - ~MtcCall key[%lu]", ToString().GetStr(), m_nKey, 0);
 
     m_objService.RemoveAosStateListener(this);
     m_objService.RemoveSrvccStateListener(this);
@@ -552,26 +552,6 @@ PUBLIC VIRTUAL JniCallInfo MtcCall::CreateJniCallInfo()
     objJniCallInfo.eRatType = GetService().GetRatType();
 
     return objJniCallInfo;
-}
-
-PUBLIC VIRTUAL ISipClientConnection* MtcCall::CreateClientConnection(IN SipMethod eMethod)
-{
-    IMtcSession* pSession = GetSession();
-    if (!pSession)
-    {
-        return IMS_NULL;
-    }
-
-    ISipClientConnection* piSipClientConnection =
-            pSession->GetISession().CreateTransaction(eMethod);
-
-    if (piSipClientConnection)
-    {
-        piSipClientConnection->SetListener(this);
-        piSipClientConnection->SetErrorListener(this);
-    }
-
-    return piSipClientConnection;
 }
 
 PUBLIC VIRTUAL UdpKeepAliveSender* MtcCall::CreateUdpKeepAliveSender()
@@ -1161,63 +1141,6 @@ PUBLIC VIRTUAL void MtcCall::OnStateTransition(IN CallStateName eState)
         m_bEstablished = IMS_TRUE;
     }
     GetCallStateProxy().UpdateCallState(m_nKey, eState, GetCallType(), m_objCallInfo.IsEmergency());
-}
-
-PUBLIC VIRTUAL void MtcCall::ClientConnection_NotifyResponse(
-        IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc /*= IMS_NULL*/)
-{
-    IMS_TRACE_I("%s - ClientConnection_NotifyResponse", ToString().GetStr(), 0, 0);
-    if (piScc == IMS_NULL)
-    {
-        OnInternalFailure();
-        return;
-    }
-
-    if (IsUssi())
-    {
-        m_objStateMachine.RunStateOperation(
-                [&](IMtcCallState* pState)
-                {
-                    return pState->NotifyResponseToUssiInfo(piScc, piForkedScc);
-                });
-    }
-    else
-    {
-        m_objStateMachine.RunStateOperation(
-                [&](IMtcCallState* pState)
-                {
-                    return pState->ClientConnection_NotifyResponse(piScc, piForkedScc);
-                });
-    }
-}
-
-PUBLIC VIRTUAL void MtcCall::Error_NotifyError(
-        IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage)
-{
-    IMS_TRACE_I("%s - Error_NotifyError : code[%d] message[%s]", ToString().GetStr(), nCode,
-            strMessage.GetStr());
-    if (piSc == IMS_NULL)
-    {
-        OnInternalFailure();
-        return;
-    }
-
-    if (IsUssi())
-    {
-        m_objStateMachine.RunStateOperation(
-                [&](IMtcCallState* pState)
-                {
-                    return pState->NotifyErrorToUssiInfo(piSc, nCode, strMessage);
-                });
-    }
-    else
-    {
-        m_objStateMachine.RunStateOperation(
-                [&](IMtcCallState* pState)
-                {
-                    return pState->Error_NotifyError(piSc, nCode, strMessage);
-                });
-    }
 }
 
 PUBLIC VIRTUAL void MtcCall::OnReceivingMediaDataStarted(

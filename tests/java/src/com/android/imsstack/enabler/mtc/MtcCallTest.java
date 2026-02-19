@@ -1068,8 +1068,12 @@ public class MtcCallTest extends ImsStackTest {
 
     @Test
     public void testJniListenerResumedBy() {
+        mTestMtcCallWithMockJniProxy.setUpdateState(mTestMtcCall.UPDATE_STATE_RESUME_ACCEPTED);
+
         sendMessageToJniListener(IUMtcCall.RESUMED_BY);
 
+        assertEquals(mTestMtcCall.UPDATE_STATE_IDLE,
+                mTestMtcCallWithMockJniProxy.getUpdateState());
         verify(mCT, times(1)).updateCallState(
                 eq(mTestMtcCallWithMockJniProxy), eq(CallTracker.CALL_EVENT_UPDATED), eq(null));
         verify(mListener, times(1)).onCallResumeReceived(
@@ -1250,10 +1254,12 @@ public class MtcCallTest extends ImsStackTest {
         mTestMtcCall.setListener(mListener);
 
         mTestMtcCall.getTextListener().onRttMessageReceived(mMtcMediaSession, "");
+        processAllMessages();
 
         verify(mListener, times(1)).onCallRttMessageReceived(eq(mTestMtcCall), any());
 
         mTestMtcCall.getTextListener().onRttAudioIndication(mMtcMediaSession, true);
+        processAllMessages();
 
         verify(mListener, times(1)).onCallRttAudioIndication(eq(mTestMtcCall), eq(true));
     }

@@ -470,7 +470,7 @@ PRIVATE GLOBAL void PAccessNetworkInfoHeader::SetCniHeader(IN IMS_SINT32 nSlotId
 
     if (piSipMsg->SetHeader(ISipHeader::UNKNOWN, strHeader, strHeaderName) != IMS_SUCCESS)
     {
-        IMS_TRACE_E(0, "SetCniHeader :: Setting %s header failed", strHeaderName.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "SetCniHeader: Setting %s header failed", strHeaderName.GetStr(), 0, 0);
     }
 }
 

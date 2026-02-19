@@ -85,8 +85,6 @@ PUBLIC VIRTUAL void AosNConfiguration::SetListener(IN IAosNConfigurationListener
     }
 
     m_objListeners.Append(piListener);
-
-    A_IMS_TRACE_D(LOGTAG, "SetListener :: Listener (%" PFLS_x ") is set", piListener, 0, 0);
 }
 
 PUBLIC VIRTUAL void AosNConfiguration::RemoveListener(IN IAosNConfigurationListener* piListener)
@@ -103,9 +101,6 @@ PUBLIC VIRTUAL void AosNConfiguration::RemoveListener(IN IAosNConfigurationListe
         if (piCurrListener == piListener)
         {
             m_objListeners.RemoveAt(i);
-
-            A_IMS_TRACE_D(
-                    LOGTAG, "RemoveListener - Listener (%" PFLS_x ") is removed", piListener, 0, 0);
             return;
         }
     }
@@ -553,6 +548,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsUseRegInfoContactWithoutUriCheck() 
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsTestModeEnabled(IN IMS_SINT32 nType) const
 {
     return m_objAsset.objTestMode.Contains(nType);
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::ShouldDisableN1ModeOnImsPduEstablishFailure() const
+{
+    return m_objAsset.bDisableN1ModeOnImsPduEstablishFailure;
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::ShouldKeepExistingPcscfOnPcscfChangeDuringTheCall() const
@@ -1686,6 +1686,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Ims::KEY_CALL_END_AND_PDN_REACTIVATION_BY_REG_TERMINATED_BOOL);
     m_objAsset.bDestroyUnsecureTcpSocketOnAccomplishingReg = piCc->GetBoolean(
             CarrierConfig::Ims::KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL);
+    m_objAsset.bDisableN1ModeOnImsPduEstablishFailure = piCc->GetBoolean(
+            CarrierConfig::Ims::KEY_DISABLE_N1_MODE_ON_IMS_PDU_ESTABLISH_FAILURE_BOOL);
     m_objAsset.bEmcCallBasedOnPAssociatedUriOfNormalReg = piCc->GetBoolean(
             CarrierConfig::ImsEmergency::KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL);
     m_objAsset.bEmcRegOnRandomPcscf =

@@ -73,7 +73,7 @@ PUBLIC VIRTUAL void AlertingState::OnExit()
 
 PUBLIC VIRTUAL CallStateName AlertingState::HandleUserAlert()
 {
-    // If IsPrackRequiredForAlert() returns true, a 180 or 183 for alerting has already been sent
+    // If IsPrackRequiredForAlert() returns true, a 180 provisional response has already been sent
     // by MtcCallState::OnReadyToAlert(), so don't need to send it again.
     if (!IsPrackRequiredForAlert())
     {
@@ -150,7 +150,6 @@ PUBLIC VIRTUAL CallStateName AlertingState::Terminate(IN const CallReasonInfo& o
 PUBLIC VIRTUAL CallStateName AlertingState::AcceptUssi(
         IN CallType eCallType, IN MediaInfo& objMediaInfo)
 {
-    IMS_TRACE_D("AcceptUssi", 0, 0, 0);
     IMtcSession* pSession = m_objContext.GetSession();
 
     pSession->SetCallType(eCallType);
@@ -173,7 +172,6 @@ PUBLIC VIRTUAL CallStateName AlertingState::AcceptUssi(
 
 PUBLIC VIRTUAL CallStateName AlertingState::UssiStarted(IN ISession* piSession)
 {
-    IMS_TRACE_D("UssiStarted - ACK received", 0, 0, 0);
     m_objContext.GetSession()->HandleRequest(
             RequestType::ACK, *piSession->GetPreviousRequest(IMessage::SESSION_ACK));
 

@@ -110,8 +110,7 @@ OsCarrierConfig::OsCarrierConfig(
 PUBLIC VIRTUAL void OsCarrierConfig::System_NotifyEvent(
         IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
 {
-    IMS_TRACE_D(
-            "OsCarrierConfig :: event=%d, wp=%" PFLS_u ", lp=%" PFLS_u, nEvent, nWParam, nLParam);
+    IMS_TRACE_D("OsCarrierConfig: event=%d, wp=%" PFLS_u ", lp=%" PFLS_u, nEvent, nWParam, nLParam);
 
     switch (nEvent)
     {

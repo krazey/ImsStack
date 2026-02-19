@@ -36,13 +36,11 @@ MtcAosEventHandler::MtcAosEventHandler(
         m_objConfiguration(objConfiguration),
         m_objListeners(ImsList<IMtcAosStateListener*>())
 {
-    IMS_TRACE_I("+MtcAosEventHandler", 0, 0, 0);
 }
 
 PUBLIC
 MtcAosEventHandler::~MtcAosEventHandler()
 {
-    IMS_TRACE_I("~MtcAosEventHandler", 0, 0, 0);
     m_objListeners.Clear();
 }
 
@@ -75,8 +73,6 @@ void MtcAosEventHandler::RemoveListener(IN IMtcAosStateListener* piListener)
 PUBLIC
 void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures)
 {
-    IMS_TRACE_I("OnConnected emergency[%s]", _TRACE_B_(m_objService.IsEmergency()), 0, 0);
-
     if (!m_objService.IsEmergency())
     {
         IJniMtcServiceThread* pThread = m_objService.GetJniServiceThread();
@@ -93,18 +89,12 @@ void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures)
 PUBLIC
 void MtcAosEventHandler::OnDisconnecting(IN IMS_UINT32 nReason)
 {
-    IMS_TRACE_I("OnDisconnecting emergency[%s] nReason[%d]", _TRACE_B_(m_objService.IsEmergency()),
-            nReason, 0);
-
     NotifyStateChanged(MtcAosState::DISCONNECTING, nReason);
 }
 
 PUBLIC
 void MtcAosEventHandler::OnDisconnected(IN IMS_UINT32 nReason, IN IMS_SINT32 nDataFailureReason)
 {
-    IMS_TRACE_I("OnDisconnected emergency[%s] nReason[%d]", _TRACE_B_(m_objService.IsEmergency()),
-            nReason, 0);
-
     if (!m_objService.IsEmergency())
     {
         IJniMtcServiceThread* pThread = m_objService.GetJniServiceThread();
@@ -120,15 +110,12 @@ void MtcAosEventHandler::OnDisconnected(IN IMS_UINT32 nReason, IN IMS_SINT32 nDa
 PUBLIC
 void MtcAosEventHandler::OnSuspended(IN IMS_UINT32 nReason)
 {
-    IMS_TRACE_I("OnSuspended emergency[%s] nReason[%d]", _TRACE_B_(m_objService.IsEmergency()),
-            nReason, 0);
     NotifyStateChanged(MtcAosState::SUSPENDED, nReason);
 }
 
 PUBLIC
 void MtcAosEventHandler::OnResumed()
 {
-    IMS_TRACE_I("OnResumed emergency[%s]", _TRACE_B_(m_objService.IsEmergency()), 0, 0);
     NotifyStateChanged(MtcAosState::CONNECTED, ImsAosReason::NONE);
 }
 

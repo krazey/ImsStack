@@ -17,12 +17,13 @@
 #define SDP_OFFER_ANSWER_STATE_H_
 
 #include "ISdpOaState.h"
-#include "SdpParser.h"
-#include "SessionParameter.h"
+
+class SdpParser;
 
 class ISipMessage;
 class Service;
 class SessionCapabilities;
+class SessionParameter;
 
 class SdpOaState : public ISdpOaState
 {

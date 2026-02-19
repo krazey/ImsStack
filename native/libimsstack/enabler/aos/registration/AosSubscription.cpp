@@ -24,7 +24,9 @@
 #include "Engine.h"
 #include "IConfiguration.h"
 #include "IImsRadio.h"
+#include "IRegInfo.h"
 #include "IRegInfoContact.h"
+#include "IRegInfoRegistration.h"
 #include "IRegSubscription.h"
 #include "IRegistration.h"
 #include "SipConfigProxy.h"
@@ -214,7 +216,6 @@ PUBLIC VIRTUAL void AosSubscription::SetRetryTimer(IN IMS_BOOL bCheckRetryAfter)
 
 PUBLIC VIRTUAL IMS_UINT32 AosSubscription::GetState()
 {
-    A_IMS_TRACE_I(AOSTAG, "GetState :: state(%s)", StateToString(m_nState), 0, 0);
     return m_nState;
 }
 

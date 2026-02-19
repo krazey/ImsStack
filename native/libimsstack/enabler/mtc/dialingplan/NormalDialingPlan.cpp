@@ -81,16 +81,17 @@ PRIVATE GLOBAL AString& NormalDialingPlan::Translate(IN IMtcContext& objContext,
     }
 
     AString strLog;
-    IMS_TRACE_D("Translate Dialed number :: %s",
-            UtilService::GetLogString(strNumber, strLog, 3).GetStr(), 0, 0);
-
     if (IsNameAddress(strNumber))
     {
+        IMS_TRACE_D("Translate number[%s]",
+                UtilService::GetLogString(strNumber, strLog, 3).GetStr(), 0, 0);
         return strNumber;
     }
 
     if (IsAddressSpec(strNumber))
     {
+        IMS_TRACE_D("Translate number[%s]",
+                UtilService::GetLogString(strNumber, strLog, 3).GetStr(), 0, 0);
         AddAquotIfRequired(strNumber);
         return strNumber;
     }
@@ -105,16 +106,14 @@ PRIVATE GLOBAL AString& NormalDialingPlan::Translate(IN IMtcContext& objContext,
         FormSipUri(objContext, strNumber, objIdentityProxy);
     }
 
-    IMS_TRACE_D("Translate Dialed URI :: %s",
-            UtilService::GetLogString(strNumber, strLog, 7).GetStr(), 0, 0);
+    IMS_TRACE_D(
+            "Translate URI[%s]", UtilService::GetLogString(strNumber, strLog, 7).GetStr(), 0, 0);
     return strNumber;
 }
 
 PRIVATE GLOBAL void NormalDialingPlan::FormSipUri(IN IMtcContext& objContext,
         IN_OUT AString& strNumber, IN const ImsIdentityProxy& objIdentityProxy)
 {
-    IMS_TRACE_I("FormSipUri", 0, 0, 0);
-
     NumberFormat eDialedNumberFormat = GetDialedNumberFormat(strNumber);
 
     if (eDialedNumberFormat == NumberFormat::GLOBAL_FORMAT)
@@ -137,8 +136,6 @@ PRIVATE GLOBAL void NormalDialingPlan::FormSipUri(IN IMtcContext& objContext,
 PRIVATE GLOBAL void NormalDialingPlan::FormTelUri(IN IMtcContext& objContext,
         IN_OUT AString& strNumber, IN const ImsIdentityProxy& objIdentityProxy)
 {
-    IMS_TRACE_I("FormTelUri", 0, 0, 0);
-
     if (IsLocalNumberFormat(strNumber))
     {
         AccessNetworkInfo objAni;
@@ -271,7 +268,6 @@ PRIVATE GLOBAL NormalDialingPlan::Scheme NormalDialingPlan::GetScheme(IN IMtcCon
 {
     IMS_SINT32 nValue =
             objContext.GetConfigurationProxy().GetInt(ConfigIms::KEY_REQUEST_URI_TYPE_INT);
-    IMS_TRACE_D("GetScheme config=[%d]", nValue, 0, 0);
     switch (nValue)
     {
         case ConfigIms::REQUEST_URI_FORMAT_TEL:

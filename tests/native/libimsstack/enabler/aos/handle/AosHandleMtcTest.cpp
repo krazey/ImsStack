@@ -1203,7 +1203,7 @@ TEST_F(AosHandleMtcTest, InitializeFeatureTags_Test)
 
 TEST_F(AosHandleMtcTest, UpdateGGsmaRcsTelephonyFeatureTag_Test1)
 {
-    // Test1: vzw vowifi "cs" feature tag for call test. Idle -> Offhook -> Idle
+    // Test1: vowifi "cs" feature tag for call test. Idle -> Offhook -> Idle
     // Expectation: "cs" in idle, "cs,volte" in offhook
 
     m_pAosHandleMtc->AddFeature(ImsAosFeature::VIDEO);
@@ -1251,7 +1251,7 @@ TEST_F(AosHandleMtcTest, UpdateGGsmaRcsTelephonyFeatureTag_Test1)
 
 TEST_F(AosHandleMtcTest, UpdateGGsmaRcsTelephonyFeatureTag_Test2)
 {
-    // Test2: VZW VoWiFi IMS Registration Table Test - Wifi Only.
+    // Test2: VoWiFi IMS Registration Table Test - Wifi Only.
     // Expectation: "cs,volte" if mmtel / "cs" if no mmtel but video / none if no mmtel and video
 
     m_pAosHandleMtc->AddFeature(ImsAosFeature::MMTEL);
@@ -1311,7 +1311,7 @@ TEST_F(AosHandleMtcTest, UpdateGGsmaRcsTelephonyFeatureTag_Test2)
 
 TEST_F(AosHandleMtcTest, UpdateGGsmaRcsTelephonyFeatureTag_Test3)
 {
-    // Test3: VZW VoWiFi IMS Registration Table Test - CS Roam + Wifi
+    // Test3: VoWiFi IMS Registration Table Test - CS Roam + Wifi
     // Expectation: "cs,volte" if mmtel / "cs" if no mmtel but video / none if no mmtel and video
 
     m_pAosHandleMtc->AddFeature(ImsAosFeature::MMTEL);
@@ -1371,7 +1371,7 @@ TEST_F(AosHandleMtcTest, UpdateGGsmaRcsTelephonyFeatureTag_Test3)
 
 TEST_F(AosHandleMtcTest, UpdateGGsmaRcsTelephonyFeatureTag_Test4)
 {
-    // Test4: VZW VoWiFi IMS Registration Table Test - Changing to Wifi Only.
+    // Test4: VoWiFi IMS Registration Table Test - Changing to Wifi Only.
     // Expectation: "cs,volte" if mmtel / "cs" if no mmtel but video / none if no mmtel and video
 
     m_pAosHandleMtc->AddFeature(ImsAosFeature::MMTEL);

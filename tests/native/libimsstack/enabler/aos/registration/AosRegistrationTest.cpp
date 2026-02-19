@@ -222,6 +222,7 @@ public:
             m_pIpsecHelperInstance(IMS_NULL)
     {
         m_pCounter = new AosCounter();
+        m_nCreateRegFailureCount = 10;
     }
     inline ~TestAosRegistration() override { delete m_pCounter; }
 
@@ -2947,6 +2948,17 @@ TEST_F(AosRegistrationTest, TryRegistrationOnReceivingMessageThatRegRequiredWith
     m_pAosRegistration->OnMessage(objMsg);
 
     EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
+}
+
+TEST_F(AosRegistrationTest, TriggerFlowRecoveryWhenRegRequiredWithNextPcscf)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
+            .WillByDefault(Return(CarrierConfig::Ims::ERROR_POLICY_PDN_REACTIVATED));
+
+    ImsMessage objMsg(AosRegistration::MSG_REG_REQUIRED_WITH_NEXT_PCSCF, 0, 0);
+    m_pAosRegistration->OnMessage(objMsg);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessDefaultFlowRecovery_Start"), 1);
 }
 
 TEST_F(AosRegistrationTest, TryRegistrationOnReceivingMessageThatRegRequiredWithScscfRestoration)

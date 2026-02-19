@@ -21,6 +21,7 @@
 
 #include "config/CodecAudioConfig.h"
 #include "MediaBaseProfile.h"
+#include "audio/AudioDef.h"
 
 /**
  * AudioProfile is used to keep the SDP negotiation information for audio like
@@ -650,12 +651,30 @@ public:
     };
 
 public:
+    static constexpr int IMS_EVS_CONFIG_MAX = 6;
+
     enum
     {
         // COMMON PARAMETER
         DEFAULT_PTIME = -1,
         DEFAULT_MAXPTIME = -1,
     };
+
+    struct EVSConfigParams
+    {
+        IMS_UINT32 bw;
+        IMS_UINT32 br;
+    };
+
+    static constexpr std::array<EVSConfigParams, IMS_EVS_CONFIG_MAX> IR92EVSParams =
+    {{
+        { static_cast<IMS_UINT32>(-1), static_cast<IMS_UINT32>(-1) }, // [0] IMS_EVS_CONFIG_INVALID
+        { 0x07, 0x1F }, // [1] IMS_EVS_CONFIG_A1
+        { 0x07, 0x7F }, // [2] IMS_EVS_CONFIG_A2
+        { 0x04, 0x10 }, // [3] IMS_EVS_CONFIG_B0
+        { 0x04, 0x18 }, // [4] IMS_EVS_CONFIG_B1
+        { 0x04, 0x78 }  // [5] IMS_EVS_CONFIG_B2
+    }};
 
     AudioProfile() :
             MediaBaseProfile(

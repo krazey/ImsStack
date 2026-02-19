@@ -107,14 +107,18 @@ public class SscAuthAgent implements ISscAuthAgent {
     }
 
     @Override
-    public String getNafFqdn() {
-        String nafFqdn = SscConfig.getNafFqdn(mSlotId);
-        if (TextUtils.isEmpty(nafFqdn)) {
-            return getNafFqdnFromRealm();
-        } else {
-            ImsLog.d("nafFqdn : "  + nafFqdn);
-            return nafFqdn;
+    public String getNafFqdnFromRealm() {
+        String realm = mSscAuthCredentials.getRealm();
+        if (TextUtils.isEmpty(realm)) {
+            ImsLog.d("realm is invalid");
+            return null;
         }
+
+        String[] tokens = realm.split("@");
+        String nafFqdn = tokens.length > 1 ? tokens[1] : tokens[0];
+
+        ImsLog.d("nafFqdn : "  + nafFqdn);
+        return nafFqdn;
     }
 
     @Override
@@ -124,10 +128,8 @@ public class SscAuthAgent implements ISscAuthAgent {
 
     @Override
     public void parse(String wwwAuthenticate) {
-        ImsLog.d("");
-
         if (TextUtils.isEmpty(wwwAuthenticate)) {
-            ImsLog.d("wwwAuthenticate is invalid : [" + wwwAuthenticate + "]");
+            ImsLog.d("wwwAuthenticate is invalid.");
             return;
         }
         ImsLog.d("wwwAuthenticate : " + wwwAuthenticate);
@@ -159,33 +161,33 @@ public class SscAuthAgent implements ISscAuthAgent {
                 if (TextUtils.isEmpty(mSscAuthCredentials.getRealm())) {
                     mSscAuthCredentials.setRealm(realms[0]);
                 }
-                ImsLog.d("nameValue :" + nameValue[0] + "/" + nameValue[1]
+                ImsLog.d("nameValue: " + nameValue[0] + " - " + nameValue[1]
                         + ", getRealm() : " + mSscAuthCredentials.getRealm());
             } else if ("nonce".equalsIgnoreCase(nameValue[0])) {
                 String temp_nonce = token.replaceAll("(?i)nonce=", "");
                 mSscAuthCredentials.setNonce(temp_nonce.replaceAll("\"", ""));
-                ImsLog.d("nameValue :" + nameValue[0] + "/" + nameValue[1]
+                ImsLog.d("nameValue: " + nameValue[0] + " - " + nameValue[1]
                         + ", getNonce() : " + mSscAuthCredentials.getNonce());
             } else if ("nextnonce".equalsIgnoreCase(nameValue[0])) {
                 // nonce can include '=' character...
                 nameValue[1] = token.replaceAll(nameValue[0] + "=", "");
                 mSscAuthCredentials.setNonce(nameValue[1].replaceAll("\"", ""));
-                ImsLog.d("nameValue :" + nameValue[0] + "/" + nameValue[1]
+                ImsLog.d("nameValue: " + nameValue[0] + " - " + nameValue[1]
                         + ", getNonce() : " + mSscAuthCredentials.getNonce());
             } else if ("qop".equalsIgnoreCase(nameValue[0])) {
                 mSscAuthCredentials.setQop(nameValue[1].replaceAll("\"", ""));
                 mSscAuthCredentials.setQopExist(true);
-                ImsLog.d("nameValue :" + nameValue[0] + "/" + nameValue[1]
+                ImsLog.d("nameValue: " + nameValue[0] + " - " + nameValue[1]
                         + ", getQos() : " + mSscAuthCredentials.getQop()
                         + ", isQopExist : " + mSscAuthCredentials.isQopExist());
             } else if ("opaque".equalsIgnoreCase(nameValue[0])) {
                 nameValue[1] = token.replaceAll("opaque=", "");
                 mSscAuthCredentials.setOpaque(nameValue[1].replaceAll("\"", ""));
-                ImsLog.d("nameValue :" + nameValue[0] + "/" + nameValue[1]
+                ImsLog.d("nameValue: " + nameValue[0] + " - " + nameValue[1]
                         + ", getOpaque() : " + mSscAuthCredentials.getOpaque());
             } else if ("algorithm".equalsIgnoreCase(nameValue[0])) {
                 mSscAuthCredentials.setAlgorithm(nameValue[1].replaceAll("\"", ""));
-                ImsLog.d("nameValue :" + nameValue[0] + "/" + nameValue[1]
+                ImsLog.d("nameValue: " + nameValue[0] + "- " + nameValue[1]
                         + ", getAlgorithm() : " + mSscAuthCredentials.getAlgorithm());
             }
         }
@@ -213,20 +215,6 @@ public class SscAuthAgent implements ISscAuthAgent {
     @Override
     public void setLastSuccessfulGbaMode(int gbaMode) {
         mLastSuccessfulGbaMode = gbaMode;
-    }
-
-    private String getNafFqdnFromRealm() {
-        String realm = mSscAuthCredentials.getRealm();
-        if (TextUtils.isEmpty(realm)) {
-            ImsLog.d("realm is invalid");
-            return null;
-        }
-
-        String[] tokens = realm.split("@");
-        String nafFqdn = tokens.length > 1 ? tokens[1] : tokens[0];
-
-        ImsLog.d("nafFqdn : "  + nafFqdn);
-        return nafFqdn;
     }
 
     private boolean isGbaValid(int appType) {
@@ -475,8 +463,6 @@ public class SscAuthAgent implements ISscAuthAgent {
         }
 
         private void increaseNc() {
-            ImsLog.d("");
-
             if (mNc == 0x7FFFFFFF) {
                 mNc = 1;
             }

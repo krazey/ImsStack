@@ -84,7 +84,6 @@ IMS_BOOL SdpVersion::SetVersion(IN IMS_SINT32 nVersion /*= SDP_VERSION*/)
 {
     m_nVersion = nVersion;
 
-    // TODO:: ???
     if (m_nVersion != SDP_VERSION)
     {
         return IMS_FALSE;

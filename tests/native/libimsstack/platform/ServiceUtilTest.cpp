@@ -92,11 +92,23 @@ TEST_F(UtilServiceTest, GetLogString)
     AString strOutputValue("zzz");
     EXPECT_EQ(UtilService::GetLogString(strInput, strOut, 5), strOutputValue);
     strInput = "Log String to print";
-    strOutputValue = "Log Stringxxx";
+    strOutputValue = "Log String***";
     EXPECT_EQ(UtilService::GetLogString(strInput, strOut, 10), strOutputValue);
-    strOutputValue = "Log xxx";
+    strOutputValue = "Log ***";
     EXPECT_STREQ(
             UtilService::GetLogString(strInput, strOut, 10, 'S').GetStr(), strOutputValue.GetStr());
+}
+
+TEST_F(UtilServiceTest, LogSipMessage)
+{
+    const AString strMessage("SIP/2.0 200 OK");
+
+    EXPECT_CALL(m_objMockSystem,
+            LogSipMessage(strMessage.GetStr(), strMessage.GetLength(), IMS_SLOT_0, IMS_TRUE))
+            .Times(1);
+
+    m_pUtilService->LogSipMessage(
+            strMessage.GetStr(), strMessage.GetLength(), IMS_SLOT_0, IMS_TRUE);
 }
 
 }  // namespace android

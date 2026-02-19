@@ -797,6 +797,15 @@ public:
     virtual IMS_BOOL IsTestModeEnabled(IN IMS_SINT32 nType) const = 0;
 
     /**
+     * @brief Returns whether to disable N1 mode capability when failing to establish
+     *        IMS PDU Session.
+     *
+     * @return IMS_BOOL Return whether to be enabled or not
+     * @see {@code ims.disable_n1_mode_on_ims_pdu_establish_failure_bool}
+     */
+    virtual IMS_BOOL ShouldDisableN1ModeOnImsPduEstablishFailure() const = 0;
+
+    /**
      * @brief Indicates whether to keep using the existing pcscf to perform re-reg when handover
      *        between cellular and wifi during the call.
      *

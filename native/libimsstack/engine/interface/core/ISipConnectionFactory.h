@@ -16,7 +16,6 @@
 #ifndef INTERFACE_SIP_CONNECTION_FACTORY_H_
 #define INTERFACE_SIP_CONNECTION_FACTORY_H_
 
-#include "SipMethod.h"
 #include "base/IMethod.h"
 
 class ISipClientConnection;
@@ -24,6 +23,7 @@ class ISipConnectionFactoryListener;
 class ISipDialog;
 class ISipServerConnection;
 class SipAddress;
+class SipMethod;
 
 /**
  * @brief This class provides an interface to use J180 interface layer directly

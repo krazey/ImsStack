@@ -46,12 +46,14 @@
 
     <int name="imsvoice.audio_telephone_event_duration_millis_int" value="200"/>
     <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
+    <boolean name="imsvoice.codec_based_dynamic_as_enabled_bool" value="false"/>
 
     <!-- Video -->
     <int-array name="imsvt.video_rtp_port_range_int_array" num="2">
         <item value="1230"/>
         <item value="1236"/>
     </int-array>
+    <int name="imsvt.video_iframe_interval_sec_int" value="1"/>
     <int name="imsvt.video_send_periodic_sps_pps_int" value="1"/>
     <boolean name="imsvt.video_drop_p_frame_bool" value="true"/>
     <int name="imsvt.video_cvo_value_int" value="4"/>

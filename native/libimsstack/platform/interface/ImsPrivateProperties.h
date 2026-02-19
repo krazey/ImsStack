@@ -24,23 +24,9 @@
 class ImsPrivateProperties
 {
 public:
-    class Ephemeral
-    {
-    public:
-        static const IMS_CHAR KEY_KR_TTA_VERSION[];
-        static const IMS_CHAR KEY_REG_0_BT[];
-        static const IMS_CHAR KEY_REG_1_MT[];
-        static const IMS_CHAR KEY_REG_2_CF[];
-        static const IMS_CHAR KEY_REG_3_UWT[];
-        static const IMS_CHAR KEY_REG_4_AWT[];
-        static const IMS_CHAR KEY_SMS_NETWORK_REG_BIND[];
-        static const IMS_CHAR KEY_THIRD_PARTY_DIALER_FOR_VIDEO_CALL[];
-    };
-
     class Persistent
     {
     public:
-        static const IMS_CHAR KEY_SHOW_CODEC_INFO[];
         static const IMS_CHAR KEY_WIFI_TEST[];
         static const IMS_CHAR KEY_SIP_DEVICE_ID[];
         // SIM operator / country / operator-sub

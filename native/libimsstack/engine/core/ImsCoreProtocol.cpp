@@ -19,6 +19,7 @@
 
 #include "private/ConfigurationManager.h"
 
+#include "CoreService.h"
 #include "CoreServiceImpl.h"
 #include "IServiceManager.h"
 #include "ImsCoreContext.h"
@@ -41,12 +42,12 @@ PRIVATE VIRTUAL IService* ImsCoreProtocol::CreateService(
     const IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
     IMS_SINT32 nSlotId = (piThread == IMS_NULL) ? IMS_SLOT_0 : piThread->GetSlotId();
 
-    IMS_TRACE_D("CoreService - appId=%s, serviceId=%s, slotId=%d", strAppId.GetStr(),
+    IMS_TRACE_D("CoreService: appId=%s, serviceId=%s, slotId=%d", strAppId.GetStr(),
             strServiceId.GetStr(), nSlotId);
 
     if (strUserId.GetLength() > 0)
     {
-        IMS_TRACE_D("CoreService - userId=%s", SipDebug::GetUri1(strUserId).GetStr(), 0, 0);
+        IMS_TRACE_D("CoreService: userId=%s", SipDebug::GetUri1(strUserId).GetStr(), 0, 0);
     }
 
     const ConfigurationManager* pConfigMngr = ConfigurationManager::GetInstance();
@@ -76,7 +77,7 @@ PRIVATE VIRTUAL IService* ImsCoreProtocol::CreateService(
 
     if (!IsRegistryConsistent(pAppConfig, pServiceConfig))
     {
-        IMS_TRACE_E(0, "The IMS registry is not consistent : App (%s), Service (%s)",
+        IMS_TRACE_E(0, "The IMS registry is not consistent: app(%s), service(%s)",
                 strAppId.GetStr(), strServiceId.GetStr(), 0);
         return IMS_NULL;
     }
@@ -87,7 +88,7 @@ PRIVATE VIRTUAL IService* ImsCoreProtocol::CreateService(
 
     if (pService != IMS_NULL)
     {
-        IMS_TRACE_E(0, "A service with appId (%s) and serviceId (%s) is already created",
+        IMS_TRACE_E(0, "A service with appId(%s) and serviceId(%s) is already created",
                 strAppId.GetStr(), strServiceId.GetStr(), 0);
         return IMS_NULL;
     }
@@ -101,7 +102,7 @@ PRIVATE VIRTUAL IService* ImsCoreProtocol::CreateService(
 
         if (!objUserId.Create(strUserId))
         {
-            IMS_TRACE_E(0, "The userId (%s) parameter is invalid :: SipError (%d)",
+            IMS_TRACE_E(0, "The userId (%s) parameter is invalid; SipError(%d)",
                     SipDebug::GetUri1(strUserId).GetStr(), SipError::GetLastError(), 0);
             return IMS_NULL;
         }

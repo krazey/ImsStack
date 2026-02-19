@@ -123,8 +123,42 @@
     <int name="imsvt.convert_remote_response_timer_millis_int" value="30000"/>
     <int name="imsvt.convert_user_response_timer_millis_int" value="40000"/>
     <int name="imsvt.policy_on_video_qos_deactivation_int" value="2"/>
-    <string-array name="imsemergency.reject_code_and_action_set_string_array" num="1">
-        <item value="403:4"/> <!-- CROSS_SIM_TEMP_FAILURE  -->
+    <string-array name="imsemergency.reject_code_and_action_set_string_array" num="35">
+        <item value="400:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="401:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="402:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="403:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="404:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="405:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="406:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="407:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="408:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="410:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="413:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="414:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="415:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="416:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="420:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="421:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="423:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="433:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="480:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="481:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="482:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="483:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="484:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="485:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="488:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="491:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="493:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="500:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="501:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="502:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="503:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="504:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="505:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="513:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
+        <item value="580:5"/> <!-- CROSS_SIM_PERM_FAILURE  -->
     </string-array>
     <string-array name="imsemergency.contact_header_address_in_invite_string_array" num="12">
         <item value=""/> <!-- REG_MODE_NORMAL -->
@@ -159,4 +193,5 @@
     <boolean name="imsvoice.audio_show_codec_attribute_dtx_bool" value="false"/>
     <boolean name="imsvoice.audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
     <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
+    <boolean name="imsvoice.codec_based_dynamic_as_enabled_bool" value="false"/>
 </carrier_config>

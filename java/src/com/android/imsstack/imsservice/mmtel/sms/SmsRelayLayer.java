@@ -54,6 +54,7 @@ public class SmsRelayLayer {
     //TODO: to be included in ImsSmsImplBase
     public static final int DELIVER_STATUS_ERROR_INVALID_MR_VALUE = 5;
     public static final int GENERIC_ERROR_CAUSE_VALUE = 0x6f;
+    public static final int MT_TOKEN_MASK = 0x40000000;
     Map<Integer , Integer> mDeliverCause = new ConcurrentHashMap<>();
 
     /**
@@ -387,7 +388,7 @@ public class SmsRelayLayer {
                 int result;
                 Listener listener = mListener;
                 if (smsFormat == SmsUtils.FORMAT_INT_3GPP2) {
-                    token = mToken.incrementAndGet();
+                    token = mToken.incrementAndGet() | MT_TOKEN_MASK;
                     if(listener == null) {
                         loge("Listener is null");
                         return;
@@ -442,7 +443,7 @@ public class SmsRelayLayer {
                         mTokenStateTrackerMap.remove(token);
                     }
                 } else if (mtData.getMessageType() == SmsUtils.RP_DATA) {
-                    token = mToken.incrementAndGet();
+                    token = mToken.incrementAndGet() | MT_TOKEN_MASK;
                     synchronized (mLock) {
                         mMTTokenMRMap.put(token, messageRef);
                         mSmsRLStateMachine = new SmsRLStateMachine(token, SmsUtils.RP_DATA,

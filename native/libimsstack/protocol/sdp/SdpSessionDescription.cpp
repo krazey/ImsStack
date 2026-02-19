@@ -151,7 +151,6 @@ PUBLIC VIRTUAL IMS_BOOL SdpSessionDescription::Decode(IN const AStringArray& obj
         nEndLine = objLines.GetCount();
     }
 
-    // TODO:: consider SDP line ordering
     AString strLineBody;
 
     for (IMS_SINT32 i = nStartLine; i < nEndLine; ++i)

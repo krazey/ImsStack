@@ -36,14 +36,10 @@ TransactionTimerUpdateHelper::TransactionTimerUpdateHelper(
         m_objConfiguration(objContext.GetConfigurationProxy()),
         m_bUpdated(IMS_FALSE)
 {
-    IMS_TRACE_I("+TransactionTimerUpdateHelper", 0, 0, 0);
 }
 
 PUBLIC
-TransactionTimerUpdateHelper::~TransactionTimerUpdateHelper()
-{
-    IMS_TRACE_I("~TransactionTimerUpdateHelper", 0, 0, 0);
-}
+TransactionTimerUpdateHelper::~TransactionTimerUpdateHelper() {}
 
 PUBLIC VIRTUAL void TransactionTimerUpdateHelper::SetInviteTransactionTimer()
 {

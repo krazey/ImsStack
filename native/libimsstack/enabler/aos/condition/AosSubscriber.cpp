@@ -70,7 +70,6 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscriber::IsUsim() const
 
 PUBLIC VIRTUAL void AosSubscriber::SetListener(IN IAosSubscriberListener* piListener)
 {
-    A_IMS_TRACE_D(APPPROFILE, "SetListener :: (%" PFLS_x ") is set", piListener, 0, 0);
     m_piListener = piListener;
 
     if (IsReady())
@@ -166,7 +165,6 @@ IMS_BOOL AosSubscriber::Init()
     {
         m_piSubscriberManager->AddListener(this);
     }
-    A_IMS_TRACE_D(APPPROFILE, "Init - AddListener :: (%" PFLS_X ")", this, 0, 0);
 
     return IMS_TRUE;
 }

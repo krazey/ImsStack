@@ -17,8 +17,12 @@
 #include "ServiceTrace.h"
 
 #include "private/ConfigurationManager.h"
+#include "private/CoreServiceConfig.h"
 #include "private/MediaConfig.h"
 
+#include "SdpMediaDescription.h"
+#include "SdpParser.h"
+#include "SdpSessionDescription.h"
 #include "offeranswer/SdpOfferAnswer.h"
 #include "offeranswer/SdpSessionParameter.h"
 
@@ -26,6 +30,7 @@
 #include "ISipMessageBodyPart.h"
 #include "SdpOaState.h"
 #include "Service.h"
+#include "SessionParameter.h"
 #include "SipDebug.h"
 #include "SipStatusCode.h"
 
@@ -432,8 +437,8 @@ PUBLIC VIRTUAL SdpOaState::~SdpOaState()
  */
 PUBLIC VIRTUAL void SdpOaState::AbortProposal()
 {
-    IMS_TRACE_D("SDP Offer/Answer :: AbortProposal (%s)",
-            (m_pProposalView == IMS_NULL) ? "NULL" : "non-NULL", 0, 0);
+    IMS_TRACE_D("SDP_OA: AbortProposal (%s)", (m_pProposalView == IMS_NULL) ? "NULL" : "non-NULL",
+            0, 0);
 
     if (m_pProposalView == IMS_NULL)
     {
@@ -482,13 +487,12 @@ PUBLIC VIRTUAL IMS_SINT32 SdpOaState::GetSessionCurrentView(
 {
     if (m_nState != STATE_ESTABLISHED)
     {
-        IMS_TRACE_D("SessionCurrentView :: Invalid state (%d)", m_nState, 0, 0);
         return ISdpOaState::RESULT_INVALID_STATE;
     }
 
     if (m_pCurrentView == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Error (Current View does not exist)", 0, 0, 0);
+        IMS_TRACE_D("SDP_OA: No current view", 0, 0, 0);
         return ISdpOaState::RESULT_ERROR;
     }
 
@@ -505,7 +509,7 @@ PUBLIC VIRTUAL IMS_SINT32 SdpOaState::GetSessionPeerView(
 {
     if (m_pPeerView == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Error (Peer View does not exist)", 0, 0, 0);
+        IMS_TRACE_D("SDP_OA: No peer view", 0, 0, 0);
         return ISdpOaState::RESULT_ERROR;
     }
 
@@ -530,7 +534,7 @@ PUBLIC VIRTUAL IMS_SINT32 SdpOaState::GetSessionProposalView(
 
     if (m_pProposalView == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Error (Proposed View does not exist)", 0, 0, 0);
+        IMS_TRACE_D("SDP_OA: No proposal view", 0, 0, 0);
         return ISdpOaState::RESULT_ERROR;
     }
 
@@ -546,7 +550,7 @@ PUBLIC VIRTUAL IMS_SINT32 SdpOaState::CreateMediaParameter(OUT SdpMediaParameter
 {
     if (m_pProposalView == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Invalid state (Proposed View is NULL)", 0, 0, 0);
+        IMS_TRACE_E(0, "Invalid state (No proposal view)", 0, 0, 0);
         return ISdpOaState::RESULT_INVALID_STATE;
     }
 
@@ -574,13 +578,13 @@ PUBLIC VIRTUAL IMS_SINT32 SdpOaState::GetMediaCurrentView(
 {
     if (m_nState != STATE_ESTABLISHED)
     {
-        IMS_TRACE_D("MediaCurrentView :: Invalid state (%d)", m_nState, 0, 0);
+        IMS_TRACE_D("Invalid state (%d)", m_nState, 0, 0);
         return ISdpOaState::RESULT_INVALID_STATE;
     }
 
     if (m_pCurrentView == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Error (Current View does not exist)", 0, 0, 0);
+        IMS_TRACE_D("SDP_OA: No current view", 0, 0, 0);
         return ISdpOaState::RESULT_ERROR;
     }
 
@@ -588,7 +592,7 @@ PUBLIC VIRTUAL IMS_SINT32 SdpOaState::GetMediaCurrentView(
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Can't find the media parameter (%d) from the current view", nMid, 0, 0);
+        IMS_TRACE_E(0, "No media parameter(%d) from the current view", nMid, 0, 0);
         return ISdpOaState::RESULT_NOT_FOUND;
     }
 
@@ -603,7 +607,7 @@ PUBLIC VIRTUAL IMS_SINT32 SdpOaState::GetMediaPeerView(
 {
     if (m_pPeerView == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Error (Peer View does not exist)", 0, 0, 0);
+        IMS_TRACE_D("SDP_OA: No peer view", 0, 0, 0);
         return ISdpOaState::RESULT_ERROR;
     }
 
@@ -611,7 +615,7 @@ PUBLIC VIRTUAL IMS_SINT32 SdpOaState::GetMediaPeerView(
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS_TRACE_D("Can't find the media parameter (%d) from the peer view", nMid, 0, 0);
+        IMS_TRACE_D("No media parameter(%d) from the peer view", nMid, 0, 0);
 
         if (m_pProposalView != IMS_NULL)
         {
@@ -619,8 +623,7 @@ PUBLIC VIRTUAL IMS_SINT32 SdpOaState::GetMediaPeerView(
 
             if (pMediaParam == IMS_NULL)
             {
-                IMS_TRACE_E(0, "Can't find the media parameter (%d) from the proposal view", nMid,
-                        0, 0);
+                IMS_TRACE_E(0, "No media parameter(%d) from the proposal view", nMid, 0, 0);
                 return ISdpOaState::RESULT_NOT_FOUND;
             }
         }
@@ -649,7 +652,7 @@ PUBLIC VIRTUAL IMS_SINT32 SdpOaState::GetMediaProposalView(
 
     if (m_pProposalView == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Error (Proposed View does not exist)", 0, 0, 0);
+        IMS_TRACE_D("SDP_OA: No proposal view", 0, 0, 0);
         return ISdpOaState::RESULT_ERROR;
     }
 
@@ -657,7 +660,7 @@ PUBLIC VIRTUAL IMS_SINT32 SdpOaState::GetMediaProposalView(
 
     if (pMediaParam == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Can't find the media parameter (%d) from the proposed view", nMid, 0, 0);
+        IMS_TRACE_E(0, "No media parameter(%d) from the proposal view", nMid, 0, 0);
         return ISdpOaState::RESULT_NOT_FOUND;
     }
 
@@ -824,14 +827,14 @@ IMS_BOOL SdpOaState::GetSdp(OUT AString& strSdp) const
 {
     if (m_pProposalView == IMS_NULL)
     {
-        IMS_TRACE_D("SDP Offer/Answer :: There is no proposed view ...", 0, 0, 0);
+        IMS_TRACE_D("SDP_OA: No proposal view", 0, 0, 0);
         return IMS_FALSE;
     }
 
     if ((m_nState == STATE_OFFER_SENT) || (m_nState == STATE_OFFER_CHANGE_SENT))
     {
         // Do not transmit the SDP
-        IMS_TRACE_D("SDP Offer/Answer :: OFFER PROGRESSING ...", 0, 0, 0);
+        IMS_TRACE_D("SDP_OA: offer in progress", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -906,7 +909,7 @@ IMS_SINT32 SdpOaState::HandleOfferAnswer(IN const ISipMessage* piSipMsg)
 {
     if (m_bStateChanged == IMS_FALSE)
     {
-        IMS_TRACE_I("SDP Offer/Answer - NO STATE CHANGED", 0, 0, 0);
+        IMS_TRACE_I("SDP_OA: NO STATE CHANGED", 0, 0, 0);
         return SdpOfferAnswer::RESULT_NOT_CHANGED;
     }
 
@@ -916,7 +919,7 @@ IMS_SINT32 SdpOaState::HandleOfferAnswer(IN const ISipMessage* piSipMsg)
 
     if (piBodyPart == IMS_NULL)
     {
-        IMS_TRACE_I("SDP Offer/Answer - NO SDP", 0, 0, 0);
+        IMS_TRACE_I("SDP_OA: NO SDP", 0, 0, 0);
         return SdpOfferAnswer::RESULT_NOT_CHANGED;
     }
 
@@ -928,14 +931,14 @@ IMS_SINT32 SdpOaState::HandleOfferAnswer(IN const ISipMessage* piSipMsg)
 
     if (!objParser.Decode(strSdp))
     {
-        IMS_TRACE_E(0, "Decoding SDP message failed\r\n-----> SDP\r\n%s",
+        IMS_TRACE_E(0, "Decoding SDP message failed\r\n[SDP]\r\n%s",
                 SipDebug::GetCharA1(strSdp.GetStr(), 32, '\n'), 0, 0);
 
         // OA_STATE_ROLLBACK_FOR_MALFORMED_SDP
         if ((m_nState == STATE_ESTABLISHED) &&
                 ((m_nOldState == STATE_OFFER_SENT) || (m_nOldState == STATE_OFFER_CHANGE_SENT)))
         {
-            // Ignore the SDP answer if SDP body part is malformed...
+            // Ignore the SDP answer if SDP body part is malformed.
             SetState(m_nOldState);
 
             if (m_nOldState == STATE_OFFER_SENT)
@@ -954,7 +957,7 @@ IMS_SINT32 SdpOaState::HandleOfferAnswer(IN const ISipMessage* piSipMsg)
             m_nMode = MODE_IDLE;
             // Revert the flag for tracking state changes
             m_bStateChanged = IMS_FALSE;
-            // Ignore the SDP offer if SDP body part is malformed...
+            // Ignore the SDP offer if SDP body part is malformed.
             SetState(m_nOldState);
         }
 
@@ -1048,7 +1051,7 @@ IMS_SINT32 SdpOaState::HandleOfferAnswer(IN const ISipMessage* piSipMsg)
         case STATE_OFFER_CHANGE_RECEIVED:
             return HandleOffer(objParser);
         default:
-            IMS_TRACE_E(0, "SDP Offer/Answer :: INVALID STATE (%d)", m_nState, 0, 0);
+            IMS_TRACE_E(0, "SDP_OA: Invalid state (%d)", m_nState, 0, 0);
             break;
     }
 
@@ -1076,7 +1079,7 @@ void SdpOaState::CompleteExchange()
         }
         else
         {
-            IMS_TRACE_D("SDP Offer/Answer :: CompleteExchange - no proposal view", 0, 0, 0);
+            IMS_TRACE_D("SDP_OA: CompleteExchange - no proposal view", 0, 0, 0);
         }
     }
     else
@@ -1102,7 +1105,7 @@ void SdpOaState::CompleteExchange()
 PUBLIC
 IMS_BOOL SdpOaState::RestoreState()
 {
-    IMS_TRACE_I("SDP Offer/Answer - Restore ...", 0, 0, 0);
+    IMS_TRACE_I("SDP_OA: Restore", 0, 0, 0);
 
     if (m_pProposalView != IMS_NULL)
     {
@@ -1169,8 +1172,7 @@ IMS_BOOL SdpOaState::UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 n
             break;
         default:
             // No Offer/Answer state transition
-            IMS_TRACE_D("SDP Offer/Answer :: No state transition (Method: %s)",
-                    objMethod.ToString().GetStr(), 0, 0);
+            IMS_TRACE_D("SDP_OA: No state transition(%s)", objMethod.ToString().GetStr(), 0, 0);
             return IMS_TRUE;
     }
 
@@ -1184,7 +1186,7 @@ IMS_BOOL SdpOaState::UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 n
         if (nStatusCode == SipStatusCode::SC_100)
         {
             // No Offer/Answer state transition.
-            IMS_TRACE_D("SDP Offer/Answer :: No state transition (100 Trying)", 0, 0, 0);
+            IMS_TRACE_D("SDP_OA: No state transition (100 Trying)", 0, 0, 0);
             return IMS_TRUE;
         }
         else if (SipStatusCode::IsProvisional(nStatusCode))
@@ -1238,8 +1240,8 @@ IMS_BOOL SdpOaState::UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 n
                     // We revert back the flag now.
                     // This is because the transaction is complete now.
                     m_bProvisionalRespWithSdp = IMS_FALSE;
-                    IMS_TRACE_D("SDP Offer/Answer :: Final response received &"
-                                " ProvisionalRespWithSDP on ESTABLISHED state",
+                    IMS_TRACE_D("SDP_OA: Final response received &"
+                                " ProvisionalRespWithSdp on ESTABLISHED state",
                             0, 0, 0);
                     // Consider as the device received the changed offer
                     if (!bAllowOaForNonRpr)
@@ -1259,9 +1261,8 @@ IMS_BOOL SdpOaState::UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 n
                 // We revert back the flag now.
                 // This is because the transaction is complete now.
                 m_bProvisionalRespWithSdp = IMS_FALSE;
-                IMS_TRACE_D("SDP Offer/Answer :: Final failure response received &"
-                            " ProvisionalRespWithSDP",
-                        0, 0, 0);
+                IMS_TRACE_D("SDP_OA: Final failure response received & ProvisionalRespWithSdp", 0,
+                        0, 0);
             }
 
             nTrigger = TRIGGER_FAILURE_RESP;
@@ -1272,7 +1273,7 @@ IMS_BOOL SdpOaState::UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 n
     {
         if (bAllowOaForNonRpr || IsInPreviewMode())
         {
-            IMS_TRACE_D("SDP Offer/Answer :: non-RPR is allowed", 0, 0, 0);
+            IMS_TRACE_D("SDP_OA: non-RPR is allowed", 0, 0, 0);
         }
         else
         {
@@ -1280,7 +1281,7 @@ IMS_BOOL SdpOaState::UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 n
             // it needs not to change its state.
             // Either Offer or Answer received through unreliable 1xx response need
             // to be received again in the final response.
-            IMS_TRACE_D("SDP Offer/Answer :: Trigger event is a provisional response.", 0, 0, 0);
+            IMS_TRACE_D("SDP_OA: Trigger event is a provisional response", 0, 0, 0);
             return IMS_TRUE;
         }
     }
@@ -1288,7 +1289,7 @@ IMS_BOOL SdpOaState::UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 n
     // If no SDP in the message, do not transit the state
     if (!bMessageWithSdp && (nTrigger != TRIGGER_FAILURE_RESP))
     {
-        IMS_TRACE_D("SDP Offer/Answer :: SDP body is not present", 0, 0, 0);
+        IMS_TRACE_D("SDP_OA: SDP body is not present", 0, 0, 0);
         return IMS_TRUE;
     }
 
@@ -1300,7 +1301,7 @@ IMS_BOOL SdpOaState::UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 n
 
         if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
         {
-            IMS_TRACE_D("SDP Offer/Answer :: Ignored; It will be resubmitted ...", 0, 0, 0);
+            IMS_TRACE_D("SDP_OA: Ignored(being resubmitted)", 0, 0, 0);
 
             if (bIsCallEstablished && objMethod.Equals(SipMethod::UPDATE))
             {
@@ -1322,7 +1323,7 @@ IMS_BOOL SdpOaState::UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 n
 
         if ((nUpdateState = STATE_SENT[nOldState][nTrigger]) == STATE_INVALID)
         {
-            IMS_TRACE_E(0, "SDP Offer/Answer :: State transition failed", 0, 0, 0);
+            IMS_TRACE_E(0, "SDP_OA: State transition failed", 0, 0, 0);
             return IMS_FALSE;
         }
 
@@ -1332,7 +1333,7 @@ IMS_BOOL SdpOaState::UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 n
         {
             m_bStateChanged = IMS_TRUE;
             bNeedToChangeOldState = IMS_TRUE;
-            IMS_TRACE_D("SDP Offer/Answer :: SENT - STATE CHANGED", 0, 0, 0);
+            IMS_TRACE_D("SDP_OA: SENT - STATE CHANGED", 0, 0, 0);
         }
 
         if ((nUpdateState == STATE_OFFER_SENT) || (nUpdateState == STATE_OFFER_CHANGE_SENT))
@@ -1353,7 +1354,7 @@ IMS_BOOL SdpOaState::UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 n
 
         if ((nUpdateState = STATE_RECEIVED[nOldState][nTrigger]) == STATE_INVALID)
         {
-            IMS_TRACE_E(0, "SDP Offer/Answer :: State transition failed", 0, 0, 0);
+            IMS_TRACE_E(0, "SDP_OA: State transition failed", 0, 0, 0);
             return IMS_FALSE;
         }
 
@@ -1361,13 +1362,13 @@ IMS_BOOL SdpOaState::UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 n
         {
             if (nTrigger == TRIGGER_SUCCESS_RESP)
             {
-                IMS_TRACE_I("SDP Offer/Answer: Ignored - stray SDP answer", 0, 0, 0);
+                IMS_TRACE_I("SDP_OA: Ignored(stray SDP answer)", 0, 0, 0);
                 return IMS_TRUE;
             }
             else if (IsInPreviewMode())
             {
                 // SessionEx handles the incoming early UPDATE request with 491.
-                IMS_TRACE_I("SDP Offer/Answer: Ignored - preview state", 0, 0, 0);
+                IMS_TRACE_I("SDP_OA: Ignored(preview state)", 0, 0, 0);
                 return IMS_TRUE;
             }
         }
@@ -1376,8 +1377,7 @@ IMS_BOOL SdpOaState::UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 n
                 (nTrigger == TRIGGER_RPR || nTrigger == TRIGGER_PROVISIONAL_RESP ||
                         nTrigger == TRIGGER_SUCCESS_RESP))
         {
-            IMS_TRACE_I("SDP Offer/Answer: RECEIVED ON PREVIEW - STATE CHANGED (trigger=%d)",
-                    nTrigger, 0, 0);
+            IMS_TRACE_I("SDP_OA: RECEIVED ON PREVIEW - STATE CHANGED (trigger=%d)", nTrigger, 0, 0);
             m_bStateChanged = IMS_TRUE;
         }
         else
@@ -1388,7 +1388,7 @@ IMS_BOOL SdpOaState::UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 n
             {
                 m_bStateChanged = IMS_TRUE;
                 bNeedToChangeOldState = IMS_TRUE;
-                IMS_TRACE_D("SDP Offer/Answer :: RECEIVED - STATE CHANGED", 0, 0, 0);
+                IMS_TRACE_D("SDP_OA: RECEIVED - STATE CHANGED", 0, 0, 0);
             }
 
             if ((nUpdateState == STATE_OFFER_RECEIVED) ||
@@ -1408,7 +1408,7 @@ IMS_BOOL SdpOaState::UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 n
 
         m_bProvisionalRespWithSdp = IMS_TRUE;
 
-        IMS_TRACE_D("SDP Offer/Answer :: Provisional response is received with an SDP", 0, 0, 0);
+        IMS_TRACE_D("SDP_OA: Provisional response is received with SDP", 0, 0, 0);
     }
 
     // OA_STATE_ROLLBACK_FOR_MALFORMED_SDP
@@ -1417,7 +1417,7 @@ IMS_BOOL SdpOaState::UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 n
         SetOldState(nOldState);
     }
 
-    IMS_TRACE_I("SDP Offer/Answer :: UPDATING OFFER/ANSWER SUCCEEDED", 0, 0, 0);
+    IMS_TRACE_I("SDP_OA: UPDATING OA SUCCEEDED", 0, 0, 0);
 
     return IMS_TRUE;
 }
@@ -1441,7 +1441,7 @@ void SdpOaState::UpdateStateOnTransactionCompleted(
         if (m_bProvisionalRespWithSdp)
         {
             m_bProvisionalRespWithSdp = IMS_FALSE;
-            IMS_TRACE_D("SDP Offer/Answer :: ProvisionalRespWithSdp will be reset", 0, 0, 0);
+            IMS_TRACE_D("SDP_OA: ProvisionalRespWithSdp will be reset", 0, 0, 0);
         }
 
         if (piSipMsg->GetSdpBodyPart() != IMS_NULL)
@@ -1594,7 +1594,7 @@ IMS_SINT32 SdpOaState::HandleAnswer(IN const SdpParser& objParser, IN IMS_BOOL b
 {
     SessionParameter* pAnswer = new SessionParameter();
 
-    IMS_TRACE_D("SDP Offer/Answer - HandleAnswer(...)", 0, 0, 0);
+    IMS_TRACE_D("SDP_OA: HandleAnswer", 0, 0, 0);
 
     if (pAnswer == IMS_NULL)
     {
@@ -1671,7 +1671,7 @@ IMS_SINT32 SdpOaState::HandleOffer(IN const SdpParser& objParser)
 {
     SessionParameter* pOffer = new SessionParameter();
 
-    IMS_TRACE_D("SDP Offer/Answer - HandleOffer(...)", 0, 0, 0);
+    IMS_TRACE_D("SDP_OA: HandleOffer", 0, 0, 0);
 
     if (pOffer == IMS_NULL)
     {
@@ -1810,11 +1810,11 @@ void SdpOaState::SetCapabilities()
 {
     if (m_pProposalView == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Proposed view is NULL", 0, 0, 0);
+        IMS_TRACE_D("SDP_OA: No proposal view", 0, 0, 0);
         return;
     }
 
-    IMS_TRACE_D("SetCapabilities() - Capabilities is updated by the received offer ...", 0, 0, 0);
+    IMS_TRACE_D("SetCapabilities: Updated by the received offer", 0, 0, 0);
     m_pCapabilities->GetCapabilities() = (*m_pProposalView);
 }
 
@@ -1866,8 +1866,8 @@ void SdpOaState::SetLastOfferMade(IN SessionParameter* pSessionParam)
 PRIVATE
 void SdpOaState::SetOldState(IN IMS_SINT32 nOldState)
 {
-    IMS_TRACE_I("SDP Offer/Answer (OldState) :: %s to %s", StateToString(m_nOldState),
-            StateToString(nOldState), 0);
+    IMS_TRACE_I(
+            "SDP_OA: (OldState) %s to %s", StateToString(m_nOldState), StateToString(nOldState), 0);
 
     m_nOldState = nOldState;
 }
@@ -1878,7 +1878,7 @@ void SdpOaState::SetOldState(IN IMS_SINT32 nOldState)
 PRIVATE
 void SdpOaState::SetState(IN IMS_SINT32 nState)
 {
-    IMS_TRACE_I("SDP Offer/Answer :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
+    IMS_TRACE_I("SDP_OA: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
     m_nState = nState;
 }
@@ -1889,7 +1889,7 @@ void SdpOaState::StartPreviewMode()
     if (!m_bPreviewMode)
     {
         m_bPreviewMode = IMS_TRUE;
-        IMS_TRACE_I("SDP Offer/Answer: Preview mode started", 0, 0, 0);
+        IMS_TRACE_I("SDP_OA: Preview mode started", 0, 0, 0);
     }
 }
 
@@ -1899,7 +1899,7 @@ void SdpOaState::StopPreviewMode()
     if (m_bPreviewMode)
     {
         m_bPreviewMode = IMS_FALSE;
-        IMS_TRACE_I("SDP Offer/Answer: Preview mode stopped", 0, 0, 0);
+        IMS_TRACE_I("SDP_OA: Preview mode stopped", 0, 0, 0);
     }
 }
 

@@ -370,7 +370,7 @@ public class SscTransactionTest {
                 eq(ISscHttpConnection.HTTP_REQUEST_GET), eq(mDefaultRequestUri), eq(mDefaultXui),
                 eq(""), anyInt())).thenReturn(SscConstant.HTTP_UNAUTHORIZED);
         when(mMockSscUtils.getTelephonySimType(eq(SLOT_0))).thenReturn(appType);
-        when(mMockSscAuthAgent.getNafFqdn()).thenReturn(nafFqdn);
+        when(mMockSscAuthAgent.getNafFqdnFromRealm()).thenReturn(nafFqdn);
         when(mMockSscAuthAgent.getCipherSuite()).thenReturn(securityProtocol);
         when(mMockGbaAgent.getGbaKey(eq(appType), eq(mGbaMode), anyBoolean(), eq(nafFqdn),
                 eq(securityProtocol), eq(true), anyInt()))
@@ -385,7 +385,7 @@ public class SscTransactionTest {
                 eq(ISscHttpConnection.HTTP_REQUEST_GET), eq(mDefaultRequestUri), eq(mDefaultXui),
                 eq(""), anyInt());
         verify(mMockSscAuthAgent, atLeast(2)).isCredentialInfoUpdated();
-        verify(mMockSscAuthAgent).getNafFqdn();
+        verify(mMockSscAuthAgent).getNafFqdnFromRealm();
         verify(mMockSscAuthAgent).getCipherSuite();
         verify(mMockGbaAgent).getGbaKey(eq(appType), eq(mGbaMode), anyBoolean(), eq(nafFqdn),
                 eq(securityProtocol), eq(true), anyInt());
@@ -468,7 +468,7 @@ public class SscTransactionTest {
                 mDefaultRequestUri, mDefaultXui, "", expectedHttpRequestTimeout))
                 .thenReturn(SscConstant.HTTP_UNAUTHORIZED);
         when(mMockSscUtils.getTelephonySimType(eq(SLOT_0))).thenReturn(appType);
-        when(mMockSscAuthAgent.getNafFqdn()).thenReturn(nafFqdn);
+        when(mMockSscAuthAgent.getNafFqdnFromRealm()).thenReturn(nafFqdn);
         when(mMockSscAuthAgent.getCipherSuite()).thenReturn(securityProtocol);
         when(mMockGbaAgent.getGbaKey(eq(appType), eq(mGbaMode), anyBoolean(), eq(nafFqdn),
                 eq(securityProtocol), eq(true), anyInt()))
@@ -499,7 +499,7 @@ public class SscTransactionTest {
                 mDefaultRequestUri, mDefaultXui, "", DEFAULT_HTTP_TRANSACTION_TIMEOUT_MS))
                 .thenReturn(SscConstant.HTTP_UNAUTHORIZED);
         when(mMockSscUtils.getTelephonySimType(eq(SLOT_0))).thenReturn(appType);
-        when(mMockSscAuthAgent.getNafFqdn()).thenReturn(nafFqdn);
+        when(mMockSscAuthAgent.getNafFqdnFromRealm()).thenReturn(nafFqdn);
         when(mMockSscAuthAgent.getCipherSuite()).thenReturn(securityProtocol);
         when(mMockGbaAgent.getGbaKey(eq(appType), eq(mGbaMode), anyBoolean(), eq(nafFqdn),
                 eq(securityProtocol), eq(true), anyInt()))
@@ -940,7 +940,7 @@ public class SscTransactionTest {
         when(mMockSscAuthAgent.getGbaMode(anyInt())).thenReturn(mGbaMode);
         when(mMockSscAuthAgent.isCredentialInfoUpdated()).thenReturn(true);
         when(mMockSscUtils.getTelephonySimType(eq(SLOT_0))).thenReturn(appType);
-        when(mMockSscAuthAgent.getNafFqdn()).thenReturn(nafFqdn);
+        when(mMockSscAuthAgent.getNafFqdnFromRealm()).thenReturn(nafFqdn);
         when(mMockSscAuthAgent.getCipherSuite()).thenReturn(securityProtocol);
         when(mMockGbaAgent.getGbaKey(eq(appType), eq(mGbaMode), anyBoolean(), eq(nafFqdn),
                 eq(securityProtocol), eq(true), anyInt()))
@@ -966,7 +966,7 @@ public class SscTransactionTest {
         when(mMockSscAuthAgent.getGbaMode(anyInt())).thenReturn(mGbaMode);
         when(mMockSscAuthAgent.isCredentialInfoUpdated()).thenReturn(true);
         when(mMockSscUtils.getTelephonySimType(eq(SLOT_0))).thenReturn(appType);
-        when(mMockSscAuthAgent.getNafFqdn()).thenReturn(nafFqdn);
+        when(mMockSscAuthAgent.getNafFqdnFromRealm()).thenReturn(nafFqdn);
         when(mMockSscAuthAgent.getCipherSuite()).thenReturn(securityProtocol);
         when(mMockGbaAgent.getGbaKey(eq(appType), eq(mGbaMode), anyBoolean(), eq(nafFqdn),
                 eq(securityProtocol), eq(true), anyInt()))
@@ -995,7 +995,7 @@ public class SscTransactionTest {
         when(mMockSscAuthAgent.getGbaMode(anyInt())).thenReturn(mGbaMode);
         when(mMockSscAuthAgent.isCredentialInfoUpdated()).thenReturn(true);
         when(mMockSscUtils.getTelephonySimType(eq(SLOT_0))).thenReturn(appType);
-        when(mMockSscAuthAgent.getNafFqdn()).thenReturn(nafFqdn);
+        when(mMockSscAuthAgent.getNafFqdnFromRealm()).thenReturn(nafFqdn);
         when(mMockSscAuthAgent.getCipherSuite()).thenReturn(securityProtocol);
         when(mMockGbaAgent.getGbaKey(eq(appType), eq(mGbaMode), anyBoolean(), eq(nafFqdn),
                 eq(securityProtocol), eq(true), anyInt()))
@@ -1021,7 +1021,7 @@ public class SscTransactionTest {
         when(mMockSscAuthAgent.getGbaMode(anyInt())).thenReturn(mGbaMode);
         when(mMockSscAuthAgent.isCredentialInfoUpdated()).thenReturn(true);
         when(mMockSscUtils.getTelephonySimType(eq(SLOT_0))).thenReturn(appType);
-        when(mMockSscAuthAgent.getNafFqdn()).thenReturn(nafFqdn);
+        when(mMockSscAuthAgent.getNafFqdnFromRealm()).thenReturn(nafFqdn);
         when(mMockSscAuthAgent.getCipherSuite()).thenReturn(securityProtocol);
         when(mMockSscAuthAgent.getLastSuccessfulGbaMode()).thenReturn(SscConfig.GBA_ME);
         when(mMockGbaAgent.getGbaKey(eq(appType), eq(SscConfig.GBA_ME), anyBoolean(), eq(nafFqdn),

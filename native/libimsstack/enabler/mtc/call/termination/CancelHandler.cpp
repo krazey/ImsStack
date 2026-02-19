@@ -23,8 +23,8 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-const LOCAL AString REASON_TEXT_CALL_BUSY_VZW = "another device sent all devices busy response";
-const LOCAL AString REASON_TEXT_CALL_COMPLETED_VZW = "call completion elsewhere";
+const LOCAL AString REASON_TEXT_CALL_BUSY_TYPE1 = "another device sent all devices busy response";
+const LOCAL AString REASON_TEXT_CALL_COMPLETED_TYPE1 = "call completion elsewhere";
 
 PUBLIC
 CancelHandler::CancelHandler(IN IMtcCallContext& objContext) :
@@ -65,11 +65,11 @@ IMS_SINT32 CancelHandler::GetCodeFromReason(const ReasonHeaderValue& objReasonRe
     if (objReasonResult.strProtocol.EqualsIgnoreCase(REASON_SIP_PROTOCOL))
     {
         const AString strNormalizedText = objReasonResult.strText.SimplifyWsp().MakeLower();
-        if (strNormalizedText.Contains(REASON_TEXT_CALL_BUSY_VZW))
+        if (strNormalizedText.Contains(REASON_TEXT_CALL_BUSY_TYPE1))
         {
             return CODE_REJECTED_ELSEWHERE;
         }
-        else if (strNormalizedText.Contains(REASON_TEXT_CALL_COMPLETED_VZW))
+        else if (strNormalizedText.Contains(REASON_TEXT_CALL_COMPLETED_TYPE1))
         {
             return CODE_ANSWERED_ELSEWHERE;
         }

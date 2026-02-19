@@ -18,6 +18,7 @@
 #include "TextParser.h"
 
 #include "ISipHeader.h"
+#include "ISipMessage.h"
 #include "ISubscriptionState.h"
 #include "Sip.h"
 #include "SipDebug.h"
@@ -92,7 +93,6 @@ IMS_BOOL SubState::SetHeadersAndBodyParts(IN_OUT ISipMessage *&piSipMsg)
 {
     if (m_piSipMsg == IMS_NULL)
     {
-        // Nothing to do ...
         return IMS_TRUE;
     }
 
@@ -108,7 +108,7 @@ IMS_BOOL SubState::SetHeadersAndBodyParts(IN_OUT ISipMessage *&piSipMsg)
 PUBLIC
 void SubState::SetOperation(IN IMS_SINT32 nOperation)
 {
-    IMS_TRACE_I("SubState :: %s to %s", OperationToString(m_nOperation),
+    IMS_TRACE_I("SubState: %s to %s", OperationToString(m_nOperation),
             OperationToString(nOperation), 0);
 
     m_nOperation = nOperation;
@@ -284,7 +284,7 @@ void SubState::SetState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 nState)
 
     (void)strCallId;
 
-    IMS_TRACE_I("SUB_STATE : %s - %s >> %s", SipDebug::GetCharA1(strCallId.GetStr(), 8, '@'),
+    IMS_TRACE_I("SUB_STATE: %s - %s >> %s", SipDebug::GetCharA1(strCallId.GetStr(), 8, '@'),
             StateToString(m_nState), StateToString(nState));
 
     m_nState = nState;

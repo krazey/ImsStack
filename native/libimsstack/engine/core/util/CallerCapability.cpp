@@ -150,7 +150,7 @@ IMS_BOOL CallerCapability::Create(IN const AppConfig* pAppConfig,
 {
     if (pAppConfig == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Error occurred - AppConfig is NULL", 0, 0, 0);
+        IMS_TRACE_E(0, "AppConfig is null", 0, 0, 0);
         return IMS_FALSE;
     }
 

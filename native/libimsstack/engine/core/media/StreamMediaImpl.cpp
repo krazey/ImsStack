@@ -17,6 +17,7 @@
 #include "ServiceTrace.h"
 
 #include "base/Ims.h"
+#include "base/ImsError.h"
 #include "media/MediaDescriptor.h"
 #include "media/StreamMediaImpl.h"
 #include "media/StreamMediaProposalImpl.h"
@@ -103,7 +104,6 @@ PRIVATE VIRTUAL void StreamMediaImpl::OnMedia_FictitiousMediaCreated(IN Media* p
 
     if (pMediaProposal == IMS_NULL)
     {
-        // Do nothing
         IMS_TRACE_E(0, "NO MEDIA PROPOSAL", 0, 0, 0);
         return;
     }

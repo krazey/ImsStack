@@ -15,7 +15,5 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Ut/Xcap -->
-    <string name="imsss.ut_naf_fqdn_string">naf.ims.mnc390.mcc313.3gppnetwork.org</string>
     <boolean name="imsvoice.incoming_dtmf_tone_play_support_bool" value="true"/>
 </carrier_config>

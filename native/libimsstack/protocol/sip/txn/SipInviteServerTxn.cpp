@@ -377,7 +377,17 @@ static SIP_BOOL AcceptedState_ReceiveAckRequest(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* /*pnError*/)
 {
     SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
-    pFsmData->m_eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
+
+    if (pTxn->IsAckReceived() == SIP_TRUE)
+    {
+        pFsmData->m_eTxnStatus = SipTxn::STATUS_ACK_RETRANSMISSION;
+    }
+    else
+    {
+        pTxn->SetAckReceived(SIP_TRUE);
+        pFsmData->m_eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
+    }
+
     pFsmData->m_pOutUserData = pTxn->GetUserData();
 
     /* Remain in same state */

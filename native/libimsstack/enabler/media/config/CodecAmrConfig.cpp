@@ -35,7 +35,6 @@ CodecAmrConfig::CodecAmrConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNu
         m_nOctetAlign(DEFAULT_PAYLOAD_FORMAT),
         m_nSamplingRate(DEFAULT_SAMPLING_RATE_AMRWB)
 {
-    IMS_TRACE_I("+CodecAmrConfig - Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecAmrConfig::~CodecAmrConfig()
@@ -45,8 +44,6 @@ PUBLIC VIRTUAL CodecAmrConfig::~CodecAmrConfig()
 
 PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
 {
-    IMS_TRACE_D("Create - Codec[%s]", ImsCodec::CodecToString(m_nCodec), 0, 0);
-
     if (piCc == IMS_NULL)
     {
         IMS_TRACE_E(0, "Create - piCc is NULL or invalid codec index", 0, 0, 0);
@@ -134,17 +131,10 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
             if (nModeChangeCapability != NOT_DEFINED)
             {
                 SetModeChangeCapability(nModeChangeCapability);
-                SetVisibleModeChangeCapability(IMS_TRUE);
-
-                IMS_BOOL bVisibleFlag = piCc->GetBoolean(
+                SetVisibleModeChangeCapability(piCc->GetBoolean(
                         CarrierConfig::ImsVoice::
                                 KEY_CODEC_ATTRIBUTE_VISIBLE_MODE_CHANGE_CAPABILITY_BOOL,
-                        IMS_TRUE);
-
-                if (!bVisibleFlag)
-                {
-                    SetVisibleModeChangeCapability(IMS_FALSE);
-                }
+                        IMS_TRUE));
             }
             else
             {
@@ -158,17 +148,10 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
             if (nModeChangePeriod != NOT_DEFINED)
             {
                 SetModeChangePeriod(nModeChangePeriod);
-                SetVisibleModeChangePeriod(IMS_TRUE);
-
-                IMS_BOOL bVisibleFlag = piCc->GetBoolean(
+                SetVisibleModeChangePeriod(piCc->GetBoolean(
                         CarrierConfig::ImsVoice::
                                 KEY_CODEC_ATTRIBUTE_VISIBLE_MODE_CHANGE_PERIOD_BOOL,
-                        IMS_TRUE);
-
-                if (!bVisibleFlag)
-                {
-                    SetVisibleModeChangePeriod(IMS_FALSE);
-                }
+                        IMS_TRUE));
             }
             else
             {
@@ -182,17 +165,10 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
             if (nModeChangeNeighbor != NOT_DEFINED)
             {
                 SetModeChangeNeighbor(nModeChangeNeighbor);
-                SetVisibleModeChangeNeighbor(IMS_TRUE);
-
-                IMS_BOOL bVisibleFlag = piCc->GetBoolean(
+                SetVisibleModeChangeNeighbor(piCc->GetBoolean(
                         CarrierConfig::ImsVoice::
                                 KEY_CODEC_ATTRIBUTE_VISIBLE_MODE_CHANGE_NEIGHBOR_BOOL,
-                        IMS_TRUE);
-
-                if (!bVisibleFlag)
-                {
-                    SetVisibleModeChangeNeighbor(IMS_FALSE);
-                }
+                        IMS_TRUE));
             }
             else
             {

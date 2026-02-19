@@ -16,7 +16,9 @@
 #ifndef CONNECTOR_H_
 #define CONNECTOR_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
+
+class AString;
 
 class IConnection;
 

@@ -31,9 +31,6 @@ PUBLIC GLOBAL IMS_BOOL PlatformProperty::Initialize()
     ImsNetworkConnectionState_InitInstance();
     ImsSocketState_InitInstance();
 
-    // Initialize the other module
-    OsUtil::GetInstance()->InitializeReadOnlyProperties();
-
     return IMS_TRUE;
 }
 

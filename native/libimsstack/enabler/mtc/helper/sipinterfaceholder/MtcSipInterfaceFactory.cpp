@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/ReferenceInterfaceHolder.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include "helper/sipinterfaceholder/SubscriptionInterfaceHolder.h"
-
-__IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 MtcSipInterfaceFactory::MtcSipInterfaceFactory() :
@@ -29,14 +26,11 @@ MtcSipInterfaceFactory::MtcSipInterfaceFactory() :
         m_piReferenceHolder(IMS_NULL),
         m_piSubscriptionHolder(IMS_NULL)
 {
-    IMS_TRACE_D("+MtcSipInterfaceFactory", 0, 0, 0);
 }
 
 PUBLIC
 MtcSipInterfaceFactory::~MtcSipInterfaceFactory()
 {
-    IMS_TRACE_D("~MtcSipInterfaceFactory", 0, 0, 0);
-
     delete m_piReferenceHolder;
     delete m_piSubscriptionHolder;
 }

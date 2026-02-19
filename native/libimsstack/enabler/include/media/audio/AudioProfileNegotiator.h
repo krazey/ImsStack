@@ -63,6 +63,8 @@ private:
             IN AudioProfile::Payload* pPeerPayload, IN IMS_BOOL bAmrPayloadFormatRelaxedMatching,
             IN IMS_UINT32 nNegoModeSetList, IN IMS_UINT32 nNegoDefaultRtpModeSet,
             OUT IMS_SINT32& nLocalPayloadIndex);
+    IMS_EVS_CONFIG CompareEVSBwBrWithIR92(IN AudioProfile* pLocalProfile,
+            IN AudioProfile::Payload* pPeerPayload, IN AudioProfile::Payload* pNextPeerPayload);
     AudioProfile::Payload* NegotiateEvs(IN AudioProfile::Payload* pLocalPayload,
             IN AudioProfile::Payload* pPeerPayload, IN AudioProfile* pNegotiatedProfile);
     std::shared_ptr<AudioProfile::EvsFmtp> NegotiateEvsFmtp(IN AudioProfile::Payload* pLocalPayload,

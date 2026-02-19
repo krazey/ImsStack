@@ -16,7 +16,9 @@
 #include "ServiceTrace.h"
 
 #include "IConfigurable.h"
+#include "ISipConfig.h"
 #include "ISipConfigV.h"
+#include "ISubscriberConfig.h"
 #include "ImsConfig.h"
 
 #include "Engine.h"

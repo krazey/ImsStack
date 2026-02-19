@@ -29,6 +29,7 @@
 #include "ect/EctFactory.h"
 #include "ect/MockEctReference.h"
 #include "ect/MockIEctControllerListener.h"
+#include "helper/MockICallStateProxy.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockReferenceInterfaceHolder.h"
@@ -83,6 +84,7 @@ public:
     MockReferenceInterfaceHolder* pMockReferenceInterfaceHolder;
     MockIInterfaceHolderListener objMockHolderListener;
     ImsList<IMtcCall*> objManagedCalls;
+    MockICallStateProxy objCallStateProxy;
 
 protected:
     virtual void SetUp() override
@@ -98,6 +100,7 @@ protected:
         ON_CALL(objCallManager, GetCallByCallKey(TRANSFER_TARGET_KEY))
                 .WillByDefault(Return(&objTransferTargetCall));
         ON_CALL(objTransferTargetCall, GetKey).WillByDefault(Return(TRANSFER_TARGET_KEY));
+        ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
 
         pController = new ConsultativeTransferController(
                 objContext, TRANSFEREE_KEY, objListener, objFactory);

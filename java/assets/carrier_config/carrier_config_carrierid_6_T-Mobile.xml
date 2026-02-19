@@ -15,12 +15,9 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Aos -->
-    <int-array name="ims.keep_reg_with_mmtel_feature_tag_policy_int_array" num="1">
-        <item value="3"/>
-    </int-array>
-    <!-- Mtc -->
-    <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
-        <item value="3"/>
+    <!-- Please always keep this config on the first line. -->
+    <!-- Specifies a list of parent carrier ids from which to inherit configuration values. -->
+    <int-array name="ims.parent_carrier_ids_int_array" num="1">
+        <item value="2394"/>
     </int-array>
 </carrier_config>

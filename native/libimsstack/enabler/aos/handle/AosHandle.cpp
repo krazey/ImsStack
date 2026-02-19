@@ -377,12 +377,7 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::IsFeatureConnected(IN IMS_UINT32 nFeature) co
 
 PUBLIC VIRTUAL IMS_BOOL AosHandle::IsImsConnected() const
 {
-    IMS_UINT32 nState = GetState();
-
-    A_IMS_TRACE_D(APPPROFILE, "IsImsConnected :: connected(%s)",
-            _TRACE_B_(nState == STATE_CONNECTED), 0, 0);
-
-    return (nState == STATE_CONNECTED);
+    return (GetState() == STATE_CONNECTED);
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosHandle::IsImsSuspended() const
@@ -459,10 +454,9 @@ PUBLIC VIRTUAL void AosHandle::ReinitiateRegistration(IN IMS_UINT32 nAfterSec)
     }
 }
 
-PUBLIC VIRTUAL void AosHandle::CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState)
+PUBLIC VIRTUAL void AosHandle::CallTracker_StateChanged(
+        IN IMS_UINT32 /*nType*/, IN CallState /*eState*/)
 {
-    A_IMS_TRACE_D(APPPROFILE, "CallTracker_StateChanged :: nType=%d, nState=%d", nType,
-            static_cast<IMS_UINT32>(eState), 0);
     // Implemented in child
 }
 
@@ -578,15 +572,15 @@ PROTECTED VIRTUAL void AosHandle::Init()
 {
     A_IMS_TRACE_D(APPPROFILE, "Init", 0, 0, 0);
 
+    m_piInfo = new AosInfo(m_piAppContext);
+    m_piWifiWatcher = PhoneInfoService::GetPhoneInfoService()->GetWifiWatcher();
+
     InitializeHoldingBlocksPolicy();
     InitializeServiceBlock();
     InitializeServiceFeature();
     InitializeFeatureTags();
 
     AddListeners();
-
-    m_piInfo = new AosInfo(m_piAppContext);
-    m_piWifiWatcher = PhoneInfoService::GetPhoneInfoService()->GetWifiWatcher();
 
     IMSMSG objMSG(HANDLE_MSG_BLOCK_STATUS, 0, 0);
     OnStateMessage(objMSG);
@@ -1376,8 +1370,8 @@ PROTECTED VIRTUAL void AosHandle::ProcessCapabilitiesChanged(
         return;
     }
 
-    A_IMS_TRACE_I(APPPROFILE, "ProcessCapabilitiesChanged :: Size[%d]",
-            objNewCapabilities.GetSize(), 0, 0);
+    A_IMS_TRACE_I(APPPROFILE, "ProcessCapabilitiesChanged :: Size[%d], m_nNetworkType[%s]",
+            objNewCapabilities.GetSize(), RadioTypeToString(m_nNetworkType), 0);
 
     for (IMS_UINT32 i = 0; i < m_objCapabilities.GetSize(); i++)
     {
@@ -1391,13 +1385,7 @@ PROTECTED VIRTUAL void AosHandle::ProcessCapabilitiesChanged(
             continue;
         }
 
-        IMS_UINT32 nNewCapabilities = objNewCapabilities.GetValue(nCapaNetworkType);
-
-        A_IMS_TRACE_D(APPPROFILE, "ProcessCapabilitiesChanged :: \
-                nCapaNetworkType[%d], nNewCapabilities[%x], m_nNetworkType[%s]",
-                nCapaNetworkType, nNewCapabilities, RadioTypeToString(m_nNetworkType));
-
-        m_objCapabilities.SetValue(nCapaNetworkType, nNewCapabilities);
+        m_objCapabilities.SetValue(nCapaNetworkType, objNewCapabilities.GetValue(nCapaNetworkType));
     }
 }
 
@@ -1522,9 +1510,6 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnecting(IN IMSMSG& objMSG)
             IMS_UINT32 nState = LONG_TO_INT(objMSG.nWparam);
             SetReason(LONG_TO_INT(objMSG.nLparam));
 
-            A_IMS_TRACE_I(APPPROFILE, "HANDLE_MSG_APP_STATUS :: State(%d), m_nReason(%d)", nState,
-                    m_nReason, 0);
-
             switch (nState)
             {
                 case IAosApplication::APP_CONNECTED:
@@ -1594,9 +1579,6 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnected(IN IMSMSG& objMSG)
         {
             IMS_UINT32 nState = LONG_TO_INT(objMSG.nWparam);
             SetReason(LONG_TO_INT(objMSG.nLparam));
-
-            A_IMS_TRACE_I(APPPROFILE, "HANDLE_MSG_APP_STATUS :: State(%d), m_nReason(%d)", nState,
-                    m_nReason, 0);
 
             switch (nState)
             {
@@ -1668,9 +1650,6 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateDisconnecting(IN IMSMSG& objMSG)
         {
             IMS_UINT32 nState = LONG_TO_INT(objMSG.nWparam);
             SetReason(LONG_TO_INT(objMSG.nLparam));
-
-            A_IMS_TRACE_I(APPPROFILE, "HANDLE_MSG_APP_STATUS :: State(%d), m_nReason(%d)", nState,
-                    m_nReason, 0);
 
             switch (nState)
             {
@@ -1801,7 +1780,6 @@ PROTECTED VIRTUAL void AosHandle::InitializeFeatureTags()
 {
     m_objFeatureTagList.ClearFeatureTags();
 
-    // VZW Req. - VZ_REQ_IMS_22939
     if (GET_N_CONFIG(m_nSlotId)->IsCdmalessFeatureTagRequired())
     {
         m_objFeatureTagList.AddFeatureTag(FeatureTags::CDMALESS);

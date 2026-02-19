@@ -49,10 +49,8 @@ public class ImsGarbageCalls {
             return;
         }
 
-        synchronized (mCalls) {
-            mCalls.add(new Call(slotId, session));
-            log("ImsGarbageCalls :: add=" + callId);
-        }
+        mCalls.add(new Call(slotId, session));
+        log("ImsGarbageCalls :: add=" + callId);
     }
 
     public boolean contains(ImsCallSessionImplBase session) {
@@ -62,13 +60,11 @@ public class ImsGarbageCalls {
     public int getCount(int slotId) {
         int count = 0;
 
-        synchronized (mCalls) {
-            for (int i = 0; i < mCalls.size(); ++i) {
-                Call call = mCalls.get(i);
+        for (int i = 0; i < mCalls.size(); ++i) {
+            Call call = mCalls.get(i);
 
-                if (slotId == call.mSlotId) {
-                    count++;
-                }
+            if (slotId == call.mSlotId) {
+                count++;
             }
         }
 
@@ -82,41 +78,35 @@ public class ImsGarbageCalls {
 
         String callId = getCallId(session);
 
-        synchronized (mCalls) {
-            for (int i = 0; i < mCalls.size(); ++i) {
-                Call call = mCalls.get(i);
+        for (int i = 0; i < mCalls.size(); ++i) {
+            Call call = mCalls.get(i);
 
-                if (callId.equals(getCallId(call.mSession))) {
-                    mCalls.remove(i);
-                    log("ImsGarbageCalls :: remove=" + callId);
-                    break;
-                }
+            if (callId.equals(getCallId(call.mSession))) {
+                mCalls.remove(i);
+                log("ImsGarbageCalls :: remove=" + callId);
+                break;
             }
         }
     }
 
     public void removeAll(int slotId) {
-        synchronized (mCalls) {
-            log("ImsGarbageCalls :: removeAll=" + mCalls.size());
+        log("ImsGarbageCalls :: removeAll=" + mCalls.size());
 
-            for (int i = mCalls.size() - 1; i >= 0; i--) {
-                Call call = mCalls.get(i);
+        for (int i = mCalls.size() - 1; i >= 0; i--) {
+            Call call = mCalls.get(i);
 
-                if (slotId == call.mSlotId) {
-                    mCalls.remove(i);
-                    log("ImsGarbageCalls :: slotId=" + slotId
-                            + ", remove=" + getCallId(call.mSession));
-                }
+            if (slotId == call.mSlotId) {
+                mCalls.remove(i);
+                log("ImsGarbageCalls :: slotId=" + slotId
+                        + ", remove=" + getCallId(call.mSession));
             }
         }
     }
 
     private boolean contains(String callId) {
-        synchronized (mCalls) {
-            for (Call call : mCalls) {
-                if (callId.equals(getCallId(call.mSession))) {
-                    return true;
-                }
+        for (Call call : mCalls) {
+            if (callId.equals(getCallId(call.mSession))) {
+                return true;
             }
         }
 
@@ -133,7 +123,7 @@ public class ImsGarbageCalls {
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-IMPL] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 
     private static class Call {

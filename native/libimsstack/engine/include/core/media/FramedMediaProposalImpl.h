@@ -18,6 +18,7 @@
 
 #include "media/FramedMediaProposal.h"
 #include "media/IMedia.h"
+#include "media/MediaDescriptor.h"
 
 class FramedMediaProposalImpl : public IMedia
 {

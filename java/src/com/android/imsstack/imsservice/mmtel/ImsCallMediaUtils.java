@@ -34,12 +34,6 @@ import java.util.Set;
 
 public class ImsCallMediaUtils {
     /**
-     * Indicates if the video direction is overridden based on call type.
-     * This feature should be enabled by Android Native implementation.
-     */
-    private static final boolean FEATURE_OVERRIDE_VIDEO_DIRECTION_FROM_CALL_TYPE = true;
-
-    /**
      * DTMF characters
      */
     private static final String DTMF_EVENT = "0123456789*#ABCD";
@@ -266,7 +260,7 @@ public class ImsCallMediaUtils {
     }
 
     public static int getVideoCallType(ImsStreamMediaProfile profile) {
-        // P-OS: CALL_TYPE_VT_NODIR is not used for video state control
+        // CALL_TYPE_VT_NODIR is not used for video state control
         if (profile != null) {
             if (profile.getVideoDirection() == ImsStreamMediaProfile.DIRECTION_RECEIVE) {
                 return ImsCallProfile.CALL_TYPE_VT_RX;
@@ -316,7 +310,6 @@ public class ImsCallMediaUtils {
     }
 
     public static int getDirectionFromGTTMode(int gttMode) {
-        // VZW requires "sendrecv" direction if TTY is enabled
         switch (gttMode) {
         case MediaInfo.GTTMODE_FULL:
             return MediaInfo.DIRECTION_SEND_RECEIVE;
@@ -563,13 +556,19 @@ public class ImsCallMediaUtils {
         int audioDirection = getMediaDirectionFromProfile(profile, true);
         int videoDirection = getMediaDirectionFromProfile(profile, false);
 
-        if (FEATURE_OVERRIDE_VIDEO_DIRECTION_FROM_CALL_TYPE) {
-            int videoDir = getVideoDirectionFromCallType(callType);
+        int videoDir = getVideoDirectionFromCallType(callType);
+        if (videoDir != ImsStreamMediaProfile.DIRECTION_INVALID
+                && callType != ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE) {
+            videoDirection = getDirectionFromMediaProfileForMediaInfo(videoDir);
 
-            if ((videoDir != ImsStreamMediaProfile.DIRECTION_INVALID)
-                    && (callType != ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE)) {
-                // Override the video direction based on the call type
-                videoDirection = getDirectionFromMediaProfileForMediaInfo(videoDir);
+            // It covers the case when the video direction in the initial offer is inactive.
+            // The answer should be inactive if it's accepted as a 2-way video.
+            // Note: DIRECTION_INACTIVE is stored as DIRECTION_INVALID by
+            //       {@link ImsCallUtils#getSanitizedCallProfileForVideoDirection}.
+            if (videoDirection == MediaInfo.DIRECTION_SEND_RECEIVE
+                    && profile.getMediaProfile().mVideoDirection
+                            == ImsStreamMediaProfile.DIRECTION_INVALID) {
+                videoDirection = MediaInfo.DIRECTION_INACTIVE;
             }
         }
 

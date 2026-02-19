@@ -31,7 +31,8 @@ public:
     virtual ~TextSdpGenerator() override;
 
     virtual IMS_BOOL Generate(OUT ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile) override;
+            OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile,
+            IN const MediaSessionConfig* pConfig) override;
 
 private:
     void CheckRedPayloadSubTypeValidity(OUT TextProfile* pProfile);

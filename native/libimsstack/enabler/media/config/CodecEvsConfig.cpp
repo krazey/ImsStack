@@ -60,7 +60,6 @@ CodecEvsConfig::CodecEvsConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNu
         m_nDefaultAmrIOModeSetList(DEFAULT_MODESET_AMRWB),
         m_nChAwRecv(DEFAULT_CH_AW_RECV)
 {
-    IMS_TRACE_I("+CodecEvsConfig - Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecEvsConfig::~CodecEvsConfig()
@@ -108,8 +107,6 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
         {
             m_bVisibleDtx = IMS_TRUE;
         }
-        IMS_TRACE_D("Create - VisibleDtx[%d], Dtx[%d], DtxRecv[%d], ", m_bVisibleDtx, GetDtx(),
-                m_bDtxRecv);
 
         m_nHfOnly = piCcSubBundle->GetInt(
                 CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT, NOT_DEFINED);
@@ -122,7 +119,6 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
             m_nHfOnly = DEFAULT_HF_ONLY;
             m_bVisibleHfOnly = IMS_FALSE;
         }
-        IMS_TRACE_D("Create - HfOnly[%d], VisibleHfOnly[%d]", m_nHfOnly, m_bVisibleHfOnly, 0);
 
         m_nEvsModeSwitch = piCcSubBundle->GetInt(
                 CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT, NOT_DEFINED);
@@ -135,8 +131,6 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
             m_nEvsModeSwitch = DEFAULT_EVS_MODESWITCH;
             m_bVisibleEvsModeSwitch = IMS_FALSE;
         }
-        IMS_TRACE_D("Create - EvsModeSwitch[%d], VisibleEvsModeSwitch[%d]", m_nEvsModeSwitch,
-                m_bVisibleEvsModeSwitch, 0);
 
         ImsVector<IMS_SINT32> objBitrateList = piCcSubBundle->GetIntArray(
                 CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY);
@@ -294,7 +288,6 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
 
     piCcBundle->ReleaseBundle();
 
-    ToDebugString();
     return IMS_TRUE;
 }
 
@@ -342,7 +335,6 @@ IMS_SINT32 CodecEvsConfig::CheckEvsBandwidthWithBitrate(
             case EVS_ENCODED_BW_TYPE_NB:  // FALL-THROUGH
             case EVS_ENCODED_BW_TYPE_WB:  // FALL-THROUGH
             case EVS_ENCODED_BW_TYPE_NB_WB:
-                IMS_TRACE_D("CheckEvsBandwidthWithBitrate - no change", 0, 0, 0);
                 break;
             case EVS_ENCODED_BW_TYPE_SWB:  // FALL-THROUGH
             case EVS_ENCODED_BW_TYPE_FB:
@@ -364,7 +356,6 @@ IMS_SINT32 CodecEvsConfig::CheckEvsBandwidthWithBitrate(
             case EVS_ENCODED_BW_TYPE_NB_WB:      // FALL-THROUGH
             case EVS_ENCODED_BW_TYPE_SWB:        // FALL-THROUGH
             case EVS_ENCODED_BW_TYPE_NB_WB_SWB:  // FALL-THROUGH
-                IMS_TRACE_D("CheckEvsBandwidthWithBitrate - no change", 0, 0, 0);
                 break;
             case EVS_ENCODED_BW_TYPE_FB:
                 IMS_TRACE_D("CheckEvsBandwidthWithBitrate - br and bw mismatched", 0, 0, 0);

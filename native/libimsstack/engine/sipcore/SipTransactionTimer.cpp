@@ -45,7 +45,7 @@ SipTransactionTimer::~SipTransactionTimer()
     }
 
 #ifdef __IMS_SIP_DEBUG__
-    IMS_TRACE_D("Destructor :: SipTransactionTimer", 0, 0, 0);
+    IMS_TRACE_D("dtor: SipTransactionTimer", 0, 0, 0);
 #endif
 }
 
@@ -70,7 +70,7 @@ IMS_BOOL SipTransactionTimer::Start(IN IMS_SINT32 nDuration)
 
     m_piTimer->SetTimer(nDuration, this);
 
-    IMS_TRACE_I(">>> START TIMER - TIMER (%p), TYPE (%s), DURATION (%d)", m_piTimer,
+    IMS_TRACE_I(">>> START TIMER: TIMER(%p|%s|%d)", m_piTimer,
             SipStack::GetTimerTypeAsString(m_pData), nDuration);
 
     return IMS_TRUE;
@@ -81,7 +81,7 @@ void SipTransactionTimer::Stop(OUT SipTimeoutData*& pData)
 {
     if (m_piTimer != IMS_NULL)
     {
-        IMS_TRACE_I(">>> STOP TIMER - TIMER (%p), TYPE (%s)", m_piTimer,
+        IMS_TRACE_I(">>> STOP TIMER: TIMER(%p|%s)", m_piTimer,
                 SipStack::GetTimerTypeAsString(m_pData), 0);
 
         m_piTimer->KillTimer();
@@ -109,9 +109,7 @@ PUBLIC GLOBAL void SipTransactionTimer::FreeTimer(IN void* pvTimerHandle)
 PUBLIC GLOBAL void SipTransactionTimer::TimerExpired(IN IMS_SINT32 eTimerType)
 {
     (void)eTimerType;
-
-    IMS_TRACE_I(
-            "___ EXPIRED TIMER - TYPE (%s) ___", SipStack::GetTimerTypeAsString(eTimerType), 0, 0);
+    IMS_TRACE_I("___ EXPIRED TIMER (%s) ___", SipStack::GetTimerTypeAsString(eTimerType), 0, 0);
 }
 
 PRIVATE VIRTUAL void SipTransactionTimer::Timer_TimerExpired(IN ITimer* piTimer)
@@ -126,7 +124,7 @@ PRIVATE VIRTUAL void SipTransactionTimer::Timer_TimerExpired(IN ITimer* piTimer)
         return;
     }
 
-    IMS_TRACE_I(">>> TIMER TIMEOUT - TIMER (%p), TYPE (%s)", m_piTimer,
+    IMS_TRACE_I(">>> TIMER TIMEOUT: TIMER(%p|%s)", m_piTimer,
             SipStack::GetTimerTypeAsString(m_pData), 0);
 
     m_piTimer->KillTimer();

@@ -17,6 +17,7 @@
 #define STREAM_MEDIA_PROPOSAL_IMPL_H_
 
 #include "media/IMedia.h"
+#include "media/MediaDescriptor.h"
 #include "media/StreamMediaProposal.h"
 
 class StreamMediaProposalImpl : public IMedia

@@ -229,6 +229,11 @@ public:
     static const IMS_UINT32 REMOVE_IPSEC_SA_PARAMETER = CATEGORY_BASE + 1502;
     static const IMS_UINT32 APPLY_IPSEC_SA = CATEGORY_BASE + 1503;
     static const IMS_UINT32 REMOVE_IPSEC_SA = CATEGORY_BASE + 1504;
+
+    ////
+    // Logging
+    ////
+    static const IMS_UINT32 LOG_SIP_MESSAGE = CATEGORY_BASE + 1601;
 };
 
 #endif

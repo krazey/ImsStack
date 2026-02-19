@@ -67,7 +67,7 @@ PUBLIC VIRTUAL IMS_BOOL SdpMediaFormatParameter::Equals(
 
     if (m_nPayloadTypeNumber != pParameter->m_nPayloadTypeNumber)
     {
-        // 4 Check if the existing payload type number is wildcard or not...
+        // 4 Check if the existing payload type number is wildcard or not.
         return IMS_FALSE;
     }
 

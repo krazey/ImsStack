@@ -39,6 +39,7 @@
     <boolean name="imsvoice.audio_show_codec_attribute_dtx_bool" value="false"/>
     <boolean name="imsvoice.audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
     <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
+    <boolean name="imsvoice.codec_based_dynamic_as_enabled_bool" value="false"/>
     <int-array name="imsvoice.audio_rtcp_interval_int_array" num="2">
         <item value="2"/>
         <item value="2"/>

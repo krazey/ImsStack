@@ -67,9 +67,9 @@ TEST_F(CredentialTest, SetCredentials)
 
 TEST_F(CredentialTest, SetAkaResponse)
 {
-    AString strUserName("1111@vzw.com");
+    AString strUserName("1111@ims.com");
     AString strPassword("0000");
-    AString strRealm("vzw.com");
+    AString strRealm("ims.com");
     Credential objCredential(strUserName, strPassword, strRealm);
 
     ByteArray objRes("response");

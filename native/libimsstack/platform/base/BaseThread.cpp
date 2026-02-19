@@ -39,7 +39,7 @@ IMS_BOOL BaseThread::Start(IN const AString& strName, IN IMS_SINT32 nSlotId)
 {
     if (m_piThread != IMS_NULL)
     {
-        IMS_TRACE_I("Start :: Thread(%s) is already running ...", strName.GetStr(), 0, 0);
+        IMS_TRACE_I("Start: Thread(%s) is already running", strName.GetStr(), 0, 0);
         return IMS_TRUE;
     }
 
@@ -49,7 +49,7 @@ IMS_BOOL BaseThread::Start(IN const AString& strName, IN IMS_SINT32 nSlotId)
 
     if (m_piThread == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Start :: Creating a thread(%s) failed ...", m_strName.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "Start: Creating a thread(%s) failed", m_strName.GetStr(), 0, 0);
         return IMS_FALSE;
     }
 
@@ -57,7 +57,7 @@ IMS_BOOL BaseThread::Start(IN const AString& strName, IN IMS_SINT32 nSlotId)
 
     if (!m_piThread->Activate())
     {
-        IMS_TRACE_E(0, "Start :: Starting a thread(%s) failed ...", m_strName.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "Start: Starting a thread(%s) failed", m_strName.GetStr(), 0, 0);
         return IMS_FALSE;
     }
 

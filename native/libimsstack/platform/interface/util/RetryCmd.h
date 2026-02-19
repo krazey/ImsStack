@@ -24,7 +24,7 @@ class RetryCmd
 {
 public:
     explicit RetryCmd(IN IMS_UINT32 nCmdId = 0);
-    virtual ~RetryCmd();
+    virtual ~RetryCmd() = default;
 
     RetryCmd(IN const RetryCmd&) = delete;
     RetryCmd& operator=(IN const RetryCmd&) = delete;

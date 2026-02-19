@@ -80,6 +80,7 @@ public class MtcApp implements Closeable {
 
     protected static final int MSG_IMS_SERVICE_STARTED = 1;
     protected static final int MSG_SEND_NOTIFICATION = 2;
+    protected static final int MSG_MESSAGE_RECEIVED = 3;
 
     private final IBaseContext mContext;
     private final IMtcCallManager mCM;
@@ -455,20 +456,30 @@ public class MtcApp implements Closeable {
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-MTC] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 
     private static void loge(String s) {
-        ImsLog.e("[GII-MTC] " + s);
+        ImsLog.e("[ISIL] " + s);
     }
 
     private static void logi(String s) {
-        ImsLog.i("[GII-MTC] " + s);
+        ImsLog.i("[ISIL] " + s);
     }
 
     private class JNIImsListenerProxy implements JniImsListener {
         @Override
         public void onMessage(Parcel parcel) {
+            byte[] data = parcel.marshall();
+
+            if (data == null) {
+                return;
+            }
+
+            Message.obtain(mHandler, MSG_MESSAGE_RECEIVED, data).sendToTarget();
+        }
+
+        private void handleMessage(Parcel parcel) {
             int msg = parcel.readInt();
 
             // LogFilter compatibility: Mtc-MSG
@@ -592,6 +603,20 @@ public class MtcApp implements Closeable {
                     Parcel parcel = (Parcel)msg.obj;
 
                     mMtcJniProxy.sendDataToNative(getJNIService(), parcel);
+                    break;
+                }
+
+                case MSG_MESSAGE_RECEIVED: {
+                    byte[] data = (byte[]) msg.obj;
+                    Parcel parcel = Parcel.obtain();
+                    parcel.unmarshall(data, 0, data.length);
+                    parcel.setDataPosition(0);
+
+                    try {
+                        mNativeListener.handleMessage(parcel);
+                    } finally {
+                        parcel.recycle();
+                    }
                     break;
                 }
 

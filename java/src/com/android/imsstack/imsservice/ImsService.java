@@ -238,6 +238,6 @@ public class ImsService extends android.telephony.ims.ImsService {
     }
 
     private static void logi(Object o, String s) {
-        Log.i(o, "[GII-IMPL] " + s);
+        Log.i(o, "[ISIL] " + s);
     }
 }

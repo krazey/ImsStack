@@ -16,8 +16,10 @@
 #ifndef INTERFACE_MEDIA_H_
 #define INTERFACE_MEDIA_H_
 
-#include "media/IMediaDescriptor.h"
+#include "ImsList.h"
 
+class IMedia;
+class IMediaDescriptor;
 class IMediaListener;
 
 /**

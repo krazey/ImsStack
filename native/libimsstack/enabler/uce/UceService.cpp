@@ -28,6 +28,7 @@
 #include "ImsServiceConfig.h"
 #include "ServiceTrace.h"
 #include "SipMethod.h"
+#include "TriggerPoint.h"
 #include "config/UceConfig.h"
 #include "def/UceDef.h"
 #include "options/UceOptionsManager.h"

@@ -88,12 +88,12 @@ PRIVATE VIRTUAL IMS_RESULT SipKeepAliveHelper::SendPacket(IN const ByteArray& ob
 
     if (pSocket == IMS_NULL)
     {
-        IMS_TRACE_D("NearEnd - %s, %d, %d", SipDebug::GetIp(m_objNearEnd.GetIpAddress()),
+        IMS_TRACE_D("NearEnd: %s|%d|%d", SipDebug::GetIp(m_objNearEnd.GetIpAddress()),
                 m_objNearEnd.GetPort(), m_objNearEnd.GetType());
         // LOG_EXCLUDING_SERVER_INFO
-        IMS_TRACE_D("FarEnd - %s, %d, %d",
+        IMS_TRACE_D("FarEnd: %s|%d|%d",
                 SipRtConfigUtils::IsRoutingInfoHiddenInLog(GetSlotId())
-                        ? "xxx"
+                        ? "***"
                         : SipDebug::GetIp(m_objFarEnd.GetIpAddress()),
                 m_objFarEnd.GetPort(), m_objFarEnd.GetType());
         IMS_TRACE_E(0, "Finding the socket failed", 0, 0, 0);

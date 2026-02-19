@@ -424,3 +424,23 @@ TEST_F(AudioConfigurationTest, testNegotiateAmrPayloadFormatRelaxedMatching)
     EXPECT_TRUE(m_pConfig->Update(m_pMockICarrierConfig));
     EXPECT_EQ(m_pConfig->IsAmrPayloadFormatRelaxedMatching(), IMS_FALSE);
 }
+
+TEST_F(AudioConfigurationTest, TestIsCodecBasedDynamicAsEnabled)
+{
+    // Case 1: Config is not present, should default to false.
+    ON_CALL(*m_pMockICarrierConfig,
+            GetBoolean(CarrierConfig::ImsVoice::KEY_CODEC_BASED_DYNAMIC_AS_ENABLED_BOOL, IMS_FALSE))
+            .WillByDefault(Return(IMS_FALSE));
+
+    GetReadyToCreate();
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
+    EXPECT_EQ(m_pConfig->IsCodecBasedDynamicAsEnabled(), IMS_FALSE);
+
+    // Case 2: Config is present, IMS_TRUE);
+    ON_CALL(*m_pMockICarrierConfig,
+            GetBoolean(CarrierConfig::ImsVoice::KEY_CODEC_BASED_DYNAMIC_AS_ENABLED_BOOL, IMS_FALSE))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_TRUE(m_pConfig->Update(m_pMockICarrierConfig));
+    EXPECT_EQ(m_pConfig->IsCodecBasedDynamicAsEnabled(), IMS_TRUE);
+}

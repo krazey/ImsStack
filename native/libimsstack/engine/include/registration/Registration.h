@@ -17,7 +17,6 @@
 #define REGISTRATION_H_
 
 #include "IDigestAkaListener.h"
-#include "ITimer.h"
 
 #include "Credential.h"
 #include "EngineActivity.h"

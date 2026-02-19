@@ -20,6 +20,7 @@
 
 #include "Engine.h"
 #include "IConfiguration.h"
+#include "ISubscriberConfig.h"
 
 #include "GeolocationHelper.h"
 #include "GeolocationPidfCreator.h"

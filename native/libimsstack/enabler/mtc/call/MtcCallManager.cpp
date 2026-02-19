@@ -62,8 +62,8 @@ PUBLIC VIRTUAL IMtcCall* MtcCallManager::CreateCall(
     IMtcService* pService = m_objContext.GetServiceByType(eServiceType);
     if (pService == IMS_NULL || pService->GetStatus() != ServiceStatus::SERVICE_ACTIVE)
     {
-        IMS_TRACE_E(0, "CreateCall : Service not active - type[%d]",
-                static_cast<IMS_SINT32>(eServiceType), 0, 0);
+        IMS_TRACE_E(
+                0, "Service not active - type[%d]", static_cast<IMS_SINT32>(eServiceType), 0, 0);
         return s_pNullCall;
     }
 
@@ -101,7 +101,6 @@ PUBLIC VIRTUAL IMtcCall* MtcCallManager::GetCallByCallKey(IN CallKey nCallKey)
                 return pCall->GetKey() == nCallKey;
             });
 
-    IMS_TRACE_D("GetCallByCallKey index[%d]", nIndex, 0, 0);
     if (nIndex >= 0)
     {
         return m_lstCalls.GetAt(nIndex);
@@ -119,7 +118,6 @@ PUBLIC VIRTUAL IMS_UINT32 MtcCallManager::GetNextCallIndex()
         s_nNextCallIndex = 1;
     }
 
-    IMS_TRACE_D("GetNextCallIndex index[%d]", s_nNextCallIndex, 0, 0);
     return s_nNextCallIndex++;
 }
 

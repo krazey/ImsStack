@@ -201,7 +201,7 @@ void CurrentLocationDiscoveryController::SetLocationInformation()
         return;
     }
 
-    MtcLocationObject(m_objContext).SetLocationToMessage(*piMessage, IMS_TRUE);
+    MtcLocationObject(m_objContext).SetLocationToMessage(*piMessage);
 }
 
 PRIVATE
@@ -232,8 +232,6 @@ IMS_BOOL CurrentLocationDiscoveryController::CreatePublication()
         return IMS_FALSE;
     }
 
-    IMS_TRACE_D("Publication created", 0, 0, 0);
-
     return IMS_TRUE;
 }
 
@@ -247,6 +245,4 @@ void CurrentLocationDiscoveryController::DestroyPublication()
 
     m_piPublication->Destroy();
     m_piPublication = IMS_NULL;
-
-    IMS_TRACE_D("Publication destroyed", 0, 0, 0);
 }

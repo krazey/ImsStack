@@ -319,7 +319,7 @@ TEST_F(AlertingStateTest, HandleUserAlertSendsProvisionalResponseIf183IsSentButC
             .WillByDefault(Return(IMS_TRUE));
 
     ON_CALL(*pConfigurationProxy,
-            GetBoolean(ConfigVoice::KEY_FORCE_183_FOR_ALERTING_ON_NON_100REL_INVITE_BOOL))
+            GetBoolean(ConfigVoice::KEY_FORCE_183_BEFORE_ALERTING_ON_NON_100REL_INVITE_BOOL))
             .WillByDefault(Return(IMS_FALSE));
 
     MtcExtensionSet objMtcExtensionSet(
@@ -341,7 +341,7 @@ TEST_F(AlertingStateTest,
             .WillByDefault(Return(IMS_TRUE));
 
     ON_CALL(*pConfigurationProxy,
-            GetBoolean(ConfigVoice::KEY_FORCE_183_FOR_ALERTING_ON_NON_100REL_INVITE_BOOL))
+            GetBoolean(ConfigVoice::KEY_FORCE_183_BEFORE_ALERTING_ON_NON_100REL_INVITE_BOOL))
             .WillByDefault(Return(IMS_TRUE));
     MtcExtensionSet objMtcExtensionSet(
             GetTestExtensionSet(MtcExtensionSet::OPTION_TAG_RPR, IMS_TRUE, IMS_TRUE));
@@ -802,9 +802,6 @@ TEST_F(AlertingStateTest, UssiStartedParsesBodyInInvite)
 
     UssiResult objResult(UssiNextAction::SEND_INFO_WITH_NOTIFY_ELEMENT, UssiError::CODE_NONE);
     EXPECT_CALL(*pUssiController, HandleUssiBody(_, _)).Times(1).WillOnce(Return(objResult));
-    EXPECT_CALL(objCallContext, CreateClientConnection(_))
-            .Times(1)
-            .WillOnce(Return(reinterpret_cast<ISipClientConnection*>(0x0)));
     EXPECT_CALL(objUiNotifier, SendStarted).Times(1);
 
     EXPECT_EQ(CallStateName::ESTABLISHED, pAlertingState->UssiStarted(&objISession));

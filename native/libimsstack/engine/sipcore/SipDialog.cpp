@@ -29,8 +29,10 @@ __IMS_TRACE_TAG_SIP_CORE__;
 PUBLIC
 SipDialog::~SipDialog()
 {
-    IMS_TRACE_D("Destructor :: SipDialog (%s)",
+#ifdef __IMS_SIP_DEBUG__
+    IMS_TRACE_D("dtor: SipDialog(%s)",
             SipDebug::GetCharA1(m_pDialogEx->GetDialogState()->GetCallId().GetStr(), 8, '@'), 0, 0);
+#endif
 }
 
 PUBLIC
@@ -181,7 +183,7 @@ IMS_BOOL SipDialog::IsSameDialog(IN const SipDialog* pDialog)
         return IMS_FALSE;
     }
 
-    // Only check a dialog usage in this time ...
+    // Only check a dialog usage in this time.
     return m_pDialogEx->Equals(pDialog->m_pDialogEx.Get());
 }
 

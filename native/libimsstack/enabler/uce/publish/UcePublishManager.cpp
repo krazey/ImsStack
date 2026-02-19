@@ -62,6 +62,7 @@ END_STATE_MSG_MAP()
 
 BEGIN_STATE_MSG_MAP(UcePublishManager, ON)
 STATE_MSG_ENTRY(PUBLISH_REQUESTED, &UcePublishManager::StateON_PublishRequested)
+STATE_MSG_ENTRY(AOS_CONNECTED, &UcePublishManager::StateON_AoSConnected)
 STATE_MSG_ENTRY(AOS_DISCONNECTED, &UcePublishManager::StateON_AoSDisConnected)
 STATE_MSG_ENTRY(SERVICE_CLOSED, &UcePublishManager::StateALL_Terminated)
 END_STATE_MSG_MAP()
@@ -135,6 +136,7 @@ UcePublishManager::UcePublishManager(
         m_bEnablePIDFCompression(IMS_FALSE),
         m_bSetPublishStarted(IMS_FALSE),
         m_bUnpublishSent(IMS_FALSE),
+        m_bRegistrationRecoveryRequested(IMS_FALSE),
         m_nImmediatelyRetryCount(0),
         m_nRetryCount(0),
         m_nExponentialRetryCount(0),
@@ -455,6 +457,7 @@ IMS_BOOL UcePublishManager::AosDisConnected()
 {
     m_nConnectedServices = 0;
     m_bEnablePIDFCompression = IMS_FALSE;
+    SetRegistrationRecoveryRequested(IMS_FALSE);
     SetLastResponseCode(0);
     IMSMSG objMsg(AOS_DISCONNECTED, 0, 0);
     return OnStateMessage(objMsg);
@@ -522,6 +525,7 @@ void UcePublishManager::PublicationDelivered(IN IPublication* piPublication)
     OnStateMessage(objMsg);
 
     SetLastResponseCode(0);
+    SetRegistrationRecoveryRequested(IMS_FALSE);
 }
 
 void UcePublishManager::PublicationDeliveryFailed(IN IPublication* piPublication)
@@ -713,6 +717,21 @@ IMS_BOOL UcePublishManager::StateON_PublishRequested(IN IMSMSG& objMsg)
     return IMS_TRUE;
 }
 
+IMS_BOOL UcePublishManager::StateON_AoSConnected(IN IMSMSG& objMsg)
+{
+    (void)objMsg;
+    IMS_TRACE_I("StateON_AoSConnected ", 0, 0, 0);
+    if (GetRegistrationRecoveryRequested())
+    {
+        SetRegistrationRecoveryRequested(IMS_FALSE);
+        StopTimer(TIMER_ALL);
+        m_strEtag = AString::ConstNull();
+        SendPublishRequest(m_nKey, m_strPidfXml, "", m_nCapability, m_nExtended);
+    }
+
+    return IMS_TRUE;
+}
+
 IMS_BOOL UcePublishManager::StateON_AoSDisConnected(IN IMSMSG& objMsg)
 {
     (void)objMsg;
@@ -854,12 +873,8 @@ IMS_BOOL UcePublishManager::StatePUBLISHING_Failed(IN IMSMSG& objMsg)
 
     if (m_bEnablePIDFCompression == IMS_TRUE)
     {
+        IMS_TRACE_D("StatePUBLISHING_Failed:Disable GZIP.", 0, 0, 0);
         m_bEnablePIDFCompression = IMS_FALSE;
-        StopTimer(TIMER_ALL);
-        m_strEtag = AString::ConstNull();
-        DestroyPublication();
-        SetPublishState(ON);
-        return SendPublishRequest(m_nKey, m_strPidfXml, "", m_nCapability, m_nExtended);
     }
 
     IMS_BOOL bNeedToRetry = IMS_FALSE;
@@ -874,11 +889,13 @@ IMS_BOOL UcePublishManager::StatePUBLISHING_Failed(IN IMSMSG& objMsg)
             bNeedToRetry = IMS_TRUE;
         }
     }
-    SendPublishResponseInd(m_nKey, pResponseData->m_nResponseCode, pResponseData->m_strReason,
-            pResponseData->m_nReasonCause, pResponseData->m_strReasonText, m_strEtag, bNeedToRetry);
-    m_nKey = 0;
+
     if (!bNeedToRetry)
     {
+        SendPublishResponseInd(m_nKey, pResponseData->m_nResponseCode, pResponseData->m_strReason,
+                pResponseData->m_nReasonCause, pResponseData->m_strReasonText, m_strEtag,
+                bNeedToRetry);
+        m_nKey = 0;
         SetPublishState(ON);
     }
     return IMS_TRUE;
@@ -1427,7 +1444,6 @@ IMS_BOOL UcePublishManager::SetPublish(IN IMS_BOOL bIsRefresh, AString strMinExp
         IMS_TRACE_I("InitPublish:add SIP IF MATCH header with [%s]", m_strEtag.GetStr(), 0, 0);
     }
     SetRefreshPolicy(piMessage, strMinExpiryValue);
-    // check ATT/TMUS live network and equipment test
     piMessage->AddHeader(ISipHeader::ACCEPT_CONTACT, "*;+g.oma.sip-im;explicit;require");
     if (bIsRefresh == INITIAL)
     {
@@ -1544,7 +1560,6 @@ IMS_BOOL UcePublishManager::SetPidfXmlBody(ISipMessage* piMessage)
     const IMS_BYTE* pszXML = reinterpret_cast<const IMS_BYTE*>(m_strPidfXml.GetStr());
     objContent.Attach(pszXML, m_strPidfXml.GetLength());
 
-    // TMO TRD 2020 4Q - GID-MTRREQ-480586
     if (m_bEnablePIDFCompression == IMS_TRUE)
     {
         ByteArray objCompressedContent;
@@ -1636,9 +1651,9 @@ IMS_BOOL UcePublishManager::HandleFailResponse(IMS_SINT32 nResponseCode)
     if (UceConfig::GetInstance()->IsImsRegistrationRequired(IMS_TRUE, nResponseCode, m_nSimSlot))
     {
         SetPublishState(ON);
-        Process403Scenario();
+        IMS_BOOL bNeedToRetry = Process403Scenario();
         DestroyPublication();
-        return IMS_FALSE;
+        return bNeedToRetry;
     }
 
     switch (UceConfig::GetInstance()->GetPublishRetryType(nResponseCode, m_nSimSlot))
@@ -1671,6 +1686,14 @@ void UcePublishManager::SetPublishStateToAoS(IN IMS_UINT32 nState)
         m_bSetPublishStarted = IMS_FALSE;
         IMS_TRACE_D("SetPublishStateToAoS:send Publish Terminated Msg to UceApp", 0, 0, 0);
     }
+}
+
+void UcePublishManager::RequestRegistrationRecovery(IN IMS_UINT32 eControl)
+{
+    IMSMSG objMsg(AosAppRequest::COMMAND_REGISTER_RECOVERY, 0, eControl);
+    MessageService::PostMessage(m_strAppName, objMsg);
+
+    SetRegistrationRecoveryRequested(IMS_TRUE);
 }
 
 IMS_BOOL UcePublishManager::ProcessRetryAfterHeader()
@@ -1729,22 +1752,20 @@ IMS_BOOL UcePublishManager::Process403Scenario()
     if (strReasonPhrs.Contains(NOT_AUTHORIZED_FOR_PRESENCE) == IMS_TRUE)
     {
         IMS_TRACE_I("ReasonPhrase:Not Authorized for presence (ReasonPhrase)", 0, 0, 0);
-        return IMS_TRUE;
+        return IMS_FALSE;
     }
 
     if (GetLastResponseCode() == piMessage->GetStatusCode())
     {
         IMS_TRACE_I("Same error response received twice", 0, 0, 0);
-        return IMS_TRUE;
+        return IMS_FALSE;
     }
 
     ImsList<AString> objReasonList = piMessage->GetHeaders(ISipHeader::REASON);
     if (objReasonList.IsEmpty() == IMS_TRUE)
     {
         IMS_TRACE_D("No Reason header present.Send Register Recovery message to the App", 0, 0, 0);
-        IMSMSG objMsg(
-                AosAppRequest::COMMAND_REGISTER_RECOVERY, 0, ImsAosControl::REGISTER_REINITIATE);
-        MessageService::PostMessage(m_strAppName, objMsg);
+        RequestRegistrationRecovery(ImsAosControl::REGISTER_REFRESH);
         return IMS_TRUE;
     }
     for (IMS_UINT32 i = 0; i < objReasonList.GetSize(); i++)
@@ -1754,12 +1775,13 @@ IMS_BOOL UcePublishManager::Process403Scenario()
         if (strReason.Contains(NOT_AUTHORIZED_FOR_PRESENCE) == IMS_TRUE)
         {
             IMS_TRACE_I("ReasonPhrase:Not Authorized for presence(ReasonPhrase)", 0, 0, 0);
-            return IMS_TRUE;
+            return IMS_FALSE;
         }
     }
-    IMSMSG objMsg(AosAppRequest::COMMAND_REGISTER_RECOVERY, 0, ImsAosControl::REGISTER_REINITIATE);
-    MessageService::PostMessage(m_strAppName, objMsg);
+
     IMS_TRACE_D("Send Register Recovery message to the App", 0, 0, 0);
+    RequestRegistrationRecovery(ImsAosControl::REGISTER_REFRESH);
+
     return IMS_TRUE;
 }
 
@@ -1799,7 +1821,20 @@ IMS_BOOL UcePublishManager::Process423Scenario(IMS_BOOL bIsRefresh)
     piHeader->Destroy();
     IMS_TRACE_I("Process423Scenario:min Expire Value [%s]", szMinExpire.GetStr(), 0, 0);
     DestroyPublication();
-    return RetryPublish(bIsRefresh, szMinExpire);
+
+    IMS_BOOL bRetry = RetryPublish(bIsRefresh, szMinExpire);
+    if (bRetry)
+    {
+        if (bIsRefresh == INITIAL)
+        {
+            SetPublishState(PUBLISHING);
+        }
+        else
+        {
+            SetPublishState(REFRESHING);
+        }
+    }
+    return bRetry;
 }
 
 IMS_BOOL UcePublishManager::ProcessImmediatelyRetryResponseScenario()

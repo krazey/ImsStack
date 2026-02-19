@@ -16,11 +16,13 @@
 #ifndef INTERFACE_SIP_CONNECTION_NOTIFIER_MANAGER_H_
 #define INTERFACE_SIP_CONNECTION_NOTIFIER_MANAGER_H_
 
-#include "IpAddress.h"
+#include "ImsTypeDef.h"
 
-#include "SipAddress.h"
+class AString;
+class IpAddress;
 
 class ISipConnectionNotifier;
+class SipAddress;
 
 class ISipConnectionNotifierManager
 {

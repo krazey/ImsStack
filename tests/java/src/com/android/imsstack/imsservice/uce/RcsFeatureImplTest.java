@@ -56,7 +56,6 @@ import java.util.concurrent.Executor;
 
 @RunWith(JUnit4.class)
 public class RcsFeatureImplTest {
-    private static final int STATE_READY = 2;
 
     @Mock private CapabilityExchangeEventListener mCapabilityExchangeEventListener;
     @Mock private RcsCapPublishResponseCallback mRcsCapPublishResponseCallback;
@@ -104,7 +103,6 @@ public class RcsFeatureImplTest {
         mImsContext = new ImsContext(mTestAppContext.getContext(), mExecutor, TestAppContext.SLOT0);
         mFeature = new TestRcsFeatureImpl(mImsContext);
         mFeature.initialize(mTestAppContext.getContext(), TestAppContext.SLOT0);
-        mFeature.setFeatureState(STATE_READY);
     }
 
     @After
@@ -121,9 +119,12 @@ public class RcsFeatureImplTest {
     }
 
     @Test
-    public void onFeatureReadyTest() {
+    public void startTest() {
+        mFeature.start();
+
         int status = mFeature.getFeatureState();
-        assertEquals(STATE_READY, status);
+
+        assertEquals(android.telephony.ims.feature.ImsFeature.STATE_READY, status);
     }
 
     @Test

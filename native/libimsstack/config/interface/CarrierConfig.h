@@ -334,6 +334,16 @@ public:
         static const IMS_CHAR KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL[];
 
         /**
+         * Specifies whether to disable N1 mode capability when failing to establish IMS PDU Session
+         * for IMS.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
+        static const IMS_CHAR KEY_DISABLE_N1_MODE_ON_IMS_PDU_ESTABLISH_FAILURE_BOOL[];
+
+        /**
          * Specifies whether the re-registration is held when IPCAN is changed during IMS calls
          * and performed immediately after they are released.
          *
@@ -538,7 +548,7 @@ public:
          * Specifies this item adds a customized +g.gsma.rcs.telephony feature tag in contact
          * header of SIP REGISTER message with "cs,volte" value.
          *
-         * The value is changed to "cs" at runtime according to the VZW VoWiFi
+         * The value is changed to "cs" at runtime according to the specific carrier's VoWiFi
          * requirement.
          *
          * Possible Values:
@@ -1525,6 +1535,29 @@ public:
             GEOLOCATION_PIDF_INFO_COUNTRY_CODE_AND_STATE = 3,
         };
 
+        /**
+         * Specifies the mode for including the Geolocation-Routing header.
+         *
+         * Possible Values:
+         *   {@code GEOLOCATION_HEADER_MODE_NOT_PRESENT} (0) : The Geolocation-Routing header is
+         *                                                     not included.
+         *   {@code GEOLOCATION_HEADER_MODE_INCLUDE_YES_ON_IWLAN} (1) : Include "yes" in the
+         *                                                              Geolocation-Routing header
+         *                                                              only when on IWLAN.
+         *   {@code GEOLOCATION_HEADER_MODE_INCLUDE_YES_ALWAYS} (2) : Always include "yes" in the
+         *                                                            Geolocation-Routing header.
+         *   {@code GEOLOCATION_HEADER_MODE_INCLUDE_NO_ALWAYS} (3) : Always include "no" in the
+         *                                                           Geolocation-Routing header.
+         */
+        static const IMS_CHAR KEY_GEOLOCATION_ROUTING_HEADER_MODE_INT[];
+        enum
+        {
+            GEOLOCATION_HEADER_MODE_NOT_PRESENT = 0,
+            GEOLOCATION_HEADER_MODE_INCLUDE_YES_ON_IWLAN = 1,
+            GEOLOCATION_HEADER_MODE_INCLUDE_YES_ALWAYS = 2,
+            GEOLOCATION_HEADER_MODE_INCLUDE_NO_ALWAYS = 3
+        };
+
         // Unused.
         // Network types
         enum
@@ -1924,6 +1957,7 @@ public:
                 KEY_EMERGENCY_RETRY_WITHOUT_CHECKING_380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL_BOOL
                         [];
         static const IMS_CHAR KEY_EMERGENCY_EXCLUDE_URI_PARAMETERS_FOR_EMERGENCY_TEST_NUMBER_BOOL[];
+        static const IMS_CHAR KEY_SKIP_AUDIO_DEDICATED_BEARER_WAIT_TIMER_FOR_EMERGENCY_BOOL[];
         static const IMS_CHAR KEY_EMERGENCY_TCALL_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_EMERGENCY_RINGBACK_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_EMERGENCY_18X_TIMER_MILLIS_INT[];
@@ -1974,6 +2008,7 @@ public:
         static const IMS_CHAR
                 KEY_PLMN_ALLOWING_GEOLOCATION_PIDF_IN_SIP_INVITE_NO_UICC_STRING_ARRAY[];
         static const IMS_CHAR KEY_DYNAMIC_ROUTING_NUMBER_PER_PLMN_STRING_ARRAY[];
+        static const IMS_CHAR KEY_EMERGENCY_SERVICE_CATEGORY_PER_PLMN_STRING_ARRAY[];
     };
 
     class ImsRtt
@@ -1999,6 +2034,18 @@ public:
         static const IMS_CHAR KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT[];
         static const IMS_CHAR KEY_TEXT_RTP_INACTIVITY_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT[];
+        /**
+         * Specifies whether to check if local resource for text media is reserved after
+         * the call is established or updated.
+         *
+         * If {@code true} and text QoS hasn't activated, the next action will be determined
+         * by {@code imsrtt.policy_on_text_qos_deactivation_int} - usually downgrade.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
+        static const IMS_CHAR KEY_CHECK_LOCAL_RESOURCE_AFTER_ESTABLISHED_OR_MODIFIED_BOOL[];
     };
 
     class ImsSms
@@ -2266,7 +2313,7 @@ public:
         // Mtc
         static const IMS_CHAR KEY_18X_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_REQUIRE_PRACK_FOR_ALERT_BOOL[];
-        static const IMS_CHAR KEY_FORCE_183_FOR_ALERTING_ON_NON_100REL_INVITE_BOOL[];
+        static const IMS_CHAR KEY_FORCE_183_BEFORE_ALERTING_ON_NON_100REL_INVITE_BOOL[];
         static const IMS_CHAR KEY_SUPPORT_CONFERENCE_REFER_SUBSCRIBE_BOOL[];
         static const IMS_CHAR KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL[];
 
@@ -2305,6 +2352,7 @@ public:
 
         static const IMS_CHAR
                 KEY_REGISTRATION_RESTORATION_FOR_INVITE_REQUIRE_HEADER_VALIDATION_BOOL[];
+        static const IMS_CHAR KEY_RELEASE_CALL_ON_DEDICATED_BEARER_WAIT_TIMEOUT_BOOL[];
 
         static const IMS_CHAR KEY_POLICY_ON_AUDIO_QOS_DEACTIVATION_INT[];
         enum
@@ -2562,8 +2610,26 @@ public:
 
         static const IMS_CHAR KEY_INCOMING_RESUME_EVENT_SUPPORT_BOOL[];
         static const IMS_CHAR KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT[];
-        static const IMS_CHAR KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL[];
+
+        /**
+         * Specifies whether to initialize P-Early-Media type to 'inactive' when the header is
+         * missing in the received message and no P-Early-Media type has been set yet.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
+        static const IMS_CHAR KEY_SET_INACTIVE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL[];
+
         static const IMS_CHAR KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT[];
+        enum
+        {
+            DYNAMIC_NW_TONE_WHEN_PEM_NOT_CONTAINS_SEND = 0,
+            DYNAMIC_NW_TONE_WHEN_PEM_ALL = 1,
+            DYNAMIC_NW_TONE_WHEN_PEM_CONTAINS_SEND = 2,
+            NW_TONE_WHEN_PEM_CONTAINS_SEND_AFTER_180 = 3,
+        };
+
         static const IMS_CHAR KEY_USER_CANCEL_REASON_AFTER_RESPONSE_TIMEOUT_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT[];
         static const IMS_CHAR KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT[];
@@ -2582,7 +2648,8 @@ public:
         static const IMS_CHAR KEY_QOS_LOST_GUARD_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_QOS_FORCED_ACQUISITION_TIMER_MILLIS_INT[];
 
-        static const IMS_CHAR KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_INT_ARRAY[];
+        static const IMS_CHAR
+                KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_BEFORE_ESTABLISHED_INT_ARRAY[];
         enum
         {
             NO_WAIT_DEDICATED_BEARER_IN_NR = 0,
@@ -2635,10 +2702,13 @@ public:
         static const IMS_CHAR KEY_MEDIA_SESSION_LEVEL_BANDWIDTH_BOOL[];
         static const IMS_CHAR KEY_SDP_ANSWER_FULL_CAPABILITY_BOOL[];
         static const IMS_CHAR KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL[];
+        static const IMS_CHAR KEY_MEDIA_ADD_C_LINE_FOR_EACH_MEDIA_BOOL[];
         static const IMS_CHAR KEY_SESSION_REFRESH_SDP_SESSION_VERSION_INCREMENT_INT[];
         static const IMS_CHAR KEY_INCOMING_DTMF_TONE_PLAY_SUPPORT_BOOL[];
         static const IMS_CHAR KEY_MEDIA_RECVONLY_EARLY_SESSION_BOOL[];
+        static const IMS_CHAR KEY_EARLY_MEDIA_INACTIVE_DIRECTION_ON_PEM_INACTIVE_BOOL[];
         static const IMS_CHAR KEY_AMR_CODEC_ATTRIBUTE_DTX_BOOL[];
+        static const IMS_CHAR KEY_CODEC_BASED_DYNAMIC_AS_ENABLED_BOOL[];
         static const IMS_CHAR KEY_AMR_CODEC_PAYLOAD_FORMAT_RELAXED_MATCHING_BOOL[];
 
         // AMR payload formats
@@ -2752,7 +2822,28 @@ public:
         static const IMS_CHAR KEY_SUPPORT_VIDEO_CALL_ONLY_IN_VOPS_OFF_STATUS_BOOL[];
         static const IMS_CHAR
                 KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL[];
+        /**
+         * Specifies whether to include the "video" feature tag in the Accept-Contact header
+         * regardless of the call type.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
+        static const IMS_CHAR KEY_ADD_VIDEO_FEATURE_TAG_IN_ACCEPT_CONTACT_ALWAYS_BOOL[];
         static const IMS_CHAR KEY_REQUIRE_SIP_SIGNALING_ON_MULTITASKING_BOOL[];
+        /**
+         * Specifies whether to check if local resource for video media is reserved after
+         * the call is established or updated.
+         *
+         * If {@code true} and video QoS hasn't activated, the next action will be determined
+         * by {@code imsvt.policy_on_video_qos_deactivation_int} - usually downgrade.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
+        static const IMS_CHAR KEY_CHECK_LOCAL_RESOURCE_AFTER_ESTABLISHED_OR_MODIFIED_BOOL[];
         // Media
         static const IMS_CHAR KEY_VIDEO_RTCP_INTERVAL_INT_ARRAY[];
         static const IMS_CHAR KEY_VIDEO_AVPF_FEATURE_INT[];

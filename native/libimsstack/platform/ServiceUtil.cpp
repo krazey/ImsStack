@@ -20,6 +20,7 @@
 #include "PlatformContext.h"
 #include "ServiceMemory.h"
 #include "ServiceUtil.h"
+#include "system-intf/System.h"
 
 PRIVATE
 UtilService::UtilService() {}
@@ -126,8 +127,15 @@ PUBLIC GLOBAL const AString& UtilService::GetLogString(IN const AString& strInpu
 
     if (bAddPostFix)
     {
-        strOutput.Append("xxx");
+        strOutput.Append("***");
     }
 
     return strOutput;
+}
+
+PUBLIC GLOBAL void UtilService::LogSipMessage(IN const IMS_CHAR* pszMessage, IN IMS_SINT32 nLength,
+        IN IMS_SINT32 nSlotId, IN IMS_BOOL bOutgoing)
+{
+    PlatformContext::GetInstance()->GetSystem()->LogSipMessage(
+            pszMessage, nLength, nSlotId, bOutgoing);
 }

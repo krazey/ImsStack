@@ -14,24 +14,16 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
-#include "ServiceTrace.h"
 
 #include "media/FramedMedia.h"
 #include "media/FramedMediaProposal.h"
 #include "media/MediaDescriptor.h"
-
-__IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
 FramedMedia::FramedMedia(IN Service* pService, IN ISdpOaState* piOaState) :
         Media(pService, piOaState)
 {
     SetInitializationDone(IMS_TRUE);
-}
-
-PUBLIC VIRTUAL FramedMedia::~FramedMedia()
-{
-    IMS_TRACE_D("Destructor :: FramedMedia", 0, 0, 0);
 }
 
 PROTECTED VIRTUAL MediaProposal* FramedMedia::CreateMediaProposal(IN ISdpOaState* piOaState)

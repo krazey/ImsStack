@@ -474,6 +474,24 @@ TEST_F(SilentRedialHelperTest, HandleFailureTriggersCsfbByConfig)
             pRedialHelper->Redial(ISilentRedialHelper::INTERVAL_BY_TYPE));
 }
 
+TEST_F(SilentRedialHelperTest, HandleFailureTriggersCsfbWhenMaxCountReachedByConfig)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SILENT_REDIAL_ULTIMATE_FAILURE_ACTION_INT))
+            .WillByDefault(Return(ConfigVoice::SILENT_REDIAL_FAILURE_ACTION_CSFB));
+    EXPECT_CALL(objContext, IsCsfbAvailable).WillOnce(Return(IMS_TRUE));
+
+    const CallReasonInfo objAnyReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE);
+    pRedialHelper = new SilentRedialHelper(objContext, objAnyReason);
+
+    EXPECT_EQ(CallReasonInfo(CODE_NONE),
+            pRedialHelper->Redial(ISilentRedialHelper::INTERVAL_BY_TYPE));
+
+    EXPECT_EQ(
+            CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL),
+            pRedialHelper->Redial(ISilentRedialHelper::INTERVAL_BY_TYPE));
+}
+
 TEST_F(SilentRedialHelperTest, TimerExpiresDoesNothingIfTimerIsNull)
 {
     const CallReasonInfo objAnyReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_REDIRECTION);

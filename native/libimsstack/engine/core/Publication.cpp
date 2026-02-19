@@ -17,6 +17,7 @@
 #include "ServiceTrace.h"
 
 #include "IOnPublicationListener.h"
+#include "ISipClientConnection.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "PubState.h"
@@ -26,6 +27,7 @@
 #include "SipStatusCode.h"
 #include "base/IRefreshListener.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
@@ -117,10 +119,10 @@ PUBLIC VIRTUAL IMS_RESULT Publication::Publish(
     }
 
     // if the state is in ACTIVE and refresh is started by the publication,
-    // keep the request and after refresh is completed, try to send a PUBLISH request...
+    // keep the request and after refresh is completed, try to send a PUBLISH request.
     if (m_pPubState->GetOperation() == PubState::OPERATION_REFRESH)
     {
-        // 1 : save all the information ? try to send later .... ???
+        // 1 : save all the information.
         // SetState(STATE_PENDING);
 
         // Ims::SetLastError(ImsError::NO_ERROR);
@@ -255,10 +257,10 @@ PUBLIC VIRTUAL IMS_RESULT Publication::Unpublish()
     }
 
     // If the state is in ACTIVE and refresh is started by the publication,
-    // keep the request and after refresh is completed, try to send a PUBLISH request...
+    // keep the request and after refresh is completed, try to send a PUBLISH request.
     if (m_pPubState->GetOperation() == PubState::OPERATION_REFRESH)
     {
-        // 4 : save all the information ? try to send later .... ???
+        // 4 : save all the information.
         // nPendingOperation = PubState::OPERATION_REMOVE;
 
         // SetState(STATE_PENDING);
@@ -495,7 +497,7 @@ PRIVATE VIRTUAL void Publication::NotifySipResponse(IN ISipClientConnection* piS
     const ISipMessage* piSipMsg = piScc->GetMessage();
     const SipMethod& objMethod = piSipMsg->GetMethod();
 
-    IMS_TRACE_I("The response is received in the %s", StateToString(GetState()), 0, 0);
+    IMS_TRACE_I("SIP response on %s", StateToString(GetState()), 0, 0);
 
     if (!objMethod.Equals(SipMethod::PUBLISH))
     {
@@ -522,10 +524,9 @@ PRIVATE VIRTUAL void Publication::NotifySipResponse(IN ISipClientConnection* piS
 
     ReceiveResponse(piScc);
 
-    // Handle the response to PUBLISH request ...
+    // Handle the response to PUBLISH request.
     if (SipStatusCode::Is1XX(nStatusCode))
     {
-        // Do nothing ...
         return;
     }
     else if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
@@ -622,7 +623,7 @@ PRIVATE VIRTUAL void Publication::NotifySipError(
 PRIVATE VIRTUAL void Publication::Refreshable_RefreshCompleted(
         IN ISipClientConnection* piScc, IN IMS_SINT32 nCode /*= 0*/)
 {
-    IMS_TRACE_I("___ PUBLICATION REFRESH COMPLETED ... Code (%d)", nCode, 0, 0);
+    IMS_TRACE_I("___ PUBLICATION REFRESH COMPLETED (%d)", nCode, 0, 0);
 
     if (m_piRefreshListener != IMS_NULL)
     {
@@ -690,7 +691,7 @@ PRIVATE VIRTUAL IMS_BOOL Publication::Refreshable_RefreshStarted()
     IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
     IMS_SINT32 nState = GetState();
 
-    IMS_TRACE_I("___ PUBLICATION REFRESH STARTED ... State(%d)", nState, 0, 0);
+    IMS_TRACE_I("___ PUBLICATION REFRESH STARTED on %s", StateToString(nState), 0, 0);
 
     if (m_piRefreshListener != IMS_NULL)
     {
@@ -758,7 +759,7 @@ PRIVATE VIRTUAL IMS_BOOL Publication::Refreshable_RefreshStarted()
 
 PRIVATE VIRTUAL void Publication::Refreshable_RefreshTerminated()
 {
-    IMS_TRACE_D("_____ PUBLICATION REFRESH TERMINATED ...", 0, 0, 0);
+    IMS_TRACE_D("___ PUBLICATION REFRESH TERMINATED", 0, 0, 0);
 
     if (m_piRefreshListener != IMS_NULL)
     {
@@ -790,7 +791,6 @@ void Publication::CloseConnection()
             ServiceMethod::CloseConnection(IMessage::PUBLICATION_UNPUBLISH);
             break;
         default:
-            // Do nothing ...
             break;
     }
 
@@ -831,7 +831,6 @@ void Publication::ReceiveResponse(IN const ISipClientConnection* piScc)
             UpdateResponseOnReceived(IMessage::PUBLICATION_UNPUBLISH, piScc);
             break;
         default:
-            // Do nothing ...
             break;
     }
 }
@@ -839,7 +838,7 @@ void Publication::ReceiveResponse(IN const ISipClientConnection* piScc)
 PRIVATE
 void Publication::SetState(IN IMS_SINT32 nState)
 {
-    IMS_TRACE_I("Publication :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
+    IMS_TRACE_I("Publication: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
     m_nState = nState;
 }

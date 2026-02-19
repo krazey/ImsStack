@@ -16,16 +16,23 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
+#include "Capabilities.h"
 #include "CapabilitiesImpl.h"
 #include "CoreServiceImpl.h"
 #include "ICoreServiceListener.h"
 #include "IDirectCoreServiceListener.h"
+#include "PageMessage.h"
 #include "PageMessageImpl.h"
+#include "Publication.h"
 #include "PublicationImpl.h"
+#include "Reference.h"
 #include "ReferenceImpl.h"
+#include "SessionEx.h"
 #include "SessionImpl.h"
+#include "Subscription.h"
 #include "SubscriptionImpl.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 

@@ -309,6 +309,18 @@ public class SmsRelayLayerTest {
         assertEquals(SmsUtils.SMSRL_RESULT_TOKEN_DOES_NOT_EXIST, result);
     }
 
+    private int getMtToken() {
+        try {
+            Field f = SmsRelayLayer.class.getDeclaredField("mToken");
+            f.setAccessible(true);
+            AtomicInteger intToken = (AtomicInteger) f.get(mSmsRelayLayer);
+            return intToken.get() | SmsRelayLayer.MT_TOKEN_MASK;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
     @Test
     public void test_VerifyMtSuccess_3GPP2() {
         String pduString = "0000021002020702A848D159E24006010008"
@@ -316,16 +328,7 @@ public class SmsRelayLayerTest {
                 + "7AF4EECE819E7E1C19000306220707183319";
         byte[] pdu = ImsUtils.hexStringToBytes(pduString);
         mProxyListener.notifyIncomingMessage(SmsUtils.FORMAT_INT_3GPP2, pdu);
-        int token = 0;
-        try {
-            Field f = SmsRelayLayer.class.getDeclaredField("mToken");
-            f.setAccessible(true);
-            AtomicInteger intToken = (AtomicInteger) f.get(mSmsRelayLayer);
-            token = intToken.get();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return;
-        }
+        int token = getMtToken();
         verify(mListener).notifyRLDataIndication(eq(token), eq(SmsUtils.FORMAT_INT_3GPP2),
                 eq(SmsUtils.RP_DATA), eq(pdu));
     }
@@ -591,15 +594,7 @@ public class SmsRelayLayerTest {
         mProxyListener.notifyIncomingMessage(mSmsFormat, mMtRpData);
 
         SmsRPdu mtPdu = new SmsRPdu(mMtRpData);
-        int token = 0;
-        try {
-            Field f = SmsRelayLayer.class.getDeclaredField("mToken");
-            f.setAccessible(true);
-            AtomicInteger intToken = (AtomicInteger) f.get(mSmsRelayLayer);
-            token = intToken.get();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        int token = getMtToken();
 
         verify(mListener).notifyRLDataIndication(eq(token), eq(mSmsFormat),
                 eq(SmsUtils.RP_DATA), any());
@@ -625,15 +620,7 @@ public class SmsRelayLayerTest {
         // First MT SMS
         mProxyListener.notifyIncomingMessage(mSmsFormat, mMtRpData);
         SmsRPdu mtPdu1 = new SmsRPdu(mMtRpData);
-        int token1 = 0;
-        try {
-            Field f = SmsRelayLayer.class.getDeclaredField("mToken");
-            f.setAccessible(true);
-            AtomicInteger intToken = (AtomicInteger) f.get(mSmsRelayLayer);
-            token1 = intToken.get();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        int token1 = getMtToken();
         verify(mListener).notifyRLDataIndication(eq(token1), eq(mSmsFormat),
                 eq(SmsUtils.RP_DATA), any());
 
@@ -653,15 +640,7 @@ public class SmsRelayLayerTest {
                                                         + "B2996C2603");
         mProxyListener.notifyIncomingMessage(mSmsFormat, mMtRpData2);
         SmsRPdu mtPdu2 = new SmsRPdu(mMtRpData2);
-        int token2;
-        try {
-            Field f = SmsRelayLayer.class.getDeclaredField("mToken");
-            f.setAccessible(true);
-            AtomicInteger intToken = (AtomicInteger) f.get(mSmsRelayLayer);
-            token2 = intToken.get();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        int token2 = getMtToken();
         verify(mListener).notifyRLDataIndication(eq(token2), eq(mSmsFormat),
                 eq(SmsUtils.RP_DATA), any());
 
@@ -684,15 +663,7 @@ public class SmsRelayLayerTest {
         mProxyListener.notifyIncomingMessage(mSmsFormat, mMtRpData);
 
         SmsRPdu mtPdu = new SmsRPdu(mMtRpData);
-        int token = 0;
-        try {
-            Field f = SmsRelayLayer.class.getDeclaredField("mToken");
-            f.setAccessible(true);
-            AtomicInteger intToken = (AtomicInteger) f.get(mSmsRelayLayer);
-            token = intToken.get();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        int token = getMtToken();
 
         verify(mListener).notifyRLDataIndication(eq(token), eq(mSmsFormat),
                 eq(SmsUtils.RP_DATA), any());

@@ -26,7 +26,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.os.DeadSystemException;
-import android.os.Looper;
 import android.telephony.CallQuality;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsCallSessionListener;
@@ -42,7 +41,6 @@ import android.testing.TestableLooper;
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.enabler.media.MediaTestUtils;
 import com.android.imsstack.imsservice.mmtel.ImsCallSessionCallback;
-import com.android.imsstack.util.MessageExecutor;
 
 import org.junit.After;
 import org.junit.Before;
@@ -65,14 +63,12 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
     private ImsReasonInfo mReasonInfo;
     private ImsStreamMediaProfile mMediaProfile;
     private ImsSuppServiceNotification mIssn;
-    private MessageExecutor mMessageExecutor;
 
     @Before
     public void setUp() throws Exception {
         super.setUp(getClass().getSimpleName());
-        mMessageExecutor = new MessageExecutor(Looper.myLooper());
         mMockListener = Mockito.mock(ImsCallSessionListener.class);
-        mImsCallSessionCallback = new ImsCallSessionCallback(mMessageExecutor);
+        mImsCallSessionCallback = new ImsCallSessionCallback();
         mSession = Mockito.mock(ImsCallSessionImplBase.class);
         mConfSession = Mockito.mock(ImsCallSessionImplBase.class);
         mNewSession = Mockito.mock(ImsCallSessionImplBase.class);
@@ -197,15 +193,6 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
         mImsCallSessionCallback.setListener(null);
         mImsCallSessionCallback.invokeTerminated(mSession, mReasonInfo);
         verify(mMockListener, never()).callSessionTerminated(mReasonInfo);
-    }
-
-    @Test
-    public void testInvokeTerminatedForNullListenerAfterInvoked() {
-        mImsCallSessionCallback.invokeTerminated(mSession, mReasonInfo);
-        mImsCallSessionCallback.setListener(null);
-        verify(mMockListener, times(0)).callSessionTerminated(mReasonInfo);
-        processAllMessages();
-        verify(mMockListener).callSessionTerminated(mReasonInfo);
     }
 
     @Test

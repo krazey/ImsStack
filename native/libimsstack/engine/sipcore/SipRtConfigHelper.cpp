@@ -170,15 +170,14 @@ const SipRtConfig::IpQos* SipRtConfigHelper::GetIpQos(
         {
             if (objIpQos.nPort == 0)
             {
-                IMS_TRACE_D("IP-level QoS supports - IP (%s)", SipDebug::GetIp(objIp), 0, 0);
+                IMS_TRACE_D("IP-level QoS: %s", SipDebug::GetIp(objIp), 0, 0);
                 return &objIpQos;
             }
             else
             {
                 if (nPort == objIpQos.nPort)
                 {
-                    IMS_TRACE_D("IP-level QoS supports - IP (%s), Port (%d)",
-                            SipDebug::GetIp(objIp), nPort, 0);
+                    IMS_TRACE_D("IP-level QoS: %s|%d", SipDebug::GetIp(objIp), nPort, 0);
                     return &objIpQos;
                 }
             }
@@ -245,7 +244,7 @@ PRIVATE VIRTUAL void SipRtConfigHelper::RemoveConfig(
 
             if (GetSocketOptionCount(nItem) != 0)
             {
-                IMS_TRACE_D("SipRtConfig :: SocketOption(%d) is removed; sizeOfMap=%d", nItem,
+                IMS_TRACE_D("SipRtConfig: SocketOption(%d) is removed; sizeOfMap=%d", nItem,
                         m_objSocketOptionMap.GetSize(), 0);
                 return;
             }
@@ -277,8 +276,7 @@ PRIVATE VIRTUAL void SipRtConfigHelper::RemoveConfig(
 
             if (!m_objIpQoss.IsEmpty())
             {
-                IMS_TRACE_D(
-                        "SipRtConfig :: IpQos is removed; size=%d", m_objIpQoss.GetSize(), 0, 0);
+                IMS_TRACE_D("SipRtConfig: IpQos is removed; size=%d", m_objIpQoss.GetSize(), 0, 0);
                 return;
             }
             break;
@@ -310,7 +308,7 @@ PRIVATE VIRTUAL void SipRtConfigHelper::RemoveConfig(
             if (!m_objHeaders.IsEmpty())
             {
                 IMS_TRACE_D(
-                        "SipRtConfig :: Header is removed; size=%d", m_objHeaders.GetSize(), 0, 0);
+                        "SipRtConfig: Header is removed; size=%d", m_objHeaders.GetSize(), 0, 0);
                 return;
             }
             break;
@@ -341,8 +339,8 @@ PRIVATE VIRTUAL void SipRtConfigHelper::RemoveConfig(
 
             if (!m_objIpSecSas.IsEmpty())
             {
-                IMS_TRACE_D("SipRtConfig :: IpSecSa is removed; size=%d", m_objIpSecSas.GetSize(),
-                        0, 0);
+                IMS_TRACE_D(
+                        "SipRtConfig: IpSecSa is removed; size=%d", m_objIpSecSas.GetSize(), 0, 0);
                 return;
             }
             break;
@@ -379,7 +377,7 @@ PRIVATE VIRTUAL void SipRtConfigHelper::RemoveConfig(
 
             if (!m_objRegContacts.IsEmpty())
             {
-                IMS_TRACE_D("SipRtConfig :: RegContactAddress is removed; size=%d",
+                IMS_TRACE_D("SipRtConfig: RegContactAddress is removed; size=%d",
                         m_objRegContacts.GetSize(), 0, 0);
                 return;
             }
@@ -440,7 +438,7 @@ PRIVATE VIRTUAL IMS_RESULT SipRtConfigHelper::SetConfig(
 
             if (GetSocketOptionCount(nItem) > 1)
             {
-                IMS_TRACE_D("SipRtConfig :: SocketOption(%d) is set; sizeOfMap=%d", nItem,
+                IMS_TRACE_D("SipRtConfig: SocketOption(%d) is set; sizeOfMap=%d", nItem,
                         m_objSocketOptionMap.GetSize(), 0);
                 return IMS_SUCCESS;
             }
@@ -477,7 +475,7 @@ PRIVATE VIRTUAL IMS_RESULT SipRtConfigHelper::SetConfig(
 
             if (m_objIpQoss.GetSize() > 1)
             {
-                IMS_TRACE_D("SipRtConfig :: IpQos is set; size=%d", m_objIpQoss.GetSize(), 0, 0);
+                IMS_TRACE_D("SipRtConfig: IpQos is set; size=%d", m_objIpQoss.GetSize(), 0, 0);
                 return IMS_SUCCESS;
             }
         }
@@ -514,7 +512,7 @@ PRIVATE VIRTUAL IMS_RESULT SipRtConfigHelper::SetConfig(
 
             if (m_objHeaders.GetSize() > 1)
             {
-                IMS_TRACE_D("SipRtConfig :: Header is set; size=%d", m_objHeaders.GetSize(), 0, 0);
+                IMS_TRACE_D("SipRtConfig: Header is set; size=%d", m_objHeaders.GetSize(), 0, 0);
                 return IMS_SUCCESS;
             }
         }
@@ -550,8 +548,7 @@ PRIVATE VIRTUAL IMS_RESULT SipRtConfigHelper::SetConfig(
 
             if (m_objIpSecSas.GetSize() > 1)
             {
-                IMS_TRACE_D(
-                        "SipRtConfig :: IpSecSa is set; size=%d", m_objIpSecSas.GetSize(), 0, 0);
+                IMS_TRACE_D("SipRtConfig: IpSecSa is set; size=%d", m_objIpSecSas.GetSize(), 0, 0);
                 return IMS_SUCCESS;
             }
         }
@@ -610,7 +607,7 @@ PRIVATE VIRTUAL IMS_RESULT SipRtConfigHelper::SetConfig(
 
             if (m_objRegContacts.GetSize() > 1)
             {
-                IMS_TRACE_D("SipRtConfig :: RegContactAddress is set; size=%d",
+                IMS_TRACE_D("SipRtConfig: RegContactAddress is set; size=%d",
                         m_objRegContacts.GetSize(), 0, 0);
                 return IMS_SUCCESS;
             }

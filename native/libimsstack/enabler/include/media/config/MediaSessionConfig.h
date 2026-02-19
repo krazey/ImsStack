@@ -118,6 +118,13 @@ public:
      */
     virtual IMS_BOOL IsSdpReofferFullCapability() const;
 
+    /**
+     * @brief Get whether to add a c= line for each media stream in the SDP.
+     *
+     * @return IMS_BOOL Return true if the c= line should be added for each media stream.
+     */
+    virtual IMS_BOOL IsAddCLineForEachMediaEnabled() const;
+
     static const IMS_BOOL DEFAULT_SESSION_LEVEL_BW = IMS_FALSE;
     static const IMS_BOOL DEFAULT_ANBR_CAPABILITY = IMS_FALSE;
     static const IMS_BOOL DEFAULT_SUPPORT_MULTICONFIG = IMS_TRUE;
@@ -142,6 +149,7 @@ private:
     IMS_BOOL m_bAnbrSupported;
     IMS_BOOL m_bSupportMultiConfigInEarlySession;
     IMS_BOOL m_bSdpReofferFullCapability;
+    IMS_BOOL m_bAddCLineForEachMedia;
 };
 
 #endif

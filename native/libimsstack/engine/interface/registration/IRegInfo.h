@@ -16,7 +16,12 @@
 #ifndef INTERFACE_REG_INFO_H_
 #define INTERFACE_REG_INFO_H_
 
-#include "IRegInfoRegistration.h"
+#include "ImsList.h"
+
+class AString;
+
+class IRegInfoRegistration;
+class SipAddress;
 
 /**
  * @brief This class provides an interface to access the "reginfo" XML document.

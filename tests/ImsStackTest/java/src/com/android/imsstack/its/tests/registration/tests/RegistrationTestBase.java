@@ -58,6 +58,10 @@ public class RegistrationTestBase extends ImsStackTestBase {
     protected static final int ACCESS_NETWORK_TYPE_IWLAN = 5;
     protected static final int ACCESS_NETWORK_TYPE_NGRAN = 6;
 
+    protected static final int PREFERRED_ACCESSTYPE_FEATURE_TAG_DISABLED = 0;
+    protected static final int PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED = 1;
+    protected static final int PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED_WITHOUT_NUMERICAL_VALUE = 2;
+
     protected ControlConnection mServerControlConnection;
     protected TestRegistration mRegistration;
     protected RegistrationHelper mRegistrationHelper;

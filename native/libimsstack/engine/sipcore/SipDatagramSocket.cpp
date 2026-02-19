@@ -35,7 +35,7 @@ SipDatagramSocket::SipDatagramSocket(IN IMS_SINT32 nSlotId) :
 
 PUBLIC VIRTUAL SipDatagramSocket::~SipDatagramSocket()
 {
-    IMS_TRACE_D("DatagramSocket(D) :: (%s, %d)", SipDebug::GetIp(m_objSockAddr.GetIpAddress()),
+    IMS_TRACE_D("DatagramSocket(D) (%s|%d)", SipDebug::GetIp(m_objSockAddr.GetIpAddress()),
             m_objSockAddr.GetPort(), 0);
 }
 
@@ -62,8 +62,8 @@ PUBLIC VIRTUAL IMS_BOOL SipDatagramSocket::Create(
 
     SetState(STATE_CONNECTING);
 
-    IMS_TRACE_I("DatagramSocket(C) ::(%s , %d)",
-            SipRtConfigUtils::IsRoutingInfoHiddenInLog(GetSlotId()) ? "xxx"
+    IMS_TRACE_I("DatagramSocket(C) (%s|%d)",
+            SipRtConfigUtils::IsRoutingInfoHiddenInLog(GetSlotId()) ? "***"
                                                                     : SipDebug::GetIp(objIp),
             nPort, 0);
 

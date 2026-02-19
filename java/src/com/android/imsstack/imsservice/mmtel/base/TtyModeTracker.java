@@ -78,6 +78,6 @@ public class TtyModeTracker {
     }
 
     private static void logi(String s) {
-        ImsLog.i("[GII-IMPL] " + s);
+        ImsLog.i("[ISIL] " + s);
     }
 }

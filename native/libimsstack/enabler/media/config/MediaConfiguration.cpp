@@ -38,7 +38,6 @@ MediaConfiguration::MediaConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
         m_nRtcpInactivityTimerMillis(DEFAULT_RTCP_INACTIVITY),
         m_bRecvOnlyEarlySessionEnabled(IMS_TRUE)
 {
-    IMS_TRACE_I("+MediaConfiguration - SessionType[%d]", eSessionType, 0, 0);
 }
 
 PUBLIC VIRTUAL MediaConfiguration::~MediaConfiguration()

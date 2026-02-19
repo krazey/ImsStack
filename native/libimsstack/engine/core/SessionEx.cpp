@@ -38,6 +38,7 @@
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 #include "media/Media.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
@@ -76,7 +77,7 @@ IMS_RESULT SessionEx::RespondToEarlyUpdate(
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
-        IMS_TRACE_E(0, "Early UPDATE :: invalid state", 0, 0, 0);
+        IMS_TRACE_E(0, "Early UPDATE: invalid state", 0, 0, 0);
         return IMS_FAILURE;
     }
 
@@ -250,7 +251,7 @@ IMS_RESULT SessionEx::RespondToPrack(
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
-        IMS_TRACE_E(0, "ReliableProvResponseHelper :: invalid state", 0, 0, 0);
+        IMS_TRACE_E(0, "ReliableProvResponseHelper: invalid state", 0, 0, 0);
         return IMS_FAILURE;
     }
 
@@ -360,7 +361,7 @@ IMS_RESULT SessionEx::SendPrack()
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
-        IMS_TRACE_E(0, "ReliableProvResponseHelper :: invalid state", 0, 0, 0);
+        IMS_TRACE_E(0, "ReliableProvResponseHelper: invalid state", 0, 0, 0);
         return IMS_FAILURE;
     }
 
@@ -497,7 +498,7 @@ IMS_RESULT SessionEx::SendRpr(IN IMS_SINT32 nStatusCode,
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
-        IMS_TRACE_E(0, "ReliableProvResponseHelper :: invalid state", 0, 0, 0);
+        IMS_TRACE_E(0, "ReliableProvResponseHelper: invalid state", 0, 0, 0);
         return IMS_FAILURE;
     }
 
@@ -553,14 +554,13 @@ IMS_RESULT SessionEx::SendRpr(IN IMS_SINT32 nStatusCode,
         return IMS_FAILURE;
     }
 
-    IMS_TRACE_I("___ RPR :: SENDING %d \"%s\" ___", nStatusCode,
+    IMS_TRACE_I("___ RPR: SENDING %d \"%s\" ___", nStatusCode,
             strReason.IsNULL() ? SipStatusCode::GetReasonPhrase(nStatusCode) : strReason.GetStr(),
             0);
 
     if (CreateResponse(piSsc, nStatusCode, strReason) == IMS_FALSE)
     {
-        IMS_TRACE_E(0, "Initializing a response failed - SipError (%d)", SipError::GetLastError(),
-                0, 0);
+        IMS_TRACE_E(0, "Initializing a response failed(%d)", SipError::GetLastError(), 0, 0);
         return IMS_FAILURE;
     }
 
@@ -579,7 +579,7 @@ IMS_RESULT SessionEx::SendRpr(IN IMS_SINT32 nStatusCode,
         return IMS_FAILURE;
     }
 
-    // Set SDP body if the condition meets...
+    // Set SDP body if the condition meets.
     if (bSdp)
     {
         CheckNSetSdpBodyPart(piSipMsgRpr);
@@ -593,7 +593,7 @@ IMS_RESULT SessionEx::SendRpr(IN IMS_SINT32 nStatusCode,
 
     if (!SendNUpdateResponse(nServiceMethod, piSsc))
     {
-        IMS_TRACE_E(0, "Sending a response failed - SipError (%d)", SipError::GetLastError(), 0, 0);
+        IMS_TRACE_E(0, "Sending a response failed(%d)", SipError::GetLastError(), 0, 0);
         return IMS_FAILURE;
     }
 
@@ -633,7 +633,7 @@ IMS_RESULT SessionEx::UpdateEarlyMedia()
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
-        IMS_TRACE_E(0, "Early UPDATE :: invalid state", 0, 0, 0);
+        IMS_TRACE_E(0, "Early UPDATE: invalid state", 0, 0, 0);
         return IMS_FAILURE;
     }
 
@@ -641,7 +641,7 @@ IMS_RESULT SessionEx::UpdateEarlyMedia()
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
-        IMS_TRACE_E(0, "Early UPDATE :: PendingUpdate", 0, 0, 0);
+        IMS_TRACE_E(0, "Early UPDATE: PendingUpdate", 0, 0, 0);
         return IMS_FAILURE;
     }
 
@@ -656,7 +656,7 @@ IMS_RESULT SessionEx::UpdateEarlyMedia()
         {
             Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
-            IMS_TRACE_E(0, "Early UPDATE :: invalid state - SDP negotiation in progress", 0, 0, 0);
+            IMS_TRACE_E(0, "Early UPDATE: invalid state - SDP negotiation in progress", 0, 0, 0);
             return IMS_FAILURE;
         }
     }
@@ -665,7 +665,7 @@ IMS_RESULT SessionEx::UpdateEarlyMedia()
     {
         Ims::SetLastError(ImsError::INVALID_OPERATION);
 
-        IMS_TRACE_E(0, "Early UPDATE :: invalid state", 0, 0, 0);
+        IMS_TRACE_E(0, "Early UPDATE: invalid state", 0, 0, 0);
         return IMS_FAILURE;
     }
 
@@ -902,7 +902,7 @@ PROTECTED VIRTUAL void SessionEx::NotifySipError(
             (m_pRprHelper != IMS_NULL) &&
             (m_pRprHelper->GetState() == ReliableProvResponseHelper::STATE_RPR_SENT))
     {
-        IMS_TRACE_D("SessionEx :: RPR transaction timer is expired", 0, 0, 0);
+        IMS_TRACE_D("SessionEx: RPR transaction timer is expired", 0, 0, 0);
 
         if (!IsTerminatePending())
         {
@@ -1248,7 +1248,7 @@ PROTECTED VIRTUAL IMS_RESULT SessionEx::HandleRequestToUpdate(IN ISipServerConne
 
     if (nStatusCode != SipStatusCode::SC_INVALID)
     {
-        IMS_TRACE_I("Rejecting an UPDATE with %d ... in SessionEx", nStatusCode, 0, 0);
+        IMS_TRACE_I("Rejecting UPDATE with %d in SessionEx", nStatusCode, 0, 0);
 
         if (GetService()->CreateResponse(piSsc, nStatusCode) == IMS_FALSE)
         {
@@ -1320,7 +1320,7 @@ PROTECTED VIRTUAL IMS_RESULT SessionEx::HandleRequestToUpdate(IN ISipServerConne
     if ((nOaResult == SdpOfferAnswer::RESULT_FAILURE) ||
             (nOaResult == SdpOfferAnswer::RESULT_NOT_DONE))
     {
-        IMS_TRACE_D("Rejecting SDP Offer/Answer with 400 (Bad Request) ...", 0, 0, 0);
+        IMS_TRACE_D("Rejecting SDP OA with 400 (Bad Request)", 0, 0, 0);
 
         if (!GetService()->SendResponse(piSsc, SipStatusCode::SC_400))
         {
@@ -1341,14 +1341,14 @@ PROTECTED VIRTUAL IMS_RESULT SessionEx::HandleRequestToUpdate(IN ISipServerConne
     }
     else if (nOaResult == SdpOfferAnswer::RESULT_NOT_FOUND)
     {
-        IMS_TRACE_D("Rejecting SDP Offer/Answer with 606 (Not Acceptable) ...", 0, 0, 0);
+        IMS_TRACE_D("Rejecting SDP OA with 606 (Not Acceptable)", 0, 0, 0);
 
         if (GetService()->CreateResponse(piSsc, SipStatusCode::SC_606) == IMS_FALSE)
         {
             RestoreOfferAnswerState();
             piSsc->Close();
 
-            IMS_TRACE_E(0, "Rejecting SDP Offer/Answer failed", 0, 0, 0);
+            IMS_TRACE_E(0, "Rejecting SDP OA failed", 0, 0, 0);
             return IMS_FAILURE;
         }
 
@@ -1374,7 +1374,7 @@ PROTECTED VIRTUAL IMS_RESULT SessionEx::HandleRequestToUpdate(IN ISipServerConne
     }
     else if (nOaResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT)
     {
-        IMS_TRACE_D("QoS precondition is required ...", 0, 0, 0);
+        IMS_TRACE_D("QoS precondition is required", 0, 0, 0);
     }
     else if (nOaResult == SdpOfferAnswer::RESULT_NOT_CHANGED)
     {
@@ -1721,7 +1721,7 @@ void SessionEx::HandleRequestToPrack(IN ISipServerConnection* piSsc)
 
     if (m_pRprHelper->GetState() != ReliableProvResponseHelper::STATE_RPR_SENT)
     {
-        IMS_TRACE_E(0, "ReliableProvResponseHelper :: invalid state", 0, 0, 0);
+        IMS_TRACE_E(0, "ReliableProvResponseHelper: invalid state", 0, 0, 0);
 
         GetService()->SendResponse(piSsc, SipStatusCode::SC_481);
         piSsc->Close();
@@ -1736,7 +1736,7 @@ void SessionEx::HandleRequestToPrack(IN ISipServerConnection* piSsc)
     if ((nOaResult == SdpOfferAnswer::RESULT_FAILURE) ||
             (nOaResult == SdpOfferAnswer::RESULT_NOT_DONE))
     {
-        IMS_TRACE_D("Rejecting SDP Offer/Answer with 400 (Bad Request) ...", 0, 0, 0);
+        IMS_TRACE_D("Rejecting SDP OA with 400 (Bad Request)", 0, 0, 0);
 
         GetService()->SendResponse(piSsc, SipStatusCode::SC_400);
         piSsc->Close();
@@ -1744,12 +1744,12 @@ void SessionEx::HandleRequestToPrack(IN ISipServerConnection* piSsc)
     }
     else if (nOaResult == SdpOfferAnswer::RESULT_NOT_FOUND)
     {
-        IMS_TRACE_D("Rejecting SDP Offer/Answer with 606 (Not Acceptable) ...", 0, 0, 0);
+        IMS_TRACE_D("Rejecting SDP OA with 606 (Not Acceptable)", 0, 0, 0);
 
         if (GetService()->CreateResponse(piSsc, SipStatusCode::SC_606) == IMS_FALSE)
         {
             piSsc->Close();
-            IMS_TRACE_E(0, "Rejecting SDP Offer/Answer failed", 0, 0, 0);
+            IMS_TRACE_E(0, "Rejecting SDP OA failed", 0, 0, 0);
             return;
         }
 
@@ -1768,7 +1768,7 @@ void SessionEx::HandleRequestToPrack(IN ISipServerConnection* piSsc)
     }
     else if (nOaResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT)
     {
-        IMS_TRACE_D("QoS precondition is required ...", 0, 0, 0);
+        IMS_TRACE_D("QoS precondition is required", 0, 0, 0);
     }
     else if (nOaResult == SdpOfferAnswer::RESULT_NOT_CHANGED)
     {
@@ -1796,7 +1796,7 @@ void SessionEx::HandleResponseToPrack(IN ISipClientConnection* piScc)
 
     if (m_pRprHelper->GetState() != ReliableProvResponseHelper::STATE_PRACK_SENT)
     {
-        IMS_TRACE_E(0, "ReliableProvResponseHelper :: invalid state", 0, 0, 0);
+        IMS_TRACE_E(0, "ReliableProvResponseHelper: invalid state", 0, 0, 0);
         return;
     }
 
@@ -1861,7 +1861,7 @@ void SessionEx::HandleResponseToPrack(IN ISipClientConnection* piScc)
 PRIVATE
 void SessionEx::SetEarlyState(IN IMS_UINT32 nState)
 {
-    IMS_TRACE_I("SessionEx :: %s to %s", EarlyStateToString(m_nEarlyState),
+    IMS_TRACE_I("SessionEx: %s to %s", EarlyStateToString(m_nEarlyState),
             EarlyStateToString(nState), 0);
 
     m_nEarlyState = nState;
@@ -1925,7 +1925,7 @@ void SessionEx::SetLastEarlyUpdateCompletedTime(IN IMS_SINT32 nExplicitTime /*= 
                 m_nLastEarlyUpdateCompletedTimeSec, nOldMicroSec,
                 m_nLastEarlyUpdateCompletedTimeMicroSec);
 
-        IMS_TRACE_D("SetLastEarlyUpdateCompletedTime :: %s", strLog.GetStr(), 0, 0);
+        IMS_TRACE_D("SetLastEarlyUpdateCompletedTime: %s", strLog.GetStr(), 0, 0);
     }
 }
 

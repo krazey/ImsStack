@@ -374,6 +374,6 @@ public class ConfigProxy {
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-CONFIG] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 }

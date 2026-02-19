@@ -199,11 +199,11 @@ SIP_INT32 SipMsgUtil::GetMsgType(const SIP_CHAR* pszStartPt)
 SipUri::UriType SipMsgUtil::GetUriType(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
 {
     SIP_UINT32 nSize = (pEndPt - pStartPt) + SIP_ONE;
-    if (SipPf_Memcmp(pStartPt, SIP_SIP, nSize) == 0)
+    if ((nSize == SIP_THREE) && SipPf_Memcmp(SIP_SIP, pStartPt, nSize) == 0)
     {
         return SipUri::SCHEME_SIP;
     }
-    else if (SipPf_Memcmp(pStartPt, SIP_SIPS, nSize) == 0)
+    else if ((nSize == SIP_FOUR) && SipPf_Memcmp(SIP_SIPS, pStartPt, nSize) == 0)
     {
         return SipUri::SCHEME_SIPS;
     }

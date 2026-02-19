@@ -58,8 +58,6 @@ PUBLIC VIRTUAL MediaNetworkConnectionWatcher::~MediaNetworkConnectionWatcher()
 PUBLIC void MediaNetworkConnectionWatcher::SetListener(
         IN IMediaNetworkConnectionListener* piListener)
 {
-    IMS_TRACE_D("SetListener()", 0, 0, 0);
-
     m_piListener = piListener;
 }
 
