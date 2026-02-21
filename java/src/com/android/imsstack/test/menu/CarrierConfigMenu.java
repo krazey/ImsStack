@@ -44,6 +44,7 @@ import com.android.imsstack.core.config.CarrierConfig.Ims;
 import com.android.imsstack.core.config.CarrierConfig.ImsWfc;
 import com.android.imsstack.core.config.ConfigXmlUtils;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -261,10 +262,14 @@ public class CarrierConfigMenu extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        ImsLog.d("");
-
         super.onCreate(savedInstanceState);
 
+        if (ImsUtils.IS_USER) {
+            finish();
+            return;
+        }
+
+        ImsLog.d("");
         Window wd = getWindow();
 
         if (wd != null) {

@@ -17,6 +17,7 @@
 #define REG_INFO_CONTACT_H_
 
 #include "IRegInfoContact.h"
+#include "SipAddress.h"
 
 class INamedNodeMap;
 class INode;

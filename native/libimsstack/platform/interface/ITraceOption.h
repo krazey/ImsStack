@@ -36,6 +36,8 @@ public:
 
         /// Default trace options
         OPT_DEFAULT = (OPT_CAT_ALL | OPT_MEDIUM_SERIAL),
+        /// Release trace options
+        RELEASE_OPT_DEFAULT = (OPT_CAT_E | OPT_CAT_I | OPT_CAT_TEXT | OPT_MEDIUM_SERIAL),
 
         OPT_MAX = 0x7FFFFFFF
     };

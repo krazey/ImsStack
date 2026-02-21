@@ -15,7 +15,9 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Aos -->
-    <boolean name="imsemergency.reg_timer_for_ecall_timeout_as_failure_bool" value="false"/>
-    <int name="imsemergency.reg_timer_for_ecall_millis_int" value="4000"/>
+    <!-- Please always keep this config on the first line. -->
+    <!-- Specifies a list of parent carrier ids from which to inherit configuration values. -->
+    <int-array name="ims.parent_carrier_ids_int_array" num="1">
+        <item value="2367"/>
+    </int-array>
 </carrier_config>

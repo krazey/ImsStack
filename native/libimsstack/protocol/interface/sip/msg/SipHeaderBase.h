@@ -21,6 +21,7 @@
 #include "SipDatatypes.h"
 #include "msg/SipAddrSpec.h"
 
+class AStringBuffer;
 class IParameterComponent;
 class SipParameters;
 

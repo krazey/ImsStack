@@ -437,6 +437,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "call_end_and_pdn_reactivation_by_reg_terminated_bool";
         public static final String KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL =
                 KEY_PREFIX + "destroy_unsecure_tcp_socket_on_accomplishing_reg_bool";
+        public static final String KEY_DISABLE_N1_MODE_ON_IMS_PDU_ESTABLISH_FAILURE_BOOL =
+                KEY_PREFIX + "disable_n1_mode_on_ims_pdu_establish_failure_bool";
         public static final String KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL =
                 KEY_PREFIX + "hold_reg_with_ipcan_changed_during_ims_call_bool";
         public static final String KEY_IMS_DEREG_ON_3G_NETWORK_BOOL =
@@ -669,7 +671,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "information_level_of_geolocation_pidf_int_array";
         public static final String KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT =
                 KEY_PREFIX + "geolocation_policy_for_location_based_call_int";
-
+        public static final String KEY_GEOLOCATION_ROUTING_HEADER_MODE_INT =
+                KEY_PREFIX + "geolocation_routing_header_mode_int";
         // Indicates preferred IP version
         public static final int IPV4_PREFERRED = 0;
         public static final int IPV6_PREFERRED = 1;
@@ -689,31 +692,6 @@ public class CarrierConfig {
         public static final int USAT_REG_EVENT_CONDITIONAL_DOWNLOAD = 2;
 
         private Ims() {}
-    }
-
-    /** Configuration items for ACS. */
-    public static class ImsAcs {
-        public static final String KEY_PREFIX = "imsacs.";
-        public static final String KEY_REFRESH_RATIO_INT =
-                KEY_PREFIX + "refresh_ratio_int";
-        public static final String KEY_THROTTLING_TIME_SEC_INT =
-                KEY_PREFIX + "throttling_time_sec_int";
-        public static final String KEY_INITIAL_REQUEST_HTTPS_BOOL =
-                KEY_PREFIX + "initial_request_https_bool";
-        public static final String KEY_ALWAYS_USE_HTTP_PARAMS_STRING_ARRAY =
-                KEY_PREFIX + "always_use_http_params_string_array";
-        public static final String KEY_HTTP_PARAMS_STRING_ARRAY =
-                KEY_PREFIX + "http_params_string_array";
-        public static final String KEY_PERMANENT_ERROR_CODE_INT_ARRAY =
-                KEY_PREFIX + "permanent_error_code_int_array";
-        public static final String KEY_PDN_TYPE_STRING =
-                KEY_PREFIX + "pdn_type_string";
-        public static final String KEY_ALWAYS_WORKING_BOOL =
-                KEY_PREFIX + "always_working_bool";
-        public static final String KEY_USE_PRE_PROVISIONING_BOOL =
-                KEY_PREFIX + "use_pre_provisioning_bool";
-
-        private ImsAcs() {}
     }
 
     /** Configuration items for emergency calling. */
@@ -793,6 +771,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "exclude_uri_parameters_for_emergency_test_number_bool";
         public static final String KEY_EMERGENCY_RETRY_WITHOUT_CHECKING_380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL_BOOL =
                 KEY_PREFIX + "emergency_retry_without_checking_380_content_for_non_ue_detectable_emergency_call_bool";
+        public static final String KEY_SKIP_AUDIO_DEDICATED_BEARER_WAIT_TIMER_FOR_EMERGENCY_BOOL =
+                KEY_PREFIX + "skip_audio_dedicated_bearer_wait_timer_for_emergency_bool";
         public static final String KEY_EMERGENCY_TCALL_TIMER_MILLIS_INT =
                 KEY_PREFIX + "emergency_tcall_timer_millis_int";
         public static final String KEY_EMERGENCY_RINGBACK_TIMER_MILLIS_INT =
@@ -848,6 +828,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "plmn_allowing_geolocation_pidf_in_sip_invite_no_uicc_string_array";
         public static final String KEY_DYNAMIC_ROUTING_NUMBER_PER_PLMN_STRING_ARRAY =
                 KEY_PREFIX + "dynamic_routing_number_per_plmn_string_array";
+        public static final String KEY_EMERGENCY_SERVICE_CATEGORY_PER_PLMN_STRING_ARRAY =
+                KEY_PREFIX + "emergency_service_category_per_plmn_string_array";
 
         /** Emergency URN policy **/
         public static final int NOT_USE_SERVICE_CATEGORY = 1;
@@ -881,6 +863,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "text_rtcp_interval_int_array";
         public static final String KEY_TEXT_HOLD_WITH_DIRECTION_INACTIVE_BOOL =
                 KEY_PREFIX + "text_hold_with_direction_inactive_bool";
+        public static final String KEY_CHECK_LOCAL_RESOURCE_AFTER_ESTABLISHED_OR_MODIFIED_BOOL =
+                KEY_PREFIX + "check_local_resource_after_established_or_modified_bool";
 
         private ImsRtt() {}
     }
@@ -1001,7 +985,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "ut_insert_new_rule_bool";
         public static final String KEY_UT_URI_TYPE_FOR_CF_TARGET_NUMBER_INT =
                 KEY_PREFIX + "ut_uri_type_for_cf_target_number_int";
-        public static final String KEY_UT_NAF_FQDN_STRING = KEY_PREFIX + "ut_naf_fqdn_string";
         public static final String KEY_UT_TRANSACTION_TIMER_SEC_INT =
                 KEY_PREFIX + "ut_transaction_timer_sec_int";
         public static final String KEY_UT_SYNC_WITH_CS_FOR_TB_SS_BOOL =
@@ -1010,6 +993,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "ut_network_query_for_tb_oir_network_default_bool";
         public static final String KEY_UT_UPDATE_CB_WITHOUT_PASSWORD_BOOL =
                 KEY_PREFIX + "ut_update_cb_without_password_bool";
+        public static final String KEY_UT_UPDATE_CB_WITH_CONDITIONS_ELEMENT_BOOL =
+                KEY_PREFIX + "ut_update_cb_with_conditions_element_bool";
 
         private ImsSs() {}
     }
@@ -1092,8 +1077,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "18x_timer_millis_int";
         public static final String KEY_REQUIRE_PRACK_FOR_ALERT_BOOL =
                 KEY_PREFIX + "require_prack_for_alert_bool";
-        public static final String KEY_FORCE_183_FOR_ALERTING_ON_NON_100REL_INVITE_BOOL =
-                KEY_PREFIX + "force_183_for_alerting_on_non_100rel_invite_bool";
+        public static final String KEY_FORCE_183_BEFORE_ALERTING_ON_NON_100REL_INVITE_BOOL =
+                KEY_PREFIX + "force_183_before_alerting_on_non_100rel_invite_bool";
         public static final String KEY_SUPPORT_CONFERENCE_REFER_SUBSCRIBE_BOOL =
                 KEY_PREFIX + "support_conference_refer_subscribe_bool";
         public static final String KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL =
@@ -1118,6 +1103,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "registration_restoration_mode_on_504_for_invite_int";
         public static final String KEY_REGISTRATION_RESTORATION_FOR_INVITE_REQUIRE_HEADER_VALIDATION_BOOL =
                 KEY_PREFIX + "registration_restoration_for_invite_require_header_validation_bool";
+        public static final String KEY_RELEASE_CALL_ON_DEDICATED_BEARER_WAIT_TIMEOUT_BOOL =
+                KEY_PREFIX + "release_call_on_dedicated_bearer_wait_timeout_bool";
         public static final String KEY_POLICY_ON_AUDIO_QOS_DEACTIVATION_INT =
                 KEY_PREFIX + "policy_on_audio_qos_deactivation_int";
         public static final String KEY_ENABLE_SEND_REINVITE_ON_RAT_CHANGE_BOOL =
@@ -1283,8 +1270,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "incoming_resume_event_support_bool";
         public static final String KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT =
                 KEY_PREFIX + "sip_status_code_for_rejecting_call_type_change_int";
-        public static final String KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL =
-                KEY_PREFIX + "initialize_p_early_media_when_no_header_bool";
+        public static final String KEY_SET_INACTIVE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL =
+                KEY_PREFIX + "set_inactive_p_early_media_when_no_header_bool";
         public static final String KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT =
                 KEY_PREFIX + "policy_for_local_ringback_tone_with_180_response_int";
         public static final String KEY_USER_CANCEL_REASON_AFTER_RESPONSE_TIMEOUT_TIMER_MILLIS_INT =
@@ -1325,8 +1312,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "qos_lost_guard_timer_millis_int";
         public static final String KEY_QOS_FORCED_ACQUISITION_TIMER_MILLIS_INT =
                 KEY_PREFIX + "qos_forced_acquisition_timer_millis_int";
-        public static final String KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_INT_ARRAY =
-                KEY_PREFIX + "rat_condition_for_not_waiting_dedicated_bearer_int_array";
+        public static final String KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_BEFORE_ESTABLISHED_INT_ARRAY =
+                KEY_PREFIX + "rat_condition_for_not_waiting_dedicated_bearer_before_established_int_array";
         public static final String KEY_TRIGGER_DEDICATED_BEARER_WAIT_TIMER_BY_SENDING_INITIAL_INVITE_BOOL =
                 KEY_PREFIX + "trigger_dedicated_bearer_wait_timer_by_sending_initial_invite_bool";
         public static final String KEY_RESTART_DEDICATED_BEARER_WAIT_TIMER_BY_EPS_FALLBACK_BOOL =
@@ -1402,8 +1389,12 @@ public class CarrierConfig {
                 KEY_PREFIX + "audio_hold_with_direction_inactive_bool";
         public static final String KEY_MEDIA_RECVONLY_EARLY_SESSION_BOOL =
                 KEY_PREFIX + "media_recvonly_early_session_bool";
+        public static final String KEY_EARLY_MEDIA_INACTIVE_DIRECTION_ON_PEM_INACTIVE_BOOL =
+                KEY_PREFIX + "early_media_inactive_direction_on_pem_inactive_bool";
         public static final String KEY_AMR_CODEC_ATTRIBUTE_DTX_BOOL =
                 KEY_PREFIX + "amr_codec_attribute_dtx_bool";
+        public static final String KEY_CODEC_BASED_DYNAMIC_AS_ENABLED_BOOL =
+                KEY_PREFIX + "codec_based_dynamic_as_enabled_bool";
         public static final String KEY_CODEC_ATTRIBUTE_VISIBLE_MODE_CHANGE_CAPABILITY_BOOL =
                 KEY_PREFIX + "codec_attribute_visible_mode_change_capability_bool";
         public static final String KEY_CODEC_ATTRIBUTE_VISIBLE_MODE_CHANGE_PERIOD_BOOL =
@@ -1443,6 +1434,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "support_video_call_only_in_vops_off_status_bool";
         public static final String KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL =
                 KEY_PREFIX + "set_video_text_feature_exclusively_in_contact_header_by_session_type_bool";
+        public static final String KEY_ADD_VIDEO_FEATURE_TAG_IN_ACCEPT_CONTACT_ALWAYS_BOOL =
+                KEY_PREFIX + "add_video_feature_tag_in_accept_contact_always_bool";
         public static final String KEY_ONE_WAY_VIDEO_CALL_BY_LOCAL_END_SUPPORTED_BOOL =
                 KEY_PREFIX + "one_way_video_call_by_local_end_supported_bool";
         public static final String KEY_ONE_WAY_VIDEO_CALL_BY_REMOTE_END_SUPPORTED_BOOL =
@@ -1451,6 +1444,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "video_hold_with_direction_inactive_bool";
         public static final String KEY_REQUIRE_SIP_SIGNALING_ON_MULTITASKING_BOOL =
                 KEY_PREFIX + "require_sip_signaling_on_multitasking_bool";
+        public static final String KEY_CHECK_LOCAL_RESOURCE_AFTER_ESTABLISHED_OR_MODIFIED_BOOL =
+                KEY_PREFIX + "check_local_resource_after_established_or_modified_bool";
         // Media
         public static final String KEY_VIDEO_RTP_PORT_RANGE_INT_ARRAY =
                 KEY_PREFIX + "video_rtp_port_range_int_array";

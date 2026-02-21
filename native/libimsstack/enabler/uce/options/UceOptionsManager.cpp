@@ -25,6 +25,7 @@
 #include "IUce.h"
 #include "ServiceMessage.h"
 #include "Sip.h"
+#include "SipAddress.h"
 #include "options/UceOptions.h"
 #include "IUceJniThread.h"
 #include "JniEnablerConnector.h"

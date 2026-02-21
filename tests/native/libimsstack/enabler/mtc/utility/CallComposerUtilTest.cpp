@@ -214,6 +214,8 @@ TEST_F(CallComposerUtilTest, SetLocationSetsLocation)
     ON_CALL(objMessageUtils, GenerateContentId(_)).WillByDefault(Return(CID));
     ON_CALL(objConfigurationProxy, GetString(ConfigVoice::KEY_CONTENT_ID_FOR_GEOLOCATION_STRING))
             .WillByDefault(Return(AString::ConstEmpty()));
+    ON_CALL(objConfigurationProxy, GetInt(ConfigIms::KEY_GEOLOCATION_ROUTING_HEADER_MODE_INT))
+            .WillByDefault(Return(ConfigIms::GEOLOCATION_HEADER_MODE_NOT_PRESENT));
 
     const ByteArray objContent = ByteArray("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                            "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "

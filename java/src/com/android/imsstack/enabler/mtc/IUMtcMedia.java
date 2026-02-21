@@ -66,16 +66,6 @@ public class IUMtcMedia {
     /** Send audio received indication to UI */
     public static final int RTT_AUDIO_INDICATION_IND        = (IMS_MSG_BASE_MEDIA_TEXT_IND + 2);
 
-    /** Notification Events */
-    public static class Notify {
-        /** Event notify that receiving display is portrait resolution */
-        public static final int NOTIFY_ORIENTATION_PORTRAIT     = (IMS_MEDIA_MSG_NOTIFY + 1);
-        /** Event notify that receiving display is landscape resolution */
-        public static final int NOTIFY_ORIENTATION_LANDSCAPE    = (IMS_MEDIA_MSG_NOTIFY + 2);
-        /** Notify undefined event */
-        public static final int UNDEFINED                       = (IMS_MEDIA_MSG_NOTIFY + 99);
-    };
-
     /** Surface Types */
     public static class ParamValue {
         /** preview surface */

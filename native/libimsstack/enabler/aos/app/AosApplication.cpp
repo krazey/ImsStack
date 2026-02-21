@@ -867,12 +867,8 @@ PROTECTED VIRTUAL void AosApplication::SetAppType(IN AosRegistrationType eRegTyp
 PROTECTED VIRTUAL void AosApplication::SetAppState(IN IMS_UINT32 nState)
 {
     IMS_UINT32 nOldState = GetState();
-    A_IMS_TRACE_I(APPID, "SetAppState :: old (%s) , curr (%s)",
-            AosProvider::GetLog()->AppStateToString(nOldState),
-            AosProvider::GetLog()->AppStateToString(nState), 0);
 
     SetState(nState);
-
     if (m_piRegistration)
     {
         m_piRegistration->SetAppReady((IsUpdateAvailable()) ? IMS_TRUE : IMS_FALSE);
@@ -880,6 +876,9 @@ PROTECTED VIRTUAL void AosApplication::SetAppState(IN IMS_UINT32 nState)
 
     if (nOldState != nState)
     {
+        A_IMS_TRACE_I(APPID, "SetAppState :: old (%s) , curr (%s)",
+                AosProvider::GetLog()->AppStateToString(nOldState),
+                AosProvider::GetLog()->AppStateToString(nState), 0);
         TRACE_APP_STATUS;
     }
 }
@@ -1657,6 +1656,10 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::StateReady_Connection(IN IMSMSG& objM
                     m_pCondition->SetBlock(BLOCK_PERMANENT_DATA_FAILED);
                     m_pConnector->Stop(PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS);
                 }
+                else if (nReason == AosConnector::REASON_TEMPORARILY_FAILED)
+                {
+                    ProcessPlmnBlock(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
+                }
                 else if (nReason == AosConnector::REASON_PCSCF_DISCOVERY_FAILED)
                 {
                     m_pCondition->SetBlock(BLOCK_INVALID_CONNECTION);
@@ -2104,6 +2107,11 @@ PROTECTED VIRTUAL void AosApplication::ProcessConnectionDeactivated(IN IMS_UINT3
     {
         m_pCondition->SetBlock(BLOCK_PERMANENT_DATA_FAILED, IMS_FALSE);
         CleanAll(AosReason::DATA_PERMANENTLY_FAILED);
+    }
+    else if (nReason == AosConnector::REASON_TEMPORARILY_FAILED)
+    {
+        ProcessPlmnBlock(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
+        CleanAll(AosReason::DATA_DISCONNECTED);
     }
     else if (nReason == AosConnector::REASON_IP_CHANGED)
     {
@@ -3356,7 +3364,7 @@ PROTECTED VIRTUAL void AosApplication::Connector_Deactivated(IN IMS_UINT32 nReas
     A_IMS_TRACE_I(APPID, "Connection_Deactivated :: reason(%d)", nReason, 0, 0);
 
     // To allow IMS registration to resume upon IMS PDN reconnection, the USIM authentication
-    // failure block is released when the IMS PDN disconnects. (SKT specific)
+    // failure block is released when the IMS PDN disconnects.
     m_pCondition->ResetBlock(BLOCK_USIM_AUTHENTICATION_FAILED);
     // If the data is disconnected, it will be newly connected. So, wifi connection will be also
     // newly connected
@@ -3726,11 +3734,7 @@ PROTECTED VIRTUAL void AosApplication::RegistrationControl_ControlRegistration(
 
     if (eType == AosRegRequestType::START_IMS_EST_TIMER)
     {
-        if (GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTimeForLte() > 0)
-        {
-            PostMessage(MSG_IMS_EST_TIMER_CONTROL, 0, 0);
-        }
-
+        PostMessage(MSG_IMS_EST_TIMER_CONTROL, 0, 0);
         return;
     }
 }

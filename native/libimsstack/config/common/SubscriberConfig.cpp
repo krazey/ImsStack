@@ -503,7 +503,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
     {
         case IConfigurable::CP_I_START_SUBSCRIBER:
         case IConfigurable::CP_I_END_SUBSCRIBER:
-            // Control messages MUST be notified to the application...
+            // Control messages MUST be notified to the application.
             break;
 
         case IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_ALL:
@@ -1944,7 +1944,7 @@ void SubscriberConfig::ToDebugString()
         }
         else
         {
-            IMS_TRACE_D("Credential - password: %s", "xxx", 0, 0);
+            IMS_TRACE_D("Credential - password: ***", 0, 0, 0);
         }
         IMS_TRACE_D("Credential - realm: %s",
                 GetLog(pSubsInfo->m_objCredential.GetRealm(), 4).GetStr(), 0, 0);

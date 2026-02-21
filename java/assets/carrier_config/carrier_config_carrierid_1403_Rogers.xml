@@ -37,7 +37,6 @@
     <boolean name="imswfc.use_wfc_country_code_availability_check_bool" value="true"/>
 
     <!-- MTC -->
-    <boolean name="ims.support_sip_session_id_header_bool" value="true"/>
     <boolean name="imsvoice.enable_send_reinvite_on_rat_change_bool" value="true"/>
     <int name="imswfc.country_code_int" value="1"/>
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">

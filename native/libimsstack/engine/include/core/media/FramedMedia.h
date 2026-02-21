@@ -16,9 +16,7 @@
 #ifndef FRAMED_MEDIA_H_
 #define FRAMED_MEDIA_H_
 
-#include "AStringArray.h"
-#include "ByteArray.h"
-#include "ImsMap.h"
+#include "ImsCore.h"
 
 #include "media/Media.h"
 
@@ -26,7 +24,7 @@ class FramedMedia : public Media
 {
 public:
     FramedMedia(IN Service* pService, IN ISdpOaState* piOaState);
-    ~FramedMedia() override;
+    ~FramedMedia() override = default;
 
     FramedMedia(IN const FramedMedia&) = delete;
     FramedMedia& operator=(IN const FramedMedia&) = delete;

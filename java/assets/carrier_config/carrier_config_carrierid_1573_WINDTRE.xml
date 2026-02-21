@@ -15,4 +15,6 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <!-- Mtc -->
+    <int name="ims.geolocation_routing_header_mode_int" value="0"/>
 </carrier_config>

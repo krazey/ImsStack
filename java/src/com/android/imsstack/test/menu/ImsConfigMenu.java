@@ -30,6 +30,7 @@ import com.android.imsstack.core.carrier.CarrierInfo;
 import com.android.imsstack.core.carrier.ImsCarrierResolver;
 import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.ImsUtils;
 
 import java.util.ArrayList;
 
@@ -42,8 +43,14 @@ public class ImsConfigMenu extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        ImsLog.d("");
         super.onCreate(savedInstanceState);
+
+        if (ImsUtils.IS_USER) {
+            finish();
+            return;
+        }
+
+        ImsLog.d("");
         showSimList();
     }
 

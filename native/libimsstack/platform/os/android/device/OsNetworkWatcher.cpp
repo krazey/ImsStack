@@ -65,7 +65,9 @@ PUBLIC VIRTUAL NETRADIO_ENTYPE OsNetworkWatcher::GetNetRadioTechType(
     {
         IMS_SINT32 nType = GetNetworkType();
 
-        IMS_TRACE_D("GetNetRadioTechType(Mobile) :: RAT(%s)", RadioTechToString(nType), 0, 0);
+#ifdef __IMS_DEBUG__
+        IMS_TRACE_D("GetNetRadioTechType(Mobile): RAT(%s)", RadioTechToString(nType), 0, 0);
+#endif
 
         m_eNetDomainType = NW_REPORT_DOMAIN_CSPS;
 
@@ -118,7 +120,9 @@ PUBLIC VIRTUAL NETRADIO_ENTYPE OsNetworkWatcher::GetNetRadioTechType(
     }
     else if (pNetworkPolicy->GetApnType() == NetworkPolicy::APN_WIFI)
     {
+#ifdef __IMS_DEBUG__
         IMS_TRACE_D("GetNetRadioTechType(WiFi)", 0, 0, 0);
+#endif
 
         // This operation is provided for mobile-based AoS enabler
         // to verify the service features on WLAN environment.
@@ -244,7 +248,9 @@ PUBLIC VIRTUAL NETSERVICE_ENTYPE OsNetworkWatcher::GetNetServiceType(
 
     if (pNetworkPolicy != IMS_NULL)
     {
-        IMS_TRACE_D("GetNetServiceType :: apnType=%d", pNetworkPolicy->GetApnType(), 0, 0);
+#ifdef __IMS_DEBUG__
+        IMS_TRACE_D("GetNetServiceType: apnType=%d", pNetworkPolicy->GetApnType(), 0, 0);
+#endif
 
         if (pNetworkPolicy->IsMobilePolicy())
         {
@@ -321,8 +327,7 @@ PUBLIC VIRTUAL NETDOMAIN_ENTYPE OsNetworkWatcher::GetNetDomainType()
 PUBLIC VIRTUAL void OsNetworkWatcher::System_NotifyEvent(
         IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
 {
-    IMS_TRACE_D(
-            "NetWatcherInfo :: event=%d, wp=%" PFLS_d ", lp=%" PFLS_d, nEvent, nWParam, nLParam);
+    IMS_TRACE_D("NetWatcherInfo: event=%d, wp=%" PFLS_d ", lp=%" PFLS_d, nEvent, nWParam, nLParam);
 
     switch (nEvent)
     {

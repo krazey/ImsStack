@@ -172,8 +172,6 @@ PUBLIC VIRTUAL void AosCondition::Stop()
 
 PUBLIC VIRTUAL void AosCondition::SetListener(IN IAosConditionListener* piListener)
 {
-    A_IMS_TRACE_D(APPPROFILE, "SetListener :: (%" PFLS_x ") is set", piListener, 0, 0);
-
     m_piListener = piListener;
 }
 
@@ -211,8 +209,6 @@ PUBLIC VIRTUAL IMS_BOOL AosCondition::IsReady()
         bReturn = (m_bCellServiceAvailable || m_bWifiServiceAvailable);
     }
 
-    A_IMS_TRACE_I(APPPROFILE, "IsReady(%s) - Cellular(%s), WiFi(%s)", _TRACE_B_(bReturn),
-            _TRACE_B_(m_bCellServiceAvailable), _TRACE_B_(m_bWifiServiceAvailable));
     return bReturn;
 }
 
@@ -284,8 +280,6 @@ PROTECTED VIRTUAL void AosCondition::RemoveConfigListener()
 
 PROTECTED VIRTUAL void AosCondition::AddServiceAvailable()
 {
-    A_IMS_TRACE_D(APPPROFILE, "AddServiceAvailable", 0, 0, 0);
-
     m_pAvailableCellular = new AosServiceAvailableCellular();
     m_pAvailableCellular->Init(m_piAppContext);
     m_pAvailableCellular->SetListener(this);
@@ -297,8 +291,6 @@ PROTECTED VIRTUAL void AosCondition::AddServiceAvailable()
 
 PROTECTED VIRTUAL void AosCondition::RemoveServiceAvailable()
 {
-    A_IMS_TRACE_D(APPPROFILE, "RemoveServiceAvailable", 0, 0, 0);
-
     if (m_pAvailableWifi != IMS_NULL)
     {
         m_pAvailableWifi->RemoveListener(this);
@@ -379,10 +371,6 @@ PROTECTED VIRTUAL void AosCondition::Event_NotifyEvent(
 PROTECTED VIRTUAL void AosCondition::CallTracker_StateChanged(
         IN IMS_UINT32 nType, IN CallState eState)
 {
-    A_IMS_TRACE_I(APPPROFILE, "(%s) Call state [%d]",
-            nType == IAosCallTracker::TYPE_CS ? "CS" : "Normal", static_cast<IMS_UINT32>(eState),
-            0);
-
     if (nType == IAosCallTracker::TYPE_CS)
     {
         IMS_BOOL bBlockRegOnCsCall = IMS_TRUE;
@@ -411,8 +399,6 @@ PROTECTED VIRTUAL void AosCondition::CallTracker_StateChanged(
 
 PROTECTED VIRTUAL void AosCondition::NetTracker_StatusChanged()
 {
-    A_IMS_TRACE_I(APPPROFILE, "NetTracker_StatusChanged()", 0, 0, 0);
-
     if (m_bIsTtyOn)
     {
         ProcessTtyEvent(IMS_TRUE);
@@ -458,7 +444,7 @@ PROTECTED VIRTUAL void AosCondition::Subscriber_StateChanged(
 PROTECTED VIRTUAL void AosCondition::Block_Changed(IN IMS_UINT32 nType, IN IMS_UINT32 nParam)
 {
     const IMS_CHAR* pszReason = AosBlock::BlockReasonToString(nType);
-    const IMS_CHAR* pszStatus = (nParam > 0) ? "BLOCK" : "NOT_BLOCK";
+    const IMS_CHAR* pszStatus = (nParam > 0) ? "BLOCK" : "UNBLOCK";
 
     A_IMS_TRACE_I(APPPROFILE, "Block_Changed :: Reason(%s)(%d) - %s", pszReason, nType, pszStatus);
 
@@ -470,7 +456,7 @@ PROTECTED VIRTUAL void AosCondition::Block_Changed(IN IMS_UINT32 nType, IN IMS_U
 PROTECTED VIRTUAL void AosCondition::Block_SilentChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nParam)
 {
     const IMS_CHAR* pszReason = AosBlock::BlockReasonToString(nType);
-    const IMS_CHAR* pszStatus = (nParam > 0) ? "BLOCK" : "NOT_BLOCK";
+    const IMS_CHAR* pszStatus = (nParam > 0) ? "BLOCK" : "UNBLOCK";
 
     A_IMS_TRACE_I(
             APPPROFILE, "Block_SilentChanged :: Reason(%s)(%d) - %s", pszReason, nType, pszStatus);
@@ -511,17 +497,15 @@ PROTECTED VIRTUAL void AosCondition::ServiceAvailable_RequestCommand(
 
 PROTECTED VIRTUAL void AosCondition::NConfiguration_NotifyConfigChanged()
 {
-    A_IMS_TRACE_D(APPPROFILE, "NConfiguration_NotifyConfigChanged :: changed", 0, 0, 0);
-
     const IAosNConfiguration* piNConfig = GET_N_CONFIG(m_nSlotId);
-
     if (piNConfig == IMS_NULL)
     {
         return;
     }
 
     m_eServiceType = GetServiceType();
-    A_IMS_TRACE_D(APPPROFILE, "ServiceType[%d]", m_eServiceType, 0, 0);
+    A_IMS_TRACE_D(APPPROFILE, "NConfiguration_NotifyConfigChanged :: ServiceType[%d]",
+            m_eServiceType, 0, 0);
 
     UpdateEventListener(IMS_EVENT_ROAMING_STATE, !piNConfig->IsVoLteRoamingAvailable());
 }
@@ -630,7 +614,6 @@ IMS_BOOL AosCondition::IsListenerEnabled(IN IMS_UINT32 nType) const
 }
 
 /*
-
 Remarks
     AddHold means that the condition or event will be ignored from now on.
     So firstly, reset a block with the event held.
@@ -661,11 +644,9 @@ void AosCondition::AddHold(IN IMS_UINT32 nEvent, IN IMS_BOOL bIsEventReset /* = 
 }
 
 /*
-
 Remarks
     If RemoveHold() is invoked with an event (or condition).
     AosCondition will take care of the event or condition from now on.
-
 */
 PROTECTED
 void AosCondition::RemoveHold(IN IMS_UINT32 nEvent, IN IMS_BOOL bIsEventReset /* = IMS_FALSE */)
@@ -756,7 +737,6 @@ void AosCondition::ProcessAosStartEvent()
 PROTECTED
 void AosCondition::ProcessAirPlaneEvent(IN IMS_BOOL bIsOn)
 {
-    A_IMS_TRACE_I(APPPROFILE, "ProcessAirPlaneEvent(), bIsOn(%s)", _TRACE_B_(bIsOn), 0, 0);
     SendConditionEvent(AosServiceAvailable::EVENT_AIRPLANE, static_cast<IMS_UINT32>(bIsOn));
 
     if (bIsOn)
@@ -832,7 +812,6 @@ void AosCondition::ProcessImsServiceEvent(IN ServiceSetting eState, IN IMS_UINT3
 PROTECTED
 void AosCondition::ProcessTtyEvent(IN IMS_BOOL bIsOn)
 {
-    A_IMS_TRACE_I(APPPROFILE, "ProcessTtyEvent(), bIsOn(%s)", _TRACE_B_(bIsOn), 0, 0);
     m_bIsTtyOn = bIsOn;
 
     if (m_bIsTtyOn && IsDeregRequiredForTty())
@@ -870,9 +849,6 @@ void AosCondition::ProcessLocationInfo(IN LocationInfo eState)
 PROTECTED
 void AosCondition::ProcessLteInfoEvent(IN IMS_UINT32 nState, IN IMS_UINT32 nStateEx)
 {
-    A_IMS_TRACE_I(
-            APPPROFILE, "ProcessLteInfoEvent(), nState(%d), nStateEx(%d)", nState, nStateEx, 0);
-
     m_bIsCombinedAttached =
             (nState == IMS_LTE_INFO_COMBINED_ATTACHED && nStateEx == IMS_LTE_INFO_EXTRA_NONE);
 }
@@ -893,7 +869,6 @@ void AosCondition::ProcessTraceBlockEvent(IN const IMS_CHAR* pszPrefix,
 PROTECTED
 void AosCondition::ProcessAllowedNetworkTypesEvent(IN IMS_ULONG /*nNetworkTypesBitMask*/)
 {
-    A_IMS_TRACE_D(APPPROFILE, "ProcessAllowedNetworkTypesEvent", 0, 0, 0);
     ProcessBlockReason(IMS_FALSE, BLOCK_AUTHENTICATION_FAILED);
     ProcessBlockReason(IMS_FALSE, BLOCK_CELLULAR_RAT_BLOCK);
     ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_DATA_FAILED);

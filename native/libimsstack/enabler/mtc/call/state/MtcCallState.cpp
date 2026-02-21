@@ -18,7 +18,6 @@
 #include "IMessage.h"
 #include "INetworkWatcher.h"
 #include "ISipClientConnection.h"
-#include "ISipConnection.h"
 #include "ISipMessage.h"
 #include "ISipServerConnection.h"
 #include "ImsAosReason.h"
@@ -204,18 +203,6 @@ PUBLIC VIRTUAL CallStateName MtcCallState::UssiInfoReceived(
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName MtcCallState::NotifyResponseToUssiInfo(
-        IN ISipClientConnection* /* piScc */, IN ISipClientConnection* /* piForkedScc */)
-{
-    return GetStateName();
-}
-
-PUBLIC VIRTUAL CallStateName MtcCallState::NotifyErrorToUssiInfo(IN ISipConnection* /* piSc */,
-        IN IMS_SINT32 /* nCode */, IN const AString& /* strMessage */)
-{
-    return GetStateName();
-}
-
 PUBLIC VIRTUAL CallStateName MtcCallState::SessionAlerting(IN ISession* /* piSession */)
 {
     return GetStateName();
@@ -388,34 +375,6 @@ PUBLIC VIRTUAL CallStateName MtcCallState::OnInternalFailure()
 
 PUBLIC VIRTUAL CallStateName MtcCallState::OnAttached()
 {
-    return GetStateName();
-}
-
-PUBLIC VIRTUAL CallStateName MtcCallState::ClientConnection_NotifyResponse(
-        IN ISipClientConnection* piScc, IN ISipClientConnection* /*piForkedScc*/)
-{
-    if (piScc->Receive() != IMS_SUCCESS)
-    {
-        return GetStateName();
-    }
-
-    IMS_SINT32 nStatusCode = piScc->GetStatusCode();
-
-    IMS_TRACE_D("ClientConnection_NotifyResponse : StatusCode[%d]", nStatusCode, 0, 0);
-
-    if (SipStatusCode::IsFinal(nStatusCode))
-    {
-        piScc->Close();
-    }
-
-    return GetStateName();
-}
-
-PUBLIC VIRTUAL CallStateName MtcCallState::Error_NotifyError(IN ISipConnection* piSc,
-        IN [[maybe_unused]] IMS_SINT32 nCode, IN [[maybe_unused]] const AString& strMessage)
-{
-    piSc->Close();
-
     return GetStateName();
 }
 
@@ -772,8 +731,6 @@ CallStateName MtcCallState::RejectIncomingAndToTerminating(IN const CallReasonIn
 PROTECTED
 void MtcCallState::SendIncomingUpdateToUi(IN CallType eCallType)
 {
-    IMS_TRACE_D("SendIncomingUpdateToUi", 0, 0, 0);
-
     m_objContext.GetUpdatingInfo().SetAlerted();
     m_objContext.GetUiNotifier().SendIncomingUpdate(eCallType);
     m_objContext.GetTimer().Start(TIMER_CONVERT_USER_RESPONSE,
@@ -812,7 +769,7 @@ IMS_BOOL MtcCallState::IsNeedToIgnore(IN ISession* piSession, IN const IMessage*
     {
         if (eState == NegotiationState::STATE_NEGOTIATED)
         {
-            IMS_TRACE_I("IsNeedToIgnore - Offer is included in ACK", 0, 0, 0);
+            IMS_TRACE_D("IsNeedToIgnore - Offer is included in ACK", 0, 0, 0);
             return IMS_TRUE;
         }
     }
@@ -943,6 +900,13 @@ IMS_SINT32 MtcCallState::GetTimeInMilliseconds(IN IMS_UINT32 nType) const
     const IMS_CHAR* pszKey;
     switch (nType)
     {
+        case TIMER_MO_CALL_SETUP_WATCHDOG:
+        {
+            IMS_SINT32 n18xWaitTimer = m_objContext.GetConfigurationProxy().GetInt(
+                    ConfigVoice::KEY_18X_TIMER_MILLIS_INT);
+            return TIMER_C_WITH_MARGIN_TIME_MS > n18xWaitTimer ? TIMER_C_WITH_MARGIN_TIME_MS
+                                                               : n18xWaitTimer;
+        }
         case TIMER_MO_18X_WAIT:
             if (bNormal)
             {
@@ -989,21 +953,12 @@ PROTECTED
 void MtcCallState::SendInfoForUssi(
         IN const AString& strUssdString, IN UssiError eErrorCode /*= UssiError::CODE_NONE*/)
 {
-    IMS_TRACE_D("SendInfoForUssi", 0, 0, 0);
-    ISipClientConnection* piConnection = m_objContext.CreateClientConnection(SipMethod::INFO);
-    if (!piConnection)
+    ISession* piSession = GetISession();
+    if (!piSession ||
+            m_objContext.GetUssiController()->SendInfo(*piSession, strUssdString, eErrorCode) ==
+                    IMS_FAILURE)
     {
-        return;
-    }
-
-    if (m_objContext.GetUssiController()->FormInfoRequest(
-                piConnection, strUssdString, eErrorCode) == IMS_SUCCESS)
-    {
-        piConnection->Send();
-    }
-    else
-    {
-        piConnection->Close();
+        IMS_TRACE_E(0, "Send INFO failed.", 0, 0, 0);
     }
 }
 

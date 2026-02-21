@@ -15,6 +15,7 @@
  */
 package com.android.imsstack.enabler.aos;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
@@ -25,6 +26,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 
+import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.enabler.aos.service.AosService;
 
 import org.junit.After;
@@ -40,6 +42,7 @@ public class CarrierSignalReceiverTest {
     private static final int SLOT_0 = 0;
     private static final int PCO_TARGET_ID = 0xff00;
     private FakeCarrierSignalReceiver mFakeCarrierSignalReceiver;
+    private TestAppContext mTestAppContext;
 
     @Mock private Context mMockContext;
     @Mock private AosService mMockAosService;
@@ -52,6 +55,9 @@ public class CarrierSignalReceiverTest {
 
         MockitoAnnotations.initMocks(this);
 
+        mTestAppContext = new TestAppContext(mMockContext);
+        mTestAppContext.setUp();
+
         AosFactory.getInstance().replaceService(SLOT_0, mMockAosService);
         mFakeCarrierSignalReceiver = new FakeCarrierSignalReceiver();
     }
@@ -59,6 +65,10 @@ public class CarrierSignalReceiverTest {
     @After
     public void cleanUp() throws Exception {
         AosFactory.getInstance().replaceService(SLOT_0, null);
+
+        if (mTestAppContext != null) {
+            mTestAppContext.tearDown();
+        }
     }
 
     @Test
@@ -116,6 +126,25 @@ public class CarrierSignalReceiverTest {
         // Note: EXTRA_SUBSCRIPTION_INDEX is intentionally omitted.
 
         // Trigger broadcast
+        mFakeCarrierSignalReceiver.onReceive(mMockContext, intent);
+
+        verifyNoInteractions(mMockAosService);
+    }
+
+    @Test
+    public void testGetSlotId() {
+        CarrierSignalReceiver receiver = new CarrierSignalReceiver();
+
+        int result = receiver.getSlotId(TestAppContext.SUB_ID_1);
+
+        assertEquals(TestAppContext.SLOT0, result);
+    }
+
+    @Test
+    public void testOnReceive_NullAction() {
+        Intent intent = new Intent();
+        intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, 0);
+
         mFakeCarrierSignalReceiver.onReceive(mMockContext, intent);
 
         verifyNoInteractions(mMockAosService);

@@ -23,12 +23,10 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.net.Uri;
 import android.os.RemoteException;
 import android.telecom.VideoProfile;
-import android.telephony.ims.ImsStreamMediaProfile;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Surface;
@@ -37,7 +35,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.enabler.mtc.MtcMediaSession;
 import com.android.imsstack.imsservice.mmtel.call.IVideoCallSession;
-import com.android.imsstack.imsservice.mmtel.util.VideoDimension;
 
 import org.junit.After;
 import org.junit.Before;
@@ -247,13 +244,6 @@ public class ImsVideoCallProviderBaseTest extends ImsVideoCallProviderTestBase {
 
     @SmallTest
     @Test
-    public void testOnSessionModificationAbortedByCameraOff() {
-        mProvider.onSessionModificationAbortedByCameraOff();
-        // Base implementation is empty. No crash is a pass.
-    }
-
-    @SmallTest
-    @Test
     public void testUpdateMediaSession() {
         MtcMediaSession newMockMediaSession = mock(MtcMediaSession.class);
         mProvider.updateMediaSession(newMockMediaSession);
@@ -292,14 +282,6 @@ public class ImsVideoCallProviderBaseTest extends ImsVideoCallProviderTestBase {
 
     @SmallTest
     @Test
-    public void testHandleMediaSessionStarted() throws RemoteException {
-        mProvider.handleMediaSessionStarted();
-        // Base implementation is empty.
-        verify(mMockCallback, never()).changePeerDimensions(anyInt(), anyInt());
-    }
-
-    @SmallTest
-    @Test
     public void testMediaSessionListener_onDataUsageChanged() throws RemoteException {
         ArgumentCaptor<MtcMediaSession.VideoListener> listenerCaptor =
                 ArgumentCaptor.forClass(MtcMediaSession.VideoListener.class);
@@ -307,6 +289,7 @@ public class ImsVideoCallProviderBaseTest extends ImsVideoCallProviderTestBase {
         MtcMediaSession.VideoListener listener = listenerCaptor.getValue();
 
         listener.onMediaSessionDataUsageChanged(mMockMediaSession, 1024);
+        processAllMessages();
 
         verify(mMockCallback).changeCallDataUsage(1024);
     }
@@ -329,14 +312,6 @@ public class ImsVideoCallProviderBaseTest extends ImsVideoCallProviderTestBase {
 
     @SmallTest
     @Test
-    public void testHandleMediaSessionPeerDisplayOrientationChanged() throws RemoteException {
-        mProvider.handleMediaSessionPeerDisplayOrientationChanged(0);
-        // Base implementation is empty.
-        verify(mMockCallback, never()).changePeerDimensions(anyInt(), anyInt());
-    }
-
-    @SmallTest
-    @Test
     public void testMediaSessionListener_onPeerDimensionsChanged() throws RemoteException {
         ArgumentCaptor<MtcMediaSession.VideoListener> listenerCaptor =
                 ArgumentCaptor.forClass(MtcMediaSession.VideoListener.class);
@@ -344,130 +319,9 @@ public class ImsVideoCallProviderBaseTest extends ImsVideoCallProviderTestBase {
         MtcMediaSession.VideoListener listener = listenerCaptor.getValue();
 
         listener.onMediaSessionPeerDimensionsChanged(mMockMediaSession, 1920, 1080);
+        processAllMessages();
 
         verify(mMockCallback).changePeerDimensions(1920, 1080);
-    }
-
-    @SmallTest
-    @Test
-    public void testSetAndGetCurrentVideoDimension() {
-        assertThat(mProvider.getCurrentVideoDimension()).isNull();
-        mProvider.setCurrentVideoDimension(10, 20);
-        VideoDimension vd = mProvider.getCurrentVideoDimension();
-        assertThat(vd).isNotNull();
-        assertThat(vd.getWidth()).isEqualTo(10);
-        assertThat(vd.getHeight()).isEqualTo(20);
-    }
-
-    @SmallTest
-    @Test
-    public void testUpdateReversedPeerDimensionFromMediaProfile_toPortrait()
-            throws RemoteException {
-        when(mMockCallSession.getStreamMediaProfile()).thenReturn(mMockMediaProfile);
-        when(mMockMediaProfile.getVideoQuality())
-                .thenReturn(ImsStreamMediaProfile.VIDEO_QUALITY_VGA_LANDSCAPE);
-
-        mProvider.updateReversedPeerDimensionFromMediaProfile(
-                VideoCallUtils.ORIENTATION_PORTRAIT, false);
-
-        verify(mMockCallback).changePeerDimensions(480, 640);
-    }
-
-    @SmallTest
-    @Test
-    public void testUpdateReversedPeerDimensionFromMediaProfile_toLandscape()
-            throws RemoteException {
-        when(mMockCallSession.getStreamMediaProfile()).thenReturn(mMockMediaProfile);
-        when(mMockMediaProfile.getVideoQuality())
-                .thenReturn(ImsStreamMediaProfile.VIDEO_QUALITY_VGA_PORTRAIT);
-
-        mProvider.updateReversedPeerDimensionFromMediaProfile(
-                VideoCallUtils.ORIENTATION_LANDSCAPE, false);
-
-        verify(mMockCallback).changePeerDimensions(640, 480);
-    }
-
-    @SmallTest
-    @Test
-    public void testUpdateReversedPeerDimensionFromMediaProfile_noChange() throws RemoteException {
-        when(mMockCallSession.getStreamMediaProfile()).thenReturn(mMockMediaProfile);
-        when(mMockMediaProfile.getVideoQuality())
-                .thenReturn(ImsStreamMediaProfile.VIDEO_QUALITY_VGA_LANDSCAPE);
-
-        mProvider.updateReversedPeerDimensionFromMediaProfile(
-                VideoCallUtils.ORIENTATION_LANDSCAPE, false);
-
-        verify(mMockCallback, never()).changePeerDimensions(anyInt(), anyInt());
-    }
-
-    @SmallTest
-    @Test
-    public void testUpdateReversedPeerDimensionFromMediaProfile_enforceUpdate()
-            throws RemoteException {
-        when(mMockCallSession.getStreamMediaProfile()).thenReturn(mMockMediaProfile);
-        when(mMockMediaProfile.getVideoQuality())
-                .thenReturn(ImsStreamMediaProfile.VIDEO_QUALITY_VGA_LANDSCAPE);
-
-        mProvider.updateReversedPeerDimensionFromMediaProfile(
-                VideoCallUtils.ORIENTATION_LANDSCAPE, true);
-
-        verify(mMockCallback).changePeerDimensions(640, 480);
-    }
-
-    @SmallTest
-    @Test
-    public void testUpdateReversedPeerDimensionFromMediaProfile_nullProfile()
-            throws RemoteException {
-        when(mMockCallSession.getStreamMediaProfile()).thenReturn(null);
-        mProvider.updateReversedPeerDimensionFromMediaProfile(
-                VideoCallUtils.ORIENTATION_LANDSCAPE, false);
-        verify(mMockCallback, never()).changePeerDimensions(anyInt(), anyInt());
-    }
-
-    @SmallTest
-    @Test
-    public void testUpdateReversedPeerDimensionFromVideoDimension_toPortrait()
-            throws RemoteException {
-        mProvider.setCurrentVideoDimension(640, 480); // landscape
-        mProvider.updateReversedPeerDimensionFromVideoDimension(
-                VideoCallUtils.ORIENTATION_PORTRAIT, false);
-        verify(mMockCallback).changePeerDimensions(480, 640);
-        VideoDimension vd = mProvider.getCurrentVideoDimension();
-        assertThat(vd.getWidth()).isEqualTo(480);
-        assertThat(vd.getHeight()).isEqualTo(640);
-    }
-
-    @SmallTest
-    @Test
-    public void testUpdateReversedPeerDimensionFromVideoDimension_toLandscape()
-            throws RemoteException {
-        mProvider.setCurrentVideoDimension(480, 640); // portrait
-        mProvider.updateReversedPeerDimensionFromVideoDimension(
-                VideoCallUtils.ORIENTATION_LANDSCAPE, false);
-        verify(mMockCallback).changePeerDimensions(640, 480);
-        VideoDimension vd = mProvider.getCurrentVideoDimension();
-        assertThat(vd.getWidth()).isEqualTo(640);
-        assertThat(vd.getHeight()).isEqualTo(480);
-    }
-
-    @SmallTest
-    @Test
-    public void testUpdateReversedPeerDimensionFromVideoDimension_noChange()
-            throws RemoteException {
-        mProvider.setCurrentVideoDimension(640, 480); // landscape
-        mProvider.updateReversedPeerDimensionFromVideoDimension(
-                VideoCallUtils.ORIENTATION_LANDSCAPE, false);
-        verify(mMockCallback, never()).changePeerDimensions(anyInt(), anyInt());
-    }
-
-    @SmallTest
-    @Test
-    public void testUpdateReversedPeerDimensionFromVideoDimension_enforceUpdate()
-            throws RemoteException {
-        mProvider.setCurrentVideoDimension(640, 480); // landscape
-        mProvider.updateReversedPeerDimensionFromVideoDimension(
-                VideoCallUtils.ORIENTATION_LANDSCAPE, true);
-        verify(mMockCallback).changePeerDimensions(640, 480);
     }
 
     @SmallTest

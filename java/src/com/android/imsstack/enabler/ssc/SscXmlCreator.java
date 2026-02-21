@@ -544,6 +544,10 @@ public class SscXmlCreator {
                 return createCbRuleAndRuleSet(doc, data);
             }
 
+            if (SscConfig.isUpdateCbWithConditionsElement(data.getSlotId())) {
+                return updateCbCondition(doc, data);
+            }
+
             return updateCbRule(doc, data);
         }
 
@@ -586,6 +590,18 @@ public class SscXmlCreator {
             allowElement.setTextContent("false");
 
             return cbRuleElement;
+        }
+
+        private Element updateCbCondition(Document doc, SscServiceData data) {
+            int slotId = data.getSlotId();
+            ImsLog.d(slotId, "");
+
+            Element cbRuleElement = updateCbRule(doc, data);
+            if (cbRuleElement == null) {
+                return null;
+            }
+
+            return SscUtils.getElementByName(cbRuleElement, SscXmlFormat.CONDITIONS);
         }
 
         private Element createCbRuleAndRuleSet(Document doc, SscServiceData data) {

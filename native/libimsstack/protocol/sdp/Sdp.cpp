@@ -160,7 +160,7 @@ PUBLIC GLOBAL IMS_BOOL Sdp::IsUriString(IN const AString& strValue)
         return IMS_FALSE;
     }
 
-    // TODO: validation check
+    // Validation check if necessary.
 
     return IMS_TRUE;
 }

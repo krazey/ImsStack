@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "AStringBuffer.h"
 #include "ImsUuid.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
 #include "Feature.h"
+#include "IAppConfig.h"
 #include "ICoreServiceConfig.h"
 #include "ServiceIdentifier.h"
 
@@ -33,6 +35,7 @@
 #include "SipDebug.h"
 #include "SipFeatures.h"
 #include "SipParameter.h"
+#include "util/CallerCapability.h"
 
 __IMS_TRACE_TAG_REG__;
 
@@ -115,8 +118,10 @@ PUBLIC VIRTUAL RegContact::~RegContact()
 
     RemoveAllHeaderParameters();
 
-    IMS_TRACE_D("Destructor :: RegContact (%s, %d)", SipDebug::GetIp(m_objIpAddr),
+#ifdef __IMS_CORE_DEBUG__
+    IMS_TRACE_D("dtor: RegContact(%s|%d)", SipDebug::GetIp(m_objIpAddr),
             m_objContactAddress.GetPort(), 0);
+#endif
 }
 
 PUBLIC VIRTUAL IMS_UINT32 RegContact::GetExpires() const
@@ -296,7 +301,7 @@ IMS_SINT32 RegContact::UpdateParameter(
 
                 if (bSameContact)
                 {
-                    IMS_TRACE_D("LV :: Contact is same w/o \"transport\" parameter", 0, 0, 0);
+                    IMS_TRACE_D("Contact is same w/o \"transport\" parameter", 0, 0, 0);
                 }
             }
         }
@@ -721,7 +726,7 @@ PRIVATE VIRTUAL IMS_BOOL RegContact::IsServiceRegistered(
         pFeature = IMS_NULL;
     }
 
-    IMS_TRACE_D("ServiceRegistered :: [%s-%s]", strAppId.GetStr(), strServiceId.GetStr(), 0);
+    IMS_TRACE_D("ServiceRegistered: [%s|%s]", strAppId.GetStr(), strServiceId.GetStr(), 0);
 
     return IMS_TRUE;
 }
@@ -758,11 +763,11 @@ PRIVATE VIRTUAL IMS_BOOL RegContact::IsFeatureRegistered(
 
     if (strFtValue.GetLength() == 0)
     {
-        IMS_TRACE_D("FeatureRegistered :: [%s]", strFtName.GetStr(), 0, 0);
+        IMS_TRACE_D("FeatureRegistered: [%s]", strFtName.GetStr(), 0, 0);
     }
     else
     {
-        IMS_TRACE_D("FeatureRegistered :: [%s=%s]", strFtName.GetStr(), strFtValue.GetStr(), 0);
+        IMS_TRACE_D("FeatureRegistered: [%s=%s]", strFtName.GetStr(), strFtValue.GetStr(), 0);
     }
 
     return IMS_TRUE;
@@ -938,7 +943,7 @@ void RegContact::UnregisterServiceCapability(IN const CallerCapability* pCc)
 PRIVATE
 void RegContact::SetState(IN IMS_SINT32 nState)
 {
-    IMS_TRACE_I("RegContact (%s) :: %s to %s",
+    IMS_TRACE_I("RegContact: (%s) %s to %s",
             SipDebug::GetUri1(m_objContactAddress.GetUri()).GetStr(), StateToString(m_nState),
             StateToString(nState));
 

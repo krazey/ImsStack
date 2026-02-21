@@ -134,10 +134,16 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::SendProvisionalResponse(
         }
     }
 
-    IMS_SINT32 nStatusCode = bUserAlert ? GetStatusCodeForAlerting() : SipStatusCode::SC_183;
+    IMS_SINT32 nStatusCode = bUserAlert ? SipStatusCode::SC_180 : SipStatusCode::SC_183;
 
     m_objExtensionSet.FormatResponse(
             ResponseType::PROVISIONAL_RESPONSE, *m_objSession.GetNextResponse());
+
+    if (bUserAlert)
+    {
+        Send183BeforeAlertingForNon100rel();
+    }
+
     return m_pMessageSender->SendProvisionalResponse(
             nStatusCode, bReliable, bIncludeSdp, IsAlertInfoRequired(nStatusCode));
 }
@@ -722,19 +728,6 @@ CallType MtcSession::MayGetFirstCallType() const
 }
 
 PRIVATE
-IMS_SINT32 MtcSession::GetStatusCodeForAlerting() const
-{
-    if (!m_objExtensionSet.IsAvailableOnBoth(MtcExtensionSet::OPTION_TAG_RPR) &&
-            m_objContext.GetConfigurationProxy().GetBoolean(
-                    ConfigVoice::KEY_FORCE_183_FOR_ALERTING_ON_NON_100REL_INVITE_BOOL))
-    {
-        return SipStatusCode::SC_183;
-    }
-
-    return SipStatusCode::SC_180;
-}
-
-PRIVATE
 MtcSession::ResultSetSdp MtcSession::SetSdpToSend(IN IMS_BOOL bAllowReOffer,
         IN IMS_BOOL bAnswerForOfferlessReInvite /* = IMS_FALSE*/,
         IN IMS_BOOL bInitialInvite /* = IMS_FALSE */)
@@ -865,4 +858,17 @@ void MtcSession::HandleByeTransactionIfNeeded()
                     pAosConnector->Control(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY);
                 }
             });
+}
+
+PRIVATE
+void MtcSession::Send183BeforeAlertingForNon100rel()
+{
+    if (m_objContext.GetConfigurationProxy().GetBoolean(
+                ConfigVoice::KEY_FORCE_183_BEFORE_ALERTING_ON_NON_100REL_INVITE_BOOL) &&
+            !m_objExtensionSet.IsAvailableOnBoth(MtcExtensionSet::OPTION_TAG_RPR) &&
+            !m_objContext.GetMessageUtils().IsResponseExist(&m_objSession, SipStatusCode::SC_183))
+    {
+        m_pMessageSender->SendProvisionalResponse(
+                SipStatusCode::SC_183, IMS_FALSE, IMS_FALSE, IMS_FALSE);
+    }
 }

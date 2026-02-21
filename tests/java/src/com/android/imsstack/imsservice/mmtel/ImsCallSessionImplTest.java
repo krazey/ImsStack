@@ -281,9 +281,23 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         mImsCallSession.start("1234", mImsCallProfile);
 
         assertTrue(mCallDetails.is(mCallDetails.CALL_END_CALLBACK_NOTIFIED));
-        verify(mMockImsCallSessionCallback).invokeStartFailed(any(ImsCallSessionImplBase.class),
-                any(ImsReasonInfo.class));
-        verify(mMockMtcCall, times(0)).isEmergencyCall();
+        verify(mMockImsCallSessionCallback, times(1)).invokeStartFailed(
+                any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
+        verify(mMockMtcCall, times(1)).isEmergencyCall();
+
+        when(mMockMtcCall.isEmergencyCall()).thenReturn(true);
+        when(mMockMtcApp.getMtcEmergencyServiceManager())
+                .thenReturn(mMockMtcEmergencyServiceManager);
+
+        mImsCallSession = new TestImsCallSessionImpl(
+                mMockCallContext, mMockCallTracker, mMockMtcCall,
+                mCallId, mImsCallProfile, true, mMockImsCallSessionCallback, mVideoCallSession);
+
+        mImsCallSession.start("1234", mImsCallProfile);
+
+        verify(mMockImsCallSessionCallback, times(1)).invokeStartFailed(
+                any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
+        verify(mMockMtcCall, times(3)).isEmergencyCall();
     }
 
     @Test
@@ -622,17 +636,17 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     @Test
     public void testMerge() {
         mImsCallSession.setState(ImsCallSessionImplBase.State.RENEGOTIATING);
+        when(mMockCallContext.getApp()).thenReturn(mMockImsCallApp);
+        when(mMockImsCallApp.getCallManager()).thenReturn(mMockImsCallManager);
         when(mMockImsCallSessionCallback.hasListener()).thenReturn(true);
         mImsCallSession.merge();
-        processAllMessages();
         verify(mMockImsCallSessionCallback).invokeMergeFailed(any(ImsCallSessionImplBase.class),
                 any(ImsReasonInfo.class));
 
         mImsCallSession = createImsCallSession("2", true);
         mImsCallSession.merge();
-        processAllMessages();
-        verify(mMockImsCallSessionCallback).invokeMergeFailed(any(ImsCallSessionImplBase.class),
-                any(ImsReasonInfo.class));
+        verify(mMockImsCallSessionCallback, times(2)).invokeMergeFailed(
+                any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
     }
 
     @Test
@@ -936,6 +950,24 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         assertEquals(state, mImsCallSession.getState());
         verify(mMockImsCallSessionCallback).invokeInitiating(any(
                 ImsCallSessionImplBase.class), any(ImsCallProfile.class));
+    }
+
+    @Test
+    public void testOnCallInitiatingChecksRatType() {
+        CallInfo callInfo = new CallInfo();
+        int ratType = 13; // TelephonyManager.NETWORK_TYPE_LTE
+        MtcCallInfo.setRatType(callInfo, ratType);
+
+        mImsCallSession.getCallListenerProxy().onCallInitiating(mMockMtcCall, callInfo,
+                mMockMediaInfo);
+
+        ArgumentCaptor<ImsCallProfile> profileCaptor =
+                ArgumentCaptor.forClass(ImsCallProfile.class);
+        verify(mMockImsCallSessionCallback).invokeInitiating(
+                any(ImsCallSessionImplBase.class), profileCaptor.capture());
+
+        assertEquals(ratType, profileCaptor.getValue().getCallExtraInt(
+                ImsCallProfile.EXTRA_CALL_NETWORK_TYPE));
     }
 
     @Test
@@ -1593,6 +1625,8 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 any(ImsCallSessionImplBase.class),
                 eq(RttModifyStatus.SESSION_MODIFY_REQUEST_FAIL));
         assertFalse(mCallDetails.is(ImsCallSessionImpl.CallDetails.RTT_TURNING_ON));
+        verify(mMockImsCallSessionCallback, times(1)).invokeUpdateFailed(
+                any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
 
         // RTT Turning Off Failed
         mImsCallSession = createImsCallSession("5", true);
@@ -1602,6 +1636,8 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 any(ImsCallSessionImplBase.class),
                 eq(RttModifyStatus.SESSION_MODIFY_REQUEST_FAIL));
         assertFalse(mCallDetails.is(ImsCallSessionImpl.CallDetails.RTT_TURNING_OFF));
+        verify(mMockImsCallSessionCallback, times(2)).invokeUpdateFailed(
+                any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
 
         // Video Session Modification in Progress
         mImsCallSession = createImsCallSession("6", true);
@@ -1618,17 +1654,9 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         mImsCallSession.getCallListenerProxy().onCallUpdateFailed(mMockMtcCall, mockCallReasonInfo);
         verify(mVideoCallSession).finalizeSessionModification();
 
-        // Call Controlled by IMS
-        mImsCallSession = createImsCallSession("8", true);
-        when(mVideoCallSession.isSessionModificationFinalizing()).thenReturn(false);
-        mImsCallSession.getLocalCallProfile().setCallExtraBoolean("call_controlled_by_ims", true);
-        mImsCallSession.getCallListenerProxy().onCallUpdateFailed(mMockMtcCall, mockCallReasonInfo);
-
-        assertFalse(mImsCallSession.getLocalCallProfile().getCallExtraBoolean(
-                "call_controlled_by_ims", false));
-
         // Generic Update Failed
-        mImsCallSession = createImsCallSession("9", true);
+        when(mVideoCallSession.isSessionModificationFinalizing()).thenReturn(false);
+        mImsCallSession = createImsCallSession("8", true);
         mImsCallSession.getCallListenerProxy().onCallUpdateFailed(mMockMtcCall, mockCallReasonInfo);
         verify(mMockImsCallSessionCallback, times(3)).invokeUpdateFailed(
                 any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
@@ -2192,7 +2220,7 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     }
 
     private TestImsCallSessionImpl createImsCallSession(String callId, boolean isMo) {
-        TestImsCallSessionImpl callSession =  new TestImsCallSessionImpl(mMockCallContext,
+        TestImsCallSessionImpl callSession = new TestImsCallSessionImpl(mMockCallContext,
                 mMockCallTracker, mMockMtcCall, callId, mImsCallProfile, isMo,
                 mMockImsCallSessionCallback, mVideoCallSession);
         mCallFeaturemap = new HashMap<Integer, Boolean>();

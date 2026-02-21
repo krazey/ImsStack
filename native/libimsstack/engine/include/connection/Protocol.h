@@ -16,7 +16,9 @@
 #ifndef PROTOCOL_H_
 #define PROTOCOL_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
+
+class AString;
 
 class IConnection;
 

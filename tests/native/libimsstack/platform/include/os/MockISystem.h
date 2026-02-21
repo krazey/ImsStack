@@ -226,6 +226,14 @@ public:
             (IN IMS_SINT32 nIpSecId, IN IMS_SINT32 nSpi, IN IMS_SINT32 nSocketFd,
                     IN IMS_SINT32 nSlotId),
             (override));
+
+    ////
+    // Logging
+    ////
+    MOCK_METHOD(void, LogSipMessage,
+            (IN const IMS_CHAR* pszMessage, IN IMS_SINT32 nLength, IN IMS_SINT32 nSlotId,
+                    IN IMS_BOOL bOutgoing),
+            (override));
 };
 
 #endif

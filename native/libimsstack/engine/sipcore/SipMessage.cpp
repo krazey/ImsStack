@@ -78,7 +78,7 @@ PUBLIC VIRTUAL SipMessage::~SipMessage()
     }
 
 #ifdef __IMS_SIP_DEBUG__
-    IMS_TRACE_D("Destructor :: SipMessage", 0, 0, 0);
+    IMS_TRACE_D("dtor: SipMessage", 0, 0, 0);
 #endif
 }
 
@@ -704,7 +704,7 @@ IMS_BOOL SipMessage::CreateBodyParts()
                 return IMS_FALSE;
             }
 
-            // Clear the previous message body parts ...
+            // Clear the previous message body parts.
             while (!m_objBodyParts.IsEmpty())
             {
                 SipMessageBodyPart* pBodyPart = m_objBodyParts.GetAt(0);
@@ -729,7 +729,7 @@ IMS_BOOL SipMessage::CreateBodyParts()
         return IMS_FALSE;
     }
 
-    // Clear the previous message body parts ...
+    // Clear the previous message body parts.
     while (!m_objBodyParts.IsEmpty())
     {
         SipMessageBodyPart* pBodyPart = m_objBodyParts.GetAt(0);

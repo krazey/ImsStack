@@ -14,24 +14,16 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
-#include "ServiceTrace.h"
 
 #include "media/MediaDescriptor.h"
 #include "media/StreamMedia.h"
 #include "media/StreamMediaProposal.h"
-
-__IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
 StreamMedia::StreamMedia(IN Service* pService, IN ISdpOaState* piOaState) :
         Media(pService, piOaState)
 {
     SetInitializationDone(IMS_TRUE);
-}
-
-PUBLIC VIRTUAL StreamMedia::~StreamMedia()
-{
-    IMS_TRACE_D("Destructor :: StreamMedia", 0, 0, 0);
 }
 
 PROTECTED VIRTUAL MediaProposal* StreamMedia::CreateMediaProposal(IN ISdpOaState* piOaState)

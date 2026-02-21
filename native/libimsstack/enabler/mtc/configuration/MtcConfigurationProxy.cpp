@@ -19,14 +19,11 @@
 #include "ImsVector.h"
 #include "ServiceConfig.h"
 #include "ServiceThread.h"
-#include "ServiceTrace.h"
 #include "configuration/ConfigCache.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include <memory>
 #include <optional>
-
-__IMS_TRACE_TAG_COM_MTC__;
 
 LOCAL const IMS_CHAR* SUFFIX_BOOL = "_bool";
 LOCAL const IMS_CHAR* SUFFIX_INT = "_int";
@@ -136,7 +133,6 @@ PUBLIC VIRTUAL void MtcConfigurationProxy::PutCache(
 
 PUBLIC VIRTUAL void MtcConfigurationProxy::OnRegistrationRefreshed()
 {
-    IMS_TRACE_I("OnRegistrationRefreshed", 0, 0, 0);
     m_pCache.reset();
 }
 

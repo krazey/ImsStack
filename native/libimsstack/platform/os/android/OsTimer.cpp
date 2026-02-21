@@ -70,8 +70,7 @@ PUBLIC VIRTUAL IMS_UINTP OsTimer::SetTimer(IN IMS_SINT64 nDuration, IN ITimerLis
 {
     if (m_nState == STATE_ACTIVE)
     {
-        IMS_TRACE_D(
-                "Timer (id=%" PFLS_u ",%d) is already active", m_nTimerId, m_nInternalTimerId, 0);
+        IMS_TRACE_D("Timer(%" PFLS_u "-%d) is already active", m_nTimerId, m_nInternalTimerId, 0);
         return 0;
     }
 
@@ -81,8 +80,7 @@ PUBLIC VIRTUAL IMS_UINTP OsTimer::SetTimer(IN IMS_SINT64 nDuration, IN ITimerLis
 
     OsTimerService::GetTimerService()->SetTimer(nDuration, this);
 
-    IMS_TRACE_I("Timer :: Set (id=%" PFLS_u ",%d; duration=%lld)", m_nTimerId, m_nInternalTimerId,
-            nDuration);
+    IMS_TRACE_I("Timer: Set (%" PFLS_u "-%d|%lld)", m_nTimerId, m_nInternalTimerId, nDuration);
 
     return m_nTimerId;
 }
@@ -119,7 +117,7 @@ PUBLIC VIRTUAL void OsTimer::DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS
 
     if (m_nInternalTimerId != LONG_TO_INT(nLparam))
     {
-        IMS_TRACE_D("Timer :: Timer id(%" PFLS_u ") is matched, but internal timer id(%d)"
+        IMS_TRACE_D("Timer: Timer(%" PFLS_u ") is matched, but internal timer id(%d)"
                     " is not matched; ignored",
                 m_nTimerId, m_nInternalTimerId, 0);
         return;

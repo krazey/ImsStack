@@ -172,7 +172,7 @@ public:
         m_bSupportLimitedAdminSmsMode = bSupportLimitedAdminSmsMode;
     }
 
-    inline void SetImsIdentityPriority(IN ImsVector<IMS_SINT32> objImsIdentityPriority)
+    inline void SetImsIdentityPriority(IN const ImsVector<IMS_SINT32>& objImsIdentityPriority)
     {
         m_objImsIdentityPriority = objImsIdentityPriority;
     }
@@ -196,6 +196,18 @@ public:
     MockISubscriberInfo m_objMockISubscriberInfo;
     MockIConfigurable m_objMockIConfigurable;
     MockIAosService m_objMockIAosService;
+
+    // cppcheck-suppress unusedStructMember
+    MockIAosSubscriberManagerListener m_objListener1;
+    // cppcheck-suppress unusedStructMember
+    MockIAosSubscriberManagerListener m_objListener2;
+    // cppcheck-suppress unusedStructMember
+    MockIAosSubscriberManagerListener m_objListener3;
+    // cppcheck-suppress unusedStructMember
+    MockIAosSubscriberManagerListener m_objListener4;
+    // cppcheck-suppress unusedStructMember
+    MockIAosSubscriberManagerListener m_objListener5;
+
     // cppcheck-suppress unusedStructMember
     MockIAosNConfiguration m_objMockIAosNConfiguration;
 
@@ -310,7 +322,7 @@ protected:
 TEST_F(AosSubscriberManagerTest, FailedAddListenerWhenListenerIsNull)
 {
     // GIVEN
-    EXPECT_EQ(m_pSubscriberManager->getListeners().GetSize(), 0);
+    ASSERT_EQ(m_pSubscriberManager->getListeners().GetSize(), 0);
 
     // WHEN
     m_pSubscriberManager->AddListener(IMS_NULL);
@@ -322,16 +334,12 @@ TEST_F(AosSubscriberManagerTest, FailedAddListenerWhenListenerIsNull)
 TEST_F(AosSubscriberManagerTest, SucceedsAddListener)
 {
     // GIVEN
-    EXPECT_EQ(m_pSubscriberManager->getListeners().GetSize(), 0);
-
-    IAosSubscriberManagerListener* piListener1 = new MockIAosSubscriberManagerListener();
-    IAosSubscriberManagerListener* piListener2 = new MockIAosSubscriberManagerListener();
-    IAosSubscriberManagerListener* piListener3 = new MockIAosSubscriberManagerListener();
+    ASSERT_EQ(m_pSubscriberManager->getListeners().GetSize(), 0);
 
     // WHEN
-    m_pSubscriberManager->AddListener(piListener1);
-    m_pSubscriberManager->AddListener(piListener2);
-    m_pSubscriberManager->AddListener(piListener3);
+    m_pSubscriberManager->AddListener(&m_objListener1);
+    m_pSubscriberManager->AddListener(&m_objListener2);
+    m_pSubscriberManager->AddListener(&m_objListener3);
 
     // THEN
     EXPECT_EQ(m_pSubscriberManager->getListeners().GetSize(), 3);
@@ -340,20 +348,16 @@ TEST_F(AosSubscriberManagerTest, SucceedsAddListener)
 TEST_F(AosSubscriberManagerTest, FailedAddListenerWhenDuplicatedListener)
 {
     // GIVEN
-    IAosSubscriberManagerListener* piListener1 = new MockIAosSubscriberManagerListener();
-    IAosSubscriberManagerListener* piListener2 = new MockIAosSubscriberManagerListener();
-    IAosSubscriberManagerListener* piListener3 = new MockIAosSubscriberManagerListener();
-
-    m_pSubscriberManager->AddListener(piListener1);
-    m_pSubscriberManager->AddListener(piListener2);
-    m_pSubscriberManager->AddListener(piListener3);
+    m_pSubscriberManager->AddListener(&m_objListener1);
+    m_pSubscriberManager->AddListener(&m_objListener2);
+    m_pSubscriberManager->AddListener(&m_objListener3);
 
     EXPECT_EQ(m_pSubscriberManager->getListeners().GetSize(), 3);
 
     // WHEN
-    m_pSubscriberManager->AddListener(piListener1);
-    m_pSubscriberManager->AddListener(piListener2);
-    m_pSubscriberManager->AddListener(piListener3);
+    m_pSubscriberManager->AddListener(&m_objListener1);
+    m_pSubscriberManager->AddListener(&m_objListener2);
+    m_pSubscriberManager->AddListener(&m_objListener3);
 
     // THEN
     EXPECT_EQ(m_pSubscriberManager->getListeners().GetSize(), 3);
@@ -362,13 +366,9 @@ TEST_F(AosSubscriberManagerTest, FailedAddListenerWhenDuplicatedListener)
 TEST_F(AosSubscriberManagerTest, FailedRemoveListenerWhenListenerIsNull)
 {
     // GIVEN
-    IAosSubscriberManagerListener* piListener1 = new MockIAosSubscriberManagerListener();
-    IAosSubscriberManagerListener* piListener2 = new MockIAosSubscriberManagerListener();
-    IAosSubscriberManagerListener* piListener3 = new MockIAosSubscriberManagerListener();
-
-    m_pSubscriberManager->AddListener(piListener1);
-    m_pSubscriberManager->AddListener(piListener2);
-    m_pSubscriberManager->AddListener(piListener3);
+    m_pSubscriberManager->AddListener(&m_objListener1);
+    m_pSubscriberManager->AddListener(&m_objListener2);
+    m_pSubscriberManager->AddListener(&m_objListener3);
 
     EXPECT_EQ(m_pSubscriberManager->getListeners().GetSize(), 3);
 
@@ -384,20 +384,16 @@ TEST_F(AosSubscriberManagerTest, FailedRemoveListenerWhenListenerIsNull)
 TEST_F(AosSubscriberManagerTest, SucceedsRemoveListener)
 {
     // GIVEN
-    IAosSubscriberManagerListener* piListener1 = new MockIAosSubscriberManagerListener();
-    IAosSubscriberManagerListener* piListener2 = new MockIAosSubscriberManagerListener();
-    IAosSubscriberManagerListener* piListener3 = new MockIAosSubscriberManagerListener();
-
-    m_pSubscriberManager->AddListener(piListener1);
-    m_pSubscriberManager->AddListener(piListener2);
-    m_pSubscriberManager->AddListener(piListener3);
+    m_pSubscriberManager->AddListener(&m_objListener1);
+    m_pSubscriberManager->AddListener(&m_objListener2);
+    m_pSubscriberManager->AddListener(&m_objListener3);
 
     EXPECT_EQ(m_pSubscriberManager->getListeners().GetSize(), 3);
 
     // WHEN
-    m_pSubscriberManager->RemoveListener(piListener3);
-    m_pSubscriberManager->RemoveListener(piListener2);
-    m_pSubscriberManager->RemoveListener(piListener1);
+    m_pSubscriberManager->RemoveListener(&m_objListener3);
+    m_pSubscriberManager->RemoveListener(&m_objListener2);
+    m_pSubscriberManager->RemoveListener(&m_objListener1);
 
     // THEN
     EXPECT_EQ(m_pSubscriberManager->getListeners().GetSize(), 0);
@@ -406,21 +402,15 @@ TEST_F(AosSubscriberManagerTest, SucceedsRemoveListener)
 TEST_F(AosSubscriberManagerTest, FailedRemoveListenerWhenNoMatchedListener)
 {
     // GIVEN
-    IAosSubscriberManagerListener* piListener1 = new MockIAosSubscriberManagerListener();
-    IAosSubscriberManagerListener* piListener2 = new MockIAosSubscriberManagerListener();
-    IAosSubscriberManagerListener* piListener3 = new MockIAosSubscriberManagerListener();
-    IAosSubscriberManagerListener* piListener4 = new MockIAosSubscriberManagerListener();
-    IAosSubscriberManagerListener* piListener5 = new MockIAosSubscriberManagerListener();
-
-    m_pSubscriberManager->AddListener(piListener1);
-    m_pSubscriberManager->AddListener(piListener2);
-    m_pSubscriberManager->AddListener(piListener3);
+    m_pSubscriberManager->AddListener(&m_objListener1);
+    m_pSubscriberManager->AddListener(&m_objListener2);
+    m_pSubscriberManager->AddListener(&m_objListener3);
 
     EXPECT_EQ(m_pSubscriberManager->getListeners().GetSize(), 3);
 
     // WHEN
-    m_pSubscriberManager->RemoveListener(piListener4);
-    m_pSubscriberManager->RemoveListener(piListener5);
+    m_pSubscriberManager->RemoveListener(&m_objListener4);
+    m_pSubscriberManager->RemoveListener(&m_objListener5);
 
     // THEN
     EXPECT_EQ(m_pSubscriberManager->getListeners().GetSize(), 3);
@@ -429,7 +419,7 @@ TEST_F(AosSubscriberManagerTest, FailedRemoveListenerWhenNoMatchedListener)
 TEST_F(AosSubscriberManagerTest, FailedAddListenerForMonitorWhenListenerIsNull)
 {
     // GIVEN
-    EXPECT_EQ(m_pSubscriberManager->getMonitorListeners().GetSize(), 0);
+    ASSERT_EQ(m_pSubscriberManager->getMonitorListeners().GetSize(), 0);
 
     // WHEN
     m_pSubscriberManager->AddListenerForMonitor(IMS_NULL);
@@ -440,15 +430,10 @@ TEST_F(AosSubscriberManagerTest, FailedAddListenerForMonitorWhenListenerIsNull)
 
 TEST_F(AosSubscriberManagerTest, SucceedsAddListenerForMonitor)
 {
-    // GIVEN
-    IAosSubscriberManagerListener* piListener1 = new MockIAosSubscriberManagerListener();
-    IAosSubscriberManagerListener* piListener2 = new MockIAosSubscriberManagerListener();
-    IAosSubscriberManagerListener* piListener3 = new MockIAosSubscriberManagerListener();
-
-    // WHEN
-    m_pSubscriberManager->AddListenerForMonitor(piListener1);
-    m_pSubscriberManager->AddListenerForMonitor(piListener2);
-    m_pSubscriberManager->AddListenerForMonitor(piListener3);
+    // GIVEN & WHEN
+    m_pSubscriberManager->AddListenerForMonitor(&m_objListener1);
+    m_pSubscriberManager->AddListenerForMonitor(&m_objListener2);
+    m_pSubscriberManager->AddListenerForMonitor(&m_objListener3);
 
     // THEN
     EXPECT_EQ(m_pSubscriberManager->getMonitorListeners().GetSize(), 3);
@@ -457,20 +442,16 @@ TEST_F(AosSubscriberManagerTest, SucceedsAddListenerForMonitor)
 TEST_F(AosSubscriberManagerTest, FailedAddListenerForMonitorWhenDuplicatedListener)
 {
     // GIVEN
-    IAosSubscriberManagerListener* piListener1 = new MockIAosSubscriberManagerListener();
-    IAosSubscriberManagerListener* piListener2 = new MockIAosSubscriberManagerListener();
-    IAosSubscriberManagerListener* piListener3 = new MockIAosSubscriberManagerListener();
-
-    m_pSubscriberManager->AddListenerForMonitor(piListener1);
-    m_pSubscriberManager->AddListenerForMonitor(piListener2);
-    m_pSubscriberManager->AddListenerForMonitor(piListener3);
+    m_pSubscriberManager->AddListenerForMonitor(&m_objListener1);
+    m_pSubscriberManager->AddListenerForMonitor(&m_objListener2);
+    m_pSubscriberManager->AddListenerForMonitor(&m_objListener3);
 
     EXPECT_EQ(m_pSubscriberManager->getMonitorListeners().GetSize(), 3);
 
     // WHEN
-    m_pSubscriberManager->AddListenerForMonitor(piListener1);
-    m_pSubscriberManager->AddListenerForMonitor(piListener2);
-    m_pSubscriberManager->AddListenerForMonitor(piListener3);
+    m_pSubscriberManager->AddListenerForMonitor(&m_objListener1);
+    m_pSubscriberManager->AddListenerForMonitor(&m_objListener2);
+    m_pSubscriberManager->AddListenerForMonitor(&m_objListener3);
 
     // THEN
     EXPECT_EQ(m_pSubscriberManager->getMonitorListeners().GetSize(), 3);
@@ -479,13 +460,9 @@ TEST_F(AosSubscriberManagerTest, FailedAddListenerForMonitorWhenDuplicatedListen
 TEST_F(AosSubscriberManagerTest, FailedRemoveListenerForMonitorWhenListenerIsNull)
 {
     // GIVEN
-    IAosSubscriberManagerListener* piListener1 = new MockIAosSubscriberManagerListener();
-    IAosSubscriberManagerListener* piListener2 = new MockIAosSubscriberManagerListener();
-    IAosSubscriberManagerListener* piListener3 = new MockIAosSubscriberManagerListener();
-
-    m_pSubscriberManager->AddListenerForMonitor(piListener1);
-    m_pSubscriberManager->AddListenerForMonitor(piListener2);
-    m_pSubscriberManager->AddListenerForMonitor(piListener3);
+    m_pSubscriberManager->AddListenerForMonitor(&m_objListener1);
+    m_pSubscriberManager->AddListenerForMonitor(&m_objListener2);
+    m_pSubscriberManager->AddListenerForMonitor(&m_objListener3);
 
     EXPECT_EQ(m_pSubscriberManager->getMonitorListeners().GetSize(), 3);
 
@@ -501,20 +478,16 @@ TEST_F(AosSubscriberManagerTest, FailedRemoveListenerForMonitorWhenListenerIsNul
 TEST_F(AosSubscriberManagerTest, SucceedsRemoveListenerForMonitor)
 {
     // GIVEN
-    IAosSubscriberManagerListener* piListener1 = new MockIAosSubscriberManagerListener();
-    IAosSubscriberManagerListener* piListener2 = new MockIAosSubscriberManagerListener();
-    IAosSubscriberManagerListener* piListener3 = new MockIAosSubscriberManagerListener();
-
-    m_pSubscriberManager->AddListenerForMonitor(piListener1);
-    m_pSubscriberManager->AddListenerForMonitor(piListener2);
-    m_pSubscriberManager->AddListenerForMonitor(piListener3);
+    m_pSubscriberManager->AddListenerForMonitor(&m_objListener1);
+    m_pSubscriberManager->AddListenerForMonitor(&m_objListener2);
+    m_pSubscriberManager->AddListenerForMonitor(&m_objListener3);
 
     EXPECT_EQ(m_pSubscriberManager->getMonitorListeners().GetSize(), 3);
 
     // WHEN
-    m_pSubscriberManager->RemoveListenerForMonitor(piListener3);
-    m_pSubscriberManager->RemoveListenerForMonitor(piListener2);
-    m_pSubscriberManager->RemoveListenerForMonitor(piListener1);
+    m_pSubscriberManager->RemoveListenerForMonitor(&m_objListener3);
+    m_pSubscriberManager->RemoveListenerForMonitor(&m_objListener2);
+    m_pSubscriberManager->RemoveListenerForMonitor(&m_objListener1);
 
     // THEN
     EXPECT_EQ(m_pSubscriberManager->getMonitorListeners().GetSize(), 0);
@@ -523,21 +496,15 @@ TEST_F(AosSubscriberManagerTest, SucceedsRemoveListenerForMonitor)
 TEST_F(AosSubscriberManagerTest, FailedRemoveListenerForMonitorWhenNoMatchedListener)
 {
     // GIVEN
-    IAosSubscriberManagerListener* piListener1 = new MockIAosSubscriberManagerListener();
-    IAosSubscriberManagerListener* piListener2 = new MockIAosSubscriberManagerListener();
-    IAosSubscriberManagerListener* piListener3 = new MockIAosSubscriberManagerListener();
-    IAosSubscriberManagerListener* piListener4 = new MockIAosSubscriberManagerListener();
-    IAosSubscriberManagerListener* piListener5 = new MockIAosSubscriberManagerListener();
+    m_pSubscriberManager->AddListenerForMonitor(&m_objListener1);
+    m_pSubscriberManager->AddListenerForMonitor(&m_objListener2);
+    m_pSubscriberManager->AddListenerForMonitor(&m_objListener3);
 
-    m_pSubscriberManager->AddListenerForMonitor(piListener1);
-    m_pSubscriberManager->AddListenerForMonitor(piListener2);
-    m_pSubscriberManager->AddListenerForMonitor(piListener3);
-
-    EXPECT_EQ(m_pSubscriberManager->getMonitorListeners().GetSize(), 3);
+    ASSERT_EQ(m_pSubscriberManager->getMonitorListeners().GetSize(), 3);
 
     // WHEN
-    m_pSubscriberManager->RemoveListenerForMonitor(piListener4);
-    m_pSubscriberManager->RemoveListenerForMonitor(piListener5);
+    m_pSubscriberManager->RemoveListenerForMonitor(&m_objListener4);
+    m_pSubscriberManager->RemoveListenerForMonitor(&m_objListener5);
 
     // THEN
     EXPECT_EQ(m_pSubscriberManager->getMonitorListeners().GetSize(), 3);
@@ -548,7 +515,7 @@ TEST_F(AosSubscriberManagerTest, SucceedsGetConfiguredImpusForFake)
     // GIVEN
     m_pSubscriberManager->SetPuidsForFake(m_objEmptyPuids);
 
-    EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpusForFake().GetCount(), 0);
+    ASSERT_EQ(m_pSubscriberManager->GetConfiguredImpusForFake().GetCount(), 0);
 
     // WHEN
     m_pSubscriberManager->SetPuidsForFake(m_objValidPuids);
@@ -562,7 +529,7 @@ TEST_F(AosSubscriberManagerTest, SucceedsGetConfiguredImpusForNormal)
     // GIVEN
     m_pSubscriberManager->SetPuids(m_objEmptyPuids);
 
-    EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 0);
+    ASSERT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 0);
 
     // WHEN
     m_pSubscriberManager->SetPuids(m_objValidPuids);
@@ -637,7 +604,7 @@ TEST_F(AosSubscriberManagerTest, SucceedsSetProvisionedTrueWithNormalType)
     // GIVEN
     m_pSubscriberManager->SetProvisioned(IMS_FALSE);
 
-    EXPECT_FALSE(m_pSubscriberManager->IsReady());
+    ASSERT_FALSE(m_pSubscriberManager->IsReady());
 
     // WHEN
     m_pSubscriberManager->SetProvisioned(IMS_TRUE);
@@ -650,8 +617,7 @@ TEST_F(AosSubscriberManagerTest, SucceedsSetProvisionedFalseWithNormalType)
 {
     // GIVEN
     m_pSubscriberManager->SetProvisioned(IMS_TRUE);
-
-    EXPECT_TRUE(m_pSubscriberManager->IsReady(IMS_FALSE));
+    ASSERT_TRUE(m_pSubscriberManager->IsReady(IMS_FALSE));
 
     // WHEN
     m_pSubscriberManager->SetProvisioned(IMS_FALSE);
@@ -665,7 +631,7 @@ TEST_F(AosSubscriberManagerTest, SucceedsSetProvisionedTrueWithFakeType)
     // GIVEN
     m_pSubscriberManager->SetProvisioned(IMS_FALSE, IAosSubscriber::FAKE);
 
-    EXPECT_FALSE(m_pSubscriberManager->IsReady(IMS_TRUE));
+    ASSERT_FALSE(m_pSubscriberManager->IsReady(IMS_TRUE));
 
     // WHEN
     m_pSubscriberManager->SetProvisioned(IMS_TRUE, IAosSubscriber::FAKE);
@@ -678,8 +644,7 @@ TEST_F(AosSubscriberManagerTest, SucceedsSetProvisionedFalseWithFakeType)
 {
     // GIVEN
     m_pSubscriberManager->SetProvisioned(IMS_TRUE, IAosSubscriber::FAKE);
-
-    EXPECT_TRUE(m_pSubscriberManager->IsReady(IMS_TRUE));
+    ASSERT_TRUE(m_pSubscriberManager->IsReady(IMS_TRUE));
 
     // WHEN
     m_pSubscriberManager->SetProvisioned(IMS_FALSE, IAosSubscriber::FAKE);
@@ -735,24 +700,6 @@ TEST_F(AosSubscriberManagerTest, SucceedsGetIsimAt)
     // THEN
     EXPECT_EQ(nIndex, isimIndex);
 }
-
-// TODO : FIXME
-// TEST_F(AosSubscriberManagerTest, SucceedsConfigureAsDefaultWhenIsimTrueProvisioningDone)
-// {
-//     // GIVEN : ISIM is true and Provisioning is done, GetImpuFromIsim is true
-//     m_pSubscriberManager->SetIsim(IMS_TRUE);
-//     m_pSubscriberManager->m_objPuids = m_objEmptyPuids;
-
-//     EXPECT_CALL(m_objMockISubscriberConfig, IsProvisioningDone())
-//             .Times(1)
-//             .WillOnce(Return(IMS_TRUE));
-
-//     // WHEN
-//     m_pSubscriberManager->ConfigureAsDefault();
-
-//     // THEN
-//     EXPECT_NE(0, m_pSubscriberManager->m_objPuids.GetCount());
-// }
 
 TEST_F(AosSubscriberManagerTest, FailedConfigureAsDefaultWithoutSubscriberConfig)
 {
@@ -1196,9 +1143,9 @@ TEST_F(AosSubscriberManagerTest, UpdateSubscriberInfoWithTempImpuReturnsFalseWhe
     // GIVEN
     m_pSubscriberManager->m_strTemporaryPublicUserId = AString::ConstNull();
 
-    EXPECT_TRUE(m_pSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
-    EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
-    EXPECT_FALSE(m_pSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
+    ASSERT_TRUE(m_pSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
+    ASSERT_FALSE(m_pSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
+    ASSERT_FALSE(m_pSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
 
     AStringArray objPuids;
 
@@ -1214,9 +1161,9 @@ TEST_F(AosSubscriberManagerTest, UpdateSubscriberInfoWithTempImpuReturnsFalseWhe
     // GIVEN
     m_pSubscriberManager->m_strTemporaryPrivateUserId = AString::ConstNull();
 
-    EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
-    EXPECT_TRUE(m_pSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
-    EXPECT_FALSE(m_pSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
+    ASSERT_FALSE(m_pSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
+    ASSERT_TRUE(m_pSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
+    ASSERT_FALSE(m_pSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
 
     AStringArray objPuids;
 
@@ -1232,9 +1179,9 @@ TEST_F(AosSubscriberManagerTest, UpdateSubscriberInfoWithTempImpuReturnsFalseWhe
     // GIVEN
     m_pSubscriberManager->m_strTemporaryHomeDomainName = AString::ConstNull();
 
-    EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
-    EXPECT_FALSE(m_pSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
-    EXPECT_TRUE(m_pSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
+    ASSERT_FALSE(m_pSubscriberManager->GetTemporaryPublicUserId().GetLength() == 0);
+    ASSERT_FALSE(m_pSubscriberManager->GetTemporaryPrivateUserId().GetLength() == 0);
+    ASSERT_TRUE(m_pSubscriberManager->GetTemporaryHomeDomainName().GetLength() == 0);
 
     AStringArray objPuids;
 
@@ -1510,7 +1457,7 @@ TEST_F(AosSubscriberManagerTest, ReturnsFalseWhenProcessSimStateChangeWithReady)
 TEST_F(AosSubscriberManagerTest, StartRestartTimerWhenProcessPhoneRestarted)
 {
     // GIVEN
-    EXPECT_EQ(m_pSubscriberManager->GetTimerToPhoneRestartRecovery(), nullptr);
+    ASSERT_EQ(m_pSubscriberManager->GetTimerToPhoneRestartRecovery(), nullptr);
 
     // WHEN
     m_pSubscriberManager->ProcessPhoneRestarted();
@@ -1535,17 +1482,13 @@ TEST_F(AosSubscriberManagerTest, ShouldStopTimerPhoneRestartRecoveryWhenTimerExp
 TEST_F(AosSubscriberManagerTest, SucceedsNotifyState)
 {
     // GIVEN
-    MockIAosSubscriberManagerListener objListener1;
-    MockIAosSubscriberManagerListener objListener2;
-    MockIAosSubscriberManagerListener objListener3;
+    EXPECT_CALL(m_objListener1, AosSubscriberManager_NotifyState(_)).Times(1);
+    EXPECT_CALL(m_objListener2, AosSubscriberManager_NotifyState(_)).Times(1);
+    EXPECT_CALL(m_objListener3, AosSubscriberManager_NotifyState(_)).Times(1);
 
-    EXPECT_CALL(objListener1, AosSubscriberManager_NotifyState(_)).Times(1);
-    EXPECT_CALL(objListener2, AosSubscriberManager_NotifyState(_)).Times(1);
-    EXPECT_CALL(objListener3, AosSubscriberManager_NotifyState(_)).Times(1);
-
-    m_pSubscriberManager->AddListener(&objListener1);
-    m_pSubscriberManager->AddListener(&objListener2);
-    m_pSubscriberManager->AddListener(&objListener3);
+    m_pSubscriberManager->AddListener(&m_objListener1);
+    m_pSubscriberManager->AddListener(&m_objListener2);
+    m_pSubscriberManager->AddListener(&m_objListener3);
 
     // WHEN
     m_pSubscriberManager->NotifyState(IAosSubscriber::READY);
@@ -1555,16 +1498,10 @@ TEST_F(AosSubscriberManagerTest, SucceedsNotifyState)
 
 TEST_F(AosSubscriberManagerTest, FailedNotifyStateWhenEmptyListener)
 {
-    // GIVEN
-    MockIAosSubscriberManagerListener objListener1;
-    MockIAosSubscriberManagerListener objListener2;
-    MockIAosSubscriberManagerListener objListener3;
-
-    // No AddListenr
-
-    EXPECT_CALL(objListener1, AosSubscriberManager_NotifyState(_)).Times(0);
-    EXPECT_CALL(objListener2, AosSubscriberManager_NotifyState(_)).Times(0);
-    EXPECT_CALL(objListener3, AosSubscriberManager_NotifyState(_)).Times(0);
+    // GIVEN: No AddListenr
+    EXPECT_CALL(m_objListener1, AosSubscriberManager_NotifyState(_)).Times(0);
+    EXPECT_CALL(m_objListener2, AosSubscriberManager_NotifyState(_)).Times(0);
+    EXPECT_CALL(m_objListener3, AosSubscriberManager_NotifyState(_)).Times(0);
 
     // WHEN
     m_pSubscriberManager->NotifyState(IAosSubscriber::READY);
@@ -1575,17 +1512,13 @@ TEST_F(AosSubscriberManagerTest, FailedNotifyStateWhenEmptyListener)
 TEST_F(AosSubscriberManagerTest, SucceedsNotifyMonitorState)
 {
     // GIVEN
-    MockIAosSubscriberManagerListener objListener1;
-    MockIAosSubscriberManagerListener objListener2;
-    MockIAosSubscriberManagerListener objListener3;
+    EXPECT_CALL(m_objListener1, AosSubscriberManager_NotifyState(_)).Times(1);
+    EXPECT_CALL(m_objListener2, AosSubscriberManager_NotifyState(_)).Times(1);
+    EXPECT_CALL(m_objListener3, AosSubscriberManager_NotifyState(_)).Times(1);
 
-    EXPECT_CALL(objListener1, AosSubscriberManager_NotifyState(_)).Times(1);
-    EXPECT_CALL(objListener2, AosSubscriberManager_NotifyState(_)).Times(1);
-    EXPECT_CALL(objListener3, AosSubscriberManager_NotifyState(_)).Times(1);
-
-    m_pSubscriberManager->AddListenerForMonitor(&objListener1);
-    m_pSubscriberManager->AddListenerForMonitor(&objListener2);
-    m_pSubscriberManager->AddListenerForMonitor(&objListener3);
+    m_pSubscriberManager->AddListenerForMonitor(&m_objListener1);
+    m_pSubscriberManager->AddListenerForMonitor(&m_objListener2);
+    m_pSubscriberManager->AddListenerForMonitor(&m_objListener3);
 
     // WHEN
     m_pSubscriberManager->NotifyMonitorState(IAosSubscriber::READY);
@@ -1596,13 +1529,9 @@ TEST_F(AosSubscriberManagerTest, SucceedsNotifyMonitorState)
 TEST_F(AosSubscriberManagerTest, FailedNotifyMonitorStateWhenEmptyListener)
 {
     // GIVEN
-    MockIAosSubscriberManagerListener objListener1;
-    MockIAosSubscriberManagerListener objListener2;
-    MockIAosSubscriberManagerListener objListener3;
-
-    EXPECT_CALL(objListener1, AosSubscriberManager_NotifyState(_)).Times(0);
-    EXPECT_CALL(objListener2, AosSubscriberManager_NotifyState(_)).Times(0);
-    EXPECT_CALL(objListener3, AosSubscriberManager_NotifyState(_)).Times(0);
+    EXPECT_CALL(m_objListener1, AosSubscriberManager_NotifyState(_)).Times(0);
+    EXPECT_CALL(m_objListener2, AosSubscriberManager_NotifyState(_)).Times(0);
+    EXPECT_CALL(m_objListener3, AosSubscriberManager_NotifyState(_)).Times(0);
 
     // No AddListenr
 
@@ -1797,8 +1726,8 @@ TEST_F(AosSubscriberManagerTest, ClearAllWhenInitCompletedWithNotSupportUsim)
 
     m_pSubscriberManager->SetPuids(m_objValidPuids);
     m_pSubscriberManager->SetProvisioned(IMS_TRUE);
-    EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 3);
-    EXPECT_TRUE(m_pSubscriberManager->IsProvisioned(IMS_FALSE));
+    ASSERT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 3);
+    ASSERT_TRUE(m_pSubscriberManager->IsProvisioned(IMS_FALSE));
 
     // WHEN
     m_pSubscriberManager->SubscriberConfig_InitCompleted();
@@ -1817,8 +1746,8 @@ TEST_F(AosSubscriberManagerTest, ClearAllWhenRefreshCompletedWithNotSupportUsim)
 
     m_pSubscriberManager->SetPuids(m_objValidPuids);
     m_pSubscriberManager->SetProvisioned(IMS_TRUE);
-    EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 3);
-    EXPECT_TRUE(m_pSubscriberManager->IsProvisioned(IMS_FALSE));
+    ASSERT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 3);
+    ASSERT_TRUE(m_pSubscriberManager->IsProvisioned(IMS_FALSE));
 
     // WHEN
     m_pSubscriberManager->SubscriberConfig_RefreshCompleted();
@@ -1831,7 +1760,7 @@ TEST_F(AosSubscriberManagerTest, ClearAllWhenRefreshCompletedWithNotSupportUsim)
 TEST_F(AosSubscriberManagerTest, EnableRefreshStartedValueWhenInvokesRefreshStarted)
 {
     // GIVEN
-    EXPECT_FALSE(m_pSubscriberManager->IsRefreshStarted());
+    ASSERT_FALSE(m_pSubscriberManager->IsRefreshStarted());
 
     // WHEN
     m_pSubscriberManager->SubscriberConfig_RefreshStarted();
@@ -1845,8 +1774,8 @@ TEST_F(AosSubscriberManagerTest, ClearAllWhenNotifyErrorWithNotSupportFallback)
     // GIVEN
     m_pSubscriberManager->SetPuids(m_objValidPuids);
     m_pSubscriberManager->SetProvisioned(IMS_TRUE);
-    EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 3);
-    EXPECT_TRUE(m_pSubscriberManager->IsProvisioned(IMS_FALSE));
+    ASSERT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 3);
+    ASSERT_TRUE(m_pSubscriberManager->IsProvisioned(IMS_FALSE));
 
     // WHEN
     m_pSubscriberManager->SubscriberConfig_NotifyError(0);
@@ -1861,8 +1790,8 @@ TEST_F(AosSubscriberManagerTest, FailedFallbackOnNotifyErrorWhenTimerIsRunning)
     // GIVEN
     m_pSubscriberManager->SetPuids(m_objValidPuids);
     m_pSubscriberManager->SetProvisioned(IMS_TRUE);
-    EXPECT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 3);
-    EXPECT_TRUE(m_pSubscriberManager->IsProvisioned(IMS_FALSE));
+    ASSERT_EQ(m_pSubscriberManager->GetConfiguredImpus().GetCount(), 3);
+    ASSERT_TRUE(m_pSubscriberManager->IsProvisioned(IMS_FALSE));
 
     ImsVector<IMS_SINT32> objImsIdentityPriority;
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM);

@@ -29,7 +29,6 @@ CodecT140Config::CodecT140Config(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadType
         m_nRedLevel(DEFAULT_RED_LEVEL),
         m_nTextSamplingRate(DEFAULT_TEXT_SAMPLING_RATE)
 {
-    IMS_TRACE_I("+CodecT140Config - Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecT140Config::~CodecT140Config()

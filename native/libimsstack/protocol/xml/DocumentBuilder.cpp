@@ -38,7 +38,8 @@ public:
 
 public:
     IDocument* Parse(IN const IMS_CHAR* pszXml, IN IMS_SINT32 nLength);
-    static void NormalizeXml(IN_OUT AString& strXml);
+    static IMS_BOOL HasSpecialCharacters(IN const AString& strXml);
+    static void EscapeSpecialCharacters(IN_OUT AString& strXml);
 
 private:
     IDocument* CreateDocument(IN xmlDocPtr pstDoc);
@@ -46,6 +47,13 @@ private:
     IMS_RESULT CreateChildNode(
             IN IDocument* piDocument, IN INode* piParentNode, IN xmlNodePtr pstNode);
     static INode* CreateNodeInstance(IN xmlNodePtr pstNode);
+
+private:
+    static const constexpr IMS_CHAR* ESCAPED_AMP = "&amp;";
+    static const constexpr IMS_CHAR* ESCAPED_LT = "&lt;";
+    static const constexpr IMS_CHAR* ESCAPED_GT = "&gt;";
+    static const constexpr IMS_CHAR* ESCAPED_QUOT = "&quot;";
+    static const constexpr IMS_CHAR* ESCAPED_APOS = "&apos;";
 };
 
 PUBLIC
@@ -65,15 +73,47 @@ IDocument* DocumentBuilderPrivate::Parse(IN const IMS_CHAR* pszXml, IN IMS_SINT3
         return IMS_NULL;
     }
 
-    IMS_TRACE_D("DocumentBuilder :: Parse done (l=%d, standalone=%d, properties=0x%04x)", nLength,
+    IMS_TRACE_D("DocumentBuilder: Parse done (l=%d, standalone=%d, properties=0x%04x)", nLength,
             pstDoc->standalone, pstDoc->properties);
 
     return CreateDocument(pstDoc);
 }
 
 PUBLIC
-void DocumentBuilderPrivate::NormalizeXml(IN_OUT AString& strXml)
+IMS_BOOL DocumentBuilderPrivate::HasSpecialCharacters(IN const AString& strXml)
 {
+    if (strXml.Contains('\r'))
+    {
+        return IMS_TRUE;
+    }
+
+    IMS_SINT32 nIndex = strXml.GetIndexOf('&');
+
+    while (nIndex != AString::NPOS)
+    {
+        // Skip if the characters are already escaped.
+        if (strXml.GetIndexOf(ESCAPED_AMP, nIndex) == nIndex ||
+                strXml.GetIndexOf(ESCAPED_LT, nIndex) == nIndex ||
+                strXml.GetIndexOf(ESCAPED_GT, nIndex) == nIndex ||
+                strXml.GetIndexOf(ESCAPED_QUOT, nIndex) == nIndex ||
+                strXml.GetIndexOf(ESCAPED_APOS, nIndex) == nIndex)
+        {
+            nIndex = strXml.GetIndexOf('&', nIndex + 1);
+        }
+        else
+        {
+            return IMS_TRUE;
+        }
+    }
+
+    return IMS_FALSE;
+}
+
+PUBLIC
+void DocumentBuilderPrivate::EscapeSpecialCharacters(IN_OUT AString& strXml)
+{
+    IMS_SINT32 nOriginalSize = strXml.GetLength();
+
     // 2.11 End-of-Line Handling
     // XML parsed entities are often stored in computer files which, for editing convenience,
     // are organized into lines. These lines are typically separated by some combination of
@@ -85,6 +125,29 @@ void DocumentBuilderPrivate::NormalizeXml(IN_OUT AString& strXml)
     // is not followed by #xA to a single #xA character.
     strXml.Replace("\r\n", "\n");
     strXml.Replace('\r', '\n');
+
+    // Handle the escaped character('&').
+    IMS_SINT32 nIndex = strXml.GetIndexOf('&');
+
+    while (nIndex != AString::NPOS)
+    {
+        // Skip if the characters are already escaped.
+        if (strXml.GetIndexOf(ESCAPED_AMP, nIndex) == nIndex ||
+                strXml.GetIndexOf(ESCAPED_LT, nIndex) == nIndex ||
+                strXml.GetIndexOf(ESCAPED_GT, nIndex) == nIndex ||
+                strXml.GetIndexOf(ESCAPED_QUOT, nIndex) == nIndex ||
+                strXml.GetIndexOf(ESCAPED_APOS, nIndex) == nIndex)
+        {
+            nIndex = strXml.GetIndexOf('&', nIndex + 4);
+        }
+        else
+        {
+            strXml.Replace(nIndex, 1, ESCAPED_AMP);
+            nIndex = strXml.GetIndexOf('&', nIndex + 5);
+        }
+    }
+
+    IMS_TRACE_D("XML: special characters escaped (%d >> %d)", nOriginalSize, strXml.GetLength(), 0);
 }
 
 PRIVATE
@@ -236,11 +299,11 @@ PUBLIC VIRTUAL DocumentBuilder::~DocumentBuilder()
 PUBLIC
 IDocument* DocumentBuilder::Parse(IN const AString& strXml)
 {
-    if (strXml.Contains('\r'))
+    if (DocumentBuilderPrivate::HasSpecialCharacters(strXml))
     {
-        AString strNewXml(strXml);
-        DocumentBuilderPrivate::NormalizeXml(strNewXml);
-        return pDocumentBuilderPrivate->Parse(strNewXml.GetStr(), strNewXml.GetLength());
+        AString strEncodedXml(strXml);
+        DocumentBuilderPrivate::EscapeSpecialCharacters(strEncodedXml);
+        return pDocumentBuilderPrivate->Parse(strEncodedXml.GetStr(), strEncodedXml.GetLength());
     }
 
     return pDocumentBuilderPrivate->Parse(strXml.GetStr(), strXml.GetLength());
@@ -249,12 +312,6 @@ IDocument* DocumentBuilder::Parse(IN const AString& strXml)
 PUBLIC
 IDocument* DocumentBuilder::Parse(IN const IMS_CHAR* pszXml)
 {
-    if (IMS_StrChr(pszXml, '\r') != IMS_NULL)
-    {
-        AString strXml(pszXml);
-        DocumentBuilderPrivate::NormalizeXml(strXml);
-        return pDocumentBuilderPrivate->Parse(strXml.GetStr(), strXml.GetLength());
-    }
-
-    return pDocumentBuilderPrivate->Parse(pszXml, IMS_StrLen(pszXml));
+    AString strXml(pszXml);
+    return Parse(strXml);
 }

@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 
+#include "AStringBuffer.h"
 #include "SipAbnfUtil.h"
 #include "msg/SipAddrSpec.h"
 

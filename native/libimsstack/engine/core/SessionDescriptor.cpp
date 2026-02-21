@@ -24,6 +24,7 @@
 #include "SessionDescriptor.h"
 #include "SipDebug.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 

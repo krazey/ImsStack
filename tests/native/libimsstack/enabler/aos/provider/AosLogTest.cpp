@@ -232,6 +232,13 @@ TEST(AosLogTest, RegMessageToString)
     EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(
                          RegistrationLog::MSG_REG_TERMINATED_BY_NOTIFY),
             "MSG_REG_TERMINATED_BY_NOTIFY");
+    EXPECT_STREQ(
+            AosProvider::GetLog()->RegMessageToString(RegistrationLog::MSG_REG_FORBIDDEN_IN_WIFI),
+            "MSG_REG_FORBIDDEN_IN_WIFI");
+    EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(RegistrationLog::MSG_REG_PROCESS_GIBA),
+            "MSG_REG_PROCESS_GIBA");
+    EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(RegistrationLog::MSG_REG_RESTART),
+            "MSG_REG_RESTART");
     EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(RegistrationLog::MSG_SUB_REINITIATE),
             "MSG_SUB_REINITIATE");
     EXPECT_STREQ(AosProvider::GetLog()->RegMessageToString(RegistrationLog::MSG_SUB_TERMINATED),

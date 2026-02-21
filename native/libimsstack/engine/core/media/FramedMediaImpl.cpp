@@ -101,7 +101,6 @@ PRIVATE VIRTUAL void FramedMediaImpl::OnMedia_FictitiousMediaCreated(IN Media* p
 
     if (pMediaProposal == IMS_NULL)
     {
-        // Do nothing
         IMS_TRACE_E(0, "NO MEDIA PROPOSAL", 0, 0, 0);
         return;
     }

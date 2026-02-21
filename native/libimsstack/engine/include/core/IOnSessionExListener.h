@@ -16,8 +16,9 @@
 #ifndef INTERFACE_ON_SESSION_EX_LISTENER_H_
 #define INTERFACE_ON_SESSION_EX_LISTENER_H_
 
-#include "SessionEx.h"
+#include "Session.h"
 
+class SessionEx;
 class VirtualSession;
 
 class IOnSessionExListener

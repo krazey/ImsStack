@@ -24,6 +24,7 @@
 
 #include "Capabilities.h"
 #include "IOnCapabilitiesListener.h"
+#include "ISipClientConnection.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ISipServerConnection.h"
@@ -40,6 +41,7 @@
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 #include "util/CallerCapability.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
@@ -299,7 +301,7 @@ PUBLIC VIRTUAL IMS_RESULT Capabilities::Accept(IN IMS_SINT32 nFlags /*= FLAG_RES
     // Send a 200 OK to OPTIONS request
     if (CreateResponse(piSsc, SipStatusCode::SC_200) == IMS_FALSE)
     {
-        IMS_TRACE_E(0, "Initializing the response to OPTIONS request failed", 0, 0, 0);
+        IMS_TRACE_E(0, "Initializing 200-OPTIONS failed", 0, 0, 0);
     }
 
     // Now, the variable, piSIPMsg will be used for OPTIONS response message
@@ -403,7 +405,7 @@ PUBLIC VIRTUAL IMS_RESULT Capabilities::Reject(
     // Send a failure final response to OPTIONS request
     if (CreateResponse(piSsc, nStatusCode) == IMS_FALSE)
     {
-        IMS_TRACE_E(0, "Initializing the response to OPTIONS request failed", 0, 0, 0);
+        IMS_TRACE_E(0, "Initializing %d-OPTIONS failed", nStatusCode, 0, 0);
     }
 
     // Now, the variable, piSIPMsg will be used for OPTIONS response message
@@ -550,8 +552,6 @@ PRIVATE VIRTUAL IMS_BOOL Capabilities::SendRequestToChallenge(IN ISipClientConne
 
 PRIVATE VIRTUAL IMS_BOOL Capabilities::NotifySipRequest(IN ISipServerConnection* piSsc)
 {
-    IMS_TRACE_I("Capabilities - OPTIONS REQUEST RECEIVED ...", 0, 0, 0);
-
     if (!UpdateRequestOnReceived(IMessage::CAPABILITIES_QUERY, piSsc))
     {
         IMS_TRACE_E(0, "Updating SIP message failed", 0, 0, 0);
@@ -564,12 +564,8 @@ PRIVATE VIRTUAL IMS_BOOL Capabilities::NotifySipRequest(IN ISipServerConnection*
     {
         if (pSipConfigV->IsCapabilitiesRespByApp())
         {
-            IMS_TRACE_I("INCOMING OPTIONS REQUEST WILL BE HANDLED BY APPLICATION", 0, 0, 0);
-
             PostMessage(AMSG_CAPABILITY_QUERY_RECEIVED, 0, 0);
-
             SetState(STATE_PENDING);
-
             return IMS_TRUE;
         }
     }
@@ -583,7 +579,7 @@ PRIVATE VIRTUAL IMS_BOOL Capabilities::NotifySipRequest(IN ISipServerConnection*
     // Send a 200 OK to OPTIONS request
     if (CreateResponse(piSsc, SipStatusCode::SC_200) == IMS_FALSE)
     {
-        IMS_TRACE_E(0, "Initializing the response to OPTIONS request failed", 0, 0, 0);
+        IMS_TRACE_E(0, "Initializing 200-OPTIONS failed", 0, 0, 0);
         goto EXIT_NotifySipRequest;
     }
 
@@ -654,10 +650,9 @@ PRIVATE VIRTUAL void Capabilities::NotifySipResponse(IN ISipClientConnection* pi
     // Add the response message received
     UpdateResponseOnReceived(IMessage::CAPABILITIES_QUERY, piScc);
 
-    // Handle the response to OPTIONS request ...
+    // Handle the response to OPTIONS request.
     if (SipStatusCode::Is1XX(nStatusCode))
     {
-        // Do nothing ...
         return;
     }
     else if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
@@ -1007,7 +1002,7 @@ void Capabilities::HandleCapabilities(IN const ISipClientConnection* piScc)
 
     if (objContacts.IsEmpty())
     {
-        IMS_TRACE_D("Capabilities :: no contacts", 0, 0, 0);
+        IMS_TRACE_D("Capabilities: no contacts", 0, 0, 0);
         return;
     }
 
@@ -1026,7 +1021,7 @@ void Capabilities::HandleCapabilities(IN const ISipClientConnection* piScc)
             {
                 const AString& strScheme = pAddress->GetScheme();
 
-                // Collects all SIP & TEL URIs ...
+                // Collects all SIP & TEL URIs.
                 if (strScheme.EqualsIgnoreCase(Sip::STR_SIP) ||
                         strScheme.EqualsIgnoreCase(Sip::STR_SIPS) ||
                         strScheme.EqualsIgnoreCase(Sip::STR_TEL))
@@ -1096,14 +1091,14 @@ IMS_BOOL Capabilities::ParseConnectionName(
 
     if (!strServiceType.EqualsIgnoreCase(GetService()->GetScheme()))
     {
-        IMS_TRACE_E(0, "Illegal URI scheme - Connection (%s), Scheme (%s)", strConnection.GetStr(),
+        IMS_TRACE_E(0, "Illegal URI scheme: Connection(%s), Scheme(%s)", strConnection.GetStr(),
                 strServiceType.GetStr(), 0);
         return IMS_FALSE;
     }
 
     if (!strAppId.StartsWith("//"))
     {
-        IMS_TRACE_E(0, "Connection string is malformed after URI scheme - Connection (%s)",
+        IMS_TRACE_E(0, "Connection string is malformed after URI scheme: Connection(%s)",
                 strConnection.GetStr(), 0, 0);
         return IMS_FALSE;
     }
@@ -1143,7 +1138,7 @@ IMS_BOOL Capabilities::ParseConnectionName(
 PRIVATE
 void Capabilities::SetState(IN IMS_SINT32 nState)
 {
-    IMS_TRACE_I("Capabilities :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
+    IMS_TRACE_I("Capabilities: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
     m_nState = nState;
 }

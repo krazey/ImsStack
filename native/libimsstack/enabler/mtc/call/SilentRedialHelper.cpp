@@ -185,7 +185,6 @@ void SilentRedialHelper::SetRedialDetail()
             LoadRetryLimitsFromConfiguration();
             return;
         case EXTRA_CODE_REDIAL_FOR_REDIRECTION:
-        case EXTRA_CODE_REDIAL_FOR_SDP_CHANGE:
         case EXTRA_CODE_REDIAL_BY_EPS_FALLBACK:
         case EXTRA_CODE_REDIAL_BY_EPS_FALLBACK_WITH_REG:
         case EXTRA_CODE_REDIAL_BY_RTT_EMERGENCY_REJECTION:
@@ -198,6 +197,7 @@ void SilentRedialHelper::SetRedialDetail()
             m_nInterval = 0;
             m_nMaxCount = NO_LIMIT;
             return;
+        case EXTRA_CODE_REDIAL_FOR_SDP_CHANGE:
         case EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF_ONCE:
             m_nInterval = 0;
             m_nMaxCount = 1;

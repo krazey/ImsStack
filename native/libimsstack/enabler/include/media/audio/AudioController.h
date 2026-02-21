@@ -280,6 +280,13 @@ public:
     virtual void SetMediaPemType(IN IMS_UINTP nNegoId, IN MEDIA_PEM_TYPE ePemType);
 
     /**
+     * @brief Handles the logic for updating the previous session in a forked call scenario.
+     *
+     * @param nPrevNegoId The negotiation ID of the previously active session.
+     */
+    virtual void HandleForkedSessionUpdate(IN IMS_UINTP nPrevNegoId);
+
+    /**
      * @brief Get the media direction of the current active audio session
      *
      * @return MEDIA_DIRECTION The media direction
@@ -300,9 +307,9 @@ public:
 
 protected:
     virtual IMS_BOOL IsAudioConfigChanged(IN AudioConfig* pAudioConfig);
+    AudioSession* FindAudioSession(IN IMS_UINTP nNegoId = UNDEFINED_NEGO_ID);
 
 private:
-    AudioSession* FindAudioSession(IN IMS_UINTP nNegoId = UNDEFINED_NEGO_ID);
     void ClearSession();
 
     ImsList<AudioSession*> m_listAudioSession;
@@ -311,6 +318,7 @@ private:
     IpAddress m_objLocalAddr;
     IMS_UINT32 m_nPort;
     IMS_UINTP m_nCurrentActiveNegoId;
+    IMS_BOOL m_bForceModify;
     AudioConfig* m_pAudioConfig;
 };
 

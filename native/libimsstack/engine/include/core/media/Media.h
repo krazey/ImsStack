@@ -16,14 +16,15 @@
 #ifndef MEDIA_H_
 #define MEDIA_H_
 
-#include "offeranswer/SdpMediaParameter.h"
+#include "ImsList.h"
 
-#include "ImsCore.h"
 #include "media/IMediaState.h"
-#include "media/MediaDescriptor.h"
+
+class SdpMediaParameter;
 
 class IOnMediaListener;
 class ISdpOaState;
+class MediaDescriptor;
 class MediaProposal;
 class Service;
 

@@ -17,6 +17,7 @@
 #include "MtcDef.h"
 #include "ServiceTrace.h"
 #include "media/IMedia.h"
+#include "media/IMediaDescriptor.h"
 #include "offeranswer/SdpSegmentedPrecondition.h"
 #include "precondition/QosStatusTable.h"
 #include "precondition/QosStringUtils.h"
@@ -29,13 +30,10 @@ QosStatusTable::QosStatusTable() :
         m_lstVideoRecords(ImsList<QosStatusRecord*>()),
         m_lstTextRecords(ImsList<QosStatusRecord*>())
 {
-    IMS_TRACE_D("+QosStatusTable", 0, 0, 0);
 }
 
 PUBLIC VIRTUAL QosStatusTable::~QosStatusTable()
 {
-    IMS_TRACE_D("~QosStatusTable", 0, 0, 0);
-
     ClearRecords(SdpMedia::TYPE_AUDIO);
     ClearRecords(SdpMedia::TYPE_VIDEO);
     ClearRecords(SdpMedia::TYPE_TEXT);
@@ -167,15 +165,14 @@ PUBLIC VIRTUAL void QosStatusTable::UpdateLocalCurrentStatus(
     IMS_BOOL bLocalCurrentEnabled =
             IsCurrentStatusEnabled(eSdpMediaType, SdpPrecondition::STATUS_LOCAL);
 
+    if (bLocalQosEnabled == bLocalCurrentEnabled)
+    {
+        return;
+    }
+
     IMS_TRACE_D("UpdateLocalCurrentStatus : [%s] QoS Status[%s] Local Status[%s]",
             QosStringUtils::ConvertSdpMediaType(eSdpMediaType), _TRACE_B_(bLocalQosEnabled),
             _TRACE_B_(bLocalCurrentEnabled));
-
-    if (bLocalQosEnabled == bLocalCurrentEnabled)
-    {
-        IMS_TRACE_D("UpdateLocalCurrentStatus : already updated", 0, 0, 0);
-        return;
-    }
 
     // if Local QoS is enabled, set direction as direction tag of Desired Status.
     IMS_SINT32 eDesiredDir = bLocalQosEnabled
@@ -274,18 +271,7 @@ PUBLIC VIRTUAL void QosStatusTable::SetDirectionTag(IN IMS_SINT32 eSdpMediaType,
 
     QosStatusRecord* pRecord = lstRecords.GetAt(0);
 
-    if (pRecord->eDirTag != eDirTag)
-    {
-        IMS_TRACE_D("SetDirectionTag : media[%s] attr[%s] status[%s]",
-                QosStringUtils::ConvertSdpMediaType(eSdpMediaType),
-                QosStringUtils::ConvertQosAttribute(eAttrType),
-                QosStringUtils::ConvertQosStatusType(eStatusType));
-        IMS_TRACE_D("SetDirectionTag : [%s] -> [%s]",
-                QosStringUtils::ConvertQosDir(pRecord->eDirTag),
-                QosStringUtils::ConvertQosDir(eDirTag), 0);
-
-        pRecord->eDirTag = eDirTag;
-    }
+    pRecord->eDirTag = eDirTag;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 QosStatusTable::GetStrengthTag(
@@ -318,14 +304,6 @@ PUBLIC VIRTUAL void QosStatusTable::SetStrengthTag(IN IMS_SINT32 eSdpMediaType,
     // Not allow downgrade
     if (eStrengthTag == SdpPrecondition::STRENGTH_NOTUSED || pRecord->eStrengthTag > eStrengthTag)
     {
-        IMS_TRACE_D("SetStrengthTag : media[%s] status[%s] dir[%s]",
-                QosStringUtils::ConvertSdpMediaType(eSdpMediaType),
-                QosStringUtils::ConvertQosStatusType(eStatusType),
-                QosStringUtils::ConvertQosDir(eDirTag));
-        IMS_TRACE_D("SetStrengthTag : [%s] -> [%s]",
-                QosStringUtils::ConvertQosStrength(pRecord->eStrengthTag),
-                QosStringUtils::ConvertQosStrength(eStrengthTag), 0);
-
         pRecord->eStrengthTag = eStrengthTag;
     }
 
@@ -491,10 +469,6 @@ void QosStatusTable::UpdateDesiredStatus(
     // des:qos strength local direction
     // update strength of local desired status based on remote detail infos.
     const ImsList<SdpPrecondition::DetailInfo>& lstRemoteDetails = pDes->GetRemoteDetails();
-
-    IMS_TRACE_D("UpdateDesiredStatus : update local desired status, size [%d]",
-            lstRemoteDetails.GetSize(), 0, 0);
-
     for (IMS_UINT32 index = 0; index < lstRemoteDetails.GetSize(); index++)
     {
         const SdpPrecondition::DetailInfo& detailInfo = lstRemoteDetails.GetAt(index);
@@ -516,9 +490,6 @@ void QosStatusTable::UpdateDesiredStatus(
     // des:qos strength remote direction
     // update strength of remote desired status based on local detail infos.
     const ImsList<SdpPrecondition::DetailInfo>& lstLocalDetails = pDes->GetLocalDetails();
-    IMS_TRACE_D("UpdateDesiredStatus : update remote desired status, size [%d]",
-            lstLocalDetails.GetSize(), 0, 0);
-
     for (IMS_UINT32 index = 0; index < lstLocalDetails.GetSize(); index++)
     {
         const SdpPrecondition::DetailInfo& detailInfo = lstLocalDetails.GetAt(index);

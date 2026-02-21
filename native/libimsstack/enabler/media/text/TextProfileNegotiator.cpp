@@ -16,6 +16,7 @@
 
 #include "text/TextProfileNegotiator.h"
 
+#include "MediaDef.h"
 #include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_MEDIA__;
@@ -56,6 +57,11 @@ PUBLIC IMS_BOOL TextProfileNegotiator::Negotiate(IN TextProfile* pLocalProfile,
                 0, 0);
         ResetNegotiatedProfile(IMS_TRUE, pLocalProfile, pPeerProfile,
                 reinterpret_cast<MediaBaseProfile**>(&pNegotiatedProfile));
+    }
+
+    if (pNegotiatedProfile->GetDataPort() == 0)
+    {
+        pNegotiatedProfile->SetDirection(MEDIA_DIRECTION_INACTIVE);
     }
 
     NegotiateRtcpInterval(pNegotiatedProfile, pConfig);

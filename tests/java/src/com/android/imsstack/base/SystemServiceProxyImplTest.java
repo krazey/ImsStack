@@ -56,6 +56,7 @@ import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.PersistableBundle;
 import android.telecom.TelecomManager;
+import android.telephony.AccessNetworkConstants;
 import android.telephony.CarrierConfigManager;
 import android.telephony.CarrierConfigManager.CarrierConfigChangeListener;
 import android.telephony.SmsManager;
@@ -65,6 +66,7 @@ import android.telephony.ims.ImsManager;
 import android.telephony.ims.ImsMmTelManager;
 import android.telephony.ims.ProvisioningManager;
 import android.telephony.ims.ProvisioningManager.FeatureProvisioningCallback;
+import android.telephony.ims.feature.MmTelFeature;
 
 import androidx.test.filters.SmallTest;
 
@@ -723,6 +725,32 @@ public class SystemServiceProxyImplTest {
         doThrow(new ImsException("isCrossSimCallingEnabled failed."))
                 .when(imsMmTelManager).isCrossSimCallingEnabled();
         assertFalse(imtmp.isCrossSimCallingEnabled());
+    }
+
+    @Test
+    @SmallTest
+    public void testImsMmTelManagerProxy_isSupported() throws ImsException {
+        ImsManager imsManager = mContext.getSystemService(ImsManager.class);
+        ImsMmTelManager imsMmTelManager = mock(ImsMmTelManager.class);
+        when(imsManager.getImsMmTelManager(anyInt())).thenReturn(imsMmTelManager);
+
+        ImsManagerProxy imp = mSystemServiceProxy.getSystemService(ImsManagerProxy.class);
+        ImsMmTelManagerProxy imtmp = imp.getImsMmTelManagerProxy(TestAppContext.SUB_ID_1);
+        Executor executor = Runnable::run;
+        Consumer<Boolean> consumer = mock(Consumer.class);
+
+        imtmp.isSupported(MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO,
+                AccessNetworkConstants.TRANSPORT_TYPE_WLAN, executor, consumer);
+        verify(imsMmTelManager).isSupported(
+                eq(MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO),
+                eq(AccessNetworkConstants.TRANSPORT_TYPE_WLAN), eq(executor), eq(consumer));
+
+        doThrow(new ImsException("isSupported failed."))
+                .when(imsMmTelManager).isSupported(
+                eq(MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO),
+                eq(AccessNetworkConstants.TRANSPORT_TYPE_WLAN), eq(executor), eq(consumer));
+        imtmp.isSupported(MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO,
+                AccessNetworkConstants.TRANSPORT_TYPE_WLAN, executor, consumer);
     }
 
     @Test

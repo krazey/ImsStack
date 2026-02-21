@@ -15,10 +15,18 @@
  */
 package com.android.imsstack.its.base;
 
+import android.annotation.CallbackExecutor;
+import android.telephony.AccessNetworkConstants;
 import android.telephony.ims.ImsMmTelManager;
 import android.telephony.ims.ImsMmTelManager.WiFiCallingMode;
+import android.telephony.ims.feature.MmTelFeature;
+
+import androidx.annotation.NonNull;
 
 import com.android.imsstack.base.SystemServiceProxy.ImsMmTelManagerProxy;
+
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * An implementation class to access the {@link ImsMmTelManager}.
@@ -74,6 +82,14 @@ public class ImsMmTelManagerProxyImpl implements ImsMmTelManagerProxy {
     @Override
     public void setCrossSimCallingEnabled(boolean isEnabled) {
         mCrossSimCallingEnabled = isEnabled;
+    }
+
+    @Override
+    public void isSupported(@MmTelFeature.MmTelCapabilities.MmTelCapability int capability,
+            @AccessNetworkConstants.TransportType int transportType,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<Boolean> callback) {
+        executor.execute(() -> callback.accept(true));
     }
 
     /**

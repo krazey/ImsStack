@@ -66,7 +66,7 @@ PUBLIC VIRTUAL EmergencyServiceController::~EmergencyServiceController()
 
 PUBLIC VIRTUAL void EmergencyServiceController::Start()
 {
-    IMS_TRACE_I("Start", 0, 0, 0);
+    IMS_TRACE_D("Start :: State[%d]", m_eState, 0, 0);
     Start18xWaitingTimer();
 
     switch (m_eState)
@@ -103,7 +103,7 @@ PUBLIC VIRTUAL void EmergencyServiceController::Start()
 
 PUBLIC VIRTUAL void EmergencyServiceController::Close()
 {
-    IMS_TRACE_I("Close", 0, 0, 0);
+    IMS_TRACE_D("Close :: State[%d]", m_eState, 0, 0);
     Stop18xWaitingTimer();
     StopWaitForHandoverToRetryOverImsPdnTimer();
 
@@ -114,9 +114,9 @@ PUBLIC VIRTUAL void EmergencyServiceController::OnAosStateChanged(
         IN [[maybe_unused]] IMtcService& objMtcService, IN MtcAosState eState,
         IN IMS_UINT32 eAosReason, IN [[maybe_unused]] IMS_SINT32 nDataFailureReason)
 {
-    IMS_TRACE_I("OnAosStateChanged :: AosState[%s] Reason[%s]",
+    IMS_TRACE_D("OnAosStateChanged :: AosState[%s] Reason[%s] State[%d]",
             MtcCallStringUtils::ConvertAosState(eState),
-            MtcCallStringUtils::ConvertAosReason(eAosReason), 0);
+            MtcCallStringUtils::ConvertAosReason(eAosReason), m_eState);
 
     switch (m_eState)
     {
@@ -187,7 +187,7 @@ PUBLIC VIRTUAL void EmergencyServiceController::OnRatChanged(IN
         return;
     }
 
-    IMS_TRACE_I("Normal service is handed over to WWAN", 0, 0, 0);
+    IMS_TRACE_D("Normal service is handed over to WWAN", 0, 0, 0);
     StopWaitForHandoverToRetryOverImsPdnTimer();
     if (IsNetworkRoaming())
     {
@@ -233,7 +233,7 @@ PUBLIC void EmergencyServiceController::OnPassiveTimerExpired(IN IPassiveTimerHo
 {
     if (eType == IPassiveTimerHolder::Type::REGISTRATION_TO_18X)
     {
-        IMS_TRACE_I("Registration ~ 18x timer expires", 0, 0, 0);
+        IMS_TRACE_D("Registration ~ 18x timer expires", 0, 0, 0);
 
         if (m_nEmergencyCallKey == IMtcCall::CALL_KEY_INVALID)
         {
@@ -248,7 +248,7 @@ PUBLIC void EmergencyServiceController::OnPassiveTimerExpired(IN IPassiveTimerHo
     }
     else if (eType == IPassiveTimerHolder::Type::WAIT_FOR_HANDOVER_TO_RETRY_OVER_IMS_PDN)
     {
-        IMS_TRACE_I("Wait for handover to retry over IMS PDN timer expires", 0, 0, 0);
+        IMS_TRACE_D("Wait for handover to retry over IMS PDN timer expires", 0, 0, 0);
 
         Notify(IuMtcService::EmergencyServiceState::UNAVAILABLE,
                 ConvertToUnavailableReason(m_ePendingUnavailableAosReasonForHandover));
@@ -272,7 +272,7 @@ PRIVATE void EmergencyServiceController::HandleServiceUnavailable(IN IMS_UINT32 
             FinishAndRetryOverImsPdn();
             break;
         case RetryOverImsPdnAction::RETRY_AFTER_HANDOVER:
-            IMS_TRACE_I("Wait for normal service to be handed over to WWAN", 0, 0, 0);
+            IMS_TRACE_D("Wait for normal service to be handed over to WWAN", 0, 0, 0);
             m_ePendingUnavailableAosReasonForHandover = eAosReason;
             StartWaitForHandoverToRetryOverImsPdnTimer();
             break;

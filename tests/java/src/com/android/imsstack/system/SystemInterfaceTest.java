@@ -2816,6 +2816,50 @@ public class SystemInterfaceTest {
         verify(mSystemCall, never()).isImsVoiceCallSupported();
     }
 
+    @Test
+    @SmallTest
+    public void testSystemCallLogSipMessage() {
+        setUpSystemInterface();
+        setUpSystem();
+        int direction = 1;
+        String sipMessage = "SIP/2.0 200 OK";
+        byte[] bytes = sipMessage.getBytes();
+        Parcel data = Parcel.obtain();
+        try {
+            data.writeInt(SLOT0);
+            data.writeInt(SystemConstants.LOG_SIP_MESSAGE);
+            data.writeInt(direction);
+            data.writeByteArray(bytes);
+            data.setDataPosition(0);
+            mSystemInterface.onMessage(data, null);
+        } finally {
+            data.recycle();
+        }
+
+        verify(mSystemCall).logSipMessage(eq(sipMessage), eq(SLOT0), eq(direction));
+    }
+
+    @Test
+    @SmallTest
+    public void testSystemCallLogSipMessageWhenBytesNull() {
+        setUpSystemInterface();
+        setUpSystem();
+        int direction = 1;
+        Parcel data = Parcel.obtain();
+        try {
+            data.writeInt(SLOT0);
+            data.writeInt(SystemConstants.LOG_SIP_MESSAGE);
+            data.writeInt(direction);
+            data.writeByteArray(null);
+            data.setDataPosition(0);
+            mSystemInterface.onMessage(data, null);
+        } finally {
+            data.recycle();
+        }
+
+        verify(mSystemCall, never()).logSipMessage(anyString(), anyInt(), anyInt());
+    }
+
     private void setUpSystemInterface() {
         mSystemInterface.init();
         mSystemInterface.setSystemCallInterface(mDefaultSystemCall);

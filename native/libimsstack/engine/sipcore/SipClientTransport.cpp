@@ -58,7 +58,7 @@ SipClientTransport::~SipClientTransport()
     }
 
 #ifdef __IMS_SIP_DEBUG__
-    IMS_TRACE_D("Destructor :: SipClientTransport", 0, 0, 0);
+    IMS_TRACE_D("dtor: SipClientTransport", 0, 0, 0);
 #endif
 }
 
@@ -94,7 +94,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::FormViaHeader(
     }
     else
     {
-        // Overwrites the transport protocol by the local configuration...
+        // Overwrites the transport protocol by the local configuration.
         IMS_SINT32 nProtocol = Sip::TRANSPORT_EXT_ANY;
 
         if (!IsExplicitTargetProtocolSelected())
@@ -232,8 +232,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::FormViaHeader(
             return IMS_FALSE;
         }
 
-        IMS_TRACE_D(
-                "SipClientTransport :: transport protocol selection - length(%d)", nBuffLen, 0, 0);
+        IMS_TRACE_D("ClientTransport: transport protocol selection(l:%d)", nBuffLen, 0, 0);
 
         if (nBuffLen > SipConfigProxy::GetTcpCriterionLength(GetSlotId(), pProfile))
         {
@@ -251,7 +250,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::FormViaHeader(
             // Update the transport protocol of a far end point
             SetProtocol(SipTransportAddress::PROTOCOL_TCP, TA_FAR);
 
-            IMS_TRACE_D("SipClientTransport :: sent-protocol is changed to TCP", 0, 0, 0);
+            IMS_TRACE_D("ClientTransport: sent-protocol is changed to TCP", 0, 0, 0);
         }
     }
 
@@ -275,7 +274,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::FormViaHeader(
     // LOG_EXCLUDING_SERVER_INFO
     if (SipRtConfigUtils::IsMessageHiddenInLog(GetSlotId()))
     {
-        IMS_TRACE_D("SipClientTransport :: via (%s, %s, %s)", strSentProtocol.GetStr(),
+        IMS_TRACE_D("ClientTransport: via (%s|%s|%s)", strSentProtocol.GetStr(),
                 SipDebug::GetIp(strSentBy), strBranch.GetStr());
     }
 
@@ -299,7 +298,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::ReserveResource(
             (nTransportType == SipConfig::TRANSPORT_TYPE_TCP ||
                     nTransportType == SipConfig::TRANSPORT_TYPE_TLS))
     {
-        IMS_TRACE_D("ClientTransport :: Configured transport protocol (%d) is not required "
+        IMS_TRACE_D("ClientTransport: Configured transport protocol(%d) doesn't required "
                     "a server socket",
                 nTransportType, 0, 0);
         return IMS_TRUE;
@@ -315,20 +314,20 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::ReserveResource(
         {
             // If the server & client port is same,
             // no need to create socket in case of UDP protocol.
-            IMS_TRACE_D("ClientTransport :: UDP server socket (%d) will not be created", GetPortC(),
-                    0, 0);
+            IMS_TRACE_D(
+                    "ClientTransport: UDP server socket(%d) not being created", GetPortC(), 0, 0);
             return IMS_TRUE;
         }
     }
 
     if (IsTcpConnectionOnlyRequired())
     {
-        // Do not create a server socket for the SIP client connection...
-        IMS_TRACE_D("ClientTransport :: TCP client connection is only required...", 0, 0, 0);
+        // Do not create a server socket for the SIP client connection.
+        IMS_TRACE_D("ClientTransport: TCP client connection is only required", 0, 0, 0);
         return IMS_TRUE;
     }
 
-    // Reserves the listening sockets for incoming SIP message...
+    // Reserves the listening sockets for incoming SIP message.
     if (m_pServerSocket != IMS_NULL)
     {
         // If the near port number is changed, then destroy & create a TCP server socket.
@@ -359,7 +358,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::ReserveResource(
         {
             objSsa.SetType(SipSocketAddress::SOCKET_TCP);
 
-            // If the transport protocol is TLS, SSL socket will be created...
+            // If the transport protocol is TLS, SSL socket will be created.
             if (objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TLS)
             {
                 objSsa.SetSecure(IMS_TRUE);
@@ -374,13 +373,10 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::ReserveResource(
 
         if (m_pServerSocket == IMS_NULL)
         {
-            IMS_TRACE_E(0, "Creating server socket (%s, %d, %d) failed",
+            IMS_TRACE_E(0, "Creating server socket(%s|%d|%d) failed",
                     SipDebug::GetIp(objSsa.GetIpAddress()), objSsa.GetPort(), objSsa.GetType());
             return IMS_FALSE;
         }
-
-        IMS_TRACE_D("ClientTransport :: server (%s, %d, %d) is created",
-                SipDebug::GetIp(objSsa.GetIpAddress()), objSsa.GetPort(), objSsa.GetType());
 
         m_pServerSocket->SetListener(this);
     }
@@ -426,8 +422,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
                 SipStack::FreeAddrSpec(pReqUri);
             }
 
-            IMS_TRACE_I("IMPLICIT_ROUTE (%s,%s) will be applied...",
-                    strImplicitRoutingTransport.GetStr(),
+            IMS_TRACE_I("ImplicitRoute: %s|%s", strImplicitRoutingTransport.GetStr(),
                     bImplicitRoutingTransportRequired ? "true" : "false", 0);
         }
         else
@@ -439,7 +434,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
 
     if (pAddrSpec == IMS_NULL)
     {
-        IMS_TRACE_E(0, "The target URI does not exist...", 0, 0, 0);
+        IMS_TRACE_E(0, "No target URI", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -562,7 +557,6 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
 
         if (bDnsQueryRequired)
         {
-            // Do DNS query ...
             INetworkConnection* piConnection =
                     NetworkService::GetNetworkService()->FindConnection(objIpAddr);
 
@@ -641,16 +635,16 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
         SipStack::FreeAddrSpec(pReqAddrSpec);
 
         // LOG_EXCLUDING_SERVER_INFO
-        IMS_TRACE_D("UpdateDestinationInfo :: IP (%s), Port (%d)",
+        IMS_TRACE_D("UpdateDestinationInfo: %s|%d",
                 SipRtConfigUtils::IsRoutingInfoHiddenInLog(GetSlotId())
-                        ? "xxx"
+                        ? "***"
                         : SipDebug::GetIp(GetIpAddress(TA_FAR)),
                 GetPort(TA_FAR), 0);
     }
     else
     {
         // For TEL/IM/PRES URI scheme, we need to resolve the address using DNS query.
-        IMS_TRACE_D("UpdateDestinationInfo :: No SIP/SIPS URI scheme (not implemented)", 0, 0, 0);
+        IMS_TRACE_D("UpdateDestinationInfo: No SIP/SIPS URI scheme (not implemented)", 0, 0, 0);
         SetTransportProtocolByConfig();
     }
 
@@ -699,13 +693,13 @@ PROTECTED VIRTUAL void SipClientTransport::Socket_NotifyError(
 {
     if (m_pServerSocket != pSocket)
     {
-        IMS_TRACE_D("ClientTransport :: server socket is not matched", 0, 0, 0);
+        IMS_TRACE_D("ClientTransport: server socket not matched", 0, 0, 0);
 
         SipTransport::Socket_NotifyError(pSocket, nErrorCode);
         return;
     }
 
-    IMS_TRACE_D("ClientTransport :: Error (%d)", nErrorCode, 0, 0);
+    IMS_TRACE_D("ClientTransport: error=%d", nErrorCode, 0, 0);
 
     if (m_pServerSocket != IMS_NULL)
     {

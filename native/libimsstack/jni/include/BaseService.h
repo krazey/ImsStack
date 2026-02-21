@@ -57,7 +57,7 @@ protected:
     inline virtual void HandleMessage(
             IN IMS_SINT32 /*nMsg*/, IN const android::Parcel& /*objParcel*/)
     {
-        // TODO: this will be changed to pure virtual after all services implement this.
+        // If necessary, change this to pure virtual after all services implement this.
     }
 
     static const IMS_SINT32 MSG_DESTROY = -1;

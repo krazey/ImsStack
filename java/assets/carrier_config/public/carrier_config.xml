@@ -15,27 +15,4 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <int name="imsemergency.emergency_registration_timer_millis_int" value="10000"/>
-    <pbundle_as_map name="imsvoice.amrwb_payload_description_bundle">
-        <pbundle_as_map name="100">
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle_as_map>
-        <pbundle_as_map name="105">
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle_as_map>
-    </pbundle_as_map>
-    <pbundle_as_map name="imsvoice.amrnb_payload_description_bundle">
-        <pbundle_as_map name="98">
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle_as_map>
-        <pbundle_as_map name="103">
-            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
-            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
-        </pbundle_as_map>
-    </pbundle_as_map>
-    <int name="ims.ipv4_sip_mtu_size_cellular_int" value="1300"/>
-    <int name="ims.ipv6_sip_mtu_size_cellular_int" value="1300"/>
 </carrier_config>

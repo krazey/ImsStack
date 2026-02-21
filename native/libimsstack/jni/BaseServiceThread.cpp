@@ -15,9 +15,6 @@
  */
 #include "BaseServiceThread.h"
 #include "IThread.h"
-#include "ServiceTrace.h"
-
-__IMS_TRACE_TAG_USER_DECL__("JNI");
 
 PUBLIC
 BaseServiceThread::BaseServiceThread() :
@@ -37,8 +34,6 @@ void BaseServiceThread::SetCallback(
 
 PROTECTED VIRTUAL IMS_BOOL BaseServiceThread::OnMessage(IN ImsMessage& objMsg)
 {
-    IMS_TRACE_D("OnMessage (%d)", objMsg.GetName(), 0, 0);
-
     switch (objMsg.GetName())
     {
         case MESSAGE_THREAD_SWITCHING:
@@ -72,8 +67,6 @@ IMS_BOOL BaseServiceThread::SendData2Java(
     int nMsg = objParcel.readInt32();
     objParcel.setDataPosition(0);
     IMS_BOOL bSendCurrentThread = bThreadSwitched || !IsThreadSwitchingRequired(nMsg);
-
-    IMS_TRACE_D("SendData2Java (%s)", _TRACE_B_(bSendCurrentThread), 0, 0);
 
     if (bSendCurrentThread)
     {

@@ -45,12 +45,10 @@ public:
      */
     static MtcLocationProperties* GetLocationFromMessage(IN const IMessage& objMessage);
 
-    void SetLocationToMessage(IN_OUT IMessage& objMessage, IN IMS_BOOL bGeolocationRouting,
-            IN const ByteArray& objContent);
-    inline void SetLocationToMessage(
-            IN_OUT IMessage& objMessage, IN IMS_BOOL bGeolocationRouting = IMS_FALSE)
+    void SetLocationToMessage(IN_OUT IMessage& objMessage, IN const ByteArray& objContent);
+    inline void SetLocationToMessage(IN_OUT IMessage& objMessage)
     {
-        SetLocationToMessage(objMessage, bGeolocationRouting, CreateLocationBody());
+        SetLocationToMessage(objMessage, CreateLocationBody());
     }
 
     ByteArray CreateLocationBody() const;

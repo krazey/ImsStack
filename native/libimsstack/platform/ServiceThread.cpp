@@ -143,7 +143,7 @@ IThread* ThreadService::GetCurrentThread() const
 
     LockThreadPool();
 
-    // According to the platform specific API, we will find the current thread ...
+    // According to the platform specific API, we will find the current thread.
     IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
     nCurrentThreadId = piOsFactory->GetCurrentThreadId();
 

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+#include "SdpAttribute.h"
 #include "ServiceTrace.h"
 #include "offeranswer/SdpAvCodec.h"
 #include "offeranswer/SdpMediaFormatParameter.h"
 #include "offeranswer/SdpRtcpFeedback.h"
-
+#include "config/MediaSessionConfig.h"
 #include "video/VideoSdpGenerator.h"
 
 __IMS_TRACE_TAG_MEDIA__;
@@ -32,15 +33,16 @@ PUBLIC VIRTUAL VideoSdpGenerator::~VideoSdpGenerator() {}
 
 PUBLIC
 IMS_BOOL VideoSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
-        OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile)
+        OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile,
+        IN const MediaSessionConfig* pConfig)
 {
-    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || pBaseProfile == IMS_NULL)
+    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || pBaseProfile == IMS_NULL ||
+            pConfig == IMS_NULL)
     {
         IMS_TRACE_E(0, "Generate(): invalid arguments", 0, 0, 0);
         return IMS_FALSE;
     }
-
-    GenerateCommonAttributes(pSessionDescriptor, pDescriptor, pBaseProfile);
+    GenerateCommonAttributes(pSessionDescriptor, pDescriptor, pBaseProfile, pConfig);
 
     VideoProfile* pProfile = static_cast<VideoProfile*>(pBaseProfile);
 

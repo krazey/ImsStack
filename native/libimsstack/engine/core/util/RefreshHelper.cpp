@@ -23,6 +23,7 @@
 #include "SipMethod.h"
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
+#include "base/IMessageMediator.h"
 #include "util/IRefreshable.h"
 #include "util/RefreshHelper.h"
 
@@ -218,7 +219,7 @@ IMS_BOOL RefreshHelper::StartRefresh()
 {
     if (m_piTimer != IMS_NULL)
     {
-        IMS_TRACE_D("The refresh timer already exists; It will be updated...", 0, 0, 0);
+        IMS_TRACE_D("Refresh timer already exists", 0, 0, 0);
 
         m_piTimer->KillTimer();
         TimerService::GetTimerService()->DestroyTimer(m_piTimer);
@@ -227,7 +228,7 @@ IMS_BOOL RefreshHelper::StartRefresh()
 
     if (GetPolicy() == POLICY_NO_REFRESH)
     {
-        IMS_TRACE_D("Refresh operation is not supported by the engine...", 0, 0, 0);
+        IMS_TRACE_D("No refresh policy", 0, 0, 0);
         return IMS_TRUE;
     }
 
@@ -235,7 +236,7 @@ IMS_BOOL RefreshHelper::StartRefresh()
 
     if (nTimerDuration <= 0)
     {
-        IMS_TRACE_E(0, "Timer duration is ZERO; STOPPED ...", 0, 0, 0);
+        IMS_TRACE_E(0, "Timer duration is ZERO", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -257,7 +258,7 @@ void RefreshHelper::StopRefresh()
         return;
     }
 
-    IMS_TRACE_I("Refresh Timer (%p) - STOPPED ...", m_piTimer, 0, 0);
+    IMS_TRACE_I("Refresh Timer(%p): STOPPED", m_piTimer, 0, 0);
 
     m_piTimer->KillTimer();
     TimerService::GetTimerService()->DestroyTimer(m_piTimer);
@@ -268,13 +269,13 @@ PRIVATE VIRTUAL void RefreshHelper::Timer_TimerExpired(IN ITimer* piTimer)
 {
     if (m_piTimer == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Refresh Timer - NOT ACTIVE", 0, 0, 0);
+        IMS_TRACE_E(0, "Refresh Timer: NOT ACTIVE", 0, 0, 0);
         return;
     }
 
     if (m_piTimer != piTimer)
     {
-        IMS_TRACE_D("Refresh Timer - INVALID TIMER", 0, 0, 0);
+        IMS_TRACE_D("Refresh Timer: INVALID TIMER", 0, 0, 0);
         return;
     }
 
@@ -322,7 +323,7 @@ PRIVATE VIRTUAL void RefreshHelper::ClientConnection_NotifyResponse(
         IMS_TRACE_E(0, "Parsing a message body part failed", 0, 0, 0);
 
         Error_NotifyError(
-                piScc, SipError::PARSING_ERROR, AString("Parsing Error :: message body part"));
+                piScc, SipError::PARSING_ERROR, AString("Parsing Error: message body part"));
         return;
     }
 
@@ -389,7 +390,7 @@ IMS_BOOL RefreshHelper::SetTimer(IN IMS_SINT32 nTimerDuration)
 
     m_piTimer->SetTimer(nTimerDuration * 1000L, this);
 
-    IMS_TRACE_I("Refresh Timer (%p) :: START - Duration (%d)", m_piTimer, nTimerDuration, 0);
+    IMS_TRACE_I("Refresh Timer: START(%p|%d)", m_piTimer, nTimerDuration, 0);
 
     return IMS_TRUE;
 }

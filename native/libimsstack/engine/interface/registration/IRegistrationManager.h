@@ -16,7 +16,11 @@
 #ifndef INTERFACE_REGISTRATION_MANAGER_H_
 #define INTERFACE_REGISTRATION_MANAGER_H_
 
-#include "IRegistration.h"
+#include "AString.h"
+
+class IRegistration;
+class SipAddress;
+class SipProfile;
 
 /**
  * @brief An interface for providing the methods to create/destroy IMS registrations and

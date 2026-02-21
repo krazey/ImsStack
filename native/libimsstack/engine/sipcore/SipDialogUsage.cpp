@@ -28,7 +28,7 @@ __IMS_TRACE_TAG_SIP_CORE__;
 
 PUBLIC VIRTUAL SipDialogUsage::~SipDialogUsage()
 {
-    IMS_TRACE_D("Destructor :: SipDialogUsage (%s)",
+    IMS_TRACE_D("dtor: SipDialogUsage(%s)",
             (m_nType == TYPE_EPHEMERAL) ? "EPHEMERAL"
                                         : ((m_nType == TYPE_INVITE) ? "INVITE" : "SUBSCRIBE"),
             0, 0);
@@ -89,8 +89,8 @@ PUBLIC VIRTUAL IMS_SINT32 SipDialogUsage::UpdateUsageDetails(IN const SipMessage
         }
     }
 
-    IMS_TRACE_D("UpdateDialogDetails() - %s : %s", ActionToString(nAction),
-            TriggerToString(nTrigger), 0);
+    IMS_TRACE_D(
+            "UpdateDialogDetails: %s|%s", ActionToString(nAction), TriggerToString(nTrigger), 0);
 
     return m_pDialogBase->OnUpdateDialogDetails(objMsgInfo, m_nType, nAction, nTrigger);
 }
@@ -223,13 +223,13 @@ IMS_SINT32 SipDialogUsage::GetActionForResponse(IN const SipMessageInfo& objMsgI
 
                 // Impacts on transaction only
             default:
-                // In this case, the state will not be changed ...
+                // In this case, the state will not be changed.
                 if (m_pDialogBase->GetState() == SipDState::STATE_CONFIRMED)
                 {
                     if (nStatusCode == SipStatusCode::SC_408)
                     {
                         // Case1) TYPE_INVITE
-                        //      It should be verified in the commercial networks...
+                        //      It should be verified in the commercial networks.
                         //      return SipDState::ACTION_DESTROY_USAGE;
                         // Case2) TYPE_SUBSCRIBE
                         //      If re-SUBSCRIBE is timed out (Timer F),

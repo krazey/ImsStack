@@ -293,6 +293,15 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegMessageToString(IN IMS_UINT32 nType)
         case RegistrationLog::MSG_REG_TERMINATED_BY_NOTIFY:
             return "MSG_REG_TERMINATED_BY_NOTIFY";
 
+        case RegistrationLog::MSG_REG_FORBIDDEN_IN_WIFI:
+            return "MSG_REG_FORBIDDEN_IN_WIFI";
+
+        case RegistrationLog::MSG_REG_PROCESS_GIBA:
+            return "MSG_REG_PROCESS_GIBA";
+
+        case RegistrationLog::MSG_REG_RESTART:
+            return "MSG_REG_RESTART";
+
         case RegistrationLog::MSG_SUB_REINITIATE:
             return "MSG_SUB_REINITIATE";
 

@@ -32,9 +32,9 @@ PUBLIC
 AosMngr::AosMngr(IN IMS_SINT32 nSlotId) :
         m_pBuildDirector(IMS_NULL),
         m_pStaticConfig(IMS_NULL),
+        m_objAppContext(ImsMap<AString, IAosAppContext*>()),
         m_nSlotId(nSlotId),
-        m_objAppId(ImsList<AString>()),
-        m_objAppContext(ImsMap<AString, IAosAppContext*>())
+        m_objAppId(ImsList<AString>())
 {
     CreateStaticConfig();
 
@@ -187,41 +187,7 @@ void AosMngr::DestroyStaticConfig()
     }
 }
 
-PRIVATE
-void AosMngr::CreateStaticConfig()
-{
-    m_pStaticConfig = new AosStaticConfig();
-    m_pStaticConfig->Create();
-
-    const ImsList<AosStaticProfile*>& objProfiles = m_pStaticConfig->GetProfiles();
-
-    for (IMS_UINT32 i = 0; i < objProfiles.GetSize(); i++)
-    {
-        AosStaticProfile* pProfile = objProfiles.GetAt(i);
-
-        if (pProfile == IMS_NULL)
-        {
-            continue;
-        }
-
-        const AString& strId = pProfile->GetId();
-
-        m_objAppId.Append(AString(strId));
-    }
-
-    AString strLog;
-    for (IMS_UINT32 i = 0; i < m_objAppId.GetSize(); i++)
-    {
-        AString& strAoSAppId = m_objAppId.GetAt(i);
-        strLog.Append("[");
-        strLog.Append(strAoSAppId.GetStr());
-        strLog.Append("]");
-    }
-
-    IMS_TRACE_I("[SLOT%d] CreateStaticConfig :: appId list (%s)", m_nSlotId, strLog.GetStr(), 0);
-}
-
-PRIVATE
+PROTECTED
 void AosMngr::CreateAos()
 {
     IAosBuilder* piAosBuilder = AosBuilderFactory();
@@ -257,7 +223,7 @@ void AosMngr::CreateAos()
     delete piAosBuilder;
 }
 
-PRIVATE
+PROTECTED
 void AosMngr::DestroyAos()
 {
     if (m_pBuildDirector != IMS_NULL)
@@ -270,8 +236,41 @@ void AosMngr::DestroyAos()
     }
 }
 
-PRIVATE
-IAosBuilder* AosMngr::AosBuilderFactory()
+PROTECTED VIRTUAL IAosBuilder* AosMngr::AosBuilderFactory()
 {
     return new AosBuilder();
+}
+
+PRIVATE
+void AosMngr::CreateStaticConfig()
+{
+    m_pStaticConfig = new AosStaticConfig();
+    m_pStaticConfig->Create();
+
+    const ImsList<AosStaticProfile*>& objProfiles = m_pStaticConfig->GetProfiles();
+
+    for (IMS_UINT32 i = 0; i < objProfiles.GetSize(); i++)
+    {
+        AosStaticProfile* pProfile = objProfiles.GetAt(i);
+
+        if (pProfile == IMS_NULL)
+        {
+            continue;
+        }
+
+        const AString& strId = pProfile->GetId();
+
+        m_objAppId.Append(AString(strId));
+    }
+
+    AString strLog;
+    for (IMS_UINT32 i = 0; i < m_objAppId.GetSize(); i++)
+    {
+        AString& strAoSAppId = m_objAppId.GetAt(i);
+        strLog.Append("[");
+        strLog.Append(strAoSAppId.GetStr());
+        strLog.Append("]");
+    }
+
+    IMS_TRACE_I("[SLOT%d] CreateStaticConfig :: appId list (%s)", m_nSlotId, strLog.GetStr(), 0);
 }

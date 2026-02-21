@@ -230,7 +230,7 @@ PUBLIC VIRTUAL void OsImsRadio::StartImsTraffic(IN IMS_UINT32 nTrafficType,
         m_objConnectionListeners.Append(new ConnectionListener(nId, nTrafficType, piListener));
         m_objTrafficStartedCount.SetValue(nTrafficType, ++nStartedCount);
 
-        IMS_TRACE_D("OsImsRadio :: StartImsTraffic - slotId=%d, size=%d, count=%d", GetSlotId(),
+        IMS_TRACE_D("OsImsRadio: StartImsTraffic - slotId=%d, size=%d, count=%d", GetSlotId(),
                 m_objConnectionListeners.GetSize(), nStartedCount);
     }
     else
@@ -247,7 +247,7 @@ PUBLIC VIRTUAL void OsImsRadio::StartImsTraffic(IN IMS_UINT32 nTrafficType,
     if (PlatformContext::GetInstance()->GetSystem()->StartImsTraffic(
                 nId, nTrafficType, nAccessNetworkType, nDirection, GetSlotId()) <= 0)
     {
-        IMS_TRACE_I("OsImsRadio :: [%d] StartImsTraffic is failed", GetSlotId(), 0, 0);
+        IMS_TRACE_I("OsImsRadio: [%d] StartImsTraffic is failed", GetSlotId(), 0, 0);
     }
 
     IImsTraffic* piImsTraffic = ImsRadioService::GetImsRadioService()->GetImsTraffic();
@@ -287,8 +287,8 @@ PUBLIC VIRTUAL void OsImsRadio::StopImsTraffic(IN IImsRadioConnectionListener* p
                 m_objTrafficStartedCount.SetValue(nTrafficType, --nStartedCount);
             }
 
-            IMS_TRACE_D("OsImsRadio :: StopImsTraffic - slotId=%d, id=%d, size=%d", GetSlotId(),
-                    nId, m_objConnectionListeners.GetSize());
+            IMS_TRACE_D("OsImsRadio: StopImsTraffic - slotId=%d, id=%d, size=%d", GetSlotId(), nId,
+                    m_objConnectionListeners.GetSize());
 
             PlatformContext::GetInstance()->GetSystem()->StopImsTraffic(nId, GetSlotId());
 
@@ -307,7 +307,7 @@ PUBLIC VIRTUAL void OsImsRadio::TriggerEpsFallback(IN IMS_UINT32 nEpsfbReason)
     if (PlatformContext::GetInstance()->GetSystem()->TriggerEpsFallback(
                 nEpsfbReason, GetSlotId()) <= 0)
     {
-        IMS_TRACE_I("OsImsRadio :: [%d] TriggerEpsFallback is failed", GetSlotId(), 0, 0);
+        IMS_TRACE_I("OsImsRadio: [%d] TriggerEpsFallback is failed", GetSlotId(), 0, 0);
     }
 }
 
@@ -406,7 +406,7 @@ PROTECTED VIRTUAL void OsImsRadio::DispatchServiceMessage(IN IMS_UINTP /* nWpara
 
     if (pImsRadioParam != IMS_NULL)
     {
-        IMS_TRACE_D("OsImsRadio :: DispatchServiceMessage - slotId=%d, event=%s, lp=%" PFLS_u,
+        IMS_TRACE_D("OsImsRadio: DispatchServiceMessage - slotId=%d, event=%s, lp=%" PFLS_u,
                 GetSlotId(), EventToString(pImsRadioParam->m_nEvent), nLparam);
 
         if (pImsRadioParam->m_nEvent == OsImsRadioParam::EVENT_CONNECTION_SETUP_PREPARED)
@@ -446,7 +446,7 @@ PROTECTED VIRTUAL void OsImsRadio::DispatchServiceMessage(IN IMS_UINTP /* nWpara
 
 PROTECTED VIRTUAL void OsImsRadio::ImsTraffic_OnPriorityChanged()
 {
-    IMS_TRACE_D("OsImsRadio :: ImsTraffic_OnPriorityChanged - slotId=%d", GetSlotId(), 0, 0);
+    IMS_TRACE_D("OsImsRadio: ImsTraffic_OnPriorityChanged - slotId=%d", GetSlotId(), 0, 0);
 
     for (IMS_UINT32 i = 0; i < m_objTrafficPriorityListeners.GetSize(); ++i)
     {
@@ -464,7 +464,7 @@ PROTECTED VIRTUAL void OsImsRadio::ImsTraffic_OnPriorityChanged()
 PROTECTED VIRTUAL void OsImsRadio::System_NotifyEvent(
         IN IMS_UINT32 nEvent, IN IMS_UINTP /* nWParam */, IN IMS_UINTP nLParam)
 {
-    IMS_TRACE_D("OsImsRadio :: System_NotifyEvent - slotId=%d, event=%s", GetSlotId(),
+    IMS_TRACE_D("OsImsRadio: System_NotifyEvent - slotId=%d, event=%s", GetSlotId(),
             EventToString(nEvent), 0);
 
     android::Parcel* pParcel = reinterpret_cast<android::Parcel*>(nLParam);
@@ -580,7 +580,7 @@ PRIVATE void OsImsRadio::NotifySsacInfoChanged(IN IMS_SINT32 nFactorForVoice,
     strSsacForLog.Sprintf("slotId=%d, voice=%d,%d , video=%d,%d", GetSlotId(), nFactorForVoice,
             nTimeSecForVoice, nFactorForVideo, nTimeSecForVideo);
 
-    IMS_TRACE_D("OsImsRadio :: NotifySsacInfoChanged -  %s", strSsacForLog.GetStr(), 0, 0);
+    IMS_TRACE_D("OsImsRadio: NotifySsacInfoChanged -  %s", strSsacForLog.GetStr(), 0, 0);
 
     m_objSsacInfo.nBarringFactorForVoice = nFactorForVoice;
     m_objSsacInfo.nBarringTimeSecForVoice = nTimeSecForVoice;

@@ -59,7 +59,7 @@ PUBLIC VIRTUAL SipClientTransactionState::~SipClientTransactionState()
     SipStack::FreeAddrSpec(m_pImplicitRoute);
 
 #ifdef __IMS_SIP_DEBUG__
-    IMS_TRACE_D("Destructor :: SipClientTransactionState", 0, 0, 0);
+    IMS_TRACE_D("dtor: SipClientTransactionState", 0, 0, 0);
 #endif
 }
 
@@ -758,9 +758,7 @@ IMS_SINT32 SipClientTransactionState::HandleResponse(IN ::SipMessage* pSipMsg)
 
     if (m_nCSeqNumber != nCSeqNum)
     {
-        // notify the error ???
-        IMS_TRACE_E(0, "Sequence number is not ordered - Current (%d), New (%d)", m_nCSeqNumber,
-                nCSeqNum, 0);
+        IMS_TRACE_E(0, "Sequence number is not ordered: c=%d, n=%d", m_nCSeqNumber, nCSeqNum, 0);
         return SipPrivate::MESSAGE_DISCARDED;
     }
 
@@ -773,8 +771,8 @@ IMS_SINT32 SipClientTransactionState::HandleResponse(IN ::SipMessage* pSipMsg)
     if (nValidity == SipPrivate::MESSAGE_VALID_FORKED)
     {
         // Handle forked response
-        IMS_TRACE_I("__UAC__ :: _____ FORKED RESPONSE (%s) RECEIVED _____",
-                objMethod.ToString().GetStr(), 0, 0);
+        IMS_TRACE_I("__UAC__: ___ FORKED RESPONSE(%s) RECEIVED ___", objMethod.ToString().GetStr(),
+                0, 0);
 
         if (!HandleForkedResponse(objMsgInfo))
         {
@@ -879,13 +877,13 @@ IMS_BOOL SipClientTransactionState::IsAckSent() const
 PUBLIC GLOBAL IMS_SINT32 SipClientTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg,
         IN const SipTransportAddress& objFarEnd, OUT RcPtr<SipClientTransactionState>& pCtState)
 {
-    IMS_TRACE_I("SipClientTransactionState::MatchTransaction ... ", 0, 0, 0);
+    IMS_TRACE_I("MatchTransaction", 0, 0, 0);
 
     SipMethod objMethod = SipStack::GetMethod(pSipMsg);
 
     if (objMethod.Equals(SipMethod::ACK) && !SipStack::IsRequestMessage(pSipMsg))
     {
-        IMS_TRACE_I("__UAC__ :: __ACK RESPONSE RECEIVED__", 0, 0, 0);
+        IMS_TRACE_I("__UAC__: __ACK RESPONSE RECEIVED__", 0, 0, 0);
         return SipPrivate::MESSAGE_DISCARDED;
     }
 
@@ -925,7 +923,7 @@ PUBLIC GLOBAL IMS_SINT32 SipClientTransactionState::MatchTransaction(IN ::SipMes
 
     if (bStatus == SIP_FALSE)
     {
-        IMS_TRACE_E(nError, "OnRecvMessage() Failed", 0, 0, 0);
+        IMS_TRACE_E(nError, "OnRecvMessage Failed", 0, 0, 0);
         return SipPrivate::MESSAGE_FAILED;
     }
 
@@ -933,43 +931,43 @@ PUBLIC GLOBAL IMS_SINT32 SipClientTransactionState::MatchTransaction(IN ::SipMes
     {
         case SipTxn::STATUS_NEW_REQ_RECVD:
         {
-            IMS_TRACE_I("__UAC__ :: _____ NEW REQUEST _____", 0, 0, 0);
+            IMS_TRACE_I("__UAC__: ___ NEW REQUEST ___", 0, 0, 0);
             break;
         }
         case SipTxn::STATUS_VALID_MESSAGE:
         {
-            IMS_TRACE_I("__UAC__ :: _____ VALID MESSAGE _____", 0, 0, 0);
+            IMS_TRACE_I("__UAC__: ___ VALID MESSAGE ___", 0, 0, 0);
             break;
         }
         case SipTxn::STATUS_IGNORE_REQ:
         {
-            IMS_TRACE_I("__UAC__ :: _____ IGNORE REQUEST _____", 0, 0, 0);
+            IMS_TRACE_I("__UAC__: ___ IGNORE REQUEST ___", 0, 0, 0);
             return SipPrivate::MESSAGE_DISCARDED;
         }
         case SipTxn::STATUS_IGNORE_RESP:
         {
-            IMS_TRACE_I("__UAC__ :: _____ IGNORE RESPONSE _____", 0, 0, 0);
+            IMS_TRACE_I("__UAC__: ___ IGNORE RESPONSE ___", 0, 0, 0);
             return SipPrivate::MESSAGE_DISCARDED;
         }
         case SipTxn::STATUS_STRAY_RESP:
         {
-            IMS_TRACE_I("__UAC__ :: _____ STRAY RESPONSE _____", 0, 0, 0);
+            IMS_TRACE_I("__UAC__: ____ STRAY RESPONSE ___", 0, 0, 0);
             return SipPrivate::MESSAGE_DISCARDED;
         }
         case SipTxn::STATUS_RETRANSMISSION:
         {
-            IMS_TRACE_I("__UAC__ :: _____ REMOTE RETRANSMISSION _____", 0, 0, 0);
+            IMS_TRACE_I("__UAC__: ___ REMOTE RETRANSMISSION ___", 0, 0, 0);
             return SipPrivate::MESSAGE_DISCARDED;
         }
         case SipTxn::STATUS_ERROR_ON_SEND:    // FALL-THROUGH
         case SipTxn::STATUS_INVALID_MESSAGE:  // FALL-THROUGH
         case SipTxn::STATUS_INVALID:
         {
-            IMS_TRACE_I("__UAC__ :: _____ PROCESSING FAILED _____", 0, 0, 0);
+            IMS_TRACE_I("__UAC__: ___ PROCESSING FAILED ___", 0, 0, 0);
             return SipPrivate::MESSAGE_FAILED;
         }
         default:
-            IMS_TRACE_I("__UAC__ :: _____ PROCESSING FAILED _____", 0, 0, 0);
+            IMS_TRACE_I("__UAC__: ___ PROCESSING FAILED ___", 0, 0, 0);
             return SipPrivate::MESSAGE_FAILED;
     }
 
@@ -991,7 +989,7 @@ PUBLIC GLOBAL IMS_SINT32 SipClientTransactionState::MatchTransaction(IN ::SipMes
         return SipPrivate::MESSAGE_FAILED;
     }
 
-    // FORKED_RESPONSE :: Check & look up the appropriate client transaction ...
+    // FORKED_RESPONSE: Check & look up the appropriate client transaction.
     // FORKED_RESPONSE_TO_SUPPORT_EARLY_DIALOG_TERMINATION
     RcPtr<SipForkedTransactionManager> pTmpFtm;
 
@@ -1162,7 +1160,7 @@ void SipClientTransactionState::CheckNSendAck()
         // SipStack::FreeMessage(m_pLastSipMsg);
         // m_pLastSipMsg = SipStack::CloneMessage(pAckSipMsg);
 
-        IMS_TRACE_I("___ SENDING ACK REQUEST .....", 0, 0, 0);
+        IMS_TRACE_I("___ SENDING ACK REQUEST", 0, 0, 0);
         SipTransactionState::Send(pAckSipMsg, IMS_NULL);
 
         SipStack::FreeMessage(pAckSipMsg);
@@ -1206,7 +1204,7 @@ IMS_BOOL SipClientTransactionState::HandleForkedResponse(IN const SipMessageInfo
         return IMS_FALSE;
     }
 
-    // Add the forked transaction to the forked transaction manager...
+    // Add the forked transaction to the forked transaction manager.
     pForkedCtState->m_pForkedTxnMngr = m_pForkedTxnMngr;
 
     if (!pForkedCtState->m_pForkedTxnMngr.IsNull())
@@ -1657,7 +1655,7 @@ IMS_BOOL SipClientTransactionState::UpdateTxnDetails(IN const SipMethod& objMeth
         // Use an existing dialog
         else
         {
-            IMS_TRACE_D("_____ UPDATE DIALOG  (%s:%s) _____", objMethod.ToString().GetStr(),
+            IMS_TRACE_D("___ UPDATE DIALOG(%s|%s) ___", objMethod.ToString().GetStr(),
                     SipDebug::GetCharA1(pDState->GetCallId().GetStr(), 8, '@'), 0);
 
             m_pDialogEx = pTmpDialogEx;

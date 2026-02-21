@@ -25,10 +25,12 @@
 #include "ISipMessage.h"
 #include "ISipMessageBodyPart.h"
 #include "RegParameter.h"
+#include "RegStateTracker.h"
 #include "Sip.h"
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
 #include "SipParsingHelper.h"
+#include "SipProfile.h"
 #include "SipStatusCode.h"
 #include "base/SubscriberTracker.h"
 #include "util/UserAgentHeader.h"
@@ -148,7 +150,7 @@ IMS_BOOL ExtraHeaders::AddHeader(IN const AString& strName, IN const AString& st
         }
     }
 
-    // If no match found...
+    // If no match found.
     pNewHeader->AddReference();
 
     if (!m_objHeaders.Append(pNewHeader))
@@ -245,7 +247,7 @@ RegParameter::RegParameter(IN IMS_SINT32 nSlotId) :
     m_pExtraHeaders = new ExtraHeaders();
     m_nPort = SipConfigProxy::GetPort(GetSlotId());
 
-    IMS_TRACE_D("The default port_uc (%d) is selected", m_nPort, 0, 0);
+    IMS_TRACE_D("Default port_uc: %d", m_nPort, 0, 0);
 }
 
 PUBLIC VIRTUAL RegParameter::~RegParameter()
@@ -594,13 +596,12 @@ IMS_SINT32 RegParameter::GetProtectedPortUc() const
 
     if (m_pPreferredSecurityClient == IMS_NULL)
     {
-        IMS_TRACE_D("The configured port_uc (%d) is selected", GetPort(), 0, 0);
+        IMS_TRACE_D("Configured port_uc: %d", GetPort(), 0, 0);
 
         return GetPort();
     }
 
-    IMS_TRACE_D(
-            "The protected port_uc (%d) is selected", m_pPreferredSecurityClient->GetPortC(), 0, 0);
+    IMS_TRACE_D("Protected port_uc: %d", m_pPreferredSecurityClient->GetPortC(), 0, 0);
 
     return m_pPreferredSecurityClient->GetPortC();
 }
@@ -615,13 +616,12 @@ IMS_SINT32 RegParameter::GetProtectedPortUs() const
 
     if (m_pPreferredSecurityClient == IMS_NULL)
     {
-        IMS_TRACE_D("The configured port_us (%d) is selected", GetPort(), 0, 0);
+        IMS_TRACE_D("Configured port_us: %d", GetPort(), 0, 0);
 
         return GetPort();
     }
 
-    IMS_TRACE_D(
-            "The protected port_us (%d) is selected", m_pPreferredSecurityClient->GetPortS(), 0, 0);
+    IMS_TRACE_D("Protected port_us: %d", m_pPreferredSecurityClient->GetPortS(), 0, 0);
 
     return m_pPreferredSecurityClient->GetPortS();
 }
@@ -699,7 +699,7 @@ void RegParameter::RestoreSecurityHeaders()
 
     if ((m_pPreferredSecurityClient != IMS_NULL) || (m_pPreferredSecurityServer != IMS_NULL))
     {
-        IMS_TRACE_D("RestoreSecurityHeaders :: client=%s, server=%s",
+        IMS_TRACE_D("RestoreSecurityHeaders: client=%s, server=%s",
                 (m_pPreferredSecurityClient != IMS_NULL)
                         ? m_pPreferredSecurityClient->ToString().GetStr()
                         : "(null)",
@@ -874,7 +874,7 @@ void RegParameter::UpdateSipProfile(IN const SipProfile* pProfile)
 
     if ((nProfilePort != SipProfile::NOT_PROVISIONED) && (nProfilePort != m_nPort))
     {
-        IMS_TRACE_D("Default port_uc :: %d >> %d", m_nPort, nProfilePort, 0);
+        IMS_TRACE_D("Default port_uc: %d >> %d", m_nPort, nProfilePort, 0);
         m_nPort = nProfilePort;
     }
 }

@@ -37,11 +37,17 @@ template <class T>
 class ImsList;
 union Key;
 
+/**
+ * @brief This class defines the primary interface for controlling and managing {@code MtcCall}.
+ *
+ * It acts as a facade for all call-related operations, delegating actions to the appropriate call
+ * objects and managers.
+ */
 class IMtcCallController : public INativeEnabler
 {
 public:
     /**
-     * Creates a new outgoing call.
+     * @brief Creates a new outgoing call.
      *
      * @param eServiceType Service type of the new call.
      * @param objCallInfo Call information.
@@ -52,21 +58,26 @@ public:
             IN ServiceType eServiceType, IN CallInfo& objCallInfo, IN const AString& strLogTag) = 0;
 
     /**
-     * Sets an interface to interact with the Java layer.
+     * @brief Sets an interface to interact with the Java layer.
      *
-     * @param nCallKey Key of the call to be manipulated.
+     * This is typically called for an incoming call after the framework is ready to proceed with
+     * handling it.
+     *
+     * @param nCallKey Key of the call to be attached.
      */
     virtual void Attach(IN CallKey nCallKey) = 0;
 
     /**
-     * Detaches the call associated with the specified call key.
+     * @brief Detaches the call associated with the specified call key.
      *
-     * @param nCallKey Key of the call to be manipulated.
+     * This is called when the call is terminated and its resources can be released.
+     *
+     * @param nCallKey Key of the call to be detached.
      */
     virtual void Detach(IN CallKey nCallKey) = 0;
 
     /**
-     * Creates a call to handle the incoming call.
+     * @brief Creates a call to handle the incoming call.
      *
      * @param pService Service of the incoming call.
      * @param piSession Session of the incoming call.
@@ -74,9 +85,9 @@ public:
     virtual void HandleIncoming(IN IMtcService* pService, IN ISession* piSession) = 0;
 
     /**
-     * Sets the call information to start the outgoing call.
+     * @brief Sets the call information to start the outgoing call.
      *
-     * @param nCallKey Key of the call to be manipulated.
+     * @param nCallKey Key of the call to be started.
      * @param eCallType Type of the call.
      * @param strTarget Remote target.
      * @param objMediaInfo Media of the call.
@@ -86,212 +97,167 @@ public:
             IN MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices) = 0;
 
     /**
-     * Notifies the call that the user is alerted by the incoming call.
+     * @brief Notifies the call that the user is alerted by the incoming call.
      *
-     * @param nCallKey Key of the call to be manipulated.
+     * @param nCallKey Key of the call being alerted.
      */
     virtual void HandleUserAlert(IN CallKey nCallKey) = 0;
 
-    // Accepts an incoming call.
-    // - nIMSKey: Key of the call to be manipulated.
-
     /**
-     * @brief Accepts
+     * @brief Accepts an incoming call.
      *
-     * @param nCallKey
-     * @param eCallType
-     * @param objMediaInfo
+     * @param nCallKey Key of the call to be accepted.
+     * @param eCallType The desired call type for the accepted call.
+     * @param objMediaInfo The media information for the accepted call.
      */
     virtual void Accept(IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo& objMediaInfo) = 0;
 
-    // Rejects an incoming call.
-    // - nIMSKey: Key of the call to be manipulated.
-    // - eSessionType: See MtcDef::SESSIONTYPE_*
-    // - objMediaInfo: `MediaInfo`
-
     /**
-     * @brief Rejects
+     * @brief Rejects an incoming call.
      *
-     * @param nCallKey
-     * @param objReason
+     * @param nCallKey Key of the call to be rejected.
+     * @param objReason The reason for rejecting the call.
      */
     virtual void Reject(IN CallKey nCallKey, IN const CallReasonInfo& objReason) = 0;
 
-    // Holds a call.
-    // - nIMSKey: Key of the call to be manipulated.
-    // - objMediaInfo: `MediaInfo`
-
     /**
-     * @brief Holds
+     * @brief Holds a call.
      *
-     * @param nCallKey
-     * @param objMediaInfo
+     * @param nCallKey Key of the call to be held.
+     * @param objMediaInfo The media information to be used for the hold operation.
      */
     virtual void Hold(IN CallKey nCallKey, IN MediaInfo& objMediaInfo) = 0;
 
-    // Resumes a call.
-    // - nIMSKey: Key of the call to be manipulated.
-    // - objMediaInfo: `MediaInfo`
-
     /**
-     * @brief Resumes
+     * @brief Resumes a call.
      *
-     * @param nCallKey
-     * @param objMediaInfo
+     * @param nCallKey Key of the call to be resumed.
+     * @param objMediaInfo The media information to be used for the resume operation.
      */
     virtual void Resume(IN CallKey nCallKey, IN MediaInfo& objMediaInfo) = 0;
 
-    // Accepts the resume request from the remote.
-    // - nIMSKey: Key of the call to be manipulated.
-    // - eSessionType: See MtcDef::SESSIONTYPE_*
-    // - objMediaInfo: `MediaInfo`
-
     /**
-     * @brief Accepts
+     * @brief Accepts the resume request from the remote.
      *
-     * @param nCallKey
-     * @param eCallType
-     * @param objMediaInfo
+     * @param nCallKey Key of the call for which resume is being accepted.
+     * @param eCallType The call type after resuming.
+     * @param objMediaInfo The media information for the resumed call.
      */
     virtual void AcceptResume(
             IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo& objMediaInfo) = 0;
 
-    // Rejects the resume request from the remote.
-    // - nIMSKey: Key of the call to be manipulated.
-    // - objReason: Rejected reason.
-
     /**
-     * @brief Rejects
+     * @brief Rejects the resume request from the remote.
      *
-     * @param nCallKey
-     * @param objReason
+     * @param nCallKey Key of the call for which resume is being rejected.
+     * @param objReason The reason for rejecting the resume request.
      */
     virtual void RejectResume(IN CallKey nCallKey, IN const CallReasonInfo& objReason) = 0;
 
-    // Terminates a call.
-    // - nIMSKey: Key of the call to be manipulated.
-    // - objReason: Terminate reason.
-
     /**
-     * @brief Terminates
+     * @brief Terminates a call.
      *
-     * @param nCallKey
-     * @param objReason
+     * @param nCallKey Key of the call to be terminated.
+     * @param objReason The reason for terminating the call.
      */
     virtual void Terminate(IN CallKey nCallKey, IN const CallReasonInfo& objReason) = 0;
 
-    // Modifies media parameters of a call.
-    // - nIMSKey: Key of the call to be manipulated.
-    // - eSessionType: See MtcDef::SESSIONTYPE_*
-    // - objMediaInfo: `MediaInfo`
-
     /**
-     * @brief Updates
+     * @brief Modifies media parameters of a call.
      *
-     * @param nCallKey
-     * @param eCallType
-     * @param objMediaInfo
+     * @param nCallKey Key of the call to be updated.
+     * @param eCallType The new call type.
+     * @param objMediaInfo The new media information.
      */
     virtual void Update(IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo& objMediaInfo) = 0;
 
-    // Cancels the ongoing modification request.
-    // - nIMSKey: Key of the call to be manipulated.
-    // - objReason: Canceled reason.
-
     /**
-     * @brief Cancels
+     * @brief Cancels the ongoing modification request.
      *
-     * @param nCallKey
-     * @param objReason
+     * @param nCallKey Key of the call for which the update is being canceled.
+     * @param objReason The reason for canceling the update.
      */
     virtual void CancelUpdate(IN CallKey nCallKey, IN const CallReasonInfo& objReason) = 0;
 
-    // Accepts the modification request from the remote.
-    // - nIMSKey: Key of the call to be manipulated.
-    // - eSessionType: See MtcDef::SESSIONTYPE_*
-    // - objMediaInfo: `MediaInfo`
-
     /**
-     * @brief Accepts
+     * @brief Accepts the modification request from the remote.
      *
-     * @param nCallKey
-     * @param eCallType
-     * @param objMediaInfo
+     * @param nCallKey Key of the call for which the update is being accepted.
+     * @param eCallType The call type after the update.
+     * @param objMediaInfo The media information for the updated call.
      */
     virtual void AcceptUpdate(
             IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo& objMediaInfo) = 0;
 
-    // Rejects the modification request from the remote.
-    // - nIMSKey: Key of the call to be manipulated.
-    // - objReason: Rejected reason.
-
     /**
-     * @brief Rejects
+     * @brief Rejects the modification request from the remote.
      *
-     * @param nCallKey
-     * @param objReason
+     * @param nCallKey Key of the call for which the update is being rejected.
+     * @param objReason The reason for rejecting the update.
      */
     virtual void RejectUpdate(IN CallKey nCallKey, IN const CallReasonInfo& objReason) = 0;
 
-    // Sends USSD. Nothing happens if the specified call isn't a USSI session.
-    // - nIMSKey: Key of the call to be manipulated.
-    // - aStrUSSD: USSD string.
-
     /**
-     * @brief Sends
+     * @brief Sends a USSD.
      *
-     * @param nCallKey
-     * @param strUssd
+     * @param nCallKey Key of the call to send USSD over.
+     * @param strUssd The USSD string to send.
      */
     virtual void SendUssd(IN CallKey nCallKey, IN const AString& strUssd) = 0;
 
     /**
-     * @brief Merges
+     * @brief Merges one or more calls into a conference.
      *
-     * @param nCallKey
-     * @param objUsers
+     * @param nCallKey Key of the call that will host the conference.
+     * @param objUsers List of users (and their calls) to be merged into the conference.
      */
     virtual void MergeToConference(IN CallKey nCallKey, IN ImsList<ConfUser*>& objUsers) = 0;
 
     /**
-     * @brief Adds
+     * @brief Adds participants to an existing conference call.
      *
-     * @param nCallKey
-     * @param objUsers
+     * @param nCallKey Key of the conference call.
+     * @param objUsers List of users to add to the conference.
      */
     virtual void AddToConference(IN CallKey nCallKey, IN ImsList<ConfUser*>& objUsers) = 0;
 
     /**
-     * @brief Removes
+     * @brief Removes participants from an existing conference call.
      *
-     * @param nCallKey
-     * @param objUsers
+     * @param nCallKey Key of the conference call.
+     * @param objUsers List of users to remove from the conference.
      */
     virtual void RemoveFromConference(IN CallKey nCallKey, IN ImsList<ConfUser*>& objUsers) = 0;
 
     /**
-     * @brief Transfers
+     * @brief Transfers an ongoing call to a new target.
      *
-     * @param nCallKey
-     * @param strTarget
+     * @param nCallKey Key of the call to be transferred.
+     * @param strTarget The URI of the transfer target.
      */
     virtual void Transfer(IN CallKey nCallKey, IN const AString& strTarget) = 0;
 
     /**
      * @brief Handles a BYE transaction for a call.
      *
-     * @param nCallKey Key of the call to be manipulated.
+     * This is used to perform an action (like registration recovery) after a BYE transaction
+     * completes or times out.
+     *
+     * @param nCallKey Key of the call being terminated.
      * @param objOperation The operation to be executed when the BYE transaction is completed.
      */
     virtual void HandleByeTransaction(
             IN CallKey nCallKey, IN std::function<void(ISession&)> objOperation) = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets or creates a helper for handling silent redial scenarios.
      *
-     * @param objContext
-     * @param objReason
-     * @return
+     * If a helper for the same redial type already exists, it is returned. Otherwise, a new one
+     * is created.
+     *
+     * @param objContext The context of the call that needs redialing.
+     * @param objReason The reason that triggered the redial.
+     * @return A reference to the silent redial helper.
      */
     virtual ISilentRedialHelper& GetRedialHelper(
             IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason) = 0;
@@ -307,8 +273,9 @@ public:
     virtual const ISilentRedialHelper* GetActiveRedialHelper() const = 0;
 
     /**
-     * @brief Releases
+     * @brief Releases the current silent redial helper instance.
      *
+     * This should be called when the redial sequence is completed or no longer needed.
      */
     virtual void ReleaseRedialHelper() = 0;
 };

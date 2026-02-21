@@ -21,8 +21,10 @@
 
 #include <MockISessionDescriptor.h>
 #include "core/media/MockIMediaDescriptor.h"
+#include "config/MockMediaSessionConfig.h"
 
 using ::testing::_;
+using ::testing::Return;
 
 class TextSdpGeneratorTest : public ::testing::Test
 {
@@ -30,6 +32,7 @@ public:
     std::unique_ptr<TextSdpGenerator> m_pGenerator;
     std::unique_ptr<MockIMediaDescriptor> m_pMockIMediaDescriptor;
     std::unique_ptr<MockISessionDescriptor> m_pMockISessionDescriptor;
+    std::unique_ptr<MockMediaSessionConfig> m_pMockMediaSessionConfig;
     std::unique_ptr<TextProfile> m_pTextProfile;
 
 protected:
@@ -38,8 +41,11 @@ protected:
         m_pGenerator = std::make_unique<TextSdpGenerator>();
         m_pMockIMediaDescriptor = std::make_unique<MockIMediaDescriptor>();
         m_pMockISessionDescriptor = std::make_unique<MockISessionDescriptor>();
+        m_pMockMediaSessionConfig = std::make_unique<MockMediaSessionConfig>();
         m_pTextProfile = std::make_unique<TextProfile>();
     }
+
+    void TearDown() override {}
 };
 
 TEST_F(TextSdpGeneratorTest, TestGenerateRedFmtp)
@@ -60,8 +66,8 @@ TEST_F(TextSdpGeneratorTest, TestGenerateRedFmtp)
     EXPECT_CALL(*m_pMockIMediaDescriptor,
             SetMediaFormat(_, AString("101"), AString("t140/1000"), AString::ConstNull()))
             .Times(1);
-    EXPECT_TRUE(m_pGenerator->Generate(
-            m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(), m_pTextProfile.get()));
+    EXPECT_TRUE(m_pGenerator->Generate(m_pMockISessionDescriptor.get(),
+            m_pMockIMediaDescriptor.get(), m_pTextProfile.get(), m_pMockMediaSessionConfig.get()));
 }
 
 TEST_F(TextSdpGeneratorTest, TestGenerateRedFmtpEmpty)
@@ -80,8 +86,8 @@ TEST_F(TextSdpGeneratorTest, TestGenerateRedFmtpEmpty)
     EXPECT_CALL(*m_pMockIMediaDescriptor,
             SetMediaFormat(_, AString("101"), AString("t140/1000"), AString::ConstNull()))
             .Times(1);
-    EXPECT_TRUE(m_pGenerator->Generate(
-            m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(), m_pTextProfile.get()));
+    EXPECT_TRUE(m_pGenerator->Generate(m_pMockISessionDescriptor.get(),
+            m_pMockIMediaDescriptor.get(), m_pTextProfile.get(), m_pMockMediaSessionConfig.get()));
 }
 
 TEST_F(TextSdpGeneratorTest, TestGenerateRedFmtpNull)
@@ -100,8 +106,8 @@ TEST_F(TextSdpGeneratorTest, TestGenerateRedFmtpNull)
     EXPECT_CALL(*m_pMockIMediaDescriptor,
             SetMediaFormat(_, AString("101"), AString("t140/1000"), AString::ConstNull()))
             .Times(1);
-    EXPECT_TRUE(m_pGenerator->Generate(
-            m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(), m_pTextProfile.get()));
+    EXPECT_TRUE(m_pGenerator->Generate(m_pMockISessionDescriptor.get(),
+            m_pMockIMediaDescriptor.get(), m_pTextProfile.get(), m_pMockMediaSessionConfig.get()));
 }
 
 TEST_F(TextSdpGeneratorTest, TestGenerateRedFmtpNoSubPayload)
@@ -114,18 +120,20 @@ TEST_F(TextSdpGeneratorTest, TestGenerateRedFmtpNoSubPayload)
     // The RED payload is removed because its sub-payload doesn't exist.
     // So, SetMediaFormat should not be called at all.
     EXPECT_CALL(*m_pMockIMediaDescriptor, SetMediaFormat(_, _, _, _)).Times(0);
-    EXPECT_TRUE(m_pGenerator->Generate(
-            m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(), m_pTextProfile.get()));
+    EXPECT_TRUE(m_pGenerator->Generate(m_pMockISessionDescriptor.get(),
+            m_pMockIMediaDescriptor.get(), m_pTextProfile.get(), m_pMockMediaSessionConfig.get()));
 }
 
 TEST_F(TextSdpGeneratorTest, TestGenerateNull)
 {
-    EXPECT_FALSE(
-            m_pGenerator->Generate(IMS_NULL, m_pMockIMediaDescriptor.get(), m_pTextProfile.get()));
-    EXPECT_FALSE(m_pGenerator->Generate(
-            m_pMockISessionDescriptor.get(), IMS_NULL, m_pTextProfile.get()));
-    EXPECT_FALSE(m_pGenerator->Generate(
-            m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(), IMS_NULL));
+    EXPECT_FALSE(m_pGenerator->Generate(m_pMockISessionDescriptor.get(),
+            m_pMockIMediaDescriptor.get(), m_pTextProfile.get(), IMS_NULL));
+    EXPECT_FALSE(m_pGenerator->Generate(IMS_NULL, m_pMockIMediaDescriptor.get(),
+            m_pTextProfile.get(), m_pMockMediaSessionConfig.get()));
+    EXPECT_FALSE(m_pGenerator->Generate(m_pMockISessionDescriptor.get(), IMS_NULL,
+            m_pTextProfile.get(), m_pMockMediaSessionConfig.get()));
+    EXPECT_FALSE(m_pGenerator->Generate(m_pMockISessionDescriptor.get(),
+            m_pMockIMediaDescriptor.get(), IMS_NULL, m_pMockMediaSessionConfig.get()));
 }
 
 TEST_F(TextSdpGeneratorTest, TestGenerateRtpMapNoPayload)
@@ -136,8 +144,8 @@ TEST_F(TextSdpGeneratorTest, TestGenerateRtpMapNoPayload)
     m_pTextProfile->AddPayload(pPayload);
 
     EXPECT_CALL(*m_pMockIMediaDescriptor, SetMediaFormat(_, _, _, _)).Times(0);
-    m_pGenerator->Generate(
-            m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(), m_pTextProfile.get());
+    m_pGenerator->Generate(m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(),
+            m_pTextProfile.get(), m_pMockMediaSessionConfig.get());
 }
 
 TEST_F(TextSdpGeneratorTest, TestGenerateRedFmtpWithZeroLevel)
@@ -161,8 +169,8 @@ TEST_F(TextSdpGeneratorTest, TestGenerateRedFmtpWithZeroLevel)
     // Expect SetMediaFormat to be called for T140 as well
     EXPECT_CALL(*m_pMockIMediaDescriptor, SetMediaFormat(_, AString("101"), _, _)).Times(1);
 
-    m_pGenerator->Generate(
-            m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(), m_pTextProfile.get());
+    m_pGenerator->Generate(m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(),
+            m_pTextProfile.get(), m_pMockMediaSessionConfig.get());
 }
 
 TEST_F(TextSdpGeneratorTest, TestCheckRedPayloadSubTypeValiditySubTypeMissing)
@@ -186,8 +194,8 @@ TEST_F(TextSdpGeneratorTest, TestCheckRedPayloadSubTypeValiditySubTypeMissing)
             SetMediaFormat(_, AString("105"), AString("t140/1000"), AString::ConstNull()))
             .Times(1);
 
-    m_pGenerator->Generate(
-            m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(), m_pTextProfile.get());
+    m_pGenerator->Generate(m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(),
+            m_pTextProfile.get(), m_pMockMediaSessionConfig.get());
 }
 
 TEST_F(TextSdpGeneratorTest, TestGenerateRtpMapInvalidPayload)
@@ -200,8 +208,8 @@ TEST_F(TextSdpGeneratorTest, TestGenerateRtpMapInvalidPayload)
     m_pTextProfile->AddPayload(pPayload);
 
     EXPECT_CALL(*m_pMockIMediaDescriptor, SetMediaFormat(_, _, _, _)).Times(0);
-    m_pGenerator->Generate(
-            m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(), m_pTextProfile.get());
+    m_pGenerator->Generate(m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(),
+            m_pTextProfile.get(), m_pMockMediaSessionConfig.get());
 }
 
 TEST_F(TextSdpGeneratorTest, TestGenerateT140FmtpCpsNotVisible)
@@ -216,8 +224,8 @@ TEST_F(TextSdpGeneratorTest, TestGenerateT140FmtpCpsNotVisible)
     m_pTextProfile->AddPayload(pPayload);
 
     EXPECT_CALL(*m_pMockIMediaDescriptor, SetMediaFormat(_, _, _, AString::ConstNull())).Times(1);
-    m_pGenerator->Generate(
-            m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(), m_pTextProfile.get());
+    m_pGenerator->Generate(m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(),
+            m_pTextProfile.get(), m_pMockMediaSessionConfig.get());
 }
 
 TEST_F(TextSdpGeneratorTest, TestGenerateT140FmtpCpsVisible)
@@ -233,8 +241,8 @@ TEST_F(TextSdpGeneratorTest, TestGenerateT140FmtpCpsVisible)
     m_pTextProfile->AddPayload(pPayload);
 
     EXPECT_CALL(*m_pMockIMediaDescriptor, SetMediaFormat(_, _, _, AString("cps=40"))).Times(1);
-    m_pGenerator->Generate(
-            m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(), m_pTextProfile.get());
+    m_pGenerator->Generate(m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(),
+            m_pTextProfile.get(), m_pMockMediaSessionConfig.get());
 }
 
 TEST_F(TextSdpGeneratorTest, TestGenerateT140FmtpNull)
@@ -243,12 +251,12 @@ TEST_F(TextSdpGeneratorTest, TestGenerateT140FmtpNull)
     pPayload->GetRtpMap().SetPayloadType("t140");
     pPayload->GetRtpMap().SetPayloadNumber(100);
     pPayload->GetRtpMap().SetSamplingRate(1000);
-    pPayload->SetFmtp(nullptr);  // Null FMTP
+    pPayload->SetFmtp(IMS_NULL);  // Null FMTP
     m_pTextProfile->AddPayload(pPayload);
 
     EXPECT_CALL(*m_pMockIMediaDescriptor, SetMediaFormat(_, _, _, AString::ConstNull())).Times(1);
-    m_pGenerator->Generate(
-            m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(), m_pTextProfile.get());
+    m_pGenerator->Generate(m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(),
+            m_pTextProfile.get(), m_pMockMediaSessionConfig.get());
 }
 
 TEST_F(TextSdpGeneratorTest, TestCheckRedPayloadSubTypeValidityNullInList)
@@ -261,7 +269,7 @@ TEST_F(TextSdpGeneratorTest, TestCheckRedPayloadSubTypeValidityNullInList)
     m_pTextProfile->AddPayload(pRedPayload);
 
     // Add a null payload in the middle
-    m_pTextProfile->GetPayloadList().Append(nullptr);
+    m_pTextProfile->GetPayloadList().Append(IMS_NULL);
 
     // Add the corresponding T140 payload
     TextProfile::Payload* pT140Payload = new TextProfile::Payload();
@@ -276,6 +284,41 @@ TEST_F(TextSdpGeneratorTest, TestCheckRedPayloadSubTypeValidityNullInList)
             SetMediaFormat(_, AString("101"), AString("t140/1000"), AString::ConstNull()))
             .Times(1);
 
-    m_pGenerator->Generate(
-            m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(), m_pTextProfile.get());
+    m_pGenerator->Generate(m_pMockISessionDescriptor.get(), m_pMockIMediaDescriptor.get(),
+            m_pTextProfile.get(), m_pMockMediaSessionConfig.get());
+}
+
+class TestableTextSdpGenerator : public TextSdpGenerator
+{
+public:
+    using TextSdpGenerator::GenerateCommonAttributes;
+};
+
+TEST_F(TextSdpGeneratorTest, TestSetSdpMediaIpAddress)
+{
+    // Arrange
+    TestableTextSdpGenerator generator;
+    const AString kTestIpAddress = "192.168.1.100";
+    m_pTextProfile->SetIpAddress(IpAddress(kTestIpAddress));
+
+    // Case 1: IsAddCLineForEachMediaEnabled() returns true.
+    // SetConnectionAddress should be called with the profile's IP address.
+    EXPECT_CALL(*m_pMockMediaSessionConfig, IsAddCLineForEachMediaEnabled())
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(*m_pMockIMediaDescriptor, SetConnectionAddress(AString(kTestIpAddress))).Times(1);
+
+    // Act
+    generator.GenerateCommonAttributes(m_pMockISessionDescriptor.get(),
+            m_pMockIMediaDescriptor.get(), m_pTextProfile.get(), m_pMockMediaSessionConfig.get());
+
+    // Case 2: IsAddCLineForEachMediaEnabled() returns false.
+    // SetConnectionAddress should NOT be called.
+    testing::Mock::VerifyAndClearExpectations(m_pMockIMediaDescriptor.get());
+    EXPECT_CALL(*m_pMockMediaSessionConfig, IsAddCLineForEachMediaEnabled())
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(*m_pMockIMediaDescriptor, SetConnectionAddress(_)).Times(0);
+
+    // Act
+    generator.GenerateCommonAttributes(m_pMockISessionDescriptor.get(),
+            m_pMockIMediaDescriptor.get(), m_pTextProfile.get(), m_pMockMediaSessionConfig.get());
 }

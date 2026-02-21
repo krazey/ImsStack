@@ -16,10 +16,10 @@
 #ifndef INTERFACE_PAGE_MESSAGE_H_
 #define INTERFACE_PAGE_MESSAGE_H_
 
-#include "ByteArray.h"
-
 #include "IServiceMethod.h"
 #include "SipStatusCode.h"
+
+class ByteArray;
 
 class IPageMessageListener;
 

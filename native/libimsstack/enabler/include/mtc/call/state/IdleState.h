@@ -82,6 +82,7 @@ private:
     AString RemoveCallerIdServiceCodeAndUpdateSuppService(IN const AString& strTarget);
     const CallReasonInfo GetInternalErrorReason() const;
     void PerformPreRadioCheckForMo();
+    IMS_BOOL MaybeStopEmergencyRegistration();
 
     std::unique_ptr<IMtcBlockChecker> m_pBlockChecker;
     std::function<CallStateName()> m_objOperationAfterBlockCheck;

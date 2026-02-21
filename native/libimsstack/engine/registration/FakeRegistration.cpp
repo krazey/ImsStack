@@ -29,6 +29,7 @@
 #include "SipStatusCode.h"
 #include "SipUrnHelper.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 
 __IMS_TRACE_TAG_REG__;
 
@@ -59,10 +60,12 @@ PUBLIC VIRTUAL FakeRegistration::~FakeRegistration()
 
     RegBindingProxy::DestroyBinding(GetSlotId(), this);
 
-    IMS_TRACE_D("Destructor :: Registration - %s",
+#ifdef __IMS_CORE_DEBUG__
+    IMS_TRACE_D("dtor: Registration - %s",
             (m_pRegFlow != IMS_NULL) ? SipDebug::GetCharA1(m_pRegFlow->GetCallId().GetStr(), 8, '@')
                                      : "__UNKNOWN__",
             0, 0);
+#endif
 
     if (m_pRegFlow != IMS_NULL)
     {
@@ -122,7 +125,7 @@ IMS_BOOL FakeRegistration::Create(IN IMS_UINT32 nFlowId, IN const SipAddress& ob
 PUBLIC
 void FakeRegistration::Destroy()
 {
-    IMS_TRACE_D("Registration :: Destroy() - SCNEL=%d", m_nRefCountForScnErrorListener, 0, 0);
+    IMS_TRACE_D("Registration: Destroy(SCNEL=%d)", m_nRefCountForScnErrorListener, 0, 0);
 
     DestroyAllContacts();
     UpdateBindingState(BINDING_DESTROY);
@@ -328,7 +331,7 @@ PRIVATE VIRTUAL void FakeRegistration::DestroyAllContacts()
     {
         RegContact* pContact = m_objContacts.GetAt(0);
 
-        // Notify the removal of contact to the RegBinding ...
+        // Notify the removal of contact to the RegBinding.
         UpdateBindingState(BINDING_DESTROY_CONTACT);
 
         delete pContact;
@@ -346,7 +349,7 @@ PRIVATE VIRTUAL void FakeRegistration::DestroyContact(IN IRegContact* piContact)
 
         if (pContact == piContact)
         {
-            // Notify the removal of contact to the RegBinding ...
+            // Notify the removal of contact to the RegBinding.
             UpdateBindingState(BINDING_DESTROY_CONTACT);
 
             delete pContact;
@@ -367,7 +370,7 @@ PRIVATE VIRTUAL void FakeRegistration::DestroyContact(
 
         if (objIpAddr.Equals(pContact->GetIpAddress()) && (nPort == pContact->GetPort()))
         {
-            // Notify the removal of contact to the RegBinding ...
+            // Notify the removal of contact to the RegBinding.
             UpdateBindingState(BINDING_DESTROY_CONTACT);
 
             delete pContact;
@@ -530,7 +533,7 @@ PRIVATE VIRTUAL void FakeRegistration::RemoveActiveBindingsForcingly()
 
 PRIVATE VIRTUAL void FakeRegistration::Restore()
 {
-    IMS_TRACE_I("Registration::Restore - State (%s)", StateToString(GetState()), 0, 0);
+    IMS_TRACE_I("Registration: Restore on %s", StateToString(GetState()), 0, 0);
 
     // 4 contact handling/ connection if present
 
@@ -574,7 +577,7 @@ PRIVATE VIRTUAL void FakeRegistration::SetRefreshPolicy(IN IMS_SINT32 /*nPolicy*
         IN IMS_SINT32 /*nCriteriaInterval*/, IN IMS_SINT32 /*nValueEorLt*/,
         IN IMS_SINT32 /*nValueGt*/)
 {
-    IMS_TRACE_D("SetRefreshPolicy :: not implemented", 0, 0, 0);
+    IMS_TRACE_D("SetRefreshPolicy: not implemented", 0, 0, 0);
 }
 
 PRIVATE VIRTUAL void FakeRegistration::SetSipProfile(IN SipProfile* pProfile)
@@ -593,14 +596,14 @@ PRIVATE VIRTUAL void FakeRegistration::SetSipProfile(IN SipProfile* pProfile)
 PRIVATE VIRTUAL void FakeRegistration::SetBindingStateListener(
         IN IRegBindingStateListener* /*piListener*/)
 {
-    IMS_TRACE_D("SetBindingStateListener :: not implemented", 0, 0, 0);
+    IMS_TRACE_D("SetBindingStateListener: not implemented", 0, 0, 0);
 }
 
 PRIVATE VIRTUAL void FakeRegistration::SetFlagForWithinTrustDomain(IN IMS_BOOL bWithinTrustDomain)
 {
     if (m_bIsWithinTrustDomain != bWithinTrustDomain)
     {
-        IMS_TRACE_I("WithinTrustDomain:: %s > %s", _TRACE_B_(m_bIsWithinTrustDomain),
+        IMS_TRACE_I("WithinTrustDomain: %s > %s", _TRACE_B_(m_bIsWithinTrustDomain),
                 _TRACE_B_(bWithinTrustDomain), 0);
 
         m_bIsWithinTrustDomain = bWithinTrustDomain;
@@ -626,18 +629,17 @@ PRIVATE VIRTUAL void FakeRegistration::ConnectionNotifierError_NotifyError(
 {
     (void)piScn;
 
-    IMS_TRACE_D("ConnectionNotifierError_NotifyError :: code=%d, message=%s", nCode,
-            strMessage.GetStr(), 0);
+    IMS_TRACE_D("ConnectionNotifierError_NotifyError: %d|%s", nCode, strMessage.GetStr(), 0);
 
     if (GetState() != STATE_ACTIVE)
     {
-        IMS_TRACE_D("FakeRegistration :: State is not in the ACTIVE; ignored ...", 0, 0, 0);
+        IMS_TRACE_D("Registration: State not in ACTIVE", 0, 0, 0);
         return;
     }
 
     if (GetSubState() != SUB_STATE_IDLE)
     {
-        IMS_TRACE_D("FakeRegistration :: Sub-State is not in the IDLE; ignored ...", 0, 0, 0);
+        IMS_TRACE_D("Registration: Sub-State not in IDLE", 0, 0, 0);
         return;
     }
 
@@ -683,8 +685,8 @@ PRIVATE VIRTUAL void FakeRegistration::RemoveObserver(IN RegObserver* pObserver)
 
 PRIVATE VIRTUAL IMS_SINT32 FakeRegistration::AddReferenceForScnErrorListener()
 {
-#ifdef __IMS_DEBUG__
-    IMS_TRACE_D("Registration :: SCNEL (add) - %d >> %d", m_nRefCountForScnErrorListener,
+#ifdef __IMS_CORE_DEBUG__
+    IMS_TRACE_D("Registration: SCNEL(add): %d >> %d", m_nRefCountForScnErrorListener,
             (m_nRefCountForScnErrorListener + 1), 0);
 #endif
 
@@ -697,8 +699,8 @@ PRIVATE VIRTUAL IMS_SINT32 FakeRegistration::RemoveReferenceForScnErrorListener(
 {
     if (m_nRefCountForScnErrorListener > 0)
     {
-#ifdef __IMS_DEBUG__
-        IMS_TRACE_D("Registration :: SCNEL (remove) - %d >> %d", m_nRefCountForScnErrorListener,
+#ifdef __IMS_CORE_DEBUG__
+        IMS_TRACE_D("Registration: SCNEL(remove): %d >> %d", m_nRefCountForScnErrorListener,
                 (m_nRefCountForScnErrorListener - 1), 0);
 #endif
 
@@ -706,7 +708,7 @@ PRIVATE VIRTUAL IMS_SINT32 FakeRegistration::RemoveReferenceForScnErrorListener(
 
         if (m_nRefCountForScnErrorListener == 0)
         {
-            IMS_TRACE_D("Registration :: SCNEL (0)", 0, 0, 0);
+            IMS_TRACE_D("Registration: SCNEL(0)", 0, 0, 0);
         }
     }
 
@@ -863,7 +865,7 @@ IMS_SINT32 FakeRegistration::GetPortUs() const
 PRIVATE
 void FakeRegistration::NotifyResponse(IN IMS_SINT32 nStatusCode)
 {
-    IMS_TRACE_I("Registration - %d response to REGISTER received", nStatusCode, 0, 0);
+    IMS_TRACE_I("Registration: %d-REGISTER received", nStatusCode, 0, 0);
 
     if (SipStatusCode::Is1XX(nStatusCode))
     {
@@ -950,7 +952,7 @@ void FakeRegistration::NotifyResponse(IN IMS_SINT32 nStatusCode)
 PRIVATE
 void FakeRegistration::SetState(IN IMS_SINT32 nState)
 {
-    IMS_TRACE_I("Registration (%s) :: %s to %s",
+    IMS_TRACE_I("Registration: (%s) %s to %s",
             SipDebug::GetUri1(m_pStateTracker->GetAor().GetUri()).GetStr(), StateToString(m_nState),
             StateToString(nState));
 
@@ -960,7 +962,7 @@ void FakeRegistration::SetState(IN IMS_SINT32 nState)
 PRIVATE
 void FakeRegistration::SetSubState(IN IMS_SINT32 nSubState)
 {
-    IMS_TRACE_I("Registration (Sub-State) :: %s to %s", SubStateToString(m_nSubState),
+    IMS_TRACE_I("Registration: %s to %s (Sub-State)", SubStateToString(m_nSubState),
             SubStateToString(nSubState), 0);
 
     m_nSubState = nSubState;
@@ -1097,7 +1099,7 @@ void FakeRegistration::UpdateCSeqNumber()
     // Increase the CSeq number after the transaction is completed
     IMS_SINT32 nSeqNum = m_pRegFlow->IncreaseNGetCSeqValue(0);
 
-    IMS_TRACE_I("Registration - Sequence Number Changed (%d >> %d)", nSeqNum, (nSeqNum + 1), 0);
+    IMS_TRACE_I("Registration: Sequence Number Changed (%d >> %d)", nSeqNum, (nSeqNum + 1), 0);
 
     // Store the current sequence number (last one) from the last successful response.
     m_pRegFlow->SetCSeqValue(nSeqNum + 1);

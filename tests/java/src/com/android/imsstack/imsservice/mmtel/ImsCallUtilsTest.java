@@ -59,6 +59,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ImsCallUtilsTest {
@@ -77,6 +78,9 @@ public class ImsCallUtilsTest {
     public static final String EXTRA_CONFERENCE_USER_ID = "conference_user_id";
     public static final String ANONYMOUS = "anonymous";
     private static final int SLOT_ID = 0;
+    private static final String TEST_NUMBER = "119";
+    private static final String TEST_COUNTRY_ISO = "tw";
+    private static final String TEST_MNC = "01";
 
     //Mocked classes
     @Mock CarrierConfig mMockCarrierConfig;
@@ -1015,5 +1019,200 @@ public class ImsCallUtilsTest {
                 callProfile.getEmergencyServiceCategories());
         emergencyUrn = callProfile.getEmergencyUrns();
         assertEquals(SOS_SERVICE_URN_GENERIC, emergencyUrn.get(0));
+    }
+
+    @Test
+    public void testResolveCategoryFromNetworkSource() {
+        setupEmergencyNumber(TEST_NUMBER, TEST_COUNTRY_ISO, TEST_MNC,
+                EmergencyNumber.EMERGENCY_NUMBER_SOURCE_NETWORK_SIGNALING);
+        ImsCallProfile profile = createEmergencyProfileWithCategory(
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE);
+        setupEmergencyServiceCategoryConfig(new String[]{"tw,,119,4"}); // FIRE
+
+        SuppInfo suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(
+                mContext, profile, TEST_NUMBER, TEST_COUNTRY_ISO);
+        assertNotNull(suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI));
+        assertEquals(SOS_SERVICE_URN_POLICE,
+                suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI).strValue);
+    }
+
+    @Test
+    public void testResolveCategoryFromSimSource() {
+        setupEmergencyNumber(TEST_NUMBER, TEST_COUNTRY_ISO, TEST_MNC,
+                EmergencyNumber.EMERGENCY_NUMBER_SOURCE_SIM);
+        ImsCallProfile profile = createEmergencyProfileWithCategory(
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_AMBULANCE);
+        setupEmergencyServiceCategoryConfig(new String[]{"tw,,119,4"}); // FIRE
+
+        SuppInfo suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(
+                mContext, profile, TEST_NUMBER, TEST_COUNTRY_ISO);
+        assertNotNull(suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI));
+        assertEquals(SOS_SERVICE_URN_AMBULANCE,
+                suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI).strValue);
+    }
+
+    @Test
+    public void testResolveCategoryFromConfigWildcardMnc() {
+        setupEmergencyNumber(TEST_NUMBER, TEST_COUNTRY_ISO, TEST_MNC,
+                EmergencyNumber.EMERGENCY_NUMBER_SOURCE_DATABASE);
+        ImsCallProfile profile = createEmergencyProfileWithCategory(
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED);
+        when(mMockTelephonyInterface.getNetworkMnc()).thenReturn(TEST_MNC);
+        setupEmergencyServiceCategoryConfig(new String[]{"tw,,119,4"}); // FIRE
+
+        SuppInfo suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(
+                mContext, profile, TEST_NUMBER, TEST_COUNTRY_ISO);
+        assertNotNull(suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI));
+        assertEquals(SOS_SERVICE_URN_FIRE,
+                suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI).strValue);
+    }
+
+    @Test
+    public void testResolveCategoryFromConfigSpecificMncMatch() {
+        setupEmergencyNumber(TEST_NUMBER, TEST_COUNTRY_ISO, TEST_MNC,
+                EmergencyNumber.EMERGENCY_NUMBER_SOURCE_DATABASE);
+        ImsCallProfile profile = createEmergencyProfileWithCategory(
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED);
+        when(mMockTelephonyInterface.getNetworkMnc()).thenReturn(TEST_MNC);
+        setupEmergencyServiceCategoryConfig(new String[]{"tw,01,119,1"}); // POLICE
+
+        SuppInfo suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(
+                mContext, profile, TEST_NUMBER, TEST_COUNTRY_ISO);
+        assertNotNull(suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI));
+        assertEquals(SOS_SERVICE_URN_POLICE,
+                suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI).strValue);
+    }
+
+    @Test
+    public void testResolveCategoryFromConfigMncMismatch() {
+        setupEmergencyNumber(TEST_NUMBER, TEST_COUNTRY_ISO, TEST_MNC,
+                EmergencyNumber.EMERGENCY_NUMBER_SOURCE_DATABASE);
+        ImsCallProfile profile = createEmergencyProfileWithCategory(
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED);
+        when(mMockTelephonyInterface.getNetworkMnc()).thenReturn("02"); // Different MNC
+        setupEmergencyServiceCategoryConfig(new String[]{"tw,01,119,1"}); // POLICE
+
+        SuppInfo suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(
+                mContext, profile, TEST_NUMBER, TEST_COUNTRY_ISO);
+        assertNotNull(suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI));
+        assertEquals(SOS_SERVICE_URN_GENERIC,
+                suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI).strValue);
+    }
+
+    @Test
+    public void testResolveCategoryFromConfigCountryMismatch() {
+        setupEmergencyNumber(TEST_NUMBER, TEST_COUNTRY_ISO, TEST_MNC,
+                EmergencyNumber.EMERGENCY_NUMBER_SOURCE_DATABASE);
+        ImsCallProfile profile = createEmergencyProfileWithCategory(
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED);
+        when(mMockTelephonyInterface.getNetworkMnc()).thenReturn(TEST_MNC);
+        setupEmergencyServiceCategoryConfig(new String[]{"us,,119,4"}); // Different country
+
+        SuppInfo suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(
+                mContext, profile, TEST_NUMBER, TEST_COUNTRY_ISO);
+        assertNotNull(suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI));
+        assertEquals(SOS_SERVICE_URN_GENERIC,
+                suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI).strValue);
+    }
+
+    @Test
+    public void testResolveCategoryFromConfigNumberMismatch() {
+        setupEmergencyNumber(TEST_NUMBER, TEST_COUNTRY_ISO, TEST_MNC,
+                EmergencyNumber.EMERGENCY_NUMBER_SOURCE_DATABASE);
+        ImsCallProfile profile = createEmergencyProfileWithCategory(
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED);
+        when(mMockTelephonyInterface.getNetworkMnc()).thenReturn(TEST_MNC);
+        setupEmergencyServiceCategoryConfig(new String[]{"tw,,911,4"}); // Different number
+
+        SuppInfo suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(
+                mContext, profile, TEST_NUMBER, TEST_COUNTRY_ISO);
+        assertNotNull(suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI));
+        assertEquals(SOS_SERVICE_URN_GENERIC,
+                suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI).strValue);
+    }
+
+    @Test
+    public void testResolveCategoryConfigNull() {
+        setupEmergencyNumber(TEST_NUMBER, TEST_COUNTRY_ISO, TEST_MNC,
+                EmergencyNumber.EMERGENCY_NUMBER_SOURCE_DATABASE);
+        ImsCallProfile profile = createEmergencyProfileWithCategory(
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_AMBULANCE);
+        when(mMockTelephonyInterface.getNetworkMnc()).thenReturn(TEST_MNC);
+        setupEmergencyServiceCategoryConfig(null);
+
+        SuppInfo suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(
+                mContext, profile, TEST_NUMBER, TEST_COUNTRY_ISO);
+        assertNotNull(suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI));
+        assertEquals(SOS_SERVICE_URN_AMBULANCE,
+                suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI).strValue);
+    }
+
+    @Test
+    public void testResolveCategoryConfigEmpty() {
+        setupEmergencyNumber(TEST_NUMBER, TEST_COUNTRY_ISO, TEST_MNC,
+                EmergencyNumber.EMERGENCY_NUMBER_SOURCE_DATABASE);
+        ImsCallProfile profile = createEmergencyProfileWithCategory(
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE);
+        when(mMockTelephonyInterface.getNetworkMnc()).thenReturn(TEST_MNC);
+        setupEmergencyServiceCategoryConfig(new String[]{});
+
+        SuppInfo suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(
+                mContext, profile, TEST_NUMBER, TEST_COUNTRY_ISO);
+        assertNotNull(suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI));
+        assertEquals(SOS_SERVICE_URN_POLICE,
+                suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI).strValue);
+    }
+
+    @Test
+    public void testResolveCategoryConfigInvalidFormat() {
+        setupEmergencyNumber(TEST_NUMBER, TEST_COUNTRY_ISO, TEST_MNC,
+                EmergencyNumber.EMERGENCY_NUMBER_SOURCE_DATABASE);
+        ImsCallProfile profile = createEmergencyProfileWithCategory(
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED);
+        when(mMockTelephonyInterface.getNetworkMnc()).thenReturn(TEST_MNC);
+        setupEmergencyServiceCategoryConfig(new String[]{"tw,,119"}); // Missing category
+
+        SuppInfo suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(
+                mContext, profile, TEST_NUMBER, TEST_COUNTRY_ISO);
+        assertNotNull(suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI));
+        assertEquals(SOS_SERVICE_URN_GENERIC,
+                suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI).strValue);
+    }
+
+    @Test
+    public void testResolveCategoryConfigInvalidCategory() {
+        setupEmergencyNumber(TEST_NUMBER, TEST_COUNTRY_ISO, TEST_MNC,
+                EmergencyNumber.EMERGENCY_NUMBER_SOURCE_DATABASE);
+        ImsCallProfile profile = createEmergencyProfileWithCategory(
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED);
+        when(mMockTelephonyInterface.getNetworkMnc()).thenReturn(TEST_MNC);
+        setupEmergencyServiceCategoryConfig(new String[]{"tw,,119,abc"}); // NumberFormatException
+
+        SuppInfo suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(
+                mContext, profile, TEST_NUMBER, TEST_COUNTRY_ISO);
+        assertNotNull(suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI));
+        assertEquals(SOS_SERVICE_URN_GENERIC,
+                suppInfo.getService(SuppInfo.SUPP_TYPE_TARGET_URI).strValue);
+    }
+
+    private ImsCallProfile createEmergencyProfileWithCategory(int category) {
+        ImsCallProfile profile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_EMERGENCY,
+                ImsCallProfile.CALL_TYPE_VOICE);
+        profile.setEmergencyServiceCategories(category);
+        return profile;
+    }
+
+    private void setupEmergencyNumber(String number, String countryIso, String mnc, int source) {
+        EmergencyNumber emergencyNumber = new EmergencyNumber(
+                number, countryIso, mnc, EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED,
+                new ArrayList<>(), source, EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN);
+        when(mMockTelephonyInterface.getEmergencyNumberList())
+                .thenReturn(Collections.singletonList(emergencyNumber));
+    }
+
+    private void setupEmergencyServiceCategoryConfig(String[] config) {
+        when(mMockCarrierConfig.getStringArray(
+                CarrierConfig.ImsEmergency.KEY_EMERGENCY_SERVICE_CATEGORY_PER_PLMN_STRING_ARRAY))
+                .thenReturn(config);
     }
 }

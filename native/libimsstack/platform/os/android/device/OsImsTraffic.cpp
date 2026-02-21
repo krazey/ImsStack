@@ -90,19 +90,19 @@ PUBLIC VIRTUAL IMS_BOOL OsImsTraffic::IsAllowed(IN IMS_SINT32 nSlotId, IN IMS_UI
 
     if (IsEmergency(nSlotId))
     {
-        IMS_TRACE_D("IsAllowed :: [%d] same slot is emergency", nSlotId, 0, 0);
+        IMS_TRACE_D("IsAllowed: [%d] same slot is emergency", nSlotId, 0, 0);
         return IMS_TRUE;
     }
 
     if (IsEmergencyInOtherSlot(nSlotId))
     {
-        IMS_TRACE_D("IsAllowed :: [%d] other slot is emergency", nSlotId, 0, 0);
+        IMS_TRACE_D("IsAllowed: [%d] other slot is emergency", nSlotId, 0, 0);
         return IMS_FALSE;
     }
 
     if (IsWlan(nSlotId) || IsWlanInOtherSlot(nSlotId))
     {
-        IMS_TRACE_D("IsAllowed :: [%d] WLAN is connected", nSlotId, 0, 0);
+        IMS_TRACE_D("IsAllowed: [%d] WLAN is connected", nSlotId, 0, 0);
         return IMS_TRUE;
     }
 
@@ -128,7 +128,7 @@ PUBLIC VIRTUAL void OsImsTraffic::Start(IN IMS_SINT32 nSlotId, IN IMS_UINT32 nTr
         return;
     }
 
-    IMS_TRACE_I("Start :: [%d][%s]", nSlotId, PriorityTypeToString(nPriorityType), 0);
+    IMS_TRACE_I("Start: [%d][%s]", nSlotId, PriorityTypeToString(nPriorityType), 0);
 
     LockGuard objLock(m_piLock);
     Traffic* pTraffic = GetTraffic(nSlotId);
@@ -150,7 +150,7 @@ PUBLIC VIRTUAL void OsImsTraffic::Start(IN IMS_SINT32 nSlotId, IN IMS_UINT32 nTr
         pTraffic->SetTopPriorityTraffic(nPriorityType);
 
         IMS_TRACE_I(
-                "Start :: [%d][%s] top priority", nSlotId, PriorityTypeToString(nPriorityType), 0);
+                "Start: [%d][%s] top priority", nSlotId, PriorityTypeToString(nPriorityType), 0);
 
         PlatformContext::GetInstance()->GetSystem()->SetTrafficPriority(nPriorityType, nSlotId);
 
@@ -169,7 +169,7 @@ PUBLIC VIRTUAL void OsImsTraffic::Stop(IN IMS_SINT32 nSlotId, IN IMS_UINT32 nTra
         return;
     }
 
-    IMS_TRACE_I("Stop :: [%d][%s]", nSlotId, PriorityTypeToString(nPriorityType), 0);
+    IMS_TRACE_I("Stop: [%d][%s]", nSlotId, PriorityTypeToString(nPriorityType), 0);
 
     LockGuard objLock(m_piLock);
     Traffic* pTraffic = GetTraffic(nSlotId);
@@ -230,8 +230,8 @@ PUBLIC VIRTUAL void OsImsTraffic::SetSimultaneousCallingSupported(
         return;
     }
 
-    IMS_TRACE_D("SetSimultaneousCallingSupported :: [%d] simultaneous calling support (%s)",
-            nSlotId, _TRACE_B_(bSupported), 0);
+    IMS_TRACE_D("SetSimultaneousCallingSupported: [%d] simultaneous calling support (%s)", nSlotId,
+            _TRACE_B_(bSupported), 0);
 
     pTraffic->SetSimultaneousCallingSupported(bSupported);
 
@@ -256,7 +256,7 @@ PUBLIC VIRTUAL void OsImsTraffic::SetWlan(IN IMS_SINT32 nSlotId, IN IMS_BOOL bEn
         return;
     }
 
-    IMS_TRACE_D("SetWlan :: [%d] is WLAN (%d)", nSlotId, bEnabled, 0);
+    IMS_TRACE_D("SetWlan: [%d] is WLAN (%d)", nSlotId, bEnabled, 0);
 
     pTraffic->SetWlan(bEnabled);
     PostMessage();
@@ -329,7 +329,7 @@ PUBLIC VIRTUAL void OsImsTraffic::RemoveListener(IN IImsTrafficListener* piListe
 PUBLIC VIRTUAL void OsImsTraffic::ImsTrafficTimer_Expired(
         IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType)
 {
-    IMS_TRACE_D("ImsTrafficTimer_Expired :: [%d][%s]", nSlotId, PriorityTypeToString(nType), 0);
+    IMS_TRACE_D("ImsTrafficTimer_Expired: [%d][%s]", nSlotId, PriorityTypeToString(nType), 0);
 
     Stop(nSlotId, GetTrafficType(nType));
 }

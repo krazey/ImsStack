@@ -16,7 +16,9 @@
 #ifndef INTERFACE_REG_USER_IDENTITY_NOTIFIER_H_
 #define INTERFACE_REG_USER_IDENTITY_NOTIFIER_H_
 
-#include "AStringArray.h"
+#include "ImsTypeDef.h"
+
+class AStringArray;
 
 /**
  * @brief This class provides an interface to adjust public user identities

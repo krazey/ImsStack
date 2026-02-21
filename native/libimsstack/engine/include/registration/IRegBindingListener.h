@@ -16,7 +16,9 @@
 #ifndef INTERFACE_REG_BINDING_LISTENER_H_
 #define INTERFACE_REG_BINDING_LISTENER_H_
 
-#include "AStringArray.h"
+#include "ImsTypeDef.h"
+
+class AStringArray;
 
 class CallerCapability;
 class SipAddress;

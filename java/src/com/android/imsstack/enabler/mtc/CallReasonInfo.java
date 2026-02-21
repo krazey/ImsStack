@@ -195,7 +195,6 @@ public class CallReasonInfo implements Parcelable {
     }
 
     public CallReasonInfo(Parcel source) {
-        ImsLog.i("");
         readFromParcel(source);
     }
 

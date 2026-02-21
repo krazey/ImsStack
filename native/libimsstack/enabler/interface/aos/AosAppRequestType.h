@@ -103,7 +103,7 @@ public:
 
         COMMAND_SERVICE_CONTROL = 170,
 
-        // SMS to 911 for VZW
+        // SMS to 911
         COMMAND_SCBM = 180,
         COMMAND_REGISTER_INFO,
 

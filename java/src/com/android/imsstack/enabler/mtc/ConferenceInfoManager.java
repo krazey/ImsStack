@@ -53,9 +53,7 @@ public final class ConferenceInfoManager {
 
         ci = new ConferenceInfo(ccid);
 
-        synchronized(mConferenceInfos) {
-            mConferenceInfos.add(ci);
-        }
+        mConferenceInfos.add(ci);
 
         log("ConferenceInfo(add): ccid=" + ccid + ", size=" + mConferenceInfos.size());
 
@@ -67,31 +65,27 @@ public final class ConferenceInfoManager {
             return;
         }
 
-        synchronized(mConferenceInfos) {
-            for (int i = 0; i < mConferenceInfos.size(); ++i) {
-                ConferenceInfo ci = mConferenceInfos.get(i);
+        for (int i = 0; i < mConferenceInfos.size(); ++i) {
+            ConferenceInfo ci = mConferenceInfos.get(i);
 
-                if ((ci != null) && ccid.equalsIgnoreCase(ci.getCcid())) {
-                    mConferenceInfos.remove(i);
+            if ((ci != null) && ccid.equalsIgnoreCase(ci.getCcid())) {
+                mConferenceInfos.remove(i);
 
-                    log("ConferenceInfo(remove): ccid="
-                            + ccid + ", size=" + mConferenceInfos.size());
-                    break;
-                }
+                log("ConferenceInfo(remove): ccid="
+                        + ccid + ", size=" + mConferenceInfos.size());
+                break;
             }
         }
     }
 
     public void destroyAllConferenceInfos() {
-         synchronized(mConferenceInfos) {
-            if (mConferenceInfos.isEmpty()) {
-                return;
-            }
-
-            log("destroyAllConferenceInfos :: size=" + mConferenceInfos.size());
-
-            mConferenceInfos.clear();
+        if (mConferenceInfos.isEmpty()) {
+            return;
         }
+
+        log("destroyAllConferenceInfos :: size=" + mConferenceInfos.size());
+
+        mConferenceInfos.clear();
     }
 
     public ConferenceInfo getConferenceInfo(String ccid) {
@@ -99,11 +93,9 @@ public final class ConferenceInfoManager {
             return null;
         }
 
-        synchronized(mConferenceInfos) {
-            for (ConferenceInfo ci : mConferenceInfos) {
-                if (ccid.equalsIgnoreCase(ci.getCcid())) {
-                    return ci;
-                }
+        for (ConferenceInfo ci : mConferenceInfos) {
+            if (ccid.equalsIgnoreCase(ci.getCcid())) {
+                return ci;
             }
         }
 
@@ -115,13 +107,11 @@ public final class ConferenceInfoManager {
             return null;
         }
 
-        synchronized(mConferenceInfos) {
-            for (ConferenceInfo ci : mConferenceInfos) {
-                User user = ci.getUser(callId, uid);
+        for (ConferenceInfo ci : mConferenceInfos) {
+            User user = ci.getUser(callId, uid);
 
-                if (user != null) {
-                    return ci;
-                }
+            if (user != null) {
+                return ci;
             }
         }
 
@@ -129,12 +119,10 @@ public final class ConferenceInfoManager {
     }
 
     public boolean hasConferenceInfo() {
-        synchronized (mConferenceInfos) {
-            return !mConferenceInfos.isEmpty();
-        }
+        return !mConferenceInfos.isEmpty();
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-CALL] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 }

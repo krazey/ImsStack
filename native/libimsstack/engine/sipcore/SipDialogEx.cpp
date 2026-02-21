@@ -66,7 +66,7 @@ PUBLIC VIRTUAL SipDialogEx::~SipDialogEx()
     }
 
 #ifdef __IMS_SIP_DEBUG__
-    IMS_TRACE_D("Destructor :: SipDialogEx (%s)",
+    IMS_TRACE_D("dtor: SipDialogEx(%s)",
             SipDebug::GetCharA1(GetDialogState()->GetCallId().GetStr(), 8, '@'), 0, 0);
 #endif
 }
@@ -242,9 +242,8 @@ IMS_BOOL SipDialogEx::IsInviteUsage() const
 PUBLIC
 void SipDialogEx::TerminateDialogUsage()
 {
-    IMS_TRACE_I("TerminateDialogUsage :: %s",
-            ((m_pDialogUsage != IMS_NULL) ? m_pDialogUsage->ToString().GetStr() : "__NULL__"), 0,
-            0);
+    IMS_TRACE_I("TerminateDialogUsage: %s",
+            ((m_pDialogUsage != IMS_NULL) ? m_pDialogUsage->ToString().GetStr() : "(null)"), 0, 0);
 
     OnTerminated();
 }

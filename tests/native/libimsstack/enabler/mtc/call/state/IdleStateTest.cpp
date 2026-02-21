@@ -17,6 +17,7 @@
 #include "IMessage.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
+#include "ImsAosParameter.h"
 #include "ImsList.h"
 #include "MediaDef.h"
 #include "MockIMessage.h"
@@ -204,6 +205,50 @@ TEST_F(IdleStateTest, OnEnterDoesNotInvokePreRadioCheckForMt)
 {
     objCallInfo.ePeerType = PeerType::MT;
     EXPECT_CALL(objMockIMtcRadioChecker, Check(_, _, _, _, _, _)).Times(0);
+    pIdleState->OnEnter();
+}
+
+TEST_F(IdleStateTest, OnEnterStartsCallSetupWatchdogTimer)
+{
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
+    objCallInfo.ePeerType = PeerType::MO;
+
+    IMS_SINT32 n18xWaitTimer = 20000;
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_18X_TIMER_MILLIS_INT))
+            .WillByDefault(Return(n18xWaitTimer));
+
+    // TIMER_C_WITH_MARGIN_TIME_MS = 200000
+    const static IMS_SINT32 TIMER_C_WITH_MARGIN_TIME_MS = 200000;
+    EXPECT_CALL(objTimerWrapper,
+            Start(MtcCallState::TimerType::TIMER_MO_CALL_SETUP_WATCHDOG,
+                    TIMER_C_WITH_MARGIN_TIME_MS));
+    pIdleState->OnEnter();
+
+    n18xWaitTimer = 300000;
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_18X_TIMER_MILLIS_INT))
+            .WillByDefault(Return(n18xWaitTimer));
+    EXPECT_CALL(objTimerWrapper,
+            Start(MtcCallState::TimerType::TIMER_MO_CALL_SETUP_WATCHDOG, n18xWaitTimer));
+    pIdleState->OnEnter();
+}
+
+TEST_F(IdleStateTest, OnEnterDoesNotStartCallSetupWatchdogTimerIfEmergency)
+{
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    objCallInfo.ePeerType = PeerType::MO;
+
+    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_CALL_SETUP_WATCHDOG, _))
+            .Times(0);
+    pIdleState->OnEnter();
+}
+
+TEST_F(IdleStateTest, OnEnterDoesNotStartCallSetupWatchdogTimerIfMtCall)
+{
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
+    objCallInfo.ePeerType = PeerType::MT;
+
+    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_CALL_SETUP_WATCHDOG, _))
+            .Times(0);
     pIdleState->OnEnter();
 }
 
@@ -1849,6 +1894,16 @@ TEST_F(IdleStateTest, OnBlockCheckedTriggersEpsfbIfRequired)
     EXPECT_EQ(CallStateName::IDLE, pIdleState->OnBlockChecked(objBlockResult));
 }
 
+TEST_F(IdleStateTest, OnTimerExpiredNotifiesSendStartFailedIfCallSetupWatchdogTimerExpired)
+{
+    const CallReasonInfo objReason(CODE_LOCAL_INTERNAL_ERROR);
+
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pIdleState->OnTimerExpired(MtcCallState::TIMER_MO_CALL_SETUP_WATCHDOG));
+}
+
 TEST_F(IdleStateTest, OnTimerExpiredRejectIncomingCallIfAlertingTimerExpired)
 {
     const CallReasonInfo objReason(CODE_LOCAL_INTERNAL_ERROR);
@@ -1877,4 +1932,71 @@ TEST_F(IdleStateTest, HandleAosConnectedNotifiesEpsFallbackCompletedIfEpsFallbac
 
     EXPECT_CALL(*pEpsfbTrigger, OnEpsFallbackCompleted()).Times(1);
     EXPECT_EQ(CallStateName::IDLE, pIdleState->OnAosStateChanged(MtcAosState::CONNECTED, 0, 0));
+}
+
+TEST_F(IdleStateTest, EmergencyCallStartFailsTriggersDeregistration)
+{
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    CallType eCallType = CallType::VOIP;
+    AString strTarget("911");
+
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
+    ON_CALL(objCallContext, CreateSession()).WillByDefault(Return(&objMtcSession));
+    ON_CALL(objMtcSession, Start).WillByDefault(Return(IMS_FAILURE));
+    ON_CALL(objService, IsEmergency).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objAosConnector, Control(ImsAosControl::REGISTER_STOP)).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_STOP)).Times(1);
+    EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
+
+    EXPECT_EQ(CallStateName::IDLE,
+            pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices));
+}
+
+TEST_F(IdleStateTest, EmergencyCallStartFailsNullAosConnector)
+{
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    CallType eCallType = CallType::VOIP;
+    AString strTarget("911");
+
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
+    ON_CALL(objCallContext, CreateSession()).WillByDefault(Return(&objMtcSession));
+    ON_CALL(objMtcSession, Start).WillByDefault(Return(IMS_FAILURE));
+    ON_CALL(objService, IsEmergency).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, GetAosConnector).WillByDefault(Return(nullptr));
+
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_STOP)).Times(0);
+    EXPECT_CALL(objUiNotifier,
+            SendStartFailed(CallReasonInfo(
+                    CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY)));
+
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices));
+}
+
+TEST_F(IdleStateTest, NonEmergencyCallStartFailsNoDeregistration)
+{
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
+    CallType eCallType = CallType::VOIP;
+    AString strTarget("some_target");
+
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
+    ON_CALL(objCallContext, CreateSession()).WillByDefault(Return(&objMtcSession));
+    ON_CALL(objMtcSession, Start).WillByDefault(Return(IMS_FAILURE));
+    ON_CALL(objService, IsEmergency).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_STOP)).Times(0);
+    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR)));
+
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices));
 }

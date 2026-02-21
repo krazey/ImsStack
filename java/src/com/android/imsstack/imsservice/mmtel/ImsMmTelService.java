@@ -196,8 +196,6 @@ public class ImsMmTelService extends MmTelFeature
             return;
         }
 
-        logi("changeEnabledCapabilities :: capabilities change request from framework");
-
         List<CapabilityPair> enabledCaps = request.getCapabilitiesToEnable();
         List<CapabilityPair> disabledCaps = request.getCapabilitiesToDisable();
 
@@ -428,25 +426,23 @@ public class ImsMmTelService extends MmTelFeature
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-IMPL] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 
     private static void loge(String s) {
-        ImsLog.e("[GII-IMPL] " + s);
+        ImsLog.e("[ISIL] " + s);
     }
 
     private static void logi(String s) {
-        ImsLog.i("[GII-IMPL] " + s);
+        ImsLog.i("[ISIL] " + s);
     }
 
     private class MmTelFeatureCapabilityListener implements IMmTelFeatureCapabilityListener {
         @Override
         public void onFeatureCapabilityChanged(MmTelFeature.MmTelCapabilities capabilities) {
-            log("MmTel :: onFeatureCapabilityChanged");
-
             postAndRunTask(() -> {
                 try {
-                    logi("MmTel :: phoneId=" + mImsContext.getPhoneId()
+                    logi("onFeatureCapabilityChanged :: phoneId=" + mImsContext.getPhoneId()
                             + ", " + capabilities.toString());
                     notifyCapabilitiesStatusChanged(capabilities);
                 } catch (IllegalStateException e) {

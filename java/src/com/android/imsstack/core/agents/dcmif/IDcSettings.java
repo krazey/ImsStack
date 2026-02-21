@@ -76,4 +76,9 @@ public interface IDcSettings extends IDc {
      * Returns whether the causeCode requires a cross stack redial.
      */
     boolean isCrossStackRedialCause(EApnType apnType, int causeCode);
+
+    /**
+     * Returns whether N1 mode capability disabling is required when failing to establish IMS PDU.
+     */
+    boolean disableN1ModeOnImsPduEstablishFailure();
 }

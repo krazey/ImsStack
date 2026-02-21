@@ -71,7 +71,6 @@ PUBLIC VIRTUAL IMS_BOOL SdpMediaDescription::Decode(IN const AStringArray& objLi
         nEndLine = objLines.GetCount();
     }
 
-    // TODO:: consider SDP line ordering
     AString strLineBody;
 
     for (IMS_SINT32 i = nStartLine; i < nEndLine; ++i)

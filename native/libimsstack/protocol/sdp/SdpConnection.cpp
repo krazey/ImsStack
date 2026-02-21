@@ -120,8 +120,7 @@ PUBLIC VIRTUAL IMS_BOOL SdpConnection::Decode(IN const AString& strValue)
         m_nAddrType = Sdp::ADDR_TYPE_OTHER;
     }
 
-    // TODO:: allow FQDN, so needs to be parsed using URI parser
-    // TODO:: multicast ???
+    // To allow FQDN, so needs to be parsed using URI parser
     // connection-address field
     ImsList<AString> objConnectionAddress = objTokens.GetElementAt(2).Split(TextParser::CHAR_SLASH);
 
@@ -161,7 +160,7 @@ PUBLIC VIRTUAL IMS_BOOL SdpConnection::Decode(IN const AString& strValue)
     // Check if the address format is valid
     if (!CheckValidityForAddress(m_strAddress, m_nAddrType))
     {
-        IMS_TRACE_E(0, "c-line :: Address validity failed", 0, 0, 0);
+        IMS_TRACE_E(0, "c-line: Address validity failed", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -206,7 +205,7 @@ PUBLIC VIRTUAL AString SdpConnection::GetValue() const
     // connection-address
     strValue.Append(m_strAddress);
 
-    // TODO:: multicast address
+    // multicast address if needed
 
     return strValue;
 }
@@ -216,7 +215,7 @@ ImsList<AString> SdpConnection::GetAddresses() const
 {
     ImsList<AString> objAddresses;
     objAddresses.Append(m_strAddress);
-    // TODO: add extra addresses
+    // add extra addresses
     return objAddresses;
 }
 
@@ -260,7 +259,7 @@ IMS_BOOL SdpConnection::SetValue(IN IMS_SINT32 nAddrType, IN const AString& strA
     // Check if the address format is valid
     if (!CheckValidityForAddress(strAddress, m_nAddrType))
     {
-        IMS_TRACE_E(0, "c-line :: Address validity failed", 0, 0, 0);
+        IMS_TRACE_E(0, "c-line: Address validity failed", 0, 0, 0);
         return IMS_FALSE;
     }
 

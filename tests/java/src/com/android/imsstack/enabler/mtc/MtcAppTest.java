@@ -493,6 +493,7 @@ public class MtcAppTest extends ImsStackTest {
         parcel.setDataPosition(0);
         mTestMtcApp.getNativeListener().onMessage(parcel);
         parcel.recycle();
+        processAllMessages();
 
         verify(mCM, times(1)).attachPreIncomingCall(mMtcCall);
         verify(mCallListener, times(1)).onPreIncomingCallReceived(any(MtcApp.class), anyLong());
@@ -514,6 +515,7 @@ public class MtcAppTest extends ImsStackTest {
         parcel.setDataPosition(0);
         mTestMtcApp.getNativeListener().onMessage(parcel);
         parcel.recycle();
+        processAllMessages();
 
         verify(mCM, times(1)).attachPreIncomingCall(mMtcCall);
         verify(mCallListener, times(1)).onPreIncomingCallReceived(any(MtcApp.class), anyLong());
@@ -547,6 +549,7 @@ public class MtcAppTest extends ImsStackTest {
         parcel.setDataPosition(0);
         mTestMtcApp.getNativeListener().onMessage(parcel);
         parcel.recycle();
+        processAllMessages();
 
         verify(mMtcCall, times(1)).attach(anyLong());
         verify(mExecutor, times(1)).execute(any());
@@ -563,6 +566,7 @@ public class MtcAppTest extends ImsStackTest {
         parcel.setDataPosition(0);
         mTestMtcApp.getNativeListener().onMessage(parcel);
         parcel.recycle();
+        processAllMessages();
 
         verify(mCM, times(0)).getPendingCall(0);
         verify(mCM, times(1)).attachPreIncomingCall(mMtcCall);
@@ -596,6 +600,7 @@ public class MtcAppTest extends ImsStackTest {
         parcel.setDataPosition(0);
         mTestMtcApp.getNativeListener().onMessage(parcel);
         parcel.recycle();
+        processAllMessages();
 
         verify(mCM, times(1)).getPendingCall(nativeCallID);
         verify(mCM, times(1)).attachPreIncomingCall(mMtcCall);
@@ -628,6 +633,7 @@ public class MtcAppTest extends ImsStackTest {
         parcel.setDataPosition(0);
         mTestMtcApp.getNativeListener().onMessage(parcel);
         parcel.recycle();
+        processAllMessages();
 
         verify(mCM, times(0)).getPendingCall(nativeCallID);
         verify(mCM, times(2)).attachPreIncomingCall(mMtcCall);
@@ -647,6 +653,7 @@ public class MtcAppTest extends ImsStackTest {
         parcel.setDataPosition(0);
         mTestMtcApp.getNativeListener().onMessage(parcel);
         parcel.recycle();
+        processAllMessages();
 
         verify(mCallListener, times(1)).onExternalCallStateChanged(
                 any(MtcApp.class), any(ExternalCalls.class));
@@ -659,6 +666,7 @@ public class MtcAppTest extends ImsStackTest {
         parcel.setDataPosition(0);
         mTestMtcApp.getNativeListener().onMessage(parcel);
         parcel.recycle();
+        processAllMessages();
 
         verify(mServiceStateListener, times(1)).onServiceStateChanged(any(MtcApp.class),
                 anyInt(), anyInt());
@@ -668,6 +676,7 @@ public class MtcAppTest extends ImsStackTest {
         parcel2.setDataPosition(0);
         mTestMtcApp.getNativeListener().onMessage(parcel2);
         parcel2.recycle();
+        processAllMessages();
 
         verify(mEmergencyServiceManager, times(1)).onEmergencyServiceStateChanged(anyInt(),
                 anyInt(), anyInt());

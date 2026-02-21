@@ -27,7 +27,6 @@ import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsStreamMediaProfile;
 import android.text.TextUtils;
 
-import com.android.imsstack.base.ImsPrivateProperties;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.TelephonyInterface;
@@ -86,14 +85,6 @@ public class ImsCallUtils {
      * For call type translation: ImsCallProfile#getVideoStateFromImsCallProfile
      */
     private static final boolean CALL_TYPE_ABBREVIATION = true;
-    /**
-     * For call type conversion from the media information
-     * L-OS: true
-     * M-OS: false
-     * JUMP: true
-     * P-OS: true (AOSP based video state control - CALL_TYPE_VT_NODIR is not used)
-     */
-    private static final boolean CALL_TYPE_OVERRIDE_VT_FROM_MEDIA_INFO = true;
 
     /**
      * Definition of the index as configured in
@@ -102,6 +93,20 @@ public class ImsCallUtils {
     private static final int DYNAMIC_ROUTING_NUMBER_CONFIG_INDEX_COUNTRY_ISO = 0;
     private static final int DYNAMIC_ROUTING_NUMBER_CONFIG_INDEX_MNC = 1;
     private static final int DYNAMIC_ROUTING_NUMBER_CONFIG_INDEX_NUMBER = 2;
+
+    /**
+     * Definition of the index as configured in
+     * CarrierConfig::ImsEmergency::KEY_EMERGENCY_SERVICE_CATEGORY_PER_PLMN_STRING_ARRAY
+     */
+    private static final int EMERGENCY_SERVICE_CATEGORY_CONFIG_INDEX_COUNTRY_ISO = 0;
+    private static final int EMERGENCY_SERVICE_CATEGORY_CONFIG_INDEX_MNC = 1;
+    private static final int EMERGENCY_SERVICE_CATEGORY_CONFIG_INDEX_NUMBER = 2;
+    private static final int EMERGENCY_SERVICE_CATEGORY_CONFIG_INDEX_CATEGORY = 3;
+
+    /**
+     * Wildcard MNC used in configurations to match any MNC.
+     */
+    private static final String WILDCARD_MNC = "";
 
     /** "sos" URN for IMS emergency call */
     private static final String SOS_SERVICE_URN_POLICE = "urn:service:sos.police";
@@ -112,7 +117,6 @@ public class ImsCallUtils {
     private static final String SOS_SERVICE_URN_MIEC = "urn:service:sos.ecall.manual";
     private static final String SOS_SERVICE_URN_AIEC = "urn:service:sos.ecall.automatic";
     private static final String SOS_SERVICE_URN_GENERIC = "urn:service:sos";
-    //To-Do: Need to check AOSP behaviour.
     // for supplementary Service
     public static final String EXTRA_CDIV_CAUSE = "cdiv_cause";
     //  for Conference disconnect cause
@@ -187,8 +191,9 @@ public class ImsCallUtils {
         }
 
         ImsStreamMediaProfile mediaProfile = ImsCallMediaUtils.getMediaProfileFromMediaInfo(mi);
-        if (CALL_TYPE_OVERRIDE_VT_FROM_MEDIA_INFO
-                && (callType == ImsCallProfile.CALL_TYPE_VT)) {
+        if (callType == ImsCallProfile.CALL_TYPE_VT) {
+            // For video calls, the call type needs to be updated according to the video direction.
+            // CALL_TYPE_VT_NODIR is not used.
             callType = ImsCallMediaUtils.getVideoCallType(mediaProfile);
         }
         ImsCallMediaUtils.updateMediaProfileFromMediaInfoForAudioCodecAttributes(mediaProfile, mi);
@@ -202,6 +207,8 @@ public class ImsCallUtils {
                 MtcCallInfo.isVideoCapable(ci));
         profile.setCallExtraBoolean(ImsCallProfile.EXTRA_IS_CROSS_SIM_CALL,
                 MtcCallInfo.isCrossSim(ci));
+        profile.setCallExtraInt(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE,
+                MtcCallInfo.getRatType(ci));
 
         boolean isAudioHD = MtcCallUtils.isAudioHDQuality(mi.audioQuality);
         boolean isAudioUHD = MtcCallUtils.isAudioUHDQuality(mi.audioQuality);
@@ -263,17 +270,6 @@ public class ImsCallUtils {
         updateCallProfileFromCallInfo(context, profile, incomingCall.callInfo);
         updateCallProfileFromSuppInfo(context, profile, incomingCall.suppInfo);
 
-        if (isCallOnNativeAppsAndCountryKR(context)) {
-            // Do not set the conference extra info. in MT call setup.
-            if (MtcCallInfo.isConference(incomingCall.callInfo)) {
-                profile.setCallExtraBoolean(ImsCallProfile.EXTRA_CONFERENCE, false);
-            }
-
-            if ("LGU".equals(ImsPrivateProperties.getSimOperator(context.getSlotId()))) {
-                removeCallExtra(profile, ImsCallProfile.EXTRA_CNAP);
-            }
-        }
-
         return profile;
     }
 
@@ -297,8 +293,8 @@ public class ImsCallUtils {
      *
      * If the video direction in the provided {@code ImsCallProfile}'s {@code ImsStreamMediaProfile}
      * is {@code DIRECTION_INACTIVE}, it is converted to {@code DIRECTION_INVALID}. It's to address
-     * scenarios where the dialer assumes {@code DIRECTION_INACTIVE} as an unexpected status,
-     * leading to unintended video call resumption.
+     * scenarios where the dialer assumes {@code DIRECTION_INACTIVE} as an unexpected status for
+     * video calls, leading to unintended video call resumption.
      *
      * @param profile The {@code ImsCallProfile} to be sanitized.
      * @return A new {@code ImsCallProfile} instance with the sanitized video direction.
@@ -429,7 +425,9 @@ public class ImsCallUtils {
                         int[] policies = cc != null ? cc.getIntArray(
                             CarrierConfig.ImsEmergency.KEY_POLICY_FOR_EMERGENCY_URN_INT_ARRAY) : null;
                         urn = getSosUrnFromECallServiceCategory(
-                                profile.getEmergencyServiceCategories(), policies, context);
+                                resolveEmergencyServiceCategory(
+                                        context, callee, countryIso, profile),
+                                policies, context);
                     }
                 } else {
                     // The first item has priority ??
@@ -753,10 +751,6 @@ public class ImsCallUtils {
             default:
                 return CallReasonInfo.CODE_UNSPECIFIED;
         }
-    }
-
-    public static boolean isCallOnNativeAppsAndCountryKR(ICallContext context) {
-        return "KR".equals(ImsPrivateProperties.getSimCountry(context.getSlotId()));
     }
 
     public static boolean isCallTypeChanged(int callType, int otherCallType) {
@@ -1144,6 +1138,54 @@ public class ImsCallUtils {
         }
 
         return Arrays.stream(policies).anyMatch(value -> value == policy);
+    }
+
+    private static @EmergencyServiceCategories int resolveEmergencyServiceCategory(
+            ICallContext context, String callee, String countryIso, ImsCallProfile profile) {
+        if (isFromNetworkOrSim(context, callee)) {
+            return profile.getEmergencyServiceCategories();
+        }
+
+        String[] configs = AgentFactory.getInstance().getAgent(ConfigInterface.class,
+                context.getSlotId()).getCarrierConfig().getStringArray(CarrierConfig.ImsEmergency
+                        .KEY_EMERGENCY_SERVICE_CATEGORY_PER_PLMN_STRING_ARRAY);
+        if (configs == null) {
+            return profile.getEmergencyServiceCategories();
+        }
+
+        TelephonyInterface telephony = AgentFactory.getInstance().getAgent(
+                TelephonyInterface.class, context.getSlotId());
+        if (telephony == null) {
+            return profile.getEmergencyServiceCategories();
+        }
+        String mnc = telephony.getNetworkMnc();
+        ImsLog.d("resolveEmergencyServiceCategory :: countryIso=" + countryIso + ", mnc=" + mnc);
+
+        for (String config : configs) {
+            String[] fields = config.split(",");
+            // Format: "iso,mnc,number,category"
+            if (fields.length < 4) {
+                continue;
+            }
+            if (!fields[EMERGENCY_SERVICE_CATEGORY_CONFIG_INDEX_COUNTRY_ISO].equals(countryIso)) {
+                continue;
+            }
+            if (!fields[EMERGENCY_SERVICE_CATEGORY_CONFIG_INDEX_NUMBER].equals(callee)) {
+                continue;
+            }
+            if (fields[EMERGENCY_SERVICE_CATEGORY_CONFIG_INDEX_MNC].equals(WILDCARD_MNC)
+                    || fields[EMERGENCY_SERVICE_CATEGORY_CONFIG_INDEX_MNC].equals(mnc)) {
+                try {
+                    return Integer.parseInt(
+                            fields[EMERGENCY_SERVICE_CATEGORY_CONFIG_INDEX_CATEGORY]);
+                } catch (NumberFormatException e) {
+                    ImsLog.e("resolveEmergencyServiceCategory: Failed to parse category: "
+                            + config + " - " + e);
+                }
+            }
+        }
+
+        return profile.getEmergencyServiceCategories();
     }
 
     @VisibleForTesting

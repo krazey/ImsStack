@@ -16,8 +16,9 @@
 #ifndef SUB_STATE_H_
 #define SUB_STATE_H_
 
-#include "ISipMessage.h"
 #include "util/EventPackage.h"
+
+class ISipMessage;
 
 struct SipHeaderProperty;
 
@@ -84,7 +85,7 @@ private:
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
 public:
-    /// ONLY OUTGOING SUBSCRIPTION WILL BE CONCERNED ...
+    /// ONLY OUTGOING SUBSCRIPTION WILL BE CONCERNED.
     /// Internal states for tracking the subscription state
     enum
     {

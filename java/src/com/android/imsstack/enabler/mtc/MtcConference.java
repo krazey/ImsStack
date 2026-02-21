@@ -126,7 +126,6 @@ public class MtcConference {
     /** Args: Parcel */
     private static final int MSG_SEND_REQUEST = 101;
 
-    private final Object mLock = new Object();
     private final Call mParent;
     private final ConferenceTracker mCT;
     private final MessageHandler mHandler;
@@ -154,10 +153,8 @@ public class MtcConference {
 
         log("dispose");
 
-        synchronized (mLock) {
-            mListener = null;
-            mDisposed = true;
-        }
+        mListener = null;
+        mDisposed = true;
     }
 
     public Call getParent() {
@@ -273,17 +270,13 @@ public class MtcConference {
     }
 
     public void setListener(MtcConference.Listener listener) {
-        synchronized (mLock) {
-            mListener = listener;
-        }
+        mListener = listener;
     }
 
     public void handleMessage(int msg, Parcel parcel) {
         Listener listener = null;
 
-        synchronized (mLock) {
-            listener = mListener;
-        }
+        listener = mListener;
 
         // Checks if the listener is alive
         if (listener == null) {
@@ -298,10 +291,7 @@ public class MtcConference {
             SuppInfo suppInfo = new SuppInfo(parcel);
             long confCallId = 0; //parcel.readLong();
 
-            logi("EXPANDED :: Call Id=" + Long.toHexString(confCallId)
-                    + ", " + MtcCallUtils.toString(callInfo)
-                    + ", " + MtcCallUtils.toString(mediaInfo)
-                    + ", " + MtcCallUtils.toString(suppInfo));
+                logi("EXPANDED :: Call Id=" + Long.toHexString(confCallId));
 
             ImsArgs args = ImsArgs.obtain(callInfo, mediaInfo, suppInfo);
             args.mLongArg = confCallId;
@@ -319,8 +309,6 @@ public class MtcConference {
         {
                 CallReasonInfo callReasonInfo = new CallReasonInfo(parcel);
 
-                logi("EXPANDFAILED :: " + MtcCallUtils.toString(callReasonInfo));
-
                 mCT.updateConferenceState(this,
                         ConferenceTracker.EVENT_EXTEND_FAILED,
                         ImsArgs.obtain(callReasonInfo, null, null));
@@ -336,10 +324,7 @@ public class MtcConference {
             SuppInfo suppInfo = new SuppInfo(parcel);
             long confCallId = parcel.readLong();
 
-            logi("EXPANDED_BY :: confCallId=" + Long.toHexString(confCallId)
-                    + ", " + MtcCallUtils.toString(callInfo)
-                    + ", " + MtcCallUtils.toString(mediaInfo)
-                    + ", " + MtcCallUtils.toString(suppInfo));
+                logi("EXPANDED_BY :: confCallId=" + Long.toHexString(confCallId));
 
             ImsArgs args = ImsArgs.obtain(callInfo, mediaInfo, suppInfo);
             args.mLongArg = confCallId;
@@ -360,11 +345,6 @@ public class MtcConference {
             SuppInfo suppInfo = new SuppInfo(parcel);
             UsersInfo usersInfo = new UsersInfo(parcel);
 
-            logi("MERGED :: " + MtcCallUtils.toString(callInfo)
-                    + ", " + MtcCallUtils.toString(mediaInfo)
-                    + ", " + MtcCallUtils.toString(suppInfo)
-                    + ", " + MtcCallUtils.toString(usersInfo));
-
             mCT.updateConferenceState(this,
                     ConferenceTracker.EVENT_MERGED,
                     ImsArgs.obtain(callInfo, mediaInfo, suppInfo));
@@ -376,8 +356,6 @@ public class MtcConference {
         case IUConf.MERGEFAILED:
         {
                 CallReasonInfo callReasonInfo = new CallReasonInfo(parcel);
-
-                logi("MERGEFAILED :: " + MtcCallUtils.toString(callReasonInfo));
 
                 mCT.updateConferenceState(this,
                         ConferenceTracker.EVENT_MERGE_FAILED,
@@ -476,9 +454,7 @@ public class MtcConference {
     }
 
     private boolean isConferenceValid() {
-        synchronized (mLock) {
-            return !mDisposed;
-        }
+        return !mDisposed;
     }
 
     private void sendRequest(Parcel parcel) {
@@ -486,11 +462,11 @@ public class MtcConference {
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-MTC] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 
     private static void logi(String s) {
-        ImsLog.i("[GII-MTC] " + s);
+        ImsLog.i("[ISIL] " + s);
     }
 
     /**

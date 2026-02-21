@@ -51,7 +51,6 @@ PUBLIC VIRTUAL IMS_RESULT Attr::SetChildren(IN INode* piNode)
 
 PUBLIC VIRTUAL const AString& Attr::GetName() const
 {
-    // FIXME: GetNodeName() ?
     return GetLocalName();
 }
 

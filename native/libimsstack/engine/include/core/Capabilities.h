@@ -16,8 +16,9 @@
 #ifndef CAPABILITIES_H_
 #define CAPABILITIES_H_
 
-#include "SdpDescription.h"
 #include "ServiceMethod.h"
+
+class SdpDescription;
 
 class IOnCapabilitiesListener;
 class RemoteCapabilities;

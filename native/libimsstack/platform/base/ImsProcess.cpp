@@ -103,7 +103,7 @@ IMS_BOOL ImsProcess::Initialize()
 PUBLIC
 void ImsProcess::Uninitialize()
 {
-    IMS_TRACE_I("Uninitialize :: Thread count (%d)", m_objThreads.GetSize(), 0, 0);
+    IMS_TRACE_I("Uninitialize: Thread count (%d)", m_objThreads.GetSize(), 0, 0);
 
     LockGuard objLock(m_piLock);
 
@@ -195,7 +195,7 @@ BaseThread* ImsProcess::GetThread(IN const AString& strThreadName)
         }
     }
 
-    IMS_TRACE_I("GetThread :: Thread(%s) not found", strThreadName.GetStr(), 0, 0);
+    IMS_TRACE_I("GetThread: Thread(%s) not found", strThreadName.GetStr(), 0, 0);
     return IMS_NULL;
 }
 
@@ -263,7 +263,7 @@ IImsActivityController* ImsProcess::GetController(IN const AString& strControlle
     AString strThreadName = GetThreadName(strControllerName);
     ImsAppThread* pAppThread = GetApplicationThread(strThreadName);
 
-    IMS_TRACE_D("GetController :: Controller(%s), Thread(%s)", strControllerName.GetStr(),
+    IMS_TRACE_D("GetController: Controller(%s), Thread(%s)", strControllerName.GetStr(),
             strThreadName.GetStr(), 0);
 
     if (pAppThread != IMS_NULL)
@@ -309,7 +309,7 @@ void ImsProcess::DetachThread(IN const AString& strName)
 
         if (pThreadMap->m_strName.Equals(strName))
         {
-            IMS_TRACE_I("DetachThread :: Thread (%s)", strName.GetStr(), 0, 0);
+            IMS_TRACE_I("DetachThread: Thread (%s)", strName.GetStr(), 0, 0);
 
             delete pThreadMap;
             m_objThreads.RemoveAt(i);

@@ -198,6 +198,17 @@ public class DcSettings implements IDcSettings {
         return false;
     }
 
+    @Override
+    public boolean disableN1ModeOnImsPduEstablishFailure() {
+        CarrierConfig config = getCarrierConfig(mSlotId);
+        if (config == null) {
+            return false;
+        }
+
+        return config.getBoolean(
+                CarrierConfig.Ims.KEY_DISABLE_N1_MODE_ON_IMS_PDU_ESTABLISH_FAILURE_BOOL, false);
+    }
+
     @VisibleForTesting
     protected IDcNetWatcher getDcNetWatcher(int slotId) {
         return DcFactory.getDcAgent(IDcNetWatcher.class, slotId);

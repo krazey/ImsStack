@@ -36,84 +36,76 @@ public final class ImsCallConnectionIds {
     private static Map<Integer, List<Integer>> sCallConnectionIdTable;
 
     public static int getNewId(int slotId) {
-        synchronized (sCallConnectionIdTable) {
-            List<Integer> callConnectionIds = getConnectionIds(slotId);
+        List<Integer> callConnectionIds = getConnectionIds(slotId);
 
-            if (callConnectionIds == null) {
-                ImsLog.d("[GII-IMPL] No call connection ids");
-                return 1;
-            }
-
-            if (callConnectionIds.isEmpty()) {
-                return 1;
-            }
-
-            for (int i = 0; i < callConnectionIds.size(); i++) {
-                Integer ccId = callConnectionIds.get(i);
-
-                if (!ccId.equals(Integer.valueOf(i + 1))) {
-                    return (i + 1);
-                }
-            }
-
-            Integer ccId = callConnectionIds.get(callConnectionIds.size() - 1);
-
-            return (ccId.intValue() + 1);
+        if (callConnectionIds == null) {
+            ImsLog.d("[ISIL] No call connection ids");
+            return 1;
         }
+
+        if (callConnectionIds.isEmpty()) {
+            return 1;
+        }
+
+        for (int i = 0; i < callConnectionIds.size(); i++) {
+            Integer ccId = callConnectionIds.get(i);
+
+            if (!ccId.equals(Integer.valueOf(i + 1))) {
+                return (i + 1);
+            }
+        }
+
+        Integer ccId = callConnectionIds.get(callConnectionIds.size() - 1);
+
+        return (ccId.intValue() + 1);
     }
 
     public static void add(int slotId, int ccId) {
         if (ccId > 0) {
-            synchronized (sCallConnectionIdTable) {
-                List<Integer> callConnectionIds = getConnectionIds(slotId);
+            List<Integer> callConnectionIds = getConnectionIds(slotId);
 
-                if (callConnectionIds == null) {
-                    ImsLog.d("[GII-IMPL] No call connection ids");
-                    return;
-                }
+            if (callConnectionIds == null) {
+                ImsLog.d("[ISIL] No call connection ids");
+                return;
+            }
 
-                callConnectionIds.add(Integer.valueOf(ccId));
-                Collections.sort(callConnectionIds);
+            callConnectionIds.add(Integer.valueOf(ccId));
+            Collections.sort(callConnectionIds);
 
-                if (ImsLog.isDebuggable()) {
-                    displayCallConnectionIds(callConnectionIds, "add");
-                }
+            if (ImsLog.isDebuggable()) {
+                displayCallConnectionIds(callConnectionIds, "add");
             }
         }
     }
 
     public static void remove(int slotId, int ccId) {
         if (ccId > 0) {
-            synchronized (sCallConnectionIdTable) {
-                List<Integer> callConnectionIds = getConnectionIds(slotId);
+            List<Integer> callConnectionIds = getConnectionIds(slotId);
 
-                if (callConnectionIds == null) {
-                    ImsLog.d("[GII-IMPL] No call connection ids");
-                    return;
-                }
+            if (callConnectionIds == null) {
+                ImsLog.d("[ISIL] No call connection ids");
+                return;
+            }
 
-                callConnectionIds.remove(Integer.valueOf(ccId));
+            callConnectionIds.remove(Integer.valueOf(ccId));
 
-                if (ImsLog.isDebuggable()) {
-                    displayCallConnectionIds(callConnectionIds, "remove");
-                }
+            if (ImsLog.isDebuggable()) {
+                displayCallConnectionIds(callConnectionIds, "remove");
             }
         }
     }
 
     public static void removeAll(int slotId) {
-        synchronized (sCallConnectionIdTable) {
-            List<Integer> callConnectionIds = getConnectionIds(slotId);
+        List<Integer> callConnectionIds = getConnectionIds(slotId);
 
-            if (callConnectionIds == null) {
-                ImsLog.d("[GII-IMPL] No call connection ids");
-                return;
-            }
+        if (callConnectionIds == null) {
+            ImsLog.d("[ISIL] No call connection ids");
+            return;
+        }
 
-            if (!callConnectionIds.isEmpty()) {
-                displayCallConnectionIds(callConnectionIds, "removeAll");
-                callConnectionIds.clear();
-            }
+        if (!callConnectionIds.isEmpty()) {
+            displayCallConnectionIds(callConnectionIds, "removeAll");
+            callConnectionIds.clear();
         }
     }
 
@@ -126,7 +118,7 @@ public final class ImsCallConnectionIds {
     }
 
     private static void displayCallConnectionIds(List<Integer> ids, String tag) {
-        ImsLog.d("[GII-IMPL] ImsCallConnectionIds :: "
+        ImsLog.d("[ISIL] ImsCallConnectionIds :: "
                 + tag + " - " + ids.toString());
     }
 

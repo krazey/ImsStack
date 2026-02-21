@@ -188,7 +188,7 @@ void SipMessageFraming::UpdateState()
         if (nWSPCount > 0)
         {
             m_objMessageBuffer.Erase(0, nWSPCount);
-            IMS_TRACE_I("MessageFraming :: WSP(%d/%d) is discarded", nWSPCount, nDataLen, 0);
+            IMS_TRACE_I("MessageFraming: WSP(%d/%d) is discarded", nWSPCount, nDataLen, 0);
         }
     }
 
@@ -377,7 +377,7 @@ void SipMessageFraming::ParseContentLength()
 
                 m_nContentLength = strContentLength.ToInt32();
 
-                IMS_TRACE_I("MessageFraming :: Content-Length: %s >> %d", strContentLength.GetStr(),
+                IMS_TRACE_I("MessageFraming: Content-Length: %s >> %d", strContentLength.GetStr(),
                         m_nContentLength, 0);
 
                 // Store the current position to parse message body continuously
@@ -466,7 +466,7 @@ void SipMessageFraming::ParseMessageBody()
             }
             else
             {
-                IMS_TRACE_D("MessageFraming :: No D-CRLF [offset=%d, bodyStart=%c, cPos=%c]",
+                IMS_TRACE_D("MessageFraming: No D-CRLF [offset=%d, bodyStart=%c, cPos=%c]",
                         m_nOffset, (pBodyStart != IMS_NULL) ? *pBodyStart : '\0',
                         (pCurrentPos != IMS_NULL) ? *pCurrentPos : '\0');
 
@@ -499,7 +499,7 @@ void SipMessageFraming::ParseMessageBody()
          * The offset field indicates the start position of the message body
          * when looks at the buffer int the next time.
          */
-        IMS_TRACE_I("MessageFraming :: Waiting more body part - clen=%d, rx=%d", m_nContentLength,
+        IMS_TRACE_I("MessageFraming: Waiting more body part - clen=%d, rx=%d", m_nContentLength,
                 nContentLength, 0);
         return;
     }

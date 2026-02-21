@@ -41,8 +41,6 @@ MtsDynamicLoader::~MtsDynamicLoader()
 PRIVATE
 void MtsDynamicLoader::Initialize()
 {
-    IMS_TRACE_I("Initialize : nSlotId[%d]", m_objContext.GetSlotId(), 0, 0);
-
     m_pMtsSipFormUtils = new MtsSipFormUtils(m_objContext.GetSlotId());
     m_pMtsSmUtils = new MtsSmUtils();
     m_pMtsGeolocationUtils = new MtsGeolocationUtils();

@@ -102,13 +102,13 @@ PUBLIC VIRTUAL void FeatureCaps::AddFeature(IN const AString& strName, IN const 
             (nSipMethod != SipMethod::REFER) && (nSipMethod != SipMethod::NOTIFY) &&
             (nSipMethod != SipMethod::OPTIONS) && (nSipMethod != SipMethod::PUBLISH))
     {
-        IMS_TRACE_E(0, "FeatureCaps :: Method(%d) is not allowed", nSipMethod, 0, 0);
+        IMS_TRACE_E(0, "FeatureCaps: Method(%d) is not allowed", nSipMethod, 0, 0);
         return;
     }
 
     if ((nMessageType < ISipMessage::TYPE_REQUEST) || (nMessageType > ISipMessage::TYPE_ANY))
     {
-        IMS_TRACE_E(0, "FeatureCaps :: Message type(%d) is not allowed", nMessageType, 0, 0);
+        IMS_TRACE_E(0, "FeatureCaps: Message type(%d) is not allowed", nMessageType, 0, 0);
         return;
     }
 
@@ -173,13 +173,13 @@ PUBLIC VIRTUAL void FeatureCaps::RemoveFeature(IN const AString& strName,
             (nSipMethod != SipMethod::REFER) && (nSipMethod != SipMethod::NOTIFY) &&
             (nSipMethod != SipMethod::OPTIONS) && (nSipMethod != SipMethod::PUBLISH))
     {
-        IMS_TRACE_E(0, "FeatureCaps :: Method(%d) is not allowed", nSipMethod, 0, 0);
+        IMS_TRACE_E(0, "FeatureCaps: Method(%d) is not allowed", nSipMethod, 0, 0);
         return;
     }
 
     if ((nMessageType < ISipMessage::TYPE_REQUEST) || (nMessageType > ISipMessage::TYPE_ANY))
     {
-        IMS_TRACE_E(0, "FeatureCaps :: Message type(%d) is not allowed", nMessageType, 0, 0);
+        IMS_TRACE_E(0, "FeatureCaps: Message type(%d) is not allowed", nMessageType, 0, 0);
         return;
     }
 

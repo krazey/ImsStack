@@ -19,16 +19,16 @@
 #include "ImsMap.h"
 
 #include "EngineActivity.h"
-#include "ISipClientConnection.h"
 #include "ISipClientConnectionListener.h"
 #include "ISipErrorListener.h"
-#include "Sip.h"
-#include "SipAddress.h"
 #include "base/IMessageMediator.h"
 
 class IReferredMessageListener;
+class ISipClientConnection;
+class ISipDialog;
 class ISipGenericChallenge;
 class ISipServerConnection;
+class SipAddress;
 
 class Method : public EngineActivity, public ISipClientConnectionListener, public ISipErrorListener
 {

@@ -178,7 +178,7 @@ void SipClientTransmissionProxy::NotifyTransportError(IN IMS_SINT32 nErrorCode)
         // Change transport protocol to UDP
         if (m_pCtState != IMS_NULL)
         {
-            IMS_TRACE_D("TransmissionProxy :: UDP fallback", 0, 0, 0);
+            IMS_TRACE_D("TransmissionProxy: UDP fallback", 0, 0, 0);
             m_pCtState->AdjustTransportProtocolAsUdp();
             SendPendingMessage();
             return;
@@ -197,7 +197,7 @@ void SipClientTransmissionProxy::NotifyTransportError(IN IMS_SINT32 nErrorCode)
 PRIVATE
 IMS_RESULT SipClientTransmissionProxy::PrepareStreamSocket()
 {
-    IMS_TRACE_D("TransmissionProxy :: Preparing a stream socket", 0, 0, 0);
+    IMS_TRACE_D("TransmissionProxy: Preparing a stream socket", 0, 0, 0);
 
     if (m_pSocket == IMS_NULL)
     {
@@ -258,7 +258,7 @@ IMS_RESULT SipClientTransmissionProxy::SendMessage()
         }
         else if (nResult == RESULT_PENDING)
         {
-            IMS_TRACE_D("TransmissionProxy :: Waits for stream socket", 0, 0, 0);
+            IMS_TRACE_D("TransmissionProxy: Waits for stream socket", 0, 0, 0);
             return RESULT_PENDING;
         }
     }
@@ -294,7 +294,7 @@ void SipClientTransmissionProxy::SendPendingMessage()
         goto EXIT_SendPendingMessage;
     }
 
-    IMS_TRACE_D("TransmissionProxy :: Sending a pending message", 0, 0, 0);
+    IMS_TRACE_D("TransmissionProxy: Sending a pending message", 0, 0, 0);
 
     if (m_bIsResubmittedRequest)
     {

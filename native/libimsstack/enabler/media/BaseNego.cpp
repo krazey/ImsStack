@@ -25,6 +25,7 @@
 #include "MediaProfileGenerator.h"
 #include "MediaProfileUtil.h"
 #include "ServiceTrace.h"
+#include "config/MediaSessionConfigFactory.h"
 #include "config/MediaConfiguration.h"
 
 __IMS_TRACE_TAG_MEDIA__;
@@ -182,14 +183,14 @@ PUBLIC VIRTUAL void BaseNego::CleanupIncompleteOaModels()
 
 PUBLIC const IpAddress& BaseNego::GetNegotiatedRemoteAddress()
 {
-    const auto pProfile = GetNegotiatedPeerProfile();
+    const MediaBaseProfile* pProfile = GetNegotiatedPeerProfile();
 
     return (pProfile != IMS_NULL) ? pProfile->GetIpAddress() : IpAddress::NONE;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 BaseNego::GetRemotePort()
 {
-    const auto pProfile = GetNegotiatedPeerProfile();
+    const MediaBaseProfile* pProfile = GetNegotiatedPeerProfile();
 
     return (pProfile != IMS_NULL) ? pProfile->GetDataPort() : MEDIA_PORT_INVALID;
 }
@@ -484,4 +485,15 @@ IMS_BOOL BaseNego::CheckArgument(IN ISessionDescriptor* pSessionDescriptor,
     }
 
     return IMS_TRUE;
+}
+
+PROTECTED
+const MediaSessionConfig* BaseNego::GetMediaSessionConfig() const
+{
+    if (m_pEnvironment == IMS_NULL)
+    {
+        return IMS_NULL;
+    }
+    return MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
+            GetSlotId(), m_pEnvironment->eServiceType);
 }

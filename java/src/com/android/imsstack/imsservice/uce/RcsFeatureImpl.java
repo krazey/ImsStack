@@ -42,7 +42,6 @@ public class RcsFeatureImpl extends RcsFeature {
     public RcsFeatureImpl(IContext iContext) {
         super(iContext.getExecutor());
         mIContext = iContext;
-        setFeatureState(ImsFeature.STATE_READY);
     }
 
     @Override
@@ -134,6 +133,14 @@ public class RcsFeatureImpl extends RcsFeature {
     }
 
     /**
+     * Starts the feature and notifies that it is ready.
+     */
+    public void start() {
+        logi("start");
+        setFeatureState(ImsFeature.STATE_READY);
+    }
+
+    /**
      * Dump this instance into a readable format for dumpsys usage.
      */
     public void dump(IndentingPrintWriter pw) {
@@ -168,6 +175,6 @@ public class RcsFeatureImpl extends RcsFeature {
     }
 
     private static void logi(String s) {
-        ImsLog.i("[GII-IMPL] " + s);
+        ImsLog.i("[ISIL] " + s);
     }
 }

@@ -113,6 +113,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsVideoSupportedForEmergencyReg, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsUseRegInfoContactWithoutUriCheck, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsTestModeEnabled, (IN IMS_SINT32 nType), (const, override));
+    MOCK_METHOD(IMS_BOOL, ShouldDisableN1ModeOnImsPduEstablishFailure, (), (const, override));
     MOCK_METHOD(IMS_BOOL, ShouldKeepExistingPcscfOnPcscfChangeDuringTheCall, (), (const, override));
 
     MOCK_METHOD(IMS_SINT32, GetSipTimerT1, (), (override));

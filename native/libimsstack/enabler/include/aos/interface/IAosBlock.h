@@ -111,9 +111,8 @@ typedef enum
 } SERVICE_TYPE;
 
 /**
- * @brief
- *
- * @see
+ * @class IAosBlock
+ * @brief Interface for managing and querying IMS service block states.
  */
 class IAosBlock
 {
@@ -121,16 +120,16 @@ public:
     virtual ~IAosBlock(){};
 
     /**
-     * @brief
+     * @brief Registers a listener for block state change notifications.
      *
-     * @param
+     * @param piListener Pointer to the listener implementation.
      */
     virtual void SetListener(IN IAosBlockListener* piListener) = 0;
 
     /**
-     * @brief
+     * @brief Unregisters a block state change listener.
      *
-     * @param
+     * @param piListener Pointer to the listener to be removed.
      */
     virtual void RemoveListener(IN IAosBlockListener* piListener) = 0;
 
@@ -155,23 +154,35 @@ public:
     virtual void RemoveSilentListener(IN IAosBlockSilentListener* piListener) = 0;
 
     /**
-     * @brief
+     * @brief Activates a specific block reason.
      *
-     * @param
+     * Adds the reason to the internal block maps based on its category (Common,
+     * Cellular, or WiFi). If bNotify is true, standard listeners are notified;
+     * otherwise, silent listeners are notified.
+     *
+     * @param eReason The block reason to set.
+     * @param bNotify If IMS_TRUE, notifies standard listeners. If IMS_FALSE, notifies silent
+     *                listeners.
+     * @return IMS_TRUE if the block state was changed; IMS_FALSE if the reason was already blocked.
      */
     virtual IMS_BOOL SetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify = IMS_TRUE) = 0;
 
     /**
-     * @brief
+     * @brief Deactivates a specific block reason.
      *
-     * @param
+     * Removes the reason from internal block maps. Notification logic follows the bNotify flag.
+     *
+     * @param eReason The block reason to reset.
+     * @param bNotify If IMS_TRUE, notifies standard listeners. If IMS_FALSE, notifies silent
+     *                listeners.
+     * @return IMS_TRUE if the block state was changed; IMS_FALSE if the reason was not active.
      */
     virtual IMS_BOOL ResetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify = IMS_TRUE) = 0;
 
     /**
-     * @brief
+     * @brief Clears all active block reasons for all service types.
      *
-     * @param
+     * Resets all internal maps (Common, Cellular, and WiFi) and sends a notification.
      */
     virtual void ClearAllBlockReasons() = 0;
 
@@ -195,25 +206,31 @@ public:
     virtual IMS_BOOL PrintBlockReasons() = 0;
 
     /**
-     * @brief
+     * @brief Gets a list of currently active block reasons for a specific service type.
      *
-     * @param
+     * @param objReasons [OUT] List to be populated with active block reason IDs.
+     * @param eType Filter for the service type (CELLULAR, WIFI, or WHOLE).
      */
     virtual void GetBlockReasons(
             OUT ImsList<IMS_UINT32>& objReasons, IN SERVICE_TYPE eType = SERVICE_WHOLE) = 0;
 
     /**
-     * @brief
+     * @brief Checks if a specific reason is currently blocking the service.
      *
-     * @param
+     * @param eReason The block reason to check.
+     * @param bOnlyEnabled If IMS_TRUE, returns true only if the specified reason is the *only*
+     *                     reason active for that service.
+     * @param eType The service type context to check against.
+     * @return IMS_TRUE if the reason is blocking; otherwise IMS_FALSE.
      */
     virtual IMS_BOOL IsReasonBlocked(IN BLOCK_REASON eReason, IN IMS_BOOL bOnlyEnabled = IMS_FALSE,
             IN SERVICE_TYPE eType = SERVICE_CELLULAR) = 0;
 
     /**
-     * @brief
+     * @brief Checks if the specified service is free of any block reasons.
      *
-     * @param
+     * @param eType The service type to check (CELLULAR, WIFI, or WHOLE).
+     * @return IMS_TRUE if no block reasons are active for the service; otherwise IMS_FALSE.
      */
     virtual IMS_BOOL IsCleared(IN SERVICE_TYPE eType = SERVICE_CELLULAR) = 0;
 };

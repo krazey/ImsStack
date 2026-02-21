@@ -27,7 +27,6 @@ import java.util.List;
   * Implementation of ImsMultiEndpointImplBase class.
   */
 public class ImsMultiEndpointImpl extends ImsMultiEndpointImplBase {
-    private final Object mLock = new Object();
     private List<ImsExternalCallState> mImsExternalCallStates;
 
     public ImsMultiEndpointImpl(ICallContext callContext) {
@@ -37,9 +36,7 @@ public class ImsMultiEndpointImpl extends ImsMultiEndpointImplBase {
      * Disposes the object
      */
     public void dispose() {
-        synchronized (mLock) {
-            mImsExternalCallStates = null;
-        }
+        mImsExternalCallStates = null;
     }
 
     /**
@@ -47,9 +44,7 @@ public class ImsMultiEndpointImpl extends ImsMultiEndpointImplBase {
      * Notification is sent to framework via callback method.
      */
     public void updateDialogState(List<ImsExternalCallState> imsExternalCallStates) {
-        synchronized (mLock) {
-            mImsExternalCallStates = imsExternalCallStates;
-        }
+        mImsExternalCallStates = imsExternalCallStates;
         onImsExternalCallStateUpdate(imsExternalCallStates);
     }
 
@@ -57,9 +52,7 @@ public class ImsMultiEndpointImpl extends ImsMultiEndpointImplBase {
      * ImsExternalCallState is cached.
      */
     private List<ImsExternalCallState> getImsExternalCallState() {
-        synchronized (mLock) {
-            return mImsExternalCallStates;
-        }
+        return mImsExternalCallStates;
     }
 
     /**

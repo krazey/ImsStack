@@ -23,6 +23,7 @@
 #include "Capabilities.h"
 #include "IOnNotificationListener.h"
 #include "IOnReferenceListener.h"
+#include "ISipClientConnection.h"
 #include "ISipDialog.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
@@ -31,12 +32,14 @@
 #include "ImplicitSubscriberState.h"
 #include "ImsCoreContext.h"
 #include "Reference.h"
+#include "Replaces.h"
 #include "Service.h"
 #include "Sip.h"
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
 #include "SipFeatures.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 #include "util/DialogMethodManager.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
@@ -392,7 +395,7 @@ IMS_RESULT Reference::SetReplaces(IN const AString& strSessionId)
 
     if (pTmpReplaces == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Can't find a Replaces from sessionId (%s)", strSessionId.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "No Replaces from sessionId(%s)", strSessionId.GetStr(), 0, 0);
         return IMS_FAILURE;
     }
 
@@ -437,16 +440,16 @@ IMS_RESULT Reference::AcceptEx(IN IMS_SINT32 nStatusCode /*= SipStatusCode::SC_2
 
     if (CreateResponse(piSsc, nStatusCode) == IMS_FALSE)
     {
-        IMS_TRACE_E(0, "Initializing the response to REFER request failed", 0, 0, 0);
+        IMS_TRACE_E(0, "Initializing %d-REFER failed", nStatusCode, 0, 0);
 
         CloseConnection(IMessage::REFERENCE_REFER);
         return IMS_FAILURE;
     }
 
-    // Send a response to REFER request immediately...
+    // Send a response to REFER request immediately.
     if (!SendNUpdateResponse(IMessage::REFERENCE_REFER, piSsc))
     {
-        IMS_TRACE_E(0, "Sending the response to REFER request failed ...", 0, 0, 0);
+        IMS_TRACE_E(0, "Sending %d-REFER failed", nStatusCode, 0, 0);
 
         CloseConnection(IMessage::REFERENCE_REFER);
         return IMS_FAILURE;
@@ -626,16 +629,16 @@ IMS_RESULT Reference::RejectEx(IN IMS_SINT32 nStatusCode)
 
     if (CreateResponse(piSsc, nStatusCode) == IMS_FALSE)
     {
-        IMS_TRACE_E(0, "Initializing the response to REFER request failed", 0, 0, 0);
+        IMS_TRACE_E(0, "Initializing %d-REFER failed", nStatusCode, 0, 0);
 
         CloseConnection(IMessage::REFERENCE_REFER);
         return IMS_FAILURE;
     }
 
-    // Send a response to REFER request immediately...
+    // Send a response to REFER request immediately.
     if (!SendNUpdateResponse(IMessage::REFERENCE_REFER, piSsc))
     {
-        IMS_TRACE_E(0, "Sending the response to REFER request failed ...", 0, 0, 0);
+        IMS_TRACE_E(0, "Sending %d-REFER failed", nStatusCode, 0, 0);
 
         CloseConnection(IMessage::REFERENCE_REFER);
         return IMS_FAILURE;
@@ -822,8 +825,6 @@ PROTECTED VIRTUAL IMS_BOOL Reference::InitInstance()
 
 PROTECTED VIRTUAL IMS_BOOL Reference::NotifySipRequest(IN ISipServerConnection* piSsc)
 {
-    IMS_TRACE_I("Reference - REFER REQUEST RECEIVED ...", 0, 0, 0);
-
     if (!UpdateRequestOnReceived(IMessage::REFERENCE_REFER, piSsc))
     {
         IMS_TRACE_E(0, "Updating SIP message failed", 0, 0, 0);
@@ -836,8 +837,6 @@ PROTECTED VIRTUAL IMS_BOOL Reference::NotifySipRequest(IN ISipServerConnection* 
     {
         if (pSipConfigV->IsReferenceRespByApp())
         {
-            IMS_TRACE_I("INCOMING REFER REQUEST WILL BE HANDLED BY APPLICATION", 0, 0, 0);
-
             // Notify the information which the Reference is received
             if (!m_bReferenceInOtherDialog)
             {
@@ -851,16 +850,16 @@ PROTECTED VIRTUAL IMS_BOOL Reference::NotifySipRequest(IN ISipServerConnection* 
     // Send a 202 ACCEPTED to REFER request
     if (CreateResponse(piSsc, SipStatusCode::SC_202) == IMS_FALSE)
     {
-        IMS_TRACE_E(0, "Initializing the response to REFER request failed", 0, 0, 0);
+        IMS_TRACE_E(0, "Initializing 202-REFER failed", 0, 0, 0);
 
         CloseConnection(IMessage::REFERENCE_REFER);
         return IMS_FALSE;
     }
 
-    // Send a response to REFER request immediately...
+    // Send a response to REFER request immediately.
     if (!SendNUpdateResponse(IMessage::REFERENCE_REFER, piSsc))
     {
-        IMS_TRACE_E(0, "Sending the response to REFER request failed ...", 0, 0, 0);
+        IMS_TRACE_E(0, "Sending 202-REFER failed", 0, 0, 0);
 
         CloseConnection(IMessage::REFERENCE_REFER);
         return IMS_FALSE;
@@ -1048,12 +1047,12 @@ PROTECTED VIRTUAL IMS_BOOL Reference::Dialog_Compare(IN ISipServerConnection* pi
 
     if (piDialog == IMS_NULL)
     {
-        // In case of an early NOTIFY received ...
+        // In case of an early NOTIFY received.
         if (GetState() == STATE_PROCEEDING)
         {
             const ISipClientConnection* piScc = GetClientConnection(IMessage::REFERENCE_REFER);
 
-            IMS_TRACE_I("Checks if the early NOTIFY is received or not ...", 0, 0, 0);
+            IMS_TRACE_I("Checks if the early NOTIFY is received", 0, 0, 0);
 
             if (piScc != IMS_NULL)
             {
@@ -1138,7 +1137,6 @@ PROTECTED VIRTUAL IMS_BOOL Reference::Dialog_NotifyRequest(IN ISipServerConnecti
 
     if (pMessage == IMS_NULL)
     {
-        // Internal error ... ???
         if (GetService()->SendResponse(piSsc, SipStatusCode::SC_500))
         {
             m_pSubState->UpdateState(piSsc->GetMessage());
@@ -1154,7 +1152,7 @@ PROTECTED VIRTUAL IMS_BOOL Reference::Dialog_NotifyRequest(IN ISipServerConnecti
         delete pMessage;
         piSsc->Close();
 
-        IMS_TRACE_E(0, "Creating & sending the response to NOTIFY request failed", 0, 0, 0);
+        IMS_TRACE_E(0, "Sending 200-NOTIFY failed", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -1192,7 +1190,6 @@ PROTECTED VIRTUAL void Reference::ReferredMessage_NotifyOnActive(IN ISipMessage*
 
     if (piSipMsg == IMS_NULL)
     {
-        // Nothing to do...
         return;
     }
 
@@ -1441,7 +1438,7 @@ IMS_RESULT Reference::DoNotification(IN IMS_SINT32 nSubState, IN const ByteArray
 PRIVATE
 void Reference::SetState(IN IMS_SINT32 nState)
 {
-    IMS_TRACE_I("Reference :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
+    IMS_TRACE_I("Reference: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
     m_nState = nState;
 }

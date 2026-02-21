@@ -94,7 +94,7 @@ public:
         return MessageMediator_AdjustMessage(piSIPMsg);
     }
 
-    void SetConectedService(IMS_UINT32 service) { m_nConnectedServices = service; }
+    void SetConnectedService(IMS_UINT32 service) { m_nConnectedServices = service; }
     void SetExponentialTimer(ITimer* piTimer) { m_pExponentialTimer = piTimer; }
     void SetRetryTimer(ITimer* piTimer) { m_pRetryTimer = piTimer; }
     void SetRetryAfterTimer(ITimer* piTimer) { m_pRetryAfterTimer = piTimer; }
@@ -109,7 +109,7 @@ public:
     void NotifyTerminated() { Refresh_NotifyTerminated(); }
     void NotifyTimerExpired(IMS_BOOL& bDoRefresh) { Refresh_NotifyTimerExpired(bDoRefresh); }
 
-    IMS_UINT32 GetConectedService() { return m_nConnectedServices; }
+    IMS_UINT32 GetConnectedService() { return m_nConnectedServices; }
 
     void SetIPublication(IPublication* pPublication) { m_piPublication = pPublication; }
 
@@ -122,6 +122,7 @@ public:
     IMS_BOOL IdlePublishRequested(IMSMSG& objMsg) { return StateIDLE_PublishRequested(objMsg); }
     IMS_BOOL IdleAoSConnected(IMSMSG& objMsg) { return StateIDLE_AoSConnected(objMsg); }
     IMS_BOOL OnPublishRequested(IMSMSG& objMsg) { return StateON_PublishRequested(objMsg); }
+    IMS_BOOL OnAosConnected(IMSMSG& objMsg) { return StateON_AoSConnected(objMsg); }
     IMS_BOOL OnAoSDisConnected(IMSMSG& objMsg) { return StateON_AoSDisConnected(objMsg); }
     IMS_BOOL PublishingPublishRequested(IMSMSG& objMsg)
     {
@@ -188,6 +189,11 @@ public:
 
     IMS_UINT32 GetResponseCode() { return GetLastResponseCode(); }
     void SetResponseCode(IMS_UINT32 nCode) { return SetLastResponseCode(nCode); }
+
+    void SetRegistrationRequested(IMS_BOOL bRequested)
+    {
+        SetRegistrationRecoveryRequested(bRequested);
+    }
 };
 
 class UcePublishManagerTest : public ::testing::Test
@@ -276,69 +282,70 @@ TEST_F(UcePublishManagerTest, SetContactHeader)
     objNew->m_bUseContactHeaderInPublish = IMS_TRUE;
     UceConfig::GetInstance()->SetConfig(0, objNew);
 
-    pUcePublishManager->SetConectedService(0);
+    pUcePublishManager->SetConnectedService(0);
     EXPECT_EQ(pUcePublishManager->MessageMediatorAdjustMessage(&objMockISipMessage), IMS_SUCCESS);
 
     EXPECT_CALL(objMockISipMessage, SetHeader).Times(AnyNumber());
 
-    pUcePublishManager->SetConectedService(CONNECTED_SERVICE_CPM_SESSION);
+    pUcePublishManager->SetConnectedService(CONNECTED_SERVICE_CPM_SESSION);
     EXPECT_EQ(pUcePublishManager->MessageMediatorAdjustMessage(&objMockISipMessage), IMS_SUCCESS);
 
     ON_CALL(objMockISipMessage, GetHeader).WillByDefault(Return(AString(UceTag::TAG_CHAT)));
-    pUcePublishManager->SetConectedService(
+    pUcePublishManager->SetConnectedService(
             CONNECTED_SERVICE_CPM_SESSION | CONNECTED_SERVICE_CALL_COMPOSER);
     EXPECT_EQ(pUcePublishManager->MessageMediatorAdjustMessage(&objMockISipMessage), IMS_SUCCESS);
 
     ON_CALL(objMockISipMessage, GetHeader).WillByDefault(Return(AString(UceTag::TAG_CHAT)));
-    pUcePublishManager->SetConectedService(
+    pUcePublishManager->SetConnectedService(
             CONNECTED_SERVICE_CPM_SESSION | CONNECTED_SERVICE_CPM_MSG);
     EXPECT_EQ(pUcePublishManager->MessageMediatorAdjustMessage(&objMockISipMessage), IMS_SUCCESS);
 
     ON_CALL(objMockISipMessage, GetHeader).WillByDefault(Return(AString(UceTag::TAG_CHAT)));
-    pUcePublishManager->SetConectedService(
+    pUcePublishManager->SetConnectedService(
             CONNECTED_SERVICE_CPM_SESSION | CONNECTED_SERVICE_CPM_LARGEMSG);
     EXPECT_EQ(pUcePublishManager->MessageMediatorAdjustMessage(&objMockISipMessage), IMS_SUCCESS);
 
     ON_CALL(objMockISipMessage, GetHeader).WillByDefault(Return(AString(UceTag::TAG_PRESENCE)));
-    pUcePublishManager->SetConectedService(
+    pUcePublishManager->SetConnectedService(
             CONNECTED_SERVICE_CPM_SESSION | CONNECTED_SERVICE_PRESENCE);
     EXPECT_EQ(pUcePublishManager->MessageMediatorAdjustMessage(&objMockISipMessage), IMS_SUCCESS);
 
     ON_CALL(objMockISipMessage, GetHeader).WillByDefault(Return(AString(UceTag::TAG_CHAT)));
-    pUcePublishManager->SetConectedService(
+    pUcePublishManager->SetConnectedService(
             CONNECTED_SERVICE_CPM_SESSION | CONNECTED_SERVICE_HTTPFT);
     EXPECT_EQ(pUcePublishManager->MessageMediatorAdjustMessage(&objMockISipMessage), IMS_SUCCESS);
 
     ON_CALL(objMockISipMessage, GetHeader).WillByDefault(Return(AString(UceTag::TAG_CHAT)));
-    pUcePublishManager->SetConectedService(
+    pUcePublishManager->SetConnectedService(
             CONNECTED_SERVICE_CPM_SESSION | CONNECTED_SERVICE_GEOPUSH);
     EXPECT_EQ(pUcePublishManager->MessageMediatorAdjustMessage(&objMockISipMessage), IMS_SUCCESS);
 
     ON_CALL(objMockISipMessage, GetHeader).WillByDefault(Return(AString(UceTag::TAG_CHAT)));
-    pUcePublishManager->SetConectedService(CONNECTED_SERVICE_CPM_SESSION | CONNECTED_SERVICE_FTSMS);
+    pUcePublishManager->SetConnectedService(
+            CONNECTED_SERVICE_CPM_SESSION | CONNECTED_SERVICE_FTSMS);
     EXPECT_EQ(pUcePublishManager->MessageMediatorAdjustMessage(&objMockISipMessage), IMS_SUCCESS);
 
     ON_CALL(objMockISipMessage, GetHeader).WillByDefault(Return(AString(UceTag::TAG_CHAT)));
-    pUcePublishManager->SetConectedService(
+    pUcePublishManager->SetConnectedService(
             CONNECTED_SERVICE_CPM_SESSION | CONNECTED_SERVICE_GEOSMS);
     EXPECT_EQ(pUcePublishManager->MessageMediatorAdjustMessage(&objMockISipMessage), IMS_SUCCESS);
 
     ON_CALL(objMockISipMessage, GetHeader)
             .WillByDefault(Return(AString(UceTag::TAG_CHATBOT_SESSION)));
-    pUcePublishManager->SetConectedService(
+    pUcePublishManager->SetConnectedService(
             CONNECTED_SERVICE_CPM_SESSION | CONNECTED_SERVICE_CHATBOT);
     EXPECT_EQ(pUcePublishManager->MessageMediatorAdjustMessage(&objMockISipMessage), IMS_SUCCESS);
 
     ON_CALL(objMockISipMessage, GetHeader).WillByDefault(Return(AString(UceTag::TAG_CHAT)));
-    pUcePublishManager->SetConectedService(
+    pUcePublishManager->SetConnectedService(
             CONNECTED_SERVICE_CPM_SESSION | CONNECTED_SERVICE_CHATBOT_STANDALONE_MSG);
     EXPECT_EQ(pUcePublishManager->MessageMediatorAdjustMessage(&objMockISipMessage), IMS_SUCCESS);
 
-    pUcePublishManager->SetConectedService(
+    pUcePublishManager->SetConnectedService(
             CONNECTED_SERVICE_CHATBOT_V1 | CONNECTED_SERVICE_CPM_SESSION);
     EXPECT_EQ(pUcePublishManager->MessageMediatorAdjustMessage(&objMockISipMessage), IMS_SUCCESS);
 
-    pUcePublishManager->SetConectedService(
+    pUcePublishManager->SetConnectedService(
             CONNECTED_SERVICE_CHATBOT_V2 | CONNECTED_SERVICE_CPM_SESSION);
     EXPECT_EQ(pUcePublishManager->MessageMediatorAdjustMessage(&objMockISipMessage), IMS_SUCCESS);
 
@@ -348,7 +355,7 @@ TEST_F(UcePublishManagerTest, SetContactHeader)
             CONNECTED_SERVICE_FTSMS | CONNECTED_SERVICE_GEOSMS | CONNECTED_SERVICE_CHATBOT |
             CONNECTED_SERVICE_CHATBOT_STANDALONE_MSG | CONNECTED_SERVICE_CHATBOT_V1 |
             CONNECTED_SERVICE_CHATBOT_V2;
-    pUcePublishManager->SetConectedService(service);
+    pUcePublishManager->SetConnectedService(service);
     EXPECT_EQ(pUcePublishManager->MessageMediatorAdjustMessage(&objMockISipMessage), IMS_SUCCESS);
 }
 
@@ -361,10 +368,10 @@ TEST_F(UcePublishManagerTest, SendPublishRequest)
 TEST_F(UcePublishManagerTest, AosConnected)
 {
     IMS_TRACE_D("AosConnected", 0, 0, 0);
-    IMS_UINT32 conectedService = 10;
+    IMS_UINT32 connectedService = 10;
 
-    EXPECT_EQ(pUcePublishManager->AosConnected(conectedService), IMS_TRUE);
-    EXPECT_EQ(pUcePublishManager->GetConectedService(), conectedService);
+    EXPECT_EQ(pUcePublishManager->AosConnected(connectedService), IMS_TRUE);
+    EXPECT_EQ(pUcePublishManager->GetConnectedService(), connectedService);
     EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::ON);
 }
 
@@ -373,14 +380,14 @@ TEST_F(UcePublishManagerTest, AosDisConnected)
     IMS_TRACE_D("AosDisConnected", 0, 0, 0);
     pUcePublishManager->SetResponseCode(403);
     EXPECT_EQ(pUcePublishManager->AosDisConnected(), IMS_FALSE);
-    EXPECT_EQ(pUcePublishManager->GetConectedService(), 0);
+    EXPECT_EQ(pUcePublishManager->GetConnectedService(), 0);
     EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::IDLE);
     EXPECT_EQ(pUcePublishManager->GetResponseCode(), 0);
 
     pUcePublishManager->SetPublishState(TestUcePublishManager::ON);
     pUcePublishManager->SetResponseCode(403);
     EXPECT_EQ(pUcePublishManager->AosDisConnected(), IMS_TRUE);
-    EXPECT_EQ(pUcePublishManager->GetConectedService(), 0);
+    EXPECT_EQ(pUcePublishManager->GetConnectedService(), 0);
     EXPECT_EQ(pUcePublishManager->GetResponseCode(), 0);
 }
 
@@ -557,9 +564,9 @@ TEST_F(UcePublishManagerTest, StateIDLE_AoSConnected)
     EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::ON);
 }
 
-TEST_F(UcePublishManagerTest, StateON_PublishRequestedWithNoPulibcation)
+TEST_F(UcePublishManagerTest, StateON_PublishRequestedWithNoPublication)
 {
-    IMS_TRACE_D("StateON_PublishRequestedWithNoPulibcation", 0, 0, 0);
+    IMS_TRACE_D("StateON_PublishRequestedWithNoPublication", 0, 0, 0);
 
     ON_CALL(objMockICoreService, CreatePublication(_, _, _)).WillByDefault(ReturnNull());
 
@@ -604,6 +611,42 @@ TEST_F(UcePublishManagerTest, StateON_PublishRequested)
             reinterpret_cast<IMS_UINTP>(pPublicationData));
 
     pUcePublishManager->OnPublishRequested(objMsg1);
+}
+
+TEST_F(UcePublishManagerTest, StateON_AoSConnected)
+{
+    IMS_TRACE_D("StateON_AoSConnected", 0, 0, 0);
+
+    pUcePublishManager->SetRegistrationRequested(IMS_FALSE);
+    pUcePublishManager->SetPublishState(TestUcePublishManager::ON);
+
+    EXPECT_CALL(objMockIPublication, SetListener(_)).Times(0);
+    EXPECT_CALL(objMockIPublication, SetRefreshListener(_)).Times(0);
+    EXPECT_CALL(objMockIUceJniThread, PublishErrorInd(_, _)).Times(0);
+
+    ON_CALL(objMockICoreService, CreatePublication(_, _, _))
+            .WillByDefault(Return(&objMockIPublication));
+
+    IMSMSG objMsg(TestUcePublishManager::AOS_CONNECTED, 0, 0);
+    EXPECT_TRUE(pUcePublishManager->OnAosConnected(objMsg));
+}
+
+TEST_F(UcePublishManagerTest, StateON_AoSConnectedByRequest)
+{
+    IMS_TRACE_D("StateON_AoSConnected", 0, 0, 0);
+
+    pUcePublishManager->SetRegistrationRequested(IMS_TRUE);
+    pUcePublishManager->SetPublishState(TestUcePublishManager::ON);
+
+    EXPECT_CALL(objMockIPublication, SetListener(_)).Times(1);
+    EXPECT_CALL(objMockIPublication, SetRefreshListener(_)).Times(1);
+    EXPECT_CALL(objMockIUceJniThread, PublishErrorInd(_, _)).Times(1);
+
+    ON_CALL(objMockICoreService, CreatePublication(_, _, _))
+            .WillByDefault(Return(&objMockIPublication));
+
+    IMSMSG objMsg(TestUcePublishManager::AOS_CONNECTED, 0, 0);
+    EXPECT_TRUE(pUcePublishManager->OnAosConnected(objMsg));
 }
 
 TEST_F(UcePublishManagerTest, StateON_AoSDisConnected)
@@ -729,6 +772,42 @@ TEST_F(UcePublishManagerTest, StatePUBLISHING_Failed)
 
     EXPECT_EQ(pUcePublishManager->GetKey(), 0);
     EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::ON);
+}
+
+TEST_F(UcePublishManagerTest, StatePUBLISHING_FailedBy423)
+{
+    IMS_TRACE_D("StatePUBLISHING_FailedBy423", 0, 0, 0);
+
+    MockISipMessage objMockISipMessage;
+    MockISipMessageBodyPart objMockISipMessageBodyPart;
+    IMS_UINT32 nErrorCode = 423;
+    AString reason = AString("Interval Too Brief");
+    ImsList<AString> objReasonHeaders;
+    objReasonHeaders.Clear();
+
+    pUcePublishManager->SetPublishState(TestUcePublishManager::PUBLISHING);
+    pUcePublishManager->SetIPublication(&objMockIPublication);
+    pUcePublishManager->SetKey(10);
+
+    EXPECT_CALL(objMockIPublication, SetListener(_)).Times(1);
+    EXPECT_CALL(objMockIPublication, SetRefreshListener(_)).Times(1);
+    EXPECT_CALL(objMockISipMessage, AddHeader(_, _, _)).Times(AnyNumber());
+    EXPECT_CALL(objMockISipMessageBodyPart, SetContent(_)).Times(1);
+
+    ON_CALL(objMockIMessage, GetMessage).WillByDefault(Return(&objMockISipMessage));
+    ON_CALL(objMockISipMessage, GetHeader).WillByDefault(Return(AString("100")));
+    ON_CALL(objMockISipMessage, CreateBodyPart).WillByDefault(Return(&objMockISipMessageBodyPart));
+    ON_CALL(objMockICoreService, CreatePublication(_, _, _))
+            .WillByDefault(Return(&objMockIPublication));
+    ON_CALL(objMockIPublication, Publish).WillByDefault(Return(IMS_SUCCESS));
+    ON_CALL(objMockISipMessage, GetStatusCode).WillByDefault(Return(nErrorCode));
+    ON_CALL(objMockISipMessage, GetReasonPhrase).WillByDefault(ReturnRef(reason));
+    ON_CALL(objMockISipMessage, GetHeaders).WillByDefault(Return(objReasonHeaders));
+
+    IMSMSG objMsg(TestUcePublishManager::PUBLISH_FAILED, 0, 0);
+    pUcePublishManager->PublishingFailed(objMsg);
+
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::PUBLISHING);
 }
 
 TEST_F(UcePublishManagerTest, StatePUBLISHING_FailedWith403Twice)
@@ -977,6 +1056,41 @@ TEST_F(UcePublishManagerTest, StateREFRESHING_RefreshFailedWithNoResponse)
 
     pUcePublishManager->RefreshingRefreshFailedWithNoResponse(objMsg);
     EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::ON);
+}
+
+TEST_F(UcePublishManagerTest, StateREFRESHING_RefreshFailedBy423)
+{
+    IMS_TRACE_D("StateREFRESHING_RefreshFailedBy423", 0, 0, 0);
+
+    MockISipMessage objMockISipMessage;
+    MockISipMessageBodyPart objMockISipMessageBodyPart;
+    IMS_UINT32 nErrorCode = 423;
+    AString reason = AString("Interval Too Brief");
+    ImsList<AString> objReasonHeaders;
+    objReasonHeaders.Clear();
+
+    pUcePublishManager->SetPublishState(TestUcePublishManager::REFRESHING);
+    pUcePublishManager->SetIPublication(&objMockIPublication);
+    pUcePublishManager->SetKey(10);
+
+    EXPECT_CALL(objMockIPublication, SetListener(_)).Times(1);
+    EXPECT_CALL(objMockIPublication, SetRefreshListener(_)).Times(1);
+    EXPECT_CALL(objMockISipMessage, AddHeader(_, _, _)).Times(AnyNumber());
+
+    ON_CALL(objMockIMessage, GetMessage).WillByDefault(Return(&objMockISipMessage));
+    ON_CALL(objMockISipMessage, GetHeader).WillByDefault(Return(AString("100")));
+    ON_CALL(objMockISipMessage, CreateBodyPart).WillByDefault(Return(&objMockISipMessageBodyPart));
+    ON_CALL(objMockICoreService, CreatePublication(_, _, _))
+            .WillByDefault(Return(&objMockIPublication));
+    ON_CALL(objMockIPublication, Publish).WillByDefault(Return(IMS_SUCCESS));
+    ON_CALL(objMockISipMessage, GetStatusCode).WillByDefault(Return(nErrorCode));
+    ON_CALL(objMockISipMessage, GetReasonPhrase).WillByDefault(ReturnRef(reason));
+    ON_CALL(objMockISipMessage, GetHeaders).WillByDefault(Return(objReasonHeaders));
+
+    IMSMSG objMsg(TestUcePublishManager::PUBLISH_FAILED, 0, 0);
+    pUcePublishManager->PublishingFailed(objMsg);
+
+    EXPECT_EQ(pUcePublishManager->GetStateInternal(), TestUcePublishManager::REFRESHING);
 }
 
 TEST_F(UcePublishManagerTest, StateTERMINATING_PublishRequested)

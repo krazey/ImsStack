@@ -98,7 +98,9 @@ PUBLIC VIRTUAL void OsIpSecSa::SetSa(IN const IpAddress& objSrcIp, IN IMS_UINT32
 
 PUBLIC VIRTUAL void OsIpSecSa::DoneSa()
 {
+#ifdef __IMS_DEBUG__
     IMS_TRACE_D("IPSEC-SA done.", 0, 0, 0);
+#endif
 }
 
 PUBLIC
@@ -116,14 +118,10 @@ void OsIpSecSa::DisplayInfo()
     }
 
     AString strLog;
-
-    IMS_TRACE_D("IPSEC-SA-INFO(spi|s-ip|d-ip|sec-proto|algo-auth|algo-enc|ik|ck)", 0, 0, 0);
-
-    strLog.Sprintf("IMS_SA=0x%x|%s|%s|%d|%d|%d|na|na", m_pIpSecSaP->m_nSpi,
-            m_pIpSecSaP->m_objSrcIp.ToString().GetStr(),
+    strLog.Sprintf("IMS_SA=0x%x|%s|%s|%d|%d|%d|na|na(spi|s-ip|d-ip|proto|algo-auth|algo-enc|ik|ck)",
+            m_pIpSecSaP->m_nSpi, m_pIpSecSaP->m_objSrcIp.ToString().GetStr(),
             m_pIpSecSaP->m_objDstIp.ToString().GetStr(), m_pIpSecSaP->m_nSecurityProtocol,
             m_pIpSecSaP->m_nAuthAlgorithm, m_pIpSecSaP->m_nEncryptionAlgorithm);
-
     IMS_TRACE_D("%s", strLog.GetStr(), 0, 0);
 }
 

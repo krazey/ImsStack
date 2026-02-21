@@ -15,26 +15,9 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <!-- Please always keep this config on the first line. -->
+    <!-- Specifies a list of parent carrier ids from which to inherit configuration values. -->
     <int-array name="ims.parent_carrier_ids_int_array" num="1">
         <item value="1454"/>
-    </int-array>
-
-    <!-- Aos -->
-    <int name="ims.reg_out_of_service_policy_int" value="1"/>
-    <boolean name="imsemergency.release_epdn_upon_ecall_end_in_fake_mode_bool" value="true"/>
-    <int name="imsemergency.preferred_emergency_registration_int" value="1"/>
-    <int name="imsemergency.wait_time_millis_for_release_epdn_after_ecall_end_int" value="2000"/>
-    <int-array name="imsemergency.epdn_reject_causes_for_cross_stack_redial_int_array" num="1">
-        <item value="5"/>
-    </int-array>
-    <boolean name="imsvoice.ignore_vops_for_volte_enable_bool" value="false"/>
-
-    <!-- Ut/Xcap -->
-    <int-array name="imsss.ut_sm_cause_permanent_block_int_array" num="2">
-        <item value="27"/>
-        <item value="33"/>
-    </int-array>
-    <int-array name="imsss.ut_http_permanent_error_code_int_array" num="1">
-        <item value="403"/>
     </int-array>
 </carrier_config>

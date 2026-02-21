@@ -87,7 +87,7 @@ PRIVATE VIRTUAL void ConfigEnabler::Start()
             piRtConfigHelper->SetConfig(SipRtConfig::CONFIG_I_SHUTDOWN, &objSocketOption);
         }
 
-        // It's based on the Verizon's requirement, but it will be applied for all the carriers.
+        // TCP client port range for SIP signaling.
         ImsVector<IMS_SINT32> objPortRange =
                 piCc->GetIntArray(CarrierConfig::Ims::KEY_SIP_TCP_CLIENT_PORT_RANGE_INT_ARRAY);
         if (objPortRange.GetSize() < 2)

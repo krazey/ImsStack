@@ -18,6 +18,7 @@
 
 #include "SdpAttribute.h"
 #include "SdpMediaDescription.h"
+#include "offeranswer/SdpMediaParameter.h"
 #include "offeranswer/SdpOfferAnswer.h"
 
 #include "SessionParameter.h"
@@ -100,7 +101,7 @@ IMS_BOOL SessionParameter::Create(IN const SdpSessionDescription& objSessionDesc
         m_objMediaParams.Clear();
         m_objMediaGroups.Clear();
 
-        IMS_TRACE_I("SessionParameter - NO MEDIA-LEVEL PARAMETERS", 0, 0, 0);
+        IMS_TRACE_I("SessionParameter: NO MEDIA-LEVEL PARAMETERS", 0, 0, 0);
         return IMS_TRUE;
     }
 
@@ -199,12 +200,12 @@ IMS_BOOL SessionParameter::IsSameVersion(IN const SessionParameter* pSessionPara
 {
     if (!m_strRemoteVersion.Equals(pSessionParam->m_strRemoteVersion))
     {
-        IMS_TRACE_I("SDP Offer/Answer - Version (%s), Offered Version (%s)",
-                m_strRemoteVersion.GetStr(), pSessionParam->m_strRemoteVersion.GetStr(), 0);
+        IMS_TRACE_I("SDP_OA: Version (%s), Offered Version (%s)", m_strRemoteVersion.GetStr(),
+                pSessionParam->m_strRemoteVersion.GetStr(), 0);
         return IMS_FALSE;
     }
 
-    IMS_TRACE_I("SDP Offer/Answer - NO CHANGES (%s) ...", m_strRemoteVersion.GetStr(), 0, 0);
+    IMS_TRACE_I("SDP_OA: NO CHANGES(%s)", m_strRemoteVersion.GetStr(), 0, 0);
 
     return IMS_TRUE;
 }
@@ -374,7 +375,7 @@ IMS_SINT32 SessionParameter::GenerateAnswer(IN const SessionParameter* pOffer,
 
     if ((nOptions & SdpOfferAnswer::F_MEDIA_PARAM) != SdpOfferAnswer::F_MEDIA_PARAM)
     {
-        IMS_TRACE_I("SDP Offer/Answer - No media parameter comparison ...", 0, 0, 0);
+        IMS_TRACE_I("SDP_OA: No media parameter comparison", 0, 0, 0);
 
         return SdpOfferAnswer::RESULT_SUCCESS;
     }
@@ -382,7 +383,7 @@ IMS_SINT32 SessionParameter::GenerateAnswer(IN const SessionParameter* pOffer,
     // Compare & generate the media level parameters
     nOaResult = CompareMediaParameters(bInitialOffer, IMS_TRUE, pOffer, pProposalView, pPeerView);
 
-    IMS_TRACE_I("SDP Offer/Answer - Generating Answer (%d)", nOaResult, 0, 0);
+    IMS_TRACE_I("SDP_OA: Generating Answer(%d)", nOaResult, 0, 0);
 
     if (nOaResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT)
     {
@@ -422,7 +423,7 @@ IMS_SINT32 SessionParameter::ProcessAnswer(IN const SessionParameter* pAnswer,
     // Compare & generate the media level parameters
     nOaResult = CompareMediaParameters(IMS_FALSE, IMS_FALSE, pAnswer, pProposalView, pPeerView);
 
-    IMS_TRACE_I("SDP Offer/Answer - Processing Answer (%d)", nOaResult, 0, 0);
+    IMS_TRACE_I("SDP_OA: Processing Answer(%d)", nOaResult, 0, 0);
 
     if (nOaResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT)
     {
@@ -475,7 +476,7 @@ void SessionParameter::UpdateDirection(IN const SessionParameter* pOther)
 
     m_objSessionParam.UpdateDirection(pOther->m_objSessionParam);
 
-    IMS_TRACE_D("UpdateDirection :: Count of media parameter (this: %d, other: %d)",
+    IMS_TRACE_D("UpdateDirection: Count of media parameter (this: %d, other: %d)",
             m_objMediaParams.GetSize(), pOther->m_objMediaParams.GetSize(), 0);
 
     IMS_UINT32 nMediaCount = m_objMediaParams.GetSize();
@@ -492,7 +493,7 @@ void SessionParameter::UpdateDirection(IN const SessionParameter* pOther)
 
         if ((pMediaParam == IMS_NULL) || (pOtherMediaParam == IMS_NULL))
         {
-            IMS_TRACE_E(0, "UpdateDirection :: Media parameter is null (%p, %p)", pMediaParam,
+            IMS_TRACE_E(0, "UpdateDirection: Media parameter is null (%p, %p)", pMediaParam,
                     pOtherMediaParam, 0);
             continue;
         }
@@ -763,7 +764,7 @@ IMS_SINT32 SessionParameter::CompareMediaParameters(IN IMS_BOOL bInitialOffer, I
                 // Update the media direction in the negotiated media stream
                 pProposalMedia->UpdateDirection();
 
-                IMS_TRACE_D("Count of media formats :: Proposal (%d), Peer (%d)",
+                IMS_TRACE_D("Count of media formats: Proposal (%d), Peer (%d)",
                         pProposalMedia->GetMediaFormats().GetSize(),
                         (pNegotiatedPeerParam != IMS_NULL)
                                 ? pNegotiatedPeerParam->GetMediaFormats().GetSize()
@@ -902,8 +903,8 @@ void SessionParameter::RemovePreconditionsIfNotSupport(
         pLocalMediaParam->RemovePrecondition(SdpAttribute::DES);
         pLocalMediaParam->RemovePrecondition(SdpAttribute::CONF);
 
-        IMS_TRACE_I("SDP offer/answer :: The precondition is not supported by the peer;"
-                    " remove the precondition attributes...",
+        IMS_TRACE_I("SDP OA: The precondition is not supported by the peer;"
+                    " remove the precondition attributes",
                 0, 0, 0);
     }
 #endif

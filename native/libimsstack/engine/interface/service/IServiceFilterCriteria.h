@@ -16,7 +16,10 @@
 #ifndef INTERFACE_SERVICE_FILTER_CRITERIA_H_
 #define INTERFACE_SERVICE_FILTER_CRITERIA_H_
 
-#include "TriggerPoint.h"
+#include "ImsTypeDef.h"
+
+class SipMethod;
+class TriggerPoint;
 
 /**
  * @brief This class provides an interface to manage/control the initial filter criteria.\n

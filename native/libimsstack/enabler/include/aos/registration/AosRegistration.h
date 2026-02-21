@@ -266,6 +266,7 @@ protected:
     virtual void CloseUnsecureTcpSocket();
     virtual void ClearReasonCode();
     virtual void ClearSipRtConfig();
+    virtual void ClearRegCreateFailureCount();
 
     virtual void CheckPending();
     virtual IMS_BOOL CheckRadioReadyAndSetTxnPending();
@@ -283,6 +284,7 @@ protected:
     virtual void ProcessReinitiate(IN IMS_BOOL bClearPcscf = IMS_TRUE);
     virtual void ProcessUpdatePending();
     virtual void ProcessReconfigPending();
+    virtual void ProcessReStart();
     virtual void ProcessUnpredictableFailure();
     virtual void ProcessNextPcscfUnsuccessful(
             IN IMS_UINT32 nPdnReactivateWaitTimeValue, IN IMS_UINT32 nReason);
@@ -466,6 +468,7 @@ public:
         MSG_REG_TERMINATED_BY_NOTIFY,
         MSG_REG_FORBIDDEN_IN_WIFI,
         MSG_REG_PROCESS_GIBA,
+        MSG_REG_RESTART,
 
         MSG_SUB_REINITIATE,
         MSG_SUB_TERMINATED,
@@ -618,6 +621,9 @@ protected:
     /// socket error counter
     IMS_UINT32 m_nErrorCountForServerSocket;
 
+    /// create reg failure count
+    IMS_UINT32 m_nCreateRegFailureCount;
+
     /// Calling number verification supported
     IMS_BOOL m_bCallingNumberVerificationSupported;
 
@@ -664,6 +670,7 @@ protected:
     static const IMS_UINT32 MTU_MAX_SIZE_VIA_MOBILE = 1500;
     static const IMS_UINT32 MTU_MAX_SIZE_VIA_WIFI = 1280;
     static const IMS_UINT32 MIN_RETRY_NUMBER_DURING_ACCESS_BARRING = 10;
+    static const IMS_UINT32 CREATE_REG_FAILURE_MAX_COUNT = 3;
 
 private:
     /// IPCAN category being registered

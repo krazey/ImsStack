@@ -45,10 +45,11 @@ AudioConfiguration::AudioConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
         m_bAudioRtcpXrPacketDuplicateRleEnabled(DEFAULT_RTCPXR_PACKET_DUPLICATE_RLE),
         m_bAmrPayloadFormatRelaxedMatching(IMS_FALSE),
         m_nDtmfDuration(DEFAULT_DTMF_DURATION),
+        m_bCodecBasedDynamicAsEnabled(IMS_FALSE),
+        m_bEarlyMediaDirectionInactiveOnPemInactive(IMS_FALSE),
         m_objAudioCandidateAttribute(ImsVector<AString>()),
         m_objAudioInactivityCallEndReasons(ImsVector<IMS_SINT32>())
 {
-    IMS_TRACE_I("+AudioConfiguration - SessionType[%d]", eSessionType, 0, 0);
     m_objAudioCandidateAttribute.Push(DEFAULT_CANDIDATE_ATTRIBUTE);
 }
 
@@ -153,6 +154,13 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_TELEPHONE_EVENT_DURATION_MILLIS_INT,
                     DEFAULT_DTMF_DURATION);
 
+    m_bCodecBasedDynamicAsEnabled = piCc->GetBoolean(
+            CarrierConfig::ImsVoice::KEY_CODEC_BASED_DYNAMIC_AS_ENABLED_BOOL, IMS_FALSE);
+
+    m_bEarlyMediaDirectionInactiveOnPemInactive = piCc->GetBoolean(
+            CarrierConfig::ImsVoice::KEY_EARLY_MEDIA_INACTIVE_DIRECTION_ON_PEM_INACTIVE_BOOL,
+            IMS_FALSE);
+
     // Creates a codec configuration
     if (!CreateCodecConfigs(piCc))
     {
@@ -160,7 +168,6 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
         return IMS_FALSE;
     }
 
-    ToDebugString();
     return IMS_TRUE;
 }
 
@@ -259,7 +266,10 @@ PROTECTED VIRTUAL void AudioConfiguration::ToDebugString() const
             m_bAudioRtcpXrVoipMetricsEnabled, m_bAudioRtcpXrPacketLossRleEnabled,
             m_bAudioRtcpXrPacketDuplicateRleEnabled);
     IMS_TRACE_D("RecvOnlyEarlySessionEnabled[%d]", m_bRecvOnlyEarlySessionEnabled, 0, 0);
+    IMS_TRACE_D("EarlyMediaDirectionInactiveOnPemInactive[%d]",
+            m_bEarlyMediaDirectionInactiveOnPemInactive, 0, 0);
     IMS_TRACE_D("AmrPayloadFormatRelaxedMatching[%d]", m_bAmrPayloadFormatRelaxedMatching, 0, 0);
+    IMS_TRACE_D("CodecBasedDynamicAsEnabled[%d]", m_bCodecBasedDynamicAsEnabled, 0, 0);
 
     for (IMS_UINT32 i = 0; i < m_objAudioCandidateAttribute.GetSize(); i++)
     {
@@ -397,4 +407,16 @@ IMS_BOOL AudioConfiguration::IsAudioInactivityCallEndReason(IN IMS_SINT32 nReaso
     }
 
     return IMS_FALSE;
+}
+
+PUBLIC
+IMS_BOOL AudioConfiguration::IsCodecBasedDynamicAsEnabled() const
+{
+    return m_bCodecBasedDynamicAsEnabled;
+}
+
+PUBLIC
+IMS_BOOL AudioConfiguration::IsEarlyMediaDirectionInactiveOnPemInactiveEnabled() const
+{
+    return m_bEarlyMediaDirectionInactiveOnPemInactive;
 }

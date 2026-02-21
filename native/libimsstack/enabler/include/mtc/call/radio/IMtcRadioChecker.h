@@ -134,16 +134,21 @@ public:
     virtual ~IMtcRadioCheckerListener() = default;
 
     /**
-     * @brief Notifies
+     * @brief Notifies that the connection setup has been prepared.
      *
+     * This is called when the IMS traffic is ready.
      */
     virtual void OnConnectionSetupPrepared() = 0;
 
     /**
-     * @brief Notifies
+     * @brief Notifies the connection failure details.
      *
-     * @param nFailureReason See ConnectionFailureReason of IImsRadio.
-     * @param nWaitTimeMillis
+     * It includes the reason and suggested wait time before retrying, originally provided by the
+     * network through {@link IImsRadioConnectionListener}.
+     *
+     * @param nFailureReason The reason for the connection failure.
+     *                       See {@link IImsRadio#ConnectionFailureReason} for possible values.
+     * @param nWaitTimeMillis The retry wait time suggested by the network.
      */
     virtual void OnConnectionFailed(
             IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) = 0;

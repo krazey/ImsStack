@@ -193,4 +193,9 @@ public interface SystemConstants {
     int REMOVE_IPSEC_SA_PARAMETER = CATEGORY_BASE + 1502;
     int APPLY_IPSEC_SA = CATEGORY_BASE + 1503;
     int REMOVE_IPSEC_SA = CATEGORY_BASE + 1504;
+
+    /**
+     * Logging
+     */
+    int LOG_SIP_MESSAGE = CATEGORY_BASE + 1601;
 }

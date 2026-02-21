@@ -66,6 +66,8 @@ public class DcUtils implements IDcUtils {
     */
     private final SparseArray<List<String>> mRecentAccessNetworkInfos = new SparseArray<>(2);
     private int mSlotId = 0;
+    @VisibleForTesting
+    int mRecentNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
 
     public DcUtils(int slotId) {
         mSlotId = slotId;
@@ -99,11 +101,15 @@ public class DcUtils implements IDcUtils {
                 : TelephonyManager.NETWORK_TYPE_UNKNOWN;
 
         if (networkType == TelephonyManager.NETWORK_TYPE_UNKNOWN) {
-            // When no UICC is inserted, network type is not correctly reported from modem.
-            // the only case we care is making 911 call with no UICC.
-            // if 911 call is over IMS, then UE must be in lte network.
-            networkType = (defaultNetworkType > 0)
-                    ? defaultNetworkType : TelephonyManager.NETWORK_TYPE_LTE;
+            // When the network type is unknown (e.g., emergency calls without a UICC or
+            // IMS de-registration during airplane mode transitions),
+            // select a valid fallback network type.
+            if (defaultNetworkType > 0) {
+                networkType = defaultNetworkType;
+            } else {
+                networkType = (mRecentNetworkType != TelephonyManager.NETWORK_TYPE_UNKNOWN)
+                        ? mRecentNetworkType : TelephonyManager.NETWORK_TYPE_LTE;
+            }
         }
 
         if (nri == null) {
@@ -198,6 +204,7 @@ public class DcUtils implements IDcUtils {
 
     @VisibleForTesting
     protected void storeAccessNetworkInfoToCache(int networkType, @NonNull String[] ani) {
+        mRecentNetworkType = networkType;
         mRecentAccessNetworkInfos.put(networkType, Arrays.asList(ani));
     }
 

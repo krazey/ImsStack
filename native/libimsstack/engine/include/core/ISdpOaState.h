@@ -16,8 +16,10 @@
 #ifndef INTERFACE_SDP_OFFER_ANSWER_STATE_H_
 #define INTERFACE_SDP_OFFER_ANSWER_STATE_H_
 
-#include "offeranswer/SdpMediaParameter.h"
-#include "offeranswer/SdpSessionParameter.h"
+#include "ImsTypeDef.h"
+
+class SdpMediaParameter;
+class SdpSessionParameter;
 
 class ISdpOaState
 {

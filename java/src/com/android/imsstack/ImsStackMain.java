@@ -66,7 +66,9 @@ public class ImsStackMain {
         AppContext.init(applicationContext);
         // Sets the log options once when ImsStack is created.
         String logOptions = ImsPrivateProperties.Persistent.get(
-                ImsPrivateProperties.Persistent.KEY_TEST_LOG_OPTIONS, Log.DEFAULT_LOG_OPTIONS, 0);
+                ImsPrivateProperties.Persistent.KEY_TEST_LOG_OPTIONS,
+                ImsUtils.IS_USER ? Log.RELEASE_LOG_OPTIONS : Log.DEFAULT_LOG_OPTIONS,
+                0);
         boolean debugEnabled = ImsPrivateProperties.Persistent.getBoolean(
                 ImsPrivateProperties.Persistent.KEY_TEST_DEBUG_ENABLED, 0);
         Log.init(ImsUtils.hexStringToInt(logOptions), debugEnabled);

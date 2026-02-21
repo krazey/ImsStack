@@ -88,6 +88,9 @@ public abstract class Apn extends Handler implements IApn {
     protected static final int EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED = 1005;
     protected static final int EVENT_DATA_CONNECTION_FAILED = 1006;
     protected static final int EVENT_DEFAULT_NETWORK_STATUS_CHANGED = 1007;
+    protected static final int EVENT_DELAYED_DISCONNECT = 1008;
+    protected static final int EVENT_CALL_CREATED = 1009;
+    protected static final int EVENT_CALL_DESTROYED = 1010;
 
     protected static final int EVENT_AIRPLANE_MODE_CHANGED = 2001;
 
@@ -130,6 +133,12 @@ public abstract class Apn extends Handler implements IApn {
                 "DATA_CONNECTION_FAILED");
         sEventToString.put(EVENT_DEFAULT_NETWORK_STATUS_CHANGED,
                 "DEFAULT_NETWORK_STATUS_CHANGED");
+        sEventToString.put(EVENT_DELAYED_DISCONNECT,
+                "DELAYED_DISCONNECT");
+        sEventToString.put(EVENT_CALL_CREATED,
+                "CALL_CREATED");
+        sEventToString.put(EVENT_CALL_DESTROYED,
+                "CALL_DESTROYED");
 
         sEventToString.put(EVENT_AIRPLANE_MODE_CHANGED,
                 "AIRPLANE_MODE_CHANGED");

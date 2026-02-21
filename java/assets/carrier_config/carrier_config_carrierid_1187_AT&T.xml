@@ -103,7 +103,6 @@
     <boolean name="imsss.ut_display_error_phrase_with_409_error_bool" value="true"/>
 
     <!-- MTC -->
-    <boolean name="ims.support_sip_session_id_header_bool" value="false"/>
     <int name="imsvoice.18x_timer_millis_int" value="-1"/>
     <boolean name="imsvoice.support_conference_refer_subscribe_bool" value="true"/>
     <boolean name="imsvoice.enable_conference_subscribe_by_participant_bool" value="false"/>
@@ -111,6 +110,7 @@
     <int name="imsvoice.conference_inviting_refer_type_int" value="1"/>
     <int name="imsvoice.incoming_call_reject_code_for_user_decline_int" value="486"/>
     <int name="imsvoice.incoming_call_reject_code_for_no_answer_int" value="480"/>
+    <int name="imsvoice.prack_wait_timer_millis_int" value="32000"/>
     <int name="imsvoice.prack_update_response_wait_timer_millis_int" value="-1"/>
     <int name="imsvoice.session_refresh_trigger_interval_sec_int" value="-1"/>
     <int name="imsvoice.registration_restoration_mode_on_504_for_invite_int" value="1"/>
@@ -224,8 +224,8 @@
         <item value="0"/> <!-- INVITE -->
         <item value="1"/> <!-- PROVISIONAL_RESPONSE -->
     </int-array>
-    <boolean name="imsvoice.initialize_p_early_media_when_no_header_bool" value="false"/>
-    <int name="imsvoice.policy_for_local_ringback_tone_with_180_response_int" value="1"/>
+    <boolean name="imsvoice.set_inactive_p_early_media_when_no_header_bool" value="false"/>
+    <int name="imsvoice.policy_for_local_ringback_tone_with_180_response_int" value="3"/>
     <boolean name="imsvoice.suppinfo_cdiv_cause_required_bool" value="true"/>
     <string name="imsemergency.p_emergency_info_header_in_invite_string">IEEE-802.11b; I-wlan-node-id=#AID#</string>
     <string-array name="imsemergency.reject_code_and_reason_code_set_string_array" num="1">
@@ -249,6 +249,7 @@
     <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
     <boolean name="imsvoice.amr_codec_payload_format_relaxed_matching_bool" value="true"/>
     <boolean name="imsvoice.incoming_dtmf_tone_play_support_bool" value="true"/>
+    <boolean name="imsvoice.codec_based_dynamic_as_enabled_bool" value="false"/>
     <int name="imsvt.video_cvo_value_int" value="4"/>
     <int name="imsvt.video_sdp_offer_cap_nego_for_avpf_int" value="2"/>
     <boolean name="imsvt.video_bw_nego_option_bool" value="true"/>

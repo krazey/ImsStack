@@ -151,6 +151,7 @@
         <item value="600"/>
         <item value="603"/>
     </int-array>
+    <int name="imsuce.immediately_retry_publish_response_max_count_int" value="1"/>
     <int name="imsuce.fixed_time_retry_publish_response_max_count_int" value="3"/>
     <int name="imsuce.fixed_time_retry_publish_response_time_sec_int" value="3600"/>
     <int-array name="imsuce.reattempt_registration_publish_response_int_array" num="1">
@@ -166,7 +167,7 @@
 
     <!-- MTC default -->
     <int name="imsvoice.18x_timer_millis_int" value="-1"/>
-    <boolean name="imsvoice.force_183_for_alerting_on_non_100rel_invite_bool" value="true"/>
+    <boolean name="imsvoice.force_183_before_alerting_on_non_100rel_invite_bool" value="true"/>
     <int-array name="imsvoice.message_type_support_geolocation_pidf_int_array" num="1">
         <item value="0"/> <!-- INVITE -->
     </int-array>
@@ -194,6 +195,7 @@
         <item value="411"/>
     </int-array>
     <int name="imsvoice.policy_for_tcall_timer_expiry_of_volte_call_int" value="1"/>
+    <int name="imsvoice.silent_redial_ultimate_failure_action_int" value="2"/>
     <int name="imswfc.policy_for_tcall_timer_expiry_of_vowifi_call_int" value="1"/>
     <string-array name="imsvoice.reject_code_and_action_set_string_array" num="44">
         <item value="300:5,0"/> <!-- REDIRECTION_BY_CONTACT, CSFB -->
@@ -249,14 +251,15 @@
     <int name="imsvoice.policy_for_403_response_for_invite_int" value="5"/>
     <int name="imsvoice.policy_for_checking_qos_while_call_upgrading_int" value="1"/>
     <boolean name="imsvoice.wait_qos_for_incoming_invite_without_precondition_bool" value="false"/>
-    <boolean name="imsvoice.initialize_p_early_media_when_no_header_bool" value="true"/>
-    <int name="imsvoice.policy_for_local_ringback_tone_with_180_response_int" value="1"/>
+    <boolean name="imsvoice.set_inactive_p_early_media_when_no_header_bool" value="true"/>
+    <int name="imsvoice.policy_for_local_ringback_tone_with_180_response_int" value="2"/>
     <int name="imsvoice.user_cancel_reason_after_response_timeout_timer_millis_int" value="8000"/>
     <int name="imsvoice.registration_restoration_mode_on_504_for_invite_int" value="3"/>
+    <boolean name="imsvoice.release_call_on_dedicated_bearer_wait_timeout_bool" value="true"/>
     <int name="imsvoice.policy_on_audio_qos_deactivation_int" value="1"/>
     <int name="imsvoice.prealerting_timer_millis_int" value="7000"/>
     <int name="imsvoice.media_type_for_offerless_invite_int" value="1"/>
-    <int-array name="imsvoice.rat_condition_for_not_waiting_dedicated_bearer_int_array" num="3">
+    <int-array name="imsvoice.rat_condition_for_not_waiting_dedicated_bearer_before_established_int_array" num="3">
         <item value="0"/> <!-- NO_WAIT_DEDICATED_BEARER_IN_NR -->
         <item value="1"/> <!-- NO_WAIT_DEDICATED_BEARER_IN_EPS_FALLBACK -->
         <item value="2"/> <!-- NO_WAIT_DEDICATED_BEARER_IN_EPS_ONLY_ATTACH -->
@@ -268,6 +271,8 @@
         <item value="25000"/> <!-- EMERGENCY_WIFI -->
     </int-array>
     <int name="imsvt.convert_user_response_timer_millis_int" value="20000"/>
+    <boolean name="imsvt.check_local_resource_after_established_or_modified_bool" value="true"/>
+    <boolean name="imsrtt.check_local_resource_after_established_or_modified_bool" value="false"/>
     <!-- MTC terminate reason -->
     <string name="imsvoice.call_terminate_reason_header_user_ends_and_rtp_timeout_string">RELEASE_CAUSE;cause=2;text="User ends call RTP/RTCP time-out"</string>
     <string name="imsvoice.call_terminate_reason_header_user_ends_and_sip_response_timeout_string">RELEASE_CAUSE;cause=5;text="User ends call and SIP response time-out"</string>
@@ -340,11 +345,14 @@
         <item value="606:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
         <item value="699:2,0"/> <!-- SILENT_REINVITE_VOIP_BY_RTT_REJECTION, SILENT_REINVITE_NEXT_PCSCF_IF_EPDN -->
     </string-array>
+    <boolean name="imsemergency.skip_audio_dedicated_bearer_wait_timer_for_emergency_bool" value="true"/>
     <int name="imsemergency.emergency_tcall_timer_millis_int" value="5000"/>
     <int name="imsemergency.emergency_ringback_timer_millis_int" value="-1"/>
     <int name="imsemergency.emergency_18x_timer_millis_int" value="-1"/>
     <int name="imsemergency.emergency_rtt_guard_timer_millis_int" value="180000"/>
     <int name="imsemergency.wifi_emergency_18x_timer_millis_int" value="-1"/>
+    <boolean name="imsvt.add_video_feature_tag_in_accept_contact_always_bool" value="true"/>
+    <boolean name="imsvoice.conference_refer_to_uri_source_paid_bool" value="false"/>
 
     <!-- Media -->
     <pbundle_as_map name="imsvt.hevc_payload_description_bundle">
@@ -376,6 +384,9 @@
         <item value="2"/>
         <item value="2"/>
     </int-array>
+    <boolean name="imsvoice.codec_based_dynamic_as_enabled_bool" value="false"/>
+    <boolean name="imsvoice.early_media_inactive_direction_on_pem_inactive_bool" value="true"/>
+    <int name="imsvt.video_iframe_interval_sec_int" value="1"/>
     <int name="imsvt.video_cvo_value_int" value="4"/>
     <int name="imsvt.video_sdp_offer_cap_nego_for_avpf_int" value="1"/>
     <int name="imsvt.video_lowest_bitrate_bps_int" value="100000"/>

@@ -16,7 +16,9 @@
 #ifndef INTERFACE_MEDIA_STATE_H_
 #define INTERFACE_MEDIA_STATE_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
+
+class AString;
 
 class SdpMediaParameter;
 

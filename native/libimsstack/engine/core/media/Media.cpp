@@ -16,19 +16,22 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
+#include "offeranswer/SdpMediaParameter.h"
+#include "offeranswer/SdpSessionParameter.h"
+
 #include "ISdpOaState.h"
 #include "Service.h"
 #include "base/Ims.h"
+#include "base/ImsError.h"
 #include "media/IOnMediaListener.h"
 #include "media/Media.h"
+#include "media/MediaDescriptor.h"
 #include "media/MediaProposal.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-// 3  100503
-// 3 To support the connection in the media object,
-// 3 it needs to be modified using any active class to send/receive MSG.
-
+// To support the connection in the media object,
+// it needs to be modified using any active class to send/receive MSG.
 PUBLIC
 Media::Media(IN Service* pService, IN ISdpOaState* piOaState) :
         m_pService(pService),
@@ -68,7 +71,7 @@ PUBLIC VIRTUAL Media::~Media()
         m_pMediaProposal = IMS_NULL;
     }
 
-    IMS_TRACE_D("Destructor :: Media", 0, 0, 0);
+    IMS_TRACE_D("dtor: Media", 0, 0, 0);
 }
 
 PUBLIC
@@ -339,7 +342,7 @@ void Media::TransitMedia(IN IMS_SINT32 nSessionTransition, IN IMS_SINT32 nOaStat
     {
         if (nOaStatus == OFFER_RECEIVED)
         {
-            // When the initial offer received, do not anything ...
+            // When the initial offer received, do not anything.
             // To access the MediaDescriptor
             m_bInitialOfferReceived = IMS_TRUE;
             return;
@@ -434,7 +437,7 @@ void Media::TransitMedia(IN IMS_SINT32 nSessionTransition, IN IMS_SINT32 nOaStat
                 m_piOaState->AbortProposal();
             }
 
-            // 4 Check if the proposal media is accepted or not...
+            // 4 Check if the proposal media is accepted or not.
             // 4 for state change (ACTIVE to DELETED)
 
             SetUpdateState(UPDATE_UNCHANGED);
@@ -494,7 +497,7 @@ void Media::TransitMedia(IN IMS_SINT32 nSessionTransition, IN IMS_SINT32 nOaStat
             {
                 if (!IsMediaAccepted() && (GetUpdateState() == UPDATE_MODIFIED))
                 {
-                    // Re-arrange the update state according to the media port information...
+                    // Re-arrange the update state according to the media port information.
                     SetUpdateState(UPDATE_REMOVED);
                 }
             }
@@ -853,7 +856,7 @@ IMS_BOOL Media::IsMediaProposed() const
 PROTECTED
 void Media::SetState(IN IMS_SINT32 nState)
 {
-    IMS_TRACE_I("Media :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
+    IMS_TRACE_I("Media: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
     m_nState = nState;
 }
@@ -861,8 +864,8 @@ void Media::SetState(IN IMS_SINT32 nState)
 PROTECTED
 void Media::SetUpdateState(IN IMS_SINT32 nState)
 {
-    IMS_TRACE_I("Media :: %s to %s", UpdateStateToString(m_nUpdateState),
-            UpdateStateToString(nState), 0);
+    IMS_TRACE_I(
+            "Media: %s to %s", UpdateStateToString(m_nUpdateState), UpdateStateToString(nState), 0);
 
     m_nUpdateState = nState;
 }

@@ -26,13 +26,20 @@ import com.android.imsstack.core.agents.dcmif.EApnReqState;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
+import com.android.imsstack.enabler.mtc.Call;
+import com.android.imsstack.internal.enabler.MtcCallRegistry;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * this is data connection class for emergency
  */
 public final class ApnEmergency extends Apn {
+    static final int DISCONNECT_DELAY_TIME = 1000;
+    @VisibleForTesting
+    boolean mIsWaitForTransportChange = false;
     private IDcUtils mDcUtils;
+    final MtcCallRegistryListener mMtcCallRegistryListener = new MtcCallRegistryListener();
 
     // Public methods --------------------------------------------
     public ApnEmergency(Context context, int slotId) {
@@ -44,16 +51,29 @@ public final class ApnEmergency extends Apn {
         registerHandler(EVENT_NETWORK_LOST, new HandleNetworkLost());
         registerHandler(EVENT_IP_CHANGED, new HandleIpChanged());
         registerHandler(EVENT_DATA_CONNECTION_FAILED, new HandleDataConnectionFailed());
+        registerHandler(EVENT_DELAYED_DISCONNECT, new HandleDelayedDisconnect());
+        registerHandler(EVENT_CALL_CREATED, new HandleCallCreated());
+        registerHandler(EVENT_CALL_DESTROYED, new HandleCallDestroyed());
+
+        MtcCallRegistry mtcCallRegistry = MtcCallRegistry.getInstance(mSlotId);
+        mtcCallRegistry.addListener(mMtcCallRegistryListener);
     }
 
     // Interface implementation methods --------------------------
     @Override
     public void cleanup() {
+        MtcCallRegistry mtcCallRegistry = MtcCallRegistry.getInstance(mSlotId);
+        mtcCallRegistry.removeListener(mMtcCallRegistryListener);
+        mIsWaitForTransportChange = false;
+
         super.cleanup();
     }
 
     @Override
     public boolean connect() {
+        mIsWaitForTransportChange = false;
+        removeMessages(EVENT_DELAYED_DISCONNECT);
+
         if (mAPNState == EApnReqState.APN_REQUEST_DONE) {
             ImsLog.w(mSlotId, "request is already done");
             return true;
@@ -79,13 +99,19 @@ public final class ApnEmergency extends Apn {
             return false;
         }
 
-        boolean isPdnConnected = isConnected();
-        releaseNetwork();
+        if (mIsWaitForTransportChange) {
+            ImsLog.w(mSlotId, "wait for transport change before disconnect");
+            if (!hasMessages(EVENT_DELAYED_DISCONNECT)) {
+                sendEmptyMessageDelayed(EVENT_DELAYED_DISCONNECT, DISCONNECT_DELAY_TIME);
+            }
+            return true;
+        }
 
+        releaseNetwork();
         setDataState(TelephonyManager.DATA_DISCONNECTED);
         setApnReqState(EApnReqState.APN_REQUEST_IDLE);
 
-        if (isPdnConnected) {
+        if (isConnected()) {
             sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_DISCONNECTED);
         }
 
@@ -101,6 +127,32 @@ public final class ApnEmergency extends Apn {
         return super.getApn();
     }
 
+    @VisibleForTesting
+    protected class MtcCallRegistryListener implements MtcCallRegistry.Listener {
+        @Override
+        public void onCallCreated(Call call) {
+            if (!call.getCallExtraBoolean(Call.EXTRA_E_CALL, false)) {
+                return;
+            }
+
+            if (getDataState() != TelephonyManager.DATA_CONNECTED) {
+                return;
+            }
+
+            sendMessage(obtainMessage(EVENT_CALL_CREATED,
+                    call.getCallExtraBoolean(Call.EXTRA_WIFI_E_CALL, false)));
+        }
+
+        @Override
+        public void onCallDestroyed(Call call) {
+            if (!call.getCallExtraBoolean(Call.EXTRA_E_CALL, false)) {
+                return;
+            }
+
+            sendMessage(obtainMessage(EVENT_CALL_DESTROYED));
+        }
+    }
+
     private final class HandleNetworkAvailable implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
@@ -111,6 +163,9 @@ public final class ApnEmergency extends Apn {
                 ImsLog.w(mSlotId, "apn is not requested, ignore event");
                 return;
             }
+
+            mIsWaitForTransportChange = false;
+            removeMessages(EVENT_DELAYED_DISCONNECT);
 
             if (mDataState != curDataState) {
                 if (mDcUtils != null) {
@@ -201,6 +256,41 @@ public final class ApnEmergency extends Apn {
             }
 
             sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_DISCONNECTED);
+        }
+    }
+
+    private final class HandleDelayedDisconnect implements MsgProcInterface {
+        @Override
+        public void procMsg(Message msg) {
+            ImsLog.i(mSlotId, "handle delayed disconnect");
+            mIsWaitForTransportChange = false;
+            disconnect();
+        }
+    }
+
+    private final class HandleCallCreated implements MsgProcInterface {
+        @Override
+        public void procMsg(Message msg) {
+            if (msg == null || msg.obj == null) {
+                return;
+            }
+
+            boolean isWifiCall = (boolean) msg.obj;
+            int eCallTransportType = (isWifiCall) ? IPCAN_CATEGORY_WLAN : IPCAN_CATEGORY_MOBILE;
+            mIsWaitForTransportChange = (eCallTransportType != mIpcanCategory);
+            ImsLog.i(mSlotId, "Telephony selected: " + (isWifiCall ? "WLAN" : "WWAN")
+                    + ", Wait for change: " + mIsWaitForTransportChange);
+        }
+    }
+
+    private final class HandleCallDestroyed implements MsgProcInterface {
+        @Override
+        public void procMsg(Message msg) {
+            mIsWaitForTransportChange = false;
+            if (hasMessages(EVENT_DELAYED_DISCONNECT)) {
+                removeMessages(EVENT_DELAYED_DISCONNECT);
+                disconnect();
+            }
         }
     }
 }

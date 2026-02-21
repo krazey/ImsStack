@@ -17,8 +17,8 @@
 #define INTERFACE_REG_SUBSCRIPTION_H_
 
 #include "IRegBase.h"
-#include "IRegInfo.h"
 
+class IRegInfo;
 class IRegSubscriptionListener;
 
 /**

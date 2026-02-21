@@ -139,6 +139,8 @@ const IMS_CHAR CarrierConfig::Ims::KEY_IMS_USER_AGENT_STRING[] =
         KEY_IMS_PREFIX "ims_user_agent_string";
 const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORTED_RATS_INT_ARRAY[] =
         KEY_IMS_PREFIX "supported_rats_int_array";
+const IMS_CHAR CarrierConfig::Ims::KEY_GEOLOCATION_ROUTING_HEADER_MODE_INT[] =
+        KEY_IMS_PREFIX "geolocation_routing_header_mode_int";
 // Bundle {
 const IMS_CHAR CarrierConfig::Ims::KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE[] =
         KEY_IMS_PREFIX "mmtel_requires_provisioning_bundle";
@@ -262,6 +264,8 @@ const IMS_CHAR CarrierConfig::Ims::KEY_CALL_END_AND_PDN_REACTIVATION_BY_REG_TERM
         KEY_IMS_PREFIX "call_end_and_pdn_reactivation_by_reg_terminated_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL[] =
         KEY_IMS_PREFIX "destroy_unsecure_tcp_socket_on_accomplishing_reg_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_DISABLE_N1_MODE_ON_IMS_PDU_ESTABLISH_FAILURE_BOOL[] =
+        KEY_IMS_PREFIX "disable_n1_mode_on_ims_pdu_establish_failure_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL[] =
         KEY_IMS_PREFIX "hold_reg_with_ipcan_changed_during_ims_call_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_IMS_DEREG_ON_3G_NETWORK_BOOL[] =
@@ -589,6 +593,9 @@ const IMS_CHAR CarrierConfig::ImsEmergency::
 const IMS_CHAR CarrierConfig::ImsEmergency::
         KEY_EMERGENCY_EXCLUDE_URI_PARAMETERS_FOR_EMERGENCY_TEST_NUMBER_BOOL[] =
                 KEY_IMS_EMERGENCY_PREFIX "exclude_uri_parameters_for_emergency_test_number_bool";
+const IMS_CHAR CarrierConfig::ImsEmergency::
+        KEY_SKIP_AUDIO_DEDICATED_BEARER_WAIT_TIMER_FOR_EMERGENCY_BOOL[] = KEY_IMS_EMERGENCY_PREFIX
+        "skip_audio_dedicated_bearer_wait_timer_for_emergency_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EMERGENCY_TCALL_TIMER_MILLIS_INT[] =
         KEY_IMS_EMERGENCY_PREFIX "emergency_tcall_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EMERGENCY_RINGBACK_TIMER_MILLIS_INT[] =
@@ -610,6 +617,8 @@ const IMS_CHAR CarrierConfig::ImsEmergency::
         "plmn_allowing_geolocation_pidf_in_sip_invite_no_uicc_string_array";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_DYNAMIC_ROUTING_NUMBER_PER_PLMN_STRING_ARRAY[] =
         KEY_IMS_EMERGENCY_PREFIX "dynamic_routing_number_per_plmn_string_array";
+const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EMERGENCY_SERVICE_CATEGORY_PER_PLMN_STRING_ARRAY[] =
+        KEY_IMS_EMERGENCY_PREFIX "emergency_service_category_per_plmn_string_array";
 
 //// ImsRtt
 #define KEY_IMS_RTT_PREFIX "imsrtt."
@@ -649,6 +658,9 @@ const IMS_CHAR CarrierConfig::ImsRtt::KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT[
         KEY_IMS_RTT_PREFIX "text_rtcp_inactivity_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsRtt::KEY_TEXT_RTCP_INTERVAL_INT_ARRAY[] =
         KEY_IMS_RTT_PREFIX "text_rtcp_interval_int_array";
+const IMS_CHAR
+        CarrierConfig::ImsRtt::KEY_CHECK_LOCAL_RESOURCE_AFTER_ESTABLISHED_OR_MODIFIED_BOOL[] =
+                KEY_IMS_RTT_PREFIX "check_local_resource_after_established_or_modified_bool";
 
 //// ImsSms
 #define KEY_IMS_SMS_PREFIX "imssms."
@@ -851,8 +863,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_18X_TIMER_MILLIS_INT[] =
         KEY_IMS_VOICE_PREFIX "18x_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_REQUIRE_PRACK_FOR_ALERT_BOOL[] =
         KEY_IMS_VOICE_PREFIX "require_prack_for_alert_bool";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_FORCE_183_FOR_ALERTING_ON_NON_100REL_INVITE_BOOL[] =
-        KEY_IMS_VOICE_PREFIX "force_183_for_alerting_on_non_100rel_invite_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_FORCE_183_BEFORE_ALERTING_ON_NON_100REL_INVITE_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "force_183_before_alerting_on_non_100rel_invite_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_SUPPORT_CONFERENCE_REFER_SUBSCRIBE_BOOL[] =
         KEY_IMS_VOICE_PREFIX "support_conference_refer_subscribe_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL[] =
@@ -879,6 +891,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::
         KEY_REGISTRATION_RESTORATION_FOR_INVITE_REQUIRE_HEADER_VALIDATION_BOOL[] =
                 KEY_IMS_VOICE_PREFIX
         "registration_restoration_for_invite_require_header_validation_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_RELEASE_CALL_ON_DEDICATED_BEARER_WAIT_TIMEOUT_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "release_call_on_dedicated_bearer_wait_timeout_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_ON_AUDIO_QOS_DEACTIVATION_INT[] =
         KEY_IMS_VOICE_PREFIX "policy_on_audio_qos_deactivation_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_ENABLE_SEND_REINVITE_ON_RAT_CHANGE_BOOL[] =
@@ -1017,9 +1031,10 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_QOS_LOST_GUARD_TIMER_MILLIS_INT[] =
         KEY_IMS_VOICE_PREFIX "qos_lost_guard_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_QOS_FORCED_ACQUISITION_TIMER_MILLIS_INT[] =
         KEY_IMS_VOICE_PREFIX "qos_forced_acquisition_timer_millis_int";
-const IMS_CHAR
-        CarrierConfig::ImsVoice::KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_INT_ARRAY[] =
-                KEY_IMS_VOICE_PREFIX "rat_condition_for_not_waiting_dedicated_bearer_int_array";
+const IMS_CHAR CarrierConfig::ImsVoice::
+        KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_BEFORE_ESTABLISHED_INT_ARRAY[] =
+                KEY_IMS_VOICE_PREFIX
+        "rat_condition_for_not_waiting_dedicated_bearer_before_established_int_array";
 const IMS_CHAR CarrierConfig::ImsVoice::
         KEY_TRIGGER_DEDICATED_BEARER_WAIT_TIMER_BY_SENDING_INITIAL_INVITE_BOOL[] =
                 KEY_IMS_VOICE_PREFIX
@@ -1093,6 +1108,8 @@ const IMS_CHAR CarrierConfig::ImsVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT[] =
         KEY_IMS_VT_PREFIX "policy_for_text_with_video_int";
 const IMS_CHAR CarrierConfig::ImsVt::KEY_MINIMUM_BATTERY_LEVEL_FOR_LIMIT_VIDEO_CALL_INT[] =
         KEY_IMS_VT_PREFIX "minimum_battery_level_for_limit_video_call_int";
+const IMS_CHAR CarrierConfig::ImsVt::KEY_CHECK_LOCAL_RESOURCE_AFTER_ESTABLISHED_OR_MODIFIED_BOOL[] =
+        KEY_IMS_VT_PREFIX "check_local_resource_after_established_or_modified_bool";
 // Media
 const IMS_CHAR CarrierConfig::ImsVt::KEY_VIDEO_RTCP_INTERVAL_INT_ARRAY[] =
         KEY_IMS_VT_PREFIX "video_rtcp_interval_int_array";
@@ -1268,6 +1285,8 @@ const IMS_CHAR CarrierConfig::ImsVt::
         KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL[] =
                 KEY_IMS_VT_PREFIX
         "set_video_text_feature_exclusively_in_contact_header_by_session_type_bool";
+const IMS_CHAR CarrierConfig::ImsVt::KEY_ADD_VIDEO_FEATURE_TAG_IN_ACCEPT_CONTACT_ALWAYS_BOOL[] =
+        KEY_IMS_VT_PREFIX "add_video_feature_tag_in_accept_contact_always_bool";
 const IMS_CHAR CarrierConfig::ImsVt::KEY_REQUIRE_SIP_SIGNALING_ON_MULTITASKING_BOOL[] =
         KEY_IMS_VT_PREFIX "require_sip_signaling_on_multitasking_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING_BOOL[] =
@@ -1287,8 +1306,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_INCOMING_RESUME_EVENT_SUPPORT_BOOL[]
         KEY_IMS_VOICE_PREFIX "incoming_resume_event_support_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT[] =
         KEY_IMS_VOICE_PREFIX "sip_status_code_for_rejecting_call_type_change_int";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL[] =
-        KEY_IMS_VOICE_PREFIX "initialize_p_early_media_when_no_header_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_SET_INACTIVE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "set_inactive_p_early_media_when_no_header_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT[] =
         KEY_IMS_VOICE_PREFIX "policy_for_local_ringback_tone_with_180_response_int";
 const IMS_CHAR
@@ -1399,14 +1418,20 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_SDP_ANSWER_FULL_CAPABILITY_BOOL[] =
         KEY_IMS_VOICE_PREFIX "sdp_answer_full_capability_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL[] =
         KEY_IMS_VOICE_PREFIX "sdp_reoffer_full_capability_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_MEDIA_ADD_C_LINE_FOR_EACH_MEDIA_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "media_add_c_line_for_each_media_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_SESSION_REFRESH_SDP_SESSION_VERSION_INCREMENT_INT[] =
         KEY_IMS_VOICE_PREFIX "session_refresh_sdp_session_version_increment_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_INCOMING_DTMF_TONE_PLAY_SUPPORT_BOOL[] =
         KEY_IMS_VOICE_PREFIX "incoming_dtmf_tone_play_support_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_MEDIA_RECVONLY_EARLY_SESSION_BOOL[] =
         KEY_IMS_VOICE_PREFIX "media_recvonly_early_session_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_EARLY_MEDIA_INACTIVE_DIRECTION_ON_PEM_INACTIVE_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "early_media_inactive_direction_on_pem_inactive_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_DTX_BOOL[] =
         KEY_IMS_VOICE_PREFIX "amr_codec_attribute_dtx_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_CODEC_BASED_DYNAMIC_AS_ENABLED_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "codec_based_dynamic_as_enabled_bool";
 const IMS_CHAR CarrierConfig::ImsVt::KEY_AVC_SPROP_PARAMETER_SETS_STRING[] =
         KEY_IMS_VT_PREFIX "avc_sprop_parameter_sets_string";
 const IMS_CHAR CarrierConfig::ImsVt::KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY[] =

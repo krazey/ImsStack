@@ -124,17 +124,14 @@ public class ImsCallMediaUtilsTest {
     public void testCreateMediaInfoForCallAcceptSetsDirectionForVideoCall() {
         ImsCallProfile profile = new ImsCallProfile();
 
+        // DIRECTION_INACTIVE is currently unavailable.
+        // See {@link ImsCallUtils#getSanitizedCallProfileForVideoDirection}.
+
         profile.getMediaProfile().mVideoDirection = ImsStreamMediaProfile.DIRECTION_INVALID;
         assertEquals(
                 ImsCallMediaUtils.createMediaInfoForCallAccept(
                         profile, ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE, 0, 0).videoDir,
                 MediaInfo.DIRECTION_INVALID);
-
-        profile.getMediaProfile().mVideoDirection = ImsStreamMediaProfile.DIRECTION_INACTIVE;
-        assertEquals(
-                ImsCallMediaUtils.createMediaInfoForCallAccept(
-                        profile, ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE, 0, 0).videoDir,
-                MediaInfo.DIRECTION_INACTIVE);
 
         profile.getMediaProfile().mVideoDirection = ImsStreamMediaProfile.DIRECTION_RECEIVE;
         assertEquals(
@@ -153,6 +150,26 @@ public class ImsCallMediaUtilsTest {
                 ImsCallMediaUtils.createMediaInfoForCallAccept(
                         profile, ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE, 0, 0).videoDir,
                 MediaInfo.DIRECTION_SEND_RECEIVE);
+
+        profile.getMediaProfile().mVideoDirection = ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE;
+        assertEquals(
+                ImsCallMediaUtils.createMediaInfoForCallAccept(
+                        profile, ImsCallProfile.CALL_TYPE_VT, 0, 0).videoDir,
+                MediaInfo.DIRECTION_SEND_RECEIVE);
+        assertEquals(
+                ImsCallMediaUtils.createMediaInfoForCallAccept(
+                        profile, ImsCallProfile.CALL_TYPE_VT_RX, 0, 0).videoDir,
+                MediaInfo.DIRECTION_RECEIVE);
+        assertEquals(
+                ImsCallMediaUtils.createMediaInfoForCallAccept(
+                        profile, ImsCallProfile.CALL_TYPE_VT_TX, 0, 0).videoDir,
+                MediaInfo.DIRECTION_SEND);
+
+        profile.getMediaProfile().mVideoDirection = ImsStreamMediaProfile.DIRECTION_INVALID;
+        assertEquals(
+                ImsCallMediaUtils.createMediaInfoForCallAccept(
+                        profile, ImsCallProfile.CALL_TYPE_VT_NODIR, 0, 0).videoDir,
+                MediaInfo.DIRECTION_INACTIVE);
     }
 
     @Test

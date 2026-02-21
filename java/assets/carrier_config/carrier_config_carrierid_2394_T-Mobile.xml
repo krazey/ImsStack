@@ -15,7 +15,16 @@
  * limitations under the License.
 -->
 <carrier_config>
-    <!-- Mtc -->
+    <!-- Aos -->
+    <int-array name="ims.keep_reg_with_mmtel_feature_tag_policy_int_array" num="1">
+        <item value="3"/>
+    </int-array>
+
+    <!-- MTC -->
+    <int-array name="imsvoice.call_initiation_to_18x_timer_millis_int_array" num="2">
+        <item value="5000"/>
+        <item value="5000"/>
+    </int-array>
     <int-array name="imsemergency.policy_for_emergency_urn_int_array" num="1">
         <item value="3"/>
     </int-array>

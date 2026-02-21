@@ -46,15 +46,13 @@ public final class ImsConferenceHelper implements ConferenceProxy.DisposalCallba
 
     @Override
     public void onConferenceProxyDisposed(ConferenceProxy confProxy) {
-        synchronized(mConferenceProxys) {
-            int size = mConferenceProxys.size();
-            mConferenceProxys.remove(confProxy);
-            log("onConferenceProxyDisposed :: size - "
-                    + size + " >> " + mConferenceProxys.size());
+        int size = mConferenceProxys.size();
+        mConferenceProxys.remove(confProxy);
+        log("onConferenceProxyDisposed :: size - "
+                + size + " >> " + mConferenceProxys.size());
 
-            if (mConferenceProxys.isEmpty()) {
-                setBackgroundSession(null);
-            }
+        if (mConferenceProxys.isEmpty()) {
+            setBackgroundSession(null);
         }
 
         confProxy.dispose();
@@ -107,9 +105,7 @@ public final class ImsConferenceHelper implements ConferenceProxy.DisposalCallba
             return false;
         }
 
-        synchronized(mConferenceProxys) {
-            mConferenceProxys.add(confProxy);
-        }
+        mConferenceProxys.add(confProxy);
 
         return true;
     }
@@ -151,18 +147,16 @@ public final class ImsConferenceHelper implements ConferenceProxy.DisposalCallba
 
         setBackgroundSession(bgCallSession);
 
-        synchronized(mConferenceProxys) {
-            mConferenceProxys.add(confProxy);
-        }
+        mConferenceProxys.add(confProxy);
 
         return true;
     }
 
     private static void log(String s) {
-        ImsLog.d("[GII-IMPL] " + s);
+        ImsLog.d("[ISIL] " + s);
     }
 
     private static void loge(String s) {
-        ImsLog.e("[GII-IMPL] " + s);
+        ImsLog.e("[ISIL] " + s);
     }
 }

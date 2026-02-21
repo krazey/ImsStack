@@ -17,7 +17,10 @@
 
 #include "SipUtil.h"
 #include "platform/SipString.h"
+#include "transport/SipTransportBuffer.h"
 #include "transport/SipTransportHandler.h"
+#include "transport/SipTransportInfo.h"
+#include "transport/SipTransportParameter.h"
 #include "txn/SipTxn.h"
 #include "../txn/include/MockISipTransactionCallback.h"
 

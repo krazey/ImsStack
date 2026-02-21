@@ -16,7 +16,9 @@
 #ifndef INTERFACE_SESSION_STATE_H_
 #define INTERFACE_SESSION_STATE_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
+
+class AString;
 
 class SdpSessionParameter;
 

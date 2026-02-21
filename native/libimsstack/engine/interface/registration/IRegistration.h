@@ -17,15 +17,18 @@
 #define INTERFACE_REGISTRATION_H_
 
 #include "IRegBase.h"
-#include "IRegContact.h"
-#include "IRegParameter.h"
-#include "SipAddress.h"
 
+class AStringArray;
 class Credential;
+class IpAddress;
+
 class IRegBindingStateListener;
+class IRegContact;
+class IRegParameter;
 class IRegSubscription;
 class IRegUserIdentityNotifier;
 class IRegistrationListener;
+class SipAddress;
 class SipProfile;
 
 /**

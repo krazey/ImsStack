@@ -114,7 +114,7 @@ PUBLIC VIRTUAL IMS_BOOL SipConnectionFactory::Dialog_Compare(IN ISipServerConnec
 
         if (strDialogId.Equals(strReferDialogId))
         {
-            IMS_TRACE_D("SipConnectionFactory :: Dialog (%s), Refer's Dialog (%s)",
+            IMS_TRACE_D("SipConnectionFactory: Dialog (%s), Refer's Dialog (%s)",
                     SipDebug::GetCharA1(strDialogId.GetStr(), 8, '@'),
                     SipDebug::GetCharA2(strReferDialogId.GetStr(), 8, '@'), 0);
             return IMS_TRUE;

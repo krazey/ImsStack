@@ -128,7 +128,7 @@ IMS_RESULT DialogInfo::Update(IN IElement* piElementDialogInfo)
 
         if (pNewDialog->GetState().GetState() == Dialog::State::STATE_TERMINATED)
         {
-            // Upper layers(Telephony/GII) set the state to terminated
+            // Upper layers(Telephony/ISIL) set the state to terminated
             // if a Dialog is deleted from the list.
             delete pNewDialog;
         }

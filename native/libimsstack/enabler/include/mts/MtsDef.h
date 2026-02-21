@@ -89,6 +89,7 @@ enum
 class MtsRegRecoveryPolicy
 {
 public:
+    // Do not change the order of the enum. The orders are used in config files.
     enum Policy : IMS_SINT32
     {
         MTS_REG_RECOVERY_POLICY_NONE = -1,
@@ -96,7 +97,9 @@ public:
         REGISTER_START_WITH_WLAN,
         REGISTER_REFRESH,
         REGISTER_STOP,
+        REGISTER_STOP_BY_ROAMING,
         REGISTER_REINITIATE,
+        REGISTER_REINITIATE_BY_CSFB,
         E_REGISTER_FAKE_WITH_NEXT_PCSCF,
         PCSCF_NEXT,
         PCSCF_NEXT_WITH_DISCOVERY,

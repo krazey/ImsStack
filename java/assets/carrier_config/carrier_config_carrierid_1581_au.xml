@@ -18,7 +18,6 @@
     <!-- Ims General -->
     <boolean name="ims.sip_compact_form_enabled_bool" value="true"/>
     <boolean name="ims.allow_sip_p_access_network_info_header_in_initial_register_bool" value="true"/>
-    <boolean name="ims.support_sip_session_id_header_bool" value="true"/>
 
     <!-- Aos -->
     <int name="ims.ims_establishment_time_for_nr_sec_int" value="0"/>
@@ -217,8 +216,8 @@
         <item value="483:1,5"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, CROSS_SIM_PERM_FAILURE -->
         <item value="484:1,5"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, CROSS_SIM_PERM_FAILURE -->
         <item value="485:1,5"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, CROSS_SIM_PERM_FAILURE -->
-        <item value="486:1,5"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, CROSS_SIM_PERM_FAILURE -->
-        <item value="487:1,5"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, CROSS_SIM_PERM_FAILURE -->
+        <item value="486:1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
+        <item value="487:1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
         <item value="488:1,5"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, CROSS_SIM_PERM_FAILURE -->
         <item value="489:1"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER -->
         <item value="491:1,5"/> <!-- SILENT_REINVITE_BY_RETRY_AFTER, CROSS_SIM_PERM_FAILURE -->

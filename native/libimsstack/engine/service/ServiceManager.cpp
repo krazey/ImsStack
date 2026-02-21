@@ -74,7 +74,7 @@ PUBLIC VIRTUAL void ServiceManager::DetachService(IN Service* pService)
 
     if (m_objServices.IsEmpty())
     {
-        IMS_TRACE_I("ServiceManager :: No services", 0, 0, 0);
+        IMS_TRACE_I("ServiceManager: No services", 0, 0, 0);
     }
 }
 

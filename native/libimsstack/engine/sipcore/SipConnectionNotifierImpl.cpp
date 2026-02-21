@@ -148,7 +148,7 @@ PRIVATE VIRTUAL void SipConnectionNotifierImpl::AddErrorListener(
 
         if (piErrorListener == piListener)
         {
-            IMS_TRACE_D("SCNImpl :: ErrorListener(%p) is already added", piListener, 0, 0);
+            IMS_TRACE_D("SCNImpl: ErrorListener(%p) is already added", piListener, 0, 0);
             return;
         }
     }
@@ -177,7 +177,7 @@ PRIVATE VIRTUAL void SipConnectionNotifierImpl::RemoveErrorListener(
 
     if (m_objErrorListeners.IsEmpty())
     {
-        IMS_TRACE_D("SCNImpl :: No error listeners", 0, 0, 0);
+        IMS_TRACE_D("SCNImpl: No error listeners", 0, 0, 0);
     }
 }
 

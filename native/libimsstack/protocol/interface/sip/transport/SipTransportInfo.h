@@ -17,10 +17,11 @@
 #define __SIP_TRANSPORT_INFO_H__
 
 #include "SipDatatypes.h"
-#include "msg/SipMessage.h"
 #include "msg/SipMsgUtil.h"
 #include "transport/SipTransportBuffer.h"
 #include "transport/SipTransportParameter.h"
+
+class SipMessage;
 
 class SipTransportInfo
 {

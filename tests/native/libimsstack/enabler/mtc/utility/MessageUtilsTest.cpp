@@ -1663,6 +1663,31 @@ TEST_F(MessageUtilsTest, GetRemotePortFromSdpReturnsZeroIfNotFound)
     EXPECT_EQ(objMessageUtils.GetRemotePortFromSdp(piSession, SdpMedia::TYPE_VIDEO), -1);
 }
 
+TEST_F(MessageUtilsTest, GetRemotePortFromSdpHandlesModifiedStateWithNullProposal)
+{
+    ImsList<IMedia*> lstIMedia;
+    MockIMedia objMedia;
+    lstIMedia.Append(&objMedia);
+
+    // Simulate a modified state where the proposal is unexpectedly null.
+    ON_CALL(objMedia, GetUpdateState).WillByDefault(Return(IMedia::UPDATE_MODIFIED));
+    ON_CALL(objMedia, GetProposal).WillByDefault(Return(IMS_NULL));
+
+    // The original media descriptor should not be used in this case.
+    MockIMediaDescriptor objOriginalDescriptor;
+    ON_CALL(objMedia, GetMediaDescriptor).WillByDefault(Return(&objOriginalDescriptor));
+    SdpMedia objOriginalSdpMedia;
+    objOriginalSdpMedia.SetType(SdpMedia::TYPE_AUDIO);
+    objOriginalSdpMedia.SetPort(99999);  // A port that should not be returned
+    ON_CALL(objOriginalDescriptor, GetMediaDescriptionEx)
+            .WillByDefault(Return(&objOriginalSdpMedia));
+
+    ON_CALL(*piSession, GetMedia).WillByDefault(Return(lstIMedia));
+
+    // Expect -1 as the proposal was null, so no descriptor could be processed.
+    EXPECT_EQ(objMessageUtils.GetRemotePortFromSdp(piSession, SdpMedia::TYPE_AUDIO), -1);
+}
+
 TEST_F(MessageUtilsTest, IsResponseExist)
 {
     IMS_SINT32 nAnyCode = SipStatusCode::SC_200;

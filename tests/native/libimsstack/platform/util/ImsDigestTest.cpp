@@ -40,9 +40,9 @@ TEST_F(ImsDigestTest, CalculateResponse)
     IMS_CHAR acResponse[HASHHEX_SIZE + 1] = {
             0,
     };
-    AString strUserName("310410123456789@private.att.net");
+    AString strUserName("00101123456789@private.ims.com");
     AString strPassword("xxxx");
-    AString strRealm("one.att.net");
+    AString strRealm("ims.com");
     AString strNonce("33OwNiwLSXwCAowt1cRhYTUoDk97CIAA33KyNSgMz3s=");
     AString strCNonce("MzhkZTcxNjQ");
 
@@ -51,13 +51,13 @@ TEST_F(ImsDigestTest, CalculateResponse)
     // Calculate the H(A1)
     ImsDigest_CalculateA1(
             "AKAv1-MD5", strUserName, strRealm, strPassword, strNonce, strCNonce, acA1);
-    EXPECT_STREQ(acA1, "634a9b99a3db5d06f0fd1b8c4b4ab18e");
+    EXPECT_STREQ(acA1, "b521a2d1778dcadb28f1f5d003c29dde");
 
     // Calculate the response digest
     ImsDigest_CalculateResponse(acA1, strNonce, "00000002", strCNonce, "auth", "REGISTER",
-            "sip:one.att.net", hEntity, acResponse);
+            "sip:ims.com", hEntity, acResponse);
 
-    EXPECT_STREQ(acResponse, "90686613c9e29457f98d59fc84d33416");
+    EXPECT_STREQ(acResponse, "a66b51e7ce5334dd56897e87fe2a55a1");
 }
 
 }  // namespace android

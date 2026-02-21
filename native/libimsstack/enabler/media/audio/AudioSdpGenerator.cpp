@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+#include "SdpAttribute.h"
 #include "ServiceTrace.h"
 
 #include "audio/AudioProfileUtil.h"
 #include "audio/AudioSdpGenerator.h"
+#include "offeranswer/SdpMediaFormat.h"
+#include "config/MediaSessionConfig.h"
 
 #define MODESET_MAX_AMR   7
 #define MODESET_MAX_AMRWB 8
@@ -33,9 +36,11 @@ PUBLIC VIRTUAL AudioSdpGenerator::~AudioSdpGenerator() {}
 
 PUBLIC
 IMS_BOOL AudioSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
-        OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile)
+        OUT IMediaDescriptor* pDescriptor, IN MediaBaseProfile* pBaseProfile,
+        IN const MediaSessionConfig* pConfig)
 {
-    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || pBaseProfile == IMS_NULL)
+    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || pBaseProfile == IMS_NULL ||
+            pConfig == IMS_NULL)
     {
         IMS_TRACE_E(0, "Generate(): invalid arguments", 0, 0, 0);
         return IMS_FALSE;
@@ -43,7 +48,7 @@ IMS_BOOL AudioSdpGenerator::Generate(OUT ISessionDescriptor* pSessionDescriptor,
 
     IMS_TRACE_I("Generate(): PayloadSize[%d]", pBaseProfile->GetPayloadList().GetSize(), 0, 0);
 
-    GenerateCommonAttributes(pSessionDescriptor, pDescriptor, pBaseProfile);
+    GenerateCommonAttributes(pSessionDescriptor, pDescriptor, pBaseProfile, pConfig);
 
     AudioProfile* pProfile = static_cast<AudioProfile*>(pBaseProfile);
 

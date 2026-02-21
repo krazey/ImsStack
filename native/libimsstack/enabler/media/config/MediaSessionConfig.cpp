@@ -35,9 +35,10 @@ MediaSessionConfig::MediaSessionConfig(IN IMS_SINT32 nSlotId, IN MEDIA_SERVICE_T
         m_bIsSessLevelBW(DEFAULT_SESSION_LEVEL_BW),
         m_bAnbrSupported(DEFAULT_ANBR_CAPABILITY),
         m_bSupportMultiConfigInEarlySession(DEFAULT_SUPPORT_MULTICONFIG),
-        m_bSdpReofferFullCapability(IMS_TRUE)
+        m_bSdpReofferFullCapability(IMS_TRUE),
+        m_bAddCLineForEachMedia(IMS_FALSE)
 {
-    IMS_TRACE_I("+MediaSessionConfig() - SlotId[%d], ServiceType[%d]", nSlotId, serviceType, 0);
+    (void)nSlotId;
 }
 
 PUBLIC VIRTUAL MediaSessionConfig::~MediaSessionConfig()
@@ -67,6 +68,8 @@ IMS_BOOL MediaSessionConfig::Create(IN IMS_SINT32 nSlotId)
             CarrierConfig::ImsVoice::KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL);
     m_bSdpReofferFullCapability =
             piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL);
+    m_bAddCLineForEachMedia =
+            piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_MEDIA_ADD_C_LINE_FOR_EACH_MEDIA_BOOL);
 
     if (m_pAudioConfig == IMS_NULL)
     {
@@ -80,8 +83,6 @@ IMS_BOOL MediaSessionConfig::Create(IN IMS_SINT32 nSlotId)
     {
         CreateTextConfiguration(piCc);
     }
-
-    ToDebugString();
 
     return IMS_TRUE;
 }
@@ -99,6 +100,7 @@ void MediaSessionConfig::ToDebugString() const
             m_bIsSessLevelBW, m_bAnbrSupported);
     IMS_TRACE_D("SupportMultiConfigInEarlySession[%d], SdpReofferFullCapability[%d]",
             m_bSupportMultiConfigInEarlySession, m_bSdpReofferFullCapability, 0);
+    IMS_TRACE_I("AddCLineForEachMedia[%d]", m_bAddCLineForEachMedia, 0, 0);
 }
 
 PUBLIC
@@ -147,6 +149,12 @@ PUBLIC
 IMS_BOOL MediaSessionConfig::IsSdpReofferFullCapability() const
 {
     return m_bSdpReofferFullCapability;
+}
+
+PUBLIC
+IMS_BOOL MediaSessionConfig::IsAddCLineForEachMediaEnabled() const
+{
+    return m_bAddCLineForEachMedia;
 }
 
 PRIVATE

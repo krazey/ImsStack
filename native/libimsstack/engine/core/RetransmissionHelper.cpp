@@ -45,7 +45,7 @@ RetransmissionHelper::RetransmissionHelper(
 
     if (bIntervalCap)
     {
-        // Interval cap will be read from the timer T2...
+        // Interval cap will be read from the timer T2.
         m_nIntervalCap = SipConfigProxy::GetTimerValueT2(
                 pService->GetSlotId(), pService->GetSipProfile(), piSipConfigV);
     }
@@ -57,7 +57,9 @@ RetransmissionHelper::RetransmissionHelper(
 
 PUBLIC VIRTUAL RetransmissionHelper::~RetransmissionHelper()
 {
-    IMS_TRACE_D("Destructor :: RetransmissionHelper", 0, 0, 0);
+#ifdef __IMS_CORE_DEBUG__
+    IMS_TRACE_D("dtor: RetransmissionHelper", 0, 0, 0);
+#endif
 
     if (m_piTimer != IMS_NULL)
     {
@@ -83,7 +85,7 @@ IMS_RESULT RetransmissionHelper::Start()
 {
     if (m_piTimer != IMS_NULL)
     {
-        IMS_TRACE_D("Retransmission timer is already running ...", 0, 0, 0);
+        IMS_TRACE_D("Retransmission timer is already running", 0, 0, 0);
         return IMS_SUCCESS;
     }
 
@@ -97,7 +99,7 @@ IMS_RESULT RetransmissionHelper::Start()
 
     m_piTimer->SetTimer(m_nDuration, this);
 
-    IMS_TRACE_I("Retransmission timer (%p) is started .....", m_piTimer, 0, 0);
+    IMS_TRACE_I("Retransmission timer(%p) is started", m_piTimer, 0, 0);
 
     return IMS_SUCCESS;
 }
@@ -110,7 +112,7 @@ void RetransmissionHelper::Stop()
         return;
     }
 
-    IMS_TRACE_I("Retransmission timer (%p) is stopped .....", m_piTimer, 0, 0);
+    IMS_TRACE_I("Retransmission timer(%p) is stopped", m_piTimer, 0, 0);
 
     m_piTimer->KillTimer();
     TimerService::GetTimerService()->DestroyTimer(m_piTimer);

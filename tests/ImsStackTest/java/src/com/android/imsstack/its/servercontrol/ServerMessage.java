@@ -162,6 +162,7 @@ public class ServerMessage extends SipMessage {
          * @param type The type of the body part.
          *             {@link ControlProtocolConstants#BODY_TYPE_SDP},
          *             {@link ControlProtocolConstants#BODY_TYPE_XML}
+         *             {@link ControlProtocolConstants#BODY_TYPE_HTTP}
          * @param name The name of the body part.
          *             To include the body to the message, the name of this body part must also be
          *             provided via {@link #setSdp} or {@link #setXml}

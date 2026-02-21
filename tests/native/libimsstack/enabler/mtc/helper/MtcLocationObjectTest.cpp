@@ -555,15 +555,17 @@ TEST_F(MtcLocationObjectTest, SetLocationToMessageDoesNothingIfContentEmpty)
 
     EXPECT_CALL(objMessage, AddHeader(_, _)).Times(0);
     EXPECT_CALL(objMessage, GetMessage).Times(0);
-    MtcLocationObject(objContext).SetLocationToMessage(objMessage, IMS_FALSE, objEmptyContent);
+    MtcLocationObject(objContext).SetLocationToMessage(objMessage, objEmptyContent);
 }
 
-TEST_F(MtcLocationObjectTest, SetLocationToMessageSetHeadersAndBodyPartWithNoGeolocationRouting)
+TEST_F(MtcLocationObjectTest, SetLocationToMessageSetHeadersAndBodyPartGeolocationRoutingNotPresent)
 {
     const AString strCid = "c-i-d";
     ON_CALL(objMessageUtils, GenerateContentId(_)).WillByDefault(Return(strCid));
     ON_CALL(objConfigurationProxy, GetString(ConfigVoice::KEY_CONTENT_ID_FOR_GEOLOCATION_STRING))
             .WillByDefault(Return(AString::ConstEmpty()));
+    ON_CALL(objConfigurationProxy, GetInt(ConfigIms::KEY_GEOLOCATION_ROUTING_HEADER_MODE_INT))
+            .WillByDefault(Return(ConfigIms::GEOLOCATION_HEADER_MODE_NOT_PRESENT));
 
     ByteArray objContent("PIDF-LO XML Content");
     MockIMessage objMessage;
@@ -571,7 +573,6 @@ TEST_F(MtcLocationObjectTest, SetLocationToMessageSetHeadersAndBodyPartWithNoGeo
     ON_CALL(objMessage, CreateBodyPart).WillByDefault(Return(&objBodyPart));
 
     EXPECT_CALL(objMessage, AddHeader(AString("Geolocation"), AString("<cid:c-i-d>")));
-    EXPECT_CALL(objMessage, AddHeader(AString("Geolocation-Routing"), AString("no")));
 
     EXPECT_CALL(objBodyPart, SetContent(objContent));
     EXPECT_CALL(objBodyPart, SetHeader(AString(SipHeaderName::CONTENT_LENGTH), AString("19")));
@@ -582,15 +583,19 @@ TEST_F(MtcLocationObjectTest, SetLocationToMessageSetHeadersAndBodyPartWithNoGeo
             SetHeader(AString(SipHeaderName::CONTENT_DISPOSITION),
                     AString("render;handling=optional")));
 
-    MtcLocationObject(objContext).SetLocationToMessage(objMessage, IMS_FALSE, objContent);
+    MtcLocationObject(objContext).SetLocationToMessage(objMessage, objContent);
 }
 
-TEST_F(MtcLocationObjectTest, SetLocationToMessageSetHeadersAndBodyPartWithGeolocationRouting)
+TEST_F(MtcLocationObjectTest,
+        SetLocationToMessageSetHeadersAndBodyPartWithGeolocationRoutingYesOnIwlan)
 {
     const AString strCid = "c-i-d";
     ON_CALL(objMessageUtils, GenerateContentId(_)).WillByDefault(Return(strCid));
     ON_CALL(objConfigurationProxy, GetString(ConfigVoice::KEY_CONTENT_ID_FOR_GEOLOCATION_STRING))
             .WillByDefault(Return(AString::ConstEmpty()));
+    ON_CALL(objConfigurationProxy, GetInt(ConfigIms::KEY_GEOLOCATION_ROUTING_HEADER_MODE_INT))
+            .WillByDefault(Return(ConfigIms::GEOLOCATION_HEADER_MODE_INCLUDE_YES_ON_IWLAN));
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
 
     ByteArray objContent("PIDF-LO XML Content");
     MockIMessage objMessage;
@@ -609,7 +614,67 @@ TEST_F(MtcLocationObjectTest, SetLocationToMessageSetHeadersAndBodyPartWithGeolo
             SetHeader(AString(SipHeaderName::CONTENT_DISPOSITION),
                     AString("render;handling=optional")));
 
-    MtcLocationObject(objContext).SetLocationToMessage(objMessage, IMS_TRUE, objContent);
+    MtcLocationObject(objContext).SetLocationToMessage(objMessage, objContent);
+}
+
+TEST_F(MtcLocationObjectTest,
+        SetLocationToMessageSetHeadersAndBodyPartWithGeolocationRoutingeYesAlways)
+{
+    const AString strCid = "c-i-d";
+    ON_CALL(objMessageUtils, GenerateContentId(_)).WillByDefault(Return(strCid));
+    ON_CALL(objConfigurationProxy, GetString(ConfigVoice::KEY_CONTENT_ID_FOR_GEOLOCATION_STRING))
+            .WillByDefault(Return(AString::ConstEmpty()));
+    ON_CALL(objConfigurationProxy, GetInt(ConfigIms::KEY_GEOLOCATION_ROUTING_HEADER_MODE_INT))
+            .WillByDefault(Return(ConfigIms::GEOLOCATION_HEADER_MODE_INCLUDE_YES_ALWAYS));
+
+    ByteArray objContent("PIDF-LO XML Content");
+    MockIMessage objMessage;
+    MockIMessageBodyPart objBodyPart;
+    ON_CALL(objMessage, CreateBodyPart).WillByDefault(Return(&objBodyPart));
+
+    EXPECT_CALL(objMessage, AddHeader(AString("Geolocation"), AString("<cid:c-i-d>")));
+    EXPECT_CALL(objMessage, AddHeader(AString("Geolocation-Routing"), AString("yes")));
+
+    EXPECT_CALL(objBodyPart, SetContent(objContent));
+    EXPECT_CALL(objBodyPart, SetHeader(AString(SipHeaderName::CONTENT_LENGTH), AString("19")));
+    EXPECT_CALL(objBodyPart, SetHeader(AString(SipHeaderName::CONTENT_ID), AString("<c-i-d>")));
+    EXPECT_CALL(objBodyPart,
+            SetHeader(AString(SipHeaderName::CONTENT_TYPE), AString("application/pidf+xml")));
+    EXPECT_CALL(objBodyPart,
+            SetHeader(AString(SipHeaderName::CONTENT_DISPOSITION),
+                    AString("render;handling=optional")));
+
+    MtcLocationObject(objContext).SetLocationToMessage(objMessage, objContent);
+}
+
+TEST_F(MtcLocationObjectTest,
+        SetLocationToMessageSetHeadersAndBodyPartWithGeolocationRoutingeNoAlways)
+{
+    const AString strCid = "c-i-d";
+    ON_CALL(objMessageUtils, GenerateContentId(_)).WillByDefault(Return(strCid));
+    ON_CALL(objConfigurationProxy, GetString(ConfigVoice::KEY_CONTENT_ID_FOR_GEOLOCATION_STRING))
+            .WillByDefault(Return(AString::ConstEmpty()));
+    ON_CALL(objConfigurationProxy, GetInt(ConfigIms::KEY_GEOLOCATION_ROUTING_HEADER_MODE_INT))
+            .WillByDefault(Return(ConfigIms::GEOLOCATION_HEADER_MODE_INCLUDE_NO_ALWAYS));
+
+    ByteArray objContent("PIDF-LO XML Content");
+    MockIMessage objMessage;
+    MockIMessageBodyPart objBodyPart;
+    ON_CALL(objMessage, CreateBodyPart).WillByDefault(Return(&objBodyPart));
+
+    EXPECT_CALL(objMessage, AddHeader(AString("Geolocation"), AString("<cid:c-i-d>")));
+    EXPECT_CALL(objMessage, AddHeader(AString("Geolocation-Routing"), AString("no")));
+
+    EXPECT_CALL(objBodyPart, SetContent(objContent));
+    EXPECT_CALL(objBodyPart, SetHeader(AString(SipHeaderName::CONTENT_LENGTH), AString("19")));
+    EXPECT_CALL(objBodyPart, SetHeader(AString(SipHeaderName::CONTENT_ID), AString("<c-i-d>")));
+    EXPECT_CALL(objBodyPart,
+            SetHeader(AString(SipHeaderName::CONTENT_TYPE), AString("application/pidf+xml")));
+    EXPECT_CALL(objBodyPart,
+            SetHeader(AString(SipHeaderName::CONTENT_DISPOSITION),
+                    AString("render;handling=optional")));
+
+    MtcLocationObject(objContext).SetLocationToMessage(objMessage, objContent);
 }
 
 TEST_F(MtcLocationObjectTest, CreateLocationBodyReturnsEmptyIfNoCreator)

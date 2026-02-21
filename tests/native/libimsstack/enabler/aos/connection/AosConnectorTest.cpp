@@ -733,11 +733,26 @@ TEST_F(AosConnectorTest, NotifyChangeWhenPcscfChanged)
     m_pAosConnector->AosConnection_PcscfChanged();
 }
 
-TEST_F(AosConnectorTest, NotifyDeactivatedWhenConnectionFailed)
+TEST_F(AosConnectorTest, NotifyDeactivatedWithPermanentReasonWhenConnectionFailed)
 {
+    ON_CALL(m_objMockIAosNConfiguration, ShouldDisableN1ModeOnImsPduEstablishFailure())
+            .WillByDefault(Return(IMS_FALSE));
+
     // notify Deactivated
     EXPECT_CALL(m_objMockIAosConnectorListener,
             Connector_Deactivated(AosConnector::REASON_PERMANENTLY_FAILED));
+
+    m_pAosConnector->AosConnection_ConnectionFailed();
+}
+
+TEST_F(AosConnectorTest, NotifyDeactivatedWithTemporaryReasonWhenConnectionFailed)
+{
+    ON_CALL(m_objMockIAosNConfiguration, ShouldDisableN1ModeOnImsPduEstablishFailure())
+            .WillByDefault(Return(IMS_TRUE));
+
+    // notify Deactivated
+    EXPECT_CALL(m_objMockIAosConnectorListener,
+            Connector_Deactivated(AosConnector::REASON_TEMPORARILY_FAILED));
 
     m_pAosConnector->AosConnection_ConnectionFailed();
 }

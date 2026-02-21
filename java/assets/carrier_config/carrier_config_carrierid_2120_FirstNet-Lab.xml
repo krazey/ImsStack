@@ -17,7 +17,8 @@
 <carrier_config>
     <!-- Please always keep this config on the first line. -->
     <!-- Specifies a list of parent carrier ids from which to inherit configuration values. -->
-    <int-array name="ims.parent_carrier_ids_int_array" num="1">
+    <int-array name="ims.parent_carrier_ids_int_array" num="2">
+        <item value="1187"/>
         <item value="2119"/>
     </int-array>
 </carrier_config>

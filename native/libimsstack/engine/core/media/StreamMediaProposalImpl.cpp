@@ -17,6 +17,7 @@
 #include "ServiceTrace.h"
 
 #include "base/Ims.h"
+#include "base/ImsError.h"
 #include "media/StreamMediaProposalImpl.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;

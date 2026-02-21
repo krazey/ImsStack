@@ -16,16 +16,18 @@
 #ifndef INTERFACE_SERVICE_H_
 #define INTERFACE_SERVICE_H_
 
-#include "AStringArray.h"
-#include "IpAddress.h"
-
 #include "IConnection.h"
-#include "SipAddress.h"
 #include "SipMethod.h"
+
+class AStringArray;
+class IpAddress;
 
 class IFeatureCaps;
 class IRegInfo;
 class IServiceFilterCriteria;
+class ISipHeader;
+class SipAddress;
+class SipParameter;
 class SipProfile;
 
 /**

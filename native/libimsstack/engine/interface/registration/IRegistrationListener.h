@@ -16,7 +16,9 @@
 #ifndef INTERFACE_REGISTRATION_LISTENER_H_
 #define INTERFACE_REGISTRATION_LISTENER_H_
 
-#include "ByteArray.h"
+#include "ImsTypeDef.h"
+
+class ByteArray;
 
 class IRegistration;
 

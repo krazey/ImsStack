@@ -16,15 +16,24 @@
 #include <gtest/gtest.h>
 
 #include "CoreService.h"
+#include "IMessage.h"
+#include "MockISipDialog.h"
 #include "MockIReasonHeaderSetter.h"
 #include "MockISipClientConnection.h"
 #include "Session.h"
 #include "SessionRefreshHelper.h"
+#include "SipError.h"
+#include "SipMessage.h"
+#include "SipMethod.h"
+#include "SipPrivate.h"
+
 #include "TestCoreBase.h"
 #include "TestCoreService.h"
 
 using ::testing::_;
+using ::testing::An;
 using ::testing::Eq;
+using ::testing::Invoke;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -52,10 +61,19 @@ class TestSession : public Session
 public:
     inline explicit TestSession(IN Service* pService) :
             Session(pService),
-            m_pTestRefreshHelper(IMS_NULL)
+            m_pTestRefreshHelper(IMS_NULL),
+            m_pForkedSession(IMS_NULL)
     {
     }
+    inline ~TestSession() override
+    {
+        if (m_pForkedSession != IMS_NULL)
+        {
+            delete m_pForkedSession;
+        }
+    }
 
+    inline Session* GetForkedSession() const { return m_pForkedSession; }
     inline SessionRefreshHelper* CreateRefreshHelper() override
     {
         if (m_pTestRefreshHelper == IMS_NULL)
@@ -83,9 +101,28 @@ public:
     inline void SetStateForTest(IN IMS_SINT32 nState) { SetState(nState); }
     inline void SendRequestToByeInternalForTest() { SendRequestToByeInternal(); }
     inline void CreateDialog(IN const ISipConnection* piSc) { CheckNCreateDialog(piSc); }
+    inline void NotifySipForkedResponseForTest(
+            IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc)
+    {
+        UpdateRequestOnSent(IMessage::SESSION_START, piScc);
+        NotifySipForkedResponse(piScc, piForkedScc);
+    }
+
+    inline void DispatchMessageForTest(IN const ImsMessage& objMsg)
+    {
+        switch (objMsg.GetName())
+        {
+            case AMSG_SESSION_FORKED_RESPONSE_RECEIVED:
+                m_pForkedSession = reinterpret_cast<Session*>(objMsg.nLparam);
+                break;
+            default:
+                break;
+        }
+    }
 
 public:
     TestSessionRefreshHelper* m_pTestRefreshHelper;
+    Session* m_pForkedSession;
 };
 
 class SessionTest : public TestCoreBase
@@ -93,11 +130,18 @@ class SessionTest : public TestCoreBase
 public:
     inline SessionTest() :
             TestCoreBase(),
+            m_nMsgCount(1),
+            m_pForkedSipMsg(IMS_NULL),
             m_pSession(IMS_NULL)
     {
     }
     inline ~SessionTest() override
     {
+        if (m_pForkedSipMsg != IMS_NULL)
+        {
+            delete m_pForkedSipMsg;
+        }
+
         if (m_pSession != IMS_NULL)
         {
             delete m_pSession;
@@ -110,6 +154,15 @@ protected:
         TestCoreBase::SetUp();
 
         m_pSession = new TestSession(GetCoreService());
+
+        ON_CALL(m_pThreadService->GetMockThread(), PostMessageI(An<ImsMessage&>()))
+                .WillByDefault(Invoke(
+                        [&](IN ImsMessage& objMsg)
+                        {
+                            m_pSession->DispatchMessageForTest(objMsg);
+                            return IMS_TRUE;
+                        }));
+
         InitMethod(m_pSession);
     }
 
@@ -121,10 +174,47 @@ protected:
             m_pSession = IMS_NULL;
         }
 
+        SipPrivate::SetLastError(SipError::NO_ERROR);
         TestCoreBase::TearDown();
     }
 
+    void SetUpForkedClientConnection()
+    {
+        if (m_pForkedSipMsg == IMS_NULL)
+        {
+            m_pForkedSipMsg = new sipcore::SipMessage(ISipMessage::TYPE_RESPONSE);
+            m_pForkedSipMsg->SetMethod(SipMethod(SipMethod::INVITE));
+            m_pForkedSipMsg->SetStatusCode(183);
+        }
+        ON_CALL(m_objForkedScc, Close()).WillByDefault(Return());
+        ON_CALL(m_objForkedScc, SetErrorListener(_)).WillByDefault(Return());
+        ON_CALL(m_objForkedScc, SetListener(_)).WillByDefault(Return());
+        ON_CALL(m_objForkedScc, GetDialog()).WillByDefault(Return(&m_objForkedDialog));
+        ON_CALL(m_objForkedScc, GetMessage()).WillByDefault(Return(m_pForkedSipMsg));
+        ON_CALL(m_objForkedScc, GetMethod()).WillByDefault(ReturnRef(m_pForkedSipMsg->GetMethod()));
+        ON_CALL(m_objForkedScc, Receive)
+                .WillByDefault(Invoke(
+                        [&]()
+                        {
+                            if (m_nMsgCount > 0)
+                            {
+                                m_nMsgCount--;
+                                return IMS_SUCCESS;
+                            }
+                            SipPrivate::SetLastError(SipError::NO_MESSAGE);
+                            return IMS_FAILURE;
+                        }));
+
+        ON_CALL(m_objForkedDialog, Clone()).WillByDefault(Return(&m_objForkedDialog));
+        ON_CALL(m_objForkedDialog, GetState()).WillByDefault(Return(ISipDialog::STATE_EARLY));
+        ON_CALL(m_objForkedDialog, Destroy()).WillByDefault(Return());
+    }
+
 protected:
+    IMS_SINT32 m_nMsgCount;
+    sipcore::SipMessage* m_pForkedSipMsg;
+    MockISipDialog m_objForkedDialog;
+    MockISipClientConnection m_objForkedScc;
     TestSession* m_pSession;
 };
 
@@ -210,6 +300,21 @@ TEST_F(SessionTest, CreateTransaction)
     const ISipClientConnection* piScc = m_pSession->CreateTransaction(objMethod);
 
     ASSERT_TRUE(piScc != nullptr);
+}
+
+TEST_F(SessionTest, NotifySipForkedResponse)
+{
+    SipMethod objMethod(SipMethod::INVITE);
+    SetMethodForSipConnection(objMethod);
+    SetUpClientConnection(IMS_TRUE);
+    SetUpForkedClientConnection();
+
+    m_pSession->SetConfiguration(m_pSession->GetConfiguration() | Session::CONFIG_SUPPORT_PREVIEW);
+    m_pSession->NotifySipForkedResponseForTest(&GetScc(), &m_objForkedScc);
+
+    const Session* pForkedSession = m_pSession->GetForkedSession();
+    ASSERT_TRUE(pForkedSession != IMS_NULL);
+    ASSERT_EQ(m_pSession->GetConfiguration(), pForkedSession->GetConfiguration());
 }
 
 }  // namespace android

@@ -19,10 +19,12 @@
 #include "ect/IEctManager.h"
 #include "ect/MockBlindTransferController.h"
 #include "ect/MockConsultativeTransferController.h"
+#include "helper/MockICallStateProxy.h"
 #include <gtest/gtest.h>
 #include <memory>
 
 using ::testing::Return;
+using ::testing::ReturnRef;
 
 namespace android
 {
@@ -53,11 +55,17 @@ public:
     TestEctManager* pManager;
 
     MockIMtcContext objContext;
+    MockICallStateProxy objCallStateProxy;
     std::unique_ptr<MockBlindTransferController> pBlindController;
     std::unique_ptr<MockConsultativeTransferController> pConsultativeController;
 
 protected:
-    virtual void SetUp() override { pManager = new TestEctManager(objContext); }
+    virtual void SetUp() override
+    {
+        ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
+
+        pManager = new TestEctManager(objContext);
+    }
 
     virtual void TearDown() override { delete pManager; }
 

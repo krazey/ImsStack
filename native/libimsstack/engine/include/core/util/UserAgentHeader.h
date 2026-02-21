@@ -16,7 +16,9 @@
 #ifndef USER_AGENT_HEADER_H_
 #define USER_AGENT_HEADER_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
+
+class AString;
 
 class ISipMessage;
 class SipProfile;

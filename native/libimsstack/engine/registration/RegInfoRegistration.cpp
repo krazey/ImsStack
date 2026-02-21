@@ -22,6 +22,7 @@
 #include "INode.h"
 
 #include "RegInfoConst.h"
+#include "RegInfoContact.h"
 #include "RegInfoRegistration.h"
 #include "SipDebug.h"
 
@@ -47,8 +48,10 @@ PUBLIC VIRTUAL RegInfoRegistration::~RegInfoRegistration()
         }
     }
 
-    IMS_TRACE_D("Destructor :: aor=%s, id=%s", SipDebug::GetUri1(m_objAor.ToString()).GetStr(),
+#ifdef __IMS_CORE_DEBUG__
+    IMS_TRACE_D("dtor: aor=%s, id=%s", SipDebug::GetUri1(m_objAor.ToString()).GetStr(),
             m_strId.GetStr(), 0);
+#endif
 }
 
 PUBLIC VIRTUAL IRegInfoContact* RegInfoRegistration::GetContact(
@@ -154,11 +157,11 @@ void RegInfoRegistration::DisplayRegInfo()
 
     if (IMS_UTIL_SYS_PROP_IS_SERVER_INFO_HIDDEN_IN_LOG())
     {
-        IMS_TRACE_I("REG :: id=%s, state=%s", m_strId.GetStr(), pszState[m_nState], 0);
+        IMS_TRACE_I("REG: id=%s, state=%s", m_strId.GetStr(), pszState[m_nState], 0);
     }
     else
     {
-        IMS_TRACE_I("REG :: id=%s, aor=%s, state=%s", m_strId.GetStr(),
+        IMS_TRACE_I("REG: id=%s, aor=%s, state=%s", m_strId.GetStr(),
                 SipDebug::GetUri1(m_objAor.ToString()).GetStr(), pszState[m_nState]);
     }
 
@@ -214,11 +217,11 @@ IMS_BOOL RegInfoRegistration::Update(IN INode* piNode)
 
         if (IMS_UTIL_SYS_PROP_IS_SERVER_INFO_HIDDEN_IN_LOG())
         {
-            IMS_TRACE_I("REG :: id=%s", m_strId.GetStr(), 0, 0);
+            IMS_TRACE_I("REG: id=%s", m_strId.GetStr(), 0, 0);
         }
         else
         {
-            IMS_TRACE_I("REG :: aor=%s, id=%s", SipDebug::GetUri1(m_objAor.ToString()).GetStr(),
+            IMS_TRACE_I("REG: aor=%s, id=%s", SipDebug::GetUri1(m_objAor.ToString()).GetStr(),
                     m_strId.GetStr(), 0);
         }
     }
@@ -256,7 +259,7 @@ RegInfoContact* RegInfoRegistration::CheckNCreateContact(IN INode* piNode)
         }
     }
 
-    // New contact updated...
+    // New contact updated.
     RegInfoContact* pContact = new RegInfoContact();
 
     if (pContact == IMS_NULL)
@@ -280,13 +283,13 @@ IMS_BOOL RegInfoRegistration::SetAor(IN const INamedNodeMap* piNodeMap)
 
     if (piNode == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Can't find 'aor' attribute", 0, 0, 0);
+        IMS_TRACE_E(0, "No 'aor' attribute", 0, 0, 0);
         return IMS_FALSE;
     }
 
     if (!m_objAor.Create(piNode->GetNodeValue()))
     {
-        IMS_TRACE_E(0, "Creating an AOR (%s) failed",
+        IMS_TRACE_E(0, "Creating AOR(%s) failed",
                 SipDebug::GetUri1(piNode->GetNodeValue()).GetStr(), 0, 0);
         return IMS_FALSE;
     }
@@ -317,7 +320,7 @@ IMS_BOOL RegInfoRegistration::SetId(IN const INamedNodeMap* piNodeMap)
 
     if (piNode == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Can't find 'id' attribute", 0, 0, 0);
+        IMS_TRACE_E(0, "No 'id' attribute", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -333,7 +336,7 @@ IMS_BOOL RegInfoRegistration::SetState(IN const INamedNodeMap* piNodeMap)
 
     if (piNode == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Can't find 'state' attribute", 0, 0, 0);
+        IMS_TRACE_E(0, "No 'state' attribute", 0, 0, 0);
         return IMS_FALSE;
     }
 

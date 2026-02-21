@@ -17,10 +17,7 @@
 #include "AString.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
-#include "ServiceTrace.h"
 #include "utility/SuppServiceUtils.h"
-
-__IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC GLOBAL void SuppServiceUtils::Add(IN ImsList<SuppService*>& objSuppServices,
         IN IMS_SINT32 nSuppType, IN const AString& strValue)
@@ -81,18 +78,13 @@ PUBLIC GLOBAL void SuppServiceUtils::Delete(
     {
         objSuppServices.Remove(pTargetSupp);
         delete pTargetSupp;
-        IMS_TRACE_I("Delete : size[%d] type[%d]", objSuppServices.GetSize(), nSuppType, 0);
         return;
     }
-
-    IMS_TRACE_I("Delete : type[%d] not found", nSuppType, 0, 0);
 }
 
 PUBLIC GLOBAL void SuppServiceUtils::DeleteServices(IN ImsList<SuppService*>& objSuppServices)
 {
     IMS_UINT32 nSize = objSuppServices.GetSize();
-
-    IMS_TRACE_I("DeleteServices : size[%d]", nSize, 0, 0);
 
     for (IMS_UINT32 index = 0; index < nSize; index++)
     {
@@ -114,7 +106,6 @@ PUBLIC GLOBAL SuppService* SuppServiceUtils::Get(
         }
     }
 
-    IMS_TRACE_I("Get : NoT Matched, Size[%d]", objSuppServices.GetSize(), 0, 0);
     return IMS_NULL;
 }
 

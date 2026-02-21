@@ -52,7 +52,7 @@ OsWifiConnection::OsWifiConnection() :
         m_piConnectionListener(IMS_NULL),
         m_objReferenceListeners(ImsList<INetworkConnectionListener*>())
 {
-    IMS_TRACE_D("Constructor :: Wifi connection", 0, 0, 0);
+    IMS_TRACE_D("ctor: OsWifiConnection", 0, 0, 0);
 
     m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
 
@@ -62,7 +62,7 @@ OsWifiConnection::OsWifiConnection() :
 
 PUBLIC VIRTUAL OsWifiConnection::~OsWifiConnection()
 {
-    IMS_TRACE_D("Destructor :: Wifi connection", 0, 0, 0);
+    IMS_TRACE_D("dtor: OsWifiConnection", 0, 0, 0);
 
     PlatformContext::GetInstance()->GetSystem()->RemoveListener(
             SystemConstants::CATEGORY_WIFI, this, GetSlotId());
@@ -113,7 +113,7 @@ PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsWifiConnection::Activate(
             IMS_TRACE_E(0, "Caching the local IP address failed", 0, 0, 0);
         }
 
-        IMS_TRACE_I("Wifi :: Activate() - APN (%s) is already activated; "
+        IMS_TRACE_I("Wifi: Activate - APN (%s) is already activated; "
                     "state=%d, detailed_state=%d",
                 GetProfileName().GetStr(), m_nWifiState, m_nWifiConnectionState);
 
@@ -122,7 +122,7 @@ PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsWifiConnection::Activate(
         return RESULT_DONE;
     }
 
-    IMS_TRACE_D("Wifi :: Activate() - state=%d, detailed_state=%d", m_nWifiState,
+    IMS_TRACE_D("Wifi: Activate - state=%d, detailed_state=%d", m_nWifiState,
             m_nWifiConnectionState, 0);
 
     SetState(STATE_ACTIVATING);
@@ -135,19 +135,19 @@ PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsWifiConnection::Deactivate(
 {
     if (m_nState == STATE_TERMINATED)
     {
-        IMS_TRACE_D("Wifi :: Deactivate() in TERMINATED state", 0, 0, 0);
+        IMS_TRACE_D("Wifi: Deactivate on TERMINATED", 0, 0, 0);
         return RESULT_DONE;
     }
 
     if (IsDisconnected())
     {
-        IMS_TRACE_D("Wifi :: Deactivate() in DATA_DISCONNECTED state", 0, 0, 0);
+        IMS_TRACE_D("Wifi: Deactivate on DATA_DISCONNECTED", 0, 0, 0);
 
         SetState(STATE_TERMINATED);
         return RESULT_DONE;
     }
 
-    IMS_TRACE_D("Wifi :: Deactivate() - state=%d, detailed_state=%d", m_nWifiState,
+    IMS_TRACE_D("Wifi: Deactivate - state=%d, detailed_state=%d", m_nWifiState,
             m_nWifiConnectionState, 0);
 
     SetState(STATE_TERMINATED);
@@ -259,8 +259,8 @@ PRIVATE VIRTUAL IMS_SINT32 OsWifiConnection::GetHostByName(IN const AString& str
         OUT ImsList<IpAddress>& objIpAddrs,
         IN IMS_SINT32 nIpVersion /*= 0 default-local-address-based*/)
 {
-    IMS_TRACE_I("DNS lookup (%d) :: apnType=%d, domain=%s", nIpVersion, GetApnType(),
-            OsUtil::GetInstance()->IsDebugMode() ? strHostName.GetStr() : "xxx");
+    IMS_TRACE_I("DNS lookup (%d): apnType=%d, domain=%s", nIpVersion, GetApnType(),
+            OsUtil::GetInstance()->IsDebugMode() ? strHostName.GetStr() : "***");
 
     if ((nIpVersion != IpAddress::IPV4) && (nIpVersion != IpAddress::IPV6))
     {
@@ -281,8 +281,6 @@ PRIVATE VIRTUAL IMS_SINT32 OsWifiConnection::GetHostByName(IN const AString& str
         }
     }
 
-    // ANDROID_L: android_gethostbynameforiface (KK-OS)
-    // ANDROID_P: android_gethostbynamefornet (libc)
     AStringArray objHostIps = PlatformContext::GetInstance()->GetSystem()->GetHostByName(
             strHostName, nIpVersion, GetApnType(), GetSlotId());
 
@@ -302,9 +300,9 @@ PRIVATE VIRTUAL IMS_SINT32 OsWifiConnection::GetHostByName(IN const AString& str
             objIpAddrs.Append(objIp);
         }
 
-        IMS_TRACE_D("gethostbyname() :: %s >>> %s at index(%d)",
-                OsUtil::GetInstance()->IsDebugMode() ? strHostName.GetStr() : "xxx",
-                OsUtil::GetInstance()->IsDebugMode() ? strHostIp.GetStr() : "xxx", i);
+        IMS_TRACE_D("gethostbyname: %s >>> %s at index(%d)",
+                OsUtil::GetInstance()->IsDebugMode() ? strHostName.GetStr() : "***",
+                OsUtil::GetInstance()->IsDebugMode() ? strHostIp.GetStr() : "***", i);
     }
 
     if (objIpAddrs.IsEmpty())
@@ -470,29 +468,29 @@ PRIVATE VIRTUAL IMS_SINT32 OsWifiConnection::GetApnType() const
 PRIVATE VIRTUAL void OsWifiConnection::System_NotifyEvent(
         IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
 {
-    IMS_TRACE_D("Wifi :: event=%d, wp=%" PFLS_d ", lp=%" PFLS_d, nEvent, nWParam, nLParam);
+    IMS_TRACE_D("Wifi: event=%d, wp=%" PFLS_d ", lp=%" PFLS_d, nEvent, nWParam, nLParam);
 
     switch (nEvent)
     {
         case IMS_SYSTEM_WIFI_STATE_CHANGED:
         {
             IMS_TRACE_D(
-                    "Wifi :: State changed in %s - %" PFLS_d, StateToString(m_nState), nWParam, 0);
+                    "Wifi: State changed in %s - %" PFLS_d, StateToString(m_nState), nWParam, 0);
 
             OnWifiStateChanged(LONG_TO_INT(nWParam));
             break;
         }
         case IMS_SYSTEM_WIFI_CONNECTION_STATE_CHANGED:
         {
-            IMS_TRACE_I("Wifi :: Connection state changed in %s - %" PFLS_d,
-                    StateToString(m_nState), nWParam, 0);
+            IMS_TRACE_I("Wifi: Connection state changed in %s - %" PFLS_d, StateToString(m_nState),
+                    nWParam, 0);
 
             OnWifiConnectionStateChanged(LONG_TO_INT(nWParam));
             break;
         }
         default:
         {
-            IMS_TRACE_D("___ Event (%d) :: Ignored ___", nEvent, 0, 0);
+            IMS_TRACE_D("Event(%d): not handled", nEvent, 0, 0);
             break;
         }
     }
@@ -591,9 +589,6 @@ IMS_BOOL OsWifiConnection::CacheLocalAddress()
         return IMS_FALSE;
     }
 
-    IMS_TRACE_D("Wifi :: LOCAL - IPv4 (%s), IPv6 (%s)", m_objLocalAddressIpv4.ToString().GetStr(),
-            m_objLocalAddressIpv6.ToString().GetStr(), 0);
-
     // Network interface identifier
     m_nIfaceId = PlatformContext::GetInstance()->GetSystem()->GetIfaceId(GetApnType(), GetSlotId());
 
@@ -601,7 +596,11 @@ IMS_BOOL OsWifiConnection::CacheLocalAddress()
     m_strIfaceName =
             PlatformContext::GetInstance()->GetSystem()->GetIfaceName(GetApnType(), GetSlotId());
 
-    IMS_TRACE_D("Wifi :: IfaceId=%d, IfaceName=%s", m_nIfaceId, m_strIfaceName.GetStr(), 0);
+    AString strLog;
+    strLog.Sprintf("Wifi: ipv4=%s, ipv6=%s, if-id=%d, if-name=%s",
+            m_objLocalAddressIpv4.ToString().GetStr(), m_objLocalAddressIpv6.ToString().GetStr(),
+            m_nIfaceId, m_strIfaceName.GetStr());
+    IMS_TRACE_D("%s", strLog.GetStr(), 0, 0);
 
     return IMS_TRUE;
 }
@@ -683,7 +682,7 @@ void OsWifiConnection::CheckValidityForLocalAddress()
         m_objLocalAddressIpv4 = objTmpLocalAddressIpv4;
         m_objLocalAddressIpv6 = objTmpLocalAddressIpv6;
 
-        IMS_TRACE_D("Wifi :: IP_VALIDITY_CHECK - caching local address failed", 0, 0, 0);
+        IMS_TRACE_D("Wifi: IP_VALIDITY_CHECK - caching local address failed", 0, 0, 0);
         return;
     }
 
@@ -693,7 +692,7 @@ void OsWifiConnection::CheckValidityForLocalAddress()
 
     if (bDefaultChanged || bIpv4Changed || bIpv6Changed)
     {
-        IMS_TRACE_D("Wifi :: IP_VALIDITY_CHECK - change detected; default(%s), v4(%s), v6(%s)",
+        IMS_TRACE_D("Wifi: IP_VALIDITY_CHECK - change detected; default(%s), v4(%s), v6(%s)",
                 _TRACE_B_(bDefaultChanged), _TRACE_B_(bIpv4Changed), _TRACE_B_(bIpv6Changed));
     }
 }
@@ -762,7 +761,7 @@ void OsWifiConnection::NotifyDataConnected(IN IMS_SINT32 nErrorCode)
 {
     if (IsConnected())
     {
-        IMS_TRACE_I("Wifi :: Network Connection is already activated.", 0, 0, 0);
+        IMS_TRACE_I("Wifi: Data connection is already activated", 0, 0, 0);
 
         CheckValidityForLocalAddress();
         return;
@@ -826,7 +825,7 @@ void OsWifiConnection::NotifyIpChanged(IN IMS_SINT32 nErrorCode)
     if (m_nState != STATE_ACTIVE)
     {
         // Ignore the event
-        IMS_TRACE_D("Wifi :: IP changed - not ACTIVE", 0, 0, 0);
+        IMS_TRACE_D("Wifi: IP changed - not ACTIVE", 0, 0, 0);
         return;
     }
 
@@ -914,7 +913,7 @@ void OsWifiConnection::SetState(IN IMS_UINT32 nState)
 {
     if (m_nState != nState)
     {
-        IMS_TRACE_I("Wifi :: %s >> %s", StateToString(m_nState), StateToString(nState), 0);
+        IMS_TRACE_I("Wifi: %s >> %s", StateToString(m_nState), StateToString(nState), 0);
         m_nState = nState;
     }
 }

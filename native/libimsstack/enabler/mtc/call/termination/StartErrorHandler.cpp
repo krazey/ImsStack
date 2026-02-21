@@ -54,7 +54,7 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-LOCAL const AString REASON_TEXT_MAX_CALL_LIMIT_REACHED_VZW =
+LOCAL const AString REASON_TEXT_MAX_CALL_LIMIT_REACHED_TYPE1 =
         "simultaneous call limit has already been reached";
 
 // clang-format off
@@ -131,7 +131,7 @@ CallReasonInfo StartErrorHandler::Handle(IN const IMessage* piMessage) const
 
     if (IsTransactionTimeout(piMessage))
     {
-        IMS_TRACE_I("Handle : Timeout", 0, 0, 0);
+        IMS_TRACE_D("Handle : Timeout", 0, 0, 0);
         return HandleTransactionTimeout();
     }
 
@@ -167,7 +167,7 @@ PUBLIC GLOBAL CallReasonInfo StartErrorHandler::GetDefaultCallReasonInfo(
         }
     }
     IMS_SINT32 nReasonCode = GetDefaultReasonCode(objContext, objMessage.GetStatusCode());
-    IMS_TRACE_I("GetDefaultCallReasonInfo [%d]", nReasonCode, 0, 0);
+    IMS_TRACE_D("GetDefaultCallReasonInfo [%d]", nReasonCode, 0, 0);
     return CallReasonInfo(nReasonCode, GetDefaultExtraCode(objContext, objMessage));
 }
 
@@ -214,7 +214,7 @@ PUBLIC GLOBAL IMS_BOOL StartErrorHandler::ShouldTerminateWithoutActionConfig(
             objContext.GetCallController().GetActiveRedialHelper();
     if (pRedialHelper && pRedialHelper->GetType() == EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF_ONCE)
     {
-        IMS_TRACE_I("ShouldTerminateWithoutActionConfig : REDIAL_WITH_NEXT_PCSCF_ONCE", 0, 0, 0);
+        IMS_TRACE_D("ShouldTerminateWithoutActionConfig : REDIAL_WITH_NEXT_PCSCF_ONCE", 0, 0, 0);
         return IMS_TRUE;
     }
 
@@ -235,7 +235,7 @@ PRIVATE GLOBAL CallReasonInfo StartErrorHandler::GetDefaultCallReasonInfoWithExt
 
     IMS_SINT32 nExtraCode = (objReasonResult.nCause != CODE_NONE) ? objReasonResult.nCause
                                                                   : objMessage.GetStatusCode();
-    IMS_TRACE_I("GetDefaultCallReasonInfoWithExtraMessage [%d][%d][%s]", nReasonCode, nExtraCode,
+    IMS_TRACE_D("GetDefaultCallReasonInfoWithExtraMessage [%d][%d][%s]", nReasonCode, nExtraCode,
             strExtraMessage.GetStr());
 
     return CallReasonInfo(nReasonCode, nExtraCode, strExtraMessage);
@@ -323,7 +323,7 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
 PRIVATE
 CallReasonInfo StartErrorHandler::HandleCsfb(IN const IMessage& /*objMessage*/) const
 {
-    IMS_TRACE_I("HandleCsfb", 0, 0, 0);
+    IMS_TRACE_D("HandleCsfb", 0, 0, 0);
     if (m_objContext.IsCsfbAvailable())
     {
         return CallReasonInfo(
@@ -335,7 +335,7 @@ CallReasonInfo StartErrorHandler::HandleCsfb(IN const IMessage& /*objMessage*/) 
 PRIVATE
 CallReasonInfo StartErrorHandler::HandleSilentReinvite(IN const IMessage& /*objMessage*/) const
 {
-    IMS_TRACE_I("HandleSilentReinvite", 0, 0, 0);
+    IMS_TRACE_D("HandleSilentReinvite", 0, 0, 0);
     return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_ERROR_RESPONSE);
 }
 
@@ -343,7 +343,7 @@ PRIVATE
 CallReasonInfo StartErrorHandler::HandleSilentReinviteBySdpContent(
         IN const IMessage& objMessage) const
 {
-    IMS_TRACE_I("HandleSilentReinviteBySdpContent", 0, 0, 0);
+    IMS_TRACE_D("HandleSilentReinviteBySdpContent", 0, 0, 0);
     if (m_objContext.GetMessageUtils().HasSdp(&objMessage))
     {
         IMS_UINT32 eMediaTypes =
@@ -362,7 +362,7 @@ PRIVATE
 CallReasonInfo StartErrorHandler::HandleSilentReinviteByRetryAfter(
         IN const IMessage& objMessage) const
 {
-    IMS_TRACE_I("HandleSilentReinviteByRetryAfter", 0, 0, 0);
+    IMS_TRACE_D("HandleSilentReinviteByRetryAfter", 0, 0, 0);
     IMS_SINT32 nRetryAfter = m_objContext.GetMessageUtils().GetHeaderValueInt(
             &objMessage, ISipHeader::RETRY_AFTER_ANY);
     if (nRetryAfter <= 0)
@@ -378,7 +378,7 @@ PRIVATE
 CallReasonInfo StartErrorHandler::HandleRegistrationRestorationOnIms3gppByPolicy(
         IN const IMessage& objMessage) const
 {
-    IMS_TRACE_I("HandleRegistrationRestorationOnIms3gppByPolicy", 0, 0, 0);
+    IMS_TRACE_D("HandleRegistrationRestorationOnIms3gppByPolicy", 0, 0, 0);
     if (m_objContext.GetConfigurationProxy().GetBoolean(ConfigVoice::
                         KEY_REGISTRATION_RESTORATION_FOR_INVITE_REQUIRE_HEADER_VALIDATION_BOOL))
     {
@@ -429,7 +429,7 @@ CallReasonInfo StartErrorHandler::HandleRegistrationRestorationOnIms3gppByPolicy
 PRIVATE
 CallReasonInfo StartErrorHandler::HandleRedirectionByContact(IN const IMessage& objMessage) const
 {
-    IMS_TRACE_I("HandleRedirectionByContact", 0, 0, 0);
+    IMS_TRACE_D("HandleRedirectionByContact", 0, 0, 0);
     AString strContact =
             m_objContext.GetMessageUtils().GetHeaderValue(&objMessage, ISipHeader::CONTACT_NORMAL);
     if (strContact.GetLength() > 0)
@@ -477,7 +477,7 @@ CallReasonInfo StartErrorHandler::HandleNonUeDetectableEmergencyCall(
 PRIVATE
 CallReasonInfo StartErrorHandler::HandleForbiddenByPolicy(IN const IMessage& objMessage) const
 {
-    IMS_TRACE_I("HandleForbiddenByPolicy", 0, 0, 0);
+    IMS_TRACE_D("HandleForbiddenByPolicy", 0, 0, 0);
     const IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(
             ConfigVoice::KEY_POLICY_FOR_403_RESPONSE_FOR_INVITE_INT);
     switch (nPolicy)
@@ -529,10 +529,10 @@ CallReasonInfo StartErrorHandler::HandleForbiddenByPolicy(IN const IMessage& obj
 PRIVATE
 CallReasonInfo StartErrorHandler::HandleTerminateByReasonPhrase(IN const IMessage& objMessage) const
 {
-    IMS_TRACE_I("HandleTerminateByReasonPhrase", 0, 0, 0);
+    IMS_TRACE_D("HandleTerminateByReasonPhrase", 0, 0, 0);
 
     const AString strNormalizedReasonPhrase = objMessage.GetReasonPhrase().SimplifyWsp();
-    if (strNormalizedReasonPhrase.MakeLower().Contains(REASON_TEXT_MAX_CALL_LIMIT_REACHED_VZW))
+    if (strNormalizedReasonPhrase.MakeLower().Contains(REASON_TEXT_MAX_CALL_LIMIT_REACHED_TYPE1))
     {
         return CallReasonInfo(GetDefaultReasonCode(m_objContext, objMessage.GetStatusCode()), -1,
                 strNormalizedReasonPhrase);
@@ -543,7 +543,7 @@ CallReasonInfo StartErrorHandler::HandleTerminateByReasonPhrase(IN const IMessag
 PRIVATE
 CallReasonInfo StartErrorHandler::HandleUssiCsfb(IN const IMessage& /*objMessage*/) const
 {
-    IMS_TRACE_I("HandleUssiCsfb", 0, 0, 0);
+    IMS_TRACE_D("HandleUssiCsfb", 0, 0, 0);
     if (m_objContext.GetCallInfo().bUssi && m_objContext.IsCsfbAvailable())
     {
         return CallReasonInfo(
@@ -555,7 +555,7 @@ CallReasonInfo StartErrorHandler::HandleUssiCsfb(IN const IMessage& /*objMessage
 PRIVATE
 CallReasonInfo StartErrorHandler::HandleBlockCallByTimer(IN const IMessage& objMessage) const
 {
-    IMS_TRACE_I("HandleBlockCallByTimer", 0, 0, 0);
+    IMS_TRACE_D("HandleBlockCallByTimer", 0, 0, 0);
     IMS_SINT32 nRetryAfter = m_objContext.GetMessageUtils().GetHeaderValueInt(
             &objMessage, ISipHeader::RETRY_AFTER_ANY);
     IMS_SINT32 nRetryAfterInMillis = nRetryAfter * 1000;
@@ -597,7 +597,7 @@ CallReasonInfo StartErrorHandler::HandleBlockCallByTimer(IN const IMessage& objM
 PRIVATE
 CallReasonInfo StartErrorHandler::HandleTriggerEpsfb(IN const IMessage& /*objMessage*/) const
 {
-    IMS_TRACE_I("HandleTriggerEpsfb", 0, 0, 0);
+    IMS_TRACE_D("HandleTriggerEpsfb", 0, 0, 0);
     if (m_objContext.GetService().IsNr() && EpsFallbackTrigger::IsEpsFbAvailable(m_objContext))
     {
         m_objContext.GetEpsFallbackTrigger().TriggerEpsFallback(
@@ -611,7 +611,7 @@ PRIVATE
 CallReasonInfo StartErrorHandler::HandleTerminateByResponseSource(
         IN const IMessage& objMessage) const
 {
-    IMS_TRACE_I("HandleTerminateByResponseSource", 0, 0, 0);
+    IMS_TRACE_D("HandleTerminateByResponseSource", 0, 0, 0);
     if (!m_objContext.GetMessageUtils().IsHeaderPresent(&objMessage, ISipHeader::RETRY_AFTER_SEC))
     {
         if (IsIpcanResourceUnavailable(objMessage))
@@ -629,7 +629,7 @@ PRIVATE
 CallReasonInfo StartErrorHandler::HandleTerminateByReasonHeaderText(
         IN const IMessage& objMessage) const
 {
-    IMS_TRACE_I("HandleTerminateByReasonHeaderText", 0, 0, 0);
+    IMS_TRACE_D("HandleTerminateByReasonHeaderText", 0, 0, 0);
     ReasonHeaderValue objValue =
             m_objContext.GetMessageUtils().GetCauseAndTextFromReasonHeader(&objMessage);
 
@@ -646,7 +646,7 @@ PRIVATE
 CallReasonInfo StartErrorHandler::HandleRegistrationToAlternatePcscf(
         IN const IMessage& objMessage) const
 {
-    IMS_TRACE_I("HandleRegistrationToAlternatePcscf", 0, 0, 0);
+    IMS_TRACE_D("HandleRegistrationToAlternatePcscf", 0, 0, 0);
 
     ControlAos(ImsAosControl::PCSCF_NEXT);
     return GetDefaultCallReasonInfo(m_objContext, objMessage);
@@ -656,7 +656,7 @@ PRIVATE
 CallReasonInfo StartErrorHandler::HandleSilentReinviteToAlternatePcscf(
         IN [[maybe_unused]] const IMessage& objMessage) const
 {
-    IMS_TRACE_I("HandleSilentReinviteToAlternatePcscf", 0, 0, 0);
+    IMS_TRACE_D("HandleSilentReinviteToAlternatePcscf", 0, 0, 0);
 
     if (HasActiveCalls())
     {
@@ -671,7 +671,7 @@ PRIVATE
 CallReasonInfo StartErrorHandler::HandleSilentReinviteToAlternatePcscfOnce(
         IN [[maybe_unused]] const IMessage& objMessage) const
 {
-    IMS_TRACE_I("HandleSilentReinviteToAlternatePcscfOnce", 0, 0, 0);
+    IMS_TRACE_D("HandleSilentReinviteToAlternatePcscfOnce", 0, 0, 0);
 
     if (HasActiveCalls())
     {
@@ -691,7 +691,7 @@ CallReasonInfo StartErrorHandler::HandleSilentReinviteToAlternatePcscfOnce(
 CallReasonInfo StartErrorHandler::HandleSilentReinviteWithAudio(
         IN [[maybe_unused]] const IMessage& objMessage) const
 {
-    IMS_TRACE_I("HandleSilentReinviteWithAudio", 0, 0, 0);
+    IMS_TRACE_D("HandleSilentReinviteWithAudio", 0, 0, 0);
     CallType eCallType = m_objContext.GetSession()->GetCallType();
     if (eCallType == CallType::VT || eCallType == CallType::RTT || eCallType == CallType::VIDEO_RTT)
     {
@@ -704,7 +704,7 @@ CallReasonInfo StartErrorHandler::HandleSilentReinviteWithAudio(
 PRIVATE
 CallReasonInfo StartErrorHandler::RegisterAfterMayPerformCsfb() const
 {
-    IMS_TRACE_I("RegisterAfterMayPerformCsfb", 0, 0, 0);
+    IMS_TRACE_D("RegisterAfterMayPerformCsfb", 0, 0, 0);
 
     if (m_objContext.IsCsfbAvailable())
     {

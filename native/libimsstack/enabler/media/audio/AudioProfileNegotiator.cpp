@@ -30,6 +30,16 @@
 #define RETURN_MODE_MATCHED  IMS_FALSE
 #define RETURN_MODE_SIMILAR  IMS_TRUE
 
+static const IMS_EVS_CONFIG IR92EVSConfigTable[AudioProfile::IMS_EVS_CONFIG_MAX][AudioProfile::IMS_EVS_CONFIG_MAX] =
+{
+    {IMS_EVS_CONFIG_INVALID, IMS_EVS_CONFIG_INVALID, IMS_EVS_CONFIG_INVALID, IMS_EVS_CONFIG_INVALID, IMS_EVS_CONFIG_INVALID, IMS_EVS_CONFIG_INVALID},
+    {IMS_EVS_CONFIG_INVALID, IMS_EVS_CONFIG_A1, IMS_EVS_CONFIG_A1, IMS_EVS_CONFIG_A1, IMS_EVS_CONFIG_A1, IMS_EVS_CONFIG_A1},
+    {IMS_EVS_CONFIG_INVALID, IMS_EVS_CONFIG_A1, IMS_EVS_CONFIG_A2, IMS_EVS_CONFIG_A1, IMS_EVS_CONFIG_A1, IMS_EVS_CONFIG_A2},
+    {IMS_EVS_CONFIG_INVALID, IMS_EVS_CONFIG_B0, IMS_EVS_CONFIG_B0, IMS_EVS_CONFIG_B0, IMS_EVS_CONFIG_B0, IMS_EVS_CONFIG_B0},
+    {IMS_EVS_CONFIG_INVALID, IMS_EVS_CONFIG_A1, IMS_EVS_CONFIG_A1, IMS_EVS_CONFIG_B1, IMS_EVS_CONFIG_B1, IMS_EVS_CONFIG_B1},
+    {IMS_EVS_CONFIG_INVALID, IMS_EVS_CONFIG_A1, IMS_EVS_CONFIG_A2, IMS_EVS_CONFIG_B1, IMS_EVS_CONFIG_B1, IMS_EVS_CONFIG_B2}
+};
+
 __IMS_TRACE_TAG_MEDIA__;
 
 PUBLIC AudioProfileNegotiator::AudioProfileNegotiator() :
@@ -70,10 +80,20 @@ IMS_BOOL AudioProfileNegotiator::Negotiate(IN AudioProfile* pLocalProfile,
 
         if (pNegotiatedPayload == IMS_NULL)
         {
-            IMS_TRACE_D("Negotiate(): null negotiated payload", 0, 0, 0);
-            ResetNegotiatedProfile(IMS_FALSE, pLocalProfile, pPeerProfile,
+            const bool bPeerPortIsZero = (pPeerProfile->GetDataPort() == 0);
+
+            ResetNegotiatedProfile(bPeerPortIsZero, pLocalProfile, pPeerProfile,
                     reinterpret_cast<MediaBaseProfile**>(&pNegotiatedProfile));
-            return IMS_FALSE;
+
+            if (bPeerPortIsZero)
+            {
+                IMS_TRACE_D("Negotiate(): null negotiated payload with peer port 0", 0, 0, 0);
+            }
+            else
+            {
+                IMS_TRACE_D("Negotiate(): null negotiated payload", 0, 0, 0);
+                return IMS_FALSE;
+            }
         }
 
         if (!NegotiateDirection(pLocalProfile, pPeerProfile, pNegotiatedProfile))
@@ -183,10 +203,34 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiateAudioPayload(IN AudioPro
         {
             if (FindMatchingEvsPayload(pLocalProfile, pPeerPayload))
             {
+                AudioProfile::Payload* pNextPeerPayload =
+                        (i + 1 < pPeerProfile->GetPayloadListSize()) ?
+                        pPeerProfile->GetPayloadAt(i + 1) :
+                        IMS_NULL;
+
                 pPeerProfile->SetNegotiatedPayloadIndex(i);
-                return NegotiateEvs(
+                IMS_EVS_CONFIG nNegotiatedEVSConfig = CompareEVSBwBrWithIR92(
+                        pLocalProfile, pPeerPayload, pNextPeerPayload);
+                AudioProfile::Payload* pNegotiatedPayload =
+                        NegotiateEvs(
                         pLocalProfile->GetPayloadAt(pLocalProfile->GetNegotiatedPayloadIndex()),
                         pPeerPayload, pNegotiatedProfile);
+                if (pNegotiatedPayload != IMS_NULL)
+                {
+                    auto pNegotiatedFmtp =
+                            std::static_pointer_cast<AudioProfile::EvsFmtp>(
+                            pNegotiatedPayload->GetFmtp());
+                    if (pNegotiatedFmtp != IMS_NULL &&
+                        nNegotiatedEVSConfig != IMS_EVS_CONFIG_INVALID)
+                    {
+                        pNegotiatedFmtp->SetBwList(
+                                AudioProfile::IR92EVSParams[nNegotiatedEVSConfig].bw);
+                        pNegotiatedFmtp->SetBrList(
+                                AudioProfile::IR92EVSParams[nNegotiatedEVSConfig].br);
+                    }
+                }
+
+                return pNegotiatedPayload;
             }
         }
         else if (pPeerPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("PCMU") ||
@@ -324,6 +368,160 @@ std::shared_ptr<AudioProfile::AmrFmtp> AudioProfileNegotiator::NegotiateAmrFmtp(
     }
 
     return pAmrFmtp;
+}
+
+PRIVATE
+IMS_EVS_CONFIG EVSMapToIR92Config(
+    IN std::shared_ptr<AudioProfile::EvsFmtp> pFmtp)
+{
+    if (pFmtp == IMS_NULL)
+    {
+        return IMS_EVS_CONFIG_INVALID;
+    }
+
+    const auto bw = pFmtp->GetBwList();
+    const auto br = pFmtp->GetBrList();
+
+    for (size_t i = 1; i < AudioProfile::IR92EVSParams.size(); ++i)
+    {
+        if (AudioProfile::IR92EVSParams[i].bw == bw && AudioProfile::IR92EVSParams[i].br == br)
+        {
+            return static_cast<IMS_EVS_CONFIG>(i);
+        }
+    }
+    IMS_TRACE_E(0, "EVSMapToIR92Config(): Not a recognized IR.92 config", 0, 0, 0);
+    return IMS_EVS_CONFIG_INVALID;
+}
+
+PRIVATE
+IMS_EVS_CONFIG AudioProfileNegotiator::CompareEVSBwBrWithIR92(IN AudioProfile* pLocalProfile,
+        IN AudioProfile::Payload* pPeerPayload, IN AudioProfile::Payload* pNextPeerPayload)
+{
+    IMS_EVS_CONFIG nLocalEVSConfig = IMS_EVS_CONFIG_INVALID;
+    IMS_EVS_CONFIG nNextLocalEVSConfig = IMS_EVS_CONFIG_INVALID;
+    IMS_EVS_CONFIG nPeerEVSConfig = IMS_EVS_CONFIG_INVALID;
+    IMS_EVS_CONFIG nNextPeerEVSConfig = IMS_EVS_CONFIG_INVALID;
+    IMS_EVS_CONFIG nNegotiatedEVSConfig = IMS_EVS_CONFIG_INVALID;
+    IMS_BOOL bIsValidIR92Config = IMS_FALSE;
+
+    if (pLocalProfile == IMS_NULL || pPeerPayload == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "CompareEVSBwBrWithIR92(): invalid arguments", 0, 0, 0);
+        return IMS_EVS_CONFIG_INVALID;
+    }
+
+    AudioProfile::Payload* pLocalPayload =
+            pLocalProfile->GetPayloadAt(pLocalProfile->GetNegotiatedPayloadIndex());
+    AudioProfile::Payload* pNextLocalPayload =
+            (pLocalProfile->GetNegotiatedPayloadIndex() + 1 < pLocalProfile->GetPayloadListSize()) ?
+            pLocalProfile->GetPayloadAt(pLocalProfile->GetNegotiatedPayloadIndex() + 1) :
+            IMS_NULL;
+
+    std::shared_ptr<AudioProfile::EvsFmtp> pLocalFmtp =
+            std::static_pointer_cast<AudioProfile::EvsFmtp>(pLocalPayload->GetFmtp());
+    nLocalEVSConfig = EVSMapToIR92Config(pLocalFmtp);
+
+    if (pNextLocalPayload != IMS_NULL &&
+        pNextLocalPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
+    {
+        std::shared_ptr<AudioProfile::EvsFmtp> pNextLocalFmtp =
+            std::static_pointer_cast<AudioProfile::EvsFmtp>(pNextLocalPayload->GetFmtp());
+        nNextLocalEVSConfig = EVSMapToIR92Config(pNextLocalFmtp);
+    }
+    else
+    {
+        IMS_TRACE_E(0, "CompareEVSBwBrWithIR92(): second local payload not a EVS config", 0, 0, 0);
+    }
+
+    std::shared_ptr<AudioProfile::EvsFmtp> pPeerFmtp =
+            std::static_pointer_cast<AudioProfile::EvsFmtp>(pPeerPayload->GetFmtp());
+    nPeerEVSConfig = EVSMapToIR92Config(pPeerFmtp);
+
+    if (pNextPeerPayload != IMS_NULL &&
+        pNextPeerPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
+    {
+        std::shared_ptr<AudioProfile::EvsFmtp> pNextPeerFmtp =
+            std::static_pointer_cast<AudioProfile::EvsFmtp>(pNextPeerPayload->GetFmtp());
+        nNextPeerEVSConfig = EVSMapToIR92Config(pNextPeerFmtp);
+    }
+    else
+    {
+        IMS_TRACE_E(0, "CompareEVSBwBrWithIR92(): second peer payload not a EVS config", 0, 0, 0);
+    }
+
+    if (nLocalEVSConfig == IMS_EVS_CONFIG_INVALID || nPeerEVSConfig == IMS_EVS_CONFIG_INVALID)
+    {
+        IMS_TRACE_E(0, "CompareEVSBwBrWithIR92(): not a valid IR92 EVS config", 0, 0, 0);
+        return IMS_EVS_CONFIG_INVALID;
+    }
+
+    //check local payload is valid EVS config
+    if (nLocalEVSConfig >= IMS_EVS_CONFIG_B0 && nLocalEVSConfig <= IMS_EVS_CONFIG_B2)
+    {
+        if (nNextLocalEVSConfig != IMS_EVS_CONFIG_INVALID)
+        {
+            if ((nLocalEVSConfig == IMS_EVS_CONFIG_B0 ||
+                nLocalEVSConfig == IMS_EVS_CONFIG_B1) && nNextLocalEVSConfig == IMS_EVS_CONFIG_A1)
+            {
+                IMS_TRACE_I("CompareEVSBwBrWithIR92(): Local is valid IR92 EVS config", 0, 0, 0);
+            }
+            else if (nLocalEVSConfig == IMS_EVS_CONFIG_B2 &&
+                     nNextLocalEVSConfig == IMS_EVS_CONFIG_A2)
+            {
+                IMS_TRACE_I("CompareEVSBwBrWithIR92(): Local is valid IR92 EVS config", 0, 0, 0);
+            }
+            else
+            {
+                IMS_TRACE_E(0, "CompareEVSBwBrWithIR92(): Invalid IR.92 EVS config combination", 0, 0, 0);
+                return IMS_EVS_CONFIG_INVALID;
+            }
+        }
+    }
+
+    //check peer payload is valid EVS config
+    if (nPeerEVSConfig >= IMS_EVS_CONFIG_B0 && nPeerEVSConfig <= IMS_EVS_CONFIG_B2)
+    {
+        if (nNextPeerEVSConfig != IMS_EVS_CONFIG_INVALID)
+        {
+            if ((nPeerEVSConfig == IMS_EVS_CONFIG_B0 || nPeerEVSConfig == IMS_EVS_CONFIG_B1) &&
+                nNextPeerEVSConfig == IMS_EVS_CONFIG_A1)
+            {
+                bIsValidIR92Config = IMS_TRUE;
+            }
+            else if (nPeerEVSConfig == IMS_EVS_CONFIG_B2 &&
+                nNextPeerEVSConfig == IMS_EVS_CONFIG_A2)
+            {
+                bIsValidIR92Config = IMS_TRUE;
+            }
+        }
+        else
+        {
+            IMS_TRACE_E(0, "CompareEVSBwBrWithIR92(): second config is not EVS", 0, 0, 0);
+            return IMS_EVS_CONFIG_INVALID;
+        }
+    }
+    else if (nPeerEVSConfig == IMS_EVS_CONFIG_A1 || nPeerEVSConfig == IMS_EVS_CONFIG_A2)
+    {
+        bIsValidIR92Config = IMS_TRUE;
+    }
+
+    if (bIsValidIR92Config)
+    {
+        nNegotiatedEVSConfig = IR92EVSConfigTable[nPeerEVSConfig][nLocalEVSConfig];
+
+        if (nNegotiatedEVSConfig != IMS_EVS_CONFIG_INVALID)
+        {
+            IMS_TRACE_D("CompareEVSBwBrWithIR92():NegotiatedEVSConfig[%d]",
+                nNegotiatedEVSConfig, 0, 0);
+            return nNegotiatedEVSConfig;
+        }
+    }
+    else
+    {
+        IMS_TRACE_E(0, "CompareEVSBwBrWithIR92(): Negotiated config is not valid", 0, 0, 0);
+    }
+
+    return IMS_EVS_CONFIG_INVALID;
 }
 
 PRIVATE

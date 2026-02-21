@@ -40,6 +40,7 @@ import com.android.imsstack.util.MessageExecutor;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.FileDescriptor;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -1164,6 +1165,16 @@ public class SystemInterface implements JniSystemListener {
                 case SystemConstants.REMOVE_IPSEC_SA:
                     handleSystemCallForIpSec(method, in, fd, out);
                     break;
+                case SystemConstants.LOG_SIP_MESSAGE: {
+                    int direction = in.readInt();
+                    byte[] bytes = in.createByteArray();
+                    if (bytes != null) {
+                        String sipMessage = new String(bytes, StandardCharsets.UTF_8);
+                        mSystemCall.logSipMessage(sipMessage, mSlotId, direction);
+                    }
+                    out.writeInt(1);
+                    break;
+                }
                 default:
                     handleSystemCallForOthers(method, out);
                     break;

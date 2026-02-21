@@ -471,7 +471,7 @@ public class Call implements Closeable {
     }
 
     private void logi(String s) {
-        ImsLog.i("[GII-CALL][" + mLogTag + "] " + s);
+        ImsLog.i("[ISIL][" + mLogTag + "] " + s);
     }
 
     /**

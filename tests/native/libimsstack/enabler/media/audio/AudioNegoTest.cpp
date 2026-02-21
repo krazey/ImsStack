@@ -37,6 +37,7 @@
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::ReturnRoundRobin;
 
 const IMS_SINT32 DEFAULT_SLOT_ID = 0;
 const AString LOCAL_IP = "127.0.0.1";
@@ -78,10 +79,13 @@ public:
     std::shared_ptr<MockAudioProfileNegotiator> m_pMockProfileNegotiator;
     std::shared_ptr<MockMediaProfileGenerator> m_pMockProfileGenerator;
     std::shared_ptr<AudioProfile> m_pBaseProfile;
+    MockMediaProfileFactory m_objMediaProfileFactory;
 
 protected:
     virtual void SetUp() override
     {
+        MockMediaProfileFactory::SetInstance(&m_objMediaProfileFactory);
+
         CreateEnvironment();
 
         PrepareAudioConfig();
@@ -207,7 +211,7 @@ protected:
                 .WillByDefault(Return(m_pAmrNbSubBundle.get()));
     }
 
-    virtual void TearDown() override {}
+    virtual void TearDown() override { MockMediaProfileFactory::SetInstance(IMS_NULL); }
 
     /**
      * @brief Helper method to simulate a successful negotiation and set up a negotiated profile.
@@ -223,9 +227,6 @@ protected:
         MockISessionDescriptor objSessionDescriptor;
         MockIMediaDescriptor objMediaDescriptor;
         MEDIA_DIRECTION eDirection;
-
-        MockMediaProfileFactory objMediaProfileFactory;
-        MockMediaProfileFactory::SetInstance(&objMediaProfileFactory);
 
         auto pNegoProfile = std::make_shared<AudioProfile>();
         AudioProfile::Payload* pPayload = new AudioProfile::Payload();
@@ -259,19 +260,14 @@ protected:
         auto pLocalProfile = std::make_shared<AudioProfile>();
         auto pPeerProfile = std::make_shared<AudioProfile>();
 
-        EXPECT_CALL(objMediaProfileFactory, CreateProfile(_, _))
-                .WillOnce(Return(pLocalProfile))
-                .WillOnce(Return(pPeerProfile))
-                .WillOnce(Return(pNegoProfile));
-
+        ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _))
+                .WillByDefault(ReturnRoundRobin({pLocalProfile, pPeerProfile, pNegoProfile}));
         ON_CALL(*m_pMockAudioSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
         ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _))
                 .WillByDefault(Return(IMS_TRUE));
 
         m_pAudioNego->NegotiateSdp(
                 STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
-
-        MockMediaProfileFactory::SetInstance(IMS_NULL);
     }
 };
 
@@ -279,34 +275,18 @@ TEST_F(AudioNegoTest, testIsMediaCodecFromSdpSupported)
 {
     MockIMediaDescriptor objAudioDescriptor;
     MockISessionDescriptor objSessionDescriptor;
-    MockMediaProfileFactory objMediaProfileFactory;
-    MockMediaProfileFactory::SetInstance(&objMediaProfileFactory);
 
+    ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _)).WillByDefault(Return(m_pBaseProfile));
     ON_CALL(*m_pMockAudioSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_FALSE));
-    EXPECT_EQ(
-            m_pAudioNego->IsMediaCodecFromSdpSupported(&objSessionDescriptor, &objAudioDescriptor),
-            IMS_FALSE);
 
-    auto pProfile = std::make_shared<AudioProfile>();
-    AudioProfile::Payload* pAmrPayload = new AudioProfile::Payload();
-    pAmrPayload->SetRtpMap(99, "AMR-WB", 16000, 1);
-    pAmrPayload->SetFmtp(std::make_shared<AudioProfile::AmrFmtp>());
-    pProfile->AddPayload(pAmrPayload);
-    pProfile->SetDataPort(10000);
+    EXPECT_FALSE(
+            m_pAudioNego->IsMediaCodecFromSdpSupported(&objSessionDescriptor, &objAudioDescriptor));
 
     ON_CALL(*m_pMockAudioSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
-    EXPECT_CALL(objMediaProfileFactory, CreateProfile(_, testing::NotNull()))
-            .WillOnce(Return(pProfile));
-    EXPECT_CALL(objMediaProfileFactory, CreateProfile(_, testing::IsNull()))
-            .WillOnce(Return(pProfile))
-            .WillOnce(Return(pProfile));
 
-    EXPECT_EQ(
-            m_pAudioNego->IsMediaCodecFromSdpSupported(&objSessionDescriptor, &objAudioDescriptor),
-            IMS_TRUE);
-
-    MockMediaProfileFactory::SetInstance(IMS_NULL);
+    EXPECT_TRUE(
+            m_pAudioNego->IsMediaCodecFromSdpSupported(&objSessionDescriptor, &objAudioDescriptor));
 }
 
 TEST_F(AudioNegoTest, testFormSdpInvalidObject)
@@ -314,20 +294,20 @@ TEST_F(AudioNegoTest, testFormSdpInvalidObject)
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
 
-    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _, _)).WillByDefault(Return(IMS_TRUE));
     EXPECT_FALSE(m_pAudioNego->FormSdp(
-            STATE_IDLE, nullptr, &objMediaDescriptor, MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
-    EXPECT_FALSE(m_pAudioNego->FormSdp(STATE_IDLE, &objSessionDescriptor, nullptr,
+            STATE_IDLE, IMS_NULL, &objMediaDescriptor, MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
+    EXPECT_FALSE(m_pAudioNego->FormSdp(STATE_IDLE, &objSessionDescriptor, IMS_NULL,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
 
-    EXPECT_FALSE(m_pAudioNego->FormSdp(STATE_NEGOTIATED, nullptr, &objMediaDescriptor,
+    EXPECT_FALSE(m_pAudioNego->FormSdp(STATE_NEGOTIATED, IMS_NULL, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
-    EXPECT_FALSE(m_pAudioNego->FormSdp(STATE_NEGOTIATED, &objSessionDescriptor, nullptr,
+    EXPECT_FALSE(m_pAudioNego->FormSdp(STATE_NEGOTIATED, &objSessionDescriptor, IMS_NULL,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
 
-    EXPECT_FALSE(m_pAudioNego->FormSdp(STATE_OFFER_RECEIVED, nullptr, &objMediaDescriptor,
+    EXPECT_FALSE(m_pAudioNego->FormSdp(STATE_OFFER_RECEIVED, IMS_NULL, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
-    EXPECT_FALSE(m_pAudioNego->FormSdp(STATE_OFFER_RECEIVED, &objSessionDescriptor, nullptr,
+    EXPECT_FALSE(m_pAudioNego->FormSdp(STATE_OFFER_RECEIVED, &objSessionDescriptor, IMS_NULL,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
 }
 
@@ -336,7 +316,9 @@ TEST_F(AudioNegoTest, testFormSdpOfferIdle)
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
 
-    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _)).WillByDefault(Return(m_pBaseProfile));
+    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _, _)).WillByDefault(Return(IMS_TRUE));
+
     EXPECT_TRUE(m_pAudioNego->FormSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
 }
@@ -346,7 +328,9 @@ TEST_F(AudioNegoTest, testFormSdpOfferNegotiated)
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
 
-    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _)).WillByDefault(Return(m_pBaseProfile));
+    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _, _)).WillByDefault(Return(IMS_TRUE));
+
     EXPECT_TRUE(m_pAudioNego->FormSdp(STATE_NEGOTIATED, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
 }
@@ -366,7 +350,9 @@ TEST_F(AudioNegoTest, testFormSdpReoffer)
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
 
-    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _)).WillByDefault(Return(m_pBaseProfile));
+    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _, _)).WillByDefault(Return(IMS_TRUE));
+
     EXPECT_TRUE(m_pAudioNego->FormSdp(STATE_NEGOTIATED, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_TRUE));
 }
@@ -376,11 +362,13 @@ TEST_F(AudioNegoTest, testFormSdpInvalid)
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
 
+    ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _)).WillByDefault(Return(m_pBaseProfile));
+
     EXPECT_FALSE(m_pAudioNego->FormSdp(STATE_OFFER_SENT, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
     EXPECT_FALSE(m_pAudioNego->FormSdp(
-            STATE_IDLE, nullptr, &objMediaDescriptor, MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
-    EXPECT_FALSE(m_pAudioNego->FormSdp(STATE_IDLE, &objSessionDescriptor, nullptr,
+            STATE_IDLE, IMS_NULL, &objMediaDescriptor, MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
+    EXPECT_FALSE(m_pAudioNego->FormSdp(STATE_IDLE, &objSessionDescriptor, IMS_NULL,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
     EXPECT_FALSE(m_pAudioNego->FormSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_INVALID, IMS_FALSE, IMS_FALSE));
@@ -391,7 +379,9 @@ TEST_F(AudioNegoTest, testFormSdpOfferIdleGenerateFail)
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
 
-    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _)).WillByDefault(Return(m_pBaseProfile));
+    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _, _)).WillByDefault(Return(IMS_FALSE));
+
     EXPECT_FALSE(m_pAudioNego->FormSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
 }
@@ -402,19 +392,19 @@ TEST_F(AudioNegoTest, testNegotiateSdpInvalidDescriptor)
     MockIMediaDescriptor objMediaDescriptor;
     MEDIA_DIRECTION eDirection;
 
-    m_pAudioNego->NegotiateSdp(STATE_IDLE, nullptr, &objMediaDescriptor, eDirection);
+    m_pAudioNego->NegotiateSdp(STATE_IDLE, IMS_NULL, &objMediaDescriptor, eDirection);
     EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
-    m_pAudioNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, nullptr, eDirection);
-    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
-
-    m_pAudioNego->NegotiateSdp(STATE_NEGOTIATED, nullptr, &objMediaDescriptor, eDirection);
-    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
-    m_pAudioNego->NegotiateSdp(STATE_NEGOTIATED, &objSessionDescriptor, nullptr, eDirection);
+    m_pAudioNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, IMS_NULL, eDirection);
     EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
 
-    m_pAudioNego->NegotiateSdp(STATE_OFFER_SENT, nullptr, &objMediaDescriptor, eDirection);
+    m_pAudioNego->NegotiateSdp(STATE_NEGOTIATED, IMS_NULL, &objMediaDescriptor, eDirection);
     EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
-    m_pAudioNego->NegotiateSdp(STATE_OFFER_SENT, &objSessionDescriptor, nullptr, eDirection);
+    m_pAudioNego->NegotiateSdp(STATE_NEGOTIATED, &objSessionDescriptor, IMS_NULL, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
+
+    m_pAudioNego->NegotiateSdp(STATE_OFFER_SENT, IMS_NULL, &objMediaDescriptor, eDirection);
+    EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
+    m_pAudioNego->NegotiateSdp(STATE_OFFER_SENT, &objSessionDescriptor, IMS_NULL, eDirection);
     EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
 }
 
@@ -423,6 +413,8 @@ TEST_F(AudioNegoTest, testNegotiateSdpIdleFail)
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
     MEDIA_DIRECTION eDirection;
+
+    ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _)).WillByDefault(Return(m_pBaseProfile));
     m_pAudioNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
     EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
 }
@@ -433,7 +425,9 @@ TEST_F(AudioNegoTest, testNegotiateSdpIdleParseFail)
     MockIMediaDescriptor objMediaDescriptor;
     MEDIA_DIRECTION eDirection;
 
+    ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _)).WillByDefault(Return(m_pBaseProfile));
     ON_CALL(*m_pMockAudioSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_FALSE));
+
     m_pAudioNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
     EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
 }
@@ -443,8 +437,11 @@ TEST_F(AudioNegoTest, testNegotiateSdpIdleNegotiateFail)
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
     MEDIA_DIRECTION eDirection;
+
+    ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _)).WillByDefault(Return(m_pBaseProfile));
     ON_CALL(*m_pMockAudioSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_FALSE));
+
     m_pAudioNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
     EXPECT_EQ(eDirection, MEDIA_DIRECTION_INVALID);
 }
@@ -456,9 +453,6 @@ TEST_F(AudioNegoTest, testNegotiateSdpIdleSuccessAndFormSdpOfferReceived)
     MEDIA_DIRECTION eDirection;
 
     // setup the valid OA model
-    MockMediaProfileFactory objMediaProfileFactory;
-    MockMediaProfileFactory::SetInstance(&objMediaProfileFactory);
-
     auto pLocalProfile = std::make_shared<AudioProfile>();
     AudioProfile::Payload* pAmrPayload = new AudioProfile::Payload();
     pAmrPayload->SetRtpMap(99, "AMR-WB", 16000, 1);
@@ -470,21 +464,16 @@ TEST_F(AudioNegoTest, testNegotiateSdpIdleSuccessAndFormSdpOfferReceived)
     auto pNegoProfile = std::make_shared<AudioProfile>(*pLocalProfile);
     pNegoProfile->SetDirection(MEDIA_DIRECTION_SEND);
 
-    EXPECT_CALL(objMediaProfileFactory, CreateProfile(_, _))
-            .WillOnce(Return(pLocalProfile))
-            .WillOnce(Return(pPeerProfile))
-            .WillOnce(Return(pNegoProfile));
-
+    ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _))
+            .WillByDefault(ReturnRoundRobin({pLocalProfile, pPeerProfile, pNegoProfile}));
     ON_CALL(*m_pMockAudioSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
     m_pAudioNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
     EXPECT_EQ(eDirection, MEDIA_DIRECTION_SEND);
 
-    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _, _)).WillByDefault(Return(IMS_TRUE));
     EXPECT_TRUE(m_pAudioNego->FormSdp(STATE_OFFER_RECEIVED, &objSessionDescriptor,
             &objMediaDescriptor, MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
-
-    MockMediaProfileFactory::SetInstance(IMS_NULL);
 }
 
 TEST_F(AudioNegoTest, testNegotiateSdpOfferSentFail)
@@ -501,8 +490,6 @@ TEST_F(AudioNegoTest, testNegotiateSdpOfferSentSuccess)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
-    MockMediaProfileFactory objMediaProfileFactory;
-    MockMediaProfileFactory::SetInstance(&objMediaProfileFactory);
 
     auto pLocalProfile = std::make_shared<AudioProfile>();
     AudioProfile::Payload* pAmrPayload = new AudioProfile::Payload();
@@ -515,24 +502,20 @@ TEST_F(AudioNegoTest, testNegotiateSdpOfferSentSuccess)
     auto pNegoProfile = std::make_shared<AudioProfile>(*pLocalProfile);
     pNegoProfile->SetDirection(MEDIA_DIRECTION_SEND);
 
-    EXPECT_CALL(objMediaProfileFactory, CreateProfile(_, _))
-            .WillOnce(Return(pLocalProfile))
-            .WillOnce(Return(pPeerProfile))
-            .WillOnce(Return(pNegoProfile));
+    ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _))
+            .WillByDefault(ReturnRoundRobin({pLocalProfile, pPeerProfile, pNegoProfile}));
+    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _, _)).WillByDefault(Return(IMS_TRUE));
 
-    // form offer in the idle state
-    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _)).WillByDefault(Return(IMS_TRUE));
     EXPECT_TRUE(m_pAudioNego->FormSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE));
 
     MEDIA_DIRECTION eDirection;
     ON_CALL(*m_pMockAudioSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
+
     m_pAudioNego->NegotiateSdp(
             STATE_OFFER_SENT, &objSessionDescriptor, &objMediaDescriptor, eDirection);
     EXPECT_EQ(eDirection, MEDIA_DIRECTION_SEND);
-
-    MockMediaProfileFactory::SetInstance(IMS_NULL);
 }
 
 TEST_F(AudioNegoTest, testNegotiateSdpOfferReceivedFail)
@@ -552,9 +535,6 @@ TEST_F(AudioNegoTest, testGetNegotiatedAudioCodecRateEvsChannelAware)
     MEDIA_DIRECTION nDirection;
 
     // Setup for a successful EVS negotiation
-    MockMediaProfileFactory objMediaProfileFactory;
-    MockMediaProfileFactory::SetInstance(&objMediaProfileFactory);
-
     auto pLocalProfile = std::make_shared<AudioProfile>();
     auto pPeerProfile = std::make_shared<AudioProfile>();
     auto pNegoProfile = std::make_shared<AudioProfile>();
@@ -566,11 +546,8 @@ TEST_F(AudioNegoTest, testGetNegotiatedAudioCodecRateEvsChannelAware)
     pEvsPayload->SetFmtp(pEvsFmtp);
     pNegoProfile->AddPayload(pEvsPayload);
 
-    EXPECT_CALL(objMediaProfileFactory, CreateProfile(_, _))
-            .WillOnce(Return(pLocalProfile))
-            .WillOnce(Return(pPeerProfile))
-            .WillOnce(Return(pNegoProfile));
-
+    ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _))
+            .WillByDefault(ReturnRoundRobin({pLocalProfile, pPeerProfile, pNegoProfile}));
     ON_CALL(*m_pMockAudioSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
 
@@ -592,14 +569,14 @@ TEST_F(AudioNegoTest, testGetNegotiatedAudioCodecRateEvsChannelAware)
 
     pEvsFmtp->SetChAwRecv(7);
     EXPECT_EQ(m_pAudioNego->GetNegotiatedAudioCodecRate(), AUDIO_CODEC_BITRATE_EVS_1320_CHA_7);
-
-    MockMediaProfileFactory::SetInstance(IMS_NULL);
 }
 
 TEST_F(AudioNegoTest, testCleanupIncompleteOaModels)
 {
     MockISessionDescriptor objSessionDescriptor;
     MockIMediaDescriptor objMediaDescriptor;
+
+    ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _)).WillByDefault(Return(m_pBaseProfile));
 
     m_pAudioNego->FormSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE);
@@ -613,26 +590,14 @@ TEST_F(AudioNegoTest, testIsMediaCodecFromSdpSupportedNegotiationFails)
 {
     MockIMediaDescriptor objAudioDescriptor;
     MockISessionDescriptor objSessionDescriptor;
-    MockMediaProfileFactory objMediaProfileFactory;
-    MockMediaProfileFactory::SetInstance(&objMediaProfileFactory);
 
-    auto pProfile = std::make_shared<AudioProfile>();
-    pProfile->SetDataPort(10000);
-
+    ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _)).WillByDefault(Return(m_pBaseProfile));
     ON_CALL(*m_pMockAudioSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
-    // Simulate negotiation failure
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_FALSE));
-
-    EXPECT_CALL(objMediaProfileFactory, CreateProfile(_, _))
-            .WillOnce(Return(pProfile))   // For local profile
-            .WillOnce(Return(pProfile))   // For peer profile
-            .WillOnce(Return(pProfile));  // For negotiated profile
 
     EXPECT_EQ(
             m_pAudioNego->IsMediaCodecFromSdpSupported(&objSessionDescriptor, &objAudioDescriptor),
             IMS_FALSE);
-
-    MockMediaProfileFactory::SetInstance(IMS_NULL);
 }
 
 TEST_F(AudioNegoTest, testFormAnswerWithValidNegoModel)
@@ -644,7 +609,8 @@ TEST_F(AudioNegoTest, testFormAnswerWithValidNegoModel)
     SetUpNegotiatedProfile("AMR-WB");
 
     // Now, test FormAnswer
-    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _, _)).WillByDefault(Return(IMS_TRUE));
+
     EXPECT_TRUE(m_pAudioNego->FormSdp(STATE_OFFER_RECEIVED, &objSessionDescriptor,
             &objMediaDescriptor, MEDIA_DIRECTION_SEND_RECEIVE, IMS_FALSE, IMS_FALSE));
 }
@@ -675,7 +641,9 @@ TEST_F(AudioNegoTest, testFormReofferReusePreviousProfile)
             .WillByDefault(Return(pMediaSessionConfig.get()));
     MediaSessionConfigFactory::SetInstance(pMediaSessionConfigFactory.get());
 
-    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _)).WillByDefault(Return(m_pBaseProfile));
+
     EXPECT_TRUE(m_pAudioNego->FormSdp(STATE_NEGOTIATED, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND_RECEIVE, IMS_FALSE, IMS_FALSE));
 
@@ -701,10 +669,10 @@ TEST_F(AudioNegoTest, testFormReofferWithFullCapability)
             .WillByDefault(Return(pMediaSessionConfig.get()));
     MediaSessionConfigFactory::SetInstance(pMediaSessionConfigFactory.get());
 
-    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _, _)).WillByDefault(Return(IMS_TRUE));
+
     EXPECT_TRUE(m_pAudioNego->FormSdp(STATE_NEGOTIATED, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND_RECEIVE, IMS_FALSE, IMS_FALSE));
-
     // The new local profile should be based on the base profile, not the previous negotiated one.
     EXPECT_EQ(m_pAudioNego->GetOaModelList().GetSize(), 2);
 
@@ -726,7 +694,8 @@ TEST_F(AudioNegoTest, testFormReofferWithPortZero)
     // Negotiate a profile first
     SetUpNegotiatedProfile("AMR-WB");
 
-    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _, _)).WillByDefault(Return(IMS_TRUE));
+
     EXPECT_TRUE(m_pAudioNego->FormSdp(STATE_NEGOTIATED, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND_RECEIVE, IMS_TRUE, IMS_FALSE));
 
@@ -748,7 +717,9 @@ TEST_F(AudioNegoTest, testFormReofferWithNoPreviousProfile)
             .WillByDefault(Return(pMediaSessionConfig.get()));
     MediaSessionConfigFactory::SetInstance(pMediaSessionConfigFactory.get());
 
-    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _)).WillByDefault(Return(m_pBaseProfile));
+    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _, _)).WillByDefault(Return(IMS_TRUE));
+
     EXPECT_TRUE(m_pAudioNego->FormSdp(STATE_NEGOTIATED, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND_RECEIVE, IMS_TRUE, IMS_FALSE));
 
@@ -765,7 +736,7 @@ TEST_F(AudioNegoTest, testFormReofferWithNoConfig)
     // Negotiate a profile first
     SetUpNegotiatedProfile("AMR-WB");
 
-    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _, _)).WillByDefault(Return(IMS_TRUE));
     EXPECT_TRUE(m_pAudioNego->FormSdp(STATE_NEGOTIATED, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND_RECEIVE, IMS_TRUE, IMS_FALSE));
 
@@ -834,7 +805,7 @@ TEST_F(AudioNegoTest, testHasNegotiatedDtmf)
 
     // Scenario 2: DTMF is negotiated
     auto pNegoProfile = static_cast<AudioProfile*>(m_pAudioNego->GetNegotiatedNegoProfile());
-    ASSERT_NE(pNegoProfile, nullptr);
+    ASSERT_NE(pNegoProfile, IMS_NULL);
 
     auto* pDtmfPayload = new AudioProfile::Payload();
     pDtmfPayload->SetRtpMap(TELEPHONE_EVENT_PAYLOAD, "telephone-event", 8000);
@@ -862,6 +833,8 @@ TEST_F(AudioNegoTest, testNegotiateAnswerSdpParseFails)
     MockIMediaDescriptor objMediaDescriptor;
     MEDIA_DIRECTION eDirection;
 
+    ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _)).WillByDefault(Return(m_pBaseProfile));
+
     // Create an initial offer to have an OA model
     m_pAudioNego->FormSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND_RECEIVE, IMS_FALSE, IMS_FALSE);
@@ -882,6 +855,8 @@ TEST_F(AudioNegoTest, testNegotiateAnswerNegotiationFails)
     MockIMediaDescriptor objMediaDescriptor;
     MEDIA_DIRECTION eDirection;
 
+    ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _)).WillByDefault(Return(m_pBaseProfile));
+
     // Create an initial offer
     m_pAudioNego->FormSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND_RECEIVE, IMS_FALSE, IMS_FALSE);
@@ -899,22 +874,26 @@ TEST_F(AudioNegoTest, testNegotiateAnswerNegotiationFails)
 
 TEST_F(AudioNegoTest, testCleanupIncompleteOaModelsRemovesIncomplete)
 {
-    MockISessionDescriptor objSessionDescriptorComplete;
-    MockIMediaDescriptor objMediaDescriptorComplete;
+    MockISessionDescriptor objSessionDescriptor;
+    MockIMediaDescriptor objMediaDescriptor;
 
-    m_pAudioNego->FormSdp(STATE_IDLE, &objSessionDescriptorComplete, &objMediaDescriptorComplete,
+    // 1. Create a complete OA model
+    SetUpNegotiatedProfile("AMR-WB");
+    EXPECT_EQ(m_pAudioNego->GetOaModelList().GetSize(), 1);
+    EXPECT_TRUE(m_pAudioNego->GetOaModelList().GetAt(0)->IsAllProfileExist());
+
+    // 2. Create an incomplete OA model (only pLocalProfile is set)
+    ON_CALL(*m_pMockAudioSdpGenerator, Generate(_, _, _, _)).WillByDefault(Return(IMS_TRUE));
+
+    m_pAudioNego->FormSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor,
             MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE);
-    auto pCompleteOaModel = m_pAudioNego->GetOaModelList().GetAt(0);
-
-    MockISessionDescriptor objSessionDescriptorIncomplete;
-    MockIMediaDescriptor objMediaDescriptorIncomplete;
-    m_pAudioNego->FormSdp(STATE_IDLE, &objSessionDescriptorIncomplete,
-            &objMediaDescriptorIncomplete, MEDIA_DIRECTION_SEND, IMS_FALSE, IMS_FALSE);
 
     EXPECT_EQ(m_pAudioNego->GetOaModelList().GetSize(), 2);
+    EXPECT_FALSE(m_pAudioNego->GetOaModelList().GetAt(1)->IsAllProfileExist());
 
     m_pAudioNego->CleanupIncompleteOaModels();
     EXPECT_EQ(m_pAudioNego->GetOaModelList().GetSize(), 1);
+    EXPECT_TRUE(m_pAudioNego->GetOaModelList().GetAt(0)->IsAllProfileExist());
 }
 
 TEST_F(AudioNegoTest, testGetNegotiatedPayloadValid)
@@ -923,6 +902,7 @@ TEST_F(AudioNegoTest, testGetNegotiatedPayloadValid)
     MockIMediaDescriptor objMediaDescriptor;
     MEDIA_DIRECTION eDirection;
 
+    ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _)).WillByDefault(Return(m_pBaseProfile));
     ON_CALL(*m_pMockAudioSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
     m_pAudioNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
@@ -935,6 +915,7 @@ TEST_F(AudioNegoTest, testGetNegotiatedRtpPortValid)
     MockIMediaDescriptor objMediaDescriptor;
     MEDIA_DIRECTION eDirection;
 
+    ON_CALL(m_objMediaProfileFactory, CreateProfile(_, _)).WillByDefault(Return(m_pBaseProfile));
     ON_CALL(*m_pMockAudioSdpParser, Parse(_, _, _)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*m_pMockProfileNegotiator, Negotiate(_, _, _, _, _)).WillByDefault(Return(IMS_TRUE));
     m_pAudioNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
@@ -952,12 +933,12 @@ TEST_F(AudioNegoTest, testGetters)
     EXPECT_EQ(m_pAudioNego->GetNegotiatedCodec(), AUDIO_CODEC_NONE);
     EXPECT_EQ(m_pAudioNego->GetLocalPort(), LOCAL_PORT);
     EXPECT_EQ(m_pAudioNego->GetNegotiatedBandwidth(), -1);
-    EXPECT_EQ(m_pAudioNego->GetNegotiatedPayload(), nullptr);
+    EXPECT_EQ(m_pAudioNego->GetNegotiatedPayload(), IMS_NULL);
     EXPECT_EQ(m_pAudioNego->GetNegotiatedDirection(), MEDIA_DIRECTION_INVALID);
     EXPECT_EQ(m_pAudioNego->GetNegotiatedRemoteAddress(), IpAddress::NONE);
-    EXPECT_EQ(m_pAudioNego->GetNegotiatedLocalProfile(), nullptr);
-    EXPECT_EQ(m_pAudioNego->GetNegotiatedNegoProfile(), nullptr);
-    EXPECT_EQ(m_pAudioNego->GetNegotiatedPeerProfile(), nullptr);
+    EXPECT_EQ(m_pAudioNego->GetNegotiatedLocalProfile(), IMS_NULL);
+    EXPECT_EQ(m_pAudioNego->GetNegotiatedNegoProfile(), IMS_NULL);
+    EXPECT_EQ(m_pAudioNego->GetNegotiatedPeerProfile(), IMS_NULL);
     EXPECT_EQ(m_pAudioNego->GetRemotePort(), MEDIA_PORT_INVALID);
 }
 

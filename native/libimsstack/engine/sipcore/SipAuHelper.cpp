@@ -339,7 +339,7 @@ IMS_BOOL SipAuHelperPrivate::AddChallenge(IN ISipGenericChallenge* piChallenge)
         return IMS_FALSE;
     }
 
-    IMS_TRACE_D("AuHelper :: AddChallenge - nonce (%s), nonce_count (%d), algorithm (%s)",
+    IMS_TRACE_D("AuHelper: AddChallenge - nonce(%s), nonce_count(%d), algorithm(%s)",
             pChallenge->GetNonce().GetStr(), pChallenge->GetNonceCount(),
             pChallenge->GetAlgorithm().GetStr());
 
@@ -414,9 +414,9 @@ IMS_BOOL SipAuHelperPrivate::AddCredential(IN const Credential& objCredential)
 
     if (pCredential != IMS_NULL)
     {
-        IMS_TRACE_D("The credential already exists - Realm (%s), UserName (%s), Password (xxx)",
-                SipDebug::GetCharA1(pCredential->GetRealm().GetStr(), 4),
-                SipDebug::GetCharA2(pCredential->GetUsername().GetStr(), 6), 0);
+        IMS_TRACE_D("Credential already exists: (%s|***|%s)",
+                SipDebug::GetCharA2(pCredential->GetUsername().GetStr(), 6),
+                SipDebug::GetCharA1(pCredential->GetRealm().GetStr(), 4), 0);
         return IMS_TRUE;
     }
 

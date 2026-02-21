@@ -26,13 +26,10 @@ PUBLIC
 MtcMediaProfileManager::MtcMediaProfileManager() :
         m_objMediaProfiles(ImsMap<const ISession*, MediaProfile*>())
 {
-    IMS_TRACE_D("+MtcMediaProfileManager", 0, 0, 0);
 }
 
 PUBLIC VIRTUAL MtcMediaProfileManager::~MtcMediaProfileManager()
 {
-    IMS_TRACE_D("~MtcMediaProfileManager", 0, 0, 0);
-
     for (IMS_UINT32 index = 0; index < m_objMediaProfiles.GetSize(); index++)
     {
         MediaProfile* pProfile = m_objMediaProfiles.GetValueAt(index);
@@ -49,8 +46,6 @@ void MtcMediaProfileManager::CreateMediaProfile(IN const ISession* piSession, IN
         IN IMS_BOOL bOriginalProfile, IN MEDIA_CONTENT_TYPE eMediaContents,
         IN IMediaSession* piMediaSession)
 {
-    IMS_TRACE_D("CreateMediaProfile", 0, 0, 0);
-
     if (!piSession)
     {
         return;
@@ -58,6 +53,7 @@ void MtcMediaProfileManager::CreateMediaProfile(IN const ISession* piSession, IN
 
     if (IsMediaProfilePresent(piSession))
     {
+        IMS_TRACE_D("IsMediaProfilePresent : The media profile already exists.", 0, 0, 0);
         return;
     }
 
@@ -101,8 +97,6 @@ PUBLIC
 void MtcMediaProfileManager::DestroyMediaProfile(
         IN const ISession* piSession, IN IMediaSession* piMediaSession)
 {
-    IMS_TRACE_D("DestroyMediaProfile", 0, 0, 0);
-
     // It can be called when the specific media profile should be destroyed.
     if (!IsMediaProfilePresent(piSession))
     {
@@ -266,14 +260,12 @@ IMS_BOOL MtcMediaProfileManager::IsPemSendInOtherEarlySession(IN const ISession*
         }
     }
 
-    IMS_TRACE_D("IsPemSendInOtherEarlySession : %d", bResult, 0, 0);
     return bResult;
 }
 
 PUBLIC
 void MtcMediaProfileManager::UpdateProfileForMediaActivation(IN const ISession* piActiveSession)
 {
-    IMS_TRACE_D("UpdateProfileForMediaActivation", 0, 0, 0);
     SetActive(piActiveSession, IMS_TRUE);
 
     for (IMS_UINT32 index = 0; index < m_objMediaProfiles.GetSize(); index++)
@@ -328,7 +320,6 @@ IMS_BOOL MtcMediaProfileManager::IsMediaProfilePresent(IN const ISession* piSess
     {
         if (m_objMediaProfiles.GetKeyAt(index) == piSession)
         {
-            IMS_TRACE_D("IsMediaProfilePresent : The media profile already exists.", 0, 0, 0);
             return IMS_TRUE;
         }
     }

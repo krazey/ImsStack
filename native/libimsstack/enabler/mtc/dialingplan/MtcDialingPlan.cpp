@@ -42,13 +42,11 @@ PUBLIC
 MtcDialingPlan::MtcDialingPlan() :
         m_pIdentityProxy(new ImsIdentityProxy())
 {
-    IMS_TRACE_I("+MtcDialingPlan", 0, 0, 0);
 }
 
 PUBLIC
 MtcDialingPlan::~MtcDialingPlan()
 {
-    IMS_TRACE_I("~MtcDialingPlan", 0, 0, 0);
     delete m_pIdentityProxy;
 }
 
@@ -108,8 +106,6 @@ AString MtcDialingPlan::GetConferenceFactoryUri(IN IMtcCallContext& objContext) 
 {
     AString strUri = objContext.GetConfigurationProxy().GetString(
             ConfigVoice::KEY_CONFERENCE_FACTORY_URI_STRING);
-
-    IMS_TRACE_D("GetConferenceFactoryUri uri from config[%s]", strUri.GetStr(), 0, 0);
 
     if (strUri.GetLength() <= 0)
     {

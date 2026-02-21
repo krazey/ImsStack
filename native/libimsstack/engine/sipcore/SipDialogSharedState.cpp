@@ -28,7 +28,7 @@ PUBLIC
 SipDialogSharedState::~SipDialogSharedState()
 {
 #ifdef __IMS_SIP_DEBUG__
-    IMS_TRACE_D("Destructor :: SipDialogSharedState (STATE: %d)", m_nSharedState, 0, 0);
+    IMS_TRACE_D("dtor: SipDialogSharedState (state=%d)", m_nSharedState, 0, 0);
 #endif
 }
 

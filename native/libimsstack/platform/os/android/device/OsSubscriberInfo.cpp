@@ -35,8 +35,8 @@ PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetPhoneNumber(OUT AString& strPhoneNu
 {
     PlatformContext::GetInstance()->GetSystem()->GetPhoneNumber(strPhoneNumber, GetSlotId());
 
-    IMS_TRACE_D("SubsInfo :: phoneNumber=%s",
-            IMS_UTIL_SYS_PROP_IS_DEBUG_MODE() ? strPhoneNumber.GetStr() : "xxx", 0, 0);
+    IMS_TRACE_D("SubsInfo: phoneNumber=%s",
+            IMS_UTIL_SYS_PROP_IS_DEBUG_MODE() ? strPhoneNumber.GetStr() : "***", 0, 0);
 
     return IMS_TRUE;
 }
@@ -63,7 +63,7 @@ PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetNetworkCountryIso(OUT AString& strC
 {
     PlatformContext::GetInstance()->GetSystem()->GetNetworkCountryIso(strCountry, GetSlotId());
 
-    IMS_TRACE_D("SubsInfo :: networkCountry=%s", strCountry.GetStr(), 0, 0);
+    IMS_TRACE_D("SubsInfo: networkCountry=%s", strCountry.GetStr(), 0, 0);
 
     return IMS_TRUE;
 }
@@ -72,8 +72,8 @@ PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetSubscriberId(OUT AString& strImsi) 
 {
     PlatformContext::GetInstance()->GetSystem()->GetSubscriberId(strImsi, GetSlotId());
 
-    IMS_TRACE_D("SubsInfo :: subscriberId(imsi)=%s",
-            IMS_UTIL_SYS_PROP_IS_DEBUG_MODE() ? strImsi.GetStr() : "xxx", 0, 0);
+    IMS_TRACE_D("SubsInfo: subscriberId(imsi)=%s",
+            IMS_UTIL_SYS_PROP_IS_DEBUG_MODE() ? strImsi.GetStr() : "***", 0, 0);
 
     return IMS_TRUE;
 }
@@ -84,7 +84,7 @@ PUBLIC VIRTUAL IMS_BOOL OsSubscriberInfo::GetPreference(
     PlatformContext::GetInstance()->GetSystem()->GetPreference(
             strFileName, strKey, GetSlotId(), strValue);
 
-    IMS_TRACE_D("SubsInfo :: preference(get)=%s", strValue.GetStr(), 0, 0);
+    IMS_TRACE_D("SubsInfo: preference(get)=%s", strValue.GetStr(), 0, 0);
 
     return IMS_TRUE;
 }

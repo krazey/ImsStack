@@ -16,11 +16,14 @@
 
 #include <gtest/gtest.h>
 
+#include "SdpAttribute.h"
+
 #include "video/VideoSdpGenerator.h"
 #include "video/VideoProfile.h"
 
 #include "core/MockISessionDescriptor.h"
 #include "core/media/MockIMediaDescriptor.h"
+#include "config/MockMediaSessionConfig.h"
 
 using ::testing::_;
 using ::testing::Return;
@@ -223,6 +226,7 @@ public:
     std::unique_ptr<VideoProfile> m_pProfile;
     std::unique_ptr<MockISessionDescriptor> m_pSessionDescriptor;
     std::unique_ptr<MockIMediaDescriptor> m_pDescriptor;
+    std::unique_ptr<MockMediaSessionConfig> m_pMockMediaSessionConfig;
 
 protected:
     virtual void SetUp() override
@@ -230,6 +234,7 @@ protected:
         m_pProfile = std::make_unique<VideoProfile>();
         m_pDescriptor = std::make_unique<MockIMediaDescriptor>();
         m_pSessionDescriptor = std::make_unique<MockISessionDescriptor>();
+        m_pMockMediaSessionConfig = std::make_unique<MockMediaSessionConfig>();
     }
 
     virtual void TearDown() override {}
@@ -324,5 +329,34 @@ TEST_F(VideoSdpGeneratorTest, TestGenerateOmitAttributes)
     EXPECT_CALL(*m_pDescriptor, SetMediaDescription(_, _, _, _)).Times(1);
     EXPECT_CALL(*m_pDescriptor, SetMediaFormat(_)).Times(0);
 
-    EXPECT_TRUE(Generate(m_pSessionDescriptor.get(), m_pDescriptor.get(), m_pProfile.get()));
+    EXPECT_TRUE(Generate(m_pSessionDescriptor.get(), m_pDescriptor.get(), m_pProfile.get(),
+            m_pMockMediaSessionConfig.get()));
+}
+
+TEST_F(VideoSdpGeneratorTest, TestSetSdpMediaIpAddress)
+{
+    // Arrange
+    const AString kTestIpAddress = "192.168.1.100";
+    m_pProfile->SetIpAddress(IpAddress(kTestIpAddress));
+
+    // Case 1: IsAddCLineForEachMediaEnabled() returns true.
+    // SetConnectionAddress should be called with the profile's IP address.
+    EXPECT_CALL(*m_pMockMediaSessionConfig, IsAddCLineForEachMediaEnabled())
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(*m_pDescriptor, SetConnectionAddress(AString(kTestIpAddress))).Times(1);
+
+    // Act
+    GenerateCommonAttributes(m_pSessionDescriptor.get(), m_pDescriptor.get(), m_pProfile.get(),
+            m_pMockMediaSessionConfig.get());
+
+    // Case 2: IsAddCLineForEachMediaEnabled() returns false.
+    // SetConnectionAddress should NOT be called.
+    testing::Mock::VerifyAndClearExpectations(m_pDescriptor.get());
+    EXPECT_CALL(*m_pMockMediaSessionConfig, IsAddCLineForEachMediaEnabled())
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(*m_pDescriptor, SetConnectionAddress(_)).Times(0);
+
+    // Act
+    GenerateCommonAttributes(m_pSessionDescriptor.get(), m_pDescriptor.get(), m_pProfile.get(),
+            m_pMockMediaSessionConfig.get());
 }

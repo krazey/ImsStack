@@ -27,6 +27,46 @@ import org.junit.runner.RunWith;
 public class IAosInfoTest {
 
     @Test
+    public void roamingPreferredVoiceNetwork_getValue_shouldReturnCorrectValues() {
+        assertEquals(0, IAosInfo.RoamingPreferredVoiceNetwork.CELLULAR.getValue());
+        assertEquals(1, IAosInfo.RoamingPreferredVoiceNetwork.WIFI.getValue());
+    }
+
+    @Test
+    public void serviceSetting_getValue_shouldReturnCorrectValues() {
+        assertEquals(0, IAosInfo.ServiceSetting.OFF.getValue());
+        assertEquals(1, IAosInfo.ServiceSetting.ON.getValue());
+        assertEquals(2, IAosInfo.ServiceSetting.PRESENTITY.getValue());
+    }
+
+    @Test
+    public void locationInfo_getValue_shouldReturnCorrectValues() {
+        assertEquals(1, IAosInfo.LocationInfo.FIXED.getValue());
+        assertEquals(2, IAosInfo.LocationInfo.COUNTRY_CHANGED.getValue());
+        assertEquals(3, IAosInfo.LocationInfo.CHANGED.getValue());
+        assertEquals(4, IAosInfo.LocationInfo.AVAILABLE.getValue());
+    }
+
+    @Test
+    public void phoneNumberState_getValue_shouldReturnCorrectValues() {
+        assertEquals(0, IAosInfo.PhoneNumberState.SIM_LOADED.getValue());
+        assertEquals(1, IAosInfo.PhoneNumberState.RETRY_SUCCESS.getValue());
+        assertEquals(2, IAosInfo.PhoneNumberState.RETRY_FAILURE.getValue());
+    }
+
+    @Test
+    public void crossSimStatus_getValue_shouldReturnCorrectValues() {
+        assertEquals(0, IAosInfo.CrossSimStatus.DATA_DISCONNECTED.getValue());
+        assertEquals(1, IAosInfo.CrossSimStatus.DATA_CONNECTED.getValue());
+    }
+
+    @Test
+    public void emergencyCallbackModeType_getValue_shouldReturnCorrectValues() {
+        assertEquals(1, IAosInfo.EmergencyCallbackModeType.CALL.getValue());
+        assertEquals(2, IAosInfo.EmergencyCallbackModeType.SMS.getValue());
+    }
+
+    @Test
     public void emergencyCallbackModeState_getValue_shouldReturnCorrectValues() {
         assertEquals(0, IAosInfo.EmergencyCallbackModeState.STOP.getValue());
         assertEquals(1, IAosInfo.EmergencyCallbackModeState.START.getValue());

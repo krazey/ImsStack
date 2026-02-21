@@ -19,12 +19,12 @@ import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.imsstack.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class IpSecSaParameter implements Parcelable {
-    private static final boolean DBG = true;
-
     /** Deprecated */
     public static final int INTEGRITY_ALGORITHM_HMAC_MD5_96 = 0;
     public static final int INTEGRITY_ALGORITHM_HMAC_SHA_1_96 = 1;
@@ -121,13 +121,13 @@ public class IpSecSaParameter implements Parcelable {
         sb.append(", securityProtocol=");
         sb.append(mSecurityProtocol);
         sb.append(", integrityAlgorithm=");
-        sb.append(mIntegrityAlgorithm);
+        sb.append(integrityAlgorithmToString(mIntegrityAlgorithm));
         sb.append(", ik=");
-        sb.append(DBG ? toHexString(mIk) : "xxx");
+        sb.append(Log.pii(toHexString(mIk)));
         sb.append(", encryptionAlgorithm=");
-        sb.append(mEncryptionAlgorithm);
+        sb.append(encryptionAlgorithmToString(mEncryptionAlgorithm));
         sb.append(", ck=");
-        sb.append(DBG ? toHexString(mCk) : "xxx");
+        sb.append(Log.pii(toHexString(mCk)));
 
         sb.append(", policys=" + mPolicys.size());
 
@@ -191,6 +191,28 @@ public class IpSecSaParameter implements Parcelable {
             return new IpSecSaParameter[size];
         }
     };
+
+    /** Returns a string represented by the given encryption algorithm. */
+    public static String encryptionAlgorithmToString(int algorithm) {
+        return switch(algorithm) {
+            case ENCRYPTION_ALGORITHM_AES_CBC -> "aes-cbc";
+            case ENCRYPTION_ALGORITHM_NULL -> "null";
+            case ENCRYPTION_ALGORITHM_AES_GCM -> "aes-gcm";
+            case ENCRYPTION_ALGORITHM_DES_EDE3_CBC -> "des-ede3-cbc";
+            default -> "unknown";
+        };
+    }
+
+    /** Returns a string represented by the given integrity algorithm. */
+    public static String integrityAlgorithmToString(int algorithm) {
+        return switch(algorithm) {
+            case INTEGRITY_ALGORITHM_HMAC_SHA_1_96 -> "hmac-sha-1-96";
+            case INTEGRITY_ALGORITHM_HMAC_MD5_96 -> "hmac-md5-96";
+            case INTEGRITY_ALGORITHM_NULL -> "null";
+            case INTEGRITY_ALGORITHM_AES_GMAC -> "aes-gmac";
+            default -> "unknown";
+        };
+    }
 
     private static String toHexString(byte[] data) {
         StringBuilder sb = new StringBuilder();

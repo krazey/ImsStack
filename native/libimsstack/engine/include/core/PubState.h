@@ -16,9 +16,10 @@
 #ifndef PUB_STATE_H_
 #define PUB_STATE_H_
 
-#include "ISipMessage.h"
 #include "SipHeaderProperty.h"
 #include "util/EventPackage.h"
+
+class ISipMessage;
 
 /**
  * @brief This class defines a state & behavior for a published event state.

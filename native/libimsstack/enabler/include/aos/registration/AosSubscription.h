@@ -20,6 +20,7 @@
 #include "ServicePhoneInfo.h"
 #include "ITimer.h"
 #include "IRegSubscriptionListener.h"
+#include "SipAddress.h"
 
 #include "interface/IAosTransaction.h"
 

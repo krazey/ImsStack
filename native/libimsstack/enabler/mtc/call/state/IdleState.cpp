@@ -22,6 +22,7 @@
 #include "ISession.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
+#include "ImsAosParameter.h"
 #include "ImsVector.h"
 #include "IuMtcService.h"
 #include "MediaDef.h"
@@ -84,6 +85,13 @@ PUBLIC VIRTUAL IdleState::~IdleState() {}
 
 PUBLIC VIRTUAL void IdleState::OnEnter()
 {
+    if (!m_objContext.GetCallInfo().IsEmergency())
+    {
+        if (m_objContext.GetCallInfo().ePeerType == PeerType::MO)
+        {
+            StartTimer(TIMER_MO_CALL_SETUP_WATCHDOG);
+        }
+    }
     PerformPreRadioCheckForMo();
 }
 
@@ -335,8 +343,17 @@ PUBLIC VIRTUAL CallStateName IdleState::OnTimerExpired(IN IMS_SINT32 nType)
 {
     switch (nType)
     {
+        case TIMER_MO_CALL_SETUP_WATCHDOG:
+        {
+            IMS_TRACE_E(0, "call setup watchdog timer expired.", 0, 0, 0);
+            const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+            if (pAosConnector)
+            {
+                pAosConnector->Control(ImsAosControl::REGISTER_REINITIATE);
+            }
+            return Terminate(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR));
+        }
         case TIMER_MT_ALERTING:
-            IMS_TRACE_D("TIMER_MT_ALERTING expires in IdleState", 0, 0, 0);
             return RejectIncomingAndToTerminating(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR));
         default:
             break;
@@ -373,8 +390,6 @@ PROTECTED VIRTUAL const CallReasonInfo IdleState::GetCallReasonInfoByAosDisconne
 
 PUBLIC VIRTUAL CallStateName IdleState::HandleIncomingUssi(IN ISession* piSession)
 {
-    IMS_TRACE_D("HandleIncomingUssi", 0, 0, 0);
-
     m_objContext.GetCallInfo().bUssi = IMS_TRUE;
     m_objContext.CreateSession(piSession);
 
@@ -403,8 +418,6 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncomingUssi(IN ISession* piSessio
 
 PUBLIC VIRTUAL CallStateName IdleState::OnUssiAttached()
 {
-    IMS_TRACE_D("OnUssiAttached", 0, 0, 0);
-
     ISession* piSession = GetISession();
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
@@ -449,6 +462,11 @@ CallStateName IdleState::ContinueStart(IN const MediaInfo& objMediaInfo)
 
     if (m_objContext.GetSession()->Start() == IMS_FAILURE)
     {
+        if (MaybeStopEmergencyRegistration())
+        {
+            return GetStateName();
+        }
+
         m_objContext.GetUiNotifier().SendStartFailed(GetInternalErrorReason());
         return CallStateName::TERMINATING;
     }
@@ -712,4 +730,27 @@ void IdleState::PerformPreRadioCheckForMo()
                 m_objContext.GetService().GetRatType(), objCallInfo.bUssi,
                 m_objContext.GetCallKey());
     }
+}
+
+PRIVATE
+IMS_BOOL IdleState::MaybeStopEmergencyRegistration()
+{
+    if (!m_objContext.GetService().IsEmergency())
+    {
+        return IMS_FALSE;
+    }
+
+    const IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
+    if (!pAosConnector)
+    {
+        return IMS_FALSE;
+    }
+
+    // Clear the current emergency registration.
+    // By stopping the service, AoS will emit a DISCONNECTED event.
+    // This event, under specific conditions triggers the retry mechanism.
+    // IEmergencyCallFailureListener::onEmergencyCallFailedByAlreadyOpenedServiceClosed
+    // will be invoked, prompting a new emergency registration attempt on the currently selected
+    // RAT by Telephony.
+    return pAosConnector->Control(ImsAosControl::REGISTER_STOP);
 }

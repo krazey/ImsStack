@@ -17,6 +17,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "ServiceEvent.h"
+
 #include "AosCounter.h"
 #include "AosReason.h"
 #include "interface/IAosAppContext.h"
@@ -328,6 +330,20 @@ TEST_F(AosServiceAvailableTest, ShouldNotifyToListenersWhenRefreshServiceAvailab
     // THEN : GIVEN conditions should be met.
 }
 
+TEST_F(AosServiceAvailableTest, ShouldReturnFalseWhenStartToCheckNetworkConnection)
+{
+    IMS_BOOL bResult = m_pAosServiceAvailable->StartToCheckNetworkConnection();
+
+    EXPECT_EQ(bResult, IMS_FALSE);
+}
+
+TEST_F(AosServiceAvailableTest, ShouldReturnFalseWhenStopToCheckNetworkConnection)
+{
+    IMS_BOOL bResult = m_pAosServiceAvailable->StopToCheckNetworkConnection();
+
+    EXPECT_EQ(bResult, IMS_FALSE);
+}
+
 TEST_F(AosServiceAvailableTest, SucceedsInvokeValidFunctionWhenHandleEvent)
 {
     // GIVEN
@@ -367,6 +383,31 @@ TEST_F(AosServiceAvailableTest, FailsInvokeFunctionWhenHandleEventWithInvalid)
     EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleRoamingChanged"), 0);
     EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleLocationInfoChanged"), 0);
     EXPECT_EQ(m_pAosServiceAvailable->GetInvokedCount("HandleWifiConnectionChanged"), 0);
+}
+
+TEST_F(AosServiceAvailableTest, ShouldUpdateRoamingStateToTrueWhenHandleRoamingChangedToOn)
+{
+    // GIVEN
+    ASSERT_EQ(m_pAosServiceAvailable->IsRoaming(), IMS_FALSE);
+
+    // WHEN
+    m_pAosServiceAvailable->HandleRoamingChanged(IMS_ROAMING_STATE_ON);
+
+    // THEN
+    EXPECT_EQ(m_pAosServiceAvailable->IsRoaming(), IMS_TRUE);
+}
+
+TEST_F(AosServiceAvailableTest, ShouldUpdateRoamingStateToFalseWhenHandleRoamingChangedToOff)
+{
+    // GIVEN
+    m_pAosServiceAvailable->HandleRoamingChanged(IMS_ROAMING_STATE_ON);
+    ASSERT_EQ(m_pAosServiceAvailable->IsRoaming(), IMS_TRUE);
+
+    // WHEN
+    m_pAosServiceAvailable->HandleRoamingChanged(IMS_ROAMING_STATE_OFF);
+
+    // THEN
+    EXPECT_EQ(m_pAosServiceAvailable->IsRoaming(), IMS_FALSE);
 }
 
 TEST_F(AosServiceAvailableTest, SucceedsNotifyToListenersWhenRequestCommand)

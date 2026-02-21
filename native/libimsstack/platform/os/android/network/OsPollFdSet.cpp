@@ -101,7 +101,7 @@ pollfd* PollFds::AddFd(IN IMS_SINT32 nFd)
 {
     if (m_nCount == MAX_POLL_SIZE)
     {
-        IMS_TRACE_E(0, "PollFds :: No empty pollfd", 0, 0, 0);
+        IMS_TRACE_E(0, "PollFds: No empty pollfd", 0, 0, 0);
         return IMS_NULL;
     }
 
@@ -110,7 +110,7 @@ pollfd* PollFds::AddFd(IN IMS_SINT32 nFd)
     m_astFd[m_nCount].revents = 0;
     ++m_nCount;
 
-    IMS_TRACE_D("PollFds :: AddFd() - fd=%d, count=%d", nFd, m_nCount, 0);
+    IMS_TRACE_D("PollFds: AddFd - fd=%d, count=%d", nFd, m_nCount, 0);
 
     return &(m_astFd[m_nCount - 1]);
 }
@@ -157,7 +157,7 @@ void PollFds::RemoveFd(IN IMS_SINT32 nFd)
 
         --m_nCount;
 
-        IMS_TRACE_D("PollFds :: RemoveFd() - fd=%d, count=%d", nFd, m_nCount, 0);
+        IMS_TRACE_D("PollFds: RemoveFd - fd=%d, count=%d", nFd, m_nCount, 0);
     }
 }
 
@@ -394,7 +394,7 @@ PUBLIC VIRTUAL IMS_SINT32 OsPollFdSet::SetEvent(IN IMS_SINT32 nFd, IN IMS_SINT32
 {
     if (nFd < 0)
     {
-        IMS_TRACE_E(0, "PollFdSet :: Invalid fd=%d", nFd, 0, 0);
+        IMS_TRACE_E(0, "PollFdSet: Invalid fd=%d", nFd, 0, 0);
         return 0;
     }
 
@@ -405,7 +405,9 @@ PUBLIC VIRTUAL IMS_SINT32 OsPollFdSet::SetEvent(IN IMS_SINT32 nFd, IN IMS_SINT32
         // Ignores the initial CLOSE event for TCP sockets
         if (((nEvent & EVENT_TCP) != 0) && ((nEvent & EVENT_ALL) == EVENT_EXCEPT))
         {
-            IMS_TRACE_D("PollFdSet :: TCP CLOSE event will be set later; fd=%d", nFd, 0, 0);
+#ifdef __IMS_DEBUG__
+            IMS_TRACE_D("PollFdSet: TCP CLOSE event will be set later; fd=%d", nFd, 0, 0);
+#endif
             return 0;
         }
 
@@ -419,7 +421,7 @@ PUBLIC VIRTUAL IMS_SINT32 OsPollFdSet::SetEvent(IN IMS_SINT32 nFd, IN IMS_SINT32
 
         if (pstFd == IMS_NULL)
         {
-            IMS_TRACE_E(0, "PollFdSet :: AddFd() failed; fd=%d", nFd, 0, 0);
+            IMS_TRACE_E(0, "PollFdSet: AddFd failed; fd=%d", nFd, 0, 0);
             return 0;
         }
     }

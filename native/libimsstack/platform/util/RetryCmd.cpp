@@ -15,21 +15,12 @@
  */
 #include "IRetryCmdListener.h"
 #include "RetryCmd.h"
-#include "ServiceMemory.h"
-#include "ServiceTrace.h"
-
-__IMS_TRACE_TAG_BASE__;
 
 PUBLIC
 RetryCmd::RetryCmd(IN IMS_UINT32 nCmdId /*= 0*/) :
         m_nCmdId(nCmdId),
         m_piListener(IMS_NULL)
 {
-}
-
-PUBLIC VIRTUAL RetryCmd::~RetryCmd()
-{
-    IMS_TRACE_D("Destructor :: RetryCmd (%d)", m_nCmdId, 0, 0);
 }
 
 /**

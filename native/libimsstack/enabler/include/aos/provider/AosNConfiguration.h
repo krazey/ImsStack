@@ -125,6 +125,7 @@ public:
     IMS_BOOL IsReleaseEPdnOfUnavailableNetwork() const override;
     IMS_BOOL IsReleaseEPdnUponECallEndIfEAttach() const override;
     IMS_BOOL IsReleaseEPdnUponECallEndInFakeMode() const override;
+    IMS_BOOL ShouldDisableN1ModeOnImsPduEstablishFailure() const override;
     IMS_BOOL ShouldKeepExistingPcscfOnPcscfChangeDuringTheCall() const override;
 
     IMS_SINT32 GetSipTimerT1() override;

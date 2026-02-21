@@ -16,7 +16,10 @@
 #ifndef REG_BINDING_PROXY_H_
 #define REG_BINDING_PROXY_H_
 
-#include "AString.h"
+#include "ImsTypeDef.h"
+
+class AString;
+class AStringArray;
 
 class CallerCapability;
 class IRegContact;

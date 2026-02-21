@@ -19,14 +19,17 @@
 #include <IJniMedia.h>
 #include <MediaNetworkConnectionWatcher.h>
 #include <ServiceConfig.h>
+#include <audio/AudioSession.h>
 #include <audio/AudioController.h>
 #include <config/AudioConfiguration.h>
 
+#include <config/MockAudioConfiguration.h>
 #include <MockIMediaSessionListener.h>
 #include <audio/MockAudioNego.h>
 
 using namespace android::telephony::imsmedia;
 using ::testing::_;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -50,13 +53,32 @@ public:
     {
         return AudioController::IsAudioConfigChanged(pAudioConfig);
     }
+
+    AudioSession* FindAudioSession(IN IMS_UINTP nNegoId = UNDEFINED_NEGO_ID)
+    {
+        return AudioController::FindAudioSession(nNegoId);
+    }
+};
+
+class MockAudioSession : public AudioSession
+{
+public:
+    MOCK_METHOD(void, SetMediaPemType, (MEDIA_PEM_TYPE ePemType), (override));
+    MOCK_METHOD(MEDIA_PEM_TYPE, GetPemType, (), (override));
+    MOCK_METHOD(IMS_BOOL, UpdateDirectionToInactiveByPem, (), (override));
+};
+
+class MockAudioController : public FakeAudioController
+{
+public:
+    MOCK_METHOD(IMS_BOOL, ModifySession, (IN IMS_UINTP nNegoId), (override));
 };
 
 class AudioControllerTest : public ::testing::Test
 {
 public:
     std::unique_ptr<FakeAudioController> m_pController;
-    std::unique_ptr<AudioConfiguration> m_pConfig;
+    std::unique_ptr<NiceMock<MockAudioConfiguration>> m_pConfig;
     FakeIMediaSessionListener m_objFakeListener;
     MockIMediaSessionListener m_objListener;
     std::shared_ptr<MockAudioNego> m_pAudioNego;
@@ -67,10 +89,11 @@ public:
     IpAddress m_objIpAddr;
 
 protected:
+    AudioConfiguration m_objAudioConfig;
     virtual void SetUp() override
     {
         m_pController = std::make_unique<FakeAudioController>();
-        m_pConfig = std::make_unique<AudioConfiguration>(MEDIA_TYPE_AUDIO);
+        m_pConfig = std::make_unique<NiceMock<MockAudioConfiguration>>(MEDIA_TYPE_AUDIO);
         m_pConfig->Create(ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID));
         m_pAudioNego = std::make_shared<MockAudioNego>(DEFAULT_SLOT_ID);
 
@@ -447,18 +470,32 @@ TEST_F(AudioControllerTest, testNotifyAnbrReceived)
     EXPECT_FALSE(m_pController->NotifyAnbrReceived(MEDIA_TYPE_AUDIO, 0, 0));
 }
 
-TEST_F(AudioControllerTest, testSetMediaPemType)
+TEST_F(AudioControllerTest, testHandleForkedSessionUpdate)
 {
-    // No session, should not crash
-    m_pController->SetMediaPemType(NEGO_ID, MEDIA_PEM_TYPE::SENDONLY);
+    const IMS_UINTP NEGO_ID_1 = 1;
+    const IMS_UINTP NEGO_ID_2 = 2;
 
-    // Create a session and test
-    m_pController->CreateSession(&m_objListener, NEGO_ID, m_pConfig.get(), MEDIA_SERVICE_DEFAULT);
-    m_pController->SetMediaPemType(NEGO_ID, MEDIA_PEM_TYPE::SENDONLY);
+    // Create two sessions to simulate a forked call
+    ASSERT_TRUE(m_pController->CreateSession(
+            &m_objListener, NEGO_ID_1, m_pConfig.get(), MEDIA_SERVICE_DEFAULT));
+    ASSERT_TRUE(m_pController->CreateSession(
+            &m_objListener, NEGO_ID_2, m_pConfig.get(), MEDIA_SERVICE_DEFAULT));
 
-    // Test with UNDEFINED_NEGO_ID
-    m_pController->UpdateSession(NEGO_ID, ACCESS_NETWORK, m_pAudioNego);  // sets current nego id
-    m_pController->SetMediaPemType(UNDEFINED_NEGO_ID, MEDIA_PEM_TYPE::RECVONLY);
+    // Simulate that the previous session (session 1) is active
+    AudioSession* pSession1 = m_pController->FindAudioSession(NEGO_ID_1);
+    ASSERT_NE(pSession1, nullptr);
+    pSession1->SetMediaPemType(MEDIA_PEM_TYPE::SENDRECV);
+
+    AudioConfig* pConfig = static_cast<AudioConfig*>(pSession1->GetRtpConfig());
+    ASSERT_NE(pConfig, nullptr);
+    pConfig->setRemotePort(5004);
+
+    EXPECT_CALL(
+            m_objListener, MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_MODIFY_SESSION, _))
+            .Times(1)
+            .WillOnce(Return(true));
+
+    m_pController->HandleForkedSessionUpdate(NEGO_ID_1);
 }
 
 TEST_F(AudioControllerTest, testUpdateMediaDirection)

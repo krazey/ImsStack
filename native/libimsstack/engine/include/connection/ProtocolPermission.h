@@ -16,7 +16,11 @@
 #ifndef PROTOCOL_PERMISSION_H_
 #define PROTOCOL_PERMISSION_H_
 
-#include "Protocol.h"
+#include "ImsTypeDef.h"
+
+class AString;
+
+class Protocol;
 
 class ProtocolPermission
 {

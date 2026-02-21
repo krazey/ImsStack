@@ -26,6 +26,7 @@ import android.util.Pair;
 
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.Capability;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.CapabilityReason;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.ExtraReason;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.FeatureTagMask;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.NetworkType;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.ReasonCode;
@@ -268,5 +269,15 @@ public class IAosRegistrationListenerTest {
         int unknownReason = 123;
         String expected = "UNKNOWN(" + unknownReason + ")";
         assertEquals(expected, CapabilityReason.toString(unknownReason));
+    }
+
+    // --- ExtraReason Tests ---
+
+    @Test
+    public void extraReason_shouldHaveCorrectConstantValues() {
+        assertEquals(1001, ExtraReason.CODE_NORMAL_DEREGISTRATION);
+        assertEquals(1518, ExtraReason.CODE_RADIO_VOPS_NOT_SUPPORTED);
+        assertEquals(1519, ExtraReason.CODE_SSAC_BARRED);
+        assertEquals(1626, ExtraReason.WFC_MISSING_911_ADDRESS);
     }
 }

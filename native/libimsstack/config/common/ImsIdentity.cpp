@@ -571,8 +571,7 @@ PUBLIC GLOBAL const AString ImsIdentity::GetPhoneContext(IN IMS_SINT32 nDialingP
                     (pAni->nType == AccessNetworkInfo::TYPE_3GPP2_1X_HRPD) ||
                     (pAni->nType == AccessNetworkInfo::TYPE_3GPP2_UMB))
             {
-                // CDMA2000
-                // FIXME: I don't know what is the subnet id...
+                // no-op: CDMA2000 not supported.
             }
             else if ((pAni->nClass == AccessNetworkInfo::CLASS_3GPP_GERAN) ||
                     (pAni->nClass == AccessNetworkInfo::CLASS_3GPP_UTRAN) ||

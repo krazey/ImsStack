@@ -86,7 +86,7 @@ PUBLIC VIRTUAL OsThread::~OsThread()
 {
     if (IMS_UTIL_SYS_PROP_IS_DEBUG_MODE())
     {
-        IMS_TRACE_D("Thread(%s, %x) is destroyed", m_strName.GetStr(), m_nThreadId, 0);
+        IMS_TRACE_D("Thread(%s|%x) being destroyed", m_strName.GetStr(), m_nThreadId, 0);
     }
 
     if (pthread_cond_destroy(&m_stCond) == 0)
@@ -99,7 +99,7 @@ PUBLIC VIRTUAL IMS_BOOL OsThread::Activate()
 {
     if (IsRunning())
     {
-        IMS_TRACE_D("Thread is already running ...", 0, 0, 0);
+        IMS_TRACE_D("Thread(%x) already running", m_nThreadId, 0, 0);
         return IMS_TRUE;
     }
 
@@ -111,7 +111,7 @@ PUBLIC VIRTUAL IMS_BOOL OsThread::Activate()
     }
     else
     {
-        IMS_TRACE_D("Thread :: Created (%x)", m_nThreadId, 0, 0);
+        IMS_TRACE_D("Thread: Created (%x)", m_nThreadId, 0, 0);
 
         m_bIsRunning = IMS_TRUE;
 
@@ -127,7 +127,7 @@ PUBLIC VIRTUAL void OsThread::Deactivate()
 {
     if (!IsRunning())
     {
-        IMS_TRACE_D("Thread is not running ...", 0, 0, 0);
+        IMS_TRACE_D("Thread not running", 0, 0, 0);
         return;
     }
 
@@ -210,7 +210,7 @@ PUBLIC VIRTUAL IMS_ULONG OsThread::Run()
 {
     IMS_BOOL bLoop = IMS_TRUE;
 
-    IMS_TRACE_I("Thread :: Started (%s, %x)", GetName().GetStr(), m_nThreadId, 0);
+    IMS_TRACE_I("Thread: Started (%s|%x)", GetName().GetStr(), m_nThreadId, 0);
 
     while (bLoop)
     {
@@ -263,7 +263,9 @@ PUBLIC VIRTUAL IMS_ULONG OsThread::Run()
         }
     }
 
-    IMS_TRACE_D("Thread :: Terminated (%x)", m_nThreadId, 0, 0);
+#ifdef __IMS_DEBUG__
+    IMS_TRACE_D("Thread: Terminated (%x)", m_nThreadId, 0, 0);
+#endif
 
     m_bIsRunning = IMS_FALSE;
 
@@ -274,7 +276,7 @@ PROTECTED VIRTUAL void OsThread::OnStart(IN ImsMessage& objMsg)
 {
     if (m_piListener == IMS_NULL)
     {
-        IMS_TRACE_D("OnStart(%s) :: No listener", GetName().GetStr(), 0, 0);
+        IMS_TRACE_D("OnStart(%s): No listener", GetName().GetStr(), 0, 0);
         return;
     }
 
@@ -285,7 +287,7 @@ PROTECTED VIRTUAL void OsThread::OnTerminate(IN ImsMessage& objMsg)
 {
     if (m_piListener == IMS_NULL)
     {
-        IMS_TRACE_D("OnTerminate(%s) :: No listener", GetName().GetStr(), 0, 0);
+        IMS_TRACE_D("OnTerminate(%s): No listener", GetName().GetStr(), 0, 0);
         return;
     }
 
@@ -332,7 +334,7 @@ PROTECTED VIRTUAL void OsThread::OnThreadMessage(IN ImsMessage& objMsg)
 
     if (m_piListener == IMS_NULL)
     {
-        IMS_TRACE_D("OnThreadMessage(%s) :: No listener", GetName().GetStr(), 0, 0);
+        IMS_TRACE_D("OnThreadMessage(%s): No listener", GetName().GetStr(), 0, 0);
         return;
     }
 
@@ -349,19 +351,19 @@ PROTECTED VIRTUAL pthread_t OsThread::CreateThread()
     {
         if (nResult == EAGAIN)
         {
-            IMS_TRACE_E(0, "pthread_create - Failed (lack of resource)", 0, 0, 0);
+            IMS_TRACE_E(0, "pthread_create: (lack of resource)", 0, 0, 0);
         }
         else if (nResult == EINVAL)
         {
-            IMS_TRACE_E(0, "pthread_create - Failed (invalid attribute)", 0, 0, 0);
+            IMS_TRACE_E(0, "pthread_create: (invalid attribute)", 0, 0, 0);
         }
         else if (nResult == EPERM)
         {
-            IMS_TRACE_E(0, "pthread_create - Failed (inappropriate permission)", 0, 0, 0);
+            IMS_TRACE_E(0, "pthread_create: (inappropriate permission)", 0, 0, 0);
         }
         else
         {
-            IMS_TRACE_E(0, "pthread_create - Failed (%d)", nResult, 0, 0);
+            IMS_TRACE_E(0, "pthread_create: failed(%d)", nResult, 0, 0);
         }
     }
 
@@ -374,19 +376,21 @@ PROTECTED VIRTUAL void OsThread::JoinThread()
 
     if (nResult == 0)
     {
-        IMS_TRACE_D("pthread_join - %lu", m_nThreadId, 0, 0);
+#ifdef __IMS_DEBUG__
+        IMS_TRACE_D("pthread_join: %lu", m_nThreadId, 0, 0);
+#endif
     }
     else if (nResult == EINVAL)
     {
-        IMS_TRACE_E(0, "pthread_join - failed (does not refer to a joinable thread)", 0, 0, 0);
+        IMS_TRACE_E(0, "pthread_join: (does not refer to a joinable thread)", 0, 0, 0);
     }
     else if (nResult == ESRCH)
     {
-        IMS_TRACE_E(0, "pthread_join - failed (can not found thread id (%x))", m_nThreadId, 0, 0);
+        IMS_TRACE_E(0, "pthread_join: (can not found thread id (%x))", m_nThreadId, 0, 0);
     }
     else
     {
-        IMS_TRACE_E(0, "pthread_join - failed (%d)", nResult, 0, 0);
+        IMS_TRACE_E(0, "pthread_join: failed(%d)", nResult, 0, 0);
     }
 
     // RACE_CONDITION_HANDLING
@@ -406,7 +410,7 @@ PROTECTED VIRTUAL IMS_BOOL OsThread::SendSignal()
 
     if (nResult != 0)
     {
-        IMS_TRACE_E(0, "pthread_cond_signal - error (%d)", nResult, 0, 0);
+        IMS_TRACE_E(0, "pthread_cond_signal: error(%d)", nResult, 0, 0);
     }
 
     m_objCondMutex.Unlock();
@@ -453,11 +457,11 @@ PROTECTED VIRTUAL IMS_SINT32 OsThread::WaitForSignal(IN IMS_SINT32 nMsgCount)
     }
     else if (nWaitResult == EINVAL)
     {
-        IMS_TRACE_E(0, "pthread_cond_wait failed - invalid parameter", 0, 0, 0);
+        IMS_TRACE_E(0, "pthread_cond_wait failed: invalid parameter", 0, 0, 0);
     }
     else
     {
-        IMS_TRACE_E(0, "pthread_cond_wait failed - error(%d)", nWaitResult, 0, 0);
+        IMS_TRACE_E(0, "pthread_cond_wait failed: error(%d)", nWaitResult, 0, 0);
     }
 
     return nWaitResult;

@@ -29,6 +29,7 @@
 #include "ect/EctFactory.h"
 #include "ect/EctReference.h"
 #include "ect/IEctControllerListener.h"
+#include "helper/ICallStateProxy.h"
 #include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -44,6 +45,7 @@ EctController::EctController(IN IMtcContext& objContext, IN CallKey nCallKey,
         m_piTimer(IMS_NULL)
 {
     IMS_TRACE_D("+EctController", 0, 0, 0);
+    m_objContext.GetCallStateProxy().AddListener(this);
 }
 
 PUBLIC
@@ -51,6 +53,7 @@ EctController::~EctController()
 {
     IMS_TRACE_D("~EctController", 0, 0, 0);
     StopTimer();
+    m_objContext.GetCallStateProxy().RemoveListener(this);
 }
 
 PUBLIC VIRTUAL void EctController::OnReferenceStarted()
@@ -115,7 +118,14 @@ void EctController::NotifyResult(
         IN IMS_RESULT nResult, IN IMS_SINT32 nReason /* = CODE_NONE*/) const
 {
     IMS_TRACE_D("NotifyResult [%d]", nResult, 0, 0);
-    IMtcUiNotifier& objNotifier = GetTransferee()->GetCallContext().GetUiNotifier();
+
+    IMtcCall* piTransferee = GetTransferee();
+    if (piTransferee->GetKey() == IMtcCall::CALL_KEY_INVALID)
+    {
+        return;
+    }
+
+    IMtcUiNotifier& objNotifier = piTransferee->GetCallContext().GetUiNotifier();
     objNotifier.SendEctCompleted(nResult, CallReasonInfo(nReason));
 }
 

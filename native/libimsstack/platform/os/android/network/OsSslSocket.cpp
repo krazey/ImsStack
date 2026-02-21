@@ -64,7 +64,7 @@ static void osSslSocket_DisplayCiphers(IN SSL* pstSsl)
         }
     } while (pszCipher != IMS_NULL);
 
-    IMS_TRACE_D("SSL ciphers :: %d [%s]", nIndex, strBuffer.GetStr(), 0);
+    IMS_TRACE_D("SSL ciphers: %d [%s]", nIndex, strBuffer.GetStr(), 0);
 }
 #endif
 
@@ -107,7 +107,7 @@ private:
     SslCertificate m_objCertificate;
 };
 
-// Example...
+// For example,
 // CA_FILE : "/data/local/root.pem"
 // CERTIFICATE : "/system/etc/msrpcert.pem"
 // PASSWORD : "password"
@@ -177,7 +177,7 @@ PUBLIC
 IMS_BOOL OsSsl::Initialize()
 {
     // TLSv1 : TLSv1_method, TLSv1_server_method, TLSv1_client_method
-    // FIXME: consider TLS_method() for generic scheme
+    // Consider TLS_method() for generic scheme.
     const SSL_METHOD* pMethod = TLSv1_method();
 
     m_pstCtx = SSL_CTX_new(pMethod);
@@ -529,7 +529,7 @@ OsSslSocket::OsSslSocket(IN SslCertificate* pCertificate) :
 
 PUBLIC VIRTUAL OsSslSocket::~OsSslSocket()
 {
-    IMS_TRACE_D("Destructor :: OsSslSocket", 0, 0, 0);
+    IMS_TRACE_D("dtor: OsSslSocket", 0, 0, 0);
 
     IMS_SINT32 nOption = GetOptionForShutdown();
     ShutDown((nOption < 0) ? SHUTDOWN_BOTH : nOption);
@@ -628,7 +628,7 @@ PROTECTED VIRTUAL IMS_SINT32 OsSslSocket::Receive(OUT IMS_BYTE* pBuffer, IN IMS_
     {
         SelectEventEx(FD_READ);
 
-        IMS_TRACE_D("Receive() - TLS is handshaking ...", 0, 0, 0);
+        IMS_TRACE_D("Receive: TLS is handshaking", 0, 0, 0);
         return RESULT_WOULDBLOCK;
     }
 }
@@ -697,7 +697,7 @@ PROTECTED VIRTUAL void OsSslSocket::NotifyConnected(IN IMS_SINT32 nErrorCode)
     {
         DeselectEventEx(FD_CONNECT);
 
-        IMS_TRACE_D("Try to connect SSL connection ...", 0, 0, 0);
+        IMS_TRACE_D("Try to connect SSL connection", 0, 0, 0);
         NotifyMessage(IMS_SOCKET_SSL_HANDSHAKE);
         return;
     }
@@ -798,7 +798,7 @@ void OsSslSocket::DoHandshake()
 
     SetSslState(SSL_STATE_CONNECTING);
 
-    // After the retry interval, try to connect again...
+    // After the retry interval, try to connect again.
     m_piSslConnectRetryTimer = TimerService::GetTimerService()->CreateTimer();
 
     if (m_piSslConnectRetryTimer != IMS_NULL)
@@ -823,8 +823,8 @@ void OsSslSocket::SetSslState(IN IMS_SINT32 nState)
 {
     if (m_nSslState != nState)
     {
-        IMS_TRACE_I("SSL state :: %s >> %s", SslStateToString(m_nSslState),
-                SslStateToString(nState), 0);
+        IMS_TRACE_I(
+                "SSL state: %s >> %s", SslStateToString(m_nSslState), SslStateToString(nState), 0);
 
         m_nSslState = nState;
     }

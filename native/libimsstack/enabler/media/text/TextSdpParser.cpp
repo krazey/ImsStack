@@ -16,6 +16,7 @@
 
 #include "ServiceTrace.h"
 
+#include "offeranswer/SdpMediaFormat.h"
 #include "text/TextSdpParser.h"
 
 __IMS_TRACE_TAG_MEDIA__;
@@ -62,13 +63,13 @@ void TextSdpParser::ParsePayloads(IN const IMediaDescriptor* pDescriptor, OUT Te
 
     for (IMS_UINT32 i = 0; i < lstMediaFormat.GetSize(); i++)
     {
-        const SdpAvCodec* pSdpCodec = DYNAMIC_CAST(SdpAvCodec*, lstMediaFormat.GetAt(i));
-
-        if (pSdpCodec == IMS_NULL)
+        if (lstMediaFormat.GetAt(i) == IMS_NULL ||
+                lstMediaFormat.GetAt(i)->GetType() != SdpMediaFormat::TYPE_RTP)
         {
             continue;
         }
 
+        const SdpAvCodec* pSdpCodec = static_cast<SdpAvCodec*>(lstMediaFormat.GetAt(i));
         TextProfile::Payload* pPayload = new TextProfile::Payload();
 
         AString strCodecName = AString::ConstNull();
@@ -226,13 +227,13 @@ PROTECTED IMS_BOOL TextSdpParser::ParseRedSubPtExist(
 
     for (IMS_UINT32 i = 0; i < lstMediaFormat.GetSize(); i++)
     {
-        const SdpAvCodec* pSdpCodec = DYNAMIC_CAST(SdpAvCodec*, lstMediaFormat.GetAt(i));
-
-        if (pSdpCodec == IMS_NULL)
+        if (lstMediaFormat.GetAt(i) == IMS_NULL ||
+                lstMediaFormat.GetAt(i)->GetType() != SdpMediaFormat::TYPE_RTP)
         {
             continue;
         }
 
+        const SdpAvCodec* pSdpCodec = static_cast<SdpAvCodec*>(lstMediaFormat.GetAt(i));
         IMS_TRACE_D("ParseRedSubPtExist(): Check RedSubPT, PT[%d] of PL[%d] / Red Payload[%d]",
                 pSdpCodec->GetPayloadType(), i, nRedPayload);
 

@@ -31,7 +31,6 @@ CodecTelephoneEventConfig::CodecTelephoneEventConfig(
         m_nRedundancyCount(DEFAULT_REDUNDANT_COUNT),
         m_nSamplingRate(DEFAULT_SAMPLING_RATE_WB)
 {
-    IMS_TRACE_I("+CodecTelephoneEventConfig - Type[%d]", nType, 0, 0);
 }
 
 PUBLIC VIRTUAL CodecTelephoneEventConfig::~CodecTelephoneEventConfig()

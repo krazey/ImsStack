@@ -160,14 +160,14 @@ GLOBAL void Initialize()
         SetTransactionTimerValues(nSlotId, IMS_NULL, piSipConfigV);
 
         AString strSipTimers;
-        strSipTimers.Sprintf("t1=%u, t2=%u, t4=%u, tb=%u, tc=%u, td=%u, tf=%u, th=%u, ti=%u,\
-                tj=%u, tk=%u",
+        strSipTimers.Sprintf(
+                "t1=%u, t2=%u, t4=%u, tb=%u, tc=%u, td=%u, tf=%u, th=%u, ti=%u, tj=%u, tk=%u",
                 pSipConfig->GetT1(), pSipConfig->GetT2(), pSipConfig->GetT4(),
                 pSipConfig->GetTimerB(), pSipConfig->GetTimerC(), pSipConfig->GetTimerD(),
                 pSipConfig->GetTimerF(), pSipConfig->GetTimerH(), pSipConfig->GetTimerI(),
                 pSipConfig->GetTimerJ(), pSipConfig->GetTimerK());
 
-        IMS_TRACE_D("SIP Timers :: %s", strSipTimers.GetStr(), 0, 0);
+        IMS_TRACE_D("SIP Timers: %s", strSipTimers.GetStr(), 0, 0);
 
         // SetCompactForm Encoding
         SIP_BOOL bCompact = (SIP_BOOL)SipConfigProxy::IsCompactFormConfigured(nSlotId, NULL);
@@ -2342,7 +2342,6 @@ GLOBAL AString GetMimeHeader(
     switch (nType)
     {
         case SipMessageBodyPart::CONTENT_TYPE:
-            IMS_TRACE_D("SipMessageBodyPart::CONTENT_TYPE", 0, 0, 0);
             pHeader = pMsgBody->GetContentType();
             break;
         case SipMessageBodyPart::CONTENT_DISPOSITION:
@@ -3805,7 +3804,7 @@ GLOBAL void DisplayBadHeaders(IN ::SipMessage* pMessage)
 #ifdef SIP_BADMESSAGE_PARSING
     SIPStackError(EERR_NOERR);
 
-    IMS_TRACE_I("___ SIP bad headers - S ___", 0, 0, 0);
+    IMS_TRACE_I("___ SIP bad headers ___", 0, 0, 0);
 
     SipHeaderList* pBadHdrList = pMessage->GetBadHdrs();
 
@@ -3830,8 +3829,6 @@ GLOBAL void DisplayBadHeaders(IN ::SipMessage* pMessage)
             pBadHeader->SipDelete();
         }
     }
-
-    IMS_TRACE_I("___ SIP bad headers - E ___", 0, 0, 0);
 #else
     (void)pMessage;
 #endif
@@ -4134,17 +4131,16 @@ GLOBAL void DisplayTxnKey(IN const ::SipTxnKey* pTxnKey)
         return;
     }
 
-    IMS_TRACE_D("___ TRANSACTION INFO. - S ___", 0, 0, 0);
-    IMS_TRACE_I("\tMethod: %s, %d", _TRACE_S_(pTxnKey->GetMethod()), pTxnKey->GetCSeqNum(), 0);
-    IMS_TRACE_I("\tVia Branch: %s, RSeq: %d", _TRACE_S_(pTxnKey->GetViaBranchParam()),
-            pTxnKey->GetRSeq(), 0);
-
     IMS_CHAR acCallId[11 + 1] = {
             '\0',
     };
+    AString strLog;
+    strLog.Sprintf("{ TxnKey: method=%s-%d, via-branch=%s, rseq=%d, call-id=%s }",
+            _TRACE_S_(pTxnKey->GetMethod()), pTxnKey->GetCSeqNum(),
+            _TRACE_S_(pTxnKey->GetViaBranchParam()), pTxnKey->GetRSeq(),
+            GetLogString(pTxnKey->GetCallId(), acCallId, 11, '@'));
 
-    IMS_TRACE_I("\tCall-ID: %s", GetLogString(pTxnKey->GetCallId(), acCallId, 11, '@'), 0, 0);
-    IMS_TRACE_D("___ TRANSACTION INFO. - E ___", 0, 0, 0);
+    IMS_TRACE_I("%s", strLog.GetStr(), 0, 0);
 }
 
 GLOBAL void FreeTxnKey(IN ::SipTxnKey*& pTxnKey)
@@ -4325,7 +4321,7 @@ GLOBAL void SetTimerValues(IN const SipTimerValues* pTv, IN_OUT SipTxnContext*& 
 
 GLOBAL void DisplayUnknownHeaders(IN ::SipMessage* pMessage)
 {
-    IMS_TRACE_I("___ SIP unknown headers - S ___", 0, 0, 0);
+    IMS_TRACE_I("___ SIP unknown headers ___", 0, 0, 0);
 
     if (pMessage == IMS_NULL)
     {
@@ -4340,7 +4336,6 @@ GLOBAL void DisplayUnknownHeaders(IN ::SipMessage* pMessage)
         IMS_CHAR acLog[13 + 1] = {
                 '\0',
         };
-        IMS_BOOL bFullLog = IMS_FALSE;
 
         for (IMS_UINT32 i = 0; i < nSize; ++i)
         {
@@ -4353,21 +4348,11 @@ GLOBAL void DisplayUnknownHeaders(IN ::SipMessage* pMessage)
 
                 acLog[0] = '\0';
 
-                if (pszHdrName != SIP_NULL)
+                if (pszHdrName != SIP_NULL && pszHdrValue != SIP_NULL &&
+                        GetHeaderTypeFromName(pszHdrName) != SipHeaderBase::CONTENT_LENGTH)
                 {
-                    if ((pszHdrName[0] == 'P') || (pszHdrName[0] == 'p'))
-                    {
-                        if (IMS_StrICmp(pszHdrName, "P-SKT-BYE-CAUSE") == 0)
-                        {
-                            bFullLog = IMS_TRUE;
-                        }
-                    }
-                }
-
-                if ((pszHdrName != SIP_NULL) && (pszHdrValue != SIP_NULL))
-                {
-                    IMS_TRACE_I("\t(U) %s: %s", pszHdrName,
-                            bFullLog ? pszHdrValue : GetLogString(pszHdrValue, acLog, 13), 0);
+                    IMS_TRACE_I(
+                            "\t(U) %s: %s", pszHdrName, GetLogString(pszHdrValue, acLog, 13), 0);
                 }
 
                 pUnknown->SipDelete();
@@ -4401,8 +4386,6 @@ GLOBAL void DisplayUnknownHeaders(IN ::SipMessage* pMessage)
 
         pHeaderList->SipDelete();
     }
-
-    IMS_TRACE_I("___ SIP unknown headers - E ___", 0, 0, 0);
 }
 
 // Return value: pszOutput (user mode & config-debug-off), pszInput (non-user mode)

@@ -380,10 +380,7 @@ void Feature::ExtractProperties(IN const AString& strFeature)
             if (m_strTag.EqualsIgnoreCase(OTHER_G_3GPP_IARI_REF))
             {
                 m_nType = IARI;
-
-                // IMS_TRACE_D(".... IARI (before decoding) : %s", strValue.GetStr(), 0, 0);
                 m_strValue = DoPercentDecoding(m_strValue);
-                // IMS_TRACE_D(".... IARI (after decoding) : %s", strValue.GetStr(), 0, 0);
             }
             else if (m_strTag.EqualsIgnoreCase(OTHER_G_3GPP_ICSI_REF))
             {

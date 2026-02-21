@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 
+#include "AStringBuffer.h"
 #include "msg/SipAddrSpec.h"
 #include "platform/SipString.h"
 
@@ -94,6 +95,42 @@ TEST_F(SipAddrSpecTest, EncodeAndDecode)
     EXPECT_STREQ(pUri, objBuffer.GetCharString());
 
     pSipUri->SipDelete();
+    pSipAddrSpec->SipDelete();
+
+    pUri = "si:test.3gpp.com";
+    pSipAddrSpec = new SipAddrSpec();
+    ASSERT_TRUE(pSipAddrSpec != nullptr);
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->Decode(pUri, SipPf_Strlen(pUri)));
+    EXPECT_EQ(SipUri::SCHEME_ABS, pSipAddrSpec->GetUriScheme());
+    EXPECT_STREQ("si:test.3gpp.com", pSipAddrSpec->GetAbsUri());
+
+    pBuff = &(aBuffer[0]);
+    memset(pBuff, 0, BUFFER_SIZE);
+    objBuffer = AString::ConstNull();
+
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->Encode(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->Encode(objBuffer, SIP_FALSE));
+    EXPECT_STREQ("si:test.3gpp.com", &(aBuffer[0]));
+    EXPECT_STREQ("si:test.3gpp.com", objBuffer.GetCharString());
+
+    pSipAddrSpec->SipDelete();
+
+    pUri = "sipabc:test.3gpp.com";
+    pSipAddrSpec = new SipAddrSpec();
+    ASSERT_TRUE(pSipAddrSpec != nullptr);
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->Decode(pUri, SipPf_Strlen(pUri)));
+    EXPECT_EQ(SipUri::SCHEME_ABS, pSipAddrSpec->GetUriScheme());
+    EXPECT_STREQ("sipabc:test.3gpp.com", pSipAddrSpec->GetAbsUri());
+
+    pBuff = &(aBuffer[0]);
+    memset(pBuff, 0, BUFFER_SIZE);
+    objBuffer = AString::ConstNull();
+
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->Encode(&pBuff));
+    EXPECT_EQ(SIP_TRUE, pSipAddrSpec->Encode(objBuffer, SIP_FALSE));
+    EXPECT_STREQ("sipabc:test.3gpp.com", &(aBuffer[0]));
+    EXPECT_STREQ("sipabc:test.3gpp.com", objBuffer.GetCharString());
+
     pSipAddrSpec->SipDelete();
 
     pSipAddrSpec = new SipAddrSpec();

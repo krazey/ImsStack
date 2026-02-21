@@ -53,19 +53,15 @@ PUBLIC VIRTUAL void AosBlock::SetListener(IN IAosBlockListener* piListener)
 
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        IAosBlockListener* pTmpListener = m_objListeners.GetAt(i);
+        const IAosBlockListener* pTmpListener = m_objListeners.GetAt(i);
 
         if (pTmpListener == piListener)
         {
-            A_IMS_TRACE_D(
-                    APPPROFILE, "SetListener :: (%" PFLS_X ") is already set", piListener, 0, 0);
             return;
         }
     }
 
     m_objListeners.Append(piListener);
-
-    A_IMS_TRACE_D(APPPROFILE, "SetListener :: (%" PFLS_X ") is set", piListener, 0, 0);
 }
 
 PUBLIC VIRTUAL void AosBlock::RemoveListener(IN IAosBlockListener* piListener)
@@ -77,14 +73,11 @@ PUBLIC VIRTUAL void AosBlock::RemoveListener(IN IAosBlockListener* piListener)
 
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        IAosBlockListener* pTmpListener = m_objListeners.GetAt(i);
+        const IAosBlockListener* pTmpListener = m_objListeners.GetAt(i);
 
         if (pTmpListener == piListener)
         {
             m_objListeners.RemoveAt(i);
-
-            A_IMS_TRACE_D(
-                    APPPROFILE, "RemoveListener :: (%" PFLS_X ") is removed", piListener, 0, 0);
             return;
         }
     }
@@ -99,18 +92,15 @@ PUBLIC VIRTUAL void AosBlock::SetSilentListener(IN IAosBlockSilentListener* piLi
 
     for (IMS_UINT32 i = 0; i < m_objSilentListeners.GetSize(); ++i)
     {
-        IAosBlockSilentListener* pTmpListener = m_objSilentListeners.GetAt(i);
+        const IAosBlockSilentListener* pTmpListener = m_objSilentListeners.GetAt(i);
 
         if (pTmpListener == piListener)
         {
-            A_IMS_TRACE_D(APPPROFILE, "SetSilentListener :: (%" PFLS_X ") is already set",
-                    piListener, 0, 0);
             return;
         }
     }
 
     m_objSilentListeners.Append(piListener);
-    A_IMS_TRACE_D(APPPROFILE, "SetSilentListener :: (%" PFLS_X ") is set", piListener, 0, 0);
 }
 
 PUBLIC VIRTUAL void AosBlock::RemoveSilentListener(IN IAosBlockSilentListener* piListener)
@@ -122,14 +112,11 @@ PUBLIC VIRTUAL void AosBlock::RemoveSilentListener(IN IAosBlockSilentListener* p
 
     for (IMS_UINT32 i = 0; i < m_objSilentListeners.GetSize(); ++i)
     {
-        IAosBlockSilentListener* pTmpListener = m_objSilentListeners.GetAt(i);
+        const IAosBlockSilentListener* pTmpListener = m_objSilentListeners.GetAt(i);
 
         if (pTmpListener == piListener)
         {
             m_objSilentListeners.RemoveAt(i);
-
-            A_IMS_TRACE_D(APPPROFILE, "RemoveSilentListener :: (%" PFLS_X ") is removed",
-                    piListener, 0, 0);
             return;
         }
     }
@@ -325,9 +312,6 @@ PUBLIC VIRTUAL IMS_BOOL AosBlock::IsReasonBlocked(IN BLOCK_REASON eReason,
     {
         bResult = (m_objBlockWifi.GetValueAt(&REASON[eReason]) == &BLOCK_ENABLED);
     }
-
-    A_IMS_TRACE_D(APPPROFILE, "IsReasonBlocked :: eReason (%s) - (%s)",
-            BlockReasonToString(eReason), bResult ? "BLOCKED" : "NOT_BLOCKED", 0);
 
     return bResult;
 }

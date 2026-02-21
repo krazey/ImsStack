@@ -635,4 +635,17 @@ TEST_F(SipTxnTest, AbortTxn)
     pTxnKey->SipDelete();
     delete pSipTxnTimerContext;
 }
+
+TEST_F(SipTxnTest, SetAckReceived)
+{
+    SipTxn* pTxn = new SipTxn();
+
+    EXPECT_EQ(SIP_FALSE, pTxn->IsAckReceived());
+
+    pTxn->SetAckReceived(SIP_TRUE);
+
+    EXPECT_EQ(SIP_TRUE, pTxn->IsAckReceived());
+
+    pTxn->SipDelete();
+}
 }  // namespace android

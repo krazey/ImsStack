@@ -16,10 +16,11 @@
 #ifndef __SIP_PARAMETERS_H__
 #define __SIP_PARAMETERS_H__
 
-#include "AStringBuffer.h"
 #include "SipRefBase.h"
 #include "SipVector.h"
 #include "msg/IParameterComponent.h"
+
+class AStringBuffer;
 
 class SipNameValue : public SipRefBase
 {

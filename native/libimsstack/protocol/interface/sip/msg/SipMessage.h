@@ -22,9 +22,9 @@
 #include "msg/SipBadHeader.h"
 #endif
 #include "msg/SipHeaders.h"
-#include "msg/SipMsgBody.h"
-#include "msg/SipRequestLine.h"
 
+class SipMsgBody;
+class SipRequestLine;
 /**
   This class represents one SIP message. The stack user can create a suitable message by setting
   the headers in SipMessage. Each header that has to be added should be set using

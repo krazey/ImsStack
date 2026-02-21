@@ -16,7 +16,9 @@
 #ifndef INTERFACE_MESSAGE_MEDIATOR_H_
 #define INTERFACE_MESSAGE_MEDIATOR_H_
 
-#include "ISipMessage.h"
+#include "ImsTypeDef.h"
+
+class ISipMessage;
 
 /**
  * @brief This class is SIP message mediator.

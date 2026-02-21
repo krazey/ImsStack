@@ -20,6 +20,7 @@
 #include "ICoreService.h"
 #include "IOnCoreServiceListener.h"
 #include "IOnDirectCoreServiceListener.h"
+#include "ServiceFilterCriteria.h"
 
 class CoreServiceImpl :
         public ICoreService,
