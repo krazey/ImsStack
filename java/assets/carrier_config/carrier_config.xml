@@ -126,8 +126,6 @@
     <string-array name="imsvoice.caller_id_service_codes_for_identity_string_array" num="1">
         <item value="*82"/>
     </string-array>
-    <int-array name="imsvoice.short_call_code_int_array" num="0">
-    </int-array>
     <string name="imsvoice.local_number_presentation_set_string"></string>
     <boolean name="imsvoice.allow_multiple_call_including_video_call_bool" value="true"/>
     <string-array name="imsvoice.reject_code_and_reason_code_set_string_array" num="0">
@@ -723,40 +721,19 @@
     <string-array name="imsvoice.carrier_specific_sip_headers_string_array" num="0">
     </string-array>
     <boolean name="imsvt.check_avchange_feature_for_call_converting_capability_bool" value="false"/>
-    <boolean name="imsvoice.support_registration_recovery_for_failure_of_session_refresh_bool" value="false"/>
-    <int-array name="imsvoice.policy_for_call_maintaining_on_registration_suspended_int_array" num="5">
-        <item value="0"/> <!-- index 0 : NO_SERVICE -->
-        <item value="0"/> <!-- index 1 : CS_CALL -->
-        <item value="1"/> <!-- index 2 : LOW_BATTERY -->
-        <item value="0"/> <!-- index 3 : NO_LTE_COVERAGE -->
-        <item value="2"/> <!-- index 4 : INSTANTAENOUS_OFFLINE -->
-    </int-array>
-    <int-array name="imsemergency.policy_for_requiring_emergency_call_when_video_emergency_call_failed_int_array" num="3">
-        <item value="0"/>
-        <item value="403"/>
-        <item value="488"/>
-    </int-array>
-    <boolean name="imsvoice.use_lte_preferred_status_for_service_capability_bool" value="false"/>
-    <boolean name="imsvoice.allow_incoming_hold_request_during_conference_call_bool" value="false"/>
-    <boolean name="imsvoice.ignore_180_after_183_response_bool" value="false"/>
     <boolean name="imsvoice.add_replace_header_for_conference_bool" value="false"/>
     <int-array name="imsvt.vilte_to_volte_retry_failure_response_code_int_array" num="1">
         <item value="488"/>
     </int-array>
-    <boolean name="imsemergency.use_emergency_number_translation_in_roaming_status_bool" value="false"/>
     <int name="imsvoice.policy_for_prack_delivery_failure_int" value="0"/>
     <boolean name="imsvt.support_video_call_only_in_vops_off_status_bool" value="false"/>
     <boolean name="imsemergency.exclude_uri_parameters_for_emergency_test_number_bool" value="false"/>
-    <boolean name="imsemergency.block_wifi_emergency_call_if_not_provisioned_bool" value="false"/>
     <int name="imsemergency.wifi_emergency_18x_timer_millis_int" value="-1"/>
     <boolean name="imsvoice.use_carrier_specific_contact_header_for_options_response_bool" value="false"/>
     <boolean name="imsvoice.use_carrier_specific_reject_phrase_for_incoming_call_during_no_registration_bool" value="false"/>
     <boolean name="imsvoice.enable_registration_recovery_on_prack_timeout_bool" value="false"/>
-    <boolean name="imsvoice.enable_registration_recovery_when_call_rejected_by_server_error_bool" value="false"/>
-    <boolean name="imsvoice.enable_registration_recovery_when_call_retry_unavailable_bool" value="false"/>
     <boolean name="imsvoice.enable_registration_recovery_when_bye_transaction_timeout_bool" value="false"/>
     <boolean name="imswfc.reject_vowifi_voice_call_when_vowifi_setting_off_bool" value="false"/>
-    <boolean name="imsvoice.check_server_outage_reason_for_vxlte_call_bool" value="false"/>
     <boolean name="imsvt.set_video_text_feature_exclusively_in_contact_header_by_session_type_bool" value="false"/>
     <boolean name="imsvt.add_video_feature_tag_in_accept_contact_always_bool" value="false"/>
     <boolean name="imsvoice.maintain_multiple_early_sessions_by_forking_bool" value="true"/>

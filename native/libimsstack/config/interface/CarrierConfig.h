@@ -1581,25 +1581,6 @@ public:
             GEOLOCATION_HEADER_MODE_INCLUDE_YES_ALWAYS = 2,
             GEOLOCATION_HEADER_MODE_INCLUDE_NO_ALWAYS = 3
         };
-
-        // Unused.
-        // Network types
-        enum
-        {
-            NETWORK_TYPE_HOME = 0,
-            NETWORK_TYPE_ROAMING = 1
-        };
-
-        // Unused.
-        // Reasons for terminated state of "reg" event package
-        enum
-        {
-            REG_EVENT_TERMINATED_REASON_EXPIRED = 1,
-            REG_EVENT_TERMINATED_REASON_DEACTIVATED = 2,
-            REG_EVENT_TERMINATED_REASON_PROBATION = 3,
-            REG_EVENT_TERMINATED_REASON_UNREGISTERED = 4,
-            REG_EVENT_TERMINATED_REASON_REJECTED = 5
-        };
     };
 
     class ImsEmergency
@@ -2087,38 +2068,6 @@ public:
          *   See {@link #KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT} enum values.
          */
         static const IMS_CHAR KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_EMERGENCY_CALL_INT[];
-
-        /**
-         * Specifies the policy for requiring a VoLTE emergency call when a ViLTE emergency call
-         * fails.
-         *
-         * @unused
-         */
-        static const IMS_CHAR
-                KEY_POLICY_FOR_REQUIRING_EMERGENCY_CALL_WHEN_VIDEO_EMERGENCY_CALL_FAILED_INT_ARRAY
-                        [];
-
-        /**
-         * Specifies whether to use emergency number translation in roaming status.
-         *
-         * @unused
-         *
-         * Possible Values:
-         *   {@code true}
-         *   {@code false}
-         */
-        static const IMS_CHAR KEY_USE_EMERGENCY_NUMBER_TRANSLATION_IN_ROAMING_STATUS_BOOL[];
-
-        /**
-         * Specifies whether to block WiFi emergency calls if not provisioned.
-         *
-         * @unused
-         *
-         * Possible Values:
-         *   {@code true}
-         *   {@code false}
-         */
-        static const IMS_CHAR KEY_BLOCK_WIFI_EMERGENCY_CALL_IF_NOT_PROVISIONED_BOOL[];
 
         /**
          * Specifies the wait timer in milliseconds for a 18x response to an emergency INVITE
@@ -3231,11 +3180,6 @@ public:
         static const IMS_CHAR KEY_CALLER_ID_SERVICE_CODES_FOR_IDENTITY_STRING_ARRAY[];
 
         /**
-         * @unused
-         */
-        static const IMS_CHAR KEY_SHORT_CALL_CODE_INT_ARRAY[];
-
-        /**
          * Specifies the set of strings used for Local Number Presentation.
          *
          * This config determines which international prefix is replaced with which local number
@@ -3883,68 +3827,6 @@ public:
         static const IMS_CHAR KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY[];
 
         /**
-         * Specifies whether to trigger registration recovery if a session refresh fails.
-         *
-         * @unused
-         *
-         * Possible Values:
-         *   {@code true}
-         *   {@code false}
-         */
-        static const IMS_CHAR
-                KEY_SUPPORT_REGISTRATION_RECOVERY_FOR_FAILURE_OF_SESSION_REFRESH_BOOL[];
-
-        /**
-         * Specifies the policy for maintaining calls when IMS registration is suspended.
-         *
-         * @unused
-         *
-         * Possible Values:
-         *   {@code REGISTRATION_SUSPENDED_POLICY_MAINTAIN_NONE} (0)
-         *   {@code REGISTRATION_SUSPENDED_POLICY_MAINTAIN_AUDIO_ONLY} (1)
-         *   {@code REGISTRATION_SUSPENDED_POLICY_MAINTAIN_ALL} (2)
-         */
-        static const IMS_CHAR KEY_POLICY_FOR_CALL_MAINTAINING_ON_REGISTRATION_SUSPENDED_INT_ARRAY[];
-        enum
-        {
-            REGISTRATION_SUSPENDED_POLICY_MAINTAIN_NONE = 0,
-            REGISTRATION_SUSPENDED_POLICY_MAINTAIN_AUDIO_ONLY = 1,
-            REGISTRATION_SUSPENDED_POLICY_MAINTAIN_ALL = 2
-        };
-
-        /**
-         * Specifies whether to use LTE preferred status for determining service capability.
-         *
-         * @unused
-         *
-         * Possible Values:
-         *   {@code true}
-         *   {@code false}
-         */
-        static const IMS_CHAR KEY_USE_LTE_PREFERRED_STATUS_FOR_SERVICE_CAPABILITY_BOOL[];
-        /**
-         * Specifies whether to allow an incoming hold request while in a conference call.
-         *
-         * @unused
-         *
-         * Possible Values:
-         *   {@code true}
-         *   {@code false}
-         */
-        static const IMS_CHAR KEY_ALLOW_INCOMING_HOLD_REQUEST_DURING_CONFERENCE_CALL_BOOL[];
-        /**
-         * Specifies whether to ignore a 180 Ringing response if a 183 Session Progress response has
-         * already been received.
-         *
-         * @unused
-         *
-         * Possible Values:
-         *   {@code true}
-         *   {@code false}
-         */
-        static const IMS_CHAR KEY_IGNORE_180_AFTER_183_RESPONSE_BOOL[];
-
-        /**
          * Specifies whether to add a Replaces header when inviting a participant to a conference.
          *
          * If {@code true}, "Require=replaces" extra header is added to the Refer-To header.
@@ -4010,30 +3892,6 @@ public:
         static const IMS_CHAR KEY_ENABLE_REGISTRATION_RECOVERY_ON_PRACK_TIMEOUT_BOOL[];
 
         /**
-         * Specifies whether to trigger registration recovery when a call is rejected due to a
-         * server error.
-         *
-         * @unused
-         *
-         * Possible Values:
-         *   {@code true}
-         *   {@code false}
-         */
-        static const IMS_CHAR
-                KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_REJECTED_BY_SERVER_ERROR_BOOL[];
-
-        /**
-         * Specifies whether to trigger registration recovery when call retry is unavailable.
-         *
-         * @unused
-         *
-         * Possible Values:
-         *   {@code true}
-         *   {@code false}
-         */
-        static const IMS_CHAR KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_RETRY_UNAVAILABLE_BOOL[];
-
-        /**
          * Specifies whether to trigger registration recovery when a BYE transaction times out.
          *
          * Possible Values:
@@ -4041,17 +3899,6 @@ public:
          *   {@code false}
          */
         static const IMS_CHAR KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_BYE_TRANSACTION_TIMEOUT_BOOL[];
-
-        /**
-         * Specifies whether to check for server outage reasons for VxLTE calls.
-         *
-         * @unused
-         *
-         * Possible Values:
-         *   {@code true}
-         *   {@code false}
-         */
-        static const IMS_CHAR KEY_CHECK_SERVER_OUTAGE_REASON_FOR_VXLTE_CALL_BOOL[];
 
         /**
          * Specifies whether to maintain multiple early sessions created by forking.
@@ -4601,16 +4448,6 @@ public:
             EVS_PRIMARY_MODE_BITRATE_96_0_KBPS = 10,
             EVS_PRIMARY_MODE_BITRATE_128_0_KBPS = 11
         };
-
-        // Unused. Duplicated {@code GEOLOCATION_PIDF_FOR_...}.
-        // Index for Geolocation-PIDF information level
-        enum
-        {
-            GEOLOCATION_PIDF_INFO_INDEX_EMERGENCY_CELLULAR = 0,
-            GEOLOCATION_PIDF_INFO_INDEX_EMERGENCY_WIFI = 1,
-            GEOLOCATION_PIDF_INFO_INDEX_CELLULAR = 2,
-            GEOLOCATION_PIDF_INFO_INDEX_WIFI = 3
-        };
     };
 
     class ImsVt
@@ -4926,13 +4763,6 @@ public:
         static const IMS_CHAR KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY[];
         static const IMS_CHAR KEY_NETWORK_INITIATED_USSD_OVER_IMS_SUPPORTED_BOOL[];
         // Public carrier-config - ends
-
-        // Unused. Using {@code CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_...}.
-        // ut terminal based services
-        enum
-        {
-            SUPPLEMENTARY_SERVICE_CW = 0,
-        };
     };
 
     /**

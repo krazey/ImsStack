@@ -922,8 +922,6 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALLER_ID_SERVICE_CODES_FOR_RESTRICT
         KEY_IMS_VOICE_PREFIX "caller_id_service_codes_for_restriction_string_array";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALLER_ID_SERVICE_CODES_FOR_IDENTITY_STRING_ARRAY[] =
         KEY_IMS_VOICE_PREFIX "caller_id_service_codes_for_identity_string_array";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_SHORT_CALL_CODE_INT_ARRAY[] =
-        KEY_IMS_VOICE_PREFIX "short_call_code_int_array";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_LOCAL_NUMBER_PRESENTATION_SET_STRING[] =
         KEY_IMS_VOICE_PREFIX "local_number_presentation_set_string";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL[] =
@@ -1224,38 +1222,14 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_
 const IMS_CHAR
         CarrierConfig::ImsVt::KEY_CHECK_AVCHANGE_FEATURE_FOR_CALL_CONVERTING_CAPABILITY_BOOL[] =
                 KEY_IMS_VT_PREFIX "check_avchange_feature_for_call_converting_capability_bool";
-const IMS_CHAR CarrierConfig::ImsVoice::
-        KEY_SUPPORT_REGISTRATION_RECOVERY_FOR_FAILURE_OF_SESSION_REFRESH_BOOL[] =
-                KEY_IMS_VOICE_PREFIX
-        "support_registration_recovery_for_failure_of_session_refresh_bool";
-const IMS_CHAR CarrierConfig::ImsVoice::
-        KEY_POLICY_FOR_CALL_MAINTAINING_ON_REGISTRATION_SUSPENDED_INT_ARRAY[] = KEY_IMS_VOICE_PREFIX
-        "policy_for_call_maintaining_on_registration_suspended_int_array";
-const IMS_CHAR CarrierConfig::ImsEmergency::
-        KEY_POLICY_FOR_REQUIRING_EMERGENCY_CALL_WHEN_VIDEO_EMERGENCY_CALL_FAILED_INT_ARRAY[] =
-                KEY_IMS_EMERGENCY_PREFIX
-        "policy_for_requiring_emergency_call_when_video_emergency_call_failed_int_array";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_USE_LTE_PREFERRED_STATUS_FOR_SERVICE_CAPABILITY_BOOL[] =
-        KEY_IMS_VOICE_PREFIX "use_lte_preferred_status_for_service_capability_bool";
-const IMS_CHAR
-        CarrierConfig::ImsVoice::KEY_ALLOW_INCOMING_HOLD_REQUEST_DURING_CONFERENCE_CALL_BOOL[] =
-                KEY_IMS_VOICE_PREFIX "allow_incoming_hold_request_during_conference_call_bool";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_IGNORE_180_AFTER_183_RESPONSE_BOOL[] =
-        KEY_IMS_VOICE_PREFIX "ignore_180_after_183_response_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_ADD_REPLACE_HEADER_FOR_CONFERENCE_BOOL[] =
         KEY_IMS_VOICE_PREFIX "add_replace_header_for_conference_bool";
 const IMS_CHAR CarrierConfig::ImsVt::KEY_VILTE_TO_VOLTE_RETRY_FAILURE_RESPONSE_CODE_INT_ARRAY[] =
         KEY_IMS_VT_PREFIX "vilte_to_volte_retry_failure_response_code_int_array";
-const IMS_CHAR
-        CarrierConfig::ImsEmergency::KEY_USE_EMERGENCY_NUMBER_TRANSLATION_IN_ROAMING_STATUS_BOOL[] =
-                KEY_IMS_EMERGENCY_PREFIX "use_emergency_number_translation_in_roaming_status_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_FOR_PRACK_DELIVERY_FAILURE_INT[] =
         KEY_IMS_VOICE_PREFIX "policy_for_prack_delivery_failure_int";
 const IMS_CHAR CarrierConfig::ImsVt::KEY_SUPPORT_VIDEO_CALL_ONLY_IN_VOPS_OFF_STATUS_BOOL[] =
         KEY_IMS_VT_PREFIX "support_video_call_only_in_vops_off_status_bool";
-const IMS_CHAR
-        CarrierConfig::ImsEmergency::KEY_BLOCK_WIFI_EMERGENCY_CALL_IF_NOT_PROVISIONED_BOOL[] =
-                KEY_IMS_EMERGENCY_PREFIX "block_wifi_emergency_call_if_not_provisioned_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_WIFI_EMERGENCY_18X_TIMER_MILLIS_INT[] =
         KEY_IMS_EMERGENCY_PREFIX "wifi_emergency_18x_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsVoice::
@@ -1268,19 +1242,10 @@ const IMS_CHAR CarrierConfig::ImsVoice::
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_ENABLE_REGISTRATION_RECOVERY_ON_PRACK_TIMEOUT_BOOL[] =
         KEY_IMS_VOICE_PREFIX "enable_registration_recovery_on_prack_timeout_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::
-        KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_REJECTED_BY_SERVER_ERROR_BOOL[] =
-                KEY_IMS_VOICE_PREFIX
-        "enable_registration_recovery_when_call_rejected_by_server_error_bool";
-const IMS_CHAR CarrierConfig::ImsVoice::
-        KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_RETRY_UNAVAILABLE_BOOL[] = KEY_IMS_VOICE_PREFIX
-        "enable_registration_recovery_when_call_retry_unavailable_bool";
-const IMS_CHAR CarrierConfig::ImsVoice::
         KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_BYE_TRANSACTION_TIMEOUT_BOOL[] = KEY_IMS_VOICE_PREFIX
         "enable_registration_recovery_when_bye_transaction_timeout_bool";
 const IMS_CHAR CarrierConfig::ImsWfc::KEY_REJECT_VOWIFI_VOICE_CALL_WHEN_VOWIFI_SETTING_OFF_BOOL[] =
         KEY_IMS_WFC_PREFIX "reject_vowifi_voice_call_when_vowifi_setting_off_bool";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_CHECK_SERVER_OUTAGE_REASON_FOR_VXLTE_CALL_BOOL[] =
-        KEY_IMS_VOICE_PREFIX "check_server_outage_reason_for_vxlte_call_bool";
 const IMS_CHAR CarrierConfig::ImsVt::
         KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL[] =
                 KEY_IMS_VT_PREFIX
