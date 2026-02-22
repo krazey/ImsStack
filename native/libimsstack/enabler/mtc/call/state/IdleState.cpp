@@ -571,7 +571,6 @@ void IdleState::SetResourceListForConference(IN_OUT IMessage& objMessage)
         objUsers.Append(m_pConfUsers.GetAt(i).get());
     }
 
-    // LGU needs to set bMultiPart = false
     m_objContext.GetMessageUtils().SetResourceList(&objMessage, objUsers, IMS_TRUE, IMS_TRUE);
 }
 
@@ -669,7 +668,6 @@ AString IdleState::RemoveCallerIdServiceCodeAndUpdateSuppService(IN const AStrin
     if (m_objContext.GetCallInfo().IsEmergency())
     {
         // TODO: b/382332088
-        // imsemergency.caller_id_service_codes_for_restriction_string_array for JP carriers.
         return strTarget;
     }
 

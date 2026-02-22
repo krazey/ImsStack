@@ -49,8 +49,6 @@ PUBLIC VIRTUAL WfcBlockRule::Result WfcBlockRule::Check(
     }
 
     // On WLAN, but WFC is OFF and cellular voice is not available. Only one video call is allowed.
-    // VZW Requirements - VZ_REQ_VOWIFI_6230932, VZ_REQ_RCS_32003
-
     if (!IsVideoCall(m_eCallType))
     {
         IMS_TRACE_D("Wi-Fi voice call is unavailable", 0, 0, 0);

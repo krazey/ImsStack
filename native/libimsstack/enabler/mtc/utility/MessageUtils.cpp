@@ -1547,7 +1547,6 @@ PRIVATE AString MessageUtils::CreateEntryUri(IN const ConfUser& objUser, IN IMS_
         return objUser.strTarget;
     }
 
-    // KDDI carrier requires 3GPP 24.147 5.3.1.5.4
     // <entry uri="[SIP-URI]?[Call-ID]?[From header including tag value];
     // [To header including tag value];[Session-ID]
     // <entry uri="B?Call-ID=1a&amp;From=A%3Btag%3Da1&amp;To=B%3Btag%3Db&amp;Session-ID=1"

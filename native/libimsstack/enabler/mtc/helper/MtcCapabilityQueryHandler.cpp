@@ -58,8 +58,6 @@ PUBLIC VIRTUAL MtcCapabilityQueryHandler::~MtcCapabilityQueryHandler() {}
 PUBLIC VIRTUAL IMS_RESULT MtcCapabilityQueryHandler::MessageMediator_AdjustMessage(
         IN_OUT ISipMessage* piSipMessage, IN IMS_SINT32 /*nMessage*/)
 {
-    // invoked only case VZW - USE_CARRIER_SPECIFIC_CONTACT_HEADER_FOR_OPTIONS_RESPONSE is on
-
     ISipHeader* piContactHeader = SipParsingHelper::CreateHeader(
             ISipHeader::CONTACT_NORMAL, piSipMessage->GetHeader(ISipHeader::CONTACT_NORMAL));
     piContactHeader->RemoveParameter("text");

@@ -541,7 +541,7 @@ PUBLIC VIRTUAL JniCallInfo MtcCall::CreateJniCallInfo()
     objJniCallInfo.bOffline = m_objCallInfo.bOffline;
     objJniCallInfo.bUssi = m_objCallInfo.bUssi;
     objJniCallInfo.bConference = m_objCallInfo.bConference;
-    objJniCallInfo.bConferenceEnabled = IMS_FALSE;  // Conference extension for SKT
+    objJniCallInfo.bConferenceEnabled = IMS_FALSE;  // Enabled when Conference expansion is enabled.
     objJniCallInfo.bConferenceSubscriptionRequired =
             m_objContext.GetConfigurationProxy().GetInt(
                     ConfigVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT) !=

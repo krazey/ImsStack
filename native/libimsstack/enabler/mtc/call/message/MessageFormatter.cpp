@@ -120,13 +120,14 @@ PUBLIC VIRTUAL void MessageFormatter::ReasonHeaderSetter_SetPrivateHeader(
     if (objConfig.Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
                 MessageUtil::STR_P_SKT_BYE_CAUSE))
     {
-        const AString strPSktByeCause(MessageUtil::STR_P_SKT_BYE_CAUSE);
-        AString strByeCause = piOldSipMsg->GetHeader(ISipHeader::UNKNOWN, 0, strPSktByeCause);
+        const AString strCarrierSpecificByeCause(MessageUtil::STR_P_SKT_BYE_CAUSE);
+        AString strByeCause =
+                piOldSipMsg->GetHeader(ISipHeader::UNKNOWN, 0, strCarrierSpecificByeCause);
         IMS_TRACE_D("ReasonHeaderSetter_SetPrivateHeader [%s]", strByeCause.GetStr(), 0, 0);
 
         if (strByeCause.GetLength() > 0)
         {
-            piNewSipMsg->SetHeader(ISipHeader::UNKNOWN, strByeCause, strPSktByeCause);
+            piNewSipMsg->SetHeader(ISipHeader::UNKNOWN, strByeCause, strCarrierSpecificByeCause);
         }
     }
 }
@@ -599,7 +600,8 @@ void MessageFormatter::SetCarrierSpecificHeaders()
         }
     }
 
-    // Assumes only VZW supports CALL_PULL and it's a carrier specific feature.
+    // If there comes more carriers require CALL PULL feature but no P_Com. header, this should be
+    // updated.
     if (m_objContext.GetSupplementaryService().Get(SuppType::CALL_PULL))
     {
         if (m_eFormType == FormType::START)

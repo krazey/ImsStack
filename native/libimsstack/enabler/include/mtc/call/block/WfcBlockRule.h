@@ -26,8 +26,6 @@ class IImsRadio;
  * This class checks the condition where the UE is registered on the Wi-Fi but WFC is off.
  * In this case, voice calls should be blocked if voice call on cellular network is unavailable for
  * any reason: including VoPS off or voice SSAC barring.
- *
- * It covers Verizon's requirement VZ_REQ_VOWIFI_6230932. See {@code MtcRoutingRejectHandler} too.
  */
 class WfcBlockRule final : public IMtcBlockRule
 {

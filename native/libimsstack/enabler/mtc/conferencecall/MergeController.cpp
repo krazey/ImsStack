@@ -227,7 +227,6 @@ void MergeController::UpdateUserStateByCallTerminated(IN IMS_UINTP nCallKey)
 {
     IMS_TRACE_I("UpdateUserStateByCallTerminated : key[%d]", nCallKey, 0, 0);
 
-    // KDDI
     for (IMS_UINT32 i = 0; i < m_pParticipantList->GetSize(); i++)
     {
         ConfUser* pUser = m_pParticipantList->GetConfUser(i);

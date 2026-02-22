@@ -1021,7 +1021,7 @@ TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderDoesNotSetReasonHeadersB
     }
 }
 
-TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderSetsReasonHeadersByVzwConfiguration)
+TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderSetsReasonHeadersByConfiguration1)
 {
     const AString strReasonHeaderValue("USER;text=\"Session Expired\"");
     ON_CALL(objConfigurationProxy,
@@ -1049,7 +1049,7 @@ TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderSetsReasonHeadersByVzwCo
     }
 }
 
-TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderSetsReasonHeadersByKrConfiguration)
+TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderSetsReasonHeadersByConfiguration2)
 {
     const AString strCarrierSpecificHeader(MessageUtil::STR_P_SKT_BYE_CAUSE);
     ON_CALL(objConfigurationProxy,
@@ -1092,26 +1092,27 @@ TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderSetsReasonHeadersByKrCon
     }
 }
 
-TEST_F(MessageFormatterTest, ReasonHeaderSetterSetPrivateHeaderSetsPrivateHeaderByKrConfiguration)
+TEST_F(MessageFormatterTest, ReasonHeaderSetterSetPrivateHeaderSetsPrivateHeaderByConfiguration)
 {
     ON_CALL(objConfigurationProxy,
             Contains(ConfigVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY,
                     MessageUtil::STR_P_SKT_BYE_CAUSE))
             .WillByDefault(Return(IMS_TRUE));
 
-    const AString strPSktByeCause(MessageUtil::STR_P_SKT_BYE_CAUSE);
+    const AString strCarrierSpecificByeCause(MessageUtil::STR_P_SKT_BYE_CAUSE);
     MockISipMessage objOldMessage;
     MockISipMessage objNewMessage;
 
-    ON_CALL(objOldMessage, GetHeader(ISipHeader::UNKNOWN, 0, strPSktByeCause))
+    ON_CALL(objOldMessage, GetHeader(ISipHeader::UNKNOWN, 0, strCarrierSpecificByeCause))
             .WillByDefault(Return(AString::ConstEmpty()));
     EXPECT_CALL(objNewMessage, SetHeader(_, _, _)).Times(0);
     pFormatter->ReasonHeaderSetter_SetPrivateHeader(&objOldMessage, &objNewMessage);
 
     const AString strAnyCause("anyCause");
-    ON_CALL(objOldMessage, GetHeader(ISipHeader::UNKNOWN, 0, strPSktByeCause))
+    ON_CALL(objOldMessage, GetHeader(ISipHeader::UNKNOWN, 0, strCarrierSpecificByeCause))
             .WillByDefault(Return(strAnyCause));
-    EXPECT_CALL(objNewMessage, SetHeader(ISipHeader::UNKNOWN, strAnyCause, strPSktByeCause));
+    EXPECT_CALL(
+            objNewMessage, SetHeader(ISipHeader::UNKNOWN, strAnyCause, strCarrierSpecificByeCause));
 
     pFormatter->ReasonHeaderSetter_SetPrivateHeader(&objOldMessage, &objNewMessage);
 }
