@@ -1076,7 +1076,7 @@ public:
         static const IMS_CHAR KEY_REREG_ERR_CODE_FOR_IMS_PDN_REACTIVATION_INT_ARRAY[];
 
         /**
-         * Specifies the error codes of the reregistration followed by intital registration
+         * Specifies the error codes of the reregistration followed by initial registration
          * with available PCSCF. If no available PCSCF, IMS PDN is re-activated.
          *
          * Possible Values:
@@ -1326,7 +1326,7 @@ public:
          *   NOTIFY_TERMINATED_EXPIRED (1)
          *   NOTIFY_TERMINATED_DEACTIVATED (2)
          *   NOTIFY_TERMINATED_PROBATION (3)
-         *   NOTIFY_TERMINATED_UNREGITERED (4)
+         *   NOTIFY_TERMINATED_UNREGISTERED (4)
          *   NOTIFY_TERMINATED_REJECTED (5)
          */
         static const IMS_CHAR KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY[];
@@ -1340,7 +1340,7 @@ public:
          *   NOTIFY_TERMINATED_EXPIRED (1)
          *   NOTIFY_TERMINATED_DEACTIVATED (2)
          *   NOTIFY_TERMINATED_PROBATION (3)
-         *   NOTIFY_TERMINATED_UNREGITERED (4)
+         *   NOTIFY_TERMINATED_UNREGISTERED (4)
          *   NOTIFY_TERMINATED_REJECTED (5)
          */
         static const IMS_CHAR
@@ -1349,7 +1349,7 @@ public:
 
         // Bundle {
         /**
-         * Specifies include information to control PSCSF recovery condition of each carrier
+         * Specifies include information to control PCSCF recovery condition of each carrier
          * with mutable value.
          */
         static const IMS_CHAR KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE[];
@@ -1366,7 +1366,7 @@ public:
 
         /**
          * Specifies wait time in seconds before retrying PCSCF recovery.
-         * This is used as waiting time for PCSCF recovery during fail count is unter max count.
+         * This is used as waiting time for PCSCF recovery during fail count is under max count.
          * If valid PCSCF acquisition fails during this time, IMS PDN reestablishment will be
          * requested for PCSCF recovery.
          *
@@ -1453,7 +1453,7 @@ public:
 
         /**
          * Specifies the length of the timer shall be any seconds plus random value
-         * that shall have an uper bound of the value.
+         * that shall have an upper bound of the value.
          *
          * Possible Values:
          *   {@code 0, 0, 15, 0, 0}
@@ -1520,7 +1520,7 @@ public:
         static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_CNT_INT[];
 
         /**
-         * Specifies information what error responses against SUBSCRIBE mag for the reg event
+         * Specifies information what error responses against SUBSCRIBE message for the reg event
          * package to handle not trying ims subscription.
          *
          * ("Timer F" should be replaced to 0 when error response argument is represented)
@@ -1597,7 +1597,7 @@ public:
             REG_EVENT_TERMINATED_REASON_EXPIRED = 1,
             REG_EVENT_TERMINATED_REASON_DEACTIVATED = 2,
             REG_EVENT_TERMINATED_REASON_PROBATION = 3,
-            REG_EVENT_TERMINATED_REASON_UNREGITERED = 4,
+            REG_EVENT_TERMINATED_REASON_UNREGISTERED = 4,
             REG_EVENT_TERMINATED_REASON_REJECTED = 5
         };
     };
@@ -1817,7 +1817,7 @@ public:
         static const IMS_CHAR KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL[];
 
         /**
-         * Specifies if GIBA(GPRS-IMS-Bundled authentication) is support for emergency
+         * Specifies if GIBA(GPRS-IMS-Bundled Authentication) is supported for emergency
          * registration in roaming.
          *
          * Possible Values:
@@ -1933,7 +1933,7 @@ public:
         static const IMS_CHAR KEY_ROAMING_PREFERRED_EREG_INT[];
 
         /**
-         * Specifies the error codes of emergency registration which does not supported the
+         * Specifies the error codes of emergency registration which does not support the
          * common policy.
          *
          * Possible Values:
@@ -2447,7 +2447,7 @@ public:
 
         // Aos
         /**
-         * Specifies whether registration mode to limited mode when ISIM is inactivated.
+         * Specifies whether registration mode to limited mode when ISIM is deactivated.
          *
          * Only sending admin SMS and receiving admin/normal SMS is allowed in the
          * limited mode.
@@ -3869,7 +3869,7 @@ public:
             MO_CALL_REQUEST_TIMEOUT_POLICY_CALL_END = 0,
             MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_PCSCF_DISCOVERY_AFTER_CSFB = 1,
             MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB = 2,
-            MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_AFTER_CSFB_IF_AVAILBLE = 3,
+            MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_AFTER_CSFB_IF_AVAILABLE = 3,
             MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_CURRENT_PCSCF = 4,
             MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_NEXT_PCSCF = 5,
             MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_WITH_PDN_RECONNECT_AFTER_CSFB = 6,
@@ -4844,7 +4844,7 @@ public:
         /**
          * This WFC error message is not supported if empty.
          *
-         * The information to be displayed are written f it is supported.
+         * The information to be displayed is written if it is supported.
          *
          * Possible Values:
          *   REG90 - Unable to Connect
@@ -4854,7 +4854,7 @@ public:
         /**
          * This WFC error message is not supported if empty.
          *
-         * The information to be displayed are written f it is supported.
+         * The information to be displayed is written if it is supported.
          *
          * Possible Values:
          *   REG91 - Unable to Connect
@@ -4864,7 +4864,7 @@ public:
         /**
          * This WFC error message is not supported if empty.
          *
-         * The information to be displayed are written f it is supported.
+         * The information to be displayed is written if it is supported.
          *
          * Possible Values:
          *   REG92 - Wi-Fi Calling isn't supported in this country
@@ -4874,7 +4874,7 @@ public:
         /**
          * This WFC error message is not supported if empty.
          *
-         * The information to be displayed are written f it is supported.
+         * The information to be displayed is written if it is supported.
          *
          * Possible Values:
          *   REG09 - Missing 911 Address
@@ -4884,7 +4884,7 @@ public:
         /**
          * This WFC error message is not supported if empty.
          *
-         * The information to be displayed are written f it is supported.
+         * The information to be displayed is written if it is supported.
          *
          * Possible Values:
          *   REG09 - Missing 911 Address
@@ -4894,7 +4894,7 @@ public:
         /**
          * This WFC error message is not supported if empty.
          *
-         * The information to be displayed are written f it is supported.
+         * The information to be displayed is written if it is supported.
          *
          * Possible Values:
          *   REG99 - Unable to Connect
