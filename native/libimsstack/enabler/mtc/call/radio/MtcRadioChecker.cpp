@@ -123,6 +123,13 @@ PUBLIC VIRTUAL IMtcRadioChecker::CheckResult MtcRadioChecker::Check(IN CallType 
     {
         m_nRegistrationThrottlingTimeMillis = 0;
 
+        if (eCallDirection == IImsRadio::DIRECTION_MO)
+        {
+            // If there is an identical call key already existing in another MtcTrafficInfo, remove
+            // it. This is to handle changes in the call type before INVITE is sent.
+            RemoveCallKeyAndStopTrafficCheckingIfNeeded(nCallKey, IMS_TRUE);
+        }
+
         // Traffic info not found. Initiate new traffic type and direction for checking.
         pMtcTrafficInfo = CreateCallTrafficInfo(eTrafficType, eCallDirection, eRatType);
         AddCallKey(*pMtcTrafficInfo, nCallKey);
@@ -338,9 +345,10 @@ PRIVATE void MtcRadioChecker::AddCallKey(IN MtcTrafficInfo& objMtcTrafficInfo, I
             nCallKey, 0);
 }
 
-PRIVATE void MtcRadioChecker::RemoveCallKeyAndStopTrafficCheckingIfNeeded(IN CallKey nCallKeyIn)
+PRIVATE void MtcRadioChecker::RemoveCallKeyAndStopTrafficCheckingIfNeeded(
+        IN CallKey nCallKeyIn, IN IMS_BOOL bForceRemove)
 {
-    if (!IsCallTerminated(nCallKeyIn))
+    if (!bForceRemove && !IsCallTerminated(nCallKeyIn))
     {
         return;  // Silent redialing, no need to stop the traffic
     }

@@ -818,4 +818,44 @@ TEST_F(MtcRadioCheckerTest, MtcTrafficInfoNotifiesListenerForImsRadioOnConnectio
     m_piImsRadioConnectionListener->ImsRadio_OnConnectionSetupPrepared();
 }
 
+TEST_F(MtcRadioCheckerTest, CheckRemovesCallKeyFromOldTrafficInfoIfTrafficTypeChanged)
+{
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    // 1. Check with VOIP (Voice)
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
+            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN,
+                    IImsRadio::DIRECTION_MO, _))
+            .Times(1)
+            .WillOnce(WithArgs<3>(
+                    Invoke(this, &MtcRadioCheckerTest::CaptureIImsRadioConnectionListener)));
+
+    EXPECT_EQ(IMtcRadioChecker::CheckResult::Pending(),
+            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
+
+    IImsRadioConnectionListener* pVoiceListener = m_piImsRadioConnectionListener;
+    ASSERT_TRUE(pVoiceListener != IMS_NULL);
+
+    // 2. Check with VT (Video) for the same CALL_KEY1.
+    // This should trigger removal of CALL_KEY1 from Voice TrafficInfo.
+    // Since Voice TrafficInfo becomes empty, StopImsTraffic should be called for it.
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
+            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN,
+                    IImsRadio::DIRECTION_MO, _))
+            .Times(1);
+
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(pVoiceListener)).Times(1);
+    EXPECT_EQ(IMtcRadioChecker::CheckResult::Pending(),
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO,
+                    INetworkWatcher::RADIOTECH_TYPE_LTE, IMS_FALSE, CALL_KEY1));
+
+    ::testing::Mock::VerifyAndClearExpectations(&m_objImsRadioService.GetMockImsRadio());
+
+    // Reset the default rule (AnyNumber) for subsequent calls such as DeInit().
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_))
+            .Times(::testing::AnyNumber());
+}
+
 }  // namespace android
