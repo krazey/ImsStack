@@ -235,7 +235,6 @@ private:
     IMS_BOOL m_bVisibleCmr;
     IMS_BOOL m_bVisibleEvsModeSwitch;  // Indicate whether EvsModeSwitch attribute to display in SDP
     IMS_BOOL m_bVisibleChannelAwMode;  // Indicate whether channel-aware mode to display in SDP
-    IMS_BOOL m_bVisibleAmrIOModeSet;
     IMS_BOOL m_bVisibleChAwRecv;
 
     IMS_BOOL m_bDtxRecv;          // 1(default) is turn on DTX
@@ -244,8 +243,6 @@ private:
     IMS_SINT32 m_nBrList;         // EVS primary mode bitrate range (kbps)
     IMS_SINT32 m_nBwList;  // bw has a value from the set: nb, wb, swb, fb, nb-wb, nb-swb, and nb-fb
     IMS_SINT32 m_nCmr;
-    IMS_UINT32 m_nAmrIOModeSetList;
-    IMS_UINT32 m_nDefaultAmrIOModeSetList;
     IMS_SINT32 m_nChAwRecv;  // -1: disabled / 0(default)
 };
 

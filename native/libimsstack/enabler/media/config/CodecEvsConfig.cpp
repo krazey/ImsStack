@@ -48,7 +48,6 @@ CodecEvsConfig::CodecEvsConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNu
         m_bVisibleCmr(IMS_FALSE),
         m_bVisibleEvsModeSwitch(IMS_FALSE),
         m_bVisibleChannelAwMode(IMS_FALSE),
-        m_bVisibleAmrIOModeSet(IMS_FALSE),
         m_bVisibleChAwRecv(IMS_FALSE),
         m_bDtxRecv(DEFAULT_DTX_RECV),
         m_nHfOnly(DEFAULT_HF_ONLY),
@@ -56,8 +55,6 @@ CodecEvsConfig::CodecEvsConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNu
         m_nBrList(DEFAULT_BR_LIST),
         m_nBwList(DEFAULT_BW_LIST),
         m_nCmr(DEFAULT_CMR),
-        m_nAmrIOModeSetList(DEFAULT_MODESET_AMRWB),
-        m_nDefaultAmrIOModeSetList(DEFAULT_MODESET_AMRWB),
         m_nChAwRecv(DEFAULT_CH_AW_RECV)
 {
 }
@@ -267,22 +264,18 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
         }
 
         // From the internal Asset.
-        m_bVisibleAmrIOModeSet = piCc->GetBoolean(
-                CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL,
-                IMS_FALSE);
-        SetVisibleModeSet(m_bVisibleAmrIOModeSet);
-
-        m_nAmrIOModeSetList = static_cast<IMS_UINT32>(
-                piCc->GetInt(CarrierConfig::ImsVoice::KEY_EVS_AMRWB_IO_MODE_SET_INT,
-                        CodecAudioConfig::DEFAULT_MODESET_AMRWB));
-        SetModeSetList(m_nAmrIOModeSetList);
-
         ImsVector<IMS_SINT32> objCodecDefaultModeset = piCc->GetIntArray(
                 CarrierConfig::ImsVoice::KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY);
-        IMS_SINT32 nDefaultModeSetList = ConvertModeSetList(objCodecDefaultModeset);
-        SetDefaultModeSetList(nDefaultModeSetList);
-        // TODO(b/414484057) : need to change the default value like the amrcodec and check the
-        // display asset for the AMR-IO mode again
+
+        IMS_SINT32 nModeSetList = CodecAudioConfig::FULL_MODESET_AMRWB;
+        if (!objCodecDefaultModeset.IsEmpty())
+        {
+            nModeSetList = ConvertModeSetList(objCodecDefaultModeset);
+        }
+        SetModeSetList(nModeSetList);
+        SetDefaultModeSetList(nModeSetList);
+        SetVisibleModeSet(IMS_FALSE);
+
         piCcSubBundle->ReleaseBundle();
     }
 
@@ -531,7 +524,5 @@ PUBLIC VIRTUAL void CodecEvsConfig::CreateDefaultEvsCodec()
     SetModeChangeNeighbor(CodecAudioConfig::DEFAULT_MODECHANGE_NEIGHBOR);
     SetVisibleModeChangeNeighbor(IMS_FALSE);
 
-    m_bVisibleAmrIOModeSet = IMS_FALSE;
-    m_nAmrIOModeSetList = CodecAudioConfig::DEFAULT_MODESET_AMRWB;
     SetDefaultModeSetList(CodecAudioConfig::FULL_MODESET_AMRWB);
 }
