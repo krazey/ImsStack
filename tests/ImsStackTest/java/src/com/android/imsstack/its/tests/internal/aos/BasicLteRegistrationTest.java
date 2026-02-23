@@ -70,7 +70,9 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
 
     @After
     public void tearDown() throws Exception {
-        mServerControlConnection.disconnect();
+        if (mServerControlConnection != null) {
+            mServerControlConnection.disconnect();
+        }
         tearDownBase(SLOT0);
 
         mEventLatch.sleep(SingleLatch.LONG_SLEEP_MS);
@@ -100,12 +102,9 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
         generator.addMessages("<200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        RegistrationInfo regInfo = mInfoBuilder.build();
+        triggerRegistration();
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        mRegistration.expect().registered(
-                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
+        verifyRegistered(REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -145,10 +144,9 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .build();
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
+        triggerRegistration(regInfo);
 
-        mRegistration.expect().registered(
-                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
+        verifyRegistered(REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -188,10 +186,9 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .build();
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
+        triggerRegistration(regInfo);
 
-        mRegistration.expect().registered(
-                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
+        verifyRegistered(REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -228,10 +225,9 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .build();
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
+        triggerRegistration(regInfo);
 
-        mRegistration.expect().registered(
-                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
+        verifyRegistered(REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -274,18 +270,14 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
         generator.addMessages("<200-REGISTER");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        RegistrationInfo regInfo = mInfoBuilder.build();
+        triggerRegistration();
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        mRegistration.expect().registered(
-                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
+        verifyRegistered(REGISTRATION_TECH_LTE);
 
         changeMmTelCapability(false, CAPABILITY_TYPE_VIDEO,
                 REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN);
 
-        mRegistration.expect().registered(
-                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
+        verifyRegistered(REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -338,16 +330,14 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
                         REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN)
                 .build();
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
+        triggerRegistration(regInfo);
 
-        mRegistration.expect().registered(
-                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
+        verifyRegistered(REGISTRATION_TECH_LTE);
 
         changeMmTelCapability(true, CAPABILITY_TYPE_VIDEO,
                 REGISTRATION_TECH_LTE, REGISTRATION_TECH_NR, REGISTRATION_TECH_IWLAN);
 
-        mRegistration.expect().registered(
-                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
+        verifyRegistered(REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -375,11 +365,9 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
         mConfig.putInt(CarrierConfig.Ims.KEY_REGISTRATION_PREFERRED_ACCESSTYPE_FEATURE_TAG_INT,
                 PREFERRED_ACCESSTYPE_FEATURE_TAG_DISABLED);
 
-        RegistrationInfo regInfo = mInfoBuilder.addConfig(mConfig).build();
-        mRegistrationHelper.triggerRegistration(this, regInfo);
+        triggerRegistration(mConfig);
 
-        mRegistration.expect().registered(
-                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
+        verifyRegistered(REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -407,11 +395,9 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
         mConfig.putInt(CarrierConfig.Ims.KEY_REGISTRATION_PREFERRED_ACCESSTYPE_FEATURE_TAG_INT,
                 PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED);
 
-        RegistrationInfo regInfo = mInfoBuilder.addConfig(mConfig).build();
-        mRegistrationHelper.triggerRegistration(this, regInfo);
+        triggerRegistration(mConfig);
 
-        mRegistration.expect().registered(
-                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
+        verifyRegistered(REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -440,11 +426,9 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
         mConfig.putInt(CarrierConfig.Ims.KEY_REGISTRATION_PREFERRED_ACCESSTYPE_FEATURE_TAG_INT,
                 PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED_WITHOUT_NUMERICAL_VALUE);
 
-        RegistrationInfo regInfo = mInfoBuilder.addConfig(mConfig).build();
-        mRegistrationHelper.triggerRegistration(this, regInfo);
+        triggerRegistration(mConfig);
 
-        mRegistration.expect().registered(
-                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
+        verifyRegistered(REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -462,16 +446,9 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
         generator.addMessages("<305-REGISTER");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        RegistrationInfo regInfo = mInfoBuilder.build();
+        triggerRegistration();
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        mRegistration.expect().registering();
-
-        mRegistration.expect().deregistered(
-                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
-                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
-                networkType -> networkType == REGISTRATION_TECH_LTE);
+        verifyDeregistered(REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -490,13 +467,9 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
                 "<423-REGISTER | >REGISTER | <200-REGISTER | >SUBSCRIBE | <200-SUBSCRIBE");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        RegistrationInfo regInfo = mInfoBuilder.build();
-        mRegistrationHelper.triggerRegistration(this, regInfo);
+        triggerRegistration();
 
-        mRegistration.expect().registering();
-
-        mRegistration.expect().registered(
-                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
+        verifyRegistered(REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -524,18 +497,9 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
-        RegistrationInfo regInfo = mInfoBuilder
-                .addConfig(mConfig)
-                .build();
+        triggerRegistration(mConfig);
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        mRegistration.expect().registering();
-
-        mRegistration.expect().deregistered(
-                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
-                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
-                networkType -> networkType == REGISTRATION_TECH_LTE);
+        verifyDeregistered(REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -563,18 +527,11 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
-        RegistrationInfo regInfo = mInfoBuilder
-                .addConfig(mConfig)
-                .build();
+        triggerRegistration(mConfig);
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        mRegistration.expect().registering();
-
-        mRegistration.expect().deregistered(
-                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
-                action -> action == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK,
-                networkType -> networkType == REGISTRATION_TECH_LTE);
+        verifyDeregisteredWithAction(
+                RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK,
+                REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -602,19 +559,11 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
-        RegistrationInfo regInfo = mInfoBuilder
-                .addConfig(mConfig)
-                .build();
+        triggerRegistration(mConfig);
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        mRegistration.expect().registering();
-
-        mRegistration.expect().deregistered(
-                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
-                action -> action
-                        == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
-                networkType -> networkType == REGISTRATION_TECH_LTE);
+        verifyDeregisteredWithAction(
+                RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
+                REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -642,18 +591,11 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
-        RegistrationInfo regInfo = mInfoBuilder
-                .addConfig(mConfig)
-                .build();
+        triggerRegistration(mConfig);
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        mRegistration.expect().registering();
-
-        mRegistration.expect().deregistered(
-                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
-                action -> action == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK,
-                networkType -> networkType == REGISTRATION_TECH_LTE);
+        verifyDeregisteredWithAction(
+                RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK,
+                REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -681,19 +623,11 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
-        RegistrationInfo regInfo = mInfoBuilder
-                .addConfig(mConfig)
-                .build();
+        triggerRegistration(mConfig);
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        mRegistration.expect().registering();
-
-        mRegistration.expect().deregistered(
-                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
-                action -> action
-                        == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
-                networkType -> networkType == REGISTRATION_TECH_LTE);
+        verifyDeregisteredWithAction(
+                RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
+                REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -722,19 +656,9 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
-        RegistrationInfo regInfo = mInfoBuilder
-                .addConfig(mConfig)
-                .build();
+        triggerRegistration(mConfig);
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        mRegistration.expect().registering();
-
-        mRegistration.expect().deregistered(
-                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
-                action -> action
-                        == RegistrationManager.SUGGESTED_ACTION_NONE,
-                networkType -> networkType == REGISTRATION_TECH_LTE);
+        verifyDeregistered(REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -768,15 +692,11 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
                 .setServiceState(buildLteEpsOnlyServiceState())
                 .build();
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
+        triggerRegistration(regInfo);
 
-        mRegistration.expect().registering();
-
-        mRegistration.expect().deregistered(
-                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
-                action -> action
-                        == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
-                networkType -> networkType == REGISTRATION_TECH_LTE);
+        verifyDeregisteredWithAction(
+                RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
+                REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -804,19 +724,11 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
-        RegistrationInfo regInfo = mInfoBuilder
-                .addConfig(mConfig)
-                .build();
+        triggerRegistration(mConfig);
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        mRegistration.expect().registering();
-
-        mRegistration.expect().deregistered(
-                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
-                action -> action
-                        == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
-                networkType -> networkType == REGISTRATION_TECH_LTE);
+        verifyDeregisteredWithAction(
+                RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
+                REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -848,20 +760,11 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
-        RegistrationInfo regInfo = mInfoBuilder
-                .addConfig(mConfig)
-                .build();
+        triggerRegistration(mConfig);
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        mRegistration.expect().registering();
-
-        mRegistration.expect().deregistered(
-                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
-                action -> action
-                        == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
-                networkType -> networkType == REGISTRATION_TECH_LTE);
-
+        verifyDeregisteredWithAction(
+                RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
+                REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -889,19 +792,11 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
-        RegistrationInfo regInfo = mInfoBuilder
-                .addConfig(mConfig)
-                .build();
+        triggerRegistration(mConfig);
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        mRegistration.expect().registering();
-
-        mRegistration.expect().deregistered(
-                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
-                action -> action
-                        == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
-                networkType -> networkType == REGISTRATION_TECH_LTE);
+        verifyDeregisteredWithAction(
+                RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
+                REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -933,19 +828,11 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
         mConfig.putPersistableBundle(
                 CarrierConfig.Ims.KEY_EXTRA_REG_ERR_BUNDLE, objExtraRegErrBundle);
 
-        RegistrationInfo regInfo = mInfoBuilder
-                .addConfig(mConfig)
-                .build();
+        triggerRegistration(mConfig);
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        mRegistration.expect().registering();
-
-        mRegistration.expect().deregistered(
-                info -> info.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR,
-                action -> action
-                        == RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
-                networkType -> networkType == REGISTRATION_TECH_LTE);
+        verifyDeregisteredWithAction(
+                RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
+                REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -969,10 +856,9 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
                 .addConfig(mConfig)
                 .build();
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
+        triggerRegistration(regInfo);
 
-        mRegistration.expect().registered(
-                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
+        verifyRegistered(REGISTRATION_TECH_LTE);
 
         mRegistration.expect(3000).nothing();
 
@@ -982,8 +868,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
         notifyPreciseDataConnectionState(getIwlanPreciseDataConnectionState(
                 TelephonyManager.DATA_CONNECTED), regInfo.getSlotId());
 
-        mRegistration.expect(20000).registered(
-                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_IWLAN);
+        verifyRegistered(REGISTRATION_TECH_IWLAN);
     }
 
     @Test
@@ -1008,12 +893,9 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
         generator.addMessages("<200-SUBSCRIBE");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        RegistrationInfo regInfo = mInfoBuilder.build();
+        triggerRegistration();
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        mRegistration.expect().registered(
-                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
+        verifyRegistered(REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -1031,18 +913,14 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
         generator.addMessages(">200-NOTIFY");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        RegistrationInfo regInfo = mInfoBuilder.build();
+        triggerRegistration();
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
+        verifyRegistered(REGISTRATION_TECH_LTE);
 
-        mRegistration.expect().registered(
-                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
-
-        mRegistration.expect().deregistered(
-                reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
-                        && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
-                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
-                networkType -> networkType == REGISTRATION_TECH_LTE);
+        verifyDeregisteredWithReason(
+                ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                ImsReasonInfo.CODE_NETWORK_DETACH,
+                REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -1070,23 +948,16 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
                 CarrierConfig.Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
                 objNotifyTerminatedForInitRegUsedEvenBundle);
 
-        RegistrationInfo regInfo = mInfoBuilder
-                .addConfig(mConfig)
-                .build();
+        triggerRegistration(mConfig);
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
+        verifyRegistered(REGISTRATION_TECH_LTE);
 
-        mRegistration.expect().registered(
-                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
+        verifyDeregisteredWithReason(
+                ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                ImsReasonInfo.CODE_NETWORK_DETACH,
+                REGISTRATION_TECH_LTE);
 
-        mRegistration.expect().deregistered(
-                reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
-                        && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
-                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
-                networkType -> networkType == REGISTRATION_TECH_LTE);
-
-        mRegistration.expect().registered(
-                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
+        verifyRegistered(REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -1103,15 +974,12 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
         generator.addMessages(">200-NOTIFY");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        RegistrationInfo regInfo = mInfoBuilder.build();
+        triggerRegistration();
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        mRegistration.expect().deregistered(
-                reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
-                        && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
-                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
-                networkType -> networkType == REGISTRATION_TECH_LTE);
+        verifyDeregisteredWithReason(
+                ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                ImsReasonInfo.CODE_NETWORK_DETACH,
+                REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -1139,20 +1007,14 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
                 CarrierConfig.Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
                 objNotifyTerminatedForInitRegUsedEvenBundle);
 
-        RegistrationInfo regInfo = mInfoBuilder
-                .addConfig(mConfig)
-                .build();
+        triggerRegistration(mConfig);
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
+        verifyDeregisteredWithReason(
+                ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                ImsReasonInfo.CODE_NETWORK_DETACH,
+                REGISTRATION_TECH_LTE);
 
-        mRegistration.expect().deregistered(
-                reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
-                        && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
-                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
-                networkType -> networkType == REGISTRATION_TECH_LTE);
-
-        mRegistration.expect().registered(
-                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
+        verifyRegistered(REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -1170,15 +1032,12 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
         generator.addMessages(">200-NOTIFY");
         mServerControlConnection.sendControlCommand(generator.build().toString());
 
-        RegistrationInfo regInfo = mInfoBuilder.build();
+        triggerRegistration();
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
-
-        mRegistration.expect().deregistered(
-                reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
-                        && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
-                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
-                networkType -> networkType == REGISTRATION_TECH_LTE);
+        verifyDeregisteredWithReason(
+                ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                ImsReasonInfo.CODE_NETWORK_DETACH,
+                REGISTRATION_TECH_LTE);
     }
 
     @Test
@@ -1207,19 +1066,13 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
                 CarrierConfig.Ims.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
                 objNotifyTerminatedForInitRegUsedEvenBundle);
 
-        RegistrationInfo regInfo = mInfoBuilder
-                .addConfig(mConfig)
-                .build();
+        triggerRegistration(mConfig);
 
-        mRegistrationHelper.triggerRegistration(this, regInfo);
+        verifyDeregisteredWithReason(
+                ImsReasonInfo.CODE_REGISTRATION_ERROR,
+                ImsReasonInfo.CODE_NETWORK_DETACH,
+                REGISTRATION_TECH_LTE);
 
-        mRegistration.expect().deregistered(
-                reason -> reason.getCode() == ImsReasonInfo.CODE_REGISTRATION_ERROR
-                        && reason.getExtraCode() == ImsReasonInfo.CODE_NETWORK_DETACH,
-                action -> action == RegistrationManager.SUGGESTED_ACTION_NONE,
-                networkType -> networkType == REGISTRATION_TECH_LTE);
-
-        mRegistration.expect().registered(
-                attributes -> attributes.getRegistrationTechnology() == REGISTRATION_TECH_LTE);
+        verifyRegistered(REGISTRATION_TECH_LTE);
     }
 }
