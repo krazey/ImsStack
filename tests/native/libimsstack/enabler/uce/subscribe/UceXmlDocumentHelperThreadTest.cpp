@@ -147,6 +147,9 @@ TEST_F(UceXmlDocumentHelperThreadTest, SendMsg)
 
     pUceXmlDocumentHelperThread->setThread(&objMockIThread);
     pUceXmlDocumentHelperThread->SendMsg(0, 0, 0);
+
+    // Reset the mock thread after testing.
+    pUceXmlDocumentHelperThread->setThread(IMS_NULL);
 }
 
 TEST_F(UceXmlDocumentHelperThreadTest, XmlState_NotifyStateChanged)
