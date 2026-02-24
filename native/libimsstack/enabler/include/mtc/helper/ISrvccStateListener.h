@@ -19,24 +19,38 @@
 
 #include "ImsTypeDef.h"
 
+/**
+ * @brief Defines the possible states of SRVCC.
+ */
 enum class SrvccState
 {
+    /// SRVCC is not active.
     IDLE = -1,
+    /// SRVCC handover has started.
     STARTED,
+    /// SRVCC handover completed successfully.
     SUCCEEDED,
+    /// SRVCC handover failed.
     FAILED,
+    /// SRVCC handover was canceled.
     CANCELED
 };
 
+/**
+ * @brief Interface for listening to SRVCC state change events.
+ *
+ * Classes that need to monitor the progress of SRVCC (e.g., to handle media handover or call
+ * termination) should implement this interface.
+ */
 class ISrvccStateListener
 {
 public:
     virtual ~ISrvccStateListener() {}  // for Unit Test
 
     /**
-     * @brief Notifies
+     * @brief Notifies that the SRVCC state has been updated.
      *
-     * @param eState
+     * @param eState The new {@link SrvccState}.
      */
     virtual void OnSrvccStateUpdated(IN SrvccState eState) = 0;
 };

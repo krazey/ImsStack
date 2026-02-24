@@ -22,6 +22,13 @@
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 
+/**
+ * @brief Structure containing call information to be passed to the JNI layer.
+ *
+ * This structure aggregates various properties of a call, such as service type,
+ * call type, capabilities, and network status, to notify the upper layers (Java)
+ * about the call's state and attributes.
+ */
 struct JniCallInfo
 {
 public:
@@ -95,18 +102,30 @@ public:
     }
 
 public:
+    /// The type of service (e.g., NORMAL, EMERGENCY).
     ServiceType eServiceType;
+    /// The type of the call (e.g., VOIP, VT, RTT).
     CallType eCallType;
+    /// The type of emergency call (e.g., NONE, EMERGENCY_ROUTING).
     EmergencyType eEmergencyType;
 
+    /// Indicates if the call is an offline call.
     IMS_BOOL bOffline;
+    /// Indicates if the session is for USSI (Unstructured Supplementary Service Data over IMS).
     IMS_BOOL bUssi;
+    /// Indicates if the call is a conference call.
     IMS_BOOL bConference;
+    /// Indicates if conference features are enabled.
     IMS_BOOL bConferenceEnabled;
+    /// Indicates if subscription to the conference event package is required.
     IMS_BOOL bConferenceSubscriptionRequired;
+    /// Indicates if the session is capable of RTT (Real-time Text).
     IMS_BOOL bRttCapable;
+    /// Indicates if the session is capable of Video.
     IMS_BOOL bVideoCapable;
+    /// Indicates if the call is connected via Cross-SIM.
     IMS_BOOL bCrossSim;
+    /// The Radio Access Technology type (e.g., LTE, NR, IWLAN).
     IMS_SINT32 eRatType;
 };
 

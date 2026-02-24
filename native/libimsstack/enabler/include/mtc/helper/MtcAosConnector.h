@@ -23,9 +23,20 @@
 #include "ImsTypeDef.h"
 #include "helper/IMtcAosConnector.h"
 
+/**
+ * @brief Implementation of the IMtcAosConnector interface.
+ *
+ * This class delegates calls to the underlying IImsAos and IImsAosInfo interfaces.
+ */
 class MtcAosConnector final : public IMtcAosConnector
 {
 public:
+    /**
+     * @brief Constructs a new MtcAosConnector object.
+     *
+     * @param objImsAos Reference to the IImsAos interface.
+     * @param objImsAosInfo Reference to the IImsAosInfo interface.
+     */
     inline MtcAosConnector(IN IImsAos& objImsAos, IN IImsAosInfo& objImsAosInfo) :
             m_objImsAos(objImsAos),
             m_objImsAosInfo(objImsAosInfo)
