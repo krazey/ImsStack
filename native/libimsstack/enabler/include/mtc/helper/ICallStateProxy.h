@@ -23,6 +23,12 @@
 
 class IMtcCallStateListener;
 
+/**
+ * @brief Interface for proxying call state changes to registered listeners.
+ *
+ * This interface allows components to register for call state updates and provides
+ * methods to broadcast these updates to all registered listeners.
+ */
 class ICallStateProxy
 {
 public:
@@ -30,31 +36,42 @@ public:
 
 public:
     /**
-     * @brief Adds
+     * @brief Adds a listener for call state events.
      *
-     * @param pListener
+     * @param pListener The listener object to add.
      */
     virtual void AddListener(IN IMtcCallStateListener* pListener) = 0;
 
     /**
-     * @brief Removes
+     * @brief Removes a listener for call state events.
      *
-     * @param pListener
+     * @param pListener The listener object to remove.
      */
     virtual void RemoveListener(IN IMtcCallStateListener* pListener) = 0;
 
     /**
-     * @brief Updates
+     * @brief Notifies registered listeners of a call state update.
      *
-     * @param nCallkey
-     * @param eState
-     * @param eCallType
-     * @param bEmergency
-     * @param nReason
+     * @param nCallkey The unique identifier of the call.
+     * @param eState The new state of the call.
+     * @param eCallType The type of the call (e.g. Voice, Video).
+     * @param bEmergency IMS_TRUE if the call is an emergency call, IMS_FALSE otherwise.
+     * @param nReason The reason code for the state change (default is CODE_NONE).
      */
     virtual void UpdateCallState(IN CallKey nCallkey, IN IMtcCall::State eState,
             IN CallType eCallType, IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason = CODE_NONE) = 0;
 
+    /**
+     * @brief Notifies listeners that the SIP session associated with a call has been released.
+     *
+     * This function is called under the following conditions:
+     * 1. Emergency call: BYE/CANCEL is completed with a guard timer by T1.
+     * 2. Normal call: BYE/CANCEL is started and MtcCall is destroyed.
+     *
+     * @param nCallkey The unique identifier of the call.
+     * @param bEmergency IMS_TRUE if the call was an emergency call, IMS_FALSE otherwise.
+     * @param bEstablished IMS_TRUE if the call had a confirmed dialog, IMS_FALSE otherwise.
+     */
     virtual void NotifyCallSessionReleased(
             IN CallKey nCallkey, IN IMS_BOOL bEmergency, IN IMS_BOOL bEstablished) = 0;
 };
