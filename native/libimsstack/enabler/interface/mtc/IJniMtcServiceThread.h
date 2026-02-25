@@ -30,23 +30,32 @@ struct MediaInfo;
 template <class T>
 class ImsList;
 
+/**
+ * @brief Interface for notifying the JNI layer about MTC service-level events.
+ *
+ * This interface defines the callback methods used by the native MTC stack to inform the upper
+ * layers (Java/JNI) about changes in service status (e.g., registration state, emergency service
+ * availability) and other service-related events such as pre-incoming calls or external call
+ * updates.
+ */
 class IJniMtcServiceThread : public IJniEnablerThread
 {
 public:
     /**
-     * @brief Notifies
+     * @brief Notifies that the MTC service state has changed.
      *
-     * @param eState
-     * @param eReason
+     * @param eState The new {@code IuMtcService::ServiceState}.
+     * @param eReason The reason for the state change.
      */
     virtual void OnServiceChanged(IN IuMtcService::ServiceState eState, IN IMS_SINT32 eReason) = 0;
 
     /**
-     * @brief Notifies
+     * @brief Notifies that the emergency service state has changed.
      *
-     * @param eState
-     * @param eReason
-     * @param eServiceType
+     * @param eState The new {@code IuMtcService::EmergencyServiceState}.
+     * @param eReason The reason for the unavailability. Valid when the state is
+     *                {@code UNAVAILABLE}.
+     * @param eServiceType The {@code ServiceType} associated with the change.
      */
     virtual void OnEmergencyServiceChanged(IN IuMtcService::EmergencyServiceState eState,
             IN IuMtcService::EmergencyServiceUnavailableReason eReason,
@@ -65,18 +74,19 @@ public:
      * @brief Notifies there is an rejected incoming call for call logs.
      *
      * @param nCallKey A unique key for the call.
-     * @param objCallInfo The call information.
-     * @param objMediaInfo The media information related to the call.
-     * @param objSuppServices The supplementary services information related to the call.
-     * @param eOipType The OIP type to determine whether to show a caller identification or not.
+     * @param objCallInfo The {@code JniCallInfo} containing call information.
+     * @param objMediaInfo The {@code MediaInfo} related to the call.
+     * @param objSuppServices The list of {@code SuppService} related to the call.
+     * @param eOipType The {@code OipType} to determine whether to show caller identification.
      * @param strRemoteNumber The number of a caller.
-     * @param objReason The reason for the rejection.
+     * @param objReason The {@code CallReasonInfo} for the rejection.
      * @param strLogTag A log tag for the call.
      */
     virtual void OnRejectedIncomingCall(IN IMS_ULONG nCallKey, IN const JniCallInfo& objCallInfo,
             IN const MediaInfo& objMediaInfo, IN const ImsList<SuppService*>& objSuppServices,
             IN OipType eOipType, IN const AString& strRemoteNumber,
             IN const CallReasonInfo& objReason, IN const AString& strLogTag) = 0;
+
     /**
      * @brief Notifies Java that {@code JniExternalCall} state is changed.
      *

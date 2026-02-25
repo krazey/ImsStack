@@ -17,20 +17,34 @@
 #ifndef INTERFACE_MTC_APP_H_
 #define INTERFACE_MTC_APP_H_
 
+/**
+ * @brief Interface for the MTC application.
+ *
+ * This interface defines the lifecycle methods for the MTC application.
+ * It serves as the main entry point for the MTC enabler, managing services and components
+ * related to IMS telephony features such as voice/video calls and supplementary services.
+ */
 class IMtcApp
 {
 public:
     virtual ~IMtcApp(){};
 
     /**
-     * @brief Starts
+     * @brief Starts the MTC application.
      *
+     * This method initializes the necessary resources and starts the application logic.
+     * It creates {@code IMtcService} instances (Normal and Emergency), initializes the
+     * {@code IMtcCallManager}, and sets up other components such as {@code IMtcRadioChecker}
+     * and {@code MultiEndpointManager} required for the MTC enabler.
      */
     virtual void Start() = 0;
 
     /**
-     * @brief Stops
+     * @brief Stops the MTC application.
      *
+     * This method stops the application logic and releases allocated resources.
+     * It de-initializes the {@code IMtcCallManager} and destroys the {@code IMtcService}
+     * instances and other components created during start.
      */
     virtual void Stop() = 0;
 };

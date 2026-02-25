@@ -46,6 +46,13 @@ class RttAutoUpgrader;
 class OperationAsyncRunner;
 enum class ServiceType;
 
+/**
+ * @brief Interface that provides access to the context and components of the MTC enabler.
+ *
+ * This interface acts as a central registry or service locator, allowing various parts of
+ * the MTC application to retrieve shared instances of managers, controllers, and utility classes
+ * (e.g., {@code IMtcCallManager}, {@code IMtcCallController}, {@code IMtcDialingPlan}).
+ */
 class IMtcContext
 {
 public:
@@ -59,102 +66,104 @@ public:
     virtual IMS_SINT32 GetSlotId() const = 0;
 
     /**
-     * @brief Gets ISubscriberConfig from Configuration using current slot ID.
+     * @brief Gets {@code ISubscriberConfig} from Configuration using current slot ID.
      *
-     * @return Instance of ISubscriberConfig. Could be null.
+     * @return Instance of {@code ISubscriberConfig}. Could be null.
      */
     virtual const ISubscriberConfig* GetSubscriberConfig() const = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the MTC service instance for the specified service type.
      *
-     * @param eServiceType
-     * @return
+     * @param eServiceType The type of service (e.g., {@code ServiceType::NORMAL},
+     *                     {@code ServiceType::EMERGENCY}).
+     * @return Pointer to the {@code IMtcService} instance.
      */
     virtual IMtcService* GetServiceByType(IN ServiceType eServiceType) = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the Dialing Plan instance.
      *
-     * @return
+     * @return Reference to the {@code IMtcDialingPlan} instance.
      */
     virtual IMtcDialingPlan& GetDialingPlan() = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the Call Controller instance.
      *
-     * @return
+     * @return Reference to the {@code IMtcCallController} instance.
      */
     virtual IMtcCallController& GetCallController() = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the Call Manager instance.
      *
-     * @return
+     * @return Reference to the {@code IMtcCallManager} instance.
      */
     virtual IMtcCallManager& GetCallManager() = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the Radio Checker instance.
      *
-     * @return
+     * @return Reference to the {@code IMtcRadioChecker} instance.
      */
     virtual IMtcRadioChecker& GetRadioChecker() = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the Configuration Proxy instance.
      *
-     * @return
+     * @return Reference to the {@code MtcConfigurationProxy} instance.
      */
     virtual MtcConfigurationProxy& GetConfigurationProxy() = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the Call State Proxy instance.
      *
-     * @return
+     * @return Reference to the {@code ICallStateProxy} instance.
      */
     virtual ICallStateProxy& GetCallStateProxy() = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the IMS Event Receiver instance.
      *
-     * @return
+     * @return Reference to the {@code IMtcImsEventReceiver} instance.
      */
     virtual IMtcImsEventReceiver& GetImsEventReceiver() = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the AOS Connector instance for the specified service type.
      *
-     * @param eServiceType
-     * @return
+     * @param eServiceType The type of service (e.g., {@code ServiceType::NORMAL},
+     *                     {@code ServiceType::EMERGENCY}).
+     * @return Pointer to the {@code IMtcAosConnector} instance.
      */
     virtual IMtcAosConnector* GetAosConnector(IN ServiceType eServiceType) = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the SIP Interface Factory instance.
      *
-     * @return
+     * @return Reference to the {@code IMtcSipInterfaceFactory} instance.
      */
     virtual IMtcSipInterfaceFactory& GetSipInterfaceFactory() = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the Conference Manager instance.
      *
-     * @return
+     * @return Reference to the {@code IConferenceManager} instance.
      */
     virtual IConferenceManager& GetConferenceManager() = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the ECT (Explicit Call Transfer) Manager instance.
      *
-     * @return
+     * @return Reference to the {@code IEctManager} instance.
      */
     virtual IEctManager& GetEctManager() = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the Emergency Service Manager instance.
      *
-     * @return
+     * @return Reference to the {@code IMtcEmergencyServiceManager} instance.
      */
     virtual IMtcEmergencyServiceManager& GetEmergencyServiceManager() = 0;
 
@@ -194,72 +203,68 @@ public:
     virtual void ReleaseAsyncOperation(IN void* pOwner) = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the Message Utils instance.
      *
-     * @return
+     * @return Reference to the {@code IMessageUtils} instance.
      */
     virtual IMessageUtils& GetMessageUtils() = 0;
 
     /**
-     * @brief Creates MtcTimerWrapper. Each time it is called, a new MtcTimerWrapper is created.
+     * @brief Creates a new {@code MtcTimerWrapper} instance.
      *
-     * @return MtcTimerWrapper.
+     * @return A unique pointer to the new {@code MtcTimerWrapper} instance.
      */
     virtual std::unique_ptr<MtcTimerWrapper> CreateTimer() = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the Passive Timer Holder instance.
      *
-     * @return
+     * @return Reference to the {@code IPassiveTimerHolder} instance.
      */
     virtual IPassiveTimerHolder& GetPassiveTimerHolder() = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the Multi-Endpoint Manager instance.
      *
-     * @return
+     * @return Pointer to the {@code IMultiEndpointManager} instance.
      */
     virtual IMultiEndpointManager* GetMultiEndpointManager() = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the Last Come First Served Helper instance.
      *
-     * @return
+     * @return Reference to the {@code ILastComeFirstServedHelper} instance.
      */
     virtual ILastComeFirstServedHelper& GetLastComeFirstServedHelper() = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the Call Connection ID Manager instance.
      *
-     * @return
+     * @return Reference to the {@code CallConnectionIdManager} instance.
      */
     virtual CallConnectionIdManager& GetCallConnectionIdManager() = 0;
 
     /**
-     * @brief Returns an instance of {@link MtcLocationRefresher}.
+     * @brief Gets the Location Refresher instance.
      *
-     * @return {@link MtcLocationRefresher} instance.
+     * @return Reference to the {@code MtcLocationRefresher} instance.
      */
     virtual MtcLocationRefresher& GetLocationRefresher() = 0;
 
     /**
-     * @brief Creates
-     *
-     * @return
+     * @brief Initializes the RTT (Real-time Text) Auto Upgrader.
      */
     virtual void CreateRttAutoUpgrader() = 0;
 
     /**
-     * @brief Destroy
-     *
-     * @return
+     * @brief Destroys the RTT (Real-time Text) Auto Upgrader.
      */
     virtual void DestroyRttAutoUpgrader() = 0;
 
     /**
-     * @brief Checks
+     * @brief Checks if the device is in Wi-Fi test mode.
      *
-     * @return
+     * @return {@code IMS_TRUE} if in Wi-Fi test mode, {@code IMS_FALSE} otherwise.
      */
     virtual IMS_BOOL IsWifiTestMode() = 0;
 };
