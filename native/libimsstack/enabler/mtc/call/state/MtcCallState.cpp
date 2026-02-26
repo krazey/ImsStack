@@ -884,6 +884,14 @@ void MtcCallState::StartTimer(IN IMS_UINT32 nType) const
     m_objContext.GetTimer().Start(nType, GetTimeInMilliseconds(nType));
 }
 
+void MtcCallState::RestartTimerIfActive(IN IMS_UINT32 nType) const
+{
+    if (m_objContext.GetTimer().IsActive(nType))
+    {
+        StartTimer(nType);
+    }
+}
+
 PROTECTED
 void MtcCallState::StopTimer(IN IMS_UINT32 nType) const
 {
@@ -906,6 +914,11 @@ IMS_SINT32 MtcCallState::GetTimeInMilliseconds(IN IMS_UINT32 nType) const
                     ConfigVoice::KEY_18X_TIMER_MILLIS_INT);
             return TIMER_C_WITH_MARGIN_TIME_MS > n18xWaitTimer ? TIMER_C_WITH_MARGIN_TIME_MS
                                                                : n18xWaitTimer;
+        }
+        case TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG:
+        {
+            return m_objContext.GetConfigurationProxy().GetInt(
+                    ConfigVoice::KEY_CONFERENCE_CALL_SETUP_WATCHDOG_TIMER_MILLIS_INT);
         }
         case TIMER_MO_18X_WAIT:
             if (bNormal)

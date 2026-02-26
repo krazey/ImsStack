@@ -638,7 +638,9 @@ TEST_F(IdleStateTest, StartSetsMoTimersAndTransitsToOutgoingState)
     EXPECT_CALL(objTimerWrapper,
             Start(MtcCallState::TimerType::TIMER_MO_CALL_INITIATION_TO_18X_WAIT, _))
             .Times(0);
-    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_18X_WAIT, n18xWaitTimer))
+    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_18X_WAIT, _)).Times(0);
+    EXPECT_CALL(objTimerWrapper,
+            Start(MtcCallState::TimerType::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG, _))
             .Times(0);
 
     EXPECT_EQ(CallStateName::OUTGOING,
@@ -1080,14 +1082,21 @@ TEST_F(IdleStateTest, StartConferenceSetsMoTimersAndTransitsOutgoingState)
 
     IMS_SINT32 nResponseTimeoutForReasonTimer = 10000;
     IMS_SINT32 n18xWaitTimer = 20000;
+    IMS_SINT32 nConferenceWatchdogTimer = 30000;
     ON_CALL(*pConfigurationProxy,
             GetInt(ConfigVoice::KEY_USER_CANCEL_REASON_AFTER_RESPONSE_TIMEOUT_TIMER_MILLIS_INT))
             .WillByDefault(Return(nResponseTimeoutForReasonTimer));
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_18X_TIMER_MILLIS_INT))
             .WillByDefault(Return(n18xWaitTimer));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_CONFERENCE_CALL_SETUP_WATCHDOG_TIMER_MILLIS_INT))
+            .WillByDefault(Return(nConferenceWatchdogTimer));
     EXPECT_CALL(objTimerWrapper,
             Start(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON,
                     nResponseTimeoutForReasonTimer));
+    EXPECT_CALL(objTimerWrapper,
+            Start(MtcCallState::TimerType::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG,
+                    nConferenceWatchdogTimer));
     EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_MO_18X_WAIT, n18xWaitTimer))
             .Times(0);
 

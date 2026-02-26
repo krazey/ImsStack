@@ -869,6 +869,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_SUPPORT_CONFERENCE_REFER_SUBSCRIBE_B
         KEY_IMS_VOICE_PREFIX "support_conference_refer_subscribe_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL[] =
         KEY_IMS_VOICE_PREFIX "enable_conference_subscribe_by_participant_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_CONFERENCE_CALL_SETUP_WATCHDOG_TIMER_MILLIS_INT[] =
+        KEY_IMS_VOICE_PREFIX "conference_call_setup_watchdog_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CONFERENCE_SIP_FLOW_ORDER_INT[] =
         KEY_IMS_VOICE_PREFIX "conference_sip_flow_order_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CONFERENCE_INVITING_REFER_TYPE_INT[] =

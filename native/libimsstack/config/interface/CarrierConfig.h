@@ -2740,6 +2740,19 @@ public:
         static const IMS_CHAR KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL[];
 
         /**
+         * Specifies the timer value for waiting for the conference session setup.
+         *
+         * Start: When sending an INVITE for a conference call.
+         *        Restarts whenever a SIP message receives.
+         * Stop: A final response received for the INVITE.
+         * Expiry: The call fails with {@code CODE_SIP_SERVER_TIMEOUT}.
+         *
+         * Possible Values:
+         *   An integer value representing the timeout in milliseconds.
+         */
+        static const IMS_CHAR KEY_CONFERENCE_CALL_SETUP_WATCHDOG_TIMER_MILLIS_INT[];
+
+        /**
          * Specifies the order of SIP messages (SUBSCRIBE and REFER) used when inviting a new
          * participant to a conference call.
          *
