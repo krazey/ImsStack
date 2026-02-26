@@ -99,10 +99,12 @@ public:
     virtual IMS_BOOL ReserveResource(IN const SipProfile* pProfile = IMS_NULL);
     inline virtual IMS_BOOL UpdateDestinationInfo(IN ::SipMessage* /*pSipMsg*/,
             IN const SipProfile* /*pProfile*/, IN IMS_BOOL bRoutingLr = IMS_TRUE,
-            IN SipAddrSpec* pImplicitRoute = IMS_NULL)
+            IN SipAddrSpec* pImplicitRoute = IMS_NULL,
+            IN const IpAddress* pImplicitDstAddress = IMS_NULL)
     {
         (void)bRoutingLr;
         (void)pImplicitRoute;
+        (void)pImplicitDstAddress;
         return IMS_TRUE;
     }
     inline virtual IMS_SINT32 ValidateViaHeader(IN ::SipMessage* /*pSipMsg*/)
