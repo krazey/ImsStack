@@ -66,6 +66,7 @@ protected:
     CallStateName SendUpdateBySrvcc(IN UpdateType eType) override;
 
 private:
+    CallStateName HandleRetry();
     IMS_RESULT HandleUpdate(
             IN UpdateType eUpdateType, IN CallType eCallType, IN const MediaInfo& objMediaInfo);
     CallReasonInfo HandleReceivedUpdate(OUT CallStateName& eStateName);
@@ -74,6 +75,7 @@ private:
     ImsList<IMtcBlockRule*> GetCallUpdateBlockRules() const;
     CallStateName Downgrade(IN CallType eCallType);
     IMS_BOOL ShouldPendOperation() const;
+    void CancelStashedUpdateOnCallTypeChange(IN ISession* piSession);
 };
 
 #endif

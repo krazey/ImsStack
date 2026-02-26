@@ -37,6 +37,7 @@
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
 #include "media/IMtcMediaManager.h"
+#include "media/MtcMediaUtil.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "utility/IMessageUtils.h"
 
@@ -44,7 +45,8 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 UpdatingState::UpdatingState(IN IMtcCallContext& objContext) :
-        MtcCallState(CallStateName::UPDATING, objContext)
+        MtcCallState(CallStateName::UPDATING, objContext),
+        m_bShouldStashUpdatingInfoInGlare(IMS_FALSE)
 {
 }
 
@@ -58,7 +60,15 @@ PUBLIC VIRTUAL void UpdatingState::OnExit()
     {
         m_objContext.GetSession()->Update(UpdateType::REFRESH, IMS_FALSE, SipMethod::INVALID);
     }
-    m_objContext.DeleteUpdatingInfo();
+
+    if (m_bShouldStashUpdatingInfoInGlare)
+    {
+        m_objContext.StashUpdatingInfoInGlare();
+    }
+    else
+    {
+        m_objContext.DeleteUpdatingInfo();
+    }
 }
 
 PUBLIC VIRTUAL CallStateName UpdatingState::Hold(IN MediaInfo& objMediaInfo)
@@ -276,14 +286,14 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdateFailed(IN ISession* piS
     {
         case CODE_UNSPECIFIED:
             RecoverModificationFailure();
-            NotifyFailure();
+            NotifySessionUpdateFailure(m_objContext.GetUpdatingInfo());
             return CallStateName::ESTABLISHED;
 
         case CODE_INTERNAL_RETRY_UPDATE:
             // Keep UpdatingState to block another outgoing request or pending operation during this
-            // period. Also, UpdatingInfo is going to be deleted if transits to Established.
-            // And, when a incoming request is received, transits to Established to handle the
-            // request.
+            // period. When an incoming request is received, transits to Established to handle the
+            // request. Also, UpdatingInfo is going to be deleted if transits to Established,
+            // unless there is a stashed updating info to be processed in glare case.
             RecoverModificationFailure();
             m_objContext.GetTimer().Start(TIMER_RETRY_UPDATE, objReason.nExtraCode);
             return GetStateName();
@@ -302,7 +312,19 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdateReceived(IN ISession* p
         // Purge previous update operation and handles the received update
         IMS_TRACE_I("SessionUpdateReceived - waiting glare condition timer", 0, 0, 0);
 
-        NotifyFailure();
+        if (m_objContext.GetUpdatingInfo().GetRequestingType() == UpdateType::SESSION)
+        {
+            NotifySessionUpdateFailure(m_objContext.GetUpdatingInfo());
+        }
+        else if (m_objContext.GetUpdatingInfo().GetRequestingType() == UpdateType::NORMAL)
+        {
+            // In any response, P-Access-Network-Info header will be included.
+        }
+        else
+        {
+            m_bShouldStashUpdatingInfoInGlare = IMS_TRUE;
+        }
+
         m_objContext.GetPendingOperationHolder().PushPendingOperation(
                 [piSession](IMtcCallState* pState)
                 {
@@ -331,7 +353,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionEarlyMediaUpdated(IN ISession
     {
         CancelUpdate(objReason);
         RecoverModificationFailure();
-        NotifyFailure();
+        NotifySessionUpdateFailure(m_objContext.GetUpdatingInfo());
         return CallStateName::ESTABLISHED;
     }
     return GetStateName();
@@ -342,7 +364,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionEarlyMediaUpdateFailed(
 {
     CancelUpdate(CallReasonInfo(CODE_SESSION_MODIFICATION_FAILED));
     RecoverModificationFailure();
-    NotifyFailure();
+    NotifySessionUpdateFailure(m_objContext.GetUpdatingInfo());
     return CallStateName::ESTABLISHED;
 }
 
@@ -400,7 +422,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionPrackDelivered(IN ISession* p
     {
         CancelUpdate(CallReasonInfo(CODE_SESSION_MODIFICATION_FAILED));
         RecoverModificationFailure();
-        NotifyFailure();
+        NotifySessionUpdateFailure(m_objContext.GetUpdatingInfo());
         return CallStateName::ESTABLISHED;
     }
     return GetStateName();
@@ -410,7 +432,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionPrackDeliveryFailed(IN ISessi
 {
     CancelUpdate(CallReasonInfo(CODE_SESSION_MODIFICATION_FAILED));
     RecoverModificationFailure();
-    NotifyFailure();
+    NotifySessionUpdateFailure(m_objContext.GetUpdatingInfo());
     return CallStateName::ESTABLISHED;
 }
 
@@ -444,7 +466,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionRprDeliveryFailed(IN ISession
 {
     CancelUpdate(CallReasonInfo(CODE_SESSION_MODIFICATION_FAILED));
     RecoverModificationFailure();
-    NotifyFailure();
+    NotifySessionUpdateFailure(m_objContext.GetUpdatingInfo());
     return CallStateName::ESTABLISHED;
 }
 
@@ -462,7 +484,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionRprReceived(
     {
         CancelUpdate(CallReasonInfo(CODE_SESSION_MODIFICATION_FAILED));
         RecoverModificationFailure();
-        NotifyFailure();
+        NotifySessionUpdateFailure(m_objContext.GetUpdatingInfo());
         return CallStateName::ESTABLISHED;
     }
 
@@ -472,7 +494,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionRprReceived(
     {
         CancelUpdate(CallReasonInfo(CODE_SESSION_MODIFICATION_FAILED));
         RecoverModificationFailure();
-        NotifyFailure();
+        NotifySessionUpdateFailure(m_objContext.GetUpdatingInfo());
         return CallStateName::ESTABLISHED;
     }
 
@@ -803,11 +825,33 @@ CallStateName UpdatingState::HandleReceivedModificationSucceeded()
 PRIVATE
 CallStateName UpdatingState::HandleRetry()
 {
-    MediaInfo objMediaInfo = m_objContext.GetUpdatingInfo().GetModifyingInfo();
-    UpdateType eType = m_objContext.GetUpdatingInfo().GetRequestingType();
-    CallType eCallType = m_objContext.GetUpdatingInfo().GetTargetCallType();
+    UpdatingInfo* pGlareInfo = m_objContext.GetStashedUpdatingInfoInGlare();
+    UpdatingInfo& objUpdatingInfo = pGlareInfo ? *pGlareInfo : m_objContext.GetUpdatingInfo();
+
+    MediaInfo objMediaInfo = objUpdatingInfo.GetModifyingInfo();
+    UpdateType eType = objUpdatingInfo.GetRequestingType();
+
+    // cppcheck-suppress variableScope: Cache eCallType as objUpdatingInfo can be invalidated by
+    // ClearStashedUpdatingInfoInGlare.
+    CallType eCallType = objUpdatingInfo.GetTargetCallType();
+
+    if (pGlareInfo)
+    {
+        IMS_TRACE_I("HandleRetry - handle retry after receiving ACK for remote request", 0, 0, 0);
+        m_objContext.ClearStashedUpdatingInfoInGlare();
+
+        IMtcSession* pSession = m_objContext.GetSession();
+        if (pSession)
+        {
+            MtcMediaUtil::RefineMediaDirectionByPendingRetry(
+                    m_objContext.GetSession()->GetCallType(), eType,
+                    m_objContext.GetMediaManager().GetMediaInfo(pSession->GetISession()),
+                    objMediaInfo);
+        }
+    }
 
     IMS_TRACE_I("HandleRetry UpdateType[%s]", MtcCallStringUtils::ConvertUpdateType(eType), 0, 0);
+
     if (eType == UpdateType::HOLD)
     {
         m_objContext.GetPendingOperationHolder().PushPendingOperation(
@@ -847,6 +891,11 @@ CallStateName UpdatingState::HandleRetry()
                 {
                     return pState->OnSrvccStateUpdated(SrvccState::FAILED);
                 });
+    }
+
+    if (!m_objContext.GetUpdatingInfo().IsModifier())
+    {
+        return GetStateName();
     }
 
     // Other UpdateTypes are not used.
@@ -901,25 +950,6 @@ void UpdatingState::RecoverModificationFailure()
 }
 
 PRIVATE
-void UpdatingState::NotifyFailure()
-{
-    IMS_TRACE_D("NotifyFailure", 0, 0, 0);
-    if (m_objContext.GetUpdatingInfo().IsHeld())
-    {
-        m_objContext.GetUiNotifier().SendHoldFailed(CallReasonInfo(CODE_SUPP_SVC_FAILED));
-    }
-    else if (m_objContext.GetUpdatingInfo().IsResumed())
-    {
-        m_objContext.GetUiNotifier().SendResumeFailed(CallReasonInfo(CODE_SUPP_SVC_FAILED));
-    }
-    else
-    {
-        m_objContext.GetUiNotifier().SendUpdateFailed(
-                CallReasonInfo(CODE_USER_REJECTED_SESSION_MODIFICATION));
-    }
-}
-
-PRIVATE
 void UpdatingState::StopTimer()
 {
     IMS_TRACE_D("StopTimer", 0, 0, 0);
@@ -927,7 +957,12 @@ void UpdatingState::StopTimer()
     if (m_objContext.GetUpdatingInfo().IsModifier())
     {
         m_objContext.GetTimer().Stop(TIMER_CONVERT_REMOTE_RESPONSE);
-        m_objContext.GetTimer().Stop(TIMER_RETRY_UPDATE);
+        if (!m_bShouldStashUpdatingInfoInGlare)
+        {
+            // Don't stop the TIMER_RETRY_UPDATE if we have stashed info for a glare condition.
+            // This timer will be used to trigger the retry of the stashed local update.
+            m_objContext.GetTimer().Stop(TIMER_RETRY_UPDATE);
+        }
     }
 
     if (m_objContext.GetUpdatingInfo().IsAlerted())

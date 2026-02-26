@@ -2538,3 +2538,62 @@ TEST_F(MtcCallTest, ToString)
 
     EXPECT_EQ(objCall.ToString(), strCall);
 }
+
+TEST_F(MtcCallTest, StashUpdatingInfoInGlareMovesUpdatingInfo)
+{
+    CallType eTargetCallType = CallType::VT;
+    UpdateType eUpdateType = UpdateType::HOLD;
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
+
+    objCall.GetUpdatingInfo().SetTargetCallType(eTargetCallType);
+    objCall.GetUpdatingInfo().SetRequestingType(eUpdateType);
+    objCall.GetUpdatingInfo().SetModifier();
+
+    objCall.StashUpdatingInfoInGlare();
+
+    const UpdatingInfo* pGlareInfo = objCall.GetStashedUpdatingInfoInGlare();
+    EXPECT_NE(IMS_NULL, pGlareInfo);
+    EXPECT_EQ(eTargetCallType, pGlareInfo->GetTargetCallType());
+    EXPECT_EQ(eUpdateType, pGlareInfo->GetRequestingType());
+    EXPECT_TRUE(pGlareInfo->IsModifier());
+
+    // Original UpdatingInfo should be reset
+    EXPECT_NE(pGlareInfo, &objCall.GetUpdatingInfo());
+    EXPECT_NE(eTargetCallType, objCall.GetUpdatingInfo().GetTargetCallType());
+    EXPECT_NE(eUpdateType, objCall.GetUpdatingInfo().GetRequestingType());
+    EXPECT_FALSE(objCall.GetUpdatingInfo().IsModifier());
+}
+
+TEST_F(MtcCallTest, ClearStashedUpdatingInfoInGlareDeletesGlareInfo)
+{
+    CallType eTargetCallType = CallType::VT;
+    UpdateType eUpdateType = UpdateType::HOLD;
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
+
+    objCall.GetUpdatingInfo().SetTargetCallType(eTargetCallType);
+    objCall.GetUpdatingInfo().SetRequestingType(eUpdateType);
+    objCall.GetUpdatingInfo().SetModifier();
+
+    objCall.StashUpdatingInfoInGlare();
+    EXPECT_NE(IMS_NULL, objCall.GetStashedUpdatingInfoInGlare());
+
+    objCall.ClearStashedUpdatingInfoInGlare();
+    EXPECT_EQ(IMS_NULL, objCall.GetStashedUpdatingInfoInGlare());
+}
+
+TEST_F(MtcCallTest, DeleteUpdatingInfoDoesNotClearGlareInfo)
+{
+    CallType eTargetCallType = CallType::VT;
+    UpdateType eUpdateType = UpdateType::HOLD;
+    MtcCall objCall(objContext, objService, objCallInfo, CreateStateFactory(), TEST_CALL_LOG_TAG);
+
+    objCall.GetUpdatingInfo().SetTargetCallType(eTargetCallType);
+    objCall.GetUpdatingInfo().SetRequestingType(eUpdateType);
+    objCall.GetUpdatingInfo().SetModifier();
+
+    objCall.StashUpdatingInfoInGlare();
+    EXPECT_NE(IMS_NULL, objCall.GetStashedUpdatingInfoInGlare());
+
+    objCall.DeleteUpdatingInfo();
+    EXPECT_NE(IMS_NULL, objCall.GetStashedUpdatingInfoInGlare());
+}

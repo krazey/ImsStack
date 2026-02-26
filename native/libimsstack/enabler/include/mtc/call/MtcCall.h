@@ -176,6 +176,9 @@ public:
     void RemoveSession(IN IMtcSession& objSession) override;
     void RemoveAllSessions() override;
     void DeleteUpdatingInfo() override;
+    void StashUpdatingInfoInGlare() override;
+    UpdatingInfo* GetStashedUpdatingInfoInGlare() override;
+    void ClearStashedUpdatingInfoInGlare() override;
     void RunPendingOperationIfPossible() override;
 
     inline MtcTimerWrapper& GetTimer() const override { return *m_pTimer; }
@@ -352,6 +355,7 @@ private:
     CallInfo m_objCallInfo;
     ParticipantInfo m_objParticipantInfo;
     UpdatingInfo* m_pUpdatingInfo;
+    UpdatingInfo* m_pStashedUpdatingInfoInGlare;
     ImsList<IMtcSession*> m_lstSessions;
     MtcPendingOperationHolder m_objPendingOperationHolder;
     std::unique_ptr<MtcTimerWrapper> m_pTimer;
