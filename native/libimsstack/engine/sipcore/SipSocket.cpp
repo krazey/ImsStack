@@ -28,6 +28,7 @@
 #include "SipFeatures.h"
 #include "SipPrivate.h"
 #include "SipRtConfigHelper.h"
+#include "SipConfigProxy.h"
 #include "SipRtConfigUtils.h"
 #include "SipSocket.h"
 
@@ -323,13 +324,19 @@ PROTECTED
 void SipSocket::SetSocketOptionForTcpMaxSeg(
         IN const INetworkConnection* piConnection, IN const IpAddress& objLocalIp)
 {
+    IMS_SINT32 nMaxAllowedNetworkMtu = SipConfigProxy::GetMaxAllowedNetworkMtu(GetSlotId());
+    IMS_SINT32 nMtu = piConnection->GetMtu();
     // MSS(Max Segment Size) for TCP
-    IMS_SINT32 nMss = piConnection->GetMtu();
+    IMS_SINT32 nMss = (nMaxAllowedNetworkMtu > 0 && nMaxAllowedNetworkMtu < nMtu)
+            ? nMaxAllowedNetworkMtu
+            : nMtu;
     IMS_BOOL bIpV6 = !objLocalIp.IsIPv4Address();
     IMS_BOOL bWfcSupported = CarrierConfig::IsWfcEnabled(GetSlotId());
-    IMS_SINT32 nOverhead = Sip::PACKET_OVERHEAD_ESP + Sip::PACKET_OVERHEAD_TCP;
+    // Include a 20-byte buffer for any extensions safely.
+    IMS_SINT32 nOverhead =
+            Sip::PACKET_OVERHEAD_ESP + Sip::PACKET_OVERHEAD_TCP + Sip::PACKET_EXTRA_BUFFER;
 
-    // Total overhead : esp + tcp + ip + edpg
+    // Total overhead: esp + tcp + ip + edpg
     nOverhead += (bIpV6 ? Sip::PACKET_OVERHEAD_IPV6 : Sip::PACKET_OVERHEAD_IPV4);
     nOverhead += (bWfcSupported ? Sip::PACKET_OVERHEAD_EPDG : 0);
 

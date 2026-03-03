@@ -49,8 +49,8 @@ TEST_F(SipConfigProxyTest, GetAndIsConfiguredMethods)
     IMS_SINT32 nTcpCriterionLength = 1300;
 
     EXPECT_EQ(SipConfigProxy::GetTcpCriterionLength(IMS_SLOT_0), nTcpCriterionLength);
-
     EXPECT_EQ(SipConfigProxy::GetTransportType(IMS_SLOT_0), SipConfig::TRANSPORT_TYPE_UDP);
+    EXPECT_EQ(SipConfigProxy::GetMaxAllowedNetworkMtu(IMS_SLOT_0), -1);
     EXPECT_EQ(SipConfigProxy::GetUaString(IMS_SLOT_0), AString::ConstNull());
 
     const AStringArray& regAllowMethods = SipConfigProxy::GetRegAllowMethods(IMS_SLOT_0);
