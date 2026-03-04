@@ -56,6 +56,7 @@ public:
             (IN ISession * piSession, IN IMS_UINTP nNegoId,
                     IN MEDIA_CONTENT_TYPE eNegotiatedMediaType, IN IMediaSession* piMediaSession),
             (override));
+    MOCK_METHOD(IMS_BOOL, IsAudioQosEverAvailable, (), (const, override));
 };
 
 #endif

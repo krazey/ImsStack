@@ -244,7 +244,10 @@ void EpsFallbackTrigger::TriggerEpsFallback(IN EpsFallbackReason eReason)
 PRIVATE
 IMS_BOOL EpsFallbackTrigger::IsEpsFallbackTriggeredByNetwork() const
 {
+    // If Audio QoS has been acquired at least once, it means the network successfully performed
+    // the Dedicated Bearer setup on NR. The EPS Fallback Watchdog is a safeguard for initial
+    // call setup failures. Therefore, subsequent QoS loss should be treated as a QoS Lost issue,
+    // not an initial setup failure, so the Watchdog should not trigger a forced Fallback.
     return !m_objContext.GetService().IsNr() ||
-            m_objContext.GetPreconditionManager().IsDedicatedBearerAllocated(
-                    &m_objContext.GetSession()->GetISession(), MEDIATYPE_AUDIO);
+            m_objContext.GetPreconditionManager().IsAudioQosEverAvailable();
 }
