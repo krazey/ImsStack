@@ -225,7 +225,11 @@ public abstract class ImsStackTest {
         sLogTag = tag;
         enableStrictMode();
         mServiceState = Mockito.mock(ServiceState.class);
-        mIActivityManagerSingleton = Mockito.mock(Singleton.class);
+        Field activityManagerSingletionField =
+                ActivityManager.class.getDeclaredField("IActivityManagerSingleton");
+        activityManagerSingletionField.setAccessible(true);
+        mIActivityManagerSingleton =
+                (Singleton<IActivityManager>) activityManagerSingletionField.get(null);
         mIActivityManager = Mockito.mock(IActivityManager.class);
         mIIntentSender = Mockito.mock(IIntentSender.class);
         mIBinder = Mockito.mock(IBinder.class);
@@ -303,8 +307,6 @@ public abstract class ImsStackTest {
         doReturn(mWifiManager).when(mContext).getSystemService(eq(Context.WIFI_SERVICE));
 
         //Use reflection to mock singletons
-        replaceInstance(ActivityManager.class, "IActivityManagerSingleton", null,
-                mIActivityManagerSingleton);
         replaceInstance(Singleton.class, "mInstance", mIActivityManagerSingleton,
                 mIActivityManager);
         replaceInstance(TelephonyManager.class, "sInstance", null,
