@@ -17,15 +17,26 @@
 #ifndef INTERFACE_MTC_TIMER_LISTENER_H_
 #define INTERFACE_MTC_TIMER_LISTENER_H_
 
+/**
+ * @brief Interface for listening to timer expiration events.
+ *
+ * Classes that require timer functionality within the MTC module should implement
+ * this interface to receive notifications from {@link MtcTimerWrapper} when a specific timer
+ * expires.
+ */
 class IMtcTimerListener
 {
 public:
     virtual ~IMtcTimerListener() = default;
 
     /**
-     * @brief Notifies a timer expiration event.
+     * @brief Notifies that a specific timer has expired from {@link MtcTimerWrapper}.
      *
-     * @param nType The type of the expired timer.
+     * This callback is invoked by the timer mechanism when the duration of a started timer has
+     * elapsed.
+     *
+     * @param nType The unique identifier of the expired timer. This value corresponds to the
+     *              timer type passed when starting the timer (e.g., MtcCallState::TimerType).
      */
     virtual void OnTimerExpired(IN IMS_SINT32 nType) = 0;
 };
