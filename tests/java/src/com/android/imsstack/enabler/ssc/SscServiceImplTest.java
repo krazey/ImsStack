@@ -378,16 +378,17 @@ public class SscServiceImplTest {
         mHttpErrorResponse = SscConstant.HTTP_PRECONDITION_FAILURE;
         int tId = 1;
 
+        // Updates CFNR with timer to send two HTTP requests.
         mSscServiceImpl.updateCallForward(tId, SscConstant.ACTION_ACTIVATION,
-                SscConstant.CONDITION_CFB, null, 0, 20);
+                SscConstant.CONDITION_CFNR, null, 0, 20);
 
-        // Entire Doc. query.
+        // 1st Entire Doc. query.
         processEntireXmlDocQueryAsSuccess();
         assertTrue(SscXmlGov.getInstance(SLOT_0).isXmlDataPresent());
 
-        // Handle HTTP_PRECONDITION_FAILURE for PUT. Triggering the entire Doc. query again.
+        // 1st HTTP_PRECONDITION_FAILURE for PUT for CFNR. Triggering the entire Doc. query again.
         processPutTransactionAsFailure(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
-                SscConstant.CONDITION_CFB);
+                SscConstant.CONDITION_CFNR);
         mLooper.processAllMessages();
         assertFalse(SscXmlGov.getInstance(SLOT_0).isXmlDataPresent());
 
@@ -396,9 +397,14 @@ public class SscServiceImplTest {
         mLooper.processAllMessages();
         assertTrue(SscXmlGov.getInstance(SLOT_0).isXmlDataPresent());
 
-        // Handle HTTP_PRECONDITION_FAILURE for PUT. Triggering the entire Doc. query again.
+        // Responds with 200 OK for the 2nd PUT for CFNR. This resets precondition failure count.
+        processPutTransactionAsSuccess(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
+                SscConstant.CONDITION_CFNR);
+        assertTrue(SscXmlGov.getInstance(SLOT_0).isXmlDataPresent());
+
+        // 1st HTTP_PRECONDITION_FAILURE for PUT for Timer. Triggering the entire Doc. query.
         processPutTransactionAsFailure(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
-                SscConstant.CONDITION_CFB);
+                SscConstant.CONDITION_CFNR_TIMER);
         mLooper.processAllMessages();
         assertFalse(SscXmlGov.getInstance(SLOT_0).isXmlDataPresent());
 
@@ -407,9 +413,9 @@ public class SscServiceImplTest {
         mLooper.processAllMessages();
         assertTrue(SscXmlGov.getInstance(SLOT_0).isXmlDataPresent());
 
-        // 3rd handling HTTP_PRECONDITION_FAILURE for PUT. Considering it as a final failure.
+        // 2nd HTTP_PRECONDITION_FAILURE for PUT for Timer. Considering it as a final failure.
         processPutTransactionAsFailure(ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF,
-                SscConstant.CONDITION_CFB);
+                SscConstant.CONDITION_CFNR_TIMER);
         mLooper.processAllMessages();
         assertFalse(SscXmlGov.getInstance(SLOT_0).isXmlDataPresent());
 

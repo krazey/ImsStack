@@ -73,6 +73,13 @@ public class SscRequestData {
     }
 
     /**
+     * Reset the number of precondition failure.
+     */
+    public void resetPreconditionFailedCount() {
+        mPreconditionFailedCount = 0;
+    }
+
+    /**
      * Inserts SscData at the front of mSscDataDeque to handle first.
      *
      * @param sscData See {@link SscData}.

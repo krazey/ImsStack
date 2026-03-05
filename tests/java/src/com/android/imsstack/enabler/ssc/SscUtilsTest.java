@@ -17,7 +17,9 @@
 package com.android.imsstack.enabler.ssc;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -718,6 +720,30 @@ public class SscUtilsTest {
                 SscUtils.getConditionFromSsType(SscConfig.SERVICE_TYPE_TIP));
         assertEquals(SscConstant.CONDITION_INVALID,
                 SscUtils.getConditionFromSsType(SscConfig.SERVICE_TYPE_TIR));
+    }
+
+    @Test
+    @SmallTest
+    public void isHttpPutEvent() {
+        assertTrue(SscUtils.isHttpPutEvent(SscConstant.EVENT_SSC_UPDATE_CB));
+        assertTrue(SscUtils.isHttpPutEvent(SscConstant.EVENT_SSC_UPDATE_CF));
+        assertTrue(SscUtils.isHttpPutEvent(SscConstant.EVENT_SSC_UPDATE_CW));
+        assertTrue(SscUtils.isHttpPutEvent(SscConstant.EVENT_SSC_UPDATE_OIR));
+        assertTrue(SscUtils.isHttpPutEvent(SscConstant.EVENT_SSC_UPDATE_OIP));
+        assertTrue(SscUtils.isHttpPutEvent(SscConstant.EVENT_SSC_UPDATE_TIR));
+        assertTrue(SscUtils.isHttpPutEvent(SscConstant.EVENT_SSC_UPDATE_TIP));
+        assertTrue(SscUtils.isHttpPutEvent(SscConstant.EVENT_SSC_INSERT_CB));
+        assertTrue(SscUtils.isHttpPutEvent(SscConstant.EVENT_SSC_INSERT_CF));
+
+        assertFalse(SscUtils.isHttpPutEvent(SscConstant.EVENT_SSC_QUERY_DOCUMENT));
+        assertFalse(SscUtils.isHttpPutEvent(SscConstant.EVENT_SSC_QUERY_CB));
+        assertFalse(SscUtils.isHttpPutEvent(SscConstant.EVENT_SSC_QUERY_CF));
+        assertFalse(SscUtils.isHttpPutEvent(SscConstant.EVENT_SSC_QUERY_CW));
+        assertFalse(SscUtils.isHttpPutEvent(SscConstant.EVENT_SSC_QUERY_OIR));
+        assertFalse(SscUtils.isHttpPutEvent(SscConstant.EVENT_SSC_QUERY_OIP));
+        assertFalse(SscUtils.isHttpPutEvent(SscConstant.EVENT_SSC_QUERY_TIR));
+        assertFalse(SscUtils.isHttpPutEvent(SscConstant.EVENT_SSC_QUERY_TIP));
+        assertFalse(SscUtils.isHttpPutEvent(SscConstant.EVENT_SSC_QUERY_OIR_TB_NETWORK_DEFAULT));
     }
 
     private class FakeSscUtils extends SscUtils {
