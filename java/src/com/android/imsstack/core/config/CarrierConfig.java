@@ -689,7 +689,8 @@ public class CarrierConfig {
         // Indicates the policy of USAT Registration event download.
         public static final int USAT_REG_EVENT_NOT_DOWNLOAD = 0;
         public static final int USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD = 1;
-        public static final int USAT_REG_EVENT_CONDITIONAL_DOWNLOAD = 2;
+        public static final int USAT_REG_EVENT_SETUP_EVENT_LIST_CONDITIONAL_DOWNLOAD = 2;
+        public static final int USAT_REG_EVENT_ALL_CONDITIONAL_DOWNLOAD = 3;
 
         private Ims() {}
     }

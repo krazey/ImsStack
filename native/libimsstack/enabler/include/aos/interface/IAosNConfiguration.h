@@ -1286,7 +1286,8 @@ public:
      *        Possible values are,
      *        CarrierConfig::Ims::USAT_REG_EVENT_NOT_DOWNLOAD
      *        CarrierConfig::Ims::USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD
-     *        CarrierConfig::Ims::USAT_REG_EVENT_CONDITIONAL_DOWNLOAD
+     *        CarrierConfig::Ims::USAT_REG_EVENT_SETUP_EVENT_LIST_CONDITIONAL_DOWNLOAD
+     *        CarrierConfig::Ims::USAT_REG_EVENT_ALL_CONDITIONAL_DOWNLOAD
      *
      * @return IMS_SINT32 Returns registration event download policy for USAT.
      * @see {@code ims.usat_reg_event_download_policy_int}
