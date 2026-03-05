@@ -64,7 +64,12 @@ public class SscUrl {
         String queryUri = getUriPrefixFromConfig(slotId);
         queryUri += URI_AUID + URI_USERS + "/" + xui + URI_DOC;
 
-        if (data.getSsType() != ESsType.NONE) {
+        if (data.getSsType() == ESsType.NONE) {
+            // Add node selector only when it requires root element for the document query.
+            if (SscConfig.useRootElementWhenDocQuery(slotId)) {
+                queryUri += URI_NODE_SELECTOR_SEPARATOR + "/" + SscXmlFormat.SIMSERVS;
+            }
+        } else {
             queryUri += URI_NODE_SELECTOR_SEPARATOR
                     + "/" + SscXmlFormat.getSsElement(slotId, SscXmlFormat.SIMSERVS)
                     + "/" + SscXmlFormat.getSsElement(slotId, data.getSsType().getSsName());
