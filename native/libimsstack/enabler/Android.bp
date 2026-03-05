@@ -55,7 +55,7 @@ cc_library_static {
         "**/*.cpp",
     ],
     header_libs: [
-        "libpixelimsmedia_config_headers",
+        "libimsmedia_config_headers",
         "libimsstack_config_headers",
         "libimsstack_enabler_headers",
         "libimsstack_enabler_loader_headers",

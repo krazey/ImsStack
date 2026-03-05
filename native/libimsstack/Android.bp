@@ -28,7 +28,7 @@ cc_library_shared {
         "libimsstack.cpp",
     ],
     static_libs: [
-        "libpixelimsmedia_config",
+        "libimsmedia_config",
         "libimsstack-platform",
         "libimsstack-protocol",
         "libimsstack-config",
