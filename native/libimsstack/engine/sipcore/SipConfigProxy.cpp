@@ -38,6 +38,12 @@ PUBLIC GLOBAL IMS_SINT32 SipConfigProxy::GetDeviceId(
     return pSipConfig->GetDeviceId();
 }
 
+PUBLIC GLOBAL IMS_SINT32 SipConfigProxy::GetMaxAllowedNetworkMtu(IN IMS_SINT32 nSlotId)
+{
+    const SipConfig* pSipConfig = ConfigurationManager::GetInstance()->GetSipConfig(nSlotId);
+    return pSipConfig->GetMaxAllowedNetworkMtu();
+}
+
 PUBLIC GLOBAL const AString& SipConfigProxy::GetPredefinedDeviceId(
         IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile /* = IMS_NULL*/)
 {

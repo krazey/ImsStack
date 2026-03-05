@@ -96,7 +96,9 @@ public:
         /// IP headers (v4)
         PACKET_OVERHEAD_IPV4 = 20,
         /// ePDG ESP headers + outer IP headers(40)
-        PACKET_OVERHEAD_EPDG = 100
+        PACKET_OVERHEAD_EPDG = 100,
+        /// 20-byte buffer for any extensions safely
+        PACKET_EXTRA_BUFFER = 20
     };
 
 public:

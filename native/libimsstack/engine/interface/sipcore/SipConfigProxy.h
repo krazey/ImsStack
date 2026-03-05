@@ -54,6 +54,16 @@ public:
      */
     static IMS_SINT32 GetDeviceId(IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
+     * @brief Gets a maximum allowed network MTU size.
+     *
+     * If the actual PDN MTU size is larger than this value,
+     * the MTU size is identified based on this value.
+     *
+     * @param nSlotId The current slot id
+     * @return The maximum allowed network MTU size.
+     */
+    static IMS_SINT32 GetMaxAllowedNetworkMtu(IN IMS_SINT32 nSlotId);
+    /**
      * @brief Gets a pre-defined device id (+sip.instance).
      *
      * SipProfile is preferred than a default SipConfig.

@@ -72,6 +72,7 @@ SipConfig::SipConfig(IN IMS_SINT32 nSlotId) :
         m_strTagPrefix(TAG_PREFIX),
         m_nListenChannel(DEFAULT_CHANNEL),
         m_nTransportType(TRANSPORT_TYPE_UDP),
+        m_nMaxAllowedNetworkMtu(-1),
         m_nTimerValue100Trying(200),
         m_nTcpCriterionLength(TCP_CRITERION_LEN),
         m_objTcpTimerValues(SipConfig::TcpTimerValues()),
@@ -186,8 +187,8 @@ PROTECTED VIRTUAL IMS_BOOL SipConfig::ReadFrom()
             ImsPrivateProperties::Persistent::KEY_SIP_DEVICE_ID, GetSlotId());
 
     m_nTcpCriterionLength = piCc->GetInt(CarrierConfig::Ims::KEY_IPV6_SIP_MTU_SIZE_CELLULAR_INT);
-
     m_nTransportType = piCc->GetInt(CarrierConfig::Ims::KEY_SIP_PREFERRED_TRANSPORT_INT);
+    m_nMaxAllowedNetworkMtu = piCc->GetInt(CarrierConfig::Ims::KEY_MAX_ALLOWED_NETWORK_MTU_INT);
 
     m_nHideMacInPaniHeader = piCc->GetInt(
             CarrierConfig::Ims::KEY_HIDE_MAC_ADDRESS_IN_PANI_HEADER_INT, HIDE_MAC_IN_PANI);
