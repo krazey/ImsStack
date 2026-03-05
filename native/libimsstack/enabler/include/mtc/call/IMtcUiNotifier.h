@@ -120,8 +120,6 @@ public:
     /**
      * @brief Notifies that a call resume is incoming but need to check UI condition before accept
      *        automatically.
-     *
-     * Currently it's for Verizon only.
      */
     virtual void SendIncomingResume() = 0;
 

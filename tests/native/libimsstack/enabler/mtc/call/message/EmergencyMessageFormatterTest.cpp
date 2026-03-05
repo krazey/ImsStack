@@ -130,8 +130,8 @@ protected:
         lstPpi.Add("");
         lstPpi.Add("");
         ON_CALL(*pConfigurationProxy,
-                GetStringArray(ConfigEmergency::
-                                KEY_P_PREFERRED_IDENTITY_INFO_HEADER_IN_INVITE_STRING_ARRAY))
+                GetStringArray(
+                        ConfigEmergency::KEY_P_PREFERRED_IDENTITY_HEADER_IN_INVITE_STRING_ARRAY))
                 .WillByDefault(Return(lstPpi));
 
         pFormatter = new EmergencyMessageFormatter(objContext, objSession);
@@ -529,8 +529,7 @@ TEST_F(EmergencyMessageFormatterTest, SetPPreferredIdentityHeaderFormatsForRegMo
     lstPpi.Add("internal@ppi");
     lstPpi.Add("nouicc@ppi");
     ON_CALL(*pConfigurationProxy,
-            GetStringArray(
-                    ConfigEmergency::KEY_P_PREFERRED_IDENTITY_INFO_HEADER_IN_INVITE_STRING_ARRAY))
+            GetStringArray(ConfigEmergency::KEY_P_PREFERRED_IDENTITY_HEADER_IN_INVITE_STRING_ARRAY))
             .WillByDefault(Return(lstPpi));
     AString strPuid = "puid";
     ON_CALL(objSubscriberConfig, GetPublicUserId(_)).WillByDefault(ReturnRef(strPuid));
@@ -577,8 +576,7 @@ TEST_F(EmergencyMessageFormatterTest, SetPPreferredIdentityHeaderFormatsByTokens
     ImsVector<AString> lstPpi;
     lstPpi.Add("#PUID#-#IMEI#-#IP#-#PORT#");
     ON_CALL(*pConfigurationProxy,
-            GetStringArray(
-                    ConfigEmergency::KEY_P_PREFERRED_IDENTITY_INFO_HEADER_IN_INVITE_STRING_ARRAY))
+            GetStringArray(ConfigEmergency::KEY_P_PREFERRED_IDENTITY_HEADER_IN_INVITE_STRING_ARRAY))
             .WillByDefault(Return(lstPpi));
     ON_CALL(objAosConnector, GetRegistrationMode)
             .WillByDefault(Return(IImsAosInfo::REG_MODE_NORMAL));
@@ -631,8 +629,7 @@ TEST_F(EmergencyMessageFormatterTest, SetPPreferredIdentityHeaderByImeiWithHyphe
     ImsVector<AString> lstPpi;
     lstPpi.Add("sip:#IMEIWITHHYPHEN#@#IP#:#PORT#");
     ON_CALL(*pConfigurationProxy,
-            GetStringArray(
-                    ConfigEmergency::KEY_P_PREFERRED_IDENTITY_INFO_HEADER_IN_INVITE_STRING_ARRAY))
+            GetStringArray(ConfigEmergency::KEY_P_PREFERRED_IDENTITY_HEADER_IN_INVITE_STRING_ARRAY))
             .WillByDefault(Return(lstPpi));
 
     ON_CALL(objPhoneInfoService.GetMockDeviceInfo(), GetDeviceId(_, _))

@@ -217,7 +217,7 @@ PUBLIC GLOBAL IMS_BOOL DialogInfo::IsAttrExist(
 PRIVATE
 IMS_UINT32 DialogInfo::ConvertState(IN const AString& strState)
 {
-    // Only VZW guarantees that the first one is FULL and all the subsequent NOTIFYs are partial.
+    // Assuming that the first one is FULL and all the subsequent NOTIFYs are partial.
     // If the state is FULL and a dialog doesn't exist in it, it must be set as a Terminated-state
     // dialog and deleted.
     if (strState.Equals("partial"))

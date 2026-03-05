@@ -21,9 +21,19 @@
 #include "ImsTypeDef.h"
 #include "ServiceTrace.h"
 
+/**
+ * @brief Represents the state of an external call.
+ *
+ * This data structure is used to pass information across the JNI boundary about a call that is
+ * active on another one of a user's devices. It is used for Multi-Endpoint and Call-Pull
+ * features.
+ */
 struct JniExternalCall
 {
 public:
+    /**
+     * @brief Default constructor.
+     */
     JniExternalCall() :
             m_strCallId(AString::ConstNull()),
             m_strAddress(AString::ConstNull()),
@@ -35,6 +45,9 @@ public:
     {
     }
 
+    /**
+     * @brief Copy constructor.
+     */
     JniExternalCall(IN const JniExternalCall& objRhs) :
             m_strCallId(objRhs.m_strCallId),
             m_strAddress(objRhs.m_strAddress),
@@ -46,6 +59,9 @@ public:
     {
     }
 
+    /**
+     * @brief Assignment operator.
+     */
     JniExternalCall& operator=(IN const JniExternalCall& objRhs)
     {
         if (this != &objRhs)
@@ -62,10 +78,14 @@ public:
         return *this;
     }
 
+    /**
+     * @brief Generates a string representation of the object for debugging.
+     * @return An AString containing the object's state.
+     */
     inline const AString ToString() const
     {
         AString strLog;
-        strLog.Sprintf("CallId: %s, Address: %s, LocalAddrsss: %s, IsPullable: %s, CallState: %d, \
+        strLog.Sprintf("CallId: %s, Address: %s, LocalAddress: %s, IsPullable: %s, CallState: %d, \
                 CallType: %d",
                 m_strCallId.GetStr(), m_strAddress.GetStr(), m_strLocalAddress.GetStr(),
                 _TRACE_B_(m_bIsPullable), m_nCallState, m_nCallType);
@@ -73,16 +93,24 @@ public:
     }
 
 public:
-    // See ImsExternalCallState in Telephony framework.
+    /** @brief Call has been established. */
     static const IMS_UINT32 CALL_STATE_CONFIRMED = 1;
+    /** @brief Call has been terminated. */
     static const IMS_UINT32 CALL_STATE_TERMINATED = 2;
 
+    /** @brief A unique identifier for the external call. */
     AString m_strCallId;
+    /** @brief The address of the remote party (e.g., phone number). */
     AString m_strAddress;
+    /** @brief The address of the local party on the other device. */
     AString m_strLocalAddress;
+    /** @brief Whether the call can be transferred (pulled) to the current device. */
     IMS_BOOL m_bIsPullable;
+    /** @brief The current state of the call (e.g., CALL_STATE_CONFIRMED). */
     IMS_UINT32 m_nCallState;
+    /** @brief The type of call (e.g., voice, video). */
     IMS_UINT32 m_nCallType;
+    /** @brief Whether the call is currently on hold on the external device. */
     IMS_BOOL m_bIsHeld;
 };
 

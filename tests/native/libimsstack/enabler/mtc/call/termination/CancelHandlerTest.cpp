@@ -128,14 +128,14 @@ TEST_F(CancelHandlerTest, HandleMessageWith603AnyTextReturnsRejectedElsewhere)
     EXPECT_EQ(CallReasonInfo(CODE_REJECTED_ELSEWHERE), objHandler.Handle(objMessage));
 }
 
-TEST_F(CancelHandlerTest, HandleMessageWithCallCompletedVzwReturnsAnsweredElsewhere)
+TEST_F(CancelHandlerTest, HandleMessageWithCallCompletedReturnsAnsweredElsewhere)
 {
     SetUpPrioritizedReasonHeader(REASON_SIP_PROTOCOL, 999, "\"Call Completion Elsewhere\"");
 
     EXPECT_EQ(CallReasonInfo(CODE_ANSWERED_ELSEWHERE), objHandler.Handle(objMessage));
 }
 
-TEST_F(CancelHandlerTest, HandleMessageWithBusyEverywhereVzwReturnsRejectedElsewhere)
+TEST_F(CancelHandlerTest, HandleMessageWithBusyEverywhereReturnsRejectedElsewhere)
 {
     SetUpPrioritizedReasonHeader(
             REASON_SIP_PROTOCOL, 999, "\"Another device sent All Devices Busy response\"");
@@ -247,10 +247,8 @@ TEST_F(CancelHandlerTest, GetCodeFromReason_SipProtocolNoMatch_ReturnsTerminated
     EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE), objHandler.Handle(objMessage));
 }
 
-TEST_F(CancelHandlerTest, HandleMessageWithVzwBusySubstringReturnsRejectedElsewhere)
+TEST_F(CancelHandlerTest, HandleMessageWithBusySubstringReturnsRejectedElsewhere)
 {
-    // Verifies that the VZW "busy" reason text is detected even when it's part of a larger
-    // string, leveraging the 'Contains' logic.
     SetUpPrioritizedReasonHeader(REASON_SIP_PROTOCOL, 999,
             "Some other info; another device sent all devices busy response; some more info");
 
@@ -258,10 +256,8 @@ TEST_F(CancelHandlerTest, HandleMessageWithVzwBusySubstringReturnsRejectedElsewh
     EXPECT_EQ(CallReasonInfo(CODE_REJECTED_ELSEWHERE), objHandler.Handle(objMessage));
 }
 
-TEST_F(CancelHandlerTest, HandleMessageWithVzwCompletedSubstringReturnsAnsweredElsewhere)
+TEST_F(CancelHandlerTest, HandleMessageWithCompletedSubstringReturnsAnsweredElsewhere)
 {
-    // Verifies that the VZW "call completed" reason text is detected even when it's part of a
-    // larger string, leveraging the 'Contains' logic.
     SetUpPrioritizedReasonHeader(
             REASON_SIP_PROTOCOL, 999, "Some other info; call completion elsewhere; some more info");
 

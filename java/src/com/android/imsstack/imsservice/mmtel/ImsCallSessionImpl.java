@@ -3935,9 +3935,12 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             log("onCallInfoChanged");
 
             ImsCallUtils.updateCallProfileFromCallInfo(mCallContext, mCallProfile, callInfo);
+            ImsCallProfile profile = ImsCallUtils.createCallProfileFromCallInfo(
+                    mCallContext, callInfo, mCall.getMediaInfo());
+            setCallInfo(profile);
 
             mCallback.invokeUpdated(ImsCallSessionImpl.this,
-                    ImsCallUtils.getSanitizedCallProfileForVideoDirection(mCallProfile));
+                    ImsCallUtils.getSanitizedCallProfileForVideoDirection(profile));
         }
 
         @Override

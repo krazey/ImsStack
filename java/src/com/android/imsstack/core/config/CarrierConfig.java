@@ -783,7 +783,7 @@ public class CarrierConfig {
                 KEY_PREFIX + "p_emergency_info_header_in_invite_string";
         public static final String KEY_CONTACT_HEADER_ADDRESS_IN_INVITE_STRING_ARRAY =
                 KEY_PREFIX + "contact_header_address_in_invite_string_array";
-        public static final String KEY_P_PREFERRED_IDENTITY_INFO_HEADER_IN_INVITE_STRING_ARRAY =
+        public static final String KEY_P_PREFERRED_IDENTITY_HEADER_IN_INVITE_STRING_ARRAY =
                 KEY_PREFIX + "p_preferred_identity_header_in_invite_string_array";
         public static final String KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL =
                 KEY_PREFIX + "support_ecbm_for_volte_bool";
@@ -793,12 +793,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "emergency_rtt_guard_timer_millis_int";
         public static final String KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_EMERGENCY_CALL_INT =
                 KEY_PREFIX + "policy_for_tcall_timer_expiry_of_volte_emergency_call_int";
-        public static final String KEY_POLICY_FOR_REQUIRING_EMERGENCY_CALL_WHEN_VIDEO_EMERGENCY_CALL_FAILED_INT_ARRAY =
-                KEY_PREFIX + "policy_for_requiring_emergency_call_when_video_emergency_call_failed_int_array";
-        public static final String KEY_USE_EMERGENCY_NUMBER_TRANSLATION_IN_ROAMING_STATUS_BOOL =
-                KEY_PREFIX + "use_emergency_number_translation_in_roaming_status_bool";
-        public static final String KEY_BLOCK_WIFI_EMERGENCY_CALL_IF_NOT_PROVISIONED_BOOL =
-                KEY_PREFIX + "block_wifi_emergency_call_if_not_provisioned_bool";
         public static final String KEY_WIFI_EMERGENCY_18X_TIMER_MILLIS_INT =
                 KEY_PREFIX + "wifi_emergency_18x_timer_millis_int";
         public static final String KEY_RELEASE_EMERGENCY_PDN_ON_FAILURE_AFTER_100_BOOL =
@@ -1135,8 +1129,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "caller_id_service_codes_for_restriction_string_array";
         public static final String KEY_CALLER_ID_SERVICE_CODES_FOR_IDENTITY_STRING_ARRAY =
                 KEY_PREFIX + "caller_id_service_codes_for_identity_string_array";
-        public static final String KEY_SHORT_CALL_CODE_INT_ARRAY =
-                KEY_PREFIX + "short_call_code_int_array";
         public static final String KEY_LOCAL_NUMBER_PRESENTATION_SET_STRING =
                 KEY_PREFIX + "local_number_presentation_set_string";
         public static final String KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL =
@@ -1230,16 +1222,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "policy_for_tcall_timer_expiry_of_volte_call_int";
         public static final String KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY =
                 KEY_PREFIX + "carrier_specific_sip_headers_string_array";
-        public static final String KEY_SUPPORT_REGISTRATION_RECOVERY_FOR_FAILURE_OF_SESSION_REFRESH_BOOL =
-                KEY_PREFIX + "support_registration_recovery_for_failure_of_session_refresh_bool";
-        public static final String KEY_POLICY_FOR_CALL_MAINTAINING_ON_REGISTRATION_SUSPENDED_INT_ARRAY =
-                KEY_PREFIX + "policy_for_call_maintaining_on_registration_suspended_int_array";
-        public static final String KEY_USE_LTE_PREFERRED_STATUS_FOR_SERVICE_CAPABILITY_BOOL =
-                KEY_PREFIX + "use_lte_preferred_status_for_service_capability_bool";
-        public static final String KEY_ALLOW_INCOMING_HOLD_REQUEST_DURING_CONFERENCE_CALL_BOOL =
-                KEY_PREFIX + "allow_incoming_hold_request_during_conference_call_bool";
-        public static final String KEY_IGNORE_180_AFTER_183_RESPONSE_BOOL =
-                KEY_PREFIX + "ignore_180_after_183_response_bool";
         public static final String KEY_ADD_REPLACE_HEADER_FOR_CONFERENCE_BOOL =
                 KEY_PREFIX + "add_replace_header_for_conference_bool";
         public static final String KEY_POLICY_FOR_PRACK_DELIVERY_FAILURE_INT =
@@ -1250,14 +1232,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "use_carrier_specific_reject_phrase_for_incoming_call_during_no_registration_bool";
         public static final String KEY_ENABLE_REGISTRATION_RECOVERY_ON_PRACK_TIMEOUT_BOOL =
                 KEY_PREFIX + "enable_registration_recovery_on_prack_timeout_bool";
-        public static final String KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_REJECTED_BY_SERVER_ERROR_BOOL =
-                KEY_PREFIX + "enable_registration_recovery_when_call_rejected_by_server_error_bool";
-        public static final String KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_RETRY_UNAVAILABLE_BOOL =
-                KEY_PREFIX + "enable_registration_recovery_when_call_retry_unavailable_bool";
         public static final String KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_BYE_TRANSACTION_TIMEOUT_BOOL =
                 KEY_PREFIX + "enable_registration_recovery_when_bye_transaction_timeout_bool";
-        public static final String KEY_CHECK_SERVER_OUTAGE_REASON_FOR_VXLTE_CALL_BOOL =
-                KEY_PREFIX + "check_server_outage_reason_for_vxlte_call_bool";
         public static final String KEY_MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING_BOOL =
                 KEY_PREFIX + "maintain_multiple_early_sessions_by_forking_bool";
         public static final String KEY_DESTROY_INACTIVE_EARLY_SESSIONS_WHEN_ESTABLISHED_BOOL =

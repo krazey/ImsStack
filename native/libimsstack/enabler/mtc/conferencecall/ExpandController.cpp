@@ -46,7 +46,6 @@ PUBLIC VIRTUAL ExpandController::~ExpandController()
 PUBLIC VIRTUAL void ExpandController::OnReferenceStarted(IN IConferenceReference* piConfRef)
 {
     IMS_TRACE_D("OnReferenceStarted", 0, 0, 0);
-    // LGU+
     if ((ConferenceConfigurationHelper::IsReferSubscriptionRequired(
                  m_objContext.GetConfigurationProxy()) == IMS_FALSE) &&
             (GetState() == STATE_EXPANDING) && (piConfRef->GetType() == REFERENCE_TYPE_INVITE))
@@ -171,7 +170,7 @@ void ExpandController::ProcessExpand(IN ImsList<ConfUser*>& objUsers)
     IMS_SINT32 nReferType = ConferenceConfigurationHelper::GetReferTypeForInvite(
             m_objContext.GetConfigurationProxy());
 
-    if (nReferType == ConfigVoice::CONFERENCE_INVITE_REFER_SINGLE)  // SKT
+    if (nReferType == ConfigVoice::CONFERENCE_INVITE_REFER_SINGLE)
     {
         // This is not a verified operation.
         m_pOperationQueue->CreateNPutWithUsers(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objUsers);
@@ -182,7 +181,7 @@ void ExpandController::ProcessExpand(IN ImsList<ConfUser*>& objUsers)
         // Terminate the exist 1-to-1 session : it is triggered by GII operation.
         m_pOperationQueue->CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI);
     }
-    else if (nReferType == ConfigVoice::CONFERENCE_INVITE_REFER_MULTIPLE)  // LGU+
+    else if (nReferType == ConfigVoice::CONFERENCE_INVITE_REFER_MULTIPLE)
     {
         m_pOperationQueue->CreateNPutWithUsers(
                 CONTROL_OPERATION_REFER_INVITE, m_pParticipantList->GetConfUsers());
@@ -262,7 +261,7 @@ PROTECTED VIRTUAL void ExpandController::OnCallUpdated(IN IMS_UINT32, IN IMS_UIN
         return;
     }
 
-    // Session is updated to conference during STATE_EXPANDING - LGU+.
+    // Session is updated to conference during STATE_EXPANDING.
 
     // Add the user of exist 1-to-1 session to participant list
     IMS_TRACE_D("Updated : Add user of the exist 1-to-1 session", 0, 0, 0);

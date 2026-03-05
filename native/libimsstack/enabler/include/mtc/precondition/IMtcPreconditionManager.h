@@ -25,154 +25,199 @@ class IMessage;
 class IMtcPreconditionListener;
 class ISession;
 
+/**
+ * @brief Manages the end-to-end lifecycle of Quality of Service (QoS) preconditions (RFC 3312).
+ *
+ * This interface is responsible for tracking the status of local and remote resource reservations,
+ * modifying Session Description Protocol (SDP) to include precondition attributes, handling
+ * network events that affect QoS (like RAT changes), and determining when call setup can proceed
+ * based on the reservation status.
+ */
 class IMtcPreconditionManager
 {
 public:
     virtual ~IMtcPreconditionManager(){};
 
     /**
-     * @brief Create QosTimer, QosData, QosStatusTable to handle the behavior related to
-     *        precondition.
-     * @param piSession ISession instance is used for managing the QosTimer, QosData, and
-     *                  QosStatusTable.
+     * @brief Creates and initializes QoS (Quality of Service) resources for a given session.
+     *
+     * This sets up the necessary data structures (QosTimer, QosData, QosStatusTable) to manage
+     * the state of precondition attributes for the session.
+     *
+     * @param piSession The session for which to create QoS resources.
      */
     virtual void CreateQos(IN ISession* piSession) = 0;
 
     /**
-     * @brief Destroy the QosTimer, QosData, QosStatusTable matched with the param. Remove them
-     *        from the list or map managed in the PreconditionManager.
-     * @param piSession Isession instance is used to find the QosTimer, QosData and QosStatusTable
-     *                  should be deleted.
+     * @brief Destroys the QoS resources associated with a given session.
+     *
+     * This cleans up all data structures that were allocated by CreateQos for the session.
+     *
+     * @param piSession The session whose QoS resources should be destroyed.
      */
     virtual void DestroyQos(IN ISession* piSession) = 0;
 
     /**
-     * @brief Set callback listener from MtcCall.
-     * @param pListener callback listener to set.
+     * @brief Sets the listener for precondition-related events.
+     *
+     * The listener will be notified of events like QoS reservation success or failure.
+     *
+     * @param pListener A pointer to the listener implementation.
      */
     virtual void SetListener(IN IMtcPreconditionListener* pListener) = 0;
 
     /**
-     * @brief Initializes the RAT information.
+     * @brief Initializes or resets the mobile RAT (Radio Access Technology) information.
      *
-     * This initializes the values of {@link MtcPreconditionManager#m_ePreviousRatType} and
-     * {@link MtcPreconditionManager#m_eCurrentRatType} which store RAT information.
-     * It is called when the {@code MtcPreconditionManager} is created and when the resources of an
-     * existing call are released for internal silent call redial.
+     * This function is called on creation and during certain redial scenarios to ensure the
+     * manager has the correct current and previous RAT types.
      */
     virtual void InitializeMobileRatInformation() = 0;
 
     /**
-     * @brief Checks
+     * @brief Checks if QoS preconditions are supported locally.
      *
-     * @return
+     * This is determined by carrier configuration based on the call type (e.g., normal,
+     * emergency) and media types involved.
+     *
+     * @return IMS_TRUE if preconditions are supported, IMS_FALSE otherwise.
      */
     virtual IMS_BOOL IsPreconditionSupportedInLocal() const = 0;
 
     /**
-     * @brief Checks
+     * @brief Checks if a dedicated bearer has been successfully allocated for a specific media
+     * type.
      *
-     * @param piSession
-     * @param eMediaType
-     * @return IMS_BOOL
+     * @param piSession The session to check.
+     * @param eMediaType The media type (e.g., MEDIATYPE_AUDIO, MEDIATYPE_VIDEO) to check.
+     * @return IMS_TRUE if the dedicated bearer is available, IMS_FALSE otherwise.
      */
     virtual IMS_BOOL IsDedicatedBearerAllocated(
             IN ISession* piSession, IN IMS_UINT32 eMediaType) const = 0;
 
     /**
-     * @brief Checks
+     * @brief Determines if the device must wait for QoS resource reservation to be confirmed
+     * before alerting the user of an incoming call.
      *
-     * @return IMS_BOOL
+     * @param piSession The session of the incoming call.
+     * @return IMS_TRUE if waiting is required, IMS_FALSE otherwise.
      */
     virtual IMS_BOOL IsCheckingResourcesRequiredToAlertUser(IN ISession* piSession) const = 0;
 
     /**
-     * @brief Checks
+     * @brief Checks if all necessary QoS resources are reserved, making it permissible to alert the
+     * user for an incoming call.
      *
-     * @param piSession
-     * @return IMS_BOOL
+     * @param piSession The session to check.
+     * @return IMS_TRUE if resources are ready and the user can be alerted, IMS_FALSE otherwise.
      */
     virtual IMS_BOOL IsAvailableToAlertUser(IN ISession* piSession) const = 0;
 
     /**
-     * @brief Checks
+     * @brief Determines whether the device needs to send a confirmation to the network that local
+     * QoS resources have been successfully reserved.
      *
-     * @param piSession
-     * @return IMS_BOOL
+     * @param piSession The session to check.
+     * @return IMS_TRUE if a confirmation is required, IMS_FALSE otherwise.
      */
     virtual IMS_BOOL IsLocalResourceConfirmationRequired(IN ISession* piSession) const = 0;
 
     /**
-     * @brief Checks
+     * @brief Checks if the conditions are met to send a local resource confirmation message (e.g.,
+     * in a PRACK or UPDATE).
      *
-     * @param piSession
-     * @return IMS_BOOL
+     * @param piSession The session to check.
+     * @return IMS_TRUE if a confirmation can be sent, IMS_FALSE otherwise.
      */
     virtual IMS_BOOL IsAvailableToSendLocalResourceConfirmation(IN ISession* piSession) const = 0;
 
     /**
-     * @brief Checks if QoS precondition attributes are included in the SDP media information that
-     *        was last negotiated for the given @ISession at the current time.
+     * @brief Checks if the SDP for the session contains any QoS precondition attributes.
      *
-     * @param piSession ISession instance to examine.
+     * @param piSession The ISession instance to examine.
      * @return IMS_TRUE if QoS precondition attributes are included, IMS_FALSE otherwise.
      */
     virtual IMS_BOOL IsPreconditionIncludedInSdp(IN ISession* piSession) const = 0;
 
     /**
-     * @brief To form the precondition attributes of SDP.
-     * @param piSession ISession instance to get the QosStatusTable and the SDP body of the
-     *                  specific session.
-     * @param bFailure Flag to form the SDP for failure case or not.
+     * @brief Modifies the session's SDP to add or update precondition attributes based on the
+     * current QoS status.
+     *
+     * @param piSession The session whose SDP is to be modified.
+     * @param bFailure If true, forms an SDP indicating precondition failure.
      */
     virtual void FormPreconditionSdp(IN ISession* piSession, IN IMS_BOOL bFailure) = 0;
 
     /**
-     * @brief Updates
+     * @brief Handles an incoming SDP message.
      *
-     * @param piSession
+     * It parses precondition attributes from the remote party's SDP, updates the session's QoS
+     * state, and may start timers for waiting on dedicated bearers.
+     *
+     * @param piSession The session that received the SDP.
      */
     virtual void OnSdpReceived(IN ISession* piSession) = 0;
 
     /**
-     * @brief
+     * @brief Handles an outgoing SDP message.
      *
-     * @param piSession
+     * It may start timers related to waiting for QoS bearers based on the sent SDP.
+     *
+     * @param piSession The session that sent the SDP.
+     * @param bInitialInvite True if this is for the initial INVITE, false otherwise.
      */
     virtual void OnSdpSent(IN ISession* piSession, IN IMS_BOOL bInitialInvite = IMS_FALSE) = 0;
 
     /**
-     * @brief Updates
+     * @brief Handles an incoming SIP message.
      *
-     * @param piSession
-     * @param piMessage
+     * It inspects headers (`Supported`, `Require`) and status codes to update the remote
+     * party's precondition support and resource status.
+     *
+     * @param piSession The session that received the message.
+     * @param piMessage The received SIP message.
      */
     virtual void OnMessageReceived(IN ISession* piSession, IN IMessage* piMessage) = 0;
 
     /**
-     * @brief Checks
+     * @brief Handles the call established event.
      *
-     * @param piSession
+     * It may start timers to wait for QoS for non-audio media types (video, RTT) if they
+     * haven't been allocated yet.
+     *
+     * @param piSession The session that was established.
      */
     virtual void OnCallEstablished(IN ISession* piSession) = 0;
 
     /**
-     * @brief Checks
+     * @brief Handles the call modified event (e.g., after a re-INVITE).
      *
-     * @param piSession
+     * It updates QoS states, starts timers for new media, and cleans up state for any media
+     * that was removed from the session.
+     *
+     * @param piSession The session that was modified.
      */
     virtual void OnCallModified(IN ISession* piSession) = 0;
 
     /**
-     * @brief Handles the RAT(Radio Access Technology) changed event.
+     * @brief Handles a change in the Radio Access Technology (RAT).
      *
-     * The received RAT type for determining conditions such as handover between WiFi and mobile
-     * network, or fallback from NR to EPS.
+     * This manages QoS state transitions during network handovers (e.g., Wi-Fi to LTE, LTE to
+     * Wi-Fi) and EPS Fallback scenarios by starting or stopping relevant timers.
      *
-     * @param eRatType The changed RAT type
+     * @param eRatType The new RAT type from the network.
      */
     virtual void OnRatChanged(IN IMS_SINT32 eRatType) = 0;
 
+    /**
+     * @brief Updates the QoS status for media types if the underlying media session reports that
+     * QoS has become available.
+     *
+     * @param piSession The session to update.
+     * @param nNegoId The ID of the media negotiation.
+     * @param eNegotiatedMediaType The bitmap of media types whose QoS status is available.
+     * @param piMediaSession The media session providing the QoS status.
+     */
     virtual void UpdateQosIfAvailable(IN ISession* piSession, IN IMS_UINTP nNegoId,
             IN MEDIA_CONTENT_TYPE eNegotiatedMediaType, IN IMediaSession* piMediaSession) = 0;
 };

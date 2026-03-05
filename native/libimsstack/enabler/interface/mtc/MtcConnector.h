@@ -21,10 +21,30 @@
 
 class IMtcCallStateListener;
 
+/**
+ * @brief A static utility class that acts as a bridge to the MTC call state event system.
+ *
+ * This connector provides a simple, static interface for clients to subscribe to (and unsubscribe
+ * from) call state change notifications for a specific subscription slot. It abstracts the process
+ * of retrieving the correct context and proxy for listener management.
+ */
 class MtcConnector
 {
 public:
+    /**
+     * @brief Registers a listener to receive call state change notifications.
+     *
+     * @param nSlotId The subscription slot ID to listen to.
+     * @param pListener A pointer to the listener implementation that will receive the callbacks.
+     */
     static void AddCallStateListener(IN IMS_SINT32 nSlotId, IN IMtcCallStateListener* pListener);
+
+    /**
+     * @brief Unregisters a listener, stopping it from receiving further call state notifications.
+     *
+     * @param nSlotId The subscription slot ID from which to remove the listener.
+     * @param pListener A pointer to the listener implementation to be removed.
+     */
     static void RemoveCallStateListener(IN IMS_SINT32 nSlotId, IN IMtcCallStateListener* pListener);
 };
 

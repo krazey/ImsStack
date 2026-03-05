@@ -21,51 +21,65 @@
 
 struct CallReasonInfo;
 
+/**
+ * @brief Interface for listening to media reporting events.
+ *
+ * This interface is implemented by classes that need to react to media-related events
+ * such as the start/failure of data reception, video quality changes, and network tone status.
+ * It is typically used by the MtcCall or MtcCallState to handle media events propagated
+ * by the #IMtcMediaManager.
+ */
 class IMediaReportEventListener
 {
 public:
     virtual ~IMediaReportEventListener(){};
 
     /**
-     * @brief Notifies
+     * @brief Notifies that the reception of media data has started.
      *
-     * @param eMediaType
-     * @param eProtocolType
+     * @param eMediaType The type of media received (e.g., #MEDIATYPE_AUDIO, #MEDIATYPE_VIDEO).
+     * @param eProtocolType The transport protocol used (e.g., #MEDIA_PROTOCOL_RTP).
+     * @see MEDIA_CONTENT_TYPE
+     * @see MEDIA_TRANSPORT_PROTOCOL
      */
     virtual void OnReceivingMediaDataStarted(
             IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) = 0;
 
     /**
-     * @brief Notifies
+     * @brief Notifies that the reception of media data has failed.
      *
-     * @param eMediaType
-     * @param eProtocolType
+     * This typically indicates an RTP timeout or connection loss for the specific media type.
+     *
+     * @param eMediaType The type of media that failed (e.g., #MEDIATYPE_AUDIO).
+     * @param eProtocolType The transport protocol used (e.g., #MEDIA_PROTOCOL_RTCP).
+     * @see MEDIA_CONTENT_TYPE
+     * @see MEDIA_TRANSPORT_PROTOCOL
      */
     virtual void OnReceivingMediaDataFailed(
             IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) = 0;
 
     /**
-     * @brief Notifies
+     * @brief Notifies that the video bitrate has dropped to the lowest supported level.
      *
+     * This event is often used to trigger a downgrade from video to voice call to maintain
+     * call continuity under poor network conditions.
      */
     virtual void OnVideoLowestBitRate() = 0;
 
     /**
-     * @brief Notifies
-     *
+     * @brief Notifies that the reception of the network tone has started.
      */
     virtual void OnReceivingNetworkToneStarted() = 0;
 
     /**
-     * @brief Notifies
-     *
+     * @brief Notifies that the reception of the network tone has failed.
      */
     virtual void OnReceivingNetworkToneFailed() = 0;
 
     /**
-     * @brief Notifies
+     * @brief Notifies of a general media failure.
      *
-     * @param objReason
+     * @param objReason The reason for the media failure.(#CallReasonInfo)
      */
     virtual void OnMediaFailed(IN const CallReasonInfo& objReason) = 0;
 };

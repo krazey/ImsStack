@@ -1847,6 +1847,9 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         CallInfo callInfo = new CallInfo();
         MtcCallInfo.setCrossSim(callInfo, true);
         MtcCallInfo.setRatType(callInfo, 1);
+        MediaInfo mediaInfo = new MediaInfo();
+        mediaInfo.videoDir = MediaInfo.DIRECTION_INACTIVE;
+        when(mMockMtcCall.getMediaInfo()).thenReturn(mediaInfo);
         mImsCallSession.getCallListenerProxy().onCallInfoChanged(mMockMtcCall, callInfo);
         processAllMessages();
 
@@ -1860,6 +1863,19 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 ImsCallProfile.EXTRA_IS_CROSS_SIM_CALL));
         assertEquals(1, profileCaptor.getValue().getCallExtraInt(
                 ImsCallProfile.EXTRA_CALL_NETWORK_TYPE));
+
+        // Test video direction change updates call type
+        Mockito.clearInvocations(mMockImsCallSessionCallback);
+        MtcCallInfo.setVideoCapable(callInfo, true);
+        MtcCallInfo.setCallType(callInfo, IUMtcCall.CALLTYPE_VT);
+        mediaInfo.videoDir = MediaInfo.DIRECTION_RECEIVE;
+        mediaInfo.videoQuality = MediaInfo.VIDEO_QUALITY_QVGA_LS;
+        mImsCallSession.getCallListenerProxy().onCallInfoChanged(mMockMtcCall, callInfo);
+        processAllMessages();
+
+        verify(mMockImsCallSessionCallback).invokeUpdated(
+                any(ImsCallSessionImplBase.class), profileCaptor.capture());
+        assertEquals(ImsCallProfile.CALL_TYPE_VT_RX, profileCaptor.getValue().getCallType());
     }
 
     @Test

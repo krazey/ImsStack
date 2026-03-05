@@ -24,6 +24,7 @@
 #include "call/block/CallTypeBlockRule.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "media/IMedia.h"
+#include "utility/CallTypeUtil.h"
 #include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -120,7 +121,7 @@ PRIVATE IMS_BOOL CallTypeBlockRule::IsBlockedByVideoMultipleCall()
         return IMS_FALSE;
     }
 
-    if (IsVideoCall(m_eCallType) || HasVideoCall(lstOtherCalls))
+    if (CallTypeUtil::IsVideoCall(m_eCallType) || HasVideoCall(lstOtherCalls))
     {
         IMS_TRACE_I("IsBlockedByVideoMultipleCall : Video call cannot be placed with another call",
                 0, 0, 0);
@@ -140,7 +141,7 @@ PRIVATE IMS_BOOL CallTypeBlockRule::HasVideoCall(IN const ImsList<IMtcCall*>& ls
 {
     for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
     {
-        if (IsVideoCall(lstCalls.GetAt(nIndex)->GetCallType()))
+        if (CallTypeUtil::IsVideoCall(lstCalls.GetAt(nIndex)->GetCallType()))
         {
             return IMS_TRUE;
         }
@@ -158,17 +159,11 @@ PRIVATE IMS_BOOL CallTypeBlockRule::HasRttCall(IN const ImsList<IMtcCall*>& lstC
 {
     for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
     {
-        CallType eCallType = lstCalls.GetAt(nIndex)->GetCallType();
-        if (eCallType == CallType::RTT || eCallType == CallType::VIDEO_RTT)
+        if (CallTypeUtil::IsRttCall(lstCalls.GetAt(nIndex)->GetCallType()))
         {
             return IMS_TRUE;
         }
     }
 
     return IMS_FALSE;
-}
-
-PRIVATE IMS_BOOL CallTypeBlockRule::IsVideoCall(IN CallType eCallType)
-{
-    return eCallType == CallType::VT || eCallType == CallType::VIDEO_RTT;
 }

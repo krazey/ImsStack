@@ -49,7 +49,6 @@ PRIVATE ServiceBlockRule::Result ServiceBlockRule::CheckForInitiatingCall() cons
         return Result(Result::Status::UNBLOCKED);
     }
 
-    // Can place a video call without the MMTel feature (Verizon)
     if (m_eCallType == CallType::VT &&
             m_objService.GetAosConnector()->IsFeatureConnected(ImsAosFeature::VIDEO))
     {

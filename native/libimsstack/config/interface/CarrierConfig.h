@@ -235,6 +235,13 @@ public:
             MULTIPLE_REGISTRATION_FULL = 2
         };
 
+        /**
+         * Specifies whether the <gbp:retransmission-allowed> element is added to the PIDF-LO XML.
+         * Reference: RFC 4119.
+         *
+         * Possible Values:
+         * "yes", "no", "True"
+         */
         static const IMS_CHAR KEY_RETRANSMISSION_ALLOWED_OF_GEOLOCATION_PIDF_STRING[];
         static const IMS_CHAR KEY_ALLOW_CELLULAR_NETWORK_INFO_HEADER_BOOL[];
         static const IMS_CHAR KEY_CELLULAR_NETWORK_INFO_CACHE_EXPIRATION_SEC_INT[];
@@ -1069,7 +1076,7 @@ public:
         static const IMS_CHAR KEY_REREG_ERR_CODE_FOR_IMS_PDN_REACTIVATION_INT_ARRAY[];
 
         /**
-         * Specifies the error codes of the reregistration followed by intital registration
+         * Specifies the error codes of the reregistration followed by initial registration
          * with available PCSCF. If no available PCSCF, IMS PDN is re-activated.
          *
          * Possible Values:
@@ -1319,7 +1326,7 @@ public:
          *   NOTIFY_TERMINATED_EXPIRED (1)
          *   NOTIFY_TERMINATED_DEACTIVATED (2)
          *   NOTIFY_TERMINATED_PROBATION (3)
-         *   NOTIFY_TERMINATED_UNREGITERED (4)
+         *   NOTIFY_TERMINATED_UNREGISTERED (4)
          *   NOTIFY_TERMINATED_REJECTED (5)
          */
         static const IMS_CHAR KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY[];
@@ -1333,7 +1340,7 @@ public:
          *   NOTIFY_TERMINATED_EXPIRED (1)
          *   NOTIFY_TERMINATED_DEACTIVATED (2)
          *   NOTIFY_TERMINATED_PROBATION (3)
-         *   NOTIFY_TERMINATED_UNREGITERED (4)
+         *   NOTIFY_TERMINATED_UNREGISTERED (4)
          *   NOTIFY_TERMINATED_REJECTED (5)
          */
         static const IMS_CHAR
@@ -1342,7 +1349,7 @@ public:
 
         // Bundle {
         /**
-         * Specifies include information to control PSCSF recovery condition of each carrier
+         * Specifies include information to control PCSCF recovery condition of each carrier
          * with mutable value.
          */
         static const IMS_CHAR KEY_PCSCF_RECOVERY_CONDITIONS_BUNDLE[];
@@ -1359,7 +1366,7 @@ public:
 
         /**
          * Specifies wait time in seconds before retrying PCSCF recovery.
-         * This is used as waiting time for PCSCF recovery during fail count is unter max count.
+         * This is used as waiting time for PCSCF recovery during fail count is under max count.
          * If valid PCSCF acquisition fails during this time, IMS PDN reestablishment will be
          * requested for PCSCF recovery.
          *
@@ -1446,7 +1453,7 @@ public:
 
         /**
          * Specifies the length of the timer shall be any seconds plus random value
-         * that shall have an uper bound of the value.
+         * that shall have an upper bound of the value.
          *
          * Possible Values:
          *   {@code 0, 0, 15, 0, 0}
@@ -1513,7 +1520,7 @@ public:
         static const IMS_CHAR KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_CNT_INT[];
 
         /**
-         * Specifies information what error responses against SUBSCRIBE mag for the reg event
+         * Specifies information what error responses against SUBSCRIBE message for the reg event
          * package to handle not trying ims subscription.
          *
          * ("Timer F" should be replaced to 0 when error response argument is represented)
@@ -1526,6 +1533,23 @@ public:
         // }
 
         // Mtc
+        /**
+         * Specifies the level of geolocation information to be included for each call type.
+         *
+         * The array must always consist of 6 elements:
+         *   index 0 : NON_EMERGENCY_ON_WIFI,
+         *   index 1 : EMERGENCY_ON_WIFI,
+         *   index 2 : NON_EMERGENCY_ON_CELLULAR,
+         *   index 3 : EMERGENCY_ON_CELLULAR,
+         *   index 4 : NORMAL_ROUTING_EMERGENCY_ON_WIFI,
+         *   index 5 : NORMAL_ROUTING_EMERGENCY_ON_CELLULAR.
+         *
+         * Possible Values:
+         *   {@code GEOLOCATION_PIDF_INFO_LAT_AND_LONG} (0)
+         *   {@code GEOLOCATION_PIDF_INFO_LAT_AND_LONG_AND_CIVIC} (1)
+         *   {@code GEOLOCATION_PIDF_INFO_COUNTRY_CODE_ONLY} (2)
+         *   {@code GEOLOCATION_PIDF_INFO_COUNTRY_CODE_AND_STATE} (3)
+         */
         static const IMS_CHAR KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY[];
         enum
         {
@@ -1556,25 +1580,6 @@ public:
             GEOLOCATION_HEADER_MODE_INCLUDE_YES_ON_IWLAN = 1,
             GEOLOCATION_HEADER_MODE_INCLUDE_YES_ALWAYS = 2,
             GEOLOCATION_HEADER_MODE_INCLUDE_NO_ALWAYS = 3
-        };
-
-        // Unused.
-        // Network types
-        enum
-        {
-            NETWORK_TYPE_HOME = 0,
-            NETWORK_TYPE_ROAMING = 1
-        };
-
-        // Unused.
-        // Reasons for terminated state of "reg" event package
-        enum
-        {
-            REG_EVENT_TERMINATED_REASON_EXPIRED = 1,
-            REG_EVENT_TERMINATED_REASON_DEACTIVATED = 2,
-            REG_EVENT_TERMINATED_REASON_PROBATION = 3,
-            REG_EVENT_TERMINATED_REASON_UNREGITERED = 4,
-            REG_EVENT_TERMINATED_REASON_REJECTED = 5
         };
     };
 
@@ -1793,7 +1798,7 @@ public:
         static const IMS_CHAR KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL[];
 
         /**
-         * Specifies if GIBA(GPRS-IMS-Bundled authentication) is support for emergency
+         * Specifies if GIBA(GPRS-IMS-Bundled Authentication) is supported for emergency
          * registration in roaming.
          *
          * Possible Values:
@@ -1909,7 +1914,7 @@ public:
         static const IMS_CHAR KEY_ROAMING_PREFERRED_EREG_INT[];
 
         /**
-         * Specifies the error codes of emergency registration which does not supported the
+         * Specifies the error codes of emergency registration which does not support the
          * common policy.
          *
          * Possible Values:
@@ -1953,28 +1958,203 @@ public:
 
         // Mtc
         static const IMS_CHAR KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_ON_CELLULAR_BOOL[];
+
+        /**
+         * Specifies whether to verify if the P-Asserted-Identity header in SIP 380 response matches
+         * the Path header for non-UE detectable emergency calls.
+         *
+         * If {@code true}, the UE retries the emergency call without checking if the PAI header in
+         * the 380 response matches the Path header value from the 200 OK of the REGISTER request.
+         * If {@code false}, the UE performs the validation before retrying.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR
                 KEY_EMERGENCY_RETRY_WITHOUT_CHECKING_380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL_BOOL
                         [];
-        static const IMS_CHAR KEY_EMERGENCY_EXCLUDE_URI_PARAMETERS_FOR_EMERGENCY_TEST_NUMBER_BOOL[];
-        static const IMS_CHAR KEY_SKIP_AUDIO_DEDICATED_BEARER_WAIT_TIMER_FOR_EMERGENCY_BOOL[];
-        static const IMS_CHAR KEY_EMERGENCY_TCALL_TIMER_MILLIS_INT[];
-        static const IMS_CHAR KEY_EMERGENCY_RINGBACK_TIMER_MILLIS_INT[];
-        static const IMS_CHAR KEY_EMERGENCY_18X_TIMER_MILLIS_INT[];
-        static const IMS_CHAR KEY_EMERGENCY_RTT_GUARD_TIMER_MILLIS_INT[];
-        static const IMS_CHAR KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_EMERGENCY_CALL_INT[];
-        static const IMS_CHAR
-                KEY_POLICY_FOR_REQUIRING_EMERGENCY_CALL_WHEN_VIDEO_EMERGENCY_CALL_FAILED_INT_ARRAY
-                        [];
-        static const IMS_CHAR KEY_USE_EMERGENCY_NUMBER_TRANSLATION_IN_ROAMING_STATUS_BOOL[];
-        static const IMS_CHAR KEY_BLOCK_WIFI_EMERGENCY_CALL_IF_NOT_PROVISIONED_BOOL[];
-        static const IMS_CHAR KEY_WIFI_EMERGENCY_18X_TIMER_MILLIS_INT[];
-        static const IMS_CHAR KEY_RELEASE_EMERGENCY_PDN_ON_FAILURE_AFTER_100_BOOL[];
-        static const IMS_CHAR KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL[];
-        static const IMS_CHAR KEY_P_EMERGENCY_INFO_HEADER_IN_INVITE_STRING[];
-        static const IMS_CHAR KEY_CONTACT_HEADER_ADDRESS_IN_INVITE_STRING_ARRAY[];
-        static const IMS_CHAR KEY_P_PREFERRED_IDENTITY_INFO_HEADER_IN_INVITE_STRING_ARRAY[];
 
+        /**
+         * Specifies whether to exclude URI parameters (e.g., user=phone) for emergency test
+         * numbers.
+         *
+         * If {@code true}, URI parameters are excluded from the Request-URI when dialing an
+         * emergency test number (e.g., sip:922).
+         * If {@code false}, URI parameters are included (e.g., sip:922@phone-context=...).
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
+        static const IMS_CHAR KEY_EMERGENCY_EXCLUDE_URI_PARAMETERS_FOR_EMERGENCY_TEST_NUMBER_BOOL[];
+
+        /**
+         * Specifies whether to skip the wait timer for audio dedicated bearer establishment during
+         * an emergency call.
+         *
+         * If {@code true}, the UE does not wait for the dedicated bearer to be established before
+         * proceeding with the emergency call setup.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
+        static const IMS_CHAR KEY_SKIP_AUDIO_DEDICATED_BEARER_WAIT_TIMER_FOR_EMERGENCY_BOOL[];
+
+        /**
+         * Specifies the timer value in milliseconds for waiting for the first 1xx response after
+         * sending an INVITE for an emergency call.
+         *
+         * Start: After receiving 100 Trying
+         * Stop: First 1xx response received.
+         * Expiry: UE behaves as per the setting.
+         *         @see KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_EMERGENCY_CALL_INT.
+         *
+         * Possible Values:
+         *   An integer value representing the timeout in milliseconds.
+         */
+        static const IMS_CHAR KEY_EMERGENCY_TCALL_TIMER_MILLIS_INT[];
+
+        /**
+         * Specifies the ringback timer in milliseconds for emergency calls.
+         *
+         * This timer limits the duration the UE waits for a final response after receiving a
+         * 180 Ringing response.
+         *
+         * Start: 180 Ringing received.
+         * Stop: Final response received.
+         * Expiry: UE terminates the call with {@link CODE_TIMEOUT_NO_ANSWER}.
+         *
+         * Possible Values:
+         *   An integer value representing the timeout in milliseconds.
+         */
+        static const IMS_CHAR KEY_EMERGENCY_RINGBACK_TIMER_MILLIS_INT[];
+
+        /**
+         * Specifies the wait timer in milliseconds for a 18x response to an emergency INVITE
+         * request.
+         *
+         * Start: After receiving 100 Trying
+         * Stop: First 18x response received.
+         * Expiry: UE terminates the call with {@link CODE_TIMEOUT_1XX_WAITING}.
+         *
+         * Possible Values:
+         *   An integer value representing the timeout in milliseconds.
+         */
+        static const IMS_CHAR KEY_EMERGENCY_18X_TIMER_MILLIS_INT[];
+
+        /**
+         * Specifies the duration in milliseconds of the guard timer for automatically upgrading
+         * incoming Voice Calls to RTT calls after an RTT emergency call ends.
+         *
+         * This is used to support callback scenarios where the PSAP calls back the user after
+         * an RTT emergency call.
+         *
+         * Start: RTT Emergency Call is terminated.
+         * End: Another RTT Emergency Call is established.
+         * Expiry: The RTT auto-upgrade capability for incoming calls is disabled.
+         *
+         * Possible Values:
+         *   An integer value representing the timeout in milliseconds.
+         */
+        static const IMS_CHAR KEY_EMERGENCY_RTT_GUARD_TIMER_MILLIS_INT[];
+
+        /**
+         * Specifies the policy to follow when the MO call request timer (Tcall) expires for a
+         * VoLTE emergency call.
+         *
+         * Possible Values:
+         *   See {@link #KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT} enum values.
+         */
+        static const IMS_CHAR KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_EMERGENCY_CALL_INT[];
+
+        /**
+         * Specifies the wait timer in milliseconds for a 18x response to an emergency INVITE
+         * request over Wi-Fi.
+         *
+         * Start: After receiving 100 Trying
+         * Stop: First 18x response received.
+         * Expiry: UE terminates the call with {@link CODE_TIMEOUT_1XX_WAITING}.
+         *
+         * Possible Values:
+         *   An integer value representing the timeout in milliseconds.
+         */
+        static const IMS_CHAR KEY_WIFI_EMERGENCY_18X_TIMER_MILLIS_INT[];
+
+        /**
+         * Specifies whether to release the Emergency PDN if the emergency call fails after
+         * receiving a 100 Trying response.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
+        static const IMS_CHAR KEY_RELEASE_EMERGENCY_PDN_ON_FAILURE_AFTER_100_BOOL[];
+
+        /**
+         * Specifies whether the UE supports current location discovery for emergency calls.
+         *
+         * If {@code true}, the UE adds
+         * "Accept: application/vnd.3gpp.current-location-discovery+xml" header to the INVITE
+         * request.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
+        static const IMS_CHAR KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL[];
+
+        /**
+         * Specifies the P-Emergency-Info header format to be added in the INVITE of Wi-Fi emergency
+         * calls.
+         *
+         * If this string is not empty, "P-Emergency-Info: {value}" will be added to the header.
+         *
+         * Possible Format Tokens: {@link TemplateFormatter#Format}
+         *   #IMEI#, #IMEIWITHHYPHEN#, #IMEIASADDRREFID#, #IMSI#, #IMSIASADDRREFID#, #MAC#, #IP#,
+         *   #PORT#, #PUID#, #AID#, #PUID#, #MSISDN#, #HOME_DOMAIN#, #UNIQUE_ID#,
+         *   #MNC#, #MNC2#, #MCC#
+         *
+         */
+        static const IMS_CHAR KEY_P_EMERGENCY_INFO_HEADER_IN_INVITE_STRING[];
+
+        /**
+         * Specifies the address part format of the Contact header in emergency INVITEs.
+         *
+         * Possible Format Tokens: {@link TemplateFormatter#Format}
+         *   #IMEI#, #IMEIWITHHYPHEN#, #IMEIASADDRREFID#, #IMSI#, #IMSIASADDRREFID#, #MAC#, #IP#,
+         *   #PORT#, #PUID#, #AID#, #PUID#, #MSISDN#, #HOME_DOMAIN#, #UNIQUE_ID#,
+         *   #MNC#, #MNC2#, #MCC#
+         *
+         * @see IImsAosInfo::REG_MODE_XXX for the registration mode.
+         * Index: NORMAL(0), ADMIN(1), INTERNAL(2), NOUICC(3).
+         */
+        static const IMS_CHAR KEY_CONTACT_HEADER_ADDRESS_IN_INVITE_STRING_ARRAY[];
+
+        /**
+         * Specifies the P-Preferred-Identity header format in the INVITE of emergency calls.
+         *
+         * Possible Format Tokens: {@link TemplateFormatter#Format}
+         *   #IMEI#, #IMEIWITHHYPHEN#, #IMEIASADDRREFID#, #IMSI#, #IMSIASADDRREFID#, #MAC#, #IP#,
+         *   #PORT#, #PUID#, #AID#, #PUID#, #MSISDN#, #HOME_DOMAIN#, #UNIQUE_ID#,
+         *   #MNC#, #MNC2#, #MCC#
+         *
+         * @see IImsAosInfo::REG_MODE_XXX for the registration mode.
+         * Index: NORMAL(0), ADMIN(1), INTERNAL(2), NOUICC(3).
+         */
+        static const IMS_CHAR KEY_P_PREFERRED_IDENTITY_HEADER_IN_INVITE_STRING_ARRAY[];
+
+        /**
+         * Specifies the method used for periodic location discovery during an emergency call.
+         *
+         * If set to {@code CALL_PERIODIC_LOCATION_DISCOVERY_METHOD_UPDATE}, the UE sends periodic
+         * SIP UPDATE requests containing the current location information.
+         *
+         * Possible Values:
+         *   {@code CALL_PERIODIC_LOCATION_DISCOVERY_METHOD_NONE} (0)
+         *   {@code CALL_PERIODIC_LOCATION_DISCOVERY_METHOD_UPDATE} (1)
+         */
         static const IMS_CHAR KEY_CALL_PERIODIC_LOCATION_DISCOVERY_METHOD_INT[];
         enum
         {
@@ -1982,9 +2162,76 @@ public:
             CALL_PERIODIC_LOCATION_DISCOVERY_METHOD_UPDATE = 1
         };
 
+        /**
+         * Specifies the interval in milliseconds for periodic location discovery during an
+         * emergency call.
+         *
+         * Start: The emergency call is established.
+         * Expiry: The UE sends a SIP UPDATE request containing the current location information.
+         *         The timer restarts for the next period.
+         * End: The call is terminated.
+         *
+         * Possible Values:
+         *   An integer value representing the timeout in milliseconds.
+         */
         static const IMS_CHAR KEY_CALL_PERIODIC_LOCATION_DISCOVERY_TIMER_MILLIS_INT[];
+
+        /**
+         * Specifies the mapping between SIP reject codes and internal reason codes for emergency
+         * call.
+         *
+         * Used to map specific SIP error responses to internal `CallReasonInfo` codes for
+         * consistent error handling and UI notification.
+         *
+         * Format: "StatusCode:ReasonCode"
+         *
+         * Refer to DefaultStatusCodeAndReasonCodeSets.h
+         *
+         * Possible Values:
+         *   e.g. 503:1622
+         */
         static const IMS_CHAR KEY_REJECT_CODE_AND_REASON_CODE_SET_STRING_ARRAY[];
 
+        /**
+         * Specifies the mapping between SIP reject codes and subsequent actions for initial
+         * emergency call setup.
+         *
+         * Defines what action the UE should take (e.g., CSFB, Silent Redial) when an initial
+         * INVITE is rejected with a specific SIP error code.
+         *
+         * Format: "StatusCode:ACTION#1,ACTION#2,ACTION#3..."
+         *
+         * Multiple actions can be written with comma(,) separation according to priority.
+         * For reject codes where no action is defined, CSFB is the default behavior.
+         *
+         * Possible Values:
+         *   e.g. 488:2,3,4,6
+         *   See enum values below (e.g., {@code START_ERROR_ACTION_CSFB}).
+         *
+         * Action Descriptions:
+         *   0: {@code START_ERROR_ACTION_SILENT_REINVITE_NEXT_PCSCF_IF_EPDN} -
+         *      Silently redials with the next P-CSCF if the call is on an emergency PDN and
+         *      there is no 100 Trying response before the failure response.
+         *   1: {@code START_ERROR_ACTION_SILENT_REINVITE_BY_RETRY_AFTER} -
+         *      Silently redials after the duration specified in the 'Retry-After' header if exists.
+         *   2: {@code START_ERROR_ACTION_SILENT_REINVITE_VOIP_BY_RTT_REJECTION} -
+         *      Silently redials as a VoIP call if an RTT call was rejected.
+         *   3: {@code START_ERROR_ACTION_SILENT_REINVITE_ANONYMOUS} -
+         *      Silently redials with an anonymous identity if rejected by the network.
+         *   4: {@code START_ERROR_ACTION_CROSS_SIM_TEMP_FAILURE} -
+         *      Redials on the other SIM in a dual-SIM device.
+         *   5: {@code START_ERROR_ACTION_CROSS_SIM_PERM_FAILURE} -
+         *      Redials on the other SIM in a dual-SIM device and the current SIM won't be used
+         *      for this Emergency call.
+         *   6: {@code START_ERROR_ACTION_TERMINATE} -
+         *      Terminates the call attempt. If a text parameter of a Reason header exists, compares
+         *      it with
+         *      {@code KEY_REJECT_CODE_AND_REASON_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY}.
+         *   7: {@code START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF_ONCE} -
+         *      Silently redials to an alternate P-CSCF, but only tries once.
+         *   8: {@code START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF} -
+         *      Silently redials to an alternate P-CSCF.
+         */
         static const IMS_CHAR KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY[];
         enum
         {
@@ -1999,15 +2246,96 @@ public:
             START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF = 8
         };
 
+        /**
+         * Specifies the list of SIP reject codes and reason texts that require immediate
+         * termination of an emergency call.
+         *
+         * If an emergency call is rejected with a SIP response matching a code and reason
+         * defined in this list, the UE terminates the call attempt immediately without
+         * attempting further retries (e.g., CSFB or other domains).
+         *
+         * Format: "StatusCode:ReasonValue"
+         *
+         * Possible Values:
+         *   String array (e.g., "503:Emergency calls over WiFi not allowed in this location")
+         */
         static const IMS_CHAR
                 KEY_REJECT_CODE_AND_REASON_REQUIRE_IMMEDIATE_TERMINATION_STRING_ARRAY[];
+
+        /**
+         * Specifies the policy for emergency service URN selection (e.g., generic vs police).
+         *
+         * Possible Values:
+         *   {@link NOT_USE_SERVICE_CATEGORY = 1}
+         *   {@link USE_POLICE_FOR_UNSPECIFIED = 2}
+         *   {@link USE_GENERIC_FOR_MULTIPLE_CATEGORIES = 3}
+         *   {@link USE_GENERIC_FOR_SPECIAL_CATEGORIES = 4}
+         */
         static const IMS_CHAR KEY_POLICY_FOR_EMERGENCY_URN_INT_ARRAY[];
+
+        /**
+         * Specifies the list of emergency service categories that should use a generic URN.
+         *
+         * If an emergency call's service category matches one in this list, the UE uses
+         * "urn:service:sos" instead of a specific service URN.
+         *
+         * Possible Values:
+         *   Integer array of service categories.
+         */
         static const IMS_CHAR KEY_CATEGORY_FOR_GENERIC_URN_INT_ARRAY[];
+
+        /**
+         * Specifies the list of emergency numbers that require Originating Identification
+         * Presentation (OIP).
+         *
+         * If the dialed emergency number matches an entry in this list, the Privacy header
+         * is set to "none".
+         *
+         * Possible Values:
+         *   String array of numbers.
+         */
         static const IMS_CHAR KEY_NUMBER_NEED_OIP_STRING_ARRAY[];
+
+        /**
+         * Specifies the list of emergency numbers that require Originating Identification
+         * Restriction (OIR).
+         *
+         * If the dialed emergency number matches an entry in this list, the Privacy header
+         * is set to restrict identity (e.g., "id").
+         *
+         * Possible Values:
+         *   String array of numbers.
+         */
         static const IMS_CHAR KEY_NUMBER_NEED_OIR_STRING_ARRAY[];
+
+        /**
+         * Specifies the list of PLMNs where Geolocation PIDF-LO is allowed in the SIP INVITE
+         * for emergency calls when no UICC is present.
+         *
+         * Possible Values:
+         *   String array of PLMNs (MCCMNC).
+         */
         static const IMS_CHAR
                 KEY_PLMN_ALLOWING_GEOLOCATION_PIDF_IN_SIP_INVITE_NO_UICC_STRING_ARRAY[];
+
+        /**
+         * Specifies the dynamic routing numbers associated with specific PLMNs.
+         *
+         * Format: "Country,MNC,Number1,Number2..."
+         *
+         * Possible Values:
+         *   String array.
+         */
         static const IMS_CHAR KEY_DYNAMIC_ROUTING_NUMBER_PER_PLMN_STRING_ARRAY[];
+
+        /**
+         * Specifies the emergency service categories associated with specific PLMNs.
+         *
+         * Format: "Country,MNC,Number,ServiceCategory"
+         *
+         * Possible Values:
+         *   String array.
+         */
         static const IMS_CHAR KEY_EMERGENCY_SERVICE_CATEGORY_PER_PLMN_STRING_ARRAY[];
     };
 
@@ -2034,12 +2362,13 @@ public:
         static const IMS_CHAR KEY_TEXT_CODEC_REDUNDANCY_LEVEL_INT[];
         static const IMS_CHAR KEY_TEXT_RTP_INACTIVITY_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT[];
+
         /**
          * Specifies whether to check if local resource for text media is reserved after
          * the call is established or updated.
          *
          * If {@code true} and text QoS hasn't activated, the next action will be determined
-         * by {@code imsrtt.policy_on_text_qos_deactivation_int} - usually downgrade.
+         * by {@code imsrtt.policy_on_text_qos_deactivation_int}.
          *
          * Possible Values:
          *   {@code true}
@@ -2067,7 +2396,7 @@ public:
 
         // Aos
         /**
-         * Specifies whether registration mode to limited mode when ISIM is inactivated.
+         * Specifies whether registration mode to limited mode when ISIM is deactivated.
          *
          * Only sending admin SMS and receiving admin/normal SMS is allowed in the
          * limited mode.
@@ -2311,12 +2640,127 @@ public:
          */
         static const IMS_CHAR KEY_VOLTE_HYS_TIME_SEC_INT[];
         // Mtc
+
+        /**
+         * Specifies the timer for waiting for a 18x provisional response after sending an initial
+         * INVITE request for a mobile-originated (MO) call. The timer is specified in
+         * milliseconds.
+         *
+         * A 18x response (e.g., 180 Ringing, 183 Session Progress) indicates that the call is
+         * progressing. If this timer expires before a 18x response is received, the call setup
+         * may be considered to have failed.
+         *
+         * This timer starts when the initial INVITE is sent and stops upon receiving the first 18x
+         * response.
+         *
+         * Possible Values:
+         *   An integer value representing the timeout in milliseconds.
+         */
         static const IMS_CHAR KEY_18X_TIMER_MILLIS_INT[];
+
+        /**
+         * Specifies whether a PRACK (Provisional Response ACKnowledgement) exchange must be
+         * completed before the device starts alerting the user for an incoming call.
+         *
+         * When set to {@code true}, upon being ready to alert the user of the incoming call,
+         * the device will send a reliable provisional response (e.g., 180 Ringing) and wait for
+         * the PRACK from the network before signaling the incoming call to the user
+         * (e.g., ringing). This ensures reliable delivery of the provisional response.
+         *
+         * When set to {@code false}, the device may start alerting immediately after sending a
+         * provisional response(180 Ringing) without waiting for a PRACK.
+         *
+         * This flag is typically used in conjunction with `KEY_PRACK_SUPPORTED_FOR_18X_BOOL`.
+         *
+         * Possible Values:
+         *   {@code true} - A PRACK is required before alerting.
+         *   {@code false} - A PRACK is not required before alerting.
+         * @see RFC 3262
+         */
         static const IMS_CHAR KEY_REQUIRE_PRACK_FOR_ALERT_BOOL[];
+
+        /**
+         * Specifies whether to forcibly send a "183 Session Progress" response before sending a
+         * "180 Ringing" response when handling an incoming INVITE that does not support reliable
+         * provisional responses (i.e., does not use "Supported: 100rel").
+         *
+         * This flag has no effect if:
+         *   The session already uses reliable provisional responses (100rel).
+         *   A 183 response has already been sent for the session.
+         *
+         * Possible Values:
+         *   {@code true} - Force sending a 183 response before 180 Ringing in non-100rel
+         *                  sessions.
+         *   {@code false} - Do not force a 183 response. A 180 Ringing may be sent directly.
+         */
         static const IMS_CHAR KEY_FORCE_183_BEFORE_ALERTING_ON_NON_100REL_INVITE_BOOL[];
+
+        /**
+         * Specifies whether the device should use the implicit subscription created by a SIP
+         * REFER request for conference call management.
+         *
+         * According to RFC 3515, a REFER request creates an implicit subscription. The recipient
+         * of the REFER (the referred party) sends NOTIFY messages to the referrer to report the
+         * status of the referred action (e.g., the result of a subsequent INVITE).
+         *
+         * When set to {@code true}, the device will expect and handle these NOTIFY messages to
+         * track the progress of a conference invitation sent via REFER. This is a standard
+         * mechanism for tracking conference invitations.
+         *
+         * When set to {@code false}, the device may not rely on this subscription,
+         * potentially using the delivery result of REFER request to track conference state.
+         *
+         * Possible Values:
+         *   {@code true} - Support and use the implicit subscription for REFER.
+         *   {@code false} - Do not use the implicit subscription for REFER.
+         * @see RFC 3515
+         */
         static const IMS_CHAR KEY_SUPPORT_CONFERENCE_REFER_SUBSCRIBE_BOOL[];
+
+        /**
+         * Specifies whether a device that is a participant (not the host/creator) in a
+         * conference call should subscribe to the conference event package.
+         *
+         * The conference event package (RFC 4575) provides information about the conference
+         * state, such as the list of participants. By subscribing, the device receives NOTIFY
+         * messages with updates to the conference roster and participant statuses.
+         *
+         * When set to {@code true}, a participant device will send a SUBSCRIBE request to the
+         * conference URI to receive these state updates.
+         *
+         * When set to {@code false}, the participant device will not subscribe and will only have
+         * local information about its own connection to the conference.
+         *
+         * Possible Values:
+         *   {@code true} - A conference participant should subscribe to the conference event
+         *                  package.
+         *   {@code false} - A conference participant should not subscribe. (Default)
+         * @see RFC 4575
+         *
+         * Note: This conflicts with "support_ims_conference_event_package_on_peer_bool".
+         */
         static const IMS_CHAR KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL[];
 
+        /**
+         * Specifies the order of SIP messages (SUBSCRIBE and REFER) used when inviting a new
+         * participant to a conference call.
+         *
+         * Different network carriers may require different sequences of messages for managing
+         * conference invitations. This key allows configuring the SIP flow to match the
+         * network's expected behavior.
+         *
+         * Possible Values:
+         *   {@code CONFERENCE_SIP_FLOW_SUBSCRIBE_AND_REFER} (0) -  The device first sends a
+         *       SUBSCRIBE request and waits its response to/from the conference focus or factory
+         *       to get the conference state, and then sends a REFER request to invite the new
+         *       participant.
+         *   {@code CONFERENCE_SIP_FLOW_REFER_AND_SUBSCRIBE} (1) - The device first sends a
+         *       REFER request to invite the new participant, and then sends a SUBSCRIBE request
+         *       to the conference URI.
+         *   {@code CONFERENCE_SIP_FLOW_SUBSCRIBE_AND_NOTIFY_REFER} (2) - The device first
+         *       subscribes to the conference, waits for a NOTIFY message containing conference
+         *       information, and then sends the REFER request.
+         */
         static const IMS_CHAR KEY_CONFERENCE_SIP_FLOW_ORDER_INT[];
         enum
         {
@@ -2325,6 +2769,19 @@ public:
             CONFERENCE_SIP_FLOW_SUBSCRIBE_AND_NOTIFY_REFER = 2
         };
 
+        /**
+         * Specifies the mechanism or "type" of SIP REFER message to use when inviting one or
+         * more new participants to a conference call.
+         *
+         * The REFER method is used to ask a participant to join a conference. This key controls
+         * how the REFER requests are structured, especially when inviting multiple participants.
+         *
+         * Possible Values:
+         *   {@code CONFERENCE_INVITE_COPYCONTROL} (0) - Use a `resource-lists` in INVITE message.
+         *   {@code CONFERENCE_INVITE_REFER_SINGLE} (1) - Use a Refer-To header with a single user.
+         *   {@code CONFERENCE_INVITE_REFER_MULTIPLE} (2) - Use a `resource-lists` with multiple
+         *      entries in REFER message.
+         */
         static const IMS_CHAR KEY_CONFERENCE_INVITING_REFER_TYPE_INT[];
         enum
         {
@@ -2333,13 +2790,133 @@ public:
             CONFERENCE_INVITE_REFER_MULTIPLE = 2
         };
 
+        /**
+         * Specifies whether to disable the SIP precondition mechanism (RFC 3312) for a call
+         * once it has been established.
+         *
+         * The precondition framework is typically used during initial call setup to ensure
+         * resources like QoS are reserved before the user is connected.
+         *
+         * When set to {@code true}, the precondition mechanism will be disabled for any subsequent
+         * mid-call session modifications (e.g., re-INVITEs). The device will not use or expect
+         * precondition-related SDP attributes after the call is connected.
+         *
+         * When set to {@code false}, the precondition mechanism, if used for the initial call, may
+         * also be used for subsequent session modifications within that call.
+         *
+         * Note: This configuration only determines whether to maintain the precondition attribute
+         * in the SDP. Setting this value to {@code false} does not guarantee the QoS/Precondition
+         * process for new media.
+         *
+         * Possible Values:
+         *   {@code true} - Disable preconditions after the call is established.
+         *   {@code false} - Keep precondition support enabled for the life of the call.
+         * @see RFC 3312
+         */
         static const IMS_CHAR KEY_DISABLE_PRECONDITION_AFTER_CALL_ESTABLISHED_BOOL[];
+
+        /**
+         * Specifies the SIP status code to be sent when the user explicitly declines an
+         * incoming call.
+         *
+         * When a user rejects an incoming call, the device sends a failure response to the
+         * network. This key allows customizing the SIP status code for this specific scenario.
+         *
+         * Possible Values:
+         *   An integer representing a valid SIP failure status code (e.g., 486, 603).
+         * @see RFC 3261
+         */
         static const IMS_CHAR KEY_INCOMING_CALL_REJECT_CODE_FOR_USER_DECLINE_INT[];
+
+        /**
+         * Specifies the SIP status code to be sent when an incoming call is terminated because
+         * the user did not answer before the timeout period.
+         *
+         * When an incoming call's ringing timer expires without the user answering, the device
+         * sends a failure response. This key allows customizing the SIP status code for this
+         * "no answer" scenario.
+         *
+         * Possible Values:
+         *   An integer representing a valid SIP failure status code (e.g., 480, 486).
+         */
         static const IMS_CHAR KEY_INCOMING_CALL_REJECT_CODE_FOR_NO_ANSWER_INT[];
+
+        /**
+         * Specifies the maximum time in milliseconds to wait for a PRACK request after sending a
+         * reliable provisional response (e.g., 180, 183) for an incoming call.
+         *
+         * PRACK (Provisional Response ACKnowledgement) is used to ensure reliable delivery of
+         * provisional responses. After the device sends a reliable 1xx response, it starts this
+         * timer. If a corresponding PRACK request is not received from the network before this
+         * timer expires, the transaction is considered to have failed, and the call may be
+         * terminated by sending "500 Server Internal Error" according to RFC 3262.
+         *
+         * Possible Values:
+         *   An integer value representing the timeout in milliseconds.
+         * @see RFC 3262
+         */
         static const IMS_CHAR KEY_PRACK_WAIT_TIMER_MILLIS_INT[];
+
+        /**
+         * Specifies a custom transaction timeout in milliseconds for waiting for a final response
+         * to a PRACK or UPDATE request.
+         *
+         * This value serves as a temporary override for the standard SIP Timer F (the timeout for
+         * non-INVITE transactions) when the device sends a PRACK or an UPDATE. If a final response
+         * (e.g., 200 OK) is not received within this period, the transaction will time out.
+         *
+         * Upon expiration, the behavior is determined by:
+         *.  - {@link #KEY_POLICY_FOR_PRACK_DELIVERY_FAILURE_INT} for PRACK requests.
+         *   - {@link #KEY_EARLY_UPDATE_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY} for UPDATE
+         *     requests.
+         *
+         * Possible Values:
+         *   An integer value representing the timeout in milliseconds.
+         * @see RFC 3261, Timer F
+         */
         static const IMS_CHAR KEY_PRACK_UPDATE_RESPONSE_WAIT_TIMER_MILLIS_INT[];
+
+        /**
+         * Specifies the time interval, in seconds, before a session's expiration, at which a
+         * session refresh request (re-INVITE or UPDATE) should be triggered.
+         *
+         * This key works with the SIP Session-Expires mechanism (RFC 4028) to keep calls alive.
+         * If a session has a negotiated expiration time, this parameter ensures that a refresh
+         * request is sent automatically before the session actually expires.
+         *
+         * For example, if a session is set to expire in 180 seconds and this key is set to 30,
+         * the device will attempt to refresh the session when 30 seconds are remaining.
+         * A value of 0 or less disables this automatic trigger.
+         *
+         * Possible Values:
+         *   An integer value representing the trigger interval in seconds.
+         * @see RFC 4028
+         */
         static const IMS_CHAR KEY_SESSION_REFRESH_TRIGGER_INTERVAL_SEC_INT[];
 
+        /**
+         * Specifies the registration recovery action to take when an outgoing INVITE request
+         * fails with a 504 (Server Time-out) response that directs the device to perform a new
+         * initial registration.
+         *
+         * This situation indicates a potential loss of registration with the network. This key
+         * defines how the device should attempt to recover its registration and proceed with
+         * the call.
+         *
+         * Possible Values:
+         *   {@code REGISTRATION_RESTORATION_NOT_APPLICABLE} (0): Take no special registration
+         *       recovery action.
+         *   {@code REGISTRATION_RESTORATION_NEXT_PCSCF} (1): Attempt to perform a new
+         *       registration using the next available P-CSCF from the list.
+         *   {@code REGISTRATION_RESTORATION_SAME_PCSCF} (2): Attempt to perform a new
+         *       registration with the currently used P-CSCF.
+         *   {@code REGISTRATION_RESTORATION_NEXT_PCSCF_BY_NETWORK_CONTEXT} (3): Attempt to
+         *       register with the next P-CSCF, but only if Circuit Switched Fallback (CSFB) is
+         *       not available.
+         *   {@code REGISTRATION_RESTORATION_NEXT_PCSCF_WITH_SILENT_REDIAL} (4): Attempt to
+         *       register with the next P-CSCF and, if successful, silently redial the original
+         *       call.
+         */
         static const IMS_CHAR KEY_REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE_INT[];
         enum
         {
@@ -2350,10 +2927,60 @@ public:
             REGISTRATION_RESTORATION_NEXT_PCSCF_WITH_SILENT_REDIAL = 4
         };
 
+        /**
+         * Specifies whether to validate the P-Asserted-Identity header of a 504 (Server Time-out)
+         * response before performing a network-directed registration restoration.
+         *
+         * When a call fails with a 504 response that triggers a registration restoration, this
+         * flag provides an additional integrity check.
+         *
+         * If set to {@code true}, the device will check if the P-Asserted-Identity header in the
+         * 504 response matches the URI of a known network entity (from the Path or
+         * Service-Route headers of the current registration). The restoration action is aborted
+         * if the validation fails. This helps ensure the request is from a trusted source.
+         *
+         * Possible Values:
+         *   {@code true} - Perform header validation before registration restoration.
+         *   {@code false} - Do not perform header validation.
+         */
         static const IMS_CHAR
                 KEY_REGISTRATION_RESTORATION_FOR_INVITE_REQUIRE_HEADER_VALIDATION_BOOL[];
+
+        /**
+         * Specifies whether to terminate a call if the wait for a dedicated QoS bearer for audio
+         * times out.
+         *
+         * During call setup, the device may wait for the network to establish a dedicated bearer
+         * to guarantee Quality of Service (QoS) for audio media. The timeout for this wait is
+         * configured by {@code KEY_DEDICATED_BEARER_WAIT_TIMER_MILLIS_INT}.
+         *
+         * If set to {@code true}, and the dedicated bearer is not established before the timer
+         * expires, the call will be immediately terminated.
+         *
+         * If set to {@code false}, the call may not be immediately terminated.
+         *
+         * Possible Values:
+         *   {@code true} - Terminate the call on dedicated bearer timeout.
+         *   {@code false} - Do not automatically terminate the call.
+         */
         static const IMS_CHAR KEY_RELEASE_CALL_ON_DEDICATED_BEARER_WAIT_TIMEOUT_BOOL[];
 
+        /**
+         * Specifies the policy for how to handle an ongoing call when the dedicated Quality of
+         * Service (QoS) for the audio stream is lost or deactivated.
+         *
+         * If the network deactivates the dedicated bearer for audio mid-call, this key determines
+         * the device's response.
+         *
+         * Possible Values:
+         *   {@code QOS_DEACTIVATION_POLICY_TERMINATE_CALL} (0): Immediately terminate the
+         *   call upon QoS deactivation.
+         *   {@code QOS_DEACTIVATION_POLICY_MAINTAIN_CALL} (1): Attempt to continue the call,
+         *   potentially over a non-guaranteed default bearer, which may result in reduced
+         *   audio quality
+         *   {@code QOS_DEACTIVATION_POLICY_MODIFY_CALL} (2): Attempt to modify the call,
+         *   for example by sending a re-INVITE with deactivating the media where the QoS failed.
+         */
         static const IMS_CHAR KEY_POLICY_ON_AUDIO_QOS_DEACTIVATION_INT[];
         enum
         {
@@ -2362,10 +2989,64 @@ public:
             QOS_DEACTIVATION_POLICY_MODIFY_CALL = 2
         };
 
+        /**
+         * Specifies whether to send a re-INVITE or UPDATE request when the Radio Access
+         * Technology (RAT) changes during an active call.
+         *
+         * This is often used for handovers between different access networks (e.g., from LTE to
+         * Wi-Fi or vice versa). When set to {@code true}, the device will initiate a session update
+         * to inform the network of the new IP Connectivity Access Network (IP-CAN), which may be
+         * required for routing and QoS purposes.
+         *
+         * When set to {@code false}, no session update is sent upon RAT change.
+         *
+         * Possible Values:
+         *   {@code true} - Send a re-INVITE/UPDATE on RAT change.
+         *   {@code false} - Do not send a re-INVITE/UPDATE on RAT change. (Default)
+         */
         static const IMS_CHAR KEY_ENABLE_SEND_REINVITE_ON_RAT_CHANGE_BOOL[];
+
+        /**
+         * Specifies whether to include an SDP offer in the PRACK message body.
+         *
+         * If {@code true}, the UE includes the SDP body in the PRACK request. This is typically
+         * used for QoS precondition mechanisms where the resource reservation status needs to be
+         * confirmed via SDP in the PRACK.
+         * If {@code false}, the PRACK is sent without an SDP body.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR KEY_ALLOW_SDP_IN_PRACK_BOOL[];
 
+        /**
+         * Specifies the policy for restricting media types on cellular networks.
+         *
+         * This configuration controls which media types (Audio, Video) are allowed when the device
+         * is connected to a cellular network (e.g., LTE, NR). It can be used to restrict video
+         * calls on cellular data to save data usage.
+         *
+         * Possible Values:
+         *   {@code MEDIA_TYPE_RESTRICTION_POLICY_RESTRICT_NONE} (0)
+         *   {@code MEDIA_TYPE_RESTRICTION_POLICY_RESTRICT_AUDIO} (1)
+         *   {@code MEDIA_TYPE_RESTRICTION_POLICY_RESTRICT_AUDIO_AND_VIDEO} (2)
+         * @see IR.92
+         */
         static const IMS_CHAR KEY_POLICY_FOR_MEDIA_TYPE_RESTRICTION_ON_CELLULAR_INT[];
+
+        /**
+         * Specifies the policy for restricting media types on cellular networks while roaming.
+         *
+         * Similar to {@link #KEY_POLICY_FOR_MEDIA_TYPE_RESTRICTION_ON_CELLULAR_INT}, but
+         * specifically applied when the device is roaming.
+         *
+         * Possible Values:
+         *   {@code MEDIA_TYPE_RESTRICTION_POLICY_RESTRICT_NONE} (0)
+         *   {@code MEDIA_TYPE_RESTRICTION_POLICY_RESTRICT_AUDIO} (1)
+         *   {@code MEDIA_TYPE_RESTRICTION_POLICY_RESTRICT_AUDIO_AND_VIDEO} (2)
+         * @see IR.92
+         */
         static const IMS_CHAR KEY_POLICY_FOR_MEDIA_TYPE_RESTRICTION_ON_CELLULAR_IN_ROAMING_INT[];
         enum
         {
@@ -2374,6 +3055,18 @@ public:
             MEDIA_TYPE_RESTRICTION_POLICY_RESTRICT_AUDIO_AND_VIDEO = 2
         };
 
+        /**
+         * Specifies the policy for handling local numbers (Geo-Local vs Home-Local).
+         *
+         * This determines how the UE interprets and formats dialed numbers that are not in
+         * international format.
+         *
+         * Possible Values:
+         *   {@code NUMBER_FORMAT_HOME_LOCAL} (0)
+         *   {@code NUMBER_FORMAT_GEO_LOCAL} (1)
+         *   {@code NUMBER_FORMAT_GEO_LOCAL_ONLY_IN_ROAMING} (2)
+         * @see IR.92
+         */
         static const IMS_CHAR KEY_POLICY_OF_LOCAL_NUMBERS_INT[];
         enum
         {
@@ -2382,10 +3075,48 @@ public:
             NUMBER_FORMAT_GEO_LOCAL_ONLY_IN_ROAMING = 2
         };
 
+        /**
+         * Specifies the maximum duration in milliseconds for silent redial attempts.
+         *
+         * If the total time spent on redial attempts exceeds this value, the redial process stops.
+         * A value of 0 means no time limit (limited by count only).
+         *
+         * Possible Values:
+         *   {@code 0} (No limit) or positive integer (e.g., {@code 60000})
+         */
         static const IMS_CHAR KEY_SILENT_REDIAL_MAX_DURATION_MILLIS_INT[];
+
+        /**
+         * Specifies the interval in milliseconds between silent redial attempts.
+         *
+         * This is the wait time before the UE tries to redial the call after a failure that
+         * triggers the silent redial mechanism (e.g., request timeout, specific error codes).
+         *
+         * Possible Values:
+         *   Positive integer (e.g., {@code 5000})
+         */
         static const IMS_CHAR KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT[];
+
+        /**
+         * Specifies the maximum number of silent redial attempts allowed.
+         *
+         * If the number of retries reaches this limit, the redial process stops and the call fails.
+         *
+         * Possible Values:
+         *   Positive integer (e.g., {@code 3})
+         */
         static const IMS_CHAR KEY_SILENT_REDIAL_MAX_RETRY_COUNT_INT[];
 
+        /**
+         * Specifies the action to take when silent redial ultimately fails.
+         *
+         * When the maximum duration or retry count is reached, the UE performs this action.
+         *
+         * Possible Values:
+         *   {@code SILENT_REDIAL_FAILURE_ACTION_TERMINATE} (0) - Just terminate the call.
+         *   {@code SILENT_REDIAL_FAILURE_ACTION_REGISTRATION} (1) - Trigger IMS re-registration.
+         *   {@code SILENT_REDIAL_FAILURE_ACTION_CSFB} (2) - Attempt Circuit Switched Fallback.
+         */
         static const IMS_CHAR KEY_SILENT_REDIAL_ULTIMATE_FAILURE_ACTION_INT[];
         enum
         {
@@ -2394,8 +3125,31 @@ public:
             SILENT_REDIAL_FAILURE_ACTION_CSFB = 2
         };
 
+        /**
+         * Specifies the wait time in milliseconds for IMS registration during silent redial.
+         *
+         * If silent redial requires a new registration (e.g., to a different P-CSCF), the UE
+         * waits for this duration for the registration to complete before retrying the call.
+         *
+         * Start: Silent redial with next P-CSCF is triggered.
+         * End: IMS registration is connected or fails.
+         * Expiry: The call fails with {@code CODE_SIP_SERVER_ERROR}.
+         *
+         * Possible Values:
+         *   Positive integer (e.g., {@code 2000})
+         */
         static const IMS_CHAR KEY_SILENT_REDIAL_REGISTRATION_WAIT_TIME_MILLIS_INT[];
 
+        /**
+         * Specifies the resulting call type when an audio call and a video call are merged.
+         *
+         * When merging an active audio call and an active video call into a conference, this
+         * determines whether the conference supports video or downgrades to audio-only.
+         *
+         * Possible Values:
+         *   {@code CALL_MERGE_AS_AUDIO} (0)
+         *   {@code CALL_MERGE_AS_AUDIO_VIDEO} (1)
+         */
         static const IMS_CHAR KEY_CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL_MERGED_INT[];
         enum
         {
@@ -2403,13 +3157,128 @@ public:
             CALL_MERGE_AS_AUDIO_VIDEO = 1
         };
 
+        /**
+         * Specifies the list of service codes (e.g., "*67") used for Caller ID Restriction (CLIR).
+         *
+         * If the dialed number starts with one of these codes, the UE removes the code from the
+         * Request-URI and sets the Privacy header to restrict caller identity.
+         *
+         * Possible Values:
+         *   String array (e.g., {@code ["*67", "#31#"]})
+         */
         static const IMS_CHAR KEY_CALLER_ID_SERVICE_CODES_FOR_RESTRICTION_STRING_ARRAY[];
+
+        /**
+         * Specifies the list of service codes (e.g., "*82") used for Caller ID Presentation (CLIP).
+         *
+         * If the dialed number starts with one of these codes, the UE removes the code from the
+         * Request-URI and sets the Privacy header to allow caller identity presentation.
+         *
+         * Possible Values:
+         *   String array (e.g., {@code ["*82", "*31#"]})
+         */
         static const IMS_CHAR KEY_CALLER_ID_SERVICE_CODES_FOR_IDENTITY_STRING_ARRAY[];
-        static const IMS_CHAR KEY_SHORT_CALL_CODE_INT_ARRAY[];
+
+        /**
+         * Specifies the set of strings used for Local Number Presentation.
+         *
+         * This config determines which international prefix is replaced with which local number
+         * to notify telephony/UI when receiving an incoming call.
+         *
+         * Format: "beforePrefix:afterNumber"
+         *
+         * Possible Values: "+1:0"
+         */
         static const IMS_CHAR KEY_LOCAL_NUMBER_PRESENTATION_SET_STRING[];
+
+        /**
+         * Specifies whether multiple calls including a video call are allowed.
+         *
+         * If {@code false}, the UE blocks a new video call if another call exists, or blocks a new
+         * call if a video call is already active.
+         * If {@code true}, concurrent calls involving video are permitted.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL[];
+
+        /**
+         * Specifies the mapping between SIP reject codes and internal reason codes.
+         *
+         * Used to map specific SIP error responses to internal `CallReasonInfo` codes for
+         * consistent error handling and UI notification.
+         *
+         * Format: "StatusCode:ReasonCode"
+         *
+         * Refer to DefaultStatusCodeAndReasonCodeSets.h
+         */
         static const IMS_CHAR KEY_REJECT_CODE_AND_REASON_CODE_SET_STRING_ARRAY[];
 
+        /**
+         * Specifies the mapping between SIP reject codes and subsequent actions for initial call
+         * setup.
+         *
+         * Defines what action the UE should take (e.g., CSFB, Silent Redial) when an initial
+         * INVITE is rejected with a specific SIP error code.
+         *
+         * Format: "StatusCode:ACTION#1,ACTION#2,ACTION#3..."
+         *
+         * Multiple actions can be written with comma(,) separation according to priority.
+         * For reject codes where no action is defined, terminating call is the default behavior.
+         *
+         * Possible Values:
+         *   e.g. 488:2,3,4,6
+         *   See enum values below (e.g., {@code START_ERROR_ACTION_CSFB}).
+         *
+         * Action Descriptions:
+         *   0: {@code START_ERROR_ACTION_CSFB} -
+         *      Attempts Circuit Switched Fallback.
+         *   1: {@code START_ERROR_ACTION_SILENT_REINVITE} -
+         *      Immediately attempts a silent redial.
+         *   2: {@code START_ERROR_ACTION_SILENT_REINVITE_BY_SDP_CONTENT} -
+         *      Attempts silent redial modifying SDP content based on the received SDP in an error
+         *      response. (488)
+         *   3: {@code START_ERROR_ACTION_SILENT_REINVITE_BY_RETRY_AFTER} -
+         *      Waits for `Retry-After` duration before silent redial.
+         *   4: {@code START_ERROR_ACTION_REGISTRATION_RESTORATION_ON_IMS3GPP_BY_POLICY} -
+         *      Triggers registration restoration based on 3GPP policy. (504)
+         *      Note: The behavior is determined by the setting value of
+         *            KEY_REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE_INT.
+         *   5: {@code START_ERROR_ACTION_REDIRECTION_BY_CONTACT} -
+         *      Redirects to the URI in `Contact` header. (3xx)
+         *   6: {@code START_ERROR_ACTION_NON_UE_DETECTABLE_EMERGENCY_CALL} -
+         *      Handles response for emergency call by validating the body of the xml and
+         *      P-Asserted-Identity header.
+         *   7: {@code START_ERROR_ACTION_HANDLE_FORBIDDEN_BY_POLICY} -
+         *      Handles the error based on {@link #KEY_POLICY_FOR_403_RESPONSE_FOR_INVITE_INT}.
+         *      Note: The behavior is determined by the setting value of
+         *            KEY_POLICY_FOR_403_RESPONSE_FOR_INVITE_INT.
+         *   8: {@code START_ERROR_ACTION_TERMINATE_BY_REASON_PHRASE} -
+         *      Terminates call if reason phrase matches specific pattern.
+         *   9: {@code START_ERROR_ACTION_USSI_CSFB} -
+         *      Attempts CSFB for USSI failures.
+         *   10: {@code START_ERROR_ACTION_BLOCK_CALL_BY_TIMER} -
+         *       Blocks subsequent calls for a duration of Retry-After header if exists.
+         *   11: {@code START_ERROR_ACTION_TRIGGER_EPSFB} -
+         *       Triggers EPS Fallback.
+         *   12: {@code START_ERROR_ACTION_TERMINATE_BY_RESPONSE_SOURCE} -
+         *       Terminates if Reason header's FAILURE_CAUSE parameter value is "1" and
+         *       Response-Source header's fe parameter value contains "urn:3gpp:fe:p-cscf.orig".
+         *   13: {@code START_ERROR_ACTION_TERMINATE_BY_REASON_HEADER_TEXT} -
+         *       Terminates call and notifies {@link ImsCallReason} using the received Reason header
+         *       value.
+         *   14: {@code START_ERROR_ACTION_REGISTRATION_TO_ALTERNATE_PCSCF} -
+         *       Terminates call and triggers registration to alternate P-CSCF.
+         *   15: {@code START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF} -
+         *       Registers to alternate P-CSCF and attempts silent redial.
+         *   16: {@code START_ERROR_ACTION_SILENT_REINVITE_TO_ALTERNATE_PCSCF_ONCE} -
+         *       Same as 15, but retry only once.
+         *   17: {@code START_ERROR_ACTION_SILENT_REINVITE_WITH_AUDIO} -
+         *       Attempts silent redial as audio-only call if the original call is not an
+         *       audio-only call.
+         */
         static const IMS_CHAR KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY[];
         enum
         {
@@ -2433,6 +3302,32 @@ public:
             START_ERROR_ACTION_SILENT_REINVITE_WITH_AUDIO = 17
         };
 
+        /**
+         * Specifies the mapping between SIP reject codes and actions for session updates
+         * (re-INVITE/UPDATE).
+         *
+         * Defines what action the UE should take when a mid-call session modification request is
+         * rejected.
+         *
+         * Format: "StatusCode:ACTION#1,ACTION#2,ACTION#3..."
+         *
+         * Multiple actions can be configured using comma(,) separation, processed in priority
+         * order.
+         *
+         * Possible Values:
+         *   e.g. 488:0
+         *   See enum values below (e.g., {@code UPDATE_ERROR_ACTION_TERMINATE}).
+         *
+         * Action Descriptions:
+         *   0: {@code UPDATE_ERROR_ACTION_TERMINATE} -
+         *      Terminates the call.
+         *   1: {@code UPDATE_ERROR_ACTION_RETRY} -
+         *      Retries the update request if Retry-After header is present.
+         *   2: {@code UPDATE_ERROR_ACTION_GLARE_CONDITION} -
+         *      Handles glare condition (491) by retrying after a random interval.
+         *   3: {@code UPDATE_ERROR_ACTION_BLOCK_CALL_BY_TIMER} -
+         *      Blocks the call for a duration specified in Retry-After header.
+         */
         static const IMS_CHAR KEY_UPDATE_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY[];
         enum
         {
@@ -2442,6 +3337,37 @@ public:
             UPDATE_ERROR_ACTION_BLOCK_CALL_BY_TIMER = 3
         };
 
+        /**
+         * Specifies the mapping between SIP reject codes and actions for early session updates.
+         *
+         * Defines actions for failures of UPDATE requests sent during the early dialog state
+         * (before the call is established).
+         *
+         * Format: "StatusCode:ACTION#1,ACTION#2,ACTION#3..."
+         *
+         * Multiple actions can be configured using comma(,) separation, processed in priority
+         * order.
+         *
+         * If the "StatusCode" is "0", the actions will be used for the transaction timeout case.
+         *
+         * Possible Values:
+         *   e.g. 488:0
+         *   See enum values below (e.g., {@code EARLY_UPDATE_ERROR_ACTION_TERMINATE_DIALOG}).
+         *
+         * Action Descriptions:
+         *   0: {@code EARLY_UPDATE_ERROR_ACTION_TERMINATE_DIALOG} -
+         *      Terminates the specific early dialog (useful for forked calls).
+         *   1: {@code EARLY_UPDATE_ERROR_ACTION_TERMINATE_CALL} -
+         *      Terminates the call.
+         *   2: {@code EARLY_UPDATE_ERROR_ACTION_GLARE_CONDITION} -
+         *      Handles glare condition (491) by retrying after a random interval.
+         *   3: {@code EARLY_UPDATE_ERROR_ACTION_BLOCK_CALL_BY_TIMER} -
+         *      Blocks the call for a duration specified in Retry-After header.
+         *   4: {@code EARLY_UPDATE_ERROR_ACTION_TIMEOUT} -
+         *      Treats as a request timeout.
+         *   5: {@code EARLY_UPDATE_ERROR_ACTION_REGISTRATION_RESTORATION} -
+         *      Triggers registration restoration to the next P-CSCF.
+         */
         static const IMS_CHAR KEY_EARLY_UPDATE_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY[];
         enum
         {
@@ -2453,6 +3379,19 @@ public:
             EARLY_UPDATE_ERROR_ACTION_REGISTRATION_RESTORATION = 5
         };
 
+        /**
+         * Specifies the conditions under which CSFB (Circuit Switched Fallback) is blocked.
+         *
+         * If any of the specified conditions are met (e.g., connected to Wi-Fi, Roaming),
+         * the UE will not attempt CSFB even if the IMS call fails.
+         *
+         * Possible Values:
+         *   {@code CSFB_BLOCK_CONDITION_IF_EPS_ONLY_ATTACH} (0)
+         *   {@code CSFB_BLOCK_CONDITION_IN_NR} (1)
+         *   {@code CSFB_BLOCK_CONDITION_IN_WIFI} (2)
+         *   {@code CSFB_BLOCK_CONDITION_IN_ROAMING} (3)
+         *   {@code CSFB_BLOCK_CONDITION_IN_HOME} (4)
+         */
         static const IMS_CHAR KEY_CSFB_BLOCK_CONDITION_INT_ARRAY[];
         enum
         {
@@ -2463,8 +3402,33 @@ public:
             CSFB_BLOCK_CONDITION_IN_HOME = 4
         };
 
+        /**
+         * Specifies whether to attempt CSFB when all P-CSCFs are unavailable.
+         *
+         * This is used when ImsAosReason::REG_ALL_PCSCF_FAILED is notified.
+         *
+         * If {@code true}, the UE triggers CSFB if it cannot connect to any P-CSCF for IMS.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR KEY_CSFB_WHEN_ALL_PCSCF_UNAVAILABLE_BOOL[];
 
+        /**
+         * Specifies the policy for handling a 403 Forbidden response to an INVITE request.
+         *
+         * This is selected when the final action chosen in
+         * KEY_REJECT_CODE_AND_ACTION_SET_STRING_ARRAY is
+         * START_ERROR_ACTION_HANDLE_FORBIDDEN_BY_POLICY.
+         *
+         *
+         * Possible Values:
+         *   {@code SIP_403_POLICY_TERMINATE_CALL} (0)
+         *   {@code SIP_403_POLICY_TERMINATE_CALL_AND_RECOVER_REGISTRATION} (1)
+         *   {@code SIP_403_POLICY_CSFB} (3)
+         *   ... (see enum)
+         */
         static const IMS_CHAR KEY_POLICY_FOR_403_RESPONSE_FOR_INVITE_INT[];
         enum
         {
@@ -2476,6 +3440,20 @@ public:
             SIP_403_POLICY_CSFB_AND_RECOVER_REGISTRATION_BY_WARNING = 5
         };
 
+        /**
+         * Specifies the policy for checking QoS preconditions during a call upgrade
+         * (e.g., Audio to Video).
+         *
+         * Determines if and when the UE should check for resource reservation when upgrading a
+         * call.
+         *
+         * Possible Values:
+         *   {@code QOS_CHECK_POLICY_ON_UPGRADING_CALL_NOT_AVAILABLE} (0)
+         *   {@code QOS_CHECK_POLICY_ON_UPGRADING_CALL_AFTER_UPGRADE} (1) -
+         *   Checks if QoS is acquired after upgrade.
+         *   {@code QOS_CHECK_POLICY_ON_UPGRADING_CALL_DURING_UPGRADING} (2) -
+         *   Uses QoS precondition mechanism via 183/UPDATE during the upgrade process.
+         */
         static const IMS_CHAR KEY_POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING_INT[];
         enum
         {
@@ -2484,42 +3462,247 @@ public:
             QOS_CHECK_POLICY_ON_UPGRADING_CALL_DURING_UPGRADING = 2
         };
 
+        /**
+         * Specifies whether to wait for QoS reservation even if local preconditions are not
+         * supported.
+         *
+         * This is only meaningful for MT calls and determines whether to wait for QoS before
+         * alerting/sending 180.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL[];
+
+        /**
+         * Specifies whether to wait for QoS reservation for an incoming INVITE that does not
+         * contain preconditions.
+         *
+         * This is only meaningful for MT calls and determines whether to wait for QoS before
+         * alerting/sending 180.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR KEY_WAIT_QOS_FOR_INCOMING_INVITE_WITHOUT_PRECONDITION_BOOL[];
+
+        /**
+         * Specifies whether to reject an initial incoming INVITE that does not contain an SDP offer
+         * (Offer-less initial INVITE).
+         *
+         * If {@code true}, the UE rejects offer-less INVITEs with
+         * {@code CODE_MEDIA_NOT_ACCEPTABLE}.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR KEY_REJECT_OFFERLESS_INVITE_BOOL[];
+
+        /**
+         * Specifies the maximum number of concurrent calls allowed.
+         *
+         * If the number of active calls reaches this limit, new calls will be blocked.
+         *
+         * Possible Values:
+         *   Integer (e.g., {@code 2})
+         */
         static const IMS_CHAR KEY_CALL_MAX_COUNT_INT[];
+
+        /**
+         * Specifies the Reason header text to include in the BYE message when the user ends the
+         * call.
+         */
         static const IMS_CHAR KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_CALL_STRING[];
+
+        /**
+         * Specifies the Reason header text to include in the BYE message when the call ends due to
+         * RTP timeout.
+         */
         static const IMS_CHAR KEY_CALL_TERMINATE_REASON_HEADER_RTP_TIMEOUT_STRING[];
+
+        /**
+         * Specifies the Reason header text when user ends call during RTP timeout condition.
+         */
         static const IMS_CHAR KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_AND_RTP_TIMEOUT_STRING[];
+
+        /**
+         * Specifies the Reason header text when call ends due to media bearer loss.
+         */
         static const IMS_CHAR KEY_CALL_TERMINATE_REASON_HEADER_MEDIA_BEARER_LOSS_STRING[];
+
+        /**
+         *
+         * Specifies the Reason header text when call ends due to SIP timeout.
+         */
         static const IMS_CHAR KEY_CALL_TERMINATE_REASON_HEADER_SIP_TIMEOUT_STRING[];
+
+        /**
+         * Specifies the Reason header text when call ends due to SIP response timeout.
+         */
         static const IMS_CHAR KEY_CALL_TERMINATE_REASON_HEADER_SIP_RESPONSE_TIMEOUT_STRING[];
+
+        /**
+         * Specifies the Reason header text when user ends call during SIP response timeout.
+         */
         static const IMS_CHAR
                 KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_AND_SIP_RESPONSE_TIMEOUT_STRING[];
+
+        /**
+         * Specifies the Reason header text when call setup times out.
+         */
         static const IMS_CHAR KEY_CALL_TERMINATE_REASON_HEADER_CALL_SETUP_TIMEOUT_STRING[];
+
+        /**
+         * Specifies the Reason header text when terminating an early dialog.
+         */
         static const IMS_CHAR KEY_CALL_TERMINATE_REASON_HEADER_TERMINATING_EARLYDIALOG_STRING[];
+
+        /**
+         * Specifies the Reason header text when session refresh fails.
+         */
         static const IMS_CHAR KEY_CALL_TERMINATE_REASON_HEADER_SESSION_REFRESH_FAILURE_STRING[];
+
+        /**
+         * Specifies the Reason header text when call ends because it joined a conference.
+         */
         static const IMS_CHAR KEY_CALL_TERMINATE_REASON_HEADER_CONFERENCE_CALL_JOINED_STRING[];
+
+        /**
+         * Specifies the Reason header text when call ends due to network loss.
+         */
         static const IMS_CHAR KEY_CALL_TERMINATE_REASON_HEADER_NETWORK_LOST_STRING[];
+
+        /**
+         * Specifies the Reason header text when call ends because media is not supported.
+         */
         static const IMS_CHAR KEY_CALL_TERMINATE_REASON_HEADER_MEDIA_NOT_SUPPORTED_STRING[];
+
+        /**
+         * Specifies the Reason header text when call ends because media bearer requirements are not
+         * met.
+         */
         static const IMS_CHAR KEY_CALL_TERMINATE_REASON_HEADER_MEDIA_BEARER_NOT_MET_STRING[];
 
+        /**
+         * Specifies the Reason Phrase for rejecting a call due to an ongoing CS call.
+         */
         static const IMS_CHAR KEY_CALL_REJECT_REASON_PHRASE_ON_CSCALL_STRING[];
+
+        /**
+         * Specifies the Reason Phrase for rejecting a ViLTE call when LTE is not available.
+         */
         static const IMS_CHAR KEY_CALL_REJECT_REASON_PHRASE_ON_VILTE_AND_NO_LTE_STRING[];
+
+        /**
+         * Specifies the Reason Phrase for rejecting a call due to an ongoing call setup.
+         */
         static const IMS_CHAR KEY_CALL_REJECT_REASON_PHRASE_ON_CONNECTING_CALL_STRING[];
+
+        /**
+         * Specifies the Reason Phrase for rejecting a call when max call count is exceeded.
+         */
         static const IMS_CHAR KEY_CALL_REJECT_REASON_PHRASE_EXCEEDS_MAX_CALL_COUNT_STRING[];
+
+        /**
+         * Specifies the Reason Phrase for rejecting a call during call conversion.
+         */
         static const IMS_CHAR KEY_CALL_REJECT_REASON_PHRASE_ON_CONVERTING_STRING[];
+
+        /**
+         * Specifies the Reason Phrase for rejecting a call due to negotiation failure.
+         */
         static const IMS_CHAR KEY_CALL_REJECT_REASON_PHRASE_NEGOTIATION_FAILURE_STRING[];
+
+        /**
+         * Specifies the Reason Phrase for rejecting a call due to no answer by user.
+         */
         static const IMS_CHAR KEY_CALL_REJECT_REASON_PHRASE_NO_ANSWER_BY_USER_STRING[];
+
+        /**
+         * Specifies the Reason Phrase for rejecting a VoWiFi call when VoWiFi setting is off.
+         */
         static const IMS_CHAR KEY_CALL_REJECT_REASON_PHRASE_VOWIFI_OFF_STRING[];
+
+        /**
+         * Specifies the Reason Phrase for rejecting a call when user declines.
+         */
         static const IMS_CHAR KEY_CALL_REJECT_REASON_PHRASE_USER_REJECT_STRING[];
+
+        /**
+         * Specifies the Reason Phrase for rejecting a call due to Access Class Barring.
+         */
         static const IMS_CHAR KEY_CALL_REJECT_REASON_PHRASE_ACCESS_CLASS_BLOCKED_STRING[];
+
+        /**
+         * Specifies the Reason Phrase for rejecting a call when VoPS is off.
+         */
         static const IMS_CHAR KEY_CALL_REJECT_REASON_PHRASE_VOPS_OFF_STRING[];
+
+        /**
+         * Specifies whether to enable fallback policy for
+         * OIP(Originating Identification Presentation) headers
+         * (e.g., using From if PAI is missing and vice versa).
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR KEY_ENABLE_OIP_HEADER_POLICY_FALLBACK_BOOL[];
+
+        /**
+         * Specifies the delay time in milliseconds to wait before sending an UPDATE/Re-INVITE
+         * after the call is connected.
+         *
+         * This is used to avoid race conditions or network issues immediately after call
+         * establishment.
+         *
+         * Possible Values:
+         *   An integer value representing the timeout in milliseconds.
+         */
         static const IMS_CHAR KEY_DELAY_UPDATE_AFTER_CONNECTED_TIMER_MILLIS_INT[];
+
+        /**
+         * Specifies whether to enable verification of the conference event package version.
+         *
+         * Possible Values:
+         *   {@code true}: default. The version validation is performed according to RFC 4575.
+         *   {@code false}: otherwise.
+         */
         static const IMS_CHAR KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL[];
+
+        /**
+         * Specifies the source of the URI used in the Refer-To header for conference calls.
+         *
+         * This configuration determines how the logic generates the URI for the `Refer-To`
+         * header when sending a SIP REFER message during inviting a user to a conference call .
+         *
+         * Possible Values:
+         *   {@code true}: The SIP engine first checks its internally managed P-Asserted-Identity
+         *                 information. This managed PAI is updated throughout the session with all
+         *                 requests and responses (including re-INVITEs). If this managed PAI data
+         *                 is empty, the engine falls back to using the information from the From/To
+         *                 headers of the initial INVITE request.
+         *
+         *   {@code false}: For incoming (MT) calls, the engine first checks the P-Asserted-Identity
+         *                  header of the *initial* INVITE. If the PAI is not available in the
+         *                  initial INVITE, it falls back to using information from the `From`
+         *                  header.
+         */
         static const IMS_CHAR KEY_CONFERENCE_REFER_TO_URI_SOURCE_PAID_BOOL[];
 
+        /**
+         * Specifies the source of the URI used in the Refer-To header when dropping a participant
+         * from a conference call.
+         *
+         * Possible Values:
+         *   {@code CONFERENCE_DROP_REFER_TO_URI_SOURCE_REFER_TO_URI_FOR_INVITE} (0)
+         *   - The same Refer-To URI is used as the one used when inviting a participant.
+         *   {@code CONFERENCE_DROP_REFER_TO_URI_SOURCE_USER_ENTITY_IN_CONFERENCE_EVENT_PACKAGE} (1)
+         *   - The user-entity value in CEP is used.
+         */
         static const IMS_CHAR KEY_CONFERENCE_DROP_REFER_TO_URI_SOURCE_TYPE_INT[];
         enum
         {
@@ -2527,6 +3710,16 @@ public:
             CONFERENCE_DROP_REFER_TO_URI_SOURCE_USER_ENTITY_IN_CONFERENCE_EVENT_PACKAGE = 1
         };
 
+        /**
+         * Specifies the media type to be offered when receiving an initial INVITE without an SDP
+         * offer.
+         *
+         * Possible Values:
+         *   {@code OFFERLESS_INVITE_MEDIA_TYPE_FULL_CAPABILITY} (0) -
+         *   The media type based on the UE's registered capability is used.
+         *   {@code OFFERLESS_INVITE_MEDIA_TYPE_AUDIO} (1) -
+         *   The audio only media type is used.
+         */
         static const IMS_CHAR KEY_MEDIA_TYPE_FOR_OFFERLESS_INVITE_INT[];
         enum
         {
@@ -2534,6 +3727,24 @@ public:
             OFFERLESS_INVITE_MEDIA_TYPE_AUDIO = 1
         };
 
+        /**
+         * Specifies the media type to be assumed or offered when receiving a re-INVITE without an
+         * SDP offer.
+         *
+         * Possible Values:
+         *   {@code OFFERLESS_REINVITE_MEDIA_TYPE_FULL} (0) -
+         *      Offers the richest media experience possible based on the registered features
+         *      (e.g., video, RTT).
+         *   {@code OFFERLESS_REINVITE_MEDIA_TYPE_AUDIO} (1) -
+         *      Defaults to a voice-only call (VoIP).
+         *   {@code OFFERLESS_REINVITE_MEDIA_TYPE_CURRENT} (2) -
+         *      Uses the current call type of the session.
+         *   {@code OFFERLESS_REINVITE_MEDIA_TYPE_BY_HISTORY} (3) -
+         *      Selects the richest call type that has been used at any point during the session's
+         *      history.
+         *   {@code OFFERLESS_REINVITE_MEDIA_TYPE_INITIALLY_OFFERED} (4) -
+         *      Uses the call type that was used at the beginning of the session.
+         */
         static const IMS_CHAR KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT[];
         enum
         {
@@ -2544,16 +3755,65 @@ public:
             OFFERLESS_REINVITE_MEDIA_TYPE_INITIALLY_OFFERED = 4,
         };
 
+        /**
+         * Specifies the OIP (Originating Identification Presentation) type to use when the caller
+         * ID is "Unavailable" or "Interaction with other service".
+         *
+         * Possible Values:
+         *   Integer value representing OipType.
+         *   @see {@code OipType}
+         *   INVALID = -1, NONE = 0, IDENTITY = 1, RESTRICTED = 2, UNKNOWN = 3, PAYPHONE = 4,
+         *   UNAVAILABLE = 5,
+         */
         static const IMS_CHAR KEY_OIP_TYPE_FOR_UNAVAILABLE_INT[];
+
+        /**
+         * Specifies the duration of the pre-alerting timer in milliseconds.
+         *
+         * When this value is positive, if an incoming call fails to enter the alerting stage
+         * within this time and there comes a new incoming call, the call will be rejected, allowing
+         * the device to process the new incoming call.
+         *
+         * Possible Values:
+         *   Positive integer.
+         */
         static const IMS_CHAR KEY_PREALERTING_TIMER_MILLIS_INT[];
 
+        /**
+         * Specifies the policy to follow when the MO call request timer (Tcall) expires for a VoLTE
+         * call.
+         *
+         * Possible Values:
+         *   {@code MO_CALL_REQUEST_TIMEOUT_POLICY_CALL_END} (0) -
+         *      Simply ends the call attempt.
+         *   {@code MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_PCSCF_DISCOVERY_AFTER_CSFB}
+         *      (1) -
+         *      Attempts Circuit Switched Fallback (CSFB) if available, then triggers a new IMS
+         *      registration with P-CSCF discovery.
+         *   {@code MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB} (2) -
+         *      Attempts CSFB if available.
+         *   {@code MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_AFTER_CSFB_IF_AVAILABLE} (3) -
+         *      Attempts CSFB if available, otherwise re-initiates IMS registration.
+         *   {@code MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_CURRENT_PCSCF} (4) -
+         *      Re-initiates IMS registration with the current P-CSCF.
+         *   {@code MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_NEXT_PCSCF} (5) -
+         *      Triggers IMS registration with the next available P-CSCF.
+         *   {@code MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_WITH_PDN_RECONNECT_AFTER_CSFB}
+         *      (6) -
+         *      Attempts CSFB if available, then triggers a PDN reconnection and re-registration.
+         *   {@code MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL} (7) -
+         *      Attempts a silent redial of the call over IMS.
+         *   {@code
+         * MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL_WITH_INITIAL_REGISTER_PCSCF_DISCOVERY} (8) -
+         *      Performs P-CSCF discovery and then attempts a silent redial of the call.
+         */
         static const IMS_CHAR KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT[];
         enum
         {
             MO_CALL_REQUEST_TIMEOUT_POLICY_CALL_END = 0,
             MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_PCSCF_DISCOVERY_AFTER_CSFB = 1,
             MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB = 2,
-            MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_AFTER_CSFB_IF_AVAILBLE = 3,
+            MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_AFTER_CSFB_IF_AVAILABLE = 3,
             MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_CURRENT_PCSCF = 4,
             MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_NEXT_PCSCF = 5,
             MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_WITH_PDN_RECONNECT_AFTER_CSFB = 6,
@@ -2561,23 +3821,38 @@ public:
             MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL_WITH_INITIAL_REGISTER_PCSCF_DISCOVERY = 8
         };
 
+        /**
+         * Specifies a list of carrier-specific SIP headers that should be handled or added.
+         */
         static const IMS_CHAR KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY[];
-        static const IMS_CHAR
-                KEY_SUPPORT_REGISTRATION_RECOVERY_FOR_FAILURE_OF_SESSION_REFRESH_BOOL[];
 
-        static const IMS_CHAR KEY_POLICY_FOR_CALL_MAINTAINING_ON_REGISTRATION_SUSPENDED_INT_ARRAY[];
-        enum
-        {
-            REGISTRATION_SUSPENDED_POLICY_MAINTAIN_NONE = 0,
-            REGISTRATION_SUSPENDED_POLICY_MAINTAIN_AUDIO_ONLY = 1,
-            REGISTRATION_SUSPENDED_POLICY_MAINTAIN_ALL = 2
-        };
-
-        static const IMS_CHAR KEY_USE_LTE_PREFERRED_STATUS_FOR_SERVICE_CAPABILITY_BOOL[];
-        static const IMS_CHAR KEY_ALLOW_INCOMING_HOLD_REQUEST_DURING_CONFERENCE_CALL_BOOL[];
-        static const IMS_CHAR KEY_IGNORE_180_AFTER_183_RESPONSE_BOOL[];
+        /**
+         * Specifies whether to add a Replaces header when inviting a participant to a conference.
+         *
+         * If {@code true}, "Require=replaces" extra header is added to the Refer-To header.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR KEY_ADD_REPLACE_HEADER_FOR_CONFERENCE_BOOL[];
 
+        /**
+         * Specifies the policy to follow when PRACK delivery fails.
+         *
+         * This determines the UE's behavior when a PRACK (Provisional Response ACKnowledgement)
+         * transaction times out or fails.
+         *
+         * Possible Values:
+         *   {@code PRACK_DELIVERY_FAILURE_POLICY_TERMINATE_DIALOG} (0) -
+         *      Terminates only the specific early dialog associated with the failed PRACK. This is
+         *      useful in forked call scenarios where other dialogs may still succeed.
+         *   {@code PRACK_DELIVERY_FAILURE_POLICY_TERMINATE_CALL} (1) -
+         *      Terminates the entire call attempt.
+         *   {@code PRACK_DELIVERY_FAILURE_POLICY_IGNORE} (2) -
+         *      Ignores the PRACK failure and keeps the call attempt active, waiting for other
+         *      responses.
+         */
         static const IMS_CHAR KEY_POLICY_FOR_PRACK_DELIVERY_FAILURE_INT[];
         enum
         {
@@ -2586,21 +3861,120 @@ public:
             PRACK_DELIVERY_FAILURE_POLICY_IGNORE = 2,
         };
 
+        /**
+         * Specifies whether to use a carrier-specific Contact header in 200 OK responses to OPTIONS
+         * requests.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR KEY_USE_CARRIER_SPECIFIC_CONTACT_HEADER_FOR_OPTIONS_RESPONSE_BOOL[];
+
+        /**
+         * Specifies whether to use a carrier-specific reason phrase when rejecting an incoming call
+         * while not registered.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR
                 KEY_USE_CARRIER_SPECIFIC_REJECT_PHRASE_FOR_INCOMING_CALL_DURING_NO_REGISTRATION_BOOL
                         [];
+        /**
+         * Specifies whether to trigger registration recovery when a PRACK transaction times out.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR KEY_ENABLE_REGISTRATION_RECOVERY_ON_PRACK_TIMEOUT_BOOL[];
-        static const IMS_CHAR
-                KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_REJECTED_BY_SERVER_ERROR_BOOL[];
-        static const IMS_CHAR KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_RETRY_UNAVAILABLE_BOOL[];
+
+        /**
+         * Specifies whether to trigger registration recovery when a BYE transaction times out.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_BYE_TRANSACTION_TIMEOUT_BOOL[];
-        static const IMS_CHAR KEY_CHECK_SERVER_OUTAGE_REASON_FOR_VXLTE_CALL_BOOL[];
+
+        /**
+         * Specifies whether to maintain multiple early sessions created by forking.
+         *
+         * When an outgoing call is forked by the network, it can result in multiple early dialogs.
+         * If {@code true}, the device will keep all early dialogs active simultaneously, allowing
+         * it to accept the first final response (200 OK) that arrives.
+         * If {@code false}, the original dialog is terminated by sending BYE request upon forking,
+         * and only the new forked dialogs are maintained.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR KEY_MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING_BOOL[];
+
+        /**
+         * Specifies whether to destroy inactive early sessions when one session is established.
+         *
+         * When a call is forked, multiple early dialogs can be created. Once one of these dialogs
+         * results in an established call, this flag controls what happens to the other, now
+         * inactive, early dialogs.
+         *
+         * If {@code true}, all resources for any remaining inactive early sessions are released
+         * immediately upon call establishment. This resolves an issue where radio resources
+         * (IMS traffic) are consumed by continuing to wait for responses for these inactive
+         * dialogs.
+         *
+         * If {@code false}, inactive sessions are maintained until they naturally time out
+         * (typically according to SIP Timer F). This allows the device to properly handle any
+         * final error responses from the network for these lingering sessions by sending an
+         * ACK, ensuring standard SIP transaction completion.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR KEY_DESTROY_INACTIVE_EARLY_SESSIONS_WHEN_ESTABLISHED_BOOL[];
+
+        /**
+         * Specifies whether to stop the ringback timer upon receiving a 183 response with an SDP
+         * body.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR KEY_STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY_BOOL[];
+
+        /**
+         * Specifies a list of message types that support geolocation PIDF-LO (Presence
+         * Information Data Format - Location Object).
+         *
+         * This is an integer array, where each value corresponds to a message type.
+         * The index of the array has no special meaning. If a message type's corresponding
+         * integer value is present in this array, geolocation information will be included
+         * in that SIP message.
+         *
+         * The integer values are mapped from the {@code MessageTypeForGeolocationPidf} enum.
+         *
+         * Possible Values: @see {@code MessageTypeForGeolocationPidf}.
+         *   0: INVITE requests.
+         *   1: Provisional responses (e.g., 180 Ringing, 183 Session Progress).
+         *   2: Final success responses (e.g., 200 OK).
+         *   3: Final failure responses (e.g., 3xx, 4xx, 5xx, 6xx).
+         *
+         */
         static const IMS_CHAR KEY_MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF_INT_ARRAY[];
 
+        /**
+         * Specifies conditions under which Geolocation information should be blocked.
+         *
+         * Possible Values:
+         *   {@code GEOLOCATION_BLOCK_CONDITION_IN_ROAMING} (0)
+         *   {@code GEOLOCATION_BLOCK_CONDITION_FOR_NORMAL_ROUTING_EMERGENCY_CALL} (1)
+         */
         static const IMS_CHAR KEY_GEOLOCATION_BLOCK_CONDITION_INT_ARRAY[];
         enum
         {
@@ -2608,7 +3982,24 @@ public:
             GEOLOCATION_BLOCK_CONDITION_FOR_NORMAL_ROUTING_EMERGENCY_CALL = 1,
         };
 
+        /**
+         * Specifies whether incoming resume events are supported.
+         *
+         * See {@code CF_INCOMING_RESUME_EVENT}.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR KEY_INCOMING_RESUME_EVENT_SUPPORT_BOOL[];
+
+        /**
+         * Specifies the SIP status code to use when rejecting a call type change request
+         * (e.g., upgrade/downgrade).
+         *
+         * Possible Values:
+         *   Integer (e.g., 200, 488, 606).
+         */
         static const IMS_CHAR KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT[];
 
         /**
@@ -2621,6 +4012,25 @@ public:
          */
         static const IMS_CHAR KEY_SET_INACTIVE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL[];
 
+        /**
+         * Specifies the policy for playing a local ringback tone upon receiving a 180 Ringing
+         * response. The policy depends on the value of the P-Early-Media (PEM) header in the SIP
+         * session.
+         *
+         * Possible Values:
+         *   {@code DYNAMIC_NW_TONE_WHEN_PEM_NOT_CONTAINS_SEND} (0) -
+         *     Play a locally generated ringback tone if the P-Early-Media header is absent,
+         *     or its value is 'inactive' or 'recvonly'.
+         *   {@code DYNAMIC_NW_TONE_WHEN_PEM_ALL} (1) -
+         *     Always play a locally generated ringback tone, regardless of the P-Early-Media
+         *     header.
+         *   {@code DYNAMIC_NW_TONE_WHEN_PEM_CONTAINS_SEND} (2) -
+         *     Play a locally generated ringback tone if the P-Early-Media header value is
+         *     'sendrecv' or 'sendonly'.
+         *   {@code NW_TONE_WHEN_PEM_CONTAINS_SEND_AFTER_180} (3) -
+         *     Play the network-provided ringback tone if the P-Early-Media header value is
+         *     'sendrecv' or 'sendonly'.
+         */
         static const IMS_CHAR KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT[];
         enum
         {
@@ -2630,24 +4040,237 @@ public:
             NW_TONE_WHEN_PEM_CONTAINS_SEND_AFTER_180 = 3,
         };
 
+        /**
+         * Specifies a timer used to determine if a user-initiated termination should be
+         * treated as a network timeout.
+         *
+         * This timer starts when an outgoing INVITE is sent and is stopped when the first
+         * provisional (1xx) response is received. If the timer expires before any response
+         * is received and the user then terminates the call, the termination reason is
+         * updated to indicate a SIP timeout.
+         * @see KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_AND_SIP_RESPONSE_TIMEOUT_STRING
+         * This helps differentiate a normal hang-up from a hang-up due to a non-responsive network.
+         *
+         * Possible Values:
+         *   An integer value representing the timeout in milliseconds.
+         */
         static const IMS_CHAR KEY_USER_CANCEL_REASON_AFTER_RESPONSE_TIMEOUT_TIMER_MILLIS_INT[];
+
+        /**
+         * Specifies a shorter transaction timeout for an outgoing call on a 5G (NR) network
+         * to enable faster fallback to LTE (EPS).
+         *
+         * When making a call on a 5G network, the standard SIP transaction timeout (Timer B) is
+         * overridden with this value. If the 5G network does not respond within this shorter
+         * period, the call attempt fails faster, allowing the device to trigger an EPS Fallback
+         * to LTE. A negative value disables this feature.
+         *
+         * Possible Values:
+         *   An integer value representing the timeout in milliseconds.
+         */
         static const IMS_CHAR KEY_MO_CALL_REQUEST_TIMEOUT_FOR_EPS_FALLBACK_TRIGGER_MILLIS_INT[];
+
+        /**
+         * Specifies a watchdog timer for forcing an EPS (LTE) Fallback during a call on a 5G
+         * (NR) network.
+         *
+         * This timer starts after the call setup progresses (e.g., a response with SDP is
+         * received). If the network itself does not initiate an EPS Fallback within this timer's
+         * duration, the device will proactively trigger a fallback to LTE to ensure call
+         * stability. A value of 0 or less disables this watchdog.
+         *
+         * Possible Values:
+         *   An integer value representing the timeout in milliseconds.
+         */
         static const IMS_CHAR KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT[];
+
+        /**
+         * Specifies whether to trigger an EPS (LTE) Fallback if an outgoing call on 5G (NR) is
+         * rejected with an RRC (Radio Resource Control) Reject message.
+         *
+         * If {@code true}, and the RRC Reject message contains a 'wait time' that is longer
+         * than the standard call setup timeout, the device will immediately trigger a fallback
+         * to LTE instead of waiting.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR KEY_EPS_FALLBACK_TRIGGER_BY_RRC_REJECT_WAIT_TIME_BOOL[];
+
+        /**
+         * Specifies whether to trigger an EPS (LTE) Fallback if an outgoing call on 5G (NR) is
+         * blocked due to Access Class Barring.
+         *
+         * If {@code true}, the device will immediately attempt to fall back to LTE to place
+         * the call.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR KEY_EPS_FALLBACK_TRIGGER_BY_AC_BARRING_BOOL[];
+
+        /**
+         * Specifies whether a new IMS registration is required after performing an EPS (LTE)
+         * Fallback.
+         *
+         * When an outgoing call on 5G (NR) times out and falls back to LTE, this key
+         * determines the next step.
+         * If {@code true}, the device must complete a new IMS registration on the LTE network
+         * before silently redialing the call.
+         * If {@code false}, the device attempts to redial immediately, assuming the previous
+         * registration may still be valid.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR
                 KEY_REQUIRE_REGISTRATION_AFTER_EPS_FALLBACK_TRIGGER_FOR_SILENT_REDIAL_BOOL[];
+
+        /**
+         * Specifies the interval for sending periodic UDP keep-alive packets during a call.
+         *
+         * If this value is positive, a small UDP packet (double CRLF) is sent to the P-CSCF at
+         * this interval to maintain NAT bindings in firewalls and routers, preventing the UDP
+         * connection from timing out. This starts after the first provisional (1xx) response
+         * is received and stops when the call ends.
+         *
+         * Possible Values:
+         *   An integer value representing the interval in milliseconds. A value of 0 or less
+         *   disables this feature.
+         */
         static const IMS_CHAR KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT[];
+
+        /**
+         * Specifies the SIP status code to use when rejecting a call because the call type is
+         * not acceptable.
+         *
+         * For example, this code is used if a user attempts to upgrade a voice call to video but
+         * the peer or network does not support it.
+         *
+         * Possible Values:
+         *   An integer representing a SIP failure code (e.g., 488, 606).
+         */
         static const IMS_CHAR KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE_INT[];
+
+        /**
+         * Specifies whether user confirmation is required before accepting a "resume" request
+         * from the remote party.
+         *
+         * If {@code true}, when the remote party resumes a held call, the device will prompt the
+         * user to accept the action.
+         * If {@code false}, the device will automatically accept the resume request and make the
+         * call active.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR KEY_CHECK_UI_CONDITION_FOR_INCOMING_RESUME_BOOL[];
+
+        /**
+         * Specifies timers from registration to 18x response in milliseconds.
+         *
+         * Start: Triggering Emergency Registration for an Emergency Call.
+         * End: Receiving 1xx provisional response for the Emergency Call.
+         * Expiry:
+         * If before the call is created, stop IMS Registration.
+         * If after the call is created, CSFB.
+         *
+         * The array defines timer values based on the RAT type:
+         *   Index 0: Timer value for Emergency Call over Cellular (e.g., LTE, NR).
+         *   Index 1: Timer value for Emergency Call over Wi-Fi (IWLAN).
+         *
+         * Possible Values:
+         *   Integer array.
+         */
         static const IMS_CHAR KEY_REGISTRATION_TO_18X_TIMER_MILLIS_INT_ARRAY[];
+
+        /**
+         * Specifies timers from call initiation to 18x response in milliseconds.
+         *
+         * Start: Sending INVITE request.
+         * End: Receiving 1xx provisional response.
+         * Expiry: The call is terminated (CANCEL).
+         *
+         * The array defines timer values based on the RAT type:
+         *   Index 0: Timer value for Cellular (e.g., LTE, NR).
+         *   Index 1: Timer value for Wi-Fi (IWLAN).
+         *
+         * Possible Values:
+         *   Integer array.
+         */
         static const IMS_CHAR KEY_CALL_INITIATION_TO_18X_TIMER_MILLIS_INT_ARRAY[];
+
+        /**
+         * Specifies the wait timer for QoS acquisition after Wi-Fi to LTE handover in milliseconds.
+         *
+         * Start: Handover from Wi-Fi to LTE is detected.
+         * End: QoS resources are successfully acquired.
+         * Expiry: The UE behaves as per the setting.
+         *         @see KEY_POLICY_ON_AUDIO_QOS_DEACTIVATION_INT,
+         *
+         * Possible Values:
+         *   Positive integer.
+         */
         static const IMS_CHAR KEY_QOS_ACQUISITION_AFTER_W2L_HANDOVER_WAIT_TIMER_MILLIS_INT[];
+
+        /**
+         * Specifies the wait timer for video/text QoS after audio QoS acquisition in milliseconds.
+         *
+         * Start: Audio QoS resource is acquired.
+         * End: Video or Text QoS resource is acquired.
+         * Expiry: The UE behaves as per the setting.
+         *         @see KEY_POLICY_ON_VIDEO_QOS_DEACTIVATION_INT,
+         *              KEY_POLICY_ON_TEXT_QOS_DEACTIVATION_INT
+         *
+         * Possible Values:
+         *   Positive integer.
+         */
         static const IMS_CHAR
                 KEY_WAIT_VIDEO_TEXT_QOS_AFTER_AUDIO_QOS_ACQUISITION_TIMER_MILLIS_INT[];
+
+        /**
+         * Specifies the guard timer for QoS loss in milliseconds.
+         *
+         * This timer is started when a QoS loss event is detected. If the QoS is not recovered
+         * within this time, the call may be downgraded or terminated.
+         *
+         * Start: QoS status changes from AVAILABLE to LOST.
+         * End: QoS status recovers to AVAILABLE.
+         * Expiry: QoS reservation failure is notified, leading to call downgrade or termination.
+         *
+         * Possible Values:
+         *   Positive integer.
+         */
         static const IMS_CHAR KEY_QOS_LOST_GUARD_TIMER_MILLIS_INT[];
+
+        /**
+         * Specifies the timer for forced QoS acquisition in milliseconds.
+         *
+         * If QoS is not established within this time, the UE may attempt to force the acquisition
+         * and proceed without full QoS.
+         *
+         * Start: First SDP answer is sent or received.
+         * End: QoS is acquired.
+         * Expiry: The UE forces the local QoS status to AVAILABLE and proceeds.
+         *
+         * Possible Values:
+         *   Positive integer.
+         */
         static const IMS_CHAR KEY_QOS_FORCED_ACQUISITION_TIMER_MILLIS_INT[];
 
+        /**
+         * Specifies RAT conditions where waiting for a dedicated bearer before call establishment
+         * is not required.
+         *
+         * Possible Values:
+         *   {@code NO_WAIT_DEDICATED_BEARER_IN_NR} (0)
+         *   {@code NO_WAIT_DEDICATED_BEARER_IN_EPS_FALLBACK} (1)
+         *   {@code NO_WAIT_DEDICATED_BEARER_IN_EPS_ONLY_ATTACH} (2)
+         */
         static const IMS_CHAR
                 KEY_RAT_CONDITION_FOR_NOT_WAITING_DEDICATED_BEARER_BEFORE_ESTABLISHED_INT_ARRAY[];
         enum
@@ -2657,13 +4280,85 @@ public:
             NO_WAIT_DEDICATED_BEARER_IN_EPS_ONLY_ATTACH = 2,
         };
 
+        /**
+         * Specifies whether to trigger the dedicated bearer wait timer upon sending the initial
+         * INVITE.
+         *
+         * If {@code true}, the timer to wait for a dedicated QoS bearer for audio
+         * (defined by {@link #KEY_DEDICATED_BEARER_WAIT_TIMER_MILLIS_INT}) is started
+         * immediately when the initial INVITE request is sent.
+         * If {@code false}, the timer is started only after the first SDP answer from the
+         * network is received. This allows the timer's start to align with the network's
+         * expected QoS setup flow.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR
                 KEY_TRIGGER_DEDICATED_BEARER_WAIT_TIMER_BY_SENDING_INITIAL_INVITE_BOOL[];
+
+        /**
+         * Specifies whether to restart the "wait for dedicated bearer" timer when a call being
+         * set up on 5G (NR) falls back to LTE (EPS).
+         *
+         * If {@code true}, and an EPS Fallback occurs while the device is waiting for a
+         * dedicated audio bearer, the wait timer is reset and started again. This gives the
+         * new LTE network a full timeout period to establish the bearer, accounting for
+         * potential handover delays.
+         *
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR KEY_RESTART_DEDICATED_BEARER_WAIT_TIMER_BY_EPS_FALLBACK_BOOL[];
+
+        /**
+         * Specifies whether to restart the "no answer" timer (RingingTimer) for an incoming
+         * call at the moment the device starts alerting the user.
+         *
+         * The no-answer timer typically starts when the INVITE is first received. If {@code true},
+         * this timer is reset and started again when the device sends the 180 Ringing response.
+         * This ensures the user receives the full configured ringing duration, independent of
+         * any initial processing delays.
+         *
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR KEY_RESTART_RINGING_TIMER_BY_SENDING_180_BOOL[];
+
+        /**
+         * Specifies the Content-ID format used for Geolocation.
+         *
+         * Possible Format Tokens: {@link TemplateFormatter#Format}
+         *   #IMEI#, #IMEIWITHHYPHEN#, #IMEIASADDRREFID#, #IMSI#, #IMSIASADDRREFID#, #MAC#, #IP#,
+         *   #PORT#, #PUID#, #AID#, #PUID#, #MSISDN#, #HOME_DOMAIN#, #UNIQUE_ID#,
+         *   #MNC#, #MNC2#, #MCC#
+         */
         static const IMS_CHAR KEY_CONTENT_ID_FOR_GEOLOCATION_STRING[];
+
+        /**
+         * Specifies whether to enrich CallReasonInfo with information from the Reason header.
+         *
+         * If {@code true}, collects cause and text according to the protocol of the Reason header
+         * and notifies the telephony layer.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
         static const IMS_CHAR KEY_ENRICH_CALLREASONINFO_WITH_REASON_HEADER_BOOL[];
 
+        /**
+         * Specifies the policy for handling multiple P-Asserted-Identity headers.
+         *
+         * Possible Values:
+         *   {@code PAI_POLICY_PREFER_TOPMOST} (0)
+         *   {@code PAI_POLICY_PREFER_SIP_URI} (1)
+         */
         static const IMS_CHAR KEY_POLICY_FOR_MULTIPLE_P_ASSERTED_IDENTITY_HEADERS_INT[];
         enum
         {
@@ -2752,16 +4447,6 @@ public:
             EVS_PRIMARY_MODE_BITRATE_64_0_KBPS = 9,
             EVS_PRIMARY_MODE_BITRATE_96_0_KBPS = 10,
             EVS_PRIMARY_MODE_BITRATE_128_0_KBPS = 11
-        };
-
-        // Unused. Duplicated {@code GEOLOCATION_PIDF_FOR_...}.
-        // Index for Geolocation-PIDF information level
-        enum
-        {
-            GEOLOCATION_PIDF_INFO_INDEX_EMERGENCY_CELLULAR = 0,
-            GEOLOCATION_PIDF_INFO_INDEX_EMERGENCY_WIFI = 1,
-            GEOLOCATION_PIDF_INFO_INDEX_CELLULAR = 2,
-            GEOLOCATION_PIDF_INFO_INDEX_WIFI = 3
         };
     };
 
@@ -2996,7 +4681,7 @@ public:
         /**
          * This WFC error message is not supported if empty.
          *
-         * The information to be displayed are written f it is supported.
+         * The information to be displayed is written if it is supported.
          *
          * Possible Values:
          *   REG90 - Unable to Connect
@@ -3006,7 +4691,7 @@ public:
         /**
          * This WFC error message is not supported if empty.
          *
-         * The information to be displayed are written f it is supported.
+         * The information to be displayed is written if it is supported.
          *
          * Possible Values:
          *   REG91 - Unable to Connect
@@ -3016,7 +4701,7 @@ public:
         /**
          * This WFC error message is not supported if empty.
          *
-         * The information to be displayed are written f it is supported.
+         * The information to be displayed is written if it is supported.
          *
          * Possible Values:
          *   REG92 - Wi-Fi Calling isn't supported in this country
@@ -3026,7 +4711,7 @@ public:
         /**
          * This WFC error message is not supported if empty.
          *
-         * The information to be displayed are written f it is supported.
+         * The information to be displayed is written if it is supported.
          *
          * Possible Values:
          *   REG09 - Missing 911 Address
@@ -3036,7 +4721,7 @@ public:
         /**
          * This WFC error message is not supported if empty.
          *
-         * The information to be displayed are written f it is supported.
+         * The information to be displayed is written if it is supported.
          *
          * Possible Values:
          *   REG09 - Missing 911 Address
@@ -3046,7 +4731,7 @@ public:
         /**
          * This WFC error message is not supported if empty.
          *
-         * The information to be displayed are written f it is supported.
+         * The information to be displayed is written if it is supported.
          *
          * Possible Values:
          *   REG99 - Unable to Connect
@@ -3078,13 +4763,6 @@ public:
         static const IMS_CHAR KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY[];
         static const IMS_CHAR KEY_NETWORK_INITIATED_USSD_OVER_IMS_SUPPORTED_BOOL[];
         // Public carrier-config - ends
-
-        // Unused. Using {@code CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_...}.
-        // ut terminal based services
-        enum
-        {
-            SUPPLEMENTARY_SERVICE_CW = 0,
-        };
     };
 
     /**

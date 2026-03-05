@@ -413,6 +413,28 @@ TEST_F(EmergencyServiceControllerTest, RatChangedToWlanDoesNothing)
             INetworkWatcher::RADIOTECH_TYPE_IWLAN);
 }
 
+TEST_F(EmergencyServiceControllerTest, RatChangedDoesNothingWhenHandoverTimerIsInactive)
+{
+    // This test verifies that a RAT change is ignored if the "wait for handover"
+    // timer is not active. This ensures that unrelated RAT changes do not trigger
+    // the emergency handover retry logic.
+
+    // GIVEN the "wait for handover" timer is not active
+    ON_CALL(objPassiveTimer,
+            IsActive(IPassiveTimerHolder::Type::WAIT_FOR_HANDOVER_TO_RETRY_OVER_IMS_PDN))
+            .WillByDefault(Return(IMS_FALSE));
+
+    // EXPECT no handover-related actions are taken
+    EXPECT_CALL(objPassiveTimer,
+            RemoveTimer(IPassiveTimerHolder::Type::WAIT_FOR_HANDOVER_TO_RETRY_OVER_IMS_PDN))
+            .Times(0);
+    EXPECT_CALL(objEsm, StartOpen(_)).Times(0);
+
+    // WHEN a RAT change from IWLAN to LTE occurs
+    pController->OnRatChanged(ServiceType::NORMAL, INetworkWatcher::RADIOTECH_TYPE_IWLAN,
+            INetworkWatcher::RADIOTECH_TYPE_LTE);
+}
+
 TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedInRoamingNotifiesUnavailable)
 {
     pController->Start();
@@ -625,6 +647,40 @@ TEST_F(EmergencyServiceControllerTest, OpenedAndCallSetupFailRegisterStop)
     pController->OnCallStateChanged(
             1, IMtcCall::State::OUTGOING, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
     pController->OnCallSessionReleased(1, IMS_TRUE, IMS_FALSE);
+}
+
+TEST_F(EmergencyServiceControllerTest, OpenedAndCallSetupFailWithNullSessionDoesNothing)
+{
+    // This test verifies that the controller does not crash or take any action
+    // if an emergency call fails early and the corresponding MTC session is null.
+    // This is a defensive check.
+
+    const CallKey kCallKey = 1;
+
+    // GIVEN the controller is in the OPENED state
+    pController->Start();
+    pController->OnAosStateChanged(
+            objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE, 0);
+
+    // AND the configuration to release PDN on failure is enabled
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigEmergency::KEY_RELEASE_EMERGENCY_PDN_ON_FAILURE_AFTER_100_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    // AND the MTC session is null
+    ON_CALL(objMockCallContext, GetSession()).WillByDefault(Return(nullptr));
+
+    // EXPECT no attempt to stop registration
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_STOP)).Times(0);
+
+    // WHEN an emergency call is initiated
+    pController->OnCallStateChanged(
+            kCallKey, IMtcCall::State::IDLE, IMtcCallStateListener::Type::VOIP, IMS_TRUE, 0);
+    // AND the call session is released, indicating an early failure
+    pController->OnCallSessionReleased(kCallKey, IMS_TRUE, IMS_FALSE);
+
+    // THEN the controller state remains OPENED
+    EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::OPENED);
 }
 
 TEST_F(EmergencyServiceControllerTest, StartStartsRegTo18xTimer)

@@ -289,7 +289,7 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
                 nExtraCode = EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
             }
             break;
-        case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_AFTER_CSFB_IF_AVAILBLE:
+        case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_AFTER_CSFB_IF_AVAILABLE:
             return RegisterAfterMayPerformCsfb();
         case ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_CURRENT_PCSCF:
             ReinitiateRegistrationWithStoredWaitTime();
