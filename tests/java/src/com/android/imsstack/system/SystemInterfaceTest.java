@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -63,6 +64,7 @@ import com.android.imsstack.jni.JniIms;
 import com.android.imsstack.jni.JniImsProxy;
 import com.android.imsstack.jni.JniObjectId;
 import com.android.imsstack.jni.JniSystemListener;
+import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.imsstack.util.MessageExecutor;
 
 import org.junit.After;
@@ -72,7 +74,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.io.FileDescriptor;
@@ -1405,7 +1406,7 @@ public class SystemInterfaceTest {
     @SmallTest
     public void testSystemCallGetWfcAddressId() {
         ImsConfigImplBase originalImsConfig = ImsServiceRegistry.getInstance(SLOT0).getImsConfig();
-        ImsConfigImplBase mockImsConfigImplBase = Mockito.mock(ImsConfigImplBase.class);
+        ImsConfigImplBase mockImsConfigImplBase = mock(ImsConfigImplBase.class);
         ImsServiceRegistry.getInstance(SLOT0).setImsConfig(mockImsConfigImplBase);
         setUpSystemInterface();
         setUpSystem();
@@ -2858,6 +2859,18 @@ public class SystemInterfaceTest {
         }
 
         verify(mSystemCall, never()).logSipMessage(anyString(), anyInt(), anyInt());
+    }
+
+    @Test
+    @SmallTest
+    public void testDump() {
+        IndentingPrintWriter mockIpw = mock(IndentingPrintWriter.class);
+
+        mSystemInterface.dump(mockIpw);
+
+        verify(mockIpw, atLeastOnce()).println(anyString());
+        verify(mockIpw, atLeastOnce()).increaseIndent();
+        verify(mockIpw, atLeastOnce()).decreaseIndent();
     }
 
     private void setUpSystemInterface() {

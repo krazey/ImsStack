@@ -42,6 +42,7 @@ import com.android.imsstack.base.ContentProviderProxy.SettingsProxy;
 import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.system.SystemInterface;
+import com.android.imsstack.util.IndentingPrintWriter;
 
 import org.junit.After;
 import org.junit.Before;
@@ -323,5 +324,14 @@ public class DefaultSystemCallAgentTest {
         when(mTelephonyManagerProxy.getSimState(eq(SLOT1))).thenReturn(
                 TelephonyManager.SIM_STATE_PRESENT);
         assertTrue(mDefaultSystemCallAgent.isCrossSimRedialingAvailable(SLOT0));
+    }
+
+    @Test
+    @SmallTest
+    public void testDump() {
+        IndentingPrintWriter mockIpw = mock(IndentingPrintWriter.class);
+        mDefaultSystemCallAgent.dump(mockIpw);
+
+        verify(mSystemInterface).dump(eq(mockIpw));
     }
 }
