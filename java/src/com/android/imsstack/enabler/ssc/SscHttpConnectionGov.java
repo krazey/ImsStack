@@ -26,7 +26,7 @@ import java.util.Map;
 
 public class SscHttpConnectionGov implements ISscHttpConnectionGov {
     private static final SscHttpConnectionGov sSscHttpConnectionGov = new SscHttpConnectionGov();
-    private static final Map<Integer, ISscHttpConnection> sSscHttpConnections = new HashMap<>();
+    private static Map<Integer, ISscHttpConnection> sSscHttpConnections = new HashMap<>();
 
     public static ISscHttpConnectionGov getInstance() {
         return sSscHttpConnectionGov;
