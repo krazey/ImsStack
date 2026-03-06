@@ -171,13 +171,13 @@ TEST_F(AudioSessionTest, testUpdateEarlyMediaDirection)
         EXPECT_EQ(pConfig->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY);
     }
 
-    // Case 3: PEM type is RECVONLY -> should be SEND_ONLY
+    // Case 3: PEM type is RECVONLY -> should be INACTIVE
     {
         m_pSession->SetMediaPemType(MEDIA_PEM_TYPE::RECVONLY);
         AudioConfig* pConfig = m_pSession->UpdateRtpConfig(
                 0, &localProfile, &peerProfile, &negoProfile, IMS_FALSE);
         ASSERT_NE(pConfig, nullptr);
-        EXPECT_EQ(pConfig->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_SEND_ONLY);
+        EXPECT_EQ(pConfig->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_INACTIVE);
     }
 
     // Case 4: PEM type is INACTIVE
@@ -401,4 +401,69 @@ TEST_F(AudioSessionTest, RequestRtpReceptionStats)
 
     // Act & Assert
     EXPECT_TRUE(m_pSession->RequestRtpReceptionStats(intervalMs));
+}
+
+class MockTimer : public ITimer
+{
+public:
+    MOCK_METHOD(IMS_BOOL, Equals, (IN const ITimer* piTimer), (const, override));
+    MOCK_METHOD(IMS_UINTP, SetTimer, (IN IMS_SINT64 nDuration, IN ITimerListener* piListener),
+            (override));
+    MOCK_METHOD(void, KillTimer, (), (override));
+};
+
+class TestAudioSession : public AudioSession
+{
+public:
+    void SetNetworkToneWaitTimer(ITimer* piTimer) { m_piNetworkToneWaitTimer = piTimer; }
+};
+
+TEST_F(AudioSessionTest, testNetworkToneTimerExpired)
+{
+    // Arrange
+    const IMS_UINT32 kTimerValue = 5000;
+
+    // We need to use a subclass to access the protected timer member
+    TestAudioSession* pTestSession = new TestAudioSession();
+    pTestSession->SetMediaSessionListener(&m_objMockListener);
+    pTestSession->SetNetworkToneTimer(kTimerValue);
+
+    MockTimer mockTimer;
+    pTestSession->SetNetworkToneWaitTimer(&mockTimer);
+
+    // Expect MediaSession_NotifyToClient to be called with REPORT_NW_TONE_RTP_RECEIVE_FAILED
+    EXPECT_CALL(m_objMockListener,
+            MediaSession_NotifyToClient(
+                    REPORT_NW_TONE_RTP_RECEIVE_FAILED, MEDIA_TYPE_AUDIO, MEDIA_PROTOCOL_RTP))
+            .Times(1);
+
+    // Act: Trigger the timer expiration directly on the session
+    pTestSession->Timer_TimerExpired(&mockTimer);
+
+    // Cleanup: Reset member to NULL before deletion to avoid double-free or invalid destroy
+    pTestSession->SetNetworkToneWaitTimer(IMS_NULL);
+    delete pTestSession;
+}
+
+TEST_F(AudioSessionTest, testUpdateEarlyMediaDirectionRecvOnlyReturnsInactive)
+{
+    // Common setup
+    AudioProfile localProfile, peerProfile, negoProfile;
+    auto negoPayload = new AudioProfile::Payload();
+    negoPayload->SetRtpMap(100, "EVS", 16000, 1);
+    negoPayload->SetFmtp(std::make_shared<AudioProfile::EvsFmtp>());
+    negoProfile.AddPayload(negoPayload);
+    negoProfile.SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+
+    auto peerPayload = new AudioProfile::Payload();
+    peerPayload->SetRtpMap(100, "EVS", 16000, 1);
+    peerPayload->SetFmtp(std::make_shared<AudioProfile::EvsFmtp>());
+    peerProfile.AddPayload(peerPayload);
+
+    // PEM type is RECVONLY -> should be INACTIVE (based on recent bug fix)
+    m_pSession->SetMediaPemType(MEDIA_PEM_TYPE::RECVONLY);
+    AudioConfig* pConfig =
+            m_pSession->UpdateRtpConfig(0, &localProfile, &peerProfile, &negoProfile, IMS_FALSE);
+    ASSERT_NE(pConfig, nullptr);
+    EXPECT_EQ(pConfig->getMediaDirection(), RtpConfig::MEDIA_DIRECTION_INACTIVE);
 }
