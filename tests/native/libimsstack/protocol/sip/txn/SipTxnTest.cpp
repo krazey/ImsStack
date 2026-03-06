@@ -501,7 +501,7 @@ Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 REGISTER\r\n\
 Route: <pcscf>\r\n\
 P-Access-Network-Info: 3GPP-UTRAN;utran-cell-id-3gpp=B20E\r\n\
-User-Agent: pixel\r\n\
+User-Agent: IMS-client\r\n\
 \r\n";
 
     EXPECT_EQ(SIP_TRUE, pInSipMsg->Decode(pMsg, SipPf_Strlen(pMsg)));
