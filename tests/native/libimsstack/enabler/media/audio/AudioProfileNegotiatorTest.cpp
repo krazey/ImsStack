@@ -41,6 +41,8 @@ protected:
                 .WillByDefault(Return(MediaConfiguration::BW_OPTION_LOCAL_VALUE));
         ON_CALL(m_objMockConfig, GetRtcpIntervalOnActive()).WillByDefault(Return(5));
         ON_CALL(m_objMockConfig, GetRtcpIntervalOnHold()).WillByDefault(Return(3));
+        ON_CALL(m_objMockConfig, IsAmrPayloadFormatRelaxedMatching())
+                .WillByDefault(Return(IMS_FALSE));
         // Set default local profile values often needed
         m_pLocalProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
         m_pLocalProfile->SetDataPort(5004);
@@ -265,11 +267,13 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateEvsPeerNoFmtpDifferentPayloadNumber)
             IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
 
     // Assert
-    EXPECT_FALSE(bResult);
+    EXPECT_TRUE(bResult);
     ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
     auto pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
     ASSERT_NE(pNegoPayload, nullptr);
     EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadType(), "EVS");
+    // The negotiated payload should have the peer's payload number but the local's fmtp.
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), 100);
     EXPECT_EQ(*pNegoPayload->GetFmtp(), *m_pLocalProfile->GetPayloadAt(0)->GetFmtp());
 }
 
@@ -1605,4 +1609,143 @@ TEST_F(AudioProfileNegotiatorTest, NegotiateEvsOfferA2ReceivedNonIR92ReturnSubse
     // Check negotiated BW/BR (intersection from CompareEvsBwBrMode)
     EXPECT_EQ(pNegoFmtp->GetBwList(), 0x04);   // Subset of offer+answer
     EXPECT_EQ(pNegoFmtp->GetBrList(), 0x01F);
+}
+
+TEST_F(AudioProfileNegotiatorTest, NegotiateEvsWithMismatchedBandwidthForSamePayload)
+{
+    // Arrange
+    // Local has EVS PT 127 for SWB and PT 126 for WB.
+    m_pLocalProfile->AddPayload(CreateEvsPayload(127, EVS_BW_SWB, 0xFFF));
+    m_pLocalProfile->AddPayload(CreateEvsPayload(126, EVS_BW_WB, 0xFFF));
+
+    // Peer offers EVS with PT 127 but for WB.
+    m_pPeerProfile->AddPayload(CreateEvsPayload(127, EVS_BW_WB, 0xFFF));
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->SetDataPort(6004);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+    // Assert
+    // Negotiation should succeed by matching the peer's WB offer with the local PT 126 WB config.
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
+    auto pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadType(), "EVS");
+    // The negotiated payload number should be the one from the peer's offer.
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), 127);
+
+    auto pNegoFmtp = std::static_pointer_cast<AudioProfile::EvsFmtp>(pNegoPayload->GetFmtp());
+    ASSERT_NE(pNegoFmtp, nullptr);
+    // The negotiated bandwidth should be WB.
+    EXPECT_EQ(pNegoFmtp->GetBwList(), EVS_BW_WB);
+}
+
+TEST_F(AudioProfileNegotiatorTest, NegotiateEvsWithBandwidthSubset)
+{
+    // Arrange
+    // Local has EVS PT 127 supporting a range of bandwidths (NB-SWB).
+    m_pLocalProfile->AddPayload(CreateEvsPayload(127, EVS_BW_NB | EVS_BW_WB | EVS_BW_SWB, 0xFFF));
+    // Also add another EVS config to ensure the correct one is chosen.
+    m_pLocalProfile->AddPayload(CreateEvsPayload(126, EVS_BW_WB, 0xFFF));
+
+    // Peer offers EVS with PT 127 but only for WB, which is a subset of the local offer.
+    m_pPeerProfile->AddPayload(CreateEvsPayload(127, EVS_BW_WB, 0xFFF));
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->SetDataPort(6004);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+    // Assert
+    // Negotiation should succeed with the intersection of bandwidths.
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
+    auto pNegoPayload = m_pNegotiatedProfile->GetPayloadAt(0);
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadType(), "EVS");
+    // The negotiated payload number should be the one from the peer's offer.
+    EXPECT_EQ(pNegoPayload->GetRtpMap().GetPayloadNumber(), 127);
+
+    auto pNegoFmtp = std::static_pointer_cast<AudioProfile::EvsFmtp>(pNegoPayload->GetFmtp());
+    ASSERT_NE(pNegoFmtp, nullptr);
+    // The negotiated bandwidth should be the intersection, which is WB.
+    EXPECT_EQ(pNegoFmtp->GetBwList(), EVS_BW_WB);
+}
+
+TEST_F(AudioProfileNegotiatorTest, NegotiateEvsPeerFmtpNullReturnsTrue)
+{
+    // Arrange
+    m_pLocalProfile->AddPayload(CreateEvsPayload(kLocalPayload, 0x0F, 0xFFF));
+
+    auto pPeerPayload = new AudioProfile::Payload();
+    pPeerPayload->GetRtpMap().SetPayloadType("EVS");
+    pPeerPayload->GetRtpMap().SetSamplingRate(16000);
+    pPeerPayload->GetRtpMap().SetPayloadNumber(kPeerPayload);
+    pPeerPayload->SetFmtp(IMS_NULL);  // Peer FMTP is null
+    m_pPeerProfile->AddPayload(pPeerPayload);
+
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->SetDataPort(6004);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadType(), "EVS");
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadNumber(), kPeerPayload);
+}
+
+TEST_F(AudioProfileNegotiatorTest, NegotiateAmrWbPeerFmtpNullReturnsTrue)
+{
+    // Arrange
+    m_pLocalProfile->AddPayload(CreateAmrWbPayload(kLocalPayload, 0xFF));
+
+    auto pPeerPayload = new AudioProfile::Payload();
+    pPeerPayload->GetRtpMap().SetPayloadType("AMR-WB");
+    pPeerPayload->GetRtpMap().SetSamplingRate(16000);
+    pPeerPayload->GetRtpMap().SetPayloadNumber(kPeerPayload);
+    pPeerPayload->SetFmtp(IMS_NULL);  // Peer FMTP is null
+    m_pPeerProfile->AddPayload(pPeerPayload);
+
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->SetDataPort(6004);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    ASSERT_EQ(m_pNegotiatedProfile->GetPayloadListSize(), 1);
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadType(), "AMR-WB");
+    EXPECT_EQ(m_pNegotiatedProfile->GetPayloadAt(0)->GetRtpMap().GetPayloadNumber(), kPeerPayload);
+}
+
+TEST_F(AudioProfileNegotiatorTest, NegotiateAmrWbLocalAmrPeerFmtpNullReturnsFalse)
+{
+    // Arrange
+    m_pLocalProfile->AddPayload(CreateAmrWbPayload(kLocalPayload, 0xFF));  // AMR-WB (16k)
+
+    auto pPeerPayload = new AudioProfile::Payload();
+    pPeerPayload->GetRtpMap().SetPayloadType("AMR");  // AMR (8k)
+    pPeerPayload->GetRtpMap().SetSamplingRate(8000);
+    pPeerPayload->GetRtpMap().SetPayloadNumber(kPeerPayload);
+    pPeerPayload->SetFmtp(IMS_NULL);  // Peer FMTP is null
+    m_pPeerProfile->AddPayload(pPeerPayload);
+
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->SetDataPort(6004);
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+    // Assert
+    // Should fail because AMR-WB (16k) does not match AMR (8k)
+    EXPECT_FALSE(bResult);
 }

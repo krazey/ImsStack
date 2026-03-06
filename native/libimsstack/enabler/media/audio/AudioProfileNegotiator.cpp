@@ -323,8 +323,17 @@ std::shared_ptr<AudioProfile::AmrFmtp> AudioProfileNegotiator::NegotiateAmrFmtp(
 
     auto pLocalFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(
             pLocalProfile->GetPayloadAt(nLocalPayloadIndex)->GetFmtp());
-    auto pAmrFmtp = std::make_shared<AudioProfile::AmrFmtp>(
-            *std::static_pointer_cast<AudioProfile::AmrFmtp>(pPeerPayload->GetFmtp()));
+
+    std::shared_ptr<AudioProfile::AmrFmtp> pAmrFmtp;
+    if (pPeerPayload->GetFmtp() != IMS_NULL)
+    {
+        pAmrFmtp = std::make_shared<AudioProfile::AmrFmtp>(
+                *std::static_pointer_cast<AudioProfile::AmrFmtp>(pPeerPayload->GetFmtp()));
+    }
+    else
+    {
+        pAmrFmtp = std::make_shared<AudioProfile::AmrFmtp>(*pLocalFmtp);
+    }
 
     pAmrFmtp->SetModeSetList(nNegoModeSetList);
     pAmrFmtp->SetDefaultRtpModeSet(nNegoDefaultRtpModeSet);
@@ -1165,10 +1174,16 @@ IMS_BOOL AudioProfileNegotiator::FindMatchedEvsFmtp(
 {
     auto pCompareFmtp =
             std::static_pointer_cast<AudioProfile::EvsFmtp>(pComparedPayload->GetFmtp());
-    auto pReceivedFmtp = std::static_pointer_cast<AudioProfile::EvsFmtp>(pPeerPayload->GetFmtp());
-    if (pCompareFmtp == IMS_NULL || pReceivedFmtp == IMS_NULL)
+    if (pCompareFmtp == IMS_NULL)
     {
         return IMS_FALSE;
+    }
+
+    auto pReceivedFmtp = std::static_pointer_cast<AudioProfile::EvsFmtp>(pPeerPayload->GetFmtp());
+    if (pReceivedFmtp == IMS_NULL)
+    {
+        IMS_TRACE_I("FindMatchedEvsFmtp(): peer fmtp is null, consider it a match", 0, 0, 0);
+        return IMS_TRUE;
     }
 
     IMS_UINT32 nBandwidthNegoList, nBitrateNegoList, nModeSetNegoList;
@@ -1246,9 +1261,7 @@ IMS_BOOL AudioProfileNegotiator::FindMatchingEvsPayload(
 
         if (pLocalPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase("EVS"))
         {
-            if (pLocalPayload->GetRtpMap().GetPayloadNumber() ==
-                            pPeerPayload->GetRtpMap().GetPayloadNumber() ||
-                    FindMatchedEvsFmtp(pLocalPayload, pPeerPayload))
+            if (FindMatchedEvsFmtp(pLocalPayload, pPeerPayload))
             {
                 pLocalPayload->GetRtpMap().SetPayloadNumber(
                         pPeerPayload->GetRtpMap().GetPayloadNumber());
@@ -1318,10 +1331,11 @@ IMS_BOOL AudioProfileNegotiator::FindMatchedAmrInProfile(IN AudioProfile* pProfi
             auto pReceivedFmtp =
                     std::static_pointer_cast<AudioProfile::AmrFmtp>(pPayload->GetFmtp());
 
-            if (pCompareFmtp == IMS_NULL || pReceivedFmtp == IMS_NULL)
+            if (pCompareFmtp == IMS_NULL)
             {
                 continue;
             }
+
             if (!pComparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase(
                         pPayload->GetRtpMap().GetPayloadType()))
             {
@@ -1331,6 +1345,14 @@ IMS_BOOL AudioProfileNegotiator::FindMatchedAmrInProfile(IN AudioProfile* pProfi
                     pPayload->GetRtpMap().GetSamplingRate())
             {
                 continue;
+            }
+
+            if (pReceivedFmtp == IMS_NULL)
+            {
+                IMS_TRACE_I("FindAmrInProfile(): peer fmtp is null, consider it a match", 0, 0, 0);
+                *pnNegoModeSetList = pCompareFmtp->GetModeSetList();
+                *pnNegoDefaultRtpModeSet = pCompareFmtp->GetDefaultRtpModeSet();
+                return IMS_TRUE;
             }
 
             if ((pCompareFmtp->GetOctetAlign() != pReceivedFmtp->GetOctetAlign()) &&
@@ -1932,7 +1954,7 @@ PRIVATE IMS_SINT32 AudioProfileNegotiator::FindMatchedPayloadIndexFromProfile(
                     auto pReceivedFmtp = std::static_pointer_cast<AudioProfile::AmrFmtp>(
                             pPeerPayload->GetFmtp());
 
-                    if (pCompareFmtp == IMS_NULL || pReceivedFmtp == IMS_NULL)
+                    if (pCompareFmtp == IMS_NULL)
                     {
                         continue;
                     }
@@ -1946,6 +1968,14 @@ PRIVATE IMS_SINT32 AudioProfileNegotiator::FindMatchedPayloadIndexFromProfile(
                             pPeerPayload->GetRtpMap().GetSamplingRate())
                     {
                         continue;
+                    }
+
+                    if (pReceivedFmtp == IMS_NULL)
+                    {
+                        IMS_TRACE_I("FindMatchedPayloadIndexFromProfile(): peer fmtp is null, "
+                                    "consider it a match",
+                                0, 0, 0);
+                        return i;
                     }
 
                     if ((pCompareFmtp->GetOctetAlign() != pReceivedFmtp->GetOctetAlign()) &&
@@ -2006,9 +2036,17 @@ PRIVATE IMS_SINT32 AudioProfileNegotiator::FindMatchedPayloadIndexFromProfile(
                     auto pReceivedFmtp = std::static_pointer_cast<AudioProfile::EvsFmtp>(
                             pPeerPayload->GetFmtp());
 
-                    if (pCompareFmtp == IMS_NULL || pReceivedFmtp == IMS_NULL)
+                    if (pCompareFmtp == IMS_NULL)
                     {
                         continue;
+                    }
+
+                    if (pReceivedFmtp == IMS_NULL)
+                    {
+                        IMS_TRACE_I("FindMatchedPayloadIndexFromProfile(): peer fmtp is null, "
+                                    "consider it a match",
+                                0, 0, 0);
+                        return i;
                     }
 
                     if (pComparedPayload->GetRtpMap().GetPayloadType().EqualsIgnoreCase(
