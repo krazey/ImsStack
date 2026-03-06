@@ -1207,6 +1207,45 @@ IMS_BOOL AosRegistration::UpdateCallingNumberVerification()
     return IMS_TRUE;
 }
 
+PROTECTED
+IMS_BOOL AosRegistration::UpdateNetworkFeatureRtt()
+{
+    if (m_piRegContact == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    IAosHandle* piAosHandleMtc = m_piContext->GetHandle(ImsAosService::MTC);
+    if (piAosHandleMtc == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    AosFeatureTagList& objBindedList = piAosHandleMtc->GetBindedFeatureTagList();
+    if ((objBindedList.GetFeatures() & ImsAosFeature::TEXT) == 0)
+    {
+        return IMS_FALSE;
+    }
+
+    IMS_UINT32 nOldUnavailableFeatures = objBindedList.GetUnavailableFeatures();
+    IMS_BOOL bNetworkSupportsRtt = m_piRegContact->IsFeatureRegistered(AosString::STR_RTT_FEATURE);
+    if (bNetworkSupportsRtt)
+    {
+        objBindedList.RemoveUnavailableFeature(ImsAosFeature::TEXT);
+    }
+    else
+    {
+        objBindedList.AddUnavailableFeature(ImsAosFeature::TEXT);
+    }
+
+    if (nOldUnavailableFeatures != objBindedList.GetUnavailableFeatures())
+    {
+        A_IMS_TRACE_D(REGID, "Network supports RTT (%s)", _TRACE_B_(bNetworkSupportsRtt), 0, 0);
+    }
+
+    return bNetworkSupportsRtt;
+}
+
 PROTECTED IMS_BOOL AosRegistration::IsPdnReconnectWithDelayRequiredOnWfcSetupFailure()
 {
     IMS_SINT32 nPdnReconnectionDelay =
@@ -5647,6 +5686,8 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Started()
         }
     }
 
+    UpdateNetworkFeatureRtt();
+
     SetState(STATE_REGISTERED);
 
     UpdateUserInfoInContact();
@@ -5736,6 +5777,8 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Updated()
             return;
         }
     }
+
+    UpdateNetworkFeatureRtt();
 
     SetState(STATE_REGISTERED);
 

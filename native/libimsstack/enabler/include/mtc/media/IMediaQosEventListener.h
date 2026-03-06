@@ -22,17 +22,28 @@
 
 class ISession;
 
+/**
+ * @brief Interface for listening to Quality of Service (QoS) events.
+ *
+ * This interface is implemented by classes that need to monitor the QoS status of media streams
+ * within a session. It provides notifications when QoS resources become available or are lost,
+ * which is critical for preconditions handling and call setup.
+ */
 class IMediaQosEventListener
 {
 public:
     virtual ~IMediaQosEventListener(){};
 
     /**
-     * @brief Notifies
+     * @brief Notifies that the QoS status has changed for a specific session and media type.
      *
-     * @param piSession
-     * @param eStatus
-     * @param eMediaType
+     * This callback is invoked when the underlying media layer reports a change in resource
+     * reservation status.
+     *
+     * @param piSession The #ISession associated with the QoS event.
+     * @param eStatus The new #QosStatus (e.g., AVAILABLE, LOST).
+     * @param eMediaType The media type(s) affected by the status change (e.g., #MEDIATYPE_AUDIO).
+     * @param bNeedToNotify Indicates if this event should be propagated to listeners (e.g. UI).
      */
     virtual void OnQosStatusChanged(IN ISession* piSession, IN QosStatus eStatus,
             IN IMS_UINT32 eMediaType, IN IMS_BOOL bNeedToNotify = IMS_TRUE) = 0;

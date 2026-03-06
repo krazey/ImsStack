@@ -1,4 +1,4 @@
-// Copyright (C) 2022 The Android Open Source Project
+// Copyright (C) 2023 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,21 +13,22 @@
 // limitations under the License.
 
 package {
-    default_team: "trendy_team_pmw_telephony",
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-cc_test {
-    name: "ImsStackNativeEnablerMtsTests",
-    defaults: [
-        "imsstack_native_test_enabler_defaults",
+java_defaults {
+    name: "imsstack_mockito_target_extended_defaults",
+    static_libs: [
+        "mockito-target-extended-minus-junit4",
     ],
-    srcs: [
-        "**/*.cpp",
+    jni_libs: [
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
     ],
-    header_libs: [
-        "libimsstack_test_enabler_headers",
-        "libimsstack_test_enabler_include_headers",
+}
+
+java_library {
+    name: "imsstack-prebuilt",
+    static_libs: [
     ],
-    test_config: "ImsStackNativeEnablerMtsTests.xml",
 }

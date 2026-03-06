@@ -221,6 +221,40 @@ TEST_F(MessageUtilsTest, GetRemoteUrisReturnsEmptyIfNoInformation)
     EXPECT_EQ(objMessageUtils.GetRemoteUris(piSession, PeerType::MO).GetSize(), 0);
 }
 
+TEST_F(MessageUtilsTest, GetRemoteUrisFromSession)
+{
+    // Setup: Session returns a remote user ID directly.
+    ImsList<AString> objAddresses;
+    objAddresses.Append("sip:user@example.com");
+    ON_CALL(*piSession, GetRemoteUserId).WillByDefault(Return(objAddresses));
+
+    // Action: Get remote URIs.
+    ImsList<AString> objUris = objMessageUtils.GetRemoteUris(piSession, PeerType::MO);
+
+    // Verification: The URI from the session should be returned.
+    EXPECT_EQ(objUris.GetSize(), 1);
+    EXPECT_STREQ(objUris.GetAt(0).GetStr(), "sip:user@example.com");
+}
+
+TEST_F(MessageUtilsTest, GetRemoteUrisForMtCall)
+{
+    // Setup: Session has no remote user ID, forcing fallback to message headers for an MT call.
+    ImsList<AString> objEmptyAddresses;
+    ON_CALL(*piSession, GetRemoteUserId).WillByDefault(Return(objEmptyAddresses));
+
+    AString strFromUri = "sip:caller@example.com";
+    ImsList<AString> objFromHeaders;
+    objFromHeaders.Append(strFromUri);
+    // For MT call, the remote URI is in the 'From' header.
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::FROM, _)).WillByDefault(Return(objFromHeaders));
+    SetUpPreviousRequest(IMessage::SESSION_START);
+
+    // Action: Get remote URIs for a Mobile-Terminated call.
+    ImsList<AString> objUris = objMessageUtils.GetRemoteUris(piSession, PeerType::MT);
+    EXPECT_EQ(objUris.GetSize(), 1);
+    EXPECT_STREQ(objUris.GetAt(0).GetStr(), strFromUri.GetStr());
+}
+
 TEST_F(MessageUtilsTest, GetRemoteUri)
 {
     ImsList<AString> objAddresses;
@@ -741,6 +775,43 @@ TEST_F(MessageUtilsTest, GetPrioritizedReasonHeader)
     EXPECT_STREQ(objResult.strProtocol.GetStr(), "SIP");
 }
 
+TEST_F(MessageUtilsTest, GetPrioritizedReasonHeaderFallsBackToLowerPriority)
+{
+    ReasonHeaderValue objResult;
+    ImsList<AString> objHeaders;
+    // Add headers in a different order than the priority list.
+    objHeaders.Append("SIP;cause=603;text=\"any reason\"");
+    objHeaders.Append("Q.850;cause=19;text=\"no answer\"");
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::REASON, _)).WillByDefault(Return(objHeaders));
+
+    // Action: Prioritize Q.850 over SIP.
+    objResult = objMessageUtils.GetPrioritizedReasonHeader(
+            piMessage, {"NonExistentProtocol", "Q.850", "SIP"});
+
+    // Verification: The Q.850 header should be chosen.
+    EXPECT_EQ(objResult.nCause, 19);
+    EXPECT_STREQ(objResult.strText.GetStr(), "\"no answer\"");
+    EXPECT_STREQ(objResult.strProtocol.GetStr(), "Q.850");
+}
+
+TEST_F(MessageUtilsTest, GetPrioritizedReasonHeaderReturnsDefaultWhenNoMatch)
+{
+    ReasonHeaderValue objResult;
+    ImsList<AString> objHeaders;
+    objHeaders.Append("SIP;cause=603;text=\"any reason\"");
+    objHeaders.Append("Q.850;cause=19;text=\"no answer\"");
+    ON_CALL(*piSipMessage, GetHeaders(ISipHeader::REASON, _)).WillByDefault(Return(objHeaders));
+
+    // Action: Use a priority list with no matching protocols.
+    objResult = objMessageUtils.GetPrioritizedReasonHeader(
+            piMessage, {"NonExistentProtocol1", "NonExistentProtocol2"});
+
+    // Verification: A default-initialized value should be returned.
+    EXPECT_EQ(objResult.nCause, -1);
+    EXPECT_STREQ(objResult.strText.GetStr(), "");
+    EXPECT_STREQ(objResult.strProtocol.GetStr(), "");
+}
+
 TEST_F(MessageUtilsTest, GetIms3gppFromBody)
 {
     MockISipMessageBodyPart objISipMessageBodyPartOtherContent1;
@@ -782,6 +853,39 @@ TEST_F(MessageUtilsTest, GetIms3gppFromBody)
     EXPECT_EQ(objIms3gpp.GetAlternativeService().GetAction(),
             Ims3gpp::AlternativeService::ACTION_UNKNOWN);
     EXPECT_EQ(objIms3gpp.GetAlternativeService().GetUnknownAction(), strIms3gppAction);
+}
+
+TEST_F(MessageUtilsTest, GetIms3gppFromBodySkipsInvalidXml)
+{
+    MockISipMessageBodyPart objInvalidBodyPart;
+    MockISipMessageBodyPart objValidBodyPart;
+    ImsList<ISipMessageBodyPart*> objBodyParts;
+    objBodyParts.Append(&objInvalidBodyPart);
+    objBodyParts.Append(&objValidBodyPart);
+    ON_CALL(*piSipMessage, GetBodyParts).WillByDefault(Return(objBodyParts));
+
+    AString strContextType("application/3gpp-ims+xml");
+    ON_CALL(objInvalidBodyPart, GetHeader(ISipMessageBodyPart::CONTENT_TYPE, _))
+            .WillByDefault(Return(strContextType));
+    ON_CALL(objValidBodyPart, GetHeader(ISipMessageBodyPart::CONTENT_TYPE, _))
+            .WillByDefault(Return(strContextType));
+
+    // Setup invalid XML for the first body part.
+    ByteArray objInvalidContent("this is not valid xml");
+    ON_CALL(objInvalidBodyPart, GetContent).WillByDefault(ReturnRef(objInvalidContent));
+
+    // Setup valid XML for the second body part.
+    ByteArray objValidContent(GetIms3gppXml("restoration", "any", "initial-registration"));
+    ON_CALL(objValidBodyPart, GetContent).WillByDefault(ReturnRef(objValidContent));
+
+    Ims3gpp objIms3gpp;
+    objMessageUtils.GetIms3gppFromBody(piMessage, objIms3gpp);
+
+    // Verification: The valid XML from the second body part should be parsed.
+    EXPECT_EQ(objIms3gpp.GetAlternativeService().GetType(),
+            Ims3gpp::AlternativeService::TYPE_RESTORATION);
+    EXPECT_EQ(objIms3gpp.GetAlternativeService().GetAction(),
+            Ims3gpp::AlternativeService::ACTION_INITIAL_REGISTRATION);
 }
 
 TEST_F(MessageUtilsTest, GetIms3gpp)
@@ -1299,6 +1403,37 @@ TEST_F(MessageUtilsTest, SetResourceListWithDialogId)
             IMS_SUCCESS);
 }
 
+TEST_F(MessageUtilsTest, SetResourceListNonMultiPart)
+{
+    ImsList<ConfUser*> lstConfUser;
+    ConfUser objUser1;
+    objUser1.strTarget = "sip:user1Target";
+    objUser1.eCcType = COPYCONTROLTYPE_TO;
+    lstConfUser.Append(&objUser1);
+
+    MockIMessageBodyPart objMessageBodyPart;
+    ON_CALL(*piMessage, CreateBodyPart).WillByDefault(Return(&objMessageBodyPart));
+
+    const AString strContentType(SipHeaderName::CONTENT_TYPE);
+    const AString strResourceList(MessageUtil::STR_CONTENT_TYPE_RESOURCE_LISTS_XML);
+    const AString strDisposition(SipHeaderName::CONTENT_DISPOSITION);
+    const AString strLength(SipHeaderName::CONTENT_LENGTH);
+
+    // Verification: Only Content-Type should be set on the body part.
+    // Content-Disposition and Content-Length should NOT be set.
+    EXPECT_CALL(objMessageBodyPart, SetHeader(strContentType, strResourceList));
+    EXPECT_CALL(objMessageBodyPart, SetHeader(strDisposition, _)).Times(0);
+    EXPECT_CALL(objMessageBodyPart, SetHeader(strLength, _)).Times(0);
+
+    ImsList<AString> objResourceList;
+    objResourceList.Append("entry uri=\"sip:user1Target\" cp:copyControl=\"to\"");
+    EXPECT_CALL(objMessageBodyPart, SetContent(IsEqualResourceList(objResourceList)));
+
+    // Action: Call with bMultiPart = IMS_FALSE.
+    EXPECT_EQ(objMessageUtils.SetResourceList(piMessage, lstConfUser, IMS_FALSE, IMS_FALSE),
+            IMS_SUCCESS);
+}
+
 TEST_F(MessageUtilsTest, IsMediaFeaturesIncludedReturnsNulloptIfNoContactHeader)
 {
     ImsList<AString> objHeaders;
@@ -1576,6 +1711,74 @@ TEST_F(MessageUtilsTest, GetCallTypeFromSdpWithActiveMediaOnly)
     ON_CALL(*piSession, GetMedia).WillByDefault(Return(lstIMedia));
     EXPECT_EQ(objMessageUtils.GetCallTypeFromSdp(piSession, IMS_TRUE, IMS_FALSE, IMS_FALSE),
             CallType::VOIP);
+}
+
+TEST_F(MessageUtilsTest, GetCallTypeFromSdpReturnsUnknownIfNoAudio)
+{
+    ImsList<IMedia*> lstIMedia;
+
+    // Setup Video Media
+    MockIMedia objVideoMedia;
+    lstIMedia.Append(&objVideoMedia);
+    MockIMediaDescriptor objVideoMediaDescriptor;
+    ON_CALL(objVideoMedia, GetMediaDescriptor).WillByDefault(Return(&objVideoMediaDescriptor));
+    SdpMedia objVideoSdpMedia;
+    objVideoSdpMedia.SetType(SdpMedia::TYPE_VIDEO);
+    objVideoSdpMedia.SetPort(12345);
+    ON_CALL(objVideoMediaDescriptor, GetMediaDescriptionExAsLocal)
+            .WillByDefault(Return(&objVideoSdpMedia));
+
+    // Setup Text Media
+    MockIMedia objTextMedia;
+    lstIMedia.Append(&objTextMedia);
+    MockIMediaDescriptor objTextMediaDescriptor;
+    ON_CALL(objTextMedia, GetMediaDescriptor).WillByDefault(Return(&objTextMediaDescriptor));
+    SdpMedia objTextSdpMedia;
+    objTextSdpMedia.SetType(SdpMedia::TYPE_TEXT);
+    objTextSdpMedia.SetPort(54321);
+    ON_CALL(objTextMediaDescriptor, GetMediaDescriptionExAsLocal)
+            .WillByDefault(Return(&objTextSdpMedia));
+
+    ON_CALL(*piSession, GetMedia).WillByDefault(Return(lstIMedia));
+
+    // Action & Verification: Call type should be UNKNOWN as there is no audio stream.
+    EXPECT_EQ(objMessageUtils.GetCallTypeFromSdp(piSession, IMS_FALSE, IMS_FALSE, IMS_FALSE),
+            CallType::UNKNOWN);
+}
+
+TEST_F(MessageUtilsTest, GetCallTypeFromSdpWithCheckRemote)
+{
+    ImsList<IMedia*> lstIMedia;
+
+    // Setup Audio Media for remote SDP
+    MockIMedia objAudioMedia;
+    lstIMedia.Append(&objAudioMedia);
+    MockIMediaDescriptor objAudioMediaDescriptor;
+    ON_CALL(objAudioMedia, GetMediaDescriptor).WillByDefault(Return(&objAudioMediaDescriptor));
+    SdpMedia objAudioSdpMedia;
+    objAudioSdpMedia.SetType(SdpMedia::TYPE_AUDIO);
+    objAudioSdpMedia.SetPort(12345);
+    ON_CALL(objAudioMediaDescriptor, GetMediaDescriptionEx)
+            .WillByDefault(Return(&objAudioSdpMedia));
+
+    // Setup Video Media for remote SDP
+    MockIMedia objVideoMedia;
+    lstIMedia.Append(&objVideoMedia);
+    MockIMediaDescriptor objVideoMediaDescriptor;
+    ON_CALL(objVideoMedia, GetMediaDescriptor).WillByDefault(Return(&objVideoMediaDescriptor));
+    SdpMedia objVideoSdpMedia;
+    objVideoSdpMedia.SetType(SdpMedia::TYPE_VIDEO);
+    objVideoSdpMedia.SetPort(54321);
+    ON_CALL(objVideoMediaDescriptor, GetMediaDescriptionEx)
+            .WillByDefault(Return(&objVideoSdpMedia));
+
+    ON_CALL(*piSession, GetMedia).WillByDefault(Return(lstIMedia));
+
+    // Action: Call with bCheckRemote = IMS_TRUE.
+    CallType eCallType =
+            objMessageUtils.GetCallTypeFromSdp(piSession, IMS_FALSE, IMS_TRUE, IMS_FALSE);
+
+    EXPECT_EQ(eCallType, CallType::VT);
 }
 
 TEST_F(MessageUtilsTest, GetRemotePortFromSdpReturnsCorrectPort)

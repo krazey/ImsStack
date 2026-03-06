@@ -26,6 +26,7 @@ using ::testing::AnyNumber;
 using ::testing::Invoke;
 using ::testing::Return;
 using ::testing::ReturnRoundRobin;
+using ::testing::StrEq;
 using ::testing::Unused;
 
 namespace android
@@ -190,6 +191,24 @@ TEST_F(SipConfigTest, GetTimerValue)
     EXPECT_EQ(objSipConfig.GetTimerValueT1(), nT1);
     // T2 value
     EXPECT_EQ(objSipConfig.GetTimerValueT2(), nT2);
+}
+
+TEST_F(SipConfigTest, GetMaxAllowedNetworkMtu)
+{
+    SipConfig objSipConfig(IMS_SLOT_0);
+
+    // default value
+    EXPECT_EQ(objSipConfig.GetMaxAllowedNetworkMtu(), -1);
+
+    IMS_SINT32 nMaxMtu = 1200;
+
+    ON_CALL(m_pConfigService->GetMockCarrierConfig(),
+            GetInt(StrEq(CarrierConfig::Ims::KEY_MAX_ALLOWED_NETWORK_MTU_INT), _))
+            .WillByDefault(Return(nMaxMtu));
+
+    objSipConfig.Init();
+
+    EXPECT_EQ(objSipConfig.GetMaxAllowedNetworkMtu(), nMaxMtu);
 }
 
 TEST_F(SipConfigTest, Update)

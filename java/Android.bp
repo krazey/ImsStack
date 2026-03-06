@@ -49,10 +49,13 @@ android_library {
     static_libs: [
         "androidx.annotation_annotation",
         "androidx.appcompat_appcompat",
-        "PixelImsMediaFramework",
+        "ImsMediaFramework",
         "imsstack-prebuilt",
         "libphonenumber",
-    ],
+    ] + select(soong_config_variable("imsstack_namespace", "use_carrier_config_ext"), {
+        "true": ["imsstack-carrier-config-ext"],
+        default: [],
+    }),
     libs: [
         "framework-annotations-lib",
         "ims-common",

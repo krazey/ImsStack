@@ -100,7 +100,6 @@ PUBLIC GLOBAL IMS_BOOL EpsFallbackTrigger::ShouldTriggerByReasonInfo(
 PUBLIC GLOBAL IMS_BOOL EpsFallbackTrigger::ShouldTriggerByWatchdogTimer(
         IN IMtcCallContext& objContext)
 {
-    // Start only if Teps_fb_watchdog > 0 by Verizon's requirement
     return objContext.GetService().IsNr() && IsEpsFbAvailable(objContext) &&
             objContext.GetConfigurationProxy().GetInt(
                     ConfigVoice::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT) > 0;

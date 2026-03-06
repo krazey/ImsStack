@@ -13,33 +13,20 @@
 // limitations under the License.
 
 package {
-    default_team: "trendy_team_pmw_telephony",
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
 cc_test {
-    name: "ImsStackNativeJniTests",
+    name: "ImsStackNativeEnablerMtcTests",
     defaults: [
-        "imsstack_native_test_defaults",
+        "imsstack_native_test_enabler_defaults",
     ],
     srcs: [
         "**/*.cpp",
     ],
     header_libs: [
-        "libimsstack_config_headers",
-        "libimsstack_enabler_headers",
-        "libimsstack_platform_headers",
-        "libimsstack_platform_os_android_system-intf_headers",
         "libimsstack_test_enabler_headers",
-        "libimsstack_test_platform_headers",
-        "libpixelimsmedia_config_headers",
+        "libimsstack_test_enabler_include_headers",
     ],
-    static_libs: [
-        "libimsstack-jni",
-        "libimsstack-platform",
-        "libimsstack-enabler",
-        "libpixelimsmedia_config",
-    ],
-
-    test_config: "ImsStackNativeJniTests.xml",
+    test_config: "ImsStackNativeEnablerMtcTests.xml",
 }

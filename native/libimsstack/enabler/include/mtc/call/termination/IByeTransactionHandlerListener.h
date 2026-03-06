@@ -19,10 +19,22 @@
 
 class ByeTransactionHandler;
 
+/**
+ * @brief Interface for listening to the completion of a BYE transaction.
+ *
+ * This interface defines a callback to be notified when a BYE transaction, handled by
+ * a ByeTransactionHandler, has finished its execution.
+ */
 class IByeTransactionHandlerListener
 {
 public:
     virtual ~IByeTransactionHandlerListener() = default;
+
+    /**
+     * @brief Notifies that the BYE transaction has completed.
+     *
+     * @param pHandler The ByeTransactionHandler instance that processed the transaction.
+     */
     virtual void OnByeTransactionCompleted(IN ByeTransactionHandler* pHandler) = 0;
 };
 

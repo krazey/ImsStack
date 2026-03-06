@@ -69,7 +69,7 @@ cc_library_static {
         "system/libbase/include",
     ],
     header_libs: [
-        "libpixelimsmedia_config_headers",
+        "libimsmedia_config_headers",
         "libimsstack_config_headers",
         "libimsstack_enabler_headers",
         "libimsstack_main_headers",

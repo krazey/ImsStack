@@ -13,7 +13,6 @@
 // limitations under the License.
 
 package {
-    default_team: "trendy_team_pmw_telephony",
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
@@ -63,7 +62,7 @@ cc_test {
         "libimsstack_platform_headers",
         "libimsstack_platform_os_android_system-intf_headers",
         "libimsstack_protocol_headers",
-        "libpixelimsmedia_config_headers",
+        "libimsmedia_config_headers",
     ] + [
         "libimsstack_test_config_headers",
         "libimsstack_test_enabler_headers",
@@ -79,7 +78,7 @@ cc_test {
         "libimsstack-main",
         "libimsstack-platform",
         "libimsstack-protocol",
-        "libpixelimsmedia_config",
+        "libimsmedia_config",
     ],
 
     test_config: "ImsStackNativeTests.xml",

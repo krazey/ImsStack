@@ -40,6 +40,7 @@
 #include "media/MtcMediaUtil.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
+#include "utility/CallTypeUtil.h"
 #include "utility/IMessageUtils.h"
 #include <vector>
 
@@ -534,12 +535,11 @@ PUBLIC VIRTUAL void MtcMediaManager::AdjustDirectionForAutoOffer(
     MediaInfo objMediaInfo = GetMediaInfo(objISession);
     objMediaInfo.eAudioDirection = eNewDirection;
 
-    if (eCallType == CallType::VT || eCallType == CallType::VIDEO_RTT)
+    if (CallTypeUtil::IsVideoCall(eCallType))
     {
         objMediaInfo.eVideoDirection = eNewDirection;
     }
-
-    if (eCallType == CallType::RTT || eCallType == CallType::VIDEO_RTT)
+    if (CallTypeUtil::IsRttCall(eCallType))
     {
         objMediaInfo.eTextDirection = eNewDirection;
     }

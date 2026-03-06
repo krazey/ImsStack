@@ -13,40 +13,19 @@
 // limitations under the License.
 
 package {
-    default_team: "trendy_team_pmw_telephony",
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-// Do not add additional include paths with three depths.
-cc_library_headers {
-    name: "libimsstack_test_platform_headers",
-    export_include_dirs: [
-        "include",
-        "include/os",
-        "interface",
-    ],
-}
-
 cc_test {
-    name: "ImsStackNativePlatformTests",
+    name: "ImsStackNativeEnablerMediaTests",
     defaults: [
-        "imsstack_native_test_defaults",
+        "imsstack_native_test_enabler_defaults",
     ],
     srcs: [
         "**/*.cpp",
     ],
-    local_include_dirs: [
-        "include",
-        "include/os",
-        "interface",
-    ],
     header_libs: [
-        "libimsstack_platform_headers",
-        "libimsstack_platform_os_android_system-intf_headers",
+        "libimsstack_test_enabler_include_headers",
     ],
-    static_libs: [
-        "libimsstack-platform",
-    ],
-
-    test_config: "ImsStackNativePlatformTests.xml",
+    test_config: "ImsStackNativeEnablerMediaTests.xml",
 }

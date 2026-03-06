@@ -82,6 +82,7 @@ public:
     inline const AString& GetTagPrefix() const { return m_strTagPrefix; }
     inline IMS_SINT32 GetTcpCriterionLength() const { return m_nTcpCriterionLength; }
     inline IMS_SINT32 GetTransportType() const { return m_nTransportType; }
+    inline IMS_SINT32 GetMaxAllowedNetworkMtu() const { return m_nMaxAllowedNetworkMtu; }
     IMS_SINT32 GetTimerValueT1() const;
     IMS_SINT32 GetTimerValueT2() const;
     inline IMS_SINT32 GetTimerValue100Trying() const { return m_nTimerValue100Trying; }
@@ -273,6 +274,7 @@ private:
     // SIP listen channel - default port
     IMS_SINT32 m_nListenChannel;
     IMS_SINT32 m_nTransportType;
+    IMS_SINT32 m_nMaxAllowedNetworkMtu;
 
     // Timer to send 100 Trying response (milli-seconds)
     IMS_SINT32 m_nTimerValue100Trying;

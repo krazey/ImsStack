@@ -350,7 +350,7 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutControlledByNetworkContext
     ON_CALL(objMtcService, IsNr).WillByDefault(Return(IMS_FALSE));
 
     SetTcallTimerConfig(
-            ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_AFTER_CSFB_IF_AVAILBLE);
+            ConfigVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_AFTER_CSFB_IF_AVAILABLE);
 
     ON_CALL(objCallContext, IsCsfbAvailable).WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objAosConnector, ReinitiateRegistration(REGISTRATION_THROTTLING_TIME_SECONDS));

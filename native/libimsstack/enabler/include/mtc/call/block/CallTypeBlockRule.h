@@ -43,7 +43,6 @@ private:
     static IMS_BOOL HasVideoRttSdp(IN IMS_SINT32 videoPort, IN IMS_SINT32 textPort);
     static IMS_BOOL HasVideoCall(IN const ImsList<IMtcCall*>& lstCalls);
     static IMS_BOOL HasRttCall(IN const ImsList<IMtcCall*>& lstCalls);
-    static IMS_BOOL IsVideoCall(IN CallType eCallType);
 
     IMtcCallContext& m_objContext;
     MtcConfigurationProxy& m_objConfiguration;

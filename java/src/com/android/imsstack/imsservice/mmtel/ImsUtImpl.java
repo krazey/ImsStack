@@ -39,7 +39,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public final class ImsUtImpl extends ImsUtImplBase {
-    private static final boolean DBG = ImsLog.isDebuggable();
+    private static boolean DBG = ImsLog.isDebuggable();
 
     private final IBaseContext mContext;
     @VisibleForTesting

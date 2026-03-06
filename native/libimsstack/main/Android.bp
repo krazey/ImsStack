@@ -13,18 +13,29 @@
 // limitations under the License.
 
 package {
-    default_team: "trendy_team_pmw_telephony",
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-cc_test {
-    name: "ImsStackNativeProtocolSipTests",
+cc_library_headers {
+    name: "libimsstack_main_headers",
+    export_include_dirs: [
+        "include",
+    ],
+}
+
+cc_library_static {
+    name: "libimsstack-main",
     defaults: [
-        "imsstack_native_test_protocol_defaults",
+        "imsstack_native_defaults",
     ],
     srcs: [
         "**/*.cpp",
     ],
-
-    test_config: "ImsStackNativeProtocolSipTests.xml",
+    header_libs: [
+        "libimsstack_config_headers",
+        "libimsstack_enabler_loader_headers",
+        "libimsstack_engine_headers",
+        "libimsstack_main_headers",
+        "libimsstack_platform_headers",
+    ],
 }

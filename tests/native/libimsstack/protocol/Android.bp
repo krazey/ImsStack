@@ -13,67 +13,39 @@
 // limitations under the License.
 
 package {
-    default_team: "trendy_team_pmw_telephony",
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-// Do not add additional include paths with three depths.
 cc_library_headers {
-    name: "libimsstack_test_config_headers",
+    name: "libimsstack_test_protocol_headers",
     export_include_dirs: [
-        "interface",
-        "interface/common",
+        "interface/xml",
     ],
 }
 
 cc_defaults {
-    name: "imsstack_native_test_config_defaults",
+    name: "imsstack_native_test_protocol_defaults",
     defaults: [
         "imsstack_native_test_defaults",
     ],
     header_libs: [
-        "libimsstack_config_headers",
         "libimsstack_platform_headers",
-        "libimsstack_test_platform_headers",
+        "libimsstack_protocol_headers",
     ],
     static_libs: [
-        "libimsstack-config",
         "libimsstack-platform",
-    ],
-}
-
-cc_library_static {
-    name: "libimsstack-test-config",
-    defaults: [
-        "imsstack_native_test_config_defaults",
-    ],
-    srcs: [
-        "common/TestAppConfig.cpp",
-    ],
-    local_include_dirs: [
-        "interface",
-        "interface/common",
+        "libimsstack-protocol",
     ],
 }
 
 cc_test {
-    name: "ImsStackNativeConfigTests",
+    name: "ImsStackNativeProtocolTests",
     defaults: [
-        "imsstack_native_test_config_defaults",
+        "imsstack_native_test_protocol_defaults",
     ],
     srcs: [
         "**/*.cpp",
     ],
-    exclude_srcs: [
-        "common/TestAppConfig.cpp",
-    ],
-    local_include_dirs: [
-        "interface",
-        "interface/common",
-    ],
-    static_libs: [
-        "libimsstack-test-config",
-    ],
 
-    test_config: "ImsStackNativeConfigTests.xml",
+    test_config: "ImsStackNativeProtocolTests.xml",
 }

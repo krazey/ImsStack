@@ -1,0 +1,78 @@
+// Copyright (C) 2022 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+// Do not add additional include paths with three depths.
+cc_library_headers {
+    name: "libimsstack_test_config_headers",
+    export_include_dirs: [
+        "interface",
+        "interface/common",
+    ],
+}
+
+cc_defaults {
+    name: "imsstack_native_test_config_defaults",
+    defaults: [
+        "imsstack_native_test_defaults",
+    ],
+    header_libs: [
+        "libimsstack_config_headers",
+        "libimsstack_platform_headers",
+        "libimsstack_test_platform_headers",
+    ],
+    static_libs: [
+        "libimsstack-config",
+        "libimsstack-platform",
+    ],
+}
+
+cc_library_static {
+    name: "libimsstack-test-config",
+    defaults: [
+        "imsstack_native_test_config_defaults",
+    ],
+    srcs: [
+        "common/TestAppConfig.cpp",
+    ],
+    local_include_dirs: [
+        "interface",
+        "interface/common",
+    ],
+}
+
+cc_test {
+    name: "ImsStackNativeConfigTests",
+    defaults: [
+        "imsstack_native_test_config_defaults",
+    ],
+    srcs: [
+        "**/*.cpp",
+    ],
+    exclude_srcs: [
+        "common/TestAppConfig.cpp",
+    ],
+    local_include_dirs: [
+        "interface",
+        "interface/common",
+    ],
+    static_libs: [
+        "libimsstack-test-config",
+    ],
+
+    test_config: "ImsStackNativeConfigTests.xml",
+}

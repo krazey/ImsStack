@@ -119,7 +119,7 @@ protected:
         ON_CALL(objMessageUtils, AddValueIfNotExists(&objMessage, _, _, _))
                 .WillByDefault(Return(IMS_SUCCESS));
 
-        ON_CALL(objContext, GetAosConnector(_)).WillByDefault(Return(&objAosConnector));
+        ON_CALL(objMtcService, GetAosConnector).WillByDefault(Return(&objAosConnector));
 
         ON_CALL(objSession, GetNextRequest).WillByDefault(Return(&objMessage));
         ON_CALL(objSession, GetNextResponse).WillByDefault(Return(&objMessage));
@@ -1174,12 +1174,12 @@ TEST_F(MtcSessionTest, HandleStartRequestUpdatesCallTypeIfVideoTextInRegAndVideo
 
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
-            .WillByDefault(Return(CallType::VT));
+            .WillByDefault(Return(CallType::VIDEO_RTT));
 
     pMtcSession->HandleRequest(eType, objMessage);
 
     EXPECT_EQ(CallType::UNKNOWN, pMtcSession->GetPreviousCallType());
-    EXPECT_EQ(CallType::VT, pMtcSession->GetCallType());
+    EXPECT_EQ(CallType::VIDEO_RTT, pMtcSession->GetCallType());
 }
 
 TEST_F(MtcSessionTest, HandleStartRequestUpdatesCallTypeIfVideoTextInRegAndVideoTextNotInMessage)
@@ -1190,6 +1190,22 @@ TEST_F(MtcSessionTest, HandleStartRequestUpdatesCallTypeIfVideoTextInRegAndVideo
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
             .WillByDefault(Return(CallType::VOIP));
+
+    pMtcSession->HandleRequest(eType, objMessage);
+
+    EXPECT_EQ(CallType::UNKNOWN, pMtcSession->GetPreviousCallType());
+    EXPECT_EQ(CallType::VOIP, pMtcSession->GetCallType());
+}
+
+TEST_F(MtcSessionTest, HandleStartRequestUpdatesCallTypeIfNoVideoTextInRegAndVideoTextInMessage)
+{
+    CreateMtcSession(CallType::UNKNOWN, PeerType::MT, IMS_TRUE, IMS_FALSE, IMS_FALSE);
+    RequestType eType = RequestType::START;
+
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
+            .WillByDefault(Return(CallType::VIDEO_RTT));
+    ON_CALL(objMessageUtils, IsFocusConf(&objMessage)).WillByDefault(Return(IMS_FALSE));
 
     pMtcSession->HandleRequest(eType, objMessage);
 

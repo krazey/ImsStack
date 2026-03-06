@@ -58,7 +58,6 @@ UceXmlDocumentHelperThread::UceXmlDocumentHelperThread(
 
 PUBLIC VIRTUAL UceXmlDocumentHelperThread::~UceXmlDocumentHelperThread()
 {
-    //---------------------------------------------------------------------------------------------
     Terminate();
     IMS_TRACE_MEM("UCE_MEM", "UCE_F : UceXmlDocumentHelperThread = %" PFLS_u,
             sizeof(UceXmlDocumentHelperThread), 0, 0);
@@ -102,7 +101,6 @@ IMS_BOOL UceXmlDocumentHelperThread::Start(IN const AString& strName, IN IMS_UIN
 PUBLIC
 void UceXmlDocumentHelperThread::Terminate()
 {
-    //---------------------------------------------------------------------------------------------
     if (m_piThread == IMS_NULL)
     {
         return;
@@ -128,7 +126,6 @@ void UceXmlDocumentHelperThread::SendMsg(
 PUBLIC VIRTUAL IMS_RESULT UceXmlDocumentHelperThread::XmlTransaction_NotifyParsingCompleted(
         IN IXmlTransaction* piXMLTransaction)
 {
-    //---------------------------------------------------------------------------------------------
     IMS_RESULT eResult = IMS_FAILURE;
     if (m_objTransactionQueue.IsEmpty())
     {
@@ -208,20 +205,17 @@ void UceXmlDocumentHelperThread::XmlState_NotifyStateChanged()
 PROTECTED
 IThread* UceXmlDocumentHelperThread::GetThread() const
 {
-    //---------------------------------------------------------------------------------------------
     return m_piThread;
 }
 
 IMS_BOOL UceXmlDocumentHelperThread::OnStart(IN const IMSMSG& objMSG)
 {
-    //---------------------------------------------------------------------------------------------
     IMS_TRACE_I("OnStart:[%d]", objMSG.GetName(), 0, 0);
     return IMS_TRUE;
 }
 
 IMS_BOOL UceXmlDocumentHelperThread::OnTerminate(IN const IMSMSG& objMSG)
 {
-    //---------------------------------------------------------------------------------------------
     IMS_TRACE_I("OnTerminate:[%d]", objMSG.GetName(), 0, 0);
     return IMS_TRUE;
 }
@@ -241,7 +235,6 @@ PRIVATE VIRTUAL IMS_BOOL UceXmlDocumentHelperThread::Runnable_Run(IN IMSMSG& obj
 
 PRIVATE IMS_BOOL UceXmlDocumentHelperThread::Initialize()
 {
-    //---------------------------------------------------------------------------------------------
     IMS_TRACE_D("Initialize", 0, 0, 0);
     m_objMessageMap.Clear();
     m_objMessageMap.Add(IMS_MSG_START,
@@ -260,7 +253,6 @@ PRIVATE IMS_BOOL UceXmlDocumentHelperThread::Initialize()
 
 VIRTUAL void UceXmlDocumentHelperThread::Uninitialize()
 {
-    //---------------------------------------------------------------------------------------------
     IMS_TRACE_D("Uninitialize", 0, 0, 0);
     while (!m_objTransactionQueue.IsEmpty())
     {
@@ -301,7 +293,6 @@ VIRTUAL void UceXmlDocumentHelperThread::Uninitialize()
 IMS_RESULT UceXmlDocumentHelperThread::XMLDataTokenization(IN const ByteArray& objBytes)
 {
     IMS_TRACE_D("XMLDataTokenization()", 0, 0, 0);
-    //---------------------------------------------------------------------------------------------
     IXmlTransaction* piXMLTransaction = m_pXMLTransactionProvider->CreateTransaction();
 
     if (piXMLTransaction != IMS_NULL)

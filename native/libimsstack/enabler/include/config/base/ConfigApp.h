@@ -41,8 +41,6 @@ protected:
 
     virtual void UpdateAllForHidden(IN IMS_SINT32 nItem, IN IMS_SINT32 nParam);
     virtual void UpdateAllForDm(IN IMS_SINT32 nItem, IN IMS_SINT32 nParam);
-    virtual void UpdateItemForPst(IN IMS_UINT32 nItem, IN IMS_UINT32 nValue);
-    virtual void UpdateItemForSdm(IN IMS_UINT32 nItem, IN IMS_UINT32 nValue);
 
     IMS_BOOL UpdateSipConifgV(
             IN IMS_SINT32 nCpi, IN const AString& strServiceId = AString::ConstNull());

@@ -162,6 +162,7 @@ protected:
     void NotifyDeregistered();
 
     IMS_BOOL UpdateCallingNumberVerification();
+    IMS_BOOL UpdateNetworkFeatureRtt();
     IMS_BOOL IsPdnReconnectWithDelayRequiredOnWfcSetupFailure();
 
     void ProcessStopForPdnReconnectWithAwt();

@@ -13,20 +13,28 @@
 // limitations under the License.
 
 package {
-    default_team: "trendy_team_pmw_telephony",
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-cc_test {
-    name: "ImsStackNativeEnablerMediaTests",
+cc_library_shared {
+    name: "libimsstack",
+    system_ext_specific: true,
     defaults: [
-        "imsstack_native_test_enabler_defaults",
+        "imsstack_native_defaults",
+        "imsstack_shared_libs_defaults",
+        "imsstack_tls_libs_defaults",
     ],
     srcs: [
-        "**/*.cpp",
+        "libimsstack.cpp",
     ],
-    header_libs: [
-        "libimsstack_test_enabler_include_headers",
+    static_libs: [
+        "libimsmedia_config",
+        "libimsstack-platform",
+        "libimsstack-protocol",
+        "libimsstack-config",
+        "libimsstack-engine",
+        "libimsstack-enabler",
+        "libimsstack-main",
+        "libimsstack-jni",
     ],
-    test_config: "ImsStackNativeEnablerMediaTests.xml",
 }

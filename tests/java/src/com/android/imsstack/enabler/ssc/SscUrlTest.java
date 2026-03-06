@@ -133,6 +133,21 @@ public class SscUrlTest {
     }
 
     @Test
+    public void getQueryUri_entireXml_withRootElement() {
+        String expectedUri = "/simservs.ngn.etsi.org/users/" + mXui + "/simservs.xml"
+                + "/~~/simservs";
+
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.ImsSs.KEY_UT_USE_ROOT_ELEMENT_WHEN_DOC_QUERY_BOOL))
+                .thenReturn(true);
+
+        SscServiceQueryData queryData = getQueryData(ESsType.NONE);
+        String queryUri = mSscUrl.getQueryUri(queryData, mXui);
+
+        assertEquals(expectedUri, queryUri);
+    }
+
+    @Test
     public void getQueryUri_cw() {
         String expectedUri = "/simservs.ngn.etsi.org/users/" + mXui + "/simservs.xml"
                 + "/~~/simservs/communication-waiting";

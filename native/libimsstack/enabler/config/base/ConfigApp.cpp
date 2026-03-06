@@ -188,67 +188,6 @@ PROTECTED VIRTUAL void ConfigApp::UpdateAllForDm(IN IMS_SINT32 nItem, IN IMS_SIN
     }
 }
 
-PROTECTED VIRTUAL void ConfigApp::UpdateItemForPst(IN IMS_UINT32 nItem, IN IMS_UINT32 nValue)
-{
-    IMS_TRACE_I("UpdateItemForPst :: item=%d, value=%d", nItem, nValue, 0);
-
-    switch (nItem)
-    {
-        case ImsConfig::PST_I_PCSCF_ADDRESS:
-            UpdateSubscriberConfig(IConfigurable::CP_I_PCSCF_ADDRESS_0);
-            break;
-        case ImsConfig::PST_I_PCSCF_PORT:
-            UpdateSubscriberConfig(IConfigurable::CP_I_PCSCF_PORT_0);
-            break;
-        case ImsConfig::PST_I_TV_T1:
-            UpdateSipConifgV(IConfigurable::CP_I_TIMER_T1);
-            break;
-        case ImsConfig::PST_I_TV_T2:
-            UpdateSipConifgV(IConfigurable::CP_I_TIMER_T2);
-            break;
-        case ImsConfig::PST_I_TV_TF:
-            UpdateSipConifgV(IConfigurable::CP_I_TIMER_F);
-            break;
-        case ImsConfig::PST_I_SESSION_TIMER:
-            UpdateSipConifgV(IConfigurable::CP_I_SESSION_EXPIRES);
-            break;
-        case ImsConfig::PST_I_MIN_SE:
-            UpdateSipConifgV(IConfigurable::CP_I_SESSION_MINSE);
-            break;
-        default:
-            break;
-    }
-}
-
-PROTECTED VIRTUAL void ConfigApp::UpdateItemForSdm(IN IMS_UINT32 nItem, IN IMS_UINT32 nValue)
-{
-    IMS_TRACE_I("UpdateItemForSdm :: item=%d, value=%d", nItem, nValue, 0);
-
-    switch (nItem)
-    {
-        case ImsConfig::SDM_I_HOME_DOMAIN_NAME:
-            UpdateSubscriberConfig(IConfigurable::CP_I_HOME_DOMAIN_NAME);
-            break;
-        case ImsConfig::SDM_I_TV_T1:
-            UpdateSipConifgV(IConfigurable::CP_I_TIMER_T1);
-            break;
-        case ImsConfig::SDM_I_TV_T2:
-            UpdateSipConifgV(IConfigurable::CP_I_TIMER_T2);
-            break;
-        case ImsConfig::SDM_I_TV_TF:
-            UpdateSipConifgV(IConfigurable::CP_I_TIMER_F);
-            break;
-        case ImsConfig::SDM_I_SIP_SESSION_TIMER:
-            UpdateSipConifgV(IConfigurable::CP_I_SESSION_EXPIRES);
-            break;
-        case ImsConfig::SDM_I_MIN_SE:
-            UpdateSipConifgV(IConfigurable::CP_I_SESSION_MINSE);
-            break;
-        default:
-            break;
-    }
-}
-
 PROTECTED
 IMS_BOOL ConfigApp::UpdateSipConifgV(
         IN IMS_SINT32 nCpi, IN const AString& /*strServiceId = AString::ConstNull()*/)

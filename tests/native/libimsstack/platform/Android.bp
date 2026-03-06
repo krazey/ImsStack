@@ -16,26 +16,36 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
+// Do not add additional include paths with three depths.
 cc_library_headers {
-    name: "libimsstack_main_headers",
+    name: "libimsstack_test_platform_headers",
     export_include_dirs: [
         "include",
+        "include/os",
+        "interface",
     ],
 }
 
-cc_library_static {
-    name:"libimsstack-main",
+cc_test {
+    name: "ImsStackNativePlatformTests",
     defaults: [
-        "imsstack_native_defaults",
+        "imsstack_native_test_defaults",
     ],
     srcs: [
         "**/*.cpp",
     ],
-    header_libs: [
-        "libimsstack_config_headers",
-        "libimsstack_enabler_loader_headers",
-        "libimsstack_engine_headers",
-        "libimsstack_main_headers",
-        "libimsstack_platform_headers",
+    local_include_dirs: [
+        "include",
+        "include/os",
+        "interface",
     ],
+    header_libs: [
+        "libimsstack_platform_headers",
+        "libimsstack_platform_os_android_system-intf_headers",
+    ],
+    static_libs: [
+        "libimsstack-platform",
+    ],
+
+    test_config: "ImsStackNativePlatformTests.xml",
 }

@@ -13,23 +13,17 @@
 // limitations under the License.
 
 package {
-    default_team: "trendy_team_pmw_telephony",
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
 cc_test {
-    name: "ImsStackNativeEnablerAosTests",
+    name: "ImsStackNativeProtocolSdpTests",
     defaults: [
-        "imsstack_native_test_enabler_defaults",
+        "imsstack_native_test_protocol_defaults",
     ],
     srcs: [
         "**/*.cpp",
     ],
-    header_libs: [
-        "libimsstack_test_enabler_include_headers",
-    ],
-    cflags: [
-        "-Wno-unused-parameter",
-    ],
-    test_config: "ImsStackNativeEnablerAosTests.xml",
+
+    test_config: "ImsStackNativeProtocolSdpTests.xml",
 }

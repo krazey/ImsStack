@@ -272,7 +272,7 @@ public:
             IN const MtcConfigurationProxy& objProxy, IN IMS_UINT32 eAosRegMode)
     {
         ImsVector<AString> lstConfig = objProxy.GetStringArray(
-                ConfigEmergency::KEY_P_PREFERRED_IDENTITY_INFO_HEADER_IN_INVITE_STRING_ARRAY);
+                ConfigEmergency::KEY_P_PREFERRED_IDENTITY_HEADER_IN_INVITE_STRING_ARRAY);
         switch (eAosRegMode)
         {
             case IImsAosInfo::REG_MODE_NORMAL:

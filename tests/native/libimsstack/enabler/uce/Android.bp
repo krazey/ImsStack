@@ -16,25 +16,21 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-cc_library_shared {
-    name: "libimsstack",
-    system_ext_specific: true,
+cc_test {
+    name: "ImsStackNativeEnablerUceTests",
     defaults: [
-        "imsstack_native_defaults",
-        "imsstack_shared_libs_defaults",
-        "imsstack_tls_libs_defaults",
+        "imsstack_native_test_enabler_defaults",
     ],
     srcs: [
-        "libimsstack.cpp",
+        "**/*.cpp",
     ],
-    static_libs: [
-        "libpixelimsmedia_config",
-        "libimsstack-platform",
-        "libimsstack-protocol",
-        "libimsstack-config",
-        "libimsstack-engine",
-        "libimsstack-enabler",
-        "libimsstack-main",
-        "libimsstack-jni",
+    cflags: [
+        "-Wno-unused-parameter",
     ],
+    header_libs: [
+        "libimsstack_test_enabler_headers",
+        "libimsstack_test_engine_headers",
+        "libimsstack_test_protocol_headers",
+    ],
+    test_config: "ImsStackNativeEnablerUceTests.xml",
 }

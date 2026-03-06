@@ -13,25 +13,38 @@
 // limitations under the License.
 
 package {
-    default_team: "trendy_team_pmw_telephony",
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-cc_test {
-    name: "ImsStackNativeEnablerUceTests",
+android_test {
+    name: "ImsStackJavaTests",
+    certificate: "platform",
+    platform_apis: true,
+    manifest: "AndroidManifest.xml",
+
     defaults: [
-        "imsstack_native_test_enabler_defaults",
+        "imsstack_mockito_target_extended_defaults",
     ],
     srcs: [
-        "**/*.cpp",
+        "src/**/*.java",
     ],
-    cflags: [
-        "-Wno-unused-parameter",
+    libs: [
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
+        "android.test.runner.stubs.system",
+        "ims-common",
+        "telephony-common",
     ],
-    header_libs: [
-        "libimsstack_test_enabler_headers",
-        "libimsstack_test_engine_headers",
-        "libimsstack_test_protocol_headers",
+    static_libs: [
+        "androidx.test.core",
+        "androidx.test.rules",
+        "frameworks-base-testutils",
+        "imsstack",
+        "junit",
+        "platform-test-annotations",
+        "testables",
+        "truth",
     ],
-    test_config: "ImsStackNativeEnablerUceTests.xml",
+    instrumentation_for: "ImsStack",
+    test_suites: ["general-tests"],
 }

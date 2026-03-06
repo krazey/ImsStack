@@ -125,10 +125,8 @@ private:
             IN std::optional<IMS_BOOL> bContainsMediaInSdp) const;
 
     void HandleInConference(IN const IMessage& objMessage);
-    CallType RestrictCallTypeByRegisteredFeature(IN const CallType& eCallType) const;
     CallType GetCallTypeForOfferlessInvite() const;
     CallType GetCallTypeForOfferlessReInvite() const;
-    CallType GetCallTypeByRegisteredFeature() const;
     CallType GetCallTypeByHistory() const;
     CallType MayGetFirstCallType() const;
     ResultSetSdp SetSdpToSend(IN IMS_BOOL bAllowReOffer,

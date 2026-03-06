@@ -1,5 +1,5 @@
 function coverageon() {
-    IMS_STACK_PATH=vendor/google/services/ImsStack
+    IMS_STACK_PATH=packages/modules/ImsStack
 
     export CLANG_COVERAGE=true
     export NATIVE_COVERAGE_PATHS="$IMS_STACK_PATH/native/libimsstack $IMS_STACK_PATH/tests/native/libimsstack"
@@ -17,7 +17,7 @@ function coveragegen() {
     if [ ! -e $IMS_STACK_BIN_PATH ]; then
         IMS_STACK_BIN_PATH=$OUT/symbols/system_ext/lib/libimsstack.so
     fi
-    IMS_STACK_PATH=vendor/google/services/ImsStack
+    IMS_STACK_PATH=packages/modules/ImsStack
     TEST_MODULE_PATH=$IMS_STACK_PATH/tests/native
 
     COVERAGE_OUTPUT_DEVICE_PATH=/data/misc/trace

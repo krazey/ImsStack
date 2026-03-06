@@ -345,9 +345,8 @@ IMS_BOOL SdpParameter::Create(IN const SdpDescription& objDescription)
     }
     else
     {
-        m_abAttributeContains[ATTR_SETUP] = IMS_TRUE;
         Sdp::ParseAttributeSetup(pSetup->GetAttributeValue(), m_nAttrSetup);
-
+        m_abAttributeContains[ATTR_SETUP] = (m_nAttrSetup != Sdp::SETUP_NONE);
         RemoveAttribute(SdpAttribute::SETUP);
     }
 
@@ -361,9 +360,8 @@ IMS_BOOL SdpParameter::Create(IN const SdpDescription& objDescription)
     }
     else
     {
-        m_abAttributeContains[ATTR_CONNECTION] = IMS_TRUE;
         Sdp::ParseAttributeConnection(pConnection->GetAttributeValue(), m_nAttrConnection);
-
+        m_abAttributeContains[ATTR_CONNECTION] = (m_nAttrConnection != Sdp::CONNECTION_NONE);
         RemoveAttribute(SdpAttribute::CONNECTION);
     }
 #endif  // __IMS_SETUP_CONNECTION__

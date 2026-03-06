@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-TEST_SCRIPT_PATH='vendor/google/services/ImsStack/tests/java/coverage-manual'
+TEST_SCRIPT_PATH='packages/modules/ImsStack/tests/java/coverage-manual'
 
 if [ -z $ANDROID_BUILD_TOP ]; then
   echo "You need to source and lunch before you can use this script"

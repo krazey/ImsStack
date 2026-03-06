@@ -408,6 +408,10 @@ public class SscUtils {
         };
     }
 
+    protected static boolean isHttpPutEvent(int event) {
+        return event >= SscConstant.EVENT_SSC_UPDATE_CB && event <= SscConstant.EVENT_SSC_INSERT_CF;
+    }
+
     protected long getCurrentUtcTimeEpochMs() {
         return Instant.now().toEpochMilli();
     }

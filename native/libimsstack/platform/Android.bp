@@ -18,34 +18,61 @@ package {
 
 // Do not add additional include paths with three depths.
 cc_library_headers {
-    name: "libimsstack_config_headers",
+    name: "libimsstack_platform_headers",
     export_include_dirs: [
         "interface",
-        "interface/common",
+        "interface/base",
+        "interface/util",
+    ] + [
+        // AOS: pthread / mutex
+        "include/os",
+        "include/os/android",
+    ],
+}
+
+// jni: adaptation of system interface.
+cc_library_headers {
+    name: "libimsstack_platform_os_android_system-intf_headers",
+    export_include_dirs: [
+        "include/os/android/system-intf",
     ],
 }
 
 cc_library_static {
-    name:"libimsstack-config",
+    name: "libimsstack-platform",
     defaults: [
         "imsstack_native_defaults",
+        "imsstack_tls_libs_defaults",
     ],
     srcs: [
         "**/*.cpp",
     ],
+    exclude_srcs: [
+        "base/test/*.cpp",
+    ],
     header_libs: [
-        "libimsstack_config_headers",
         "libimsstack_platform_headers",
+    ],
+    include_dirs: [
+        "system/libbase/include",
+        "external/zlib",
     ],
     local_include_dirs: [
         "include",
-        "include/assets",
-        "include/common",
+        "include/os",
+    ] + [
+        // Specifically, OS level include-path will be added.
+        "include/os/android",
     ],
     // For unit-test
     export_include_dirs: [
         "include",
-        "include/assets",
-        "include/common",
+        "include/os",
+    ] + [
+        // Specifically, OS level include-path will be added.
+        "include/os/android",
+    ],
+    shared_libs: [
+        "libcutils",
     ],
 }

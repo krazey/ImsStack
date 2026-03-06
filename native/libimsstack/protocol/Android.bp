@@ -28,7 +28,7 @@ cc_library_headers {
 }
 
 cc_library_static {
-    name:"libimsstack-protocol",
+    name: "libimsstack-protocol",
     defaults: [
         "imsstack_native_defaults",
     ],
@@ -55,5 +55,5 @@ cc_library_static {
     ],
     shared_libs: [
         "libxml2",
-    ]
+    ],
 }

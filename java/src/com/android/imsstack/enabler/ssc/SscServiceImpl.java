@@ -1314,7 +1314,7 @@ public class SscServiceImpl implements IUtInterface {
             SscXmlGov.getInstance(mSlotId).clear();
             SscXmlGov.getInstance(mSlotId).init();
 
-            if (requestData.getPreconditionFailedCount() > 1) {
+            if (requestData.getPreconditionFailedCount() > 0) {
                 return false;
             }
 
@@ -1362,6 +1362,12 @@ public class SscServiceImpl implements IUtInterface {
             SscData nextRequest = requestData.peakSscData();
             if (nextRequest == null) {
                 return false;
+            }
+
+            // Reset the precondition failure count if 200 OK was received for the previous HTTP PUT
+            // request.
+            if (SscUtils.isHttpPutEvent(previousRequest.getEventNumber())) {
+                requestData.resetPreconditionFailedCount();
             }
 
             processQueueData();

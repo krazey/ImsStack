@@ -30,7 +30,7 @@ enum class EpsFallbackReason
 
     /**
      * EPS fallback was not triggered by the network.
-     * Example: A watchdog timer (e.g., Verizon's) expired.
+     * Example: A watchdog timer expired.
      * No data buffer flush is performed by the modem.
      */
     NO_NETWORK_TRIGGER,

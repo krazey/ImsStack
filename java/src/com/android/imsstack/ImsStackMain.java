@@ -210,6 +210,7 @@ public class ImsStackMain {
                     Log.d(this, "SimState: carrier-config is changed while running.");
                     ServiceCaps.updateServiceCapabilities(context, slotId, subId);
                     ServiceLoader.updateCarrierConfig(slotId);
+                    ServiceLoader.initUserSettings(slotId);
                 }
             } else {
                 ServiceCaps.updateServiceCapabilities(context, slotId, subId);

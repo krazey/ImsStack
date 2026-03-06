@@ -100,7 +100,7 @@ public class ServiceLoader {
         Log.i(this, "Started on slot" + slotId);
 
         Context context = AppContext.getInstance();
-        ImsServiceRegistry.getInstance(slotId).getMmTelFeatureRegistry().initUserSettings();
+        initUserSettings(slotId);
         ImsTestMode.getInstance().init(slotId);
         FeatureConfig.init(slotId);
         SystemInterface.getInstance().start(slotId);
@@ -178,5 +178,15 @@ public class ServiceLoader {
 
             ca.updateCarrierConfig(subId, id);
         }
+    }
+
+    /**
+     * Initializes the user settings for the specified slot.
+     *
+     * @param slotId The slot-id for which user settings are initialized.
+     */
+    public static void initUserSettings(int slotId) {
+        Log.i(ServiceLoader.class, "initUserSettings on slot" + slotId);
+        ImsServiceRegistry.getInstance(slotId).getMmTelFeatureRegistry().initUserSettings();
     }
 }

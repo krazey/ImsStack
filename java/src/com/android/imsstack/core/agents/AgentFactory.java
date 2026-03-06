@@ -332,6 +332,12 @@ public final class AgentFactory {
                 pw.flush();
             }
         }
+
+        pw.println();
+        pw.println("### System Interface");
+        if (mDefaultSystemCallAgent != null) {
+            mDefaultSystemCallAgent.dump(pw);
+        }
     }
 
     private static Collection<IAgent> reverseCollection(Collection<IAgent> c) {
