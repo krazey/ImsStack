@@ -151,6 +151,9 @@ public class CarrierConfigMenuTest {
         mInstrumentation = null;
         mTestAppContext.tearDown();
         mTestAppContext = null;
+        // Make sure that CarrierConfigMenu instances are GC-ed.
+        // android.os.strictmode.InstanceCountViolation expected 2 instances max.
+        Runtime.getRuntime().gc();
     }
 
     @Test
