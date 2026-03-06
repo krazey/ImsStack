@@ -181,11 +181,6 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSmsOverImsAvailableWithoutVoiceCapa
     return m_objAsset.bSmsOverImsAvailableWithoutVoiceCapa;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsAnonymousECallActionSupported() const
-{
-    return m_objAsset.bSupportAnonymousECallAction;
-}
-
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRequiredVolteBlockBySsac() const
 {
     return m_objAsset.bRequiredVolteBlockBySsac;
@@ -623,6 +618,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetUssdMethod() const
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetPreferredIpType() const
 {
     return m_objAsset.nImsPreferredIpType;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetAnonymousECallSupportMode() const
+{
+    return m_objAsset.nAnonymousECallSupportMode;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetEmergencyPreferredIpType() const
@@ -1760,8 +1760,6 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Ims::KEY_SIP_OVER_IPSEC_ENABLED_IN_ROAMING_BOOL);
     m_objAsset.bSmsOverImsAvailableWithoutVoiceCapa = piCc->GetBoolean(
             CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPA_BOOL);
-    m_objAsset.bSupportAnonymousECallAction =
-            piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_SUPPORT_ANONYMOUS_ECALL_ACTION_BOOL);
     m_objAsset.bSupportERegWhenEAttachWithValidSim = piCc->GetBoolean(
             CarrierConfig::ImsEmergency::KEY_SUPPORT_EREG_WHEN_EATTACH_WITH_VALID_SIM_BOOL);
     m_objAsset.bSupportEmergencyReregOnIpcanChange =
@@ -1795,6 +1793,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Ims::KEY_AUTH_FAILURE_RETRY_MAX_CNT_INT);
     m_objAsset.nContactUserInfoPolicyForNonRegMessage =
             piCc->GetInt(CarrierConfig::Ims::KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT);
+    m_objAsset.nAnonymousECallSupportMode =
+            piCc->GetInt(CarrierConfig::ImsEmergency::KEY_ANONYMOUS_ECALL_ACTION_SUPPORT_MODE_INT);
     m_objAsset.nEmcPreferredIpType =
             piCc->GetInt(CarrierConfig::ImsEmergency::KEY_EPDN_PREFERRED_IPTYPE_INT);
     m_objAsset.nEmcRegRetryMaxCnt =

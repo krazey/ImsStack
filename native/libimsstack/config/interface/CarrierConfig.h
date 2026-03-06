@@ -1781,8 +1781,6 @@ public:
          */
         static const IMS_CHAR KEY_STOP_EREG_TIMER_ON_EPDN_CONNECTED_BOOL[];
 
-        static const IMS_CHAR KEY_SUPPORT_ANONYMOUS_ECALL_ACTION_BOOL[];
-
         static const IMS_CHAR KEY_SUPPORT_EREG_WHEN_EATTACH_WITH_VALID_SIM_BOOL[];
 
         /**
@@ -1822,6 +1820,28 @@ public:
          *   {@code false}
          */
         static const IMS_CHAR KEY_USE_REG_RETRY_RULE_FOR_EREG_BOOL[];
+
+        /**
+         * Specifies the operational mode for anonymous emergency call actions triggered by the
+         * network.
+         *
+         * Possible Values:
+         *   {@code 0} : ANONYMOUS_EMC_DISABLED - Anonymous emergency call actions are not
+         *               supported.
+         *   {@code 1} : ANONYMOUS_EMC_ON_ANY_403 - Triggers an anonymous emergency call attempt
+         *               immediately upon receiving any SIP 403 Forbidden error (bypasses XML
+         *               parsing).
+         *   {@code 2} : ANONYMOUS_EMC_XML_ACTION - (Standard) Triggers an anonymous emergency
+         *               call attempt only if SIP 403 contains a valid 'anonymous-emergencycall'
+         *               action.
+         */
+        static const IMS_CHAR KEY_ANONYMOUS_ECALL_ACTION_SUPPORT_MODE_INT[];
+        enum
+        {
+            ANONYMOUS_EMC_DISABLED = 0,
+            ANONYMOUS_EMC_ON_ANY_403 = 1,
+            ANONYMOUS_EMC_XML_ACTION = 2,
+        };
 
         /**
          * Specifies the preferred IP version priority for emergency connection.

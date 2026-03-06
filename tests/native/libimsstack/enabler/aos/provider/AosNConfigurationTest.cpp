@@ -717,10 +717,6 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
                     IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::ImsEmergency::KEY_SUPPORT_ANONYMOUS_ECALL_ACTION_BOOL,
-                    IMS_FALSE))
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::ImsEmergency::KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL,
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
@@ -780,6 +776,9 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Ims::KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT, -1))
             .WillOnce(Return(1));
+    EXPECT_CALL(objCarrierConfig,
+            GetInt(CarrierConfig::ImsEmergency::KEY_ANONYMOUS_ECALL_ACTION_SUPPORT_MODE_INT, -1))
+            .WillOnce(Return(0));
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::ImsEmergency::KEY_EPDN_PREFERRED_IPTYPE_INT, -1))
             .WillOnce(Return(1));
@@ -1071,7 +1070,6 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
     EXPECT_FALSE(m_pAosNConfiguration->IsReregRetryWithChangedCountryOnWifi());
     EXPECT_TRUE(m_pAosNConfiguration->IsSipOverIpsecInRoamingEnabled());
     EXPECT_TRUE(m_pAosNConfiguration->IsSmsOverImsAvailableWithoutVoiceCapability());
-    EXPECT_FALSE(m_pAosNConfiguration->IsAnonymousECallActionSupported());
     EXPECT_FALSE(m_pAosNConfiguration->IsVerstatForRegistrationSupported());
     EXPECT_FALSE(m_pAosNConfiguration->IsVerstatSupportedBasedOnNetworkForReg());
     EXPECT_TRUE(m_pAosNConfiguration->IsUpdateOngoingRegRetryTimerOnImsEstTimerExpiry());
@@ -1089,6 +1087,7 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
 
     EXPECT_EQ(0, m_pAosNConfiguration->GetAuthFailureRetryMaxCnt());
     EXPECT_EQ(1, m_pAosNConfiguration->GetUserInfoPolicyForNonRegisterMessage());
+    EXPECT_EQ(0, m_pAosNConfiguration->GetAnonymousECallSupportMode());
     EXPECT_EQ(1, m_pAosNConfiguration->GetEmergencyPreferredIpType());
     EXPECT_EQ(2, m_pAosNConfiguration->GetEmcRegRetryMaxCnt());
     EXPECT_EQ(3000, m_pAosNConfiguration->GetEmcRegRetryTimerMillis());

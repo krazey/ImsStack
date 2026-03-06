@@ -59,7 +59,6 @@ public:
     IMS_BOOL IsVolteTtySupported() const override;
     IMS_BOOL IsVopsIgnoredForVolteEnabled() const override;
     IMS_BOOL IsSmsOverImsAvailableWithoutVoiceCapability() const override;
-    IMS_BOOL IsAnonymousECallActionSupported() const override;
     IMS_BOOL IsRequiredVolteBlockBySsac() const override;
     IMS_BOOL IsRequiredWfcBlockByAirplaneMode() const override;
     IMS_BOOL IsGeolocationPidfInWfcInitReg() const override;
@@ -141,6 +140,7 @@ public:
     IMS_SINT32 GetRegistrationPreferredAccessTypeFeatureTag() const override;
     IMS_SINT32 GetUssdMethod() const override;
     IMS_SINT32 GetPreferredIpType() const override;
+    IMS_SINT32 GetAnonymousECallSupportMode() const override;
     IMS_SINT32 GetEmergencyPreferredIpType() const override;
     IMS_SINT32 GetEmcRegRetryMaxCnt() const override;
     IMS_SINT32 GetEmcRegRetryTimerMillis() const override;

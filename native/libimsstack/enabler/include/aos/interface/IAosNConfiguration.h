@@ -174,22 +174,6 @@ public:
     virtual IMS_BOOL IsSmsOverImsAvailableWithoutVoiceCapability() const = 0;
 
     /**
-     * @brief Indicates whether the UE supports the anonymous emergency call action.
-     *
-     * If set to true, the UE supports and will check if the network requires an
-     * anonymous emergency call to be made using a specific action (e.g.,
-     * <action>:anonymous-emergencycall) after receiving a 403 Forbidden response to the emergency
-     * registration request. If set to false, the UE does not support or will not check for the
-     * presence of the required action in the 403 Forbidden response.
-     *
-     * @return IMS_BOOL Returns {@code IMS_TRUE} if the anonymous emergency call action is
-     * supported,
-     * {@code IMS_FALSE} otherwise.
-     * @see {@code imsemergency.support_anonymous_ecall_action_bool}
-     */
-    virtual IMS_BOOL IsAnonymousECallActionSupported() const = 0;
-
-    /**
      * @brief Check if VoLTE service block by SSAC is required.
      *
      * @return IMS_TRUE if required, IMS_FALSE if not required.
@@ -981,6 +965,22 @@ public:
      * @see {@code ims.ims_preferred_iptype_int}
      */
     virtual IMS_SINT32 GetPreferredIpType() const = 0;
+
+    /**
+     * @brief Get the operational mode for anonymous emergency call actions triggered by the
+     *        network.
+     *
+     * Possible Values:
+     *   {@code 0} : ANONYMOUS_EMC_DISABLED - Anonymous emergency call actions are not supported.
+     *   {@code 1} : ANONYMOUS_EMC_ON_ANY_403 - Triggers an anonymous emergency call attempt
+     *               immediately upon receiving any SIP 403 Forbidden error (bypasses XML parsing).
+     *   {@code 2} : ANONYMOUS_EMC_XML_ACTION - (Standard) Triggers an anonymous emergency
+     *               call attempt only if SIP 403 contains a valid 'anonymous-emergencycall' action.
+     *
+     * @return IMS_SINT32 Returns the support mode value.
+     * @see {@code imsemergency.anonymous_ecall_action_support_mode_int}
+     */
+    virtual IMS_SINT32 GetAnonymousECallSupportMode() const = 0;
 
     /**
      * @brief Get the preferred IP address type for emergency

@@ -67,7 +67,6 @@ public:
             bReregWithChangedCountryOnWifi(IMS_FALSE),
             bSipOverIpsecEnabledInRoaming(IMS_TRUE),
             bSmsOverImsAvailableWithoutVoiceCapa(IMS_FALSE),
-            bSupportAnonymousECallAction(IMS_FALSE),
             bSupportERegWhenEAttachWithValidSim(IMS_FALSE),
             bSupportEmergencyReregOnIpcanChange(IMS_FALSE),
             bSupportGibaForERegInRoaming(IMS_FALSE),
@@ -85,6 +84,7 @@ public:
             nAuthFailureRetryMaxCnt(0),
             nContactUserInfoPolicyForNonRegMessage(
                     CarrierConfig::Ims::CONTACT_USER_INFO_POLICY_DEFAULT),
+            nAnonymousECallSupportMode(CarrierConfig::ImsEmergency::ANONYMOUS_EMC_DISABLED),
             nEmcPreferredIpType(CarrierConfig::Ims::IP_VERSION_6),
             nEmcRegRetryMaxCnt(0),
             nEmcRegRetryTimerMillis(0),
@@ -187,7 +187,6 @@ public:
     IMS_BOOL bReregWithChangedCountryOnWifi;
     IMS_BOOL bSipOverIpsecEnabledInRoaming;
     IMS_BOOL bSmsOverImsAvailableWithoutVoiceCapa;
-    IMS_BOOL bSupportAnonymousECallAction;
     IMS_BOOL bSupportERegWhenEAttachWithValidSim;
     IMS_BOOL bSupportEmergencyReregOnIpcanChange;
     IMS_BOOL bSupportGibaForERegInRoaming;
@@ -204,6 +203,7 @@ public:
     IMS_BOOL bVideoOverWifiSupportedWithoutVoice;
     IMS_SINT32 nAuthFailureRetryMaxCnt;
     IMS_SINT32 nContactUserInfoPolicyForNonRegMessage;
+    IMS_SINT32 nAnonymousECallSupportMode;
     IMS_SINT32 nEmcPreferredIpType;
     IMS_SINT32 nEmcRegRetryMaxCnt;
     IMS_SINT32 nEmcRegRetryTimerMillis;

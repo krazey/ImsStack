@@ -735,8 +735,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "release_epdn_of_unavailable_network_bool";
         public static final String KEY_STOP_EREG_TIMER_ON_EPDN_CONNECTED_BOOL =
                 KEY_PREFIX + "stop_ereg_timer_on_epdn_connected_bool";
-        public static final String KEY_SUPPORT_ANONYMOUS_ECALL_ACTION_BOOL =
-                KEY_PREFIX + "support_anonymous_ecall_action_bool";
         public static final String KEY_SUPPORT_EREG_WHEN_EATTACH_WITH_VALID_SIM_BOOL =
                 KEY_PREFIX + "support_ereg_when_eattach_with_valid_sim_bool";
         public static final String KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL =
@@ -747,6 +745,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "support_video_for_ereg_bool";
         public static final String KEY_USE_REG_RETRY_RULE_FOR_EREG_BOOL =
                 KEY_PREFIX + "use_reg_retry_rule_for_ereg_bool";
+        public static final String KEY_ANONYMOUS_ECALL_ACTION_SUPPORT_MODE_INT =
+                KEY_PREFIX + "anonymous_ecall_action_support_mode_int";
         public static final String KEY_EPDN_PREFERRED_IPTYPE_INT =
                 KEY_PREFIX + "epdn_preferred_iptype_int";
         public static final String KEY_EREG_RETRY_MAX_CNT_INT =
