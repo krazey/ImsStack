@@ -225,6 +225,61 @@ TEST_F(OsNetworkConnectionTest, Activate)
     pINetworkConnection->RemoveReferenceListener(&m_objMockINetworkConnectionRefListener);
 }
 
+TEST_F(OsNetworkConnectionTest, Activate_NoRequestNetwork)
+{
+    OsNetworkConnection objOsNetworkConnection(IMS_SLOT_0);
+    INetworkConnection* pINetworkConnection = &objOsNetworkConnection;
+
+    EXPECT_CALL(m_objSystem, GetDataConnectionState(_, _)).WillOnce(Return(DATA_DISCONNECTED));
+
+    // Ensure RequestNetwork is NOT called when bEnableApn is false for a non-emergency APN.
+    EXPECT_CALL(m_objSystem, RequestNetwork(_, _)).Times(0);
+
+    // Call Activate with bEnableApn = IMS_FALSE for a default IMS APN.
+    // This should not trigger a network request but should change the internal state to activating.
+    EXPECT_EQ(INetworkConnection::RESULT_DOING, pINetworkConnection->Activate(IMS_FALSE));
+
+    // The public state remains DISCONNECTED until the connection is fully active.
+    EXPECT_EQ(INetworkConnection::STATE_DISCONNECTED, pINetworkConnection->GetState());
+}
+
+TEST_F(OsNetworkConnectionTest, CacheLocalAddress_Failure)
+{
+    OsNetworkConnection objOsNetworkConnection(IMS_SLOT_0);
+    INetworkConnection* pINetworkConnection = &objOsNetworkConnection;
+    ImsNetworkConnection* pImsNetworkConnection = &objOsNetworkConnection;
+
+    // Set state to ACTIVATING
+    EXPECT_CALL(m_objSystem, GetDataConnectionState(_, _)).WillOnce(Return(DATA_DISCONNECTED));
+    EXPECT_CALL(m_objSystem, RequestNetwork(_, _)).WillOnce(Return(1));
+    pINetworkConnection->Activate(IMS_TRUE);
+
+    // Mock GetLocalAddress to return an invalid string, causing CacheLocalAddress to fail.
+    EXPECT_CALL(m_objSystem, GetLocalAddress(_, -1, _))
+            .WillRepeatedly(Return(AString("invalid-ip-address")));
+    EXPECT_CALL(m_objSystem, GetLocalAddress(_, IpAddress::IPV4, _))
+            .WillRepeatedly(Return(AString::ConstNull()));
+    EXPECT_CALL(m_objSystem, GetLocalAddress(_, IpAddress::IPV6, _))
+            .WillRepeatedly(Return(AString::ConstNull()));
+    // Other system calls for CacheLocalAddress
+    EXPECT_CALL(m_objSystem, GetIpcanCategory(_, _))
+            .WillRepeatedly(Return(IIpcan::CATEGORY_MOBILE));
+    EXPECT_CALL(m_objSystem, GetApnName(_, _)).WillRepeatedly(Return(m_strApnName));
+    EXPECT_CALL(m_objSystem, GetIfaceId(_, _)).WillRepeatedly(Return(2));
+    EXPECT_CALL(m_objSystem, GetIfaceName(_, _)).WillRepeatedly(Return(m_strIfaceName));
+
+    pINetworkConnection->SetListener(&m_objMockINetworkConnectionListener);
+    EXPECT_CALL(m_objMockINetworkConnectionListener, NetworkConnection_OnConnected(_)).Times(1);
+
+    // Dispatch NET_CONNECTED event
+    pImsNetworkConnection->DispatchServiceMessage(OsNetworkConnection::NET_CONNECTED, 0);
+
+    // Verify that despite the "connected" event, the local address is invalid due to parsing
+    // failure.
+    EXPECT_EQ(IpAddress::NONE, pINetworkConnection->GetLocalAddress(IpAddress::UNKNOWN));
+    EXPECT_EQ(INetworkConnection::STATE_CONNECTED, pINetworkConnection->GetState());
+}
+
 TEST_F(OsNetworkConnectionTest, Deactivate)
 {
     OsNetworkConnection objOsNetworkConnection(IMS_SLOT_0);
@@ -503,6 +558,7 @@ TEST_F(OsNetworkConnectionTest, GetAccessNetworkInfo)
             .WillOnce(Return(AString("8c:3b:ad:8c:31:d0:8c:40")))
             .WillOnce(Return(AString(":::::")))
             .WillOnce(Return(AString("8c:3b:ad:8c:31:d0")))
+            .WillOnce(Return(AString("8c:3b:ad:ZZ:31:d0")))
             .WillOnce(Return(AString::ConstNull()));
 
     pINetworkConnection->GetAccessNetworkInfo(objWifiAccessNetInfo);
@@ -514,22 +570,39 @@ TEST_F(OsNetworkConnectionTest, GetAccessNetworkInfo)
 
     EXPECT_EQ(objWifiAccessNetInfo.nType, AccessNetworkInfo::TYPE_IEEE_802_11);
     EXPECT_EQ(objWifiAccessNetInfo.nClass, AccessNetworkInfo::CLASS_NONE);
-    EXPECT_STREQ(reinterpret_cast<char*>(&objWifiAccessNetInfo.uniAI.i_wlan_node_id.aMAC[0]),
-            "\xFF\xFF\xFF\xFF\xFF\xFF");
+    unsigned char expectedMac1[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+    EXPECT_EQ(0,
+            memcmp(&objWifiAccessNetInfo.uniAI.i_wlan_node_id.aMAC[0], expectedMac1,
+                    sizeof(expectedMac1)));
 
     pINetworkConnection->GetAccessNetworkInfo(objWifiAccessNetInfo);
 
     EXPECT_EQ(objWifiAccessNetInfo.nType, AccessNetworkInfo::TYPE_IEEE_802_11);
     EXPECT_EQ(objWifiAccessNetInfo.nClass, AccessNetworkInfo::CLASS_NONE);
-    EXPECT_STREQ(reinterpret_cast<char*>(&objWifiAccessNetInfo.uniAI.i_wlan_node_id.aMAC[0]),
-            "\x8C\x3B\xAD\x8C\x31\xD0");
+    unsigned char expectedMac2[] = {0x8C, 0x3B, 0xAD, 0x8C, 0x31, 0xD0};
+    EXPECT_EQ(0,
+            memcmp(&objWifiAccessNetInfo.uniAI.i_wlan_node_id.aMAC[0], expectedMac2,
+                    sizeof(expectedMac2)));
 
     pINetworkConnection->GetAccessNetworkInfo(objWifiAccessNetInfo);
 
     EXPECT_EQ(objWifiAccessNetInfo.nType, AccessNetworkInfo::TYPE_IEEE_802_11);
     EXPECT_EQ(objWifiAccessNetInfo.nClass, AccessNetworkInfo::CLASS_NONE);
-    EXPECT_STREQ(reinterpret_cast<char*>(&objWifiAccessNetInfo.uniAI.i_wlan_node_id.aMAC[0]),
-            "\x00\x00\x00\x00\x00\x00");
+    // "ZZ" is invalid hex, so it should be replaced with 0xFF
+    unsigned char expectedMac3[] = {0x8C, 0x3B, 0xAD, 0xFF, 0x31, 0xD0};
+    EXPECT_EQ(0,
+            memcmp(&objWifiAccessNetInfo.uniAI.i_wlan_node_id.aMAC[0], expectedMac3,
+                    sizeof(expectedMac3)));
+
+    pINetworkConnection->GetAccessNetworkInfo(objWifiAccessNetInfo);
+
+    EXPECT_EQ(objWifiAccessNetInfo.nType, AccessNetworkInfo::TYPE_IEEE_802_11);
+    EXPECT_EQ(objWifiAccessNetInfo.nClass, AccessNetworkInfo::CLASS_NONE);
+    // Fallback to WLAN_NULL_MAC "00:00:00:00:00:00"
+    unsigned char expectedMac4[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    EXPECT_EQ(0,
+            memcmp(&objWifiAccessNetInfo.uniAI.i_wlan_node_id.aMAC[0], expectedMac4,
+                    sizeof(expectedMac4)));
 }
 
 TEST_F(OsNetworkConnectionTest, GetLastAccessNetworkInfo)
