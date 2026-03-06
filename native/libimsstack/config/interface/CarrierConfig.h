@@ -2945,23 +2945,17 @@ public:
                 KEY_REGISTRATION_RESTORATION_FOR_INVITE_REQUIRE_HEADER_VALIDATION_BOOL[];
 
         /**
-         * Specifies whether to terminate a call if the wait for a dedicated QoS bearer for audio
-         * times out.
+         * Specifies whether to terminate a call if the dedicated QoS bearer is or not reserved
+         * during call setup.
          *
-         * During call setup, the device may wait for the network to establish a dedicated bearer
-         * to guarantee Quality of Service (QoS) for audio media. The timeout for this wait is
-         * configured by {@code KEY_DEDICATED_BEARER_WAIT_TIMER_MILLIS_INT}.
-         *
-         * If set to {@code true}, and the dedicated bearer is not established before the timer
-         * expires, the call will be immediately terminated.
-         *
-         * If set to {@code false}, the call may not be immediately terminated.
+         * If set to {@code true}, and the dedicated bearer is lost or not reserved during the call
+         * setup phase, the call will be immediately terminated.
          *
          * Possible Values:
-         *   {@code true} - Terminate the call on dedicated bearer timeout.
+         *   {@code true} - Terminate the call on QoS loss during setup.
          *   {@code false} - Do not automatically terminate the call.
          */
-        static const IMS_CHAR KEY_RELEASE_CALL_ON_DEDICATED_BEARER_WAIT_TIMEOUT_BOOL[];
+        static const IMS_CHAR KEY_RELEASE_CALL_ON_QOS_LOST_DURING_SETUP_BOOL[];
 
         /**
          * Specifies the policy for how to handle an ongoing call when the dedicated Quality of
