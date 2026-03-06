@@ -32,6 +32,7 @@
 #include "IMtcImsEventReceiver.h"
 #include "IMtcService.h"
 #include "IPageMessage.h"
+#include "IPhoneInfoSubscriber.h"
 #include "IReference.h"
 #include "IServiceFilterCriteria.h"
 #include "ISipRoutingRejectNotifier.h"
@@ -215,6 +216,44 @@ PUBLIC VIRTUAL IMS_BOOL MtcService::IsRoaming() const
 {
     return m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_ROAMING_STATE) ==
             IMS_ROAMING_STATE_ON;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 MtcService::GetNetworkRoamingType() const
+{
+    INetworkWatcher* piNetworkWatcher =
+            PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_objContext.GetSlotId());
+    IMS_SINT32 nDataRoamingType = piNetworkWatcher->GetDataRoamingType();
+
+    if (nDataRoamingType == INetworkWatcher::ROAMING_TYPE_DOMESTIC ||
+            nDataRoamingType == INetworkWatcher::ROAMING_TYPE_INTERNATIONAL)
+    {
+        return nDataRoamingType;
+    }
+
+    if (nDataRoamingType == INetworkWatcher::ROAMING_TYPE_NOT_ROAMING &&
+            !piNetworkWatcher->IsDataNetworkRoaming())
+    {
+        return INetworkWatcher::ROAMING_TYPE_NOT_ROAMING;
+    }
+
+    ISubscriberInfo* piSubscriberInfo =
+            PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(m_objContext.GetSlotId());
+    AString strSimCountryIso;
+    piSubscriberInfo->GetSimCountryIso(strSimCountryIso);
+    AString strNetworkCountryIso;
+    piSubscriberInfo->GetNetworkCountryIso(strNetworkCountryIso);
+
+    if (strSimCountryIso.IsEmpty() || strNetworkCountryIso.IsEmpty())
+    {
+        return INetworkWatcher::ROAMING_TYPE_UNKNOWN;
+    }
+
+    if (strSimCountryIso.Equals(strNetworkCountryIso))
+    {
+        return INetworkWatcher::ROAMING_TYPE_DOMESTIC;
+    }
+
+    return INetworkWatcher::ROAMING_TYPE_INTERNATIONAL;
 }
 
 PUBLIC VIRTUAL IMS_BOOL MtcService::IsWlanIpCanType() const
