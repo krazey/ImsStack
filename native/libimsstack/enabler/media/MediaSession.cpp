@@ -890,17 +890,39 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
             if (pParam != IMS_NULL)
             {
                 IMS_TRACE_I("OnNotify() - Type[%d]", pParam->m_eMediaType, 0, 0);
-                m_pClientListener->MediaSession_Notify(
-                        REPORT_DATA_RECEIVE_STARTED, pParam->m_eMediaType);
 
+                bool bSkipNotification = false;
                 if (MEDIA_IS_CONTAINED_THIS_TYPE(pParam->m_eMediaType, MEDIA_TYPE_AUDIO))
+                {
+                    if (m_pAudioController != IMS_NULL)
+                    {
+                        MEDIA_DIRECTION eDirection = m_pAudioController->GetMediaDirection();
+                        if (eDirection == MEDIA_DIRECTION_INACTIVE ||
+                                eDirection == MEDIA_DIRECTION_SEND)
+                        {
+                            bSkipNotification = true;
+                            IMS_TRACE_I(
+                                    "OnNotify() - Audio direction [%d] is inactive/sendonly, skip",
+                                    eDirection, 0, 0);
+                        }
+                    }
+                }
+
+                if (!bSkipNotification)
+                {
+                    m_pClientListener->MediaSession_Notify(
+                            REPORT_DATA_RECEIVE_STARTED, pParam->m_eMediaType);
+                }
+
+                if (MEDIA_IS_CONTAINED_THIS_TYPE(pParam->m_eMediaType, MEDIA_TYPE_AUDIO) &&
+                        m_pAudioController != IMS_NULL)
                 {
                     if (m_pAudioController->GetInactivityTimer(
                                 NETWORK_TONE_INACTIVITY, UNDEFINED_NEGO_ID) > 0)
                     {
                         m_pAudioController->SetNetworkToneTimer(UNDEFINED_NEGO_ID, 0);
                     }
-                    if (!m_bSessionConfirmed)
+                    if (!m_bSessionConfirmed && !bSkipNotification)
                     {
                         m_pClientListener->MediaSession_Notify(
                                 REPORT_NW_TONE_RTP_RECEIVE_STARTED, pParam->m_eMediaType);
