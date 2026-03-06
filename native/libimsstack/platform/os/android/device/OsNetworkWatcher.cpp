@@ -587,6 +587,11 @@ PUBLIC VIRTUAL AString OsNetworkWatcher::GetAccessNetworkPlmn() const
     return PlatformContext::GetInstance()->GetSystem()->GetAccessNetworkPlmn(GetSlotId());
 }
 
+PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsDataNetworkRoaming() const
+{
+    return PlatformContext::GetInstance()->GetSystem()->IsDataNetworkRoaming(GetSlotId());
+}
+
 PRIVATE GLOBAL const IMS_CHAR* OsNetworkWatcher::RadioTechToString(IN IMS_UINT32 nType)
 {
     switch (nType)

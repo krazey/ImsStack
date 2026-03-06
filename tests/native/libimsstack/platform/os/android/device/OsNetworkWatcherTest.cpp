@@ -451,6 +451,12 @@ TEST_F(OsNetworkWatcherTest, GetAccessNetworkPlmn)
     EXPECT_EQ(m_pOsNetworkWatcher->GetAccessNetworkPlmn(), strPlmn);
 }
 
+TEST_F(OsNetworkWatcherTest, IsDataNetworkRoaming)
+{
+    EXPECT_CALL(m_objMockSystem, IsDataNetworkRoaming(_)).Times(1).WillOnce(Return(IMS_TRUE));
+    EXPECT_EQ(m_pOsNetworkWatcher->IsDataNetworkRoaming(), IMS_TRUE);
+}
+
 TEST_F(OsNetworkWatcherTest, NotifyEvent)
 {
     m_objPhoneInfoService.SetNetworkWatcher(m_pOsNetworkWatcher);

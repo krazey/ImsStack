@@ -699,6 +699,20 @@ public class SystemCallAgentTest {
 
     @Test
     @SmallTest
+    public void testIsDataNetworkRoaming() {
+        mSystemCallAgent.isDataNetworkRoaming();
+
+        verify(mDcNetWatcher).isDataNetworkRoaming();
+
+        replaceDcNetWatcher(null);
+        boolean result = mSystemCallAgent.isDataNetworkRoaming();
+
+        assertFalse(result);
+        verifyNoMoreInteractions(mDcNetWatcher);
+    }
+
+    @Test
+    @SmallTest
     public void testGetHostByName() {
         String host = "test.ims.com";
         mSystemCallAgent.getHostByName(EApnType.IMS.getType(), EIpVersion.IPV6V4.getInt(), host);

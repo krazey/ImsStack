@@ -115,6 +115,7 @@ public:
     virtual IMS_BOOL IsIpv6Preferred(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) = 0;
     virtual IMS_SINT32 GetNetworkRegistrationRejectCause(IN IMS_SINT32 nSlotId) = 0;
     virtual AString GetAccessNetworkPlmn(IN IMS_SINT32 nSlotId) = 0;
+    virtual IMS_BOOL IsDataNetworkRoaming(IN IMS_SINT32 nSlotId) = 0;
 
     ////
     // WiFi-related information

@@ -573,6 +573,13 @@ public interface SystemCallInterface {
      */
     @NonNull String getAccessNetworkPlmn();
 
+
+    /**
+     * Returns whether mobile data is registered on roaming network.
+     * This value is not affected by any carrier config or resource overlay override.
+     */
+    boolean isDataNetworkRoaming();
+
     //// Logging {
     /**
      * Logs the SIP message.
