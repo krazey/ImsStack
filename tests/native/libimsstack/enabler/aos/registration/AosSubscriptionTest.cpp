@@ -1483,7 +1483,7 @@ TEST_F(AosSubscriptionTest, NotifyRegEventWithImpuWhenRegEventChangedWithUncondi
 TEST_F(AosSubscriptionTest, NotifyRegEventWithImpuWhenRegEventChangedWithConditionalDownload)
 {
     ON_CALL(m_objMockIAosConfig, GetUsatRegEventDownloadPolicy())
-            .WillByDefault(Return(CarrierConfig::Ims::USAT_REG_EVENT_CONDITIONAL_DOWNLOAD));
+            .WillByDefault(Return(CarrierConfig::Ims::USAT_REG_EVENT_ALL_CONDITIONAL_DOWNLOAD));
 
     const SipAddress objSipAddress = SipAddress("");
     ON_CALL(m_objMockIRegInfoRegistration, GetAor()).WillByDefault(ReturnRef(objSipAddress));

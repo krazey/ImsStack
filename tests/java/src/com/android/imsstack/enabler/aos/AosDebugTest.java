@@ -36,7 +36,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
@@ -270,7 +269,6 @@ public class AosDebugTest extends ImsStackTest {
         mFakeAosDebug.mIsGranted = true;
         // Restore the ActivityManager to create a real PendingIntent.
         restoreInstance(Singleton.class, "mInstance", mIActivityManagerSingleton);
-        restoreInstance(ActivityManager.class, "IActivityManagerSingleton", null);
 
         // WHEN
         mFakeAosDebug.showOrDismissNotification(mMockActivity);
@@ -334,7 +332,6 @@ public class AosDebugTest extends ImsStackTest {
         int[] grantResults = new int[]{ PackageManager.PERMISSION_GRANTED };
         // Restore the ActivityManager to create a real PendingIntent.
         restoreInstance(Singleton.class, "mInstance", mIActivityManagerSingleton);
-        restoreInstance(ActivityManager.class, "IActivityManagerSingleton", null);
 
         // WHEN
         mFakeAosDebug.notifyPermissionsResult(requestCode, new String[]{}, grantResults,
@@ -552,7 +549,6 @@ public class AosDebugTest extends ImsStackTest {
         mFakeAosDebug.mIsGranted = false;
         // Restore the ActivityManager to create a real PendingIntent.
         restoreInstance(Singleton.class, "mInstance", mIActivityManagerSingleton);
-        restoreInstance(ActivityManager.class, "IActivityManagerSingleton", null);
 
         // WHEN
         mFakeAosDebug.mNativeStateListener.onNativeServiceReady();

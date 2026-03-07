@@ -766,18 +766,23 @@ void MtcPreconditionManager::OnWaitAudioDedicatedBearerTimerExpired(IN QosTimer*
         return;
     }
 
-    if (m_objContext.GetConfigurationProxy().GetBoolean(
-                ConfigVoice::KEY_RELEASE_CALL_ON_DEDICATED_BEARER_WAIT_TIMEOUT_BOOL))
+    ISession* piSession = GetISessionWithTimer(pTimer);
+    if (piSession == IMS_NULL)
     {
-        ISession* piSession = GetISessionWithTimer(pTimer);
-        if (piSession != IMS_NULL)
-        {
-            m_pListener->QosReserveFailed(piSession, QosLossPolicy::RELEASE);
-        }
         return;
     }
 
-    HandleReservationFailureByTimerExpiration(pTimer);
+    if (IsConfirmedDialog(piSession))
+    {
+        HandleReservationFailureByTimerExpiration(pTimer);
+    }
+    else
+    {
+        // If the Qos for audio is not reserved during call setup, the call should be released
+        // regardless of the value of policy_on_audio_qos_deactivation_int or
+        // KEY_RELEASE_CALL_ON_QOS_LOST_DURING_SETUP_BOOL
+        m_pListener->QosReserveFailed(piSession, QosLossPolicy::RELEASE);
+    }
 }
 
 PRIVATE
@@ -1482,7 +1487,20 @@ QosLossPolicy MtcPreconditionManager::GetActionForQosLoss(IN ISession* piSession
     {
         if (!IsLocalResourceReservedByMediaType(piSession, eMediaType))
         {
-            QosLossPolicy ePartialAction = GetQosLossPolicy(eMediaType);
+            QosLossPolicy ePartialAction;
+            if (!IsConfirmedDialog(piSession) && eMediaType == MEDIATYPE_AUDIO)
+            {
+                ePartialAction =
+                        m_objContext.GetConfigurationProxy().GetBoolean(
+                                ConfigVoice::KEY_RELEASE_CALL_ON_QOS_LOST_DURING_SETUP_BOOL)
+                        ? QosLossPolicy::RELEASE
+                        : QosLossPolicy::MAINTAIN;
+            }
+            else
+            {
+                ePartialAction = GetQosLossPolicy(eMediaType);
+            }
+
             if (eAction < ePartialAction)
             {
                 eAction = ePartialAction;

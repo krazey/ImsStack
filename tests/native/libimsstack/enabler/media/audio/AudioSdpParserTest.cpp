@@ -368,6 +368,36 @@ TEST_F(AudioSdpParserTest, ParseEvsFmtpDtxHfOnlyEvsModeSwitchCmrChAwMode)
     EXPECT_TRUE(pFmtp->IsChannelAwModeVisible());
 }
 
+TEST_F(AudioSdpParserTest, ParseEvsFmtpEvsModeSwitchWithModeSet)
+{
+    TestableAudioSdpParser objParser;
+    auto pFmtp = std::make_shared<AudioProfile::EvsFmtp>();
+    ImsList<AString> objSplitEqual;
+
+    // Case 1: mode-set is not present, should be set to default for AMR-WB IO
+    objSplitEqual.Append("evs-mode-switch");
+    objSplitEqual.Append("1");
+    EXPECT_TRUE(objParser.ParseEvsSwitchMode(objSplitEqual, pFmtp));
+    EXPECT_EQ(pFmtp->GetEvsModeSwitch(), 1);
+    EXPECT_TRUE(pFmtp->IsEvsModeSwitchVisible());
+    // MAX_MODESET is CodecAudioConfig::FULL_MODESET_AMRWB
+    EXPECT_EQ(pFmtp->GetModeSetList(), CodecAudioConfig::FULL_MODESET_AMRWB);
+
+    // Case 2: mode-set is already present, should not be overwritten
+    pFmtp = std::make_shared<AudioProfile::EvsFmtp>();  // Reset
+    const IMS_UINT32 preExistingModeSet = 5;            // 0, 2
+    pFmtp->SetModeSetList(preExistingModeSet);
+
+    objSplitEqual.Clear();
+    objSplitEqual.Append("evs-mode-switch");
+    objSplitEqual.Append("1");
+    EXPECT_TRUE(objParser.ParseEvsSwitchMode(objSplitEqual, pFmtp));
+    EXPECT_EQ(pFmtp->GetEvsModeSwitch(), 1);
+    EXPECT_TRUE(pFmtp->IsEvsModeSwitchVisible());
+    // Should remain the pre-existing value
+    EXPECT_EQ(pFmtp->GetModeSetList(), preExistingModeSet);
+}
+
 TEST_F(AudioSdpParserTest, ParseEvsFmtpBrBwLists)
 {
     TestableAudioSdpParser objParser;

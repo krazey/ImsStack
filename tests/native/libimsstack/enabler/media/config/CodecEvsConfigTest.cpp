@@ -15,6 +15,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 #include "CarrierConfig.h"
 #include "ImsStrLib.h"
@@ -139,9 +140,9 @@ TEST_F(CodecEvsConfigTest, Create_NullEvsSubBundle)
     ON_CALL(*m_pMockICarrierConfig,
             GetBundle(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE))
             .WillByDefault(Return(m_pMockEvsBundle.get()));
-    ON_CALL(*m_pMockEvsBundle,
-            GetBundle(AString(std::to_string(m_nDefaultPayloadType).c_str()).GetStr()))
-            .WillByDefault(Return(nullptr));
+    EXPECT_CALL(
+            *m_pMockEvsBundle, GetBundle(testing::StrEq(m_strDefaultPayloadTypeNumber.GetStr())))
+            .WillOnce(Return(nullptr));
 
     IMS_BOOL bResult = m_pCodecEvsConfig->Create(m_pMockICarrierConfig.get());
     ASSERT_EQ(bResult, IMS_TRUE);
@@ -190,7 +191,7 @@ TEST_F(CodecEvsConfigTest, Create_Successful_ReadsAllValuesFromCarrierConfig)
     IMS_UINT32 nExpectedBwList = (1 << CodecEvsConfig::EVS_BANDWIDTH_WB);  // (1 << 1) = 2
     IMS_SINT32 nCmr = -1;
     IMS_SINT32 nChAwRecv = 2;
-    IMS_BOOL bVisibleModeSet = IMS_TRUE;
+    IMS_BOOL bVisibleModeSet = IMS_FALSE;
     IMS_UINT32 nModeSetList = 5;  // Example mode for AMR-WB IO
     IMS_UINT32 nDefaultModeSetList = 6;
     IMS_SINT32 nModeChangeCapability = 1;
@@ -207,8 +208,8 @@ TEST_F(CodecEvsConfigTest, Create_Successful_ReadsAllValuesFromCarrierConfig)
     EXPECT_CALL(*m_pMockICarrierConfig,
             GetBundle(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE))
             .WillOnce(::testing::Return(m_pMockEvsBundle.get()));
-    EXPECT_CALL(*m_pMockEvsBundle,
-            GetBundle(AString(std::to_string(m_nDefaultPayloadType).c_str()).GetStr()))
+    EXPECT_CALL(
+            *m_pMockEvsBundle, GetBundle(testing::StrEq(m_strDefaultPayloadTypeNumber.GetStr())))
             .WillOnce(::testing::Return(m_pMockEvsSubBundle.get()));
     EXPECT_CALL(*m_pMockEvsSubBundle,
             GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CHANNELS_INT, DEFAULT_CHANNEL))
@@ -246,14 +247,6 @@ TEST_F(CodecEvsConfigTest, Create_Successful_ReadsAllValuesFromCarrierConfig)
             GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT,
                     CodecEvsConfig::NOT_DEFINED))
             .WillOnce(Return(nChAwRecv));
-    EXPECT_CALL(*m_pMockICarrierConfig,
-            GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL,
-                    IMS_FALSE))
-            .WillOnce(Return(bVisibleModeSet));
-    EXPECT_CALL(*m_pMockICarrierConfig,
-            GetInt(CarrierConfig::ImsVoice::KEY_EVS_AMRWB_IO_MODE_SET_INT,
-                    CodecAudioConfig::DEFAULT_MODESET_AMRWB))
-            .WillOnce(Return(nModeSetList));
     EXPECT_CALL(*m_pMockICarrierConfig,
             GetIntArray(CarrierConfig::ImsVoice::
                                 KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY,
@@ -302,7 +295,7 @@ TEST_F(CodecEvsConfigTest, Create_Successful_ReadsAllValuesFromCarrierConfig)
     EXPECT_EQ(m_pCodecEvsConfig->GetCmr(), nCmr);
     EXPECT_EQ(m_pCodecEvsConfig->GetChAwareRecv(), nChAwRecv);
     EXPECT_EQ(m_pCodecEvsConfig->GetVisibleModeSet(), bVisibleModeSet);
-    EXPECT_EQ(m_pCodecEvsConfig->GetModeSetList(), nModeSetList);
+    EXPECT_EQ(m_pCodecEvsConfig->GetModeSetList(), nDefaultModeSetList);
     EXPECT_EQ(m_pCodecEvsConfig->GetDefaultModeSetList(), nDefaultModeSetList);
     EXPECT_EQ(m_pCodecEvsConfig->GetModeChangeCapability(), nModeChangeCapability);
     EXPECT_EQ(m_pCodecEvsConfig->GetModeChangePeriod(), nModeChangePeriod);
@@ -324,8 +317,8 @@ TEST_F(CodecEvsConfigTest, BitrateConversion)
     EXPECT_CALL(*m_pMockICarrierConfig,
             GetBundle(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE))
             .WillOnce(::testing::Return(m_pMockEvsBundle.get()));
-    EXPECT_CALL(*m_pMockEvsBundle,
-            GetBundle(AString(std::to_string(m_nDefaultPayloadType).c_str()).GetStr()))
+    EXPECT_CALL(
+            *m_pMockEvsBundle, GetBundle(testing::StrEq(m_strDefaultPayloadTypeNumber.GetStr())))
             .WillOnce(::testing::Return(m_pMockEvsSubBundle.get()));
     EXPECT_CALL(*m_pMockEvsSubBundle,
             GetIntArray(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY, _))
@@ -374,8 +367,8 @@ TEST_F(CodecEvsConfigTest, Create_CmrNotPresent)
     EXPECT_CALL(*m_pMockICarrierConfig,
             GetBundle(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE))
             .WillOnce(::testing::Return(m_pMockEvsBundle.get()));
-    EXPECT_CALL(*m_pMockEvsBundle,
-            GetBundle(AString(std::to_string(m_nDefaultPayloadType).c_str()).GetStr()))
+    EXPECT_CALL(
+            *m_pMockEvsBundle, GetBundle(testing::StrEq(m_strDefaultPayloadTypeNumber.GetStr())))
             .WillOnce(::testing::Return(m_pMockEvsSubBundle.get()));
     EXPECT_CALL(*m_pMockEvsSubBundle,
             GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CHANNELS_INT, DEFAULT_CHANNEL))
@@ -413,14 +406,6 @@ TEST_F(CodecEvsConfigTest, Create_CmrNotPresent)
             GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT,
                     CodecEvsConfig::NOT_DEFINED))
             .WillOnce(Return(nChAwRecv));
-    EXPECT_CALL(*m_pMockICarrierConfig,
-            GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL,
-                    IMS_FALSE))
-            .WillOnce(Return(bVisibleModeSet));
-    EXPECT_CALL(*m_pMockICarrierConfig,
-            GetInt(CarrierConfig::ImsVoice::KEY_EVS_AMRWB_IO_MODE_SET_INT,
-                    CodecAudioConfig::DEFAULT_MODESET_AMRWB))
-            .WillOnce(Return(nModeSetList));
     EXPECT_CALL(*m_pMockICarrierConfig,
             GetIntArray(CarrierConfig::ImsVoice::
                                 KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY,
@@ -492,8 +477,8 @@ TEST_F(CodecEvsConfigTest, Create_CmrDisabled)
     EXPECT_CALL(*m_pMockICarrierConfig,
             GetBundle(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE))
             .WillOnce(::testing::Return(m_pMockEvsBundle.get()));
-    EXPECT_CALL(*m_pMockEvsBundle,
-            GetBundle(AString(std::to_string(m_nDefaultPayloadType).c_str()).GetStr()))
+    EXPECT_CALL(
+            *m_pMockEvsBundle, GetBundle(testing::StrEq(m_strDefaultPayloadTypeNumber.GetStr())))
             .WillOnce(::testing::Return(m_pMockEvsSubBundle.get()));
     EXPECT_CALL(*m_pMockEvsSubBundle,
             GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CHANNELS_INT, DEFAULT_CHANNEL))
@@ -531,14 +516,6 @@ TEST_F(CodecEvsConfigTest, Create_CmrDisabled)
             GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT,
                     CodecEvsConfig::NOT_DEFINED))
             .WillOnce(Return(nChAwRecv));
-    EXPECT_CALL(*m_pMockICarrierConfig,
-            GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL,
-                    IMS_FALSE))
-            .WillOnce(Return(bVisibleModeSet));
-    EXPECT_CALL(*m_pMockICarrierConfig,
-            GetInt(CarrierConfig::ImsVoice::KEY_EVS_AMRWB_IO_MODE_SET_INT,
-                    CodecAudioConfig::DEFAULT_MODESET_AMRWB))
-            .WillOnce(Return(nModeSetList));
     EXPECT_CALL(*m_pMockICarrierConfig,
             GetIntArray(CarrierConfig::ImsVoice::
                                 KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY,
@@ -610,8 +587,8 @@ TEST_F(CodecEvsConfigTest, Create_CmrAllEnabled)
     EXPECT_CALL(*m_pMockICarrierConfig,
             GetBundle(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE))
             .WillOnce(::testing::Return(m_pMockEvsBundle.get()));
-    EXPECT_CALL(*m_pMockEvsBundle,
-            GetBundle(AString(std::to_string(m_nDefaultPayloadType).c_str()).GetStr()))
+    EXPECT_CALL(
+            *m_pMockEvsBundle, GetBundle(testing::StrEq(m_strDefaultPayloadTypeNumber.GetStr())))
             .WillOnce(::testing::Return(m_pMockEvsSubBundle.get()));
     EXPECT_CALL(*m_pMockEvsSubBundle,
             GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CHANNELS_INT, DEFAULT_CHANNEL))
@@ -649,14 +626,6 @@ TEST_F(CodecEvsConfigTest, Create_CmrAllEnabled)
             GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT,
                     CodecEvsConfig::NOT_DEFINED))
             .WillOnce(Return(nChAwRecv));
-    EXPECT_CALL(*m_pMockICarrierConfig,
-            GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL,
-                    IMS_FALSE))
-            .WillOnce(Return(bVisibleModeSet));
-    EXPECT_CALL(*m_pMockICarrierConfig,
-            GetInt(CarrierConfig::ImsVoice::KEY_EVS_AMRWB_IO_MODE_SET_INT,
-                    CodecAudioConfig::DEFAULT_MODESET_AMRWB))
-            .WillOnce(Return(nModeSetList));
     EXPECT_CALL(*m_pMockICarrierConfig,
             GetIntArray(CarrierConfig::ImsVoice::
                                 KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY,
@@ -728,8 +697,8 @@ TEST_F(CodecEvsConfigTest, Create_CmrEnabled)
     EXPECT_CALL(*m_pMockICarrierConfig,
             GetBundle(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE))
             .WillOnce(::testing::Return(m_pMockEvsBundle.get()));
-    EXPECT_CALL(*m_pMockEvsBundle,
-            GetBundle(AString(std::to_string(m_nDefaultPayloadType).c_str()).GetStr()))
+    EXPECT_CALL(
+            *m_pMockEvsBundle, GetBundle(testing::StrEq(m_strDefaultPayloadTypeNumber.GetStr())))
             .WillOnce(::testing::Return(m_pMockEvsSubBundle.get()));
     EXPECT_CALL(*m_pMockEvsSubBundle,
             GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CHANNELS_INT, DEFAULT_CHANNEL))
@@ -767,14 +736,6 @@ TEST_F(CodecEvsConfigTest, Create_CmrEnabled)
             GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT,
                     CodecEvsConfig::NOT_DEFINED))
             .WillOnce(Return(nChAwRecv));
-    EXPECT_CALL(*m_pMockICarrierConfig,
-            GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_SHOW_CODEC_ATTRIBUTE_AMRWBIO_MODESET_BOOL,
-                    IMS_FALSE))
-            .WillOnce(Return(bVisibleModeSet));
-    EXPECT_CALL(*m_pMockICarrierConfig,
-            GetInt(CarrierConfig::ImsVoice::KEY_EVS_AMRWB_IO_MODE_SET_INT,
-                    CodecAudioConfig::DEFAULT_MODESET_AMRWB))
-            .WillOnce(Return(nModeSetList));
     EXPECT_CALL(*m_pMockICarrierConfig,
             GetIntArray(CarrierConfig::ImsVoice::
                                 KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY,

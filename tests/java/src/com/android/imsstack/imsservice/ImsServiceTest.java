@@ -24,7 +24,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -107,7 +106,6 @@ public class ImsServiceTest extends ImsStackTest {
 
         // Restore the ActivityManager to bind a real Service.
         restoreInstance(Singleton.class, "mInstance", mIActivityManagerSingleton);
-        restoreInstance(ActivityManager.class, "IActivityManagerSingleton", null);
 
         CountDownLatch latch = new CountDownLatch(1);
         mServiceConnection = new ImsServiceConnection(latch);

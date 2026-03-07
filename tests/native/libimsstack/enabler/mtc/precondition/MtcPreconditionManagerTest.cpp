@@ -2373,11 +2373,70 @@ TEST_F(MtcPreconditionManagerTest, NotifiesQosReserveFailedOnWaitAudioDedicatedB
     ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::IDLE));
     SetUpNothingOnDefaultBearerSupported();
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_ON_AUDIO_QOS_DEACTIVATION_INT))
-            .WillByDefault(Return(ConfigVoice::QOS_DEACTIVATION_POLICY_TERMINATE_CALL));
+            .WillByDefault(Return(ConfigVoice::QOS_DEACTIVATION_POLICY_MODIFY_CALL));
+    ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHED));
+    EXPECT_CALL(objListener, QosReserveFailed(&objISession, QosLossPolicy::MODIFY)).Times(1);
+
+    pPreconditionManager->OnTimerExpired(&objTimer, QosTimerType::WAIT_AUDIO_DEDICATED_BEARER);
+}
+
+TEST_F(MtcPreconditionManagerTest,
+        NotifiesQosReserveFailedWithReleaseOnWaitAudioDedicatedBearerTimerExpiredDuringSetup)
+{
+    SetUpMockQosInfo();
+    pPreconditionManager->SetOnWlanForPrerequisite(IMS_FALSE);
+    ON_CALL(objTimer, IsQosTimerActivated(QosTimerType::WAIT_AVAILABLE_AFTER_W2L_HANDOVER))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+    ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::IDLE));
+    SetUpNothingOnDefaultBearerSupported();
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_ON_AUDIO_QOS_DEACTIVATION_INT))
+            .WillByDefault(Return(ConfigVoice::QOS_DEACTIVATION_POLICY_MAINTAIN_CALL));
 
     EXPECT_CALL(objListener, QosReserveFailed(&objISession, QosLossPolicy::RELEASE)).Times(1);
 
     pPreconditionManager->OnTimerExpired(&objTimer, QosTimerType::WAIT_AUDIO_DEDICATED_BEARER);
+}
+
+TEST_F(MtcPreconditionManagerTest,
+        NotifiesQosReserveFailedWithReleaseOnGuardAfterLostTimerExpiredDuringSetupIfConfigEnabled)
+{
+    SetUpMockQosInfo();
+    ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHING));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+    pPreconditionManager->SetOnWlanForPrerequisite(IMS_FALSE);
+    ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::LOST));
+    SetUpNothingOnDefaultBearerSupported();
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_RELEASE_CALL_ON_QOS_LOST_DURING_SETUP_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objListener, QosReserveFailed(&objISession, QosLossPolicy::RELEASE)).Times(1);
+
+    pPreconditionManager->OnTimerExpired(&objTimer, QosTimerType::GUARD_AFTER_LOST);
+}
+
+TEST_F(MtcPreconditionManagerTest,
+        DoNothingOnGuardAfterLostTimerExpiredDuringSetupIfConfigDisabledEvenIfPolicyIsTerminate)
+{
+    SetUpMockQosInfo();
+    ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHING));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+    pPreconditionManager->SetOnWlanForPrerequisite(IMS_FALSE);
+    ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::LOST));
+    SetUpNothingOnDefaultBearerSupported();
+
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_RELEASE_CALL_ON_QOS_LOST_DURING_SETUP_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_ON_AUDIO_QOS_DEACTIVATION_INT))
+            .WillByDefault(Return(ConfigVoice::QOS_DEACTIVATION_POLICY_TERMINATE_CALL));
+
+    EXPECT_CALL(objListener, QosReserveFailed(&objISession, _)).Times(0);
+
+    pPreconditionManager->OnTimerExpired(&objTimer, QosTimerType::GUARD_AFTER_LOST);
 }
 
 TEST_F(MtcPreconditionManagerTest,
@@ -2388,10 +2447,29 @@ TEST_F(MtcPreconditionManagerTest,
     ON_CALL(objTimer, IsQosTimerActivated(QosTimerType::WAIT_AVAILABLE_AFTER_W2L_HANDOVER))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationProxy,
-            GetBoolean(ConfigVoice::KEY_RELEASE_CALL_ON_DEDICATED_BEARER_WAIT_TIMEOUT_BOOL))
+            GetBoolean(ConfigVoice::KEY_RELEASE_CALL_ON_QOS_LOST_DURING_SETUP_BOOL))
             .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(objListener, QosReserveFailed(&objISession, QosLossPolicy::RELEASE)).Times(1);
+
+    pPreconditionManager->OnTimerExpired(&objTimer, QosTimerType::WAIT_AUDIO_DEDICATED_BEARER);
+}
+
+TEST_F(MtcPreconditionManagerTest,
+        QosReserveFailedOnWaitAudioDedicatedBearerTimerExpiredIfConfirmedAndConfigEnabled)
+{
+    SetUpMockQosInfo();
+    pPreconditionManager->SetOnWlanForPrerequisite(IMS_FALSE);
+    ON_CALL(objTimer, IsQosTimerActivated(QosTimerType::WAIT_AVAILABLE_AFTER_W2L_HANDOVER))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_RELEASE_CALL_ON_QOS_LOST_DURING_SETUP_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHED));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_ON_AUDIO_QOS_DEACTIVATION_INT))
+            .WillByDefault(Return(ConfigVoice::QOS_DEACTIVATION_POLICY_MODIFY_CALL));
+
+    EXPECT_CALL(objListener, QosReserveFailed(&objISession, QosLossPolicy::RELEASE)).Times(0);
 
     pPreconditionManager->OnTimerExpired(&objTimer, QosTimerType::WAIT_AUDIO_DEDICATED_BEARER);
 }

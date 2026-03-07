@@ -528,8 +528,14 @@ IMS_BOOL AudioSdpParser::ParseEvsSwitchMode(
         pFmtp->SetEvsModeSwitch((IMS_UINT32)objSplitEqual.GetAt(1).ToInt32());
         pFmtp->SetShowEvsModeSwitch(IMS_TRUE);
 
-        IMS_TRACE_D("ParseEvsSwitchMode(): evs-mode-switch[%d], visible[%d]",
-                pFmtp->GetEvsModeSwitch(), pFmtp->IsEvsModeSwitchVisible(), 0);
+        if (pFmtp->GetModeSetList() == 0)
+        {
+            pFmtp->SetModeSetList(CodecAudioConfig::FULL_MODESET_AMRWB);
+        }
+
+        IMS_TRACE_D("ParseEvsSwitchMode(): evs-mode-switch[%d], visible[%d] modeSetList[%d]",
+                pFmtp->GetEvsModeSwitch(), pFmtp->IsEvsModeSwitchVisible(),
+                pFmtp->GetModeSetList());
 
         return IMS_TRUE;
     }

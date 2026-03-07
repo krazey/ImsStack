@@ -105,7 +105,7 @@
     <int name="imsvoice.session_refresh_trigger_interval_sec_int" value="0"/>
     <int name="imsvoice.registration_restoration_mode_on_504_for_invite_int" value="1"/>
     <boolean name="imsvoice.registration_restoration_for_invite_require_header_validation_bool" value="false"/>
-    <boolean name="imsvoice.release_call_on_dedicated_bearer_wait_timeout_bool" value="false"/>
+    <boolean name="imsvoice.release_call_on_qos_lost_during_setup_bool" value="true"/>
     <int name="imsvoice.policy_on_audio_qos_deactivation_int" value="1"/>
     <int name="imsvt.policy_on_video_qos_deactivation_int" value="2"/>
     <int name="imsrtt.policy_on_text_qos_deactivation_int" value="2"/>

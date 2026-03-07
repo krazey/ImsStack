@@ -117,6 +117,9 @@ public class TestConfigMenuTest {
         when(imsManagerProxy.getImsMmTelManagerProxy(eq(SUB_ID[0])))
                 .thenReturn(mImsMmTelManagerProxy);
         setUpSharedPreferences(mTestAppContext.getContext());
+        // Make sure that TestConfigMenu instances are GC-ed.
+        // android.os.strictmode.InstanceCountViolation expected 2 instances max.
+        Runtime.getRuntime().gc();
     }
 
     @After

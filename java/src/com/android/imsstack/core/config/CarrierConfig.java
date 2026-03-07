@@ -689,7 +689,8 @@ public class CarrierConfig {
         // Indicates the policy of USAT Registration event download.
         public static final int USAT_REG_EVENT_NOT_DOWNLOAD = 0;
         public static final int USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD = 1;
-        public static final int USAT_REG_EVENT_CONDITIONAL_DOWNLOAD = 2;
+        public static final int USAT_REG_EVENT_SETUP_EVENT_LIST_CONDITIONAL_DOWNLOAD = 2;
+        public static final int USAT_REG_EVENT_ALL_CONDITIONAL_DOWNLOAD = 3;
 
         private Ims() {}
     }
@@ -1099,8 +1100,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "registration_restoration_mode_on_504_for_invite_int";
         public static final String KEY_REGISTRATION_RESTORATION_FOR_INVITE_REQUIRE_HEADER_VALIDATION_BOOL =
                 KEY_PREFIX + "registration_restoration_for_invite_require_header_validation_bool";
-        public static final String KEY_RELEASE_CALL_ON_DEDICATED_BEARER_WAIT_TIMEOUT_BOOL =
-                KEY_PREFIX + "release_call_on_dedicated_bearer_wait_timeout_bool";
+        public static final String KEY_RELEASE_CALL_ON_QOS_LOST_DURING_SETUP_BOOL =
+                KEY_PREFIX + "release_call_on_qos_lost_during_setup_bool";
         public static final String KEY_POLICY_ON_AUDIO_QOS_DEACTIVATION_INT =
                 KEY_PREFIX + "policy_on_audio_qos_deactivation_int";
         public static final String KEY_ENABLE_SEND_REINVITE_ON_RAT_CHANGE_BOOL =

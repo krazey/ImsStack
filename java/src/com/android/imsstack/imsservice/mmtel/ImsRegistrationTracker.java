@@ -1062,7 +1062,9 @@ public class ImsRegistrationTracker {
             return switch (cc.getInt(CarrierConfig.Ims.KEY_USAT_REG_EVENT_DOWNLOAD_POLICY_INT)) {
                 case CarrierConfig.Ims.USAT_REG_EVENT_UNCONDITIONAL_DOWNLOAD -> true;
                 case CarrierConfig.Ims.USAT_REG_EVENT_NOT_DOWNLOAD -> false;
-                case CarrierConfig.Ims.USAT_REG_EVENT_CONDITIONAL_DOWNLOAD ->
+                case CarrierConfig.Ims.USAT_REG_EVENT_SETUP_EVENT_LIST_CONDITIONAL_DOWNLOAD ->
+                        usat.isInSetupEventList(Usat.SETUP_EVENT_IMS_REGISTRATION);
+                case CarrierConfig.Ims.USAT_REG_EVENT_ALL_CONDITIONAL_DOWNLOAD ->
                         (usat.isInSetupEventList(Usat.SETUP_EVENT_IMS_REGISTRATION)
                                 && !sim.getUiccIari().isEmpty());
                 default -> false;
