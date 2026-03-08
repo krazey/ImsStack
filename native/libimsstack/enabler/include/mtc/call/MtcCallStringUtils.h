@@ -82,6 +82,8 @@ public:
     {
         static const std::unordered_map<IMS_SINT32, const IMS_CHAR*> objTimerTypeStrings = {
                 {MtcCallState::TIMER_MO_CALL_SETUP_WATCHDOG,            "TIMER_MO_CALL_SETUP_WATCHDOG" },
+                {MtcCallState::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG,
+                 "TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG"                                             },
                 {MtcCallState::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL,
                  "TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL"                                             },
                 {MtcCallState::TIMER_MO_CALL_INITIATION_TO_18X_WAIT,

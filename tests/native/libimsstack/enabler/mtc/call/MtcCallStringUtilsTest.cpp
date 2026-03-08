@@ -103,6 +103,10 @@ TEST_F(MtcCallStringUtilsTest, ConvertTimerType)
     IMS_SINT32 nTimerType = MtcCallState::TIMER_MO_CALL_SETUP_WATCHDOG;
     EXPECT_STREQ(MtcCallStringUtils::ConvertTimerType(nTimerType), "TIMER_MO_CALL_SETUP_WATCHDOG");
 
+    nTimerType = MtcCallState::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG;
+    EXPECT_STREQ(MtcCallStringUtils::ConvertTimerType(nTimerType),
+            "TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG");
+
     nTimerType = MtcCallState::TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL;
     EXPECT_STREQ(MtcCallStringUtils::ConvertTimerType(nTimerType),
             "TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL");

@@ -1080,6 +1080,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "support_conference_refer_subscribe_bool";
         public static final String KEY_ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT_BOOL =
                 KEY_PREFIX + "enable_conference_subscribe_by_participant_bool";
+        public static final String KEY_CONFERENCE_CALL_SETUP_WATCHDOG_TIMER_MILLIS_INT =
+                KEY_PREFIX + "conference_call_setup_watchdog_timer_millis_int";
         public static final String KEY_CONFERENCE_SIP_FLOW_ORDER_INT =
                 KEY_PREFIX + "conference_sip_flow_order_int";
         public static final String KEY_CONFERENCE_INVITING_REFER_TYPE_INT =

@@ -277,11 +277,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdated(IN ISession
         return CallStateName::TERMINATING;
     }
 
-    if (m_objContext.GetTimer().IsActive(TIMER_MO_CALL_SETUP_WATCHDOG))
-    {
-        // Renew the timer.
-        StartTimer(TIMER_MO_CALL_SETUP_WATCHDOG);
-    }
+    RestartTimerIfActive(TIMER_MO_CALL_SETUP_WATCHDOG);
+    RestartTimerIfActive(TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG);
     m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_TRUE);
     m_objContext.GetUiNotifier().SendProgressing();
 
@@ -356,11 +353,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN I
         return CallStateName::TERMINATING;
     }
 
-    if (m_objContext.GetTimer().IsActive(TIMER_MO_CALL_SETUP_WATCHDOG))
-    {
-        // Renew the timer.
-        StartTimer(TIMER_MO_CALL_SETUP_WATCHDOG);
-    }
+    RestartTimerIfActive(TIMER_MO_CALL_SETUP_WATCHDOG);
+    RestartTimerIfActive(TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG);
     m_objContext.GetMediaManager().Run(piSession, piMessage, IMS_TRUE);
     m_objContext.GetUiNotifier().SendProgressing();
     return GetStateName();
@@ -383,6 +377,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionForkedResponseReceived(
 
 PUBLIC VIRTUAL CallStateName OutgoingState::SessionPrackDelivered(IN ISession* piSession)
 {
+    RestartTimerIfActive(TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG);
+
     const IMessage* piMessage = piSession->GetPreviousResponse(IMessage::SESSION_PRACK);
     if (piMessage == IMS_NULL)
     {
@@ -473,6 +469,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPrackDeliveryFailed(IN ISessi
 PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
         IN ISession* piSession, IN IMS_UINT32 nIndex)
 {
+    RestartTimerIfActive(TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG);
     StopTimer(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
 
     // to cover the case that "100 trying" is missed
@@ -548,6 +545,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
 PUBLIC VIRTUAL CallStateName OutgoingState::SessionRprReceived(
         IN ISession* piSession, IN IMS_UINT32 nIndex)
 {
+    RestartTimerIfActive(TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG);
     StopTimer(TIMER_MO_18X_WAIT);
     StopTimer(TIMER_MO_CALL_INITIATION_TO_18X_WAIT);
     StopTimer(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
@@ -837,6 +835,14 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 nType)
             {
                 pAosConnector->Control(ImsAosControl::REGISTER_REINITIATE);
             }
+            return CallStateName::TERMINATING;
+        }
+        case TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG:
+        {
+            IMS_TRACE_E(0, "Conference call setup watchdog timer expired.", 0, 0, 0);
+            CallReasonInfo objReason(CODE_SIP_SERVER_TIMEOUT);
+            HandleCancel(GetISession(), objReason);
+            OnStartFailed(objReason);
             return CallStateName::TERMINATING;
         }
         case TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL:

@@ -512,6 +512,7 @@ CallStateName IdleState::ContinueConference(IN const MediaInfo& objMediaInfo)
 
     m_objContext.GetUiNotifier().SendInitiating();
     StartTimer(TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
+    StartTimer(TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG);
 
     return CallStateName::OUTGOING;
 }

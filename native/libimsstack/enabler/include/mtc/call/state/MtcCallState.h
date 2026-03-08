@@ -146,6 +146,7 @@ public:
     enum TimerType
     {
         TIMER_MO_CALL_SETUP_WATCHDOG,
+        TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG,
         TIMER_MO_REGISTRATION_FOR_SILENT_REDIAL,
         TIMER_MO_CALL_INITIATION_TO_18X_WAIT,
         TIMER_MO_18X_WAIT,
@@ -196,6 +197,7 @@ protected:
     IMS_BOOL IsAnswerMandatory(IN ISession* piSession, IN const IMessage* piMessage) const;
 
     void StartTimer(IN IMS_UINT32 nType) const;
+    void RestartTimerIfActive(IN IMS_UINT32 nType) const;
     void StopTimer(IN IMS_UINT32 nType) const;
     IMS_SINT32 GetTimeInMilliseconds(IN IMS_UINT32 nType) const;
 

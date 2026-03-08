@@ -405,6 +405,15 @@ TEST_F(OutgoingStateTest, CallSetupWatchdogTimerExpiredTerminatesCall)
             pOutgoingState->OnTimerExpired(MtcCallState::TimerType::TIMER_MO_CALL_SETUP_WATCHDOG));
 }
 
+TEST_F(OutgoingStateTest, ConferenceCallSetupWatchdogTimerExpiredTerminatesCall)
+{
+    EXPECT_CALL(objMtcSession, Terminate(_, CallReasonInfo(CODE_SIP_SERVER_TIMEOUT)));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_SIP_SERVER_TIMEOUT)));
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pOutgoingState->OnTimerExpired(
+                    MtcCallState::TimerType::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG));
+}
+
 TEST_F(OutgoingStateTest, RegistrationTimerExpiredTerminatesCall)
 {
     EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_SIP_SERVER_ERROR)));
@@ -1549,7 +1558,7 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdatedInvokesSendProgressing)
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionEarlyMediaUpdated(&objSession));
 }
 
-TEST_F(OutgoingStateTest, SessionEarlyMediaUpdatedStartsCallSetupWatchdogTimerIfActive)
+TEST_F(OutgoingStateTest, SessionEarlyMediaUpdatedStartsCallSetupWatchdogTimersIfActive)
 {
     MockIMessage objMessage;
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_EARLY_UPDATE, -1))
@@ -1557,14 +1566,33 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdatedStartsCallSetupWatchdogTimerIf
     SipMethod objMethod(SipMethod::UPDATE);
     ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
 
-    ON_CALL(objMessageUtils, IsResponseExist(&objSession, SipStatusCode::SC_200))
-            .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMediaManager, IsLocalTone).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_CALL_SETUP_WATCHDOG))
             .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG))
+            .WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_MO_CALL_SETUP_WATCHDOG, _));
-    EXPECT_CALL(objMediaManager, Run(&objSession, &objMessage, IMS_TRUE));
-    EXPECT_CALL(objUiNotifier, SendProgressing());
+    EXPECT_CALL(
+            objTimer, Start(MtcCallState::TimerType::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG, _));
+
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionEarlyMediaUpdated(&objSession));
+}
+
+TEST_F(OutgoingStateTest, SessionEarlyMediaUpdatedDoesNotStartCallSetupWatchdogTimersIfNotActive)
+{
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_EARLY_UPDATE, -1))
+            .WillByDefault(Return(&objMessage));
+    SipMethod objMethod(SipMethod::UPDATE);
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
+
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_CALL_SETUP_WATCHDOG))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_MO_CALL_SETUP_WATCHDOG, _)).Times(0);
+    EXPECT_CALL(
+            objTimer, Start(MtcCallState::TimerType::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG, _))
+            .Times(0);
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionEarlyMediaUpdated(&objSession));
 }
@@ -1822,7 +1850,7 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateReceivedInvokesSendProgressing)
             CallStateName::OUTGOING, pOutgoingState->SessionEarlyMediaUpdateReceived(&objSession));
 }
 
-TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateReceivedStartsCallSetupWatchdogTimerIfActive)
+TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateReceivedStartsCallSetupWatchdogTimersIfActive)
 {
     MockIMessage objMessage;
     ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE))
@@ -1841,9 +1869,42 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateReceivedStartsCallSetupWatchdog
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_CALL_SETUP_WATCHDOG))
             .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG))
+            .WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_MO_CALL_SETUP_WATCHDOG, _));
+    EXPECT_CALL(
+            objTimer, Start(MtcCallState::TimerType::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG, _));
     EXPECT_CALL(objMediaManager, Run(&objSession, &objMessage, IMS_TRUE));
     EXPECT_CALL(objUiNotifier, SendProgressing());
+
+    EXPECT_EQ(
+            CallStateName::OUTGOING, pOutgoingState->SessionEarlyMediaUpdateReceived(&objSession));
+}
+
+TEST_F(OutgoingStateTest,
+        SessionEarlyMediaUpdateReceivedDoesNotStartCallSetupWatchdogTimersIfNotActive)
+{
+    MockIMessage objMessage;
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE))
+            .WillByDefault(Return(&objMessage));
+    SipMethod objMethod(SipMethod::UPDATE);
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
+
+    // to cover OnMessageReceived()
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(objPreconditionManager, OnMessageReceived(&objSession, &objMessage));
+
+    EXPECT_CALL(objMtcSession, RespondToEarlyUpdate(SipStatusCode::SC_200))
+            .WillOnce(Return(IMS_SUCCESS));
+
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_CALL_SETUP_WATCHDOG))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_MO_CALL_SETUP_WATCHDOG, _)).Times(0);
+    EXPECT_CALL(
+            objTimer, Start(MtcCallState::TimerType::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG, _))
+            .Times(0);
 
     EXPECT_EQ(
             CallStateName::OUTGOING, pOutgoingState->SessionEarlyMediaUpdateReceived(&objSession));
@@ -2139,6 +2200,32 @@ TEST_F(OutgoingStateTest, SessionPrackDeliveredInvokesSessionStartedIfEstablishe
     EXPECT_EQ(CallStateName::ESTABLISHED, pOutgoingState->SessionPrackDelivered(&objSession));
 }
 
+TEST_F(OutgoingStateTest, SessionPrackDeliveredStartsConferenceCallSetupWatchdogTimerIfActive)
+{
+    ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
+            .WillByDefault(Return(nullptr));
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(
+            objTimer, Start(MtcCallState::TimerType::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG, _));
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPrackDelivered(&objSession));
+}
+
+TEST_F(OutgoingStateTest,
+        SessionPrackDeliveredDoesNotStartConferenceCallSetupWatchdogTimerIfNotActive)
+{
+    ON_CALL(objSession, GetPreviousResponse(IMessage::SESSION_PRACK))
+            .WillByDefault(Return(nullptr));
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(
+            objTimer, Start(MtcCallState::TimerType::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG, _))
+            .Times(0);
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPrackDelivered(&objSession));
+}
+
 TEST_F(OutgoingStateTest, SessionPrackDeliveryFailedDoesNothingIfNeedToIgnoreByConfig)
 {
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_POLICY_FOR_PRACK_DELIVERY_FAILURE_INT))
@@ -2370,6 +2457,45 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedStartsUdpKeepAliveSe
 
     EXPECT_CALL(*pKeepAliveSender, Start).Times(0);
     pOutgoingState->SessionProvisionalResponseReceived(&objSession, 1);
+}
+
+TEST_F(OutgoingStateTest,
+        SessionProvisionalResponseReceivedStartsConferenceCallSetupWatchdogTimerIfActive)
+{
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objInviteMethod));
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objTimer, Start(_, _)).Times(AnyNumber());
+    EXPECT_CALL(
+            objTimer, Start(MtcCallState::TimerType::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG, _));
+
+    pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0);
+}
+
+TEST_F(OutgoingStateTest,
+        SessionProvisionalResponseReceivedDoesNotStartConferenceCallSetupWatchdogTimerIfNotActive)
+{
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objInviteMethod));
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objTimer, Start(_, _)).Times(AnyNumber());
+    EXPECT_CALL(
+            objTimer, Start(MtcCallState::TimerType::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG, _))
+            .Times(0);
+
+    pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0);
 }
 
 TEST_F(OutgoingStateTest,
@@ -2739,6 +2865,41 @@ TEST_F(OutgoingStateTest, SessionRprReceivedDoesNotStartCallSetupWatchdogTimerIf
             .WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objTimer, Stop(MtcCallState::TimerType::TIMER_MO_NOANSWER));
     EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_MO_CALL_SETUP_WATCHDOG, _)).Times(0);
+
+    pOutgoingState->SessionRprReceived(&objSession, 0);
+}
+
+TEST_F(OutgoingStateTest, SessionRprReceivedStartsConferenceCallSetupWatchdogTimerIfActive)
+{
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objTimer, Start(_, _)).Times(AnyNumber());
+    EXPECT_CALL(
+            objTimer, Start(MtcCallState::TimerType::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG, _));
+
+    pOutgoingState->SessionRprReceived(&objSession, 0);
+}
+
+TEST_F(OutgoingStateTest, SessionRprReceivedDoesNotStartConferenceCallSetupWatchdogTimerIfNotActive)
+{
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objTimer, IsActive(MtcCallState::TimerType::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objTimer, Start(_, _)).Times(AnyNumber());
+    EXPECT_CALL(
+            objTimer, Start(MtcCallState::TimerType::TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG, _))
+            .Times(0);
 
     pOutgoingState->SessionRprReceived(&objSession, 0);
 }
