@@ -74,7 +74,6 @@ using ::testing::ReturnRef;
     using Base::IsRegWaitingRequired;                      \
     using Base::IsECallConnectedNetworkUnavailable;        \
     using Base::IsImsCall;                                 \
-    using Base::IsKeepEPdnWhenNoPcscf;                     \
     using Base::IsRegBlockInCbm;                           \
     using Base::IsReleaseEmergencyPdnUponEmergencyCallEnd; \
     using Base::IsTimerRunning;                            \
@@ -93,7 +92,6 @@ using ::testing::ReturnRef;
     using Base::SetAppState;                               \
     using Base::SetAppType;                                \
     using Base::SetImsCall;                                \
-    using Base::SetKeepEPdnWhenNoPcscf;                    \
     using Base::SetRegBlockInCbm;                          \
     using Base::StateConnected_Connection;                 \
     using Base::StateConnected_Registration;               \
@@ -404,12 +402,10 @@ TEST_F(AosEApplicationTest, ReturnsTrueWhenRequestCmdWithStartAndReady)
 TEST_F(AosEApplicationTest, InitEmergencyVariableWhenRegisterStartCalled)
 {
     m_pTestAosEApplication->SetAppState(IAosApplication::STATE_READY);
-    m_pTestAosEApplication->SetKeepEPdnWhenNoPcscf(IMS_TRUE);
     m_pTestAosEApplication->SetRegBlockInCbm(IMS_TRUE);
 
     EXPECT_TRUE(m_pTestAosEApplication->RequestCmd(ImsAosControl::REGISTER_START, 0));
 
-    EXPECT_FALSE(m_pTestAosEApplication->IsKeepEPdnWhenNoPcscf());
     EXPECT_FALSE(m_pTestAosEApplication->IsRegBlockInCbm());
 }
 
@@ -856,8 +852,7 @@ TEST_F(AosEApplicationTest, ProcessRegFailed_StateConnected)
     EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::REG_FAILURE);
 }
 
-TEST_F(AosEApplicationTest,
-        KeepEPdnWhenProcessRegFailed_StateConnectedIfSettingKeepPdnUntilEModeEnd)
+TEST_F(AosEApplicationTest, KeepEPdnWhenProcessRegFailed_StateConnectedIfReasonIsNoPcscfAvailable)
 {
     m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
 
@@ -865,7 +860,6 @@ TEST_F(AosEApplicationTest,
             IAosRegistration::REASON_FAILURE_NO_PCSCF_AVAILABLE);
     m_pTestAosEApplication->StateConnected_Registration(objMessageReg);
 
-    EXPECT_TRUE(m_pTestAosEApplication->IsKeepEPdnWhenNoPcscf());
     EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::DATA_CONNECTION_MAINTAIN);
 }
 
@@ -1205,24 +1199,8 @@ TEST_F(AosEApplicationTest, AddNetTrackerListenerWhenECallTerminatedIfNetworkIsA
     m_pTestAosEApplication->ProcessECallTerminated();
 }
 
-TEST_F(AosEApplicationTest, KeepEPdnWhenECallTerminatedIfSettingKeepPdnUntilEModeEnd)
-{
-    m_pTestAosEApplication->SetKeepEPdnWhenNoPcscf(IMS_TRUE);
-    ON_CALL(m_objMockIAosNConfiguration, IsKeepEPdnUponPcscfUnavailable())
-            .WillByDefault(Return(IMS_TRUE));
-
-    m_pTestAosEApplication->ProcessECallTerminated();
-
-    EXPECT_FALSE(m_pTestAosEApplication->IsKeepEPdnWhenNoPcscf());
-    EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_TERMINATED));
-}
-
 TEST_F(AosEApplicationTest, ReleaseEPdnWhenECallTerminatedIfEAttach)
 {
-    // GIVEN
-    ON_CALL(m_objMockIAosNConfiguration, IsKeepEPdnUponPcscfUnavailable())
-            .WillByDefault(Return(IMS_FALSE));
-
     // GIVEN
     ON_CALL(m_objMockIAosNConfiguration, IsReleaseEPdnUponECallEndIfEAttach())
             .WillByDefault(Return(IMS_TRUE));
@@ -1238,8 +1216,6 @@ TEST_F(AosEApplicationTest, ReleaseEPdnWhenECallTerminatedIfEAttach)
 TEST_F(AosEApplicationTest, KeepEPdnWhenECallTerminatedIfEAttachConfigIsDisabledAndEAttach)
 {
     // GIVEN
-    ON_CALL(m_objMockIAosNConfiguration, IsKeepEPdnUponPcscfUnavailable())
-            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosRegistration, GetMode())
             .WillByDefault(Return(IAosRegistration::MODE_NORMAL));
     ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
@@ -1257,33 +1233,9 @@ TEST_F(AosEApplicationTest, KeepEPdnWhenECallTerminatedIfEAttachConfigIsDisabled
     EXPECT_FALSE(bResult);
 }
 
-TEST_F(AosEApplicationTest, KeepEPdnWhenECallTerminatedIfEAttachConfigIsDisabledAndNotEAttach)
-{
-    // GIVEN
-    ON_CALL(m_objMockIAosNConfiguration, IsKeepEPdnUponPcscfUnavailable())
-            .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(m_objMockIAosRegistration, GetMode())
-            .WillByDefault(Return(IAosRegistration::MODE_NORMAL));
-    ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
-            .WillByDefault(Return(CarrierConfig::ImsEmergency::IPCAN_NONE));
-
-    // GIVEN
-    ON_CALL(m_objMockIAosNConfiguration, IsReleaseEPdnUponECallEndIfEAttach())
-            .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(m_objMockIAosNetTracker, IsEmergencyAttach()).WillByDefault(Return(IMS_FALSE));
-
-    // WHEN
-    IMS_BOOL bResult = m_pTestAosEApplication->IsReleaseEmergencyPdnUponEmergencyCallEnd();
-
-    // THEN
-    EXPECT_FALSE(bResult);
-}
-
 TEST_F(AosEApplicationTest, KeepEPdnWhenECallTerminatedIfEAttachConfigIsEnabledButNotEAttach)
 {
     // GIVEN
-    ON_CALL(m_objMockIAosNConfiguration, IsKeepEPdnUponPcscfUnavailable())
-            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosRegistration, GetMode())
             .WillByDefault(Return(IAosRegistration::MODE_NORMAL));
     ON_CALL(m_objMockIAosNConfiguration, GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd())
@@ -1307,8 +1259,6 @@ TEST_F(AosEApplicationTest,
     ImsVector<AString> objPlmns;
     objPlmns.Add("50501");
     objPlmns.Add("50502");
-    ON_CALL(m_objMockIAosNConfiguration, IsKeepEPdnUponPcscfUnavailable())
-            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosRegistration, GetMode())
             .WillByDefault(Return(IAosRegistration::MODE_FAKE));
     ON_CALL(m_objMockIAosNConfiguration, IsReleaseEPdnUponECallEndInFakeMode())
@@ -1334,8 +1284,6 @@ TEST_F(AosEApplicationTest,
     ImsVector<AString> objPlmns;
     objPlmns.Add("50501");
     objPlmns.Add("50502");
-    ON_CALL(m_objMockIAosNConfiguration, IsKeepEPdnUponPcscfUnavailable())
-            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(m_objMockIAosRegistration, GetMode())
             .WillByDefault(Return(IAosRegistration::MODE_FAKE));
     ON_CALL(m_objMockIAosNConfiguration, IsReleaseEPdnUponECallEndInFakeMode())
@@ -1581,10 +1529,10 @@ TEST_F(AosEApplicationTest, KeepEPdnWhenECallSessionReleasedIfNotConfiguredToRel
 }
 
 TEST_F(AosEApplicationTest,
-        KeepEPdnWhenECallSessionReleasedWithoutEstablishmentIfConfiguredToKeepPdnUntilEModeEnd)
+        DoNothingWhenECallSessionReleasedWithoutEstablishmentIfConfiguredToDelayEpdnRelease)
 {
     m_pTestAosEApplication->SetImsCall(IMS_TRUE);
-    ON_CALL(m_objMockIAosNConfiguration, IsKeepEPdnUponPcscfUnavailable())
+    ON_CALL(m_objMockIAosNConfiguration, IsDelayEPdnReleaseWhenECallFailure())
             .WillByDefault(Return(IMS_TRUE));
 
     m_pTestAosEApplication->CallTracker_ECallSessionReleased(IMS_FALSE);

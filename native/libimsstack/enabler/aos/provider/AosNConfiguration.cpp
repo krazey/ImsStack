@@ -315,6 +315,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsImsOverNrEnabled() const
     return IMS_FALSE;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsDelayEPdnReleaseWhenECallFailure() const
+{
+    return m_objAsset.bDelayEPdnReleaseWhenECallFailure;
+}
+
 PUBLIC VIRTUAL IMS_BOOL
 AosNConfiguration::IsEmergencyCallBasedOnPauOfNormalRegistrationSupported() const
 {
@@ -359,11 +364,6 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsIpsecInitializedWithNewPcscf() cons
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsInitSubUponSubTerminated() const
 {
     return m_objAsset.bInitSubUponSubTerminated;
-}
-
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsKeepEPdnUponPcscfUnavailable() const
-{
-    return m_objAsset.bKeepEPdnUponPcscfUnavailable;
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsKeepERegRetryOnWlanRequired() const
@@ -1687,6 +1687,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Ims::KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL);
     m_objAsset.bDisableN1ModeOnImsPduEstablishFailure = piCc->GetBoolean(
             CarrierConfig::Ims::KEY_DISABLE_N1_MODE_ON_IMS_PDU_ESTABLISH_FAILURE_BOOL);
+    m_objAsset.bDelayEPdnReleaseWhenECallFailure = piCc->GetBoolean(
+            CarrierConfig::ImsEmergency::KEY_DELAY_EPDN_RELEASE_WHEN_ECALL_FAILURE_BOOL);
     m_objAsset.bEmcCallBasedOnPAssociatedUriOfNormalReg = piCc->GetBoolean(
             CarrierConfig::ImsEmergency::KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL);
     m_objAsset.bEmcRegOnRandomPcscf =
@@ -1707,8 +1709,6 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Ims::KEY_INIT_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL);
     m_objAsset.bInitSubUponSubTerminated =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_INIT_SUB_UPON_SUB_TERMINATED_BOOL);
-    m_objAsset.bKeepEPdnUponPcscfUnavailable = piCc->GetBoolean(
-            CarrierConfig::ImsEmergency::KEY_KEEP_EPDN_UPON_PCSCF_UNAVAILABLE_BOOL);
     m_objAsset.bKeepERegRetryOnWlan =
             piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_KEEP_EREG_RETRY_ON_WLAN_BOOL);
     m_objAsset.bKeepExistingPcscfOnPcscfChangeDuringTheCall = piCc->GetBoolean(

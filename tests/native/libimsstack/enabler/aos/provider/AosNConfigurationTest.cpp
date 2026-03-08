@@ -566,6 +566,10 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::ImsEmergency::KEY_DELAY_EPDN_RELEASE_WHEN_ECALL_FAILURE_BOOL,
+                    IMS_FALSE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::ImsEmergency::
                                KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL,
                     IMS_FALSE))
@@ -604,10 +608,6 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Ims::KEY_INIT_SUB_UPON_SUB_TERMINATED_BOOL, IMS_FALSE))
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::ImsEmergency::KEY_KEEP_EPDN_UPON_PCSCF_UNAVAILABLE_BOOL,
-                    IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::ImsEmergency::KEY_KEEP_EREG_RETRY_ON_WLAN_BOOL, IMS_FALSE))
@@ -1032,6 +1032,7 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
     EXPECT_TRUE(m_pAosNConfiguration->IsBlockRegOnCsCall());
     EXPECT_FALSE(m_pAosNConfiguration->IsCallEndAndPdnReactivationByRegTerminated());
     EXPECT_FALSE(m_pAosNConfiguration->IsUnsecureTcpSocketOnAccomplishingRegDestroyed());
+    EXPECT_FALSE(m_pAosNConfiguration->IsDelayEPdnReleaseWhenECallFailure());
     EXPECT_FALSE(m_pAosNConfiguration->IsEmergencyCallBasedOnPauOfNormalRegistrationSupported());
     EXPECT_TRUE(m_pAosNConfiguration->IsEmcRegOnRandomPcscf());
     EXPECT_TRUE(m_pAosNConfiguration->IsERegWithOnlyTcpInRoaming());
@@ -1043,7 +1044,6 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
     EXPECT_FALSE(m_pAosNConfiguration->IsImsiBasedUriPrioritized());
     EXPECT_FALSE(m_pAosNConfiguration->IsIpsecInitializedWithNewPcscf());
     EXPECT_FALSE(m_pAosNConfiguration->IsInitSubUponSubTerminated());
-    EXPECT_FALSE(m_pAosNConfiguration->IsKeepEPdnUponPcscfUnavailable());
     EXPECT_FALSE(m_pAosNConfiguration->IsKeepERegRetryOnWlanRequired());
     EXPECT_TRUE(m_pAosNConfiguration->IsKeepRegRetryCntUponPdnReconnect());
     EXPECT_TRUE(m_pAosNConfiguration->IsKeepRegRetryTimerOnAllEnablersDetached());

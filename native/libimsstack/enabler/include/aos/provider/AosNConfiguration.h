@@ -81,6 +81,7 @@ public:
     IMS_BOOL IsUnsecureTcpSocketOnAccomplishingRegDestroyed() const override;
     IMS_BOOL IsSmsOverImsSupported() const override;
     IMS_BOOL IsImsOverNrEnabled() const override;
+    IMS_BOOL IsDelayEPdnReleaseWhenECallFailure() const override;
     IMS_BOOL IsEmergencyCallBasedOnPauOfNormalRegistrationSupported() const override;
     IMS_BOOL IsEmcRegOnRandomPcscf() const override;
     IMS_BOOL IsERegWithOnlyTcpInRoaming() const override;
@@ -93,7 +94,6 @@ public:
     IMS_BOOL IsImsiBasedUriPrioritized() const override;
     IMS_BOOL IsIpsecInitializedWithNewPcscf() const override;
     IMS_BOOL IsInitSubUponSubTerminated() const override;
-    IMS_BOOL IsKeepEPdnUponPcscfUnavailable() const override;
     IMS_BOOL IsKeepERegRetryOnWlanRequired() const override;
     IMS_BOOL IsKeepRegRetryCntUponPdnReconnect() const override;
     IMS_BOOL IsKeepRegRetryTimerOnAllEnablersDetached() const override;

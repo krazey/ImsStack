@@ -66,6 +66,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsUnsecureTcpSocketOnAccomplishingRegDestroyed, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSmsOverImsSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsImsOverNrEnabled, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsDelayEPdnReleaseWhenECallFailure, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergencyCallBasedOnPauOfNormalRegistrationSupported, (),
             (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmcRegOnRandomPcscf, (), (const, override));
@@ -79,7 +80,6 @@ public:
     MOCK_METHOD(IMS_BOOL, IsImsiBasedUriPrioritized, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsIpsecInitializedWithNewPcscf, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsInitSubUponSubTerminated, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsKeepEPdnUponPcscfUnavailable, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsKeepERegRetryOnWlanRequired, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsKeepRegRetryCntUponPdnReconnect, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsKeepRegRetryTimerOnAllEnablersDetached, (), (const, override));

@@ -44,7 +44,6 @@ __IMS_TRACE_TAG_AOS__;
 PUBLIC
 AosEApplication::AosEApplication(IN IAosAppContext* piAppContext, IN AString& strAppId) :
         AosApplication(piAppContext, strAppId),
-        m_bKeepEPdnWhenNoPcscf(IMS_FALSE),
         m_bRegBlockInCbm(IMS_FALSE)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosEApplication = %" PFLS_u "/%" PFLS_x, APPID,
@@ -118,13 +117,7 @@ PUBLIC VIRTUAL void AosEApplication::GetProperty(
 
 PROTECTED void AosEApplication::InitEmergencyVariable()
 {
-    SetKeepEPdnWhenNoPcscf(IMS_FALSE);
     SetRegBlockInCbm(IMS_FALSE);
-}
-
-PROTECTED void AosEApplication::SetKeepEPdnWhenNoPcscf(IN IMS_BOOL bEnable)
-{
-    m_bKeepEPdnWhenNoPcscf = bEnable;
 }
 
 PROTECTED void AosEApplication::SetRegBlockInCbm(IN IMS_BOOL bBlock)
@@ -146,11 +139,6 @@ PROTECTED void AosEApplication::ProcessFakeRegRequest(IN IMS_UINT32 nReason)
     }
 }
 
-PROTECTED IMS_BOOL AosEApplication::IsKeepEPdnWhenNoPcscf() const
-{
-    return m_bKeepEPdnWhenNoPcscf;
-}
-
 PROTECTED IMS_BOOL AosEApplication::IsRegBlockInCbm() const
 {
     return m_bRegBlockInCbm;
@@ -158,13 +146,6 @@ PROTECTED IMS_BOOL AosEApplication::IsRegBlockInCbm() const
 
 PROTECTED IMS_BOOL AosEApplication::IsReleaseEmergencyPdnUponEmergencyCallEnd()
 {
-    if (GET_N_CONFIG(m_nSlotId)->IsKeepEPdnUponPcscfUnavailable() && IsKeepEPdnWhenNoPcscf())
-    {
-        A_IMS_TRACE_I(APPID, "Keep EPDN: Wait until data disconnected", 0, 0, 0);
-        SetKeepEPdnWhenNoPcscf(IMS_FALSE);
-        return IMS_FALSE;
-    }
-
     IAosNetTracker* piNetTracker = m_piContext->GetNetTracker();
     if (GET_N_CONFIG(m_nSlotId)->IsReleaseEPdnUponECallEndIfEAttach() &&
             piNetTracker->IsEmergencyAttach())
@@ -487,7 +468,6 @@ PROTECTED VIRTUAL void AosEApplication::ProcessRegFailed_StateConnected(IN IMS_U
 {
     if (nReason == IAosRegistration::REASON_FAILURE_NO_PCSCF_AVAILABLE)
     {
-        SetKeepEPdnWhenNoPcscf(IMS_TRUE);
         ProcessCleanAll(AosReason::DATA_CONNECTION_MAINTAIN);
     }
     else
@@ -864,10 +844,12 @@ PROTECTED VIRTUAL void AosEApplication::CallTracker_ECallSessionReleased(IN IMS_
 {
     A_IMS_TRACE_I(APPID, "CallTracker_ECallSessionReleased", 0, 0, 0);
 
-    if (GET_N_CONFIG(m_nSlotId)->IsKeepEPdnUponPcscfUnavailable() && !bEstablished)
+    if (GET_N_CONFIG(m_nSlotId)->IsDelayEPdnReleaseWhenECallFailure() && !bEstablished)
     {
-        A_IMS_TRACE_I(
-                APPID, "do not release emergency pdn if the session is not established", 0, 0, 0);
+        A_IMS_TRACE_I(APPID,
+                "Wait for TIMER_APP_TERMINATED to expire to avoid delaying domain reselection by "
+                "prematurely releasing the EPDN.",
+                0, 0, 0);
         return;
     }
 
