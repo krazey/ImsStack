@@ -473,6 +473,9 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegTimerToString(IN IMS_UINT32 nType)
         case RegistrationLog::TIMER_WAIT_EMERGENCY_NETWORK:
             return "TIMER_WAIT_EMERGENCY_NETWORK";
 
+        case RegistrationLog::TIMER_EXIT_EMERGENCY_MODE:
+            return "TIMER_EXIT_EMERGENCY_MODE";
+
         default:
             return "__INVALID__";
     }

@@ -372,6 +372,15 @@ public:
     virtual IMS_BOOL IsImsOverNrEnabled() const = 0;
 
     /**
+     * @brief Flag indicating whether to delay EPDN disconnection or not when an emergency call
+     *        setup fails and the carrier requires UE to release EPDN after the call ends.
+     *
+     * @return IMS_BOOL Return whether to delay or not
+     * @see {@code imsemergency.delay_epdn_release_when_ecall_failure_bool}
+     */
+    virtual IMS_BOOL IsDelayEPdnReleaseWhenECallFailure() const = 0;
+
+    /**
      * @brief Flag indicating whether the authorized IMPU from P-Associated-URI header in 200 OK
      *        for IMS registration is used in emergency call.
      *
@@ -489,15 +498,6 @@ public:
      * @see {@code ims.init_sub_upon_sub_terminated_bool}
      */
     virtual IMS_BOOL IsInitSubUponSubTerminated() const = 0;
-
-    /**
-     * @brief Flag indicating whether to keep the emergency pdn when pcscf is unavailable by
-     *        requesting fake registration with the next pcscf.
-     *
-     * @return IMS_BOOL Return whether to keep the emergency pdn or not in this case.
-     * @see {@code imsemergency.keep_epdn_upon_pcscf_unavailable_bool}
-     */
-    virtual IMS_BOOL IsKeepEPdnUponPcscfUnavailable() const = 0;
 
     /**
      * @brief Flag indicating whether to keep on retrying emergency registration on WLAN.
@@ -1084,24 +1084,6 @@ public:
     virtual IMS_SINT32 GetIpv6MtuSize() const = 0;
 
     /**
-     * @brief Returns the wait time in millisecond before releasing an emergency PDN.
-     *
-     *        Emergency PDN can be released after a specific time when the emergency call ends.
-     *        This returns the delay time from the end of the call to the start of the emergency
-     *        PDN release.
-     *        If this is set to zero, do not request to release emergency PDN after a specific time.
-     *
-     *        If it is configured to release emergency PDN just after the emergency call ends
-     *        by following configurations, they will take precedence over setting of this.
-     *        #KEY_IPCAN_RELEASE_EMERGENCY_PDN_UPON_EMERGENCY_CALL_END_INT
-     *        #KEY_RELEASE_EPDN_UPON_ECALL_END_IN_FAKE_MODE_BOOL
-     *
-     * @return IMS_SINT32 Return the wait time in millisecond before releasing an emergency PDN.
-     * @see {@code imsemergency.wait_time_millis_for_release_epdn_after_ecall_end_int}
-     */
-    virtual IMS_SINT32 GetWaitTimeMillisForReleaseEPdnAfterECallEnd() const = 0;
-
-    /**
      * @brief Indicate whether emergency call is tried without emergency registration
      *
      *        Specify the preferred policy for emergency registration.
@@ -1248,6 +1230,22 @@ public:
      * @see {@code imsemergency.roaming_preferred_ereg_int}
      */
     virtual IMS_SINT32 GetRoamingPreferredEmcReg() const = 0;
+
+    /**
+     * @brief Returns the wait time in millisecond before releasing an emergency PDN when exits
+     *        emergency mode.
+     *
+     *       Specifies the delay time from the exit of the emergency mode to the start of the
+     *       emergency PDN release. The time will start only when FAKE mode EIMS registration. If
+     *       this is set to zero, it means that the EPDN won't be released when UE exits emergency
+     *       mode.
+     *
+     * @return IMS_SINT32 Return the wait time in millisecond before releasing an emergency PDN.
+     * @see {@code
+     * imsemergency.wait_time_millis_for_release_epdn_after_emc_mode_exit_in_fake_mode_with_uicc_int}
+     */
+    virtual IMS_SINT32 GetWaitTimeMillisForReleaseEpdnAfterEmcModeExitInFakeModeWithUicc()
+            const = 0;
 
     /**
      * @brief Get the SIP message threshold size caused by the transport change

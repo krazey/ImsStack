@@ -35,6 +35,8 @@ import androidx.annotation.Nullable;
 import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.agents.EmergencyStateInterface;
+import com.android.imsstack.core.agents.EmergencyStateInterface.EmergencyCallbackModeState;
 import com.android.imsstack.core.agents.IPhoneStateNotifier;
 import com.android.imsstack.core.agents.ImsPhoneStateListener;
 import com.android.imsstack.core.agents.LocationInterface;
@@ -141,6 +143,23 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
             sendRequest(IIAosService.J2N_NOTIFY_WIFI_SETTING, isEnabled);
         }
     };
+    final EmergencyStateInterface.EmergencyStateListener mEmergencyStateListener =
+            new EmergencyStateInterface.EmergencyStateListener() {
+                @Override
+                public void onEmergencyModeChanged(int type, boolean entered) {
+                    notifyEmergencyModeChanged(type, entered);
+                }
+
+                @Override
+                public void onEmergencyCallbackModeChanged(
+                        @TelephonyManager.EmergencyCallbackModeType int type,
+                        EmergencyCallbackModeState state, long duration) {
+                    EmergencyCallbackModeType emergencyCbmType =
+                            (type == TelephonyManager.EMERGENCY_CALLBACK_MODE_CALL)
+                            ? EmergencyCallbackModeType.CALL : EmergencyCallbackModeType.SMS;
+                    notifyEmergencyCallbackModeChanged(emergencyCbmType, state, duration);
+                }
+            };
 
     public void init(int slotId) {
         mSlotId = slotId;
@@ -231,12 +250,24 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         if (wifi != null) {
             wifi.addListener(mWifiListener);
         }
+
+        EmergencyStateInterface emergencyState = AgentFactory.getInstance().getAgent(
+                EmergencyStateInterface.class, mSlotId);
+        if (emergencyState != null) {
+            emergencyState.addListener(mEmergencyStateListener);
+        }
     }
 
     /**
      * Stop the necessary information that was previously initialized for AoS service.
      */
     public void stop() {
+        EmergencyStateInterface emergencyState = AgentFactory.getInstance().getAgent(
+                EmergencyStateInterface.class, mSlotId);
+        if (emergencyState != null) {
+            emergencyState.removeListener(mEmergencyStateListener);
+        }
+
         WifiInterface wifi = AgentFactory.getInstance().getAgent(WifiInterface.class);
         if (wifi != null) {
             wifi.removeListener(mWifiListener);
@@ -512,6 +543,20 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
 
             notifySimStateChanged(sim.getSimState());
         }
+    }
+
+    @Override
+    public void notifyEmergencyModeChanged(int type, boolean entered) {
+        ImsLog.d(mSlotId, "AosService: notifyEmergencyModeChanged - type=" + type + ", entered="
+                + entered);
+        mLocalLog.log("J2N_NOTIFY_EMERGENCY_MODE_CHANGED: type=" + type + ", entered="
+                + entered);
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.J2N_NOTIFY_EMERGENCY_MODE_CHANGED);
+        parcel.writeInt(type);
+        parcel.writeInt(entered ? 1 : 0);
+        sendRequest(parcel);
     }
 
     @Override

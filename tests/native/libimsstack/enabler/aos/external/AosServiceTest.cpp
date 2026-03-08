@@ -495,6 +495,36 @@ TEST_F(AosServiceTest, FailsNotifyEmergencyCallbackModeChangedWhenListenerIsNull
     // THEN : GIVEN conditions should be met.
 }
 
+TEST_F(AosServiceTest, SucceedsNotifyEmergencyModeChanged)
+{
+    // GIVEN
+    m_pAosService->AddListener(&m_objMockIAosEmergencyListener1);
+    m_pAosService->AddListener(&m_objMockIAosEmergencyListener2);
+    m_pAosService->AddListener(&m_objMockIAosEmergencyListener3);
+
+    EXPECT_CALL(m_objMockIAosEmergencyListener1, EmergencyModeChanged(_, _));
+    EXPECT_CALL(m_objMockIAosEmergencyListener2, EmergencyModeChanged(_, _));
+    EXPECT_CALL(m_objMockIAosEmergencyListener3, EmergencyModeChanged(_, _));
+
+    // WHEN
+    m_pAosService->NotifyEmergencyModeChanged(1, 1);
+
+    // THEN : GIVEN conditions should be met.
+}
+
+TEST_F(AosServiceTest, FailsNotifyEmergencyModeChangedWhenListenerIsNull)
+{
+    // GIVEN
+    EXPECT_CALL(m_objMockIAosEmergencyListener1, EmergencyModeChanged(_, _)).Times(0);
+    EXPECT_CALL(m_objMockIAosEmergencyListener2, EmergencyModeChanged(_, _)).Times(0);
+    EXPECT_CALL(m_objMockIAosEmergencyListener3, EmergencyModeChanged(_, _)).Times(0);
+
+    // WHEN
+    m_pAosService->NotifyEmergencyModeChanged(1, 1);
+
+    // THEN : GIVEN conditions should be met.
+}
+
 TEST_F(AosServiceTest, UpdateSipDelegateRegistration)
 {
     MockIAosRegistrationControlListener objMockListener1;

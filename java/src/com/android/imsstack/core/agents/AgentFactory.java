@@ -228,6 +228,7 @@ public final class AgentFactory {
         agents.put(GbaInterface.class, new GbaAgent(slotId));
         agents.put(ImsRadioInterface.class, new ImsRadioAgent(slotId));
         agents.put(CellInfoInterface.class, new CellInfoAgent(slotId));
+        agents.put(EmergencyStateInterface.class, new EmergencyStateAgent(slotId));
     }
 
     /**

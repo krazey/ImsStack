@@ -40,6 +40,8 @@ public:
     MOCK_METHOD(void, RemoveListener, (IN IAosServicePhoneListener * piListener), (override));
     MOCK_METHOD(void, NotifyEmergencyCallbackModeChanged,
             (IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_ULONG nDuration), (override));
+    MOCK_METHOD(void, NotifyEmergencyModeChanged, (IN IMS_UINT32 nType, IN IMS_UINT32 nEntered),
+            (override));
     MOCK_METHOD(void, UpdateSipDelegateRegistration, (), (override));
     MOCK_METHOD(void, TriggerSipDelegateDeregistration, (), (override));
     MOCK_METHOD(void, TriggerFullNetworkRegistration,

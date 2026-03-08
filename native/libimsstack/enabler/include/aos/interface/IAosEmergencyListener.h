@@ -37,6 +37,14 @@ public:
      */
     virtual void CallbackModeChanged(IN EmergencyCallbackModeType eType,
             IN EmergencyCallbackMode eState, IN IMS_ULONG nDuration) = 0;
+
+    /**
+     * @brief Notifies an emergency mode changed information by AosService (Java).
+     *
+     * @param nType The emergency mode type.
+     * @param bEntered The emergency mode entered or not.
+     */
+    virtual void EmergencyModeChanged(IN IMS_UINT32 nType, IN IMS_BOOL bEntered) = 0;
 };
 
 /**

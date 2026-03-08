@@ -72,6 +72,7 @@ using ::testing::ReturnRef;
     using Base::ClearTimers;                                                 \
     using Base::CreateIpsecHelper;                                           \
     using Base::DestroyIpsecHelper;                                          \
+    using Base::EmergencyModeChanged;                                        \
     using Base::GetPreferredRegScheme;                                       \
     using Base::Init;                                                        \
     using Base::IsFakeModeCondition;                                         \
@@ -89,6 +90,7 @@ using ::testing::ReturnRef;
     using Base::ProcessDefaultFlowRecovery_Start;                            \
     using Base::ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy; \
     using Base::ProcessDefaultFlowRecovery_Update;                           \
+    using Base::ProcessExitEmergencyModeTimerExpired;                        \
     using Base::ProcessModeTimerExpired;                                     \
     using Base::ProcessNormalDefaultFlowRecovery_Start;                      \
     using Base::ProcessRearrangePcscf;                                       \
@@ -109,6 +111,7 @@ using ::testing::ReturnRef;
     using Base::ServicePhone_EmergencyRegistrationStateChanged;              \
     using Base::SetFakeReg;                                                  \
     using Base::SetImsCall;                                                  \
+    using Base::SetMode;                                                     \
     using Base::SetReinitiationRequested;                                    \
     using Base::SetReregFailureReportOnIpcanChangeRequired;                  \
     using Base::SetState;                                                    \
@@ -163,6 +166,8 @@ public:
 
     inline ITimer* GetWaitEmergencyNetworkTimer() { return m_piWaitEmergencyNetworkTimer; }
 
+    inline ITimer* GetExitEmergencyModeTimer() { return m_piExitEmergencyModeTimer; }
+
     inline void SetRegistration(IN IRegistration* piRegistration)
     {
         m_piRegistration = piRegistration;
@@ -191,6 +196,8 @@ public:
     {
         return AosERegistration::ECALL_FAILURE_CAUSE_EREG_TIMEOUT_DUE_TO_TCP_FAILURE;
     }
+
+    inline ImsVector<IMS_UINT32>& GetEmergencyMode() { return m_objEmergencyMode; }
 
     IMS_UINT32 GetInvokedCount(IN const AString& strName) { return m_pCounter->GetCount(strName); }
 
@@ -224,6 +231,12 @@ public:
     {
         m_pCounter->AddCount(__IMS_FUNC__);
         AosERegistration::Start();
+    }
+
+    void ProcessRegTerminated() override
+    {
+        m_pCounter->AddCount(__IMS_FUNC__);
+        AosERegistration::ProcessRegTerminated();
     }
 
 private:
@@ -380,6 +393,9 @@ protected:
                         CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL));
         ON_CALL(m_objMockIAosNConfiguration, GetERegErrCodeNotSupportedCommonPolicy())
                 .WillByDefault(ReturnRef(m_objEmptyErrCode));
+        ON_CALL(m_objMockIAosNConfiguration,
+                GetWaitTimeMillisForReleaseEpdnAfterEmcModeExitInFakeModeWithUicc())
+                .WillByDefault(Return(0));
 
         // IAosSubscriber
         m_objImpus.AddElement(AString("sip:1111@ims.co.kr"));
@@ -663,7 +679,7 @@ TEST_F(AosERegistrationTest, ReportFailureWithGeneral_HandleFakeMode)
 TEST_F(AosERegistrationTest, ReportFailureWithNoPcscf_HandleFakeModeAndNoPcscf)
 {
     ON_CALL(m_objMockIAosPcscf, GetFirstPcscf(_, _)).WillByDefault(Return(IMS_FALSE));
-    ON_CALL(m_objMockIAosNConfiguration, IsKeepEPdnUponPcscfUnavailable())
+    ON_CALL(m_objMockIAosNConfiguration, IsDelayEPdnReleaseWhenECallFailure())
             .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objMockIAosPcscf, RemoveCurrentPcscf());
@@ -2358,4 +2374,125 @@ TEST_F(AosERegistrationTest, ShouldReportFailureIfNoPcscfAvailableOnScscfRestora
     m_pAosERegistration->ProcessScscfRestoration(0);
 
     // THEN: The GIVEN expectation should be met.
+}
+
+TEST_F(AosERegistrationTest, ShouldStopTimerWhenProcessExitEmergencyModeTimerExpired)
+{
+    m_pAosERegistration->StartTimer(AosERegistration::TIMER_EXIT_EMERGENCY_MODE, 1000);
+
+    m_pAosERegistration->ProcessExitEmergencyModeTimerExpired();
+
+    EXPECT_EQ(m_pAosERegistration->GetExitEmergencyModeTimer(), nullptr);
+}
+
+TEST_F(AosERegistrationTest, ShouldProcessRegTerminatedWhenProcessExitEmergencyModeTimerExpired)
+{
+    m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERED);
+
+    m_pAosERegistration->ProcessExitEmergencyModeTimerExpired();
+
+    EXPECT_EQ(m_pAosERegistration->GetInvokedCount("ProcessRegTerminated"), 1);
+}
+
+TEST_F(AosERegistrationTest, ShouldNotProcessRegTerminatedWhenProcessExitEmergencyModeTimerExpired)
+{
+    m_pAosERegistration->SetState(IAosRegistration::STATE_OFFLINE);
+
+    m_pAosERegistration->ProcessExitEmergencyModeTimerExpired();
+
+    EXPECT_EQ(m_pAosERegistration->GetInvokedCount("ProcessRegTerminated"), 0);
+}
+
+TEST_F(AosERegistrationTest, ShouldAddEmergencyModeWhenEmergencyModeChangedEntered)
+{
+    m_pAosERegistration->StartTimer(AosERegistration::TIMER_EXIT_EMERGENCY_MODE, 1000);
+
+    m_pAosERegistration->EmergencyModeChanged(1, IMS_TRUE);
+
+    EXPECT_TRUE(m_pAosERegistration->GetEmergencyMode().Contains(1));
+    EXPECT_EQ(m_pAosERegistration->GetExitEmergencyModeTimer(), nullptr);
+}
+
+TEST_F(AosERegistrationTest, ShouldRemoveEmergencyModeWhenEmergencyModeChangedExited)
+{
+    m_pAosERegistration->GetEmergencyMode().Add(1);
+
+    m_pAosERegistration->EmergencyModeChanged(1, IMS_FALSE);
+
+    EXPECT_FALSE(m_pAosERegistration->GetEmergencyMode().Contains(1));
+}
+
+TEST_F(AosERegistrationTest, ShouldStartTimerWhenEmergencyModeChangedExited)
+{
+    m_pAosERegistration->GetEmergencyMode().Add(1);
+    m_pAosERegistration->SetMode(IAosRegistration::MODE_FAKE);
+    m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    ON_CALL(m_objMockIAosSubscriber, GetSimState()).WillByDefault(Return(SimState::READY));
+    ON_CALL(m_objMockIAosNConfiguration,
+            GetWaitTimeMillisForReleaseEpdnAfterEmcModeExitInFakeModeWithUicc())
+            .WillByDefault(Return(1000));
+
+    m_pAosERegistration->EmergencyModeChanged(1, IMS_FALSE);
+
+    EXPECT_NE(m_pAosERegistration->GetExitEmergencyModeTimer(), nullptr);
+}
+
+TEST_F(AosERegistrationTest, ShouldNotStartTimerWhenEmergencyModeChangedExitedModeNormal)
+{
+    m_pAosERegistration->GetEmergencyMode().Add(1);
+    m_pAosERegistration->SetMode(IAosRegistration::MODE_NORMAL);
+    m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    ON_CALL(m_objMockIAosSubscriber, GetSimState()).WillByDefault(Return(SimState::READY));
+    ON_CALL(m_objMockIAosNConfiguration,
+            GetWaitTimeMillisForReleaseEpdnAfterEmcModeExitInFakeModeWithUicc())
+            .WillByDefault(Return(1000));
+
+    m_pAosERegistration->EmergencyModeChanged(1, IMS_FALSE);
+
+    EXPECT_EQ(m_pAosERegistration->GetExitEmergencyModeTimer(), nullptr);
+}
+
+TEST_F(AosERegistrationTest, ShouldNotStartTimerWhenEmergencyModeChangedExitedStateOffline)
+{
+    m_pAosERegistration->GetEmergencyMode().Add(1);
+    m_pAosERegistration->SetMode(IAosRegistration::MODE_FAKE);
+    m_pAosERegistration->SetState(IAosRegistration::STATE_OFFLINE);
+    ON_CALL(m_objMockIAosSubscriber, GetSimState()).WillByDefault(Return(SimState::READY));
+    ON_CALL(m_objMockIAosNConfiguration,
+            GetWaitTimeMillisForReleaseEpdnAfterEmcModeExitInFakeModeWithUicc())
+            .WillByDefault(Return(1000));
+
+    m_pAosERegistration->EmergencyModeChanged(1, IMS_FALSE);
+
+    EXPECT_EQ(m_pAosERegistration->GetExitEmergencyModeTimer(), nullptr);
+}
+
+TEST_F(AosERegistrationTest, ShouldNotStartTimerWhenEmergencyModeChangedExitedSimAbsent)
+{
+    m_pAosERegistration->GetEmergencyMode().Add(1);
+    m_pAosERegistration->SetMode(IAosRegistration::MODE_FAKE);
+    m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    ON_CALL(m_objMockIAosSubscriber, GetSimState()).WillByDefault(Return(SimState::ABSENT));
+    ON_CALL(m_objMockIAosNConfiguration,
+            GetWaitTimeMillisForReleaseEpdnAfterEmcModeExitInFakeModeWithUicc())
+            .WillByDefault(Return(1000));
+
+    m_pAosERegistration->EmergencyModeChanged(1, IMS_FALSE);
+
+    EXPECT_EQ(m_pAosERegistration->GetExitEmergencyModeTimer(), nullptr);
+}
+
+TEST_F(AosERegistrationTest, ShouldNotStartTimerWhenEmergencyModeChangedExitedDelayTimeZero)
+{
+    m_pAosERegistration->GetEmergencyMode().Add(1);
+    m_pAosERegistration->SetMode(IAosRegistration::MODE_FAKE);
+    m_pAosERegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    ON_CALL(m_objMockIAosSubscriber, GetSimState()).WillByDefault(Return(SimState::READY));
+    ON_CALL(m_objMockIAosNConfiguration,
+            GetWaitTimeMillisForReleaseEpdnAfterEmcModeExitInFakeModeWithUicc())
+            .WillByDefault(Return(0));
+
+    m_pAosERegistration->EmergencyModeChanged(1, IMS_FALSE);
+
+    EXPECT_EQ(m_pAosERegistration->GetExitEmergencyModeTimer(), nullptr);
 }

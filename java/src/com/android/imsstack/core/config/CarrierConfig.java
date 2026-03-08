@@ -713,8 +713,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "ipcan_release_emergency_pdn_upon_emergency_call_end_int";
         public static final String KEY_PREFERRED_EMERGENCY_REGISTRATION_INT =
                 KEY_PREFIX + "preferred_emergency_registration_int";
-        public static final String KEY_WAIT_TIME_MILLIS_FOR_RELEASE_EPDN_AFTER_ECALL_END_INT =
-                KEY_PREFIX + "wait_time_millis_for_release_epdn_after_ecall_end_int";
+        public static final String KEY_DELAY_EPDN_RELEASE_WHEN_ECALL_FAILURE_BOOL =
+                KEY_PREFIX + "delay_epdn_release_when_ecall_failure_bool";
         public static final String KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL =
                 KEY_PREFIX + "ecall_based_on_p_associated_uri_of_normal_reg_bool";
         public static final String KEY_EREG_ON_RANDOM_PCSCF_BOOL =
@@ -723,8 +723,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "ereg_set_tcp_only_in_roaming_bool";
         public static final String KEY_EREG_USING_FIRST_IMPU_IN_ISIM_BOOL =
                 KEY_PREFIX + "ereg_using_first_impu_in_isim_bool";
-        public static final String KEY_KEEP_EPDN_UPON_PCSCF_UNAVAILABLE_BOOL =
-                KEY_PREFIX + "keep_epdn_upon_pcscf_unavailable_bool";
         public static final String KEY_KEEP_EREG_RETRY_ON_WLAN_BOOL =
                 KEY_PREFIX + "keep_ereg_retry_on_wlan_bool";
         public static final String KEY_REG_TIMER_FOR_ECALL_TIMEOUT_AS_FAILURE_BOOL =
@@ -757,6 +755,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "reg_timer_for_ecall_millis_int";
         public static final String KEY_ROAMING_PREFERRED_EREG_INT =
                 KEY_PREFIX + "roaming_preferred_ereg_int";
+        public static final String KEY_WAIT_TIME_MILLIS_FOR_RELEASE_EPDN_AFTER_EMC_MODE_EXIT_IN_FAKE_MODE_WITH_UICC_INT =
+                KEY_PREFIX + "wait_time_millis_for_release_epdn_after_emc_mode_exit_in_fake_mode_with_uicc_int";
         public static final String KEY_EPDN_REJECT_CAUSES_FOR_CROSS_STACK_REDIAL_INT_ARRAY =
                 KEY_PREFIX + "epdn_reject_causes_for_cross_stack_redial_int_array";
         public static final String KEY_EREG_ERR_CODE_NOT_SUPPORTED_COMMON_POLICY_INT_ARRAY =
@@ -1799,14 +1799,9 @@ public class CarrierConfig {
                     case "MANUFACTURE":
                         sb.append(Build.MANUFACTURER.replaceAll("\\s", ""));
                         break;
-                    case "MODEL": {
-                        String model = Build.MODEL.replaceAll("\\s", "");
-                        if (model.contains("eepspace") || model.contains("pacecraft")) {
-                            model = "Pixel9";
-                        }
-                        sb.append(model);
+                    case "MODEL":
+                        sb.append(Build.MODEL.replaceAll("\\s", ""));
                         break;
-                    }
                     case "AV":
                         sb.append(Build.VERSION.RELEASE.replaceAll("\\s", ""));
                         break;

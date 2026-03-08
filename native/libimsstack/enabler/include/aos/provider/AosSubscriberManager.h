@@ -60,6 +60,7 @@ public:
 
     const ISubscriberConfig* GetSubscriberConfig(
             IN IMS_SINT32 nType = IAosSubscriber::NORMAL) const override;
+    SimState GetSimState() const override;
 
 protected:
     /// Priority of Ims Identities
@@ -225,6 +226,7 @@ protected:
     IMS_BOOL m_bSupportLimitedAdminSmsMode;
     IMS_BOOL m_bPrioritizeImsiBasedUri;
     ImsVector<IMS_SINT32> m_objImsIdentityPriority;
+    SimState m_eSimState;
 
     static const IMS_UINT32 PHONE_RESTART_RECOVERY_INTERVAL = 15000;
     static const IMS_UINT32 DEFAULT_ISIM_INDEX_FOR_IMPU = 1;

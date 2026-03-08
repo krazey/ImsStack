@@ -21,6 +21,7 @@
 #include "interface/IAosEmergencyListener.h"
 #include "interface/IAosServicePhoneListener.h"
 #include "registration/AosRegistration.h"
+#include "util/ImsVector.h"
 
 class EmergencyModeInfo
 {
@@ -124,6 +125,7 @@ protected:
     void ProcessModeTimerExpired() final;
     void ProcessTransactionTimerExpired() final;
     void ProcessWaitEmergencyNetworkTimerExpired() final;
+    void ProcessExitEmergencyModeTimerExpired() final;
     void ProcessScscfRestoration(IN IMS_UINT32 nUnavailableTimeForCurrentPcscf) final;
 
     void SetRefreshPolicy() final;
@@ -155,6 +157,7 @@ protected:
     /// IAosEmergencyListener
     void CallbackModeChanged(IN EmergencyCallbackModeType eType, IN EmergencyCallbackMode eState,
             IN IMS_ULONG nDuration) override;
+    void EmergencyModeChanged(IN IMS_UINT32 nType, IN IMS_BOOL bEntered) override;
 
     // IAosServicePhoneListener
     void ServicePhone_EmergencyRegistrationStateChanged(IN IMS_BOOL bEmergencyAttached) override;
@@ -188,6 +191,7 @@ private:
     IMS_BOOL m_bReinitiationRequested;
 
 protected:
+    ImsVector<IMS_UINT32> m_objEmergencyMode;
     EmergencyModeInfo* m_pEModeInfo;
 
     static const IMS_UINT32 ECALL_FAILURE_CAUSE_EREG_TIMEOUT_DUE_TO_TCP_FAILURE = 1;

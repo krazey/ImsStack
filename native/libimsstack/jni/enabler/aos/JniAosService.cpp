@@ -245,6 +245,10 @@ PRIVATE VIRTUAL void JniAosService::HandleMessage(IN IMS_SINT32 nMsg, IN const P
             NotifySimStateChanged(objParcel);
             break;
 
+        case IIAosService::J2N_NOTIFY_EMERGENCY_MODE_CHANGED:
+            NotifyEmergencyModeChanged(objParcel);
+            break;
+
         default:
             break;
     }
@@ -621,6 +625,16 @@ void JniAosService::NotifySimStateChanged(IN const android::Parcel& objParcel)
     if (piAosService)
     {
         piAosService->NotifySimStateChanged(objParcel.readInt32());
+    }
+}
+
+PRIVATE
+void JniAosService::NotifyEmergencyModeChanged(IN const android::Parcel& objParcel)
+{
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
+    {
+        piAosService->NotifyEmergencyModeChanged(objParcel.readInt32(), objParcel.readInt32());
     }
 }
 

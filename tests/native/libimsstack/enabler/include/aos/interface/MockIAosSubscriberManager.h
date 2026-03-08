@@ -41,6 +41,7 @@ public:
     MOCK_METHOD(const AStringArray&, GetFakeImpus, (), (const, override));
     MOCK_METHOD(const ISubscriberConfig*, GetSubscriberConfig, (IN IMS_SINT32 nType),
             (const, override));
+    MOCK_METHOD(SimState, GetSimState, (), (const, override));
 };
 
 #endif // MOCK_I_AOS_SUBSCRIBER_MANAGER_H_

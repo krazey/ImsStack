@@ -31,6 +31,7 @@ public:
             bCallEndAndPdnReactivationByRegTerminated(IMS_FALSE),
             bDestroyUnsecureTcpSocketOnAccomplishingReg(IMS_FALSE),
             bDisableN1ModeOnImsPduEstablishFailure(IMS_FALSE),
+            bDelayEPdnReleaseWhenECallFailure(IMS_FALSE),
             bEmcCallBasedOnPAssociatedUriOfNormalReg(IMS_FALSE),
             bEmcRegOnRandomPcscf(IMS_FALSE),
             bERegWithOnlyTcpInRoaming(IMS_FALSE),
@@ -114,6 +115,7 @@ public:
             nReregRetry305Policy(CarrierConfig::Ims::SIP_305_CODE_POLICY_DEFAULT),
             nRoamingPreferredEmcReg(
                     CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NOT_DEFINED),
+            nWaitTimeMillisForReleaseEpdnAfterEmcModeExitInFakeModeWithUicc(3000),
             nSipMessageThresholdForTransportChange(200),
             nSubRetry503Policy(CarrierConfig::Ims::SIP_503_CODE_POLICY_3GPP),
             nUsatRegEventDownloadPolicy(CarrierConfig::Ims::USAT_REG_EVENT_NOT_DOWNLOAD),
@@ -151,6 +153,7 @@ public:
     IMS_BOOL bCallEndAndPdnReactivationByRegTerminated;
     IMS_BOOL bDestroyUnsecureTcpSocketOnAccomplishingReg;
     IMS_BOOL bDisableN1ModeOnImsPduEstablishFailure;
+    IMS_BOOL bDelayEPdnReleaseWhenECallFailure;
     IMS_BOOL bEmcCallBasedOnPAssociatedUriOfNormalReg;
     IMS_BOOL bEmcRegOnRandomPcscf;
     IMS_BOOL bERegWithOnlyTcpInRoaming;
@@ -232,6 +235,7 @@ public:
     IMS_SINT32 nReleasePdnDelaySecAfterTempPlmnBlock;
     IMS_SINT32 nReregRetry305Policy;
     IMS_SINT32 nRoamingPreferredEmcReg;
+    IMS_SINT32 nWaitTimeMillisForReleaseEpdnAfterEmcModeExitInFakeModeWithUicc;
     IMS_SINT32 nSipMessageThresholdForTransportChange;
     IMS_SINT32 nSubRetry503Policy;
     IMS_SINT32 nUsatRegEventDownloadPolicy;

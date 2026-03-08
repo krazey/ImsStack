@@ -130,7 +130,6 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(0, m_pAosNConfiguration->GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd());
     EXPECT_EQ(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK,
             m_pAosNConfiguration->GetPreferredEmergencyRegistration());
-    EXPECT_EQ(0, m_pAosNConfiguration->GetWaitTimeMillisForReleaseEPdnAfterECallEnd());
     EXPECT_FALSE(m_pAosNConfiguration->IsSupportLimitedAdminSmsMode());
     EXPECT_TRUE(m_pAosNConfiguration->IsNetworkInitiatedUssdOverImsSupported());
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegistrationPrivateHeader());
@@ -396,13 +395,6 @@ TEST_F(AosNConfigurationTest, InitConfig)
             .WillRepeatedly(
                     Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK));
 
-    EXPECT_CALL(objCarrierConfig,
-            GetInt(CarrierConfig::ImsEmergency::
-                            KEY_WAIT_TIME_MILLIS_FOR_RELEASE_EPDN_AFTER_ECALL_END_INT,
-                    -1))
-            .Times(2)
-            .WillRepeatedly(Return(240000));
-
     /// imssms
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::ImsSms::KEY_SUPPORT_LIMITED_ADMIN_SMS_MODE_BOOL, IMS_FALSE))
@@ -479,7 +471,6 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(0, m_pAosNConfiguration->GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd());
     EXPECT_EQ(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK,
             m_pAosNConfiguration->GetPreferredEmergencyRegistration());
-    EXPECT_EQ(240000, m_pAosNConfiguration->GetWaitTimeMillisForReleaseEPdnAfterECallEnd());
     EXPECT_FALSE(m_pAosNConfiguration->IsSupportLimitedAdminSmsMode());
     EXPECT_TRUE(m_pAosNConfiguration->IsNetworkInitiatedUssdOverImsSupported());
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegistrationPrivateHeader());
@@ -542,7 +533,6 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(0, m_pAosNConfiguration->GetIpcanReleaseEmergencyPdnUponEmergencyCallEnd());
     EXPECT_EQ(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK,
             m_pAosNConfiguration->GetPreferredEmergencyRegistration());
-    EXPECT_EQ(240000, m_pAosNConfiguration->GetWaitTimeMillisForReleaseEPdnAfterECallEnd());
     EXPECT_FALSE(m_pAosNConfiguration->IsSupportLimitedAdminSmsMode());
     EXPECT_EQ(0, m_pAosNConfiguration->GetRegistrationPrivateHeader());
     EXPECT_TRUE(m_pAosNConfiguration->IsNetworkInitiatedUssdOverImsSupported());
@@ -573,6 +563,10 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Ims::KEY_DISABLE_N1_MODE_ON_IMS_PDU_ESTABLISH_FAILURE_BOOL,
+                    IMS_FALSE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::ImsEmergency::KEY_DELAY_EPDN_RELEASE_WHEN_ECALL_FAILURE_BOOL,
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
@@ -614,10 +608,6 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Ims::KEY_INIT_SUB_UPON_SUB_TERMINATED_BOOL, IMS_FALSE))
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::ImsEmergency::KEY_KEEP_EPDN_UPON_PCSCF_UNAVAILABLE_BOOL,
-                    IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::ImsEmergency::KEY_KEEP_EREG_RETRY_ON_WLAN_BOOL, IMS_FALSE))
@@ -856,6 +846,11 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
             GetInt(CarrierConfig::ImsEmergency::KEY_ROAMING_PREFERRED_EREG_INT, -1))
             .WillOnce(Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL));
     EXPECT_CALL(objCarrierConfig,
+            GetInt(CarrierConfig::ImsEmergency::
+                            KEY_WAIT_TIME_MILLIS_FOR_RELEASE_EPDN_AFTER_EMC_MODE_EXIT_IN_FAKE_MODE_WITH_UICC_INT,
+                    -1))
+            .WillOnce(Return(3000));
+    EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Ims::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT, -1))
             .WillOnce(Return(200));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Ims::KEY_SUB_RETRY_503_POLICY_INT, -1))
@@ -1037,6 +1032,7 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
     EXPECT_TRUE(m_pAosNConfiguration->IsBlockRegOnCsCall());
     EXPECT_FALSE(m_pAosNConfiguration->IsCallEndAndPdnReactivationByRegTerminated());
     EXPECT_FALSE(m_pAosNConfiguration->IsUnsecureTcpSocketOnAccomplishingRegDestroyed());
+    EXPECT_FALSE(m_pAosNConfiguration->IsDelayEPdnReleaseWhenECallFailure());
     EXPECT_FALSE(m_pAosNConfiguration->IsEmergencyCallBasedOnPauOfNormalRegistrationSupported());
     EXPECT_TRUE(m_pAosNConfiguration->IsEmcRegOnRandomPcscf());
     EXPECT_TRUE(m_pAosNConfiguration->IsERegWithOnlyTcpInRoaming());
@@ -1048,7 +1044,6 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
     EXPECT_FALSE(m_pAosNConfiguration->IsImsiBasedUriPrioritized());
     EXPECT_FALSE(m_pAosNConfiguration->IsIpsecInitializedWithNewPcscf());
     EXPECT_FALSE(m_pAosNConfiguration->IsInitSubUponSubTerminated());
-    EXPECT_FALSE(m_pAosNConfiguration->IsKeepEPdnUponPcscfUnavailable());
     EXPECT_FALSE(m_pAosNConfiguration->IsKeepERegRetryOnWlanRequired());
     EXPECT_TRUE(m_pAosNConfiguration->IsKeepRegRetryCntUponPdnReconnect());
     EXPECT_TRUE(m_pAosNConfiguration->IsKeepRegRetryTimerOnAllEnablersDetached());
@@ -1126,6 +1121,9 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
             m_pAosNConfiguration->GetReregRetrySip305CodePolicy());
     EXPECT_EQ(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL,
             m_pAosNConfiguration->GetRoamingPreferredEmcReg());
+    EXPECT_EQ(3000,
+            m_pAosNConfiguration
+                    ->GetWaitTimeMillisForReleaseEpdnAfterEmcModeExitInFakeModeWithUicc());
     EXPECT_EQ(200, m_pAosNConfiguration->GetSipMessageThresholdForTransportChange());
     EXPECT_EQ(CarrierConfig::Ims::SIP_503_CODE_POLICY_3GPP,
             m_pAosNConfiguration->GetSubRetrySip503CodePolicy());

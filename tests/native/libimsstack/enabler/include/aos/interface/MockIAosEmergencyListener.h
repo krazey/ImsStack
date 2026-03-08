@@ -28,6 +28,8 @@ public:
             (IN EmergencyCallbackModeType eType, IN EmergencyCallbackMode eState,
                     IN IMS_ULONG nDuration),
             (override));
+    MOCK_METHOD(
+            void, EmergencyModeChanged, (IN IMS_UINT32 nType, IN IMS_BOOL bEntered), (override));
 };
 
 #endif  // MOCK_I_AOS_EMERGENCY_LISTENER_H_

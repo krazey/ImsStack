@@ -469,3 +469,23 @@ TEST_F(AosSubscriberTest, SucceedsNotifyWhenStateNotifiedWithRefreshFailed)
 
     // THEN: The GIVEN condition should be met.
 }
+
+TEST_F(AosSubscriberTest, GetSimStateWhenManagerNull)
+{
+    m_pAosSubscriber->SetSubscriberManager(IMS_NULL);
+    EXPECT_EQ(m_pAosSubscriber->GetSubscriberManager(), nullptr);
+    EXPECT_EQ(m_pAosSubscriber->GetSimState(), SimState::UNKNOWN);
+}
+
+TEST_F(AosSubscriberTest, GetSimStateWhenManagerValid)
+{
+    MockIAosSubscriberManager objMockIAosSubscriberManager;
+    EXPECT_CALL(objMockIAosSubscriberManager, GetSimState())
+            .Times(1)
+            .WillOnce(Return(SimState::ABSENT));
+
+    m_pAosSubscriber->SetSubscriberManager(&objMockIAosSubscriberManager);
+    EXPECT_NE(m_pAosSubscriber->GetSubscriberManager(), nullptr);
+
+    EXPECT_EQ(m_pAosSubscriber->GetSimState(), SimState::ABSENT);
+}

@@ -31,8 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Factory class for creating and managing AoS (Always On Service).
  * This class provides a singleton instance for accessing various AoS services
- * such as {@link AosService}, {@link AosSettingService}, {@link AosEmergencyCallbackModeTracker}
- * and {@link AosDebug}.
+ * such as {@link AosService}, {@link AosSettingService} and {@link AosDebug}.
  */
 public class AosFactory {
 
@@ -42,8 +41,6 @@ public class AosFactory {
             DeviceConfig.getSupportedSimCount());
     private final Map<Integer, AosSettingService> mAosSettingServices = new ConcurrentHashMap<>(
             DeviceConfig.getSupportedSimCount());
-    private final Map<Integer, AosEmergencyCallbackModeTracker> mAosEmergencyTracker =
-            new ConcurrentHashMap<>(DeviceConfig.getSupportedSimCount());
     private final Map<Integer, AosDebug> mAosDebugs =  new ConcurrentHashMap<>(
             DeviceConfig.getSupportedSimCount());
     private final Map<Integer, AosTelephonyCallbackTracker> mAosTelephonyCallbackTrackers =
@@ -83,11 +80,6 @@ public class AosFactory {
         aosSettingService.init();
         mAosSettingServices.put(slotId, aosSettingService);
 
-        AosEmergencyCallbackModeTracker aosEmergencyTracker =
-                new AosEmergencyCallbackModeTracker(slotId);
-        aosEmergencyTracker.init();
-        mAosEmergencyTracker.put(slotId, aosEmergencyTracker);
-
         if (isDebugScreenEnabled(slotId)) {
             AosDebug aosDebug = new AosDebug(slotId);
             aosDebug.init();
@@ -117,11 +109,6 @@ public class AosFactory {
         AosDebug aosDebug = mAosDebugs.remove(slotId);
         if (aosDebug != null) {
             aosDebug.cleanup();
-        }
-
-        AosEmergencyCallbackModeTracker aosEmergencyTracker = mAosEmergencyTracker.remove(slotId);
-        if (aosEmergencyTracker != null) {
-            aosEmergencyTracker.cleanup();
         }
 
         AosSettingService aosSettingService = mAosSettingServices.remove(slotId);

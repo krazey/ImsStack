@@ -50,6 +50,8 @@ import androidx.test.filters.SmallTest;
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.agents.EmergencyStateInterface;
+import com.android.imsstack.core.agents.EmergencyStateInterface.EmergencyCallbackModeState;
 import com.android.imsstack.core.agents.LocationInterface;
 import com.android.imsstack.core.agents.NativeStateInterface;
 import com.android.imsstack.core.agents.Sim;
@@ -62,6 +64,7 @@ import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.aos.IAosInfo.CrossSimStatus;
+import com.android.imsstack.enabler.aos.IAosInfo.EmergencyCallbackModeType;
 import com.android.imsstack.enabler.aos.IAosInfo.LocationInfo;
 import com.android.imsstack.enabler.aos.IAosInfo.PhoneNumberState;
 import com.android.imsstack.enabler.aos.IAosInfo.RoamingPreferredVoiceNetwork;
@@ -120,6 +123,7 @@ public class AosServiceTest extends ImsStackTest {
     @Mock WifiInterface mMockWifiInterface;
     @Mock NativeStateInterface mMockNativeStateInterface;
     @Mock IDcNetWatcher mMockDcNetWatcher;
+    @Mock EmergencyStateInterface mMockEmergencyStateInterface;
 
     @Before
     public void setup() throws Exception {
@@ -146,6 +150,8 @@ public class AosServiceTest extends ImsStackTest {
         AgentFactory.getInstance().setAgent(
                 LocationInterface.class, mMockLocationInterface, SLOT_0);
         AgentFactory.getInstance().setAgent(WifiInterface.class, mMockWifiInterface);
+        AgentFactory.getInstance().setAgent(
+                EmergencyStateInterface.class, mMockEmergencyStateInterface, SLOT_0);
 
         DcFactory.setDcAgent(IDcNetWatcher.class, mMockDcNetWatcher, SLOT_0);
 
@@ -166,6 +172,7 @@ public class AosServiceTest extends ImsStackTest {
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT_0);
         AgentFactory.getInstance().setAgent(NativeStateInterface.class, null, SLOT_0);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT_0);
+        AgentFactory.getInstance().setAgent(EmergencyStateInterface.class, null, SLOT_0);
 
         super.tearDown();
     }
@@ -178,6 +185,8 @@ public class AosServiceTest extends ImsStackTest {
         verify(mMockImsServiceRegistry).addListener(mAosService.getServiceRegistryListener());
         verify(mMockSimInterface).addListener(mAosService);
         verify(mMockSimInterface).addIsimListener(mAosService);
+        verify(mMockEmergencyStateInterface)
+                .addListener(any(EmergencyStateInterface.EmergencyStateListener.class));
     }
 
     @Test
@@ -185,6 +194,8 @@ public class AosServiceTest extends ImsStackTest {
         mAosService.stop();
         verify(mMockSimInterface).removeListener(mAosService);
         verify(mMockSimInterface).removeIsimListener(mAosService);
+        verify(mMockEmergencyStateInterface)
+                .removeListener(any(EmergencyStateInterface.EmergencyStateListener.class));
 
         mAosService.cleanup();
         verify(mMockImsServiceRegistry).removeListener(mAosService.getServiceRegistryListener());
@@ -631,6 +642,59 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
+    public void notifyEmergencyModeChanged() {
+        byte[] emergencyModeData = createBytes(IIAosService.J2N_NOTIFY_EMERGENCY_MODE_CHANGED,
+                TelephonyManager.DOMAIN_SELECTION_EMERGENCY_TYPE_CALL, 1);
+
+        mAosService.notifyEmergencyModeChanged(
+                TelephonyManager.DOMAIN_SELECTION_EMERGENCY_TYPE_CALL, true);
+
+        verify(mMockJniIms).sendData(mNativeObject, emergencyModeData);
+    }
+
+    @Test
+    public void onEmergencyCallbackModeChanged() {
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.J2N_NOTIFY_EMERGENCY_CALLBACK_MODE_CHANGED);
+        parcel.writeInt(EmergencyCallbackModeType.CALL.getValue());
+        parcel.writeInt(EmergencyCallbackModeState.START.getValue());
+        parcel.writeLong(300L);
+        byte[] emergencyCallbackModeData = parcel.marshall();
+        parcel.recycle();
+
+        ArgumentCaptor<EmergencyStateInterface.EmergencyStateListener> listenerCaptor =
+                ArgumentCaptor.forClass(EmergencyStateInterface.EmergencyStateListener.class);
+        verify(mMockEmergencyStateInterface).addListener(listenerCaptor.capture());
+
+        EmergencyStateInterface.EmergencyStateListener listener = listenerCaptor.getValue();
+        listener.onEmergencyCallbackModeChanged(TelephonyManager.EMERGENCY_CALLBACK_MODE_CALL,
+                EmergencyCallbackModeState.START, 300L);
+
+        verify(mMockJniIms).sendData(mNativeObject, emergencyCallbackModeData);
+    }
+
+    @Test
+    public void onEmergencyCallbackModeChanged_sms() {
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IIAosService.J2N_NOTIFY_EMERGENCY_CALLBACK_MODE_CHANGED);
+        parcel.writeInt(EmergencyCallbackModeType.SMS.getValue());
+        parcel.writeInt(EmergencyCallbackModeState.START.getValue());
+        parcel.writeLong(300L);
+        byte[] emergencyCallbackModeData = parcel.marshall();
+        parcel.recycle();
+
+        ArgumentCaptor<EmergencyStateInterface.EmergencyStateListener> listenerCaptor =
+                ArgumentCaptor.forClass(EmergencyStateInterface.EmergencyStateListener.class);
+        verify(mMockEmergencyStateInterface).addListener(listenerCaptor.capture());
+
+        EmergencyStateInterface.EmergencyStateListener listener = listenerCaptor.getValue();
+        listener.onEmergencyCallbackModeChanged(TelephonyManager.EMERGENCY_CALLBACK_MODE_SMS,
+                EmergencyCallbackModeState.START, 300L);
+
+        verify(mMockJniIms).sendData(mNativeObject, emergencyCallbackModeData);
+    }
+
+    @Test
     public void onPreciseCallStateChanged_csCallStateIsIdle_notifyPreciseCallStateWithIdle() {
         AgentFactory.getInstance().setAgent(
                     TelephonyInterface.class, mMockTelephonyInterface, SLOT_0);
@@ -730,6 +794,21 @@ public class AosServiceTest extends ImsStackTest {
         listener.onWifiStateChanged();
 
         verify(mMockJniIms).sendData(mNativeObject, wifiSettingData);
+    }
+
+    @Test
+    public void onEmergencyModeChanged_notifyEmergencyModeChanged() {
+        byte[] emergencyModeData = createBytes(IIAosService.J2N_NOTIFY_EMERGENCY_MODE_CHANGED,
+                TelephonyManager.DOMAIN_SELECTION_EMERGENCY_TYPE_CALL, 1);
+        ArgumentCaptor<EmergencyStateInterface.EmergencyStateListener> listenerCaptor =
+                ArgumentCaptor.forClass(EmergencyStateInterface.EmergencyStateListener.class);
+        verify(mMockEmergencyStateInterface).addListener(listenerCaptor.capture());
+
+        EmergencyStateInterface.EmergencyStateListener listener = listenerCaptor.getValue();
+        listener.onEmergencyModeChanged(
+                TelephonyManager.DOMAIN_SELECTION_EMERGENCY_TYPE_CALL, true);
+
+        verify(mMockJniIms).sendData(mNativeObject, emergencyModeData);
     }
 
     @Test

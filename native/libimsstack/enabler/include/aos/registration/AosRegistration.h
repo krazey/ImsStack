@@ -372,6 +372,7 @@ protected:
     virtual void ProcessTransactionTimerExpired();
     virtual void ProcessInternalErrorTimerExpired();
     virtual void ProcessWaitEmergencyNetworkTimerExpired();
+    virtual void ProcessExitEmergencyModeTimerExpired();
 
     virtual void StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration);
     virtual void StopTimer(IN IMS_UINT32 nType);
@@ -486,7 +487,8 @@ public:
         TIMER_MODE,
         TIMER_TRANSACTION,
         TIMER_INTERNAL_ERROR,
-        TIMER_WAIT_EMERGENCY_NETWORK
+        TIMER_WAIT_EMERGENCY_NETWORK,
+        TIMER_EXIT_EMERGENCY_MODE
     };
 
     enum
@@ -609,6 +611,8 @@ protected:
     ITimer* m_piInternalErrorTimer;
     /// this is used to wait for updates to the emergency network.
     ITimer* m_piWaitEmergencyNetworkTimer;
+    /// this is used to exit emergency mode
+    ITimer* m_piExitEmergencyModeTimer;
 
     /// authentication failure counter
     IMS_UINT32 m_nAuthChallengeCount;

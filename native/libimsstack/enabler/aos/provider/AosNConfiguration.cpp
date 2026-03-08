@@ -315,6 +315,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsImsOverNrEnabled() const
     return IMS_FALSE;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsDelayEPdnReleaseWhenECallFailure() const
+{
+    return m_objAsset.bDelayEPdnReleaseWhenECallFailure;
+}
+
 PUBLIC VIRTUAL IMS_BOOL
 AosNConfiguration::IsEmergencyCallBasedOnPauOfNormalRegistrationSupported() const
 {
@@ -359,11 +364,6 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsIpsecInitializedWithNewPcscf() cons
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsInitSubUponSubTerminated() const
 {
     return m_objAsset.bInitSubUponSubTerminated;
-}
-
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsKeepEPdnUponPcscfUnavailable() const
-{
-    return m_objAsset.bKeepEPdnUponPcscfUnavailable;
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsKeepERegRetryOnWlanRequired() const
@@ -670,11 +670,6 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetPreferredEmergencyRegistration()
     return m_objCarrierConfig.nPreferredEmergencyRegistration;
 }
 
-PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetWaitTimeMillisForReleaseEPdnAfterECallEnd() const
-{
-    return m_objCarrierConfig.nWaitTimeMillisForReleaseEPdnAfterECallEnd;
-}
-
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetEmergencyRegistrationTimerMillis() const
 {
     return m_objCarrierConfig.nEmergencyRegistrationTimerMillis;
@@ -719,6 +714,12 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegOutOfServicePolicy() const
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRoamingPreferredEmcReg() const
 {
     return m_objAsset.nRoamingPreferredEmcReg;
+}
+
+PUBLIC VIRTUAL IMS_SINT32
+AosNConfiguration::GetWaitTimeMillisForReleaseEpdnAfterEmcModeExitInFakeModeWithUicc() const
+{
+    return m_objAsset.nWaitTimeMillisForReleaseEpdnAfterEmcModeExitInFakeModeWithUicc;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetSipMessageThresholdForTransportChange() const
@@ -1663,8 +1664,6 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
                     ImsEmergency::KEY_IPCAN_RELEASE_EMERGENCY_PDN_UPON_EMERGENCY_CALL_END_INT);
     m_objCarrierConfig.nPreferredEmergencyRegistration =
             piCc->GetInt(CarrierConfig::ImsEmergency::KEY_PREFERRED_EMERGENCY_REGISTRATION_INT);
-    m_objCarrierConfig.nWaitTimeMillisForReleaseEPdnAfterECallEnd = piCc->GetInt(
-            CarrierConfig::ImsEmergency::KEY_WAIT_TIME_MILLIS_FOR_RELEASE_EPDN_AFTER_ECALL_END_INT);
     /// imssms.
     m_objCarrierConfig.bSupportLimitedAdminSmsMode =
             piCc->GetBoolean(CarrierConfig::ImsSms::KEY_SUPPORT_LIMITED_ADMIN_SMS_MODE_BOOL);
@@ -1688,6 +1687,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Ims::KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL);
     m_objAsset.bDisableN1ModeOnImsPduEstablishFailure = piCc->GetBoolean(
             CarrierConfig::Ims::KEY_DISABLE_N1_MODE_ON_IMS_PDU_ESTABLISH_FAILURE_BOOL);
+    m_objAsset.bDelayEPdnReleaseWhenECallFailure = piCc->GetBoolean(
+            CarrierConfig::ImsEmergency::KEY_DELAY_EPDN_RELEASE_WHEN_ECALL_FAILURE_BOOL);
     m_objAsset.bEmcCallBasedOnPAssociatedUriOfNormalReg = piCc->GetBoolean(
             CarrierConfig::ImsEmergency::KEY_ECALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL);
     m_objAsset.bEmcRegOnRandomPcscf =
@@ -1708,8 +1709,6 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Ims::KEY_INIT_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL);
     m_objAsset.bInitSubUponSubTerminated =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_INIT_SUB_UPON_SUB_TERMINATED_BOOL);
-    m_objAsset.bKeepEPdnUponPcscfUnavailable = piCc->GetBoolean(
-            CarrierConfig::ImsEmergency::KEY_KEEP_EPDN_UPON_PCSCF_UNAVAILABLE_BOOL);
     m_objAsset.bKeepERegRetryOnWlan =
             piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_KEEP_EREG_RETRY_ON_WLAN_BOOL);
     m_objAsset.bKeepExistingPcscfOnPcscfChangeDuringTheCall = piCc->GetBoolean(
@@ -1847,6 +1846,9 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Ims::KEY_REREG_RETRY_305_POLICY_INT);
     m_objAsset.nRoamingPreferredEmcReg =
             piCc->GetInt(CarrierConfig::ImsEmergency::KEY_ROAMING_PREFERRED_EREG_INT);
+    m_objAsset.nWaitTimeMillisForReleaseEpdnAfterEmcModeExitInFakeModeWithUicc = piCc->GetInt(
+            CarrierConfig::ImsEmergency::
+                    KEY_WAIT_TIME_MILLIS_FOR_RELEASE_EPDN_AFTER_EMC_MODE_EXIT_IN_FAKE_MODE_WITH_UICC_INT);
     m_objAsset.nSipMessageThresholdForTransportChange =
             piCc->GetInt(CarrierConfig::Ims::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT);
     m_objAsset.nSubRetry503Policy = piCc->GetInt(CarrierConfig::Ims::KEY_SUB_RETRY_503_POLICY_INT);

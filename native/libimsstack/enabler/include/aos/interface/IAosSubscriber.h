@@ -18,6 +18,7 @@
 
 #include "ImsTypeDef.h"
 #include "AStringArray.h"
+#include "interface/IAosServicePhoneListener.h"
 
 class IAosSubscriberListener;
 class ISubscriberConfig;
@@ -36,6 +37,7 @@ public:
     virtual const AStringArray& GetFakeImpus() const = 0;
 
     virtual const ISubscriberConfig* GetSubscriberConfig(IMS_SINT32 nType = NORMAL) const = 0;
+    virtual SimState GetSimState() const = 0;
 
     virtual void CreateTemporaryPublicUserIdForGiba() = 0;
     virtual void ClearTemporaryPublicUserIdForGiba() = 0;

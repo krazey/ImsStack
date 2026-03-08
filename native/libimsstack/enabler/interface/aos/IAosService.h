@@ -115,6 +115,15 @@ public:
             IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_ULONG nDuration) = 0;
 
     /**
+     * Notify an emergency mode changed information by AosService (Java)
+     * AosService(Java) -> IAosEmergencyListener (Native)
+     *
+     * @param nType The emergency mode type.
+     * @param nEntered The emergency mode entered or not.
+     */
+    virtual void NotifyEmergencyModeChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nEntered) = 0;
+
+    /**
      * Notify the application that the device is connected to the IMS network.
      *
      * @param nRegType Type of the registration.

@@ -45,6 +45,7 @@ public:
     /// Java -> Native
     void NotifyEmergencyCallbackModeChanged(
             IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_ULONG nDuration) override;
+    void NotifyEmergencyModeChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nEntered) override;
     void UpdateSipDelegateRegistration() override;
     void TriggerSipDelegateDeregistration() override;
     void TriggerFullNetworkRegistration(

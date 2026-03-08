@@ -19,6 +19,7 @@ import android.content.Intent;
 
 import androidx.annotation.NonNull;
 
+import com.android.imsstack.core.agents.EmergencyStateInterface.EmergencyCallbackModeState;
 import com.android.imsstack.core.agents.Sim;
 
 /**
@@ -202,6 +203,14 @@ public interface IAosInfo {
     void notifyAllowedNetworkTypesChanged(long networkTypesBitMask);
 
     /**
+     * Called to notify the change of emergency mode.
+     *
+     * @param type The emergency mode type.
+     * @param entered {@code true} if the emergency mode is entered, {@code false} otherwise.
+     */
+    void notifyEmergencyModeChanged(int type, boolean entered);
+
+    /**
      * Represents the preferred voice network for roaming.
      */
     enum RoamingPreferredVoiceNetwork {
@@ -346,45 +355,6 @@ public interface IAosInfo {
          */
         public int getValue() {
             return mValue;
-        }
-    }
-
-    /**
-     * Represents the state of the emergency callback mode.
-     */
-    enum EmergencyCallbackModeState {
-
-        STOP(0),
-        START(1),
-        STOP_BY_EMERGENCY(2);
-
-        private final int mValue;
-
-        EmergencyCallbackModeState(int value) {
-            mValue = value;
-        }
-
-        /**
-         * Returns the integer value associated with this emergency callback mode state.
-         *
-         * @return The integer value.
-         */
-        public int getValue() {
-            return mValue;
-        }
-
-        /**
-         * Returns a string representation of this state, including both its
-         * symbolic name and its integer value (e.g., "START(1)").
-         * This format is useful for logging, debugging, and dumpsys output,
-         * providing more context than just the name.
-         *
-         * @return The string representation of the enum in "NAME(VALUE)" format
-         * (e.g., "START(1)").
-         */
-        @Override
-        public String toString() {
-            return this.name() + "(" + mValue + ")";
         }
     }
 }
