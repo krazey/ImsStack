@@ -858,7 +858,7 @@ public class ApnTest {
     }
 
     @Test
-    public void testHandlePreciseDataConnectionStateChanged_suspendedAndRegisteredForSuspended()
+    public void testHandlePreciseDataConnectionStateChanged_suspended()
             throws Exception {
         mApn.registerHandler(Apn.EVENT_NETWORK_SUSPENDED, mMockMsgProc);
         mApn.mNetworkType = TelephonyManager.NETWORK_TYPE_LTE;
@@ -874,24 +874,6 @@ public class ApnTest {
         verify(mMockMsgProc).procMsg(any(Message.class));
         assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mApn.mNetworkType);
         assertEquals(TelephonyManager.DATA_SUSPENDED, mApn.mPreciseDcState);
-    }
-
-    @Test
-    public void testHandlePreciseDataConnectionStateChanged_suspendedButNotRegisteredForSuspended()
-            throws Exception {
-        mApn.mNetworkType = TelephonyManager.NETWORK_TYPE_LTE;
-        mApn.mPreciseDcState = TelephonyManager.DATA_CONNECTED;
-
-        Message msg = Message.obtain();
-        msg.what = Apn.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED;
-        msg.obj = getPreciseDataConnectionState(TelephonyManager.DATA_SUSPENDED,
-                TelephonyManager.NETWORK_TYPE_LTE, DataFailCause.NONE);
-        mApn.sendMessage(msg);
-        mTestableLooper.processAllMessages();
-
-        verify(mMockMsgProc, never()).procMsg(any(Message.class));
-        assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mApn.mNetworkType); // Ignore SUSPENDED.
-        assertEquals(TelephonyManager.DATA_CONNECTED, mApn.mPreciseDcState);
     }
 
     @Test

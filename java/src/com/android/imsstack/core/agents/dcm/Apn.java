@@ -27,6 +27,7 @@ import android.net.TelephonyNetworkSpecifier;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.telephony.Annotation.DataState;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.DataFailCause;
 import android.telephony.PreciseDataConnectionState;
@@ -606,9 +607,10 @@ public abstract class Apn extends Handler implements IApn {
 
     /**
      * Notifies the change of CrossSim connection status.
+     * @param dataState The current precise data connection state
      * @param networkType The type of access network that is carry this data connection
      */
-    protected void updateCrossSimStatus(@NetworkType int networkType) {
+    protected void updateCrossSimStatus(@DataState int dataState, @NetworkType int networkType) {
         // ApnIms need to implement because CrossSim feature is only available for IMS type
     }
 
@@ -1117,8 +1119,8 @@ public abstract class Apn extends Handler implements IApn {
                             }
                         }
                     }
+                    updateCrossSimStatus(dataState, networkType);
                     if (mNetworkType != networkType) {
-                        updateCrossSimStatus(networkType);
                         if (mNetworkType == TelephonyManager.NETWORK_TYPE_UNKNOWN
                                 || isIpcanChanged(networkType)) {
                             handleIpcanCategory(networkType);
@@ -1139,12 +1141,11 @@ public abstract class Apn extends Handler implements IApn {
                         handleInitialConnectionFailure(causeCode);
                     }
                     mNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
-                    updateCrossSimStatus(mNetworkType);
+                    updateCrossSimStatus(dataState, mNetworkType);
                     break;
                 case TelephonyManager.DATA_SUSPENDED:
-                    if (!handleNetworkSuspended()) {
-                        return;
-                    }
+                    updateCrossSimStatus(dataState, mNetworkType);
+                    handleNetworkSuspended();
                     break;
                 default:
                     // no-op

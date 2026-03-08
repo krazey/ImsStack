@@ -47,6 +47,7 @@ import android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.MmTelFeature;
 import android.util.ArraySet;
+import android.util.Pair;
 
 import androidx.test.filters.SmallTest;
 
@@ -1180,6 +1181,25 @@ public class ImsRegistrationTrackerTest {
         capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.NONE,
                 IAosRegistrationListener.Capability.NONE);
         assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
+    }
+
+    @Test
+    public void testChangeCapabilities_notifyDcNetWatcher() {
+        List<CapabilityPair> enableCapabilities = new ArrayList<>();
+        enableCapabilities.add(new CapabilityPair(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE,
+                ImsRegistrationImpl.REGISTRATION_TECH_LTE));
+        List<CapabilityPair> disableCapabilities = new ArrayList<>();
+        disableCapabilities.add(new CapabilityPair(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_UT,
+                ImsRegistrationImpl.REGISTRATION_TECH_LTE));
+
+        mRegTracker.changeCapabilities(enableCapabilities, disableCapabilities);
+
+        List<Pair<Integer, Integer>> capabilities = new ArrayList<Pair<Integer, Integer>>();
+        capabilities.add(new Pair<>(ImsRegistrationImpl.REGISTRATION_TECH_LTE,
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE));
+        verify(mMockIDcNetWatcher).notifyImsCapabilities(capabilities);
     }
 
     @Test
