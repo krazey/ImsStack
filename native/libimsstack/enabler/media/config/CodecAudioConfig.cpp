@@ -82,7 +82,7 @@ PUBLIC VIRTUAL void CodecAudioConfig::ToDebugString() const
 }
 
 PUBLIC
-IMS_SINT32 CodecAudioConfig::ConvertModeSetList(ImsVector<IMS_SINT32> objCodecModeset)
+IMS_SINT32 CodecAudioConfig::ConvertModeSetList(const ImsVector<IMS_SINT32>& objCodecModeset)
 {
     IMS_SINT32 nModeSetList = 0;
     IMS_SINT32 nModeSetNum = objCodecModeset.GetSize();
