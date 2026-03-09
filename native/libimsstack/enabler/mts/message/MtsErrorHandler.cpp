@@ -71,7 +71,6 @@ IMS_SINT32 MtsErrorHandler::Handle(
     ImsVector<IMS_SINT32> objSmmaGenericErrorCodes = m_piCarrierConfig->GetIntArray(
             CarrierConfig::ImsSms::KEY_SMS_SMMA_GENERIC_ERROR_CODES_INT_ARRAY);
 
-    // VZW Requirements - VZ_REQ_5GNRSA SMS_4105999311952943 and VZ_REQ_LTESMS_29553
     if (NeedToCheckRadioStatusForRetry(piMtsMessage->GetRetryCount()))
     {
         IMS_SINT32 nNetworkType = m_objContext.GetNetworkTracker().GetNetworkType();
