@@ -20,4 +20,8 @@
     <allow-in-data-usage-save package="com.android.imsstack" />
     <!-- Allow IMS location requests by ignoring location settings for IMS Emergency call. -->
     <allow-ignore-location-settings package="com.android.imsstack" attributionTag="*" />
+    <install-in-user-type package="com.android.imsstack">
+        <install-in user-type="SYSTEM" />
+        <!-- Explicitly omitting FULL/PROFILE user types -->
+    </install-in-user-type>
 </config>

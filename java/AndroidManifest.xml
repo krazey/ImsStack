@@ -138,14 +138,16 @@
         <!-- Receiver -->
         <receiver
             android:name=".enabler.aos.CarrierSignalReceiver"
-            android:exported="true">
+            android:exported="true"
+            android:singleUser="true">
             <intent-filter>
                 <action android:name="android.telephony.action.CARRIER_SIGNAL_PCO_VALUE"/>
             </intent-filter>
         </receiver>
         <receiver
             android:name=".core.StkSetupEventReceiver"
-            android:exported="true">
+            android:exported="true"
+            android:singleUser="true">
             <intent-filter>
                 <action android:name="android.telephony.action.STK_SETUP_EVENT_LIST"/>
             </intent-filter>

@@ -98,7 +98,7 @@ android_app {
     required: [
         "libimsstack",
         "privapp_permissions_com.android.imsstack",
-        "allowlist_com.android.imsstack",
+        "sysconfig_com.android.imsstack",
     ],
 }
 
@@ -111,9 +111,9 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
-    name: "allowlist_com.android.imsstack",
+    name: "sysconfig_com.android.imsstack",
     system_ext_specific: true,
     sub_dir: "sysconfig",
-    src: "allowlist_com.android.imsstack.xml",
-    filename_from_src: true,
+    src: "sysconfig_com.android.imsstack.xml",
+    filename: "com.android.imsstack.xml",
 }
