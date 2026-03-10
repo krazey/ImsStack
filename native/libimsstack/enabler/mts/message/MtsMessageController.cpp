@@ -725,8 +725,7 @@ IMS_BOOL MtsMessageController::ConstructSendMessage(IN IMessage* piMessage,
         }
     }
 
-    // As per VZW requirement VZ_REQ_E911_7302888, Contact Header needs to be added.
-    // Also, only VZW e911 SMS uses E-PDN.
+    // If configured for e911 SMS to use E-PDN and contact Header to be added for Emergency SMS.
     if (eServiceType == MtsServiceType::EMERGENCY)
     {
         if (AddContactHeader(piMessage, eServiceType) == IMS_FAILURE)

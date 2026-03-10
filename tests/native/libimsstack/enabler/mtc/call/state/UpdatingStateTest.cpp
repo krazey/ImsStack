@@ -247,6 +247,7 @@ TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenPreviousRequestIsUpd
 
     EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
     EXPECT_CALL(objMediaManager, SetMediaInfo(Ref(objSession), _)).Times(1);
+    EXPECT_CALL(objMediaManager, AdjustDirectionForAutoAnswer(Ref(objSession))).Times(1);
     EXPECT_CALL(objMtcSession, SetCallType(_)).Times(1);
     EXPECT_CALL(objMtcSession, AcceptUpdate()).Times(1);
     EXPECT_CALL(objSession, GetPreviousRequest(_)).Times(1).WillOnce(Return(&objMessage));
@@ -261,6 +262,7 @@ TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenPreviousRequestIsUpd
 TEST_F(UpdatingStateTest, AcceptUpdateReturnsUpdating)
 {
     ON_CALL(objSession, GetState()).WillByDefault(Return(ISession::STATE_RENEGOTIATING));
+    EXPECT_CALL(objMediaManager, AdjustDirectionForAutoAnswer(Ref(objSession))).Times(1);
     EXPECT_CALL(objSession, GetPreviousRequest(_)).Times(1).WillOnce(Return(&objMessage));
     SipMethod objSipMethod(SipMethod::INVITE);
     EXPECT_CALL(objMessage, GetMethod()).Times(1).WillOnce(ReturnRef(objSipMethod));
@@ -324,6 +326,7 @@ TEST_F(UpdatingStateTest, RejectUpdateInvokesAcceptUpdateIfRejectCodeIs200)
 
     EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
     EXPECT_CALL(objMediaManager, SetMediaInfo(Ref(objSession), _)).Times(1);
+    EXPECT_CALL(objMediaManager, AdjustDirectionForAutoAnswer(Ref(objSession))).Times(1);
     EXPECT_CALL(objMtcSession, SetCallType(_)).Times(1);
     EXPECT_CALL(objMtcSession, AcceptUpdate()).Times(1);
     EXPECT_CALL(objSession, GetPreviousRequest(_)).Times(1).WillOnce(Return(&objMessage));

@@ -117,6 +117,8 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
         return CallStateName::ESTABLISHED;
     }
 
+    m_objContext.GetMediaManager().AdjustDirectionForAutoAnswer(objSession);
+
     m_objContext.GetUpdatingInfo().GetModifiedInfo() =
             m_objContext.GetMediaManager().GetMediaInfo(objSession);
 

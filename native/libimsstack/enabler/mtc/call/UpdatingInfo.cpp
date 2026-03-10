@@ -270,12 +270,12 @@ IMS_BOOL UpdatingInfo::IsDowngraded() const
 PUBLIC
 MediaInfo UpdatingInfo::GetModifiedMediaInfoWithOriginalAudioDir() const
 {
-    MediaInfo objInfoForUpdatedNotiying(m_objModifiedInfo);
+    MediaInfo objInfoForUpdatedNotifying(m_objModifiedInfo);
     // Don't need to care about video and text direction because the ISIL relies on
     // upper layer(or directly sets in the specific cases) for video, text direction.
-    objInfoForUpdatedNotiying.eAudioDirection = m_objOriginalInfo.eAudioDirection;
+    objInfoForUpdatedNotifying.eAudioDirection = m_objOriginalInfo.eAudioDirection;
 
-    return objInfoForUpdatedNotiying;
+    return objInfoForUpdatedNotifying;
 }
 
 PUBLIC GLOBAL IMS_BOOL UpdatingInfo::IsValidHoldDirection(
