@@ -19,8 +19,6 @@
 #include "media/MtcMediaUtil.h"
 #include <vector>
 
-__IMS_TRACE_TAG_COM_MTC__;
-
 PUBLIC GLOBAL CallType MtcMediaUtil::GetCallTypeFromMediaTypes(IN IMS_UINT32 eMediaTypes)
 {
     CallType eCallType = CallType::UNKNOWN;
@@ -370,6 +368,66 @@ PUBLIC GLOBAL void MtcMediaUtil::RefineMediaInfoByCallType(
         {
             objMediaInfo.eTextDirection = DIRECTION_INVALID;
             objMediaInfo.eGttMode = GTT_MODE_INVALID;
+        }
+    }
+}
+
+PUBLIC GLOBAL void MtcMediaUtil::RefineMediaDirectionByPendingRetry(IN CallType eCallType,
+        IN UpdateType eUpdateType, IN const MediaInfo& objCurrentMediaInfo,
+        OUT MediaInfo& objModifyingMediaInfo)
+{
+    auto fnUpdateDirection = [&](IMS_SINT32 currentDirection, IMS_SINT32& modifyingDirection)
+    {
+        if (eUpdateType == UpdateType::HOLD)
+        {
+            // sendrecv -> sendonly
+            // sendonly -> sendonly (invalid)
+            // recvonly -> inactive
+            // inactive -> inactive (invalid)
+            if (currentDirection == MEDIA_DIRECTION_SEND_RECEIVE)
+            {
+                modifyingDirection = MEDIA_DIRECTION_SEND;
+            }
+            else if (currentDirection == MEDIA_DIRECTION_RECEIVE)
+            {
+                modifyingDirection = MEDIA_DIRECTION_INACTIVE;
+            }
+        }
+        else if (eUpdateType == UpdateType::RESUME)
+        {
+            // sendrecv -> sendrecv (invalid)
+            // sendonly -> sendrecv
+            // recvonly -> recvonly (invalid)
+            // inactive -> recvonly
+            if (currentDirection == MEDIA_DIRECTION_SEND)
+            {
+                modifyingDirection = MEDIA_DIRECTION_SEND_RECEIVE;
+            }
+            else if (currentDirection == MEDIA_DIRECTION_INACTIVE)
+            {
+                modifyingDirection = MEDIA_DIRECTION_RECEIVE;
+            }
+        }
+    };
+
+    for (IMS_UINT32 eMediaType : GetMediaTypeListFromCallType(eCallType))
+    {
+        switch (eMediaType)
+        {
+            case MEDIATYPE_AUDIO:
+                fnUpdateDirection(
+                        objCurrentMediaInfo.eAudioDirection, objModifyingMediaInfo.eAudioDirection);
+                break;
+            case MEDIATYPE_VIDEO:
+                fnUpdateDirection(
+                        objCurrentMediaInfo.eVideoDirection, objModifyingMediaInfo.eVideoDirection);
+                break;
+            case MEDIATYPE_TEXT:
+                fnUpdateDirection(
+                        objCurrentMediaInfo.eTextDirection, objModifyingMediaInfo.eTextDirection);
+                break;
+            default:
+                break;
         }
     }
 }

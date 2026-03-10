@@ -72,6 +72,9 @@ public:
     MOCK_METHOD(MtcTimerWrapper&, GetTimer, (), (const, override));
     MOCK_METHOD(MtcSupplementaryService&, GetSupplementaryService, (), (override));
     MOCK_METHOD(UpdatingInfo&, GetUpdatingInfo, (), (override));
+    MOCK_METHOD(void, StashUpdatingInfoInGlare, (), (override));
+    MOCK_METHOD(UpdatingInfo*, GetStashedUpdatingInfoInGlare, (), (override));
+    MOCK_METHOD(void, ClearStashedUpdatingInfoInGlare, (), (override));
     MOCK_METHOD(EpsFallbackTrigger&, GetEpsFallbackTrigger, (), (override));
     MOCK_METHOD(CurrentLocationDiscoveryController&, GetCurrentLocationDiscoveryController, (),
             (override));

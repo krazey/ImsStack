@@ -192,6 +192,30 @@ public:
     virtual UpdatingInfo& GetUpdatingInfo() = 0;
 
     /**
+     * @brief Saves the current update information to be used for retrying after a glare condition.
+     *
+     * This is necessary to prevent the loss of {@link UpdatingInfo} when processing an update from
+     * the peer while the {@link MtcCallState::TIMER_RETRY_UPDATE} timer is running due to a glare
+     * condition. Therefore, it is not used for a simple glare condition.
+     *
+     * Note: Calling this function will set the main {@link UpdatingInfo} object to null,
+     * as its content is moved for stashing.
+     */
+    virtual void StashUpdatingInfoInGlare() = 0;
+
+    /**
+     * @brief Gets the saved update information for glare condition retry.
+     *
+     * @return A pointer to the {@link UpdatingInfo} object if saved, nullptr otherwise.
+     */
+    virtual UpdatingInfo* GetStashedUpdatingInfoInGlare() = 0;
+
+    /**
+     * @brief Clears the saved update information for glare condition.
+     */
+    virtual void ClearStashedUpdatingInfoInGlare() = 0;
+
+    /**
      * @brief Gets the EPS fallback trigger for this call.
      *
      * @return A reference to the {@link EpsFallbackTrigger} object.

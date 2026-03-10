@@ -596,6 +596,25 @@ void MtcCallState::HandleTerminate(IN const CallReasonInfo& objReason) const
 }
 
 PROTECTED
+void MtcCallState::NotifySessionUpdateFailure(IN const UpdatingInfo& objUpdatingInfo) const
+{
+    IMS_TRACE_D("NotifySessionUpdateFailure", 0, 0, 0);
+    if (objUpdatingInfo.IsHeld())
+    {
+        m_objContext.GetUiNotifier().SendHoldFailed(CallReasonInfo(CODE_SUPP_SVC_FAILED));
+    }
+    else if (objUpdatingInfo.IsResumed())
+    {
+        m_objContext.GetUiNotifier().SendResumeFailed(CallReasonInfo(CODE_SUPP_SVC_FAILED));
+    }
+    else
+    {
+        m_objContext.GetUiNotifier().SendUpdateFailed(
+                CallReasonInfo(CODE_USER_REJECTED_SESSION_MODIFICATION));
+    }
+}
+
+PROTECTED
 void MtcCallState::NotifyHoldResumeState()
 {
     if (m_objContext.GetUpdatingInfo().IsHeld())
