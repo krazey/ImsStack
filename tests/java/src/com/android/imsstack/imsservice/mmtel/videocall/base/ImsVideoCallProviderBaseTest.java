@@ -288,10 +288,10 @@ public class ImsVideoCallProviderBaseTest extends ImsVideoCallProviderTestBase {
         verify(mMockMediaSession).setVideoListener(listenerCaptor.capture());
         MtcMediaSession.VideoListener listener = listenerCaptor.getValue();
 
-        listener.onMediaSessionDataUsageChanged(mMockMediaSession, 1024);
+        listener.onMediaSessionDataUsageChanged(mMockMediaSession, 1024L);
         processAllMessages();
 
-        verify(mMockCallback).changeCallDataUsage(1024);
+        verify(mMockCallback).changeCallDataUsage(1024L);
     }
 
     @SmallTest

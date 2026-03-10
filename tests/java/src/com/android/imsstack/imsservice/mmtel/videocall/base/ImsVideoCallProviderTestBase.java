@@ -26,6 +26,8 @@ import android.telephony.ims.ImsStreamMediaProfile;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.platform.app.InstrumentationRegistry;
+
 import com.android.ims.internal.IImsVideoCallCallback;
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.enabler.mtc.MtcMediaSession;
@@ -66,8 +68,9 @@ public abstract class ImsVideoCallProviderTestBase extends ImsStackTest {
 
         mProvider = createProvider();
         mProvider.getInterface().setCallback(mMockCallback);
-        // This is to complete the callback setting above.
-        processAllMessages();
+
+        // Wait for the MainLooper to process the setCallback message
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {});
     }
 
     @After
