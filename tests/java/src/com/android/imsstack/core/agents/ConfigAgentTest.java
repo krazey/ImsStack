@@ -20,6 +20,7 @@ import static com.android.imsstack.base.TestAppContext.SLOT1;
 import static com.android.imsstack.base.TestAppContext.SUB_ID_1;
 import static com.android.imsstack.base.TestAppContext.SUB_ID_2;
 import static com.android.imsstack.base.ImsPrivateProperties.Persistent.KEY_CONFIG_IMPI;
+import static com.android.imsstack.base.ImsPrivateProperties.Persistent.KEY_TEST_IMS_DISABLED;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -689,6 +690,139 @@ public class ConfigAgentTest {
         assertFalse(config.containsKey(KEY_TEST_LONG_ARRAY));
         assertFalse(config.containsKey(KEY_TEST_DOUBLE_ARRAY));
         assertFalse(config.containsKey(KEY_TEST_STRING_ARRAY));
+    }
+
+    @Test
+    @SmallTest
+    public void testCommandGetProp() {
+        final String value = "true";
+        SharedPreferences sharedPref = mock(SharedPreferences.class);
+        doReturn(sharedPref).when(mContext).getSharedPreferences(anyString(), anyInt());
+        doReturn(value).when(sharedPref).getString(eq(KEY_TEST_IMS_DISABLED), any());
+
+        BroadcastReceiver receiver = setUpConfigCommand();
+        Intent intent = mock(Intent.class);
+        when(intent.getAction()).thenReturn(ConfigAgent.ACTION_GET_PROP);
+        when(intent.getIntExtra(eq(ConfigAgent.KEY_SLOT_ID), anyInt())).thenReturn(SLOT0);
+        when(intent.getStringExtra(eq(ConfigAgent.KEY_NAME))).thenReturn(KEY_TEST_IMS_DISABLED);
+
+        receiver.onReceive(mContext, intent);
+
+        assertEquals(ConfigAgent.RESULT_OK, receiver.getResultCode());
+        assertEquals(KEY_TEST_IMS_DISABLED + "=" + value, receiver.getResultData());
+
+        // No exists
+        doReturn(null).when(sharedPref).getString(eq(KEY_TEST_IMS_DISABLED), any());
+
+        receiver.onReceive(mContext, intent);
+
+        assertEquals(ConfigAgent.RESULT_OK, receiver.getResultCode());
+        assertEquals(KEY_TEST_IMS_DISABLED + "=(null)", receiver.getResultData());
+    }
+
+    @Test
+    @SmallTest
+    public void testCommandGetProp_nullOrEmptyName() {
+        BroadcastReceiver receiver = setUpConfigCommand();
+        // Name: null
+        Intent intent = mock(Intent.class);
+        when(intent.getAction()).thenReturn(ConfigAgent.ACTION_GET_PROP);
+        when(intent.getIntExtra(eq(ConfigAgent.KEY_SLOT_ID), anyInt())).thenReturn(SLOT0);
+        when(intent.getStringExtra(eq(ConfigAgent.KEY_NAME))).thenReturn(null);
+
+        receiver.onReceive(mContext, intent);
+
+        assertEquals(ConfigAgent.RESULT_OK, receiver.getResultCode());
+        assertNull(receiver.getResultData());
+
+        // Name: empty
+        when(intent.getStringExtra(eq(ConfigAgent.KEY_NAME))).thenReturn("");
+
+        receiver.onReceive(mContext, intent);
+
+        assertEquals(ConfigAgent.RESULT_OK, receiver.getResultCode());
+        assertNull(receiver.getResultData());
+    }
+
+    @Test
+    @SmallTest
+    public void testCommandSetProp() {
+        SharedPreferences sharedPref = mock(SharedPreferences.class);
+        SharedPreferences.Editor spEditor = mock(SharedPreferences.Editor.class);
+        doReturn(sharedPref).when(mContext).getSharedPreferences(anyString(), anyInt());
+        doReturn(spEditor).when(sharedPref).edit();
+
+        BroadcastReceiver receiver = setUpConfigCommand();
+        final String value = "true";
+        Intent intent = mock(Intent.class);
+        when(intent.getAction()).thenReturn(ConfigAgent.ACTION_SET_PROP);
+        when(intent.getIntExtra(eq(ConfigAgent.KEY_SLOT_ID), anyInt())).thenReturn(SLOT0);
+        when(intent.getStringExtra(eq(ConfigAgent.KEY_NAME))).thenReturn(KEY_TEST_IMS_DISABLED);
+        when(intent.getStringExtra(eq(ConfigAgent.KEY_VALUE))).thenReturn(value);
+
+        receiver.onReceive(mContext, intent);
+
+        assertEquals(ConfigAgent.RESULT_OK, receiver.getResultCode());
+        assertEquals(KEY_TEST_IMS_DISABLED + "=" + value, receiver.getResultData());
+        verify(spEditor).putString(eq(KEY_TEST_IMS_DISABLED), eq(value));
+    }
+
+    @Test
+    @SmallTest
+    public void testCommandSetProp_nullOrEmptyName() {
+        BroadcastReceiver receiver = setUpConfigCommand();
+        // Name: null
+        Intent intent = mock(Intent.class);
+        when(intent.getAction()).thenReturn(ConfigAgent.ACTION_SET_PROP);
+        when(intent.getIntExtra(eq(ConfigAgent.KEY_SLOT_ID), anyInt())).thenReturn(SLOT0);
+        when(intent.getStringExtra(eq(ConfigAgent.KEY_NAME))).thenReturn(null);
+
+        receiver.onReceive(mContext, intent);
+
+        assertEquals(ConfigAgent.RESULT_OK, receiver.getResultCode());
+        assertNull(receiver.getResultData());
+
+        // Name: empty
+        when(intent.getStringExtra(eq(ConfigAgent.KEY_NAME))).thenReturn("");
+
+        receiver.onReceive(mContext, intent);
+
+        assertEquals(ConfigAgent.RESULT_OK, receiver.getResultCode());
+        assertNull(receiver.getResultData());
+    }
+
+    @Test
+    @SmallTest
+    public void testCommandSetProp_nullOrEmptyValue() {
+        SharedPreferences sharedPref = mock(SharedPreferences.class);
+        SharedPreferences.Editor spEditor = mock(SharedPreferences.Editor.class);
+        doReturn(sharedPref).when(mContext).getSharedPreferences(anyString(), anyInt());
+        doReturn(spEditor).when(sharedPref).edit();
+
+        BroadcastReceiver receiver = setUpConfigCommand();
+        Intent intent = mock(Intent.class);
+        when(intent.getAction()).thenReturn(ConfigAgent.ACTION_SET_PROP);
+        when(intent.getIntExtra(eq(ConfigAgent.KEY_SLOT_ID), anyInt())).thenReturn(SLOT0);
+        when(intent.getStringExtra(eq(ConfigAgent.KEY_NAME))).thenReturn(KEY_TEST_IMS_DISABLED);
+
+        // Value: null
+        when(intent.getStringExtra(eq(ConfigAgent.KEY_VALUE))).thenReturn(null);
+
+        receiver.onReceive(mContext, intent);
+
+        assertEquals(ConfigAgent.RESULT_OK, receiver.getResultCode());
+        assertEquals(KEY_TEST_IMS_DISABLED + "=(null)", receiver.getResultData());
+        verify(spEditor).remove(eq(KEY_TEST_IMS_DISABLED));
+
+        // Value: empty
+        final String value = "";
+        when(intent.getStringExtra(eq(ConfigAgent.KEY_VALUE))).thenReturn(value);
+
+        receiver.onReceive(mContext, intent);
+
+        assertEquals(ConfigAgent.RESULT_OK, receiver.getResultCode());
+        assertEquals(KEY_TEST_IMS_DISABLED + "=" + value, receiver.getResultData());
+        verify(spEditor).putString(eq(KEY_TEST_IMS_DISABLED), eq(value));
     }
 
     private void setUpCarrierConfig(PersistableBundle config) {

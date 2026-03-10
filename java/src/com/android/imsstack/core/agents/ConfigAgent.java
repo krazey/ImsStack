@@ -89,6 +89,15 @@ public class ConfigAgent implements ConfigInterface {
     // Command with committable flag is successfully executed.
     @VisibleForTesting
     protected static final int RESULT_COMMITTABLE_OK = 12;
+    /** Commands for getting/setting a private property. */
+    @VisibleForTesting
+    protected static final String ACTION_GET_PROP = ImsUtils.PACKAGE_NAME + ".action.GET_PROP";
+    @VisibleForTesting
+    protected static final String ACTION_SET_PROP = ImsUtils.PACKAGE_NAME + ".action.SET_PROP";
+    @VisibleForTesting
+    protected static final String KEY_NAME = "name";
+    @VisibleForTesting
+    protected static final String KEY_VALUE = "value";
 
     private static final String CARRIER_ID_PREFIX = "carrier_config_carrierid_";
     private static final String MCC_MNC_PREFIX = "carrier_config_mccmnc_";
@@ -98,9 +107,7 @@ public class ConfigAgent implements ConfigInterface {
             "com.android.imsstack.TEST_CARRIER_CONFIG_PUT";
     private static final String ACTION_TEST_CARRIER_CONFIG_APPLY =
             "com.android.imsstack.TEST_CARRIER_CONFIG_APPLY";
-    /** Extra parameters for ACTION_TEST_CARRIER_CONFIG_PUT */
-    private static final String KEY_NAME = "name";
-    private static final String KEY_VALUE = "value";
+    /** Extra parameters for ACTION_TEST_CARRIER_CONFIG_PUT : {@code KEY_NAME}, {@code KEY_VALUE} */
 
     private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
     private final int mSlotId;
@@ -782,6 +789,8 @@ public class ConfigAgent implements ConfigInterface {
             filter.addAction(ACTION_GET_CONFIG);
             filter.addAction(ACTION_SET_CONFIG);
             filter.addAction(ACTION_CLEAR_CONFIG);
+            filter.addAction(ACTION_GET_PROP);
+            filter.addAction(ACTION_SET_PROP);
             filter.addAction(ACTION_TEST_CARRIER_CONFIG_PUT);
             filter.addAction(ACTION_TEST_CARRIER_CONFIG_APPLY);
 
@@ -849,6 +858,27 @@ public class ConfigAgent implements ConfigInterface {
                 setResultData(getConfig(intent.getStringArrayExtra(KEY_CONFIG_KEYS)));
                 // This is to prevent the config from being accidentally updated incorrectly.
                 committable = false;
+            } else if (ACTION_GET_PROP.equals(action)) {
+                String name = intent.getStringExtra(KEY_NAME);
+                if (name != null && !name.isEmpty()) {
+                    String value = ImsPrivateProperties.Persistent.get(name, null, mSlotId);
+                    setResultData(name + "=" + (value == null ? "(null)" : value));
+                }
+                setResultCode(resultCode);
+                return;
+            } else if (ACTION_SET_PROP.equals(action)) {
+                String name = intent.getStringExtra(KEY_NAME);
+                if (name != null && !name.isEmpty()) {
+                    String value = intent.getStringExtra(KEY_VALUE);
+                    if (value == null) {
+                        ImsPrivateProperties.Persistent.remove(name, mSlotId);
+                    } else {
+                        ImsPrivateProperties.Persistent.set(name, value, mSlotId);
+                    }
+                    setResultData(name + "=" + (value == null ? "(null)" : value));
+                }
+                setResultCode(resultCode);
+                return;
             } else if (ACTION_TEST_CARRIER_CONFIG_PUT.equals(action)) {
                 String key = intent.getStringExtra(KEY_NAME);
 

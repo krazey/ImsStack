@@ -372,4 +372,13 @@ public class ImsPrivatePropertiesTest {
         assertEquals(defaultIntValue,
                 ImsPrivateProperties.Ephemeral.getInt(KEY_TEST_INT, defaultIntValue, SLOT0));
     }
+
+    @Test
+    @SmallTest
+    public void testPersistent_remove() {
+        ImsPrivateProperties.Persistent.remove(KEY_TEST_STRING, SLOT0);
+
+        verify(mSpEditor).remove(eq(KEY_TEST_STRING));
+        verify(mSpEditor).commit();
+    }
 }
