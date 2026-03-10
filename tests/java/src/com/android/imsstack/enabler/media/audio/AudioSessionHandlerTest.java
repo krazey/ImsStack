@@ -154,14 +154,22 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
         verify(mMockAudioSessionCallbackHandler).openSessionResponse(
                 eq(ImsMediaSession.RESULT_PORT_UNAVAILABLE));
 
-        // ImsMediaManager is not connected
+        // ImsMediaManager is not ready
         mAudioSessionHandler.setAudioSession(null);
-        mMediaManager.setImsMediaConnected(false);
+        MediaManagerHelper.setImsMediaConnected(false);
+        MediaManagerHelper spyMediaManager = spy(mMediaManager);
+        mAudioSessionHandler = new AudioSessionHandler(mMockBaseContext, spyMediaManager,
+                mMockAudioSessionCallbackHandler, null, mMockMediaConfig,
+                Looper.myLooper(), mMockDtmfToneGenerator, mMockQosAgent);
+        mMediaSession.setAudioSessionHandler(mAudioSessionHandler);
+
         testParcel.setDataPosition(0);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
+        verify(spyMediaManager).waitForConnection(eq((long) MediaConstants.SERVICE_WAIT_TIMEOUT));
         verify(mMockAudioSessionCallbackHandler).openSessionResponse(
                 eq(ImsMediaSession.RESULT_NOT_READY));
+
 
         /**
          * AudioSession was opened already, but OpenAudioSession requested again

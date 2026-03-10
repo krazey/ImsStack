@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -121,14 +122,21 @@ public class TextSessionHandlerTest extends MediaSessionHandlerTest {
         verify(mMockTextSessionCallbackHandler).openSessionResponse(
                 eq(ImsMediaSession.RESULT_PORT_UNAVAILABLE));
 
-        // ImsMediaManager is not connected
+        // ImsMediaManager is not ready
         mTextSessionHandler.setTextSession(null);
-        mMediaManager.setImsMediaConnected(false);
+        MediaManagerHelper.setImsMediaConnected(false);
+        MediaManagerHelper spyMediaManager = spy(mMediaManager);
+        mTextSessionHandler = new TextSessionHandler(mMockBaseContext, spyMediaManager,
+                mMockTextSessionCallbackHandler, null, Looper.myLooper());
+        mMediaSession.setTextSessionHandler(mTextSessionHandler);
+
         testParcel.setDataPosition(0);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
+        verify(spyMediaManager).waitForConnection(eq((long) MediaConstants.SERVICE_WAIT_TIMEOUT));
         verify(mMockTextSessionCallbackHandler).openSessionResponse(
                 eq(ImsMediaSession.RESULT_NOT_READY));
+
 
         /**
          * TextSession was opened already, but OpenTextSession requested again

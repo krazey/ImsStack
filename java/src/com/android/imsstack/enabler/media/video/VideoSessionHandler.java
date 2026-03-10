@@ -500,6 +500,11 @@ public class VideoSessionHandler extends MediaState {
     private void handleVideoOpenSession(VideoConfig videoConfig) {
 
         if (mVideoSession == null) {
+            if (!mMediaManager.isImsMediaConnected()) {
+                ImsLog.d("ImsMediaManager is not ready, waiting...");
+                mMediaManager.waitForConnection(MediaConstants.SERVICE_WAIT_TIMEOUT);
+            }
+
             if (mMediaManager.isImsMediaConnected()) {
                 mRtpSocket = mVideoQosAgent.createQosConnection(mLocalIpAddress, mLocalPortNumber);
 

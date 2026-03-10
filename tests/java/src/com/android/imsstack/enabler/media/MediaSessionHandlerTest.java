@@ -76,6 +76,12 @@ public abstract class MediaSessionHandlerTest extends ImsStackTest {
         stubQosAgent();
         stubMediaConfig();
 
+        try {
+            com.android.imsstack.base.AppContext.init(mMockContext);
+        } catch (IllegalStateException e) {
+            // Already initialized
+        }
+
         // create the instance to test
         mMediaSession = new MediaSession(mMockBaseContext, mMockMtcMediaSession,
                 mMockImsMediaManager, mMockExecutor);
@@ -87,6 +93,7 @@ public abstract class MediaSessionHandlerTest extends ImsStackTest {
         mRtpSocketPair = null;
         mMediaSession = null;
         mMediaManager.close();
+        com.android.imsstack.base.AppContext.deinit();
         super.tearDown();
     }
 

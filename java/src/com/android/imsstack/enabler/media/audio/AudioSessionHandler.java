@@ -746,6 +746,11 @@ public class AudioSessionHandler extends MediaState {
         mCodecType = UNUSED;
 
         if (mAudioSession == null) {
+            if (!mMediaManager.isImsMediaConnected()) {
+                ImsLog.d("ImsMediaManager is not ready, waiting...");
+                mMediaManager.waitForConnection(MediaConstants.SERVICE_WAIT_TIMEOUT);
+            }
+
             if (mMediaManager.isImsMediaConnected()) {
 
                 Pair<DatagramSocket, DatagramSocket> rtpSocket =

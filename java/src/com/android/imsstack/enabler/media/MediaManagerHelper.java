@@ -41,6 +41,7 @@ public class MediaManagerHelper {
 
     private final Context mContext;
     private static AtomicBoolean sIsImsMediaConnected = new AtomicBoolean(false);
+    private static final Object sLock = new Object();
     private static ImsMediaManager sImsMediaManager;
     private static Executor sExecutor;
     private static IMediaConnectionObserver sMediaObserver;
@@ -117,6 +118,40 @@ public class MediaManagerHelper {
     static void setImsMediaConnected(boolean isConnected) {
         sIsImsMediaConnected.set(isConnected);
         ImsLog.i("ImsMediaManager is connected[" + isImsMediaConnected() + "]");
+        if (isConnected) {
+            synchronized (sLock) {
+                sLock.notifyAll();
+            }
+        }
+    }
+
+    /**
+     * Waits for ImsMedia service to be connected
+     *
+     * @param timeoutMs The maximum time to wait in milliseconds
+     * @return true if connected, false if timeout
+     */
+    public boolean waitForConnection(long timeoutMs) {
+        if (isImsMediaConnected()) {
+            return true;
+        }
+
+        synchronized (sLock) {
+            long startTime = System.currentTimeMillis();
+            long remainingWaitTime = timeoutMs;
+            while (!isImsMediaConnected() && remainingWaitTime > 0) {
+                try {
+                    sLock.wait(remainingWaitTime);
+                } catch (InterruptedException e) {
+                    ImsLog.e("Interrupted while waiting for connection: " + e.getMessage());
+                    // Restore interrupted status
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+                remainingWaitTime = timeoutMs - (System.currentTimeMillis() - startTime);
+            }
+        }
+        return isImsMediaConnected();
     }
 
     /**

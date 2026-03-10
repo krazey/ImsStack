@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -136,14 +137,22 @@ public class VideoSessionHandlerTest extends MediaSessionHandlerTest {
         verify(mMockVideoSessionCallbackHandler).openSessionResponse(
                 eq(ImsMediaSession.RESULT_PORT_UNAVAILABLE));
 
-        // ImsMediaManager is not connected
+        // ImsMediaManager is not ready
         mVideoSessionHandler.setVideoSession(null);
-        mMediaManager.setImsMediaConnected(false);
+        MediaManagerHelper.setImsMediaConnected(false);
+        MediaManagerHelper spyMediaManager = spy(mMediaManager);
+        mVideoSessionHandler = new VideoSessionHandler(mMockBaseContext, spyMediaManager,
+                mMockMtcMediaSession, mMockVideoSessionCallbackHandler,
+                null, Looper.myLooper(), mMockQosAgent);
+        mMediaSession.setVideoSessionHandler(mVideoSessionHandler);
+
         testParcel.setDataPosition(0);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
+        verify(spyMediaManager).waitForConnection(eq((long) MediaConstants.SERVICE_WAIT_TIMEOUT));
         verify(mMockVideoSessionCallbackHandler)
                 .openSessionResponse(eq(ImsMediaSession.RESULT_NOT_READY));
+
 
         /**
          * VideoSession was opened already, but OpenVideoSession requested again

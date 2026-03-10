@@ -434,6 +434,11 @@ public class TextSessionHandler extends MediaState {
     private void handleTextOpenSession(String localIpAddress, int localPortNumber) {
 
         if (mTextSession == null) {
+            if (!mMediaManager.isImsMediaConnected()) {
+                ImsLog.d("ImsMediaManager is not ready, waiting...");
+                mMediaManager.waitForConnection(MediaConstants.SERVICE_WAIT_TIMEOUT);
+            }
+
             if (mMediaManager.isImsMediaConnected()) {
 
                 mRtpSocket = mTextQosAgent.createQosConnection(localIpAddress, localPortNumber);
