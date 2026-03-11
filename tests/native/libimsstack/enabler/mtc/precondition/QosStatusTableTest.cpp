@@ -585,6 +585,58 @@ TEST_F(QosStatusTableTest, GetDirectionTagForDesReturnsSendRecvIfBothStrengthAre
             SdpPrecondition::DIRECTION_SENDRECV);
 }
 
+TEST_F(QosStatusTableTest, SetDirectionTagDoesNothingIfRecordsDoNotExist)
+{
+    // Pre-condition: No records are initialized for any media type.
+    ASSERT_TRUE(pQosStatusTable->GetRecords(SdpMedia::TYPE_AUDIO).IsEmpty());
+
+    // Action: Attempt to set a direction tag for a media type with no records.
+    // This should be a no-op and not cause any errors, as the method should return early.
+    pQosStatusTable->SetDirectionTag(SdpMedia::TYPE_AUDIO, SdpAttribute::CURR,
+            SdpPrecondition::STATUS_LOCAL, SdpPrecondition::DIRECTION_SEND);
+
+    // Verification: Check that getting the direction tag still indicates no valid record exists.
+    EXPECT_EQ(pQosStatusTable->GetDirectionTag(
+                      SdpMedia::TYPE_AUDIO, SdpAttribute::CURR, SdpPrecondition::STATUS_LOCAL),
+            SdpPrecondition::DIRECTION_INVALID);
+}
+
+TEST_F(QosStatusTableTest, SetDirectionTagUnconditionallySetsValue)
+{
+    // This test verifies that SetDirectionTag updates the value, even if it's the same
+    // as the existing one, which is the behavior after the recent optimization change.
+
+    // Setup: Initialize records. The initial direction for CURR/LOCAL is NONE.
+    pQosStatusTable->InitializeRecords(SdpMedia::TYPE_AUDIO);
+    const IMS_SINT32 eSdpMediaType = SdpMedia::TYPE_AUDIO;
+    const IMS_SINT32 eAttrType = SdpAttribute::CURR;
+    const IMS_SINT32 eStatusType = SdpPrecondition::STATUS_LOCAL;
+
+    // Scenario 1: Set the direction to the same value it already has (NONE).
+    pQosStatusTable->SetDirectionTag(
+            eSdpMediaType, eAttrType, eStatusType, SdpPrecondition::DIRECTION_NONE);
+
+    // Verification 1: The direction should remain NONE.
+    EXPECT_EQ(pQosStatusTable->GetDirectionTag(eSdpMediaType, eAttrType, eStatusType),
+            SdpPrecondition::DIRECTION_NONE);
+
+    // Scenario 2: Set the direction to a new value (SEND).
+    pQosStatusTable->SetDirectionTag(
+            eSdpMediaType, eAttrType, eStatusType, SdpPrecondition::DIRECTION_SEND);
+
+    // Verification 2: The direction should be updated to SEND.
+    EXPECT_EQ(pQosStatusTable->GetDirectionTag(eSdpMediaType, eAttrType, eStatusType),
+            SdpPrecondition::DIRECTION_SEND);
+
+    // Scenario 3: Set the direction again to the same new value (SEND).
+    pQosStatusTable->SetDirectionTag(
+            eSdpMediaType, eAttrType, eStatusType, SdpPrecondition::DIRECTION_SEND);
+
+    // Verification 3: The direction should remain SEND.
+    EXPECT_EQ(pQosStatusTable->GetDirectionTag(eSdpMediaType, eAttrType, eStatusType),
+            SdpPrecondition::DIRECTION_SEND);
+}
+
 TEST_F(QosStatusTableTest, GetStrengthTagReturnsNotUsedIfNoRecord)
 {
     pQosStatusTable->SetStrengthTag(SdpMedia::TYPE_AUDIO, SdpPrecondition::STATUS_REMOTE,
