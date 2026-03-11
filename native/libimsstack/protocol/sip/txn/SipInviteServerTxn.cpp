@@ -253,6 +253,36 @@ static SIP_BOOL ProceedingState_Send2xxResponse(SipTxn* pTxn, SIP_VOID* pvData, 
         pTxn->SetMaxDuration(nDurationTL);
         pTxn->IncreaseDurationExpired(nDurationTL);
         pTxn->SetTxnState(SipTxn::INV_SER_ACCEPTED_ST);
+
+        SipTxnKey* pOutTxnKey = SIP_NULL;
+        SIP_BOOL bStatus = SIP_FALSE;
+        ISipTransactionCallback* pCallback = SipUtil::GetInstance()->GetTransactionCallback();
+
+        if (pCallback != SIP_NULL)
+        {
+            SipTxn* pOutTxn = SIP_NULL;
+
+            bStatus = pCallback->FetchTransaction(
+                    pTxn->GetTxnKey(), SipTxn::OPT_FETCH, pOutTxnKey, pOutTxn);
+        }
+
+        if ((bStatus == SIP_TRUE) && (pOutTxnKey != SIP_NULL))
+        {
+            SipNameAddrHeader* pToHdr = static_cast<SipNameAddrHeader*>(
+                    pFsmData->m_pSipMsgIn->GetHdrObj(SipHeaderBase::TO));
+
+            if (pToHdr != SIP_NULL)
+            {
+                const SIP_CHAR* pToTag = pToHdr->GetTag();
+
+                if (pToTag != SIP_NULL)
+                {
+                    pOutTxnKey->SetToTag(pToTag);
+                    delete[] pToTag;
+                }
+                pToHdr->SipDelete();
+            }
+        }
     }
     else
     {

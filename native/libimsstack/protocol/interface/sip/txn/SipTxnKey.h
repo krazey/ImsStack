@@ -92,6 +92,7 @@ public:
     inline SIP_VOID SetRSeq(SIP_UINT32 nRseqNum) { m_nRSeqNum = nRseqNum; }
     inline SIP_VOID SetResponseCode(SIP_UINT16 nRespCode) { m_nRespCode = nRespCode; }
     inline SIP_VOID SetTxnType(SIP_INT32 eTxnType) { m_eTxnType = eTxnType; }
+    SIP_VOID SetToTag(const SIP_CHAR* pToTag);
 
     SIP_INT32 CompareKeys(SipTxnKey* pGeneratedKey);
     SIP_INT32 CompareKeysForRPR(SipTxnKey* pGeneratedKey);
