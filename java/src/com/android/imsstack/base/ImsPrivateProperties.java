@@ -23,7 +23,7 @@ import java.util.Locale;
 
 /**
  * This class provides the wrapper APIs for IMS internal properties.
- * It's generally used by hidden menu.
+ * It's generally used by a hidden menu.
  */
 public final class ImsPrivateProperties {
     /** Returns the SIM country string. */
@@ -62,7 +62,7 @@ public final class ImsPrivateProperties {
     public static class Ephemeral {
         /**
          * Caches the video quality information for H.265 if operator provides this value.
-         * It may be used for preview's video resolution for 3rd party dialer.
+         * It may be used for preview's video resolution for a 3rd party dialer.
          * Value: String
          */
         public static final String KEY_H265_VIDEO_QUALITY = "h265_video_quality";
@@ -289,7 +289,7 @@ public final class ImsPrivateProperties {
          */
         public static final String KEY_CONFIG_NR_DUPLEX_MODE = "config_nr_duplex_mode";
         /**
-         * Keeps the pre-defined ims deregister.
+         * Keeps the pre-defined IMS deregister.
          * Value : string
          */
         public static final String KEY_TEST_IMS_DEREGISTER = "test_ims_deregister";
@@ -327,14 +327,14 @@ public final class ImsPrivateProperties {
          */
         public static final String KEY_USIM_ENABLED = "usim_enabled";
         /**
-         * Keeps primary public user identity that will be ued for IMS registration.
+         * Keeps the primary public user identity that will be used for IMS registration.
          * Value : string
          */
         public static final String KEY_PRIMARY_IMPU = "primary_impu";
 
         /**
          * Configuration items which can be provisioned for a test purpose.
-         *  - List of P-CSCF address
+         *  - List of P-CSCF addresses
          *  - IMPI (Private user identity)
          *  - List of IMPU (Public user identities)
          *  - Home domain name
@@ -538,6 +538,19 @@ public final class ImsPrivateProperties {
          */
         public static void setInt(String key, int value, int slotId) {
             set(key, String.valueOf(value), slotId);
+        }
+
+        /**
+         * Removes the property for the given key.
+         *
+         * @param key The property key.
+         * @param slotId The slot id.
+         */
+        public static void remove(String key, int slotId) {
+            SharedPreferences.Editor editor = getSharedPreferences(
+                    AppContext.getInstance(), slotId).edit();
+            editor.remove(key);
+            editor.commit();
         }
 
         /**
