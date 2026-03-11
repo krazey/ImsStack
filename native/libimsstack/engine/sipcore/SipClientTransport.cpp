@@ -386,7 +386,8 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::ReserveResource(
 
 PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessage* pSipMsg,
         IN const SipProfile* pProfile, IN IMS_BOOL bRoutingLr /*= IMS_TRUE*/,
-        IN SipAddrSpec* pImplicitRoute /*= IMS_NULL*/)
+        IN SipAddrSpec* pImplicitRoute /*= IMS_NULL*/,
+        IN const IpAddress* pImplicitDstAddress /*= IMS_NULL*/)
 {
     const AString PARAM_TRANSPORT(SipAddress::PARAM_TRANSPORT);
 
@@ -538,67 +539,43 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
         IpAddress objFarAddress(strFarAddress);
 
 #if defined(__IMS_DNS_QUERY_SIP__)
-        // LOCAL_DNS_QUERY
-        const IpAddress& objIpAddr = GetIpAddress();
-        IMS_BOOL bDnsQueryRequired = IMS_FALSE;
-
         if (objFarAddress.IsUnknownAddress())
         {
-            bDnsQueryRequired = IMS_TRUE;
-
-            IpAddress objHostIp;
-
-            if (GetTransportHelper()->GetHostByName(objIpAddr, strFarAddress, objHostIp))
-            {
-                objFarAddress = objHostIp;
-                bDnsQueryRequired = IMS_FALSE;
-            }
-        }
-
-        if (bDnsQueryRequired)
-        {
+            const IpAddress& objIpAddr = GetIpAddress();
+            ImsList<IpAddress> objIpAddrs;
             INetworkConnection* piConnection =
                     NetworkService::GetNetworkService()->FindConnection(objIpAddr);
 
-            if (piConnection == IMS_NULL)
+            if (piConnection != IMS_NULL)
             {
-                SipStack::FreeAddrSpec(pAddrSpec);
-
-                IMS_TRACE_E(0, "Finding a network connection failed", 0, 0, 0);
-                return IMS_FALSE;
-            }
-
-            ImsList<IpAddress> objIpAddrs;
-            IMS_SINT32 nIpVersion = 0;
-
-            if (objIpAddr.IsIPv4Address())
-            {
-                nIpVersion = IpAddress::IPV4;
-            }
-            else if (objIpAddr.IsIPv6Address())
-            {
-                nIpVersion = IpAddress::IPV6;
-            }
-
-            if (piConnection->GetHostByName(strFarAddress, objIpAddrs, nIpVersion) <= 0)
-            {
-                SipStack::FreeAddrSpec(pAddrSpec);
-
-                IMS_TRACE_E(0, "Getting host address by the name (%s) failed",
-                        SipDebug::GetIp(strFarAddress), 0, 0);
-                return IMS_FALSE;
+                piConnection->GetHostByName(strFarAddress, objIpAddrs,
+                        objIpAddr.IsIPv6Address() ? IpAddress::IPV6 : IpAddress::IPV4);
             }
 
             if (objIpAddrs.IsEmpty())
             {
-                SipStack::FreeAddrSpec(pAddrSpec);
+                IMS_TRACE_I(
+                        "No entry in DNS query(%s) result", SipDebug::GetIp(strFarAddress), 0, 0);
 
-                IMS_TRACE_E(0, "No entry in the DNS query (%s) result",
+                if (pImplicitDstAddress != IMS_NULL)
+                {
+                    objFarAddress = *pImplicitDstAddress;
+                }
+            }
+            else
+            {
+                objFarAddress = objIpAddrs.GetAt(0);
+            }
+
+            // If the destination address is still not a numeric IP address,
+            // the message can't be sent and will be processed as a failure.
+            if (objFarAddress.IsUnknownAddress())
+            {
+                SipStack::FreeAddrSpec(pAddrSpec);
+                IMS_TRACE_E(0, "No destination address(%s) resolved",
                         SipDebug::GetIp(strFarAddress), 0, 0);
                 return IMS_FALSE;
             }
-
-            objFarAddress = objIpAddrs.GetAt(0);
         }
 #endif
 

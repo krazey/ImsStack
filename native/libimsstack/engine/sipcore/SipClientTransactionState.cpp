@@ -241,6 +241,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::UpdateTransportDetails()
     IMS_BOOL bCheckImplicitRouteUsage = IMS_FALSE;
     IMS_BOOL bIgnoreLr = IMS_FALSE;
     const IMS_CHAR* pImplicitRoutingReason = "";
+    IpAddress objImplicitDstAddress(IpAddress::NONE);
 
     if (m_pImplicitRoute != IMS_NULL)
     {
@@ -262,6 +263,15 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::UpdateTransportDetails()
             bCheckImplicitRouteUsage = IMS_TRUE;
             bIgnoreLr = IMS_TRUE;
             pImplicitRoutingReason = "IPSec";
+        }
+
+        AString strAddress;
+        IMS_UINT32 nPortUnused;
+        (void)SipStack::GetHostAndPort(m_pImplicitRoute, strAddress, nPortUnused);
+
+        if (!objImplicitDstAddress.Parse(strAddress))
+        {
+            objImplicitDstAddress = IpAddress::NONE;
         }
     }
 
@@ -295,7 +305,8 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::UpdateTransportDetails()
     }
 
     if (!m_pTransport->UpdateDestinationInfo(m_pSipMsg, GetSipProfile(), bRoutingLr,
-                (bImplicitRouteRequired == IMS_TRUE) ? m_pImplicitRoute : IMS_NULL))
+                (bImplicitRouteRequired == IMS_TRUE) ? m_pImplicitRoute : IMS_NULL,
+                !objImplicitDstAddress.IsNoneAddress() ? &objImplicitDstAddress : IMS_NULL))
     {
         return IMS_FALSE;
     }
