@@ -1220,6 +1220,8 @@ const IMS_CHAR CarrierConfig::ImsEmergency::
         "policy_for_tcall_timer_expiry_of_volte_emergency_call_int";
 const IMS_CHAR CarrierConfig::ImsWfc::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL_INT[] =
         KEY_IMS_WFC_PREFIX "policy_for_tcall_timer_expiry_of_vowifi_call_int";
+const IMS_CHAR CarrierConfig::ImsWfc::KEY_USE_MO_CALL_REQUEST_TIMEOUT_TIMER_BOOL[] =
+        KEY_IMS_WFC_PREFIX "use_mo_call_request_timeout_timer_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY[] =
         KEY_IMS_VOICE_PREFIX "carrier_specific_sip_headers_string_array";
 const IMS_CHAR

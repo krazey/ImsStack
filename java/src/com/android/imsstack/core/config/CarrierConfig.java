@@ -1535,6 +1535,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "enable_fake_qos_call_flow_on_wifi_bool";
         public static final String KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL_INT =
                 KEY_PREFIX + "policy_for_tcall_timer_expiry_of_vowifi_call_int";
+        public static final String KEY_USE_MO_CALL_REQUEST_TIMEOUT_TIMER_BOOL =
+                KEY_PREFIX + "use_mo_call_request_timeout_timer_bool";
         public static final String KEY_REJECT_VOWIFI_VOICE_CALL_WHEN_VOWIFI_SETTING_OFF_BOOL =
                 KEY_PREFIX + "reject_vowifi_voice_call_when_vowifi_setting_off_bool";
         public static final String KEY_OVERRIDE_MEDIA_INACTIVITY_TO_WIFI_LOST_BOOL =

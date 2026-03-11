@@ -205,9 +205,31 @@ TEST_F(TransactionTimerUpdateHelperTest, SetInviteTransactionTimerWithNormalCall
     objUpdateHelper.ResetInviteTransactionTimer();
 }
 
-TEST_F(TransactionTimerUpdateHelperTest, SetInviteTransactionTimerWithNormalWifiCallUpdatesTimer)
+TEST_F(TransactionTimerUpdateHelperTest,
+        SetInviteTransactionTimerWithNormalWifiCallDoesNothingIfConfigOff)
 {
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objConfigurationProxy,
+            GetBoolean(ConfigWfc::KEY_USE_MO_CALL_REQUEST_TIMEOUT_TIMER_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT))
+            .WillByDefault(Return(TIMER_VALUE));
+
+    TransactionTimerUpdateHelper objUpdateHelper =
+            TransactionTimerUpdateHelper(objContext, &objSipConfig);
+
+    EXPECT_CALL(objConfigurable, Update(_, _)).Times(0);
+    objUpdateHelper.SetInviteTransactionTimer();
+    objUpdateHelper.ResetInviteTransactionTimer();
+}
+
+TEST_F(TransactionTimerUpdateHelperTest,
+        SetInviteTransactionTimerWithNormalWifiCallUpdatesTimerIfConfigOn)
+{
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objConfigurationProxy,
+            GetBoolean(ConfigWfc::KEY_USE_MO_CALL_REQUEST_TIMEOUT_TIMER_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objConfigurationProxy, GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT))
             .WillByDefault(Return(TIMER_VALUE));
 
