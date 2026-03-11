@@ -128,8 +128,18 @@ IMS_BOOL TransactionTimerUpdateHelper::MayUpdateForEpsFallbackTrigger()
 PRIVATE
 IMS_BOOL TransactionTimerUpdateHelper::MayUpdateForTcallTimerExpiry()
 {
-    const IMS_CHAR* pszKey = m_objContext.GetCallInfo().IsEmergency()
-            ? ConfigEmergency::KEY_EMERGENCY_TCALL_TIMER_MILLIS_INT
-            : ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT;
-    return UpdateTimer(IMS_TRUE, m_objConfiguration.GetInt(pszKey));
+    if (m_objContext.GetCallInfo().IsEmergency())
+    {
+        return UpdateTimer(IMS_TRUE,
+                m_objConfiguration.GetInt(ConfigEmergency::KEY_EMERGENCY_TCALL_TIMER_MILLIS_INT));
+    }
+
+    if (m_objContext.GetService().IsWlanIpCanType() &&
+            !m_objConfiguration.GetBoolean(ConfigWfc::KEY_USE_MO_CALL_REQUEST_TIMEOUT_TIMER_BOOL))
+    {
+        return IMS_FALSE;
+    }
+
+    return UpdateTimer(IMS_TRUE,
+            m_objConfiguration.GetInt(ConfigVoice::KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT));
 }
