@@ -48,6 +48,7 @@
 #include "helper/MtcTimerWrapper.h"
 #include "helper/OperationAsyncRunner.h"
 #include "media/IMtcMediaManager.h"
+#include "media/MtcMediaUtil.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "ussi/UssiController.h"
 #include "ussi/UssiDef.h"
@@ -243,6 +244,8 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionTerminated(IN ISession* pi
 
 PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession* piSession)
 {
+    CancelStashedUpdateOnCallTypeChange(piSession);
+
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_UPDATE);
 
     // Use CallType before it's updated by receiving INVITE.
@@ -495,6 +498,8 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnTimerExpired(IN IMS_SINT32 nTyp
                         m_objContext.RunPendingOperationIfPossible();
                     });
             break;
+        case TIMER_RETRY_UPDATE:
+            return HandleRetry();
         default:
             break;
     }
@@ -723,9 +728,76 @@ CallStateName EstablishedState::Downgrade(IN CallType eCallType)
 }
 
 PRIVATE
+CallStateName EstablishedState::HandleRetry()
+{
+    UpdatingInfo* pUpdatingInfo = m_objContext.GetStashedUpdatingInfoInGlare();
+    if (!pUpdatingInfo)
+    {
+        return GetStateName();
+    }
+
+    UpdateType eType = pUpdatingInfo->GetRequestingType();
+    MediaInfo objModifyingMediaInfo = pUpdatingInfo->GetModifyingInfo();
+    m_objContext.ClearStashedUpdatingInfoInGlare();
+
+    IMtcSession* pSession = m_objContext.GetSession();
+    if (pSession)
+    {
+        MtcMediaUtil::RefineMediaDirectionByPendingRetry(pSession->GetCallType(), eType,
+                m_objContext.GetMediaManager().GetMediaInfo(pSession->GetISession()),
+                objModifyingMediaInfo);
+        IMS_TRACE_I("HandleRetry CallType[%d] RefinedDirection[%d]", pSession->GetCallType(),
+                objModifyingMediaInfo.eAudioDirection, 0);
+    }
+
+    if (eType == UpdateType::HOLD)
+    {
+        return Hold(objModifyingMediaInfo);
+    }
+    else if (eType == UpdateType::RESUME)
+    {
+        return Resume(objModifyingMediaInfo);
+    }
+    else if (eType == UpdateType::SRVCC_RECOVERED_CANCEL)
+    {
+        return OnSrvccStateUpdated(SrvccState::CANCELED);
+    }
+    else if (eType == UpdateType::SRVCC_RECOVERED_FAILURE)
+    {
+        return OnSrvccStateUpdated(SrvccState::FAILED);
+    }
+
+    return GetStateName();
+}
+
+PRIVATE
 IMS_BOOL EstablishedState::ShouldPendOperation() const
 {
     IMtcSession* piMtcSession = m_objContext.GetSession();
     return (piMtcSession && piMtcSession->GetISession().IsSessionRefreshInProgress()) ||
             m_objContext.GetTimer().IsActive(TIMER_DELAY_UPDATE_AFTER_CONNECTED);
+}
+
+PRIVATE
+void EstablishedState::CancelStashedUpdateOnCallTypeChange(IN ISession* piSession)
+{
+    // Defensive check for call type change on the incoming remote request.
+    // This is necessary to correctly handle complex glare scenarios
+    // (multiple remote update during local retry.) and is distinct from the pre-emptive
+    // optimization in UpdatingState.
+    const UpdatingInfo* pUpdatingInfo = m_objContext.GetStashedUpdatingInfoInGlare();
+    if (!pUpdatingInfo)
+    {
+        return;
+    }
+
+    if (m_objContext.GetMessageUtils().GetCallTypeFromSdp(piSession, IMS_FALSE, IMS_TRUE) !=
+            m_objContext.GetSession()->GetCallType())
+    {
+        NotifySessionUpdateFailure(*pUpdatingInfo);
+        m_objContext.ClearStashedUpdatingInfoInGlare();
+
+        // The stashed update must exist if and only if the retry timer is active.
+        m_objContext.GetTimer().Stop(TIMER_RETRY_UPDATE);
+    }
 }

@@ -586,8 +586,19 @@ TEST_F(UpdatingStateTest, OnCodeUnspecifiedReturnsToEstablished)
     ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_403));
     SetActionConfigs(SipStatusCode::SC_403, {});
 
+    // SESSION case
+    pUpdatingInfo->SetRequestingType(UpdateType::SESSION);
     EXPECT_CALL(objUiNotifier,
             SendUpdateFailed(CallReasonInfo(CODE_USER_REJECTED_SESSION_MODIFICATION)));
+    EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdateFailed(&objSession));
+
+    // HOLD case
+    pUpdatingInfo->SetRequestingType(UpdateType::HOLD);
+    pUpdatingInfo->GetOriginalInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+    pUpdatingInfo->GetModifyingInfo().eAudioDirection = DIRECTION_SEND;
+    EXPECT_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
+            .WillOnce(Return(&objMessage));
+    EXPECT_CALL(objUiNotifier, SendHoldFailed(CallReasonInfo(CODE_SUPP_SVC_FAILED)));
     EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdateFailed(&objSession));
 }
 
@@ -642,26 +653,43 @@ TEST_F(UpdatingStateTest, OnInvalidTimerExpiredDoesNothing)
     EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->OnTimerExpired(-1));
 }
 
-TEST_F(UpdatingStateTest, SessionUpdateReceivedReturnsEstablishedIfGlareTimerActive)
+TEST_F(UpdatingStateTest, SessionUpdateReceivedHandlesGlareConditionCorrectly)
 {
-    ON_CALL(objTimer, IsActive(MtcCallState::TIMER_RETRY_UPDATE)).WillByDefault(Return(IMS_TRUE));
-    EXPECT_CALL(objPendingOperationHolder.GetMock(), SessionUpdateReceived(&objSession)).Times(3);
+    pUpdatingInfo->SetModifier();
 
-    // No Held / Resumed case.
+    ON_CALL(objTimer, IsActive(MtcCallState::TIMER_RETRY_UPDATE)).WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(objPendingOperationHolder.GetMock(), SessionUpdateReceived(&objSession)).Times(4);
+
+    // Session update case: notifies failure
+    pUpdatingInfo->SetRequestingType(UpdateType::SESSION);
+    EXPECT_CALL(objContext, StashUpdatingInfoInGlare()).Times(0);
     EXPECT_CALL(objUiNotifier, SendUpdateFailed(_));
     EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdateReceived(&objSession));
+    pUpdatingState->OnExit();
+    delete pUpdatingState;
 
-    // Held case
-    pUpdatingInfo->GetOriginalInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
-    pUpdatingInfo->GetModifyingInfo().eAudioDirection = DIRECTION_SEND;
-    EXPECT_CALL(objUiNotifier, SendHoldFailed(_));
+    // Held case: sets glare info
+    pUpdatingState = new UpdatingState(objContext);
+    pUpdatingInfo->SetRequestingType(UpdateType::HOLD);
+    EXPECT_CALL(objContext, StashUpdatingInfoInGlare());
     EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdateReceived(&objSession));
+    pUpdatingState->OnExit();
+    delete pUpdatingState;
 
-    // Resumed case
-    pUpdatingInfo->GetOriginalInfo().eAudioDirection = DIRECTION_SEND;
-    pUpdatingInfo->GetModifyingInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
-    EXPECT_CALL(objUiNotifier, SendResumeFailed(_));
+    // Resumed case: sets glare info
+    pUpdatingState = new UpdatingState(objContext);
+    pUpdatingInfo->SetRequestingType(UpdateType::RESUME);
+    EXPECT_CALL(objContext, StashUpdatingInfoInGlare());
     EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdateReceived(&objSession));
+    pUpdatingState->OnExit();
+    delete pUpdatingState;
+
+    // Normal update case: do nothing
+    pUpdatingState = new UpdatingState(objContext);
+    pUpdatingInfo->SetRequestingType(UpdateType::NORMAL);
+    EXPECT_CALL(objContext, StashUpdatingInfoInGlare()).Times(0);
+    EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdateReceived(&objSession));
+    pUpdatingState->OnExit();
 }
 
 TEST_F(UpdatingStateTest, SessionUpdateReceivedRejectsIfGlareTimerInActive)
@@ -1618,4 +1646,25 @@ TEST_F(UpdatingStateTest, SessionUpdatedRecoversFromUnconfirmedRemoteHoldAfterRe
     EXPECT_CALL(objContext, SetUnconfirmedRemoteHold(IMS_FALSE));
 
     pUpdatingState->SessionUpdated(&objSession);
+}
+
+TEST_F(UpdatingStateTest, HandleRetryWithGlareInfo)
+{
+    // Current state is RECVONLY due to remote hold
+    objMediaInfo.eAudioDirection = DIRECTION_RECEIVE;
+    ON_CALL(objMediaManager, GetMediaInfo(_)).WillByDefault(ReturnRef(objMediaInfo));
+
+    // Our pending retry was for HOLD (which should now target INACTIVE, but originally SENDONLY)
+    pUpdatingInfo->SetRequestingType(UpdateType::HOLD);
+    pUpdatingInfo->SetTargetCallType(CallType::VOIP);
+    pUpdatingInfo->GetModifyingInfo().eAudioDirection = DIRECTION_SEND;
+    ON_CALL(objContext, GetStashedUpdatingInfoInGlare()).WillByDefault(Return(pUpdatingInfo));
+    ON_CALL(objMtcSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+
+    // Verify that the requested direction for HOLD was updated to INACTIVE
+    EXPECT_CALL(objPendingOperationHolder.GetMock(),
+            Hold(testing::Field(&MediaInfo::eAudioDirection, DIRECTION_INACTIVE)));
+    EXPECT_CALL(objContext, ClearStashedUpdatingInfoInGlare());
+
+    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_RETRY_UPDATE);
 }

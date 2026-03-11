@@ -16,6 +16,9 @@
 package com.android.imsstack.its.tests.registration.tests;
 
 import android.os.PersistableBundle;
+import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.RegistrationManager;
+import android.telephony.ims.stub.ImsRegistrationImplBase;
 
 import com.android.imsstack.its.servercontrol.BasicScenarioTemplates;
 import com.android.imsstack.its.servercontrol.ControlConnection;
@@ -87,5 +90,107 @@ public class RegistrationTestBase extends ImsStackTestBase {
         ScenarioGeneratorUtils generator = new ScenarioGeneratorUtils();
         generator.addMessages(BasicScenarioTemplates.NORMAL_REGISTRATION_W_SUBSCRIPTION);
         mServerControlConnection.sendControlCommand(generator.build().toString());
+    }
+
+    /**
+     * Triggers IMS registration using the currently configured registration information.
+     * This helper reduces boilerplate in test cases.
+     */
+    protected void triggerRegistration() {
+        mRegistrationHelper.triggerRegistration(this, mInfoBuilder.build());
+    }
+
+    /**
+     * Triggers IMS registration with the provided RegistrationInfo.
+     *
+     * @param regInfo The {@link RegistrationInfo} object containing IMS registration information.
+     */
+    protected void triggerRegistration(RegistrationInfo regInfo) {
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+    }
+
+    /**
+     * Triggers IMS registration with the provided CarrierConfig overrides.
+     * This helper applies the given configuration to the default RegistrationInfo builder
+     * before triggering the registration.
+     *
+     * @param config The {@link PersistableBundle} containing carrier configuration.
+     */
+    protected void triggerRegistration(PersistableBundle config) {
+        RegistrationInfo regInfo = mInfoBuilder
+                .addConfig(config)
+                .build();
+
+        mRegistrationHelper.triggerRegistration(this, regInfo);
+    }
+
+    /**
+     * Verifies that the IMS stack has successfully registered on the specified radio technology.
+     *
+     * @param tech The expected radio technology (e.g.,
+     *             {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE}).
+     */
+    protected void verifyRegistered(int tech) {
+        mRegistration.expect().registered(
+                attr -> attr.getRegistrationTechnology() == tech
+        );
+    }
+
+    /**
+     * Verifies that the IMS stack has deregistered on the specified radio technology.
+     * This helper asserts that a {@code deregistered} event occurred where the network type
+     * matches the provided argument. The deregistration reason and suggested action are
+     * ignored in this verification.
+     *
+     * @param tech The expected radio technology (e.g.,
+     *             {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE}).
+     */
+    protected void verifyDeregistered(int tech) {
+        mRegistration.expect().deregistered(
+                null, // Any reason is acceptable
+                null, // Any action is acceptable
+                networkType -> networkType == tech
+        );
+    }
+
+    /**
+     * Verifies that the IMS stack has deregistered with the specified main error code,
+     * extra error code, and radio technology.
+     * This helper asserts that a {@code deregistered} event occurred where both the main
+     * error code and the extra error code, as well as the network type, match the provided
+     * arguments. The suggested action is ignored in this verification.
+     *
+     * @param reasonCode The expected main error code defined in {@link ImsReasonInfo}.
+     * @param extraCode  The expected extra error code defined in {@link ImsReasonInfo}
+     *                   (e.g., {@link ImsReasonInfo#CODE_NETWORK_DETACH}).
+     * @param tech       The expected radio technology (e.g.,
+     *                   {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE}).
+     */
+    protected void verifyDeregisteredWithReason(int reasonCode, int extraCode, int tech) {
+        mRegistration.expect().deregistered(
+                reason -> reason.getCode() == reasonCode && reason.getExtraCode() == extraCode,
+                null, // Any action is acceptable
+                networkType -> networkType == tech
+        );
+    }
+
+    /**
+     * Verifies that the IMS stack has deregistered with the specified suggested action,
+     * and radio technology.
+     * This helper asserts that a {@code deregistered} event occurred where both the
+     * suggested action and the network type match the provided arguments. The
+     * deregistration reason is ignored in this verification.
+     *
+     * @param action     The expected suggested action defined in {@link RegistrationManager}
+     *                   (e.g., {@link RegistrationManager#SUGGESTED_ACTION_NONE}).
+     * @param tech       The expected radio technology (e.g.,
+     *                   {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE}).
+     */
+    protected void verifyDeregisteredWithAction(int action, int tech) {
+        mRegistration.expect().deregistered(
+                null, // Any reason is acceptable
+                act -> act == action,
+                networkType -> networkType == tech
+        );
     }
 }

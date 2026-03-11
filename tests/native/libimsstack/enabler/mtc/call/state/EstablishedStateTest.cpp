@@ -853,6 +853,29 @@ TEST_F(EstablishedStateTest,
             CallStateName::ESTABLISHED, pEstablishedState->SessionUpdateReceived(&objMockISession));
 }
 
+TEST_F(EstablishedStateTest, SessionUpdateReceivedDuringRetryWaitNotifiesFailureAndStopsTimer)
+{
+    ON_CALL(objMessageUtils, GetCallTypeFromSdp(_, _, _, _)).WillByDefault(Return(CallType::VOIP));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockMtcSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
+
+    UpdatingInfo objGlareInfo(objMockCallContext);
+    ON_CALL(objMockCallContext, GetStashedUpdatingInfoInGlare())
+            .WillByDefault(Return(&objGlareInfo));
+    SipMethod objSipMethod(SipMethod::UPDATE);
+    ON_CALL(objMessage, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
+
+    // Expect that the failure is notified, the stashed info is cleared, and the timer is stopped.
+    EXPECT_CALL(objUiNotifier, SendUpdateFailed(_)).Times(1);
+    EXPECT_CALL(objMockCallContext, ClearStashedUpdatingInfoInGlare()).Times(1);
+    EXPECT_CALL(objTimerWrapper, Stop(MtcCallState::TIMER_RETRY_UPDATE)).Times(1);
+
+    pEstablishedState->SessionUpdateReceived(&objMockISession);
+}
+
 TEST_F(EstablishedStateTest, UssiTerminateInvokesCheckingUssiBodyAndSendTerminated)
 {
     MockISipMessage objMockISipMessage;
@@ -1215,6 +1238,31 @@ TEST_F(EstablishedStateTest, ResumeHandlesFailure)
 
     EXPECT_CALL(objUiNotifier, SendResumeFailed(CallReasonInfo(CODE_SUPP_SVC_FAILED)));
     EXPECT_EQ(CallStateName::ESTABLISHED, pEstablishedState->Resume(objMediaInfo));
+}
+
+TEST_F(EstablishedStateTest, HandleRetryForHold)
+{
+    // Current state is RECVONLY due to remote hold
+    objMediaInfo.eAudioDirection = DIRECTION_RECEIVE;
+    ON_CALL(objMockMediaManager, GetMediaInfo(_)).WillByDefault(ReturnRef(objMediaInfo));
+
+    // Our pending retry was for HOLD (which should now target INACTIVE, but originally SENDONLY)
+    pUpdatingInfo->SetRequestingType(UpdateType::HOLD);
+    pUpdatingInfo->SetTargetCallType(CallType::VOIP);
+    pUpdatingInfo->GetModifyingInfo().eAudioDirection = DIRECTION_SEND;
+    ON_CALL(objMockCallContext, GetStashedUpdatingInfoInGlare())
+            .WillByDefault(Return(pUpdatingInfo));
+    ON_CALL(objMockMtcSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+
+    EXPECT_CALL(objMockCallContext, ClearStashedUpdatingInfoInGlare()).Times(1);
+
+    // Verify that the requested direction for HOLD was updated to INACTIVE
+    EXPECT_CALL(objMockMediaManager,
+            SetMediaInfo(Ref(objMockISession),
+                    testing::Field(&MediaInfo::eAudioDirection, DIRECTION_INACTIVE)));
+    EXPECT_CALL(objMockMtcSession, Update(UpdateType::HOLD, _, _)).WillOnce(Return(IMS_SUCCESS));
+    EXPECT_EQ(CallStateName::UPDATING,
+            pEstablishedState->OnTimerExpired(MtcCallState::TIMER_RETRY_UPDATE));
 }
 
 }  // namespace android

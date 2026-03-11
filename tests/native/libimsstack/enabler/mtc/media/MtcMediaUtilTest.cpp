@@ -471,4 +471,57 @@ TEST_F(MtcMediaUtilTest, GetPemTypeReturnsCorrectPemType)
     EXPECT_EQ(MtcMediaUtil::GetPemType("SendRecv"), PemType::NONE);
 }
 
+TEST_F(MtcMediaUtilTest, RefineMediaDirectionByPendingRetry)
+{
+    MediaInfo objCurrentMediaInfo;
+    MediaInfo objModifyingMediaInfo;
+
+    // Retry for HOLD (sendrecv -> sendonly)
+    objCurrentMediaInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objCurrentMediaInfo.eVideoDirection = DIRECTION_SEND_RECEIVE;
+    objCurrentMediaInfo.eTextDirection = DIRECTION_SEND_RECEIVE;
+    MtcMediaUtil::RefineMediaDirectionByPendingRetry(
+            CallType::VIDEO_RTT, UpdateType::HOLD, objCurrentMediaInfo, objModifyingMediaInfo);
+    EXPECT_EQ(objModifyingMediaInfo.eAudioDirection, DIRECTION_SEND);
+    EXPECT_EQ(objModifyingMediaInfo.eVideoDirection, DIRECTION_SEND);
+    EXPECT_EQ(objModifyingMediaInfo.eTextDirection, DIRECTION_SEND);
+
+    // Current is RECVONLY due to remote hold, retry for local HOLD (recvonly -> inactive)
+    objCurrentMediaInfo.eAudioDirection = DIRECTION_RECEIVE;
+    objCurrentMediaInfo.eVideoDirection = DIRECTION_RECEIVE;
+    objCurrentMediaInfo.eTextDirection = DIRECTION_RECEIVE;
+    MtcMediaUtil::RefineMediaDirectionByPendingRetry(
+            CallType::VIDEO_RTT, UpdateType::HOLD, objCurrentMediaInfo, objModifyingMediaInfo);
+    EXPECT_EQ(objModifyingMediaInfo.eAudioDirection, DIRECTION_INACTIVE);
+    EXPECT_EQ(objModifyingMediaInfo.eVideoDirection, DIRECTION_INACTIVE);
+    EXPECT_EQ(objModifyingMediaInfo.eTextDirection, DIRECTION_INACTIVE);
+
+    // Current is SENDONLY, retry for RESUME (sendonly -> sendrecv)
+    objCurrentMediaInfo.eAudioDirection = DIRECTION_SEND;
+    objCurrentMediaInfo.eVideoDirection = DIRECTION_SEND;
+    objCurrentMediaInfo.eTextDirection = DIRECTION_SEND;
+    MtcMediaUtil::RefineMediaDirectionByPendingRetry(
+            CallType::VIDEO_RTT, UpdateType::RESUME, objCurrentMediaInfo, objModifyingMediaInfo);
+    EXPECT_EQ(objModifyingMediaInfo.eAudioDirection, DIRECTION_SEND_RECEIVE);
+    EXPECT_EQ(objModifyingMediaInfo.eVideoDirection, DIRECTION_SEND_RECEIVE);
+    EXPECT_EQ(objModifyingMediaInfo.eTextDirection, DIRECTION_SEND_RECEIVE);
+
+    // Current is INACTIVE, retry for RESUME (inactive -> recvonly)
+    objCurrentMediaInfo.eAudioDirection = DIRECTION_INACTIVE;
+    objCurrentMediaInfo.eVideoDirection = DIRECTION_INACTIVE;
+    objCurrentMediaInfo.eTextDirection = DIRECTION_INACTIVE;
+    MtcMediaUtil::RefineMediaDirectionByPendingRetry(
+            CallType::VIDEO_RTT, UpdateType::RESUME, objCurrentMediaInfo, objModifyingMediaInfo);
+    EXPECT_EQ(objModifyingMediaInfo.eAudioDirection, DIRECTION_RECEIVE);
+    EXPECT_EQ(objModifyingMediaInfo.eVideoDirection, DIRECTION_RECEIVE);
+    EXPECT_EQ(objModifyingMediaInfo.eTextDirection, DIRECTION_RECEIVE);
+
+    // SESSION update type (should not modify directions)
+    objModifyingMediaInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objCurrentMediaInfo.eAudioDirection = DIRECTION_RECEIVE;
+    MtcMediaUtil::RefineMediaDirectionByPendingRetry(
+            CallType::VOIP, UpdateType::SESSION, objCurrentMediaInfo, objModifyingMediaInfo);
+    EXPECT_EQ(objModifyingMediaInfo.eAudioDirection, DIRECTION_SEND_RECEIVE);
+}
+
 }  // namespace android

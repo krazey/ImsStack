@@ -47,6 +47,8 @@ public:
     static IMS_UINT32 StringToMediaTypes(IN const AString& strMediaTypes);
 
     static void RefineMediaInfoByCallType(IN CallType eCallType, IN_OUT MediaInfo& objMediaInfo);
+    static void RefineMediaDirectionByPendingRetry(IN CallType eCallType, IN UpdateType eUpdateType,
+            IN const MediaInfo& objCurrentMediaInfo, OUT MediaInfo& objModifyingMediaInfo);
     static PemType GetPemType(IN const AString& strPemHeader);
 };
 

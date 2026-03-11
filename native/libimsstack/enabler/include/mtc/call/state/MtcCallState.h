@@ -22,6 +22,7 @@
 #include "MtcDef.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCall.h"
+#include "call/UpdatingInfo.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/state/IMtcCallState.h"
 #include "helper/IMtcAosStateListener.h"
@@ -178,6 +179,7 @@ protected:
     inline virtual CallStateName HandleAosDisconnectedByAllPcscfFailed() { return GetStateName(); }
 
     void HandleTerminate(IN const CallReasonInfo& objReason) const;
+    void NotifySessionUpdateFailure(IN const UpdatingInfo& objUpdatingInfo) const;
     void NotifyHoldResumeState();
 
     ISession* GetISession();

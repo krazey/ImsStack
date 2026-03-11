@@ -74,6 +74,7 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
         m_objCallInfo(objCallInfo),
         m_objParticipantInfo(ParticipantInfo(*this)),
         m_pUpdatingInfo(IMS_NULL),
+        m_pStashedUpdatingInfoInGlare(IMS_NULL),
         m_lstSessions(ImsList<IMtcSession*>()),
         m_objPendingOperationHolder(),
         m_pTimer(objContext.CreateTimer()),
@@ -119,6 +120,7 @@ PUBLIC VIRTUAL MtcCall::~MtcCall()
     delete m_pUssiController;
     delete m_pEpsFallbackTrigger;
     delete m_pCurrentLocationDiscoveryController;
+    delete m_pStashedUpdatingInfoInGlare;
 }
 
 PUBLIC VIRTUAL void MtcCall::HandleIncoming(IN ISession* piSession)
@@ -582,6 +584,29 @@ PUBLIC VIRTUAL void MtcCall::DeleteUpdatingInfo()
 {
     delete m_pUpdatingInfo;
     m_pUpdatingInfo = IMS_NULL;
+}
+
+PUBLIC VIRTUAL void MtcCall::StashUpdatingInfoInGlare()
+{
+    IMS_TRACE_I("%s - StashUpdatingInfoInGlare", ToString().GetStr(), 0, 0);
+    delete m_pStashedUpdatingInfoInGlare;
+    m_pStashedUpdatingInfoInGlare = m_pUpdatingInfo;
+
+    // Transfer ownership to m_pStashedUpdatingInfoInGlare and nullify m_pUpdatingInfo
+    // to prevent double-frees.
+    m_pUpdatingInfo = IMS_NULL;
+}
+
+PUBLIC VIRTUAL UpdatingInfo* MtcCall::GetStashedUpdatingInfoInGlare()
+{
+    return m_pStashedUpdatingInfoInGlare;
+}
+
+PUBLIC VIRTUAL void MtcCall::ClearStashedUpdatingInfoInGlare()
+{
+    IMS_TRACE_I("%s - ClearStashedUpdatingInfoInGlare", ToString().GetStr(), 0, 0);
+    delete m_pStashedUpdatingInfoInGlare;
+    m_pStashedUpdatingInfoInGlare = IMS_NULL;
 }
 
 PUBLIC VIRTUAL void MtcCall::RunPendingOperationIfPossible()

@@ -91,11 +91,12 @@ private:
     IMessage* GetUpdateResponse(const IN ISession* piSession) const;
     IMS_BOOL WasTriggeredByOfferlessReinvite() const;
     void RecoverModificationFailure();
-    void NotifyFailure();
     void StopTimer();
     void UpdateCallType();
     void CheckPreconditionAndNotifyIncomingUpdate(IN ISession* piSession);
     void HandleUnconfirmedRemoteHold(IN UpdatingInfo& objUpdatingInfo);
+
+    IMS_BOOL m_bShouldStashUpdatingInfoInGlare;
 };
 
 #endif
