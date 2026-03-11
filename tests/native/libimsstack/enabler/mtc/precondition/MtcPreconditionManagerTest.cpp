@@ -2775,3 +2775,63 @@ TEST_F(MtcPreconditionManagerTest,
     EXPECT_CALL(objListener, QosReserveFailed(&objISession, _)).Times(0);
     pPreconditionManager->OnTimerExpired(&objTimer, QosTimerType::GUARD_AFTER_LOST);
 }
+
+TEST_F(MtcPreconditionManagerTest,
+        IsAudioQosEverAvailableReturnsTrueIfAudioQosWasAvailableEvenAfterLost)
+{
+    SetUpMockQosInfo();
+    SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
+    EXPECT_FALSE(pPreconditionManager->IsAudioQosEverAvailable());
+
+    // IDLE -> AVAILABLE
+    ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::IDLE));
+    pPreconditionManager->OnQosStatusChanged(
+            &objISession, QosStatus::AVAILABLE, MEDIATYPE_AUDIO, IMS_TRUE);
+
+    EXPECT_TRUE(pPreconditionManager->IsAudioQosEverAvailable());
+
+    // AVAILABLE -> LOST
+    ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::AVAILABLE));
+    EXPECT_CALL(*pInfo, SetAudioStatus(QosStatus::LOST));
+    pPreconditionManager->OnQosStatusChanged(
+            &objISession, QosStatus::LOST, MEDIATYPE_AUDIO, IMS_TRUE);
+
+    EXPECT_TRUE(pPreconditionManager->IsAudioQosEverAvailable());
+}
+
+TEST_F(MtcPreconditionManagerTest,
+        IsAudioQosEverAvailableReturnsTrueEvenIfForkedSessionQosNotAvailable)
+{
+    SetUpMockQosInfo();
+    SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
+    EXPECT_FALSE(pPreconditionManager->IsAudioQosEverAvailable());
+
+    // 1. Primary session gets QoS AVAILABLE
+    ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::IDLE));
+    EXPECT_CALL(*pInfo, SetAudioStatus(QosStatus::AVAILABLE));
+    EXPECT_CALL(objListener, QosReserved(&objISession, MEDIATYPE_AUDIO)).Times(1);
+
+    pPreconditionManager->OnQosStatusChanged(
+            &objISession, QosStatus::AVAILABLE, MEDIATYPE_AUDIO, IMS_TRUE);
+
+    EXPECT_TRUE(pPreconditionManager->IsAudioQosEverAvailable());
+
+    // 2. Setup forked session
+    MockISession objForkedSession;
+    MockQosInfo* pForkedInfo = new MockQosInfo(&objTimerListener);
+    MockQosTimer objForkedTimer(&objTimerListener);
+    MockQosStatusTable objForkedStatusTable;
+
+    ON_CALL(*pForkedInfo, GetTimer()).WillByDefault(ReturnRef(objForkedTimer));
+    ON_CALL(*pForkedInfo, GetStatusTable()).WillByDefault(ReturnRef(objForkedStatusTable));
+
+    pPreconditionManager->ReplaceQosInfo(&objForkedSession, pForkedInfo);
+
+    // 3. Forked session status is IDLE (not AVAILABLE)
+    ON_CALL(*pForkedInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::IDLE));
+
+    pPreconditionManager->OnQosStatusChanged(
+            &objForkedSession, QosStatus::IDLE, MEDIATYPE_AUDIO, IMS_TRUE);
+
+    EXPECT_TRUE(pPreconditionManager->IsAudioQosEverAvailable());
+}

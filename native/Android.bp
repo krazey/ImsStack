@@ -46,7 +46,6 @@ cc_defaults {
 cc_defaults {
     name: "imsstack_shared_libs_defaults",
     shared_libs: [
-        "libandroid_runtime",
         "libbinder",
         "libcutils",
         "liblog",

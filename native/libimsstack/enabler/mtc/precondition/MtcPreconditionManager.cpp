@@ -61,7 +61,8 @@ MtcPreconditionManager::MtcPreconditionManager(IN IMtcCallContext& objContext) :
         m_bLocalResourceConfirmedInitially(IMS_FALSE),
         m_bOnWlan(objContext.GetService().GetRatType() == INetworkWatcher::RADIOTECH_TYPE_IWLAN),
         m_ePreviousRatType(m_objContext.GetService().GetMobileRatType()),
-        m_eCurrentRatType(m_ePreviousRatType)
+        m_eCurrentRatType(m_ePreviousRatType),
+        m_bAudioQosEverAvailable(IMS_FALSE)
 {
     m_objContext.GetMediaManager().SetQosListener(this);
 }
@@ -529,6 +530,11 @@ PUBLIC VIRTUAL void MtcPreconditionManager::UpdateQosIfAvailable(IN ISession* pi
     }
 }
 
+PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsAudioQosEverAvailable() const
+{
+    return m_bAudioQosEverAvailable;
+}
+
 PUBLIC VIRTUAL void MtcPreconditionManager::OnQosStatusChanged(IN ISession* piSession,
         IN QosStatus eStatus, IN IMS_UINT32 eMediaType, IN IMS_BOOL bNeedToNotify)
 {
@@ -621,7 +627,7 @@ void MtcPreconditionManager::DestroyAllQosInfo()
 
 PRIVATE
 IMS_RESULT MtcPreconditionManager::SetQosStatus(
-        IN ISession* piSession, QosStatus eStatus, IN IMS_UINT32 eMediaType) const
+        IN ISession* piSession, QosStatus eStatus, IN IMS_UINT32 eMediaType)
 {
     QosInfo* pInfo = GetQosInfo(piSession);
     if (pInfo == IMS_NULL)
@@ -632,6 +638,10 @@ IMS_RESULT MtcPreconditionManager::SetQosStatus(
     if (eMediaType == MEDIATYPE_AUDIO)
     {
         pInfo->SetAudioStatus(eStatus);
+        if (eStatus == QosStatus::AVAILABLE)
+        {
+            m_bAudioQosEverAvailable = IMS_TRUE;
+        }
     }
     else if (eMediaType == MEDIATYPE_VIDEO)
     {
@@ -857,7 +867,7 @@ void MtcPreconditionManager::HandleReservationFailureByTimerExpiration(IN const 
 }
 
 PRIVATE
-void MtcPreconditionManager::InitializeStatusForUnusedLostQos(IN ISession* piSession) const
+void MtcPreconditionManager::InitializeStatusForUnusedLostQos(IN ISession* piSession)
 {
     CallType eCallType = m_objContext.GetSession()->GetCallType();
 
@@ -1338,7 +1348,7 @@ IMS_BOOL MtcPreconditionManager::IsNeedToStartWaitAudioDedicatedBearerTimer(
 }
 
 PRIVATE
-IMS_UINT32 MtcPreconditionManager::SetLocalResourceAvailable(IN ISession* piSession) const
+IMS_UINT32 MtcPreconditionManager::SetLocalResourceAvailable(IN ISession* piSession)
 {
     IMS_UINT32 eEnabledMediaTypes = MEDIATYPE_NONE;
     CallType eCallType = m_objContext.GetSession()->GetCallType();

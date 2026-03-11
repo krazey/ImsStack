@@ -4751,6 +4751,19 @@ public:
         // Mtc
         static const IMS_CHAR KEY_ENABLE_FAKE_QOS_CALL_FLOW_ON_WIFI_BOOL[];
         static const IMS_CHAR KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL_INT[];
+
+        /**
+         * Specifies whether to use imsvoice.mo_call_request_timeout_millis_int carrier config
+         * value when initiating a Wi-Fi normal call.
+         *
+         * If {@code false} the Timer B value is applied for transaction timeout.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
+        static const IMS_CHAR KEY_USE_MO_CALL_REQUEST_TIMEOUT_TIMER_BOOL[];
+
         static const IMS_CHAR KEY_REJECT_VOWIFI_VOICE_CALL_WHEN_VOWIFI_SETTING_OFF_BOOL[];
         static const IMS_CHAR KEY_OVERRIDE_MEDIA_INACTIVITY_TO_WIFI_LOST_BOOL[];
     };

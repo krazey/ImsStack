@@ -372,8 +372,7 @@ TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredNotTriggersEpsFallbac
     MockIMtcPreconditionManager objPreconditionManager;
     ON_CALL(objContext, GetPreconditionManager).WillByDefault(ReturnRef(objPreconditionManager));
 
-    ON_CALL(objPreconditionManager, IsDedicatedBearerAllocated(&objSession, MEDIATYPE_AUDIO))
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsAudioQosEverAvailable()).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), TriggerEpsFallback(_)).Times(0);
@@ -395,8 +394,7 @@ TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredNotTriggersEpsFallbac
     MockIMtcPreconditionManager objPreconditionManager;
     ON_CALL(objContext, GetPreconditionManager).WillByDefault(ReturnRef(objPreconditionManager));
 
-    ON_CALL(objPreconditionManager, IsDedicatedBearerAllocated(&objSession, MEDIATYPE_AUDIO))
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsAudioQosEverAvailable()).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), TriggerEpsFallback(_)).Times(0);
@@ -418,8 +416,7 @@ TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredNotTriggersEpsFallbac
     MockIMtcPreconditionManager objPreconditionManager;
     ON_CALL(objContext, GetPreconditionManager).WillByDefault(ReturnRef(objPreconditionManager));
 
-    ON_CALL(objPreconditionManager, IsDedicatedBearerAllocated(&objSession, MEDIATYPE_AUDIO))
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objPreconditionManager, IsAudioQosEverAvailable()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), TriggerEpsFallback(_)).Times(0);
@@ -441,8 +438,7 @@ TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredTriggersEpsFallbackIf
     MockIMtcPreconditionManager objPreconditionManager;
     ON_CALL(objContext, GetPreconditionManager).WillByDefault(ReturnRef(objPreconditionManager));
 
-    ON_CALL(objPreconditionManager, IsDedicatedBearerAllocated(&objSession, MEDIATYPE_AUDIO))
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objPreconditionManager, IsAudioQosEverAvailable()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objService, IsNr).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(),

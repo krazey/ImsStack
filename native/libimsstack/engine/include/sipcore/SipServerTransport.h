@@ -32,7 +32,8 @@ public:
     IMS_BOOL FormViaHeader(
             IN_OUT ::SipMessage*& pSipMsg, IN const SipProfile* pProfile = IMS_NULL) override;
     IMS_BOOL UpdateDestinationInfo(IN ::SipMessage* pSipMsg, IN const SipProfile* pProfile,
-            IN IMS_BOOL bRoutingLr = IMS_TRUE, IN SipAddrSpec* pImplicitRoute = IMS_NULL) override;
+            IN IMS_BOOL bRoutingLr = IMS_TRUE, IN SipAddrSpec* pImplicitRoute = IMS_NULL,
+            IN const IpAddress* pImplicitDstAddress = IMS_NULL) override;
     IMS_SINT32 ValidateViaHeader(IN ::SipMessage* pSipMsg) override;
 };
 

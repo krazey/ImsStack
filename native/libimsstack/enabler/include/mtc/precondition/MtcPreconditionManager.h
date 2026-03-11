@@ -122,6 +122,7 @@ public:
     virtual void OnRatChanged(IN IMS_SINT32 eRatType) override;
     virtual void UpdateQosIfAvailable(IN ISession* piSession, IN IMS_UINTP nNegoId,
             IN MEDIA_CONTENT_TYPE eNegotiatedMediaType, IN IMediaSession* piMediaSession) override;
+    virtual IMS_BOOL IsAudioQosEverAvailable() const override;
 
 public:
     virtual void OnQosStatusChanged(IN ISession* piSession, IN QosStatus eStatus,
@@ -134,8 +135,7 @@ protected:
 
 private:
     void DestroyAllQosInfo();
-    IMS_RESULT SetQosStatus(
-            IN ISession* piSession, QosStatus eStatus, IN IMS_UINT32 eMediaType) const;
+    IMS_RESULT SetQosStatus(IN ISession* piSession, QosStatus eStatus, IN IMS_UINT32 eMediaType);
     QosStatus GetQosStatus(IN ISession* piSession, IN IMS_UINT32 eMediaType) const;
     QosTimer* GetQosTimer(IN ISession* piSession) const;
     QosStatusTable* GetQosStatusTable(IN ISession* piSession) const;
@@ -147,7 +147,7 @@ private:
     void OnWaitVideoTextAvailableTimerExpired(IN const QosTimer* pTimer);
     void OnForceAvailableTimerExpired(IN const QosTimer* pTimer);
     void HandleReservationFailureByTimerExpiration(IN const QosTimer* pTimer);
-    void InitializeStatusForUnusedLostQos(IN ISession* piSession) const;
+    void InitializeStatusForUnusedLostQos(IN ISession* piSession);
     void CreateStatusRecordsWithActiveMediaTypes(IN ISession* piSession);
     void CreateStatusRecords(IN ISession* piSession, IN IMS_UINT32 eMediaType);
     void HandleQosTimer(IN ISession* piSession, IN QosStatus eCurrentStatus,
@@ -172,7 +172,7 @@ private:
     static IMS_BOOL IsConfirmedDialog(IN const ISession* piSession);
     IMS_BOOL IsNeedToStartWaitAudioDedicatedBearerTimer(
             IN ISession* piSession, IN IMS_BOOL bSendingInitialInvite) const;
-    IMS_UINT32 SetLocalResourceAvailable(IN ISession* piSession) const;
+    IMS_UINT32 SetLocalResourceAvailable(IN ISession* piSession);
     IMS_SINT32 GetQosTime(IN QosTimerType eType) const;
     static IMS_SINT32 GetSdpMediaType(IN IMS_UINT32 eMediaType);
     ISession* GetISessionWithTimer(IN const QosTimer* pTimer) const;
@@ -193,6 +193,7 @@ protected:
     IMS_BOOL m_bOnWlan;
     IMS_SINT32 m_ePreviousRatType;
     IMS_SINT32 m_eCurrentRatType;
+    IMS_BOOL m_bAudioQosEverAvailable;
 };
 
 #endif

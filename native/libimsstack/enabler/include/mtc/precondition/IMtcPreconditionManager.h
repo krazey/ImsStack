@@ -220,6 +220,19 @@ public:
      */
     virtual void UpdateQosIfAvailable(IN ISession* piSession, IN IMS_UINTP nNegoId,
             IN MEDIA_CONTENT_TYPE eNegotiatedMediaType, IN IMediaSession* piMediaSession) = 0;
+
+    /**
+     * @brief Checks if Audio QoS has ever been available during the call.
+     *
+     * In a multiple session (forking) environment, this returns true as long as at least one
+     * session has acquired QoS.
+     * Note that this only returns true upon actual QoS acquisition, independent of default bearer
+     * supportability.
+     *
+     * @return IMS_TRUE if Audio QoS has ever been available for at least one session during the
+     * call (independent of default bearer support), IMS_FALSE otherwise.
+     */
+    virtual IMS_BOOL IsAudioQosEverAvailable() const = 0;
 };
 
 #endif
