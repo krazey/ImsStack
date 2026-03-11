@@ -54,7 +54,9 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-LOCAL const AString REASON_TEXT_MAX_CALL_LIMIT_REACHED_TYPE1 =
+LOCAL const AString REASON_PHRASE_ORIGINATING_USER_NOT_REGISTERED_LOWERCASE =
+        "originating user not registered";
+LOCAL const AString REASON_TEXT_MAX_CALL_LIMIT_REACHED_LOWERCASE =
         "simultaneous call limit has already been reached";
 
 // clang-format off
@@ -531,11 +533,17 @@ CallReasonInfo StartErrorHandler::HandleTerminateByReasonPhrase(IN const IMessag
 {
     IMS_TRACE_D("HandleTerminateByReasonPhrase", 0, 0, 0);
 
-    const AString strNormalizedReasonPhrase = objMessage.GetReasonPhrase().SimplifyWsp();
-    if (strNormalizedReasonPhrase.MakeLower().Contains(REASON_TEXT_MAX_CALL_LIMIT_REACHED_TYPE1))
+    const AString strReasonPhrase = objMessage.GetReasonPhrase().SimplifyWsp();
+    const AString strReasonPhraseLowercase = strReasonPhrase.MakeLower();
+    if (strReasonPhraseLowercase.Contains(REASON_PHRASE_ORIGINATING_USER_NOT_REGISTERED_LOWERCASE))
+    {
+        ControlAos(ImsAosControl::REGISTER_REINITIATE);
+        return GetDefaultCallReasonInfo(m_objContext, objMessage);
+    }
+    else if (strReasonPhraseLowercase.Contains(REASON_TEXT_MAX_CALL_LIMIT_REACHED_LOWERCASE))
     {
         return CallReasonInfo(GetDefaultReasonCode(m_objContext, objMessage.GetStatusCode()), -1,
-                strNormalizedReasonPhrase);
+                strReasonPhrase);
     }
     return CallReasonInfo(CODE_NONE);
 }

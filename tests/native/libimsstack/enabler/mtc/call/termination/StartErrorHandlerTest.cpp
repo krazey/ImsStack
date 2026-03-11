@@ -695,15 +695,27 @@ TEST_F(StartErrorHandlerTest, Handle403Response)
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }
 
-TEST_F(StartErrorHandlerTest, Handle403ResponseForReasonPhrase)
+TEST_F(StartErrorHandlerTest, Handle403ResponseForReasonPhraseNotRegistered)
 {
     SetMessageCode(SipStatusCode::SC_403);
     SetActionConfig(
             SipStatusCode::SC_403, ConfigVoice::START_ERROR_ACTION_TERMINATE_BY_REASON_PHRASE);
-    AString reasonPhrase = "Forbidden: Simultaneous Call Limit Has Already Been Reached";
-    ON_CALL(*pMessage, GetReasonPhrase()).WillByDefault(ReturnRef(reasonPhrase));
+    AString strReasonPhrase = "Forbidden - Originating user not registered";
+    ON_CALL(*pMessage, GetReasonPhrase()).WillByDefault(ReturnRef(strReasonPhrase));
 
-    EXPECT_TRUE(CheckHandleResult(CODE_SIP_FORBIDDEN, -1, reasonPhrase));
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE));
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_FORBIDDEN, SipStatusCode::SC_403));
+}
+
+TEST_F(StartErrorHandlerTest, Handle403ResponseForReasonPhraseCallLimit)
+{
+    SetMessageCode(SipStatusCode::SC_403);
+    SetActionConfig(
+            SipStatusCode::SC_403, ConfigVoice::START_ERROR_ACTION_TERMINATE_BY_REASON_PHRASE);
+    AString strReasonPhrase = "Forbidden: Simultaneous Call Limit Has Already Been Reached";
+    ON_CALL(*pMessage, GetReasonPhrase()).WillByDefault(ReturnRef(strReasonPhrase));
+
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_FORBIDDEN, -1, strReasonPhrase));
 }
 
 TEST_F(StartErrorHandlerTest, Handle403ResponseForWarningHeaderWhenCsfbIsNotAvailable)
