@@ -792,6 +792,11 @@ public class SystemServiceProxyImplTest {
 
         pmp.unregisterFeatureProvisioningChangedCallback(callback);
         verify(provisioningManager).unregisterFeatureProvisioningChangedCallback(eq(callback));
+
+        doThrow(new RuntimeException("unregisterFeatureProvisioningChangedCallback failed."))
+                .when(provisioningManager).unregisterFeatureProvisioningChangedCallback(any());
+        // Expected: no exception thrown.
+        pmp.unregisterFeatureProvisioningChangedCallback(callback);
     }
 
     @Test
