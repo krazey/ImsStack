@@ -450,7 +450,6 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
 
     @Override
     public void callQualityChanged(CallQuality callQuality) {
-        log("callQualityChanged");
         if (mAudioListener != null) {
             mAudioListener.onCallQualityChanged(callQuality);
         }
