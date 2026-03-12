@@ -4152,7 +4152,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 return;
             }
 
-            logi("onCallQualityChanged");
             /* After SRVCC success case don't invoke callQualityChanged as ImsCallSession
              * will be closed from framework side.
              */
