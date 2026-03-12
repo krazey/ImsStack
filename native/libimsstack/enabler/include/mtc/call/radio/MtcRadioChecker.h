@@ -123,7 +123,8 @@ private:
     static TrafficType ConvertCallTypeToTrafficType(IN CallType eCallType, IN IMS_BOOL bEmergency);
     IMS_UINT32 ConvertRatType(IN IMS_SINT32 eRatType) const;
     void AddCallKey(IN MtcTrafficInfo& objMtcTrafficInfo, IN CallKey nCallKey);
-    void RemoveCallKeyAndStopTrafficCheckingIfNeeded(IN CallKey nCallKeyIn);
+    void RemoveCallKeyAndStopTrafficCheckingIfNeeded(
+            IN CallKey nCallKeyIn, IN IMS_BOOL bForceRemove = IMS_FALSE);
     void MaybeStoreRegistrationThrottlingTime(
             IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis);
     MtcTrafficInfo* GetCallTrafficInfo(
