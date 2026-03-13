@@ -523,8 +523,7 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessDataConnectionChanged()
         return;
     }
 
-    if (!m_bDataConnected && !IsSupportedNetworkType(m_nNetworkType) &&
-            m_nNetworkType != NW_REPORT_RADIO_NOSRV)
+    if (!m_bDataConnected)
     {
         if (IsVolteHysTimerRunning())
         {
