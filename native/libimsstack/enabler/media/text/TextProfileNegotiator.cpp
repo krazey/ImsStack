@@ -217,10 +217,19 @@ void TextProfileNegotiator::NegotiateBandwidthForOfferReceived(IN TextProfile* p
         IN TextProfile* pPeerProfile, OUT TextProfile* pNegotiatedProfile)
 {
     // For offer-received, the negotiated AS bandwidth is the minimum of the local and peer
-    // profile values. If one is zero, we take the other. If both are zero, it will be handled
-    // by the configuration default later if needed.
-    pNegotiatedProfile->SetBandwidthAs(
-            std::min(pLocalProfile->GetBandwidthAs(), pPeerProfile->GetBandwidthAs()));
+    // profile values. If one is zero or negative, we take the other. If both are zero or negative,
+    // it will be handled by the configuration default later if needed.
+    IMS_SINT32 localAs = pLocalProfile->GetBandwidthAs();
+    IMS_SINT32 peerAs = pPeerProfile->GetBandwidthAs();
+
+    if (localAs > 0 && peerAs > 0)
+    {
+        pNegotiatedProfile->SetBandwidthAs(std::min(localAs, peerAs));
+    }
+    else
+    {
+        pNegotiatedProfile->SetBandwidthAs(std::max(localAs, peerAs));
+    }
 
     // Exception Handling (b=RS/RR line is not included in Answer SDP)
     if (pNegotiatedProfile->GetBandwidthRs() < 0 || pNegotiatedProfile->GetBandwidthRr() < 0)

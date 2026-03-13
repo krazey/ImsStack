@@ -234,7 +234,7 @@ TEST_F(TextProfileNegotiatorTest, NegotiateBandwidthOfferReceivedLocalNoBw)
     m_pLocalProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kLocalT140Payload));
     m_pLocalProfile->SetBandwidthAs(0);
     m_pLocalProfile->SetBandwidthRs(0);
-    m_pLocalProfile->SetBandwidthRs(0);
+    m_pLocalProfile->SetBandwidthRr(0);
     m_pPeerProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kPeerT140Payload));
     m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
 
@@ -245,10 +245,29 @@ TEST_F(TextProfileNegotiatorTest, NegotiateBandwidthOfferReceivedLocalNoBw)
     // Assert
     EXPECT_TRUE(bResult);
 
-    // Bandwidth should be local profile's values except the RS
-    EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthAs(), m_pLocalProfile->GetBandwidthAs());
+    // Bandwidth should take the peer's values since local is zero
+    EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthAs(), m_pPeerProfile->GetBandwidthAs());
     EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthRs(), m_pPeerProfile->GetBandwidthRs());
-    EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthRr(), m_pLocalProfile->GetBandwidthRr());
+    EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthRr(), m_pPeerProfile->GetBandwidthRr());
+}
+
+TEST_F(TextProfileNegotiatorTest, NegotiateBandwidthOfferReceivedPeerNoBw)
+{
+    // Arrange
+    m_pLocalProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kLocalT140Payload));
+    m_pLocalProfile->SetBandwidthAs(4);
+    m_pPeerProfile->AddPayload(CreateT140Payload(TextProfileNegotiatorTest::kPeerT140Payload));
+    m_pPeerProfile->SetDirection(MEDIA_DIRECTION_SEND_RECEIVE);
+    m_pPeerProfile->SetBandwidthAs(-1); // Peer has no AS bandwidth
+
+    // Act: Offer Received
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), &m_objMockConfig);
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    // AS bandwidth should fall back to local profile's value
+    EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthAs(), 4);
 }
 
 TEST_F(TextProfileNegotiatorTest, NegotiateRedWithMissingT140InPeer)

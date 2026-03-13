@@ -996,11 +996,18 @@ PRIVATE IMS_BOOL VideoProfileNegotiator::MakeNegotiatedBandwidth(
         IN VideoProfile* pPeerProfile, IN IMS_BOOL bIsOfferReceived,
         OUT VideoProfile* pNegotiatedProfile)
 {
-    // Negotiate AS: Choose the less value
-    pNegotiatedProfile->SetBandwidthAs(
-            (pPeerProfile->GetBandwidthAs() > pLocalProfile->GetBandwidthAs())
-                    ? pLocalProfile->GetBandwidthAs()
-                    : pPeerProfile->GetBandwidthAs());
+    // Negotiate AS: Choose the less value if both are positive
+    IMS_SINT32 localAs = pLocalProfile->GetBandwidthAs();
+    IMS_SINT32 peerAs = pPeerProfile->GetBandwidthAs();
+
+    if (localAs > 0 && peerAs > 0)
+    {
+        pNegotiatedProfile->SetBandwidthAs(std::min(localAs, peerAs));
+    }
+    else
+    {
+        pNegotiatedProfile->SetBandwidthAs(std::max(localAs, peerAs));
+    }
 
     // Negotiate RS/RR Value
     if (!bIsOfferReceived)

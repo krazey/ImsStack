@@ -934,6 +934,24 @@ TEST_F(VideoProfileNegotiatorTest, NegotiateBandwidthASPeerLower)
     EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthAs(), 800);
 }
 
+TEST_F(VideoProfileNegotiatorTest, NegotiateBandwidthASPeerNoBw)
+{
+    // Arrange
+    AddAvcPayload(m_pLocalProfile.get(), kLocalPayload);
+    AddAvcPayload(m_pPeerProfile.get(), kPeerPayload);
+    m_pLocalProfile->SetBandwidthAs(1000);
+    m_pPeerProfile->SetBandwidthAs(-1); // Peer has no AS bandwidth
+
+    // Act
+    IMS_BOOL bResult = m_pNegotiator->Negotiate(m_pLocalProfile.get(), m_pPeerProfile.get(),
+            IMS_TRUE, m_pNegotiatedProfile.get(), m_pConfig.get());
+
+    // Assert
+    EXPECT_TRUE(bResult);
+    // AS bandwidth should fall back to local profile's value
+    EXPECT_EQ(m_pNegotiatedProfile->GetBandwidthAs(), 1000);
+}
+
 TEST_F(VideoProfileNegotiatorTest, NegotiateFrameRate)
 {
     // Arrange
