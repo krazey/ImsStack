@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -321,6 +322,41 @@ public class MtcMediaSessionTest {
                 eq(nRtpJitterMillis),
                 eq((long) nRtpInactivityTimeMillis)
         );
+    }
+
+    @Test
+    public void testMediaQualityStatusChanged_WithZeroValues_NotifiesReporter() {
+        // Arrange: Status with all zeros (recovery signal)
+        android.telephony.imsmedia.MediaQualityStatus recoveryStatus =
+                new android.telephony.imsmedia.MediaQualityStatus.Builder()
+                .setRtpPacketLossRate(0)
+                .setRtpJitterMillis(0)
+                .setRtpInactivityTimeMillis(0)
+                .build();
+
+        // Act
+        mMtcMediaSession.mediaQualityStatusChanged(1, 6, recoveryStatus);
+
+        // Assert: Verify the notification is forwarded despite zero values
+        verify(mMockMediaQualityReporter)
+                .notifyMediaQualityStatusChanged(anyInt(), anyInt(), eq(0), eq(0), eq(0L));
+    }
+
+    @Test
+    public void testMediaQualityStatusChanged_NullStatusOrReporter_DoesNotNotify() {
+        // Scenario 1: mediaQualityStatus is null
+        mMtcMediaSession.mediaQualityStatusChanged(1, 1, null);
+        verify(mMockMediaQualityReporter, never())
+                .notifyMediaQualityStatusChanged(anyInt(), anyInt(), anyInt(), anyInt(), anyLong());
+
+        // Scenario 2: mMediaQualityReporter is null
+        mMtcMediaSession.setMediaQualityReporter(null);
+        android.telephony.imsmedia.MediaQualityStatus status =
+                new android.telephony.imsmedia.MediaQualityStatus.Builder().build();
+        mMtcMediaSession.mediaQualityStatusChanged(1, 1, status);
+        verify(mMockMediaQualityReporter, never())
+                .notifyMediaQualityStatusChanged(anyInt(), anyInt(), anyInt(), anyInt(), anyLong());
+        // No crash should occur, and verify logic would be skipped
     }
 
     @Test
