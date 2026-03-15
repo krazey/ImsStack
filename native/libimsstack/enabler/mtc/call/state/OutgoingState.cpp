@@ -1082,10 +1082,12 @@ CallStateName OutgoingState::PerformSilentRedial(
 PRIVATE
 IMS_BOOL OutgoingState::HasNotRespondedQosConfirmation(IN ISession& objISession) const
 {
+    IMtcSession* piMtcSession = m_objContext.GetSession(&objISession);
+
     // 3GPP TS 24.229 5.1.3.1 - NOTE 5
-    if (m_objContext.GetMessageUtils().GetResponseStatusCode(
-                &objISession, IMessage::SESSION_EARLY_UPDATE) == SipStatusCode::SC_INVALID)
+    if (piMtcSession->GetOngoingUpdateType() != UpdateType::NONE)
     {
+        IMS_TRACE_D("HasNotRespondedQosConfirmation - no response", 0, 0, 0);
         const IMessage* piMessage = objISession.GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
         if (piMessage && m_objContext.GetMessageUtils().HasSdp(piMessage))
         {
@@ -1093,8 +1095,7 @@ IMS_BOOL OutgoingState::HasNotRespondedQosConfirmation(IN ISession& objISession)
         }
     }
 
-    if (m_objContext.GetMessageUtils().GetResponseStatusCode(
-                &objISession, IMessage::SESSION_PRACK) == SipStatusCode::SC_INVALID)
+    if (piMtcSession->IsPrackPending())
     {
         const IMessage* piMessage = objISession.GetPreviousRequest(IMessage::SESSION_PRACK);
         if (piMessage && m_objContext.GetMessageUtils().HasSdp(piMessage))

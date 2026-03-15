@@ -893,8 +893,8 @@ TEST_F(OutgoingStateTest, SessionStartedReturnsOutgoingStateIfNoResponseForUpdat
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(&objMessage));
 
-    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_EARLY_UPDATE, -1))
-            .WillByDefault(Return(SipStatusCode::SC_INVALID));
+    ON_CALL(objMtcSession, GetOngoingUpdateType()).WillByDefault(Return(UpdateType::NORMAL));
+    ON_CALL(objMtcSession, IsPrackPending()).WillByDefault(Return(IMS_FALSE));
     MockIMessage objUpdateMessage;
     ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE))
             .WillByDefault(Return(&objUpdateMessage));
@@ -913,8 +913,8 @@ TEST_F(OutgoingStateTest, SessionStartedReturnsOutgoingStateIfNoResponseForPrack
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(&objMessage));
 
-    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_EARLY_UPDATE, -1))
-            .WillByDefault(Return(SipStatusCode::SC_INVALID));
+    ON_CALL(objMtcSession, GetOngoingUpdateType()).WillByDefault(Return(UpdateType::NONE));
+    ON_CALL(objMtcSession, IsPrackPending()).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE))
             .WillByDefault(Return(nullptr));
     MockIMessage objPrackMessage;
@@ -935,12 +935,12 @@ TEST_F(OutgoingStateTest, SessionStartedReturnsEstablishedIfNoResponseForPrack)
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(&objMessage));
 
-    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_EARLY_UPDATE, -1))
-            .WillByDefault(Return(SipStatusCode::SC_INVALID));
-    MockIMessage objUpdateMessage;
-    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE))
-            .WillByDefault(Return(&objUpdateMessage));
-    ON_CALL(objMessageUtils, HasSdp(&objUpdateMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMtcSession, GetOngoingUpdateType()).WillByDefault(Return(UpdateType::NONE));
+    ON_CALL(objMtcSession, IsPrackPending()).WillByDefault(Return(IMS_TRUE));
+    MockIMessage objPrackMessage;
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_PRACK))
+            .WillByDefault(Return(&objPrackMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objPrackMessage)).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(objMediaManager, RestoreSdp(&objSession));
     EXPECT_CALL(objMtcSession, SendAck);
@@ -956,12 +956,12 @@ TEST_F(OutgoingStateTest, SessionStartedReturnsEstablishedIfNoResponseForUpdate)
     ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
             .WillByDefault(Return(&objMessage));
 
-    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_EARLY_UPDATE, -1))
-            .WillByDefault(Return(SipStatusCode::SC_INVALID));
-    MockIMessage objPrackMessage;
-    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_PRACK))
-            .WillByDefault(Return(&objPrackMessage));
-    ON_CALL(objMessageUtils, HasSdp(&objPrackMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMtcSession, GetOngoingUpdateType()).WillByDefault(Return(UpdateType::NORMAL));
+    ON_CALL(objMtcSession, IsPrackPending()).WillByDefault(Return(IMS_FALSE));
+    MockIMessage objUpdateMessage;
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE))
+            .WillByDefault(Return(&objUpdateMessage));
+    ON_CALL(objMessageUtils, HasSdp(&objUpdateMessage)).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(objSession, AbortEarlyUpdateTransaction);
     EXPECT_CALL(objMediaManager, RestoreSdp(&objSession));
