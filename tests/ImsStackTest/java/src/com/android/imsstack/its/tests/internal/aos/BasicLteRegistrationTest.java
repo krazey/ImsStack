@@ -25,6 +25,7 @@ import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TE
 import static com.android.imsstack.its.base.TestConstants.SLOT0;
 
 import android.os.PersistableBundle;
+import android.platform.test.annotations.Presubmit;
 import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsReasonInfo;
@@ -80,6 +81,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
 
     @Test
     @P0
+    @Presubmit
     public void register_onLte_withDefaultConfig_succeeds() throws Exception {
         // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
         //    MMTEL, audio, video, and SMSIP features.
@@ -109,6 +111,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
 
     @Test
     @P0
+    @Presubmit
     public void register_onLte_withVoiceOnly_succeeds() throws Exception {
         // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
         //    MMTEL and audio, but not video or SMSIP.
@@ -151,6 +154,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
 
     @Test
     @P0
+    @Presubmit
     public void register_onLte_withVoiceVideo_succeeds() throws Exception {
         // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
         //    MMTEL, audio, and video, but not SMSIP.
@@ -193,6 +197,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
 
     @Test
     @P0
+    @Presubmit
     public void register_onLte_withVoiceSms_succeeds() throws Exception {
         // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
         //    MMTEL, audio, and SMSIP, but not video.
@@ -873,6 +878,7 @@ public class BasicLteRegistrationTest extends RegistrationTestBase {
 
     @Test
     @P0
+    @Presubmit
     public void subscribe_onLte_withDefaultConfig_succeeds() throws Exception {
         // 1. Set up the server to complete registration and expect a SUBSCRIBE request.
         // 2. Verify the received SUBSCRIBE request contains a P-Access-Network-Info header

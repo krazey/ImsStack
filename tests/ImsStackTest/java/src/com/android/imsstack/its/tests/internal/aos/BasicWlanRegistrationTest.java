@@ -25,6 +25,7 @@ import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TE
 import static com.android.imsstack.its.base.TestConstants.SLOT0;
 
 import android.os.PersistableBundle;
+import android.platform.test.annotations.Presubmit;
 import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsReasonInfo;
@@ -78,6 +79,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
 
     @Test
     @P0
+    @Presubmit
     public void register_onWlan_withDefaultConfig_succeeds() throws Exception {
         // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
         //    MMTEL, audio, video, and SMSIP features.
@@ -117,6 +119,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
 
     @Test
     @P0
+    @Presubmit
     public void register_onWlan_withVoiceOnly_succeeds() throws Exception {
         // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
         //    MMTEL and audio, but not video or SMSIP.
@@ -163,6 +166,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
 
     @Test
     @P0
+    @Presubmit
     public void register_onWlan_withVoiceVideo_succeeds() throws Exception {
         // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
         //    MMTEL, audio, and video, but not SMSIP.
@@ -209,6 +213,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
 
     @Test
     @P0
+    @Presubmit
     public void register_onWlan_withVoiceSms_succeeds() throws Exception {
         // 1. Set up the server to expect a REGISTER request and verify its Contact header includes
         //    MMTEL, audio, and SMSIP, but not video.
@@ -1035,6 +1040,7 @@ public class BasicWlanRegistrationTest extends RegistrationTestBase {
 
     @Test
     @P0
+    @Presubmit
     public void subscribe_onWlan_withDefaultConfig_succeeds() throws Exception {
         // 1. Set up the server to complete registration and expect a SUBSCRIBE request.
         // 2. Configure the device for Wi-Fi Calling.
