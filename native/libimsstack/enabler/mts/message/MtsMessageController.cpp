@@ -510,13 +510,6 @@ PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFor
         return IMS_FAILURE;
     }
 
-    if (m_objContext.GetService(eServiceType).GetIMtsServiceState()->IsMoServiceBlocked())
-    {
-        IMS_TRACE_E(0, "Mts is not READY STATE ", 0, 0, 0);
-        ReportTransmissionResult(MO_ERROR_GENERIC, eSmsFormat, nSeqId);
-        return IMS_FAILURE;
-    }
-
     AString strDestination;
     if (FormDestinationByMti(eSmsFormat, *pContent, strAddress, nSeqId, strDestination) ==
             IMS_FALSE)
@@ -708,20 +701,15 @@ IMS_BOOL MtsMessageController::ConstructSendMessage(IN IMessage* piMessage,
         }
     }
 
-    if (eSmsFormat == SmsFormatType::SMSFORMAT_3GPP)
+    if (m_objContext.GetDynamicLoader().GetMtsSmUtils()->IsSmsRpAckOrError(eSmsFormat, objContent))
     {
-        IMS_SINT32 nMti = m_objContext.GetDynamicLoader().GetMtsSmUtils()->GetMti(
-                SmsFormatType::SMSFORMAT_3GPP, objContent);
-        if (nMti == SMS_3GPP_MTI_RP_ACK_FROM_MS || nMti == SMS_3GPP_MTI_RP_ERROR_FROM_MS)
+        const IMtsMessage* piMtsMessage =
+                Search(m_objContext.GetDynamicLoader().GetMtsSmUtils()->GetRpMr(objContent));
+        AString strCallId = GetPreviousCallId(piMtsMessage);
+        // Set the Call-ID in the In-Reply-To header
+        if (strCallId.GetLength() != 0)
         {
-            const IMtsMessage* piMtsMessage =
-                    Search(m_objContext.GetDynamicLoader().GetMtsSmUtils()->GetRpMr(objContent));
-            AString strCallId = GetPreviousCallId(piMtsMessage);
-            // Set the Call-ID in the In-Reply-To header
-            if (strCallId.GetLength())
-            {
-                piMessage->AddHeader("In-Reply-To", strCallId);
-            }
+            piMessage->AddHeader("In-Reply-To", strCallId);
         }
     }
 

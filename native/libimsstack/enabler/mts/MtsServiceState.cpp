@@ -32,7 +32,7 @@ MtsServiceState::MtsServiceState(IN IMS_SINT32 nSlotId) :
         m_bAosRegModAdmin(IMS_FALSE),
         m_bImsSuspend(IMS_FALSE),
         m_bSmsOverIpConf(IMS_FALSE),
-        m_bAllowImsiBasedSipUri(IMS_FALSE),
+        m_bSupportLimitedAdminSmsMode(IMS_FALSE),
         m_nSlotId(nSlotId)
 {
     IMS_TRACE_I("+MtsServiceState [slot_%d]", m_nSlotId, 0, 0);
@@ -150,13 +150,19 @@ void MtsServiceState::SetImsRegConnected(IN IMS_BOOL bConnected)
 PUBLIC
 IMS_BOOL MtsServiceState::IsMoServiceBlocked() const
 {
-    if (m_bAllowImsiBasedSipUri)
+    if (m_nState == STATE_READY)
     {
-        return (m_bImsConnected == IMS_FALSE);
+        return IMS_FALSE;
+    }
+    else if (m_nState == STATE_LIMITED)
+    {
+        // Only block if suspended or config is off.
+        // Admin/Limited Access Mode policy is handled separately in MtsService.
+        return (m_bImsSuspend || !m_bSmsOverIpConf);
     }
     else
     {
-        return (m_nState != STATE_READY);
+        return IMS_TRUE;
     }
 }
 
@@ -198,19 +204,20 @@ IMS_BOOL MtsServiceState::LoadCarrierConfig(IN const ICarrierConfig& objCc)
             objCc.GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL);
     if (m_bSmsOverIpConf != bSmsOverIpConf)
     {
-        IMS_TRACE_I("LoadCarrierConfig : SmsOverIp - Old(%s) -> New(%s)",
-                _TRACE_B_(m_bSmsOverIpConf), _TRACE_B_(bSmsOverIpConf), 0);
+        IMS_TRACE_I("LoadCarrierConfig : SmsOverIp - %s >> %s", _TRACE_B_(m_bSmsOverIpConf),
+                _TRACE_B_(bSmsOverIpConf), 0);
         m_bSmsOverIpConf = bSmsOverIpConf;
         bResult = IMS_TRUE;
     }
 
-    IMS_BOOL bAllowImsiBasedSipUri =
-            objCc.GetBoolean(CarrierConfig::ImsSms::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL);
-    if (m_bAllowImsiBasedSipUri != bAllowImsiBasedSipUri)
+    IMS_BOOL bSupportLimitedAdminSmsMode =
+            objCc.GetBoolean(CarrierConfig::ImsSms::KEY_SUPPORT_LIMITED_ADMIN_SMS_MODE_BOOL);
+    if (m_bSupportLimitedAdminSmsMode != bSupportLimitedAdminSmsMode)
     {
-        IMS_TRACE_I("LoadCarrierConfig : AllowImsiBasedSipUri - Old(%s) -> New(%s)",
-                _TRACE_B_(m_bAllowImsiBasedSipUri), _TRACE_B_(bAllowImsiBasedSipUri), 0);
-        m_bAllowImsiBasedSipUri = bAllowImsiBasedSipUri;
+        IMS_TRACE_I("LoadCarrierConfig : SupportLimitedAdminSmsMode - %s >> %s",
+                _TRACE_B_(m_bSupportLimitedAdminSmsMode), _TRACE_B_(bSupportLimitedAdminSmsMode),
+                0);
+        m_bSupportLimitedAdminSmsMode = bSupportLimitedAdminSmsMode;
         bResult = IMS_TRUE;
     }
 

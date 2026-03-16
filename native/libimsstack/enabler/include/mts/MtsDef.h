@@ -45,6 +45,13 @@ public:
     IMS_UINT32 nRetryCount;
 };
 
+enum class MoSmsBlockAction
+{
+    NONE = 0,
+    ERROR,
+    FALLBACK
+};
+
 enum class MtsTimerType
 {
     TIMER_UNKNOWN = 0,

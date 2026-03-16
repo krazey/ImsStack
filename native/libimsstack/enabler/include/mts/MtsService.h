@@ -100,6 +100,8 @@ private:
     IMS_BOOL ShouldUseEmergencyPdnForSms() const;
     MtsTrafficStartResult StartMtTraffic();
     MtsTrafficStartResult StartMoTrafficIfNeeded();
+    MoSmsBlockAction CheckMoSmsBlockPolicy(
+            IN SmsFormatType eSmsFormat, IN const ByteArray& objContent) const;
 
     IMtsContext& m_objContext;
     MtsServiceType m_eServiceType;

@@ -43,6 +43,7 @@
 #include "message/IMtsMessageController.h"
 #include "utility/IMtsDynamicLoader.h"
 #include "utility/MtsAosUtils.h"
+#include "utility/MtsSmUtils.h"
 #include <memory>
 
 __IMS_TRACE_TAG_COM_MTS__;
@@ -91,6 +92,20 @@ PUBLIC VIRTUAL void MtsService::SendMoSms(IN SmsFormatType eSmsFormat, IN ByteAr
         IN IMS_UINT32 nRetryCount)
 {
     IMS_TRACE_I("SendMoSms", 0, 0, 0);
+
+    MoSmsBlockAction eBlockAction = CheckMoSmsBlockPolicy(eSmsFormat, *pContent);
+    if (eBlockAction != MoSmsBlockAction::NONE)
+    {
+        IJniMtsAppThread* piAppThread = m_objContext.GetJniAppThread();
+        if (piAppThread != IMS_NULL)
+        {
+            piAppThread->ReportMoStatus((eBlockAction == MoSmsBlockAction::FALLBACK)
+                            ? MO_ERROR_FALLBACK
+                            : MO_ERROR_GENERIC,
+                    eSmsFormat, nSeqId, m_objContext.GetSlotId());
+        }
+        return;
+    }
 
     if (m_eServiceType == MtsServiceType::EMERGENCY)
     {
@@ -725,4 +740,40 @@ IMS_BOOL MtsService::ShouldUseEmergencyPdnForSms() const
             ->GetCarrierConfig(m_objContext.GetSlotId())
             ->GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL)
             && !m_objContext.GetNetworkTracker().IsInRoamingState();
+}
+
+PRIVATE
+MoSmsBlockAction MtsService::CheckMoSmsBlockPolicy(
+        IN SmsFormatType eSmsFormat, IN const ByteArray& objContent) const
+{
+    // Allow RP-ACK and RP-ERROR always
+    if (m_objContext.GetDynamicLoader().GetMtsSmUtils()->IsSmsRpAckOrError(eSmsFormat, objContent))
+    {
+        IMS_TRACE_D("RP-ACK/RP-Error is allowed", 0, 0, 0);
+        return MoSmsBlockAction::NONE;
+    }
+
+    // Allow Emergency SMS over emergency PDN
+    if (m_eServiceType == MtsServiceType::EMERGENCY)
+    {
+        IMS_TRACE_D("Emergency SMS is allowed", 0, 0, 0);
+        return MoSmsBlockAction::NONE;
+    }
+
+    // Fallback in limited access mode
+    if (m_piMtsServiceState->IsInLimitedAccessMode())
+    {
+        IMS_TRACE_D("Limited access mode: Perform Fallback", 0, 0, 0);
+        return MoSmsBlockAction::FALLBACK;
+    }
+
+    // Check if MO service is blocked (Generic check)
+    if (m_piMtsServiceState->IsMoServiceBlocked())
+    {
+        IMS_TRACE_I(
+                "MO SMS is blocked on %s", PS_ServiceState(m_piMtsServiceState->GetState()), 0, 0);
+        return MoSmsBlockAction::ERROR;
+    }
+
+    return MoSmsBlockAction::NONE;
 }
