@@ -125,7 +125,7 @@ TEST_F(CodecEvsConfigTest, Create_NullEvsBundle)
     m_pCodecEvsConfig =
             std::make_unique<CodecEvsConfig>(ImsCodec::AUDIO_EVS, m_nDefaultPayloadType);
     ON_CALL(*m_pMockICarrierConfig,
-            GetBundle(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE))
+            GetBundle(testing::StrEq(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE)))
             .WillByDefault(Return(nullptr));
 
     IMS_BOOL bResult = m_pCodecEvsConfig->Create(m_pMockICarrierConfig.get());
@@ -138,7 +138,7 @@ TEST_F(CodecEvsConfigTest, Create_NullEvsSubBundle)
             std::make_unique<CodecEvsConfig>(ImsCodec::AUDIO_EVS, m_nDefaultPayloadType);
 
     ON_CALL(*m_pMockICarrierConfig,
-            GetBundle(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE))
+            GetBundle(testing::StrEq(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE)))
             .WillByDefault(Return(m_pMockEvsBundle.get()));
     EXPECT_CALL(
             *m_pMockEvsBundle, GetBundle(testing::StrEq(m_strDefaultPayloadTypeNumber.GetStr())))
@@ -206,7 +206,7 @@ TEST_F(CodecEvsConfigTest, Create_Successful_ReadsAllValuesFromCarrierConfig)
 
     // Setup mock calls
     EXPECT_CALL(*m_pMockICarrierConfig,
-            GetBundle(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE))
+            GetBundle(testing::StrEq(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE)))
             .WillOnce(::testing::Return(m_pMockEvsBundle.get()));
     EXPECT_CALL(
             *m_pMockEvsBundle, GetBundle(testing::StrEq(m_strDefaultPayloadTypeNumber.GetStr())))
@@ -315,7 +315,7 @@ TEST_F(CodecEvsConfigTest, BitrateConversion)
 
     // Setup mock calls
     EXPECT_CALL(*m_pMockICarrierConfig,
-            GetBundle(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE))
+            GetBundle(testing::StrEq(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE)))
             .WillOnce(::testing::Return(m_pMockEvsBundle.get()));
     EXPECT_CALL(
             *m_pMockEvsBundle, GetBundle(testing::StrEq(m_strDefaultPayloadTypeNumber.GetStr())))
@@ -365,7 +365,7 @@ TEST_F(CodecEvsConfigTest, Create_CmrNotPresent)
 
     // Setup mock calls
     EXPECT_CALL(*m_pMockICarrierConfig,
-            GetBundle(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE))
+            GetBundle(testing::StrEq(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE)))
             .WillOnce(::testing::Return(m_pMockEvsBundle.get()));
     EXPECT_CALL(
             *m_pMockEvsBundle, GetBundle(testing::StrEq(m_strDefaultPayloadTypeNumber.GetStr())))
@@ -475,7 +475,7 @@ TEST_F(CodecEvsConfigTest, Create_CmrDisabled)
 
     // Setup mock calls
     EXPECT_CALL(*m_pMockICarrierConfig,
-            GetBundle(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE))
+            GetBundle(testing::StrEq(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE)))
             .WillOnce(::testing::Return(m_pMockEvsBundle.get()));
     EXPECT_CALL(
             *m_pMockEvsBundle, GetBundle(testing::StrEq(m_strDefaultPayloadTypeNumber.GetStr())))
@@ -585,7 +585,7 @@ TEST_F(CodecEvsConfigTest, Create_CmrAllEnabled)
 
     // Setup mock calls
     EXPECT_CALL(*m_pMockICarrierConfig,
-            GetBundle(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE))
+            GetBundle(testing::StrEq(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE)))
             .WillOnce(::testing::Return(m_pMockEvsBundle.get()));
     EXPECT_CALL(
             *m_pMockEvsBundle, GetBundle(testing::StrEq(m_strDefaultPayloadTypeNumber.GetStr())))
@@ -695,7 +695,7 @@ TEST_F(CodecEvsConfigTest, Create_CmrEnabled)
 
     // Setup mock calls
     EXPECT_CALL(*m_pMockICarrierConfig,
-            GetBundle(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE))
+            GetBundle(testing::StrEq(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE)))
             .WillOnce(::testing::Return(m_pMockEvsBundle.get()));
     EXPECT_CALL(
             *m_pMockEvsBundle, GetBundle(testing::StrEq(m_strDefaultPayloadTypeNumber.GetStr())))

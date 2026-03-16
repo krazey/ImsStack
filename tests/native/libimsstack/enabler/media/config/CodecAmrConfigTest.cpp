@@ -25,6 +25,7 @@
 
 using ::testing::_;
 using ::testing::Return;
+using ::testing::StrEq;
 
 static const IMS_BOOL DEFAULT_DTX = CodecAudioConfig::DEFAULT_DTX;
 static const IMS_SINT32 DEFAULT_PAYLOAD_FORMAT = CodecAmrConfig::DEFAULT_PAYLOAD_FORMAT;
@@ -93,7 +94,7 @@ TEST_F(CodecAmrConfigTest, Create_AmrCodec)
             GetBoolean(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_DTX_BOOL, DEFAULT_DTX))
             .WillOnce(Return(DEFAULT_DTX));
     EXPECT_CALL(*m_pMockICarrierConfig,
-            GetBundle(CarrierConfig::ImsVoice::KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE))
+            GetBundle(StrEq(CarrierConfig::ImsVoice::KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE)))
             .WillOnce(Return(m_pMockBundle.get()));
 
     EXPECT_CALL(*m_pMockICarrierConfig,
@@ -102,7 +103,8 @@ TEST_F(CodecAmrConfigTest, Create_AmrCodec)
                     _))
             .WillOnce(Return(ImsVector<IMS_SINT32>()));  // Assuming empty or default list
 
-    EXPECT_CALL(*m_pMockBundle, GetBundle(AString(std::to_string(nPayloadType).c_str()).GetStr()))
+    EXPECT_CALL(*m_pMockBundle,
+            GetBundle(StrEq(AString(std::to_string(nPayloadType).c_str()).GetStr())))
             .WillOnce(Return(m_pMockSubBundle.get()));
     EXPECT_CALL(*m_pMockSubBundle,
             GetInt(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT,
@@ -182,7 +184,7 @@ TEST_F(CodecAmrConfigTest, Create_AmrWbCodec)
             GetBoolean(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_DTX_BOOL, DEFAULT_DTX))
             .WillOnce(Return(DEFAULT_DTX));
     EXPECT_CALL(*m_pMockICarrierConfig,
-            GetBundle(CarrierConfig::ImsVoice::KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE))
+            GetBundle(StrEq(CarrierConfig::ImsVoice::KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE)))
             .WillOnce(Return(m_pMockBundle.get()));
 
     EXPECT_CALL(*m_pMockICarrierConfig,
@@ -190,7 +192,8 @@ TEST_F(CodecAmrConfigTest, Create_AmrWbCodec)
                                 KEY_AUDIO_AMRWB_CODEC_ATTRIBUTE_DEFAULT_MODESET_INT_ARRAY,
                     _))
             .WillOnce(Return(ImsVector<IMS_SINT32>()));  // Assuming empty or default list
-    EXPECT_CALL(*m_pMockBundle, GetBundle(AString(std::to_string(nPayloadType).c_str()).GetStr()))
+    EXPECT_CALL(*m_pMockBundle,
+            GetBundle(StrEq(AString(std::to_string(nPayloadType).c_str()).GetStr())))
             .WillOnce(Return(m_pMockSubBundle.get()));
     EXPECT_CALL(*m_pMockSubBundle,
             GetInt(CarrierConfig::ImsVoice::KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT,
@@ -245,7 +248,7 @@ TEST_F(CodecAmrConfigTest, Create_NullBundle)
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));  // Default behavior, can be adjusted if needed
     EXPECT_CALL(*m_pMockICarrierConfig,
-            GetBundle(CarrierConfig::ImsVoice::KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE))
+            GetBundle(StrEq(CarrierConfig::ImsVoice::KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE)))
             .WillOnce(Return(IMS_NULL));
 
     IMS_BOOL bResult = codecConfig.Create(m_pMockICarrierConfig.get());
@@ -282,9 +285,10 @@ TEST_F(CodecAmrConfigTest, Create_NullSubBundle)
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(*m_pMockICarrierConfig,
-            GetBundle(CarrierConfig::ImsVoice::KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE))
+            GetBundle(StrEq(CarrierConfig::ImsVoice::KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE)))
             .WillOnce(Return(m_pMockBundle.get()));
-    EXPECT_CALL(*m_pMockBundle, GetBundle(AString(std::to_string(nPayloadType).c_str()).GetStr()))
+    EXPECT_CALL(*m_pMockBundle,
+            GetBundle(StrEq(AString(std::to_string(nPayloadType).c_str()).GetStr())))
             .WillOnce(Return(IMS_NULL));
 
     IMS_BOOL bResult = codecConfig.Create(m_pMockICarrierConfig.get());
