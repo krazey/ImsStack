@@ -74,7 +74,7 @@ PRIVATE void AudioSession::NetworkToneTimerExpired()
         if (m_piMediaSessionListener != IMS_NULL)
         {
             m_piMediaSessionListener->MediaSession_NotifyToClient(
-                    REPORT_NW_TONE_RTP_RECEIVE_STARTED, MEDIA_TYPE_AUDIO, MEDIA_PROTOCOL_RTP);
+                    REPORT_NW_TONE_RTP_RECEIVE_FAILED, MEDIA_TYPE_AUDIO, MEDIA_PROTOCOL_RTP);
         }
     }
 }
@@ -1027,7 +1027,7 @@ IMS_SINT32 AudioSession::UpdateEarlyMediaDirection(IMS_SINT32 nMediaDirection)
             nEarlyAudioDirection = RtpConfig::MEDIA_DIRECTION_SEND_RECEIVE;
             break;
         case MEDIA_PEM_TYPE::RECVONLY:
-            nEarlyAudioDirection = RtpConfig::MEDIA_DIRECTION_SEND_ONLY;
+            nEarlyAudioDirection = RtpConfig::MEDIA_DIRECTION_INACTIVE;
             break;
         case MEDIA_PEM_TYPE::NONE:
         default:
