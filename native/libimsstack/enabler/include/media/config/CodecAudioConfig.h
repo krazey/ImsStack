@@ -125,7 +125,7 @@ public:
      *
      * @param objCodecModeset The mode-set value array
      */
-    virtual IMS_SINT32 ConvertModeSetList(ImsVector<IMS_SINT32> objCodecModeset);
+    virtual IMS_SINT32 ConvertModeSetList(const ImsVector<IMS_SINT32>& objCodecModeset);
     /**
      * @brief Set whether to include the mode-change-capability in sdp
      *

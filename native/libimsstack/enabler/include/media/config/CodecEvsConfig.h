@@ -225,7 +225,6 @@ public:
 
 private:
     static IMS_SINT32 ConvertEvsBitrateToList(IN IMS_SINT32 nBrStart, IN IMS_SINT32 nBrEnd);
-    static IMS_SINT32 ConvertEvsBandwidthToList(IN AString strBandwidth);
     static IMS_SINT32 GetEvsBitrateFromList(IN IMS_SINT32 nBitrateList);
     static IMS_SINT32 CheckEvsBandwidthWithBitrate(IN IMS_SINT32 nBwList, IN IMS_SINT32 nBrList);
 
@@ -234,7 +233,6 @@ private:
     IMS_BOOL m_bVisibleHfOnly;  // Indicate whether hf-only attribute to display in SDP
     IMS_BOOL m_bVisibleCmr;
     IMS_BOOL m_bVisibleEvsModeSwitch;  // Indicate whether EvsModeSwitch attribute to display in SDP
-    IMS_BOOL m_bVisibleChannelAwMode;  // Indicate whether channel-aware mode to display in SDP
     IMS_BOOL m_bVisibleChAwRecv;
 
     IMS_BOOL m_bDtxRecv;          // 1(default) is turn on DTX

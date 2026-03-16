@@ -102,6 +102,7 @@ private:
     void Stop18xWaitingTimer();
     void StartWaitForHandoverToRetryOverImsPdnTimer();
     void StopWaitForHandoverToRetryOverImsPdnTimer();
+    void NotifyIdleIfOpenedOnDestroy();
 
     IMS_BOOL IsCurrentEmergencyCall(IN CallKey nCallKey) const;
     RetryOverImsPdnAction GetRetryOverImsPdnAction(IN IMS_SINT32 eAosReason) const;

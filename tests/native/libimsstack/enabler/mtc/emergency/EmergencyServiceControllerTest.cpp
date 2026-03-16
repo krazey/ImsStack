@@ -527,6 +527,14 @@ TEST_F(EmergencyServiceControllerTest, StartAndAosConnectedNotifiesOpened)
     pController->OnAosStateChanged(
             objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE, 0);
     EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::OPENED);
+
+    const IMS_UINT32 nAosReason = ImsAosReason::DATA_DISCONNECTED;
+    EXPECT_CALL(objJniMtcServiceThread,
+            OnEmergencyServiceChanged(IuMtcService::EmergencyServiceState::IDLE,
+                    EmergencyServiceUnavailableReason::UNKNOWN, ServiceType::EMERGENCY))
+            .Times(1);
+    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason, 0);
+    EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::CLOSED);
 }
 
 TEST_F(EmergencyServiceControllerTest, OpenedAndStartNotifiesOpened)
@@ -542,6 +550,14 @@ TEST_F(EmergencyServiceControllerTest, OpenedAndStartNotifiesOpened)
 
     pController->Start();
     EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::OPENED);
+
+    const IMS_UINT32 nAosReason = ImsAosReason::DATA_DISCONNECTED;
+    EXPECT_CALL(objJniMtcServiceThread,
+            OnEmergencyServiceChanged(IuMtcService::EmergencyServiceState::IDLE,
+                    EmergencyServiceUnavailableReason::UNKNOWN, ServiceType::EMERGENCY))
+            .Times(1);
+    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason, 0);
+    EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::CLOSED);
 }
 
 TEST_F(EmergencyServiceControllerTest, OpenedAndAosConnectedNotifiesNothing)
@@ -555,6 +571,14 @@ TEST_F(EmergencyServiceControllerTest, OpenedAndAosConnectedNotifiesNothing)
     pController->OnAosStateChanged(
             objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE, 0);
     EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::OPENED);
+
+    const IMS_UINT32 nAosReason = ImsAosReason::DATA_DISCONNECTED;
+    EXPECT_CALL(objJniMtcServiceThread,
+            OnEmergencyServiceChanged(IuMtcService::EmergencyServiceState::IDLE,
+                    EmergencyServiceUnavailableReason::UNKNOWN, ServiceType::EMERGENCY))
+            .Times(1);
+    pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason, 0);
+    EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::CLOSED);
 }
 
 TEST_F(EmergencyServiceControllerTest, OpenedAndAosDisconnectedNotifiesIdle)
@@ -914,4 +938,42 @@ TEST_F(EmergencyServiceControllerTest, StartInClosedStateNotifiesUnavailable)
     pController->Start();
 
     EXPECT_EQ(pController->GetState(), IEmergencyServiceController::State::CLOSED);
+}
+
+TEST_F(EmergencyServiceControllerTest, DestructorNotifiesIdleWhenOpened)
+{
+    EmergencyServiceController* pESC = new EmergencyServiceController(objEsm, objContext);
+
+    EXPECT_CALL(objJniMtcServiceThread,
+            OnEmergencyServiceChanged(
+                    IuMtcService::EmergencyServiceState::OPENING, _, ServiceType::EMERGENCY));
+    pESC->Start();
+
+    EXPECT_CALL(objJniMtcServiceThread,
+            OnEmergencyServiceChanged(
+                    IuMtcService::EmergencyServiceState::OPENED, _, ServiceType::EMERGENCY));
+    pESC->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE, 0);
+    ASSERT_EQ(pESC->GetState(), IEmergencyServiceController::State::OPENED);
+
+    EXPECT_CALL(objJniMtcServiceThread,
+            OnEmergencyServiceChanged(IuMtcService::EmergencyServiceState::IDLE,
+                    EmergencyServiceUnavailableReason::UNKNOWN, ServiceType::EMERGENCY))
+            .Times(1);
+    delete pESC;
+}
+
+TEST_F(EmergencyServiceControllerTest, DestructorDoesNotNotifyIdleWhenNotOpened)
+{
+    EmergencyServiceController* pESC = new EmergencyServiceController(objEsm, objContext);
+
+    EXPECT_CALL(objJniMtcServiceThread,
+            OnEmergencyServiceChanged(
+                    IuMtcService::EmergencyServiceState::OPENING, _, ServiceType::EMERGENCY));
+    pESC->Start();
+    ASSERT_EQ(pESC->GetState(), IEmergencyServiceController::State::OPENING);
+
+    EXPECT_CALL(objJniMtcServiceThread,
+            OnEmergencyServiceChanged(IuMtcService::EmergencyServiceState::IDLE, _, _))
+            .Times(0);
+    delete pESC;
 }

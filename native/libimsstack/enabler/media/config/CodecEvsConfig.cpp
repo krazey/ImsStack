@@ -47,7 +47,6 @@ CodecEvsConfig::CodecEvsConfig(IN IMS_SINT32 nType, IN IMS_SINT32 nPayloadTypeNu
         m_bVisibleHfOnly(IMS_FALSE),
         m_bVisibleCmr(IMS_FALSE),
         m_bVisibleEvsModeSwitch(IMS_FALSE),
-        m_bVisibleChannelAwMode(IMS_FALSE),
         m_bVisibleChAwRecv(IMS_FALSE),
         m_bDtxRecv(DEFAULT_DTX_RECV),
         m_nHfOnly(DEFAULT_HF_ONLY),
@@ -509,9 +508,10 @@ PUBLIC VIRTUAL void CodecEvsConfig::CreateDefaultEvsCodec()
     m_nBwList = CheckEvsBandwidthWithBitrate(DEFAULT_BW_LIST, m_nBrList);
 
     m_nCmr = DEFAULT_CMR;
-    m_bVisibleChAwRecv = IMS_FALSE;
+    m_bVisibleCmr = IMS_FALSE;
 
     m_nChAwRecv = DEFAULT_CH_AW_RECV;
+    m_bVisibleChAwRecv = IMS_FALSE;
 
     SetModeSetList(CodecAudioConfig::FULL_MODESET_AMRWB);
 

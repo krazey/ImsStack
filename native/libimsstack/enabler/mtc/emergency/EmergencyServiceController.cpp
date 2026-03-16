@@ -62,6 +62,7 @@ PUBLIC VIRTUAL EmergencyServiceController::~EmergencyServiceController()
     m_objContext.ReleaseAsyncOperation(this);
     RemoveListeners();
     StopWaitForHandoverToRetryOverImsPdnTimer();
+    NotifyIdleIfOpenedOnDestroy();
 }
 
 PUBLIC VIRTUAL void EmergencyServiceController::Start()
@@ -470,6 +471,16 @@ void EmergencyServiceController::StopWaitForHandoverToRetryOverImsPdnTimer()
 {
     m_objContext.GetPassiveTimerHolder().RemoveTimer(
             IPassiveTimerHolder::Type::WAIT_FOR_HANDOVER_TO_RETRY_OVER_IMS_PDN);
+}
+
+PRIVATE
+void EmergencyServiceController::NotifyIdleIfOpenedOnDestroy()
+{
+    if (m_eState == IEmergencyServiceController::State::OPENED)
+    {
+        IMS_TRACE_D("NotifyIdleIfOpenedOnDestroy :: State was OPENED, notifying ES_IDLE", 0, 0, 0);
+        Notify(IuMtcService::EmergencyServiceState::IDLE);
+    }
 }
 
 PRIVATE
