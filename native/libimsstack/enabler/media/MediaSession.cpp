@@ -163,7 +163,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::DestroyProfile(IMS_UINTP nNegoId)
     IMS_BOOL bRet = IMS_TRUE;
     bRet &= m_pMediaNegoHandler->DeleteMediaNego(nNegoId);
 
-    // For VZW, modify the direction inactive before calling the delete session for forking.
+    // modify the direction inactive before calling the delete session for forking.
     if (!m_bSessionConfirmed)
     {
         m_pAudioController->UpdateMediaDirection(MEDIA_DIRECTION_INACTIVE);
@@ -304,8 +304,17 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::Run(IN IMS_UINTP nNegoId)
         return IMS_FALSE;
     }
 
-    UpdateMediaSessions(
-            nNegoId, m_pMediaNegoHandler->FindMediaNego(nNegoId), GetNegotiatedMediaType(nNegoId));
+    std::shared_ptr<MediaNego> pMediaNego = m_pMediaNegoHandler->FindMediaNego(nNegoId);
+    MEDIA_CONTENT_TYPE eType = GetNegotiatedMediaType(nNegoId);
+
+    // open session if it is closed before
+    OpenMediaSessions(nNegoId, pMediaNego, eType);
+
+    // qos
+    ProcessNegotiationResult(nNegoId, pMediaNego);
+
+    // update session if it is already opened.
+    UpdateMediaSessions(nNegoId, pMediaNego, eType);
     return IMS_TRUE;
 }
 
@@ -1262,7 +1271,8 @@ void MediaSession::UpdateMediaSessions(
 
     // set Access Network
     IMS_UINT32 nAccessNetwork = m_nCurrentAccessNetwork;
-    IMS_TRACE_D("UpdateMediaSessions() - CurrentAccessNetwork[%d]", m_nCurrentAccessNetwork, 0, 0);
+    IMS_TRACE_D("UpdateMediaSessions() - NegoId[%" PFLS_x "], MediaType[%d], Network[%d]", nNegoId,
+            eType, m_nCurrentAccessNetwork);
 
     // Update Audio Session
     if (eType & MEDIA_TYPE_AUDIO && m_pAudioController != IMS_NULL &&
