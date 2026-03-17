@@ -833,6 +833,12 @@ AString System::GetAccessNetworkPlmn(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
+IMS_BOOL System::IsDataNetworkRoaming(IN IMS_SINT32 nSlotId)
+{
+    return (GetInt(SystemConstants::IS_DATA_NETWORK_ROAMING, 0, nSlotId) == 1);
+}
+
+PUBLIC
 IMS_BOOL System::IsImsEmergencyCallSupported(IN IMS_SINT32 nSlotId)
 {
     return (GetInt(SystemConstants::IS_IMS_EMERGENCY_CALL_SUPPORTED, 0, nSlotId) == 1);

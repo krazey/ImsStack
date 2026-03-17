@@ -911,6 +911,10 @@ TEST_F(MediaSessionTest, testOnNotifyFirstPacketForAudio)
     ImsMediaResponseConfigParam param;
     param.m_eMediaType = MEDIA_TYPE_AUDIO;
 
+    // Expect GetMediaDirection to return an active direction
+    EXPECT_CALL(*m_pMockAudioController, GetMediaDirection())
+            .WillRepeatedly(Return(MEDIA_DIRECTION_SEND_RECEIVE));
+
     // Expect GetInactivityTimer to be called and return a positive value
     EXPECT_CALL(*m_pMockAudioController, GetInactivityTimer(NETWORK_TONE_INACTIVITY, _))
             .WillOnce(Return(kNetworkToneTimer));
@@ -924,6 +928,70 @@ TEST_F(MediaSessionTest, testOnNotifyFirstPacketForAudio)
             .Times(1);
     EXPECT_CALL(m_objMockClientListener,
             MediaSession_Notify(REPORT_NW_TONE_RTP_RECEIVE_STARTED, MEDIA_TYPE_AUDIO, _))
+            .Times(1);
+
+    // Act & Assert
+    EXPECT_TRUE(m_pSession->SendMessage(
+            IJniMedia::NOTIFY_FIRST_PACKET, reinterpret_cast<IMS_UINTP>(&param)));
+}
+
+TEST_F(MediaSessionTest, testOnNotifyFirstPacketForAudio_InactiveDirection)
+{
+    // Arrange
+    ImsMediaResponseConfigParam param;
+    param.m_eMediaType = MEDIA_TYPE_AUDIO;
+
+    // Expect GetMediaDirection to return INACTIVE
+    EXPECT_CALL(*m_pMockAudioController, GetMediaDirection())
+            .WillRepeatedly(Return(MEDIA_DIRECTION_INACTIVE));
+
+    // Notifications should NOT be called
+    EXPECT_CALL(m_objMockClientListener,
+            MediaSession_Notify(REPORT_DATA_RECEIVE_STARTED, MEDIA_TYPE_AUDIO, _))
+            .Times(0);
+    EXPECT_CALL(m_objMockClientListener,
+            MediaSession_Notify(REPORT_NW_TONE_RTP_RECEIVE_STARTED, MEDIA_TYPE_AUDIO, _))
+            .Times(0);
+
+    // Act & Assert
+    EXPECT_TRUE(m_pSession->SendMessage(
+            IJniMedia::NOTIFY_FIRST_PACKET, reinterpret_cast<IMS_UINTP>(&param)));
+}
+
+TEST_F(MediaSessionTest, testOnNotifyFirstPacketForAudio_SendOnlyDirection)
+{
+    // Arrange
+    ImsMediaResponseConfigParam param;
+    param.m_eMediaType = MEDIA_TYPE_AUDIO;
+
+    // Expect GetMediaDirection to return SEND
+    // Note: In MediaDef.h, MEDIA_DIRECTION_SEND corresponds to sendonly in SDP
+    EXPECT_CALL(*m_pMockAudioController, GetMediaDirection())
+            .WillRepeatedly(Return(MEDIA_DIRECTION_SEND));
+
+    // Notifications should NOT be called
+    EXPECT_CALL(m_objMockClientListener,
+            MediaSession_Notify(REPORT_DATA_RECEIVE_STARTED, MEDIA_TYPE_AUDIO, _))
+            .Times(0);
+    EXPECT_CALL(m_objMockClientListener,
+            MediaSession_Notify(REPORT_NW_TONE_RTP_RECEIVE_STARTED, MEDIA_TYPE_AUDIO, _))
+            .Times(0);
+
+    // Act & Assert
+    EXPECT_TRUE(m_pSession->SendMessage(
+            IJniMedia::NOTIFY_FIRST_PACKET, reinterpret_cast<IMS_UINTP>(&param)));
+}
+
+TEST_F(MediaSessionTest, testOnNotifyFirstPacketForVideo)
+{
+    // Arrange
+    ImsMediaResponseConfigParam param;
+    param.m_eMediaType = MEDIA_TYPE_VIDEO;
+
+    // Expect notification to the client (Video should not skip even if direction check exists for
+    // Audio)
+    EXPECT_CALL(m_objMockClientListener,
+            MediaSession_Notify(REPORT_DATA_RECEIVE_STARTED, MEDIA_TYPE_VIDEO, _))
             .Times(1);
 
     // Act & Assert

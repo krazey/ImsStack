@@ -56,6 +56,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsEpsOnlyAttach, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEpsCombinedAttach, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRoaming, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetNetworkRoamingType, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsWlanIpCanType, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsCrossSimConnected, (), (const, override));
     MOCK_METHOD(ServiceStatus, GetOldStatus, (), (const, override));

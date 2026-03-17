@@ -62,6 +62,7 @@ public:
     IMS_BOOL IsEmergencyAttachSupported() override;
     IMS_SINT32 GetNetworkRegistrationRejectCause() override;
     AString GetAccessNetworkPlmn() const override;
+    IMS_BOOL IsDataNetworkRoaming() const override;
 
     // ISystemListener
     void System_NotifyEvent(

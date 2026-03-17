@@ -155,6 +155,19 @@ public:
     virtual IMS_BOOL IsRoaming() const = 0;
 
     /**
+     * @brief Gets the network roaming type, considering the network registration state.
+     *
+     * This method bypasses carrier configuration overrides (like
+     * KEY_NON_ROAMING_OPERATOR_STRING_ARRAY) that might affect the platform's reported roaming
+     * status. It checks the underlying NetworkRegistrationState and compares network/SIM country
+     * codes to determine the roaming type.
+     *
+     * @return The determined roaming type (ROAMING_TYPE_NOT_ROAMING, ROAMING_TYPE_DOMESTIC,
+     *         ROAMING_TYPE_INTERNATIONAL, or ROAMING_TYPE_UNKNOWN).
+     */
+    virtual IMS_SINT32 GetNetworkRoamingType() const = 0;
+
+    /**
      * @brief Checks if the UE is currently registered through an ePDG.
      *
      * @return True if it's in ePDG.
