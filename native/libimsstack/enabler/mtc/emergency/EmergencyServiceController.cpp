@@ -287,9 +287,6 @@ PRIVATE void EmergencyServiceController::HandleServiceUnavailable(IN IMS_UINT32 
 
 PRIVATE void EmergencyServiceController::AddListeners()
 {
-    m_objContext.GetPassiveTimerHolder().AddListener(
-            IPassiveTimerHolder::Type::REGISTRATION_TO_18X, this);
-
     m_objContext.GetCallStateProxy().AddListener(this);
 
     IMtcService* pNormalService = m_objContext.GetServiceByType(ServiceType::NORMAL);
@@ -444,6 +441,8 @@ void EmergencyServiceController::Start18xWaitingTimer()
 
     m_objContext.GetPassiveTimerHolder().AddTimer(
             IPassiveTimerHolder::Type::REGISTRATION_TO_18X, nTime, IMS_FALSE);
+    m_objContext.GetPassiveTimerHolder().AddListener(
+            IPassiveTimerHolder::Type::REGISTRATION_TO_18X, this);
 }
 
 PRIVATE
