@@ -68,6 +68,7 @@
 LOCAL IMS_SINT32 SLOT_ID = 0;
 
 using ::testing::_;
+using ::testing::Invoke;
 using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -515,6 +516,171 @@ TEST_F(MtcServiceTest, IsRoamingReturnsFalse)
     ON_CALL(objEventReceiver, GetWParam(IMS_EVENT_ROAMING_STATE))
             .WillByDefault(Return(IMS_ROAMING_STATE_OFF));
     EXPECT_EQ(pNormalMtcService->IsRoaming(), IMS_FALSE);
+}
+
+TEST_F(MtcServiceTest, GetNetworkRoamingTypeReturnsDomesticFromWatcher)
+{
+    EXPECT_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetDataRoamingType())
+            .WillOnce(Return(INetworkWatcher::ROAMING_TYPE_DOMESTIC));
+
+    EXPECT_EQ(
+            pEmergencyMtcService->GetNetworkRoamingType(), INetworkWatcher::ROAMING_TYPE_DOMESTIC);
+}
+
+TEST_F(MtcServiceTest, GetNetworkRoamingTypeReturnsInternationalFromWatcher)
+{
+    EXPECT_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetDataRoamingType())
+            .WillOnce(Return(INetworkWatcher::ROAMING_TYPE_INTERNATIONAL));
+
+    EXPECT_EQ(pEmergencyMtcService->GetNetworkRoamingType(),
+            INetworkWatcher::ROAMING_TYPE_INTERNATIONAL);
+}
+
+TEST_F(MtcServiceTest, GetNetworkRoamingTypeNotRoaming)
+{
+    EXPECT_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetDataRoamingType())
+            .WillOnce(Return(INetworkWatcher::ROAMING_TYPE_NOT_ROAMING));
+    EXPECT_CALL(objPhoneInfoService.GetMockNetworkWatcher(), IsDataNetworkRoaming())
+            .WillOnce(Return(IMS_FALSE));
+
+    EXPECT_EQ(pEmergencyMtcService->GetNetworkRoamingType(),
+            INetworkWatcher::ROAMING_TYPE_NOT_ROAMING);
+}
+
+TEST_F(MtcServiceTest, GetNetworkRoamingTypeUnknownDueToEmptySimIso)
+{
+    EXPECT_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetDataRoamingType())
+            .WillOnce(Return(INetworkWatcher::ROAMING_TYPE_NOT_ROAMING));
+    EXPECT_CALL(objPhoneInfoService.GetMockNetworkWatcher(), IsDataNetworkRoaming())
+            .WillOnce(Return(IMS_TRUE));
+
+    AString strEmptyIso("");
+    AString strNetworkIso("aa");
+    ON_CALL(objPhoneInfoService.GetMockSubscriberInfo(), GetSimCountryIso(_))
+            .WillByDefault(Invoke(
+                    [strEmptyIso](AString& strCountry)
+                    {
+                        strCountry = strEmptyIso;
+                        return IMS_TRUE;
+                    }));
+    ON_CALL(objPhoneInfoService.GetMockSubscriberInfo(), GetNetworkCountryIso(_))
+            .WillByDefault(Invoke(
+                    [strNetworkIso](AString& strCountry)
+                    {
+                        strCountry = strNetworkIso;
+                        return IMS_TRUE;
+                    }));
+
+    EXPECT_EQ(pEmergencyMtcService->GetNetworkRoamingType(), INetworkWatcher::ROAMING_TYPE_UNKNOWN);
+}
+
+TEST_F(MtcServiceTest, GetNetworkRoamingTypeUnknownDueToEmptyNetworkIso)
+{
+    EXPECT_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetDataRoamingType())
+            .WillOnce(Return(INetworkWatcher::ROAMING_TYPE_NOT_ROAMING));
+    EXPECT_CALL(objPhoneInfoService.GetMockNetworkWatcher(), IsDataNetworkRoaming())
+            .WillOnce(Return(IMS_TRUE));
+
+    AString strSimIso("aa");
+    AString strEmptyIso("");
+    ON_CALL(objPhoneInfoService.GetMockSubscriberInfo(), GetSimCountryIso(_))
+            .WillByDefault(Invoke(
+                    [strSimIso](AString& strCountry)
+                    {
+                        strCountry = strSimIso;
+                        return IMS_TRUE;
+                    }));
+    ON_CALL(objPhoneInfoService.GetMockSubscriberInfo(), GetNetworkCountryIso(_))
+            .WillByDefault(Invoke(
+                    [strEmptyIso](AString& strCountry)
+                    {
+                        strCountry = strEmptyIso;
+                        return IMS_TRUE;
+                    }));
+
+    EXPECT_EQ(pEmergencyMtcService->GetNetworkRoamingType(), INetworkWatcher::ROAMING_TYPE_UNKNOWN);
+}
+
+TEST_F(MtcServiceTest, GetNetworkRoamingTypeDomesticFromIsoMatch)
+{
+    EXPECT_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetDataRoamingType())
+            .WillOnce(Return(INetworkWatcher::ROAMING_TYPE_NOT_ROAMING));
+    EXPECT_CALL(objPhoneInfoService.GetMockNetworkWatcher(), IsDataNetworkRoaming())
+            .WillOnce(Return(IMS_TRUE));
+
+    AString strSimIso("aa");
+    AString strNetworkIso("aa");
+    ON_CALL(objPhoneInfoService.GetMockSubscriberInfo(), GetSimCountryIso(_))
+            .WillByDefault(Invoke(
+                    [strSimIso](AString& strCountry)
+                    {
+                        strCountry = strSimIso;
+                        return IMS_TRUE;
+                    }));
+    ON_CALL(objPhoneInfoService.GetMockSubscriberInfo(), GetNetworkCountryIso(_))
+            .WillByDefault(Invoke(
+                    [strNetworkIso](AString& strCountry)
+                    {
+                        strCountry = strNetworkIso;
+                        return IMS_TRUE;
+                    }));
+
+    EXPECT_EQ(
+            pEmergencyMtcService->GetNetworkRoamingType(), INetworkWatcher::ROAMING_TYPE_DOMESTIC);
+}
+
+TEST_F(MtcServiceTest, GetNetworkRoamingTypeInternationalFromIsoMismatch)
+{
+    EXPECT_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetDataRoamingType())
+            .WillOnce(Return(INetworkWatcher::ROAMING_TYPE_NOT_ROAMING));
+    EXPECT_CALL(objPhoneInfoService.GetMockNetworkWatcher(), IsDataNetworkRoaming())
+            .WillOnce(Return(IMS_TRUE));
+
+    AString strSimIso("aa");
+    AString strNetworkIso("bb");
+    ON_CALL(objPhoneInfoService.GetMockSubscriberInfo(), GetSimCountryIso(_))
+            .WillByDefault(Invoke(
+                    [strSimIso](AString& strCountry)
+                    {
+                        strCountry = strSimIso;
+                        return IMS_TRUE;
+                    }));
+    ON_CALL(objPhoneInfoService.GetMockSubscriberInfo(), GetNetworkCountryIso(_))
+            .WillByDefault(Invoke(
+                    [strNetworkIso](AString& strCountry)
+                    {
+                        strCountry = strNetworkIso;
+                        return IMS_TRUE;
+                    }));
+
+    EXPECT_EQ(pEmergencyMtcService->GetNetworkRoamingType(),
+            INetworkWatcher::ROAMING_TYPE_INTERNATIONAL);
+}
+
+TEST_F(MtcServiceTest, GetNetworkRoamingTypeWatcherUnknownButIsoMatch)
+{
+    EXPECT_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetDataRoamingType())
+            .WillOnce(Return(INetworkWatcher::ROAMING_TYPE_UNKNOWN));
+
+    AString strSimIso("aa");
+    AString strNetworkIso("aa");
+    ON_CALL(objPhoneInfoService.GetMockSubscriberInfo(), GetSimCountryIso(_))
+            .WillByDefault(Invoke(
+                    [strSimIso](AString& strCountry)
+                    {
+                        strCountry = strSimIso;
+                        return IMS_TRUE;
+                    }));
+    ON_CALL(objPhoneInfoService.GetMockSubscriberInfo(), GetNetworkCountryIso(_))
+            .WillByDefault(Invoke(
+                    [strNetworkIso](AString& strCountry)
+                    {
+                        strCountry = strNetworkIso;
+                        return IMS_TRUE;
+                    }));
+
+    EXPECT_EQ(
+            pEmergencyMtcService->GetNetworkRoamingType(), INetworkWatcher::ROAMING_TYPE_DOMESTIC);
 }
 
 TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsTrue)

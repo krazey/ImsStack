@@ -72,6 +72,7 @@ public:
     IMS_BOOL IsEpsOnlyAttach() const override;
     IMS_BOOL IsEpsCombinedAttach() const override;
     IMS_BOOL IsRoaming() const override;
+    IMS_SINT32 GetNetworkRoamingType() const override;
     IMS_BOOL IsWlanIpCanType() const override;
     IMS_BOOL IsCrossSimConnected() const override { return m_bCrossSimConnected; }
     inline ServiceStatus GetOldStatus() const override { return m_eOldStatus; }

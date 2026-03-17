@@ -956,6 +956,20 @@ public final class SystemCallAgent implements SystemCallInterface {
         return (utils != null) ? utils.getAccessNetworkPlmn() : "";
     }
 
+    /**
+     * Returns whether mobile data is registered on roaming network.
+     * This value is not affected by any carrier config or resource overlay override.
+     *
+     * @return {@code true} if the {@link NetworkRegistrationInfo} for the PS domain
+     *         and {@link android.telephony.AccessNetworkConstants#TRANSPORT_TYPE_WWAN}
+     *         in {@link ServiceState} indicates roaming, {@code false} otherwise.
+     */
+    @Override
+    public boolean isDataNetworkRoaming() {
+        IDcNetWatcher netWatcher = getDcNetWatcher();
+        return (netWatcher != null) ? netWatcher.isDataNetworkRoaming() : false;
+    }
+
     @Override
     public void logSipMessage(@NonNull String sipMessage, int slotId, int direction) {
         //TODO: Enable this later to verify the logging in separate gerrit with Nimbus

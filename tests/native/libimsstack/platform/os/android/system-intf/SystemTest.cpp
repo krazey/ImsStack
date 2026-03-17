@@ -1127,6 +1127,14 @@ TEST_F(SystemTest, GetAccessNetworkPlmn)
     EXPECT_EQ(m_pSystem->GetAccessNetworkPlmn(0), strPlmn);
 }
 
+TEST_F(SystemTest, IsDataNetworkRoaming)
+{
+    EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(1));
+    EXPECT_EQ(m_pSystem->IsDataNetworkRoaming(0), 0);
+}
+
 TEST_F(SystemTest, IsImsEmergencyCallSupported)
 {
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))

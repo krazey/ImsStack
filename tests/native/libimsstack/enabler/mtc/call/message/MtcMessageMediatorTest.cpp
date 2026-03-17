@@ -494,7 +494,7 @@ TEST_F(MtcMessageMediatorTest, AdjustMessageFormatsContactAddressWithIpv6Address
 
 TEST_F(MtcMessageMediatorTest, AdjustMessageFormatsContactAddressInDomesticRoaming)
 {
-    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetDataRoamingType)
+    ON_CALL(objService, GetNetworkRoamingType)
             .WillByDefault(Return(INetworkWatcher::ROAMING_TYPE_DOMESTIC));
 
     ImsVector<AString> lstContactAddress;
@@ -566,7 +566,7 @@ TEST_F(MtcMessageMediatorTest, AdjustMessageFormatsContactAddressInDomesticRoami
 
 TEST_F(MtcMessageMediatorTest, AdjustMessageFormatsContactAddressInInternationalRoaming)
 {
-    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetDataRoamingType)
+    ON_CALL(objService, GetNetworkRoamingType)
             .WillByDefault(Return(INetworkWatcher::ROAMING_TYPE_INTERNATIONAL));
 
     ImsVector<AString> lstContactAddress;

@@ -18,11 +18,9 @@
 #include "ICoreService.h"
 #include "IImsAosInfo.h"
 #include "IMtcService.h"
-#include "INetworkWatcher.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ImsTrace.h"
-#include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "SipAddress.h"
 #include "SipParsingHelper.h"
@@ -111,9 +109,7 @@ void MtcMessageMediator::MayFormatContactAddress(
 
     AString strFormat = MtcConfigurationResolver::GetContactHeaderAddressInInviteForEmergency(
             m_objContext.GetConfigurationProxy(), GetAosEmergencyRegMode(),
-            PhoneInfoService::GetPhoneInfoService()
-                    ->GetNetworkWatcher(m_objContext.GetSlotId())
-                    ->GetDataRoamingType());
+            m_objContext.GetService().GetNetworkRoamingType());
 
     if (strFormat.GetLength() <= 0)
     {
