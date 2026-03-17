@@ -534,18 +534,17 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
     @Override
     public void mediaQualityStatusChanged(int mediaSessionType, int accessNetwork,
             android.telephony.imsmedia.MediaQualityStatus mediaQualityStatus) {
-        log("mediaQualityStatusChanged: " + mediaQualityStatus.toString());
-        if (mMediaQualityReporter != null
-                && (mediaQualityStatus.getRtpPacketLossRate() != 0
-                || mediaQualityStatus.getRtpJitterMillis() != 0
-                || mediaQualityStatus.getRtpInactivityTimeMillis() != 0)) {
-            mMediaQualityReporter.notifyMediaQualityStatusChanged(
-                    convertToQualityStatusType(mediaSessionType),
-                    convertToTransportType(accessNetwork),
-                    mediaQualityStatus.getRtpPacketLossRate(),
-                    mediaQualityStatus.getRtpJitterMillis(),
-                    mediaQualityStatus.getRtpInactivityTimeMillis());
+        if (mediaQualityStatus == null || mMediaQualityReporter == null) {
+            log("mediaQualityStatusChanged: skipped notification due to null status or reporter");
+            return;
         }
+        log("mediaQualityStatusChanged: " + mediaQualityStatus.toString());
+        mMediaQualityReporter.notifyMediaQualityStatusChanged(
+                convertToQualityStatusType(mediaSessionType),
+                convertToTransportType(accessNetwork),
+                mediaQualityStatus.getRtpPacketLossRate(),
+                mediaQualityStatus.getRtpJitterMillis(),
+                mediaQualityStatus.getRtpInactivityTimeMillis());
     }
 
     /**
