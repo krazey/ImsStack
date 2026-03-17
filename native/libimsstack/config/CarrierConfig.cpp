@@ -1444,8 +1444,6 @@ const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_PREFERRED_PSI_URI_TYPE_INT[] =
         KEY_IMS_SMS_PREFIX "sms_preferred_psi_uri_type_int";
 const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL[] =
         KEY_IMS_SMS_PREFIX "sms_use_dialed_number_for_request_uri_bool";
-const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL[] =
-        KEY_IMS_SMS_PREFIX "sms_allow_imsi_based_sip_uri_bool";
 const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY[] =
         KEY_IMS_SMS_PREFIX "sms_generic_error_codes_int_array";
 const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_FALLBACK_ERROR_CODES_INT_ARRAY[] =

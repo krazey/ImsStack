@@ -885,8 +885,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "sms_preferred_psi_uri_type_int";
         public static final String KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL =
                 KEY_PREFIX + "sms_use_dialed_number_for_request_uri_bool";
-        public static final String KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL =
-                KEY_PREFIX + "sms_allow_imsi_based_sip_uri_bool";
         public static final String KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY =
                 KEY_PREFIX + "sms_generic_error_codes_int_array";
         public static final String KEY_SMS_FALLBACK_ERROR_CODES_INT_ARRAY =
