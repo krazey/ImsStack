@@ -437,16 +437,29 @@ public class ImsMmTelService extends MmTelFeature
         ImsLog.i("[ISIL] " + s);
     }
 
+    @VisibleForTesting
+    public IMmTelFeatureCapabilityListener getMmTelFeatureCapabilityListener() {
+        return mFeatureCapabilityListener;
+    }
+
     private class MmTelFeatureCapabilityListener implements IMmTelFeatureCapabilityListener {
         @Override
         public void onFeatureCapabilityChanged(MmTelFeature.MmTelCapabilities capabilities) {
+            postAndNotifyCapabilities(capabilities, "Direct");
+
+            if (mRegTracker != null && mRegTracker.isRegistered()) {
+                postAndNotifyCapabilities(capabilities, "Correction");
+            }
+        }
+
+        private void postAndNotifyCapabilities(MmTelFeature.MmTelCapabilities caps, String tag) {
             postAndRunTask(() -> {
                 try {
-                    logi("onFeatureCapabilityChanged :: phoneId=" + mImsContext.getPhoneId()
-                            + ", " + capabilities.toString());
-                    notifyCapabilitiesStatusChanged(capabilities);
+                    logi("onFeatureCapabilityChanged (" + tag + ") :: phoneId="
+                            + mImsContext.getPhoneId() + ", " + caps.toString());
+                    notifyCapabilitiesStatusChanged(caps);
                 } catch (IllegalStateException e) {
-                    loge("onFeatureCapabilityChanged Exception:" + e.toString());
+                    loge("onFeatureCapabilityChanged Exception: " + e.toString());
                 }
             });
         }
