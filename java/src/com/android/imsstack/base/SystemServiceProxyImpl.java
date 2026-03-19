@@ -546,7 +546,7 @@ public class SystemServiceProxyImpl implements SystemServiceProxy {
 
             try {
                 mProvisioningManager.unregisterFeatureProvisioningChangedCallback(callback);
-            } catch (IllegalArgumentException e) {
+            } catch (RuntimeException e) {
                 Log.d(this, "unregisterFeatureProvisioningChangedCallback: " + e);
             }
         }
