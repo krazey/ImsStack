@@ -19,6 +19,7 @@ import static com.android.imsstack.its.base.TestConstants.SLOT0;
 import static com.android.imsstack.its.tests.registration.RegistrationInfo.SimSupportMode;
 
 import android.os.PersistableBundle;
+import android.platform.test.annotations.Presubmit;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -68,6 +69,7 @@ public class SimProvisioningTest extends RegistrationTestBase {
 
     @Test
     @P0
+    @Presubmit
     public void provisioning_supportIsimAndUsim_priorityIsimUsim_succeeds()
             throws Exception {
         // 1. Configure the IMS identity priority to support ISIM and then USIM as a fallback.
@@ -85,6 +87,7 @@ public class SimProvisioningTest extends RegistrationTestBase {
 
     @Test
     @P0
+    @Presubmit
     public void provisioning_supportIsimAndUsim_priorityIsimImsi_succeeds()
             throws Exception {
         // 1. Configure the IMS identity priority to support ISIM and then IMSI from ISIM.
@@ -102,6 +105,7 @@ public class SimProvisioningTest extends RegistrationTestBase {
 
     @Test
     @P0
+    @Presubmit
     public void provisioning_supportIsimAndUsim_priorityIsim_succeeds()
             throws Exception {
         // 1. Configure the IMS identity priority to support only ISIM.
@@ -119,6 +123,7 @@ public class SimProvisioningTest extends RegistrationTestBase {
 
     @Test
     @P0
+    @Presubmit
     public void provisioning_supportIsimAndUsim_priorityUsim_succeeds()
             throws Exception {
         // 1. Configure the IMS identity priority to support only USIM.
@@ -136,6 +141,7 @@ public class SimProvisioningTest extends RegistrationTestBase {
 
     @Test
     @P0
+    @Presubmit
     public void provisioning_supportIncompIsimAndUsim_priorityIsimUsim_succeeds()
             throws Exception {
         // 1. Configure the IMS identity priority to support ISIM and then USIM as a fallback.
@@ -154,6 +160,7 @@ public class SimProvisioningTest extends RegistrationTestBase {
 
     @Test
     @P0
+    @Presubmit
     public void provisioning_supportIncompIsimAndUsim_priorityIsimImsi_succeeds()
             throws Exception {
         // 1. Configure the IMS identity priority to support ISIM and then IMSI from ISIM.
@@ -190,6 +197,7 @@ public class SimProvisioningTest extends RegistrationTestBase {
 
     @Test
     @P0
+    @Presubmit
     public void provisioning_supportIncompIsimAndUsim_priorityUsim_succeeds()
             throws Exception {
         // 1. Configure the IMS identity priority to support only USIM.
@@ -207,6 +215,7 @@ public class SimProvisioningTest extends RegistrationTestBase {
 
     @Test
     @P0
+    @Presubmit
     public void provisioning_supportUsim_priorityIsimUsim_succeeds()
             throws Exception {
         // 1. Configure the IMS identity priority to support ISIM and then USIM as a fallback.
@@ -223,6 +232,7 @@ public class SimProvisioningTest extends RegistrationTestBase {
 
     @Test
     @P0
+    @Presubmit
     public void provisioning_supportUsim_priorityIsimImsi_succeeds()
             throws Exception {
         // 1. Configure the IMS identity priority to support ISIM and then IMSI from ISIM.
@@ -256,6 +266,7 @@ public class SimProvisioningTest extends RegistrationTestBase {
 
     @Test
     @P0
+    @Presubmit
     public void provisioning_supportUsim_priorityUsim_succeeds()
             throws Exception {
         // 1. Configure the IMS identity priority to support only USIM.
