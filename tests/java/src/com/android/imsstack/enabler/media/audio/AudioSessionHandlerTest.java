@@ -90,6 +90,7 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
     @Mock AudioConfig mMockAudioConfig;
     @Mock AnbrMode mMockAnbrMode;
     @Mock EvsParams mMockEvsParams;
+    @Mock AmrParams mMockAmrParams;
     @Mock DtmfToneGenerator mMockDtmfToneGenerator;
 
     private AudioSessionHandler mAudioSessionHandler;
@@ -869,11 +870,11 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
     @Test
     public void testConvertCodecModeToBitrate_amr() {
         assertEquals(
-                -1,
+                4750,
                 mAudioSessionHandler.convertCodecModeToBitrate(
                         AudioConfig.CODEC_AMR, AmrParams.AMR_MODE_0));
         assertEquals(
-                -1,
+                6600,
                 mAudioSessionHandler.convertCodecModeToBitrate(
                         AudioConfig.CODEC_AMR_WB, AmrParams.AMR_MODE_0));
     }
@@ -888,10 +889,14 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
         when(mMockAnbrMode.getAnbrDownlinkCodecMode()).thenReturn(downlinkMode);
         when(mMockAudioConfig.getEvsParams()).thenReturn(mMockEvsParams);
         when(mMockEvsParams.getEvsMode()).thenReturn(currentMode);
+        when(mMockAudioConfig.getAmrParams()).thenReturn(mMockAmrParams);
+        when(mMockAmrParams.getAmrMode()).thenReturn(currentMode);
     }
 
     @Test
-    public void testHandleTriggerAnbrQuery_anbrEnabled_uplink() {
+    public void testHandleTriggerAnbrQuery_anbrEnabled_upspeeding_low_to_mid() {
+        // Increase from 9600 (MODE_12) to 13200 (MODE_13)
+        // Should trigger query only
         setupAnbrTest(true, AudioSessionHandler.CODEC_EVS, AudioSessionHandler.CODEC_EVS,
                 EvsParams.EVS_MODE_13, 0, EvsParams.EVS_MODE_12);
 
@@ -903,12 +908,16 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
                     eq(AudioSessionHandler.AUDIO_TYPE),
                     eq(AudioSessionHandler.EDirectionType.DIRECTION_UPLINK.getDirection()),
                     eq(13200));
+        // bitrate > currentBitrate -> should NOT trigger modifySession
+        verify(mMockAudioSession, never()).modifySession(any());
     }
 
     @Test
-    public void testHandleTriggerAnbrQuery_anbrEnabled_downlink() {
+    public void testHandleTriggerAnbrQuery_anbrEnabled_upspeeding_mid_to_high() {
+        // Current 13200 (MODE_13), Recommendation 24400 (MODE_15)
+        // Upspeeding: Should trigger query only
         setupAnbrTest(true, AudioSessionHandler.CODEC_EVS, AudioSessionHandler.CODEC_EVS,
-                0, EvsParams.EVS_MODE_15, EvsParams.EVS_MODE_12);
+                EvsParams.EVS_MODE_15, 0, EvsParams.EVS_MODE_13);
 
         mAudioSessionCallback.triggerAnbrQuery(mMockAudioConfig);
         processAllMessages();
@@ -916,23 +925,83 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
         verify(mMockAudioSessionCallbackHandler)
                 .triggerAnbrQuery(
                     eq(AudioSessionHandler.AUDIO_TYPE),
-                    eq(AudioSessionHandler.EDirectionType.DIRECTION_DOWNLINK.getDirection()),
+                    eq(AudioSessionHandler.EDirectionType.DIRECTION_UPLINK.getDirection()),
                     eq(24400));
+        // bitrate > currentBitrate -> should NOT trigger modifySession
+        verify(mMockAudioSession, never()).modifySession(any());
     }
 
     @Test
-    public void testHandleTriggerAnbrQuery_anbrEnabled_bitrateNotHigher() {
+    public void testHandleTriggerAnbrQuery_anbrEnabled_downspeeding() {
+        // Decrease from 24400 (MODE_15) to 9600 (MODE_12)
+        // Should trigger query AND modifySession
         setupAnbrTest(true, AudioSessionHandler.CODEC_EVS, AudioSessionHandler.CODEC_EVS,
-                EvsParams.EVS_MODE_11, 0, EvsParams.EVS_MODE_12);
+                EvsParams.EVS_MODE_12, 0, EvsParams.EVS_MODE_15);
 
         mAudioSessionCallback.triggerAnbrQuery(mMockAudioConfig);
         processAllMessages();
 
-        // Should not trigger query, but should trigger modifySession
-        verify(mMockAudioSessionCallbackHandler, never())
-                .triggerAnbrQuery(anyInt(), anyInt(), anyInt());
-        verify(mMockAudioSession).modifySession(eq(mMockAudioConfig));
+        verify(mMockAudioSessionCallbackHandler)
+                .triggerAnbrQuery(
+                    eq(AudioSessionHandler.AUDIO_TYPE),
+                    eq(AudioSessionHandler.EDirectionType.DIRECTION_UPLINK.getDirection()),
+                    eq(9600));
+        // bitrate <= currentBitrate -> should trigger modifySession
+        verify(mMockAudioSession, times(1)).modifySession(eq(mMockAudioConfig));
         verify(mMockMediaConfig).updateRtpConfig(eq(mMockAudioConfig));
+    }
+
+    @Test
+    public void testHandleTriggerAnbrQuery_anbrEnabled_amrWb_upspeeding() {
+        // Increase from 12650 (MODE_2) to 23850 (MODE_8) -> Should trigger query only
+        setupAnbrTest(true, AudioSessionHandler.CODEC_AMR_WB, AudioSessionHandler.CODEC_AMR_WB,
+                AmrParams.AMR_MODE_8, 0, AmrParams.AMR_MODE_2);
+
+        mAudioSessionCallback.triggerAnbrQuery(mMockAudioConfig);
+        processAllMessages();
+
+        verify(mMockAudioSessionCallbackHandler)
+                .triggerAnbrQuery(
+                    eq(AudioSessionHandler.AUDIO_TYPE),
+                    eq(AudioSessionHandler.EDirectionType.DIRECTION_UPLINK.getDirection()),
+                    eq(23850));
+        verify(mMockAudioSession, never()).modifySession(any());
+    }
+
+    @Test
+    public void testHandleTriggerAnbrQuery_anbrEnabled_amr_downspeeding() {
+        // Decrease from 12200 (MODE_7) to 4750 (MODE_0) -> Should trigger query AND modifySession
+        setupAnbrTest(true, AudioSessionHandler.CODEC_AMR, AudioSessionHandler.CODEC_AMR,
+                AmrParams.AMR_MODE_0, 0, AmrParams.AMR_MODE_7);
+
+        mAudioSessionCallback.triggerAnbrQuery(mMockAudioConfig);
+        processAllMessages();
+
+        verify(mMockAudioSessionCallbackHandler)
+                .triggerAnbrQuery(
+                    eq(AudioSessionHandler.AUDIO_TYPE),
+                    eq(AudioSessionHandler.EDirectionType.DIRECTION_UPLINK.getDirection()),
+                    eq(4750));
+        verify(mMockAudioSession, times(1)).modifySession(eq(mMockAudioConfig));
+        verify(mMockMediaConfig).updateRtpConfig(eq(mMockAudioConfig));
+    }
+
+    @Test
+    public void testHandleTriggerAnbrQuery_anbrEnabled_bitrateEqual() {
+        // bitrate 9600 (MODE_12) == current 9600 (MODE_12)
+        // Should trigger query AND modifySession
+        setupAnbrTest(true, AudioSessionHandler.CODEC_EVS, AudioSessionHandler.CODEC_EVS,
+                EvsParams.EVS_MODE_12, 0, EvsParams.EVS_MODE_12);
+
+        mAudioSessionCallback.triggerAnbrQuery(mMockAudioConfig);
+        processAllMessages();
+
+        verify(mMockAudioSessionCallbackHandler)
+                .triggerAnbrQuery(
+                    eq(AudioSessionHandler.AUDIO_TYPE),
+                    eq(AudioSessionHandler.EDirectionType.DIRECTION_UPLINK.getDirection()),
+                    eq(9600));
+        verify(mMockAudioSession).modifySession(eq(mMockAudioConfig));
     }
 
     @Test

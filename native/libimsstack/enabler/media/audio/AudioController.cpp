@@ -124,6 +124,12 @@ IMS_BOOL AudioController::UpdateSession(
 
     UpdateAnbrEnabledConfig(nNegoId, pNegotiatedProfile->IsAnbrSupported());
 
+    AudioSession* pAudioSession = FindAudioSession(nNegoId);
+    if (pAudioSession != IMS_NULL)
+    {
+        pAudioSession->ResetAnbrMode();
+    }
+
     IMS_BOOL bRtpConfigChanged = UpdateRtpConfig(nNegoId, nAccessNetwork, pNego);
     IMS_BOOL bQualityThresholdUpdated = UpdateQualityThreshold(nNegoId, pNego);
 
@@ -456,7 +462,7 @@ IMS_BOOL AudioController::NotifyAnbrReceived(
     {
         AudioSession* pAudioSession = m_listAudioSession.GetAt(nIndex);
 
-        if (pAudioSession != IMS_NULL && pAudioSession->GetState() == AudioSession::STATE_LIVE)
+        if (pAudioSession != IMS_NULL && pAudioSession->GetState() != AudioSession::STATE_NONE)
         {
             return pAudioSession->NotifyAnbrReceived(nAnbrMediaType, nAnbrDirection, nAnbrBitrate);
         }
@@ -480,10 +486,15 @@ IMS_BOOL AudioController::UpdateAccessNetwork(IN IMS_UINT32 accessNetwork)
         {
             bResult = pAudioSession->SetAccessNetwork(accessNetwork);
 
-            if (bResult && pAudioSession->GetState() != AudioSession::STATE_IDLE &&
-                    pAudioSession->Modify())
+            if (bResult)
             {
-                bResult = pAudioSession->SetMediaQuality(m_eCallState);
+                pAudioSession->ResetAnbrMode();
+
+                if (pAudioSession->GetState() != AudioSession::STATE_IDLE &&
+                        pAudioSession->Modify())
+                {
+                    bResult = pAudioSession->SetMediaQuality(m_eCallState);
+                }
             }
         }
     }

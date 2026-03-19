@@ -25,6 +25,7 @@ import android.os.Parcel;
 import android.telephony.CallQuality;
 import android.telephony.ims.MediaThreshold;
 import android.telephony.ims.RtpHeaderExtension;
+import android.telephony.imsmedia.AmrParams;
 import android.telephony.imsmedia.AnbrMode;
 import android.telephony.imsmedia.AudioConfig;
 import android.telephony.imsmedia.AudioSessionCallback;
@@ -1103,7 +1104,6 @@ public class AudioSessionHandler extends MediaState {
             AnbrMode anbrMode = audioConfig.getAnbrMode();
             int anbrDirection = -1;
             int bitrate = -1;
-            int curBitrate = -1;
 
             ImsLog.d("handleTriggerAnbrQuery: ul=" + anbrMode.getAnbrUplinkCodecMode() + " dl="
                     + anbrMode.getAnbrDownlinkCodecMode());
@@ -1120,22 +1120,27 @@ public class AudioSessionHandler extends MediaState {
                 ImsLog.d("handleTriggerAnbrQuery: invalid codec mode ");
             }
 
-            ImsLog.d("handleTriggerAnbrQuery: dir= " + anbrDirection + " bitrate= " + bitrate);
-
-            // Need to compare the current bitrate in audioconfig and anbr ul or dl bitrate
-            if (audioConfig.getCodecType() == CODEC_EVS) {
-                curBitrate = convertCodecModeToBitrate(
-                        CODEC_EVS, audioConfig.getEvsParams().getEvsMode());
-                ImsLog.d("handleTriggerAnbrQuery: current bitrate= " + curBitrate);
-            }
-
-            if (bitrate > curBitrate) {
-                ImsLog.d("handleTriggerAnbrQuery: send AnbrQuery");
+            if (bitrate > 0) {
+                // 1. Send the Query to the Modem/Network
+                ImsLog.d("handleTriggerAnbrQuery: dir= " + anbrDirection + " bitrate= " + bitrate);
                 mAudioSessionCallbackHandler.triggerAnbrQuery(AUDIO_TYPE, anbrDirection, bitrate);
-            } else {
-                ImsLog.d("handleTriggerAnbrQuery: skip sending AnbrQuery due to the bitrate");
-                if (mAudioSession != null) {
-                    ImsLog.d("handleTriggerAnbrQuery: send modifysession");
+
+                // 2. Calculate current bitrate for comparison
+                int currentBitrate = 0;
+                if (mCodecType == CODEC_EVS) {
+                    currentBitrate = convertCodecModeToBitrate(
+                            CODEC_EVS, audioConfig.getEvsParams().getEvsMode());
+                } else if (mCodecType == CODEC_AMR) {
+                    currentBitrate = convertCodecModeToBitrate(
+                            CODEC_AMR, audioConfig.getAmrParams().getAmrMode());
+                } else if (mCodecType == CODEC_AMR_WB) {
+                    currentBitrate = convertCodecModeToBitrate(
+                            CODEC_AMR_WB, audioConfig.getAmrParams().getAmrMode());
+                }
+
+                // 3. Apply immediately if it's a safe update
+                if (bitrate <= currentBitrate && mAudioSession != null) {
+                    ImsLog.d("handleTriggerAnbrQuery: Applying current bitrate= " + currentBitrate);
                     mAudioSession.modifySession(audioConfig);
                     mMediaConfig.updateRtpConfig(audioConfig);
                 }
@@ -1167,6 +1172,33 @@ public class AudioSessionHandler extends MediaState {
                     ImsLog.d("convertCodecModeToBitrate: Error - set to 13.2kbps");
                     yield 13200;
                 }
+            };
+        } else if (codecType == CODEC_AMR) {
+            convertedBitrate =
+            switch (codecMode) {
+                case AmrParams.AMR_MODE_0 -> 4750;
+                case AmrParams.AMR_MODE_1 -> 5150;
+                case AmrParams.AMR_MODE_2 -> 5900;
+                case AmrParams.AMR_MODE_3 -> 6700;
+                case AmrParams.AMR_MODE_4 -> 7400;
+                case AmrParams.AMR_MODE_5 -> 7950;
+                case AmrParams.AMR_MODE_6 -> 10200;
+                case AmrParams.AMR_MODE_7 -> 12200;
+                default -> 12200;
+            };
+        } else if (codecType == CODEC_AMR_WB) {
+            convertedBitrate =
+            switch (codecMode) {
+                case AmrParams.AMR_MODE_0 -> 6600;
+                case AmrParams.AMR_MODE_1 -> 8850;
+                case AmrParams.AMR_MODE_2 -> 12650;
+                case AmrParams.AMR_MODE_3 -> 14250;
+                case AmrParams.AMR_MODE_4 -> 15850;
+                case AmrParams.AMR_MODE_5 -> 18250;
+                case AmrParams.AMR_MODE_6 -> 19850;
+                case AmrParams.AMR_MODE_7 -> 23050;
+                case AmrParams.AMR_MODE_8 -> 23850;
+                default -> 23850;
             };
         }
         ImsLog.d("convertedBitrate= " + convertedBitrate);

@@ -366,9 +366,84 @@ TEST_F(AudioSessionTest, testIsAnbrEnabled)
     EXPECT_FALSE(m_pSession->IsAnbrEnabled());
 }
 
+TEST_F(AudioSessionTest, testResetAnbrMode)
+{
+    // 1. Enable ANBR
+    EXPECT_CALL(m_objMockListener,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_UPDATE_ANBR_ENABLED_CONFIG, _))
+            .WillOnce(Return(IMS_TRUE));
+    m_pSession->UpdateAnbrEnabledConfig(IMS_TRUE);
+
+    // 2. Set some ANBR mode
+    AnbrMode mode;
+    mode.setAnbrUplinkCodecMode(4096);
+    mode.setAnbrDownlinkCodecMode(4096);
+    m_pSession->SetAnbrMode(mode);
+
+    EXPECT_EQ(m_pSession->GetRtpConfig()->getAnbrMode().getAnbrUplinkCodecMode(), 4096);
+    EXPECT_EQ(m_pSession->GetRtpConfig()->getAnbrMode().getAnbrDownlinkCodecMode(), 4096);
+
+    // 3. Reset ANBR mode
+    m_pSession->ResetAnbrMode();
+
+    EXPECT_EQ(m_pSession->GetRtpConfig()->getAnbrMode().getAnbrUplinkCodecMode(), 0);
+    EXPECT_EQ(m_pSession->GetRtpConfig()->getAnbrMode().getAnbrDownlinkCodecMode(), 0);
+}
+
+TEST_F(AudioSessionTest, testResetOnAnbrDisabled)
+{
+    // 1. Enable ANBR
+    EXPECT_CALL(m_objMockListener,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_UPDATE_ANBR_ENABLED_CONFIG, _))
+            .WillOnce(Return(IMS_TRUE));
+    m_pSession->UpdateAnbrEnabledConfig(IMS_TRUE);
+
+    // 2. Set ANBR mode
+    AnbrMode mode;
+    mode.setAnbrUplinkCodecMode(4096);
+    m_pSession->SetAnbrMode(mode);
+    EXPECT_EQ(m_pSession->GetRtpConfig()->getAnbrMode().getAnbrUplinkCodecMode(), 4096);
+
+    // 3. Disable ANBR -> should trigger reset
+    EXPECT_CALL(m_objMockListener,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_UPDATE_ANBR_ENABLED_CONFIG, _))
+            .WillOnce(Return(IMS_TRUE));
+    m_pSession->UpdateAnbrEnabledConfig(IMS_FALSE);
+
+    EXPECT_EQ(m_pSession->GetRtpConfig()->getAnbrMode().getAnbrUplinkCodecMode(), 0);
+}
+
 TEST_F(AudioSessionTest, testNotifyAnbrReceived)
 {
     EXPECT_FALSE(m_pSession->NotifyAnbrReceived(0, 0, 0));
+}
+
+TEST_F(AudioSessionTest, testNotifyAnbrReceived_bitrateRange)
+{
+    // Setup session with EVS and negotiated bitrate 13.2kbps (EVS_MODE_13 = 1 << 13)
+    m_pSession->UpdateAnbrEnabledConfig(IMS_TRUE);
+    AudioConfig* pConfig = static_cast<AudioConfig*>(m_pSession->GetRtpConfig());
+    pConfig->setCodecType(AudioConfig::CODEC_EVS);
+    EvsParams evsParams;
+    evsParams.setEvsMode(1 << 13);  // 13.2kbps only
+    pConfig->setEvsParams(evsParams);
+
+    // 1. Valid bitrate (13.2kbps) -> should succeed and trigger Modify()
+    EXPECT_CALL(m_objMockListener,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_MODIFY_SESSION, _))
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+
+    EXPECT_TRUE(m_pSession->NotifyAnbrReceived(
+            MEDIA_TYPE_AUDIO, AudioSession::DIRECTION_UPLINK, 13200));
+
+    // 2. Out of range bitrate (16.4kbps) -> should be rejected
+    EXPECT_CALL(m_objMockListener,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_MODIFY_SESSION, _))
+            .Times(0);
+
+    EXPECT_FALSE(m_pSession->NotifyAnbrReceived(
+            MEDIA_TYPE_AUDIO, AudioSession::DIRECTION_UPLINK, 16400));
 }
 
 TEST_F(AudioSessionTest, testSetMediaQuality)
