@@ -207,7 +207,7 @@ TEST_F(MtcCapabilityQueryHandlerTest, HandleReturnsSuccessWithoutSdpBodyPartFlag
                     &objMockCoreService, &objMockCapabilities, ImsAosFeature::VIDEO));
 }
 
-TEST_F(MtcCapabilityQueryHandlerTest, HandleReturnsSuccessWithVzwConfig)
+TEST_F(MtcCapabilityQueryHandlerTest, HandleReturnsSuccessWithCarrierSpecificContactHeader)
 {
     ON_CALL(*pConfigurationProxy,
             GetBoolean(
@@ -231,7 +231,8 @@ TEST_F(MtcCapabilityQueryHandlerTest, HandleReturnsSuccessWithVzwConfig)
                     &objMockCoreService, &objMockCapabilities, ImsAosFeature::VIDEO));
 }
 
-TEST_F(MtcCapabilityQueryHandlerTest, HandleReturnsSuccessWithVzwConfigWithoutVideo)
+TEST_F(MtcCapabilityQueryHandlerTest,
+        HandleReturnsSuccessWithCarrierSpecificContactHeaderWithoutVideo)
 {
     ON_CALL(*pConfigurationProxy,
             GetBoolean(
