@@ -33,7 +33,6 @@ import com.android.imsstack.enabler.mtc.SuppInfo;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.imsservice.mmtel.internal.ConferenceExtensionProxy;
 import com.android.imsstack.imsservice.mmtel.internal.ConferenceProxy;
-import com.android.imsstack.util.MessageExecutor;
 
 import org.junit.After;
 import org.junit.Before;
@@ -78,9 +77,6 @@ public class ConferenceExtensionProxyTest {
         mMtcConfListenerProxy = mConfExtProxy.getMtcConferenceListener();
         mCallListener = new TestCallListener();
         mConfListener = new TestConferenceListener();
-
-        MessageExecutor mExecutor = new MessageExecutor(ImsCallUtils.class.getSimpleName());
-        when(mMockCallContext.getExecutor()).thenReturn(mExecutor);
     }
 
     @After

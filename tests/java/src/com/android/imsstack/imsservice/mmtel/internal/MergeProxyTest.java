@@ -27,7 +27,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.os.Looper;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.Log;
@@ -48,7 +47,6 @@ import com.android.imsstack.imsservice.mmtel.ImsCallContext;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.imsservice.mmtel.internal.ConferenceProxy;
 import com.android.imsstack.imsservice.mmtel.internal.MergeProxy;
-import com.android.imsstack.util.MessageExecutor;
 
 import org.junit.After;
 import org.junit.Before;
@@ -62,7 +60,6 @@ import org.mockito.MockitoAnnotations;
 @TestableLooper.RunWithLooper
 public class MergeProxyTest extends ImsStackTest {
     private static final String TAG = "MergeProxyTest";
-    private MessageExecutor mMessageExecutor;
     private CallReasonInfo mFailInfo = null;
     private MtcCall.Listener mMtcCallListenerProxy = null;
     private MtcConference.Listener mMtcConferencelistenerProxy = null;
@@ -99,15 +96,20 @@ public class MergeProxyTest extends ImsStackTest {
         super.setUp(getClass().getSimpleName());
         MockitoAnnotations.initMocks(this);
 
-        mMessageExecutor = new MessageExecutor(Looper.myLooper());
-        when(mMockCallContext.getExecutor()).thenReturn(mMessageExecutor);
-
-        mMergeProxy = new TestMergeProxy(mMockCallContext, mMockFgCall, mMockBgCall,
-                mMessageExecutor);
+        mMergeProxy = new TestMergeProxy(mMockCallContext, mMockFgCall, mMockBgCall);
         mMtcCallListenerProxy = mMergeProxy.getMtcCallListener();
         mMtcConferencelistenerProxy = mMergeProxy.getMtcConferenceListener();
         mFailInfo = new CallReasonInfo();
         mockCarrierConfig();
+
+        CallInfo callInfo = new CallInfo();
+        MediaInfo mediaInfo = new MediaInfo();
+        when(mMockFgCall.getCallInfo()).thenReturn(callInfo);
+        when(mMockFgCall.getMediaInfo()).thenReturn(mediaInfo);
+        when(mMockBgCall.getCallInfo()).thenReturn(callInfo);
+        when(mMockBgCall.getMediaInfo()).thenReturn(mediaInfo);
+        when(mMockMtcCall.getCallInfo()).thenReturn(callInfo);
+        when(mMockMtcCall.getMediaInfo()).thenReturn(mediaInfo);
     }
 
     @After
@@ -128,42 +130,34 @@ public class MergeProxyTest extends ImsStackTest {
         /* callbacks */
         mMtcCallListenerProxy.onCallHoldReceived(mMockFgCall, mMockCallInfo, mMockMediaInfo,
                 mMockSuppInfo);
-        processAllMessages();
         verify(mMockMtcCallListenerProxy).onCallHoldReceived(mMockFgCall, mMockCallInfo,
                 mMockMediaInfo, mMockSuppInfo);
 
         mMtcCallListenerProxy.onCallResumeReceived(mMockFgCall, mMockCallInfo, mMockMediaInfo,
                 mMockSuppInfo);
-        processAllMessages();
         verify(mMockMtcCallListenerProxy).onCallResumeReceived(mMockFgCall, mMockCallInfo,
                 mMockMediaInfo, mMockSuppInfo);
 
         mMtcCallListenerProxy.onCallAutoUpdated(mMockFgCall, mMockCallInfo, mMockMediaInfo,
                 mMockSuppInfo);
-        processAllMessages();
         verify(mMockMtcCallListenerProxy).onCallAutoUpdated(mMockFgCall, mMockCallInfo,
                 mMockMediaInfo, mMockSuppInfo);
 
         mMtcCallListenerProxy.onCallUpdateReceived(mMockFgCall, mMockCallInfo, mMockMediaInfo,
                 mMockSuppInfo);
-        processAllMessages();
         verify(mMockMtcCallListenerProxy).onCallUpdateReceived(mMockFgCall, mMockCallInfo,
                 mMockMediaInfo, mMockSuppInfo);
 
         mMtcCallListenerProxy.onCallInfoUpdated(mMockFgCall, 0, "", 0, false);
-        processAllMessages();
         verify(mMockMtcCallListenerProxy).onCallInfoUpdated(mMockFgCall, 0, "", 0, false);
 
         mMtcCallListenerProxy.onAudioSessionOpened(mMockFgCall);
-        processAllMessages();
         verify(mMockMtcCallListenerProxy).onAudioSessionOpened(mMockFgCall);
 
         mMtcCallListenerProxy.onCallQualityChanged(mMockFgCall, null);
-        processAllMessages();
         verify(mMockMtcCallListenerProxy).onCallQualityChanged(mMockFgCall, null);
 
         mMtcCallListenerProxy.onAudioSessionClosed(mMockFgCall);
-        processAllMessages();
         verify(mMockMtcCallListenerProxy).onAudioSessionClosed(mMockFgCall);
     }
 
@@ -192,13 +186,11 @@ public class MergeProxyTest extends ImsStackTest {
         when(mMockFgCall.getConferenceInterface()).thenReturn(mtcConferenceFg);
 
         mMtcConferencelistenerProxy.onCallMergeFailed(mMockMtcConference, mFailInfo);
-        processAllMessages();
         verify(mMockMtcConferencelistenerProxy).onCallMergeFailed(mtcConferenceFg, mFailInfo);
 
         mMergeProxy.setForegroundCallRecoveryForTest(true);
         when(mMockFgCall.isOnHold()).thenReturn(true);
         mMtcConferencelistenerProxy.onCallMergeFailed(mMockMtcConference, mFailInfo);
-        processAllMessages();
         verify(mMockMtcConferencelistenerProxy, never()).onCallMergeFailed(mMockMtcConference,
                 mFailInfo);
 
@@ -208,7 +200,6 @@ public class MergeProxyTest extends ImsStackTest {
                 .thenReturn(false);
         mMtcConferencelistenerProxy.onCallMerged(mMockMtcConference, mMockCallInfo, mMockMediaInfo,
                 mMockSuppInfo, mMockUsersInfo);
-        processAllMessages();
         verify(mMockMtcConferencelistenerProxy).onCallMergeStarted(mtcConferenceFg,
                 mMockMtcConference, mMockCallInfo, mMockMediaInfo, mMockSuppInfo);
         verify(mMockMtcConferencelistenerProxy).onCallMerged(mtcConferenceFg, mMockCallInfo,
@@ -316,7 +307,6 @@ public class MergeProxyTest extends ImsStackTest {
 
         mMergeProxy.setStateForTest(STATE_MERGE_WAITING);
         mMtcCallListenerProxy.onCallTerminated(mMockFgCall, mFailInfo);
-        processAllMessages();
         verify(mMockMtcConferencelistenerProxy, times(2)).onCallMergeFailed(any(),
                 any());
 
@@ -332,7 +322,6 @@ public class MergeProxyTest extends ImsStackTest {
         mMergeProxy.setInitialConferenceExtensionForTest(false);
         mMergeProxy.setStateForTest(STATE_MERGE_WAITING);
         mMtcCallListenerProxy.onCallTerminated(mMockMtcCall, mFailInfo);
-        processAllMessages();
         verify(mMockMtcConferencelistenerProxy, times(2)).onCallMergeFailed(any(),
                 any());
     }
@@ -344,7 +333,6 @@ public class MergeProxyTest extends ImsStackTest {
         when(mMockFgCall.isTerminated()).thenReturn(true);
         //notifySessionMergeFailed()
         mMtcCallListenerProxy.onCallHeld(mMockBgCall, mMockCallInfo, mMockMediaInfo, mMockSuppInfo);
-        processAllMessages();
         verify(mMockMtcConferencelistenerProxy, times(2)).onCallMergeFailed(any(),
                 any());
         assertFalse(mMergeProxy.isBackgroundCallRecoveryRequired());
@@ -362,7 +350,6 @@ public class MergeProxyTest extends ImsStackTest {
 
         // executeMerge()
         mMtcCallListenerProxy.onCallHeld(mMockFgCall, mMockCallInfo, mMockMediaInfo, mMockSuppInfo);
-        processAllMessages();
         verify(mMockMtcConferencelistenerProxy).onCallProxyMerge(mMockMtcConference,
                 mtcConferenceFg, mtcConferenceBg);
         assertEquals(mMergeProxy.getState(), STATE_MERGE_WAITING);
@@ -393,7 +380,6 @@ public class MergeProxyTest extends ImsStackTest {
         when(mMockFgCall.isTerminated()).thenReturn(true);
         when(mMockBgCall.getConferenceInterface()).thenReturn(mMockMtcConference);
         mMtcCallListenerProxy.onCallHoldFailed(mMockBgCall, mFailInfo);
-        processAllMessages();
         verify(mMockMtcConferencelistenerProxy).onCallMergeFailed(mMockMtcConference, mFailInfo);
         assertFalse(mMergeProxy.isBackgroundCallRecoveryRequired());
     }
@@ -404,7 +390,6 @@ public class MergeProxyTest extends ImsStackTest {
         when(mMockFgCall.getConferenceInterface()).thenReturn(mMockMtcConference);
         mMergeProxy.setForegroundCallRecoveryForTest(true);
         mMtcCallListenerProxy.onCallHoldFailed(mMockFgCall, mFailInfo);
-        processAllMessages();
         verify(mMockMtcConferencelistenerProxy).onCallMergeFailed(mMockMtcConference, mFailInfo);
         clearInvocations(mMockMtcConferencelistenerProxy);
 
@@ -413,7 +398,6 @@ public class MergeProxyTest extends ImsStackTest {
         mMtcCallListenerProxy.onCallResumeFailed(mMockBgCall, mFailInfo);
 
         mMtcCallListenerProxy.onCallHoldFailed(mMockFgCall, mFailInfo);
-        processAllMessages();
         verify(mMockMtcConferencelistenerProxy).onCallMergeFailed(mMockMtcConference, mFailInfo);
     }
 
@@ -425,7 +409,6 @@ public class MergeProxyTest extends ImsStackTest {
         //notifySessionMergeFailed() for background case
         when(mMockBgCall.getConferenceInterface()).thenReturn(mMockMtcConference);
         mMtcCallListenerProxy.onCallResumeFailed(mMockBgCall, mFailInfo);
-        processAllMessages();
         verify(mMockMtcConferencelistenerProxy).onCallMergeFailed(mMockMtcConference, mFailInfo);
 
         //executeUnhold
@@ -439,7 +422,6 @@ public class MergeProxyTest extends ImsStackTest {
         mMergeProxy.setStateForTest(STATE_IDLE);
         mMtcCallListenerProxy.onCallResumeFailed(mMockFgCall, mFailInfo);
         assertFalse(mMergeProxy.isForegroundCallRecoveryRequired());
-        processAllMessages();
         verify(mMockMtcConferencelistenerProxy).onCallMergeFailed(mMockMtcConference, mFailInfo);
     }
 
@@ -455,7 +437,6 @@ public class MergeProxyTest extends ImsStackTest {
         //executeMerge()
         mMtcCallListenerProxy.onCallResumed(mMockBgCall, mMockCallInfo, mMockMediaInfo,
                 mMockSuppInfo);
-        processAllMessages();
         verify(mMockMtcConferencelistenerProxy).onCallProxyMerge(mMockMtcConference,
                 mtcConferenceFg, mtcConferenceBg);
         assertEquals(mMergeProxy.getState(), STATE_MERGE_WAITING);
@@ -476,7 +457,6 @@ public class MergeProxyTest extends ImsStackTest {
         mMtcCallListenerProxy.onCallResumed(mMockFgCall, mMockCallInfo, mMockMediaInfo,
                 mMockSuppInfo);
         assertFalse(mMergeProxy.isBackgroundCallRecoveryRequired());
-        processAllMessages();
         verify(mMockMtcConferencelistenerProxy).onCallMergeFailed(mMockMtcConference, mFailInfo);
     }
 
@@ -594,8 +574,7 @@ public class MergeProxyTest extends ImsStackTest {
     }
 
     private class TestMergeProxy extends MergeProxy {
-        TestMergeProxy(ICallContext callContext, MtcCall fgCall, MtcCall bgCall,
-                MessageExecutor exec) {
+        TestMergeProxy(ICallContext callContext, MtcCall fgCall, MtcCall bgCall) {
                 super(callContext, fgCall, bgCall);
         }
 

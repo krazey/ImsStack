@@ -151,14 +151,9 @@ public class ConferenceProxy {
         mListeners.remove(new ListenerWrapper(listener, conferenceListener));
 
         if (!hasListeners()) {
-            postAndRun(new Runnable() {
-                @Override
-                public void run() {
-                    if (mDisposalCallback != null) {
-                        mDisposalCallback.onConferenceProxyDisposed(ConferenceProxy.this);
-                    }
-                }
-            });
+            if (mDisposalCallback != null) {
+                mDisposalCallback.onConferenceProxyDisposed(ConferenceProxy.this);
+            }
         }
     }
 
@@ -212,22 +207,17 @@ public class ConferenceProxy {
             return;
         }
 
-        postAndRun(new Runnable() {
-            @Override
-            public void run() {
-                call.hold(MtcCallUtils.createHoldMedia(
-                        call.getCallInfo(),
-                        call.getMediaInfo(),
-                        isVideoDirectionInactiveOnVideoCallHold(),
-                        isTextDirectionInactiveOnRttCallHold()));
+        call.hold(MtcCallUtils.createHoldMedia(
+                call.getCallInfo(),
+                call.getMediaInfo(),
+                isVideoDirectionInactiveOnVideoCallHold(),
+                isTextDirectionInactiveOnRttCallHold()));
 
-                for (ListenerWrapper lw : mListeners) {
-                    if (lw.mListener != null) {
-                        lw.mListener.onCallProxyHold(call);
-                    }
-                }
+        for (ListenerWrapper lw : mListeners) {
+            if (lw.mListener != null) {
+                lw.mListener.onCallProxyHold(call);
             }
-        });
+        }
     }
 
     protected void executeUnhold(final MtcCall call) {
@@ -235,43 +225,29 @@ public class ConferenceProxy {
             return;
         }
 
-        postAndRun(new Runnable() {
-            @Override
-            public void run() {
-                call.resume(MtcCallUtils.createUnholdMedia(
-                        call.getCallInfo(),
-                        call.getMediaInfo(),
-                        isVideoDirectionInactiveOnVideoCallHold()));
+        call.resume(MtcCallUtils.createUnholdMedia(
+                call.getCallInfo(),
+                call.getMediaInfo(),
+                isVideoDirectionInactiveOnVideoCallHold()));
 
-                for (ListenerWrapper lw : mListeners) {
-                    if (lw.mListener != null) {
-                        lw.mListener.onCallProxyResume(call);
-                    }
-                }
+        for (ListenerWrapper lw : mListeners) {
+            if (lw.mListener != null) {
+                lw.mListener.onCallProxyResume(call);
             }
-        });
+        }
     }
 
     protected void notifySessionTerminated(final MtcCall call,
             final CallReasonInfo callReasonInfo) {
-        postAndRun(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    for (ListenerWrapper lw : mListeners) {
-                        if (lw.mListener != null) {
-                            lw.mListener.onCallTerminated(call, callReasonInfo);
-                        }
-                    }
-                } catch (Throwable t) {
-                    loge("notifySessionTerminated", t);
+        try {
+            for (ListenerWrapper lw : mListeners) {
+                if (lw.mListener != null) {
+                    lw.mListener.onCallTerminated(call, callReasonInfo);
                 }
             }
-        });
-    }
-
-    protected final void postAndRun(Runnable task) {
-        mCallContext.getExecutor().execute(task);
+        } catch (Throwable t) {
+            loge("notifySessionTerminated", t);
+        }
     }
 
     protected final void setConferenceParticipants(UsersInfo usersInfo) {

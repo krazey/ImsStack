@@ -24,11 +24,15 @@ import static org.mockito.Mockito.when;
 
 import android.telephony.ims.stub.ImsCallSessionImplBase;
 
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.config.CarrierConfig;
+import com.android.imsstack.enabler.mtc.CallInfo;
+import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcCall;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.imsservice.mmtel.internal.ConferenceProxy;
-import com.android.imsstack.util.MessageExecutor;
 
 import org.junit.After;
 import org.junit.Before;
@@ -37,6 +41,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class ImsConferenceHelperTest {
@@ -48,22 +53,30 @@ public class ImsConferenceHelperTest {
     @Mock private ImsCallSessionImpl mFgImsCallSession, mBgImsCallSession;
     @Mock private MtcCall mMtcCall, mFgMtcCall, mBgMtcCall;
     @Mock private MtcApp mMtcApp;
+    @Mock private ConfigInterface mMockConfigInterface;
+    @Mock private CarrierConfig mMockCarrierConfig;
 
     private ImsConferenceHelper mConfHelper;
     private String[] mParticipants = {"1234", "5678"};
 
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
         mConfHelper = ImsConferenceHelper.getInstance();
-        mICallContext = Mockito.mock(ICallContext.class);
-        mImsCallApp = Mockito.mock(ImsCallApp.class);
-        mImsCallManager = Mockito.mock(ImsCallManager.class);
-        mFgImsCallSession = Mockito.mock(ImsCallSessionImpl.class);
-        mBgImsCallSession = Mockito.mock(ImsCallSessionImpl.class);
-        mFgMtcCall = Mockito.mock(MtcCall.class);
-        mBgMtcCall = Mockito.mock(MtcCall.class);
-        mMtcApp = Mockito.mock(MtcApp.class);
-        mMtcCall = Mockito.mock(MtcCall.class);
+
+        // Setup ConfigInterface for CallFeature checks in ConferenceProxy
+        when(mICallContext.getSlotId()).thenReturn(0);
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, 0);
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+
+        CallInfo callInfo = new CallInfo();
+        MediaInfo mediaInfo = new MediaInfo();
+        when(mFgMtcCall.getCallInfo()).thenReturn(callInfo);
+        when(mFgMtcCall.getMediaInfo()).thenReturn(mediaInfo);
+        when(mBgMtcCall.getCallInfo()).thenReturn(callInfo);
+        when(mBgMtcCall.getMediaInfo()).thenReturn(mediaInfo);
+        when(mMtcCall.getCallInfo()).thenReturn(callInfo);
+        when(mMtcCall.getMediaInfo()).thenReturn(mediaInfo);
     }
 
     @Test
@@ -94,8 +107,6 @@ public class ImsConferenceHelperTest {
 
     @Test
     public void test_extendToConference() {
-        MessageExecutor executor = new MessageExecutor(ImsConferenceHelper.class.getSimpleName());
-        when(mICallContext.getExecutor()).thenReturn(executor);
         when(mICallContext.getApp()).thenReturn(mImsCallApp);
         when(mImsCallApp.getCallManager()).thenReturn(mImsCallManager);
         when(mImsCallManager.getActiveSession()).thenReturn(mFgImsCallSession);
@@ -121,8 +132,6 @@ public class ImsConferenceHelperTest {
 
     @Test
     public void test_merge() {
-        MessageExecutor executor = new MessageExecutor(ImsConferenceHelper.class.getSimpleName());
-        when(mICallContext.getExecutor()).thenReturn(executor);
         when(mICallContext.getApp()).thenReturn(mImsCallApp);
         when(mImsCallApp.getCallManager()).thenReturn(mImsCallManager);
         when(mImsCallManager.getActiveSession()).thenReturn(mFgImsCallSession);
@@ -160,5 +169,6 @@ public class ImsConferenceHelperTest {
     @After
     public void tearDown() {
         mConfHelper = null;
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, null, 0);
     }
 }

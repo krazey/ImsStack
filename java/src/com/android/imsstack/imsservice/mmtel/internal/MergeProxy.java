@@ -161,34 +161,29 @@ public class MergeProxy extends ConferenceProxy {
     }
 
     private void executeMerge() {
-        postAndRun(new Runnable() {
-            @Override
-            public void run() {
-                MtcCall confCall = getConferenceCall();
+        MtcCall confCall = getConferenceCall();
 
-                if (confCall == null) {
-                    return;
-                }
+        if (confCall == null) {
+            return;
+        }
 
-                MtcCall.merge(confCall, createUsersInfo());
+        MtcCall.merge(confCall, createUsersInfo());
 
-                for (ListenerWrapper lw : mListeners) {
-                    if (lw.mConferenceListener != null) {
-                        if (confCall.equals(mBackgroundCall)) {
-                            lw.mConferenceListener.onCallProxyMerge(
-                                    MtcCall.getConference(confCall),
-                                    MtcCall.getConference(mBackgroundCall),
-                                    MtcCall.getConference(mForegroundCall));
-                        } else {
-                            lw.mConferenceListener.onCallProxyMerge(
-                                    MtcCall.getConference(confCall),
-                                    MtcCall.getConference(mForegroundCall),
-                                    MtcCall.getConference(mBackgroundCall));
-                        }
-                    }
+        for (ListenerWrapper lw : mListeners) {
+            if (lw.mConferenceListener != null) {
+                if (confCall.equals(mBackgroundCall)) {
+                    lw.mConferenceListener.onCallProxyMerge(
+                            MtcCall.getConference(confCall),
+                            MtcCall.getConference(mBackgroundCall),
+                            MtcCall.getConference(mForegroundCall));
+                } else {
+                    lw.mConferenceListener.onCallProxyMerge(
+                            MtcCall.getConference(confCall),
+                            MtcCall.getConference(mForegroundCall),
+                            MtcCall.getConference(mBackgroundCall));
                 }
             }
-        });
+        }
     }
 
     private void notifyConferenceFailed() {
@@ -198,292 +193,227 @@ public class MergeProxy extends ConferenceProxy {
     /* Glare condition: operations for foreground call */
     private void notifySessionHoldReceived(final MtcCall call,
             final CallInfo callInfo, final MediaInfo mediaInfo, final SuppInfo suppInfo) {
-        postAndRun(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    for (ListenerWrapper lw : mListeners) {
-                        if (lw.mListener != null) {
-                            lw.mListener.onCallHoldReceived(
-                                    call, callInfo, mediaInfo, suppInfo);
-                        }
-                    }
-                } catch (Throwable t) {
-                    loge("notifySessionHoldReceived", t);
+        try {
+            for (ListenerWrapper lw : mListeners) {
+                if (lw.mListener != null) {
+                    lw.mListener.onCallHoldReceived(
+                            call, callInfo, mediaInfo, suppInfo);
                 }
             }
-        });
+        } catch (Throwable t) {
+            loge("notifySessionHoldReceived", t);
+        }
     }
 
     private void notifySessionResumeReceived(final MtcCall call,
             final CallInfo callInfo, final MediaInfo mediaInfo, final SuppInfo suppInfo) {
-        postAndRun(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    for (ListenerWrapper lw : mListeners) {
-                        if (lw.mListener != null) {
-                            lw.mListener.onCallResumeReceived(
-                                    call, callInfo, mediaInfo, suppInfo);
-                        }
-                    }
-                } catch (Throwable t) {
-                    loge("notifySessionResumeReceived", t);
+        try {
+            for (ListenerWrapper lw : mListeners) {
+                if (lw.mListener != null) {
+                    lw.mListener.onCallResumeReceived(
+                            call, callInfo, mediaInfo, suppInfo);
                 }
             }
-        });
+        } catch (Throwable t) {
+            loge("notifySessionResumeReceived", t);
+        }
     }
 
     private void notifySessionAutoUpdated(final MtcCall call,
             final CallInfo callInfo, final MediaInfo mediaInfo, final SuppInfo suppInfo) {
-        postAndRun(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    for (ListenerWrapper lw : mListeners) {
-                        if (lw.mListener != null) {
-                            lw.mListener.onCallAutoUpdated(
-                                    call, callInfo, mediaInfo, suppInfo);
-                        }
-                    }
-                } catch (Throwable t) {
-                    loge("notifySessionAutoUpdated", t);
+        try {
+            for (ListenerWrapper lw : mListeners) {
+                if (lw.mListener != null) {
+                    lw.mListener.onCallAutoUpdated(
+                            call, callInfo, mediaInfo, suppInfo);
                 }
             }
-        });
+        } catch (Throwable t) {
+            loge("notifySessionAutoUpdated", t);
+        }
     }
 
     private void notifySessionUpdateReceived(final MtcCall call,
             final CallInfo callInfo, final MediaInfo mediaInfo, final SuppInfo suppInfo) {
-        postAndRun(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    for (ListenerWrapper lw : mListeners) {
-                        if (lw.mListener != null) {
-                            lw.mListener.onCallUpdateReceived(
-                                    call, callInfo, mediaInfo, suppInfo);
-                        }
-                    }
-                } catch (Throwable t) {
-                    loge("notifySessionUpdateReceived", t);
+        try {
+            for (ListenerWrapper lw : mListeners) {
+                if (lw.mListener != null) {
+                    lw.mListener.onCallUpdateReceived(
+                            call, callInfo, mediaInfo, suppInfo);
                 }
             }
-        });
+        } catch (Throwable t) {
+            loge("notifySessionUpdateReceived", t);
+        }
     }
 
     private void notifySessionInfoUpdated(final MtcCall call, final int type,
             final String strValue, final int intValue, final boolean booleanValue) {
-        postAndRun(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    for (ListenerWrapper lw : mListeners) {
-                        if (lw.mListener != null) {
-                            lw.mListener.onCallInfoUpdated(
-                                    call, type, strValue, intValue, booleanValue);
-                        }
-                    }
-                } catch (Throwable t) {
-                    loge("notifySessionInfoUpdated", t);
+        try {
+            for (ListenerWrapper lw : mListeners) {
+                if (lw.mListener != null) {
+                    lw.mListener.onCallInfoUpdated(
+                            call, type, strValue, intValue, booleanValue);
                 }
             }
-        });
+        } catch (Throwable t) {
+            loge("notifySessionInfoUpdated", t);
+        }
     }
 
     private void notifySessionMerged(final CallInfo callInfo,
             final MediaInfo mediaInfo, final SuppInfo suppInfo, final UsersInfo usersInfo) {
-        postAndRun(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    MtcCall confCall = getConferenceCall();
+        try {
+            MtcCall confCall = getConferenceCall();
 
-                    if (confCall == null) {
-                        return;
+            if (confCall == null) {
+                return;
+            }
+
+            if (confCall.equals(mBackgroundCall)) {
+                for (ListenerWrapper lw : mListeners) {
+                    if (lw.mConferenceListener != null) {
+                        lw.mConferenceListener.onCallMerged(
+                                MtcCall.getConference(mForegroundCall),
+                                callInfo, mediaInfo, suppInfo, usersInfo);
                     }
+                }
 
-                    if (confCall.equals(mBackgroundCall)) {
-                        for (ListenerWrapper lw : mListeners) {
-                            if (lw.mConferenceListener != null) {
-                                lw.mConferenceListener.onCallMerged(
-                                        MtcCall.getConference(mForegroundCall),
-                                        callInfo, mediaInfo, suppInfo, usersInfo);
-                            }
-                        }
-
-                        for (ListenerWrapper lw : mListeners) {
-                            if (lw.mConferenceListener != null) {
-                                lw.mConferenceListener.onCallMerged(
-                                        MtcCall.getConference(mBackgroundCall),
-                                        callInfo, mediaInfo, suppInfo, usersInfo);
-                            }
-                        }
-                    } else {
-                        for (ListenerWrapper lw : mListeners) {
-                            if (lw.mConferenceListener != null) {
-                                lw.mConferenceListener.onCallMerged(
-                                        MtcCall.getConference(mBackgroundCall),
-                                        callInfo, mediaInfo, suppInfo, usersInfo);
-                            }
-                        }
-
-                        for (ListenerWrapper lw : mListeners) {
-                            if (lw.mConferenceListener != null) {
-                                lw.mConferenceListener.onCallMerged(
-                                        MtcCall.getConference(mForegroundCall),
-                                        callInfo, mediaInfo, suppInfo, usersInfo);
-                            }
-                        }
+                for (ListenerWrapper lw : mListeners) {
+                    if (lw.mConferenceListener != null) {
+                        lw.mConferenceListener.onCallMerged(
+                                MtcCall.getConference(mBackgroundCall),
+                                callInfo, mediaInfo, suppInfo, usersInfo);
                     }
-                } catch (Throwable t) {
-                    loge("notifySessionMerged", t);
+                }
+            } else {
+                for (ListenerWrapper lw : mListeners) {
+                    if (lw.mConferenceListener != null) {
+                        lw.mConferenceListener.onCallMerged(
+                                MtcCall.getConference(mBackgroundCall),
+                                callInfo, mediaInfo, suppInfo, usersInfo);
+                    }
+                }
+
+                for (ListenerWrapper lw : mListeners) {
+                    if (lw.mConferenceListener != null) {
+                        lw.mConferenceListener.onCallMerged(
+                                MtcCall.getConference(mForegroundCall),
+                                callInfo, mediaInfo, suppInfo, usersInfo);
+                    }
                 }
             }
-        });
+        } catch (Throwable t) {
+            loge("notifySessionMerged", t);
+        }
     }
 
     private void notifySessionMergeFailed(final CallReasonInfo callReasonInfo) {
-        postAndRun(new Runnable() {
-            @Override
-            public void run() {
-                MtcCall call1 = mBackgroundCall;
-                MtcCall call2 = mForegroundCall;
+        MtcCall call1 = mBackgroundCall;
+        MtcCall call2 = mForegroundCall;
 
-                if ((call1 != null) && call1.isConference()) {
-                    call1 = mForegroundCall;
-                    call2 = mBackgroundCall;
-                }
+        if ((call1 != null) && call1.isConference()) {
+            call1 = mForegroundCall;
+            call2 = mBackgroundCall;
+        }
 
-                try {
-                    for (ListenerWrapper lw : mListeners) {
-                        if (lw.mConferenceListener != null) {
-                            lw.mConferenceListener.onCallMergeFailed(
-                                    MtcCall.getConference(call1),
-                                    callReasonInfo);
-                        }
-                    }
-
-                    for (ListenerWrapper lw : mListeners) {
-                        if (lw.mConferenceListener != null) {
-                            lw.mConferenceListener.onCallMergeFailed(
-                                    MtcCall.getConference(call2),
-                                    callReasonInfo);
-                        }
-                    }
-                } catch (Throwable t) {
-                    loge("notifySessionMergeFailed", t);
+        try {
+            for (ListenerWrapper lw : mListeners) {
+                if (lw.mConferenceListener != null) {
+                    lw.mConferenceListener.onCallMergeFailed(
+                            MtcCall.getConference(call1),
+                            callReasonInfo);
                 }
             }
-        });
+
+            for (ListenerWrapper lw : mListeners) {
+                if (lw.mConferenceListener != null) {
+                    lw.mConferenceListener.onCallMergeFailed(
+                            MtcCall.getConference(call2),
+                            callReasonInfo);
+                }
+            }
+        } catch (Throwable t) {
+            loge("notifySessionMergeFailed", t);
+        }
     }
 
     private void notifySessionMergeStarted(final CallInfo callInfo,
             final MediaInfo mediaInfo, final SuppInfo suppInfo) {
-        postAndRun(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    for (ListenerWrapper lw : mListeners) {
-                        if (lw.mConferenceListener != null) {
-                            lw.mConferenceListener.onCallMergeStarted(
-                                    MtcCall.getConference(mForegroundCall),
-                                    MtcCall.getConference(getConferenceCall()),
-                                    callInfo, mediaInfo, suppInfo);
-                        }
-                    }
-                } catch (Throwable t) {
-                    loge("notifySessionMergeStarted", t);
+        try {
+            for (ListenerWrapper lw : mListeners) {
+                if (lw.mConferenceListener != null) {
+                    lw.mConferenceListener.onCallMergeStarted(
+                            MtcCall.getConference(mForegroundCall),
+                            MtcCall.getConference(getConferenceCall()),
+                            callInfo, mediaInfo, suppInfo);
                 }
             }
-        });
+        } catch (Throwable t) {
+            loge("notifySessionMergeStarted", t);
+        }
     }
 
     private void notifyAudioSessionOpened(MtcCall call) {
-        postAndRun(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    for (ListenerWrapper lw : mListeners) {
-                        if (lw.mListener != null) {
-                            lw.mListener.onAudioSessionOpened(call);
-                        }
-                    }
-                } catch (Throwable t) {
-                    loge("notifyAudioSessionOpened", t);
+        try {
+            for (ListenerWrapper lw : mListeners) {
+                if (lw.mListener != null) {
+                    lw.mListener.onAudioSessionOpened(call);
                 }
             }
-        });
+        } catch (Throwable t) {
+            loge("notifyAudioSessionOpened", t);
+        }
     }
 
     private void notifyCallQualityChanged(MtcCall call, CallQuality callQuality) {
-        postAndRun(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    for (ListenerWrapper lw : mListeners) {
-                        if (lw.mListener != null) {
-                            lw.mListener.onCallQualityChanged(call, callQuality);
-                        }
-                    }
-                } catch (Throwable t) {
-                    loge("notifyCallQualityChanged", t);
+        try {
+            for (ListenerWrapper lw : mListeners) {
+                if (lw.mListener != null) {
+                    lw.mListener.onCallQualityChanged(call, callQuality);
                 }
             }
-        });
+        } catch (Throwable t) {
+            loge("notifyCallQualityChanged", t);
+        }
     }
 
     private void notifyTriggerAnbrQueryReceived(MtcCall call, int mediaType, int direction,
             int bitsPerSecond) {
-        postAndRun(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    for (ListenerWrapper lw : mListeners) {
-                        if (lw.mListener != null) {
-                            lw.mListener.onTriggerAnbrQueryReceived(call, mediaType, direction,
-                                    bitsPerSecond);
-                        }
-                    }
-                } catch (Throwable t) {
-                    loge("notifyTriggerAnbrQueryReceived", t);
+        try {
+            for (ListenerWrapper lw : mListeners) {
+                if (lw.mListener != null) {
+                    lw.mListener.onTriggerAnbrQueryReceived(call, mediaType, direction,
+                            bitsPerSecond);
                 }
             }
-        });
+        } catch (Throwable t) {
+            loge("notifyTriggerAnbrQueryReceived", t);
+        }
     }
 
     private void notifyIncomingDtmfReceived(MtcCall call, int numDtmfDigit) {
-        postAndRun(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    for (ListenerWrapper lw : mListeners) {
-                        if (lw.mListener != null) {
-                            lw.mListener.onNotifyIncomingDtmfReceived(call, numDtmfDigit);
-                        }
-                    }
-                } catch (Throwable t) {
-                    loge("notifyIncomingDtmfReceived", t);
+        try {
+            for (ListenerWrapper lw : mListeners) {
+                if (lw.mListener != null) {
+                    lw.mListener.onNotifyIncomingDtmfReceived(call, numDtmfDigit);
                 }
             }
-        });
+        } catch (Throwable t) {
+            loge("notifyIncomingDtmfReceived", t);
+        }
     }
 
     private void notifyAudioSessionClosed(MtcCall call) {
-        postAndRun(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    for (ListenerWrapper lw : mListeners) {
-                        if (lw.mListener != null) {
-                            lw.mListener.onAudioSessionClosed(call);
-                        }
-                    }
-                } catch (Throwable t) {
-                    loge("notifyAudioSessionClosed", t);
+        try {
+            for (ListenerWrapper lw : mListeners) {
+                if (lw.mListener != null) {
+                    lw.mListener.onAudioSessionClosed(call);
                 }
             }
-        });
+        } catch (Throwable t) {
+            loge("notifyAudioSessionClosed", t);
+        }
     }
 
     @VisibleForTesting
