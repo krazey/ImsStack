@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 
+#include "private/ConfigurationManager.h"
 #include "private/SipConfig.h"
 
 #include "SipConfigProxy.h"
@@ -27,9 +28,9 @@ namespace android
 class SipConfigProxyTest : public ::testing::Test
 {
 protected:
-    virtual void SetUp() override {}
+    void SetUp() override { ConfigurationManager::GetInstance()->Initialize(); }
 
-    virtual void TearDown() override {}
+    void TearDown() override {}
 };
 
 TEST_F(SipConfigProxyTest, GetAndIsConfiguredMethods)
