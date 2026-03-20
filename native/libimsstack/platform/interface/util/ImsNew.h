@@ -36,6 +36,8 @@ GLOBAL void operator delete[](
         IN void* pMem, IN const IMS_CHAR* pszFile, IN IMS_UINT16 nLine) IMS_NO_EXCEPTION;
 GLOBAL void operator delete(IN void* pMem) IMS_NO_EXCEPTION;
 GLOBAL void operator delete[](IN void* pMem) IMS_NO_EXCEPTION;
+GLOBAL void operator delete(IN void* pMem, IN IMS_SIZE_T nSize) IMS_NO_EXCEPTION;
+GLOBAL void operator delete[](IN void* pMem, IN IMS_SIZE_T nSize) IMS_NO_EXCEPTION;
 
 #define DBG_NEW     new (__IMS_FILE__, __IMS_LINE__)
 #define new         DBG_NEW
@@ -49,6 +51,8 @@ GLOBAL void* operator new(IN IMS_SIZE_T nSize);
 GLOBAL void* operator new[](IN IMS_SIZE_T nSize);
 GLOBAL void operator delete(IN void* pMem) IMS_NO_EXCEPTION;
 GLOBAL void operator delete[](IN void* pMem) IMS_NO_EXCEPTION;
+GLOBAL void operator delete(IN void* pMem, IN IMS_SIZE_T nSize) IMS_NO_EXCEPTION;
+GLOBAL void operator delete[](IN void* pMem, IN IMS_SIZE_T nSize) IMS_NO_EXCEPTION;
 
 #define new new
 #define delete delete
