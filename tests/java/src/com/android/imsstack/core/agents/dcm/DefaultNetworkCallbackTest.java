@@ -16,7 +16,6 @@
 
 package com.android.imsstack.core.agents.dcm;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -24,7 +23,6 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.TelephonyNetworkSpecifier;
 import android.os.Handler;
-import android.os.Message;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -72,123 +70,110 @@ public class DefaultNetworkCallbackTest extends ImsStackTest {
     }
 
     @Test
-    public void testCallbackLostNetwork() throws Exception {
-        // onLost callback when other SIM Cellular network is not used
-        mDefaultNetworkCallback.onLost(mMockNetwork);
-        processAllMessages();
-        assertFalse(mDummyHandler.isOtherSimCellularAvailable());
-        assertEquals(0, mDummyHandler.getInvokeCount());
+    public void testLostNetworkWhileCrossSimIsNotUsed() throws Exception {
+        mDefaultNetworkCallback.mIsOtherSimCellularAvailable = false;
 
-        // callback that other SIM Cellular network is available
-        onCapabilitiesChangedForOtherSubIdCellular();
-        assertTrue(mDummyHandler.isOtherSimCellularAvailable());
-        assertEquals(1, mDummyHandler.getInvokeCount());
-
-        // calback that network is not available when other SIM Cellular network is used
         mDefaultNetworkCallback.onLost(mMockNetwork);
-        processAllMessages();
-        assertFalse(mDummyHandler.isOtherSimCellularAvailable());
-        assertEquals(2, mDummyHandler.getInvokeCount());
+
+        assertFalse(mDefaultNetworkCallback.mIsOtherSimCellularAvailable);
+        assertFalse(mDummyHandler.hasMessages(Apn.EVENT_DEFAULT_NETWORK_STATUS_CHANGED));
     }
 
     @Test
-    public void testCallbackForWifi() throws Exception {
-        final NetworkCapabilities ncNotAvailable = new NetworkCapabilities.Builder()
+    public void testLostNetworkWhileCrossSimIsUsed() throws Exception {
+        mDefaultNetworkCallback.mIsOtherSimCellularAvailable = true;
+
+        mDefaultNetworkCallback.onLost(mMockNetwork);
+
+        assertFalse(mDefaultNetworkCallback.mIsOtherSimCellularAvailable);
+        assertTrue(mDummyHandler.hasMessages(Apn.EVENT_DEFAULT_NETWORK_STATUS_CHANGED));
+    }
+
+    @Test
+    public void testCapabilitiesChangedForWifiWhileCrossSimIsNotUsed() throws Exception {
+        final NetworkCapabilities nc = new NetworkCapabilities.Builder()
                 .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
                 .setNetworkSpecifier(new TelephonyNetworkSpecifier(mSubId + 1))
                 .build();
+        mDefaultNetworkCallback.mIsOtherSimCellularAvailable = false;
 
-        // callback for WiFi network when other SIM Cellular is not used
-        mDefaultNetworkCallback.onCapabilitiesChanged(mMockNetwork, ncNotAvailable);
-        processAllMessages();
-        assertFalse(mDummyHandler.isOtherSimCellularAvailable());
-        assertEquals(0, mDummyHandler.getInvokeCount());
+        mDefaultNetworkCallback.onCapabilitiesChanged(mMockNetwork, nc);
 
-        // callback that other SIM Cellular network is available
-        onCapabilitiesChangedForOtherSubIdCellular();
-        assertTrue(mDummyHandler.isOtherSimCellularAvailable());
-        assertEquals(1, mDummyHandler.getInvokeCount());
-
-        // callback that WiFi network is available
-        mDefaultNetworkCallback.onCapabilitiesChanged(mMockNetwork, ncNotAvailable);
-        processAllMessages();
-        assertFalse(mDummyHandler.isOtherSimCellularAvailable());
-        assertEquals(2, mDummyHandler.getInvokeCount());
+        assertFalse(mDefaultNetworkCallback.mIsOtherSimCellularAvailable);
+        assertFalse(mDummyHandler.hasMessages(Apn.EVENT_DEFAULT_NETWORK_STATUS_CHANGED));
     }
 
     @Test
-    public void testCallbackWithoutSubIdInfo() throws Exception {
-        final NetworkCapabilities ncNotAvailable = new NetworkCapabilities.Builder()
-                .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+    public void testCapabilitiesChangedForWifiWhileCrossSimIsUsed() throws Exception {
+        final NetworkCapabilities nc = new NetworkCapabilities.Builder()
+                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                .setNetworkSpecifier(new TelephonyNetworkSpecifier(mSubId + 1))
                 .build();
+        mDefaultNetworkCallback.mIsOtherSimCellularAvailable = true;
 
-        // callback that other SIM Cellular network is available
-        onCapabilitiesChangedForOtherSubIdCellular();
-        assertTrue(mDummyHandler.isOtherSimCellularAvailable());
-        assertEquals(1, mDummyHandler.getInvokeCount());
+        mDefaultNetworkCallback.onCapabilitiesChanged(mMockNetwork, nc);
 
-        // callback without Subscription ID information
-        mDefaultNetworkCallback.onCapabilitiesChanged(mMockNetwork, ncNotAvailable);
-        processAllMessages();
-        assertFalse(mDummyHandler.isOtherSimCellularAvailable());
-        assertEquals(2, mDummyHandler.getInvokeCount());
+        assertFalse(mDefaultNetworkCallback.mIsOtherSimCellularAvailable);
+        assertTrue(mDummyHandler.hasMessages(Apn.EVENT_DEFAULT_NETWORK_STATUS_CHANGED));
     }
 
     @Test
-    public void testCallbackWithOwnSubId() throws Exception {
-        final NetworkCapabilities ncNotAvailable = new NetworkCapabilities.Builder()
-                .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-                .setNetworkSpecifier(new TelephonyNetworkSpecifier(mSubId))
-                .build();
-
-        // callback that other SIM Cellular network is available
-        onCapabilitiesChangedForOtherSubIdCellular();
-        assertTrue(mDummyHandler.isOtherSimCellularAvailable());
-        assertEquals(1, mDummyHandler.getInvokeCount());
-
-        // callback for own Subscription ID
-        mDefaultNetworkCallback.onCapabilitiesChanged(mMockNetwork, ncNotAvailable);
-        processAllMessages();
-        assertFalse(mDummyHandler.isOtherSimCellularAvailable());
-        assertEquals(2, mDummyHandler.getInvokeCount());
-    }
-
-    private void onCapabilitiesChangedForOtherSubIdCellular() {
-        final NetworkCapabilities ncAvailable = new NetworkCapabilities.Builder()
+    public void testCapabilitiesChangedForCellularWhileCrossSimIsNotUsed() throws Exception {
+        final NetworkCapabilities nc = new NetworkCapabilities.Builder()
                 .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
                 .setNetworkSpecifier(new TelephonyNetworkSpecifier(mSubId + 1))
                 .build();
+        mDefaultNetworkCallback.mIsOtherSimCellularAvailable = false;
 
-        // callback that other SIM Cellular network is available
-        mDefaultNetworkCallback.onCapabilitiesChanged(mMockNetwork, ncAvailable);
-        processAllMessages();
+        mDefaultNetworkCallback.onCapabilitiesChanged(mMockNetwork, nc);
+
+        assertTrue(mDefaultNetworkCallback.mIsOtherSimCellularAvailable);
+        assertTrue(mDummyHandler.hasMessages(Apn.EVENT_DEFAULT_NETWORK_STATUS_CHANGED));
+    }
+
+    @Test
+    public void testCapabilitiesChangedForCellularWhileCrossSimIsUsed() throws Exception {
+        final NetworkCapabilities nc = new NetworkCapabilities.Builder()
+                .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+                .setNetworkSpecifier(new TelephonyNetworkSpecifier(mSubId + 1))
+                .build();
+        mDefaultNetworkCallback.mIsOtherSimCellularAvailable = true;
+
+        mDefaultNetworkCallback.onCapabilitiesChanged(mMockNetwork, nc);
+
+        assertTrue(mDefaultNetworkCallback.mIsOtherSimCellularAvailable);
+        assertFalse(mDummyHandler.hasMessages(Apn.EVENT_DEFAULT_NETWORK_STATUS_CHANGED));
+    }
+
+    @Test
+    public void testCapabilitiesChangedForCellularWithoutSubId() throws Exception {
+        final NetworkCapabilities nc = new NetworkCapabilities.Builder()
+                .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+                .build();
+        mDefaultNetworkCallback.mIsOtherSimCellularAvailable = false;
+
+        mDefaultNetworkCallback.onCapabilitiesChanged(mMockNetwork, nc);
+
+        assertFalse(mDefaultNetworkCallback.mIsOtherSimCellularAvailable);
+        assertFalse(mDummyHandler.hasMessages(Apn.EVENT_DEFAULT_NETWORK_STATUS_CHANGED));
+    }
+
+    @Test
+    public void testCapabilitiesChangedForCellularWithSameSubId() throws Exception {
+        final NetworkCapabilities nc = new NetworkCapabilities.Builder()
+                .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+                .setNetworkSpecifier(new TelephonyNetworkSpecifier(mSubId))
+                .build();
+        mDefaultNetworkCallback.mIsOtherSimCellularAvailable = false;
+
+        mDefaultNetworkCallback.onCapabilitiesChanged(mMockNetwork, nc);
+
+        assertFalse(mDefaultNetworkCallback.mIsOtherSimCellularAvailable);
+        assertFalse(mDummyHandler.hasMessages(Apn.EVENT_DEFAULT_NETWORK_STATUS_CHANGED));
     }
 
     private static class DummyHandler extends Handler {
-        private boolean mIsOtherSimCellularAvailable = false;
-        private int mInvokeCount = 0;
-
         DummyHandler() {
-        }
-
-        public void handleMessage(Message msg) {
-            switch(msg.what) {
-                case Apn.EVENT_DEFAULT_NETWORK_STATUS_CHANGED:
-                    boolean isCellularAvailable = (boolean) msg.obj;
-                    mIsOtherSimCellularAvailable = isCellularAvailable;
-                    mInvokeCount++;
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        public boolean isOtherSimCellularAvailable() {
-            return mIsOtherSimCellularAvailable;
-        }
-
-        public int getInvokeCount() {
-            return mInvokeCount;
         }
     }
 }
