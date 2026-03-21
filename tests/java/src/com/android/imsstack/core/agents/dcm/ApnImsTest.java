@@ -196,12 +196,42 @@ public class ApnImsTest {
     }
 
     @Test
+    public void doNotNotifyCrossSimStatusWhileCapabilityIsDisabled() throws Exception {
+        mApnIms.addListener(mMockApnListener);
+        mApnIms.mIsCellularDefaultNetwork = true;
+        mApnIms.mIsConnectedOverCrossSim = false;
+        when(mMockIDcNetWatcher.isCrossSimCapabilityEnabled()).thenReturn(false);
+
+        mApnIms.updateCrossSimStatus(
+                TelephonyManager.DATA_CONNECTED, TelephonyManager.NETWORK_TYPE_IWLAN);
+
+        verify(mMockApnListener, never()).onCrossSimStatusChanged(anyBoolean(), anyBoolean());
+        mApnIms.removeListener(mMockApnListener);
+    }
+
+    @Test
+    public void doNotNotifyCrossSimStatusWhileStateIsNotConnected() throws Exception {
+        mApnIms.addListener(mMockApnListener);
+        mApnIms.mIsCellularDefaultNetwork = true;
+        mApnIms.mIsConnectedOverCrossSim = false;
+        when(mMockIDcNetWatcher.isCrossSimCapabilityEnabled()).thenReturn(true);
+
+        mApnIms.updateCrossSimStatus(
+                TelephonyManager.DATA_SUSPENDED, TelephonyManager.NETWORK_TYPE_IWLAN);
+
+        verify(mMockApnListener, never()).onCrossSimStatusChanged(anyBoolean(), anyBoolean());
+        mApnIms.removeListener(mMockApnListener);
+    }
+
+    @Test
     public void doNotNotifyCrossSimStatusWhenNotChanged() throws Exception {
         mApnIms.addListener(mMockApnListener);
         mApnIms.mIsCellularDefaultNetwork = false;
         mApnIms.mIsConnectedOverCrossSim = false;
+        when(mMockIDcNetWatcher.isCrossSimCapabilityEnabled()).thenReturn(true);
 
-        mApnIms.updateCrossSimStatus(TelephonyManager.NETWORK_TYPE_IWLAN);
+        mApnIms.updateCrossSimStatus(
+                TelephonyManager.DATA_CONNECTED, TelephonyManager.NETWORK_TYPE_IWLAN);
 
         verify(mMockApnListener, never()).onCrossSimStatusChanged(anyBoolean(), anyBoolean());
         mApnIms.removeListener(mMockApnListener);
@@ -212,8 +242,10 @@ public class ApnImsTest {
         mApnIms.addListener(mMockApnListener);
         mApnIms.mIsCellularDefaultNetwork = true;
         mApnIms.mIsConnectedOverCrossSim = true;
+        when(mMockIDcNetWatcher.isCrossSimCapabilityEnabled()).thenReturn(true);
 
-        mApnIms.updateCrossSimStatus(TelephonyManager.NETWORK_TYPE_LTE);
+        mApnIms.updateCrossSimStatus(
+                TelephonyManager.DATA_CONNECTED, TelephonyManager.NETWORK_TYPE_LTE);
 
         verify(mMockApnListener).onCrossSimStatusChanged(false, false);
         mApnIms.removeListener(mMockApnListener);
@@ -513,9 +545,11 @@ public class ApnImsTest {
     }
 
     @Test
-    public void handleMsgForDefaultNetworkStatusChange() throws Exception {
+    public void updateCrossSimStatusUponDefaultNetworkStatusChange() throws Exception {
         mApnIms.addListener(mMockApnListener);
         mApnIms.mNetworkType = TelephonyManager.NETWORK_TYPE_IWLAN;
+        mApnIms.mPreciseDcState = TelephonyManager.DATA_CONNECTED;
+        when(mMockIDcNetWatcher.isCrossSimCapabilityEnabled()).thenReturn(true);
 
         Message msg = Message.obtain();
         msg.what = Apn.EVENT_DEFAULT_NETWORK_STATUS_CHANGED;

@@ -18,6 +18,7 @@ package com.android.imsstack.core.agents.dcm;
 
 import android.content.Context;
 import android.os.Message;
+import android.telephony.Annotation.DataState;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.TelephonyManager;
 
@@ -146,16 +147,24 @@ public final class ApnIms extends Apn {
 
     /**
      * If the access network status is changed, update CrossSim connection status and notify it.
+     * @param dataState The current precise data connection state
      * @param networkType The type of access network that carries this data connection
      */
     @Override
-    protected void updateCrossSimStatus(@NetworkType int networkType) {
-        boolean isNetworkTypeIwlan = (networkType == TelephonyManager.NETWORK_TYPE_IWLAN);
-        boolean isCrossSimUsed = (mIsCellularDefaultNetwork && isNetworkTypeIwlan);
+    protected void updateCrossSimStatus(@DataState int dataState, @NetworkType int networkType) {
+        boolean isCrossSimActive = mDcNetWatcher == null
+                || mDcNetWatcher.isCrossSimCapabilityEnabled() || mIsConnectedOverCrossSim;
+        if (!isCrossSimActive) {
+            ImsLog.d(mSlotId, "IMS service capabilities are disabled for CrossSim");
+            return;
+        }
 
-        ImsLog.i(mSlotId, "Update CrossSim status from " + mIsConnectedOverCrossSim
-                + " to " + isCrossSimUsed);
+        boolean isNetworkTypeIwlan = (networkType == TelephonyManager.NETWORK_TYPE_IWLAN);
+        boolean isConnected = (dataState == TelephonyManager.DATA_CONNECTED);
+        boolean isCrossSimUsed = (mIsCellularDefaultNetwork && isNetworkTypeIwlan && isConnected);
         if (mIsConnectedOverCrossSim != isCrossSimUsed) {
+            ImsLog.i(mSlotId, "Update CrossSim status from " + mIsConnectedOverCrossSim
+                    + " to " + isCrossSimUsed);
             mIsConnectedOverCrossSim = isCrossSimUsed;
             for (Listener l : mListeners) {
                 l.onCrossSimStatusChanged(mIsConnectedOverCrossSim, isNetworkTypeIwlan);
@@ -335,7 +344,7 @@ public final class ApnIms extends Apn {
             boolean isCellularAvailable = (boolean) msg.obj;
             if (mIsCellularDefaultNetwork != isCellularAvailable) {
                 mIsCellularDefaultNetwork = isCellularAvailable;
-                updateCrossSimStatus(mNetworkType);
+                updateCrossSimStatus(mPreciseDcState, mNetworkType);
             }
         }
     }

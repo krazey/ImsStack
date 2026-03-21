@@ -17,6 +17,8 @@
 package com.android.imsstack.core.agents.dcm;
 
 import static android.provider.Settings.Global.AIRPLANE_MODE_ON;
+import static android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE;
+import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TECH_CROSS_SIM;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -32,6 +34,7 @@ import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.telephony.VopsSupportInfo;
+import android.util.Pair;
 
 import androidx.annotation.NonNull;
 
@@ -107,6 +110,7 @@ public class DcNetWatcher implements IDcNetWatcher {
     // data network roaming state that was not overridden by any carrier config
     private boolean mDataNetworkRoaming = false;
     private boolean mAirplaneMode = false;
+    private boolean mHasCrossSimCapability = false;
 
     // IMS voice over PS Session Supported
     private int mImsVopsState = ImsEventDef.IMS_VOICE_OVER_PS_INVALID;
@@ -345,6 +349,11 @@ public class DcNetWatcher implements IDcNetWatcher {
     }
 
     @Override
+    public boolean isCrossSimCapabilityEnabled() {
+        return mHasCrossSimCapability;
+    }
+
+    @Override
     public void addListener(Listener listener) {
         mListeners.add(listener);
     }
@@ -365,6 +374,17 @@ public class DcNetWatcher implements IDcNetWatcher {
     public void notifyPdnConnectionFailed(EApnType apnType, int smCause) {
         for (Listener l : mListeners) {
             l.onPdnConnectionFailed(apnType, smCause);
+        }
+    }
+
+    @Override
+    public void notifyImsCapabilities(List<Pair<Integer, Integer>> capabilities) {
+        boolean crossSimCapability = capabilities.stream()
+                .anyMatch(p -> p.first.equals(REGISTRATION_TECH_CROSS_SIM)
+                        && p.second.equals(CAPABILITY_TYPE_VOICE));
+        if (mHasCrossSimCapability != crossSimCapability) {
+            mHasCrossSimCapability = crossSimCapability;
+            ImsLog.d(mSlotId, "CrossSim capability enabled: " + mHasCrossSimCapability);
         }
     }
 

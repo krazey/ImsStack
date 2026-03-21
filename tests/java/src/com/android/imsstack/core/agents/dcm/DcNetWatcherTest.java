@@ -17,6 +17,9 @@
 package com.android.imsstack.core.agents.dcm;
 
 import static android.provider.Settings.Global.AIRPLANE_MODE_ON;
+import static android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE;
+import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TECH_CROSS_SIM;
+import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TECH_LTE;
 
 import static com.android.imsstack.base.TestAppContext.SLOT0;
 import static com.android.imsstack.base.TestAppContext.SUB_ID_1;
@@ -53,6 +56,7 @@ import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.Pair;
 
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.base.ContentProviderProxy.SettingsProxy;
@@ -80,6 +84,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -194,6 +199,26 @@ public class DcNetWatcherTest extends ImsStackTest {
         mDcNetWatcher.notifyPdnConnectionFailed(apnType, cause);
 
         verify(mNetWatherListener).onPdnConnectionFailed(apnType, cause);
+    }
+
+    @Test
+    public void testNotifyImsCapabilities_voiceIsEnabledForCrossSim() throws Exception {
+        List<Pair<Integer, Integer>> capabilities = new ArrayList<>();
+        capabilities.add(new Pair<>(REGISTRATION_TECH_CROSS_SIM, CAPABILITY_TYPE_VOICE));
+
+        mDcNetWatcher.notifyImsCapabilities(capabilities);
+
+        assertTrue(mDcNetWatcher.isCrossSimCapabilityEnabled());
+    }
+
+    @Test
+    public void testNotifyImsCapabilities_voiceIsDisabledForCrossSim() throws Exception {
+        List<Pair<Integer, Integer>> capabilities = new ArrayList<>();
+        capabilities.add(new Pair<>(REGISTRATION_TECH_LTE, CAPABILITY_TYPE_VOICE));
+
+        mDcNetWatcher.notifyImsCapabilities(capabilities);
+
+        assertFalse(mDcNetWatcher.isCrossSimCapabilityEnabled());
     }
 
     @Test

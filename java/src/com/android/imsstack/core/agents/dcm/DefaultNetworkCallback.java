@@ -32,10 +32,10 @@ import com.android.imsstack.util.ImsLog;
  * This is NetworkCallback to receive notifications about changes of default network
  */
 public class DefaultNetworkCallback extends ConnectivityManager.NetworkCallback {
+    protected static final int DEFAULT_NETWORK_CHANGE_DELAY_MS = 500;
     protected final int mSlotId;
     protected final Handler mHandler;
     protected boolean mIsOtherSimCellularAvailable = false;
-
     DefaultNetworkCallback(int slotId, @NonNull Handler target) {
         mSlotId = slotId;
         mHandler = target;
@@ -45,9 +45,7 @@ public class DefaultNetworkCallback extends ConnectivityManager.NetworkCallback 
     public void onLost(Network network) {
         ImsLog.i(mSlotId, "DefaultNetworkCallback::onLost=" + network);
         if (mIsOtherSimCellularAvailable) {
-            mIsOtherSimCellularAvailable = false;
-            Message.obtain(mHandler, Apn.EVENT_DEFAULT_NETWORK_STATUS_CHANGED,
-                    mIsOtherSimCellularAvailable).sendToTarget();
+            sendDefaultNetworkStatusChangedMessage(false);
         }
     }
 
@@ -59,10 +57,16 @@ public class DefaultNetworkCallback extends ConnectivityManager.NetworkCallback 
         boolean isAvailable = isOtherSimCellularAvailable(networkCapabilities);
 
         if (mIsOtherSimCellularAvailable != isAvailable) {
-            mIsOtherSimCellularAvailable = isAvailable;
-            Message.obtain(mHandler, Apn.EVENT_DEFAULT_NETWORK_STATUS_CHANGED,
-                    mIsOtherSimCellularAvailable).sendToTarget();
+            sendDefaultNetworkStatusChangedMessage(isAvailable);
         }
+    }
+
+    protected void sendDefaultNetworkStatusChangedMessage(boolean isAvailable) {
+        mIsOtherSimCellularAvailable = isAvailable;
+        mHandler.removeMessages(Apn.EVENT_DEFAULT_NETWORK_STATUS_CHANGED);
+        Message msg = mHandler.obtainMessage(Apn.EVENT_DEFAULT_NETWORK_STATUS_CHANGED, isAvailable);
+        mHandler.sendMessageDelayed(msg, DEFAULT_NETWORK_CHANGE_DELAY_MS);
+        ImsLog.i(mSlotId, "sendDefaultNetworkStatusChangedMessage::isAvailable=" + isAvailable);
     }
 
     protected boolean isOtherSimCellularAvailable(NetworkCapabilities networkCapabilities) {

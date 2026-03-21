@@ -18,6 +18,9 @@ package com.android.imsstack.core.agents.dcmif;
 
 import android.telephony.AccessNetworkConstants;
 import android.telephony.Annotation.NetworkType;
+import android.util.Pair;
+
+import java.util.List;
 
 /**
  * this class is the interface about data connection watcher
@@ -128,6 +131,11 @@ public interface IDcNetWatcher extends IDc {
      * If {@link IDcSettings#isVopsIgnored} is true it always returns VoPS is supported.
      */
     boolean isVopsSupported();
+
+    /**
+     * Returns whether Voice capability is enabled for TECH_CROSS_SIM.
+     */
+    boolean isCrossSimCapabilityEnabled();
 
     /**
      * Returns whether the current network type belongs to the 3G category.
@@ -245,4 +253,9 @@ public interface IDcNetWatcher extends IDc {
      * Notifies data connection attempt is failed with the cause
      */
     void notifyPdnConnectionFailed(EApnType apnType, int smCause);
+
+    /**
+     * Notifies updated IMS capabilities.
+     */
+    void notifyImsCapabilities(List<Pair<Integer, Integer>> capabilities);
 }

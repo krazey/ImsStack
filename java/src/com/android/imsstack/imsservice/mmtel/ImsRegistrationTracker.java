@@ -322,6 +322,11 @@ public class ImsRegistrationTracker {
         } else {
             mRegTracker.changeCapabilities(new CapabilityPairs());
         }
+
+        IDcNetWatcher dcnw = getDcNetWatcher(mContext.getSlotId());
+        if (dcnw != null) {
+            dcnw.notifyImsCapabilities(mCapabilities);
+        }
     }
 
     /**
