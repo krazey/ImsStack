@@ -374,7 +374,6 @@ void UceApp::ImsAos_Disconnected(IN IMS_UINT32 nReason, IN IMS_SINT32 /* nDataFa
     IUceJniThread* piJniUceThread = GetJniThread();
     if (piJniUceThread == IMS_NULL)
     {
-        IMS_TRACE_E(0, "ImsAos_Disconnected : IUceJniThread is null", 0, 0, 0);
         return;
     }
     piJniUceThread->NotifyImsDeregistered();
@@ -420,7 +419,6 @@ void UceApp::ImsAosMonitor_Connected(IN IMS_UINT32 nServices, IN IMS_UINT32 nIpc
     IUceJniThread* piJniUceThread = GetJniThread();
     if (piJniUceThread == IMS_NULL)
     {
-        IMS_TRACE_E(0, "ImsAosMonitor_Connected : IUceJniThread is null", 0, 0, 0);
         m_eAoSStatus = AOS_CONNECTED;
         return;
     }
@@ -514,7 +512,6 @@ IMS_BOOL UceApp::ImsRegistrationCheck()
     IUceJniThread* piJniUceThread = GetJniThread();
     if (piJniUceThread == IMS_NULL)
     {
-        IMS_TRACE_E(0, "ImsRegistrationCheck : IUceJniThread is null", 0, 0, 0);
         return IMS_FALSE;
     }
     if (m_eAoSStatus != AOS_CONNECTED)
@@ -643,7 +640,6 @@ void UceApp::NotifyRATChanged()
     IUceJniThread* piJniUceThread = GetJniThread();
     if (piJniUceThread == IMS_NULL)
     {
-        IMS_TRACE_E(0, "NotifyRATChanged : IUceJniThread is null", 0, 0, 0);
         return;
     }
     piJniUceThread->NotifyNetworkChanged(nNetworkType);
