@@ -76,6 +76,7 @@ public:
             bSupportVerstatForReg(IMS_FALSE),
             bSupportVideoForEmergencyReg(IMS_FALSE),
             bUpdateOngoingRegRetryTimerOnImsEstTimerExpiry(IMS_TRUE),
+            bUseLastAvailablePcscfOnCall(IMS_FALSE),
             bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType(IMS_FALSE),
             bUseRegInfoContactWithoutUriCheck(IMS_FALSE),
             bUseRetryRuleForEReg(IMS_FALSE),
@@ -198,6 +199,7 @@ public:
     IMS_BOOL bSupportVerstatForReg;
     IMS_BOOL bSupportVideoForEmergencyReg;
     IMS_BOOL bUpdateOngoingRegRetryTimerOnImsEstTimerExpiry;
+    IMS_BOOL bUseLastAvailablePcscfOnCall;
     IMS_BOOL bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType;
     IMS_BOOL bUseRegInfoContactWithoutUriCheck;
     IMS_BOOL bUseRetryRuleForEReg;

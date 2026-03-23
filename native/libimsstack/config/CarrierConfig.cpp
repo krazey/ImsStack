@@ -306,6 +306,8 @@ const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORT_VERSTAT_FOR_REG_BOOL[] =
 const IMS_CHAR
         CarrierConfig::Ims::KEY_UPDATE_ONGOING_REG_RETRY_TIMER_ON_IMS_EST_TIMER_EXPIRY_BOOL[] =
                 KEY_IMS_PREFIX "update_ongoing_reg_retry_timer_on_ims_est_timer_expiry_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_USE_LAST_AVAILABLE_PCSCF_ON_CALL_BOOL[] =
+        KEY_IMS_PREFIX "use_last_available_pcscf_on_call_bool";
 const IMS_CHAR
         CarrierConfig::Ims::KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL[] =
                 KEY_IMS_PREFIX "use_rcs_telephony_feature_tag_as_available_voice_call_type_bool";

@@ -601,6 +601,22 @@ public:
     virtual IMS_BOOL IsUpdateOngoingRegRetryTimerOnImsEstTimerExpiry() const = 0;
 
     /**
+     * @brief Flag indicating whether to retry the current P-CSCF if no other P-CSCFs are available
+     *        in the list when a call enabler requests registration with the next P-CSCF.
+     *
+     *        If  {@code true}, the UE follows these rules:
+     *        1. If only one P-CSCF is configured, it retries the current P-CSCF.
+     *        2. If multiple P-CSCFs exist and the current one is not the last, it switches to
+     *           the next P-CSCF.
+     *        3. If multiple P-CSCFs exist and the current one is the last in the list, it retries
+     *           the current P-CSCF instead of marking it invalid.
+     *
+     * @return IMS_BOOL Return whether to use last available pcscf during the call.
+     * @see {@code ims.use_last_available_pcscf_on_call_bool}
+     */
+    virtual IMS_BOOL IsUseLastAvailablePcscfOnCall() const = 0;
+
+    /**
      * @brief Flag specifying if g.gsma.rcs.telephony feature tag is used
      *        to indicate available voice call type ("cs", "volte" or "cs,volte").
      *        Example) g.gsma.rcs.telephony = "cs,volte"
