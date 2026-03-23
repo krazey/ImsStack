@@ -42,6 +42,24 @@ public class SmsTPdu {
     private static final int IEI_CONCATENATED_SMS_8BIT_LENGTH = 3;
     private static final int IEI_CONCATENATED_SMS_16BIT_LENGTH = 4;
 
+    // TP-PID values
+    private static final int TP_PID_USIM_DATA_DOWNLOAD = 0x7F;
+    private static final int TP_PID_ANSI_136_R_DATA = 0x7C;
+
+    // TP-DCS Constants
+    private static final int TP_DCS_CODING_GROUP_GENERAL_MASK = 0x80;
+    private static final int TP_DCS_MESSAGE_CLASS_PRESENT_MASK = 0x10;
+    private static final int TP_DCS_MESSAGE_CLASS_MASK = 0x03;
+    private static final int TP_DCS_MESSAGE_CLASS_2 = 0x02;
+    private static final int TP_DCS_CODING_GROUP_MASK = 0xF0;
+    private static final int TP_DCS_CODING_GROUP_DATA_CLASS = 0xF0;
+
+    /** TP-Parameter-Indicator (TP-PI) flags. See TS 23.040 9.2.3.27 */
+    public static final int TP_PI_NONE = 0x00;
+    public static final int TP_PI_PID_PRESENT = 0x01;
+    public static final int TP_PI_DCS_PRESENT = 0x02;
+    public static final int TP_PI_UDL_PRESENT = 0x04;
+
     private int mMessageTypeIndicator = -1;
     private int mReplyPath;
     private int mMessageRef;
@@ -157,7 +175,7 @@ public class SmsTPdu {
         }
 
         // TP-PID (Optional)
-        if ((mParameterIndicator & 0x01) != 0) {
+        if ((mParameterIndicator & TP_PI_PID_PRESENT) != 0) {
             if (!parser.hasMoreData()) {
                 return;
             }
@@ -165,7 +183,7 @@ public class SmsTPdu {
         }
 
         // TP-DCS (Optional)
-        if ((mParameterIndicator & 0x02) != 0) {
+        if ((mParameterIndicator & TP_PI_DCS_PRESENT) != 0) {
             if (!parser.hasMoreData()) {
                 return;
             }
@@ -173,7 +191,7 @@ public class SmsTPdu {
         }
 
         // TP-UDL & TP-UD (Optional)
-        if ((mParameterIndicator & 0x04) != 0) {
+        if ((mParameterIndicator & TP_PI_UDL_PRESENT) != 0) {
             if (!parser.hasMoreData()) {
                 return;
             }
@@ -276,8 +294,36 @@ public class SmsTPdu {
         parseOptionalParameters(parser);
     }
 
+    public int getProtocolIdentifier() {
+        return mProtocolIdentifier;
+    }
+
+    public int getDataCodingScheme() {
+        return mDataCodingScheme;
+    }
+
     public String getDataCodingSchemeHex() {
         return String.format("0x%02X", mDataCodingScheme);
+    }
+
+    /**
+     * Checks if the TPDU is a USIM Data Download.
+     * @return true if it is USIM Data Download, false otherwise
+     */
+    public boolean isUsimDataDownload() {
+        int pid = mProtocolIdentifier;
+        int dcs = mDataCodingScheme;
+        boolean isClass2 = false;
+
+        if ((dcs & TP_DCS_CODING_GROUP_GENERAL_MASK) == 0) {
+            if ((dcs & TP_DCS_MESSAGE_CLASS_PRESENT_MASK) != 0) {
+                isClass2 = ((dcs & TP_DCS_MESSAGE_CLASS_MASK) == TP_DCS_MESSAGE_CLASS_2);
+            }
+        } else if ((dcs & TP_DCS_CODING_GROUP_MASK) == TP_DCS_CODING_GROUP_DATA_CLASS) {
+            isClass2 = ((dcs & TP_DCS_MESSAGE_CLASS_MASK) == TP_DCS_MESSAGE_CLASS_2);
+        }
+
+        return isClass2 && (pid == TP_PID_USIM_DATA_DOWNLOAD || pid == TP_PID_ANSI_136_R_DATA);
     }
 
     // --- PduParser Inner Class ---
@@ -548,13 +594,13 @@ public class SmsTPdu {
     private void appendOptionalParamsToLog() {
         if (mParameterIndicator != -1) {
             logd("  TP-PI (Parameter Indicator): " + String.format("0x%02X", mParameterIndicator));
-            if ((mParameterIndicator & 0x01) != 0) {
+            if ((mParameterIndicator & TP_PI_PID_PRESENT) != 0) {
                 logd("    TP-PID: " + String.format("0x%02X", mProtocolIdentifier));
             }
-            if ((mParameterIndicator & 0x02) != 0) {
+            if ((mParameterIndicator & TP_PI_DCS_PRESENT) != 0) {
                 logd("    TP-DCS: " + getDataCodingSchemeHex());
             }
-            if ((mParameterIndicator & 0x04) != 0) {
+            if ((mParameterIndicator & TP_PI_UDL_PRESENT) != 0) {
                 logd("    TP-UDL: " + mUserDataLength);
             }
         } else {

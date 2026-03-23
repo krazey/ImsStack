@@ -578,7 +578,7 @@ public class SmsRLStateMachineTest {
     public void onTR1TimerExpired_notifyMoSmsTimedOut() {
         mSmsRLStateMachine.setState(WAIT_FOR_RPACK_FROM_NW);
         SmsRPdu moRPData = new SmsRPdu(1, SmsUtils.RP_DATA, mSmsc, 0, mTpdu, false);
-        mSmsRLStateMachine.mRPduData = moRPData;
+        mSmsRLStateMachine.setRpduData(moRPData);
         mSmsRLStateMachine.mTpMr = mTpdu[SmsUtils.TPDU_MR_INDEX] & 0xff;
 
         mSmsRLStateMachine.onTR1TimerExpired();
