@@ -67,6 +67,9 @@ public class SmsTPdu {
     private Direction mDirection;
     private int mRpMti;
 
+    private String mServiceCentreTimeStamp;
+    private String mDischargeTime;
+
     // Fields Parsed from User Data Header
     private int mUdhIei = -1; // IEI for concatenated SMS if present
     private int mUdhReference = -1; // Reference for concatenated SMS if present
@@ -201,7 +204,7 @@ public class SmsTPdu {
         if (!parser.hasMoreData(PduParser.TIMESTAMPS_OCTETS)) {
             return;
         }
-        parser.getTimeStamp(); // TP-SCTS
+        mServiceCentreTimeStamp = parser.getTimeStamp(); // TP-SCTS
         parseOptionalParameters(parser);
     }
 
@@ -250,7 +253,7 @@ public class SmsTPdu {
         mOriginatingAddress = parser.getAddress(); // TP-OA
         mProtocolIdentifier = parser.getOctet(); // TP-PID
         mDataCodingScheme = parser.getOctet(); // TP-DCS
-        parser.getTimeStamp(); // TP-SCTS
+        mServiceCentreTimeStamp = parser.getTimeStamp(); // TP-SCTS
 
         mUserDataLength = parser.getOctet(); // TP-UDL
         if (mUserDataHeaderIndicator == USER_DATA_HEADER_PRESENT) {
@@ -268,8 +271,8 @@ public class SmsTPdu {
 
         mMessageRef = parser.getOctet(); // TP-MR
         mDestinationAddress = parser.getAddress(); // TP-RA
-        parser.getTimeStamp(); // TP-SCTS
-        parser.getTimeStamp(); // TP-DT
+        mServiceCentreTimeStamp = parser.getTimeStamp(); // TP-SCTS
+        mDischargeTime = parser.getTimeStamp(); // TP-DT
         mStatus = parser.getOctet(); // TP-ST
 
         parseParameterIndicator(parser);
@@ -337,16 +340,40 @@ public class SmsTPdu {
             return address;
         }
 
-        long getTimeStamp() {
-            long timestamp = 0;
+        String getTimeStamp() {
             if (hasMoreData(TIMESTAMPS_OCTETS)) {
-                // Skipped parsing logic for now, just consume bytes
+                byte[] ts = Arrays.copyOfRange(mPdu, mCur, mCur + TIMESTAMPS_OCTETS);
                 mCur += TIMESTAMPS_OCTETS;
+
+                int year = gsmBcdByteToInt(ts[0]);
+                int month = gsmBcdByteToInt(ts[1]);
+                int day = gsmBcdByteToInt(ts[2]);
+                int hour = gsmBcdByteToInt(ts[3]);
+                int minute = gsmBcdByteToInt(ts[4]);
+                int second = gsmBcdByteToInt(ts[5]);
+
+                byte tzByte = ts[6];
+                int tzOffset = gsmBcdByteToInt((byte) (tzByte & ~0x08));
+                tzOffset = ((tzByte & 0x08) == 0) ? tzOffset : -tzOffset;
+
+                return String.format("%02d/%02d/%02d %02d:%02d:%02d%+d",
+                        year, month, day, hour, minute, second, tzOffset);
             } else {
                 loge("Failed to parse the timestamp, not enough data");
                 mCur = mPdu.length;
+                return null;
             }
-            return timestamp;
+        }
+
+        private int gsmBcdByteToInt(byte b) {
+            int ret = 0;
+            if ((b & 0xf0) <= 0x90) {
+                ret = (b >>> 4) & 0x0f;
+            }
+            if ((b & 0x0f) <= 0x09) {
+                ret += (b & 0x0f) * 10;
+            }
+            return ret;
         }
 
         void parseValidityPeriod(int format) {
@@ -512,6 +539,7 @@ public class SmsTPdu {
                 logd("  TP-OA (Originating Address): " + byteArrayToString(mOriginatingAddress));
                 logd("  TP-PID (Protocol ID): " + String.format("0x%02X", mProtocolIdentifier));
                 logd("  TP-DCS (Data Coding Scheme): " + getDataCodingSchemeHex());
+                logd("  TP-SCTS (Service Centre Time Stamp): " + mServiceCentreTimeStamp);
                 logd("  TP-UDL (User Data Length): " + mUserDataLength);
             } else if (mMessageTypeIndicator == MTI_STATUS_REPORT) {
                 logd("  TP-SRQ (Status Report Qualifier): " + mStatusReportQualifier);
@@ -519,10 +547,13 @@ public class SmsTPdu {
                 logd("  TP-MMS (More Messages to Send): " + mMoreMessageToSend);
                 logd("  TP-MR (Message Reference): " + mMessageRef);
                 logd("  TP-RA (Recipient Address): " + byteArrayToString(mDestinationAddress));
+                logd("  TP-SCTS (Service Centre Time Stamp): " + mServiceCentreTimeStamp);
+                logd("  TP-DT (Discharge Time): " + mDischargeTime);
                 logd("  TP-ST (Status): " + String.format("0x%02X", mStatus));
                 appendOptionalParamsToLog();
             } else if (mMessageTypeIndicator == MTI_SUBMIT_REPORT) {
                 logi("  TP-FCS (Failure Cause): " + String.format("0x%02X", mFailureCause));
+                logd("  TP-SCTS (Service Centre Time Stamp): " + mServiceCentreTimeStamp);
                 appendOptionalParamsToLog();
             }
         }
