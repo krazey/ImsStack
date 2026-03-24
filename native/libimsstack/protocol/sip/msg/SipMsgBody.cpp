@@ -497,6 +497,13 @@ SIP_BOOL SipMsgBody::EncodeBody(SIP_CHAR** ppCurrPos)
 
 SIP_BOOL SipMsgBody::DecodeSingleMsgBody(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
 {
+    if (pStartPt == SIP_NULL || pEndPt == SIP_NULL || pEndPt < pStartPt)
+    {
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODDECODER, "Invalid body boundary pointers", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
     SIP_UINT32 nSize = pEndPt - pStartPt;
     SIP_CHAR* pData = new SIP_CHAR[nSize + SIP_ONE];
 
@@ -545,8 +552,14 @@ SIP_BOOL SipMsgBody::DecodeMIMEMsgBody(const SIP_CHAR* pStartPt, const SIP_CHAR*
         /*find next terminating CRLF*/
         SIP_UINT32 nDecLen = SIP_ZERO;
         const SIP_CHAR* pTempPos = SIP_NULL;
-        // Fail condition to be added
-        SipAbnfUtil::FindTerminatingCrlf(pStartPt, pEndPt, pTempPos, bHdrEnd);
+
+        if (SipAbnfUtil::FindTerminatingCrlf(pStartPt, pEndPt, pTempPos, bHdrEnd) == SIP_FALSE)
+        {
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODDECODER, "MIME Headers decoding failed", SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
+
         nDecLen = pTempPos - pStartPt + SIP_ONE;
 
         if (m_pMIMEHdrs->Decode(pStartPt, nDecLen) == SIP_FALSE)
@@ -981,6 +994,14 @@ SIP_BOOL SipMsgBodyList::DecodeMIMEBody(
         }
         const SIP_CHAR* pTempEnd =
                 SipMsgUtil::FindMsgBodyEnd(pStartPt, pEndPt, pszBoundary, bBodyEnd);
+
+        if (pTempEnd == SIP_NULL || pTempEnd < pStartPt)
+        {
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODDECODER, "Invalid body part end detected", SIP_ZERO, SIP_ZERO);
+            pMsgBody->SipDelete();
+            return SIP_FALSE;
+        }
 
         if (pMsgBody->DecodeMIMEMsgBody(pStartPt, pTempEnd) == SIP_FALSE)
         {

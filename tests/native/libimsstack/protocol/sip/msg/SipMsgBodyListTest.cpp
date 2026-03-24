@@ -224,6 +224,26 @@ Test body 2\r\n\
     EXPECT_EQ(SIP_FALSE, pList->DecodeMIMEBody(pMsg, pMsg + nLen, "unique-boundary"));
 
     pList->SipDelete();
+
+    pList = new SipMsgBodyList();
+    ASSERT_TRUE(pList != nullptr);
+
+    pMsg = "--unique-boundary\r\nContent-Type: text/plain\r\n\r\nIncomplete part";
+    nLen = SipPf_Strlen(pMsg);
+
+    EXPECT_EQ(SIP_FALSE, pList->DecodeMIMEBody(pMsg, pMsg + nLen, "unique-boundary"));
+
+    pList->SipDelete();
+
+    pList = new SipMsgBodyList();
+    ASSERT_TRUE(pList != nullptr);
+
+    pMsg = "--unique-boundary\r\n--unique-boundary--\r\n";
+    nLen = SipPf_Strlen(pMsg);
+
+    EXPECT_EQ(SIP_FALSE, pList->DecodeMIMEBody(pMsg, pMsg + nLen, "unique-boundary"));
+
+    pList->SipDelete();
 }
 
 }  // namespace android

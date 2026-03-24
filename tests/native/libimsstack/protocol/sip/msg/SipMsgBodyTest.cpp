@@ -458,6 +458,28 @@ level1 - message body 2\r\n\
 
     EXPECT_EQ(SIP_FALSE, pMessageBody->DecodeMIMEMsgBody(pMessage, pMessage + nLen - 1));
     pMessageBody->SipDelete();
+
+    /* No crlf, fail */
+    pMessageBody = new SipMsgBody();
+    ASSERT_TRUE(pMessageBody != nullptr);
+
+    pMessage = "Content-Type: multipart/mixed;boundary=abcxz";
+    nLen = SipPf_Strlen(pMessage);
+
+    EXPECT_EQ(SIP_FALSE, pMessageBody->DecodeMIMEMsgBody(pMessage, pMessage + nLen - 1));
+    pMessageBody->SipDelete();
+
+    /* Boundary "abcxz" is defined but never found in the body, fail */
+    pMessageBody = new SipMsgBody();
+    ASSERT_TRUE(pMessageBody != nullptr);
+
+    pMessage = "Content-Type: multipart/mixed;boundary=abcxz\r\n\r\n--abcxz\r\nContent-Type: "
+               "text/plain\r\n\r\nIncomplete body";
+    nLen = SipPf_Strlen(pMessage);
+
+    EXPECT_EQ(SIP_FALSE, pMessageBody->DecodeMIMEMsgBody(pMessage, pMessage + nLen));
+
+    pMessageBody->SipDelete();
 }
 
 }  // namespace android
