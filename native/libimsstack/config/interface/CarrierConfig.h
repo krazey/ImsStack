@@ -2342,6 +2342,12 @@ public:
          *   {@code false}
          */
         static const IMS_CHAR KEY_KEEP_INVITE_TRANSACTION_TIMEOUT_DURING_CALL_BOOL[];
+
+        /**
+         * Specifies the Reason header text when user ends call during SIP response timeout.
+         */
+        static const IMS_CHAR
+                KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_AND_SIP_RESPONSE_TIMEOUT_STRING[];
     };
 
     class ImsRtt

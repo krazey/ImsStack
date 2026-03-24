@@ -827,6 +827,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "emergency_service_category_per_plmn_string_array";
         public static final String KEY_KEEP_INVITE_TRANSACTION_TIMEOUT_DURING_CALL_BOOL =
                 KEY_PREFIX + "keep_invite_transaction_timeout_during_call_bool";
+        public static final String KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_AND_SIP_RESPONSE_TIMEOUT_STRING =
+                KEY_PREFIX + "call_terminate_reason_header_user_ends_and_sip_response_timeout_string";
 
         /** Emergency URN policy **/
         public static final int NOT_USE_SERVICE_CATEGORY = 1;

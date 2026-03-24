@@ -953,7 +953,7 @@ PRIVATE
 AString MessageFormatter::GetTerminateReason(IN TerminateType eType)
 {
     return MtcConfigurationResolver::GetTerminateReasonHeader(
-            m_objContext.GetConfigurationProxy(), eType);
+            m_objContext.GetConfigurationProxy(), eType, m_objContext.GetCallInfo().IsEmergency());
 }
 
 PRIVATE

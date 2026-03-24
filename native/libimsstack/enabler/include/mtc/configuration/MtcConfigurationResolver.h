@@ -57,8 +57,8 @@ public:
                 eGeolocationPidfAllowedType - 1);
     }
 
-    inline static AString GetTerminateReasonHeader(
-            IN const MtcConfigurationProxy& objProxy, IN TerminateType eType)
+    inline static AString GetTerminateReasonHeader(IN const MtcConfigurationProxy& objProxy,
+            IN TerminateType eType, IN IMS_BOOL bEmergency)
     {
         switch (eType)
         {
@@ -81,8 +81,11 @@ public:
                 return objProxy.GetString(
                         ConfigVoice::KEY_CALL_TERMINATE_REASON_HEADER_SIP_RESPONSE_TIMEOUT_STRING);
             case TerminateType::USER_ENDS_AND_SIP_RESPONSE_TIMEOUT:
-                return objProxy.GetString(ConfigVoice::
-                                KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_AND_SIP_RESPONSE_TIMEOUT_STRING);
+                return bEmergency
+                        ? objProxy.GetString(ConfigEmergency::
+                                          KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_AND_SIP_RESPONSE_TIMEOUT_STRING)
+                        : objProxy.GetString(ConfigVoice::
+                                          KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_AND_SIP_RESPONSE_TIMEOUT_STRING);
             case TerminateType::CALL_SETUP_TIMEOUT:
                 return objProxy.GetString(
                         ConfigVoice::KEY_CALL_TERMINATE_REASON_HEADER_CALL_SETUP_TIMEOUT_STRING);

@@ -543,6 +543,35 @@ TEST_F(MessageFormatterTest, FormTerminateMessageWithCodeUserTerminatedAndSipTim
     EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
+TEST_F(MessageFormatterTest, FormTerminateMessageWithCodeUserTerminatedAndSipTimeoutForNormalCall)
+{
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
+    EXPECT_CALL(objConfigurationProxy,
+            GetString(ConfigVoice::
+                            KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_AND_SIP_RESPONSE_TIMEOUT_STRING))
+            .WillOnce(Return(AString("reason")));
+
+    CallReasonInfo objReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_AND_SIP_TIMEOUT);
+    IMS_RESULT nResult = pFormatter->FormTerminateMessage(objReasonInfo);
+
+    EXPECT_EQ(nResult, IMS_SUCCESS);
+}
+
+TEST_F(MessageFormatterTest,
+        FormTerminateMessageWithCodeUserTerminatedAndSipTimeoutForEmergencyCall)
+{
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    EXPECT_CALL(objConfigurationProxy,
+            GetString(ConfigEmergency::
+                            KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_AND_SIP_RESPONSE_TIMEOUT_STRING))
+            .WillOnce(Return(AString("reason")));
+
+    CallReasonInfo objReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_AND_SIP_TIMEOUT);
+    IMS_RESULT nResult = pFormatter->FormTerminateMessage(objReasonInfo);
+
+    EXPECT_EQ(nResult, IMS_SUCCESS);
+}
+
 TEST_F(MessageFormatterTest, FormTerminateMessageWithCodeUserTerminatedAndRtpTimeout)
 {
     CallReasonInfo objReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_AND_RTP_TIMEOUT);
