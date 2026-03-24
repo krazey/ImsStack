@@ -127,6 +127,11 @@ public final class SmsRPdu {
     public boolean isRetry() {
         return mIsRetry;
     }
+
+    public SmsTPdu getTpdu() {
+        return mTpdu;
+    }
+
     /**
      * Encodes of RPdu as per 3GPP TS 24.011
      */
