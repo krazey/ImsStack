@@ -68,6 +68,14 @@ public class MediaSession implements IMediaConnectionObserver {
         }
     }
 
+    /**
+     * Release resources
+     */
+    public void dispose() {
+        ImsLog.d("MediaSession dispose");
+        mMediaManager.removeObserver(this);
+    }
+
     public MediaSession(IBaseContext context, MtcMediaSession mtcMediaSession) {
         ImsLog.d("MediaSession created");
         mContext = context;

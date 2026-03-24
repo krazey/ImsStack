@@ -474,5 +474,6 @@ public class MtcMediaSessionTest {
 
         mMtcMediaSession.dispose();
         verify(mMockMediaRegistry).removeListener(any(MmTelMediaRegistry.Listener.class));
+        verify(mMockMediaSession).dispose();
     }
 }

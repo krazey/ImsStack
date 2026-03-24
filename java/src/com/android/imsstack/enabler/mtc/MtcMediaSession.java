@@ -253,6 +253,9 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
 
         synchronized (mLock) {
             mCall = null;
+            if (mMediaSession != null) {
+                mMediaSession.dispose();
+            }
             mMediaSession = null;
             mAudioListener = null;
             mVideoListener = null;

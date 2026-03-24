@@ -44,13 +44,18 @@ public class MediaManagerHelper {
     private static final Object sLock = new Object();
     private static ImsMediaManager sImsMediaManager;
     private static Executor sExecutor;
-    private static IMediaConnectionObserver sMediaObserver;
+    private static final java.util.Set<IMediaConnectionObserver> sMediaObservers =
+            java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
     private static HandlerThread sMediaHandlerThread;
 
     @SuppressWarnings("StaticAssignmentInConstructor")
     public MediaManagerHelper(IMediaConnectionObserver mediaObserver) {
 
-        sMediaObserver = mediaObserver;
+        if (mediaObserver != null) {
+            synchronized (sLock) {
+                sMediaObservers.add(mediaObserver);
+            }
+        }
         mContext = AppContext.getInstance();
         createImsMediaManagerInstance();
     }
@@ -61,7 +66,11 @@ public class MediaManagerHelper {
         ImsMediaManager imsMediaManager, Executor executor) {
 
         mContext = context;
-        sMediaObserver = mediaObserver;
+        if (mediaObserver != null) {
+            synchronized (sLock) {
+                sMediaObservers.add(mediaObserver);
+            }
+        }
         if (sImsMediaManager == null) {
             sImsMediaManager = imsMediaManager;
             sExecutor = executor;
@@ -164,7 +173,9 @@ public class MediaManagerHelper {
             sImsMediaManager.release();
             sImsMediaManager = null;
             sExecutor = null;
-            sMediaObserver = null;
+            synchronized (sLock) {
+                sMediaObservers.clear();
+            }
             setImsMediaConnected(false);
         }
 
@@ -214,6 +225,21 @@ public class MediaManagerHelper {
     }
 
     /**
+     * Explicitly removes an observer.
+     */
+    public void removeObserver(IMediaConnectionObserver mediaObserver) {
+        if (mediaObserver == null) {
+            return;
+        }
+        synchronized (sLock) {
+            sMediaObservers.remove(mediaObserver);
+            if (!sMediaObservers.isEmpty()) {
+                ImsLog.i("removeObserver - current observers: " + sMediaObservers.size());
+            }
+        }
+    }
+
+    /**
      * Return the Looper for the media Handler thread.
      *
      * @return The media main looper.
@@ -228,8 +254,14 @@ public class MediaManagerHelper {
     private void handleConnected() {
         if (!isImsMediaConnected()) {
             setImsMediaConnected(true);
-            if (sMediaObserver != null) {
-                sMediaObserver.onMediaConnected();
+            final java.util.List<IMediaConnectionObserver> observers;
+            synchronized (sLock) {
+                observers = new java.util.ArrayList<>(sMediaObservers);
+            }
+            for (IMediaConnectionObserver observer : observers) {
+                if (observer != null) {
+                    observer.onMediaConnected();
+                }
             }
         }
     }
@@ -239,8 +271,14 @@ public class MediaManagerHelper {
      */
     private void handleDisconnected() {
         if (isImsMediaConnected()) {
-            if (sMediaObserver != null) {
-                sMediaObserver.onMediaDisconnected();
+            final java.util.List<IMediaConnectionObserver> observers;
+            synchronized (sLock) {
+                observers = new java.util.ArrayList<>(sMediaObservers);
+            }
+            for (IMediaConnectionObserver observer : observers) {
+                if (observer != null) {
+                    observer.onMediaDisconnected();
+                }
             }
             close();
         }
