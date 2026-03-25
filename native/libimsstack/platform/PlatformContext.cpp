@@ -45,9 +45,17 @@ PlatformContext::PlatformContext() :
     m_objDefaultServices.Add(SERVICE_TRACE, new TraceService());
     m_objDefaultServices.Add(SERVICE_FILE, new FileService());
     m_objDefaultServices.Add(SERVICE_SYSTEM_TIME, new SystemTimeService());
+    m_objDefaultServices.Add(SERVICE_PHONE_INFO, IMS_NULL);
     m_objDefaultServices.Add(SERVICE_UTIL, new UtilService());
 
-    // All other default services: lazy initialization.
+    // All other default services: lazy initialization including SERVICE_PHONE_INFO.
+    m_objDefaultServices.Add(SERVICE_CONFIG, IMS_NULL);
+    m_objDefaultServices.Add(SERVICE_TIMER, IMS_NULL);
+    m_objDefaultServices.Add(SERVICE_THREAD, IMS_NULL);
+    m_objDefaultServices.Add(SERVICE_EVENT, IMS_NULL);
+    m_objDefaultServices.Add(SERVICE_NETWORK, IMS_NULL);
+    m_objDefaultServices.Add(SERVICE_NETWORK_POLICY, IMS_NULL);
+    m_objDefaultServices.Add(SERVICE_RADIO, IMS_NULL);
 }
 
 PRIVATE
@@ -275,7 +283,7 @@ PlatformService* PlatformContext::GetDefaultService(IN PlatformServiceType eType
 
     if (pService != IMS_NULL)
     {
-        m_objDefaultServices.Add(eType, pService);
+        m_objDefaultServices.SetValue(eType, pService);
     }
 
     return pService;
