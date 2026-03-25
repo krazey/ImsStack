@@ -27,7 +27,6 @@ import androidx.annotation.VisibleForTesting;
 import com.android.imsstack.base.DeviceConfig;
 import com.android.imsstack.base.SystemServiceProxy.ConnectivityManagerProxy;
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ImsTrafficInterface;
 import com.android.imsstack.core.agents.MsgProcInterface;
 import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.agents.dcmif.EApnReqState;
@@ -214,21 +213,6 @@ public final class ApnIms extends Apn {
             ImsLog.e(mSlotId, "unregisterSystemDefaultNetworkCallback: " + e.getMessage());
         }
         mDefaultNetworkCallback = null;
-    }
-
-    @Override
-    protected boolean handleIpcanCategory(int networkType) {
-        boolean ret = super.handleIpcanCategory(networkType);
-
-        if (ret) {
-            ImsTrafficInterface imsTraffic =
-                    AgentFactory.getInstance().getAgent(ImsTrafficInterface.class);
-            if (imsTraffic != null) {
-                imsTraffic.setWlan(mIpcanCategory == IPCAN_CATEGORY_WLAN, mSlotId);
-            }
-        }
-
-        return ret;
     }
 
     private boolean shouldDisableN1Mode() {

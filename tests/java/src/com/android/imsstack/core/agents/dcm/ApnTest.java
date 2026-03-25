@@ -60,6 +60,7 @@ import com.android.imsstack.base.SystemServiceProxy.SubscriptionManagerProxy;
 import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.agents.ImsTrafficInterface;
 import com.android.imsstack.core.agents.MsgProcInterface;
 import com.android.imsstack.core.agents.dcmif.EApnReqState;
 import com.android.imsstack.core.agents.dcmif.EApnType;
@@ -95,6 +96,7 @@ public class ApnTest {
     @Mock private IDcSettings mMockIDcSettings;
     @Mock private IDcNetWatcher mMockIDcNetWatcher;
     @Mock private ISystem mMockISystem;
+    @Mock private ImsTrafficInterface mMockImsTrafficInterface;
     @Mock private ConfigInterface mMockConfigInterface;
     @Mock private Network mMockNetwork;
     @Mock private MsgProcInterface mMockMsgProc;
@@ -625,30 +627,79 @@ public class ApnTest {
     }
 
     @Test
-    public void testHandleIpcanCategory_notChanged() throws Exception {
-        // IPCAN category is not changed
-        assertEquals(Apn.IPCAN_CATEGORY_MOBILE, mApn.mIpcanCategory);
-        assertFalse(mApn.handleIpcanCategory(TelephonyManager.NETWORK_TYPE_LTE));
-        assertEquals(Apn.IPCAN_CATEGORY_MOBILE, mApn.mIpcanCategory);
+    public void testHandleIpcanCategory_differentIface_delayedExecution() throws Exception {
+        String oldIface = "oldIface";
+        String newIface = "newIface";
+        replaceInstance(Apn.class, "mNetworkCallback", mApn, mMockNetworkCallback);
+        when(mMockNetworkCallback.getActiveIfaceName()).thenReturn(oldIface);
+        LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName(newIface);
+        mApn.addListener(mMockApnListener);
+        mApn.mIpcanCategory = Apn.IPCAN_CATEGORY_MOBILE;
+        mApn.mNetworkType = TelephonyManager.NETWORK_TYPE_IWLAN;
+
+        mApn.handleIpcanCategory(lp);
+
+        // do not handle EVENT_TRANSPORT_TYPE_CHANGED immediately
+        assertTrue(mApn.hasMessages(Apn.EVENT_TRANSPORT_TYPE_CHANGED));
+        mTestableLooper.processAllMessages();
+        verify(mMockISystem, never()).notifyDataConnectionIpcanChanged(anyInt(), anyInt());
+
+        // handle EVENT_TRANSPORT_TYPE_CHANGED after delay
+        mTestableLooper.moveTimeForward(Apn.HANDOVER_TIME_TO_TRIGGER_MILLIS);
+        mTestableLooper.processAllMessages();
+        verify(mMockISystem).notifyDataConnectionIpcanChanged(anyInt(), anyInt());
     }
 
     @Test
-    public void testHandleIpcanCategory_changed() throws Exception {
-        // IPCAN category is changed
-        assertEquals(Apn.IPCAN_CATEGORY_MOBILE, mApn.mIpcanCategory);
-        assertTrue(mApn.handleIpcanCategory(TelephonyManager.NETWORK_TYPE_IWLAN));
-        verify(mMockISystem).notifyDataConnectionIpcanChanged(
-                mApn.mType.getType(), Apn.IPCAN_CATEGORY_WLAN);
-        assertEquals(Apn.IPCAN_CATEGORY_WLAN, mApn.mIpcanCategory);
+    public void testHandleIpcanCategory_unknownIface_delayedExecution() throws Exception {
+        String oldIface = "oldIface";
+        replaceInstance(Apn.class, "mNetworkCallback", mApn, mMockNetworkCallback);
+        when(mMockNetworkCallback.getActiveIfaceName()).thenReturn(oldIface);
+        LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName(null);
+        mApn.addListener(mMockApnListener);
+        mApn.mIpcanCategory = Apn.IPCAN_CATEGORY_MOBILE;
+        mApn.mNetworkType = TelephonyManager.NETWORK_TYPE_IWLAN;
+
+        mApn.handleIpcanCategory(lp);
+
+        // do not handle EVENT_TRANSPORT_TYPE_CHANGED immediately
+        assertTrue(mApn.hasMessages(Apn.EVENT_TRANSPORT_TYPE_CHANGED));
+        mTestableLooper.processAllMessages();
+        verify(mMockISystem, never()).notifyDataConnectionIpcanChanged(anyInt(), anyInt());
+
+        // handle EVENT_TRANSPORT_TYPE_CHANGED after delay
+        mTestableLooper.moveTimeForward(Apn.HANDOVER_TIME_TO_TRIGGER_MILLIS);
+        mTestableLooper.processAllMessages();
+        verify(mMockISystem).notifyDataConnectionIpcanChanged(anyInt(), anyInt());
+    }
+
+    @Test
+    public void testHandleIpcanCategory_sameIface_immediateExecution() throws Exception {
+        String sameIface = "sameIface";
+        replaceInstance(Apn.class, "mNetworkCallback", mApn, mMockNetworkCallback);
+        when(mMockNetworkCallback.getActiveIfaceName()).thenReturn(sameIface);
+        LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName(sameIface);
+        mApn.addListener(mMockApnListener);
+        mApn.mIpcanCategory = Apn.IPCAN_CATEGORY_MOBILE;
+        mApn.mNetworkType = TelephonyManager.NETWORK_TYPE_IWLAN;
+
+        mApn.handleIpcanCategory(lp);
+
+        mTestableLooper.processAllMessages();
+        verify(mMockISystem).notifyDataConnectionIpcanChanged(anyInt(), anyInt());
     }
 
     @Test
     public void testHandleIpcanCategory_notHandledApnType() throws Exception {
         // Do no handle IPCAN cagegory change when apn type is not ims or emergency
         mApn.mType = EApnType.INTERNET;
-        assertEquals(Apn.IPCAN_CATEGORY_MOBILE, mApn.mIpcanCategory);
-        assertFalse(mApn.handleIpcanCategory(TelephonyManager.NETWORK_TYPE_IWLAN));
-        assertEquals(Apn.IPCAN_CATEGORY_MOBILE, mApn.mIpcanCategory);
+
+        mApn.handleIpcanCategory(null);
+
+        assertFalse(mApn.hasMessages(Apn.EVENT_TRANSPORT_TYPE_CHANGED));
     }
 
     @Test
@@ -676,6 +727,47 @@ public class ApnTest {
         mTestableLooper.processAllMessages();
 
         verify(mMockISystem).notifyDataConnectionFailed(mApn.mType.getType());
+    }
+
+    @Test
+    public void testTransportTypeChanged_imsApn_setTrafficType() throws Exception {
+        AgentFactory.getInstance().setAgent(ImsTrafficInterface.class, mMockImsTrafficInterface);
+        mApn.addListener(mMockApnListener);
+        mApn.mIpcanCategory = Apn.IPCAN_CATEGORY_MOBILE;
+        mApn.mNetworkType = TelephonyManager.NETWORK_TYPE_IWLAN;
+
+        mApn.sendEmptyMessage(Apn.EVENT_TRANSPORT_TYPE_CHANGED);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockISystem).notifyDataConnectionIpcanChanged(
+                mApn.mType.getType(), Apn.IPCAN_CATEGORY_WLAN);
+        verify(mMockApnListener).onIpcanCategoryChanged(
+                mApn.mType.getType(), Apn.IPCAN_CATEGORY_WLAN);
+        verify(mMockImsTrafficInterface).setWlan(true, SLOT0);
+        assertEquals(Apn.IPCAN_CATEGORY_WLAN, mApn.mIpcanCategory);
+
+        AgentFactory.getInstance().setAgent(ImsTrafficInterface.class, null);
+    }
+
+    @Test
+    public void testTransportTypeChanged_emergencyApn_skipSetTrafficType() throws Exception {
+        mApn.mType = EApnType.EMERGENCY;
+        AgentFactory.getInstance().setAgent(ImsTrafficInterface.class, mMockImsTrafficInterface);
+        mApn.addListener(mMockApnListener);
+        mApn.mIpcanCategory = Apn.IPCAN_CATEGORY_MOBILE;
+        mApn.mNetworkType = TelephonyManager.NETWORK_TYPE_IWLAN;
+
+        mApn.sendEmptyMessage(Apn.EVENT_TRANSPORT_TYPE_CHANGED);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockISystem).notifyDataConnectionIpcanChanged(
+                mApn.mType.getType(), Apn.IPCAN_CATEGORY_WLAN);
+        verify(mMockApnListener).onIpcanCategoryChanged(
+                mApn.mType.getType(), Apn.IPCAN_CATEGORY_WLAN);
+        verify(mMockImsTrafficInterface, never()).setWlan(true, SLOT0);
+        assertEquals(Apn.IPCAN_CATEGORY_WLAN, mApn.mIpcanCategory);
+
+        AgentFactory.getInstance().setAgent(ImsTrafficInterface.class, null);
     }
 
     @Test
@@ -743,13 +835,16 @@ public class ApnTest {
         mApn.sendMessage(msg);
         mTestableLooper.processAllMessages();
 
+        // handle EVENT_TRANSPORT_TYPE_CHANGED after delay
+        mTestableLooper.moveTimeForward(Apn.HANDOVER_TIME_TO_TRIGGER_MILLIS);
+        mTestableLooper.processAllMessages();
+
         verify(mMockApnListener).onHandoverStateChanged(Apn.HANDOVER_SUCCESS,
                 TelephonyManager.NETWORK_TYPE_IWLAN, DataFailCause.NONE);
         verify(mMockISystem).notifyDataConnectionIpcanChanged(
                 mApn.mType.getType(), Apn.IPCAN_CATEGORY_WLAN);
         verify(mMockApnListener).onIpcanCategoryChanged(
                 mApn.mType.getType(), Apn.IPCAN_CATEGORY_WLAN);
-        assertEquals(Apn.IPCAN_CATEGORY_WLAN, mApn.mIpcanCategory);
         assertEquals(TelephonyManager.NETWORK_TYPE_IWLAN, mApn.mNetworkType);
     }
 

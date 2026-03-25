@@ -42,7 +42,6 @@ import com.android.imsstack.base.DeviceConfig;
 import com.android.imsstack.base.SystemServiceProxy.ConnectivityManagerProxy;
 import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ImsTrafficInterface;
 import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.agents.dcmif.EApnReqState;
 import com.android.imsstack.core.agents.dcmif.EApnType;
@@ -73,7 +72,6 @@ public class ApnImsTest {
     @Mock private IDcSettings mMockIDcSettings;
     @Mock private IDcNetWatcher mMockIDcNetWatcher;
     @Mock private ISystem mMockISystem;
-    @Mock private ImsTrafficInterface mMockImsTrafficInterface;
     @Mock private SubsInfoInterface mMockSubsInfoInterface;
     @Mock private RuntimeException mMockRuntimeException;
 
@@ -329,21 +327,6 @@ public class ApnImsTest {
 
         mApnIms.unregisterSystemDefaultNetworkCallback();
         verify(mMockRuntimeException).getMessage();
-    }
-
-    @Test
-    public void testHandleIpcanCategory() throws Exception {
-        AgentFactory.getInstance().setAgent(ImsTrafficInterface.class, mMockImsTrafficInterface);
-        mApnIms.mIpcanCategory = Apn.IPCAN_CATEGORY_MOBILE;
-
-        assertTrue(mApnIms.handleIpcanCategory(TelephonyManager.NETWORK_TYPE_IWLAN));
-
-        assertEquals(Apn.IPCAN_CATEGORY_WLAN, mApnIms.mIpcanCategory);
-        verify(mMockISystem).notifyDataConnectionIpcanChanged(
-                mApnIms.mType.getType(), Apn.IPCAN_CATEGORY_WLAN);
-        verify(mMockImsTrafficInterface).setWlan(true, SLOT0);
-
-        AgentFactory.getInstance().setAgent(ImsTrafficInterface.class, null);
     }
 
     @Test

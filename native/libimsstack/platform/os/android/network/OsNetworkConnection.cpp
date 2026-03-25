@@ -1081,6 +1081,9 @@ void OsNetworkConnection::NotifyIpcanCatChanged()
         return;
     }
 
+    m_strIfaceName =
+            PlatformContext::GetInstance()->GetSystem()->GetIfaceName(GetApnType(), GetSlotId());
+
     if (m_piConnectionListener != IMS_NULL)
     {
         m_piConnectionListener->NetworkConnection_OnIpcanChanged(this);

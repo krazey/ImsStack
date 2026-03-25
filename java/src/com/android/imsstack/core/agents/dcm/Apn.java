@@ -35,6 +35,7 @@ import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.DeviceConfig;
@@ -42,6 +43,7 @@ import com.android.imsstack.base.MSimUtils;
 import com.android.imsstack.base.SystemServiceProxy.ConnectivityManagerProxy;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.agents.ImsTrafficInterface;
 import com.android.imsstack.core.agents.MsgProcInterface;
 import com.android.imsstack.core.agents.dcmif.DcConstants;
 import com.android.imsstack.core.agents.dcmif.EApnReqState;
@@ -92,10 +94,12 @@ public abstract class Apn extends Handler implements IApn {
     protected static final int EVENT_DELAYED_DISCONNECT = 1008;
     protected static final int EVENT_CALL_CREATED = 1009;
     protected static final int EVENT_CALL_DESTROYED = 1010;
+    protected static final int EVENT_TRANSPORT_TYPE_CHANGED = 1011;
 
     protected static final int EVENT_AIRPLANE_MODE_CHANGED = 2001;
 
     protected static final int FEATURE_NONE = 0;
+    protected static final int HANDOVER_TIME_TO_TRIGGER_MILLIS = 300;
 
     protected static final LinkedHashMap<Integer, String> sEventToString;
 
@@ -140,6 +144,8 @@ public abstract class Apn extends Handler implements IApn {
                 "CALL_CREATED");
         sEventToString.put(EVENT_CALL_DESTROYED,
                 "CALL_DESTROYED");
+        sEventToString.put(EVENT_TRANSPORT_TYPE_CHANGED,
+                "TRANSPORT_TYPE_CHANGED");
 
         sEventToString.put(EVENT_AIRPLANE_MODE_CHANGED,
                 "AIRPLANE_MODE_CHANGED");
@@ -180,6 +186,7 @@ public abstract class Apn extends Handler implements IApn {
         mSystem = SystemInterface.getInstance().getSystem(mSlotId);
 
         registerHandler(EVENT_NOTIFY_DATA_STATE_CHANGED, new HandleDataStateChanged());
+        registerHandler(EVENT_TRANSPORT_TYPE_CHANGED, new HandleTransportTypeChanged());
         registerHandler(EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED,
                 new HandlePreciseDataConnectionStateChanged());
     }
@@ -574,21 +581,23 @@ public abstract class Apn extends Handler implements IApn {
         sendMessage(msg);
     }
 
-    protected boolean handleIpcanCategory(int networkType) {
+    protected void handleIpcanCategory(@Nullable LinkProperties lp) {
         if ((mType.getType() != DcConstants.TYPE_IMS)
                 && (mType.getType() != DcConstants.TYPE_EMERGENCY)
                 && (mType.getType() != DcConstants.TYPE_XCAP)) {
-            return false;
+            return;
         }
 
-        if (!notifyDataConnectionIpcanChanged(networkType)) {
-            return false;
+        removeMessages(EVENT_TRANSPORT_TYPE_CHANGED);
+        boolean shouldSendImmediately = (lp != null && lp.getInterfaceName() != null)
+                && (mNetworkCallback == null
+                    || lp.getInterfaceName().equals(mNetworkCallback.getActiveIfaceName()));
+
+        if (shouldSendImmediately) {
+            sendEmptyMessage(EVENT_TRANSPORT_TYPE_CHANGED);
+        } else {
+            sendEmptyMessageDelayed(EVENT_TRANSPORT_TYPE_CHANGED, HANDOVER_TIME_TO_TRIGGER_MILLIS);
         }
-
-        // Notifies the change of IPCAN category
-        notifyIpcanCategoryChanged(mIpcanCategory);
-
-        return true;
     }
 
     protected void handleCarrierConfigChanged(int slotId, int subId) {
@@ -618,7 +627,6 @@ public abstract class Apn extends Handler implements IApn {
      * Notifies that IPCAN(IP Connectivity Access Network) category is changed.
      */
     protected void notifyIpcanCategoryChanged(int ipcanCategory) {
-        ImsLog.i(mSlotId, "notifyIpcanCategoryChanged");
         for (Listener l : mListeners) {
             l.onIpcanCategoryChanged(mType.getType(), ipcanCategory);
         }
@@ -628,7 +636,6 @@ public abstract class Apn extends Handler implements IApn {
      * Notifies that state of handover between WWAN and WLAN is changed.
      */
     protected void notifyHandoverStateChanged(int handoverState, int networkType, int failCause) {
-        ImsLog.i(mSlotId, "notifyHandoverStateChanged");
         for (Listener l : mListeners) {
             l.onHandoverStateChanged(handoverState, networkType, failCause);
         }
@@ -673,6 +680,8 @@ public abstract class Apn extends Handler implements IApn {
         protected LinkProperties mCachedLinkProperties = null;
         @VisibleForTesting
         protected boolean mIsPendingOnAvailable = false;
+        @VisibleForTesting
+        protected String mActiveIfaceName = null;
 
         ImsNetworkCallback(int type, Handler target) {
             this(type, EVENT_ALL, target);
@@ -706,6 +715,10 @@ public abstract class Apn extends Handler implements IApn {
 
         public int getEvents() {
             return mEvents;
+        }
+
+        public @Nullable String getActiveIfaceName() {
+            return mActiveIfaceName;
         }
 
         public void setEvents(int events) {
@@ -820,6 +833,7 @@ public abstract class Apn extends Handler implements IApn {
                 @NonNull LinkProperties linkProperties) {
             boolean ipChanged = isIpChanged(linkProperties);
             boolean pcscfChanged = isPcscfChanged(linkProperties);
+            mActiveIfaceName = linkProperties.getInterfaceName();
 
             if (ipChanged || pcscfChanged) {
                 cacheLinkProperties(network);
@@ -840,6 +854,11 @@ public abstract class Apn extends Handler implements IApn {
 
             if (mTarget == null) {
                 return;
+            }
+
+            if (mTarget.hasMessages(EVENT_TRANSPORT_TYPE_CHANGED)) {
+                mTarget.removeMessages(EVENT_TRANSPORT_TYPE_CHANGED);
+                Message.obtain(mTarget, EVENT_TRANSPORT_TYPE_CHANGED).sendToTarget();
             }
 
             if (isEventSet(EVENT_LOCAL_IP_CHANGED) && ipChanged) {
@@ -1056,7 +1075,6 @@ public abstract class Apn extends Handler implements IApn {
      * It notify the change of data connection state to IMS Native
      */
     protected class HandleDataStateChanged implements MsgProcInterface {
-
         @Override
         public void procMsg(Message msg) {
             if (mSystem == null) {
@@ -1073,6 +1091,24 @@ public abstract class Apn extends Handler implements IApn {
 
             ImsLog.i(mSlotId, "apnType=" + apnType + ", dataState=" + dataState);
             mSystem.notifyDataConnectionStateChanged(apnType, dataState);
+        }
+    }
+
+    protected class HandleTransportTypeChanged implements MsgProcInterface {
+        @Override
+        public void procMsg(Message msg) {
+            ImsLog.i(mSlotId, "HandleTransportTypeChanged");
+            if (notifyDataConnectionIpcanChanged(mNetworkType)) {
+                notifyIpcanCategoryChanged(mIpcanCategory);
+
+                if (mType.getType() == DcConstants.TYPE_IMS) {
+                    ImsTrafficInterface imsTraffic =
+                            AgentFactory.getInstance().getAgent(ImsTrafficInterface.class);
+                    if (imsTraffic != null) {
+                        imsTraffic.setWlan(mIpcanCategory == IPCAN_CATEGORY_WLAN, mSlotId);
+                    }
+                }
+            }
         }
     }
 
@@ -1123,7 +1159,7 @@ public abstract class Apn extends Handler implements IApn {
                     if (mNetworkType != networkType) {
                         if (mNetworkType == TelephonyManager.NETWORK_TYPE_UNKNOWN
                                 || isIpcanChanged(networkType)) {
-                            handleIpcanCategory(networkType);
+                            handleIpcanCategory(dataConnectionState.getLinkProperties());
                         }
 
                         // update network type
@@ -1162,17 +1198,14 @@ public abstract class Apn extends Handler implements IApn {
         }
 
         private void handleHandoverStart(int networkType) {
-            ImsLog.i(mSlotId, "handleHandoverStart");
             notifyHandoverStateChanged(HANDOVER_START, networkType, DataFailCause.NONE);
         }
 
         private void handleHandoverSuccess(int networkType) {
-            ImsLog.i(mSlotId, "handleHandoverSuccess");
             notifyHandoverStateChanged(HANDOVER_SUCCESS, networkType, DataFailCause.NONE);
         }
 
         private void handleHandoverFailure(int networkType, int causeCode) {
-            ImsLog.i(mSlotId, "handleHandoverFailure");
             notifyHandoverStateChanged(HANDOVER_FAILURE, networkType, causeCode);
         }
 
