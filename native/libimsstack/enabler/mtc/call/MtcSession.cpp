@@ -299,6 +299,10 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::Terminate(
         m_objExtensionSet.FormatRequest(RequestType::TERMINATE, *m_objSession.GetNextRequest());
         return m_pMessageSender->Terminate(bUseBye, objReason);
     }
+    else
+    {
+        m_bSessionTerminatedOrStartFailed = IMS_TRUE;
+    }
     return IMS_SUCCESS;
 }
 

@@ -37,6 +37,7 @@ import com.android.imsstack.util.ImsUtils;
 
 import org.junit.After;
 import org.junit.Before;
+import java.util.concurrent.ConcurrentHashMap;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -92,6 +93,7 @@ public class SmsTransferLayerTest {
                 any())).thenReturn(mMoSmsCCmd);
         when(mMockUsatCmdRes.getResult()).thenReturn(Usat.RESULT_ALLOWED);
 
+        mSmsRL.mTokenStateTrackerMap = new ConcurrentHashMap<>();
         mSmsTransferLayer = new TestSmsTransferLayer(mImsCallContext, mSmsRL);
         mSmsTransferLayer.setListener(mListener);
     }
@@ -448,6 +450,194 @@ public class SmsTransferLayerTest {
         byte[] deliverReportPdu = mSmsTransferLayer.generateDeliverReportPdu(mResult);
         verify(mSmsRL).sendRPMessage(eq(mToken), eq(SmsUtils.RP_ACK), eq(null), eq(null),
                 eq(deliverReportPdu), eq(mResult));
+    }
+
+    @Test
+    public void test_sendReportTPdu_DataDownload() {
+        int token = 123;
+        int messageRef = 45;
+        int result = ImsSmsImplBase.DELIVER_STATUS_ERROR_NO_MEMORY;
+
+        SmsTPdu mockTpdu = Mockito.mock(SmsTPdu.class);
+
+        when(mockTpdu.getProtocolIdentifier()).thenReturn(0x7F);
+        when(mockTpdu.getDataCodingScheme()).thenReturn(0x16);
+        when(mockTpdu.isUsimDataDownload()).thenReturn(true);
+
+        when(mSmsRL.getIncomingTpdu(token)).thenReturn(mockTpdu);
+
+        mSmsTransferLayer.sendReportTPdu(token, messageRef, result, null);
+
+        byte[] expectedPdu = new byte[] {
+            0x00,
+            (byte)0xD3,
+            0x07,
+            0x7F,
+            0x16,
+            0x00
+        };
+
+        verify(mSmsRL).sendRPMessage(eq(token), eq(SmsUtils.RP_ERROR), eq(null), eq(null),
+            eq(expectedPdu), eq(result));
+    }
+
+    @Test
+    public void test_simulateSmsPpDataDownloadEmptyUiccResponse_Message313() {
+        com.android.imsstack.core.agents.ConfigInterface mockConfigInterface =
+            Mockito.mock(com.android.imsstack.core.agents.ConfigInterface.class);
+        com.android.imsstack.core.config.CarrierConfig mockCarrierConfig =
+            Mockito.mock(com.android.imsstack.core.config.CarrierConfig.class);
+        when(mockConfigInterface.getCarrierConfig()).thenReturn(mockCarrierConfig);
+        when(mockCarrierConfig.getInt(anyString())).thenReturn(1000);
+        com.android.imsstack.core.agents.AgentFactory.getInstance().setAgent(
+            com.android.imsstack.core.agents.ConfigInterface.class, mockConfigInterface, 0);
+        when(mImsCallContext.getCallHandler()).thenReturn(Mockito.mock(android.os.Handler.class));
+
+        com.android.imsstack.enabler.mts.MtsController mockMtsController =
+            Mockito.mock(com.android.imsstack.enabler.mts.MtsController.class);
+
+        SmsRelayLayer smsRL = new SmsRelayLayer(mImsCallContext, mockMtsController) {
+            @Override
+            protected String getPSIValue() {
+                return null;
+            }
+        };
+        smsRL.mDeliverCause.put(ImsSmsImplBase.DELIVER_STATUS_OK, 0);
+        smsRL.mDeliverCause.put(ImsSmsImplBase.DELIVER_STATUS_ERROR_GENERIC, 0x6f);
+
+        ArgumentCaptor<com.android.imsstack.enabler.mts.MtsController.Listener> mtsListenerCaptor =
+            ArgumentCaptor.forClass(com.android.imsstack.enabler.mts.MtsController.Listener.class);
+        verify(mockMtsController).setListener(mtsListenerCaptor.capture());
+        com.android.imsstack.enabler.mts.MtsController.Listener mtsListener = mtsListenerCaptor
+            .getValue();
+
+        TestSmsTransferLayer testTransferLayer = new TestSmsTransferLayer(mImsCallContext, smsRL);
+        testTransferLayer.setListener(mListener);
+        smsRL.setListener(testTransferLayer.mSmsRLListener);
+
+        // STEP 1: Simulate the Network sending the MT SMS (Message 3.1.3)
+        String hexRpData = "0101099111223344556677F8001C" +
+                           "04049122337FF6891010000000000D546573744D6573736167652032";
+        byte[] incomingPdu = ImsUtils.hexStringToBytes(hexRpData);
+
+        // Inject the message into the Relay Layer (this creates the State Machine)
+        mtsListener.notifyIncomingMessage(SmsUtils.FORMAT_INT_3GPP, incomingPdu);
+        int frameworkToken = -1;
+        for (Integer t : smsRL.mTokenStateTrackerMap.keySet()) {
+            frameworkToken = t;
+            break;
+        }
+        assertTrue("State machine must be created for the incoming token. " +
+                   "Map size: " + smsRL.mTokenStateTrackerMap.size() +
+                   " mMoMRTokenMap: " + smsRL.mMoMRTokenMap.size() +
+                   " mMTTokenMRMap: " + smsRL.mMTTokenMRMap.size(),
+                   frameworkToken != -1);
+
+        // STEP 2: Simulate the Telephony Framework's empty Acknowledgement
+        int result = ImsSmsImplBase.DELIVER_STATUS_OK;
+        byte[] frameworkReportPdu = null;
+
+        // Trigger the Transfer Layer to generate the fallback RP-ACK
+        testTransferLayer.sendReportTPdu(frameworkToken, 0x01, result, frameworkReportPdu);
+
+        byte[] expectedRpAck = ImsUtils.hexStringToBytes("0201410500077FF600");
+
+        verify(mockMtsController, times(1)).sendMessage(
+                eq(SmsUtils.FORMAT_INT_3GPP),
+                eq(expectedRpAck),
+                anyString(),
+                anyString(),
+                eq(0x01) // Message Reference
+        );
+    }
+
+    @Test
+    public void test_simulateSmsPpDataDownloadEmptyUiccResponse() {
+        com.android.imsstack.core.agents.ConfigInterface mockConfigInterface =
+            Mockito.mock(com.android.imsstack.core.agents.ConfigInterface.class);
+        com.android.imsstack.core.config.CarrierConfig mockCarrierConfig =
+            Mockito.mock(com.android.imsstack.core.config.CarrierConfig.class);
+        when(mockConfigInterface.getCarrierConfig()).thenReturn(mockCarrierConfig);
+        when(mockCarrierConfig.getInt(anyString())).thenReturn(1000);
+        com.android.imsstack.core.agents.AgentFactory.getInstance().setAgent(
+            com.android.imsstack.core.agents.ConfigInterface.class, mockConfigInterface, 0);
+        when(mImsCallContext.getCallHandler()).thenReturn(Mockito.mock(android.os.Handler.class));
+
+        com.android.imsstack.enabler.mts.MtsController mockMtsController =
+            Mockito.mock(com.android.imsstack.enabler.mts.MtsController.class);
+
+        SmsRelayLayer smsRL = new SmsRelayLayer(mImsCallContext, mockMtsController) {
+            @Override
+            protected String getPSIValue() {
+                return null;
+            }
+        };
+        smsRL.mDeliverCause.put(ImsSmsImplBase.DELIVER_STATUS_OK, 0);
+        smsRL.mDeliverCause.put(ImsSmsImplBase.DELIVER_STATUS_ERROR_GENERIC, 0x6f);
+
+        ArgumentCaptor<com.android.imsstack.enabler.mts.MtsController.Listener> mtsListenerCaptor =
+            ArgumentCaptor.forClass(com.android.imsstack.enabler.mts.MtsController.Listener.class);
+        verify(mockMtsController).setListener(mtsListenerCaptor.capture());
+        com.android.imsstack.enabler.mts.MtsController.Listener mtsListener = mtsListenerCaptor
+            .getValue();
+
+        TestSmsTransferLayer testTransferLayer = new TestSmsTransferLayer(mImsCallContext, smsRL);
+        testTransferLayer.setListener(mListener);
+        smsRL.setListener(testTransferLayer.mSmsRLListener);
+
+        // STEP 1: Simulate the Network sending the MT SMS (Message 3.1.2)
+        String hexRpData = "0101099111223344556677F8001C" +
+                           "04049112347F16891010000000000D546573744D6573736167652032";
+        byte[] incomingPdu = ImsUtils.hexStringToBytes(hexRpData);
+
+        // Inject the message into the Relay Layer (this creates the State Machine)
+        mtsListener.notifyIncomingMessage(SmsUtils.FORMAT_INT_3GPP, incomingPdu);
+
+        int frameworkToken = -1;
+        for (Integer t : smsRL.mTokenStateTrackerMap.keySet()) {
+            frameworkToken = t;
+            break;
+        }
+        assertTrue("State machine must be created for the incoming token. " +
+                   "Map size: " + smsRL.mTokenStateTrackerMap.size() +
+                   " mMoMRTokenMap: " + smsRL.mMoMRTokenMap.size() +
+                   " mMTTokenMRMap: " + smsRL.mMTTokenMRMap.size(),
+                   frameworkToken != -1);
+
+        // STEP 2: Simulate the Telephony Framework's empty Acknowledgement
+        int result = ImsSmsImplBase.DELIVER_STATUS_OK;
+        byte[] frameworkReportPdu = null;
+
+        // Trigger the Transfer Layer to generate the fallback RP-ACK
+        testTransferLayer.sendReportTPdu(frameworkToken, 0x01, result, frameworkReportPdu);
+
+        byte[] expectedRpAck = ImsUtils.hexStringToBytes("0201410500077F1600");
+
+        verify(mockMtsController, times(1)).sendMessage(
+                eq(SmsUtils.FORMAT_INT_3GPP),
+                eq(expectedRpAck),
+                anyString(),
+                anyString(),
+                eq(0x01) // Message Reference
+        );
+    }
+
+    @Test
+    public void test_sendReportTPdu_Standard() {
+        int token = 124;
+        int messageRef = 46;
+        int result = ImsSmsImplBase.DELIVER_STATUS_ERROR_NO_MEMORY;
+
+        mSmsTransferLayer.sendReportTPdu(token, messageRef, result, null);
+
+        byte[] expectedPdu = new byte[] {
+            0x00,
+            (byte)0xD3,
+            0x00
+        };
+
+        verify(mSmsRL).sendRPMessage(eq(token), eq(SmsUtils.RP_ERROR), eq(null), eq(null),
+            eq(expectedPdu), eq(result));
     }
 
     @Test

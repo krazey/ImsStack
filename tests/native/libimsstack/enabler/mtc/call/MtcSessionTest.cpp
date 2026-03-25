@@ -872,8 +872,54 @@ TEST_F(MtcSessionTest, TerminateWithReasonVccDoesNotInvokeTerminate)
     CreateMtcSession();
     const CallReasonInfo objReason(CODE_LOCAL_CALL_VCC_ON_PROGRESSING);
     EXPECT_CALL(*pMessageSender, Terminate(_, _)).Times(0);
+    EXPECT_CALL(*pSessionInterfaceHolder, ReleaseISession(&objSession, IMS_FALSE, IMS_TRUE));
 
     pMtcSession->Terminate(IMS_TRUE, objReason);
+    // Trigger MtcSession's destructor
+    delete pMtcSession;
+    pMtcSession = IMS_NULL;
+}
+
+TEST_F(MtcSessionTest, TerminateWithReasonNotRegisteredSetsStartFailedFlag)
+{
+    CreateMtcSession();
+    const CallReasonInfo objReason(CODE_LOCAL_NOT_REGISTERED);
+
+    EXPECT_CALL(*pMessageSender, Terminate(_, _)).Times(0);
+    EXPECT_CALL(*pSessionInterfaceHolder, ReleaseISession(&objSession, IMS_FALSE, IMS_TRUE));
+
+    pMtcSession->Terminate(IMS_TRUE, objReason);
+    // Trigger MtcSession's destructor
+    delete pMtcSession;
+    pMtcSession = IMS_NULL;
+}
+
+TEST_F(MtcSessionTest, TerminateWithReasonNoServiceSetsStartFailedFlag)
+{
+    CreateMtcSession();
+    const CallReasonInfo objReason(CODE_LOCAL_NETWORK_NO_SERVICE);
+
+    EXPECT_CALL(*pMessageSender, Terminate(_, _)).Times(0);
+    EXPECT_CALL(*pSessionInterfaceHolder, ReleaseISession(&objSession, IMS_FALSE, IMS_TRUE));
+
+    pMtcSession->Terminate(IMS_TRUE, objReason);
+    // Trigger MtcSession's destructor
+    delete pMtcSession;
+    pMtcSession = IMS_NULL;
+}
+
+TEST_F(MtcSessionTest, TerminateWithReasonNoLteCoverageSetsStartFailedFlag)
+{
+    CreateMtcSession();
+    const CallReasonInfo objReason(CODE_LOCAL_NETWORK_NO_LTE_COVERAGE);
+
+    EXPECT_CALL(*pMessageSender, Terminate(_, _)).Times(0);
+    EXPECT_CALL(*pSessionInterfaceHolder, ReleaseISession(&objSession, IMS_FALSE, IMS_TRUE));
+
+    pMtcSession->Terminate(IMS_TRUE, objReason);
+    // Trigger MtcSession's destructor
+    delete pMtcSession;
+    pMtcSession = IMS_NULL;
 }
 
 TEST_F(MtcSessionTest, TerminateWithReasonLocalServiceUnavailableInvokesTerminate)

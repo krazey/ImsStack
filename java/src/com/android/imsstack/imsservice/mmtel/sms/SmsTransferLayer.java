@@ -300,7 +300,14 @@ public class SmsTransferLayer {
                 messageType = SmsUtils.RP_ACK;
             }
             if (deliverReportPdu == null) {
-                deliverReportPdu = generateDeliverReportPdu(result);
+                SmsTPdu incomingTpdu = null;
+                if (mSmsRL != null) {
+                    incomingTpdu = mSmsRL.getIncomingTpdu(token);
+                }
+                if (incomingTpdu == null) {
+                    loge("sendReportTPdu: No incoming TPDU found for token " + token);
+                }
+                deliverReportPdu = generateDeliverReportPdu(result, incomingTpdu);
             }
             if (DBG) {
                 log("SMS-DELIVER-REPORT = "
@@ -320,11 +327,21 @@ public class SmsTransferLayer {
      * @return SMS-DELIVER-REPORT TPDU in byte array
      */
     public byte[] generateDeliverReportPdu(int deliverResult) {
+        return generateDeliverReportPdu(deliverResult, null);
+    }
+
+    /**
+     * Generates the SMS-DELIVER-REPORT TPDU with optional parameter mirroring
+     * @param deliverResult indicates the result of SMS-DELIVER receipt
+     * @param incomingTpdu the incoming TPDU to mirror PID and DCS from, or null
+     *
+     * @return SMS-DELIVER-REPORT TPDU in byte array
+     */
+    public byte[] generateDeliverReportPdu(int deliverResult, SmsTPdu incomingTpdu) {
         try {
             log("generateDeliverReportPdu: Result" + deliverResult);
             ByteArrayOutputStream bo = new ByteArrayOutputStream(MAX_TPDU_LENGTH);
             byte mtiByte = 0x00; // TP-MTI for SMS-DELIVER-REPORT as per TS 23.040 section 9.2.3.1
-            byte parameterIndByte = 0x00;
             bo.write(mtiByte);
 
             int cause = TP_FCS_UNSPECIFIED_ERROR_CAUSE;
@@ -350,7 +367,18 @@ public class SmsTransferLayer {
                 bo.write((byte) cause);
             }
 
-            bo.write(parameterIndByte); //TP-PID not set
+            // Mirror PID/DCS if it's a (U)SIM Data Download
+            if (incomingTpdu != null && incomingTpdu.isUsimDataDownload()) {
+                // Set TP-PI to 0x07 (Indicates PID, DCS, and UDL are present)
+                bo.write(SmsTPdu.TP_PI_PID_PRESENT | SmsTPdu.TP_PI_DCS_PRESENT
+                        | SmsTPdu.TP_PI_UDL_PRESENT);
+                bo.write((byte) incomingTpdu.getProtocolIdentifier());
+                bo.write((byte) incomingTpdu.getDataCodingScheme());
+                bo.write(0x00); // TP-UDL (0 as UICC provided no payload)
+            } else {
+                bo.write(SmsTPdu.TP_PI_NONE);
+            }
+
             return bo.toByteArray();
         } catch (RuntimeException ex) {
             loge("generateDeliverReportPdu failed: " + ex.toString());

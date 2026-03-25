@@ -54,7 +54,7 @@ public class SmsRLStateMachine {
     public int mMessageType;
     public int mRetryCount = 0;
     public int mRpMr;
-    public SmsRPdu mRPduData;
+    private SmsRPdu mRPduData;
     public String mPSISmsc;
     public String mDestinationAddress;
     public int mTpMr;
@@ -493,6 +493,22 @@ public class SmsRLStateMachine {
      */
     public void setState(SmsRLState state) {
         mCurrentState = state;
+    }
+
+    /**
+     * Sets the RPDU data for this state machine.
+     * @param data the SmsRPdu data to set.
+     */
+    public void setRpduData(SmsRPdu data) {
+        mRPduData = data;
+    }
+
+    /**
+     * Gets the RPDU data for this state machine.
+     * @return the SmsRPdu data.
+     */
+    public SmsRPdu getRpduData() {
+        return mRPduData;
     }
 
     /**
