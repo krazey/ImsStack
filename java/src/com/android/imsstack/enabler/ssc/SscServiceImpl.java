@@ -1455,7 +1455,14 @@ public class SscServiceImpl implements IUtInterface {
                 case OCB:
                 case ICB:
                     final ImsSsInfo[] cbInfo = createCallBarringInfo(data);
-                    mUtListener.utConfigurationCallBarringQueried(id, cbInfo);
+                    if (cbInfo == null) {
+                        ImsReasonInfo ri = new ImsReasonInfo(
+                            ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED,
+                            ImsReasonInfo.CODE_UNSPECIFIED, null);
+                        mUtListener.utConfigurationQueryFailed(id, ri);
+                    } else {
+                        mUtListener.utConfigurationCallBarringQueried(id, cbInfo);
+                    }
                     break;
                 case CF:
                     final ImsCallForwardInfo[] cfInfo = createCallForwardInfo(data);
@@ -1504,6 +1511,9 @@ public class SscServiceImpl implements IUtInterface {
             CbServiceData cbData = (CbServiceData) data;
             if (cbData.getRuleSet() == null || cbData.getRuleSet().size() <= 0) {
                 ImsLog.e(mSlotId, "CB ruleset is null or empty");
+                if (!SscConfig.insertNewRule(mSlotId)) {
+                    return null;
+                }
                 ImsSsInfo cbInfo[] = new ImsSsInfo[1];
 
                 // No RuleSet case : status_disable

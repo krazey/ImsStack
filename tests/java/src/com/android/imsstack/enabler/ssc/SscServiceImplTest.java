@@ -547,6 +547,58 @@ public class SscServiceImplTest {
     }
 
     @Test
+    public void testQueryCallBarringForServiceClass_emptyRuleSetAndInsertNewRuleFalse() {
+        mIsIcbRulesExist = false; // So the XML won't have ICB rules
+        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.ImsSs.KEY_UT_INSERT_NEW_RULE_BOOL)))
+                .thenReturn(false);
+        int queryCondition = SscConstant.CONDITION_BAIC;
+        int tId = 1;
+
+        mSscServiceImpl.queryCallBarringForServiceClass(tId, queryCondition,
+                SscServiceClassUtil.SERVICE_CLASS_VOICE);
+        processEntireXmlDocQueryAsSuccess();
+        processGetTransactionAsSuccess(ESsType.ICB, SscConstant.EVENT_SSC_QUERY_CB,
+                queryCondition);
+
+        mLooper.processAllMessages();
+
+        verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), captorReasonInfo.capture());
+
+        ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
+        assertNotNull(reasonInfo);
+        assertEquals(ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED, reasonInfo.getCode());
+
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
+    }
+
+    @Test
+    public void testQueryCallBarringForServiceClass_emptyRuleSetAndInsertNewRule() {
+        mIsIcbRulesExist = false; // So the XML won't have ICB rules
+        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.ImsSs.KEY_UT_INSERT_NEW_RULE_BOOL)))
+                .thenReturn(true);
+        int queryCondition = SscConstant.CONDITION_BAIC;
+        int tId = 1;
+
+        mSscServiceImpl.queryCallBarringForServiceClass(tId, queryCondition,
+                SscServiceClassUtil.SERVICE_CLASS_VOICE);
+        processEntireXmlDocQueryAsSuccess();
+        processGetTransactionAsSuccess(ESsType.ICB, SscConstant.EVENT_SSC_QUERY_CB,
+                queryCondition);
+
+        mLooper.processAllMessages();
+
+        verify(mMockUtListener).utConfigurationCallBarringQueried(eq(tId), captorSsInfos.capture());
+
+        ImsSsInfo[] cbInfos = captorSsInfos.getValue();
+        assertNotNull(cbInfos);
+        assertEquals(SscConstant.STATUS_DISABLE, cbInfos[0].mStatus);
+
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
+    }
+
+    @Test
     public void testQueryCallBarringTb_notRegisteredReturnsDisabled() {
         int tId = 31;
         int condition = SscConstant.CONDITION_BAOC;
