@@ -225,6 +225,7 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
 
     auto pNewOaModel = std::make_shared<OaModel>();
 
+    IMS_BOOL bInitializedFromBase = m_listOaModel.IsEmpty();
     if (m_listOaModel.IsEmpty())
     {
         pNewOaModel->pLocalProfile =
@@ -244,6 +245,7 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
         {
             pNewOaModel->pLocalProfile = MediaProfileFactory::GetInstance()->CreateProfile(
                     m_eType, m_pBaseProfile.get());
+            bInitializedFromBase = IMS_TRUE;
         }
         else
         {
@@ -276,8 +278,11 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
         pNewOaModel->pLocalProfile->SetDataPort(m_pBaseProfile->GetDataPort());
         pNewOaModel->pLocalProfile->SetControlPort(m_pBaseProfile->GetControlPort());
         pNewOaModel->pLocalProfile->SetBandwidthAs(m_pBaseProfile->GetBandwidthAs());
-        pNewOaModel->pLocalProfile->SetBandwidthRs(m_pConfig->GetRsBandwidthBps());
-        pNewOaModel->pLocalProfile->SetBandwidthRr(m_pConfig->GetRrBandwidthBps());
+        if (bInitializedFromBase)
+        {
+            pNewOaModel->pLocalProfile->SetBandwidthRs(m_pConfig->GetRsBandwidthBps());
+            pNewOaModel->pLocalProfile->SetBandwidthRr(m_pConfig->GetRrBandwidthBps());
+        }
     }
 
     m_listOaModel.Append(pNewOaModel);
