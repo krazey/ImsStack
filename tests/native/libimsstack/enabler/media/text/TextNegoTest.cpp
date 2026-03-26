@@ -336,9 +336,13 @@ TEST_F(TextNegoTest, testFormReofferEnforceReofferMode)
                     [&](ISessionDescriptor*, IMediaDescriptor*, MediaBaseProfile* pProfile,
                             const MediaSessionConfig*)
                     {
-                        EXPECT_EQ(pProfile->GetDataPort(), m_pBaseProfile->GetDataPort());
-                        EXPECT_TRUE(pProfile->ComparePayloadList(m_pBaseProfile->GetPayloadList()));
-                        EXPECT_EQ(pProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
+                        auto* pTextProfile = static_cast<TextProfile*>(pProfile);
+                        EXPECT_EQ(pTextProfile->GetDataPort(), m_pBaseProfile->GetDataPort());
+                        EXPECT_TRUE(
+                                pTextProfile->ComparePayloadList(m_pBaseProfile->GetPayloadList()));
+                        EXPECT_EQ(pTextProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
+                        EXPECT_EQ(pTextProfile->GetBandwidthRs(), m_pConfig->GetRsBandwidthBps());
+                        EXPECT_EQ(pTextProfile->GetBandwidthRr(), m_pConfig->GetRrBandwidthBps());
                         return IMS_TRUE;
                     }));
 
@@ -385,9 +389,13 @@ TEST_F(TextNegoTest, testFormReofferUpgradeFromDisabled)
                     {
                         // Check that the new offer is based on the original base profile, not the
                         // disabled one.
-                        EXPECT_EQ(pProfile->GetDataPort(), m_pBaseProfile->GetDataPort());
-                        EXPECT_TRUE(pProfile->ComparePayloadList(m_pBaseProfile->GetPayloadList()));
-                        EXPECT_EQ(pProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
+                        auto* pTextProfile = static_cast<TextProfile*>(pProfile);
+                        EXPECT_EQ(pTextProfile->GetDataPort(), m_pBaseProfile->GetDataPort());
+                        EXPECT_TRUE(
+                                pTextProfile->ComparePayloadList(m_pBaseProfile->GetPayloadList()));
+                        EXPECT_EQ(pTextProfile->GetDirection(), MEDIA_DIRECTION_SEND_RECEIVE);
+                        EXPECT_EQ(pTextProfile->GetBandwidthRs(), m_pConfig->GetRsBandwidthBps());
+                        EXPECT_EQ(pTextProfile->GetBandwidthRr(), m_pConfig->GetRrBandwidthBps());
                         return IMS_TRUE;
                     }));
 
@@ -764,4 +772,52 @@ TEST_F(TextNegoTest, testGetters)
     EXPECT_EQ(m_pTextNego->GetNegotiatedPeerProfile(), IMS_NULL);
     EXPECT_EQ(m_pTextNego->GetNegotiatedRtpPort(), -1);
     EXPECT_EQ(m_pTextNego->GetRemotePort(), MEDIA_PORT_INVALID);
+}
+
+TEST_F(TextNegoTest, testFormReofferPreserveZeroBandwidth)
+{
+    MockISessionDescriptor objSessionDescriptor;
+    MockIMediaDescriptor objMediaDescriptor;
+
+    // Set Rs and RR to 0
+    MEDIA_DIRECTION eDirection;
+    auto pNegoProfile = std::make_shared<TextProfile>();
+    pNegoProfile->SetDataPort(10000);  // Negotiated port will be non-zero
+    pNegoProfile->SetBandwidthRs(0);
+    pNegoProfile->SetBandwidthRr(0);
+
+    EXPECT_CALL(*m_pMockProfileNegotiator,
+            Negotiate(testing::_, testing::_, testing::_, testing::_, testing::_))
+            .WillOnce(testing::DoAll(testing::SetArgPointee<3>(*pNegoProfile), Return(IMS_TRUE)));
+    ON_CALL(*m_pMockTextSdpParser, Parse(testing::_, testing::_, testing::_))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(m_objMediaProfileFactory, CreateProfile(testing::_, testing::_))
+            .WillByDefault(testing::Invoke(
+                    [](MEDIA_CONTENT_TYPE,
+                            MediaBaseProfile* pProfile) -> std::shared_ptr<MediaBaseProfile>
+                    {
+                        if (pProfile)
+                        {
+                            return std::make_shared<TextProfile>(
+                                    *static_cast<TextProfile*>(pProfile));
+                        }
+                        return std::make_shared<TextProfile>();
+                    }));
+
+    m_pTextNego->NegotiateSdp(STATE_IDLE, &objSessionDescriptor, &objMediaDescriptor, eDirection);
+
+    EXPECT_CALL(*m_pMockTextSdpGenerator, Generate(testing::_, testing::_, testing::_, testing::_))
+            .WillOnce(testing::Invoke(
+                    [&](ISessionDescriptor*, IMediaDescriptor*, MediaBaseProfile* pProfile,
+                            const MediaSessionConfig*)
+                    {
+                        auto* pTextProfile = static_cast<TextProfile*>(pProfile);
+                        EXPECT_EQ(pTextProfile->GetBandwidthRs(), 0);
+                        EXPECT_EQ(pTextProfile->GetBandwidthRr(), 0);
+                        return IMS_TRUE;
+                    }));
+
+    EXPECT_TRUE(m_pTextNego->FormSdp(STATE_NEGOTIATED, &objSessionDescriptor, &objMediaDescriptor,
+            MEDIA_DIRECTION_SEND_RECEIVE, IMS_FALSE, IMS_FALSE));
 }

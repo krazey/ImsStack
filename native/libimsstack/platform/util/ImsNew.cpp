@@ -72,6 +72,18 @@ void operator delete[](IN void* pMem) IMS_NO_EXCEPTION
     operator delete(pMem);
 }
 
+GLOBAL
+void operator delete(IN void* pMem, IN IMS_SIZE_T /*nSize*/) IMS_NO_EXCEPTION
+{
+    operator delete(pMem);
+}
+
+GLOBAL
+void operator delete[](IN void* pMem, IN IMS_SIZE_T /*nSize*/) IMS_NO_EXCEPTION
+{
+    operator delete[](pMem);
+}
+
 #else   // IMS_DEBUG_MEM
 
 GLOBAL
@@ -101,6 +113,18 @@ GLOBAL
 void operator delete[](IN void* pMem) IMS_NO_EXCEPTION
 {
     operator delete(pMem);
+}
+
+GLOBAL
+void operator delete(IN void* pMem, IN IMS_SIZE_T /*nSize*/) IMS_NO_EXCEPTION
+{
+    operator delete(pMem);
+}
+
+GLOBAL
+void operator delete[](IN void* pMem, IN IMS_SIZE_T /*nSize*/) IMS_NO_EXCEPTION
+{
+    operator delete[](pMem);
 }
 #endif  // IMS_DEBUG_MEM
 

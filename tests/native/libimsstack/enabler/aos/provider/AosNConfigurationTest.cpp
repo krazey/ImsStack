@@ -734,6 +734,9 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
                     IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::Ims::KEY_USE_LAST_AVAILABLE_PCSCF_ON_CALL_BOOL, IMS_FALSE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Ims::
                                KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL,
                     IMS_FALSE))
@@ -1070,6 +1073,7 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
     EXPECT_FALSE(m_pAosNConfiguration->IsVerstatForRegistrationSupported());
     EXPECT_FALSE(m_pAosNConfiguration->IsVerstatSupportedBasedOnNetworkForReg());
     EXPECT_TRUE(m_pAosNConfiguration->IsUpdateOngoingRegRetryTimerOnImsEstTimerExpiry());
+    EXPECT_FALSE(m_pAosNConfiguration->IsUseLastAvailablePcscfOnCall());
     EXPECT_FALSE(m_pAosNConfiguration->IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType());
     EXPECT_FALSE(m_pAosNConfiguration->IsSecurityServerPortInInitRegUsed());
     EXPECT_FALSE(m_pAosNConfiguration->IsRegRetryRuleForERegUsed());

@@ -225,10 +225,41 @@ TEST_F(SipInviteServerTxnTest, ProceedingState)
     EXPECT_EQ(SIP_FALSE,
             gpfSipInvSerTxnFsm[SipTxn::INV_SER_PROCEEDING_ST]
                               [SipTxn::INV_SER_SEND_FAILURE_RESP_EVT](pTxn, pTxnFsmData, &nError));
+
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _, _))
+            .WillByDefault(Invoke(
+                    [&](Unused, Unused, OUT SipTxnKey*& pOutTxnKey, Unused)
+                    {
+                        pOutTxnKey = pTxnKey;
+                        return SIP_TRUE;
+                    }));
+
     /* Calling once timer to make startTimer for Timer L success */
+    ASSERT_TRUE(pTxnKey->GetToTag() == nullptr);
+
+    const SIP_CHAR* pMsg = "SIP/2.0 200 OK\r\n\
+Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:userA@host>;tag=12345\r\n\
+Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
+CSeq: 1 INVITE\r\n\
+\r\n";
+
+    SipMessage* pTempSipMsg = new SipMessage();
+    pTempSipMsg->SetMessageType(SipMessage::RESP_TYPE);
+
+    EXPECT_EQ(SIP_TRUE, pTempSipMsg->Decode(pMsg, SipPf_Strlen(pMsg)));
+    delete pTxnFsmData;
+    pTxnFsmData = new SipTxnFsmData(pTempSipMsg, pSipTranspParam, pSipUserData);
+
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvSerTxnFsm[SipTxn::INV_SER_PROCEEDING_ST][SipTxn::INV_SER_SEND_2XX_RESP_EVT](
                     pTxn, pTxnFsmData, &nError));
+
+    EXPECT_STREQ("12345", pTxnKey->GetToTag());
+
+    pTempSipMsg->SipDelete();
+
     /* Calling again timer to make startTimer for Timer L fail */
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvSerTxnFsm[SipTxn::INV_SER_PROCEEDING_ST][SipTxn::INV_SER_SEND_2XX_RESP_EVT](

@@ -164,6 +164,76 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiatePayload(IN AudioProfile*
                 nNegotiatedSamplingRate, pPeerProfile, pNegotiatedProfile);
     }
 
+    // In the MT case, synchronize the local profile's payload numbers with the negotiated ones.
+    if (m_bIsOfferReceived)
+    {
+        for (IMS_UINT32 i = 0; i < pNegotiatedProfile->GetPayloadListSize(); ++i)
+        {
+            auto* pNegoPayload = pNegotiatedProfile->GetPayloadAt(i);
+            if (pNegoPayload == IMS_NULL)
+            {
+                continue;
+            }
+
+            IMS_SINT32 nLocalPayloadIndex =
+                    pLocalProfile->FindPayload(pNegoPayload->GetRtpMap().GetPayloadType(),
+                            pNegoPayload->GetRtpMap().GetSamplingRate());
+
+            if (nLocalPayloadIndex != -1)
+            {
+                AudioProfile::Payload* pLocalNegoPayload =
+                        pLocalProfile->GetPayloadAt(nLocalPayloadIndex);
+                IMS_UINT32 nNewPayloadNum = pNegoPayload->GetRtpMap().GetPayloadNumber();
+                IMS_UINT32 nOldPayloadNum = pLocalNegoPayload->GetRtpMap().GetPayloadNumber();
+
+                if (nNewPayloadNum != nOldPayloadNum)
+                {
+                    // Check for and resolve payload number collisions in the local profile.
+                    for (IMS_UINT32 k = 0; k < pLocalProfile->GetPayloadListSize(); ++k)
+                    {
+                        auto* pExistingPayload = pLocalProfile->GetPayloadAt(k);
+                        if (pExistingPayload != nullptr &&
+                                pExistingPayload->GetRtpMap().GetPayloadNumber() ==
+                                        nNewPayloadNum &&
+                                pExistingPayload != pLocalNegoPayload)
+                        {
+                            // Collision detected. Find a new unused dynamic payload number.
+                            IMS_BOOL bFoundNewPt = IMS_FALSE;
+                            for (IMS_UINT32 nDynamicPt = 96; nDynamicPt <= 127; ++nDynamicPt)
+                            {
+                                IMS_BOOL bLocalUsed =
+                                        pLocalProfile->IsPayloadNumberUsed(nDynamicPt);
+                                IMS_BOOL bPeerUsed = pPeerProfile->IsPayloadNumberUsed(nDynamicPt);
+
+                                IMS_TRACE_D("Checking PT[%d]: localUsed=%d, peerUsed=%d",
+                                        nDynamicPt, bLocalUsed, bPeerUsed);
+
+                                if (!bLocalUsed)
+                                {
+                                    pExistingPayload->GetRtpMap().SetPayloadNumber(nDynamicPt);
+                                    bFoundNewPt = IMS_TRUE;
+                                    break;
+                                }
+                            }
+
+                            if (!bFoundNewPt)
+                            {
+                                IMS_TRACE_E(0,
+                                        "NegotiatePayload(): No available dynamic payload"
+                                        " number to resolve collision for PT[%d]",
+                                        nNewPayloadNum, 0, 0);
+                                // Returning null will cause the overall negotiation to fail.
+                                return IMS_NULL;
+                            }
+                        }
+                    }
+                    // Update the local payload to match the negotiated number.
+                    pLocalNegoPayload->GetRtpMap().SetPayloadNumber(nNewPayloadNum);
+                }
+            }
+        }
+    }
+
     return pNegotiatedPayload;
 }
 
@@ -286,16 +356,6 @@ AudioProfile::Payload* AudioProfileNegotiator::NegotiateAmr(IN AudioProfile* pLo
         pPeerProfile->SetNegotiatedPayloadIndex(nPayloadIndex);
         // Set remote payload index at local profile
         pLocalProfile->SetNegotiatedPayloadIndex(nLocalPayloadIndex);
-
-        // MT case : change src PT# to dest PT#
-        if (m_bIsOfferReceived && pLocalProfile->GetNegotiatedPayloadIndex() != -1)
-        {
-            AudioProfile::Payload* pTempNegoSrcPayload =
-                    pLocalProfile->GetPayloadAt(pLocalProfile->GetNegotiatedPayloadIndex());
-
-            pTempNegoSrcPayload->GetRtpMap().SetPayloadNumber(
-                    pPeerPayload->GetRtpMap().GetPayloadNumber());
-        }
     }
 
     if (pNegotiatedProfile->GetNegotiatedPayloadIndex() == -1)
@@ -1263,8 +1323,6 @@ IMS_BOOL AudioProfileNegotiator::FindMatchingEvsPayload(
         {
             if (FindMatchedEvsFmtp(pLocalPayload, pPeerPayload))
             {
-                pLocalPayload->GetRtpMap().SetPayloadNumber(
-                        pPeerPayload->GetRtpMap().GetPayloadNumber());
                 pLocalProfile->SetNegotiatedPayloadIndex(i);
                 IMS_TRACE_D(
                         "FindMatchingEvsPayload(): Found, Local Payload index[%d], local PT[%d]", i,

@@ -163,6 +163,12 @@ not perform any processing, it simply return success. Also pTxnKey will be NULL
             /* return Key of newly created txn */
             *ppTxnKey = pTxnKey;
         }
+        else if ((pSipMsg->GetMethodType() == SipMessage::METHOD_INVITE) &&
+                (SipMsgUtil::IsSuccessfulResponse(pSipMsg->GetStatusCode()) == SIP_TRUE))
+        {
+            /* return the key to update the to-tag */
+            *ppTxnKey = pTxnKey;
+        }
         else
         {
             pTxnKey->SipDelete();

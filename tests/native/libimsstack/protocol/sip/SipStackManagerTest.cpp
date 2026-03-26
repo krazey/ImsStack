@@ -1099,20 +1099,19 @@ Content-Length: 0\r\n\
     SIP_UINT32 nLength = SipPf_Strlen(pszInviteReq);
     SIP_INT32 eTxnStatus = SipTxn::STATUS_INVALID;
     SIP_UINT16 nError = 0;
-    SipTxnKey* pTxnKey = SIP_NULL;
+    SipTxnKey* pInvTxnKey = SIP_NULL;
 
     SipMessage* pSipMsg = new SipMessage();
     EXPECT_EQ(SIP_TRUE, pSipMsg->Decode(pszInviteReq, nLength));
 
     ASSERT_EQ(SIP_TRUE,
             pSipStackManager->OnRecvMessage(
-                    pSipMsg, &objTransportParam, &objUserData, &eTxnStatus, &pTxnKey, &nError));
+                    pSipMsg, &objTransportParam, &objUserData, &eTxnStatus, &pInvTxnKey, &nError));
 
     EXPECT_EQ(SipTxn::INVITE_SERVER, pTxn->GetTxnType());
-    ASSERT_TRUE(pTxnKey != nullptr);
+    ASSERT_TRUE(pInvTxnKey != nullptr);
+    ASSERT_TRUE(pInvTxnKey->GetToTag() == nullptr);
 
-    pTxnKey->SipDelete();
-    pTxnKey = SIP_NULL;
     pSipMsg->SipDelete();
 
     const SIP_CHAR* psz200Ok = "SIP/2.0 200 OK\r\n\
@@ -1130,11 +1129,35 @@ Content-Length: 0\r\n\
     pSipMsg = new SipMessage();
     EXPECT_EQ(SIP_TRUE, pSipMsg->Decode(psz200Ok, nLength));
 
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _, _))
+            .WillByDefault(Invoke(
+                    [&](Unused, Unused, OUT SipTxnKey*& pOutTxnKey, OUT SipTxn*& pOutTxn)
+                    {
+                        pOutTxnKey = pInvTxnKey;
+                        if (pTxn == SIP_NULL)
+                        {
+                            if (pOutTxn != SIP_NULL)
+                            {
+                                pTxn = pOutTxn;
+                                return SIP_TRUE;
+                            }
+                            return SIP_FALSE;
+                        }
+
+                        pOutTxn = pTxn;
+                        return SIP_TRUE;
+                    }));
+
+    SipTxnKey* pTxnKey = SIP_NULL;
     EXPECT_EQ(SIP_TRUE,
             pSipStackManager->SendMsg(pSipMsg, &objTransportParam, &objUserData, psz200Ok, nLength,
                     &pTxnKey, &nError));
-    ASSERT_TRUE(pTxnKey == nullptr);
+    ASSERT_TRUE(pTxnKey != nullptr);
+    EXPECT_STREQ("dcba", pInvTxnKey->GetToTag());
+    EXPECT_STREQ("dcba", pTxnKey->GetToTag());
 
+    pTxnKey->SipDelete();
+    pTxnKey = SIP_NULL;
     pSipMsg->SipDelete();
 
     const SIP_CHAR* pszAckReq = "ACK sip:user@host SIP/2.0\r\n\
@@ -1171,6 +1194,33 @@ Content-Length: 0\r\n\
 
     pSipMsg->SipDelete();
     pTxnKey->SipDelete();
+    pTxnKey = SIP_NULL;
+
+    ON_CALL(*pMockISipTransactionCallback, FetchTransaction(_, _, _))
+            .WillByDefault(Return(SIP_FALSE));
+    pszAckReq = "ACK sip:user@host SIP/2.0\r\n\
+Via: SIP/2.0/TCP host;branch=test-br1\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:user@host>;tag=32423434\r\n\
+Call-ID: callid\r\n\
+CSeq: 3 ACK\r\n\
+Content-Length: 0\r\n\
+\r\n";
+
+    nLength = SipPf_Strlen(pszAckReq);
+
+    pSipMsg = new SipMessage();
+    EXPECT_EQ(SIP_TRUE, pSipMsg->Decode(pszAckReq, nLength));
+
+    EXPECT_TRUE(pTxn != nullptr);
+
+    EXPECT_EQ(SIP_FALSE,
+            pSipStackManager->OnRecvMessage(
+                    pSipMsg, &objTransportParam, &objUserData, &eTxnStatus, &pTxnKey, &nError));
+    EXPECT_EQ(SipTxn::STATUS_INVALID_MESSAGE, eTxnStatus);
+
+    pInvTxnKey->SipDelete();
+    pSipMsg->SipDelete();
     pSipStackManager->Destruct();
 }
 

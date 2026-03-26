@@ -552,6 +552,23 @@ public:
         static const IMS_CHAR KEY_UPDATE_ONGOING_REG_RETRY_TIMER_ON_IMS_EST_TIMER_EXPIRY_BOOL[];
 
         /**
+         * Specifies whether to retry the current P-CSCF if no other P-CSCFs are available in the
+         * list when a call enabler requests registration with the next P-CSCF.
+         *
+         * If {@code true}, the UE follows these rules:
+         * 1. If only one P-CSCF is configured, it retries the current P-CSCF.
+         * 2. If multiple P-CSCFs exist and the current one is not the last, it switches to the
+         *    next P-CSCF.
+         * 3. If multiple P-CSCFs exist and the current one is the last in the list, it retries
+         *    the current P-CSCF instead of marking it invalid.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
+        static const IMS_CHAR KEY_USE_LAST_AVAILABLE_PCSCF_ON_CALL_BOOL[];
+
+        /**
          * Specifies this item adds a customized +g.gsma.rcs.telephony feature tag in contact
          * header of SIP REGISTER message with "cs,volte" value.
          *

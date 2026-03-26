@@ -301,6 +301,16 @@ SIP_VOID SipTxnKey::SetMethod(const SIP_CHAR* pszMethod)
     m_pszMethod = SipPf_Strdup(pszMethod);
 }
 
+SIP_VOID SipTxnKey::SetToTag(const SIP_CHAR* pToTag)
+{
+    if (m_pszToTag != SIP_NULL)
+    {
+        delete[] m_pszToTag;
+    }
+
+    m_pszToTag = SipPf_Strdup(pToTag);
+}
+
 SIP_INT32 SipTxnKey::CompareKeys(SipTxnKey* pGeneratedKey)
 {
     if (pGeneratedKey == SIP_NULL)

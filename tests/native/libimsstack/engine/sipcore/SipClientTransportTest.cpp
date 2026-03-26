@@ -19,20 +19,25 @@
 #include "IpAddress.h"
 #include "PlatformContext.h"
 
+#include "CarrierConfig.h"
 #include "private/ConfigurationManager.h"
+#include "private/SipConfig.h"
 
 #include "msg/SipHeaderBase.h"
 #include "msg/SipMessage.h"
 
 #include "SipClientTransport.h"
+#include "SipProfile.h"
 #include "SipStack.h"
 
 #include "MockINetworkConnection.h"
+#include "TestConfigService.h"
 #include "TestNetworkService.h"
 
 using ::testing::_;
 using ::testing::Invoke;
 using ::testing::Return;
+using ::testing::StrEq;
 using ::testing::Unused;
 
 namespace android
@@ -51,6 +56,8 @@ protected:
     void SetUp() override
     {
         PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_CONFIG, &m_objConfigService);
+        PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_NETWORK, &m_objNetworkService);
 
         ConfigurationManager::GetInstance()->Initialize();
@@ -67,9 +74,11 @@ protected:
         }
 
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_NETWORK, IMS_NULL);
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
     }
 
 protected:
+    TestConfigService m_objConfigService;
     TestNetworkService m_objNetworkService;
     SipClientTransport* m_pTransport;
 };
@@ -253,6 +262,42 @@ TEST_F(SipClientTransportTest, UpdateDestinationInfoWithImplicitDstAddress)
     EXPECT_EQ(objDnsResolvedIpAddr, m_pTransport->GetIpAddress(SipTransport::TA_FAR));
     EXPECT_EQ(nPort, m_pTransport->GetPort(SipTransport::TA_FAR));
     EXPECT_EQ(SipTransportAddress::PROTOCOL_UDP, m_pTransport->GetProtocol(SipTransport::TA_FAR));
+
+    SipStack::FreeMessage(pSipMsg);
+}
+
+TEST_F(SipClientTransportTest, UpdateDestinationInfo_IgnoreUdpTransportParameter)
+{
+    ON_CALL(m_objConfigService.GetMockCarrierConfig(),
+            GetInt(StrEq(CarrierConfig::Ims::KEY_SIP_PREFERRED_TRANSPORT_INT), _))
+            .WillByDefault(Return(SipConfig::TRANSPORT_TYPE_TCP));
+    const SipConfig* pSipConfig = ConfigurationManager::GetInstance()->GetSipConfig(IMS_SLOT_0);
+    ASSERT_NE(pSipConfig, IMS_NULL);
+    const_cast<SipConfig*>(pSipConfig)->Refresh();
+
+    ::SipMessage* pSipMsg = new ::SipMessage(::SipMessage::REQ_TYPE);
+
+    IMS_SINT32 nPort = 5080;
+    const AString strHostIp("192.168.0.1");
+    AString strUri;
+    strUri.Sprintf("sip:%s:%d", strHostIp.GetStr(), nPort);
+    SipStack::SetRequestLine("INVITE", strUri, pSipMsg);
+
+    strUri.Sprintf("<sip:%s:%d;lr;transport=udp>", strHostIp.GetStr(), nPort);
+    SipHeaderBase* pRouteHeader = SipStack::DecodeHeader(SipHeaderBase::ROUTE, strUri);
+    SipStack::SetHeader(pRouteHeader, pSipMsg);
+    SipStack::FreeHeader(pRouteHeader);
+
+    SipProfile objSipProfile;
+    objSipProfile.SetSipFeatureCaps(
+            ISipConfig::SIP_FEATURE_CAPS_IGNORE_UDP_TRANSPORT_PARAMETER_FOR_OUTGOING_REQUEST);
+
+    EXPECT_TRUE(m_pTransport->UpdateDestinationInfo(
+            pSipMsg, &objSipProfile, IMS_TRUE, IMS_NULL, IMS_NULL));
+
+    EXPECT_EQ(strHostIp, m_pTransport->GetIpAddress(SipTransport::TA_FAR).ToString());
+    EXPECT_EQ(nPort, m_pTransport->GetPort(SipTransport::TA_FAR));
+    EXPECT_EQ(SipTransportAddress::PROTOCOL_TCP, m_pTransport->GetProtocol(SipTransport::TA_FAR));
 
     SipStack::FreeMessage(pSipMsg);
 }

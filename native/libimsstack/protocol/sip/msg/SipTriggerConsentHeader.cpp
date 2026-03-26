@@ -145,20 +145,19 @@ SIP_BOOL SipTriggerConsentHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32 nD
         return SIP_FALSE;
     }
 
-    // skip "sip:" from the user name
-    const SIP_CHAR* pszSIPScheme = SIP_NULL;
+    // skip "sip:" or "sips:" from the user name
+    const SIP_CHAR* pszUriScheme = SIP_NULL;
 
-    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pszSIPScheme, COLON) == SIP_TRUE)
+    if (SipAbnfUtil::FindPreDelimiter(pStartPt, pEndPt, pszUriScheme, COLON) == SIP_TRUE)
     {
-        SIP_CHAR* pszTempScheme = SipAbnfUtil::CreateString(pStartPt, pszSIPScheme);
-        if (SipPf_Stricmp(pszTempScheme, "sip") == SIP_ZERO)
+        SIP_UINT32 nSchemeLen = (pszUriScheme - pStartPt) + SIP_ONE;
+
+        if ((nSchemeLen == SIP_THREE && SipPf_Strnicmp(pStartPt, SIP_SIP, SIP_THREE) == SIP_ZERO) ||
+                (nSchemeLen == SIP_FOUR &&
+                        SipPf_Strnicmp(pStartPt, SIP_SIPS, SIP_FOUR) == SIP_ZERO))
         {
-            pStartPt = pszSIPScheme + 2;
-            nDecLen -= SipPf_Strlen("sip:");
-        }
-        if (pszTempScheme != SIP_NULL)
-        {
-            delete[] pszTempScheme;
+            pStartPt = pszUriScheme + 2;
+            nDecLen -= (nSchemeLen + 1);
         }
     }
 

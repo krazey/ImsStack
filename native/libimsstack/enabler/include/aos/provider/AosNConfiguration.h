@@ -104,6 +104,7 @@ public:
     IMS_BOOL IsVideoOverWifiSupportedWithoutVoice() const override;
     IMS_BOOL IsGeolocationPidfSupported(IN IMS_SINT32 nGeolocationPidfType) const override;
     IMS_BOOL IsUpdateOngoingRegRetryTimerOnImsEstTimerExpiry() const override;
+    IMS_BOOL IsUseLastAvailablePcscfOnCall() const override;
     IMS_BOOL IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType() const override;
     IMS_BOOL IsCdmalessFeatureTagRequired() const override;
     IMS_BOOL IsRegErrCodeWithRetryAfterTimeOnlyDefined() const override;
