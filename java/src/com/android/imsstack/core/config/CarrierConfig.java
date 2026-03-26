@@ -479,6 +479,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "support_verstat_for_reg_bool";
         public static final String KEY_UPDATE_ONGOING_REG_RETRY_TIMER_ON_IMS_EST_TIMER_EXPIRY_BOOL =
                 KEY_PREFIX + "update_ongoing_reg_retry_timer_on_ims_est_timer_expiry_bool";
+        public static final String KEY_USE_LAST_AVAILABLE_PCSCF_ON_CALL_BOOL =
+                KEY_PREFIX + "use_last_available_pcscf_on_call_bool";
         public static final String
                 KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL =
                 KEY_PREFIX
