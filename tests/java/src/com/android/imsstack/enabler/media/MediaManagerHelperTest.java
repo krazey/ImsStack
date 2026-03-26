@@ -43,6 +43,7 @@ public class MediaManagerHelperTest extends ImsStackTest {
 
     @Mock private Context mMockContext;
     @Mock private IMediaConnectionObserver mMockMediaObserver;
+    @Mock private IMediaConnectionObserver mMockMediaObserver2;
     @Mock private ImsMediaManager mMockImsMediaManager;
     @Mock private Executor mMockExecutor;
 
@@ -67,6 +68,53 @@ public class MediaManagerHelperTest extends ImsStackTest {
     public void tearDown() throws Exception {
         mMediaManagerHelper.close();
         super.tearDown();
+    }
+
+    @Test
+    public void testMultipleObserversNotified_Connected() {
+        var unused = new MediaManagerHelper(
+                mMockContext, mMockMediaObserver2, mMockImsMediaManager, mMockExecutor);
+
+        MediaManagerHelper.setImsMediaConnected(false);
+
+        // Trigger connected event
+        invokeMethod(mMediaManagerHelper, "handleConnected", null, null);
+
+        // Verify both observers are notified
+        org.mockito.Mockito.verify(mMockMediaObserver).onMediaConnected();
+        org.mockito.Mockito.verify(mMockMediaObserver2).onMediaConnected();
+
+        assertTrue(MediaManagerHelper.isImsMediaConnected());
+    }
+
+    @Test
+    public void testMultipleObserversNotified_Disconnected() {
+        var unused = new MediaManagerHelper(
+                mMockContext, mMockMediaObserver2, mMockImsMediaManager, mMockExecutor);
+
+        MediaManagerHelper.setImsMediaConnected(true);
+
+        // Trigger disconnected event
+        invokeMethod(mMediaManagerHelper, "handleDisconnected", null, null);
+
+        // Verify both observers are notified
+        org.mockito.Mockito.verify(mMockMediaObserver).onMediaDisconnected();
+        org.mockito.Mockito.verify(mMockMediaObserver2).onMediaDisconnected();
+
+        assertFalse(MediaManagerHelper.isImsMediaConnected());
+    }
+
+    @Test
+    public void testRemoveObserver() {
+        // Observer is already added in setUp
+        mMediaManagerHelper.removeObserver(mMockMediaObserver);
+
+        MediaManagerHelper.setImsMediaConnected(false);
+        invokeMethod(mMediaManagerHelper, "handleConnected", null, null);
+
+        // Verify observer is NOT notified
+        org.mockito.Mockito.verify(
+                mMockMediaObserver, org.mockito.Mockito.never()).onMediaConnected();
     }
 
     @Test
