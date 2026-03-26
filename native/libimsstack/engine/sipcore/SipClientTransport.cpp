@@ -486,16 +486,16 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
                             GetSlotId(), pProfile))
                 {
                     IMS_TRACE_I("SIP transport parameter(udp) is ignored", 0, 0, 0);
+                    SetTransportProtocolByConfig();
                 }
                 else
                 {
                     SetExplicitTargetProtocol(IMS_TRUE);
+                    // SIP/2.0/UDP
+                    SetProtocol(SipTransportAddress::PROTOCOL_UDP, TA_NEAR);
+                    // Update the destination info. scheme.
+                    SetProtocol(SipTransportAddress::PROTOCOL_UDP, TA_FAR);
                 }
-
-                // SIP/2.0/UDP
-                SetProtocol(SipTransportAddress::PROTOCOL_UDP, TA_NEAR);
-                // Update the destination info. scheme.
-                SetProtocol(SipTransportAddress::PROTOCOL_UDP, TA_FAR);
             }
             else
             {
