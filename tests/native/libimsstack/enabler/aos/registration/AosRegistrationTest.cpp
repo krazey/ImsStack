@@ -1209,6 +1209,50 @@ TEST_F(AosRegistrationTest, UpdateBlockStatusWhenRequestToUpdateIpcan)
     EXPECT_TRUE(m_pAosRegistration->IsBlocked());
 }
 
+TEST_F(AosRegistrationTest, RetryRegistrationWithCurrentPcscfIfSinglePcscfConfigured)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsUseLastAvailablePcscfOnCall())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosPcscf, GetPcscfCount()).WillByDefault(Return(1));
+    ON_CALL(m_objMockIAosPcscf, GetCurrentIndex()).WillByDefault(Return(0));
+
+    EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_SUCCESS));
+
+    m_pAosRegistration->RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION);
+
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
+}
+
+TEST_F(AosRegistrationTest, RetryRegistrationWithCurrentPcscfIfLastInMultiplePcscfList)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsUseLastAvailablePcscfOnCall())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosPcscf, GetPcscfCount()).WillByDefault(Return(3));
+    ON_CALL(m_objMockIAosPcscf, GetCurrentIndex()).WillByDefault(Return(2));
+
+    EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_SUCCESS));
+
+    m_pAosRegistration->RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION);
+
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
+}
+
+TEST_F(AosRegistrationTest, RegisterWithNextPcscfIfAvailableEvenIfLastPcscfRetryEnabled)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsUseLastAvailablePcscfOnCall())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosPcscf, GetPcscfCount()).WillByDefault(Return(3));
+    ON_CALL(m_objMockIAosPcscf, GetCurrentIndex()).WillByDefault(Return(1));
+    ON_CALL(m_objMockIAosPcscf, HasNextPcscf()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfInvalid(IMS_FALSE, 0));
+    EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_SUCCESS));
+
+    m_pAosRegistration->RequestCmd(IAosRegistration::CMD_SCSCF_RESTORATION);
+
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
+}
+
 TEST_F(AosRegistrationTest, SetCurrentPcscfInvalidForGivenTimeWhenRequestForScscfRestoration)
 {
     // GIVEN

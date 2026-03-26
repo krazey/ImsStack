@@ -3476,9 +3476,27 @@ PROTECTED VIRTUAL void AosRegistration::ProcessScscfRestoration(
             nUnavailableTimeForCurrentPcscf, 0, 0);
 
     IAosPcscf* piPcscf = m_piContext->GetPcscf();
-
     if (piPcscf == IMS_NULL)
     {
+        return;
+    }
+
+    const IAosHandle* piHandleMtc = m_piContext->GetHandle(ImsAosService::MTC);
+    IMS_BOOL bIsRegToNextPcscfRequestedByMtc =
+            piHandleMtc != IMS_NULL && piHandleMtc->IsRegToNextPcscfRequested();
+
+    if (GET_N_CONFIG(m_nSlotId)->IsUseLastAvailablePcscfOnCall() &&
+            piPcscf->GetPcscfCount() == piPcscf->GetCurrentIndex() + 1)
+    {
+        A_IMS_TRACE_I(REGID, "Do not mark invalid P-CSCF because it's the last P-CSCF.", 0, 0, 0);
+        DestroyEx();
+
+        if (bIsRegToNextPcscfRequestedByMtc)
+        {
+            m_bRegByPcscfRestoration = IMS_TRUE;
+        }
+
+        Start();
         return;
     }
 
@@ -3495,10 +3513,6 @@ PROTECTED VIRTUAL void AosRegistration::ProcessScscfRestoration(
             piPcscf->SetCurrentPcscfInvalid();
         }
     }
-
-    const IAosHandle* piHandleMtc = m_piContext->GetHandle(ImsAosService::MTC);
-    IMS_BOOL bIsRegToNextPcscfRequestedByMtc =
-            piHandleMtc != IMS_NULL && piHandleMtc->IsRegToNextPcscfRequested();
 
     if (piPcscf->HasNextPcscf())
     {
