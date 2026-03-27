@@ -1382,6 +1382,15 @@ TEST_F(MediaSessionTest, testRequestRtpReceptionStats)
     ON_CALL(*m_pMockAudioController, IsSessionOpened()).WillByDefault(Return(true));
     ON_CALL(*m_pMockVideoController, IsSessionOpened()).WillByDefault(Return(true));
 
+    // Setup ports to non-zero to avoid session closure in Run() -> ProcessNegotiationResult()
+    ON_CALL(*m_pMockAudioNegoInstance, GetNegotiatedRtpPort()).WillByDefault(Return(REMOTE_PORT));
+    ON_CALL(*m_pMockVideoNegoInstance, GetNegotiatedRtpPort()).WillByDefault(Return(REMOTE_PORT));
+
+    // Expect QoS requests (triggered by Run -> ProcessNegotiationResult)
+    EXPECT_CALL(*m_pSession, MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_QOS, _))
+            .Times(testing::AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
     // Expect controllers to be updated and stats requested
     EXPECT_CALL(*m_pMockAudioController, UpdateSession(NEGO_ID, _, _)).WillOnce(Return(true));
     EXPECT_CALL(*m_pMockVideoController, UpdateRtpConfig(_, _)).WillOnce(Return(true));
@@ -1495,4 +1504,43 @@ TEST_F(MediaSessionTest, testFinalizeSdpDelegatesToHandler)
 
     // Call the method under test
     m_pSession->FinalizeSdp(nNegoId, &mockSession);
+}
+
+TEST_F(MediaSessionTest, testRunTriggersOpenAndUpdateTextSession)
+{
+    IMS_UINTP nNegoId = NEGO_ID;
+    MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_TEXT;
+
+    // Setup: Negotiated type is TEXT, and session is confirmed
+    ON_CALL(*m_pMockMediaNegoHandler, GetNegotiatedMediaType(nNegoId)).WillByDefault(Return(eType));
+    m_pSession->SetOptions(nNegoId, MediaSession::SET_CONFIRMED_SESSION, 1, 0);
+
+    // Setup mock nego to have a valid port for TEXT
+    ON_CALL(*m_pMockTextNegoInstance, GetNegotiatedRtpPort()).WillByDefault(Return(REMOTE_PORT));
+    // And NO audio/video for this specific test case setup to simplify
+    ON_CALL(*m_pMockAudioNegoInstance, GetNegotiatedRtpPort()).WillByDefault(Return(-1));
+    ON_CALL(*m_pMockVideoNegoInstance, GetNegotiatedRtpPort()).WillByDefault(Return(-1));
+
+    // Expect OpenMediaSessions to be called (triggered by Run)
+    EXPECT_CALL(*m_pMockTextController, IsSessionOpened())
+            .WillOnce(Return(IMS_FALSE))
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(*m_pMockTextController, CreateSession(_, _)).Times(1).WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(*m_pMockTextController, UpdateLocalAddress(_)).Times(1);
+    EXPECT_CALL(*m_pMockTextController, OpenSession()).Times(1).WillOnce(Return(IMS_TRUE));
+
+    // Expect ProcessNegotiationResult to be called (triggered by Run)
+    // which calls RequestQosParam -> MediaSession_SendMsgToMediaManager
+    EXPECT_CALL(*m_pSession, MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_QOS, _))
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+
+    // Expect UpdateMediaSessions to be called (triggered by Run)
+    EXPECT_CALL(*m_pMockTextController, UpdateRtpConfig(_)).Times(1);
+    EXPECT_CALL(*m_pMockTextController, UpdateAccessNetwork(_)).Times(1);
+    EXPECT_CALL(*m_pMockTextController, UpdateSession()).Times(1).WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(*m_pMockTextController, ApplyQualityThreshold()).Times(1);
+
+    // Action
+    EXPECT_TRUE(m_pSession->Run(nNegoId));
 }
