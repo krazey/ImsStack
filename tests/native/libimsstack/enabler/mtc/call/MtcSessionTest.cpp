@@ -1463,6 +1463,8 @@ TEST_F(MtcSessionTest, HandleUpdateRequestWithSdpInvokesSetCallTypeIfSameCallTyp
                     MessageUtil::STR_P_TTA_VOLTE_INFO))
             .WillByDefault(Return(IMS_FALSE));
 
+    SipMethod objSipMethod(SipMethod::INVITE);
+    ON_CALL(objMessage, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
     ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
@@ -1485,6 +1487,8 @@ TEST_F(MtcSessionTest, HandleUpdateRequestWithoutSdpInvokesSetCallTypeByRegister
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT))
             .WillByDefault(Return(ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_FULL));
 
+    SipMethod objSipMethod(SipMethod::INVITE);
+    ON_CALL(objMessage, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
 
     CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_FALSE, IMS_TRUE);
@@ -1496,11 +1500,31 @@ TEST_F(MtcSessionTest, HandleUpdateRequestWithoutSdpInvokesSetCallTypeByRegister
     EXPECT_EQ(CallType::RTT, pMtcSession->GetCallType());
 }
 
+TEST_F(MtcSessionTest, HandleUpdateRequestWithoutSdpDoesNotInvokeSetCallTypeIfUpdateMethod)
+{
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT))
+            .WillByDefault(Return(ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_AUDIO));
+
+    SipMethod objSipMethod(SipMethod::UPDATE);
+    ON_CALL(objMessage, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
+
+    CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+    pMtcSession->SetCallType(CallType::VIDEO_RTT);
+    RequestType eType = RequestType::UPDATE;
+
+    pMtcSession->HandleRequest(eType, objMessage);
+
+    EXPECT_EQ(CallType::VIDEO_RTT, pMtcSession->GetCallType());
+}
+
 TEST_F(MtcSessionTest, HandleUpdateRequestWithoutSdpInvokesSetCallTypeWithVoip)
 {
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT))
             .WillByDefault(Return(ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_AUDIO));
 
+    SipMethod objSipMethod(SipMethod::INVITE);
+    ON_CALL(objMessage, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
 
     CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
@@ -1517,6 +1541,8 @@ TEST_F(MtcSessionTest, HandleUpdateRequestWithoutSdpInvokesSetCallTypeWithCurren
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT))
             .WillByDefault(Return(ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_CURRENT));
 
+    SipMethod objSipMethod(SipMethod::INVITE);
+    ON_CALL(objMessage, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
 
     CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
@@ -1534,6 +1560,8 @@ TEST_F(MtcSessionTest, HandleUpdateRequestWithoutSdpInvokesSetCallTypeByHistory)
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT))
             .WillByDefault(Return(ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_BY_HISTORY));
 
+    SipMethod objSipMethod(SipMethod::INVITE);
+    ON_CALL(objMessage, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
 
     CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
@@ -1552,6 +1580,8 @@ TEST_F(MtcSessionTest, HandleUpdateRequestWithoutSdpInvokesSetCallTypeWithInitia
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT))
             .WillByDefault(Return(ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_INITIALLY_OFFERED));
 
+    SipMethod objSipMethod(SipMethod::INVITE);
+    ON_CALL(objMessage, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
 
     CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
@@ -1571,6 +1601,8 @@ TEST_F(MtcSessionTest, HandleUpdateRequestDoesNotCreateConferenceIfAlreadyExists
 {
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT))
             .WillByDefault(Return(ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_INITIALLY_OFFERED));
+    SipMethod objSipMethod(SipMethod::INVITE);
+    ON_CALL(objMessage, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
 
     CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
@@ -1591,6 +1623,8 @@ TEST_F(MtcSessionTest, HandleUpdateRequestCreatesConferenceControllerIfIsfocusAn
 {
     ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT))
             .WillByDefault(Return(ConfigVoice::OFFERLESS_REINVITE_MEDIA_TYPE_INITIALLY_OFFERED));
+    SipMethod objSipMethod(SipMethod::INVITE);
+    ON_CALL(objMessage, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
     ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
 
     CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
