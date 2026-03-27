@@ -837,7 +837,7 @@
         <item value="si,,113"/>
         <item value="ba,,122,123,124"/>
     </string-array>
-    <string-array name="imsemergency.emergency_service_category_per_plmn_string_array" num="17">
+    <string-array name="imsemergency.emergency_service_category_per_plmn_string_array" num="18">
         <item value="hu,,104,2"/>
         <item value="hu,,105,4"/>
         <item value="hu,,107,1"/>
@@ -855,6 +855,7 @@
         <item value="tw,,110,1"/>
         <item value="tw,,119,4"/>
         <item value="sg,05,995,2"/>
+        <item value="be,,100,2"/>
     </string-array>
     <boolean name="imsemergency.keep_invite_transaction_timeout_during_call_bool" value="false"/>
     <boolean name="imswfc.override_media_inactivity_to_wifi_lost_bool" value="false"/>
