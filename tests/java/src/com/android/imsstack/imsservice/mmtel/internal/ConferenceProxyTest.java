@@ -37,7 +37,6 @@ import com.android.imsstack.enabler.mtc.MtcConference;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
-import com.android.imsstack.util.MessageExecutor;
 
 import org.junit.After;
 import org.junit.Before;
@@ -125,9 +124,6 @@ public class ConferenceProxyTest extends ImsStackTest {
         super.setUp(getClass().getSimpleName());
         MockitoAnnotations.initMocks(this);
         ImsCallContext mCallContext = Mockito.mock(ImsCallContext.class);
-
-        MessageExecutor mExecutor = new MessageExecutor(mTestableLooper.getLooper());
-        when(mCallContext.getExecutor()).thenReturn(mExecutor);
 
         mConfProxyWrapper = new ConferenceProxyWrapperClass(mCallContext);
         assertNotNull(mConfProxyWrapper);
@@ -283,12 +279,10 @@ public class ConferenceProxyTest extends ImsStackTest {
 
         /* hold operation */
         mConfProxyWrapper.executeHoldWrapper(call);
-        processAllMessages();
         assertEquals(mConfProxyWrapper.mHoldListenerCalled, true);
 
         /* unhold operation */
         mConfProxyWrapper.executeUnholdWrapper(call);
-        processAllMessages();
         assertEquals(mConfProxyWrapper.mUnholdListenerCalled, true);
     }
 
@@ -309,7 +303,6 @@ public class ConferenceProxyTest extends ImsStackTest {
 
         mConfProxyWrapper.notifySessionTerminatedWrapper(call);
 
-        processAllMessages();
         assertEquals(mConfProxyWrapper.mCallTerminatedrCalled, true);
     }
 }

@@ -126,27 +126,22 @@ public class ConferenceExtensionProxy extends ConferenceProxy {
     }
 
     private void executeConferenceExtension() {
-        postAndRun(new Runnable() {
-            @Override
-            public void run() {
-                MtcCall confCall = getConferenceCall();
+        MtcCall confCall = getConferenceCall();
 
-                if (confCall == null) {
-                    return;
-                }
+        if (confCall == null) {
+            return;
+        }
 
-                MtcCall.extendToConference(confCall, createUsersInfo());
+        MtcCall.extendToConference(confCall, createUsersInfo());
 
-                for (ListenerWrapper lw : mListeners) {
-                    if (lw.mListener != null) {
-                        lw.mConferenceListener.onCallProxyExtendToConference(
-                                MtcCall.getConference(confCall),
-                                MtcCall.getConference(mForegroundCall),
-                                mParticipants);
-                    }
-                }
+        for (ListenerWrapper lw : mListeners) {
+            if (lw.mListener != null) {
+                lw.mConferenceListener.onCallProxyExtendToConference(
+                        MtcCall.getConference(confCall),
+                        MtcCall.getConference(mForegroundCall),
+                        mParticipants);
             }
-        });
+        }
     }
 
     private void notifyConferenceFailed() {
@@ -155,47 +150,37 @@ public class ConferenceExtensionProxy extends ConferenceProxy {
 
     private void notifySessionConferenceExtended(final CallInfo callInfo,
             final MediaInfo mediaInfo, final SuppInfo suppInfo) {
-        postAndRun(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    MtcCall confCall = getConferenceCall();
+        try {
+            MtcCall confCall = getConferenceCall();
 
-                    if (confCall == null) {
-                        return;
-                    }
+            if (confCall == null) {
+                return;
+            }
 
-                    for (ListenerWrapper lw : mListeners) {
-                        if (lw.mConferenceListener != null) {
-                            lw.mConferenceListener.onCallConferenceExtended(
-                                    MtcCall.getConference(mForegroundCall),
-                                    confCall.getNativeCallId(),
-                                    callInfo, mediaInfo, suppInfo);
-                        }
-                    }
-                } catch (Throwable t) {
-                    loge("notifySessionConferenceExtended", t);
+            for (ListenerWrapper lw : mListeners) {
+                if (lw.mConferenceListener != null) {
+                    lw.mConferenceListener.onCallConferenceExtended(
+                            MtcCall.getConference(mForegroundCall),
+                            confCall.getNativeCallId(),
+                            callInfo, mediaInfo, suppInfo);
                 }
             }
-        });
+        } catch (Throwable t) {
+            loge("notifySessionConferenceExtended", t);
+        }
     }
 
     private void notifySessionConferenceExtendFailed(final CallReasonInfo callReasonInfo) {
-        postAndRun(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    for (ListenerWrapper lw : mListeners) {
-                        if (lw.mConferenceListener != null) {
-                            lw.mConferenceListener.onCallConferenceExtendFailed(
-                                    MtcCall.getConference(mForegroundCall), callReasonInfo);
-                        }
-                    }
-                } catch (Throwable t) {
-                    loge("notifySessionConferenceExtendFailed", t);
+        try {
+            for (ListenerWrapper lw : mListeners) {
+                if (lw.mConferenceListener != null) {
+                    lw.mConferenceListener.onCallConferenceExtendFailed(
+                            MtcCall.getConference(mForegroundCall), callReasonInfo);
                 }
             }
-        });
+        } catch (Throwable t) {
+            loge("notifySessionConferenceExtendFailed", t);
+        }
     }
 
     private class MtcCallListenerProxy extends MtcCall.Listener {
