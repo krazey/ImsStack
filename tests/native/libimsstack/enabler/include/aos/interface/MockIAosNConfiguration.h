@@ -44,7 +44,6 @@ public:
     MOCK_METHOD(IMS_BOOL, IsVolteTtySupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsVopsIgnoredForVolteEnabled, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSmsOverImsAvailableWithoutVoiceCapability, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsAnonymousECallActionSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRequiredVolteBlockBySsac, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRequiredWfcBlockByAirplaneMode, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsGeolocationPidfInWfcInitReg, (), (const, override));
@@ -130,6 +129,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetRegistrationPreferredAccessTypeFeatureTag, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetUssdMethod, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPreferredIpType, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetAnonymousECallSupportMode, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetEmergencyPreferredIpType, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetEmcRegRetryMaxCnt, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetEmcRegRetryTimerMillis, (), (const, override));

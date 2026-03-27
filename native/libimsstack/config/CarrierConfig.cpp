@@ -545,8 +545,6 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_RELEASE_EPDN_OF_UNAVAILABLE_NETW
         KEY_IMS_EMERGENCY_PREFIX "release_epdn_of_unavailable_network_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_STOP_EREG_TIMER_ON_EPDN_CONNECTED_BOOL[] =
         KEY_IMS_EMERGENCY_PREFIX "stop_ereg_timer_on_epdn_connected_bool";
-const IMS_CHAR CarrierConfig::ImsEmergency::KEY_SUPPORT_ANONYMOUS_ECALL_ACTION_BOOL[] =
-        KEY_IMS_EMERGENCY_PREFIX "support_anonymous_ecall_action_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_SUPPORT_EREG_WHEN_EATTACH_WITH_VALID_SIM_BOOL[] =
         KEY_IMS_EMERGENCY_PREFIX "support_ereg_when_eattach_with_valid_sim_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL[] =
@@ -557,6 +555,8 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_SUPPORT_VIDEO_FOR_EREG_BOOL[] =
         KEY_IMS_EMERGENCY_PREFIX "support_video_for_ereg_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_USE_REG_RETRY_RULE_FOR_EREG_BOOL[] =
         KEY_IMS_EMERGENCY_PREFIX "use_reg_retry_rule_for_ereg_bool";
+const IMS_CHAR CarrierConfig::ImsEmergency::KEY_ANONYMOUS_ECALL_ACTION_SUPPORT_MODE_INT[] =
+        KEY_IMS_EMERGENCY_PREFIX "anonymous_ecall_action_support_mode_int";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EPDN_PREFERRED_IPTYPE_INT[] =
         KEY_IMS_EMERGENCY_PREFIX "epdn_preferred_iptype_int";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EREG_RETRY_MAX_CNT_INT[] =
