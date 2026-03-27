@@ -141,6 +141,15 @@ PUBLIC VIRTUAL IMS_BOOL BaseSession::SetAccessNetwork(IMS_UINT32 nAccessNetwork)
     return IMS_FALSE;
 }
 
+PUBLIC VIRTUAL void BaseSession::ResetAnbrMode()
+{
+    if (m_pRtpConfig != IMS_NULL)
+    {
+        m_pRtpConfig->setAnbrMode(AnbrMode());
+        IMS_TRACE_D("ResetAnbrMode()", 0, 0, 0);
+    }
+}
+
 PUBLIC VIRTUAL void BaseSession::SetAnbrMode(AnbrMode objAnbrMode)
 {
     if (m_pRtpConfig != IMS_NULL)

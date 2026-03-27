@@ -699,6 +699,11 @@ IMS_BOOL AudioSession::UpdateAnbrEnabledConfig(IN IMS_BOOL anbrEnabled)
     {
         m_bAnbrEnabled = anbrEnabled;
 
+        if (!m_bAnbrEnabled)
+        {
+            ResetAnbrMode();
+        }
+
         ImsMediaMsgAnbrNegotiationParam* pParam = new ImsMediaMsgAnbrNegotiationParam();
         pParam->m_bAnbrNegotiationType = anbrEnabled;
 
@@ -728,6 +733,26 @@ IMS_BOOL AudioSession::NotifyAnbrReceived(
         AudioConfig* pAudioConfig = REINTERPRET_CAST(AudioConfig*, m_pRtpConfig);
         IMS_SINT32 codecMode =
                 ConvertBitrateToCodecMode(nAnbrBitRate, (IMS_UINT32)pAudioConfig->getCodecType());
+
+        // Check if the recommended bitrate is within the negotiated range
+        IMS_SINT32 nNegotiatedMode = 0;
+        if (pAudioConfig->getCodecType() == AudioConfig::CODEC_EVS)
+        {
+            nNegotiatedMode = pAudioConfig->getEvsParams().getEvsMode();
+        }
+        else if (pAudioConfig->getCodecType() == AudioConfig::CODEC_AMR ||
+                pAudioConfig->getCodecType() == AudioConfig::CODEC_AMR_WB)
+        {
+            nNegotiatedMode = pAudioConfig->getAmrParams().getAmrMode();
+        }
+
+        if (codecMode >= 0 && nNegotiatedMode > 0 && !(nNegotiatedMode & (1 << codecMode)))
+        {
+            IMS_TRACE_E(0, "NotifyAnbrReceived() - Out of range bitrate[%d], negotiated[0x%x]",
+                    nAnbrBitRate, nNegotiatedMode, 0);
+            return bResult;
+        }
+
         AnbrMode objAnbrMode;
 
         if (nAnbrDirection == MEDIA_DIRECTION_ANBR::DIRECTION_UPLINK)
@@ -773,20 +798,42 @@ IMS_SINT32 AudioSession::ConvertBitrateToCodecMode(IMS_UINT32 nBitRate, IMS_UINT
     switch (nCodecType)
     {
         case CodecType_ANBR::CODEC_AMR:
+            if (nBitRate <= 4750)
+                nConvertedCodecMode = 0;
+            else if (nBitRate <= 5150)
+                nConvertedCodecMode = 1;
+            else if (nBitRate <= 5900)
+                nConvertedCodecMode = 2;
+            else if (nBitRate <= 6700)
+                nConvertedCodecMode = 3;
+            else if (nBitRate <= 7400)
+                nConvertedCodecMode = 4;
+            else if (nBitRate <= 7950)
+                nConvertedCodecMode = 5;
+            else if (nBitRate <= 10200)
+                nConvertedCodecMode = 6;
+            else
+                nConvertedCodecMode = 7;
+            break;
         case CodecType_ANBR::CODEC_AMR_WB:
-            if (nBitRate <= 12)
-            {
-                nConvertedCodecMode = 10;
-            }
-            else if (nBitRate <= 16)
-            {
-                nConvertedCodecMode = 12;
-            }
-            else if (nBitRate <= 24)
-            {
-                nConvertedCodecMode = 13;
-            }
-            // TODO: need to add for EVS 24.4kbps
+            if (nBitRate <= 6600)
+                nConvertedCodecMode = 0;
+            else if (nBitRate <= 8850)
+                nConvertedCodecMode = 1;
+            else if (nBitRate <= 12650)
+                nConvertedCodecMode = 2;
+            else if (nBitRate <= 14250)
+                nConvertedCodecMode = 3;
+            else if (nBitRate <= 15850)
+                nConvertedCodecMode = 4;
+            else if (nBitRate <= 18250)
+                nConvertedCodecMode = 5;
+            else if (nBitRate <= 19850)
+                nConvertedCodecMode = 6;
+            else if (nBitRate <= 23050)
+                nConvertedCodecMode = 7;
+            else
+                nConvertedCodecMode = 8;
             break;
         case CodecType_ANBR::CODEC_EVS:
             if (nBitRate <= 5900)
