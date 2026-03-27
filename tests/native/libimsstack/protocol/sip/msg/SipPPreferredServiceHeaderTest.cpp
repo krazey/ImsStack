@@ -32,11 +32,11 @@ protected:
 
 TEST_F(SipPPreferredServiceHeaderTest, CopyConstructor)
 {
-    SipPPreferredServiceHeader* pHeader = reinterpret_cast<SipPPreferredServiceHeader*>(
+    SipPPreferredServiceHeader* pHeader = static_cast<SipPPreferredServiceHeader*>(
             SipPPreferredServiceHeader::GetNewObj(SipHeaderBase::P_PREFERRED_SERVICE, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    SipPPreferredServiceHeader* pCopyHeader = reinterpret_cast<SipPPreferredServiceHeader*>(
+    SipPPreferredServiceHeader* pCopyHeader = static_cast<SipPPreferredServiceHeader*>(
             SipPPreferredServiceHeader::GetNewObj(SipHeaderBase::P_PREFERRED_SERVICE, pHeader));
     ASSERT_TRUE(pCopyHeader != nullptr);
 
@@ -47,7 +47,7 @@ TEST_F(SipPPreferredServiceHeaderTest, CopyConstructor)
 
 TEST_F(SipPPreferredServiceHeaderTest, Decode)
 {
-    SipPPreferredServiceHeader* pHeader = reinterpret_cast<SipPPreferredServiceHeader*>(
+    SipPPreferredServiceHeader* pHeader = static_cast<SipPPreferredServiceHeader*>(
             SipPPreferredServiceHeader::GetNewObj(SipHeaderBase::P_PREFERRED_SERVICE, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
@@ -55,11 +55,11 @@ TEST_F(SipPPreferredServiceHeaderTest, Decode)
     EXPECT_EQ(SIP_FALSE, pHeader->Decode(SIP_NULL, 0));
     pHeader->SipDelete();
 
-    pHeader = reinterpret_cast<SipPPreferredServiceHeader*>(
+    pHeader = static_cast<SipPPreferredServiceHeader*>(
             SipPPreferredServiceHeader::GetNewObj(SipHeaderBase::P_PREFERRED_SERVICE, nullptr));
 
     /* Decode in complete value */
-    const SIP_CHAR* pValue = "urn:urn-8";
+    const SIP_CHAR* pValue = "urn:urn-8:";
     EXPECT_EQ(SIP_TRUE, pHeader->Decode(pValue, SipPf_Strlen(pValue)));
     const SIP_INT32 BUFFER_SIZE = 4096;
     SIP_CHAR aBuffer[BUFFER_SIZE] = {
@@ -70,7 +70,7 @@ TEST_F(SipPPreferredServiceHeaderTest, Decode)
     EXPECT_STREQ(pValue, &(aBuffer[0]));
     pHeader->SipDelete();
 
-    pHeader = reinterpret_cast<SipPPreferredServiceHeader*>(
+    pHeader = static_cast<SipPPreferredServiceHeader*>(
             SipPPreferredServiceHeader::GetNewObj(SipHeaderBase::P_PREFERRED_SERVICE, nullptr));
     pValue = "urn:urn-7:gpp-serv##ice.";
     EXPECT_EQ(SIP_FALSE, pHeader->Decode(pValue, SipPf_Strlen(pValue)));
@@ -78,6 +78,28 @@ TEST_F(SipPPreferredServiceHeaderTest, Decode)
     pValue = "urn:urn-7:3gpp-servicevalueabovetwentyseven67868.";
     EXPECT_EQ(SIP_FALSE, pHeader->Decode(pValue, SipPf_Strlen(pValue)));
 
+    pHeader = static_cast<SipPPreferredServiceHeader*>(
+            SipPPreferredServiceHeader::GetNewObj(SipHeaderBase::P_PREFERRED_SERVICE, nullptr));
+    pValue = "   ";
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode(pValue, SipPf_Strlen(pValue)));
+    pBuff = &(aBuffer[0]);
+    memset(pBuff, 0, BUFFER_SIZE);
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
+    EXPECT_STREQ(pValue, &(aBuffer[0]));
+    pHeader->SipDelete();
+
+    pHeader = static_cast<SipPPreferredServiceHeader*>(
+            SipPPreferredServiceHeader::GetNewObj(SipHeaderBase::P_PREFERRED_SERVICE, nullptr));
+    pValue = "urn:urn";
+    EXPECT_EQ(SIP_TRUE, pHeader->Decode(pValue, SipPf_Strlen(pValue)));
+    pBuff = &(aBuffer[0]);
+    memset(pBuff, 0, BUFFER_SIZE);
+    EXPECT_EQ(SIP_TRUE, pHeader->Encode(&pBuff));
+    EXPECT_STREQ(pValue, &(aBuffer[0]));
+    pHeader->SipDelete();
+
+    pHeader = static_cast<SipPPreferredServiceHeader*>(
+            SipPPreferredServiceHeader::GetNewObj(SipHeaderBase::P_PREFERRED_SERVICE, nullptr));
     pValue = "urn:urn-7:gpp-serv-ice.";
     EXPECT_EQ(SIP_TRUE, pHeader->Decode(pValue, SipPf_Strlen(pValue)));
     pBuff = &(aBuffer[0]);
@@ -86,9 +108,8 @@ TEST_F(SipPPreferredServiceHeaderTest, Decode)
     EXPECT_STREQ(pValue, &(aBuffer[0]));
     pHeader->SipDelete();
 
-    pHeader = reinterpret_cast<SipPPreferredServiceHeader*>(
+    pHeader = static_cast<SipPPreferredServiceHeader*>(
             SipPPreferredServiceHeader::GetNewObj(SipHeaderBase::P_PREFERRED_SERVICE, nullptr));
-
     /* Decode incomplete subservice value */
     pValue = "urn:urn-7:3gpp-service.ims.icsi.mmtel:.";
     EXPECT_EQ(SIP_TRUE, pHeader->Decode(pValue, SipPf_Strlen(pValue)));
@@ -99,7 +120,7 @@ TEST_F(SipPPreferredServiceHeaderTest, Decode)
     pHeader->SipDelete();
 
     /* Decode complete value */
-    pHeader = reinterpret_cast<SipPPreferredServiceHeader*>(
+    pHeader = static_cast<SipPPreferredServiceHeader*>(
             SipPPreferredServiceHeader::GetNewObj(SipHeaderBase::P_PREFERRED_SERVICE, nullptr));
     pValue = "urn:urn-7:3gpp-service.ims.icsi.mmtel";
     EXPECT_EQ(SIP_TRUE, pHeader->Decode(pValue, SipPf_Strlen(pValue)));
@@ -110,7 +131,7 @@ TEST_F(SipPPreferredServiceHeaderTest, Decode)
     pHeader->SipDelete();
 
     /* Decode complete value of SipHeaderBase::P_ASSERTED_SERVICE header */
-    pHeader = reinterpret_cast<SipPPreferredServiceHeader*>(
+    pHeader = static_cast<SipPPreferredServiceHeader*>(
             SipPPreferredServiceHeader::GetNewObj(SipHeaderBase::P_ASSERTED_SERVICE, nullptr));
     pValue = "urn:urn-7:3gpp-service.ims.icsi.mmtel";
     EXPECT_EQ(SIP_TRUE, pHeader->Decode(pValue, SipPf_Strlen(pValue)));
