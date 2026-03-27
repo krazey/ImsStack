@@ -26,8 +26,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -60,6 +62,7 @@ import com.android.imsstack.base.ContentProviderProxy.SettingsProxy;
 import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.imsservice.base.ImsContext;
+import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 import com.android.imsstack.imsservice.mmtel.sms.SmsTransferLayer;
 import com.android.imsstack.imsservice.mmtel.ut.UtFactory;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface;
@@ -72,6 +75,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -79,6 +83,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 @RunWith(JUnit4.class)
@@ -467,6 +472,73 @@ public class ImsMmTelServiceTest extends ImsStackTest {
     public void testShouldProcessCall() {
         String[] number = {"IMS"};
         assertEquals(0, mMmTelFeature.shouldProcessCall(number));
+    }
+
+    @Test
+    public void testOnFeatureCapabilityChangedWhenNotRegistered() {
+        mMmTelFeature.start();
+        IMmTelFeatureCapabilityListener listener =
+                mMmTelFeature.getMmTelFeatureCapabilityListener();
+
+        // Setup mock Executor to verify task posts
+        Executor mockExecutor = Mockito.mock(Executor.class);
+        when(mMockImsContext.getExecutor()).thenReturn(mockExecutor);
+
+        // Scenario: Not registered
+        when(mMockRegTracker.isRegistered()).thenReturn(false);
+        listener.onFeatureCapabilityChanged(Mockito.mock(MmTelCapabilities.class));
+
+        // Verification: Exactly 1 notification task posted (Direct only)
+        verify(mockExecutor, times(1)).execute(any(Runnable.class));
+    }
+
+    @Test
+    public void testOnFeatureCapabilityChangedWhenRegisteredForDoubleNotification() {
+        mMmTelFeature.start();
+        IMmTelFeatureCapabilityListener listener =
+                mMmTelFeature.getMmTelFeatureCapabilityListener();
+
+        Executor mockExecutor = Mockito.mock(Executor.class);
+        when(mMockImsContext.getExecutor()).thenReturn(mockExecutor);
+
+        // Scenario: Registered
+        when(mMockRegTracker.isRegistered()).thenReturn(true);
+        listener.onFeatureCapabilityChanged(Mockito.mock(MmTelCapabilities.class));
+
+        // Verification: Exactly 2 notification tasks posted (Direct + Correction)
+        verify(mockExecutor, times(2)).execute(any(Runnable.class));
+    }
+
+    @Test
+    public void testOnFeatureCapabilityChangedExecutionAndExceptionHandling() throws Exception {
+        mMmTelFeature.start();
+        IMmTelFeatureCapabilityListener listener =
+                mMmTelFeature.getMmTelFeatureCapabilityListener();
+
+        ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+        Executor mockExecutor = Mockito.mock(Executor.class);
+        when(mMockImsContext.getExecutor()).thenReturn(mockExecutor);
+
+        MmTelCapabilities caps = Mockito.mock(MmTelCapabilities.class);
+        listener.onFeatureCapabilityChanged(caps);
+
+        // 1. Verify and run the captured task
+        verify(mockExecutor, atLeast(1)).execute(runnableCaptor.capture());
+        runnableCaptor.getValue().run();
+
+        // 2. Verify exception handling inside the lambda
+        // Mock getPhoneId to throw IllegalStateException to trigger catch block
+        when(mMockImsContext.getPhoneId()).thenThrow(new IllegalStateException("Test Exception"));
+
+        listener.onFeatureCapabilityChanged(caps);
+        verify(mockExecutor, atLeast(2)).execute(runnableCaptor.capture());
+
+        try {
+            runnableCaptor.getAllValues().get(runnableCaptor.getAllValues().size() - 1).run();
+            // If catch block works, this line is reached without exception
+        } catch (Exception e) {
+            fail("IllegalStateException should have been caught inside the lambda: " + e);
+        }
     }
 
     @Test
