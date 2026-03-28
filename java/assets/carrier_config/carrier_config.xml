@@ -204,6 +204,7 @@
     <string name="imsvoice.call_reject_reason_phrase_user_reject_string"></string>
     <string name="imsvoice.call_reject_reason_phrase_access_class_blocked_string"></string>
     <string name="imsvoice.call_reject_reason_phrase_vops_off_string"></string>
+    <string name="imsemergency.call_terminate_reason_header_user_ends_and_sip_response_timeout_string"></string>
 
     <string-array name="imsemergency.reject_code_and_reason_code_set_string_array" num="0">
     </string-array>
@@ -619,12 +620,12 @@
     <boolean name="imsemergency.reg_timer_for_ecall_with_rat_check_enabled_bool" value="false"/>
     <boolean name="imsemergency.release_epdn_of_unavailable_network_bool" value="true"/>
     <boolean name="imsemergency.stop_ereg_timer_on_epdn_connected_bool" value="false"/>
-    <boolean name="imsemergency.support_anonymous_ecall_action_bool" value="false"/>
     <boolean name="imsemergency.support_ereg_when_eattach_with_valid_sim_bool" value="false"/>
     <boolean name="imsemergency.support_erereg_on_ipcan_change_bool" value="false"/>
     <boolean name="imsemergency.support_giba_for_ereg_in_roaming_bool" value="false"/>
     <boolean name="imsemergency.support_video_for_ereg_bool" value="false"/>
     <boolean name="imsemergency.use_reg_retry_rule_for_ereg_bool" value="false"/>
+    <int name="imsemergency.anonymous_ecall_action_support_mode_int" value="0"/>
     <int name="imsemergency.epdn_preferred_iptype_int" value="1"/>
     <int name="imsemergency.ereg_retry_max_cnt_int" value="0"/>
     <int name="imsemergency.ereg_retry_timer_millis_int" value="0"/>
@@ -836,7 +837,7 @@
         <item value="si,,113"/>
         <item value="ba,,122,123,124"/>
     </string-array>
-    <string-array name="imsemergency.emergency_service_category_per_plmn_string_array" num="17">
+    <string-array name="imsemergency.emergency_service_category_per_plmn_string_array" num="18">
         <item value="hu,,104,2"/>
         <item value="hu,,105,4"/>
         <item value="hu,,107,1"/>
@@ -854,7 +855,9 @@
         <item value="tw,,110,1"/>
         <item value="tw,,119,4"/>
         <item value="sg,05,995,2"/>
+        <item value="be,,100,2"/>
     </string-array>
+    <boolean name="imsemergency.keep_invite_transaction_timeout_during_call_bool" value="false"/>
     <boolean name="imswfc.override_media_inactivity_to_wifi_lost_bool" value="false"/>
     <int name="imsvoice.policy_for_multiple_p_asserted_identity_headers_int" value="0"/>
 
@@ -941,7 +944,6 @@
     <!-- Mts -->
     <int name="imssms.sms_preferred_psi_uri_type_int" value="-1"/>
     <boolean name="imssms.sms_use_dialed_number_for_request_uri_bool" value="false"/>
-    <boolean name="imssms.sms_allow_imsi_based_sip_uri_bool" value="false"/>
     <int-array name="imssms.sms_generic_error_codes_int_array" num="0">
     </int-array>
     <int-array name="imssms.sms_fallback_error_codes_int_array" num="0">

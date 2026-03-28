@@ -73,6 +73,16 @@ OutgoingState::OutgoingState(IN IMtcCallContext& objContext) :
 
 PUBLIC VIRTUAL OutgoingState::~OutgoingState() {}
 
+PUBLIC VIRTUAL void OutgoingState::OnEnter()
+{
+    if (!m_objContext.GetCallInfo().IsEmergency() ||
+            !m_objContext.GetConfigurationProxy().GetBoolean(
+                    ConfigEmergency::KEY_KEEP_INVITE_TRANSACTION_TIMEOUT_DURING_CALL_BOOL))
+    {
+        m_objContext.SetHadInviteTransactionTimeout(IMS_FALSE);
+    }
+}
+
 PUBLIC VIRTUAL void OutgoingState::OnExit()
 {
     m_objContext.GetTimer().Stop(TIMER_RETRY_UPDATE);
@@ -1002,6 +1012,10 @@ CallReasonInfo OutgoingState::MayGetUpdatedReasonByResponseWaitTimeout(
 
     if (!m_bMoResponseTimeoutForReasonTimerExpired)
     {
+        if (m_objContext.HadInviteTransactionTimeout())
+        {
+            return CallReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_AND_SIP_TIMEOUT);
+        }
         return CallReasonInfo(CODE_NONE);
     }
 

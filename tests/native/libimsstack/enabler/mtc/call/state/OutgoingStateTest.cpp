@@ -3626,3 +3626,48 @@ TEST_F(OutgoingStateTest, HandleAosDisconnectedByAllPcscfFailedForEmergency)
     pOutgoingState->OnAosStateChanged(
             MtcAosState::DISCONNECTED, ImsAosReason::REG_ALL_PCSCF_FAILED, 0);
 }
+
+TEST_F(OutgoingStateTest, OnEnterResetsHadInviteTransactionTimeoutForNormalCall)
+{
+    objCallInfo.eEmergencyType = EmergencyType::NONE;
+
+    EXPECT_CALL(objCallContext, SetHadInviteTransactionTimeout(IMS_FALSE)).Times(1);
+    pOutgoingState->OnEnter();
+}
+
+TEST_F(OutgoingStateTest, OnEnterResetsHadInviteTransactionTimeoutForEmergencyCallIfConfigIsFalse)
+{
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigEmergency::KEY_KEEP_INVITE_TRANSACTION_TIMEOUT_DURING_CALL_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objCallContext, SetHadInviteTransactionTimeout(IMS_FALSE)).Times(1);
+    pOutgoingState->OnEnter();
+}
+
+TEST_F(OutgoingStateTest,
+        OnEnterDoesNotResetHadInviteTransactionTimeoutForEmergencyCallIfConfigIsTrue)
+{
+    objCallInfo.eEmergencyType = EmergencyType::EMERGENCY_ROUTING;
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigEmergency::KEY_KEEP_INVITE_TRANSACTION_TIMEOUT_DURING_CALL_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objCallContext, SetHadInviteTransactionTimeout(_)).Times(0);
+    pOutgoingState->OnEnter();
+}
+
+TEST_F(OutgoingStateTest, TerminateUpdatesReasonIfHadInviteTransactionTimeoutIsTrue)
+{
+    const CallReasonInfo objReasonUserTerminated(CODE_USER_TERMINATED);
+    const CallReasonInfo objReasonSipTimeout(
+            CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_AND_SIP_TIMEOUT);
+
+    ON_CALL(objCallContext, HadInviteTransactionTimeout()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objMtcSession, Terminate(_, objReasonSipTimeout));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonSipTimeout));
+
+    pOutgoingState->Terminate(objReasonUserTerminated);
+}

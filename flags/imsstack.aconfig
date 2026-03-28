@@ -1,0 +1,11 @@
+package: "com.android.imsstack.flags"
+container: "system_ext"
+
+# This is an example flag to demonstrate the standard format.
+# OWNER=yongjunpark TARGET=26Q2
+flag {
+    name: "example_ims_feature_flag"
+    namespace: "imsstack"
+    description: "Example flag for new feature"
+    bug: "472395458"
+}

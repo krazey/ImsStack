@@ -904,44 +904,6 @@ TEST_F(AosERegistrationTest, ReportFailureWhenStartFailedAndRegRequestedByESms)
     EXPECT_EQ(m_pAosERegistration->GetState(), IAosRegistration::STATE_OFFLINE);
 }
 
-TEST_F(AosERegistrationTest, StartWithSpecifiedIntervalPolicytWhenRetryRuleForERegIsTrue)
-{
-    ON_CALL(m_objMockIAosNConfiguration, IsRegRetryRuleForERegUsed())
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
-            .WillByDefault(Return(CarrierConfig::Ims::AWT_POLICY_SPECIFIED_INTERVAL));
-    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
-            .WillByDefault(Return(IMS_TRUE));
-
-    ImsVector<IMS_SINT32> objInterval;
-    objInterval.Add(10000);
-    ON_CALL(m_objMockIAosNConfiguration, GetRegRetryIntervals())
-            .WillByDefault(ReturnRef(objInterval));
-
-    m_pAosERegistration->ProcessDefaultFlowRecovery_Start(400);
-
-    EXPECT_EQ(m_pAosERegistration->GetInvokedCount(
-                      "ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy"),
-            1);
-}
-
-TEST_F(AosERegistrationTest, DoNotInvokedStartWithSpecifiedIntervalPolicytWhenIsRoaming)
-{
-    ON_CALL(m_objMockIAosNConfiguration, IsRegRetryRuleForERegUsed())
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosNetTracker, IsRoaming()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
-            .WillByDefault(Return(CarrierConfig::Ims::AWT_POLICY_SPECIFIED_INTERVAL));
-    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
-            .WillByDefault(Return(IMS_TRUE));
-
-    m_pAosERegistration->ProcessDefaultFlowRecovery_Start(403);
-
-    EXPECT_EQ(m_pAosERegistration->GetInvokedCount(
-                      "ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy"),
-            0);
-}
-
 TEST_F(AosERegistrationTest, DefaultFlowRecoveryDuringStartWhenFakeRegistration)
 {
     m_pAosERegistration->SetRegistration(&m_objMockIRegistration);
@@ -964,8 +926,8 @@ TEST_F(AosERegistrationTest, DefaultFlowRecoveryDuringStartWhenConfiguredAsFallb
     ON_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration())
             .WillByDefault(
                     Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK));
-    ON_CALL(m_objMockIAosNConfiguration, IsAnonymousECallActionSupported())
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(m_objMockIAosNConfiguration, GetAnonymousECallSupportMode())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::ANONYMOUS_EMC_DISABLED));
 
     m_pAosERegistration->ProcessDefaultFlowRecovery_Start(400);
 
@@ -974,14 +936,17 @@ TEST_F(AosERegistrationTest, DefaultFlowRecoveryDuringStartWhenConfiguredAsFallb
     EXPECT_TRUE(m_pAosERegistration->IsReinitiationRequested());
 }
 
-TEST_F(AosERegistrationTest,
-        DefaultFlowRecoveryWhenPreferredEmergnecyRegistrationFallbackAndSupportAnonymousECallAction)
+TEST_F(AosERegistrationTest, ProceedsFakeModeWhenPreferredNormalAndEmcXmlActionModeInRoaming)
 {
     ON_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration())
             .WillByDefault(
-                    Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK));
-    ON_CALL(m_objMockIAosNConfiguration, IsAnonymousECallActionSupported())
-            .WillByDefault(Return(IMS_TRUE));
+                    Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL));
+    ON_CALL(m_objMockIAosNConfiguration, GetAnonymousECallSupportMode())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::ANONYMOUS_EMC_XML_ACTION));
+
+    MockINetworkWatcher objMockINetworkWatcher;
+    m_objPhoneInfoService.SetNetworkWatcher(&objMockINetworkWatcher);
+    ON_CALL(objMockINetworkWatcher, IsDataNetworkRoaming()).WillByDefault(Return(IMS_TRUE));
 
     ImsList<ISipMessageBodyPart*> objBodyParts;
     SipMessageBodyPart objBodyPart;
@@ -1006,31 +971,17 @@ TEST_F(AosERegistrationTest,
     EXPECT_TRUE(m_pAosERegistration->IsReinitiationRequested());
 }
 
-TEST_F(AosERegistrationTest, DoNotProceedsFakeModeWhenSupportAnonymousECallActionButNoXmlBody)
+TEST_F(AosERegistrationTest, DoNotProceedsFakeModeWhenEmcXmlActionModeButNot403InRoaming)
 {
     ON_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration())
             .WillByDefault(
-                    Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK));
-    ON_CALL(m_objMockIAosNConfiguration, IsAnonymousECallActionSupported())
-            .WillByDefault(Return(IMS_TRUE));
+                    Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL));
+    ON_CALL(m_objMockIAosNConfiguration, GetAnonymousECallSupportMode())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::ANONYMOUS_EMC_XML_ACTION));
 
-    ImsList<ISipMessageBodyPart*> objBodyParts;
-    ON_CALL(m_objMockISipMessage, GetBodyParts()).WillByDefault(Return(objBodyParts));
-
-    m_pAosERegistration->ProcessDefaultFlowRecovery_Start(403);
-
-    EXPECT_FALSE(m_pAosERegistration->IsFakeRegistration());
-    EXPECT_NE(m_pAosERegistration->GetMode(), IAosRegistration::MODE_FAKE);
-    EXPECT_FALSE(m_pAosERegistration->IsReinitiationRequested());
-}
-
-TEST_F(AosERegistrationTest, DoNotProceedsFakeModeWhenSupportAnonymousECallActionButNot403)
-{
-    ON_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration())
-            .WillByDefault(
-                    Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK));
-    ON_CALL(m_objMockIAosNConfiguration, IsAnonymousECallActionSupported())
-            .WillByDefault(Return(IMS_TRUE));
+    MockINetworkWatcher objMockINetworkWatcher;
+    m_objPhoneInfoService.SetNetworkWatcher(&objMockINetworkWatcher);
+    ON_CALL(objMockINetworkWatcher, IsDataNetworkRoaming()).WillByDefault(Return(IMS_TRUE));
 
     ImsList<ISipMessageBodyPart*> objBodyParts;
     SipMessageBodyPart objBodyPart;
@@ -1053,6 +1004,125 @@ TEST_F(AosERegistrationTest, DoNotProceedsFakeModeWhenSupportAnonymousECallActio
     EXPECT_FALSE(m_pAosERegistration->IsFakeRegistration());
     EXPECT_NE(m_pAosERegistration->GetMode(), IAosRegistration::MODE_FAKE);
     EXPECT_FALSE(m_pAosERegistration->IsReinitiationRequested());
+}
+
+TEST_F(AosERegistrationTest, DoNotProceedsFakeModeWhenPreferredNormalAndEmcOnAny403ModeInHome)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration())
+            .WillByDefault(
+                    Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL));
+    ON_CALL(m_objMockIAosNConfiguration, GetAnonymousECallSupportMode())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::ANONYMOUS_EMC_ON_ANY_403));
+
+    MockINetworkWatcher objMockINetworkWatcher;
+    m_objPhoneInfoService.SetNetworkWatcher(&objMockINetworkWatcher);
+    ON_CALL(objMockINetworkWatcher, IsDataNetworkRoaming()).WillByDefault(Return(IMS_FALSE));
+
+    m_pAosERegistration->ProcessDefaultFlowRecovery_Start(403);
+
+    EXPECT_FALSE(m_pAosERegistration->IsFakeRegistration());
+    EXPECT_NE(m_pAosERegistration->GetMode(), IAosRegistration::MODE_FAKE);
+    EXPECT_FALSE(m_pAosERegistration->IsReinitiationRequested());
+}
+
+TEST_F(AosERegistrationTest, ProceedsFakeModeWhenPreferredNormalAndEmcOnAny403ModeInRoaming)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration())
+            .WillByDefault(
+                    Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL));
+    ON_CALL(m_objMockIAosNConfiguration, GetAnonymousECallSupportMode())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::ANONYMOUS_EMC_ON_ANY_403));
+
+    MockINetworkWatcher objMockINetworkWatcher;
+    m_objPhoneInfoService.SetNetworkWatcher(&objMockINetworkWatcher);
+    ON_CALL(objMockINetworkWatcher, IsDataNetworkRoaming()).WillByDefault(Return(IMS_TRUE));
+
+    m_pAosERegistration->ProcessDefaultFlowRecovery_Start(403);
+
+    EXPECT_TRUE(m_pAosERegistration->IsFakeRegistration());
+    EXPECT_EQ(m_pAosERegistration->GetMode(), IAosRegistration::MODE_FAKE);
+    EXPECT_TRUE(m_pAosERegistration->IsReinitiationRequested());
+}
+
+TEST_F(AosERegistrationTest, DoNotProceedsFakeModeWhenPreferredNormalAndEmcDisabledModeInRoaming)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration())
+            .WillByDefault(
+                    Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL));
+    ON_CALL(m_objMockIAosNConfiguration, GetAnonymousECallSupportMode())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::ANONYMOUS_EMC_DISABLED));
+
+    MockINetworkWatcher objMockINetworkWatcher;
+    m_objPhoneInfoService.SetNetworkWatcher(&objMockINetworkWatcher);
+    ON_CALL(objMockINetworkWatcher, IsDataNetworkRoaming()).WillByDefault(Return(IMS_TRUE));
+
+    m_pAosERegistration->ProcessDefaultFlowRecovery_Start(403);
+
+    EXPECT_FALSE(m_pAosERegistration->IsFakeRegistration());
+    EXPECT_NE(m_pAosERegistration->GetMode(), IAosRegistration::MODE_FAKE);
+    EXPECT_FALSE(m_pAosERegistration->IsReinitiationRequested());
+}
+
+TEST_F(AosERegistrationTest, DoNotProceedsFakeModeWhenEmcXmlActionModeButNoXmlBodyPartInRoaming)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration())
+            .WillByDefault(
+                    Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL));
+    ON_CALL(m_objMockIAosNConfiguration, GetAnonymousECallSupportMode())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::ANONYMOUS_EMC_XML_ACTION));
+
+    MockINetworkWatcher objMockINetworkWatcher;
+    m_objPhoneInfoService.SetNetworkWatcher(&objMockINetworkWatcher);
+    ON_CALL(objMockINetworkWatcher, IsDataNetworkRoaming()).WillByDefault(Return(IMS_TRUE));
+
+    ImsList<ISipMessageBodyPart*> objBodyParts;
+    ON_CALL(m_objMockISipMessage, GetBodyParts()).WillByDefault(Return(objBodyParts));
+
+    m_pAosERegistration->ProcessDefaultFlowRecovery_Start(403);
+
+    EXPECT_FALSE(m_pAosERegistration->IsFakeRegistration());
+    EXPECT_NE(m_pAosERegistration->GetMode(), IAosRegistration::MODE_FAKE);
+    EXPECT_FALSE(m_pAosERegistration->IsReinitiationRequested());
+}
+
+TEST_F(AosERegistrationTest, DoNotProceedsFakeModeWhenEmcOnAny403ModeButNot403InRoaming)
+{
+    ON_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration())
+            .WillByDefault(
+                    Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL));
+    ON_CALL(m_objMockIAosNConfiguration, GetAnonymousECallSupportMode())
+            .WillByDefault(Return(CarrierConfig::ImsEmergency::ANONYMOUS_EMC_ON_ANY_403));
+
+    MockINetworkWatcher objMockINetworkWatcher;
+    m_objPhoneInfoService.SetNetworkWatcher(&objMockINetworkWatcher);
+    ON_CALL(objMockINetworkWatcher, IsDataNetworkRoaming()).WillByDefault(Return(IMS_TRUE));
+
+    m_pAosERegistration->ProcessDefaultFlowRecovery_Start(500);
+
+    EXPECT_FALSE(m_pAosERegistration->IsFakeRegistration());
+    EXPECT_NE(m_pAosERegistration->GetMode(), IAosRegistration::MODE_FAKE);
+    EXPECT_FALSE(m_pAosERegistration->IsReinitiationRequested());
+}
+
+TEST_F(AosERegistrationTest, StartWithSpecifiedIntervalPolicyWhenRetryRuleForERegIsTrue)
+{
+    ON_CALL(m_objMockIAosNConfiguration, IsRegRetryRuleForERegUsed())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .WillByDefault(Return(CarrierConfig::Ims::AWT_POLICY_SPECIFIED_INTERVAL));
+    ON_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .WillByDefault(Return(IMS_TRUE));
+
+    ImsVector<IMS_SINT32> objInterval;
+    objInterval.Add(10000);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegRetryIntervals())
+            .WillByDefault(ReturnRef(objInterval));
+
+    m_pAosERegistration->ProcessDefaultFlowRecovery_Start(400);
+
+    EXPECT_EQ(m_pAosERegistration->GetInvokedCount(
+                      "ProcessDefaultFlowRecovery_StartWithSpecifiedIntervalPolicy"),
+            1);
 }
 
 TEST_F(AosERegistrationTest, DefaultFlowRecoveryDuringUpdateWhenNeitherEcbmNorScbm)

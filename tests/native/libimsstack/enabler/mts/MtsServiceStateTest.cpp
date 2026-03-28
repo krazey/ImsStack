@@ -70,44 +70,6 @@ TEST_F(MtsServiceStateTest, Constructor)
     ASSERT_NE(pMtsServiceState, nullptr);
 }
 
-TEST_F(MtsServiceStateTest, BlockMoSmsByImsiBasedSipUri)
-{
-    ON_CALL(objMockIImsAosInfo, GetRegistrationMode())
-            .WillByDefault(Return(IImsAosInfo::REG_MODE_ADMIN));
-
-    MockICarrierConfig& objCarrierConfig = pConfigService->GetMockCarrierConfig();
-
-    ON_CALL(objCarrierConfig, GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::ImsSms::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
-            .WillByDefault(Return(IMS_FALSE));
-    pMtsServiceState->Init(&objMockIImsAos);
-
-    pMtsServiceState->OnImsConnected();
-
-    EXPECT_TRUE(pMtsServiceState->IsMoServiceBlocked());
-}
-
-TEST_F(MtsServiceStateTest, AllowMoSmsByImsiBasedSipUri)
-{
-    ON_CALL(objMockIImsAosInfo, GetRegistrationMode())
-            .WillByDefault(Return(IImsAosInfo::REG_MODE_ADMIN));
-
-    MockICarrierConfig& objCarrierConfig = pConfigService->GetMockCarrierConfig();
-
-    ON_CALL(objCarrierConfig, GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::ImsSms::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
-            .WillByDefault(Return(IMS_TRUE));
-    pMtsServiceState->Init(&objMockIImsAos);
-
-    pMtsServiceState->OnImsConnected();
-
-    EXPECT_FALSE(pMtsServiceState->IsMoServiceBlocked());
-}
-
 TEST_F(MtsServiceStateTest, CheckServiceStateByImsConnection)
 {
     ON_CALL(objMockIImsAosInfo, GetRegistrationMode())
@@ -117,9 +79,7 @@ TEST_F(MtsServiceStateTest, CheckServiceStateByImsConnection)
 
     ON_CALL(objCarrierConfig, GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::ImsSms::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
-            .WillByDefault(Return(IMS_FALSE));
+
     pMtsServiceState->Init(&objMockIImsAos);
 
     pMtsServiceState->OnImsConnected();
@@ -147,9 +107,7 @@ TEST_F(MtsServiceStateTest, LimitedStateBySmsOverIpConfiguration)
 
     ON_CALL(objCarrierConfig, GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
             .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::ImsSms::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
-            .WillByDefault(Return(IMS_FALSE));
+
     pMtsServiceState->Init(&objMockIImsAos);
 
     pMtsServiceState->OnImsConnected();
@@ -169,7 +127,7 @@ TEST_F(MtsServiceStateTest, ObjectInitializedBeforeCarrierConfigLoaded)
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::ImsSms::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
+            GetBoolean(CarrierConfig::ImsSms::KEY_SUPPORT_LIMITED_ADMIN_SMS_MODE_BOOL, _))
             .Times(2)
             .WillRepeatedly(Return(IMS_FALSE));
 
@@ -192,7 +150,7 @@ TEST_F(MtsServiceStateTest, NotifyConfigChangedWithMismatchedSimSlot)
             objCarrierConfig, GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
             .WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::ImsSms::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
+            GetBoolean(CarrierConfig::ImsSms::KEY_SUPPORT_LIMITED_ADMIN_SMS_MODE_BOOL, _))
             .WillOnce(Return(IMS_FALSE));
 
     pMtsServiceState->Init(&objMockIImsAos);
@@ -201,6 +159,66 @@ TEST_F(MtsServiceStateTest, NotifyConfigChangedWithMismatchedSimSlot)
 
     pMtsServiceState->CarrierConfig_NotifyConfigChanged(SLOT_ID + 1);
     EXPECT_EQ(pMtsServiceState->GetState(), STATE_READY);
+}
+
+TEST_F(MtsServiceStateTest, IsMoServiceBlockedTrueWhenImsNotConnected)
+{
+    // By default, MtsServiceState is not connected
+    EXPECT_TRUE(pMtsServiceState->IsMoServiceBlocked());
+}
+
+TEST_F(MtsServiceStateTest, IsMoServiceBlockedFalseWhenStateReady)
+{
+    ON_CALL(objMockIImsAosInfo, GetRegistrationMode())
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NORMAL));
+    MockICarrierConfig& objCarrierConfig = pConfigService->GetMockCarrierConfig();
+    ON_CALL(objCarrierConfig, GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
+
+    pMtsServiceState->Init(&objMockIImsAos);
+    pMtsServiceState->OnImsConnected();  // State becomes STATE_READY
+
+    EXPECT_EQ(pMtsServiceState->GetState(), STATE_READY);
+    EXPECT_FALSE(pMtsServiceState->IsMoServiceBlocked());
+}
+
+TEST_F(MtsServiceStateTest, IsMoServiceBlockedTrueWhenStateLimitedDueToSuspend)
+{
+    ON_CALL(objMockIImsAosInfo, GetRegistrationMode())
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NORMAL));
+    pMtsServiceState->Init(&objMockIImsAos);
+    pMtsServiceState->OnImsConnected();
+
+    // Transition to STATE_LIMITED via suspension
+    pMtsServiceState->OnImsSuspended(ImsAosReason::SUSPEND_OUT_OF_SERVICE);
+
+    EXPECT_EQ(pMtsServiceState->GetState(), STATE_LIMITED);
+    EXPECT_TRUE(pMtsServiceState->IsMoServiceBlocked());
+}
+
+TEST_F(MtsServiceStateTest, IsMoServiceBlockedTrueWhenStateLimitedDueToConfigOff)
+{
+    ON_CALL(objMockIImsAosInfo, GetRegistrationMode())
+            .WillByDefault(Return(IImsAosInfo::REG_MODE_NORMAL));
+    MockICarrierConfig& objCarrierConfig = pConfigService->GetMockCarrierConfig();
+
+    // SMS over IP not supported transitions state to STATE_LIMITED upon connection
+    ON_CALL(objCarrierConfig, GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
+
+    pMtsServiceState->Init(&objMockIImsAos);
+    pMtsServiceState->OnImsConnected();
+
+    EXPECT_EQ(pMtsServiceState->GetState(), STATE_LIMITED);
+    EXPECT_TRUE(pMtsServiceState->IsMoServiceBlocked());
+}
+
+TEST_F(MtsServiceStateTest, IsMoServiceBlockedTrueInDefaultState)
+{
+    // Default state is STATE_INIT
+    EXPECT_NE(pMtsServiceState->GetState(), STATE_READY);
+    EXPECT_NE(pMtsServiceState->GetState(), STATE_LIMITED);
+    EXPECT_TRUE(pMtsServiceState->IsMoServiceBlocked());
 }
 
 }  // namespace android

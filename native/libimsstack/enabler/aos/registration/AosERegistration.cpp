@@ -314,15 +314,6 @@ PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Start(IN IMS
         return;
     }
 
-    IMS_BOOL bRequiredERegRetry = GET_N_CONFIG(m_nSlotId)->IsRegRetryRuleForERegUsed() &&
-            !m_piContext->GetNetTracker()->IsRoaming();
-    if (bRequiredERegRetry && ProcessNormalDefaultFlowRecovery_Start(nStatusCode))
-    {
-        A_IMS_TRACE_I(
-                REGID, "ProcessDefaultFlowRecovery_Start :: Follow normal retry flow", 0, 0, 0);
-        return;
-    }
-
     if (IsFakeRegistration())
     {
         A_IMS_TRACE_I(REGID, "ProcessDefaultFlowRecovery_Start :: Fake E-REG is failed", 0, 0, 0);
@@ -330,16 +321,25 @@ PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Start(IN IMS
         return;
     }
 
-    if (GetPreferredRegScheme() ==
-            CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK)
+    IMS_BOOL bIsAnonymousECallTriggerable = IsAnonymousECallTriggerable(nStatusCode);
+    IMS_BOOL bIsFallbackPreferred = GetPreferredRegScheme() ==
+            CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK;
+
+    if (bIsAnonymousECallTriggerable || bIsFallbackPreferred)
     {
-        if (!GET_N_CONFIG(m_nSlotId)->IsAnonymousECallActionSupported() ||
-                IsAnonymousECallActionPresent(nStatusCode))
-        {
-            A_IMS_TRACE_I(REGID, "ProcessDefaultFlowRecovery_Start :: Try fake E-REG", 0, 0, 0);
-            ProcessFakeMode();
-            return;
-        }
+        A_IMS_TRACE_I(REGID,
+                "ProcessDefaultFlowRecovery_Start :: Try fake E-REG (Triggerable:%s, Fallback:%s)",
+                _TRACE_B_(bIsAnonymousECallTriggerable), _TRACE_B_(bIsFallbackPreferred), 0);
+        ProcessFakeMode();
+        return;
+    }
+
+    IMS_BOOL bRequiredERegRetry = GET_N_CONFIG(m_nSlotId)->IsRegRetryRuleForERegUsed();
+    if (bRequiredERegRetry && ProcessNormalDefaultFlowRecovery_Start(nStatusCode))
+    {
+        A_IMS_TRACE_I(
+                REGID, "ProcessDefaultFlowRecovery_Start :: Follow normal retry flow", 0, 0, 0);
+        return;
     }
 
     SetState(STATE_REGSTOP);
@@ -1084,7 +1084,7 @@ PROTECTED IMS_BOOL AosERegistration::IsRefreshRequiredByCbm()
 
 PROTECTED IMS_BOOL AosERegistration::IsFakeModeCondition()
 {
-    IMS_UINT32 nScheme = GetPreferredRegScheme();
+    IMS_SINT32 nScheme = GetPreferredRegScheme();
     if (nScheme == CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_SKIP)
     {
         A_IMS_TRACE_I(REGID, "IsFakeModeCondition :: EREG preferred scheme is SKIP", 0, 0, 0);
@@ -1170,10 +1170,36 @@ PROTECTED IMS_BOOL AosERegistration::IsRetryAllowed() const
     }
 }
 
-PROTECTED IMS_BOOL AosERegistration::IsAnonymousECallActionPresent(IN IMS_SINT32 nStatusCode) const
+PROTECTED IMS_BOOL AosERegistration::IsAnonymousECallTriggerable(IN IMS_SINT32 nStatusCode) const
 {
-    return (nStatusCode == SipStatusCode::SC_403) &&
-            m_pUtil->IsAnonymousECallActionPresent(m_piRegistration->GetPreviousResponse());
+    if (nStatusCode != SipStatusCode::SC_403)
+    {
+        return IMS_FALSE;
+    }
+
+    if (!IsDataNetworkRoaming())
+    {
+        return IMS_FALSE;
+    }
+
+    IMS_BOOL bIsTriggerable = IMS_FALSE;
+
+    switch (GET_N_CONFIG(m_nSlotId)->GetAnonymousECallSupportMode())
+    {
+        case CarrierConfig::ImsEmergency::ANONYMOUS_EMC_ON_ANY_403:
+            bIsTriggerable = IMS_TRUE;
+            break;
+
+        case CarrierConfig::ImsEmergency::ANONYMOUS_EMC_XML_ACTION:
+            bIsTriggerable =
+                    m_pUtil->IsAnonymousECallActionPresent(m_piRegistration->GetPreviousResponse());
+            break;
+
+        default:  // CarrierConfig::ImsEmergency::ANONYMOUS_EMC_DISABLED:
+            break;
+    }
+
+    return bIsTriggerable;
 }
 
 PROTECTED IMS_BOOL AosERegistration::IsNetworkReady() const
@@ -1350,19 +1376,40 @@ PROTECTED void AosERegistration::StartRegRetryTimer()
     }
 }
 
-PROTECTED VIRTUAL IMS_UINT32 AosERegistration::GetPreferredRegScheme()
+PROTECTED VIRTUAL IMS_SINT32 AosERegistration::GetPreferredRegScheme() const
 {
     IMS_SINT32 nRoamingScheme = GET_N_CONFIG(m_nSlotId)->GetRoamingPreferredEmcReg();
 
-    if (nRoamingScheme != CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NOT_DEFINED)
+    if (nRoamingScheme == CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NOT_DEFINED)
     {
-        if (PhoneInfoService::GetPhoneInfoService()
-                        ->GetNetworkWatcher(m_nSlotId)
-                        ->GetRoamingState())
-        {
-            return nRoamingScheme;
-        }
+        return GET_N_CONFIG(m_nSlotId)->GetPreferredEmergencyRegistration();
     }
 
-    return GET_N_CONFIG(m_nSlotId)->GetPreferredEmergencyRegistration();
+    IMS_BOOL bIsRoaming = IMS_FALSE;
+
+    if (GET_N_CONFIG(m_nSlotId)->GetAnonymousECallSupportMode() ==
+            CarrierConfig::ImsEmergency::ANONYMOUS_EMC_DISABLED)
+    {
+        bIsRoaming = PhoneInfoService::GetPhoneInfoService()
+                             ->GetNetworkWatcher(m_nSlotId)
+                             ->GetRoamingState();
+    }
+    else
+    {
+        bIsRoaming = IsDataNetworkRoaming();
+    }
+
+    return bIsRoaming ? nRoamingScheme
+                      : GET_N_CONFIG(m_nSlotId)->GetPreferredEmergencyRegistration();
+}
+
+/**
+ * Returns whether mobile data is registered on roaming network.
+ * This value is not affected by any carrier config or resource overlay override.
+ */
+PROTECTED IMS_BOOL AosERegistration::IsDataNetworkRoaming() const
+{
+    return PhoneInfoService::GetPhoneInfoService()
+            ->GetNetworkWatcher(m_nSlotId)
+            ->IsDataNetworkRoaming();
 }

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-#include "utility/MtsSmUtils.h"
 #include <gtest/gtest.h>
+#include "ByteArray.h"
+#include "utility/MtsSmUtils.h"
 
 namespace android
 {
@@ -54,6 +55,24 @@ TEST_F(MtsSmUtilsTest, GetMtiWithNull)
     const ByteArray* pContent = new ByteArray();
     EXPECT_EQ(pMtsSmUtils->GetMti(SmsFormatType::SMSFORMAT_3GPP, *pContent), -1);
     delete pContent;
+}
+
+TEST_F(MtsSmUtilsTest, IsSmsRpAckOrErrorReturnsTrueForAckOrError)
+{
+    const ByteArray objAckContent(static_cast<IMS_BYTE>(SMS_3GPP_MTI_RP_ACK_FROM_MS));
+    EXPECT_TRUE(MtsSmUtils::IsSmsRpAckOrError(SmsFormatType::SMSFORMAT_3GPP, objAckContent));
+
+    const ByteArray objErrorContent(static_cast<IMS_BYTE>(SMS_3GPP_MTI_RP_ERROR_FROM_MS));
+    EXPECT_TRUE(MtsSmUtils::IsSmsRpAckOrError(SmsFormatType::SMSFORMAT_3GPP, objErrorContent));
+}
+
+TEST_F(MtsSmUtilsTest, IsSmsRpAckOrErrorReturnsFalseForOtherTypesOrNull)
+{
+    const ByteArray objDataContent(static_cast<IMS_BYTE>(SMS_3GPP_MTI_RP_DATA_FROM_MS));
+    EXPECT_FALSE(MtsSmUtils::IsSmsRpAckOrError(SmsFormatType::SMSFORMAT_3GPP, objDataContent));
+
+    const ByteArray objAckContent(static_cast<IMS_BYTE>(SMS_3GPP_MTI_RP_ACK_FROM_MS));
+    EXPECT_FALSE(MtsSmUtils::IsSmsRpAckOrError(SmsFormatType::SMSFORMAT_3GPP2, objAckContent));
 }
 
 }  // namespace android

@@ -102,6 +102,11 @@ public:
     virtual IMS_BOOL SetAccessNetwork(IN const IMS_UINT32 nAccessNetwork);
 
     /**
+     * @brief Reset the ANBR mode to default (0)
+     */
+    virtual void ResetAnbrMode();
+
+    /**
      * @brief Set the ANBR mode
      *
      * @param objAnbrMode The codec mode of the current activated code in EvsParams and AmrParams in

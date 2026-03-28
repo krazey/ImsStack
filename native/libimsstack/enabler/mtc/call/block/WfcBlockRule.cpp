@@ -96,14 +96,18 @@ IMS_BOOL WfcBlockRule::IsVoiceCallAvailableInCellular() const
 PRIVATE
 IMS_BOOL WfcBlockRule::IsVopsAvailable() const
 {
-    return m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE) ==
-            IMS_VOICE_OVER_PS_SUPPORTED;
+    const IMS_UINT32 eVopsState =
+            m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE);
+    IMS_TRACE_D("IsVopsAvailable : VoPS state[%d]", eVopsState, 0, 0);
+    return eVopsState == IMS_VOICE_OVER_PS_SUPPORTED;
 }
 
 PRIVATE
 IMS_BOOL WfcBlockRule::IsVoiceBlockedBySsac() const
 {
-    return m_pImsRadio->GetSsacInfo().nBarringFactorForVoice == 0 ||
+    const IMS_SINT32 nBarringFactor = m_pImsRadio->GetSsacInfo().nBarringFactorForVoice;
+    IMS_TRACE_D("IsVoiceBlockedBySsac : Voice barring factor[%d]", nBarringFactor, 0, 0);
+    return nBarringFactor == 0 ||
             m_objContext.GetPassiveTimerHolder().IsActive(
                     IPassiveTimerHolder::Type::SSAC_VOICE_BARRING);
 }
@@ -111,6 +115,8 @@ IMS_BOOL WfcBlockRule::IsVoiceBlockedBySsac() const
 PRIVATE
 IMS_BOOL WfcBlockRule::IsWfcOn() const
 {
-    return m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_WFC_SETTING_CHANGED) ==
-            IMS_WFC_ON;
+    const IMS_UINT32 eWfcState =
+            m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_WFC_SETTING_CHANGED);
+    IMS_TRACE_D("IsWfcOn : WFC state[%d]", eWfcState, 0, 0);
+    return eWfcState == IMS_WFC_ON;
 }

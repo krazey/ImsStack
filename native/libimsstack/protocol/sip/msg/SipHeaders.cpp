@@ -176,9 +176,10 @@ SipHeaders::SipHeaders() :
 SipHeaderBase* SipHeaders::CreateCoreHdrObj(SIP_INT32 eHdrType)
 {
     eHdrType = SipMsgUtil::CheckAndGetHeaderType(eHdrType);
-    if ((eHdrType >= SIP_ZERO) && eHdrType < SipHeaderBase::TYPE_END)
+    if (SipHeaderBase::IsHeaderTypeValid(eHdrType) == SIP_TRUE)
     {
-        return gaFactoryArray[eHdrType](eHdrType, SIP_NULL);
+        return (gaFactoryArray[eHdrType] != SIP_NULL) ? gaFactoryArray[eHdrType](eHdrType, SIP_NULL)
+                                                      : SIP_NULL;
     }
     return SIP_NULL;
 }
@@ -205,8 +206,13 @@ SipHeaderBase* SipHeaders::CloneHdrObj(SipHeaderBase* pOld)
 
     SIP_INT32 eHdrType = pOld->GetHdrType();
 
-    return (eHdrType == SipHeaderBase::UNKNOWN) ? SipHeaderList::GetNewListObj(eHdrType, pOld)
-                                                : gaFactoryArray[eHdrType](eHdrType, pOld);
+    if (eHdrType == SipHeaderBase::UNKNOWN)
+    {
+        return SipHeaderList::GetNewListObj(eHdrType, pOld);
+    }
+
+    return (gaFactoryArray[eHdrType] != SIP_NULL) ? gaFactoryArray[eHdrType](eHdrType, pOld)
+                                                  : SIP_NULL;
 }
 
 SipHeaders::~SipHeaders()
@@ -304,8 +310,13 @@ SipHeaderBase* SipHeaders::GetNewHdrObj(SIP_INT32 eHdrType, SipHeaderBase* pHead
         return SIP_NULL;
     }
 
-    return (IsListHdr(eHdrType) == SIP_TRUE) ? SipHeaderList::GetNewListObj(eHdrType, pHeader)
-                                             : gaFactoryArray[eHdrType](eHdrType, pHeader);
+    if (IsListHdr(eHdrType) == SIP_TRUE)
+    {
+        return SipHeaderList::GetNewListObj(eHdrType, pHeader);
+    }
+
+    return (gaFactoryArray[eHdrType] != SIP_NULL) ? gaFactoryArray[eHdrType](eHdrType, pHeader)
+                                                  : SIP_NULL;
 }
 
 SIP_BOOL SipHeaders::RemoveHdr(SIP_INT32 eHdrType)

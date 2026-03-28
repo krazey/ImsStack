@@ -108,6 +108,8 @@ TEST_F(SipHeadersTest, CloneHdrObject)
     ASSERT_TRUE(pMaxForwardsHdr != nullptr);
     SipHeaderBase* pViaHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::VIA);
     ASSERT_TRUE(pViaHdr != nullptr);
+    SipHeaderBase* pResponseKeyHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::RESPONSE_KEY);
+    EXPECT_TRUE(pResponseKeyHdr == nullptr);
 
     const SIP_CHAR* pMaxForwardsValue = "70";
     const SIP_CHAR* pViaValue = "SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
@@ -825,6 +827,11 @@ TEST_F(SipHeadersTest, Decode)
     delete[] pszHeaderBody;
     pszHeaderName = nullptr;
     pszHeaderBody = nullptr;
+
+    pHeaderBuffer = "Response-Key: 123423";
+    EXPECT_EQ(SIP_FALSE,
+            pHdrs->Decode(
+                    pHeaderBuffer, SipPf_Strlen(pHeaderBuffer), &pszHeaderName, &pszHeaderBody));
 
     pHeaderBuffer = "ThisIsNotHeader";
     EXPECT_EQ(SIP_FALSE,

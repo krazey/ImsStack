@@ -1780,8 +1780,6 @@ public:
          */
         static const IMS_CHAR KEY_STOP_EREG_TIMER_ON_EPDN_CONNECTED_BOOL[];
 
-        static const IMS_CHAR KEY_SUPPORT_ANONYMOUS_ECALL_ACTION_BOOL[];
-
         static const IMS_CHAR KEY_SUPPORT_EREG_WHEN_EATTACH_WITH_VALID_SIM_BOOL[];
 
         /**
@@ -1821,6 +1819,28 @@ public:
          *   {@code false}
          */
         static const IMS_CHAR KEY_USE_REG_RETRY_RULE_FOR_EREG_BOOL[];
+
+        /**
+         * Specifies the operational mode for anonymous emergency call actions triggered by the
+         * network.
+         *
+         * Possible Values:
+         *   {@code 0} : ANONYMOUS_EMC_DISABLED - Anonymous emergency call actions are not
+         *               supported.
+         *   {@code 1} : ANONYMOUS_EMC_ON_ANY_403 - Triggers an anonymous emergency call attempt
+         *               immediately upon receiving any SIP 403 Forbidden error (bypasses XML
+         *               parsing).
+         *   {@code 2} : ANONYMOUS_EMC_XML_ACTION - (Standard) Triggers an anonymous emergency
+         *               call attempt only if SIP 403 contains a valid 'anonymous-emergencycall'
+         *               action.
+         */
+        static const IMS_CHAR KEY_ANONYMOUS_ECALL_ACTION_SUPPORT_MODE_INT[];
+        enum
+        {
+            ANONYMOUS_EMC_DISABLED = 0,
+            ANONYMOUS_EMC_ON_ANY_403 = 1,
+            ANONYMOUS_EMC_XML_ACTION = 2,
+        };
 
         /**
          * Specifies the preferred IP version priority for emergency connection.
@@ -2346,6 +2366,25 @@ public:
          *   String array.
          */
         static const IMS_CHAR KEY_EMERGENCY_SERVICE_CATEGORY_PER_PLMN_STRING_ARRAY[];
+
+        /**
+         * Specifies whether to keep the INVITE transaction timeout history during the entire call.
+         *
+         * If {@code true}, the INVITE transaction timeout history is retained during the entire
+         * call even after a silent redial, so if the user ends the call, the termination reason is
+         * treated as a SIP timeout.
+         *
+         * Possible Values:
+         *   {@code true}
+         *   {@code false}
+         */
+        static const IMS_CHAR KEY_KEEP_INVITE_TRANSACTION_TIMEOUT_DURING_CALL_BOOL[];
+
+        /**
+         * Specifies the Reason header text when user ends call during SIP response timeout.
+         */
+        static const IMS_CHAR
+                KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_AND_SIP_RESPONSE_TIMEOUT_STRING[];
     };
 
     class ImsRtt
@@ -2432,7 +2471,6 @@ public:
         // Mts
         static const IMS_CHAR KEY_SMS_PREFERRED_PSI_URI_TYPE_INT[];
         static const IMS_CHAR KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL[];
-        static const IMS_CHAR KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL[];
         static const IMS_CHAR KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY[];
         static const IMS_CHAR KEY_SMS_FALLBACK_ERROR_CODES_INT_ARRAY[];
         static const IMS_CHAR KEY_SMS_SMMA_GENERIC_ERROR_CODES_INT_ARRAY[];

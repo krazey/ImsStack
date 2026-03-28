@@ -98,6 +98,13 @@ PRIVATE IMS_BOOL CallTypeBlockRule::IsBlockedByTextVideoCall()
             {
                 return IMS_FALSE;
             }
+            // Allow hold/resume request of existing RTT/VT call
+            IMtcSession* pMtcSession = m_objContext.GetSession();
+            if (m_eCallType == pMtcSession->GetPreviousCallType())
+            {
+                return IMS_FALSE;
+            }
+
             // Block simultaneous video and text descriptions
             IMS_TRACE_I("IsBlockedByTextVideoCall : SDP contains video and text", 0, 0, 0);
             return IMS_TRUE;

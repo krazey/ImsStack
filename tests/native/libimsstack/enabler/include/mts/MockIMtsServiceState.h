@@ -25,7 +25,6 @@ class IImsAos;
 class MockIMtsServiceState : public IMtsServiceState
 {
 public:
-    // MtsService
     MOCK_METHOD(void, Init, (IN IImsAos* piImsAos), (override));
     MOCK_METHOD(IMS_SINT32, GetState, (), (const, override));
     MOCK_METHOD(void, OnImsConnected, (), (override));
@@ -36,7 +35,7 @@ public:
     MOCK_METHOD(void, SetImsRegConnected, (IN IMS_BOOL bConnected), (override));
     MOCK_METHOD(IMS_BOOL, GetImsRegConnected, (), (override));
 
-    // MtsMessageController
+    MOCK_METHOD(IMS_BOOL, IsInLimitedAccessMode, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsMoServiceBlocked, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsMtServiceBlocked, (), (const, override));
 };

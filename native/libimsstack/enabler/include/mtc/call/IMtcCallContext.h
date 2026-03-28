@@ -275,6 +275,20 @@ public:
     virtual void SetUnconfirmedRemoteHold(IN IMS_BOOL bUnconfirmedRemoteHold) = 0;
 
     /**
+     * @brief Sets whether the call had an INVITE transaction timeout.
+     *
+     * @param bHadTimeout IMS_TRUE if the transaction timeout occurred, IMS_FALSE otherwise.
+     */
+    virtual void SetHadInviteTransactionTimeout(IN IMS_BOOL bHadTimeout) = 0;
+
+    /**
+     * @brief Checks if the call had an INVITE transaction timeout.
+     *
+     * @return IMS_TRUE if the transaction timeout occurred, IMS_FALSE otherwise.
+     */
+    virtual IMS_BOOL HadInviteTransactionTimeout() const = 0;
+
+    /**
      * @brief Creates a new MTC session from a core session object.
      *
      * @param piSession A pointer to the core ISession to wrap.

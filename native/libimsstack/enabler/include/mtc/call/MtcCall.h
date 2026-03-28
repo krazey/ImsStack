@@ -274,6 +274,14 @@ public:
     {
         m_bUnconfirmedRemoteHold = bUnconfirmedRemoteHold;
     }
+    inline void SetHadInviteTransactionTimeout(IN IMS_BOOL bHadTimeout) override
+    {
+        m_bHadInviteTransactionTimeout = bHadTimeout;
+    }
+    inline IMS_BOOL HadInviteTransactionTimeout() const override
+    {
+        return m_bHadInviteTransactionTimeout;
+    }
 
     void SessionAlerting(IN ISession* piSession) override;
     void SessionReferenceReceived(IN ISession* piSession, IN IReference* piReference) override;
@@ -351,6 +359,7 @@ private:
     IMS_BOOL m_bEstablished;
     IMS_BOOL m_bHeldByMe;
     IMS_BOOL m_bUnconfirmedRemoteHold;
+    IMS_BOOL m_bHadInviteTransactionTimeout;
 
     CallInfo m_objCallInfo;
     ParticipantInfo m_objParticipantInfo;

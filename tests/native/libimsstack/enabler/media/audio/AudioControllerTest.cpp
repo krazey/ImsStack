@@ -109,6 +109,7 @@ protected:
 
         m_pPeerProfile = std::make_unique<AudioProfile>(*m_pLocalProfile);
         m_pNegoProfile = std::make_unique<AudioProfile>(*m_pLocalProfile);
+        m_pNegoProfile->SetAnbr(IMS_TRUE);
 
         m_objIpAddr = IpAddress(LOCAL_IP);
         ON_CALL(*m_pAudioNego, GetLocalAddress()).WillByDefault(ReturnRef(m_objIpAddr));
@@ -468,6 +469,135 @@ TEST_F(AudioControllerTest, testNotifyAnbrReceived)
 
     // Now it should try to notify, but the underlying session method will return false
     EXPECT_FALSE(m_pController->NotifyAnbrReceived(MEDIA_TYPE_AUDIO, 0, 0));
+}
+
+TEST_F(AudioControllerTest, testNotifyAnbrReceivedWithStateNone)
+{
+    // 1. Create session (initial state is STATE_NONE)
+    m_pController->CreateSession(&m_objListener, NEGO_ID, m_pConfig.get(), MEDIA_SERVICE_DEFAULT);
+    AudioSession* pSession = m_pController->FindAudioSession(NEGO_ID);
+    ASSERT_NE(pSession, nullptr);
+    EXPECT_EQ(pSession->GetState(), AudioSession::STATE_NONE);
+
+    // 2. Enable ANBR
+    EXPECT_CALL(m_objListener,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_UPDATE_ANBR_ENABLED_CONFIG, _))
+            .Times(testing::AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+    m_pController->UpdateAnbrEnabledConfig(NEGO_ID, IMS_TRUE);
+
+    // 3. Notify ANBR. Since state is NONE, it should NOT trigger session's NotifyAnbrReceived
+    // and thus NOT send REQUEST_MODIFY_SESSION.
+    EXPECT_CALL(
+            m_objListener, MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_MODIFY_SESSION, _))
+            .Times(0);
+
+    EXPECT_FALSE(m_pController->NotifyAnbrReceived(MEDIA_TYPE_AUDIO, 1, 9600));
+
+    // 4. Now move to STATE_IDLE (via OpenSession)
+    m_pController->UpdateLocalAddress(m_pAudioNego);
+    EXPECT_CALL(
+            m_objListener, MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_OPEN_SESSION, _))
+            .WillOnce(Return(IMS_TRUE));
+    m_pController->OpenSession(NEGO_ID);
+    EXPECT_EQ(pSession->GetState(), AudioSession::STATE_IDLE);
+
+    // 5. Notify ANBR again. Since state is IDLE (not NONE), it should now call Modify()
+    EXPECT_CALL(
+            m_objListener, MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_MODIFY_SESSION, _))
+            .WillOnce(Return(IMS_TRUE));
+
+    EXPECT_TRUE(m_pController->NotifyAnbrReceived(MEDIA_TYPE_AUDIO, 1, 9600));
+}
+
+TEST_F(AudioControllerTest, testResetOnUpdateSession)
+{
+    m_pController->CreateSession(&m_objListener, NEGO_ID, m_pConfig.get(), MEDIA_SERVICE_DEFAULT);
+    m_pController->UpdateLocalAddress(m_pAudioNego);
+
+    // Expect OPEN_SESSION (1401)
+    EXPECT_CALL(
+            m_objListener, MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_OPEN_SESSION, _))
+            .WillOnce(Return(IMS_TRUE));
+    m_pController->OpenSession(NEGO_ID);
+
+    AudioSession* pSession = m_pController->FindAudioSession(NEGO_ID);
+    ASSERT_NE(pSession, nullptr);
+
+    // Enable ANBR
+    EXPECT_CALL(m_objListener,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_UPDATE_ANBR_ENABLED_CONFIG, _))
+            .Times(testing::AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+    m_pController->UpdateAnbrEnabledConfig(NEGO_ID, IMS_TRUE);
+
+    // Set ANBR mode manually
+    AnbrMode mode;
+    mode.setAnbrUplinkCodecMode(4096);
+    pSession->SetAnbrMode(mode);
+    EXPECT_EQ(pSession->GetRtpConfig()->getAnbrMode().getAnbrUplinkCodecMode(), 4096);
+
+    // Trigger UpdateSession -> should trigger ResetAnbrMode
+    // UpdateSession triggers:
+    // 1. UpdateAnbrEnabledConfig (1412) - only if it changes.
+    // 2. ModifySession (1403)
+    // 3. SetMediaQuality (1408)
+
+    EXPECT_CALL(
+            m_objListener, MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_MODIFY_SESSION, _))
+            .Times(testing::AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objListener,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_SET_MEDIA_QUALITY, _))
+            .Times(testing::AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    m_pController->UpdateSession(NEGO_ID, ACCESS_NETWORK, m_pAudioNego);
+
+    EXPECT_EQ(pSession->GetRtpConfig()->getAnbrMode().getAnbrUplinkCodecMode(), 0);
+}
+
+TEST_F(AudioControllerTest, testResetOnUpdateAccessNetwork)
+{
+    m_pController->CreateSession(&m_objListener, NEGO_ID, m_pConfig.get(), MEDIA_SERVICE_DEFAULT);
+    m_pController->UpdateLocalAddress(m_pAudioNego);
+
+    // Expect OPEN_SESSION (1401)
+    EXPECT_CALL(
+            m_objListener, MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_OPEN_SESSION, _))
+            .WillOnce(Return(IMS_TRUE));
+    m_pController->OpenSession(NEGO_ID);
+
+    // Make session live to allow network update
+    EXPECT_CALL(
+            m_objListener, MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_MODIFY_SESSION, _))
+            .Times(testing::AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objListener,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_SET_MEDIA_QUALITY, _))
+            .Times(testing::AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objListener,
+            MediaSession_SendMsgToMediaManager(IJniMedia::REQUEST_UPDATE_ANBR_ENABLED_CONFIG, _))
+            .Times(testing::AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    m_pController->UpdateSession(NEGO_ID, ACCESS_NETWORK, m_pAudioNego);
+
+    AudioSession* pSession = m_pController->FindAudioSession(NEGO_ID);
+    ASSERT_NE(pSession, nullptr);
+
+    // Set ANBR mode
+    AnbrMode mode;
+    mode.setAnbrUplinkCodecMode(4096);
+    pSession->SetAnbrMode(mode);
+    EXPECT_EQ(pSession->GetRtpConfig()->getAnbrMode().getAnbrUplinkCodecMode(), 4096);
+
+    // Change network -> should trigger reset
+    // This call to UpdateAccessNetwork will trigger Modify and SetMediaQuality again.
+    m_pController->UpdateAccessNetwork(MediaNetworkConnectionWatcher::IWLAN);
+
+    EXPECT_EQ(pSession->GetRtpConfig()->getAnbrMode().getAnbrUplinkCodecMode(), 0);
 }
 
 TEST_F(AudioControllerTest, testHandleForkedSessionUpdate)

@@ -171,7 +171,7 @@ protected:
     IMS_BOOL IsERegRequestedByOnlySms() const;
     IMS_BOOL IsReinitiationRequested() const;
     IMS_BOOL IsRetryAllowed() const;
-    IMS_BOOL IsAnonymousECallActionPresent(IN IMS_SINT32 nStatusCode) const;
+    IMS_BOOL IsAnonymousECallTriggerable(IN IMS_SINT32 nStatusCode) const;
     IMS_BOOL IsNetworkReady() const;
 
     void ProcessReRegStart();
@@ -185,7 +185,8 @@ protected:
     void SetCallbackMode(IN EmergencyCallbackModeType eType, IN IMS_BOOL bEnable);
     void StartRegRetryTimer();
 
-    IMS_UINT32 GetPreferredRegScheme();
+    IMS_SINT32 GetPreferredRegScheme() const;
+    IMS_BOOL IsDataNetworkRoaming() const;
 
 private:
     IMS_BOOL m_bReinitiationRequested;

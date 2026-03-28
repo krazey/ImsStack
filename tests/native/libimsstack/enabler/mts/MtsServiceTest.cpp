@@ -120,7 +120,7 @@ protected:
                 GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
                 .WillByDefault(Return(IMS_TRUE));
         ON_CALL(objConfigService.GetMockCarrierConfig(),
-                GetBoolean(CarrierConfig::ImsSms::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
+                GetBoolean(CarrierConfig::ImsSms::KEY_SUPPORT_LIMITED_ADMIN_SMS_MODE_BOOL, _))
                 .WillByDefault(Return(IMS_FALSE));
 
         pMockNormalServiceState = new MockIMtsServiceState();
@@ -163,6 +163,75 @@ TEST_F(MtsServiceTest, GetICoreServiceReturnsNotNull)
 {
     EXPECT_EQ(pNormalService->GetICoreService(), &objMockCoreService);
     EXPECT_EQ(pEmergencyService->GetICoreService(), &objMockCoreService);
+}
+
+TEST_F(MtsServiceTest, SendMoSmsTriggersFallbackWhenInLimitedAccessMode)
+{
+    const IMS_BYTE arr[] = {0x00}; // RP-MO-DATA
+    ByteArray objContent(arr, 1);
+    SmsFormatType eSmsFormat = SmsFormatType::SMSFORMAT_3GPP;
+    AString strTargetAddress = "8765432101";
+    IMS_BOOL bEmergencyNumber = IMS_FALSE;
+
+    ON_CALL(*pMockNormalServiceState, IsInLimitedAccessMode()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pMockNormalServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
+
+    // Verify logic does NOT proceed to MessageController or traffic checks
+    EXPECT_CALL(objMockMessageController, ProcessMoSms(_, _, _, _, _, _, _)).Times(0);
+    EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_)).Times(0);
+
+    // Verify fallback is reported to the framework
+    EXPECT_CALL(objMockJniAppThread, ReportMoStatus(MO_ERROR_FALLBACK, eSmsFormat, SEQ_ID_1,
+        SLOT_ID)).Times(1);
+
+    pNormalService->SendMoSms(eSmsFormat, &objContent, strTargetAddress, SEQ_ID_1, bEmergencyNumber,
+        0);
+}
+
+TEST_F(MtsServiceTest, SendMoSmsProceedsWhenEmergencyType)
+{
+    // message type indicator(RP-MO-DATA)
+    const IMS_BYTE arr[] = {0x00};
+    ByteArray objContent(arr, 1);
+    SmsFormatType eSmsFormat = SmsFormatType::SMSFORMAT_3GPP;
+    AString strTargetAddress = "911";
+    IMS_BOOL bEmergencyNumber = IMS_TRUE;
+    // Mock conditions that would normally block a standard user SMS
+    ON_CALL(*pMockEmergencyServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_TRUE));
+
+    // Should NOT report an error/fallback
+    EXPECT_CALL(objMockJniAppThread, ReportMoStatus(_, _, _, _)).Times(0);
+
+    pEmergencyService->SendMoSms(eSmsFormat, &objContent, strTargetAddress, SEQ_ID_1,
+        bEmergencyNumber, 0);
+}
+
+TEST_F(MtsServiceTest, SendMoSmsProceedsForRpAckEvenIfBlocked)
+{
+    // message type indicator(RP-ACK-FROM-MS)
+    const IMS_BYTE arr[] = {0x02};  // RP-ACK MTI
+    ByteArray objContent(arr, 1);
+    SmsFormatType eSmsFormat = SmsFormatType::SMSFORMAT_3GPP;
+    AString strTargetAddress = "8765432101";
+    IMS_BOOL bEmergencyNumber = IMS_FALSE;
+
+    // Mock generic service block
+    ON_CALL(*pMockNormalServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockNetworkTracker, GetNetworkType())
+            .WillByDefault(Return(INetworkWatcher::RADIOTECH_TYPE_LTE));
+
+    // Should NOT report an error/fallback
+    EXPECT_CALL(objMockJniAppThread, ReportMoStatus(_, _, _, _)).Times(0);
+
+    // Verify processing proceeds despite the service block
+    EXPECT_CALL(objMockMessageController, ProcessMoSms(_, _, _, _, _, _, _)).Times(1);
+    EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
+            .WillOnce(Return(IMS_TRUE));
+
+    pNormalService->SendMoSms(eSmsFormat, &objContent, strTargetAddress, SEQ_ID_1, bEmergencyNumber,
+        0);
+    pNormalService->Traffic_OnConnectionSetupPrepared(
+            IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO);
 }
 
 TEST_F(MtsServiceTest, CoreServicePageMessageReceivedOnNormalService)

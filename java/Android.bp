@@ -50,6 +50,7 @@ android_library {
         "androidx.annotation_annotation",
         "androidx.appcompat_appcompat",
         "ImsMediaFramework",
+        "imsstack_flags_java_lib",
         "imsstack-prebuilt",
         "libphonenumber",
     ] + select(soong_config_variable("imsstack_namespace", "use_carrier_config_ext"), {

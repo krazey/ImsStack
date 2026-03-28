@@ -43,6 +43,10 @@ public:
     void SetImsRegConnected(IN IMS_BOOL bConnected) override;
     inline IMS_BOOL GetImsRegConnected() override { return m_bImsConnected; }
 
+    IMS_BOOL IsInLimitedAccessMode() const override
+    {
+        return (m_bSupportLimitedAdminSmsMode && m_bAosRegModAdmin);
+    }
     IMS_BOOL IsMoServiceBlocked() const override;
     IMS_BOOL IsMtServiceBlocked() const override;
 
@@ -54,12 +58,20 @@ private:
     IImsAos* m_piImsAos;
     IMS_SINT32 m_nState;
     // Check Condition for SMS SERVICE MODE
-    IMS_BOOL m_bImsConnected;    // if Connected true enable sms mo/mt service.
-    IMS_BOOL m_bAosRegModAdmin;  // if Mod Admin true. block mo service.
-    IMS_BOOL m_bImsSuspend;      // if IMSAoSApp_IMSSuspended true. block mo service
-    // if sms_over_ip_network Ind is false. block mo service
+    IMS_BOOL m_bImsConnected;  // if Connected true enable sms mo/mt service
+    /**
+     *  if IMS is registered as an admin mode and limited access mode is supported,
+     *  then MO SMS should fallback.
+     */
+    IMS_BOOL m_bAosRegModAdmin;
+    IMS_BOOL m_bImsSuspend;  // Flag specifying that IMS is in SUSPENDED state.
+    /**
+     * Flag specifying that the config (sms_over_ip_networks_indication) which allows
+     * MO SMS is enabled.
+     */
     IMS_BOOL m_bSmsOverIpConf;
-    IMS_BOOL m_bAllowImsiBasedSipUri;
+    // Flag specifying that the limited access mode is supported.
+    IMS_BOOL m_bSupportLimitedAdminSmsMode;
     IMS_SINT32 m_nSlotId;
 };
 

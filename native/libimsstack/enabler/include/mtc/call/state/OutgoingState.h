@@ -37,6 +37,7 @@ public:
     OutgoingState(IN const OutgoingState&) = delete;
     OutgoingState& operator=(IN const OutgoingState&) = delete;
 
+    void OnEnter() override;
     void OnExit() override;
 
     CallStateName Terminate(IN const CallReasonInfo& objReason) override;

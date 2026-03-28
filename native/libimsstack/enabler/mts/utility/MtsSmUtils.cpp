@@ -82,3 +82,16 @@ IMS_SINT32 MtsSmUtils::GetMti(IN SmsFormatType eSmsFormat, IN const ByteArray& o
 
     return GetMti(eSmsFormat, objContent.GetData());
 }
+
+PUBLIC
+IMS_BOOL MtsSmUtils::IsSmsRpAckOrError(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent)
+{
+    if (eSmsFormat != SmsFormatType::SMSFORMAT_3GPP || objContent.GetLength() == 0)
+    {
+        return IMS_FALSE;
+    }
+
+    IMS_SINT32 nMti = GetMti(SmsFormatType::SMSFORMAT_3GPP, objContent.GetData());
+
+    return (nMti == SMS_3GPP_MTI_RP_ACK_FROM_MS || nMti == SMS_3GPP_MTI_RP_ERROR_FROM_MS);
+}

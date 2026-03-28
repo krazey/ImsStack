@@ -92,9 +92,16 @@ public:
     virtual IMS_BOOL GetImsRegConnected() = 0;
 
     /**
+     * @brief Check if the limited access mode is supported and is active.
+     *
+     * @return {@code IMS_TRUE} if the limited access mode is active, {@code IMS_FALSE} otherwise.
+     */
+    virtual IMS_BOOL IsInLimitedAccessMode() const = 0;
+
+    /**
      * @brief Checks if the MO service is currently blocked.
      *
-     * @return {@code IMS_TRUE} If the MO service is blocked,
+     * @return {@code IMS_TRUE} If the MO service is blocked.
      *         {@code IMS_FALSE} otherwise.
      */
     virtual IMS_BOOL IsMoServiceBlocked() const = 0;

@@ -18,6 +18,8 @@
 #include "msg/SipPPreferredServiceHeader.h"
 #include "platform/SipString.h"
 
+const SIP_CHAR SipPPreferredServiceHeader::URN_PREFIX[] = "urn:urn-7:";
+
 SipPPreferredServiceHeader::SipPPreferredServiceHeader(SIP_INT32 eHdrType) :
         SipHeaderBase(eHdrType)
 {
@@ -41,28 +43,22 @@ SIP_BOOL SipPPreferredServiceHeader::Decode(const SIP_CHAR* pStartPt, SIP_UINT32
     }
 
     const SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    SipAbnfUtil::SkipWhiteSpaceFromLeft(pStartPt, pEndPt);
+    const SIP_CHAR* pNextPt = SipAbnfUtil::SkipWhiteSpaceFromLeft(pStartPt, pEndPt);
 
-    // validate urn:urn-7 mandatory prefix
-    SIP_CHAR* pszTempString = SipAbnfUtil::CreateString(pStartPt, pStartPt + SIP_NINE);
-    if (SipPf_Stricmp("urn:urn-7:", pszTempString) != SIP_ZERO)
+    SIP_UINT32 nRemaining = (pNextPt > pEndPt) ? 0 : (pEndPt - pNextPt + SIP_ONE);
+
+    // validate urn:urn-7: mandatory prefix
+    if (nRemaining >= URN_PREFIX_LEN &&
+            SipPf_Strnicmp(URN_PREFIX, pNextPt, URN_PREFIX_LEN) != SIP_ZERO)
     {
-        SIP_DEBUG_WARNING(
-                ESIPTRACE_MODDECODER, "value must start by urn:urn-7:", SIP_ZERO, SIP_ZERO);
-        if (pszTempString != SIP_NULL)
-        {
-            delete[] pszTempString;
-        }
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Value must start with %s", URN_PREFIX, SIP_ZERO);
 #ifdef SIP_STRICT_PARSING
         return SIP_FALSE;
 #endif
     }
-    else if (pszTempString != SIP_NULL)
-    {
-        delete[] pszTempString;
-    }
 
-    const SIP_CHAR* pTempCurr = pStartPt + SIP_TEN;
+    const SIP_CHAR* pTempCurr =
+            (nRemaining >= URN_PREFIX_LEN) ? (pNextPt + URN_PREFIX_LEN) : (pEndPt + SIP_ONE);
     const SIP_CHAR* pTempPre = SIP_NULL;
     const SIP_CHAR* pTempNext = SIP_NULL;
     // Find First dot and validate SubService Id

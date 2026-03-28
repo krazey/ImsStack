@@ -427,4 +427,18 @@ TEST_F(EmergencyStartErrorHandlerTest, HandleSilentReinviteToAlternatePcscfSucce
     EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_WITH_NEXT_PCSCF));
 }
 
+TEST_F(EmergencyStartErrorHandlerTest, HandleSetsHadInviteTransactionTimeoutIfTransactionTimeout)
+{
+    EXPECT_CALL(objCallContext, SetHadInviteTransactionTimeout(IMS_TRUE)).Times(1);
+    pHandler->Handle(nullptr);
+}
+
+TEST_F(EmergencyStartErrorHandlerTest,
+        HandleDoesNotSetHadInviteTransactionTimeoutIfNotTransactionTimeout)
+{
+    SetMessageCode(SipStatusCode::SC_403);
+    EXPECT_CALL(objCallContext, SetHadInviteTransactionTimeout(_)).Times(0);
+    pHandler->Handle(&objMessage);
+}
+
 }  // namespace android

@@ -114,6 +114,11 @@ CallReasonInfo EmergencyStartErrorHandler::Handle(IN const IMessage* piMessage) 
         }
     }
 
+    if (StartErrorHandler::IsTransactionTimeout(piMessage))
+    {
+        m_objContext.SetHadInviteTransactionTimeout(IMS_TRUE);
+    }
+
     IMS_SINT32 nStatusCode = GetStatusCode(piMessage);
     ImsVector<IMS_SINT32> objActions = MtcConfigurationResolver::LookupActionForStatusCode(
             m_objContext.GetConfigurationProxy(),

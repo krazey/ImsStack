@@ -545,8 +545,6 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_RELEASE_EPDN_OF_UNAVAILABLE_NETW
         KEY_IMS_EMERGENCY_PREFIX "release_epdn_of_unavailable_network_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_STOP_EREG_TIMER_ON_EPDN_CONNECTED_BOOL[] =
         KEY_IMS_EMERGENCY_PREFIX "stop_ereg_timer_on_epdn_connected_bool";
-const IMS_CHAR CarrierConfig::ImsEmergency::KEY_SUPPORT_ANONYMOUS_ECALL_ACTION_BOOL[] =
-        KEY_IMS_EMERGENCY_PREFIX "support_anonymous_ecall_action_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_SUPPORT_EREG_WHEN_EATTACH_WITH_VALID_SIM_BOOL[] =
         KEY_IMS_EMERGENCY_PREFIX "support_ereg_when_eattach_with_valid_sim_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_SUPPORT_EREREG_ON_IPCAN_CHANGE_BOOL[] =
@@ -557,6 +555,8 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_SUPPORT_VIDEO_FOR_EREG_BOOL[] =
         KEY_IMS_EMERGENCY_PREFIX "support_video_for_ereg_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_USE_REG_RETRY_RULE_FOR_EREG_BOOL[] =
         KEY_IMS_EMERGENCY_PREFIX "use_reg_retry_rule_for_ereg_bool";
+const IMS_CHAR CarrierConfig::ImsEmergency::KEY_ANONYMOUS_ECALL_ACTION_SUPPORT_MODE_INT[] =
+        KEY_IMS_EMERGENCY_PREFIX "anonymous_ecall_action_support_mode_int";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EPDN_PREFERRED_IPTYPE_INT[] =
         KEY_IMS_EMERGENCY_PREFIX "epdn_preferred_iptype_int";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EREG_RETRY_MAX_CNT_INT[] =
@@ -622,6 +622,12 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_DYNAMIC_ROUTING_NUMBER_PER_PLMN_
         KEY_IMS_EMERGENCY_PREFIX "dynamic_routing_number_per_plmn_string_array";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EMERGENCY_SERVICE_CATEGORY_PER_PLMN_STRING_ARRAY[] =
         KEY_IMS_EMERGENCY_PREFIX "emergency_service_category_per_plmn_string_array";
+const IMS_CHAR CarrierConfig::ImsEmergency::KEY_KEEP_INVITE_TRANSACTION_TIMEOUT_DURING_CALL_BOOL[] =
+        KEY_IMS_EMERGENCY_PREFIX "keep_invite_transaction_timeout_during_call_bool";
+const IMS_CHAR CarrierConfig::ImsEmergency::
+        KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_AND_SIP_RESPONSE_TIMEOUT_STRING[] =
+                KEY_IMS_EMERGENCY_PREFIX
+        "call_terminate_reason_header_user_ends_and_sip_response_timeout_string";
 
 //// ImsRtt
 #define KEY_IMS_RTT_PREFIX "imsrtt."
@@ -1438,8 +1444,6 @@ const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_PREFERRED_PSI_URI_TYPE_INT[] =
         KEY_IMS_SMS_PREFIX "sms_preferred_psi_uri_type_int";
 const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL[] =
         KEY_IMS_SMS_PREFIX "sms_use_dialed_number_for_request_uri_bool";
-const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL[] =
-        KEY_IMS_SMS_PREFIX "sms_allow_imsi_based_sip_uri_bool";
 const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY[] =
         KEY_IMS_SMS_PREFIX "sms_generic_error_codes_int_array";
 const IMS_CHAR CarrierConfig::ImsSms::KEY_SMS_FALLBACK_ERROR_CODES_INT_ARRAY[] =

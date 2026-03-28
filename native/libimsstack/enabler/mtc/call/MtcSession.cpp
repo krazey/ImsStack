@@ -338,7 +338,10 @@ PUBLIC VIRTUAL void MtcSession::HandleRequest(IN RequestType eType, IN const IMe
             }
             else
             {
-                SetCallType(GetCallTypeForOfferlessReInvite());
+                if (objRequest.GetMethod().Equals(SipMethod::INVITE))
+                {
+                    SetCallType(GetCallTypeForOfferlessReInvite());
+                }
             }
 
             HandleInConference(objRequest);

@@ -32,5 +32,7 @@ private:
     ~SipPPreferredServiceHeader() override;
 
     static constexpr SIP_UINT32 MAX_LET_DIG = 27;
+    static constexpr SIP_UINT32 URN_PREFIX_LEN = 10;
+    static const SIP_CHAR URN_PREFIX[];
 };
 #endif  //__SIP_P_PREFEERED_SERVICE_HEADER_H__

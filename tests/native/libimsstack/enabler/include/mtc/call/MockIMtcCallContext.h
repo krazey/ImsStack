@@ -84,6 +84,8 @@ public:
     MOCK_METHOD(ImsList<IMtcCall*>, GetOtherCalls, (), (override));
     MOCK_METHOD(void, SetHeldByMe, (IMS_BOOL), (override));
     MOCK_METHOD(void, SetUnconfirmedRemoteHold, (IMS_BOOL), (override));
+    MOCK_METHOD(void, SetHadInviteTransactionTimeout, (IMS_BOOL), (override));
+    MOCK_METHOD(IMS_BOOL, HadInviteTransactionTimeout, (), (const, override));
     MOCK_METHOD(IMtcSession*, CreateSession, (IN ISession* piSession), (override));
     MOCK_METHOD(IMtcSession*, CreateSession, (), (override));
     MOCK_METHOD(IMtcBlockChecker*, CreateBlockChecker, (IN const ImsList<IMtcBlockRule*>& lstRules),
