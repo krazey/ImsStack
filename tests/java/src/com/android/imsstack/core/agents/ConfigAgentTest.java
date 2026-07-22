@@ -52,6 +52,7 @@ import android.content.res.AssetManager;
 import android.content.res.XmlResourceParser;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -370,6 +371,72 @@ public class ConfigAgentTest {
         assertEquals(valueInt, cc.getInt(keyInt));
         assertEquals(valueBool, cc.getBoolean(keyBool));
         assertEquals(valueString, cc.getString(keyString));
+    }
+
+    @Test
+    @SmallTest
+    public void testMccMncExtensionOverridesCarrierIdAndMatchesSimPrefixes()
+            throws IOException {
+        PersistableBundle platformConfig = new PersistableBundle();
+        platformConfig.putBoolean(
+                CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL, true);
+        platformConfig.putBoolean(
+                CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
+        platformConfig.putBoolean(
+                CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, true);
+        setUpCarrierConfig(platformConfig);
+
+        AssetManager am = mContext.getAssets();
+        mConfigAgent.init(mContext);
+
+        final String carrierIdFile = "carrier_config_carrierid_20001_Test.xml";
+        final String extensionFile = "carrier_config_ext_mccmnc_401077.xml";
+        final String keyInt = "ims.ims_test_int";
+        final String keyBool = "ims.ims_test_bool";
+        final String carrierIdXml =
+                "<carrier_config><int name=\"" + keyInt + "\" value=\"100\"/>"
+                        + "</carrier_config>";
+        final String extensionXml =
+                "<carrier_config_list>"
+                        + "<carrier_config><int name=\"" + keyInt + "\" value=\"150\"/>"
+                        + "<boolean name=\"ims.carrier_policy_volte_enabled_bool\" "
+                        + "value=\"false\"/></carrier_config>"
+                        + "<carrier_config gid1_prefix=\"A000\" gid2_prefix=\"B000\" "
+                        + "spn=\"Tele2\" imsi=\"40177.*\">"
+                        + "<int name=\"" + keyInt + "\" value=\"200\"/>"
+                        + "<boolean name=\"" + keyBool + "\" value=\"true\"/>"
+                        + "</carrier_config></carrier_config_list>";
+
+        when(am.list(eq(CarrierConfig.CARRIER_CONFIG)))
+                .thenReturn(new String[] { carrierIdFile, extensionFile });
+        when(am.list(eq(CarrierConfig.PUBLIC_CARRIER_CONFIG))).thenReturn(new String[0]);
+        when(am.open(eq(CarrierConfig.CARRIER_CONFIG + "/" + carrierIdFile)))
+                .thenAnswer(invocation -> new ByteArrayInputStream(
+                        carrierIdXml.getBytes(StandardCharsets.UTF_8)));
+        when(am.open(eq(CarrierConfig.CARRIER_CONFIG + "/" + extensionFile)))
+                .thenAnswer(invocation -> new ByteArrayInputStream(
+                        extensionXml.getBytes(StandardCharsets.UTF_8)));
+
+        SimCarrierId scid = new SimCarrierId.Builder()
+                .setCarrierId(20001)
+                .setMcc("401")
+                .setMnc("77")
+                .setImsi("401771234567890")
+                .setGid1("A00020")
+                .setGid2("B00030")
+                .setSpn("Tele2")
+                .setIccId(TEST_ICCID)
+                .setSimState(SimCarrierId.SIM_LOADED)
+                .build();
+        mConfigAgent.updateCarrierConfig(SUB_ID_1, scid);
+
+        CarrierConfig cc = mConfigAgent.getCarrierConfig();
+        assertEquals(200, cc.getInt(keyInt));
+        assertTrue(cc.getBoolean(keyBool));
+        assertFalse(cc.getBoolean(CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL));
+        assertTrue(cc.getBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL));
+        assertTrue(cc.getBoolean(
+                CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL));
     }
 
     @Test

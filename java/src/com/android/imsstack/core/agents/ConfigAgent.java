@@ -101,6 +101,7 @@ public class ConfigAgent implements ConfigInterface {
 
     private static final String CARRIER_ID_PREFIX = "carrier_config_carrierid_";
     private static final String MCC_MNC_PREFIX = "carrier_config_mccmnc_";
+    private static final String EXT_MCC_MNC_PREFIX = "carrier_config_ext_mccmnc_";
     /** Intent for testing purpose. */
     // TODO: should be integrated with the above commands in the future.
     private static final String ACTION_TEST_CARRIER_CONFIG_PUT =
@@ -332,10 +333,15 @@ public class ConfigAgent implements ConfigInterface {
             config.putAll(mCarrierPublicConfig);
         }
 
+        applyCarrierPolicyServiceGates(config);
         mIntentReceiver.setOriginalCarrierConfig(config);
 
         // Loads override configs in the hidden key of CarrierConfigManager
         overrideHiddenConfigs(subId, config);
+
+        // Extension service switches are safety gates. Hidden carrier
+        // overrides may change availability but cannot bypass those gates.
+        applyCarrierPolicyServiceGates(config);
 
         // test-carrier-config
         PersistableBundle testConfig = readTestConfig();
@@ -366,6 +372,27 @@ public class ConfigAgent implements ConfigInterface {
 
         notifyCarrierConfigChanged(subId);
         notifyCarrierConfigChangedForNative();
+    }
+
+    private static void applyCarrierPolicyServiceGates(PersistableBundle config) {
+        boolean imsEnabled = config.getBoolean(
+                CarrierConfig.KEY_CARRIER_POLICY_IMS_ENABLED_BOOL, true);
+        boolean volteEnabled = config.getBoolean(
+                CarrierConfig.KEY_CARRIER_POLICY_VOLTE_ENABLED_BOOL, true);
+        boolean vowifiEnabled = config.getBoolean(
+                CarrierConfig.KEY_CARRIER_POLICY_VOWIFI_ENABLED_BOOL, true);
+        boolean smsOverImsEnabled = config.getBoolean(
+                CarrierConfig.KEY_CARRIER_POLICY_SMS_OVER_IMS_ENABLED_BOOL, true);
+
+        config.putBoolean(CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL,
+                config.getBoolean(CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL)
+                        && imsEnabled && volteEnabled);
+        config.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL,
+                config.getBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL)
+                        && imsEnabled && vowifiEnabled);
+        config.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL,
+                config.getBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL)
+                        && imsEnabled && smsOverImsEnabled);
     }
 
     @VisibleForTesting
@@ -446,17 +473,53 @@ public class ConfigAgent implements ConfigInterface {
     }
 
     private PersistableBundle readCarrierConfig(int subId, SimCarrierId id, boolean isInternal) {
-        String fileName = getCarrierConfigFile(subId, id,
-                isInternal ? CarrierConfig.CARRIER_CONFIG : CarrierConfig.PUBLIC_CARRIER_CONFIG);
+        String path = isInternal
+                ? CarrierConfig.CARRIER_CONFIG : CarrierConfig.PUBLIC_CARRIER_CONFIG;
+        String fileName = getCarrierConfigFile(subId, id, path);
+        PersistableBundle config = new PersistableBundle();
 
-        if (TextUtils.isEmpty(fileName)) {
-            ImsLog.d(this, mSlotId, "readCarrierConfig: No matched carrier configuration - " + id);
-            return new PersistableBundle();
+        if (!TextUtils.isEmpty(fileName)) {
+            ImsLog.d(this, mSlotId, "readCarrierConfig: " + fileName);
+            config.putAll(readCarrierConfigFromAsset(fileName, id));
         }
 
-        ImsLog.d(this, mSlotId, "readCarrierConfig: " + fileName);
+        String extensionFileName = getExtensionMccMncConfigFile(id, path);
+        if (!TextUtils.isEmpty(extensionFileName)
+                && !TextUtils.equals(fileName, extensionFileName)) {
+            ImsLog.d(this, mSlotId,
+                    "readCarrierConfig: applying extension " + extensionFileName);
+            config.putAll(readCarrierConfigFromAsset(extensionFileName, id));
+        }
 
-        return readCarrierConfigFromAsset(fileName, id);
+        if (TextUtils.isEmpty(fileName) && TextUtils.isEmpty(extensionFileName)) {
+            ImsLog.d(this, mSlotId, "readCarrierConfig: No matched carrier configuration - " + id);
+        }
+
+        return config;
+    }
+
+    private String getExtensionMccMncConfigFile(SimCarrierId id, @NonNull String path) {
+        if (TextUtils.isEmpty(id.getMcc()) || TextUtils.isEmpty(id.getMnc())) {
+            return null;
+        }
+
+        String mnc = id.getMnc();
+        if (mnc.length() == 2) {
+            mnc = "0" + mnc;
+        } else if (mnc.length() != 3) {
+            return null;
+        }
+
+        String candidate = EXT_MCC_MNC_PREFIX + id.getMcc() + mnc + ".xml";
+        try {
+            String[] files = AppContext.getInstance().getAssets().list(path);
+            if (files != null && Arrays.asList(files).contains(candidate)) {
+                return path + "/" + candidate;
+            }
+        } catch (IOException e) {
+            ImsLog.e(this, mSlotId, "getExtensionMccMncConfigFile: " + e);
+        }
+        return null;
     }
 
     private PersistableBundle readCarrierConfigFromAsset(String fileName, SimCarrierId id) {

@@ -56,6 +56,14 @@ public class CarrierConfig {
     // The default value is true.
     public static final String KEY_IMS_OVERRIDE_PUBLIC_CONFIG_BOOL =
             "ims.override_public_config_bool";
+    public static final String KEY_CARRIER_POLICY_IMS_ENABLED_BOOL =
+            "ims.carrier_policy_ims_enabled_bool";
+    public static final String KEY_CARRIER_POLICY_VOLTE_ENABLED_BOOL =
+            "ims.carrier_policy_volte_enabled_bool";
+    public static final String KEY_CARRIER_POLICY_VOWIFI_ENABLED_BOOL =
+            "ims.carrier_policy_vowifi_enabled_bool";
+    public static final String KEY_CARRIER_POLICY_SMS_OVER_IMS_ENABLED_BOOL =
+            "ims.carrier_policy_sms_over_ims_enabled_bool";
 
     /** Configuration items for IMS common. */
     @SuppressWarnings("deprecation")
