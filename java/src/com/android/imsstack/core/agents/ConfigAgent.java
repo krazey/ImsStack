@@ -281,6 +281,9 @@ public class ConfigAgent implements ConfigInterface {
         // 2) When carrier-id is unknown, mcc-mnc based XML will be used.
         mCarrierInternalConfig.clear();
         PersistableBundle tempConfig = readCarrierConfig(subId, id);
+        PersistableBundle carrierExtensionConfig = readCarrierExtensionConfig(
+                id, CarrierConfig.CARRIER_CONFIG);
+        tempConfig.putAll(carrierExtensionConfig);
 
         int[] parentCarrierIds = tempConfig.getIntArray(
                 CarrierConfig.KEY_IMS_PARENT_CARRIER_IDS_INT_ARRAY);
@@ -314,6 +317,7 @@ public class ConfigAgent implements ConfigInterface {
 
         // Sets the internal public carrier configuration.
         mCarrierPublicConfig.clear();
+        PersistableBundle publicCarrierExtensionConfig = new PersistableBundle();
         if (config.getBoolean(CarrierConfig.KEY_IMS_OVERRIDE_PUBLIC_CONFIG_BOOL, true)) {
             ImsLog.d(this, mSlotId, "Overriding public configs...");
             config.putAll(mDefaultPublicConfig);
@@ -330,8 +334,17 @@ public class ConfigAgent implements ConfigInterface {
 
             tempConfig = readCarrierConfig(subId, id, false);
             mCarrierPublicConfig.putAll(tempConfig);
+            publicCarrierExtensionConfig = readCarrierExtensionConfig(
+                    id, CarrierConfig.PUBLIC_CARRIER_CONFIG);
+            mCarrierPublicConfig.putAll(publicCarrierExtensionConfig);
             config.putAll(mCarrierPublicConfig);
         }
+
+        // The extension contains downstream carrier policy with direct
+        // equivalents in CarrierConfigManager. Reapply it after framework
+        // configuration so those values are not silently discarded.
+        config.putAll(carrierExtensionConfig);
+        config.putAll(publicCarrierExtensionConfig);
 
         applyCarrierPolicyServiceGates(config);
         mIntentReceiver.setOriginalCarrierConfig(config);
@@ -514,26 +527,25 @@ public class ConfigAgent implements ConfigInterface {
         String path = isInternal
                 ? CarrierConfig.CARRIER_CONFIG : CarrierConfig.PUBLIC_CARRIER_CONFIG;
         String fileName = getCarrierConfigFile(subId, id, path);
-        PersistableBundle config = new PersistableBundle();
 
-        if (!TextUtils.isEmpty(fileName)) {
-            ImsLog.d(this, mSlotId, "readCarrierConfig: " + fileName);
-            config.putAll(readCarrierConfigFromAsset(fileName, id));
-        }
-
-        String extensionFileName = getExtensionMccMncConfigFile(id, path);
-        if (!TextUtils.isEmpty(extensionFileName)
-                && !TextUtils.equals(fileName, extensionFileName)) {
-            ImsLog.d(this, mSlotId,
-                    "readCarrierConfig: applying extension " + extensionFileName);
-            config.putAll(readCarrierConfigFromAsset(extensionFileName, id));
-        }
-
-        if (TextUtils.isEmpty(fileName) && TextUtils.isEmpty(extensionFileName)) {
+        if (TextUtils.isEmpty(fileName)) {
             ImsLog.d(this, mSlotId, "readCarrierConfig: No matched carrier configuration - " + id);
+            return new PersistableBundle();
         }
 
-        return config;
+        ImsLog.d(this, mSlotId, "readCarrierConfig: " + fileName);
+        return readCarrierConfigFromAsset(fileName, id);
+    }
+
+    private PersistableBundle readCarrierExtensionConfig(
+            SimCarrierId id, @NonNull String path) {
+        String fileName = getExtensionMccMncConfigFile(id, path);
+        if (TextUtils.isEmpty(fileName)) {
+            return new PersistableBundle();
+        }
+
+        ImsLog.d(this, mSlotId, "readCarrierExtensionConfig: " + fileName);
+        return readCarrierConfigFromAsset(fileName, id);
     }
 
     private String getExtensionMccMncConfigFile(SimCarrierId id, @NonNull String path) {

@@ -378,7 +378,7 @@ public class ConfigAgentTest {
 
     @Test
     @SmallTest
-    public void testMccMncExtensionOverridesCarrierIdAndMatchesSimPrefixes()
+    public void testMccMncExtensionOverridesCarrierAndFrameworkConfig()
             throws IOException {
         PersistableBundle platformConfig = new PersistableBundle();
         platformConfig.putBoolean(
@@ -387,6 +387,8 @@ public class ConfigAgentTest {
                 CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
         platformConfig.putBoolean(
                 CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, true);
+        platformConfig.putInt(
+                CarrierConfigManager.Ims.KEY_REQUEST_URI_TYPE_INT, 0);
         setUpCarrierConfig(platformConfig);
 
         AssetManager am = mContext.getAssets();
@@ -402,6 +404,7 @@ public class ConfigAgentTest {
         final String extensionXml =
                 "<carrier_config_list>"
                         + "<carrier_config><int name=\"" + keyInt + "\" value=\"150\"/>"
+                        + "<int name=\"ims.request_uri_type_int\" value=\"1\"/>"
                         + "<boolean name=\"ims.carrier_policy_volte_enabled_bool\" "
                         + "value=\"false\"/></carrier_config>"
                         + "<carrier_config gid1_prefix=\"A000\" gid2_prefix=\"B000\" "
@@ -436,6 +439,7 @@ public class ConfigAgentTest {
         CarrierConfig cc = mConfigAgent.getCarrierConfig();
         assertEquals(200, cc.getInt(keyInt));
         assertTrue(cc.getBoolean(keyBool));
+        assertEquals(1, cc.getInt(CarrierConfigManager.Ims.KEY_REQUEST_URI_TYPE_INT));
         assertFalse(cc.getBoolean(CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL));
         assertTrue(cc.getBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL));
         assertTrue(cc.getBoolean(
