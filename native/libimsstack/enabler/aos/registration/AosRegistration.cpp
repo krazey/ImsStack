@@ -3466,6 +3466,17 @@ PROTECTED VIRTUAL void AosRegistration::ProcessIpcanChanged()
         SetReregFailureReportOnIpcanChangeRequired(IMS_TRUE);
     }
 
+    if (GetState() == STATE_REGISTERING && !IsImsCall())
+    {
+        // The in-flight REGISTER still owns a transport on the previous access. Waiting for the
+        // transaction to finish can keep initial registration blocked until Timer F expires.
+        A_IMS_TRACE_I(REGID, "ProcessIpcanChanged :: restart in-flight initial registration", 0,
+                0, 0);
+        DestroyLocalTransport();
+        ProcessReinitiate();
+        return;
+    }
+
     Update();
 }
 
