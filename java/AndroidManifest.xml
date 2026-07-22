@@ -128,9 +128,9 @@
             <meta-data android:name="android.telephony.ims.MMTEL_FEATURE"
                 android:value="true"/>
             <meta-data android:name="android.telephony.ims.EMERGENCY_MMTEL_FEATURE"
-                android:value="true"/>
+                android:value="@bool/config_imsstack_emergency_mmtel_feature"/>
             <meta-data android:name="android.telephony.ims.RCS_FEATURE"
-                android:value="true"/>
+                android:value="@bool/config_imsstack_rcs_feature"/>
             <intent-filter>
                 <action android:name="android.telephony.ims.ImsService"/>
             </intent-filter>

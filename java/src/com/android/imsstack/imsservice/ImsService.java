@@ -25,6 +25,7 @@ import android.telephony.ims.stub.ImsFeatureConfiguration;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.telephony.ims.stub.SipTransportImplBase;
 
+import com.android.imsstack.R;
 import com.android.imsstack.base.DeviceConfig;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.dcm.DcFactory;
@@ -83,11 +84,19 @@ public class ImsService extends android.telephony.ims.ImsService {
         // Generally, the features are the same as defined in AndroidManifest.xml.
         ImsFeatureConfiguration.Builder fcBuilder = new ImsFeatureConfiguration.Builder();
         int simCount = DeviceConfig.getActiveSimCount();
+        boolean emergencyMmTelEnabled = getResources().getBoolean(
+                R.bool.config_imsstack_emergency_mmtel_feature);
+        boolean rcsEnabled = getResources().getBoolean(
+                R.bool.config_imsstack_rcs_feature);
 
         for (int i = 0; i < simCount; i++) {
             fcBuilder.addFeature(i, ImsFeature.FEATURE_MMTEL);
-            fcBuilder.addFeature(i, ImsFeature.FEATURE_EMERGENCY_MMTEL);
-            fcBuilder.addFeature(i, ImsFeature.FEATURE_RCS);
+            if (emergencyMmTelEnabled) {
+                fcBuilder.addFeature(i, ImsFeature.FEATURE_EMERGENCY_MMTEL);
+            }
+            if (rcsEnabled) {
+                fcBuilder.addFeature(i, ImsFeature.FEATURE_RCS);
+            }
         }
 
         return fcBuilder.build();
