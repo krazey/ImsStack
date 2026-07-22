@@ -15,7 +15,6 @@
  */
 package com.android.imsstack.core.agents;
 
-import static android.telephony.TelephonyManager.DomainSelectionEmergencyType;
 import static android.telephony.TelephonyManager.EmergencyCallbackModeType;
 
 import androidx.annotation.NonNull;
@@ -24,6 +23,12 @@ import androidx.annotation.NonNull;
  * An interface for monitoring the emergency state such as emergency mode entered/exited.
  */
 public interface EmergencyStateInterface extends IAgent {
+    /** Domain-selection emergency mode for a call. */
+    int EMERGENCY_MODE_TYPE_CALL = 1;
+
+    /** Domain-selection emergency mode for SMS. */
+    int EMERGENCY_MODE_TYPE_SMS = 2;
+
     /**
      * Represents the state of the emergency callback mode.
      */
@@ -73,7 +78,7 @@ public interface EmergencyStateInterface extends IAgent {
          * @param type The emergency mode type.
          * @param entered {@code true} if the emergency mode is entered, {@code false} otherwise.
          */
-        void onEmergencyModeChanged(@DomainSelectionEmergencyType int type, boolean entered);
+        void onEmergencyModeChanged(int type, boolean entered);
 
         /**
          * Called to notify the update of emergency callback mode.
@@ -106,5 +111,5 @@ public interface EmergencyStateInterface extends IAgent {
      * @param type The emergency mode type.
      * @return {@code true} if the emergency mode is entered, {@code false} otherwise.
      */
-    boolean isInEmergencyMode(@DomainSelectionEmergencyType int type);
+    boolean isInEmergencyMode(int type);
 }

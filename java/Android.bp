@@ -21,6 +21,19 @@ android_library {
     manifest: "AndroidManifest-debuggable.xml",
 }
 
+filegroup {
+    name: "imsstack-java-common-srcs",
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.aidl",
+    ],
+    exclude_srcs: [
+        "src/**/ImsStackApp.java",
+        "src/com/android/imsstack/core/agents/DomainSelectionEmergencyModeMonitor.java",
+        "src/com/android/imsstack/core/agents/DomainSelectionEmergencyModeMonitorCompat.java",
+    ],
+}
+
 android_library {
     name: "imsstack",
     platform_apis: true,
@@ -32,12 +45,15 @@ android_library {
         "res",
     ],
     srcs: [
-        "src/**/*.java",
-        "src/**/*.aidl",
-    ],
-    exclude_srcs: [
-        "src/**/ImsStackApp.java",
-    ],
+        ":imsstack-java-common-srcs",
+    ] + select(soong_config_variable("imsstack_namespace", "use_android16_telephony_compat"), {
+        true: [
+            "src/com/android/imsstack/core/agents/DomainSelectionEmergencyModeMonitorCompat.java",
+        ],
+        default: [
+            "src/com/android/imsstack/core/agents/DomainSelectionEmergencyModeMonitor.java",
+        ],
+    }),
     aidl: {
         include_dirs: [
             "frameworks/native/aidl/gui",

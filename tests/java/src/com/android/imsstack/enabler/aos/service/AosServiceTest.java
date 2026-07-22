@@ -16,6 +16,8 @@
 
 package com.android.imsstack.enabler.aos.service;
 
+import static com.android.imsstack.core.agents.EmergencyStateInterface.EMERGENCY_MODE_TYPE_CALL;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
@@ -644,10 +646,10 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void notifyEmergencyModeChanged() {
         byte[] emergencyModeData = createBytes(IIAosService.J2N_NOTIFY_EMERGENCY_MODE_CHANGED,
-                TelephonyManager.DOMAIN_SELECTION_EMERGENCY_TYPE_CALL, 1);
+                EMERGENCY_MODE_TYPE_CALL, 1);
 
         mAosService.notifyEmergencyModeChanged(
-                TelephonyManager.DOMAIN_SELECTION_EMERGENCY_TYPE_CALL, true);
+                EMERGENCY_MODE_TYPE_CALL, true);
 
         verify(mMockJniIms).sendData(mNativeObject, emergencyModeData);
     }
@@ -799,14 +801,14 @@ public class AosServiceTest extends ImsStackTest {
     @Test
     public void onEmergencyModeChanged_notifyEmergencyModeChanged() {
         byte[] emergencyModeData = createBytes(IIAosService.J2N_NOTIFY_EMERGENCY_MODE_CHANGED,
-                TelephonyManager.DOMAIN_SELECTION_EMERGENCY_TYPE_CALL, 1);
+                EMERGENCY_MODE_TYPE_CALL, 1);
         ArgumentCaptor<EmergencyStateInterface.EmergencyStateListener> listenerCaptor =
                 ArgumentCaptor.forClass(EmergencyStateInterface.EmergencyStateListener.class);
         verify(mMockEmergencyStateInterface).addListener(listenerCaptor.capture());
 
         EmergencyStateInterface.EmergencyStateListener listener = listenerCaptor.getValue();
         listener.onEmergencyModeChanged(
-                TelephonyManager.DOMAIN_SELECTION_EMERGENCY_TYPE_CALL, true);
+                EMERGENCY_MODE_TYPE_CALL, true);
 
         verify(mMockJniIms).sendData(mNativeObject, emergencyModeData);
     }
