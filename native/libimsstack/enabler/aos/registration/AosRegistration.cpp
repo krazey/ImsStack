@@ -344,6 +344,23 @@ PUBLIC VIRTUAL void AosRegistration::Destroy()
     SetState(STATE_OFFLINE);
 }
 
+PUBLIC VIRTUAL void AosRegistration::DestroyLocalTransport()
+{
+    if (m_objIpa.IsNoneAddress())
+    {
+        A_IMS_TRACE_I(REGID, "DestroyLocalTransport :: local IP is unavailable", 0, 0, 0);
+        return;
+    }
+
+    ISipTransportHelper* piHelper = SipFactory::GetTransportHelper(m_nSlotId);
+    if (piHelper != IMS_NULL)
+    {
+        A_IMS_TRACE_I(REGID, "DestroyLocalTransport :: local IP (%s)",
+                m_objIpa.ToString().GetStr(), 0, 0);
+        piHelper->DestroyAllSockets(0, m_objIpa);
+    }
+}
+
 PUBLIC VIRTUAL void AosRegistration::SetListener(IN IAosRegistrationListener* piRegListener)
 {
     m_piListener = piRegListener;

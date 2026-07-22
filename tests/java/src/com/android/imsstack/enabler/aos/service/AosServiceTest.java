@@ -1021,6 +1021,36 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
+    public void onPreciseDataConnectionStateChanged_releaseIwlanLocallyUponDisconnecting() {
+        byte[] stopData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
+                IAosRegistration.RequestType.STOP.getValue(),
+                IAosRegistration.Pcscf.CURRENT.getValue(),
+                IAosRegistration.Cause.IWLAN_DATA_DISCONNECTING.getValue());
+        mAosService.mRegisteredNetworkType = NetworkType.IWLAN;
+
+        mAosService.onPreciseDataConnectionStateChanged(
+                EApnType.IMS.getType(), TelephonyManager.DATA_DISCONNECTING, 0,
+                TelephonyManager.NETWORK_TYPE_IWLAN);
+
+        verify(mMockJniIms).sendData(mNativeObject, stopData);
+    }
+
+    @Test
+    public void onPreciseDataConnectionStateChanged_releaseCrossSimLocallyUponDisconnecting() {
+        byte[] stopData = createBytes(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION,
+                IAosRegistration.RequestType.STOP.getValue(),
+                IAosRegistration.Pcscf.CURRENT.getValue(),
+                IAosRegistration.Cause.IWLAN_DATA_DISCONNECTING.getValue());
+        mAosService.mRegisteredNetworkType = NetworkType.CROSS_SIM;
+
+        mAosService.onPreciseDataConnectionStateChanged(
+                EApnType.IMS.getType(), TelephonyManager.DATA_DISCONNECTING, 0,
+                TelephonyManager.NETWORK_TYPE_IWLAN);
+
+        verify(mMockJniIms).sendData(mNativeObject, stopData);
+    }
+
+    @Test
     public void onPreciseDataConnectionStateChanged_updateDataFailureReasonUponDisconnecting() {
         int anyDataFailReason = 1;
         byte[] updateData = createBytes(IIAosService.J2N_UPDATE_DATA_FAILURE_REASON,

@@ -82,6 +82,7 @@ public:
     void Reconfig() override;
 
     void Destroy() override;
+    void DestroyLocalTransport() override;
 
     void SetListener(IN IAosRegistrationListener* piRegListener) override;
 

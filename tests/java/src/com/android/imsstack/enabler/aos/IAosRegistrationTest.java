@@ -51,6 +51,7 @@ public class IAosRegistrationTest {
     public void cause_of_shouldReturnCorrectEnumForKnownValues() {
         assertEquals(Cause.UNKNOWN, Cause.of(0));
         assertEquals(Cause.DATA, Cause.of(1));
+        assertEquals(Cause.IWLAN_DATA_DISCONNECTING, Cause.of(6));
         assertEquals(Cause.RADIO_ALLOWED_NETWORK_TYPES_CHANGED, Cause.of(13));
         assertEquals(Cause.WIFI_OFF, Cause.of(26));
     }
