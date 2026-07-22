@@ -251,6 +251,11 @@ public interface TelephonyManagerProxy {
     String getGroupIdLevel1();
 
     /**
+     * Returns the Group Identifier Level2 for a GSM phone. Returns null if it is unavailable.
+     */
+    String getGroupIdLevel2();
+
+    /**
      * Returns the Service Provider Name (SPN).
      *
      * Availability: SIM state must be {@link TelephonyManager#SIM_STATE_READY}.

@@ -90,8 +90,11 @@ public final class CarrierInfo {
 
         mSimCarrierIds.put(slotId, newCid);
 
-        return !(oldCid.getCarrierId() == newCid.getCarrierId()
-                && oldCid.getSpecificCarrierId() == newCid.getSpecificCarrierId());
+        if (!oldCid.isSimLoaded() && !newCid.isSimLoaded()) {
+            return oldCid.getCarrierId() != newCid.getCarrierId()
+                    || oldCid.getSpecificCarrierId() != newCid.getSpecificCarrierId();
+        }
+        return !oldCid.hasSameConfigIdentity(newCid);
     }
 
     /**
@@ -138,6 +141,7 @@ public final class CarrierInfo {
 
                 builder.setImsi(emptyIfNull(tmp.getSubscriberId()));
                 builder.setGid1(emptyIfNull(tmp.getGroupIdLevel1()));
+                builder.setGid2(emptyIfNull(tmp.getGroupIdLevel2()));
                 builder.setSpn(emptyIfNull(tmp.getSimOperatorName()));
                 builder.setIccId(emptyIfNull(tmp.getSimSerialNumber()));
                 builder.setSimState(SimCarrierId.SIM_LOADED);

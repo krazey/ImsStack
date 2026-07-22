@@ -223,6 +223,11 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
     }
 
     @Override
+    public String getGroupIdLevel2() {
+        return null;
+    }
+
+    @Override
     public String getSimOperatorName() {
         return mSimInfoRecord.getOperatorName();
     }

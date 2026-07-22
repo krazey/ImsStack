@@ -577,6 +577,12 @@ public class ConfigAgent implements ConfigInterface {
                 case "gid1":
                     result = (id == null) || value.equalsIgnoreCase(id.getGid1());
                     break;
+                case "gid1_prefix":
+                    result = (id == null) || matchOnPrefix(value, id.getGid1());
+                    break;
+                case "gid2_prefix":
+                    result = (id == null) || matchOnPrefix(value, id.getGid2());
+                    break;
                 case "spn":
                     result = (id == null) || matchOnSpn(value, id);
                     break;
@@ -597,6 +603,11 @@ public class ConfigAgent implements ConfigInterface {
             }
         }
         return true;
+    }
+
+    private static boolean matchOnPrefix(String prefix, String value) {
+        return !TextUtils.isEmpty(prefix) && !TextUtils.isEmpty(value)
+                && value.regionMatches(true, 0, prefix, 0, prefix.length());
     }
 
     private static boolean matchOnCarrierId(String xmlCid, SimCarrierId id) {

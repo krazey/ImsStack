@@ -34,6 +34,7 @@ public class SimCarrierIdTest {
     private static final String SIM_MNC = "01";
     private static final String SIM_IMSI = "2040439303";
     private static final String SIM_GID1 = "A00020";
+    private static final String SIM_GID2 = "B00030";
     private static final String SIM_SPN = "Test-Carrier";
     private static final String SIM_ICCID = "89011201";
 
@@ -48,6 +49,7 @@ public class SimCarrierIdTest {
         assertEquals("", cid.getMnc());
         assertEquals("", cid.getImsi());
         assertEquals("", cid.getGid1());
+        assertEquals("", cid.getGid2());
         assertEquals("", cid.getSpn());
         assertEquals("", cid.getIccId());
         assertFalse(cid.isSimLoaded());
@@ -69,6 +71,7 @@ public class SimCarrierIdTest {
         assertEquals("", cid.getMnc());
         assertEquals("", cid.getImsi());
         assertEquals("", cid.getGid1());
+        assertEquals("", cid.getGid2());
         assertEquals("", cid.getSpn());
         assertEquals(SIM_ICCID, cid.getIccId());
         assertFalse(cid.isSimLoaded());
@@ -86,6 +89,7 @@ public class SimCarrierIdTest {
                 .setMnc(SIM_MNC)
                 .setImsi(SIM_IMSI)
                 .setGid1(SIM_GID1)
+                .setGid2(SIM_GID2)
                 .setSpn(SIM_SPN)
                 .setIccId(SIM_ICCID)
                 .setSimState(SimCarrierId.SIM_LOADED)
@@ -97,6 +101,7 @@ public class SimCarrierIdTest {
         assertEquals(SIM_MNC, cid.getMnc());
         assertEquals(SIM_IMSI, cid.getImsi());
         assertEquals(SIM_GID1, cid.getGid1());
+        assertEquals(SIM_GID2, cid.getGid2());
         assertEquals(SIM_SPN, cid.getSpn());
         assertEquals(SIM_ICCID, cid.getIccId());
         assertTrue(cid.isSimLoaded());
@@ -121,6 +126,7 @@ public class SimCarrierIdTest {
                 .setMnc(SIM_MNC)
                 .setImsi(SIM_IMSI)
                 .setGid1(SIM_GID1)
+                .setGid2(SIM_GID2)
                 .setSpn(SIM_SPN)
                 .setIccId(SIM_ICCID)
                 .setSimState(SimCarrierId.SIM_LOADED)
@@ -136,6 +142,7 @@ public class SimCarrierIdTest {
                 .setMnc(SIM_MNC)
                 .setImsi(SIM_IMSI)
                 .setGid1(SIM_GID1)
+                .setGid2("different-gid2")
                 .setSpn(SIM_SPN)
                 .setIccId(SIM_ICCID)
                 .setSimState(SimCarrierId.SIM_LOADED)
@@ -143,6 +150,8 @@ public class SimCarrierIdTest {
 
         assertTrue(cid2.equals(cid3));
         assertEquals(cid2.hashCode(), cid3.hashCode());
+        assertFalse(cid2.hasSameConfigIdentity(cid3));
+        assertTrue(cid2.hasSameConfigIdentity(cid2));
 
         assertFalse(cid1.equals(null));
         assertFalse(cid1.equals(new Object()));

@@ -211,6 +211,12 @@ public class TelephonyManagerProxyImpl implements TelephonyManagerProxy {
     }
 
     @Override
+    public String getGroupIdLevel2() {
+        TelephonyManager tm = getTelephonyManager();
+        return tm != null ? tm.getGroupIdLevel2() : null;
+    }
+
+    @Override
     public String getSimOperatorName() {
         TelephonyManager tm = getTelephonyManager();
         return tm != null ? tm.getSimOperatorName() : "";

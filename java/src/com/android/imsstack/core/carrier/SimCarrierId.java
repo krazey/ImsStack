@@ -39,13 +39,15 @@ public final class SimCarrierId {
     private final String mMnc;
     private final String mImsi;
     private final String mGid1;
+    private final String mGid2;
     private final String mSpn;
     private final String mIccId;
     private final int mSimState;
 
     private SimCarrierId(int carrierId, int specificCarrierId,
             @NonNull String mcc, @NonNull String mnc, @NonNull String imsi,
-            @NonNull String gid1, @NonNull String spn, @NonNull String iccId,
+            @NonNull String gid1, @NonNull String gid2, @NonNull String spn,
+            @NonNull String iccId,
             int simState) {
         mCarrierId = carrierId;
         mSpecificCarrierId = specificCarrierId;
@@ -53,6 +55,7 @@ public final class SimCarrierId {
         mMnc = mnc;
         mImsi = imsi;
         mGid1 = gid1;
+        mGid2 = gid2;
         mSpn = spn;
         mIccId = iccId;
         mSimState = simState;
@@ -108,6 +111,13 @@ public final class SimCarrierId {
     }
 
     /**
+     * Returns the GID2 string.
+     */
+    public @NonNull String getGid2() {
+        return mGid2;
+    }
+
+    /**
      * Returns the SPN string.
      */
     public @NonNull String getSpn() {
@@ -135,10 +145,27 @@ public final class SimCarrierId {
         return mSimState == SIM_LOADED;
     }
 
+    /** Returns whether every field that can affect carrier-policy selection is unchanged. */
+    public boolean hasSameConfigIdentity(@NonNull SimCarrierId other) {
+        return mCarrierId == other.mCarrierId
+                && mSpecificCarrierId == other.mSpecificCarrierId
+                && Objects.equals(mMcc, other.mMcc)
+                && Objects.equals(mMnc, other.mMnc)
+                && Objects.equals(mImsi, other.mImsi)
+                && Objects.equals(mGid1, other.mGid1)
+                && Objects.equals(mGid2, other.mGid2)
+                && Objects.equals(mSpn, other.mSpn)
+                && Objects.equals(mIccId, other.mIccId)
+                && mSimState == other.mSimState;
+    }
+
     @Override
     public int hashCode() {
+        if (mCarrierId != UNKNOWN_ID || mSpecificCarrierId != UNKNOWN_ID) {
+            return Objects.hash(mCarrierId, mSpecificCarrierId);
+        }
         return Objects.hash(mCarrierId, mSpecificCarrierId,
-                mMcc, mMnc, mImsi, mGid1, mSpn, mIccId);
+                mMcc, mMnc, mImsi, mGid1, mGid2, mSpn, mIccId);
     }
 
     @Override
@@ -159,6 +186,7 @@ public final class SimCarrierId {
                     && Objects.equals(mMnc, id.mMnc)
                     && Objects.equals(mImsi, id.mImsi)
                     && Objects.equals(mGid1, id.mGid1)
+                    && Objects.equals(mGid2, id.mGid2)
                     && Objects.equals(mSpn, id.mSpn)
                     && Objects.equals(mIccId, id.mIccId);
         }
@@ -183,6 +211,8 @@ public final class SimCarrierId {
         sb.append(Log.pii(mImsi));
         sb.append(", gid1=");
         sb.append(mGid1);
+        sb.append(", gid2=");
+        sb.append(mGid2);
         sb.append(", spn=");
         sb.append(mSpn);
         sb.append(", iccId=");
@@ -204,6 +234,7 @@ public final class SimCarrierId {
         private String mMnc = "";
         private String mImsi = "";
         private String mGid1 = "";
+        private String mGid2 = "";
         private String mSpn = "";
         private String mIccId = "";
         private int mSimState = SIM_ABSENT;
@@ -278,6 +309,17 @@ public final class SimCarrierId {
         }
 
         /**
+         * Sets the GID2 string.
+         *
+         * @param gid2 The GID2 string.
+         * @return The same Builder instance.
+         */
+        public Builder setGid2(@NonNull String gid2) {
+            mGid2 = gid2;
+            return this;
+        }
+
+        /**
          * Sets the SPN (Servicer Provider Name) string.
          *
          * @param spn The SPN string.
@@ -320,7 +362,7 @@ public final class SimCarrierId {
          */
         public SimCarrierId build() {
             return new SimCarrierId(mCarrierId, mSpecificCarrierId,
-                    mMcc, mMnc, mImsi, mGid1, mSpn, mIccId, mSimState);
+                    mMcc, mMnc, mImsi, mGid1, mGid2, mSpn, mIccId, mSimState);
         }
     }
 }

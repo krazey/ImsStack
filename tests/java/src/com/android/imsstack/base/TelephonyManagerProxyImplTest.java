@@ -262,6 +262,7 @@ public class TelephonyManagerProxyImplTest {
         assertEquals("", mTelephonyManagerProxy.getSimCountryIso());
         assertNull(mTelephonyManagerProxy.getSimSerialNumber());
         assertNull(mTelephonyManagerProxy.getGroupIdLevel1());
+        assertNull(mTelephonyManagerProxy.getGroupIdLevel2());
         assertEquals("", mTelephonyManagerProxy.getSimOperatorName());
         assertArrayEquals(new byte[0],
                 mTelephonyManagerProxy.getSimServiceTable(TelephonyManager.APPTYPE_ISIM));

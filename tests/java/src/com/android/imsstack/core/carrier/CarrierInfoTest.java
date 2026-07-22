@@ -62,6 +62,7 @@ public class CarrierInfoTest {
     private static final String SIM_OPERATOR = SIM_MCC + SIM_MNC;
     private static final String SIM_IMSI = "2040439303";
     private static final String SIM_GID1 = "A00020";
+    private static final String SIM_GID2 = "B00030";
     private static final String SIM_OPERATOR_NAME = "Test-Carrier";
     private static final String SIM_ICCID = "89011201";
 
@@ -90,6 +91,7 @@ public class CarrierInfoTest {
         when(mTelephonyManagerProxy.getSimOperator()).thenReturn(SIM_OPERATOR);
         when(mTelephonyManagerProxy.getSubscriberId()).thenReturn(SIM_IMSI);
         when(mTelephonyManagerProxy.getGroupIdLevel1()).thenReturn(SIM_GID1);
+        when(mTelephonyManagerProxy.getGroupIdLevel2()).thenReturn(SIM_GID2);
         when(mTelephonyManagerProxy.getSimOperatorName()).thenReturn(SIM_OPERATOR_NAME);
         doReturn(mSp).when(mTestAppContext.getContext())
                 .getSharedPreferences(anyString(), anyInt());
@@ -138,6 +140,7 @@ public class CarrierInfoTest {
             assertEquals("", cid.getMnc());
             assertEquals("", cid.getImsi());
             assertEquals("", cid.getGid1());
+            assertEquals("", cid.getGid2());
             assertEquals("", cid.getSpn());
             assertEquals("", cid.getIccId());
         }
@@ -164,6 +167,7 @@ public class CarrierInfoTest {
             assertEquals("", cid.getMnc());
             assertEquals("", cid.getImsi());
             assertEquals("", cid.getGid1());
+            assertEquals("", cid.getGid2());
             assertEquals("", cid.getSpn());
             assertEquals(SIM_ICCID, cid.getIccId());
         }
@@ -196,6 +200,7 @@ public class CarrierInfoTest {
             assertEquals(SIM_MNC, cid.getMnc());
             assertEquals(SIM_IMSI, cid.getImsi());
             assertEquals(SIM_GID1, cid.getGid1());
+            assertEquals(SIM_GID2, cid.getGid2());
             assertEquals(SIM_OPERATOR_NAME, cid.getSpn());
             assertEquals(SIM_ICCID, cid.getIccId());
         }
@@ -230,6 +235,7 @@ public class CarrierInfoTest {
             assertEquals(SIM_MNC, cid.getMnc());
             assertEquals(SIM_IMSI, cid.getImsi());
             assertEquals(SIM_GID1, cid.getGid1());
+            assertEquals(SIM_GID2, cid.getGid2());
             assertEquals(SIM_OPERATOR_NAME, cid.getSpn());
             assertEquals(SIM_ICCID, cid.getIccId());
         }
