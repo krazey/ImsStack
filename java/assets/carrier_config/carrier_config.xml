@@ -98,6 +98,7 @@
     <int name="imsvoice.conference_sip_flow_order_int" value="0"/>
     <int name="imsvoice.conference_inviting_refer_type_int" value="1"/>
     <boolean name="imsvoice.disable_precondition_after_call_established_bool" value="false"/>
+    <boolean name="imsvoice.voice_qos_precondition_supported_on_iwlan_bool" value="false"/>
     <int name="imsvoice.incoming_call_reject_code_for_user_decline_int" value="486"/>
     <int name="imsvoice.incoming_call_reject_code_for_no_answer_int" value="486"/>
     <int name="imsvoice.prack_wait_timer_millis_int" value="-1"/>

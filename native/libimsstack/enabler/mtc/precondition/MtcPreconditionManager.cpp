@@ -1268,8 +1268,9 @@ IMS_BOOL MtcPreconditionManager::IsPreconditionSupportedInLocal(IN IMS_UINT32 eM
     IMS_BOOL bSupport = IMS_FALSE;
     if (eMediaType == MEDIATYPE_AUDIO)
     {
-        bSupport = m_objContext.GetConfigurationProxy().GetBoolean(
-                ConfigVoice::KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL);
+        bSupport = m_objContext.GetConfigurationProxy().GetBoolean(m_bOnWlan
+                        ? ConfigVoice::KEY_VOICE_QOS_PRECONDITION_SUPPORTED_ON_IWLAN_BOOL
+                        : ConfigVoice::KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL);
     }
     else if (eMediaType == MEDIATYPE_VIDEO)
     {

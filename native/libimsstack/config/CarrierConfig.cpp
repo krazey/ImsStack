@@ -766,6 +766,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT[] =
         KEY_IMS_VOICE_PREFIX "conference_subscribe_type_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL[] =
         KEY_IMS_VOICE_PREFIX "voice_qos_precondition_supported_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_VOICE_QOS_PRECONDITION_SUPPORTED_ON_IWLAN_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "voice_qos_precondition_supported_on_iwlan_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL[] =
         KEY_IMS_VOICE_PREFIX "voice_on_default_bearer_supported_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_DEDICATED_BEARER_WAIT_TIMER_MILLIS_INT[] =

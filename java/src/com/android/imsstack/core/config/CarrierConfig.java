@@ -1100,6 +1100,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "conference_inviting_refer_type_int";
         public static final String KEY_DISABLE_PRECONDITION_AFTER_CALL_ESTABLISHED_BOOL =
                 KEY_PREFIX + "disable_precondition_after_call_established_bool";
+        public static final String KEY_VOICE_QOS_PRECONDITION_SUPPORTED_ON_IWLAN_BOOL =
+                KEY_PREFIX + "voice_qos_precondition_supported_on_iwlan_bool";
         public static final String KEY_INCOMING_CALL_REJECT_CODE_FOR_USER_DECLINE_INT =
                 KEY_PREFIX + "incoming_call_reject_code_for_user_decline_int";
         public static final String KEY_INCOMING_CALL_REJECT_CODE_FOR_NO_ANSWER_INT =
