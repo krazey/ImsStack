@@ -16,6 +16,16 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
+filegroup {
+    name: "imsstack-java-test-common-srcs",
+    srcs: [
+        "src/**/*.java",
+    ],
+    exclude_srcs: [
+        "src/com/android/imsstack/core/agents/EmergencyStateAgentTest.java",
+    ],
+}
+
 android_test {
     name: "ImsStackJavaTests",
     certificate: "platform",
@@ -26,8 +36,13 @@ android_test {
         "imsstack_mockito_target_extended_defaults",
     ],
     srcs: [
-        "src/**/*.java",
-    ],
+        ":imsstack-java-test-common-srcs",
+    ] + select(soong_config_variable("imsstack_namespace", "use_android16_telephony_compat"), {
+        true: [],
+        default: [
+            "src/com/android/imsstack/core/agents/EmergencyStateAgentTest.java",
+        ],
+    }),
     libs: [
         "android.test.base.stubs.system",
         "android.test.mock.stubs.system",
