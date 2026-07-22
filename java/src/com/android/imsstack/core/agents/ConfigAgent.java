@@ -363,6 +363,10 @@ public class ConfigAgent implements ConfigInterface {
 
         overrideTestConfigs(config, testConfig);
 
+        // A carrier or test override cannot add a hardware capability that the
+        // product does not expose.
+        applyDeviceQosCapabilities(config);
+
         mCarrierConfig.setConfig(config, mSlotId);
 
         if (!mConfigLoaded) {
@@ -393,6 +397,40 @@ public class ConfigAgent implements ConfigInterface {
         config.putBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL,
                 config.getBoolean(CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL)
                         && imsEnabled && smsOverImsEnabled);
+    }
+
+    private void applyDeviceQosCapabilities(PersistableBundle config) {
+        if (AppContext.getInstance().getResources().getBoolean(
+                R.bool.config_imsstack_dedicated_bearer_qos_supported)) {
+            return;
+        }
+
+        ImsLog.i(this, mSlotId, "Dedicated-bearer QoS is disabled by device config");
+        config.putBoolean(CarrierConfig.Ims.KEY_SUPPORT_SDP_PRECONDITION_BOOL, false);
+        config.putBoolean(
+                CarrierConfigManager.ImsVoice.KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL,
+                false);
+        config.putBoolean(
+                CarrierConfigManager.ImsVoice.KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL,
+                true);
+        config.putBoolean(
+                CarrierConfigManager.ImsVt.KEY_VIDEO_QOS_PRECONDITION_SUPPORTED_BOOL,
+                false);
+        config.putBoolean(
+                CarrierConfigManager.ImsRtt.KEY_TEXT_QOS_PRECONDITION_SUPPORTED_BOOL,
+                false);
+        config.putBoolean(
+                CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_QOS_PRECONDITION_SUPPORTED_BOOL,
+                false);
+        config.putBoolean(
+                CarrierConfig.ImsVoice.KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL,
+                false);
+        config.putBoolean(
+                CarrierConfig.ImsVoice.KEY_WAIT_QOS_FOR_INCOMING_INVITE_WITHOUT_PRECONDITION_BOOL,
+                false);
+        config.putBoolean(
+                CarrierConfig.ImsVoice.KEY_RELEASE_CALL_ON_QOS_LOST_DURING_SETUP_BOOL,
+                false);
     }
 
     @VisibleForTesting

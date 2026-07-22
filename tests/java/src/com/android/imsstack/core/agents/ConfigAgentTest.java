@@ -150,6 +150,9 @@ public class ConfigAgentTest {
                 .getResources().getXml(R.xml.carrier_config_override);
         when(mContext.getResources().getXml(eq(R.xml.carrier_config_override)))
                 .thenReturn(mCarrierConfigOverrideParser);
+        when(mContext.getResources().getBoolean(
+                eq(R.bool.config_imsstack_dedicated_bearer_qos_supported)))
+                .thenReturn(true);
         doReturn(mFileIs).when(mContext).openFileInput(any());
         doReturn(mFileOs).when(mContext).openFileOutput(any(), anyInt());
         doReturn(true).when(mContext).deleteFile(any());
@@ -437,6 +440,67 @@ public class ConfigAgentTest {
         assertTrue(cc.getBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL));
         assertTrue(cc.getBoolean(
                 CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL));
+    }
+
+    @Test
+    @SmallTest
+    public void testDeviceWithoutDedicatedBearerQosDisablesPreconditions() {
+        when(mContext.getResources().getBoolean(
+                eq(R.bool.config_imsstack_dedicated_bearer_qos_supported)))
+                .thenReturn(false);
+
+        PersistableBundle platformConfig = new PersistableBundle();
+        platformConfig.putBoolean(
+                CarrierConfig.Ims.KEY_SUPPORT_SDP_PRECONDITION_BOOL, true);
+        platformConfig.putBoolean(
+                CarrierConfigManager.ImsVoice.KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL,
+                true);
+        platformConfig.putBoolean(
+                CarrierConfigManager.ImsVoice.KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL,
+                false);
+        platformConfig.putBoolean(
+                CarrierConfigManager.ImsVt.KEY_VIDEO_QOS_PRECONDITION_SUPPORTED_BOOL,
+                true);
+        platformConfig.putBoolean(
+                CarrierConfigManager.ImsRtt.KEY_TEXT_QOS_PRECONDITION_SUPPORTED_BOOL,
+                true);
+        platformConfig.putBoolean(
+                CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_QOS_PRECONDITION_SUPPORTED_BOOL,
+                true);
+        platformConfig.putBoolean(
+                CarrierConfig.ImsVoice.KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL,
+                true);
+        platformConfig.putBoolean(
+                CarrierConfig.ImsVoice.KEY_WAIT_QOS_FOR_INCOMING_INVITE_WITHOUT_PRECONDITION_BOOL,
+                true);
+        platformConfig.putBoolean(
+                CarrierConfig.ImsVoice.KEY_RELEASE_CALL_ON_QOS_LOST_DURING_SETUP_BOOL,
+                true);
+        setUpCarrierConfig(platformConfig);
+
+        mConfigAgent.init(mContext);
+        mConfigAgent.updateCarrierConfig(
+                SUB_ID_1, new SimCarrierId.Builder().build());
+
+        CarrierConfig config = mConfigAgent.getCarrierConfig();
+        assertFalse(config.getBoolean(
+                CarrierConfig.Ims.KEY_SUPPORT_SDP_PRECONDITION_BOOL));
+        assertFalse(config.getBoolean(
+                CarrierConfigManager.ImsVoice.KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL));
+        assertTrue(config.getBoolean(
+                CarrierConfigManager.ImsVoice.KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL));
+        assertFalse(config.getBoolean(
+                CarrierConfigManager.ImsVt.KEY_VIDEO_QOS_PRECONDITION_SUPPORTED_BOOL));
+        assertFalse(config.getBoolean(
+                CarrierConfigManager.ImsRtt.KEY_TEXT_QOS_PRECONDITION_SUPPORTED_BOOL));
+        assertFalse(config.getBoolean(
+                CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_QOS_PRECONDITION_SUPPORTED_BOOL));
+        assertFalse(config.getBoolean(
+                CarrierConfig.ImsVoice.KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL));
+        assertFalse(config.getBoolean(
+                CarrierConfig.ImsVoice.KEY_WAIT_QOS_FOR_INCOMING_INVITE_WITHOUT_PRECONDITION_BOOL));
+        assertFalse(config.getBoolean(
+                CarrierConfig.ImsVoice.KEY_RELEASE_CALL_ON_QOS_LOST_DURING_SETUP_BOOL));
     }
 
     @Test
