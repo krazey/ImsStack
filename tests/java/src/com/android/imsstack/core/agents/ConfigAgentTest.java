@@ -460,6 +460,9 @@ public class ConfigAgentTest {
                 CarrierConfigManager.ImsVoice.KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL,
                 true);
         platformConfig.putBoolean(
+                CarrierConfig.ImsVoice.KEY_VOICE_QOS_PRECONDITION_SUPPORTED_ON_IWLAN_BOOL,
+                true);
+        platformConfig.putBoolean(
                 CarrierConfigManager.ImsVoice.KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL,
                 false);
         platformConfig.putBoolean(
@@ -491,6 +494,8 @@ public class ConfigAgentTest {
                 CarrierConfig.Ims.KEY_SUPPORT_SDP_PRECONDITION_BOOL));
         assertFalse(config.getBoolean(
                 CarrierConfigManager.ImsVoice.KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL));
+        assertFalse(config.getBoolean(
+                CarrierConfig.ImsVoice.KEY_VOICE_QOS_PRECONDITION_SUPPORTED_ON_IWLAN_BOOL));
         assertTrue(config.getBoolean(
                 CarrierConfigManager.ImsVoice.KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL));
         assertFalse(config.getBoolean(

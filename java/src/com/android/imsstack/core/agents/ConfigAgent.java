@@ -424,6 +424,9 @@ public class ConfigAgent implements ConfigInterface {
                 CarrierConfigManager.ImsVoice.KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL,
                 false);
         config.putBoolean(
+                CarrierConfig.ImsVoice.KEY_VOICE_QOS_PRECONDITION_SUPPORTED_ON_IWLAN_BOOL,
+                false);
+        config.putBoolean(
                 CarrierConfigManager.ImsVoice.KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL,
                 true);
         config.putBoolean(
