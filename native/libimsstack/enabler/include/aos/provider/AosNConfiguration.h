@@ -218,6 +218,7 @@ public:
     ImsVector<IMS_SINT32>& GetExtraReregErrCode() override;
     ImsVector<IMS_SINT32>& GetExtraRegErrWaitTime() override;
     ImsVector<IMS_SINT32>& GetKeepRegWithMmtelFeatureTagPolicy() override;
+    ImsVector<IMS_SINT32>& GetRegRetryErrCodeForSamePcscf() override;
     ImsVector<IMS_SINT32>& GetReregRetryErrCodeForInitRegWithSamePcscf() override;
     ImsVector<IMS_SINT32>& GetRegPermanentErrCode() override;
     ImsVector<IMS_SINT32>& GetRegPermanentErrMaxCount() override;

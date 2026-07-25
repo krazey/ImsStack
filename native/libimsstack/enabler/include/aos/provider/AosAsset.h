@@ -126,6 +126,7 @@ public:
             objRegErrCodeForPcscfDiscovery(ImsVector<IMS_SINT32>()),
             objRegPermanentErrMaxCnt(ImsVector<IMS_SINT32>()),
             objRegRetryErrCodeWithoutIpsec(ImsVector<IMS_SINT32>()),
+            objRegRetryErrCodeForSamePcscf(ImsVector<IMS_SINT32>()),
             objTempPlmnBlockRats(ImsVector<IMS_SINT32>()),
             objReregErrCodeForCallEnd(ImsVector<IMS_SINT32>()),
             objReregErrCodeForImsPdnReactivation(ImsVector<IMS_SINT32>()),
@@ -247,6 +248,7 @@ public:
     ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
     ImsVector<IMS_SINT32> objRegPermanentErrMaxCnt;
     ImsVector<IMS_SINT32> objRegRetryErrCodeWithoutIpsec;
+    ImsVector<IMS_SINT32> objRegRetryErrCodeForSamePcscf;
     ImsVector<IMS_SINT32> objTempPlmnBlockRats;
     ImsVector<IMS_SINT32> objReregErrCodeForCallEnd;
     ImsVector<IMS_SINT32> objReregErrCodeForImsPdnReactivation;

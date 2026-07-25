@@ -80,13 +80,19 @@ validation, not carrier certification.
 
 - Track IMSI, SPN, GID1-prefix and GID2-prefix selectors used by carrier
   policy, and reload configuration when those SIM fields change.
-- Load the optional carrier extension after the canonical carrier-ID profile,
-  allowing reusable MCC-MNC policy without replacing AOSP selection.
-- Reapply carrier-extension values after Android CarrierConfig so standard
-  settings such as the outgoing Request-URI type are not silently reset.
+- Load optional compatibility defaults before Android CarrierConfig and apply
+  only the separate reviewed-exception namespace afterward, allowing reusable
+  MCC-MNC policy without giving broad imported defaults late precedence.
 - Treat imported VoLTE, VoWiFi and SMS switches as disable-only gates over
   Android CarrierConfig. Imported data cannot incorrectly enable a service
   disabled by the framework's carrier policy.
+- Provide data-driven reviewed-policy hooks for REGISTER headers,
+  registration-only non-session AKA, exact CSFB and TEL dial strings, and
+  national-number canonicalization without compiling carrier identities into
+  the stack.
+- Preserve carrier call-signaling keep-alive direction and first-packet timing,
+  and support status-specific retry of the current P-CSCF during initial
+  registration.
 - Separate cellular and IWLAN voice-precondition settings so LTE bearer QoS
   assumptions are not automatically reused for Wi-Fi calls.
 - Expose emergency-MMTEL and RCS feature advertisement as overlayable resource
@@ -126,12 +132,12 @@ The extension currently contains:
 - deterministic generation and source checksums for later refreshes.
 
 The carrier import is pinned to the PhhIms source snapshot
-`69ff68aad4e82fe56406b0893a7ebfe60d7debec`.
+`a3fec01ebc4f51c39026565c4a451fef454637fa`.
 
-Only policy with a direct ImsStack equivalent is imported. Number rewriting,
-special short-code routing, arbitrary SIP-header shaping and carrier-specific
-CS fallback rules are not guessed. Those paths need protocol traces and generic
-stack mechanisms before adding new carrier data.
+Only baseline policy with a direct ImsStack equivalent is imported
+automatically. Number rewriting, special short-code routing, SIP-header
+shaping and carrier-specific CS fallback remain limited to reviewed policy
+whose generic stack mechanism and expected wire behavior are understood.
 
 ## Android source integration
 

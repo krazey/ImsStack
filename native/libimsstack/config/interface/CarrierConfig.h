@@ -1064,6 +1064,14 @@ public:
         static const IMS_CHAR KEY_REG_RETRY_ERR_CODE_WITHOUT_IPSEC_INT_ARRAY[];
 
         /**
+         * Specifies initial registration failure codes that retry the current P-CSCF.
+         *
+         * Possible Values:
+         *   {@code {403}}
+         */
+        static const IMS_CHAR KEY_REG_RETRY_ERR_CODE_FOR_SAME_PCSCF_INT_ARRAY[];
+
+        /**
          * Specifies the list of RAT(Radio Access Technology) network types for which PLMN block
          * should be applied when IMS registration fails on all P-CSCFs.
          * This configuration specifies whether to block the PLMN in certain network types

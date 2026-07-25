@@ -897,6 +897,12 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
             GetIntArray(CarrierConfig::Ims::KEY_REG_RETRY_ERR_CODE_WITHOUT_IPSEC_INT_ARRAY, _))
             .WillOnce(Return(objRegRetryErrCodeWithoutIpsec));
 
+    ImsVector<IMS_SINT32> objRegRetryErrCodeForSamePcscf;
+    objRegRetryErrCodeForSamePcscf.Add(403);
+    EXPECT_CALL(objCarrierConfig,
+            GetIntArray(CarrierConfig::Ims::KEY_REG_RETRY_ERR_CODE_FOR_SAME_PCSCF_INT_ARRAY, _))
+            .WillOnce(Return(objRegRetryErrCodeForSamePcscf));
+
     ImsVector<IMS_SINT32> objTempPlmnBlockRats;
     objTempPlmnBlockRats.Clear();
     objTempPlmnBlockRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN);
@@ -1154,6 +1160,9 @@ TEST_F(AosNConfigurationTest, InitAssetsConfig)
     objErrCode.Clear();
     objErrCode = m_pAosNConfiguration->GetRegErrCodeWithoutIpsec();
     EXPECT_EQ(406, objErrCode.GetAt(0));
+    objErrCode.Clear();
+    objErrCode = m_pAosNConfiguration->GetRegRetryErrCodeForSamePcscf();
+    EXPECT_EQ(403, objErrCode.GetAt(0));
     objErrCode.Clear();
     objErrCode = m_pAosNConfiguration->GetReregErrCodeForCallEnd();
     IMS_UINT32 cnt = 0;

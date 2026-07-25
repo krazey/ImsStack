@@ -1959,6 +1959,14 @@ public:
     virtual ImsVector<IMS_SINT32>& GetKeepRegWithMmtelFeatureTagPolicy() = 0;
 
     /**
+     * @brief Indicates initial registration errors that retry the current P-CSCF.
+     *
+     * @return vector error code list
+     * @see {@code ims.reg_retry_err_code_for_same_pcscf_int_array}
+     */
+    virtual ImsVector<IMS_SINT32>& GetRegRetryErrCodeForSamePcscf() = 0;
+
+    /**
      * @brief Indicate the error codes to attempt the initial registration with same PCSCF
      *        Negative value elements are used for exclusion purposes.
      *

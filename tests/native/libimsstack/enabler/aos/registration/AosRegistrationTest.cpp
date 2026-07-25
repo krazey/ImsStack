@@ -668,6 +668,8 @@ protected:
         ON_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrMaxCount())
                 .WillByDefault(ReturnRef(m_objEmptyMaxCount));
         ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf()).WillByDefault(Return(0));
+        ON_CALL(m_objMockIAosNConfiguration, GetRegRetryErrCodeForSamePcscf())
+                .WillByDefault(ReturnRef(m_objEmptyErrCode));
         ON_CALL(m_objMockIAosNConfiguration, GetRegRetryCountResetPolicy())
                 .WillByDefault(Return(CarrierConfig::Ims::REG_RETRY_CNT_RESET_POLICY_REGISTRATION));
         ON_CALL(m_objMockIAosNConfiguration, GetRegRetryIntervals())
@@ -5058,6 +5060,18 @@ TEST_F(AosRegistrationTest, TriggerPcscfSelectionWhenStartFailedWithStatusCodeFo
     m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_300);
 
     EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessStandardPcscfSelection"), 1);
+}
+
+TEST_F(AosRegistrationTest, RetrySamePcscfForConfiguredInitialRegistrationError)
+{
+    ImsVector<IMS_SINT32> objErrCode;
+    objErrCode.Add(SipStatusCode::SC_403);
+    ON_CALL(m_objMockIAosNConfiguration, GetRegRetryErrCodeForSamePcscf())
+            .WillByDefault(ReturnRef(objErrCode));
+
+    m_pAosRegistration->ProcessStartFailed_StatusCode(SipStatusCode::SC_403);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessRegRequiredWithSamePcscf"), 1);
 }
 
 TEST_F(AosRegistrationTest, TriggerForbiddenFailHandlingWhenStartFailedWithPermanentStatusCode)

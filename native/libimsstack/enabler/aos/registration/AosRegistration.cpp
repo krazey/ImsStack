@@ -4981,6 +4981,13 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_StatusCode(IN IMS_SIN
     A_IMS_TRACE_I(REGID, "ProcessStartFailed_StatusCode :: Code(%d) ", nStatusCode, 0, 0);
 
     if (m_pUtil->IsErrorCodeExisted(
+                GET_N_CONFIG(m_nSlotId)->GetRegRetryErrCodeForSamePcscf(), nStatusCode))
+    {
+        ProcessRegRequiredWithSamePcscf();
+        return;
+    }
+
+    if (m_pUtil->IsErrorCodeExisted(
                 GET_N_CONFIG(m_nSlotId)->GetRegErrCodeForPcscfDiscovery(), nStatusCode))
     {
         m_piContext->GetPcscf()->SetCurrentPcscfInvalid();

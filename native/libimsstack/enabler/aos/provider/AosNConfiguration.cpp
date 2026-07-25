@@ -994,6 +994,11 @@ PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetKeepRegWithMmtelFeat
     return m_objAsset.objKeepRegWithMmtelFeatureTagPolicy;
 }
 
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetRegRetryErrCodeForSamePcscf()
+{
+    return m_objAsset.objRegRetryErrCodeForSamePcscf;
+}
+
 PUBLIC VIRTUAL ImsVector<IMS_SINT32>&
 AosNConfiguration::GetReregRetryErrCodeForInitRegWithSamePcscf()
 {
@@ -1872,6 +1877,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetIntArray(CarrierConfig::Ims::KEY_REG_PERMANENT_ERR_MAX_CNT_INT_ARRAY);
     m_objAsset.objRegRetryErrCodeWithoutIpsec =
             piCc->GetIntArray(CarrierConfig::Ims::KEY_REG_RETRY_ERR_CODE_WITHOUT_IPSEC_INT_ARRAY);
+    m_objAsset.objRegRetryErrCodeForSamePcscf =
+            piCc->GetIntArray(CarrierConfig::Ims::KEY_REG_RETRY_ERR_CODE_FOR_SAME_PCSCF_INT_ARRAY);
     m_objAsset.objTempPlmnBlockRats = piCc->GetIntArray(
             CarrierConfig::Ims::KEY_REG_TEMP_PLMN_BLOCK_RATS_ON_ALL_PCSCFS_FAIL_INT_ARRAY);
     m_objAsset.objReregErrCodeForCallEnd =
