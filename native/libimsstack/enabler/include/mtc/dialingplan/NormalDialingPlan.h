@@ -67,6 +67,10 @@ private:
     static void FormTelUri(IN IMtcContext& objContext, IN_OUT AString& strNumber,
             IN const ImsIdentityProxy& objIdentityProxy);
 
+    static void CanonicalizeConfiguredNumber(IN IMtcContext& objContext, IN_OUT AString& strNumber);
+    static IMS_BOOL IsDecimalNumber(IN const AString& strNumber);
+    static IMS_BOOL IsPlainTelShortCode(
+            IN IMtcContext& objContext, IN const AString& strNumber);
     static IMS_BOOL IsVisualSeparator(IN IMS_CHAR ch);
     static IMS_BOOL IsNameAddress(IN const AString& strNumber);
     static IMS_BOOL IsLocalNumberFormat(IN const AString& strNumber);

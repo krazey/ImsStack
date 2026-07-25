@@ -236,6 +236,7 @@ private:
     IMS_RESULT SetContactNExpiresHeader(
             IN_OUT ISipMessage* piSipMsg, IN IMS_SINT32 nExpires = (-1));
     IMS_RESULT SetExpiresHeader(IN_OUT ISipMessage* piSipMsg, IN IMS_SINT32 nExpires = (-1));
+    void SetCarrierHeaders(IN ISipClientConnection* piScc);
     IMS_RESULT SetHeaders(IN ISipClientConnection* piScc);
     // IMS_AUTH_NONCE_REUSE {
     void SetNextAuthenticationInfo(IN_OUT ISipClientConnection*& piScc);

@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ServiceConfig.h"
 #include "ServiceMemory.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 
+#include "CarrierConfig.h"
 #include "IOnSipClientConnectionListener.h"
 #include "ISipHeader.h"
 #include "SipAuHelper.h"
@@ -317,7 +319,7 @@ PUBLIC VIRTUAL IMS_RESULT SipClientConnection::Send()
         {
             ::SipMessage* pSipMsg = m_pMessage->GetMessage();
 
-            if (!m_pAuHelper->FormCredentials(pSipMsg))
+            if (!m_pAuHelper->FormCredentials(pSipMsg, IsNonSessionAkaForRegisterRequired()))
             {
                 SipPrivate::SetLastError(SipError::GENERAL_ERROR);
                 return IMS_FAILURE;
@@ -1006,7 +1008,7 @@ IMS_RESULT SipClientConnection::SendWithCredentials()
 
     ::SipMessage* pSipMsg = m_pMessage->GetMessage();
 
-    if (!m_pAuHelper->FormCredentials(pSipMsg))
+    if (!m_pAuHelper->FormCredentials(pSipMsg, IsNonSessionAkaForRegisterRequired()))
     {
         SipPrivate::SetLastError(SipError::GENERAL_ERROR);
         return IMS_FAILURE;
@@ -1050,6 +1052,20 @@ IMS_RESULT SipClientConnection::SendWithCredentials()
     SipPrivate::SetLastError(SipError::NO_ERROR);
 
     return IMS_SUCCESS;
+}
+
+PRIVATE
+IMS_BOOL SipClientConnection::IsNonSessionAkaForRegisterRequired() const
+{
+    if (!GetMethod().Equals(SipMethod::REGISTER))
+    {
+        return IMS_FALSE;
+    }
+
+    const ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(GetSlotId());
+    return piCc != IMS_NULL &&
+            piCc->GetBoolean(
+                    CarrierConfig::Ims::KEY_FORCE_NON_SESSION_AKA_FOR_REGISTER_BOOL, IMS_FALSE);
 }
 
 PROTECTED VIRTUAL IMS_BOOL SipClientConnection::DispatchMessage(IN ImsMessage& objMsg)

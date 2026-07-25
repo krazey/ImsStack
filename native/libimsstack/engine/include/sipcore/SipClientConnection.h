@@ -117,6 +117,7 @@ private:
     void StopTcpConnectionMonitoringTimer();
     void SetState(IN IMS_SINT32 nState);
 
+    IMS_BOOL IsNonSessionAkaForRegisterRequired() const;
     static IMS_BOOL IsTransportErrorCode104(IN const AString& strMessage);
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 

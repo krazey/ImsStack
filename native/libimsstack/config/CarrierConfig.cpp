@@ -178,6 +178,10 @@ const IMS_CHAR CarrierConfig::Ims::KEY_USE_SIP_USER_AGENT_HEADER_IN_UA_STRING_BO
 const IMS_CHAR
         CarrierConfig::Ims::KEY_ALLOW_SIP_P_ACCESS_NETWORK_INFO_HEADER_IN_INITIAL_REGISTER_BOOL[] =
                 KEY_IMS_PREFIX "allow_sip_p_access_network_info_header_in_initial_register_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_REGISTRATION_HEADERS_TO_SET_STRING_ARRAY[] =
+        KEY_IMS_PREFIX "registration_headers_to_set_string_array";
+const IMS_CHAR CarrierConfig::Ims::KEY_FORCE_NON_SESSION_AKA_FOR_REGISTER_BOOL[] =
+        KEY_IMS_PREFIX "force_non_session_aka_for_register_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_REQUIRE_SIP_EXPIRES_HEADER_IN_REGISTER_BOOL[] =
         KEY_IMS_PREFIX "require_sip_expires_header_in_register_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORT_SIP_SESSION_ID_HEADER_BOOL[] =
@@ -1344,6 +1348,16 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_OUTGOING_LOCAL_NUMBER_PREFIX_STRING[
         KEY_IMS_VOICE_PREFIX "outgoing_local_number_prefix_string";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_OUTGOING_LOCAL_NUMBER_LENGTH_INT[] =
         KEY_IMS_VOICE_PREFIX "outgoing_local_number_length_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_OUTGOING_NUMBER_COUNTRY_CODE_STRING[] =
+        KEY_IMS_VOICE_PREFIX "outgoing_number_country_code_string";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_OUTGOING_NUMBER_NATIONAL_PREFIX_STRING[] =
+        KEY_IMS_VOICE_PREFIX "outgoing_number_national_prefix_string";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_OUTGOING_NUMBER_NATIONAL_LENGTH_INT[] =
+        KEY_IMS_VOICE_PREFIX "outgoing_number_national_length_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_OUTGOING_NUMBER_TRUNK_PREFIX_STRING[] =
+        KEY_IMS_VOICE_PREFIX "outgoing_number_trunk_prefix_string";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_PLAIN_TEL_SHORT_CODES_STRING_ARRAY[] =
+        KEY_IMS_VOICE_PREFIX "plain_tel_short_codes_string_array";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_OUTGOING_REQUEST_URI_USER_PHONE_PARAMETER_BOOL[] =
         KEY_IMS_VOICE_PREFIX "outgoing_request_uri_user_phone_parameter_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_INITIAL_INVITE_HEADERS_TO_REMOVE_STRING_ARRAY[] =

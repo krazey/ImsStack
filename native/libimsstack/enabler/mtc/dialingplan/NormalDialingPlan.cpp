@@ -96,7 +96,10 @@ PRIVATE GLOBAL AString& NormalDialingPlan::Translate(IN IMtcContext& objContext,
         return strNumber;
     }
 
-    if (eScheme == Scheme::TEL ||
+    IMS_BOOL bPlainTelShortCode = IsPlainTelShortCode(objContext, strNumber);
+    CanonicalizeConfiguredNumber(objContext, strNumber);
+
+    if (bPlainTelShortCode || eScheme == Scheme::TEL ||
             (eScheme == Scheme::UNKNOWN && GetScheme(objContext) == Scheme::TEL))
     {
         FormTelUri(objContext, strNumber, objIdentityProxy);
@@ -118,17 +121,8 @@ PRIVATE GLOBAL void NormalDialingPlan::FormSipUri(IN IMtcContext& objContext,
     AString strPrefix = objConfig.GetString(ConfigVoice::KEY_OUTGOING_LOCAL_NUMBER_PREFIX_STRING);
     IMS_SINT32 nLocalNumberLength =
             objConfig.GetInt(ConfigVoice::KEY_OUTGOING_LOCAL_NUMBER_LENGTH_INT);
-    IMS_BOOL bDecimalNumber = IMS_TRUE;
-    for (IMS_SINT32 i = 0; i < strNumber.GetLength(); ++i)
-    {
-        if (!IMS_ISDIGIT(strNumber[i]))
-        {
-            bDecimalNumber = IMS_FALSE;
-            break;
-        }
-    }
     if (strPrefix.GetLength() > 0 && nLocalNumberLength > 0 &&
-            strNumber.GetLength() == nLocalNumberLength && bDecimalNumber)
+            strNumber.GetLength() == nLocalNumberLength && IsDecimalNumber(strNumber))
     {
         strNumber.Prepend(strPrefix);
     }
@@ -179,6 +173,85 @@ PRIVATE GLOBAL void NormalDialingPlan::FormTelUri(IN IMtcContext& objContext,
     strNumber.Prepend("tel");
 
     AddAquotIfRequired(strNumber);
+}
+
+PRIVATE GLOBAL void NormalDialingPlan::CanonicalizeConfiguredNumber(
+        IN IMtcContext& objContext, IN_OUT AString& strNumber)
+{
+    const MtcConfigurationProxy& objConfig = objContext.GetConfigurationProxy();
+    AString strCountryCode =
+            objConfig.GetString(ConfigVoice::KEY_OUTGOING_NUMBER_COUNTRY_CODE_STRING);
+    AString strNationalPrefix =
+            objConfig.GetString(ConfigVoice::KEY_OUTGOING_NUMBER_NATIONAL_PREFIX_STRING);
+    AString strTrunkPrefix =
+            objConfig.GetString(ConfigVoice::KEY_OUTGOING_NUMBER_TRUNK_PREFIX_STRING);
+    IMS_SINT32 nNationalLength =
+            objConfig.GetInt(ConfigVoice::KEY_OUTGOING_NUMBER_NATIONAL_LENGTH_INT);
+
+    if (strCountryCode.GetLength() == 0 || nNationalLength <= 0 || !IsDecimalNumber(strNumber) ||
+            !IsDecimalNumber(strCountryCode) ||
+            (strNationalPrefix.GetLength() > 0 && !IsDecimalNumber(strNationalPrefix)) ||
+            (strTrunkPrefix.GetLength() > 0 && !IsDecimalNumber(strTrunkPrefix)))
+    {
+        return;
+    }
+
+    if (strNumber.GetLength() == nNationalLength &&
+            (strNationalPrefix.GetLength() == 0 || strNumber.StartsWith(strNationalPrefix)))
+    {
+        strNumber.Prepend(strCountryCode);
+        strNumber.Prepend(TextParser::CHAR_PLUS);
+        return;
+    }
+
+    if (strNumber.GetLength() == nNationalLength + strCountryCode.GetLength() &&
+            strNumber.StartsWith(strCountryCode))
+    {
+        strNumber.Prepend(TextParser::CHAR_PLUS);
+        return;
+    }
+
+    if (strTrunkPrefix.GetLength() == 0 ||
+            strNumber.GetLength() != nNationalLength + strTrunkPrefix.GetLength() ||
+            !strNumber.StartsWith(strTrunkPrefix))
+    {
+        return;
+    }
+
+    AString strNationalNumber = strNumber.GetSubStr(strTrunkPrefix.GetLength());
+    if (strNationalPrefix.GetLength() > 0 && !strNationalNumber.StartsWith(strNationalPrefix))
+    {
+        return;
+    }
+
+    strNumber = strNationalNumber;
+    strNumber.Prepend(strCountryCode);
+    strNumber.Prepend(TextParser::CHAR_PLUS);
+}
+
+PRIVATE GLOBAL IMS_BOOL NormalDialingPlan::IsDecimalNumber(IN const AString& strNumber)
+{
+    if (strNumber.GetLength() == 0)
+    {
+        return IMS_FALSE;
+    }
+
+    for (IMS_SINT32 i = 0; i < strNumber.GetLength(); ++i)
+    {
+        if (!IMS_ISDIGIT(strNumber[i]))
+        {
+            return IMS_FALSE;
+        }
+    }
+
+    return IMS_TRUE;
+}
+
+PRIVATE GLOBAL IMS_BOOL NormalDialingPlan::IsPlainTelShortCode(
+        IN IMtcContext& objContext, IN const AString& strNumber)
+{
+    return objContext.GetConfigurationProxy().Contains(
+            ConfigVoice::KEY_PLAIN_TEL_SHORT_CODES_STRING_ARRAY, strNumber.GetStr());
 }
 
 PRIVATE GLOBAL IMS_BOOL NormalDialingPlan::IsVisualSeparator(IN IMS_CHAR ch)

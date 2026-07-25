@@ -3112,7 +3112,40 @@ IMS_RESULT Registration::SetHeaders(IN ISipClientConnection* piScc)
         }
     }
 
+    SetCarrierHeaders(piScc);
+
     return IMS_SUCCESS;
+}
+
+PRIVATE
+void Registration::SetCarrierHeaders(IN ISipClientConnection* piScc)
+{
+    const ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(GetSlotId());
+    if (piCc == IMS_NULL)
+    {
+        return;
+    }
+
+    ImsVector<AString> objHeaders =
+            piCc->GetStringArray(CarrierConfig::Ims::KEY_REGISTRATION_HEADERS_TO_SET_STRING_ARRAY);
+    for (IMS_UINT32 i = 0; i < objHeaders.GetSize(); ++i)
+    {
+        AString strHeader = objHeaders.GetAt(i);
+        IMS_SINT32 nColon = strHeader.GetIndexOf(TextParser::CHAR_COLON);
+        if (nColon <= 0)
+        {
+            IMS_TRACE_E(0, "Invalid carrier REGISTER header", 0, 0, 0);
+            continue;
+        }
+
+        AString strName = strHeader.GetSubStr(0, nColon).Trim();
+        AString strValue = strHeader.GetSubStr(nColon + 1).Trim();
+        if (strName.GetLength() == 0 || strValue.GetLength() == 0 ||
+                piScc->SetHeader(strName, strValue) != IMS_SUCCESS)
+        {
+            IMS_TRACE_E(0, "Setting carrier REGISTER header failed", 0, 0, 0);
+        }
+    }
 }
 
 // IMS_AUTH_NONCE_REUSE {

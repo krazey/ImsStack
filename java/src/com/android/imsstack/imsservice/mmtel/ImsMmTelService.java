@@ -36,6 +36,9 @@ import android.telephony.ims.stub.ImsUtImplBase;
 
 import androidx.annotation.NonNull;
 
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
@@ -46,6 +49,7 @@ import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.imsstack.util.LocalLog;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -236,6 +240,22 @@ public class ImsMmTelService extends MmTelFeature
 
     @Override
     public @ProcessCallResult int shouldProcessCall(String[] numbers) {
+        ConfigInterface config = AgentFactory.getInstance().getAgent(
+                ConfigInterface.class, mImsContext.getSlotId());
+        CarrierConfig carrierConfig = config != null ? config.getCarrierConfig() : null;
+        String[] forceCsfbNumbers = carrierConfig != null
+                ? carrierConfig.getStringArray(
+                        CarrierConfig.ImsVoice.KEY_FORCE_CSFB_DIAL_STRINGS_STRING_ARRAY)
+                : null;
+        if (numbers != null && forceCsfbNumbers != null) {
+            List<String> forceCsfbNumberList = Arrays.asList(forceCsfbNumbers);
+            for (String number : numbers) {
+                if (number != null && forceCsfbNumberList.contains(number)) {
+                    logi("shouldProcessCall :: forcing CSFB for carrier dial string");
+                    return MmTelFeature.PROCESS_CALL_CSFB;
+                }
+            }
+        }
         return super.shouldProcessCall(numbers);
     }
 

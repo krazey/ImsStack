@@ -35,7 +35,8 @@ public:
 public:
     IMS_BOOL AddChallenge(IN ISipGenericChallenge* piChallenge);
     IMS_BOOL AddCredential(IN const Credential& objCredential);
-    IMS_BOOL FormCredentials(IN_OUT ::SipMessage*& pSipMsg);
+    IMS_BOOL FormCredentials(
+            IN_OUT ::SipMessage*& pSipMsg, IN IMS_BOOL bForceNonSessionAka = IMS_FALSE);
     ISipGenericChallenge* GetChallenge(IN IMS_SINT32 nIndex = 0) const;
     IMS_BOOL IsChallengePresent() const;
     IMS_BOOL IsCredentialPresent() const;

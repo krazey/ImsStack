@@ -330,6 +330,126 @@ TEST_F(NormalDialingPlanTest, GetTranslatedUriReturnsSipUriAsGlobalNumber)
     EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
 }
 
+TEST_F(NormalDialingPlanTest, GetTranslatedUriForcesConfiguredShortCodeToTel)
+{
+    strNumber = "542";
+    eScheme = Scheme::SIP;
+    AString strAnyPhoneContext("anyPhoneContext");
+    AString strExpectedUri("<tel:" + strNumber + ";phone-context=" + strAnyPhoneContext + ">");
+
+    ON_CALL(*pConfigurationProxy,
+            Contains(ConfigVoice::KEY_PLAIN_TEL_SHORT_CODES_STRING_ARRAY, "542"))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objIdentityProxy,
+            GetPhoneContext(ImsIdentity::DIALING_POLICY_HOME_LOCAL, SLOT_ID, _, _))
+            .WillByDefault(Return(strAnyPhoneContext));
+
+    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
+}
+
+TEST_F(NormalDialingPlanTest, GetTranslatedUriCanonicalizesNationalNumber)
+{
+    strNumber = "7012345678";
+    eScheme = Scheme::SIP;
+    AString strCountryCode("7");
+    AString strNationalPrefix("7");
+    AString strTrunkPrefix("8");
+    AString strExpectedNumber("+77012345678");
+    AString strExpectedUri("sip:" + strExpectedNumber + "@anyDomain;user=phone");
+
+    ON_CALL(*pConfigurationProxy, GetString(ConfigVoice::KEY_OUTGOING_NUMBER_COUNTRY_CODE_STRING))
+            .WillByDefault(Return(strCountryCode));
+    ON_CALL(*pConfigurationProxy,
+            GetString(ConfigVoice::KEY_OUTGOING_NUMBER_NATIONAL_PREFIX_STRING))
+            .WillByDefault(Return(strNationalPrefix));
+    ON_CALL(*pConfigurationProxy, GetString(ConfigVoice::KEY_OUTGOING_NUMBER_TRUNK_PREFIX_STRING))
+            .WillByDefault(Return(strTrunkPrefix));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_OUTGOING_NUMBER_NATIONAL_LENGTH_INT))
+            .WillByDefault(Return(10));
+    ON_CALL(objIdentityProxy, CreateSipUserId(strExpectedNumber, SLOT_ID, IMS_TRUE, _))
+            .WillByDefault(Return(strExpectedUri));
+
+    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
+}
+
+TEST_F(NormalDialingPlanTest, GetTranslatedUriCanonicalizesCountryCodedNumber)
+{
+    strNumber = "77012345678";
+    eScheme = Scheme::SIP;
+    AString strCountryCode("7");
+    AString strNationalPrefix("7");
+    AString strTrunkPrefix("8");
+    AString strExpectedNumber("+77012345678");
+    AString strExpectedUri("sip:" + strExpectedNumber + "@anyDomain;user=phone");
+
+    ON_CALL(*pConfigurationProxy, GetString(ConfigVoice::KEY_OUTGOING_NUMBER_COUNTRY_CODE_STRING))
+            .WillByDefault(Return(strCountryCode));
+    ON_CALL(*pConfigurationProxy,
+            GetString(ConfigVoice::KEY_OUTGOING_NUMBER_NATIONAL_PREFIX_STRING))
+            .WillByDefault(Return(strNationalPrefix));
+    ON_CALL(*pConfigurationProxy, GetString(ConfigVoice::KEY_OUTGOING_NUMBER_TRUNK_PREFIX_STRING))
+            .WillByDefault(Return(strTrunkPrefix));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_OUTGOING_NUMBER_NATIONAL_LENGTH_INT))
+            .WillByDefault(Return(10));
+    ON_CALL(objIdentityProxy, CreateSipUserId(strExpectedNumber, SLOT_ID, IMS_TRUE, _))
+            .WillByDefault(Return(strExpectedUri));
+
+    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
+}
+
+TEST_F(NormalDialingPlanTest, GetTranslatedUriCanonicalizesTrunkPrefixedNumber)
+{
+    strNumber = "87012345678";
+    eScheme = Scheme::SIP;
+    AString strCountryCode("7");
+    AString strNationalPrefix("7");
+    AString strTrunkPrefix("8");
+    AString strExpectedNumber("+77012345678");
+    AString strExpectedUri("sip:" + strExpectedNumber + "@anyDomain;user=phone");
+
+    ON_CALL(*pConfigurationProxy, GetString(ConfigVoice::KEY_OUTGOING_NUMBER_COUNTRY_CODE_STRING))
+            .WillByDefault(Return(strCountryCode));
+    ON_CALL(*pConfigurationProxy,
+            GetString(ConfigVoice::KEY_OUTGOING_NUMBER_NATIONAL_PREFIX_STRING))
+            .WillByDefault(Return(strNationalPrefix));
+    ON_CALL(*pConfigurationProxy, GetString(ConfigVoice::KEY_OUTGOING_NUMBER_TRUNK_PREFIX_STRING))
+            .WillByDefault(Return(strTrunkPrefix));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_OUTGOING_NUMBER_NATIONAL_LENGTH_INT))
+            .WillByDefault(Return(10));
+    ON_CALL(objIdentityProxy, CreateSipUserId(strExpectedNumber, SLOT_ID, IMS_TRUE, _))
+            .WillByDefault(Return(strExpectedUri));
+
+    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
+}
+
+TEST_F(NormalDialingPlanTest, GetTranslatedUriPreservesUnmatchedNationalNumber)
+{
+    strNumber = "6012345678";
+    eScheme = Scheme::SIP;
+    AString strCountryCode("7");
+    AString strNationalPrefix("7");
+    AString strTrunkPrefix("8");
+    AString strAnyPhoneContext("anyPhoneContext");
+    AString strExpectedUri("<sip:" + strNumber + ";phone-context=" + strAnyPhoneContext + ">");
+
+    ON_CALL(*pConfigurationProxy, GetString(ConfigVoice::KEY_OUTGOING_NUMBER_COUNTRY_CODE_STRING))
+            .WillByDefault(Return(strCountryCode));
+    ON_CALL(*pConfigurationProxy,
+            GetString(ConfigVoice::KEY_OUTGOING_NUMBER_NATIONAL_PREFIX_STRING))
+            .WillByDefault(Return(strNationalPrefix));
+    ON_CALL(*pConfigurationProxy, GetString(ConfigVoice::KEY_OUTGOING_NUMBER_TRUNK_PREFIX_STRING))
+            .WillByDefault(Return(strTrunkPrefix));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_OUTGOING_NUMBER_NATIONAL_LENGTH_INT))
+            .WillByDefault(Return(10));
+    ON_CALL(objIdentityProxy,
+            GetPhoneContext(ImsIdentity::DIALING_POLICY_HOME_LOCAL, SLOT_ID, _, _))
+            .WillByDefault(Return(strAnyPhoneContext));
+    ON_CALL(objIdentityProxy, CreateSipUserIdWithPhone(strNumber, SLOT_ID, strAnyPhoneContext))
+            .WillByDefault(Return(strExpectedUri));
+
+    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
+}
+
 TEST_F(NormalDialingPlanTest, GetTranslatedUriUsesConfiguredDomainForGlobalNumber)
 {
     strNumber = "+6512345678";

@@ -48,6 +48,7 @@ import android.telephony.ims.aidl.IImsCallSessionListener;
 import android.telephony.ims.aidl.IImsMmTelListener;
 import android.telephony.ims.feature.CapabilityChangeRequest;
 import android.telephony.ims.feature.ImsFeature;
+import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.feature.MmTelFeature.MmTelCapabilities;
 import android.telephony.ims.stub.ImsCallSessionImplBase;
 import android.telephony.ims.stub.ImsEcbmImplBase;
@@ -60,6 +61,9 @@ import android.testing.TestableLooper;
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.base.ContentProviderProxy.SettingsProxy;
 import com.android.imsstack.base.TestAppContext;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
@@ -99,6 +103,8 @@ public class ImsMmTelServiceTest extends ImsStackTest {
     @Mock private SettingsProxy mGlobalSettings;
     @Mock private IImsCallSessionListener mMockCallSessionListener;
     @Mock private IImsMmTelListener mMockMmtelListener;
+    @Mock private ConfigInterface mMockConfigInterface;
+    @Mock private CarrierConfig mMockCarrierConfig;
 
     private TestAppContext mTestAppContext;
     private ImsServiceManager mServiceManager;
@@ -116,6 +122,9 @@ public class ImsMmTelServiceTest extends ImsStackTest {
         when(mMockImsContext.getSlotId()).thenReturn(SLOT0);
         when(mMockImsContext.getExecutor()).thenReturn(Runnable::run);
         when(mMockBaseContext.getSlotId()).thenReturn(SLOT0);
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        AgentFactory.getInstance().setAgent(
+                ConfigInterface.class, mMockConfigInterface, SLOT0);
 
         when(mTestAppContext.getContentProviderProxy().getGlobalSettings())
                 .thenReturn(mGlobalSettings);
@@ -137,6 +146,7 @@ public class ImsMmTelServiceTest extends ImsStackTest {
             mServiceManager = null;
         }
         UtFactory.getInstance().setUtInterfaceForSlot(SLOT0, null);
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT0);
         mTestAppContext.tearDown();
         mTestAppContext = null;
     }
@@ -471,7 +481,19 @@ public class ImsMmTelServiceTest extends ImsStackTest {
     @Test
     public void testShouldProcessCall() {
         String[] number = {"IMS"};
-        assertEquals(0, mMmTelFeature.shouldProcessCall(number));
+        assertEquals(MmTelFeature.PROCESS_CALL_IMS, mMmTelFeature.shouldProcessCall(number));
+    }
+
+    @Test
+    public void testShouldProcessCallForcesConfiguredDialStringToCsfb() {
+        when(mMockCarrierConfig.getStringArray(
+                CarrierConfig.ImsVoice.KEY_FORCE_CSFB_DIAL_STRINGS_STRING_ARRAY))
+                .thenReturn(new String[] {"333"});
+
+        assertEquals(MmTelFeature.PROCESS_CALL_CSFB,
+                mMmTelFeature.shouldProcessCall(new String[] {"333"}));
+        assertEquals(MmTelFeature.PROCESS_CALL_IMS,
+                mMmTelFeature.shouldProcessCall(new String[] {"334"}));
     }
 
     @Test

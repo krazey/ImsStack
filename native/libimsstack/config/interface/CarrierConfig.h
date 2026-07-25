@@ -184,6 +184,8 @@ public:
         static const IMS_CHAR KEY_ALLOW_ALGORITHM_PARAM_IN_SIP_AUTHORIZATION_HEADER_BOOL[];
         static const IMS_CHAR KEY_USE_SIP_USER_AGENT_HEADER_IN_UA_STRING_BOOL[];
         static const IMS_CHAR KEY_ALLOW_SIP_P_ACCESS_NETWORK_INFO_HEADER_IN_INITIAL_REGISTER_BOOL[];
+        static const IMS_CHAR KEY_REGISTRATION_HEADERS_TO_SET_STRING_ARRAY[];
+        static const IMS_CHAR KEY_FORCE_NON_SESSION_AKA_FOR_REGISTER_BOOL[];
         static const IMS_CHAR KEY_REQUIRE_SIP_EXPIRES_HEADER_IN_REGISTER_BOOL[];
         static const IMS_CHAR KEY_SUPPORT_SIP_SESSION_ID_HEADER_BOOL[];
 
@@ -4427,6 +4429,15 @@ public:
         /** Prefixes local numbers of the configured length before URI translation. */
         static const IMS_CHAR KEY_OUTGOING_LOCAL_NUMBER_PREFIX_STRING[];
         static const IMS_CHAR KEY_OUTGOING_LOCAL_NUMBER_LENGTH_INT[];
+
+        /** Canonicalizes configured national and trunk-prefixed numbers to E.164. */
+        static const IMS_CHAR KEY_OUTGOING_NUMBER_COUNTRY_CODE_STRING[];
+        static const IMS_CHAR KEY_OUTGOING_NUMBER_NATIONAL_PREFIX_STRING[];
+        static const IMS_CHAR KEY_OUTGOING_NUMBER_NATIONAL_LENGTH_INT[];
+        static const IMS_CHAR KEY_OUTGOING_NUMBER_TRUNK_PREFIX_STRING[];
+
+        /** Forces exact carrier short codes to use a TEL Request-URI. */
+        static const IMS_CHAR KEY_PLAIN_TEL_SHORT_CODES_STRING_ARRAY[];
 
         /** Controls whether outgoing SIP Request-URIs include the user=phone parameter. */
         static const IMS_CHAR KEY_OUTGOING_REQUEST_URI_USER_PHONE_PARAMETER_BOOL[];

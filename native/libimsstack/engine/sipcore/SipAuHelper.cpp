@@ -251,7 +251,7 @@ public:
     IMS_BOOL AddChallenge(IN IMS_SINT32 nType, IN SipHeaderBase* pSipHdr);
     IMS_BOOL AddCredential(IN const Credential& objCredential);
     IMS_BOOL AddHeader(IN_OUT ::SipMessage*& pSipMsg);
-    IMS_BOOL CalculateResponse();
+    IMS_BOOL CalculateResponse(IN IMS_BOOL bForceNonSessionAka);
     void Clear();
     IMS_BOOL FormCredentials(IN const SipMethod& objMethod, IN const AString& strUri,
             IN const AString& strEntityBody, IN const SipGenericResponse& objResponse,
@@ -501,7 +501,7 @@ IMS_BOOL SipAuHelperPrivate::AddHeader(IN_OUT ::SipMessage*& pSipMsg)
 }
 
 PUBLIC
-IMS_BOOL SipAuHelperPrivate::CalculateResponse()
+IMS_BOOL SipAuHelperPrivate::CalculateResponse(IN IMS_BOOL bForceNonSessionAka)
 {
     for (IMS_UINT32 i = 0; i < m_objChallenges.GetSize(); ++i)
     {
@@ -558,8 +558,11 @@ IMS_BOOL SipAuHelperPrivate::CalculateResponse()
                 // pResponse->m_objAkaParam.strAuts = pResponse->m_objAkaParam.strAuts.ToBase64();
             }
 
-            // Extract the string "auth" / "auth-int" from the received qop parameter
-            if (pChallenge->GetQop().GetLength() > 0)
+            // Extract the string "auth" / "auth-int" from the received qop parameter.
+            // Some registrars require AKA without qop even if they advertise it.
+            IMS_BOOL bNonSessionAka =
+                    bForceNonSessionAka && pCredential->GetType() != Credential::TYPE_MD5;
+            if (!bNonSessionAka && pChallenge->GetQop().GetLength() > 0)
             {
                 AStringArray objTokens = pChallenge->GetQop().Split(TextParser::CHAR_COMMA);
 
@@ -974,7 +977,8 @@ IMS_BOOL SipAuHelper::AddCredential(IN const Credential& objCredential)
 }
 
 PUBLIC
-IMS_BOOL SipAuHelper::FormCredentials(IN_OUT ::SipMessage*& pSipMsg)
+IMS_BOOL SipAuHelper::FormCredentials(
+        IN_OUT ::SipMessage*& pSipMsg, IN IMS_BOOL bForceNonSessionAka /* = IMS_FALSE */)
 {
     if (!m_pAuHelperPrivate->IsChallengePresent())
     {
@@ -999,7 +1003,7 @@ IMS_BOOL SipAuHelper::FormCredentials(IN_OUT ::SipMessage*& pSipMsg)
         --nHCount;
     }
 
-    if (!m_pAuHelperPrivate->CalculateResponse())
+    if (!m_pAuHelperPrivate->CalculateResponse(bForceNonSessionAka))
     {
         IMS_TRACE_E(0, "Calculating the digest-response failed", 0, 0, 0);
         return IMS_FALSE;

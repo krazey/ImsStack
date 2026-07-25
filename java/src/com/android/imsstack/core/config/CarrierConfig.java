@@ -342,6 +342,10 @@ public class CarrierConfig {
                 KEY_PREFIX + "use_sip_user_agent_header_in_ua_string_bool";
         public static final String KEY_ALLOW_SIP_P_ACCESS_NETWORK_INFO_HEADER_IN_INITIAL_REGISTER_BOOL =
                 KEY_PREFIX + "allow_sip_p_access_network_info_header_in_initial_register_bool";
+        public static final String KEY_REGISTRATION_HEADERS_TO_SET_STRING_ARRAY =
+                KEY_PREFIX + "registration_headers_to_set_string_array";
+        public static final String KEY_FORCE_NON_SESSION_AKA_FOR_REGISTER_BOOL =
+                KEY_PREFIX + "force_non_session_aka_for_register_bool";
         public static final String KEY_REQUIRE_SIP_EXPIRES_HEADER_IN_REGISTER_BOOL =
                 KEY_PREFIX + "require_sip_expires_header_in_register_bool";
         public static final String KEY_SUPPORT_SIP_SESSION_ID_HEADER_BOOL =
@@ -1140,6 +1144,18 @@ public class CarrierConfig {
                 KEY_PREFIX + "outgoing_local_number_prefix_string";
         public static final String KEY_OUTGOING_LOCAL_NUMBER_LENGTH_INT =
                 KEY_PREFIX + "outgoing_local_number_length_int";
+        public static final String KEY_OUTGOING_NUMBER_COUNTRY_CODE_STRING =
+                KEY_PREFIX + "outgoing_number_country_code_string";
+        public static final String KEY_OUTGOING_NUMBER_NATIONAL_PREFIX_STRING =
+                KEY_PREFIX + "outgoing_number_national_prefix_string";
+        public static final String KEY_OUTGOING_NUMBER_NATIONAL_LENGTH_INT =
+                KEY_PREFIX + "outgoing_number_national_length_int";
+        public static final String KEY_OUTGOING_NUMBER_TRUNK_PREFIX_STRING =
+                KEY_PREFIX + "outgoing_number_trunk_prefix_string";
+        public static final String KEY_PLAIN_TEL_SHORT_CODES_STRING_ARRAY =
+                KEY_PREFIX + "plain_tel_short_codes_string_array";
+        public static final String KEY_FORCE_CSFB_DIAL_STRINGS_STRING_ARRAY =
+                KEY_PREFIX + "force_csfb_dial_strings_string_array";
         public static final String KEY_OUTGOING_REQUEST_URI_USER_PHONE_PARAMETER_BOOL =
                 KEY_PREFIX + "outgoing_request_uri_user_phone_parameter_bool";
         public static final String KEY_INITIAL_INVITE_HEADERS_TO_REMOVE_STRING_ARRAY =

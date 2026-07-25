@@ -29,6 +29,9 @@
     <boolean name="ims.allow_algorithm_param_in_sip_authorization_header_bool" value="false"/>
     <boolean name="ims.use_sip_user_agent_header_in_ua_string_bool" value="false"/>
     <boolean name="ims.allow_sip_p_access_network_info_header_in_initial_register_bool" value="false"/>
+    <string-array name="ims.registration_headers_to_set_string_array" num="0">
+    </string-array>
+    <boolean name="ims.force_non_session_aka_for_register_bool" value="false"/>
     <boolean name="ims.require_sip_expires_header_in_register_bool" value="true"/>
     <boolean name="ims.support_sip_session_id_header_bool" value="true"/>
     <int name="ims.registration_contact_user_info_part_int" value="0"/>
@@ -118,6 +121,14 @@
     <string name="imsvoice.outgoing_request_uri_domain_string"></string>
     <string name="imsvoice.outgoing_local_number_prefix_string"></string>
     <int name="imsvoice.outgoing_local_number_length_int" value="-1"/>
+    <string name="imsvoice.outgoing_number_country_code_string"></string>
+    <string name="imsvoice.outgoing_number_national_prefix_string"></string>
+    <int name="imsvoice.outgoing_number_national_length_int" value="-1"/>
+    <string name="imsvoice.outgoing_number_trunk_prefix_string"></string>
+    <string-array name="imsvoice.plain_tel_short_codes_string_array" num="0">
+    </string-array>
+    <string-array name="imsvoice.force_csfb_dial_strings_string_array" num="0">
+    </string-array>
     <boolean name="imsvoice.outgoing_request_uri_user_phone_parameter_bool" value="true"/>
     <string-array name="imsvoice.initial_invite_headers_to_remove_string_array" num="0">
     </string-array>
