@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
@@ -105,6 +106,10 @@ public class SmsRelayLayerTest {
     private static final int SUB_ID_2 = 2;
     private static final Uri SMSC_IDENTITY_SUB1 = Uri.parse("tel:+1111111111");
     private static final Uri SMSC_IDENTITY_SUB2 = Uri.parse("tel:+2222222222");
+    private static final String SMSC_WITH_UNKNOWN_TON = "0781947106004034";
+    private static final String SMSC_WITH_INTERNATIONAL_TON = "0791947106004034";
+    private static final String SMSC_WITH_NATIONAL_TON = "07A1947106004034";
+    private static final String DECODED_INTERNATIONAL_SMSC = "+491760000443";
 
     @Before
     public void setUp() throws Exception {
@@ -185,6 +190,33 @@ public class SmsRelayLayerTest {
                 mStatusResultNA);
         verify(mMtsController).sendMessage(anyInt(), any(), eq(mSmsc), eq(mSmsc), anyInt(),
                 eq(false));
+    }
+
+    @Test
+    public void test_normalizeSmscTon() {
+        assertEquals(SMSC_WITH_INTERNATIONAL_TON,
+                SmsRelayLayer.normalizeSmscTon(SMSC_WITH_UNKNOWN_TON));
+        assertEquals(SMSC_WITH_INTERNATIONAL_TON,
+                SmsRelayLayer.normalizeSmscTon(SMSC_WITH_INTERNATIONAL_TON));
+        assertEquals(SMSC_WITH_NATIONAL_TON,
+                SmsRelayLayer.normalizeSmscTon(SMSC_WITH_NATIONAL_TON));
+        assertEquals("038121",
+                SmsRelayLayer.normalizeSmscTon("038121"));
+    }
+
+    @Test
+    public void test_sendRPMessage_normalizesUnknownSmscTon() {
+        when(mMtsController.sendMessage(anyInt(), any(), anyString(), anyString(), anyInt(),
+                anyBoolean())).thenReturn(true);
+        when(mMockSmsManagerProxySub1.getSmscIdentity()).thenReturn(Uri.EMPTY);
+        when(mImsCallContext.getSubId()).thenReturn(SUB_ID_1);
+
+        mSmsRelayLayer.sendRPMessage(mToken, mRpType, SMSC_WITH_UNKNOWN_TON,
+                mDestinationAddress, mTpdu, mStatusResultNA);
+
+        verify(mMtsController).sendMessage(anyInt(),
+                argThat(pdu -> pdu != null && pdu.length > 4 && (pdu[4] & 0xff) == 0x91),
+                eq(DECODED_INTERNATIONAL_SMSC), eq(mDestinationAddress), anyInt(), eq(false));
     }
 
     @Test

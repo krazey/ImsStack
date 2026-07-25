@@ -194,6 +194,13 @@ public class SmsRelayLayer {
                     loge("Smsc is null");
                     return SmsUtils.SMS_RESULT_INVALID_SMSC_ADDRESS;
                 }
+                if (rpType == SmsUtils.RP_DATA) {
+                    String normalizedSmsc = normalizeSmscTon(smsc);
+                    if (!normalizedSmsc.equals(smsc)) {
+                        logi("Normalized RP-DATA SMSC TON to international");
+                        smsc = normalizedSmsc;
+                    }
+                }
                 //As per b/232048441 if PSI is null, targetAddress is set to smsc
                 if (targetAddress == null || targetAddress.length() == 0) {
                     logi("PSI is null");
@@ -287,6 +294,27 @@ public class SmsRelayLayer {
         int len = targetAddrBytes[0];
         return PhoneNumberUtils.calledPartyBCDToString(targetAddrBytes, 1,
                             len, PhoneNumberUtils.BCD_EXTENDED_TYPE_CALLED_PARTY);
+    }
+
+    @VisibleForTesting
+    static String normalizeSmscTon(String smsc) {
+        byte[] address = ImsUtils.hexStringToBytes(smsc);
+        if (address == null || address.length < 3) {
+            return smsc;
+        }
+
+        int addressLength = address[0] & 0xff;
+        if (addressLength != address.length - 1) {
+            return smsc;
+        }
+
+        int toa = address[1] & 0xff;
+        if ((toa & 0x80) == 0 || (toa & 0x70) != 0) {
+            return smsc;
+        }
+
+        address[1] = (byte) ((toa & 0x8f) | 0x10);
+        return ImsUtils.bytesToHexString(address);
     }
 
     /**
