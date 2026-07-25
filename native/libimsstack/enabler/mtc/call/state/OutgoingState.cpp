@@ -482,16 +482,19 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
     RestartTimerIfActive(TIMER_MO_CONFERENCE_CALL_SETUP_WATCHDOG);
     StopTimer(MtcCallState::TimerType::TIMER_MO_RESPONSE_TIMEOUT_FOR_REASON);
 
-    // to cover the case that "100 trying" is missed
-    // starts UDP Keep-Alive when the first PR is received,
-    if (nIndex == 0 && UdpKeepAliveSender::IsRequired(m_objContext.GetConfigurationProxy()))
+    IMS_SINT32 nStatusCode = m_objContext.GetMessageUtils().GetResponseStatusCode(
+            piSession, IMessage::SESSION_START, nIndex);
+
+    // Start on the first response selected by the carrier's outgoing mode.
+    // This also covers a missing 100 Trying response.
+    if (m_pUdpKeepAliveSender == IMS_NULL &&
+            UdpKeepAliveSender::IsRequiredForOutgoing(
+                    m_objContext.GetConfigurationProxy(), nStatusCode))
     {
         m_pUdpKeepAliveSender.reset(m_objContext.CreateUdpKeepAliveSender());
         m_pUdpKeepAliveSender->Start();
     }
 
-    IMS_SINT32 nStatusCode = m_objContext.GetMessageUtils().GetResponseStatusCode(
-            piSession, IMessage::SESSION_START, nIndex);
     if (nStatusCode == SipStatusCode::SC_100)
     {
         return On100TryingReceived();

@@ -1317,6 +1317,12 @@ public class CarrierConfig {
                 KEY_PREFIX + "require_registration_after_eps_fallback_trigger_for_silent_redial_bool";
         public static final String KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT =
                 KEY_PREFIX + "send_udp_keep_alive_interval_time_millis_int";
+        public static final String KEY_SEND_UDP_KEEP_ALIVE_OUTGOING_MODE_INT =
+                KEY_PREFIX + "send_udp_keep_alive_outgoing_mode_int";
+        public static final String KEY_SEND_UDP_KEEP_ALIVE_INCOMING_BOOL =
+                KEY_PREFIX + "send_udp_keep_alive_incoming_bool";
+        public static final String KEY_SEND_UDP_KEEP_ALIVE_DELAY_FIRST_PACKET_BOOL =
+                KEY_PREFIX + "send_udp_keep_alive_delay_first_packet_bool";
         public static final String KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE_INT =
                 KEY_PREFIX + "call_reject_code_for_not_acceptable_call_type_int";
         public static final String KEY_SUPPINFO_CDIV_CAUSE_REQUIRED_BOOL =

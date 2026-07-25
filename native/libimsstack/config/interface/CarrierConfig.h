@@ -4191,14 +4191,35 @@ public:
          *
          * If this value is positive, a small UDP packet (double CRLF) is sent to the P-CSCF at
          * this interval to maintain NAT bindings in firewalls and routers, preventing the UDP
-         * connection from timing out. This starts after the first provisional (1xx) response
-         * is received and stops when the call ends.
+         * connection from timing out. The outgoing and incoming mode keys control when this
+         * starts; it stops when the call ends.
          *
          * Possible Values:
          *   An integer value representing the interval in milliseconds. A value of 0 or less
          *   disables this feature.
          */
         static const IMS_CHAR KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT[];
+
+        /**
+         * Specifies when UDP keep-alive starts for a mobile-originated call.
+         *
+         * {@code UDP_KEEP_ALIVE_OUTGOING_NONE} disables outgoing keep-alive.
+         * {@code UDP_KEEP_ALIVE_OUTGOING_PROVISIONAL} starts on any 1xx response.
+         * {@code UDP_KEEP_ALIVE_OUTGOING_ALERTING} starts on a 180-199 response.
+         */
+        static const IMS_CHAR KEY_SEND_UDP_KEEP_ALIVE_OUTGOING_MODE_INT[];
+        enum
+        {
+            UDP_KEEP_ALIVE_OUTGOING_NONE = 0,
+            UDP_KEEP_ALIVE_OUTGOING_PROVISIONAL = 1,
+            UDP_KEEP_ALIVE_OUTGOING_ALERTING = 2
+        };
+
+        /** Specifies whether UDP keep-alive starts for a mobile-terminated call. */
+        static const IMS_CHAR KEY_SEND_UDP_KEEP_ALIVE_INCOMING_BOOL[];
+
+        /** Specifies whether the first UDP keep-alive packet waits one interval. */
+        static const IMS_CHAR KEY_SEND_UDP_KEEP_ALIVE_DELAY_FIRST_PACKET_BOOL[];
 
         /**
          * Specifies the SIP status code to use when rejecting a call because the call type is

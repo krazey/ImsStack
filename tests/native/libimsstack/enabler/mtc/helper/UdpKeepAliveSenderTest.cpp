@@ -69,6 +69,15 @@ protected:
         ON_CALL(*pConfigurationProxy,
                 GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT))
                 .WillByDefault(Return(ANY_KEEP_ALIVE_INTERVAL));
+        ON_CALL(*pConfigurationProxy,
+                GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_OUTGOING_MODE_INT))
+                .WillByDefault(Return(ConfigVoice::UDP_KEEP_ALIVE_OUTGOING_PROVISIONAL));
+        ON_CALL(*pConfigurationProxy,
+                GetBoolean(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INCOMING_BOOL))
+                .WillByDefault(Return(IMS_TRUE));
+        ON_CALL(*pConfigurationProxy,
+                GetBoolean(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_DELAY_FIRST_PACKET_BOOL))
+                .WillByDefault(Return(IMS_FALSE));
 
         ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
         ON_CALL(objAosConnector, GetLocalAddress).WillByDefault(Return(LOCAL_IP_ADDRESS));
@@ -112,6 +121,48 @@ TEST_F(UdpKeepAliveSenderTest, StartStartsKeepAlive)
     EXPECT_CALL(objTimer, SetTimer(ANY_KEEP_ALIVE_INTERVAL, pSender));
 
     pSender->Start();
+}
+
+TEST_F(UdpKeepAliveSenderTest, OutgoingModeSelectsProvisionalResponse)
+{
+    EXPECT_TRUE(UdpKeepAliveSender::IsRequiredForOutgoing(*pConfigurationProxy, 100));
+    EXPECT_TRUE(UdpKeepAliveSender::IsRequiredForOutgoing(*pConfigurationProxy, 183));
+
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_OUTGOING_MODE_INT))
+            .WillByDefault(Return(ConfigVoice::UDP_KEEP_ALIVE_OUTGOING_ALERTING));
+    EXPECT_FALSE(UdpKeepAliveSender::IsRequiredForOutgoing(*pConfigurationProxy, 100));
+    EXPECT_TRUE(UdpKeepAliveSender::IsRequiredForOutgoing(*pConfigurationProxy, 183));
+
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_OUTGOING_MODE_INT))
+            .WillByDefault(Return(ConfigVoice::UDP_KEEP_ALIVE_OUTGOING_NONE));
+    EXPECT_FALSE(UdpKeepAliveSender::IsRequiredForOutgoing(*pConfigurationProxy, 183));
+}
+
+TEST_F(UdpKeepAliveSenderTest, IncomingModeChecksConfiguration)
+{
+    EXPECT_TRUE(UdpKeepAliveSender::IsRequiredForIncoming(*pConfigurationProxy));
+
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INCOMING_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_FALSE(UdpKeepAliveSender::IsRequiredForIncoming(*pConfigurationProxy));
+}
+
+TEST_F(UdpKeepAliveSenderTest, DelayFirstPacketWaitsOneInterval)
+{
+    delete pSender;
+    pSender = IMS_NULL;
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_DELAY_FIRST_PACKET_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    pSender = new UdpKeepAliveSender(&objKeepAliveHelper, objContext);
+
+    EXPECT_CALL(objKeepAliveHelper, SendPacket(_)).Times(0);
+    EXPECT_CALL(objTimer, SetTimer(ANY_KEEP_ALIVE_INTERVAL, pSender)).Times(2);
+    pSender->Start();
+
+    testing::Mock::VerifyAndClearExpectations(&objKeepAliveHelper);
+    EXPECT_CALL(objKeepAliveHelper, SendPacket(_));
+    pSender->Timer_TimerExpired(&objTimer);
 }
 
 TEST_F(UdpKeepAliveSenderTest, DestructorStopsKeepAlive)

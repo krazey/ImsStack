@@ -55,7 +55,7 @@ PUBLIC VIRTUAL AlertingState::~AlertingState() {}
 
 PUBLIC VIRTUAL void AlertingState::OnEnter()
 {
-    if (UdpKeepAliveSender::IsRequired(m_objContext.GetConfigurationProxy()))
+    if (UdpKeepAliveSender::IsRequiredForIncoming(m_objContext.GetConfigurationProxy()))
     {
         m_pUdpKeepAliveSender.reset(m_objContext.CreateUdpKeepAliveSender());
         m_pUdpKeepAliveSender->Start();

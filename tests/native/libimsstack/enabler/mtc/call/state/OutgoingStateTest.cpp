@@ -128,6 +128,9 @@ protected:
         pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objCallContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(*pConfigurationProxy,
+                GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_OUTGOING_MODE_INT))
+                .WillByDefault(Return(ConfigVoice::UDP_KEEP_ALIVE_OUTGOING_PROVISIONAL));
 
         pSupplementaryService = new MtcSupplementaryService(objCallContext, *pConfigurationProxy);
         ON_CALL(objCallContext, GetSupplementaryService)
@@ -2449,6 +2452,8 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedStartsUdpKeepAliveSe
     ON_CALL(*pConfigurationProxy,
             GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT))
             .WillByDefault(Return(2000));
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, _))
+            .WillByDefault(Return(SipStatusCode::SC_183));
     // to make sure OutgoingState deletes pKeepAliveSender
     EXPECT_CALL(objCallContext, CreateUdpKeepAliveSender);
 
@@ -2456,6 +2461,38 @@ TEST_F(OutgoingStateTest, SessionProvisionalResponseReceivedStartsUdpKeepAliveSe
     pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0);
 
     EXPECT_CALL(*pKeepAliveSender, Start).Times(0);
+    pOutgoingState->SessionProvisionalResponseReceived(&objSession, 1);
+}
+
+TEST_F(OutgoingStateTest, AlertingKeepAliveWaitsFor180After100)
+{
+    MtcExtensionSet objMtcExtensionSet(GetTestExtensionSet(AString("supportedExtension")));
+    ON_CALL(objMtcSession, GetExtensionSet).WillByDefault(ReturnRef(objMtcExtensionSet));
+
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, _))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objInviteMethod));
+
+    MockUdpKeepAliveSender* pKeepAliveSender = new MockUdpKeepAliveSender(
+            new MockISipKeepAliveHelper(), objCallContext);  // OutgoingState deletes it
+    ON_CALL(objCallContext, CreateUdpKeepAliveSender).WillByDefault(Return(pKeepAliveSender));
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT))
+            .WillByDefault(Return(2000));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_OUTGOING_MODE_INT))
+            .WillByDefault(Return(ConfigVoice::UDP_KEEP_ALIVE_OUTGOING_ALERTING));
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(SipStatusCode::SC_100));
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, 1))
+            .WillByDefault(Return(SipStatusCode::SC_180));
+
+    EXPECT_CALL(objCallContext, CreateUdpKeepAliveSender).Times(0);
+    pOutgoingState->SessionProvisionalResponseReceived(&objSession, 0);
+
+    testing::Mock::VerifyAndClearExpectations(&objCallContext);
+    EXPECT_CALL(objCallContext, CreateUdpKeepAliveSender);
+    EXPECT_CALL(*pKeepAliveSender, Start);
     pOutgoingState->SessionProvisionalResponseReceived(&objSession, 1);
 }
 

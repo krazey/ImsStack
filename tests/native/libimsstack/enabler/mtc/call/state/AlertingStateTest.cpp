@@ -89,6 +89,9 @@ protected:
         pConfigurationProxy = new MockMtcConfigurationProxy();
         ON_CALL(objCallContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(*pConfigurationProxy,
+                GetBoolean(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INCOMING_BOOL))
+                .WillByDefault(Return(IMS_TRUE));
 
         ON_CALL(objCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
@@ -191,6 +194,18 @@ TEST_F(AlertingStateTest, OnEnterStartsKeepAlive)
             GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT))
             .WillByDefault(Return(1));
     EXPECT_CALL(*pUdpKeepAliveSender, Start);
+
+    pAlertingState->OnEnter();
+}
+
+TEST_F(AlertingStateTest, OnEnterDoesNotStartDisabledIncomingKeepAlive)
+{
+    ON_CALL(*pConfigurationProxy,
+            GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT))
+            .WillByDefault(Return(1));
+    ON_CALL(*pConfigurationProxy, GetBoolean(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INCOMING_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_CALL(*pUdpKeepAliveSender, Start).Times(0);
 
     pAlertingState->OnEnter();
 }

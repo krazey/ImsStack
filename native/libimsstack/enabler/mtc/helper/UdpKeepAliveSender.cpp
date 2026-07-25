@@ -35,6 +35,9 @@ UdpKeepAliveSender::UdpKeepAliveSender(
         m_pKeepAliveHelper(pKeepAliveHelper),
         m_nIntervalInMillis(objContext.GetConfigurationProxy().GetInt(
                 ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT)),
+        m_bDelayFirstPacket(objContext.GetConfigurationProxy().GetBoolean(
+                ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_DELAY_FIRST_PACKET_BOOL)),
+        m_bFirstPacketPending(m_bDelayFirstPacket),
         m_piTimer(IMS_NULL)
 {
     SetTransportInfo(objContext.GetService().GetAosConnector());
@@ -51,6 +54,34 @@ PUBLIC GLOBAL IMS_BOOL UdpKeepAliveSender::IsRequired(
         IN const MtcConfigurationProxy& objConfigProxy)
 {
     return objConfigProxy.GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT) > 0;
+}
+
+PUBLIC GLOBAL IMS_BOOL UdpKeepAliveSender::IsRequiredForOutgoing(
+        IN const MtcConfigurationProxy& objConfigProxy, IN IMS_SINT32 nStatusCode)
+{
+    if (!IsRequired(objConfigProxy))
+    {
+        return IMS_FALSE;
+    }
+
+    IMS_SINT32 nMode =
+            objConfigProxy.GetInt(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_OUTGOING_MODE_INT);
+    if (nMode == ConfigVoice::UDP_KEEP_ALIVE_OUTGOING_PROVISIONAL)
+    {
+        return nStatusCode >= 100 && nStatusCode < 200;
+    }
+    if (nMode == ConfigVoice::UDP_KEEP_ALIVE_OUTGOING_ALERTING)
+    {
+        return nStatusCode >= 180 && nStatusCode < 200;
+    }
+    return IMS_FALSE;
+}
+
+PUBLIC GLOBAL IMS_BOOL UdpKeepAliveSender::IsRequiredForIncoming(
+        IN const MtcConfigurationProxy& objConfigProxy)
+{
+    return IsRequired(objConfigProxy) &&
+            objConfigProxy.GetBoolean(ConfigVoice::KEY_SEND_UDP_KEEP_ALIVE_INCOMING_BOOL);
 }
 
 PUBLIC VIRTUAL void UdpKeepAliveSender::Timer_TimerExpired(IN ITimer* piTimer)
@@ -74,7 +105,14 @@ PUBLIC
 void UdpKeepAliveSender::Start()
 {
     IMS_TRACE_D("Start", 0, 0, 0);
-    SendDummyPacket();
+    if (m_bFirstPacketPending)
+    {
+        m_bFirstPacketPending = IMS_FALSE;
+    }
+    else
+    {
+        SendDummyPacket();
+    }
 
     if (m_piTimer == IMS_NULL)
     {
@@ -89,6 +127,7 @@ void UdpKeepAliveSender::Stop()
 {
     IMS_TRACE_D("Stop", 0, 0, 0);
     StopTimer();
+    m_bFirstPacketPending = m_bDelayFirstPacket;
 }
 
 PRIVATE

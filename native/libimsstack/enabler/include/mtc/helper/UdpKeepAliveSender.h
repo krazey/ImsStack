@@ -34,6 +34,9 @@ public:
     UdpKeepAliveSender& operator=(IN const UdpKeepAliveSender&) = delete;
 
     static IMS_BOOL IsRequired(IN const MtcConfigurationProxy& objConfigProxy);
+    static IMS_BOOL IsRequiredForOutgoing(
+            IN const MtcConfigurationProxy& objConfigProxy, IN IMS_SINT32 nStatusCode);
+    static IMS_BOOL IsRequiredForIncoming(IN const MtcConfigurationProxy& objConfigProxy);
 
     void Timer_TimerExpired(IN ITimer* piTimer) override;
     virtual void Start();
@@ -46,6 +49,8 @@ private:
 
     ISipKeepAliveHelper* m_pKeepAliveHelper;
     const IMS_UINT32 m_nIntervalInMillis;
+    const IMS_BOOL m_bDelayFirstPacket;
+    IMS_BOOL m_bFirstPacketPending;
     ITimer* m_piTimer;
 };
 

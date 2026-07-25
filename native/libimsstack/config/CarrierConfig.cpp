@@ -1312,6 +1312,12 @@ const IMS_CHAR CarrierConfig::ImsVoice::
         "require_registration_after_eps_fallback_trigger_for_silent_redial_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT[] =
         KEY_IMS_VOICE_PREFIX "send_udp_keep_alive_interval_time_millis_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_SEND_UDP_KEEP_ALIVE_OUTGOING_MODE_INT[] =
+        KEY_IMS_VOICE_PREFIX "send_udp_keep_alive_outgoing_mode_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_SEND_UDP_KEEP_ALIVE_INCOMING_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "send_udp_keep_alive_incoming_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_SEND_UDP_KEEP_ALIVE_DELAY_FIRST_PACKET_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "send_udp_keep_alive_delay_first_packet_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE_INT[] =
         KEY_IMS_VOICE_PREFIX "call_reject_code_for_not_acceptable_call_type_int";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_RELEASE_EMERGENCY_PDN_ON_FAILURE_AFTER_100_BOOL[] =
