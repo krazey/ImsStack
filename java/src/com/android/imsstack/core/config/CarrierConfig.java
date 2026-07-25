@@ -1134,6 +1134,20 @@ public class CarrierConfig {
                 KEY_PREFIX + "policy_for_media_type_restriction_on_cellular_in_roaming_int";
         public static final String KEY_POLICY_OF_LOCAL_NUMBERS_INT =
                 KEY_PREFIX + "policy_of_local_numbers_int";
+        public static final String KEY_OUTGOING_REQUEST_URI_DOMAIN_STRING =
+                KEY_PREFIX + "outgoing_request_uri_domain_string";
+        public static final String KEY_OUTGOING_LOCAL_NUMBER_PREFIX_STRING =
+                KEY_PREFIX + "outgoing_local_number_prefix_string";
+        public static final String KEY_OUTGOING_LOCAL_NUMBER_LENGTH_INT =
+                KEY_PREFIX + "outgoing_local_number_length_int";
+        public static final String KEY_OUTGOING_REQUEST_URI_USER_PHONE_PARAMETER_BOOL =
+                KEY_PREFIX + "outgoing_request_uri_user_phone_parameter_bool";
+        public static final String KEY_INITIAL_INVITE_HEADERS_TO_REMOVE_STRING_ARRAY =
+                KEY_PREFIX + "initial_invite_headers_to_remove_string_array";
+        public static final String KEY_INITIAL_INVITE_HEADERS_TO_SET_STRING_ARRAY =
+                KEY_PREFIX + "initial_invite_headers_to_set_string_array";
+        public static final String KEY_INITIAL_INVITE_COMPACT_CONTACT_BOOL =
+                KEY_PREFIX + "initial_invite_compact_contact_bool";
         public static final String KEY_SILENT_REDIAL_MAX_DURATION_MILLIS_INT =
                 KEY_PREFIX + "silent_redial_max_duration_millis_int";
         public static final String KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT =

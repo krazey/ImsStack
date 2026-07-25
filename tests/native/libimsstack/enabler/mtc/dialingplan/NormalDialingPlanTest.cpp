@@ -330,4 +330,46 @@ TEST_F(NormalDialingPlanTest, GetTranslatedUriReturnsSipUriAsGlobalNumber)
     EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
 }
 
+TEST_F(NormalDialingPlanTest, GetTranslatedUriUsesConfiguredDomainForGlobalNumber)
+{
+    strNumber = "+6512345678";
+    eScheme = Scheme::SIP;
+    AString strDomain("ims.singtel.com");
+    AString strExpectedUri = "sip:" + strNumber + "@" + strDomain;
+
+    ON_CALL(*pConfigurationProxy, GetString(ConfigVoice::KEY_OUTGOING_REQUEST_URI_DOMAIN_STRING))
+            .WillByDefault(Return(strDomain));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_OUTGOING_REQUEST_URI_USER_PHONE_PARAMETER_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objIdentityProxy, CreateSipUserId(strNumber, SLOT_ID, IMS_FALSE, strDomain))
+            .WillByDefault(Return(strExpectedUri));
+
+    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
+}
+
+TEST_F(NormalDialingPlanTest, GetTranslatedUriPrefixesConfiguredLocalNumber)
+{
+    strNumber = "12345678";
+    eScheme = Scheme::SIP;
+    AString strPrefix("+65");
+    AString strPrefixedNumber("+6512345678");
+    AString strDomain("ims.singtel.com");
+    AString strExpectedUri = "sip:" + strPrefixedNumber + "@" + strDomain;
+
+    ON_CALL(*pConfigurationProxy, GetString(ConfigVoice::KEY_OUTGOING_LOCAL_NUMBER_PREFIX_STRING))
+            .WillByDefault(Return(strPrefix));
+    ON_CALL(*pConfigurationProxy, GetInt(ConfigVoice::KEY_OUTGOING_LOCAL_NUMBER_LENGTH_INT))
+            .WillByDefault(Return(8));
+    ON_CALL(*pConfigurationProxy, GetString(ConfigVoice::KEY_OUTGOING_REQUEST_URI_DOMAIN_STRING))
+            .WillByDefault(Return(strDomain));
+    ON_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_OUTGOING_REQUEST_URI_USER_PHONE_PARAMETER_BOOL))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objIdentityProxy, CreateSipUserId(strPrefixedNumber, SLOT_ID, IMS_FALSE, strDomain))
+            .WillByDefault(Return(strExpectedUri));
+
+    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
+}
+
 }  // namespace android

@@ -56,7 +56,85 @@ PUBLIC IMS_RESULT MtcMessageMediator::MessageMediator_AdjustMessage(
         MayAdjustContactHeader(piSipMessage);
     }
 
+    MayShapeInitialInvite(piSipMessage);
+
     return IMS_SUCCESS;
+}
+
+PRIVATE
+void MtcMessageMediator::MayShapeInitialInvite(IN_OUT ISipMessage* pMessage)
+{
+    const MtcConfigurationProxy& objConfig = m_objContext.GetConfigurationProxy();
+    ImsVector<AString> objHeadersToRemove = objConfig.GetStringArray(
+            ConfigVoice::KEY_INITIAL_INVITE_HEADERS_TO_REMOVE_STRING_ARRAY);
+    ImsVector<AString> objHeadersToSet =
+            objConfig.GetStringArray(ConfigVoice::KEY_INITIAL_INVITE_HEADERS_TO_SET_STRING_ARRAY);
+    IMS_BOOL bCompactContact =
+            objConfig.GetBoolean(ConfigVoice::KEY_INITIAL_INVITE_COMPACT_CONTACT_BOOL);
+
+    if (objHeadersToRemove.IsEmpty() && objHeadersToSet.IsEmpty() && !bCompactContact)
+    {
+        return;
+    }
+    if (m_objContext.GetService().GetServiceType() != ServiceType::NORMAL ||
+            pMessage->GetType() != ISipMessage::TYPE_REQUEST ||
+            !pMessage->GetMethod().Equals(SipMethod::INVITE))
+    {
+        return;
+    }
+
+    AString strTo = pMessage->GetHeader(ISipHeader::TO).MakeLower();
+    if (strTo.Contains(";tag="))
+    {
+        return;
+    }
+
+    for (IMS_UINT32 i = 0; i < objHeadersToRemove.GetSize(); ++i)
+    {
+        RemoveAllHeaders(pMessage, objHeadersToRemove.GetAt(i).Trim());
+    }
+
+    for (IMS_UINT32 i = 0; i < objHeadersToSet.GetSize(); ++i)
+    {
+        AString strHeader = objHeadersToSet.GetAt(i);
+        IMS_SINT32 nColon = strHeader.GetIndexOf(TextParser::CHAR_COLON);
+        if (nColon <= 0)
+        {
+            IMS_TRACE_E(0, "Invalid initial INVITE header override", 0, 0, 0);
+            continue;
+        }
+
+        AString strName = strHeader.GetSubStr(0, nColon).Trim();
+        AString strValue = strHeader.GetSubStr(nColon + 1).Trim();
+        RemoveAllHeaders(pMessage, strName);
+        pMessage->SetHeader(ISipHeader::UNKNOWN, strValue, strName);
+    }
+
+    if (bCompactContact)
+    {
+        MayCompactContactHeader(pMessage);
+    }
+}
+
+PRIVATE
+void MtcMessageMediator::RemoveAllHeaders(IN_OUT ISipMessage* pMessage, IN const AString& strName)
+{
+    IMS_SINT32 nCount = pMessage->GetHeaderCount(ISipHeader::UNKNOWN, strName);
+    for (IMS_SINT32 i = 0; i < nCount; ++i)
+    {
+        pMessage->RemoveHeader(ISipHeader::UNKNOWN, strName);
+    }
+}
+
+PRIVATE
+void MtcMessageMediator::MayCompactContactHeader(IN_OUT ISipMessage* pMessage)
+{
+    AString strContact = pMessage->GetHeader(ISipHeader::CONTACT_NORMAL);
+    IMS_SINT32 nRightAquot = strContact.GetIndexOf(TextParser::CHAR_RAQUOT);
+    if (nRightAquot > 0 && nRightAquot + 1 < strContact.GetLength())
+    {
+        pMessage->SetHeader(ISipHeader::CONTACT_NORMAL, strContact.GetSubStr(0, nRightAquot + 1));
+    }
 }
 
 PRIVATE

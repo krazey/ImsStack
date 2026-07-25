@@ -36,6 +36,9 @@ public:
             IN_OUT ISipMessage* piSipMessage, IN IMS_SINT32 nMessage) override;
 
 private:
+    void MayShapeInitialInvite(IN_OUT ISipMessage* pMessage);
+    void RemoveAllHeaders(IN_OUT ISipMessage* pMessage, IN const AString& strName);
+    void MayCompactContactHeader(IN_OUT ISipMessage* pMessage);
     void MayAdjustContactHeader(IN_OUT ISipMessage* pMessage);
     void MaySetVideoTextFeatureExclusively(
             IN_OUT ISipHeader** pContactHeader, IN const ISipMessage* pMessage);

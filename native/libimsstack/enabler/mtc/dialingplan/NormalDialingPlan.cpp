@@ -114,7 +114,36 @@ PRIVATE GLOBAL AString& NormalDialingPlan::Translate(IN IMtcContext& objContext,
 PRIVATE GLOBAL void NormalDialingPlan::FormSipUri(IN IMtcContext& objContext,
         IN_OUT AString& strNumber, IN const ImsIdentityProxy& objIdentityProxy)
 {
+    const MtcConfigurationProxy& objConfig = objContext.GetConfigurationProxy();
+    AString strPrefix = objConfig.GetString(ConfigVoice::KEY_OUTGOING_LOCAL_NUMBER_PREFIX_STRING);
+    IMS_SINT32 nLocalNumberLength =
+            objConfig.GetInt(ConfigVoice::KEY_OUTGOING_LOCAL_NUMBER_LENGTH_INT);
+    IMS_BOOL bDecimalNumber = IMS_TRUE;
+    for (IMS_SINT32 i = 0; i < strNumber.GetLength(); ++i)
+    {
+        if (!IMS_ISDIGIT(strNumber[i]))
+        {
+            bDecimalNumber = IMS_FALSE;
+            break;
+        }
+    }
+    if (strPrefix.GetLength() > 0 && nLocalNumberLength > 0 &&
+            strNumber.GetLength() == nLocalNumberLength && bDecimalNumber)
+    {
+        strNumber.Prepend(strPrefix);
+    }
+
     NumberFormat eDialedNumberFormat = GetDialedNumberFormat(strNumber);
+    AString strDomain = objConfig.GetString(ConfigVoice::KEY_OUTGOING_REQUEST_URI_DOMAIN_STRING);
+
+    if (strDomain.GetLength() > 0)
+    {
+        strNumber = objIdentityProxy.CreateSipUserId(strNumber, objContext.GetSlotId(),
+                objConfig.GetBoolean(
+                        ConfigVoice::KEY_OUTGOING_REQUEST_URI_USER_PHONE_PARAMETER_BOOL),
+                strDomain);
+        return;
+    }
 
     if (eDialedNumberFormat == NumberFormat::GLOBAL_FORMAT)
     {

@@ -1338,6 +1338,20 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_CATEGORY_FOR_GENERIC_URN_INT_ARR
         KEY_IMS_EMERGENCY_PREFIX "category_for_generic_urn_int_array";
 const IMS_CHAR CarrierConfig::ImsWfc::KEY_OVERRIDE_MEDIA_INACTIVITY_TO_WIFI_LOST_BOOL[] =
         KEY_IMS_WFC_PREFIX "override_media_inactivity_to_wifi_lost_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_OUTGOING_REQUEST_URI_DOMAIN_STRING[] =
+        KEY_IMS_VOICE_PREFIX "outgoing_request_uri_domain_string";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_OUTGOING_LOCAL_NUMBER_PREFIX_STRING[] =
+        KEY_IMS_VOICE_PREFIX "outgoing_local_number_prefix_string";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_OUTGOING_LOCAL_NUMBER_LENGTH_INT[] =
+        KEY_IMS_VOICE_PREFIX "outgoing_local_number_length_int";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_OUTGOING_REQUEST_URI_USER_PHONE_PARAMETER_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "outgoing_request_uri_user_phone_parameter_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_INITIAL_INVITE_HEADERS_TO_REMOVE_STRING_ARRAY[] =
+        KEY_IMS_VOICE_PREFIX "initial_invite_headers_to_remove_string_array";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_INITIAL_INVITE_HEADERS_TO_SET_STRING_ARRAY[] =
+        KEY_IMS_VOICE_PREFIX "initial_invite_headers_to_set_string_array";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_INITIAL_INVITE_COMPACT_CONTACT_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "initial_invite_compact_contact_bool";
 
 // Media
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY[] =

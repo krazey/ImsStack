@@ -4421,6 +4421,23 @@ public:
             PAI_POLICY_PREFER_SIP_URI = 1,
         };
 
+        /** Overrides the domain used to form outgoing SIP Request-URIs. */
+        static const IMS_CHAR KEY_OUTGOING_REQUEST_URI_DOMAIN_STRING[];
+
+        /** Prefixes local numbers of the configured length before URI translation. */
+        static const IMS_CHAR KEY_OUTGOING_LOCAL_NUMBER_PREFIX_STRING[];
+        static const IMS_CHAR KEY_OUTGOING_LOCAL_NUMBER_LENGTH_INT[];
+
+        /** Controls whether outgoing SIP Request-URIs include the user=phone parameter. */
+        static const IMS_CHAR KEY_OUTGOING_REQUEST_URI_USER_PHONE_PARAMETER_BOOL[];
+
+        /** Lists headers removed from or set on an initial outgoing INVITE. */
+        static const IMS_CHAR KEY_INITIAL_INVITE_HEADERS_TO_REMOVE_STRING_ARRAY[];
+        static const IMS_CHAR KEY_INITIAL_INVITE_HEADERS_TO_SET_STRING_ARRAY[];
+
+        /** Removes Contact feature parameters from an initial outgoing INVITE. */
+        static const IMS_CHAR KEY_INITIAL_INVITE_COMPACT_CONTACT_BOOL[];
+
         // Media
         static const IMS_CHAR KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY[];
         static const IMS_CHAR KEY_AUDIO_RTCP_INTERVAL_INT_ARRAY[];

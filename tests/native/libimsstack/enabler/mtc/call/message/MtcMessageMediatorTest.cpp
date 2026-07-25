@@ -157,6 +157,75 @@ TEST_F(MtcMessageMediatorTest, AdjustMessageDoesNothingIfConfigIsNotSet)
     pMessageMediator->MessageMediator_AdjustMessage(&objMessage, MESSAGE_ANY);
 }
 
+TEST_F(MtcMessageMediatorTest, AdjustMessageShapesConfiguredInitialInvite)
+{
+    ImsVector<AString> objHeadersToRemove;
+    objHeadersToRemove.Add("Accept");
+    ImsVector<AString> objHeadersToSet;
+    objHeadersToSet.Add("Supported: sec-agree");
+    objHeadersToSet.Add("Request-Disposition: no-fork");
+    ON_CALL(objConfiguration,
+            GetStringArray(ConfigVoice::KEY_INITIAL_INVITE_HEADERS_TO_REMOVE_STRING_ARRAY))
+            .WillByDefault(Return(objHeadersToRemove));
+    ON_CALL(objConfiguration,
+            GetStringArray(ConfigVoice::KEY_INITIAL_INVITE_HEADERS_TO_SET_STRING_ARRAY))
+            .WillByDefault(Return(objHeadersToSet));
+    ON_CALL(objConfiguration, GetBoolean(ConfigVoice::KEY_INITIAL_INVITE_COMPACT_CONTACT_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::NORMAL));
+
+    SipMethod objInvite(SipMethod::INVITE);
+    MockISipMessage objMessage;
+    ON_CALL(objMessage, GetType).WillByDefault(Return(ISipMessage::TYPE_REQUEST));
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objInvite));
+    ON_CALL(objMessage, IsHeaderPresent(ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessage, GetHeader(ISipHeader::TO, _, _))
+            .WillByDefault(Return("<sip:+6512345678@ims.singtel.com>"));
+    ON_CALL(objMessage, GetHeader(ISipHeader::CONTACT_NORMAL, _, _))
+            .WillByDefault(
+                    Return("<sip:user@192.0.2.1;transport=tcp>;audio;+sip.instance=\"test\""));
+    ON_CALL(objMessage, GetHeaderCount(ISipHeader::UNKNOWN, AString("Accept")))
+            .WillByDefault(Return(1));
+
+    EXPECT_CALL(objMessage, RemoveHeader(ISipHeader::UNKNOWN, AString("Accept"))).Times(1);
+    EXPECT_CALL(
+            objMessage, SetHeader(ISipHeader::UNKNOWN, AString("sec-agree"), AString("Supported")))
+            .Times(1);
+    EXPECT_CALL(objMessage,
+            SetHeader(ISipHeader::UNKNOWN, AString("no-fork"), AString("Request-Disposition")))
+            .Times(1);
+    EXPECT_CALL(objMessage,
+            SetHeader(ISipHeader::CONTACT_NORMAL, AString("<sip:user@192.0.2.1;transport=tcp>"), _))
+            .Times(1);
+
+    pMessageMediator->MessageMediator_AdjustMessage(&objMessage, MESSAGE_ANY);
+}
+
+TEST_F(MtcMessageMediatorTest, AdjustMessageDoesNotShapeReinvite)
+{
+    ImsVector<AString> objHeadersToRemove;
+    objHeadersToRemove.Add("Accept");
+    ON_CALL(objConfiguration,
+            GetStringArray(ConfigVoice::KEY_INITIAL_INVITE_HEADERS_TO_REMOVE_STRING_ARRAY))
+            .WillByDefault(Return(objHeadersToRemove));
+    ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::NORMAL));
+
+    SipMethod objInvite(SipMethod::INVITE);
+    MockISipMessage objMessage;
+    ON_CALL(objMessage, GetType).WillByDefault(Return(ISipMessage::TYPE_REQUEST));
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objInvite));
+    ON_CALL(objMessage, IsHeaderPresent(ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessage, GetHeader(ISipHeader::TO, _, _))
+            .WillByDefault(Return("<sip:+6512345678@ims.singtel.com>;tag=remote"));
+
+    EXPECT_CALL(objMessage, RemoveHeader(_, _)).Times(0);
+    EXPECT_CALL(objMessage, SetHeader(_, _, _)).Times(0);
+
+    pMessageMediator->MessageMediator_AdjustMessage(&objMessage, MESSAGE_ANY);
+}
+
 TEST_F(MtcMessageMediatorTest, AdjustMessageRemovesTextFeatureIfVtSdp)
 {
     ON_CALL(objConfiguration,
