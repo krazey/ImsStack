@@ -946,6 +946,8 @@
     <!-- Mts -->
     <int name="imssms.sms_preferred_psi_uri_type_int" value="-1"/>
     <boolean name="imssms.sms_use_dialed_number_for_request_uri_bool" value="false"/>
+    <string name="imssms.sms_rp_destination_address_string"></string>
+    <string name="imssms.sms_gateway_uri_string"></string>
     <int-array name="imssms.sms_generic_error_codes_int_array" num="0">
     </int-array>
     <int-array name="imssms.sms_fallback_error_codes_int_array" num="0">

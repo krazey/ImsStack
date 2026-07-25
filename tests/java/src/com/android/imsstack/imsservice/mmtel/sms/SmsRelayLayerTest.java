@@ -60,6 +60,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @RunWith(JUnit4.class)
@@ -110,6 +111,10 @@ public class SmsRelayLayerTest {
     private static final String SMSC_WITH_INTERNATIONAL_TON = "0791947106004034";
     private static final String SMSC_WITH_NATIONAL_TON = "07A1947106004034";
     private static final String DECODED_INTERNATIONAL_SMSC = "+491760000443";
+    private static final String SINGTEL_SMSC = "+6596197777";
+    private static final String ENCODED_SINGTEL_SMSC = "06915669917777";
+    private static final String SINGTEL_SMS_GATEWAY =
+            "sip:+6596197777@ims.singtel.com";
 
     @Before
     public void setUp() throws Exception {
@@ -202,6 +207,17 @@ public class SmsRelayLayerTest {
                 SmsRelayLayer.normalizeSmscTon(SMSC_WITH_NATIONAL_TON));
         assertEquals("038121",
                 SmsRelayLayer.normalizeSmscTon("038121"));
+        assertEquals("07912",
+                SmsRelayLayer.normalizeSmscTon("07912"));
+        assertEquals("not-hex",
+                SmsRelayLayer.normalizeSmscTon("not-hex"));
+    }
+
+    @Test
+    public void test_encodeSmscAddress() {
+        assertEquals(ENCODED_SINGTEL_SMSC,
+                SmsRelayLayer.encodeSmscAddress(SINGTEL_SMSC));
+        assertEquals(null, SmsRelayLayer.encodeSmscAddress("sip:+6596197777"));
     }
 
     @Test
@@ -217,6 +233,28 @@ public class SmsRelayLayerTest {
         verify(mMtsController).sendMessage(anyInt(),
                 argThat(pdu -> pdu != null && pdu.length > 4 && (pdu[4] & 0xff) == 0x91),
                 eq(DECODED_INTERNATIONAL_SMSC), eq(mDestinationAddress), anyInt(), eq(false));
+    }
+
+    @Test
+    public void test_sendRPMessage_usesCarrierConfiguredSmscAndGateway() {
+        when(mMtsController.sendMessage(anyInt(), any(), anyString(), anyString(), anyInt(),
+                anyBoolean())).thenReturn(true);
+        when(mMockCarrierConfig.getString(
+                CarrierConfig.ImsSms.KEY_SMS_RP_DESTINATION_ADDRESS_STRING))
+                .thenReturn(SINGTEL_SMSC);
+        when(mMockCarrierConfig.getString(CarrierConfig.ImsSms.KEY_SMS_GATEWAY_URI_STRING))
+                .thenReturn(SINGTEL_SMS_GATEWAY);
+        when(mImsCallContext.getSubId()).thenReturn(SUB_ID_1);
+
+        mSmsRelayLayer.sendRPMessage(mToken, mRpType, null,
+                mDestinationAddress, mTpdu, mStatusResultNA);
+
+        byte[] encodedSmsc = ImsUtils.hexStringToBytes(ENCODED_SINGTEL_SMSC);
+        verify(mMtsController).sendMessage(anyInt(),
+                argThat(pdu -> pdu != null && pdu.length > encodedSmsc.length + 3
+                        && Arrays.equals(encodedSmsc,
+                                Arrays.copyOfRange(pdu, 3, 3 + encodedSmsc.length))),
+                eq(SINGTEL_SMS_GATEWAY), eq(mDestinationAddress), anyInt(), eq(false));
     }
 
     @Test

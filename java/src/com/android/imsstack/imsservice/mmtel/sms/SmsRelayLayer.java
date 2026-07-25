@@ -22,6 +22,9 @@ import android.telephony.ims.stub.ImsSmsImplBase;
 
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.SystemServiceProxy.SmsManagerProxy;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.mts.MtsController;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
 import com.android.imsstack.util.ImsLog;
@@ -186,9 +189,23 @@ public class SmsRelayLayer {
              * and  saved with corresponding StateMachine object
              */
             if (rpType == SmsUtils.RP_DATA || rpType == SmsUtils.RP_SMMA) {
-                //fetch PSI Value
-                targetAddress = getPSIValue();
+                String configuredGateway =
+                        getCarrierConfigString(CarrierConfig.ImsSms.KEY_SMS_GATEWAY_URI_STRING);
+                targetAddress =
+                        configuredGateway != null && !configuredGateway.isEmpty()
+                                ? configuredGateway
+                                : getPSIValue();
                 if (DBG) log("PSI = " + ImsLog.hiddenString(targetAddress));
+                if (rpType == SmsUtils.RP_DATA) {
+                    String configuredSmsc =
+                            getCarrierConfigString(
+                                    CarrierConfig.ImsSms.KEY_SMS_RP_DESTINATION_ADDRESS_STRING);
+                    String encodedSmsc = encodeSmscAddress(configuredSmsc);
+                    if (encodedSmsc != null) {
+                        logi("Using carrier-configured RP-DATA SMSC");
+                        smsc = encodedSmsc;
+                    }
+                }
                 //return if smsc is null as it is a must to construct RP-Destination address
                 if (smsc == null || smsc.length() == 0) {
                     loge("Smsc is null");
@@ -298,7 +315,12 @@ public class SmsRelayLayer {
 
     @VisibleForTesting
     static String normalizeSmscTon(String smsc) {
-        byte[] address = ImsUtils.hexStringToBytes(smsc);
+        byte[] address;
+        try {
+            address = ImsUtils.hexStringToBytes(smsc);
+        } catch (RuntimeException e) {
+            return smsc;
+        }
         if (address == null || address.length < 3) {
             return smsc;
         }
@@ -315,6 +337,38 @@ public class SmsRelayLayer {
 
         address[1] = (byte) ((toa & 0x8f) | 0x10);
         return ImsUtils.bytesToHexString(address);
+    }
+
+    @VisibleForTesting
+    static String encodeSmscAddress(String address) {
+        if (address == null || !address.matches("\\+?[0-9]+")) {
+            return null;
+        }
+
+        byte[] bcdAddress;
+        try {
+            bcdAddress =
+                    PhoneNumberUtils.numberToCalledPartyBCD(
+                            address, PhoneNumberUtils.BCD_EXTENDED_TYPE_CALLED_PARTY);
+        } catch (RuntimeException e) {
+            return null;
+        }
+        if (bcdAddress == null || bcdAddress.length == 0 || bcdAddress.length > 0xff) {
+            return null;
+        }
+
+        byte[] encodedAddress = new byte[bcdAddress.length + 1];
+        encodedAddress[0] = (byte) bcdAddress.length;
+        System.arraycopy(bcdAddress, 0, encodedAddress, 1, bcdAddress.length);
+        return ImsUtils.bytesToHexString(encodedAddress);
+    }
+
+    private String getCarrierConfigString(String key) {
+        ConfigInterface config =
+                AgentFactory.getInstance()
+                        .getAgent(ConfigInterface.class, mCallContext.getSlotId());
+        CarrierConfig carrierConfig = config != null ? config.getCarrierConfig() : null;
+        return carrierConfig != null ? carrierConfig.getString(key) : null;
     }
 
     /**
