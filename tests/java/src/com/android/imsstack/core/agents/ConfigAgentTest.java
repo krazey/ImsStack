@@ -378,7 +378,7 @@ public class ConfigAgentTest {
 
     @Test
     @SmallTest
-    public void testMccMncExtensionOverridesCarrierAndFrameworkConfig()
+    public void testMccMncBaselineAndReviewedPolicyPrecedence()
             throws IOException {
         PersistableBundle platformConfig = new PersistableBundle();
         platformConfig.putBoolean(
@@ -389,6 +389,8 @@ public class ConfigAgentTest {
                 CarrierConfigManager.ImsSms.KEY_SMS_OVER_IMS_SUPPORTED_BOOL, true);
         platformConfig.putInt(
                 CarrierConfigManager.Ims.KEY_REQUEST_URI_TYPE_INT, 0);
+        final String baselineOnlyKey = "ims.baseline_only_int";
+        platformConfig.putInt(baselineOnlyKey, 175);
         setUpCarrierConfig(platformConfig);
 
         AssetManager am = mContext.getAssets();
@@ -396,6 +398,7 @@ public class ConfigAgentTest {
 
         final String carrierIdFile = "carrier_config_carrierid_20001_Test.xml";
         final String extensionFile = "carrier_config_ext_mccmnc_401077.xml";
+        final String overrideFile = "carrier_config_override_mccmnc_401077.xml";
         final String keyInt = "ims.ims_test_int";
         final String keyBool = "ims.ims_test_bool";
         final String carrierIdXml =
@@ -404,6 +407,7 @@ public class ConfigAgentTest {
         final String extensionXml =
                 "<carrier_config_list>"
                         + "<carrier_config><int name=\"" + keyInt + "\" value=\"150\"/>"
+                        + "<int name=\"" + baselineOnlyKey + "\" value=\"150\"/>"
                         + "<int name=\"ims.request_uri_type_int\" value=\"1\"/>"
                         + "<boolean name=\"ims.carrier_policy_volte_enabled_bool\" "
                         + "value=\"false\"/></carrier_config>"
@@ -412,9 +416,16 @@ public class ConfigAgentTest {
                         + "<int name=\"" + keyInt + "\" value=\"200\"/>"
                         + "<boolean name=\"" + keyBool + "\" value=\"true\"/>"
                         + "</carrier_config></carrier_config_list>";
+        final String overrideXml =
+                "<carrier_config_list>"
+                        + "<carrier_config gid1_prefix=\"A000\" gid2_prefix=\"B000\" "
+                        + "spn=\"Tele2\" imsi=\"40177.*\">"
+                        + "<int name=\"" + keyInt + "\" value=\"250\"/>"
+                        + "<int name=\"ims.request_uri_type_int\" value=\"1\"/>"
+                        + "</carrier_config></carrier_config_list>";
 
         when(am.list(eq(CarrierConfig.CARRIER_CONFIG)))
-                .thenReturn(new String[] { carrierIdFile, extensionFile });
+                .thenReturn(new String[] { carrierIdFile, extensionFile, overrideFile });
         when(am.list(eq(CarrierConfig.PUBLIC_CARRIER_CONFIG))).thenReturn(new String[0]);
         when(am.open(eq(CarrierConfig.CARRIER_CONFIG + "/" + carrierIdFile)))
                 .thenAnswer(invocation -> new ByteArrayInputStream(
@@ -422,6 +433,9 @@ public class ConfigAgentTest {
         when(am.open(eq(CarrierConfig.CARRIER_CONFIG + "/" + extensionFile)))
                 .thenAnswer(invocation -> new ByteArrayInputStream(
                         extensionXml.getBytes(StandardCharsets.UTF_8)));
+        when(am.open(eq(CarrierConfig.CARRIER_CONFIG + "/" + overrideFile)))
+                .thenAnswer(invocation -> new ByteArrayInputStream(
+                        overrideXml.getBytes(StandardCharsets.UTF_8)));
 
         SimCarrierId scid = new SimCarrierId.Builder()
                 .setCarrierId(20001)
@@ -437,7 +451,8 @@ public class ConfigAgentTest {
         mConfigAgent.updateCarrierConfig(SUB_ID_1, scid);
 
         CarrierConfig cc = mConfigAgent.getCarrierConfig();
-        assertEquals(200, cc.getInt(keyInt));
+        assertEquals(250, cc.getInt(keyInt));
+        assertEquals(175, cc.getInt(baselineOnlyKey));
         assertTrue(cc.getBoolean(keyBool));
         assertEquals(1, cc.getInt(CarrierConfigManager.Ims.KEY_REQUEST_URI_TYPE_INT));
         assertFalse(cc.getBoolean(CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL));

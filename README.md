@@ -445,9 +445,12 @@ bring-up, retain and verify the device's existing CS emergency path.
 
 ## Carrier migration notes
 
-The extension first loads the canonical Android carrier-ID profile, then merges
-an optional `carrier_config_ext_mccmnc_<MCC><MNC>.xml` profile. IMSI, SPN,
-GID1-prefix and GID2-prefix selectors remain data driven.
+The extension layers an optional
+`carrier_config_ext_mccmnc_<MCC><MNC>.xml` compatibility profile before
+Android CarrierConfig. A separate
+`carrier_config_override_mccmnc_<MCC><MNC>.xml` profile is applied afterward
+for reviewed carrier exceptions. IMSI, SPN, GID1-prefix and GID2-prefix
+selectors remain data driven.
 
 Important early regression targets include:
 
