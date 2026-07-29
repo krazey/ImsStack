@@ -211,8 +211,18 @@ public class ImsMmTelServiceTest extends ImsStackTest {
         assertTrue(result);
 
         result = mMmTelFeature.queryCapabilityConfiguration(
+                MmTelCapabilities.CAPABILITY_TYPE_VOICE,
+                ImsRegistrationImplBase.REGISTRATION_TECH_NR);
+        assertTrue(result);
+
+        result = mMmTelFeature.queryCapabilityConfiguration(
                 MmTelCapabilities.CAPABILITY_TYPE_VIDEO,
                 ImsRegistrationImplBase.REGISTRATION_TECH_LTE);
+        assertTrue(result);
+
+        result = mMmTelFeature.queryCapabilityConfiguration(
+                MmTelCapabilities.CAPABILITY_TYPE_VIDEO,
+                ImsRegistrationImplBase.REGISTRATION_TECH_NR);
         assertTrue(result);
 
         result = mMmTelFeature.queryCapabilityConfiguration(

@@ -179,11 +179,11 @@ public class ImsMmTelService extends MmTelFeature
 
         switch (capability) {
             case MmTelCapabilities.CAPABILITY_TYPE_VOICE:
-                return (radioTech == ImsRegistrationImplBase.REGISTRATION_TECH_LTE) ?
-                        true : false;
+                return radioTech == ImsRegistrationImplBase.REGISTRATION_TECH_LTE
+                        || radioTech == ImsRegistrationImplBase.REGISTRATION_TECH_NR;
             case MmTelCapabilities.CAPABILITY_TYPE_VIDEO:
-                return (radioTech == ImsRegistrationImplBase.REGISTRATION_TECH_LTE) ?
-                        true : false;
+                return radioTech == ImsRegistrationImplBase.REGISTRATION_TECH_LTE
+                        || radioTech == ImsRegistrationImplBase.REGISTRATION_TECH_NR;
             case MmTelCapabilities.CAPABILITY_TYPE_UT:
             case MmTelCapabilities.CAPABILITY_TYPE_SMS:
                 return false;
