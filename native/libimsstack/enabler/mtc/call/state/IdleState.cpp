@@ -327,7 +327,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
 
     m_objContext.GetPreconditionManager().OnMessageReceived(&objISession, piMessage);
 
-    if (objSession.GetExtensionSet().IsAvailableOnBoth(MtcExtensionSet::OPTION_TAG_RPR))
+    if (IsRprRequired())
     {
         if (objSession.SendProvisionalResponse(IMS_FALSE, IMS_TRUE) == IMS_FAILURE)
         {
