@@ -1374,6 +1374,16 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_INITIAL_INVITE_HEADERS_TO_SET_STRING
         KEY_IMS_VOICE_PREFIX "initial_invite_headers_to_set_string_array";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_INITIAL_INVITE_COMPACT_CONTACT_BOOL[] =
         KEY_IMS_VOICE_PREFIX "initial_invite_compact_contact_bool";
+const IMS_CHAR
+        CarrierConfig::ImsVoice::KEY_INITIAL_MT_FINAL_RESPONSE_HEADERS_TO_REMOVE_STRING_ARRAY[] =
+                KEY_IMS_VOICE_PREFIX
+        "initial_mt_final_response_headers_to_remove_string_array";
+const IMS_CHAR
+        CarrierConfig::ImsVoice::KEY_INITIAL_MT_FINAL_RESPONSE_HEADERS_TO_SET_STRING_ARRAY[] =
+                KEY_IMS_VOICE_PREFIX
+        "initial_mt_final_response_headers_to_set_string_array";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_INITIAL_MT_FINAL_RESPONSE_COMPACT_CONTACT_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "initial_mt_final_response_compact_contact_bool";
 
 // Media
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY[] =

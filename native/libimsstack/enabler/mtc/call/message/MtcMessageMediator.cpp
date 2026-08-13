@@ -57,6 +57,7 @@ PUBLIC IMS_RESULT MtcMessageMediator::MessageMediator_AdjustMessage(
     }
 
     MayShapeInitialInvite(piSipMessage);
+    MayShapeInitialMtFinalResponse(piSipMessage);
 
     return IMS_SUCCESS;
 }
@@ -114,6 +115,62 @@ void MtcMessageMediator::MayShapeInitialInvite(IN_OUT ISipMessage* pMessage)
     {
         MayCompactContactHeader(pMessage);
     }
+}
+
+PRIVATE
+void MtcMessageMediator::MayShapeInitialMtFinalResponse(IN_OUT ISipMessage* pMessage)
+{
+    const MtcConfigurationProxy& objConfig = m_objContext.GetConfigurationProxy();
+    ImsVector<AString> objHeadersToRemove = objConfig.GetStringArray(
+            ConfigVoice::KEY_INITIAL_MT_FINAL_RESPONSE_HEADERS_TO_REMOVE_STRING_ARRAY);
+    ImsVector<AString> objHeadersToSet = objConfig.GetStringArray(
+            ConfigVoice::KEY_INITIAL_MT_FINAL_RESPONSE_HEADERS_TO_SET_STRING_ARRAY);
+    IMS_BOOL bCompactContact = objConfig.GetBoolean(
+            ConfigVoice::KEY_INITIAL_MT_FINAL_RESPONSE_COMPACT_CONTACT_BOOL);
+
+    if (objHeadersToRemove.IsEmpty() && objHeadersToSet.IsEmpty() && !bCompactContact)
+    {
+        return;
+    }
+
+    IMS_SINT32 nStatusCode = pMessage->GetStatusCode();
+    if (m_objContext.GetService().GetServiceType() != ServiceType::NORMAL ||
+            pMessage->GetType() != ISipMessage::TYPE_RESPONSE ||
+            !pMessage->GetMethod().Equals(SipMethod::INVITE) ||
+            nStatusCode < 200 || nStatusCode >= 300 ||
+            m_objContext.IsEstablished())
+    {
+        return;
+    }
+
+    for (IMS_UINT32 i = 0; i < objHeadersToRemove.GetSize(); ++i)
+    {
+        RemoveAllHeaders(pMessage, objHeadersToRemove.GetAt(i).Trim());
+    }
+
+    for (IMS_UINT32 i = 0; i < objHeadersToSet.GetSize(); ++i)
+    {
+        AString strHeader = objHeadersToSet.GetAt(i);
+        IMS_SINT32 nColon = strHeader.GetIndexOf(TextParser::CHAR_COLON);
+        if (nColon <= 0)
+        {
+            IMS_TRACE_E(0, "Invalid initial MT final-response header override", 0, 0, 0);
+            continue;
+        }
+
+        AString strName = strHeader.GetSubStr(0, nColon).Trim();
+        AString strValue = strHeader.GetSubStr(nColon + 1).Trim();
+        RemoveAllHeaders(pMessage, strName);
+        pMessage->SetHeader(ISipHeader::UNKNOWN, strValue, strName);
+    }
+
+    if (bCompactContact)
+    {
+        MayCompactContactHeader(pMessage);
+    }
+
+    IMS_TRACE_I("Initial MT final response shaped: status=%d, remove=%d, set=%d",
+            nStatusCode, objHeadersToRemove.GetSize(), objHeadersToSet.GetSize());
 }
 
 PRIVATE

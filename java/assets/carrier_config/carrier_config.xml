@@ -135,6 +135,11 @@
     <string-array name="imsvoice.initial_invite_headers_to_set_string_array" num="0">
     </string-array>
     <boolean name="imsvoice.initial_invite_compact_contact_bool" value="false"/>
+    <string-array name="imsvoice.initial_mt_final_response_headers_to_remove_string_array" num="0">
+    </string-array>
+    <string-array name="imsvoice.initial_mt_final_response_headers_to_set_string_array" num="0">
+    </string-array>
+    <boolean name="imsvoice.initial_mt_final_response_compact_contact_bool" value="false"/>
     <int name="imsvoice.silent_redial_max_duration_millis_int" value="30000"/>
     <int name="imsvoice.silent_redial_interval_millis_int" value="0"/>
     <int name="imsvoice.silent_redial_max_retry_count_int" value="1"/>

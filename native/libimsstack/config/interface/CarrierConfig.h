@@ -4478,6 +4478,15 @@ public:
         /** Removes Contact feature parameters from an initial outgoing INVITE. */
         static const IMS_CHAR KEY_INITIAL_INVITE_COMPACT_CONTACT_BOOL[];
 
+        /** Lists headers removed from or set on the initial MT INVITE final response. */
+        static const IMS_CHAR
+                KEY_INITIAL_MT_FINAL_RESPONSE_HEADERS_TO_REMOVE_STRING_ARRAY[];
+        static const IMS_CHAR
+                KEY_INITIAL_MT_FINAL_RESPONSE_HEADERS_TO_SET_STRING_ARRAY[];
+
+        /** Removes Contact feature parameters from the initial MT INVITE final response. */
+        static const IMS_CHAR KEY_INITIAL_MT_FINAL_RESPONSE_COMPACT_CONTACT_BOOL[];
+
         // Media
         static const IMS_CHAR KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY[];
         static const IMS_CHAR KEY_AUDIO_RTCP_INTERVAL_INT_ARRAY[];

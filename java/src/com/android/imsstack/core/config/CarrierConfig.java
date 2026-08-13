@@ -1166,6 +1166,12 @@ public class CarrierConfig {
                 KEY_PREFIX + "initial_invite_headers_to_set_string_array";
         public static final String KEY_INITIAL_INVITE_COMPACT_CONTACT_BOOL =
                 KEY_PREFIX + "initial_invite_compact_contact_bool";
+        public static final String KEY_INITIAL_MT_FINAL_RESPONSE_HEADERS_TO_REMOVE_STRING_ARRAY =
+                KEY_PREFIX + "initial_mt_final_response_headers_to_remove_string_array";
+        public static final String KEY_INITIAL_MT_FINAL_RESPONSE_HEADERS_TO_SET_STRING_ARRAY =
+                KEY_PREFIX + "initial_mt_final_response_headers_to_set_string_array";
+        public static final String KEY_INITIAL_MT_FINAL_RESPONSE_COMPACT_CONTACT_BOOL =
+                KEY_PREFIX + "initial_mt_final_response_compact_contact_bool";
         public static final String KEY_SILENT_REDIAL_MAX_DURATION_MILLIS_INT =
                 KEY_PREFIX + "silent_redial_max_duration_millis_int";
         public static final String KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT =

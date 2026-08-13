@@ -37,6 +37,7 @@ public:
 
 private:
     void MayShapeInitialInvite(IN_OUT ISipMessage* pMessage);
+    void MayShapeInitialMtFinalResponse(IN_OUT ISipMessage* pMessage);
     void RemoveAllHeaders(IN_OUT ISipMessage* pMessage, IN const AString& strName);
     void MayCompactContactHeader(IN_OUT ISipMessage* pMessage);
     void MayAdjustContactHeader(IN_OUT ISipMessage* pMessage);

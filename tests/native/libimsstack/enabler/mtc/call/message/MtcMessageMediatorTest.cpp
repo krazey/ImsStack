@@ -226,6 +226,95 @@ TEST_F(MtcMessageMediatorTest, AdjustMessageDoesNotShapeReinvite)
     pMessageMediator->MessageMediator_AdjustMessage(&objMessage, MESSAGE_ANY);
 }
 
+
+TEST_F(MtcMessageMediatorTest, AdjustMessageShapesConfiguredInitialMtFinalResponse)
+{
+    ImsVector<AString> objHeadersToRemove;
+    objHeadersToRemove.Add("Allow");
+    objHeadersToRemove.Add("Server");
+    ON_CALL(objConfiguration,
+            GetStringArray(
+                    ConfigVoice::KEY_INITIAL_MT_FINAL_RESPONSE_HEADERS_TO_REMOVE_STRING_ARRAY))
+            .WillByDefault(Return(objHeadersToRemove));
+    ON_CALL(objConfiguration,
+            GetBoolean(ConfigVoice::KEY_INITIAL_MT_FINAL_RESPONSE_COMPACT_CONTACT_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::NORMAL));
+    ON_CALL(objContext, IsEstablished).WillByDefault(Return(IMS_FALSE));
+
+    SipMethod objInvite(SipMethod::INVITE);
+    MockISipMessage objMessage;
+    ON_CALL(objMessage, GetType).WillByDefault(Return(ISipMessage::TYPE_RESPONSE));
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objInvite));
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(200));
+    ON_CALL(objMessage, IsHeaderPresent(ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessage, GetHeader(ISipHeader::CONTACT_NORMAL, _, _))
+            .WillByDefault(
+                    Return("<sip:user@192.0.2.1>;audio;+sip.instance=\"test\""));
+    ON_CALL(objMessage, GetHeaderCount(ISipHeader::UNKNOWN, AString("Allow")))
+            .WillByDefault(Return(1));
+    ON_CALL(objMessage, GetHeaderCount(ISipHeader::UNKNOWN, AString("Server")))
+            .WillByDefault(Return(1));
+
+    EXPECT_CALL(objMessage, RemoveHeader(ISipHeader::UNKNOWN, AString("Allow"))).Times(1);
+    EXPECT_CALL(objMessage, RemoveHeader(ISipHeader::UNKNOWN, AString("Server"))).Times(1);
+    EXPECT_CALL(objMessage,
+            SetHeader(ISipHeader::CONTACT_NORMAL, AString("<sip:user@192.0.2.1>"), _))
+            .Times(1);
+
+    pMessageMediator->MessageMediator_AdjustMessage(&objMessage, MESSAGE_ANY);
+}
+
+TEST_F(MtcMessageMediatorTest, AdjustMessageDoesNotShapeInitialMtProvisionalResponse)
+{
+    ImsVector<AString> objHeadersToRemove;
+    objHeadersToRemove.Add("Allow");
+    ON_CALL(objConfiguration,
+            GetStringArray(
+                    ConfigVoice::KEY_INITIAL_MT_FINAL_RESPONSE_HEADERS_TO_REMOVE_STRING_ARRAY))
+            .WillByDefault(Return(objHeadersToRemove));
+    ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::NORMAL));
+
+    SipMethod objInvite(SipMethod::INVITE);
+    MockISipMessage objMessage;
+    ON_CALL(objMessage, GetType).WillByDefault(Return(ISipMessage::TYPE_RESPONSE));
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objInvite));
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(180));
+    ON_CALL(objMessage, IsHeaderPresent(ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMessage, RemoveHeader(_, _)).Times(0);
+    EXPECT_CALL(objMessage, SetHeader(_, _, _)).Times(0);
+
+    pMessageMediator->MessageMediator_AdjustMessage(&objMessage, MESSAGE_ANY);
+}
+
+TEST_F(MtcMessageMediatorTest, AdjustMessageDoesNotShapeEstablishedReinviteResponse)
+{
+    ImsVector<AString> objHeadersToRemove;
+    objHeadersToRemove.Add("Allow");
+    ON_CALL(objConfiguration,
+            GetStringArray(
+                    ConfigVoice::KEY_INITIAL_MT_FINAL_RESPONSE_HEADERS_TO_REMOVE_STRING_ARRAY))
+            .WillByDefault(Return(objHeadersToRemove));
+    ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::NORMAL));
+    ON_CALL(objContext, IsEstablished).WillByDefault(Return(IMS_TRUE));
+
+    SipMethod objInvite(SipMethod::INVITE);
+    MockISipMessage objMessage;
+    ON_CALL(objMessage, GetType).WillByDefault(Return(ISipMessage::TYPE_RESPONSE));
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objInvite));
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(200));
+    ON_CALL(objMessage, IsHeaderPresent(ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMessage, RemoveHeader(_, _)).Times(0);
+    EXPECT_CALL(objMessage, SetHeader(_, _, _)).Times(0);
+
+    pMessageMediator->MessageMediator_AdjustMessage(&objMessage, MESSAGE_ANY);
+}
+
 TEST_F(MtcMessageMediatorTest, AdjustMessageRemovesTextFeatureIfVtSdp)
 {
     ON_CALL(objConfiguration,
