@@ -390,6 +390,10 @@ public class ConfigAgentTest {
         platformConfig.putInt(
                 CarrierConfigManager.Ims.KEY_REQUEST_URI_TYPE_INT, 0);
         final String baselineOnlyKey = "ims.baseline_only_int";
+        final String pixelOnlyKey = "ims.pixel_only_int";
+        final String carrierOverPixelKey = "ims.carrier_over_pixel_int";
+        final String extensionOverPixelKey = "ims.extension_over_pixel_int";
+        final String overrideOverPixelKey = "ims.override_over_pixel_int";
         platformConfig.putInt(baselineOnlyKey, 175);
         setUpCarrierConfig(platformConfig);
 
@@ -397,16 +401,33 @@ public class ConfigAgentTest {
         mConfigAgent.init(mContext);
 
         final String carrierIdFile = "carrier_config_carrierid_20001_Test.xml";
+        final String pixelFile = "carrier_config_pixel_mccmnc_401077.xml";
         final String extensionFile = "carrier_config_ext_mccmnc_401077.xml";
         final String overrideFile = "carrier_config_override_mccmnc_401077.xml";
         final String keyInt = "ims.ims_test_int";
         final String keyBool = "ims.ims_test_bool";
         final String carrierIdXml =
                 "<carrier_config><int name=\"" + keyInt + "\" value=\"100\"/>"
+                        + "<int name=\"" + carrierOverPixelKey + "\" value=\"100\"/>"
                         + "</carrier_config>";
+        final String pixelXml =
+                "<carrier_config_list>"
+                        + "<carrier_config mnc=\"77\">"
+                        + "<int name=\"" + keyInt + "\" value=\"50\"/>"
+                        + "<int name=\"" + pixelOnlyKey + "\" value=\"75\"/>"
+                        + "<int name=\"" + carrierOverPixelKey + "\" value=\"50\"/>"
+                        + "<int name=\"" + extensionOverPixelKey + "\" value=\"50\"/>"
+                        + "<int name=\"" + baselineOnlyKey + "\" value=\"50\"/>"
+                        + "<int name=\"" + overrideOverPixelKey + "\" value=\"50\"/>"
+                        + "<int name=\"ims.request_uri_type_int\" value=\"2\"/>"
+                        + "</carrier_config>"
+                        + "<carrier_config mnc=\"077\">"
+                        + "<int name=\"" + pixelOnlyKey + "\" value=\"999\"/>"
+                        + "</carrier_config></carrier_config_list>";
         final String extensionXml =
                 "<carrier_config_list>"
                         + "<carrier_config><int name=\"" + keyInt + "\" value=\"150\"/>"
+                        + "<int name=\"" + extensionOverPixelKey + "\" value=\"150\"/>"
                         + "<int name=\"" + baselineOnlyKey + "\" value=\"150\"/>"
                         + "<int name=\"ims.request_uri_type_int\" value=\"1\"/>"
                         + "<boolean name=\"ims.carrier_policy_volte_enabled_bool\" "
@@ -421,12 +442,17 @@ public class ConfigAgentTest {
                         + "<carrier_config gid1_prefix=\"A000\" gid2_prefix=\"B000\" "
                         + "spn=\"Tele2\" imsi=\"40177.*\" iccid_prefix=\"12\">"
                         + "<int name=\"" + keyInt + "\" value=\"250\"/>"
+                        + "<int name=\"" + overrideOverPixelKey + "\" value=\"250\"/>"
                         + "<int name=\"ims.request_uri_type_int\" value=\"1\"/>"
                         + "</carrier_config></carrier_config_list>";
 
         when(am.list(eq(CarrierConfig.CARRIER_CONFIG)))
-                .thenReturn(new String[] { carrierIdFile, extensionFile, overrideFile });
+                .thenReturn(new String[] {
+                        carrierIdFile, pixelFile, extensionFile, overrideFile });
         when(am.list(eq(CarrierConfig.PUBLIC_CARRIER_CONFIG))).thenReturn(new String[0]);
+        when(am.open(eq(CarrierConfig.CARRIER_CONFIG + "/" + pixelFile)))
+                .thenAnswer(invocation -> new ByteArrayInputStream(
+                        pixelXml.getBytes(StandardCharsets.UTF_8)));
         when(am.open(eq(CarrierConfig.CARRIER_CONFIG + "/" + carrierIdFile)))
                 .thenAnswer(invocation -> new ByteArrayInputStream(
                         carrierIdXml.getBytes(StandardCharsets.UTF_8)));
@@ -452,7 +478,11 @@ public class ConfigAgentTest {
 
         CarrierConfig cc = mConfigAgent.getCarrierConfig();
         assertEquals(250, cc.getInt(keyInt));
+        assertEquals(75, cc.getInt(pixelOnlyKey));
+        assertEquals(100, cc.getInt(carrierOverPixelKey));
+        assertEquals(150, cc.getInt(extensionOverPixelKey));
         assertEquals(175, cc.getInt(baselineOnlyKey));
+        assertEquals(250, cc.getInt(overrideOverPixelKey));
         assertTrue(cc.getBoolean(keyBool));
         assertEquals(1, cc.getInt(CarrierConfigManager.Ims.KEY_REQUEST_URI_TYPE_INT));
         assertFalse(cc.getBoolean(CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL));

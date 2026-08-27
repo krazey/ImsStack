@@ -101,6 +101,8 @@ public class ConfigAgent implements ConfigInterface {
 
     private static final String CARRIER_ID_PREFIX = "carrier_config_carrierid_";
     private static final String MCC_MNC_PREFIX = "carrier_config_mccmnc_";
+    private static final String PIXEL_MCC_MNC_PREFIX =
+            "carrier_config_pixel_mccmnc_";
     private static final String EXT_MCC_MNC_PREFIX = "carrier_config_ext_mccmnc_";
     private static final String OVERRIDE_MCC_MNC_PREFIX =
             "carrier_config_override_mccmnc_";
@@ -282,6 +284,8 @@ public class ConfigAgent implements ConfigInterface {
         // 1) Precedence: specific-carrier-id > carrier-id > carrier-id-from-sim-mcc-mnc.
         // 2) When carrier-id is unknown, mcc-mnc based XML will be used.
         mCarrierInternalConfig.clear();
+        mCarrierInternalConfig.putAll(readMccMncOverlayConfig(
+                id, CarrierConfig.CARRIER_CONFIG, PIXEL_MCC_MNC_PREFIX));
         PersistableBundle tempConfig = readCarrierConfig(subId, id);
         tempConfig.putAll(readMccMncOverlayConfig(
                 id, CarrierConfig.CARRIER_CONFIG, EXT_MCC_MNC_PREFIX));
