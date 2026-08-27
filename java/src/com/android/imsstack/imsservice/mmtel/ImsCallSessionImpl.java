@@ -137,6 +137,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     protected ImsCallSessionImpl mTransferTargetSession = null;
     private Map<Integer, Boolean> mCallFeatureCache = new HashMap<Integer, Boolean>();
     private ImsReasonInfo mCacheCallEndReason = null;
+    private volatile boolean mLocalTerminationRequested = false;
 
     public ImsCallSessionImpl(ICallContext callContext,
             CallTracker ct, MtcCall call,
@@ -650,6 +651,11 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     @Override
     public void terminate(int reason) {
         int state = getState();
+
+        // terminate() is the framework's explicit local-end request. Preserve
+        // that intent across the native callback, which may be reported as a
+        // start failure when the INVITE has not reached progressing yet.
+        mLocalTerminationRequested = true;
 
         if (state == ImsCallSessionImplBase.State.TERMINATING) {
             return;
@@ -1721,6 +1727,14 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     }
 
     private FinalCallEndCallback determineFinalCallEndCallback(final ImsReasonInfo reasonInfo) {
+        // Telephony has already put the connection into DISCONNECTING after
+        // calling terminate(). A late native start-failed event must complete
+        // that existing connection through callSessionTerminated(), even when
+        // no progressing callback was delivered before the local hangup.
+        if (mLocalTerminationRequested) {
+            return FinalCallEndCallback.TERMINATED;
+        }
+
         if (mCallDetails.is(CallDetails.MO)
                 && (ImsCallUtils.isCsSilentRedialRequired(reasonInfo)
                 || !mCallDetails.is(CallDetails.MO_PROGRESSING))) {
