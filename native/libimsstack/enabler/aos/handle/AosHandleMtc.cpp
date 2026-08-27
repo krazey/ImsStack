@@ -413,8 +413,27 @@ PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::IsHandleBlocked() const
         return bBlocked;
     }
 
-    return AosHandle::IsHandleBlocked(
-            BLOCK_VOLTE_CAPABILITY | BLOCK_VOPS | BLOCK_SSAC | BLOCK_NETWORK | BLOCK_3G);
+    const IMS_UINT32 nCellularBlocks =
+            BLOCK_VOLTE_CAPABILITY | BLOCK_VOPS | BLOCK_SSAC | BLOCK_NETWORK | BLOCK_3G;
+    IMS_BOOL bCellularBlocked = AosHandle::IsHandleBlocked(nCellularBlocks);
+    if (!bCellularBlocked || !GET_N_CONFIG(m_nSlotId)->IsWfcImsAvailable())
+    {
+        return bCellularBlocked;
+    }
+
+    // The IWLAN capability can arrive before ePDG is established. Keep the
+    // MMTEL handle attachable so AOS can request the IMS network and bootstrap
+    // ePDG even when the cellular MMTEL capability is disabled.
+    IMS_BOOL bIwlanCapable = IsCapabilityExistedForNetworkType(
+            NW_REPORT_RADIO_WLAN, AosCapability::VOICE);
+    if (GET_N_CONFIG(m_nSlotId)->IsVideoOverWifiSupportedWithoutVoice())
+    {
+        bIwlanCapable = bIwlanCapable ||
+                IsCapabilityExistedForNetworkType(
+                        NW_REPORT_RADIO_WLAN, AosCapability::VIDEO);
+    }
+
+    return !bIwlanCapable;
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::IsFeatureBlocked(IN IMS_UINT32 nFeature) const
