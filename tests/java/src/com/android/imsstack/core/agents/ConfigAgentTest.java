@@ -412,14 +412,14 @@ public class ConfigAgentTest {
                         + "<boolean name=\"ims.carrier_policy_volte_enabled_bool\" "
                         + "value=\"false\"/></carrier_config>"
                         + "<carrier_config gid1_prefix=\"A000\" gid2_prefix=\"B000\" "
-                        + "spn=\"Tele2\" imsi=\"40177.*\">"
+                        + "spn=\"Tele2\" imsi=\"40177.*\" iccid_prefix=\"12\">"
                         + "<int name=\"" + keyInt + "\" value=\"200\"/>"
                         + "<boolean name=\"" + keyBool + "\" value=\"true\"/>"
                         + "</carrier_config></carrier_config_list>";
         final String overrideXml =
                 "<carrier_config_list>"
                         + "<carrier_config gid1_prefix=\"A000\" gid2_prefix=\"B000\" "
-                        + "spn=\"Tele2\" imsi=\"40177.*\">"
+                        + "spn=\"Tele2\" imsi=\"40177.*\" iccid_prefix=\"12\">"
                         + "<int name=\"" + keyInt + "\" value=\"250\"/>"
                         + "<int name=\"ims.request_uri_type_int\" value=\"1\"/>"
                         + "</carrier_config></carrier_config_list>";

@@ -698,6 +698,9 @@ public class ConfigAgent implements ConfigInterface {
                 case "gid2_prefix":
                     result = (id == null) || matchOnPrefix(value, id.getGid2());
                     break;
+                case "iccid_prefix":
+                    result = (id == null) || matchOnPrefix(value, id.getIccId());
+                    break;
                 case "spn":
                     result = (id == null) || matchOnSpn(value, id);
                     break;
