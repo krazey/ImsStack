@@ -374,6 +374,47 @@ TEST_F(AosHandleMtcTest, Destructor)
     EXPECT_CALL(m_objMockIAosNConfiguration, RemoveListener(_)).Times(1);
 }
 
+TEST_F(AosHandleMtcTest, ShouldNotBlockMmtelWhileBootstrappingVoWifi)
+{
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::SMS));
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::SMS));
+
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsVideoOverWifiSupportedWithoutVoice())
+            .WillByDefault(Return(IMS_FALSE));
+
+    m_pAosHandleMtc->SetCapabilities(objCapabilities);
+    m_pAosHandleMtc->SetEpdgEnabled(IMS_FALSE);
+    m_pAosHandleMtc->AddBlock(AosHandle::BLOCK_VOLTE_CAPABILITY);
+
+    EXPECT_FALSE(m_pAosHandleMtc->IsHandleBlocked());
+}
+
+TEST_F(AosHandleMtcTest, ShouldBlockMmtelWhenCellularAndIwlanVoiceAreDisabled)
+{
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::SMS));
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
+            static_cast<IMS_UINT32>(AosCapability::SMS));
+
+    ON_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNConfiguration, IsVideoOverWifiSupportedWithoutVoice())
+            .WillByDefault(Return(IMS_FALSE));
+
+    m_pAosHandleMtc->SetCapabilities(objCapabilities);
+    m_pAosHandleMtc->SetEpdgEnabled(IMS_FALSE);
+    m_pAosHandleMtc->AddBlock(AosHandle::BLOCK_VOLTE_CAPABILITY);
+
+    EXPECT_TRUE(m_pAosHandleMtc->IsHandleBlocked());
+}
+
 TEST_F(AosHandleMtcTest, ShouldReturnBindedFeaturesIfCallComposerFeatureTagForB2cIsTrue)
 {
     // GIVEN
