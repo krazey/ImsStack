@@ -316,6 +316,48 @@ TEST_F(AosHandleMtsTest, ShouldResetBlockIfSmsCapabilityIsAddedWhenRatIsLte)
     EXPECT_FALSE(m_pAosHandleMts->IsHandleBlocked());
 }
 
+TEST_F(AosHandleMtsTest, ShouldKeepSmsCapabilityOnNrSaWithVops)
+{
+    ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::SMS));
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    m_pAosHandleMts->SetNetworkType(NW_REPORT_RADIO_NR);
+
+    ON_CALL(m_objMockIAosNetTracker, GetMobileVoiceNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_NOSRV));
+    ON_CALL(m_objMockIAosNConfiguration, IsImsOverNrEnabled())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported())
+            .WillByDefault(Return(IMS_TRUE));
+
+    m_pAosHandleMts->ProcessCapabilitiesChanged(objNewCapabilities);
+
+    EXPECT_FALSE(m_pAosHandleMts->IsHandleBlockedBase(AosHandle::BLOCK_SMS_CAPABILITY));
+}
+
+TEST_F(AosHandleMtsTest, ShouldBlockSmsCapabilityOnNrSaWithoutVops)
+{
+    ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::SMS));
+    objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    m_pAosHandleMts->SetNetworkType(NW_REPORT_RADIO_NR);
+
+    ON_CALL(m_objMockIAosNetTracker, GetMobileVoiceNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_NOSRV));
+    ON_CALL(m_objMockIAosNConfiguration, IsImsOverNrEnabled())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported())
+            .WillByDefault(Return(IMS_FALSE));
+
+    m_pAosHandleMts->ProcessCapabilitiesChanged(objNewCapabilities);
+
+    EXPECT_TRUE(m_pAosHandleMts->IsHandleBlockedBase(AosHandle::BLOCK_SMS_CAPABILITY));
+}
+
 TEST_F(AosHandleMtsTest, DoNothingIfEmergencyServiceWhenCapabilityChanged)
 {
     // GIVEN

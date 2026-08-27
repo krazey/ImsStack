@@ -159,7 +159,8 @@ PROTECTED VIRTUAL void AosHandleMts::ProcessCapabilitiesChanged(
     }
 
     ProcessBlock(BLOCK_SMS_CAPABILITY,
-            !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::SMS), IMS_FALSE);
+            !IsCapabilityExistedForNetworkTypeWithNrFallback(
+                    m_nNetworkType, AosCapability::SMS), IMS_FALSE);
 }
 
 PROTECTED VIRTUAL void AosHandleMts::ProcessNetworkChanged()
@@ -167,7 +168,8 @@ PROTECTED VIRTUAL void AosHandleMts::ProcessNetworkChanged()
     if (IsSupportedNetworkType(m_nNetworkType) || Is3G(m_nNetworkType))
     {
         ProcessBlock(BLOCK_SMS_CAPABILITY,
-                !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::SMS), IMS_FALSE);
+                !IsCapabilityExistedForNetworkTypeWithNrFallback(
+                        m_nNetworkType, AosCapability::SMS), IMS_FALSE);
     }
 }
 
