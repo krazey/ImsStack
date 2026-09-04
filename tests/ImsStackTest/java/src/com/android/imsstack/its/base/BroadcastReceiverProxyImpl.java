@@ -46,6 +46,12 @@ public class BroadcastReceiverProxyImpl implements BroadcastReceiverProxy {
 
     @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
+            @NonNull String broadcastPermission) {
+        return registerReceiver(receiver, filter, mScheduler);
+    }
+
+    @Override
+    public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
             @NonNull Handler scheduler) {
         if (receiver != null) {
             mReceiverRecords.add(new ReceiverRecord(receiver, filter, scheduler));
