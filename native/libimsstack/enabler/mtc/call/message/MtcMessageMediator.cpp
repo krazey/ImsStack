@@ -187,7 +187,10 @@ PRIVATE
 void MtcMessageMediator::MayCompactContactHeader(IN_OUT ISipMessage* pMessage)
 {
     AString strContact = pMessage->GetHeader(ISipHeader::CONTACT_NORMAL);
-    IMS_SINT32 nRightAquot = strContact.GetIndexOf(TextParser::CHAR_RAQUOT);
+    IMS_SINT32 nLeftAquot = strContact.GetIndexOf(TextParser::CHAR_LAQUOT);
+    IMS_SINT32 nRightAquot = nLeftAquot == AString::NPOS
+            ? AString::NPOS
+            : strContact.GetIndexOf(TextParser::CHAR_RAQUOT, nLeftAquot + 1);
     if (nRightAquot > 0 && nRightAquot + 1 < strContact.GetLength())
     {
         pMessage->SetHeader(ISipHeader::CONTACT_NORMAL, strContact.GetSubStr(0, nRightAquot + 1));
