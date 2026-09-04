@@ -21,11 +21,12 @@ import static com.android.imsstack.base.TestAppContext.SLOT0;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -105,7 +106,8 @@ public class ImsTestHelperTest extends ImsStackTest {
 
         ArgumentCaptor<BroadcastReceiver> captor = ArgumentCaptor.forClass(BroadcastReceiver.class);
         verify(mTestAppContext.getBroadcastReceiverProxy())
-                .registerReceiver(captor.capture(), any(IntentFilter.class));
+                .registerReceiver(captor.capture(), any(IntentFilter.class),
+                        eq("android.permission.DUMP"));
         mBroadcastReceiver = captor.getValue();
     }
 

@@ -38,6 +38,18 @@ public interface BroadcastReceiverProxy {
     Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter);
 
     /**
+     * Register to receive exported intent broadcasts from senders that hold the specified
+     * permission, using the main thread managed by {@link AppContext}.
+     *
+     * @param receiver The BroadcastReceiver to handle the broadcast.
+     * @param filter Selects the {@link Intent} broadcasts to be received.
+     * @param broadcastPermission Permission a sender must hold to deliver a broadcast.
+     * @return The first sticky intent found that matches {@code filter}, or null if there are none.
+     */
+    Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
+            @NonNull String broadcastPermission);
+
+    /**
      * Register to receive intent broadcasts, to run in the context of {@code scheduler}.
      *
      * @param receiver The BroadcastReceiver to handle the broadcast.

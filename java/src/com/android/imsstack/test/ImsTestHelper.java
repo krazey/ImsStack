@@ -15,6 +15,7 @@
  */
 package com.android.imsstack.test;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -98,7 +99,8 @@ public final class ImsTestHelper {
             filter.addAction(INTENT_MTC_TEST);
             filter.addAction(INTENT_QOS_TEST);
 
-            AppContext.getInstance().getBroadcastReceiverProxy().registerReceiver(this, filter);
+            AppContext.getInstance().getBroadcastReceiverProxy()
+                    .registerReceiver(this, filter, Manifest.permission.DUMP);
         }
 
         public void unregister() {
@@ -108,10 +110,14 @@ public final class ImsTestHelper {
         @Override
         public synchronized void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
+            if (action == null) {
+                ImsLog.w("Ignoring test intent without an action");
+                return;
+            }
 
             ImsLog.d(ImsLog.lastSubString(action, "."));
 
-            if (action.equals(INTENT_AOS_TEST)) {
+            if (INTENT_AOS_TEST.equals(action)) {
                 String event = intent.getStringExtra("event");
                 if ("capa".equalsIgnoreCase(event)) {
                     sendCapabilitiesChanged(
@@ -125,13 +131,13 @@ public final class ImsTestHelper {
                 } else if ("vops".equalsIgnoreCase(event)) {
                     sendVopsChanged(intent.getIntExtra("state", 0));
                 }
-            } else if (action.equals(INTENT_SRVCC_TEST)) {
+            } else if (INTENT_SRVCC_TEST.equals(action)) {
                 sendSrvccEvent(intent.getIntExtra("type", -1));
-            } else if (action.equals(INTENT_MTC_TEST)) {
+            } else if (INTENT_MTC_TEST.equals(action)) {
                 sendMtcTestCommand(intent.getIntExtra("command", -1),
                         intent.getIntExtra("slotid", 0), intent.getStringExtra("callee"),
                         intent.getIntArrayExtra("extras"));
-            } else if (action.equals(INTENT_QOS_TEST)) {
+            } else if (INTENT_QOS_TEST.equals(action)) {
                 sendQosChanged(intent.getIntExtra("call", -1),
                         intent.getIntExtra("media", -1), intent.getStringExtra("ipaddress"),
                         intent.getIntExtra("port", -1), intent.getIntExtra("result", -1));
@@ -155,8 +161,18 @@ public final class ImsTestHelper {
                     + strText + ", call_composer=" + strCallComposer
                     + ", call_composer_business_only=" + strBizCallComposer);
 
+            if (strNetwork == null || strVoice == null || strVideo == null || strSms == null
+                    || strText == null || strCallComposer == null || strBizCallComposer == null) {
+                ImsLog.w("Ignoring incomplete capabilities test command");
+                return;
+            }
+
             AosFactory aosFactory = AosFactory.getInstance();
             IAosRegistration iAosRegistration = aosFactory.getAosRegistration(slotId);
+            if (iAosRegistration == null) {
+                ImsLog.w("No AOS registration for slot " + slotId);
+                return;
+            }
 
             String[] strNetworks = strNetwork.split(",");
             String[] strVoices = strVoice.split(",");
@@ -165,6 +181,14 @@ public final class ImsTestHelper {
             String[] strTexts = strText.split(",");
             String[] strCallComposers = strCallComposer.split(",");
             String[] strBizCallComposers = strBizCallComposer.split(",");
+
+            int count = strNetworks.length;
+            if (strVoices.length != count || strVideos.length != count || strSmss.length != count
+                    || strTexts.length != count || strCallComposers.length != count
+                    || strBizCallComposers.length != count) {
+                ImsLog.w("Ignoring capabilities test command with mismatched list lengths");
+                return;
+            }
 
             CapabilityPairs objCapabilityPairs = new CapabilityPairs();
 
@@ -248,18 +272,48 @@ public final class ImsTestHelper {
         // extra parameter : test command, WParam, LParam
         // ex)  adb shell am broadcast -a com.android.imsstack.action.INTENT_MTC_START_TEST
         //     --ei command 102 --ei slotid 0 --es callee +1234567890 --eia extras 1,3,-1,-1
-        // no exception check for the array as it's only for test
 
         private void sendMtcTestCommand(
                 int command, int slotId, @Nullable String callee, int[] extras) {
             ImsLog.d("sendMtcTestCommand :: command=" + command);
 
+            int requiredExtras = 0;
+            switch (command) {
+                case 100:
+                    requiredExtras = 2;
+                    break;
+                case 101:
+                    requiredExtras = 5;
+                    break;
+                case 102:
+                case 105:
+                    requiredExtras = 4;
+                    break;
+                case 103:
+                case 107:
+                    requiredExtras = 1;
+                    break;
+                default:
+                    break;
+            }
+            if (requiredExtras > 0 && (extras == null || extras.length < requiredExtras)) {
+                ImsLog.w("Ignoring test command " + command + ": expected " + requiredExtras
+                        + " extras");
+                return;
+            }
+
             ImsServiceManager sm = ImsServiceManager.getDefault();
+            if (sm == null) {
+                return;
+            }
             ImsCallApp callApp = sm.getCallApp(slotId);
             if (callApp == null) {
                 return;
             }
 
+            if (callApp.getCallManager() == null) {
+                return;
+            }
             MtcApp mtcApp = callApp.getCallManager().getMtcApp();
             if (mtcApp == null) {
                 return;
@@ -270,6 +324,9 @@ public final class ImsTestHelper {
                 // 1 : emergencyRouting type
                 ImsLog.d("sendMtcTestCommand :: open emergency service");
                 sTempCall = mtcApp.createMtcCallAndAttach(extras[0]);
+                if (sTempCall == null) {
+                    return;
+                }
                 mtcApp.openEmergencyService(sTempCall, extras[1]);
                 return;
             } else if (command == 101) {
@@ -277,6 +334,9 @@ public final class ImsTestHelper {
                 // 1 : serviceType, 2 : emergencyType, 3 : offline, 4 : ussi
                 ImsLog.d("sendMtcTestCommand :: open call");
                 sTempCall = mtcApp.createMtcCallAndAttach(extras[0]);
+                if (sTempCall == null) {
+                    return;
+                }
                 sTempCall.open(extras[1], extras[2], extras[3] != 0, extras[4] != 0, false);
                 return;
             } else if (command == 102) {

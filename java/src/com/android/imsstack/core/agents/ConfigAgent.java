@@ -15,6 +15,7 @@
  */
 package com.android.imsstack.core.agents;
 
+import android.Manifest;
 import android.annotation.XmlRes;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -927,7 +928,8 @@ public class ConfigAgent implements ConfigInterface {
             filter.addAction(ACTION_TEST_CARRIER_CONFIG_PUT);
             filter.addAction(ACTION_TEST_CARRIER_CONFIG_APPLY);
 
-            AppContext.getInstance().getBroadcastReceiverProxy().registerReceiver(this, filter);
+            AppContext.getInstance().getBroadcastReceiverProxy()
+                    .registerReceiver(this, filter, Manifest.permission.DUMP);
         }
 
         public void unregister() {
@@ -1014,6 +1016,12 @@ public class ConfigAgent implements ConfigInterface {
                 return;
             } else if (ACTION_TEST_CARRIER_CONFIG_PUT.equals(action)) {
                 String key = intent.getStringExtra(KEY_NAME);
+
+                if (TextUtils.isEmpty(key)) {
+                    ImsLog.w(this, mSlotId, "TestCarrierConfigPut: missing key");
+                    setResultCode(resultCode);
+                    return;
+                }
 
                 if (ImsPrivateProperties.Persistent.isConfigProperty(key)) {
                     String value = intent.getStringExtra(KEY_VALUE);
