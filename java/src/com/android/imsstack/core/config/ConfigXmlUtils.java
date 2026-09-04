@@ -202,7 +202,7 @@ public final class ConfigXmlUtils {
 
     private static int[] readIntArray(XmlPullParser parser, String endTag)
             throws XmlPullParserException, IOException {
-        int num = getValueInt(parser.getAttributeValue(null, "num"));
+        int num = getArraySize(parser, endTag);
         int[] array = new int[num];
         int i = 0;
 
@@ -210,6 +210,7 @@ public final class ConfigXmlUtils {
         while ((event = parser.next()) != XmlPullParser.END_DOCUMENT) {
             if (event == XmlPullParser.START_TAG) {
                 if (parser.getName().equals("item")) {
+                    ensureArrayHasRoom(i, num, endTag);
                     array[i] = getValueInt(parser.getAttributeValue(null, "value"));
                 } else {
                     throw new XmlPullParserException(
@@ -217,6 +218,7 @@ public final class ConfigXmlUtils {
                 }
             } else if (event == XmlPullParser.END_TAG) {
                 if (parser.getName().equals(endTag)) {
+                    ensureArrayIsComplete(i, num, endTag);
                     return array;
                 } else if (parser.getName().equals("item")) {
                     i++;
@@ -233,7 +235,7 @@ public final class ConfigXmlUtils {
 
     private static long[] readLongArray(XmlPullParser parser, String endTag)
             throws XmlPullParserException, IOException {
-        int num = getValueInt(parser.getAttributeValue(null, "num"));
+        int num = getArraySize(parser, endTag);
         long[] array = new long[num];
         int i = 0;
 
@@ -241,6 +243,7 @@ public final class ConfigXmlUtils {
         while ((event = parser.next()) != XmlPullParser.END_DOCUMENT) {
             if (event == XmlPullParser.START_TAG) {
                 if (parser.getName().equals("item")) {
+                    ensureArrayHasRoom(i, num, endTag);
                     array[i] = getValueLong(parser.getAttributeValue(null, "value"));
                 } else {
                     throw new XmlPullParserException(
@@ -248,6 +251,7 @@ public final class ConfigXmlUtils {
                 }
             } else if (event == XmlPullParser.END_TAG) {
                 if (parser.getName().equals(endTag)) {
+                    ensureArrayIsComplete(i, num, endTag);
                     return array;
                 } else if (parser.getName().equals("item")) {
                     i++;
@@ -264,7 +268,7 @@ public final class ConfigXmlUtils {
 
     private static String[] readStringArray(XmlPullParser parser, String endTag)
             throws XmlPullParserException, IOException {
-        int num = getValueInt(parser.getAttributeValue(null, "num"));
+        int num = getArraySize(parser, endTag);
         String[] array = new String[num];
         int i = 0;
 
@@ -272,6 +276,7 @@ public final class ConfigXmlUtils {
         while ((event = parser.next()) != XmlPullParser.END_DOCUMENT) {
             if (event == XmlPullParser.START_TAG) {
                 if (parser.getName().equals("item")) {
+                    ensureArrayHasRoom(i, num, endTag);
                     array[i] = parser.getAttributeValue(null, "value");
                 } else {
                     throw new XmlPullParserException(
@@ -279,6 +284,7 @@ public final class ConfigXmlUtils {
                 }
             } else if (event == XmlPullParser.END_TAG) {
                 if (parser.getName().equals(endTag)) {
+                    ensureArrayIsComplete(i, num, endTag);
                     return array;
                 } else if (parser.getName().equals("item")) {
                     i++;
@@ -291,6 +297,32 @@ public final class ConfigXmlUtils {
 
         throw new XmlPullParserException(
                 "Document ended before " + endTag + " end tag");
+    }
+
+    private static int getArraySize(XmlPullParser parser, String tag)
+            throws XmlPullParserException {
+        int size = getValueInt(parser.getAttributeValue(null, "num"));
+        if (size < 0) {
+            throw new XmlPullParserException(
+                    "Invalid negative item count in " + tag + ": " + size);
+        }
+        return size;
+    }
+
+    private static void ensureArrayHasRoom(int index, int size, String tag)
+            throws XmlPullParserException {
+        if (index >= size) {
+            throw new XmlPullParserException(
+                    "More than " + size + " items in " + tag);
+        }
+    }
+
+    private static void ensureArrayIsComplete(int actual, int expected, String tag)
+            throws XmlPullParserException {
+        if (actual != expected) {
+            throw new XmlPullParserException(
+                    "Expected " + expected + " items in " + tag + ", found " + actual);
+        }
     }
 
     private ConfigXmlUtils() {}

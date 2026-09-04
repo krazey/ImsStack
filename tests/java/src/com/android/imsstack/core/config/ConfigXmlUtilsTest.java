@@ -322,6 +322,16 @@ public class ConfigXmlUtilsTest {
 
     @Test
     @SmallTest
+    public void testReadConfigWhenArrayItemCountIsInvalid() throws XmlPullParserException {
+        for (String tag : new String[] {"int-array", "long-array", "string-array"}) {
+            assertArrayItemCountRejected(tag, -1, 0);
+            assertArrayItemCountRejected(tag, 2, 1);
+            assertArrayItemCountRejected(tag, 1, 2);
+        }
+    }
+
+    @Test
+    @SmallTest
     public void testReadConfigWhenUnknownTagOrValueInvalid() throws XmlPullParserException {
         String xmlConfigWithUnknownTag =
                 "<config>\n"
@@ -440,5 +450,22 @@ public class ConfigXmlUtilsTest {
         } catch (IOException e) {
             fail("setUpXmlParser fails: " + e.toString());
         }
+    }
+
+    private void assertArrayItemCountRejected(String tag, int declaredCount, int actualCount)
+            throws XmlPullParserException {
+        StringBuilder xml = new StringBuilder("<config><")
+                .append(tag)
+                .append(" name=\"config_array\" num=\"")
+                .append(declaredCount)
+                .append("\">");
+        String value = tag.equals("string-array") ? "text" : "1";
+        for (int i = 0; i < actualCount; i++) {
+            xml.append("<item value=\"").append(value).append("\"/>");
+        }
+        xml.append("</").append(tag).append("></config>");
+        setUpXmlParser(xml.toString());
+
+        assertThrows(XmlPullParserException.class, () -> ConfigXmlUtils.readConfig(mParser));
     }
 }
