@@ -202,6 +202,32 @@ TEST_F(MtcMessageMediatorTest, AdjustMessageShapesConfiguredInitialInvite)
     pMessageMediator->MessageMediator_AdjustMessage(&objMessage, MESSAGE_ANY);
 }
 
+TEST_F(MtcMessageMediatorTest, AdjustMessageCompactsContactAfterAddressDelimiter)
+{
+    ON_CALL(objConfiguration, GetBoolean(ConfigVoice::KEY_INITIAL_INVITE_COMPACT_CONTACT_BOOL))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::NORMAL));
+
+    SipMethod objInvite(SipMethod::INVITE);
+    MockISipMessage objMessage;
+    ON_CALL(objMessage, GetType).WillByDefault(Return(ISipMessage::TYPE_REQUEST));
+    ON_CALL(objMessage, GetMethod).WillByDefault(ReturnRef(objInvite));
+    ON_CALL(objMessage, IsHeaderPresent(ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessage, GetHeader(ISipHeader::TO, _, _))
+            .WillByDefault(Return("<sip:+6512345678@ims.singtel.com>"));
+    ON_CALL(objMessage, GetHeader(ISipHeader::CONTACT_NORMAL, _, _))
+            .WillByDefault(
+                    Return("\"Alice > Bob\" <sip:user@192.0.2.1;transport=tcp>;audio"));
+
+    EXPECT_CALL(objMessage,
+            SetHeader(ISipHeader::CONTACT_NORMAL,
+                    AString("\"Alice > Bob\" <sip:user@192.0.2.1;transport=tcp>"), _))
+            .Times(1);
+
+    pMessageMediator->MessageMediator_AdjustMessage(&objMessage, MESSAGE_ANY);
+}
+
 TEST_F(MtcMessageMediatorTest, AdjustMessageDoesNotShapeReinvite)
 {
     ImsVector<AString> objHeadersToRemove;
