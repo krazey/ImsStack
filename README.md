@@ -126,10 +126,13 @@ validation, not carrier certification.
 
 The extension currently contains:
 
-- 384 carrier-ID/MCC-MNC profiles from the last public AOSP carrier set;
+- 383 canonical carrier-ID/MCC-MNC profiles from the last public AOSP carrier
+  set, after consolidating its duplicate carrier-ID 1849 entry;
 - 988 generated MCC-MNC extension profiles;
+- 10 reviewed MCC-MNC override profiles;
+- 614 filtered Pixel carrier fallback profiles;
 - 1,304 directly transferable mappings from the PhhIms carrier database;
-- deterministic generation and source checksums for later refreshes.
+- deterministic generation, validation and source checksums for later refreshes.
 
 The carrier import is pinned to the PhhIms source snapshot
 `a3fec01ebc4f51c39026565c4a451fef454637fa`.
