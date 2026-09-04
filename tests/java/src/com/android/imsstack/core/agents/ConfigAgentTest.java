@@ -1032,7 +1032,8 @@ public class ConfigAgentTest {
         ArgumentCaptor<BroadcastReceiver> receiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
         verify(mTestAppContext.getBroadcastReceiverProxy())
-                .registerReceiver(receiverCaptor.capture(), any(IntentFilter.class));
+                .registerReceiver(receiverCaptor.capture(), any(IntentFilter.class),
+                        eq("android.permission.DUMP"));
         BroadcastReceiver br = receiverCaptor.getValue();
         br.setPendingResult(new BroadcastReceiver.PendingResult(
                 /* resultCode */ 0,

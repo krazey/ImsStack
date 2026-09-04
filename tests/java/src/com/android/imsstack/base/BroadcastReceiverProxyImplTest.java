@@ -67,6 +67,11 @@ public class BroadcastReceiverProxyImplTest {
         verify(mContext).registerReceiver(
                 eq(receiver), eq(filter), any(), eq(mScheduler), anyInt());
 
+        String permission = "com.android.imsstack.permission.IMS";
+        mBroadcastReceiverProxy.registerReceiver(receiver, filter, permission);
+        verify(mContext).registerReceiver(
+                eq(receiver), eq(filter), eq(permission), eq(mScheduler), anyInt());
+
         Handler handler = mock(Handler.class);
         mBroadcastReceiverProxy.registerReceiver(receiver, filter, handler);
         verify(mContext).registerReceiver(eq(receiver), eq(filter), any(), eq(handler), anyInt());
