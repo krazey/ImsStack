@@ -18,14 +18,20 @@ package com.android.imsstack.core.agents;
 
 import static com.android.imsstack.base.TestAppContext.SLOT0;
 
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import android.util.SparseArray;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.base.TestAppContext;
+import com.android.imsstack.system.IpSecSaParameter;
 import com.android.imsstack.util.IndentingPrintWriter;
 
 import org.junit.After;
@@ -33,10 +39,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+
+import java.lang.reflect.Field;
+import java.util.concurrent.ExecutorService;
 
 @RunWith(JUnit4.class)
 public class IpSecAgentTest {
+    private static final int IPSEC_ID = 1;
+
     private TestAppContext mTestAppContext;
     private IpSecAgent mIpSecAgent;
 
@@ -65,5 +77,54 @@ public class IpSecAgentTest {
         verify(mockIpw, atLeastOnce()).println(anyString());
         verify(mockIpw, atLeastOnce()).increaseIndent();
         verify(mockIpw, atLeastOnce()).decreaseIndent();
+    }
+
+    @Test
+    @SmallTest
+    public void removeIpSecSaParameter_dispatchesCloseAfterRemovingConnector() throws Exception {
+        ExecutorService mockExecutor = Mockito.mock(ExecutorService.class);
+        IpSecConnector mockConnector = Mockito.mock(IpSecConnector.class);
+        IpSecSaParameter mockParameter = Mockito.mock(IpSecSaParameter.class);
+        ArgumentCaptor<Runnable> cleanupCaptor = ArgumentCaptor.forClass(Runnable.class);
+        SparseArray<IpSecConnector> connectors = getConnectors();
+
+        when(mockConnector.getSaParameter()).thenReturn(mockParameter);
+        connectors.put(IPSEC_ID, mockConnector);
+        replaceInstance("mCleanupExecutor", mockExecutor);
+
+        mIpSecAgent.removeIpSecSaParameter(IPSEC_ID);
+
+        assertNull(connectors.get(IPSEC_ID));
+        verify(mockConnector).markAsRemoved();
+        verify(mockExecutor).execute(cleanupCaptor.capture());
+        verify(mockConnector, never()).close();
+
+        cleanupCaptor.getValue().run();
+
+        verify(mockConnector).close();
+    }
+
+    @Test
+    @SmallTest
+    public void cleanup_shutsDownCleanupExecutor() throws Exception {
+        ExecutorService mockExecutor = Mockito.mock(ExecutorService.class);
+        replaceInstance("mCleanupExecutor", mockExecutor);
+
+        mIpSecAgent.cleanup();
+
+        verify(mockExecutor).shutdown();
+    }
+
+    @SuppressWarnings("unchecked")
+    private SparseArray<IpSecConnector> getConnectors() throws Exception {
+        Field field = IpSecAgent.class.getDeclaredField("mConnectors");
+        field.setAccessible(true);
+        return (SparseArray<IpSecConnector>) field.get(mIpSecAgent);
+    }
+
+    private void replaceInstance(String fieldName, Object value) throws Exception {
+        Field field = IpSecAgent.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        field.set(mIpSecAgent, value);
     }
 }

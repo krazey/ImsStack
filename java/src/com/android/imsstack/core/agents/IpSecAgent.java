@@ -27,6 +27,8 @@ import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.imsstack.util.LocalLog;
 
 import java.io.FileDescriptor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class IpSecAgent implements IpSecInterface {
     /** In general, IMS can have up to 3 security associations at the same time. */
@@ -35,6 +37,7 @@ public class IpSecAgent implements IpSecInterface {
     private final LocalLog mLocalLog = new LocalLog(10);
     private final int mSlotId;
     private final SparseArray<IpSecConnector> mConnectors;
+    private ExecutorService mCleanupExecutor = null;
 
     public IpSecAgent(int slotId) {
         mSlotId = slotId;
@@ -48,7 +51,10 @@ public class IpSecAgent implements IpSecInterface {
 
     @Override
     public void cleanup() {
-        // no-op
+        if (mCleanupExecutor != null) {
+            mCleanupExecutor.shutdown();
+            mCleanupExecutor = null;
+        }
     }
 
     @Override
@@ -83,8 +89,12 @@ public class IpSecAgent implements IpSecInterface {
 
         if (connector != null) {
             connector.markAsRemoved();
-            connector.close();
             mConnectors.remove(ipSecId);
+
+            // IpSecTransform.close() makes a synchronous Binder call into the platform. Keep
+            // resource release off the native IMS callback thread so a stuck XFRM interface
+            // teardown cannot block subsequent call and registration requests for this slot.
+            getCleanupExecutor().execute(connector::close);
             return;
         }
     }
@@ -135,5 +145,14 @@ public class IpSecAgent implements IpSecInterface {
     private void logd(String s) {
         ImsLog.d(this, mSlotId, s);
         mLocalLog.log(s);
+    }
+
+    private ExecutorService getCleanupExecutor() {
+        if (mCleanupExecutor == null) {
+            // Preserve release ordering while isolating the IMS signaling thread from Binder.
+            mCleanupExecutor = Executors.newSingleThreadExecutor();
+        }
+
+        return mCleanupExecutor;
     }
 }
