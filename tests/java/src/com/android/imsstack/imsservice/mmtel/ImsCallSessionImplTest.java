@@ -1179,6 +1179,30 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     }
 
     @Test
+    public void testNetworkFailureAfterInitiatingNotifiesTerminated() {
+        CallReasonInfo callReasonInfo = new CallReasonInfo(
+                CallReasonInfo.CODE_SIP_REQUEST_CANCELLED, 31, "q.850;null");
+        mCallDetails.set(mCallDetails.TELEPHONY_LISTENING);
+
+        // Reproduce: the INVITE is announced as initiating, then the network
+        // immediately rejects it before a progressing callback is delivered.
+        mImsCallSession.getCallListenerProxy().onCallInitiating(
+                mMockMtcCall, mMockCallInfo, mMockMediaInfo);
+        mImsCallSession.getCallListenerProxy().onCallStartFailed(
+                mMockMtcCall, callReasonInfo);
+
+        assertEquals(ImsCallSessionImplBase.State.TERMINATED,
+                mImsCallSession.getState());
+        assertTrue(mCallDetails.is(mCallDetails.CALL_END_CALLBACK_NOTIFIED));
+        verify(mMockImsCallSessionCallback).invokeTerminated(
+                eq(mImsCallSession),
+                argThat(reasonInfo -> reasonInfo.getCode()
+                        == ImsReasonInfo.CODE_SIP_REQUEST_CANCELLED));
+        verify(mMockImsCallSessionCallback, never()).invokeStartFailed(
+                eq(mImsCallSession), any(ImsReasonInfo.class));
+    }
+
+    @Test
     public void testOnCallTerminated() {
         CallReasonInfo mockCallReasonInfo = Mockito.mock(CallReasonInfo.class);
         MtcCall mockMtcCall = Mockito.mock(MtcCall.class);

@@ -138,6 +138,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     private Map<Integer, Boolean> mCallFeatureCache = new HashMap<Integer, Boolean>();
     private ImsReasonInfo mCacheCallEndReason = null;
     private volatile boolean mLocalTerminationRequested = false;
+    // After this callback, Telephony requires callSessionTerminated() to end the call.
+    private volatile boolean mInitiatingCallbackSent = false;
 
     public ImsCallSessionImpl(ICallContext callContext,
             CallTracker ct, MtcCall call,
@@ -1727,11 +1729,10 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     }
 
     private FinalCallEndCallback determineFinalCallEndCallback(final ImsReasonInfo reasonInfo) {
-        // Telephony has already put the connection into DISCONNECTING after
-        // calling terminate(). A late native start-failed event must complete
-        // that existing connection through callSessionTerminated(), even when
-        // no progressing callback was delivered before the local hangup.
-        if (mLocalTerminationRequested) {
+        // A local terminate request or an initiating callback means Telephony
+        // already owns a normal connection. Complete it through
+        // callSessionTerminated(), even if no progressing callback followed.
+        if (mLocalTerminationRequested || mInitiatingCallbackSent) {
             return FinalCallEndCallback.TERMINATED;
         }
 
@@ -3079,6 +3080,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     mCallContext, callInfo, mediaInfo);
             setCallInfo(profile);
 
+            mInitiatingCallbackSent = true;
             mCallback.invokeInitiating(ImsCallSessionImpl.this, profile);
         }
 
