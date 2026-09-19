@@ -107,6 +107,13 @@ public class AudioSessionHandler extends MediaState {
     private AudioImsQosCallback mAudioImsQosCallback;
     private final Object mLock = new Object();
     private boolean mQosUpdateRequired;
+    @VisibleForTesting static final int QOS_CALLBACK_RETRY_DELAY_MILLIS = 500;
+    @VisibleForTesting static final int QOS_CALLBACK_MAX_RETRIES = 3;
+    // Accessed only on the media looper. Registration success is not bearer availability.
+    private InetSocketAddress mQosRemoteAddress;
+    private DatagramSocket mQosRtpSocket;
+    private int mQosCallbackRetryCount;
+    private final Runnable mRetryQosCallback = this::retryQosCallback;
     private Pair<String, Integer> mLocalAddress;
     private MediaConfig mMediaConfig;
     private int mCodecType;
@@ -560,6 +567,17 @@ public class AudioSessionHandler extends MediaState {
         }
 
         @Override
+        public void onNotifyQosCallbackError(
+                DatagramSocket socket, InetSocketAddress remoteAddress) {
+            mAudioMessageHandler.post(() -> {
+                if (socket == mQosRtpSocket && remoteAddress.equals(mQosRemoteAddress)) {
+                    setQosUpdateRequired(true);
+                    scheduleQosCallbackRetry();
+                }
+            });
+        }
+
+        @Override
         public void onNotifyQosConnectionLost(InetSocketAddress remoteAddress) {
             ImsLog.i("ImsQosCallback - disconnected");
 
@@ -747,6 +765,7 @@ public class AudioSessionHandler extends MediaState {
         mCodecType = UNUSED;
 
         if (mAudioSession == null) {
+            resetQosCallbackRetry();
             if (!mMediaManager.isImsMediaConnected()) {
                 ImsLog.d("ImsMediaManager is not ready, waiting...");
                 mMediaManager.waitForConnection(MediaConstants.SERVICE_WAIT_TIMEOUT);
@@ -804,6 +823,7 @@ public class AudioSessionHandler extends MediaState {
     }
 
     private void handleAudioCloseSession() {
+        resetQosCallbackRetry();
         if (mAudioSession != null) {
             mMediaManager.closeSession(mAudioSession);
             setMediaState(MEDIA_STATE_CLOSED);
@@ -822,6 +842,7 @@ public class AudioSessionHandler extends MediaState {
     }
 
     private void closeSockets() {
+        resetQosCallbackRetry();
         synchronized (mRtpSocketList) {
             for (Pair<DatagramSocket, DatagramSocket> rtpSocket : mRtpSocketList) {
                 mAudioQosAgent.destroyQosConnection(rtpSocket.first, rtpSocket.second);
@@ -841,38 +862,72 @@ public class AudioSessionHandler extends MediaState {
     }
 
     private void handleAudioQos(String remoteIpAddress, int remotePortNumber) {
-        if (isOpening() || isLive()) {
-            synchronized (mRtpSocketList) {
-                if (remoteIpAddress != null && remotePortNumber != 0 && mLocalAddress != null) {
-                    if (mQosUpdateRequired) {
-                        updateQosConnection(remoteIpAddress, remotePortNumber, false);
-                        setQosUpdateRequired(false);
-                    } else if (isNewRemoteAddress(remoteIpAddress, remotePortNumber)) {
-                        updateQosConnection(remoteIpAddress, remotePortNumber, true);
-                    }
+        if ((!isOpening() && !isLive()) || mLocalAddress == null
+                || remoteIpAddress == null || remoteIpAddress.isEmpty()
+                || remotePortNumber <= 0 || remotePortNumber >= 65535) {
+            resetQosCallbackRetry();
+            return;
+        }
+
+        synchronized (mRtpSocketList) {
+            if (mRtpSocketList.isEmpty() || mRtpSocketList.get(0) == null) {
+                resetQosCallbackRetry();
+                return;
+            }
+            Pair<DatagramSocket, DatagramSocket> sockets = mRtpSocketList.get(0);
+            InetSocketAddress remote = new InetSocketAddress(remoteIpAddress, remotePortNumber);
+            if (sockets.first != mQosRtpSocket || !remote.equals(mQosRemoteAddress)) {
+                resetQosCallbackRetry();
+                mQosRtpSocket = sockets.first;
+                mQosRemoteAddress = remote;
+            }
+
+            if (mQosUpdateRequired || isNewRemoteAddress(remoteIpAddress, remotePortNumber)) {
+                boolean isNewRemote = !mQosUpdateRequired;
+                boolean registered = mAudioQosAgent.updateQosConnection(sockets.first,
+                        sockets.second, remoteIpAddress, remotePortNumber, isNewRemote);
+                setQosUpdateRequired(!registered);
+                if (registered) {
+                    mAudioMessageHandler.removeCallbacks(mRetryQosCallback);
+                } else {
+                    scheduleQosCallbackRetry();
                 }
             }
         }
-        else {
-            ImsLog.d("OpenSession was not successful or session is already closed, state : "
-                    + getMediaState());
+    }
+
+    private void scheduleQosCallbackRetry() {
+        if ((!isOpening() && !isLive()) || mQosRtpSocket == null
+                || mQosRtpSocket.isClosed() || mQosRemoteAddress == null
+                || mAudioMessageHandler.hasCallbacks(mRetryQosCallback)) {
+            return;
+        }
+        if (mQosCallbackRetryCount >= QOS_CALLBACK_MAX_RETRIES) {
+            ImsLog.w("Audio QoS callback retry budget exhausted");
+            return;
+        }
+        ImsLog.i("Retrying audio QoS callback registration");
+        mAudioMessageHandler.postDelayed(mRetryQosCallback, QOS_CALLBACK_RETRY_DELAY_MILLIS);
+    }
+
+    private void retryQosCallback() {
+        synchronized (mRtpSocketList) {
+            if (mQosRemoteAddress == null || mRtpSocketList.isEmpty()
+                    || mRtpSocketList.get(0) == null
+                    || mRtpSocketList.get(0).first != mQosRtpSocket) {
+                resetQosCallbackRetry();
+                return;
+            }
+            ++mQosCallbackRetryCount;
+            handleAudioQos(mQosRemoteAddress.getHostString(), mQosRemoteAddress.getPort());
         }
     }
 
-    private void updateQosConnection(
-            String remoteIpAddress, int remotePortNumber, boolean isNewRemote) {
-        if (!mRtpSocketList.isEmpty()) {
-            Pair<DatagramSocket, DatagramSocket> rtpSocket = mRtpSocketList.get(0);
-            if (rtpSocket != null) {
-                mAudioQosAgent.updateQosConnection(rtpSocket.first,
-                        rtpSocket.second, remoteIpAddress, remotePortNumber, isNewRemote);
-                ImsLog.d("Updated QoS Connection for remoteIpAddress= " + remoteIpAddress
-                        + " remotePortNumber= " + remotePortNumber
-                        + " new Remote received= " + isNewRemote);
-            }
-        } else {
-            ImsLog.d("Rtp socket list is empty");
-        }
+    private void resetQosCallbackRetry() {
+        mAudioMessageHandler.removeCallbacks(mRetryQosCallback);
+        mQosRtpSocket = null;
+        mQosRemoteAddress = null;
+        mQosCallbackRetryCount = 0;
     }
 
     private void handleAudioAddConfig(AudioConfig audioConfig) {
