@@ -125,24 +125,35 @@ IMS_BOOL SipMessageFraming::GetCompleteMessage(OUT ByteArray& objMessage) const
 PUBLIC
 IMS_BOOL SipMessageFraming::IgnoreCrlf()
 {
-    if (m_objMessageBuffer.GetLength() < 2)
+    // Once parsing has advanced, removing a prefix would invalidate m_nOffset.
+    if (m_nOffset != 0)
     {
         return IMS_FALSE;
     }
 
+    const IMS_SINT32 nDataLen = m_objMessageBuffer.GetLength();
     const IMS_BYTE* pbyData = m_objMessageBuffer.GetData();
+    IMS_SINT32 nPrefixLen = 0;
 
-    // CR LF
-    if ((pbyData[0] == 0x0D) && (pbyData[1] == 0x0A))
+    // Consume every complete leading CRLF before parsing. Leaving another pair
+    // until the next socket read can shift an in-progress Content-Length scan.
+    // Keep a trailing lone CR until its LF arrives in a subsequent read.
+    while ((nDataLen - nPrefixLen >= 2) && (pbyData[nPrefixLen] == 0x0D) &&
+            (pbyData[nPrefixLen + 1] == 0x0A))
     {
-        m_objMessageBuffer.Erase(0, 2);
-
-        IMS_TRACE_I("CRLF is ignored by SIP transport layer", 0, 0, 0);
-
-        return IMS_TRUE;
+        nPrefixLen += 2;
     }
 
-    return IMS_FALSE;
+    if (nPrefixLen == 0)
+    {
+        return IMS_FALSE;
+    }
+
+    m_objMessageBuffer.Erase(0, nPrefixLen);
+
+    IMS_TRACE_I("Leading CRLF bytes(%d) ignored by SIP transport layer", nPrefixLen, 0, 0);
+
+    return IMS_TRUE;
 }
 
 PUBLIC
@@ -173,6 +184,12 @@ void SipMessageFraming::UpdateState()
         // Find non-empty character
         while (nIndex < nDataLen)
         {
+            // Preserve a split CRLF between messages for the next socket read.
+            if ((nIndex == nDataLen - 1) && (pbyData[nIndex] == 0x0D))
+            {
+                break;
+            }
+
             if (IMS_ISSPACE(static_cast<IMS_CHAR>(pbyData[nIndex])))
             {
                 nWSPCount++;
