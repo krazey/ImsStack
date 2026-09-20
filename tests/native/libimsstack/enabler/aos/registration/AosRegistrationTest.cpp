@@ -359,6 +359,7 @@ public:
         m_pCounter->AddCount(__IMS_FUNC__);
         AosRegistration::Update(bIgnoreRetryTimer, bExplicitUpdate);
     }
+    void DestroyLocalTransport() override { m_pCounter->AddCount(__IMS_FUNC__); }
     void ProcessReinitiate(IN IMS_BOOL bClearPcscf) override
     {
         m_pCounter->AddCount(__IMS_FUNC__);
@@ -1198,6 +1199,37 @@ TEST_F(AosRegistrationTest, TriggerUpdateIfNoCallExistWhenRequestToHandleIpcanCh
     m_pAosRegistration->RequestCmd(IAosRegistration::CMD_IPCAN_CHANGED);
 
     EXPECT_EQ(m_pAosRegistration->GetInvokedCount("Update"), 1);
+}
+
+TEST_F(AosRegistrationTest, RestartInitialRegistrationIfIpcanChangesWhileRegistering)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
+
+    EXPECT_CALL(m_objMockIRegistration, Register(_)).WillOnce(Return(IMS_SUCCESS));
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START));
+
+    m_pAosRegistration->RequestCmd(IAosRegistration::CMD_IPCAN_CHANGED);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("DestroyLocalTransport"), 1);
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessReinitiate"), 1);
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("Update"), 0);
+    EXPECT_FALSE(m_pAosRegistration->IsTxnPendingOn(AosRegistration::PENDING_UPDATE));
+    EXPECT_EQ(m_pAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
+}
+
+TEST_F(AosRegistrationTest, KeepInitialRegistrationIfIpcanChangesDuringCall)
+{
+    m_pAosRegistration->SetState(IAosRegistration::STATE_REGISTERING);
+    m_pAosRegistration->SetImsCall(IMS_TRUE);
+
+    m_pAosRegistration->RequestCmd(IAosRegistration::CMD_IPCAN_CHANGED);
+
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("DestroyLocalTransport"), 0);
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("ProcessReinitiate"), 0);
+    EXPECT_EQ(m_pAosRegistration->GetInvokedCount("Update"), 1);
+    EXPECT_TRUE(m_pAosRegistration->IsTxnPendingOn(AosRegistration::PENDING_UPDATE));
 }
 
 TEST_F(AosRegistrationTest, UpdateBlockStatusWhenRequestToUpdateIpcan)

@@ -40,6 +40,7 @@ public:
             (override));
     MOCK_METHOD(void, Reconfig, (), (override));
     MOCK_METHOD(void, Destroy, (), (override));
+    MOCK_METHOD(void, DestroyLocalTransport, (), (override));
     MOCK_METHOD(void, SetListener, (IN IAosRegistrationListener* piRegListener), (override));
     MOCK_METHOD(void, RequestCmd, (IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason), (override));
     MOCK_METHOD(void, NotifyEmergencySmsState,

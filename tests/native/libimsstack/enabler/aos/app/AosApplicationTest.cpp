@@ -3693,6 +3693,36 @@ TEST_F(AosApplicationTest,
     EXPECT_EQ(m_pAosApplication->GetState(), IAosApplication::STATE_DISCONNECTING);
 }
 
+TEST_F(AosApplicationTest, ReleasesIdleIwlanRegistrationLocallyWhenDataIsDisconnecting)
+{
+    m_pAosApplication->SetImsCall(IMS_FALSE);
+
+    {
+        ::testing::InSequence sequence;
+        EXPECT_CALL(m_objMockIAosRegistration, DestroyLocalTransport()).Times(1);
+        EXPECT_CALL(m_objMockIAosRegistration, Destroy()).Times(1);
+
+        m_pAosApplication->RegistrationControl_ControlRegistration(AosRegRequestType::STOP,
+                AosPcscfOrder::CURRENT, AosControlCause::IWLAN_DATA_DISCONNECTING);
+    }
+
+    EXPECT_EQ(m_pAosApplication->GetOffReason(), AosReason::DATA_DISCONNECTED);
+    EXPECT_EQ(m_pAosApplication->GetState(), IAosApplication::STATE_DISCONNECTING);
+}
+
+TEST_F(AosApplicationTest, KeepsGracefulIwlanStopWhenImsCallIsActive)
+{
+    m_pAosApplication->SetImsCall(IMS_TRUE);
+    EXPECT_CALL(m_objMockIAosRegistration, DestroyLocalTransport()).Times(0);
+    EXPECT_CALL(m_objMockIAosRegistration, Destroy()).Times(0);
+
+    m_pAosApplication->RegistrationControl_ControlRegistration(AosRegRequestType::STOP,
+            AosPcscfOrder::CURRENT, AosControlCause::IWLAN_DATA_DISCONNECTING);
+
+    EXPECT_EQ(m_pAosApplication->GetOffReason(), AosReason::DATA_DISCONNECTED);
+    EXPECT_EQ(m_pAosApplication->GetState(), IAosApplication::STATE_DISCONNECTING);
+}
+
 TEST_F(AosApplicationTest,
         SetPdnDeactivationRequiredFalseWhenControlRegistrationCalledWithStopIfSimRemovedForEmergency)
 {

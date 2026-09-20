@@ -166,6 +166,7 @@ public interface IAosRegistration {
         IMS_SERVICE(3),
         IMS_SUBSCRIBER(4),
         DATA_CONNECTING(5),
+        IWLAN_DATA_DISCONNECTING(6),
 
         // From modem
         RADIO_SIM_REMOVED(11),

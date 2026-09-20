@@ -66,6 +66,11 @@ public:
     virtual void Destroy() = 0;
 
     /**
+     * @brief Destroy SIP sockets bound to the current local IMS address.
+     */
+    virtual void DestroyLocalTransport() = 0;
+
+    /**
      * @brief Set the listener for monitoring the registration.
      *
      * @param piRegListener Indicate the registration listener.

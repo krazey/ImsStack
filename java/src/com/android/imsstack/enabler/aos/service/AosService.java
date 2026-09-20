@@ -718,10 +718,14 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                         Pcscf.CURRENT, Cause.DATA_CONNECTING);
             }
             case TelephonyManager.DATA_DISCONNECTING -> {
-                if (getRegisteredNetworkType() != NetworkType.NONE) {
+                NetworkType registeredNetworkType = getRegisteredNetworkType();
+                if (registeredNetworkType != NetworkType.NONE) {
+                    Cause cause = registeredNetworkType == NetworkType.IWLAN
+                            || registeredNetworkType == NetworkType.CROSS_SIM
+                            ? Cause.IWLAN_DATA_DISCONNECTING : Cause.DATA;
                     updateDataFailureReason(failCause);
                     controlRegistration(RequestType.STOP,
-                            Pcscf.CURRENT, Cause.DATA);
+                            Pcscf.CURRENT, cause);
                 }
             }
             case TelephonyManager.DATA_DISCONNECTED -> {

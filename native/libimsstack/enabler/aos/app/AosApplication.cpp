@@ -3690,6 +3690,9 @@ PROTECTED VIRTUAL void AosApplication::RegistrationControl_ControlRegistration(
 
     if (eType == AosRegRequestType::STOP)
     {
+        const IMS_BOOL bReleaseIwlanRegistrationLocally =
+                eCause == AosControlCause::IWLAN_DATA_DISCONNECTING && !IsImsCall();
+
         if (eCause == AosControlCause::RADIO_SIM_REMOVED ||
                 eCause == AosControlCause::RADIO_SIM_REFRESH)
         {
@@ -3700,7 +3703,8 @@ PROTECTED VIRTUAL void AosApplication::RegistrationControl_ControlRegistration(
             }
         }
 
-        if (eCause == AosControlCause::DATA)
+        if (eCause == AosControlCause::DATA ||
+                eCause == AosControlCause::IWLAN_DATA_DISCONNECTING)
         {
             const IMS_UINT32 nOffReason = GetOffReason();
             IMS_UINT32 nFinalOffReason;
@@ -3726,6 +3730,17 @@ PROTECTED VIRTUAL void AosApplication::RegistrationControl_ControlRegistration(
         else
         {
             ProcessDisconnectingState();
+        }
+
+        if (bReleaseIwlanRegistrationLocally)
+        {
+            // The IWLAN bearer is already going away, so a de-REGISTER cannot complete and
+            // would retain its SIP sockets until Timer F expires.
+            A_IMS_TRACE_I(APPID, "ControlRegistration :: release idle IWLAN registration locally",
+                    0, 0, 0);
+            m_piRegistration->DestroyLocalTransport();
+            m_piRegistration->Destroy();
+            return;
         }
 
         PostMessage(MSG_REG_STOP, 0, 0);
