@@ -801,6 +801,54 @@ IMS_BOOL AosHandle::IsCapabilityExistedForNetworkType(
 }
 
 PROTECTED
+IMS_BOOL AosHandle::IsCapabilityExistedForNetworkTypeWithNrFallback(
+        IN IMS_UINT32 nNetworkType, IN AosCapability eCapability) const
+{
+    if (IsCapabilityExistedForNetworkType(nNetworkType, eCapability))
+    {
+        return IMS_TRUE;
+    }
+
+    // Android can keep LTE as the service-level capability while the data
+    // RAT changes to NR. Only inherit voice and SMS; video, RTT, UT, and call
+    // composer remain explicitly RAT-gated.
+    if (nNetworkType != NW_REPORT_RADIO_NR ||
+            (eCapability != AosCapability::VOICE && eCapability != AosCapability::SMS) ||
+            !IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_LTE, eCapability))
+    {
+        return IMS_FALSE;
+    }
+
+    IAosNetTracker* piNetTracker = m_piAppContext->GetNetTracker();
+    if (piNetTracker == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    if (piNetTracker->GetMobileVoiceNetworkType() == NW_REPORT_RADIO_LTE)
+    {
+        A_IMS_TRACE_I(APPPROFILE,
+                "IsCapabilityExistedForNetworkTypeWithNrFallback :: "
+                "use LTE capability(%x) on NR with LTE voice RAT",
+                static_cast<IMS_UINT32>(eCapability), 0, 0);
+        return IMS_TRUE;
+    }
+
+    const IAosNConfiguration* piConfig = GET_N_CONFIG(m_nSlotId);
+    if (piConfig == IMS_NULL || !piConfig->IsImsOverNrEnabled() ||
+            !piNetTracker->IsImsVoiceCallSupported())
+    {
+        return IMS_FALSE;
+    }
+
+    A_IMS_TRACE_I(APPPROFILE,
+            "IsCapabilityExistedForNetworkTypeWithNrFallback :: "
+            "use LTE capability(%x) on NR SA with VOPS",
+            static_cast<IMS_UINT32>(eCapability), 0, 0);
+    return IMS_TRUE;
+}
+
+PROTECTED
 IMS_BOOL AosHandle::IsNetworkTypeMatchedToRat(IMS_UINT32 nNetworkType, IMS_UINT32 nRat) const
 {
     switch (nRat)

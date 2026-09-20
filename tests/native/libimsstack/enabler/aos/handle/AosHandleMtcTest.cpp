@@ -72,6 +72,7 @@ using ::testing::SetArgReferee;
     using Base::IsBlockForMobile;                   \
     using Base::IsBlockForWifi;                     \
     using Base::IsCsFeatureTagRequired;             \
+    using Base::IsCapabilityExistedForNetworkTypeWithNrFallback; \
     using Base::IsFeatureBlocked;                   \
     using Base::IsHandleBlocked;                    \
     using Base::IsInvalidMobileNetwork;             \
@@ -413,6 +414,80 @@ TEST_F(AosHandleMtcTest, ShouldBlockMmtelWhenCellularAndIwlanVoiceAreDisabled)
     m_pAosHandleMtc->AddBlock(AosHandle::BLOCK_VOLTE_CAPABILITY);
 
     EXPECT_TRUE(m_pAosHandleMtc->IsHandleBlocked());
+}
+
+TEST_F(AosHandleMtcTest, ShouldUseLteVoiceCapabilityOnNrWhenVoiceRatIsLte)
+{
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE));
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    m_pAosHandleMtc->SetCapabilities(objCapabilities);
+
+    ON_CALL(m_objMockIAosNetTracker, GetMobileVoiceNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+
+    EXPECT_TRUE(m_pAosHandleMtc->IsCapabilityExistedForNetworkTypeWithNrFallback(
+            NW_REPORT_RADIO_NR, AosCapability::VOICE));
+}
+
+TEST_F(AosHandleMtcTest, ShouldUseLteVoiceCapabilityOnNrSaWithVops)
+{
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE));
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    m_pAosHandleMtc->SetCapabilities(objCapabilities);
+
+    ON_CALL(m_objMockIAosNetTracker, GetMobileVoiceNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_NOSRV));
+    ON_CALL(m_objMockIAosNConfiguration, IsImsOverNrEnabled())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported())
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_TRUE(m_pAosHandleMtc->IsCapabilityExistedForNetworkTypeWithNrFallback(
+            NW_REPORT_RADIO_NR, AosCapability::VOICE));
+}
+
+TEST_F(AosHandleMtcTest, ShouldNotUseLteVoiceCapabilityOnNrSaWithoutVops)
+{
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE));
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    m_pAosHandleMtc->SetCapabilities(objCapabilities);
+
+    ON_CALL(m_objMockIAosNetTracker, GetMobileVoiceNetworkType())
+            .WillByDefault(Return(NW_REPORT_RADIO_NOSRV));
+    ON_CALL(m_objMockIAosNConfiguration, IsImsOverNrEnabled())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported())
+            .WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_FALSE(m_pAosHandleMtc->IsCapabilityExistedForNetworkTypeWithNrFallback(
+            NW_REPORT_RADIO_NR, AosCapability::VOICE));
+}
+
+TEST_F(AosHandleMtcTest, ShouldNotUseLteVideoCapabilityOnNrSaWithVops)
+{
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    m_pAosHandleMtc->SetCapabilities(objCapabilities);
+
+    ON_CALL(m_objMockIAosNConfiguration, IsImsOverNrEnabled())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported())
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_FALSE(m_pAosHandleMtc->IsCapabilityExistedForNetworkTypeWithNrFallback(
+            NW_REPORT_RADIO_NR, AosCapability::VIDEO));
 }
 
 TEST_F(AosHandleMtcTest, ShouldReturnBindedFeaturesIfCallComposerFeatureTagForB2cIsTrue)

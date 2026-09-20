@@ -200,6 +200,8 @@ protected:
     IMS_BOOL IsCapabilityExisted(IN IMS_UINT32 nCapabilities, IN AosCapability eCapability) const;
     IMS_BOOL IsCapabilityExistedForNetworkType(
             IN IMS_UINT32 nNetworkType, IN AosCapability eCapability) const;
+    IMS_BOOL IsCapabilityExistedForNetworkTypeWithNrFallback(
+            IN IMS_UINT32 nNetworkType, IN AosCapability eCapability) const;
     IMS_BOOL IsNetworkTypeMatchedToRat(IMS_UINT32 nNetworkType, IMS_UINT32 nRat) const;
     IMS_BOOL IsWifiConnected() const;
     IMS_BOOL IsDataConnected() const;

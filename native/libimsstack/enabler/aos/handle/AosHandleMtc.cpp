@@ -507,7 +507,8 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessCapabilitiesChanged(
         IMS_UINT32 nMobileNetworkType = GetMobileNetworkType();
         if (IsSupportedNetworkTypeForCellular(nMobileNetworkType))
         {
-            if (IsCapabilityExistedForNetworkType(nMobileNetworkType, AosCapability::VOICE))
+            if (IsCapabilityExistedForNetworkTypeWithNrFallback(
+                    nMobileNetworkType, AosCapability::VOICE))
             {
                 ProcessBlock(BLOCK_VOLTE_CAPABILITY, IMS_FALSE);
             }
@@ -621,8 +622,8 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessNetworkChanged()
 
 PROTECTED VIRTUAL void AosHandleMtc::ReevaluateCapabilities()
 {
-    IMS_BOOL bIsVoiceCapable =
-            IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::VOICE);
+    IMS_BOOL bIsVoiceCapable = IsCapabilityExistedForNetworkTypeWithNrFallback(
+            m_nNetworkType, AosCapability::VOICE);
     IMS_BOOL bIsVideoCapable =
             IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::VIDEO);
     IMS_BOOL bIsTextCapable =
