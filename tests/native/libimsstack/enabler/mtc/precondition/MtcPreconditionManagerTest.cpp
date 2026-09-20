@@ -364,6 +364,21 @@ TEST_F(MtcPreconditionManagerTest, IsPreconditionSupportedInLocalInCaseOfVoiceCa
     EXPECT_FALSE(pPreconditionManager->IsPreconditionSupportedInLocal());
 }
 
+TEST_F(MtcPreconditionManagerTest, VoicePreconditionUsesIwlanPolicyOnWlan)
+{
+    ON_CALL(objCallContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+    pPreconditionManager->SetOnWlanForPrerequisite(IMS_TRUE);
+
+    EXPECT_CALL(*pConfigurationProxy,
+            GetBoolean(ConfigVoice::KEY_VOICE_QOS_PRECONDITION_SUPPORTED_ON_IWLAN_BOOL))
+            .Times(2)
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_TRUE(pPreconditionManager->IsPreconditionSupportedInLocal());
+    EXPECT_FALSE(pPreconditionManager->IsPreconditionSupportedInLocal());
+}
+
 TEST_F(MtcPreconditionManagerTest, IsDedicatedBearerAllocatedReturnsTrueIfQosStatusIsAvailable)
 {
     SetUpMockQosInfo();
