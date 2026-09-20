@@ -56,7 +56,71 @@ PUBLIC IMS_RESULT MtcMessageMediator::MessageMediator_AdjustMessage(
         MayAdjustContactHeader(piSipMessage);
     }
 
+    MayShapeInitialMtFinalResponse(piSipMessage);
+
     return IMS_SUCCESS;
+}
+
+PRIVATE
+void MtcMessageMediator::MayShapeInitialMtFinalResponse(IN_OUT ISipMessage* pMessage)
+{
+    const MtcConfigurationProxy& objConfig = m_objContext.GetConfigurationProxy();
+    ImsVector<AString> objHeadersToRemove = objConfig.GetStringArray(
+            ConfigVoice::KEY_INITIAL_MT_FINAL_RESPONSE_HEADERS_TO_REMOVE_STRING_ARRAY);
+    IMS_BOOL bCompactContact = objConfig.GetBoolean(
+            ConfigVoice::KEY_INITIAL_MT_FINAL_RESPONSE_COMPACT_CONTACT_BOOL);
+
+    if (objHeadersToRemove.IsEmpty() && !bCompactContact)
+    {
+        return;
+    }
+
+    IMS_SINT32 nStatusCode = pMessage->GetStatusCode();
+    if (m_objContext.GetService().GetServiceType() != ServiceType::NORMAL ||
+            pMessage->GetType() != ISipMessage::TYPE_RESPONSE ||
+            !pMessage->GetMethod().Equals(SipMethod::INVITE) ||
+            nStatusCode < 200 || nStatusCode >= 300 ||
+            m_objContext.IsEstablished())
+    {
+        return;
+    }
+
+    for (IMS_UINT32 i = 0; i < objHeadersToRemove.GetSize(); ++i)
+    {
+        RemoveAllHeaders(pMessage, objHeadersToRemove.GetAt(i).Trim());
+    }
+
+    if (bCompactContact)
+    {
+        MayCompactContactHeader(pMessage);
+    }
+
+    IMS_TRACE_I("Initial MT final response shaped: status=%d, remove=%d",
+            nStatusCode, objHeadersToRemove.GetSize(), 0);
+}
+
+PRIVATE
+void MtcMessageMediator::RemoveAllHeaders(IN_OUT ISipMessage* pMessage, IN const AString& strName)
+{
+    IMS_SINT32 nCount = pMessage->GetHeaderCount(ISipHeader::UNKNOWN, strName);
+    for (IMS_SINT32 i = 0; i < nCount; ++i)
+    {
+        pMessage->RemoveHeader(ISipHeader::UNKNOWN, strName);
+    }
+}
+
+PRIVATE
+void MtcMessageMediator::MayCompactContactHeader(IN_OUT ISipMessage* pMessage)
+{
+    AString strContact = pMessage->GetHeader(ISipHeader::CONTACT_NORMAL);
+    IMS_SINT32 nLeftAquot = strContact.GetIndexOf(TextParser::CHAR_LAQUOT);
+    IMS_SINT32 nRightAquot = nLeftAquot == AString::NPOS
+            ? AString::NPOS
+            : strContact.GetIndexOf(TextParser::CHAR_RAQUOT, nLeftAquot + 1);
+    if (nRightAquot > 0 && nRightAquot + 1 < strContact.GetLength())
+    {
+        pMessage->SetHeader(ISipHeader::CONTACT_NORMAL, strContact.GetSubStr(0, nRightAquot + 1));
+    }
 }
 
 PRIVATE
