@@ -27,6 +27,8 @@ import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.imsstack.util.LocalLog;
 
 import java.io.FileDescriptor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class IpSecAgent implements IpSecInterface {
     /** In general, IMS can have up to 3 security associations at the same time. */
@@ -35,6 +37,8 @@ public class IpSecAgent implements IpSecInterface {
     private final LocalLog mLocalLog = new LocalLog(10);
     private final int mSlotId;
     private final SparseArray<IpSecConnector> mConnectors;
+    private ExecutorService mCleanupExecutor = null;
+    private boolean mClosed;
 
     public IpSecAgent(int slotId) {
         mSlotId = slotId;
@@ -42,17 +46,29 @@ public class IpSecAgent implements IpSecInterface {
     }
 
     @Override
-    public void init(Context context) {
-        // no-op
+    public synchronized void init(Context context) {
+        mClosed = false;
     }
 
     @Override
-    public void cleanup() {
-        // no-op
+    public synchronized void cleanup() {
+        // Queue remaining connectors before stopping the executor. A late native callback
+        // must not recreate the worker or reuse a connector being released.
+        for (int i = mConnectors.size() - 1; i >= 0; --i) {
+            removeIpSecSaParameter(mConnectors.keyAt(i));
+        }
+        mClosed = true;
+        if (mCleanupExecutor != null) {
+            mCleanupExecutor.shutdown();
+            mCleanupExecutor = null;
+        }
     }
 
     @Override
-    public int addIpSecSaParameter(IpSecSaParameter param) {
+    public synchronized int addIpSecSaParameter(IpSecSaParameter param) {
+        if (mClosed) {
+            return SystemCallInterface.RESULT_ERROR;
+        }
         logd("IpSec: add=" + param.toString());
 
         IpSecConnector connector = mConnectors.get(param.getId());
@@ -75,7 +91,7 @@ public class IpSecAgent implements IpSecInterface {
     }
 
     @Override
-    public void removeIpSecSaParameter(int ipSecId) {
+    public synchronized void removeIpSecSaParameter(int ipSecId) {
         IpSecConnector connector = mConnectors.get(ipSecId);
 
         logd("IpSec: remove="
@@ -83,14 +99,19 @@ public class IpSecAgent implements IpSecInterface {
 
         if (connector != null) {
             connector.markAsRemoved();
-            connector.close();
             mConnectors.remove(ipSecId);
+
+            // IpSecTransform.close() makes a synchronous Binder call into the platform. Keep
+            // resource release off the native IMS callback thread so a stuck XFRM interface
+            // teardown cannot block subsequent call and registration requests for this slot.
+            getCleanupExecutor().execute(connector::close);
             return;
         }
     }
 
     @Override
-    public int applyIpSecSa(int ipSecId, int spi, int intFd, FileDescriptor socketFd) {
+    public synchronized int applyIpSecSa(
+            int ipSecId, int spi, int intFd, FileDescriptor socketFd) {
         IpSecConnector connector = mConnectors.get(ipSecId);
 
         if (connector != null) {
@@ -105,7 +126,8 @@ public class IpSecAgent implements IpSecInterface {
     }
 
     @Override
-    public void removeIpSecSa(int ipSecId, int spi, int intFd, FileDescriptor socketFd) {
+    public synchronized void removeIpSecSa(
+            int ipSecId, int spi, int intFd, FileDescriptor socketFd) {
         IpSecConnector connector = mConnectors.get(ipSecId);
 
         if (connector != null) {
@@ -135,5 +157,14 @@ public class IpSecAgent implements IpSecInterface {
     private void logd(String s) {
         ImsLog.d(this, mSlotId, s);
         mLocalLog.log(s);
+    }
+
+    private ExecutorService getCleanupExecutor() {
+        if (mCleanupExecutor == null) {
+            // Preserve release ordering while isolating the IMS signaling thread from Binder.
+            mCleanupExecutor = Executors.newSingleThreadExecutor();
+        }
+
+        return mCleanupExecutor;
     }
 }
