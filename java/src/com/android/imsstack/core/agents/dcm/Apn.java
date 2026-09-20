@@ -758,6 +758,9 @@ public abstract class Apn extends Handler implements IApn {
 
         @Override
         public void onLosing(@NonNull Network network, int maxMsToLive) {
+            if (isStaleNetwork(network)) {
+                return;
+            }
             if (!isEventSet(EVENT_LOSING)) {
                 // no-op
                 return;
@@ -772,8 +775,13 @@ public abstract class Apn extends Handler implements IApn {
 
         @Override
         public void onLost(@NonNull Network network) {
+            if (isStaleNetwork(network)) {
+                return;
+            }
             clearLinkProperties();
             mNetwork = null;
+            mIsPendingOnAvailable = false;
+            mActiveIfaceName = null;
 
             if (!isEventSet(EVENT_LOST)) {
                 // no-op
@@ -806,6 +814,9 @@ public abstract class Apn extends Handler implements IApn {
         @Override
         public void onCapabilitiesChanged(@NonNull Network network,
                 @NonNull NetworkCapabilities networkCapabilities) {
+            if (isStaleNetwork(network)) {
+                return;
+            }
             if (mIsPendingOnAvailable) {
                 ImsLog.w(mSlotId, "network is connected");
                 mIsPendingOnAvailable = false;
@@ -831,6 +842,9 @@ public abstract class Apn extends Handler implements IApn {
         @Override
         public void onLinkPropertiesChanged(@NonNull Network network,
                 @NonNull LinkProperties linkProperties) {
+            if (isStaleNetwork(network)) {
+                return;
+            }
             boolean ipChanged = isIpChanged(linkProperties);
             boolean pcscfChanged = isPcscfChanged(linkProperties);
             mActiveIfaceName = linkProperties.getInterfaceName();
@@ -868,6 +882,14 @@ public abstract class Apn extends Handler implements IApn {
             if (isEventSet(EVENT_NET_PCSCF_CHANGED) && pcscfChanged) {
                 Message.obtain(mTarget, EVENT_PCSCF_CHANGED).sendToTarget();
             }
+        }
+
+        private boolean isStaleNetwork(Network network) {
+            if (!network.equals(mNetwork)) {
+                ImsLog.i(mSlotId, "Ignoring callback for inactive network " + network);
+                return true;
+            }
+            return false;
         }
 
         protected void cacheLinkProperties(Network network) {
