@@ -21,10 +21,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.AssetManager;
 import android.content.res.XmlResourceParser;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
+import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
 
@@ -40,6 +42,7 @@ import com.android.imsstack.base.SystemServiceProxy.CarrierConfigManagerProxy;
 import com.android.imsstack.base.TelephonyManagerProxy;
 import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.core.config.CarrierConfig;
+import com.android.imsstack.core.config.CarrierSettingsPackage;
 import com.android.imsstack.core.config.ConfigXmlUtils;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
@@ -102,6 +105,9 @@ public class ConfigAgent implements ConfigInterface {
 
     private static final String CARRIER_ID_PREFIX = "carrier_config_carrierid_";
     private static final String MCC_MNC_PREFIX = "carrier_config_mccmnc_";
+    private static final String CARRIER_SETTINGS = "carrier_settings/";
+    private static final String OVERRIDE_MCC_MNC_PREFIX =
+            "carrier_config_override_mccmnc_";
     /** Intent for testing purpose. */
     // TODO: should be integrated with the above commands in the future.
     private static final String ACTION_TEST_CARRIER_CONFIG_PUT =
@@ -123,6 +129,15 @@ public class ConfigAgent implements ConfigInterface {
     private final PersistableBundle mCarrierPublicConfig = new PersistableBundle();
     private PersistableBundle mTestConfig;
     private XmlPullParserFactory mFactory;
+    private AssetManager mCarrierAssets;
+    private int mSubscriptionId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+    private boolean mActive;
+    private final BroadcastReceiver mCarrierPackageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            onCarrierSettingsPackageChanged(intent);
+        }
+    };
 
     public ConfigAgent(int slotId) {
         mSlotId = slotId;
@@ -132,6 +147,15 @@ public class ConfigAgent implements ConfigInterface {
 
     @Override
     public void init(Context context) {
+        mActive = true;
+        mCarrierAssets = getCarrierSettingsAssets();
+        IntentFilter packageFilter = new IntentFilter();
+        packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        packageFilter.addDataScheme("package");
+        AppContext.getInstance().getBroadcastReceiverProxy()
+                .registerReceiver(mCarrierPackageReceiver, packageFilter);
         mDefaultInternalConfig.putAll(readCarrierConfigFromAsset(
                 CarrierConfig.DEFAULT_CARRIER_CONFIG_FILE, null));
         mDefaultPublicConfig.putAll(readCarrierConfigFromAsset(
@@ -141,6 +165,12 @@ public class ConfigAgent implements ConfigInterface {
 
     @Override
     public void cleanup() {
+        if (mActive) {
+            mActive = false;
+            AppContext.getInstance().getBroadcastReceiverProxy()
+                    .unregisterReceiver(mCarrierPackageReceiver);
+        }
+        mCarrierAssets = null;
         mIntentReceiver.unregister();
         mListeners.clear();
         mDefaultInternalConfig.clear();
@@ -271,6 +301,8 @@ public class ConfigAgent implements ConfigInterface {
      * @param id The SIM carrier identifier.
      */
     public void updateCarrierConfig(int subId, SimCarrierId id) {
+        // Resolve a fresh package snapshot so an APK update cannot leave cached old assets.
+        mCarrierAssets = getCarrierSettingsAssets();
         PersistableBundle config = new PersistableBundle();
 
         // Sets a default internal configuration.
@@ -297,9 +329,6 @@ public class ConfigAgent implements ConfigInterface {
 
         mCarrierInternalConfig.putAll(tempConfig);
 
-        // Overrides the specific carrier configuration values if present.
-        tempConfig = readCarrierConfigFromRes(R.xml.carrier_config_override, id);
-        mCarrierInternalConfig.putAll(tempConfig);
         config.putAll(mCarrierInternalConfig);
 
         // Sets the public carrier configuration from CarrierConfigManager.
@@ -333,10 +362,18 @@ public class ConfigAgent implements ConfigInterface {
             config.putAll(mCarrierPublicConfig);
         }
 
-        mIntentReceiver.setOriginalCarrierConfig(config);
+        // The generated Google profiles contain only reviewed, directly supported IMS keys.
+        // Load after framework defaults so those defaults do not erase the selected profile.
+        config.putAll(readCarrierSettings(id, mCarrierAssets));
 
-        // Loads override configs in the hidden key of CarrierConfigManager
+        // Keep explicit carrier corrections, product overlays and framework hidden overrides
+        // above the imported snapshot. Availability and hardware policy are never imported.
+        config.putAll(readMccMncOverlayConfig(
+                id, CarrierConfig.CARRIER_CONFIG, OVERRIDE_MCC_MNC_PREFIX));
+        config.putAll(readCarrierConfigFromRes(R.xml.carrier_config_override, id));
         overrideHiddenConfigs(subId, config);
+
+        mIntentReceiver.setOriginalCarrierConfig(config);
 
         // test-carrier-config
         PersistableBundle testConfig = readTestConfig();
@@ -358,15 +395,59 @@ public class ConfigAgent implements ConfigInterface {
 
         overrideTestConfigs(config, testConfig);
 
+        // A carrier or test override cannot add a hardware capability that the
+        // product does not expose.
+        applyDeviceCapabilities(config);
+
         mCarrierConfig.setConfig(config, mSlotId);
 
         if (!mConfigLoaded) {
             mConfigLoaded = true;
         }
         mCarrierId = id;
+        mSubscriptionId = subId;
 
         notifyCarrierConfigChanged(subId);
         notifyCarrierConfigChangedForNative();
+    }
+
+    private void applyDeviceCapabilities(PersistableBundle config) {
+        // The paired open ImsMedia implementation has no EVS encoder or decoder.
+        config.putBoolean(CarrierConfig.ImsVoice.KEY_AUDIO_EVS_SUPPORT_BOOL, false);
+        if (AppContext.getInstance().getResources().getBoolean(
+                R.bool.config_imsstack_dedicated_bearer_qos_supported)) {
+            return;
+        }
+
+        ImsLog.i(this, mSlotId, "Dedicated-bearer QoS is disabled by device config");
+        config.putBoolean(CarrierConfig.Ims.KEY_SUPPORT_SDP_PRECONDITION_BOOL, false);
+        config.putBoolean(
+                CarrierConfigManager.ImsVoice.KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL,
+                false);
+        config.putBoolean(
+                CarrierConfig.ImsVoice.KEY_VOICE_QOS_PRECONDITION_SUPPORTED_ON_IWLAN_BOOL,
+                false);
+        config.putBoolean(
+                CarrierConfigManager.ImsVoice.KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL,
+                true);
+        config.putBoolean(
+                CarrierConfigManager.ImsVt.KEY_VIDEO_QOS_PRECONDITION_SUPPORTED_BOOL,
+                false);
+        config.putBoolean(
+                CarrierConfigManager.ImsRtt.KEY_TEXT_QOS_PRECONDITION_SUPPORTED_BOOL,
+                false);
+        config.putBoolean(
+                CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_QOS_PRECONDITION_SUPPORTED_BOOL,
+                false);
+        config.putBoolean(
+                CarrierConfig.ImsVoice.KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL,
+                false);
+        config.putBoolean(
+                CarrierConfig.ImsVoice.KEY_WAIT_QOS_FOR_INCOMING_INVITE_WITHOUT_PRECONDITION_BOOL,
+                false);
+        config.putBoolean(
+                CarrierConfig.ImsVoice.KEY_RELEASE_CALL_ON_QOS_LOST_DURING_SETUP_BOOL,
+                false);
     }
 
     @VisibleForTesting
@@ -378,7 +459,7 @@ public class ConfigAgent implements ConfigInterface {
         PersistableBundle configsInHiddenKey = config.getPersistableBundle(
                 CarrierConfig.ApIms.KEY_CARRIER_CONFIG_BUNDLE);
         config.remove(CarrierConfig.ApIms.KEY_CARRIER_CONFIG_BUNDLE);
-        if (configsInHiddenKey.isEmpty()) {
+        if (configsInHiddenKey == null || configsInHiddenKey.isEmpty()) {
             return;
         }
 
@@ -447,8 +528,9 @@ public class ConfigAgent implements ConfigInterface {
     }
 
     private PersistableBundle readCarrierConfig(int subId, SimCarrierId id, boolean isInternal) {
-        String fileName = getCarrierConfigFile(subId, id,
-                isInternal ? CarrierConfig.CARRIER_CONFIG : CarrierConfig.PUBLIC_CARRIER_CONFIG);
+        String path = isInternal
+                ? CarrierConfig.CARRIER_CONFIG : CarrierConfig.PUBLIC_CARRIER_CONFIG;
+        String fileName = getCarrierConfigFile(subId, id, path);
 
         if (TextUtils.isEmpty(fileName)) {
             ImsLog.d(this, mSlotId, "readCarrierConfig: No matched carrier configuration - " + id);
@@ -456,12 +538,105 @@ public class ConfigAgent implements ConfigInterface {
         }
 
         ImsLog.d(this, mSlotId, "readCarrierConfig: " + fileName);
+        return readCarrierConfigFromAsset(mCarrierAssets, fileName, id, false);
+    }
 
-        return readCarrierConfigFromAsset(fileName, id);
+    private PersistableBundle readMccMncOverlayConfig(
+            SimCarrierId id, @NonNull String path, @NonNull String prefix) {
+        String fileName = getMccMncOverlayConfigFile(id, path, prefix);
+        if (TextUtils.isEmpty(fileName)) {
+            return new PersistableBundle();
+        }
+
+        ImsLog.d(this, mSlotId, "readMccMncOverlayConfig: " + fileName);
+        return readCarrierConfigFromAsset(mCarrierAssets, fileName, id, false);
+    }
+
+    private String getMccMncOverlayConfigFile(
+            SimCarrierId id, @NonNull String path, @NonNull String prefix) {
+        if (TextUtils.isEmpty(id.getMcc()) || TextUtils.isEmpty(id.getMnc())) {
+            return null;
+        }
+
+        // A two-digit MNC and a three-digit MNC identify different networks.
+        String candidate = prefix + id.getMcc() + id.getMnc() + ".xml";
+        try {
+            String[] files = mCarrierAssets == null ? null : mCarrierAssets.list(path);
+            if (files != null && Arrays.asList(files).contains(candidate)) {
+                return path + "/" + candidate;
+            }
+        } catch (IOException e) {
+            ImsLog.e(this, mSlotId, "getMccMncOverlayConfigFile: " + e);
+        }
+        return null;
+    }
+
+    @VisibleForTesting
+    protected PersistableBundle readCarrierSettings(SimCarrierId id) {
+        return readCarrierSettings(id, getCarrierSettingsAssets());
+    }
+
+    private PersistableBundle readCarrierSettings(SimCarrierId id, AssetManager assets) {
+        if (assets == null || id == null || !id.isSimLoaded()
+                || !id.getMcc().matches("[0-9]{3}") || !id.getMnc().matches("[0-9]{2,3}")) {
+            return new PersistableBundle();
+        }
+        // Google's carrier list is ordered: the first matching SIM identity selects one
+        // complete profile. Merging all matches would leak MNO or sibling MVNO values.
+        PersistableBundle selection = readCarrierConfigFromAsset(
+                assets, CARRIER_SETTINGS + "carrier_list.xml", id, true);
+        String profile = selection.getString("profile", "");
+        if (!profile.matches("[A-Za-z0-9_-]+")) {
+            return new PersistableBundle();
+        }
+        ImsLog.i(this, mSlotId, "CarrierSettings profile=" + profile);
+        PersistableBundle config = readCarrierConfigFromAsset(
+                assets, CARRIER_SETTINGS + "default.xml", null, false);
+        config.putAll(readCarrierConfigFromAsset(
+                assets, CARRIER_SETTINGS + "profiles/" + profile + ".xml", null, false));
+        return config;
+    }
+
+    @VisibleForTesting
+    protected AssetManager getCarrierSettingsAssets() {
+        return CarrierSettingsPackage.loadAssets(AppContext.getInstance());
+    }
+
+    @VisibleForTesting
+    protected void onCarrierSettingsPackageChanged(Intent intent) {
+        if (!mActive || intent == null || intent.getData() == null
+                || !CarrierSettingsPackage.PACKAGE_NAME.equals(
+                        intent.getData().getSchemeSpecificPart())) {
+            return;
+        }
+        String action = intent.getAction();
+        if (!Intent.ACTION_PACKAGE_ADDED.equals(action)
+                && !Intent.ACTION_PACKAGE_CHANGED.equals(action)
+                && !Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
+            return;
+        }
+        if (Intent.ACTION_PACKAGE_REMOVED.equals(action)
+                && intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+            return;
+        }
+        AppContext.runTask(() -> {
+            if (mActive && mCarrierId != null) {
+                updateCarrierConfig(mSubscriptionId, mCarrierId);
+            }
+        }, 0);
     }
 
     private PersistableBundle readCarrierConfigFromAsset(String fileName, SimCarrierId id) {
-        try (InputStream is = AppContext.getInstance().getAssets().open(fileName)) {
+        return readCarrierConfigFromAsset(
+                AppContext.getInstance().getAssets(), fileName, id, false);
+    }
+
+    private PersistableBundle readCarrierConfigFromAsset(
+            AssetManager assets, String fileName, SimCarrierId id, boolean firstMatch) {
+        if (assets == null) {
+            return new PersistableBundle();
+        }
+        try (InputStream is = assets.open(fileName)) {
             synchronized (this) {
                 if (mFactory == null) {
                     mFactory = XmlPullParserFactory.newInstance();
@@ -471,7 +646,7 @@ public class ConfigAgent implements ConfigInterface {
             XmlPullParser parser = mFactory.newPullParser();
             parser.setInput(is, "utf-8");
 
-            return readConfigFromXml(parser, id);
+            return readConfigFromXml(parser, id, firstMatch);
         } catch (IllegalArgumentException | IOException | XmlPullParserException e) {
             ImsLog.e(this, mSlotId, "readCarrierConfigFromAsset: " + e.toString());
             return new PersistableBundle();
@@ -501,7 +676,7 @@ public class ConfigAgent implements ConfigInterface {
             String[] files = null;
 
             try {
-                files = AppContext.getInstance().getAssets().list(path);
+                files = mCarrierAssets == null ? null : mCarrierAssets.list(path);
             } catch (IOException e) {
                 ImsLog.e(this, mSlotId, "getCarrierConfigFile: " + e);
                 return null;
@@ -516,6 +691,9 @@ public class ConfigAgent implements ConfigInterface {
             String fileNameForCarrierId = null;
             String fileNameForMccMncCarrierId = null;
 
+            if (files == null) {
+                return null;
+            }
             for (String file : files) {
                 if (file.startsWith(prefixForSpecificCarrierId)) {
                     fileNameForSpecificCarrierId = file;
@@ -545,6 +723,12 @@ public class ConfigAgent implements ConfigInterface {
 
     private PersistableBundle readConfigFromXml(XmlPullParser parser, SimCarrierId id)
             throws IOException, XmlPullParserException {
+        return readConfigFromXml(parser, id, false);
+    }
+
+    private PersistableBundle readConfigFromXml(
+            XmlPullParser parser, SimCarrierId id, boolean firstMatch)
+            throws IOException, XmlPullParserException {
         PersistableBundle config = new PersistableBundle();
         int event;
 
@@ -557,6 +741,9 @@ public class ConfigAgent implements ConfigInterface {
 
                 PersistableBundle configFragment = ConfigXmlUtils.readConfig(parser);
                 config.putAll(configFragment);
+                if (firstMatch) {
+                    return config;
+                }
             }
         }
 
@@ -578,6 +765,12 @@ public class ConfigAgent implements ConfigInterface {
                 case "gid1":
                     result = (id == null) || value.equalsIgnoreCase(id.getGid1());
                     break;
+                case "gid1_prefix":
+                    result = (id == null) || matchOnPrefix(value, id.getGid1());
+                    break;
+                case "iccid_prefix":
+                    result = (id == null) || matchOnPrefix(value, id.getIccId());
+                    break;
                 case "spn":
                     result = (id == null) || matchOnSpn(value, id);
                     break;
@@ -598,6 +791,11 @@ public class ConfigAgent implements ConfigInterface {
             }
         }
         return true;
+    }
+
+    private static boolean matchOnPrefix(String prefix, String value) {
+        return !TextUtils.isEmpty(prefix) && !TextUtils.isEmpty(value)
+                && value.regionMatches(true, 0, prefix, 0, prefix.length());
     }
 
     private static boolean matchOnCarrierId(String xmlCid, SimCarrierId id) {

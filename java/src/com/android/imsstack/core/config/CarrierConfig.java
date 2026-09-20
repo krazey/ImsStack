@@ -1092,6 +1092,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "conference_inviting_refer_type_int";
         public static final String KEY_DISABLE_PRECONDITION_AFTER_CALL_ESTABLISHED_BOOL =
                 KEY_PREFIX + "disable_precondition_after_call_established_bool";
+        public static final String KEY_VOICE_QOS_PRECONDITION_SUPPORTED_ON_IWLAN_BOOL =
+                KEY_PREFIX + "voice_qos_precondition_supported_on_iwlan_bool";
         public static final String KEY_INCOMING_CALL_REJECT_CODE_FOR_USER_DECLINE_INT =
                 KEY_PREFIX + "incoming_call_reject_code_for_user_decline_int";
         public static final String KEY_INCOMING_CALL_REJECT_CODE_FOR_NO_ANSWER_INT =
@@ -1120,6 +1122,10 @@ public class CarrierConfig {
                 KEY_PREFIX + "policy_for_media_type_restriction_on_cellular_in_roaming_int";
         public static final String KEY_POLICY_OF_LOCAL_NUMBERS_INT =
                 KEY_PREFIX + "policy_of_local_numbers_int";
+        public static final String KEY_INITIAL_MT_FINAL_RESPONSE_HEADERS_TO_REMOVE_STRING_ARRAY =
+                KEY_PREFIX + "initial_mt_final_response_headers_to_remove_string_array";
+        public static final String KEY_INITIAL_MT_FINAL_RESPONSE_COMPACT_CONTACT_BOOL =
+                KEY_PREFIX + "initial_mt_final_response_compact_contact_bool";
         public static final String KEY_SILENT_REDIAL_MAX_DURATION_MILLIS_INT =
                 KEY_PREFIX + "silent_redial_max_duration_millis_int";
         public static final String KEY_SILENT_REDIAL_INTERVAL_MILLIS_INT =

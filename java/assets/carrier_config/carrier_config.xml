@@ -98,6 +98,7 @@
     <int name="imsvoice.conference_sip_flow_order_int" value="0"/>
     <int name="imsvoice.conference_inviting_refer_type_int" value="1"/>
     <boolean name="imsvoice.disable_precondition_after_call_established_bool" value="false"/>
+    <boolean name="imsvoice.voice_qos_precondition_supported_on_iwlan_bool" value="false"/>
     <int name="imsvoice.incoming_call_reject_code_for_user_decline_int" value="486"/>
     <int name="imsvoice.incoming_call_reject_code_for_no_answer_int" value="486"/>
     <int name="imsvoice.prack_wait_timer_millis_int" value="-1"/>
@@ -114,6 +115,9 @@
     <int name="imsvoice.policy_for_media_type_restriction_on_cellular_int" value="0"/>
     <int name="imsvoice.policy_for_media_type_restriction_on_cellular_in_roaming_int" value="0"/>
     <int name="imsvoice.policy_of_local_numbers_int" value="0"/>
+    <string-array name="imsvoice.initial_mt_final_response_headers_to_remove_string_array" num="0">
+    </string-array>
+    <boolean name="imsvoice.initial_mt_final_response_compact_contact_bool" value="false"/>
     <int name="imsvoice.silent_redial_max_duration_millis_int" value="30000"/>
     <int name="imsvoice.silent_redial_interval_millis_int" value="0"/>
     <int name="imsvoice.silent_redial_max_retry_count_int" value="1"/>
@@ -873,7 +877,8 @@
         <item value="50060"/>
     </int-array>
     <boolean name="imsvoice.audio_bw_nego_option_bool" value="true"/>
-    <boolean name="imsvoice.audio_evs_support_bool" value="true"/>
+    <!-- ImsMedia has no EVS encoder or decoder in the open-source build. -->
+    <boolean name="imsvoice.audio_evs_support_bool" value="false"/>
     <boolean name="imsvoice.media_anbr_capability_in_modem_bool" value="false"/>
     <int name="imsvoice.audio_ptime_millis_int" value="20"/>
     <int name="imsvoice.audio_maxptime_millis_int" value="240"/>

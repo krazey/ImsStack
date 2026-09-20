@@ -17,4 +17,5 @@
 <resources>
     <bool name="config_imsstack_emergency_mmtel_feature">true</bool>
     <bool name="config_imsstack_rcs_feature">true</bool>
+    <bool name="config_imsstack_dedicated_bearer_qos_supported">true</bool>
 </resources>

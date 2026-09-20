@@ -34,6 +34,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -50,8 +51,10 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.content.res.XmlResourceParser;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -67,6 +70,7 @@ import com.android.imsstack.base.SystemServiceProxy.SubscriptionManagerProxy;
 import com.android.imsstack.base.TestAppContext;
 import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.core.config.CarrierConfig;
+import com.android.imsstack.core.config.CarrierSettingsPackage;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.Log;
@@ -128,7 +132,6 @@ public class ConfigAgentTest {
     @Mock private ISystem mSystem;
 
     private Context mContext;
-    private XmlResourceParser mCarrierConfigOverrideParser;
     private TestableLooper mTestableLooper;
     private TestAppContext mTestAppContext;
     private SubscriptionManagerProxy mSubscriptionManagerProxy;
@@ -145,10 +148,12 @@ public class ConfigAgentTest {
         mSubscriptionManagerProxy =
                 mTestAppContext.getSystemServiceProxy(SubscriptionManagerProxy.class);
 
-        mCarrierConfigOverrideParser = InstrumentationRegistry.getInstrumentation().getContext()
-                .getResources().getXml(R.xml.carrier_config_override);
         when(mContext.getResources().getXml(eq(R.xml.carrier_config_override)))
-                .thenReturn(mCarrierConfigOverrideParser);
+                .thenAnswer(i -> InstrumentationRegistry.getInstrumentation().getContext()
+                        .getResources().getXml(R.xml.carrier_config_override));
+        when(mContext.getResources().getBoolean(
+                eq(R.bool.config_imsstack_dedicated_bearer_qos_supported)))
+                .thenReturn(true);
         doReturn(mFileIs).when(mContext).openFileInput(any());
         doReturn(mFileOs).when(mContext).openFileOutput(any(), anyInt());
         doReturn(true).when(mContext).deleteFile(any());
@@ -158,13 +163,12 @@ public class ConfigAgentTest {
         when(mSystemInterface.getSystem(eq(SLOT0))).thenReturn(mSystem);
         when(mSubscriptionManagerProxy.getDefaultVoiceSubscriptionId()).thenReturn(SUB_ID_1);
 
-        mConfigAgent = new ConfigAgent(SLOT0);
+        mConfigAgent = spy(new ConfigAgent(SLOT0));
+        doReturn(mContext.getAssets()).when(mConfigAgent).getCarrierSettingsAssets();
     }
 
     @After
     public void tearDown() throws Exception {
-        mCarrierConfigOverrideParser = null;
-
         if (mConfigAgent != null) {
             mConfigAgent.cleanup();
             mConfigAgent = null;
@@ -296,7 +300,7 @@ public class ConfigAgentTest {
         setUpCarrierConfig(carrierConfigBundle);
 
         // Asset has private keys
-        ConfigAgent spyConfigAgent = spy(mConfigAgent);
+        ConfigAgent spyConfigAgent = mConfigAgent;
         doReturn(buildAssetConfigBundle()).when(spyConfigAgent).readCarrierConfig(anyInt(), any());
 
         // Test updateCarrierConfig()
@@ -370,6 +374,284 @@ public class ConfigAgentTest {
         assertEquals(valueInt, cc.getInt(keyInt));
         assertEquals(valueBool, cc.getBoolean(keyBool));
         assertEquals(valueString, cc.getString(keyString));
+    }
+
+    private void mockCarrierAsset(String name, String xml) throws IOException {
+        when(mContext.getAssets().open(eq(name)))
+                .thenAnswer(invocation -> new ByteArrayInputStream(
+                        xml.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    private SimCarrierId carrierSettingsIdentity(String mnc, String gid1, String iccid) {
+        return new SimCarrierId.Builder().setCarrierId(20001)
+                .setMcc("262").setMnc(mnc).setGid1(gid1).setIccId(iccid)
+                .setSimState(SimCarrierId.SIM_LOADED).build();
+    }
+
+    @Test
+    @SmallTest
+    public void testCarrierSettingsUsesFirstMatchAndExactMnc() throws IOException {
+        mockCarrierAsset("carrier_settings/carrier_list.xml",
+                "<carrier_config_list>"
+                        + "<carrier_config mcc=\"262\" mnc=\"07\" gid1_prefix=\"AB\">"
+                        + "<string name=\"profile\">mvno</string></carrier_config>"
+                        + "<carrier_config mcc=\"262\" mnc=\"07\">"
+                        + "<string name=\"profile\">mno</string></carrier_config>"
+                        + "<carrier_config mcc=\"262\" mnc=\"007\">"
+                        + "<string name=\"profile\">other</string></carrier_config>"
+                        + "</carrier_config_list>");
+        mockCarrierAsset("carrier_settings/default.xml",
+                "<carrier_config><int name=\"default_only_int\" value=\"10\"/></carrier_config>");
+        mockCarrierAsset("carrier_settings/profiles/mvno.xml", "<carrier_config/>");
+        mockCarrierAsset("carrier_settings/profiles/mno.xml",
+                "<carrier_config><int name=\"selected_int\" value=\"1\"/></carrier_config>");
+        mockCarrierAsset("carrier_settings/profiles/other.xml",
+                "<carrier_config><int name=\"selected_int\" value=\"2\"/></carrier_config>");
+
+        PersistableBundle mvno = mConfigAgent.readCarrierSettings(
+                carrierSettingsIdentity("07", "ab01", TEST_ICCID));
+        assertEquals(10, mvno.getInt("default_only_int"));
+        assertFalse(mvno.containsKey("selected_int")); // Empty MVNO still stops the search.
+        assertEquals(1, mConfigAgent.readCarrierSettings(
+                carrierSettingsIdentity("07", "CD", TEST_ICCID)).getInt("selected_int"));
+        assertEquals(2, mConfigAgent.readCarrierSettings(
+                carrierSettingsIdentity("007", "AB", TEST_ICCID)).getInt("selected_int"));
+        assertTrue(mConfigAgent.readCarrierSettings(
+                carrierSettingsIdentity("08", "AB", TEST_ICCID)).isEmpty());
+        assertTrue(mConfigAgent.readCarrierSettings(new SimCarrierId.Builder()
+                .setMcc("262").setMnc("07").setSimState(SimCarrierId.SIM_LOCKED)
+                .build()).isEmpty());
+    }
+
+    @Test
+    @SmallTest
+    public void testCarrierSettingsRequiresIccidPrefix() throws IOException {
+        mockCarrierAsset("carrier_settings/carrier_list.xml",
+                "<carrier_config_list><carrier_config mcc=\"262\" mnc=\"07\" "
+                        + "iccid_prefix=\"894936\"><string name=\"profile\">mvno</string>"
+                        + "</carrier_config></carrier_config_list>");
+        mockCarrierAsset("carrier_settings/default.xml", "<carrier_config/>");
+        mockCarrierAsset("carrier_settings/profiles/mvno.xml",
+                "<carrier_config><int name=\"selected_int\" value=\"1\"/></carrier_config>");
+        assertTrue(mConfigAgent.readCarrierSettings(
+                carrierSettingsIdentity("07", "", "8949001234")).isEmpty());
+        assertEquals(1, mConfigAgent.readCarrierSettings(
+                carrierSettingsIdentity("07", "", "8949361234")).getInt("selected_int"));
+    }
+
+    @Test
+    @SmallTest
+    public void testCarrierSettingsRejectsUnsafeProfileNames() throws IOException {
+        mockCarrierAsset("carrier_settings/carrier_list.xml",
+                "<carrier_config_list><carrier_config mcc=\"262\" mnc=\"07\">"
+                        + "<string name=\"profile\">../../outside</string>"
+                        + "</carrier_config></carrier_config_list>");
+        assertTrue(mConfigAgent.readCarrierSettings(
+                carrierSettingsIdentity("07", "", TEST_ICCID)).isEmpty());
+    }
+
+    private Intent carrierPackageIntent(String action) {
+        return new Intent(action, Uri.parse("package:" + CarrierSettingsPackage.PACKAGE_NAME));
+    }
+
+    @Test
+    @SmallTest
+    public void testCarrierPackageUpdateUsesNewAssets() throws IOException {
+        prepareCarrierSettingsPrecedence(null);
+        SimCarrierId id = carrierSettingsIdentity("07", "", TEST_ICCID);
+        mConfigAgent.updateCarrierConfig(SUB_ID_1, id);
+        AssetManager updated = mock(AssetManager.class);
+        when(updated.list(anyString())).thenReturn(new String[0]);
+        when(updated.open(anyString())).thenThrow(new FileNotFoundException());
+        doAnswer(i ->
+                new ByteArrayInputStream(("<carrier_config_list><carrier_config mcc=\"262\" "
+                        + "mnc=\"07\"><string name=\"profile\">new</string>"
+                        + "</carrier_config></carrier_config_list>")
+                        .getBytes(StandardCharsets.UTF_8)))
+                .when(updated).open("carrier_settings/carrier_list.xml");
+        doAnswer(i ->
+                new ByteArrayInputStream(("<carrier_config><int "
+                        + "name=\"ims.request_uri_type_int\" value=\"2\"/></carrier_config>")
+                        .getBytes(StandardCharsets.UTF_8)))
+                .when(updated).open("carrier_settings/profiles/new.xml");
+        doReturn(updated).when(mConfigAgent).getCarrierSettingsAssets();
+        mConfigAgent.onCarrierSettingsPackageChanged(carrierPackageIntent(
+                Intent.ACTION_PACKAGE_ADDED));
+        processAllMessages();
+        assertEquals(2, mConfigAgent.getCarrierConfig().getInt(
+                CarrierConfigManager.Ims.KEY_REQUEST_URI_TYPE_INT));
+    }
+
+    @Test
+    @SmallTest
+    public void testCarrierPackageRemovalRestoresFrameworkDefaults() throws IOException {
+        prepareCarrierSettingsPrecedence(null);
+        mConfigAgent.updateCarrierConfig(SUB_ID_1, carrierSettingsIdentity("07", "", TEST_ICCID));
+        doReturn(null).when(mConfigAgent).getCarrierSettingsAssets();
+        Intent removing = carrierPackageIntent(Intent.ACTION_PACKAGE_REMOVED)
+                .putExtra(Intent.EXTRA_REPLACING, true);
+        mConfigAgent.onCarrierSettingsPackageChanged(removing);
+        processAllMessages();
+        assertEquals(1, mConfigAgent.getCarrierConfig().getInt(
+                CarrierConfigManager.Ims.KEY_REQUEST_URI_TYPE_INT));
+        removing.putExtra(Intent.EXTRA_REPLACING, false);
+        mConfigAgent.onCarrierSettingsPackageChanged(removing);
+        processAllMessages();
+        assertEquals(0, mConfigAgent.getCarrierConfig().getInt(
+                CarrierConfigManager.Ims.KEY_REQUEST_URI_TYPE_INT));
+    }
+
+    @Test
+    @SmallTest
+    public void testCarrierPackageEventsIgnoreOtherPackagesAndStoppedAgent() throws IOException {
+        prepareCarrierSettingsPrecedence(null);
+        mConfigAgent.updateCarrierConfig(SUB_ID_1, carrierSettingsIdentity("07", "", TEST_ICCID));
+        doReturn(null).when(mConfigAgent).getCarrierSettingsAssets();
+        mConfigAgent.onCarrierSettingsPackageChanged(new Intent(Intent.ACTION_PACKAGE_REMOVED,
+                Uri.parse("package:unrelated.package")));
+        processAllMessages();
+        assertEquals(1, mConfigAgent.getCarrierConfig().getInt(
+                CarrierConfigManager.Ims.KEY_REQUEST_URI_TYPE_INT));
+        mConfigAgent.onCarrierSettingsPackageChanged(carrierPackageIntent(
+                Intent.ACTION_PACKAGE_CHANGED));
+        mConfigAgent.cleanup();
+        processAllMessages();
+        assertEquals(1, mConfigAgent.getCarrierConfig().getInt(
+                CarrierConfigManager.Ims.KEY_REQUEST_URI_TYPE_INT));
+    }
+
+    private void prepareCarrierSettingsPrecedence(PersistableBundle hidden) throws IOException {
+        PersistableBundle platform = new PersistableBundle();
+        platform.putInt(CarrierConfigManager.Ims.KEY_REQUEST_URI_TYPE_INT, 0);
+        platform.putBoolean(CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL, false);
+        platform.putBoolean(CarrierConfig.ImsVoice.KEY_AUDIO_EVS_SUPPORT_BOOL, true);
+        if (hidden != null) {
+            platform.putPersistableBundle(CarrierConfig.ApIms.KEY_CARRIER_CONFIG_BUNDLE, hidden);
+        }
+        setUpCarrierConfig(platform);
+        mConfigAgent.init(mContext);
+        mockCarrierAsset("carrier_settings/carrier_list.xml",
+                "<carrier_config_list><carrier_config mcc=\"262\" mnc=\"07\">"
+                        + "<string name=\"profile\">test</string>"
+                        + "</carrier_config></carrier_config_list>");
+        mockCarrierAsset("carrier_settings/default.xml", "<carrier_config/>");
+        mockCarrierAsset("carrier_settings/profiles/test.xml",
+                "<carrier_config><int name=\"ims.request_uri_type_int\" value=\"1\"/>"
+                        + "<int name=\"ims.sip_timer_f_millis_int\" value=\"32000\"/>"
+                        + "</carrier_config>");
+    }
+
+    @Test
+    @SmallTest
+    public void testCarrierSettingsSurvivesPlatformDefaults() throws IOException {
+        prepareCarrierSettingsPrecedence(null);
+        mConfigAgent.updateCarrierConfig(SUB_ID_1,
+                carrierSettingsIdentity("07", "", TEST_ICCID));
+        CarrierConfig cc = mConfigAgent.getCarrierConfig();
+        assertEquals(1, cc.getInt(CarrierConfigManager.Ims.KEY_REQUEST_URI_TYPE_INT));
+        assertEquals(32000, cc.getInt(CarrierConfigManager.Ims.KEY_SIP_TIMER_F_MILLIS_INT));
+        assertFalse(cc.getBoolean(CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL));
+        assertFalse(cc.getBoolean(CarrierConfig.ImsVoice.KEY_AUDIO_EVS_SUPPORT_BOOL));
+    }
+
+    @Test
+    @SmallTest
+    public void testExplicitHiddenPolicyOverridesCarrierSettings() throws IOException {
+        PersistableBundle hidden = new PersistableBundle();
+        hidden.putInt(CarrierConfigManager.Ims.KEY_REQUEST_URI_TYPE_INT, 2);
+        hidden.putBoolean(CarrierConfig.ImsVoice.KEY_AUDIO_EVS_SUPPORT_BOOL, true);
+        prepareCarrierSettingsPrecedence(hidden);
+        mConfigAgent.updateCarrierConfig(SUB_ID_1,
+                carrierSettingsIdentity("07", "", TEST_ICCID));
+        assertEquals(2, mConfigAgent.getCarrierConfig().getInt(
+                CarrierConfigManager.Ims.KEY_REQUEST_URI_TYPE_INT));
+        assertFalse(mConfigAgent.getCarrierConfig().getBoolean(
+                CarrierConfig.ImsVoice.KEY_AUDIO_EVS_SUPPORT_BOOL));
+    }
+
+    @Test
+    @SmallTest
+    public void testExactMncCorrectionOverridesCarrierSettings() throws IOException {
+        prepareCarrierSettingsPrecedence(null);
+        when(mContext.getAssets().list(eq(CarrierConfig.CARRIER_CONFIG)))
+                .thenReturn(new String[] {"carrier_config_override_mccmnc_26207.xml",
+                        "carrier_config_override_mccmnc_262007.xml"});
+        mockCarrierAsset("carrier_config/carrier_config_override_mccmnc_26207.xml",
+                "<carrier_config><int name=\"ims.request_uri_type_int\" value=\"2\"/>"
+                        + "</carrier_config>");
+        mockCarrierAsset("carrier_config/carrier_config_override_mccmnc_262007.xml",
+                "<carrier_config><int name=\"ims.request_uri_type_int\" value=\"99\"/>"
+                        + "</carrier_config>");
+        mConfigAgent.updateCarrierConfig(SUB_ID_1,
+                carrierSettingsIdentity("07", "", TEST_ICCID));
+        assertEquals(2, mConfigAgent.getCarrierConfig().getInt(
+                CarrierConfigManager.Ims.KEY_REQUEST_URI_TYPE_INT));
+    }
+
+    @Test
+    @SmallTest
+    public void testDeviceWithoutDedicatedBearerQosDisablesPreconditions() {
+        when(mContext.getResources().getBoolean(
+                eq(R.bool.config_imsstack_dedicated_bearer_qos_supported)))
+                .thenReturn(false);
+
+        PersistableBundle platformConfig = new PersistableBundle();
+        platformConfig.putBoolean(
+                CarrierConfig.Ims.KEY_SUPPORT_SDP_PRECONDITION_BOOL, true);
+        platformConfig.putBoolean(
+                CarrierConfigManager.ImsVoice.KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL,
+                true);
+        platformConfig.putBoolean(
+                CarrierConfig.ImsVoice.KEY_VOICE_QOS_PRECONDITION_SUPPORTED_ON_IWLAN_BOOL,
+                true);
+        platformConfig.putBoolean(
+                CarrierConfigManager.ImsVoice.KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL,
+                false);
+        platformConfig.putBoolean(
+                CarrierConfigManager.ImsVt.KEY_VIDEO_QOS_PRECONDITION_SUPPORTED_BOOL,
+                true);
+        platformConfig.putBoolean(
+                CarrierConfigManager.ImsRtt.KEY_TEXT_QOS_PRECONDITION_SUPPORTED_BOOL,
+                true);
+        platformConfig.putBoolean(
+                CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_QOS_PRECONDITION_SUPPORTED_BOOL,
+                true);
+        platformConfig.putBoolean(
+                CarrierConfig.ImsVoice.KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL,
+                true);
+        platformConfig.putBoolean(
+                CarrierConfig.ImsVoice.KEY_WAIT_QOS_FOR_INCOMING_INVITE_WITHOUT_PRECONDITION_BOOL,
+                true);
+        platformConfig.putBoolean(
+                CarrierConfig.ImsVoice.KEY_RELEASE_CALL_ON_QOS_LOST_DURING_SETUP_BOOL,
+                true);
+        setUpCarrierConfig(platformConfig);
+
+        mConfigAgent.init(mContext);
+        mConfigAgent.updateCarrierConfig(
+                SUB_ID_1, new SimCarrierId.Builder().build());
+
+        CarrierConfig config = mConfigAgent.getCarrierConfig();
+        assertFalse(config.getBoolean(
+                CarrierConfig.Ims.KEY_SUPPORT_SDP_PRECONDITION_BOOL));
+        assertFalse(config.getBoolean(
+                CarrierConfigManager.ImsVoice.KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL));
+        assertFalse(config.getBoolean(
+                CarrierConfig.ImsVoice.KEY_VOICE_QOS_PRECONDITION_SUPPORTED_ON_IWLAN_BOOL));
+        assertTrue(config.getBoolean(
+                CarrierConfigManager.ImsVoice.KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL));
+        assertFalse(config.getBoolean(
+                CarrierConfigManager.ImsVt.KEY_VIDEO_QOS_PRECONDITION_SUPPORTED_BOOL));
+        assertFalse(config.getBoolean(
+                CarrierConfigManager.ImsRtt.KEY_TEXT_QOS_PRECONDITION_SUPPORTED_BOOL));
+        assertFalse(config.getBoolean(
+                CarrierConfigManager.ImsEmergency.KEY_EMERGENCY_QOS_PRECONDITION_SUPPORTED_BOOL));
+        assertFalse(config.getBoolean(
+                CarrierConfig.ImsVoice.KEY_WAIT_QOS_WHEN_LOCAL_PRECONDITION_NOT_SUPPORTED_BOOL));
+        assertFalse(config.getBoolean(
+                CarrierConfig.ImsVoice.KEY_WAIT_QOS_FOR_INCOMING_INVITE_WITHOUT_PRECONDITION_BOOL));
+        assertFalse(config.getBoolean(
+                CarrierConfig.ImsVoice.KEY_RELEASE_CALL_ON_QOS_LOST_DURING_SETUP_BOOL));
     }
 
     @Test

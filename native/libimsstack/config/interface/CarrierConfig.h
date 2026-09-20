@@ -2564,6 +2564,7 @@ public:
         };
 
         static const IMS_CHAR KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL[];
+        static const IMS_CHAR KEY_VOICE_QOS_PRECONDITION_SUPPORTED_ON_IWLAN_BOOL[];
         static const IMS_CHAR KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL[];
         static const IMS_CHAR KEY_DEDICATED_BEARER_WAIT_TIMER_MILLIS_INT[];
 
@@ -4419,6 +4420,14 @@ public:
             PAI_POLICY_PREFER_TOPMOST = 0,
             PAI_POLICY_PREFER_SIP_URI = 1,
         };
+
+        /** Lists headers removed from or set on the initial MT INVITE final response. */
+        static const IMS_CHAR
+                KEY_INITIAL_MT_FINAL_RESPONSE_HEADERS_TO_REMOVE_STRING_ARRAY[];
+
+
+        /** Removes Contact feature parameters from the initial MT INVITE final response. */
+        static const IMS_CHAR KEY_INITIAL_MT_FINAL_RESPONSE_COMPACT_CONTACT_BOOL[];
 
         // Media
         static const IMS_CHAR KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY[];

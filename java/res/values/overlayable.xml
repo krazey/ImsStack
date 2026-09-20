@@ -19,6 +19,7 @@
         <policy type="system|product|vendor|signature">
             <item type="bool" name="config_imsstack_emergency_mmtel_feature" />
             <item type="bool" name="config_imsstack_rcs_feature" />
+            <item type="bool" name="config_imsstack_dedicated_bearer_qos_supported" />
         </policy>
     </overlayable>
 </resources>

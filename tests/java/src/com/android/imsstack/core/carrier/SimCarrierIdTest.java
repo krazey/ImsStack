@@ -136,13 +136,15 @@ public class SimCarrierIdTest {
                 .setMnc(SIM_MNC)
                 .setImsi(SIM_IMSI)
                 .setGid1(SIM_GID1)
-                .setSpn(SIM_SPN)
+                .setSpn("different-spn")
                 .setIccId(SIM_ICCID)
                 .setSimState(SimCarrierId.SIM_LOADED)
                 .build();
 
         assertTrue(cid2.equals(cid3));
         assertEquals(cid2.hashCode(), cid3.hashCode());
+        assertFalse(cid2.hasSameConfigIdentity(cid3));
+        assertTrue(cid2.hasSameConfigIdentity(cid2));
 
         assertFalse(cid1.equals(null));
         assertFalse(cid1.equals(new Object()));

@@ -45,7 +45,8 @@ public final class SimCarrierId {
 
     private SimCarrierId(int carrierId, int specificCarrierId,
             @NonNull String mcc, @NonNull String mnc, @NonNull String imsi,
-            @NonNull String gid1, @NonNull String spn, @NonNull String iccId,
+            @NonNull String gid1, @NonNull String spn,
+            @NonNull String iccId,
             int simState) {
         mCarrierId = carrierId;
         mSpecificCarrierId = specificCarrierId;
@@ -135,8 +136,24 @@ public final class SimCarrierId {
         return mSimState == SIM_LOADED;
     }
 
+    /** Returns whether every field that can affect carrier-policy selection is unchanged. */
+    public boolean hasSameConfigIdentity(@NonNull SimCarrierId other) {
+        return mCarrierId == other.mCarrierId
+                && mSpecificCarrierId == other.mSpecificCarrierId
+                && Objects.equals(mMcc, other.mMcc)
+                && Objects.equals(mMnc, other.mMnc)
+                && Objects.equals(mImsi, other.mImsi)
+                && Objects.equals(mGid1, other.mGid1)
+                && Objects.equals(mSpn, other.mSpn)
+                && Objects.equals(mIccId, other.mIccId)
+                && mSimState == other.mSimState;
+    }
+
     @Override
     public int hashCode() {
+        if (mCarrierId != UNKNOWN_ID || mSpecificCarrierId != UNKNOWN_ID) {
+            return Objects.hash(mCarrierId, mSpecificCarrierId);
+        }
         return Objects.hash(mCarrierId, mSpecificCarrierId,
                 mMcc, mMnc, mImsi, mGid1, mSpn, mIccId);
     }

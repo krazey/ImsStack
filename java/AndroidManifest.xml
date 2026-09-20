@@ -21,6 +21,10 @@
     android:versionCode="10000"
     android:versionName="1.00.00">
 
+    <queries>
+        <package android:name="org.lineageos.carriersettings" />
+    </queries>
+
     <!-- ims permission -->
     <permission android:name="com.android.imsstack.permission.IMS"
         android:protectionLevel="signatureOrSystem" />

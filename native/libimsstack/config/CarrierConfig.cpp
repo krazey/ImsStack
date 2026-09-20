@@ -766,6 +766,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT[] =
         KEY_IMS_VOICE_PREFIX "conference_subscribe_type_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL[] =
         KEY_IMS_VOICE_PREFIX "voice_qos_precondition_supported_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_VOICE_QOS_PRECONDITION_SUPPORTED_ON_IWLAN_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "voice_qos_precondition_supported_on_iwlan_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL[] =
         KEY_IMS_VOICE_PREFIX "voice_on_default_bearer_supported_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_DEDICATED_BEARER_WAIT_TIMER_MILLIS_INT[] =
@@ -1336,6 +1338,12 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_CATEGORY_FOR_GENERIC_URN_INT_ARR
         KEY_IMS_EMERGENCY_PREFIX "category_for_generic_urn_int_array";
 const IMS_CHAR CarrierConfig::ImsWfc::KEY_OVERRIDE_MEDIA_INACTIVITY_TO_WIFI_LOST_BOOL[] =
         KEY_IMS_WFC_PREFIX "override_media_inactivity_to_wifi_lost_bool";
+const IMS_CHAR
+        CarrierConfig::ImsVoice::KEY_INITIAL_MT_FINAL_RESPONSE_HEADERS_TO_REMOVE_STRING_ARRAY[] =
+                KEY_IMS_VOICE_PREFIX
+        "initial_mt_final_response_headers_to_remove_string_array";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_INITIAL_MT_FINAL_RESPONSE_COMPACT_CONTACT_BOOL[] =
+        KEY_IMS_VOICE_PREFIX "initial_mt_final_response_compact_contact_bool";
 
 // Media
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY[] =
