@@ -27,7 +27,6 @@ import android.net.QosSocketInfo;
 import android.telephony.data.EpsBearerQosSessionAttributes;
 import android.telephony.data.NrQosSessionAttributes;
 import android.util.Pair;
-import android.util.SparseArray;
 
 import com.android.imsstack.base.AppContext;
 import com.android.imsstack.base.SystemServiceProxy.ConnectivityManagerProxy;
@@ -42,7 +41,11 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Class responsible for registering and receiving qoscallback
@@ -60,92 +63,102 @@ public class QosAgent {
         * Notify that QoS is lost
         */
         void onNotifyQosConnectionLost(InetSocketAddress remoteAddress);
+
+        /** The callback was unregistered by the framework, not a bearer-loss indication. */
+        default void onNotifyQosCallbackError(
+                DatagramSocket socket, InetSocketAddress remoteAddress) {}
     }
 
     private class QosSocket extends QosCallback {
+        final DatagramSocket mSocket;
+        final Network mNetwork;
+        final InetSocketAddress mRemoteAddress;
+        // Guarded by mSockets. Include the type since EPS and NR IDs may overlap.
+        final Set<Long> mAvailableSessions = new HashSet<>();
 
-        /**
-        * LTE EPS Session.
-        */
-        public static final int TYPE_EPS_BEARER = 1;
-        /**
-        * NR Session.
-        */
-        public static final int TYPE_NR_BEARER = 2;
-
-        public DatagramSocket mSocket;
-
-        QosSocket(DatagramSocket socket) {
+        QosSocket(Network network, DatagramSocket socket) {
             mSocket = socket;
+            mNetwork = network;
+            mRemoteAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
         }
 
-        public void close() {
-            if (mSocket != null) {
-                mSocket.close();
-                mSocket = null;
-            }
+        private boolean isCurrent() {
+            return mSockets.get(mSocket) == this;
+        }
+
+        private boolean isConnected() {
+            return isCurrent() && !mSocket.isClosed()
+                    && mRemoteAddress.equals(mSocket.getRemoteSocketAddress());
         }
 
         @Override
         public void onError(final QosCallbackException exception) {
-            ImsLog.d(this, mSlotId, "onError: " + exception.toString());
+            synchronized (mSockets) {
+                if (!isCurrent()) {
+                    return;
+                }
+                // onError automatically unregisters this callback in ConnectivityManager.
+                mSockets.remove(mSocket);
+                ImsLog.w(this, mSlotId, "QoS callback unregistered: " + exception);
+                ImsQosCallback callback = mCallback;
+                if (callback != null) {
+                    callback.onNotifyQosCallbackError(mSocket, mRemoteAddress);
+                }
+            }
         }
 
         @Override
         public void onQosSessionAvailable(
                 QosSession session, QosSessionAttributes sessionAttributes) {
+            synchronized (mSockets) {
+                if (!isConnected()) {
+                    return;
+                }
 
-            int qosIdentifier = 0;
+                int qosIdentifier = 0;
+                if (session.getSessionType() == QosSession.TYPE_EPS_BEARER
+                        && sessionAttributes instanceof EpsBearerQosSessionAttributes) {
+                    qosIdentifier = ((EpsBearerQosSessionAttributes) sessionAttributes)
+                            .getQosIdentifier();
+                } else if (session.getSessionType() == QosSession.TYPE_NR_BEARER
+                        && sessionAttributes instanceof NrQosSessionAttributes) {
+                    qosIdentifier = ((NrQosSessionAttributes) sessionAttributes).getQosIdentifier();
+                }
 
-            ImsLog.d(this, mSlotId, "onQosSessionAvailable - QosSession: "
-                    + session + ", QosSessionAttributes: " + sessionAttributes);
+                if (qosIdentifier == 0) {
+                    ImsLog.d(this, mSlotId, "Invalid QCI value");
+                    return;
+                }
 
-            if (session.getSessionType() == TYPE_EPS_BEARER) {
-                EpsBearerQosSessionAttributes attributes =
-                        (EpsBearerQosSessionAttributes) sessionAttributes;
-
-                qosIdentifier = attributes.getQosIdentifier();
-
-                ImsLog.d(this, mSlotId, "EpsBearerQosSessionAttributes - qci: " + qosIdentifier
-                        + ", MAXUplink: " + attributes.getMaxUplinkBitRateKbps()
-                        + ", MAXDownlink: " + attributes.getMaxDownlinkBitRateKbps()
-                        + ", gbrUplink: " + attributes.getGuaranteedUplinkBitRateKbps()
-                        + ", gbrDownlink: " + attributes.getGuaranteedDownlinkBitRateKbps());
-            } else if (session.getSessionType() == TYPE_NR_BEARER) {
-                NrQosSessionAttributes attributes = (NrQosSessionAttributes) sessionAttributes;
-
-                qosIdentifier = attributes.getQosIdentifier();
-                ImsLog.d(this, mSlotId, "NrQosSessionAttributes - qci: " + qosIdentifier
-                        + ", MAXUplink: " + attributes.getMaxUplinkBitRateKbps()
-                        + ", MAXDownlink: " + attributes.getMaxDownlinkBitRateKbps()
-                        + ", gbrUplink: " + attributes.getGuaranteedUplinkBitRateKbps()
-                        + ", gbrDownlink: " + attributes.getGuaranteedDownlinkBitRateKbps());
-            }
-
-            if (qosIdentifier == 0) {
-                ImsLog.d(this, mSlotId, "Invalid QCI value");
-            } else {
-                InetSocketAddress remoteAddress =
-                        (InetSocketAddress) mSocket.getRemoteSocketAddress();
-
-                notifyQosConnectionAvailable(remoteAddress);
+                boolean wasAvailable = !mAvailableSessions.isEmpty();
+                mAvailableSessions.add(session.getUniqueId());
+                if (!wasAvailable) {
+                    ImsLog.i(mSlotId, "QoS available: " + session);
+                    notifyQosConnectionAvailable(mRemoteAddress);
+                }
             }
         }
 
         @Override
         public void onQosSessionLost(final QosSession session) {
-            ImsLog.d(this, mSlotId, "onQosSessionLost - QosSession: " + session);
-
-            InetSocketAddress remoteAddress = (InetSocketAddress) mSocket.getRemoteSocketAddress();
-
-            notifyQosConnectionLost(remoteAddress);
+            synchronized (mSockets) {
+                if (!isConnected() || !mAvailableSessions.remove(session.getUniqueId())) {
+                    return;
+                }
+                if (mAvailableSessions.isEmpty()) {
+                    ImsLog.i(mSlotId, "QoS lost: " + session);
+                    notifyQosConnectionLost(mRemoteAddress);
+                }
+            }
         }
+
     }
 
     private final int mSlotId;
-    private ImsQosCallback mCallback;
+    private volatile ImsQosCallback mCallback;
 
-    private final SparseArray<QosSocket> mSockets = new SparseArray<>(10);
+    // A remote port is not unique across sockets, early dialogs or access networks.
+    private final Map<DatagramSocket, QosSocket> mSockets = new IdentityHashMap<>();
 
     public QosAgent(int slotId) {
         mSlotId = slotId;
@@ -156,11 +169,17 @@ public class QosAgent {
     }
 
     private void notifyQosConnectionAvailable(InetSocketAddress remoteAddress) {
-        mCallback.onNotifyQosConnectionAvailable(remoteAddress);
+        ImsQosCallback callback = mCallback;
+        if (callback != null) {
+            callback.onNotifyQosConnectionAvailable(remoteAddress);
+        }
     }
 
     private void notifyQosConnectionLost(InetSocketAddress remoteAddress) {
-        mCallback.onNotifyQosConnectionLost(remoteAddress);
+        ImsQosCallback callback = mCallback;
+        if (callback != null) {
+            callback.onNotifyQosConnectionLost(remoteAddress);
+        }
     }
 
     /**
@@ -214,9 +233,9 @@ public class QosAgent {
             rtpSocket.connect(remoteAddr, remotePort);
             rtcpSocket.connect(remoteAddr, (remotePort + 1));
 
-            QosSocket qosSocket = new QosSocket(rtpSocket);
-            mSockets.put(remotePort, qosSocket);
-            registerQosCallback(network, rtpSocket, qosSocket);
+            synchronized (mSockets) {
+                registerQosSocket(network, rtpSocket);
+            }
         }
 
         return new Pair<>(rtpSocket, rtcpSocket);
@@ -225,28 +244,26 @@ public class QosAgent {
     /**
      * Establish a remote network connection, specifying both the remote address and port.
      * Subsequently, register a new Quality of Service (QoS) callback function.
-     * Implement a mechanism to detect and terminate any existing QoS connections associated
-     * with the same socket if the provided remote address differs from
-     * the currently connected address.
+     * Reuse an existing callback only for the same socket, network and remote endpoint.
+     * Replace obsolete callbacks without closing the media sockets.
      *
      * @param rtpSocket rtp datagram socket
      * @param rtcpSocket rtcp datagram socket
      * @param remoteAddress Remote address
      * @param remotePort Remote port
-     * @param isRemoteChanged true if remote address/port is changed
+     * @param isRemoteChanged caller hint; the socket and registration are always checked
+     * @return true if a callback is registered, not an indication of bearer availability
      */
     public boolean updateQosConnection(
             DatagramSocket rtpSocket, DatagramSocket rtcpSocket,
             String remoteAddress, int remotePort, boolean isRemoteChanged) {
 
-        if (rtpSocket == null || rtcpSocket == null || remoteAddress.isEmpty() || remotePort <= 0) {
+        if (rtpSocket == null || rtcpSocket == null || rtpSocket.isClosed()
+                || rtcpSocket.isClosed() || remoteAddress == null || remoteAddress.isEmpty()
+                || remotePort <= 0 || remotePort >= 65535) {
             ImsLog.e(this, mSlotId,
                     "updateQosConnection - Sockets are null or invalid remote address");
             return false;
-        }
-
-        if (isRemoteChanged) {
-            removeQosConnection(rtpSocket, rtcpSocket, false);
         }
 
         InetAddress remoteAddr = createInetAddress(remoteAddress);
@@ -265,57 +282,57 @@ public class QosAgent {
             return false;
         }
 
-        ImsLog.d(this, mSlotId, "updateQosConnection - rtpSocket: "
-                + rtpSocket + " remotePort: " + remotePort);
+        synchronized (mSockets) {
+            InetSocketAddress remote = new InetSocketAddress(remoteAddr, remotePort);
+            InetSocketAddress remoteRtcp = new InetSocketAddress(remoteAddr, remotePort + 1);
+            QosSocket current = mSockets.get(rtpSocket);
+            if (current != null && current.mNetwork.equals(network)
+                    && current.mRemoteAddress.equals(remote) && current.isConnected()
+                    && remoteRtcp.equals(rtcpSocket.getRemoteSocketAddress())) {
+                return true;
+            }
 
-        rtpSocket.connect(remoteAddr, remotePort);
-        rtcpSocket.connect(remoteAddr, (remotePort + 1));
-
-        QosSocket qosSocket = new QosSocket(rtpSocket);
-        mSockets.put(remotePort, qosSocket);
-        registerQosCallback(network, rtpSocket, qosSocket);
-
-        return true;
+            // Invalidate the old callback before reconnecting the shared media socket.
+            removeQosConnection(rtpSocket);
+            try {
+                rtpSocket.connect(remoteAddr, remotePort);
+                rtcpSocket.connect(remoteAddr, remotePort + 1);
+            } catch (RuntimeException e) {
+                ImsLog.e(this, mSlotId, "updateQosConnection: " + e);
+                return false;
+            }
+            return registerQosSocket(network, rtpSocket);
+        }
     }
 
-    /**
-    * Request to close rtpsocket/rtcpsocket
-    */
+    /** Request to close the RTP/RTCP sockets and unregister their callback. */
     public void destroyQosConnection(DatagramSocket rtpSocket, DatagramSocket rtcpSocket) {
-        if (rtcpSocket != null) {
+        synchronized (mSockets) {
+            removeQosConnection(rtpSocket);
+            ImsUtils.closeQuietly(rtpSocket);
             ImsUtils.closeQuietly(rtcpSocket);
         }
+    }
 
-        if (rtpSocket != null) {
-            removeQosConnection(rtpSocket, rtcpSocket, true);
-            ImsUtils.closeQuietly(rtpSocket);
+    // Caller holds mSockets. Never close a socket owned by another registration.
+    private void removeQosConnection(DatagramSocket rtpSocket) {
+        QosSocket callback = mSockets.remove(rtpSocket);
+        if (callback != null) {
+            unregisterQosCallback(callback);
         }
     }
 
-    /** Unregister QosConnection and remove QosSocket */
-    private void removeQosConnection(
-            DatagramSocket rtpSocket, DatagramSocket rtcpSocket, boolean close) {
-        if (rtpSocket != null) {
-            int remotePort = rtpSocket.getPort();
-            QosSocket socket = mSockets.get(remotePort);
-
-            if (socket != null) {
-                unregisterQosCallback(socket);
-                mSockets.remove(remotePort);
-                if (close) {
-                    ImsLog.d(this, mSlotId, "removeQosConnection - QosSocket closed");
-                    socket.close();
-                } else {
-                    ImsLog.d(this, mSlotId, "removeQosConnection - disconnect; rtpSocket: "
-                            + rtpSocket + " remotePort: " + remotePort);
-                    rtpSocket.disconnect();
-                    rtcpSocket.disconnect();
-                }
-            } else {
-                ImsLog.d(this, mSlotId, "removeQosConnection - QosSocket for remotePort: "
-                        + remotePort + "is not found");
+    // Caller holds mSockets. Success means registered, not that QoS is available.
+    private boolean registerQosSocket(Network network, DatagramSocket rtpSocket) {
+        QosSocket callback = new QosSocket(network, rtpSocket);
+        mSockets.put(rtpSocket, callback);
+        if (!registerQosCallback(network, rtpSocket, callback)) {
+            if (mSockets.get(rtpSocket) == callback) {
+                mSockets.remove(rtpSocket);
             }
+            return false;
         }
+        return mSockets.get(rtpSocket) == callback;
     }
 
     private DatagramSocket createDatagramSocket(Network network, InetAddress ipAddr, int port) {
@@ -370,15 +387,20 @@ public class QosAgent {
         return null;
     }
 
-    private void registerQosCallback(Network network, DatagramSocket socket, QosCallback callback) {
+    private boolean registerQosCallback(
+            Network network, DatagramSocket socket, QosCallback callback) {
         ConnectivityManagerProxy cmp = getConnectivityManagerProxy();
         ImsLog.d(this, mSlotId, "registerQosCallback: " + callback);
         try {
             QosSocketInfo socketInfo = new QosSocketInfo(network, socket);
             cmp.registerQosCallback(
                     socketInfo, AppContext.getInstance().getMainExecutor(), callback);
-        } catch (Throwable t) {
-            ImsLog.e(this, mSlotId, "registerQosCallback: " + t.toString());
+            ImsLog.i(mSlotId, "QoS callback registered on network " + network);
+            return true;
+        } catch (IOException | RuntimeException e) {
+            ImsLog.e(this, mSlotId, "registerQosCallback: " + e);
+            unregisterQosCallback(callback);
+            return false;
         }
     }
 
